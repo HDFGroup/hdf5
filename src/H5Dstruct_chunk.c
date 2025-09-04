@@ -93,10 +93,10 @@ typedef struct H5D_chunk_cache_mem_t {
     void  *sel_buf;   /* Buffer pointer to the encoded selection */
     H5S_t *sel_space; /* Dataspace for encoded selection */
     /* size tracking */
-    size_t  sel_nbytes;      /* nbytes for selection */
-    size_t  sel_alloc_size;  /* alloc_size for selection */
-    size_t data_nbytes;      /* nbytes for data values */
-    size_t data_alloc_size;  /* alloc_size for data values */
+    size_t sel_nbytes;      /* nbytes for selection */
+    size_t sel_alloc_size;  /* alloc_size for selection */
+    size_t data_nbytes;     /* nbytes for data values */
+    size_t data_alloc_size; /* alloc_size for data values */
 } H5D_chunk_cache_mem_t;
 
 /********************/
@@ -1734,8 +1734,8 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
     const H5D_chunk_cache_mem_t *chk   = (const H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     H5D_chunk_ud_t              *udata = (H5D_chunk_ud_t *)_udata;
     void                        *data_buf = NULL;
-    uint8_t                     *p     = NULL;
-    unsigned char               *sel_p = NULL;
+    uint8_t                     *p        = NULL;
+    unsigned char               *sel_p    = NULL;
     size_t                       sel_nbytes, sel_alloc_size;
     size_t                       data_nbytes, data_alloc_size;
     H5O_pline_t                 *pline    = NULL; /* I/O pipeline info */
@@ -2424,7 +2424,7 @@ H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_spac
     bool                    file_iter_init = false;
     size_t                  vec_arr_nused  = 0;
     size_t                  vec_arr_nalloc = VECTOR_LEN;
-    H5O_pline_t            *pline = NULL; /* I/O pipeline info */
+    H5O_pline_t            *pline          = NULL; /* I/O pipeline info */
     H5S_t                  *serial_values_space;
     H5S_t                  *serial_file_space;
     H5_flexible_const_ptr_t flex_selection;
@@ -2601,10 +2601,10 @@ H5D__struct_chunk_scatter_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t 
     bool            bkg_iter_init  = false; /* Background iteration info has been initialized */
     H5S_sel_iter_t *sel_iter       = NULL;  /* Memory selection iteration info*/
     bool            sel_iter_init  = false; /* Memory selection iteration info has been initialized */
-    hsize_t         nelmts = 0;                 /* Number of elements selected in file & memory dataspaces */
+    hsize_t         nelmts         = 0;     /* Number of elements selected in file & memory dataspaces */
     hsize_t         smine_start;            /* Strip mine start loc */
     size_t          smine_nelmts;           /* Elements per strip   */
-    bool            in_place_tconv = false;     /* Whether to perform in-place type_conversion */
+    bool            in_place_tconv = false; /* Whether to perform in-place type_conversion */
     size_t          mem_type_size;
     size_t          file_type_size;
     size_t          buf_off          = 0; /* Buffer offset for in-place type conversion */
@@ -2893,9 +2893,9 @@ H5D__struct_chunk_gather_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *
     hsize_t                 nelmts; /* Number of elements selected in file & memory dataspaces */
     size_t                  mem_type_size;
     size_t                  file_type_size;
-    size_t                  buf_off = 0;    /* Buffer offset for in-place type conversion */
+    size_t                  buf_off        = 0;     /* Buffer offset for in-place type conversion */
     bool                    in_place_tconv = false; /* Whether to perform in-place type_conversion */
-    H5D_chunk_cache_mem_t  *chk = (H5D_chunk_cache_mem_t *)chunk; /* Chunk's memory cache info */
+    H5D_chunk_cache_mem_t  *chk            = (H5D_chunk_cache_mem_t *)chunk; /* Chunk's memory cache info */
     void                   *data_scat_buf;
     hsize_t                 scat_buf_size;
     H5_flexible_const_ptr_t flex_mspace;
