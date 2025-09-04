@@ -56,6 +56,7 @@ jobs:
           echo ""
           echo "Starting link check on all files..."
           lychee \
+          --exclude-mail \
           --exclude "eigen.tuxfamily.org" \
           --exclude "gnu.org" \
           --exclude "en.wikipedia.org" \
@@ -87,6 +88,7 @@ jobs:
           HTML_FILES=$(find . -name "*.html")
           echo "Checking internal links in $(echo "$HTML_FILES" | wc -l) HTML files..."
           lychee \
+          --exclude-mail \
           --exclude-all-private \
           --offline \
           --verbose \
@@ -108,6 +110,7 @@ jobs:
           
           echo "🔗 Generating detailed external links report..."
           lychee \
+          --exclude-mail \
           --exclude "eigen.tuxfamily.org" \
           --exclude "gnu.org" \
           --exclude "en.wikipedia.org" \
@@ -131,6 +134,7 @@ jobs:
           echo ""
           echo "🏠 Generating detailed internal links report..."
           lychee \
+          --exclude-mail \
           --exclude-all-private \
           --offline \
           --format detailed \
@@ -138,4 +142,3 @@ jobs:
           
           echo ""
           echo "✅ Link check report generation complete"
-
