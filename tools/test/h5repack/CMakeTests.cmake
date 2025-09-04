@@ -1718,7 +1718,7 @@ ADD_H5_EXTERNAL_TEST (ext_uint8be "TEST" uint8be -l CONTI)
 ###    E X T E R N A L  L I N K  T E S T S
 ##############################################################################
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_TEST(h5copy_extlinks_src-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(h5copy_extlinks_src-base TEST_TYPE "SKIP" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 ERROR_STACK DUMP_CHECK)
 ADD_H5_TEST(tsoftlinks-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 ERROR_STACK DUMP_CHECK)
 ADD_H5_TEST(textlink-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlink.h5 ERROR_STACK DUMP_CHECK)
 ADD_H5_TEST(textlinkfar-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinkfar.h5 ERROR_STACK DUMP_CHECK)
@@ -1730,11 +1730,11 @@ ADD_H5_TEST (tsoftlinks-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE tsof
 ADD_H5_TEST (textlink-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 0 TEST_FILE textlink.h5 --merge FULL_DIFF ERROR_STACK)
 
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_TEST (textlinkfar-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE textlinkfar.h5 --merge FULL_DIFF ERROR_STACK)
+ADD_H5_TEST (textlinkfar-merge TEST_TYPE "SKIP" DIFF_RESULT_CODE 1 TEST_FILE textlinkfar.h5 --merge FULL_DIFF ERROR_STACK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_TEST (textlinksrc-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE textlinksrc.h5 --merge FULL_DIFF ERROR_STACK)
+ADD_H5_TEST (textlinksrc-merge TEST_TYPE "SKIP" DIFF_RESULT_CODE 1 TEST_FILE textlinksrc.h5 --merge FULL_DIFF ERROR_STACK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_TEST (textlinktar-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE textlinktar.h5 --merge FULL_DIFF ERROR_STACK)
+ADD_H5_TEST (textlinktar-merge TEST_TYPE "SKIP" DIFF_RESULT_CODE 1 TEST_FILE textlinktar.h5 --merge FULL_DIFF ERROR_STACK)
 
 ADD_H5_TEST(h5copy_extlinks_src-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 --prune ERROR_STACK DUMP_CHECK)
 ADD_H5_TEST(tsoftlinks-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 --prune ERROR_STACK DUMP_CHECK)
@@ -1747,11 +1747,11 @@ ADD_H5_TEST(h5copy_extlinks_src-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_F
 ADD_H5_TEST(tsoftlinks-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 ADD_H5_TEST(textlink-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlink.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_TEST(textlinkfar-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinkfar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinkfar-mergeprune TEST_TYPE "SKIP" RESULT_CODE 0 TEST_FILE textlinkfar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_TEST(textlinksrc-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinksrc.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinksrc-mergeprune TEST_TYPE "SKIP" RESULT_CODE 0 TEST_FILE textlinksrc.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_TEST(textlinktar-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinktar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinktar-mergeprune TEST_TYPE "SKIP" RESULT_CODE 0 TEST_FILE textlinktar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 
 ADD_H5_TEST (tst_onion_dset_1d TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tst_onion_dset_1d.h5 --src-vfd-name onion --src-vfd-info 1 DUMP_CHECK DUMP_NO_OPT)
 ADD_H5_TEST (tst_onion_dset_ext TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tst_onion_dset_ext.h5 --src-vfd-name onion --src-vfd-info 1 DUMP_CHECK DUMP_NO_OPT)
