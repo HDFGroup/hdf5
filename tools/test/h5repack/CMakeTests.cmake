@@ -288,6 +288,8 @@ endmacro ()
 # 
 # OPTIONAL KEYWORD ARGUMENTS:
 #   RESULT_CODE <code> - expected return code from h5repack (default 0)
+#   ERR_REF <string> - value for TEST_ERRREF (default empty)
+#
 # OPTIONAL FLAGS
 #   ERROR_STACK - pass the '--enable-error-stack' flag to h5repack and h5diff
 #   FILTER - Apply filters to genericize output for comparison
@@ -296,7 +298,7 @@ macro (ADD_H5_TEST testname)
   # === Argument handling ===
   cmake_parse_arguments(ARG
     "ERROR_STACK;FILTER" # flags
-    "TEST_TYPE;TEST_FILE;RESULT_CODE" # single arg
+    "TEST_TYPE;TEST_FILE;RESULT_CODE;ERR_REF" # single arg
     "" # multi arg
     ${ARGN}
   )
@@ -321,6 +323,11 @@ macro (ADD_H5_TEST testname)
 
   if (NOT DEFINED ARG_RESULT_CODE)
     set(ARG_RESULT_CODE 0)
+  endif ()
+
+  # Check for incompatible options
+  if (${ARG_FILTER} AND DEFINED ARG_ERR_REF)
+    message(FATAL_ERROR "ADD_H5_TEST: FILTER and ERR_REF options are incompatible")
   endif ()
 
   # Whether to perform comparison in runTest or locally with h5diff
@@ -376,6 +383,7 @@ macro (ADD_H5_TEST testname)
               -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
               -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
               -D "TEST_REFERENCE=${ARG_REF_FILE}"
+              -D "TEST_ERRREF=${ARG_ERR_REF}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif()
@@ -408,58 +416,6 @@ macro (ADD_H5_TEST testname)
     )
     set_tests_properties (H5REPACK-${ctest_testname}-clean-objects PROPERTIES
         DEPENDS H5REPACK-${ctest_testname}_DFF
-    )
-  endif ()
-endmacro ()
-
-macro (ADD_H5_MASK_TEST testname testtype resultcode result_errcheck resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_MASK-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_MASK-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_MASK-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_MASK-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
-      )
-    else ()
-      add_test (
-          NAME H5REPACK_MASK-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-              -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_SKIP_COMPARE=true"
-              -D "TEST_REFERENCE=${resultfile}.mty"
-              -D "TEST_ERRREF=${result_errcheck}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-    endif ()
-    set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES
-        DEPENDS H5REPACK_MASK-${testname}-clear-objects
-    )
-    if ("H5REPACK_MASK-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5REPACK_MASK-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_MASK-${testname}-clean-objects PROPERTIES
-        DEPENDS H5REPACK_MASK-${testname}
     )
   endif ()
 endmacro ()
@@ -1671,7 +1627,7 @@ ADD_H5_VERIFY_TEST (dset2_conti "TEST" 0 ${FILE4} dset2 CONTIGUOUS -l dset2:CONT
 ADD_H5_VERIFY_TEST (conti "TEST" 1 ${FILE4} null CONTIGUOUS -l CONTI)
 ADD_H5_VERIFY_TEST (dset2_compa "TEST" 0 ${FILE4} dset2 COMPACT -l dset2:COMPA)
 ADD_H5_VERIFY_TEST (compa "TEST" 1 ${FILE4} null COMPACT -l COMPA)
-ADD_H5_MASK_TEST (dset2_chunk_20x10-errstk "TEST" 0 "dimensionality of chunks doesn't match the dataspace" ${FILE4} --layout=dset2:CHUNK=20x10x5 --enable-error-stack)
+ADD_H5_TEST (dset2_chunk_20x10-errstk TEST_TYPE "TEST" RESULT_CODE 0 ERR_REF "dimensionality of chunks doesn't match the dataspace" TEST_FILE ${FILE4} --layout=dset2:CHUNK=20x10x5 ERROR_STACK)
 
 ################################################################
 # layout conversions (file has no filters)
