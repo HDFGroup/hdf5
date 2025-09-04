@@ -11,6 +11,8 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Official HDF5 releases](https://support.hdfgroup.org/downloads/index.html) 
 * [Changes from Release to Release and New Features in the HDF5-2.x.y](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdf5#help-and-support)
+
+## 📖 Contents
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](#--bug-fixes)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
