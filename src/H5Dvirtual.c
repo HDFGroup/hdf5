@@ -685,8 +685,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
         /* Decode each entry */
         for (size_t i = 0; i < layout->storage.u.virt.list_nused; i++) {
             H5O_storage_virtual_ent_t *ent = &layout->storage.u.virt.list[i]; /* Convenience pointer */
-            ptrdiff_t avail_buffer_space;
-            uint8_t   flags = 0;
+            ptrdiff_t                  avail_buffer_space;
+            uint8_t                    flags = 0;
 
             avail_buffer_space = heap_block_p_end - heap_block_p + 1;
             if (avail_buffer_space <= 0)
@@ -708,11 +708,12 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                 if (first_same_file == SIZE_MAX) {
                     /* No previous instance of ".", copy "." to entry and record this instance */
                     if (NULL == (ent->source_file_name = (char *)H5MM_malloc(2)))
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "memory allocation failed for source file string");
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL,
+                                    "memory allocation failed for source file string");
                     ent->source_file_name[0] = '.';
                     ent->source_file_name[1] = '\0';
                     ent->source_file_orig    = SIZE_MAX;
-                    first_same_file                                  = i;
+                    first_same_file          = i;
 
                     /* Invalidate hash table for use after decoding since it is missing this "."
                      */
@@ -736,7 +737,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                     H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
                     H5_CHECK_OVERFLOW(tmp_hsize, hsize_t, size_t);
                     if ((size_t)tmp_hsize >= i)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "origin source file entry has higher index than current entry");
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
+                                    "origin source file entry has higher index than current entry");
                     ent->source_file_orig = (size_t)tmp_hsize;
 
                     /* Use source file name from origin entry */
@@ -771,7 +773,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                 H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
                 H5_CHECK_OVERFLOW(tmp_hsize, hsize_t, size_t);
                 if ((size_t)tmp_hsize >= i)
-                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "origin source dataset entry has higher index than current entry");
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
+                                "origin source dataset entry has higher index than current entry");
                 ent->source_dset_orig = (size_t)tmp_hsize;
 
                 /* Use source dataset name from origin entry */
@@ -810,19 +813,21 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
             if (avail_buffer_space <= 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding layout");
 
-            if (H5S_SELECT_DESERIALIZE(&ent->source_dset.virtual_select, &heap_block_p, (size_t)(avail_buffer_space)) < 0)
+            if (H5S_SELECT_DESERIALIZE(&ent->source_dset.virtual_select, &heap_block_p,
+                                       (size_t)(avail_buffer_space)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode virtual space selection");
 
             /* Parse source file and dataset names for "printf"
              * style format specifiers */
-            if (H5D_virtual_parse_source_name(ent->source_file_name, &ent->parsed_source_file_name, &ent->psfn_static_strlen, &ent->psfn_nsubs) < 0)
+            if (H5D_virtual_parse_source_name(ent->source_file_name, &ent->parsed_source_file_name,
+                                              &ent->psfn_static_strlen, &ent->psfn_nsubs) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "can't parse source file name");
-            if (H5D_virtual_parse_source_name(ent->source_dset_name, &ent->parsed_source_dset_name, &ent->psdn_static_strlen, &ent->psdn_nsubs) < 0)
+            if (H5D_virtual_parse_source_name(ent->source_dset_name, &ent->parsed_source_dset_name,
+                                              &ent->psdn_static_strlen, &ent->psdn_nsubs) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "can't parse source dataset name");
 
             /* Set source names in source_dset struct */
-            if ((ent->psfn_nsubs == 0) &&
-                (ent->psdn_nsubs == 0)) {
+            if ((ent->psfn_nsubs == 0) && (ent->psdn_nsubs == 0)) {
                 if (ent->parsed_source_file_name)
                     ent->source_dset.file_name = ent->parsed_source_file_name->name_segment;
                 else
@@ -834,8 +839,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
             }
 
             /* Unlim_dim fields */
-            ent->unlim_dim_source = H5S_get_select_unlim_dim(ent->source_select);
-            ent->unlim_dim_virtual = H5S_get_select_unlim_dim(ent->source_dset.virtual_select);
+            ent->unlim_dim_source     = H5S_get_select_unlim_dim(ent->source_select);
+            ent->unlim_dim_virtual    = H5S_get_select_unlim_dim(ent->source_dset.virtual_select);
             ent->unlim_extent_source  = HSIZE_UNDEF;
             ent->unlim_extent_virtual = HSIZE_UNDEF;
             ent->clip_size_source     = HSIZE_UNDEF;
@@ -843,14 +848,15 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 
             /* Clipped selections */
             if (ent->unlim_dim_virtual < 0) {
-                ent->source_dset.clipped_source_select = ent->source_select;
+                ent->source_dset.clipped_source_select  = ent->source_select;
                 ent->source_dset.clipped_virtual_select = ent->source_dset.virtual_select;
             }
 
             /* Check mapping for validity (do both pre and post
              * checks here, since we had to allocate the entry list
              * before decoding the selections anyways) */
-            if (H5D_virtual_check_mapping_pre(ent->source_dset.virtual_select, ent->source_select, H5O_VIRTUAL_STATUS_INVALID) < 0)
+            if (H5D_virtual_check_mapping_pre(ent->source_dset.virtual_select, ent->source_select,
+                                              H5O_VIRTUAL_STATUS_INVALID) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid mapping selections");
             if (H5D_virtual_check_mapping_post(ent) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid mapping entry");
@@ -1089,8 +1095,8 @@ done:
 static herr_t
 H5D__virtual_free_layout_mappings(H5O_storage_virtual_t *virt)
 {
-    size_t                 i, j;
-    herr_t                 ret_value = SUCCEED;
+    size_t i, j;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1138,7 +1144,6 @@ H5D__virtual_free_layout_mappings(H5O_storage_virtual_t *virt)
     virt->list_nalloc = (size_t)0;
     virt->list_nused  = (size_t)0;
     (void)memset(virt->min_dims, 0, sizeof(virt->min_dims));
-
 
     /* Note the lack of a done: label.  This is because there are no HGOTO_ERROR
      * calls.  If one is added, a done: label must also be added */

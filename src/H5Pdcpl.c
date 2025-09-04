@@ -2023,13 +2023,13 @@ herr_t
 H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name,
                hid_t src_space_id)
 {
-    H5P_genplist_t            *plist = NULL;    /* Property list pointer */
-    H5O_layout_t               virtual_layout;  /* Layout information for setting virtual info */
-    H5S_t                     *vspace;          /* Virtual dataset space selection */
-    H5S_t                     *src_space;       /* Source dataset space selection */
-    H5O_storage_virtual_ent_t *old_list = NULL; /* List pointer previously on property list */
-    H5O_storage_virtual_ent_t *ent      = NULL; /* Convenience pointer to new VDS entry */
-    size_t                     tmp_len;         /* Temporary variable holding a string length */
+    H5P_genplist_t            *plist = NULL;               /* Property list pointer */
+    H5O_layout_t               virtual_layout;             /* Layout information for setting virtual info */
+    H5S_t                     *vspace;                     /* Virtual dataset space selection */
+    H5S_t                     *src_space;                  /* Source dataset space selection */
+    H5O_storage_virtual_ent_t *old_list = NULL;            /* List pointer previously on property list */
+    H5O_storage_virtual_ent_t *ent      = NULL;            /* Convenience pointer to new VDS entry */
+    size_t                     tmp_len;                    /* Temporary variable holding a string length */
     bool                       retrieved_layout = false;   /* Whether the layout has been retrieved */
     bool                       free_list        = false;   /* Whether to free the list of virtual entries */
     herr_t                     ret_value        = SUCCEED; /* Return value */
