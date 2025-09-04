@@ -2800,32 +2800,22 @@ test_reference_attr(void)
     }
 } /* test_reference_attr() */
 
-/****************************************************************
-**
-**  test_reference_external():
-**      Tests external references on various kinds of objects
-**
-****************************************************************/
 static void
-test_reference_external(void)
+test_reference_external_generate(void)
 {
-    hid_t     fid1, fid2; /* HDF5 File ID */
-    hid_t     dataset;    /* Dataset ID */
-    hid_t     group;      /* Group ID */
-    hid_t     attr;       /* Attribute ID */
-    hid_t     sid;        /* Dataspace ID */
-    hid_t     tid;        /* Datatype ID */
-    hsize_t   dims[] = {SPACE1_DIM1};
-    hid_t     dapl_id;               /* Dataset access property list */
-    H5R_ref_t ref_wbuf[SPACE1_DIM1], /* Buffer to write to disk */
-        ref_rbuf[SPACE1_DIM1];       /* Buffer read from disk */
-    unsigned   wbuf[SPACE1_DIM1], rbuf[SPACE1_DIM1];
+    hid_t      fid1    = H5I_INVALID_HID; /* File ID */
+    hid_t      fid2    = H5I_INVALID_HID;
+    hid_t      dataset = H5I_INVALID_HID; /* Dataset ID */
+    hid_t      group   = H5I_INVALID_HID; /* Group ID */
+    hid_t      attr    = H5I_INVALID_HID; /* Attribute ID */
+    hid_t      sid     = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t      tid     = H5I_INVALID_HID; /* Datatype ID */
+    hsize_t    dims[]  = {SPACE1_DIM1};
+    H5R_ref_t  ref_wbuf[SPACE1_DIM1]; /* Buffer to write to disk */
+    unsigned   wbuf[SPACE1_DIM1];
     unsigned   i;        /* Local index variables */
     H5O_type_t obj_type; /* Object type */
     herr_t     ret;      /* Generic return value */
-
-    /* Output message about test being performed */
-    MESSAGE(5, ("Testing External References Functions\n"));
 
     /* Create file */
     fid1 = H5Fcreate(FILE_REF_EXT1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2834,10 +2824,6 @@ test_reference_external(void)
     /* Create dataspace for datasets */
     sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
     CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
-
-    /* Create dataset access property list */
-    dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
-    CHECK(dapl_id, H5I_INVALID_HID, "H5Pcreate");
 
     /* Create a group */
     group = H5Gcreate2(fid1, GROUPNAME1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -2994,13 +2980,45 @@ test_reference_external(void)
     ret = H5Fclose(fid2);
     CHECK(ret, FAIL, "H5Fclose");
 
+    /* Free memory buffers */
+    for (i = 0; i < SPACE1_DIM1; i++) {
+        ret = H5Rdestroy(&ref_wbuf[i]);
+        CHECK(ret, FAIL, "H5Rdestroy");
+    }
+
+    return;
+}
+
+/****************************************************************
+**
+**  test_reference_external():
+**      Tests external references on various kinds of objects
+**
+****************************************************************/
+static void
+test_reference_external(void)
+{
+    hid_t     fid2    = H5I_INVALID_HID;
+    hid_t     dataset = H5I_INVALID_HID;
+    herr_t    ret     = -1;
+    hid_t     attr    = H5I_INVALID_HID;
+    hid_t     sid     = H5I_INVALID_HID;
+    H5R_ref_t ref_rbuf[SPACE1_DIM1]; /* Buffer read from disk */
+    unsigned  rbuf[SPACE1_DIM1];
+    unsigned  i; /* Local index variables */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing External References Functions\n"));
+
+    test_reference_external_generate();
+
     /* Re-open the file */
     fid2 = H5Fopen(FILE_REF_EXT2, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid2, FAIL, "H5Fopen");
 
     /* Open the dataset */
     dataset = H5Dopen2(fid2, "/Dataset3", H5P_DEFAULT);
-    CHECK(ret, H5I_INVALID_HID, "H5Dopen2");
+    CHECK(dataset, H5I_INVALID_HID, "H5Dopen2");
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_rbuf);
@@ -3062,18 +3080,12 @@ test_reference_external(void)
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* Close dataset access property list */
-    ret = H5Pclose(dapl_id);
-    CHECK(ret, FAIL, "H5Pclose");
-
     /* Close file */
     ret = H5Fclose(fid2);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free memory buffers */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        ret = H5Rdestroy(&ref_wbuf[i]);
-        CHECK(ret, FAIL, "H5Rdestroy");
         ret = H5Rdestroy(&ref_rbuf[i]);
         CHECK(ret, FAIL, "H5Rdestroy");
     }
