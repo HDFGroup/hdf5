@@ -288,6 +288,7 @@ endmacro ()
 # 
 # OPTIONAL KEYWORD ARGUMENTS:
 #   RESULT_CODE <code> - expected return code from h5repack (default 0)
+#   DIFF_RESULT_CODE <code> - expected return code from h5diff (default 0)
 #   ERR_REF <string> - value for TEST_ERRREF (default empty)
 #
 # OPTIONAL FLAGS
@@ -297,12 +298,13 @@ endmacro ()
 #   DUMP_CHECK - Whether to use h5dump to verify output
 #   DUMP_NO_OPT - Whether to provide additional cmd line arguments to h5dump
 #                 No effect if DUMP_CHECK is not provided
+#   FULL_DIFF - Whether to perform h5diff verification through runTest
 #
 macro (ADD_H5_TEST testname)
   # === Argument handling ===
   cmake_parse_arguments(ARG
-    "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK;DUMP_NO_OPT" # flags
-    "TEST_TYPE;TEST_FILE;RESULT_CODE;ERR_REF" # single arg
+    "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK;DUMP_NO_OPT;FULL_DIFF" # flags
+    "TEST_TYPE;TEST_FILE;RESULT_CODE;DIFF_RESULT_CODE;ERR_REF" # single arg
     "" # multi arg
     ${ARGN}
   )
@@ -331,6 +333,10 @@ macro (ADD_H5_TEST testname)
     set(ARG_RESULT_CODE 0)
   endif ()
 
+  if (NOT DEFINED ARG_DIFF_RESULT_CODE)
+    set(ARG_DIFF_RESULT_CODE 0)
+  endif ()
+
   if (ARG_DUMP_NO_OPT)
     set (DUMP_OPTIONS "")
   else()
@@ -340,6 +346,9 @@ macro (ADD_H5_TEST testname)
   # Check for incompatible options
   if (${ARG_GZIP_FILTER} AND DEFINED ARG_ERR_REF)
     message(FATAL_ERROR "ADD_H5_TEST: GZIP_FILTER and ERR_REF options are incompatible")
+  endif ()
+  if (${ARG_FULL_DIFF} AND ${ARG_DUMP_CHECK})
+    message(FATAL_ERROR "ADD_H5_TEST: FULL_DIFF and DUMP_CHECK options are incompatible")
   endif ()
   # not fundamentally incompatible, but this probably indicates a mistake in test setup
   if (${ARG_GZIP_FILTER} AND ${ARG_SIZE_FILTER})
@@ -422,7 +431,8 @@ macro (ADD_H5_TEST testname)
     endif ()
 
     # If we're doing local comparison, add h5diff test
-    if (${ARG_COMPARE_LOCAL})
+    if (${ARG_COMPARE_LOCAL} AND NOT ${ARG_FULL_DIFF})
+      # h5diff directly
       add_test (
           NAME H5REPACK-${ctest_testname}_DFF
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARG_ERROR_STACK_FLAG} ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}
@@ -435,6 +445,28 @@ macro (ADD_H5_TEST testname)
       endif ()
 
       set (ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}_DFF")
+    elseif (${ARG_COMPARE_LOCAL} AND ${ARG_FULL_DIFF})
+      # h5diff via runTest
+      add_test (
+        NAME H5REPACK_DIFF-${ctest_testname}_DFF
+        COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+          -D "TEST_ARGS:STRING=-v;${ARG_ERROR_STACK_FLAG};${ARG_TEST_FILE};out-${testname}.${ARG_TEST_FILE}"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+          -D "TEST_OUTPUT=out-${testname}.${ARG_TEST_FILE}.out"
+          -D "TEST_EXPECT=${ARG_DIFF_RESULT_CODE}"
+          -D "TEST_REFERENCE=${testname}.${ARG_TEST_FILE}.tst"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5REPACK_DIFF-${ctest_testname}_DFF PROPERTIES
+          DEPENDS H5REPACK_DIFF-${ctest_testname}
+      )
+      if ("H5REPACK_DIFF-${ctest_testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK_DIFF-${ctest_testname}_DFF PROPERTIES DISABLED true)
+      endif ()
+
+      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK_DIFF-${testname}_DFF")
     endif()
 
     if (${ARG_DUMP_CHECK})
@@ -460,9 +492,7 @@ macro (ADD_H5_TEST testname)
         set_tests_properties (H5REPACK-${ctest_testname}-h5dump PROPERTIES DISABLED true)
       endif ()
 
-      set (ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5dump")
-    else()
-      set (ARG_CLEANUP_DEPENDS "")
+      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5dump")
     endif()
 
     # Post-test cleanup
@@ -476,58 +506,6 @@ macro (ADD_H5_TEST testname)
           DEPENDS ${ARG_CLEANUP_DEPENDS}
       )
     endif()
-  endif ()
-endmacro ()
-
-macro (ADD_H5_DIFF_TEST testname testtype resultcode testfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_DIFF-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
-      )
-      set_property(TEST H5REPACK_DIFF-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_DIFF-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-    )
-    add_test (
-        NAME H5REPACK_DIFF-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-    )
-    set_tests_properties (H5REPACK_DIFF-${testname} PROPERTIES
-        DEPENDS H5REPACK_DIFF-${testname}-clear-objects
-    )
-    if ("H5REPACK_DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DIFF-${testname} PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5REPACK_DIFF-${testname}_DFF
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=-v;--enable-error-stack;${testfile};out-${testname}.${testfile}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=out-${testname}.${testfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${testname}.${testfile}.tst"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (H5REPACK_DIFF-${testname}_DFF PROPERTIES
-        DEPENDS H5REPACK_DIFF-${testname}
-    )
-    if ("H5REPACK_DIFF-${testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DIFF-${testname}_DFF PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5REPACK_DIFF-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-    )
-    set_tests_properties (H5REPACK_DIFF-${testname}-clean-objects PROPERTIES
-        DEPENDS H5REPACK_DIFF-${testname}_DFF
-    )
   endif ()
 endmacro ()
 
@@ -1747,15 +1725,16 @@ ADD_H5_TEST(textlinkfar-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinkfa
 ADD_H5_TEST(textlinksrc-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinksrc.h5 ERROR_STACK DUMP_CHECK)
 ADD_H5_TEST(textlinktar-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinktar.h5 ERROR_STACK DUMP_CHECK)
 
-ADD_H5_DIFF_TEST (h5copy_extlinks_src-merge "TEST" 0 h5copy_extlinks_src.h5 --merge)
-ADD_H5_DIFF_TEST (tsoftlinks-merge "TEST" 1 tsoftlinks.h5 --merge)
-ADD_H5_DIFF_TEST (textlink-merge "TEST" 0 textlink.h5 --merge)
+ADD_H5_TEST (h5copy_extlinks_src-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 --merge FULL_DIFF ERROR_STACK)
+ADD_H5_TEST (tsoftlinks-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE tsoftlinks.h5 --merge FULL_DIFF ERROR_STACK)
+ADD_H5_TEST (textlink-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 0 TEST_FILE textlink.h5 --merge FULL_DIFF ERROR_STACK)
+
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (textlinkfar-merge "TEST" 1 textlinkfar.h5 --merge)
+#ADD_H5_TEST (textlinkfar-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE textlinkfar.h5 --merge FULL_DIFF ERROR_STACK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (textlinksrc-merge "TEST" 1 textlinksrc.h5 --merge)
+#ADD_H5_TEST (textlinksrc-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE textlinksrc.h5 --merge FULL_DIFF ERROR_STACK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (textlinktar-merge "TEST" 1 textlinktar.h5 --merge)
+#ADD_H5_TEST (textlinktar-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE textlinktar.h5 --merge FULL_DIFF ERROR_STACK)
 
 ADD_H5_TEST(h5copy_extlinks_src-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 --prune ERROR_STACK DUMP_CHECK)
 ADD_H5_TEST(tsoftlinks-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 --prune ERROR_STACK DUMP_CHECK)
