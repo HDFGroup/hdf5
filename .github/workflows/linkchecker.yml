@@ -116,78 +116,37 @@ jobs:
       - name: Publish Report to Job Summary
         if: always()
         run: |
-          echo "Starting job summary creation..."
-          
-          # Check if GITHUB_STEP_SUMMARY is available
-          if [ -z "$GITHUB_STEP_SUMMARY" ]; then
-            echo "ERROR: GITHUB_STEP_SUMMARY environment variable is not set!"
-            exit 1
-          fi
-          
-          echo "GITHUB_STEP_SUMMARY path: $GITHUB_STEP_SUMMARY"
-          
-          # Test if we can write to the summary file
-          if ! touch "$GITHUB_STEP_SUMMARY" 2>/dev/null; then
-            echo "ERROR: Cannot write to GITHUB_STEP_SUMMARY file!"
-            exit 1
-          fi
+          echo "## 🔗 Link Checker Report" >> "$GITHUB_STEP_SUMMARY"
           
           HAS_BROKEN_LINKS="${{ steps.analyze.outputs.has_broken_links }}"
           ERROR_COUNT="${{ steps.analyze.outputs.error_count }}"
           
-          echo "Variables:"
-          echo "  HAS_BROKEN_LINKS = '$HAS_BROKEN_LINKS'"
-          echo "  ERROR_COUNT = '$ERROR_COUNT'"
-          
-          # Write the summary
-          {
-            echo "## Link Checker Report"
-            echo ""
-            echo "**Status:** $(date)"
-            echo ""
-            
-            if [ "$HAS_BROKEN_LINKS" = "true" ]; then
-              echo ":x: **Found $ERROR_COUNT broken link(s)!**"
-              echo ""
-              echo "### Broken Links:"
-              echo '```'
-              if [ -f "broken_links.txt" ]; then
-                cat broken_links.txt
-              else
-                echo "No broken links file found (this is unexpected)"
-              fi
-              echo '```'
+          if [ "$HAS_BROKEN_LINKS" = "true" ]; then
+            echo "❌ **Found $ERROR_COUNT broken link(s)!**" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Broken Links:" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            if [ -f "broken_links.txt" ]; then
+              cat broken_links.txt >> "$GITHUB_STEP_SUMMARY"
             else
-              echo ":white_check_mark: **No broken links found!**"
-              echo ""
-              echo "All links are either valid or were excluded from checking."
+              echo "No broken links file found" >> "$GITHUB_STEP_SUMMARY"
             fi
-            
-            echo ""
-            echo "### Full Lychee Report:"
-            if [ -f "lychee-report.md" ]; then
-              echo ""
-              echo "**Report file found, contents:**"
-              echo '```'
-              cat lychee-report.md
-              echo '```'
-            else
-              echo ""
-              echo "**No lychee-report.md file found.**"
-              echo ""
-              echo "Available files in current directory:"
-              echo '```'
-              ls -la
-              echo '```'
-            fi
-            
-            echo ""
-            echo "---"
-            echo "*Report generated at: $(date)*"
-          } >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "✅ **No broken links found!**" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "All links are either valid or were excluded from checking." >> "$GITHUB_STEP_SUMMARY"
+          fi
           
-          echo "Job summary written successfully!"
-          echo "Summary file size: $(wc -l < "$GITHUB_STEP_SUMMARY") lines"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Full Report:" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "lychee-report.md" ]; then
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cat lychee-report.md >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No detailed report available." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Fail Job on Broken Links
         if: steps.analyze.outputs.has_broken_links == 'true'
