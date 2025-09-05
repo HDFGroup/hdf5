@@ -1148,7 +1148,7 @@ H5D__virtual_free_layout_mappings(H5O_storage_virtual_t *virt)
     /* Note the lack of a done: label.  This is because there are no HGOTO_ERROR
      * calls.  If one is added, a done: label must also be added */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__virtual_reset_layout() */
+} /* end H5D__virtual_free_layout_mappings() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_reset_layout
