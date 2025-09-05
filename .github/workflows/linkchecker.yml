@@ -3,6 +3,7 @@ name: Link Checker (lychee)
 on:
   workflow_dispatch:
   push:
+    branches: [ develop ] # Run only on pushes to the develop branch
   pull_request:
     branches: [ develop ]
 
@@ -76,26 +77,30 @@ jobs:
           fail: false
 
       - name: Publish Report to Job Summary
-        # This step runs regardless of the outcome of the link check
         if: always()
         run: |
           echo "## 🔗 Link Checker Report" >> "$GITHUB_STEP_SUMMARY"
           
-          # Use the exit_code output from the lychee-action for a reliable result.
-          # A non-zero exit code indicates broken links were found.
-          if [ "${{ steps.lychee.outputs.exit_code }}" != '0' ]; then
-            # We can still count the errors from the report for a user-friendly message
-            FAILED_COUNT=$(grep -c "❌" lychee-report.md || true)
-            echo "❌ **Found $FAILED_COUNT broken link(s)!**" >> "$GITHUB_STEP_SUMMARY"
-          else
+          EXIT_CODE="${{ steps.lychee.outputs.exit_code }}"
+
+          if [ "$EXIT_CODE" = '0' ]; then
             echo "✅ **No broken links found!**" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "All links are either valid or were excluded from checking." >> "$GITHUB_STEP_SUMMARY"
+          else
+            # Count actual broken links marked with the ❌ emoji.
+            # Default to 0 if grep finds nothing or fails.
+            FAILED_COUNT=$(grep -c "❌" lychee-report.md || echo 0)
+
+            if [ "$FAILED_COUNT" -gt 0 ]; then
+              echo "❌ **Found $FAILED_COUNT broken link(s)!**" >> "$GITHUB_STEP_SUMMARY"
+            else
+              # If exit code is non-zero but no links are marked as failed, it's likely a config/input error.
+              echo "⚠️ **Link checker failed with an error (Exit Code: $EXIT_CODE).**" >> "$GITHUB_STEP_SUMMARY"
+              echo "This may indicate a configuration or network issue, not necessarily a broken link." >> "$GITHUB_STEP_SUMMARY"
+            fi
           fi
           
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### Full Report:" >> "$GITHUB_STEP_SUMMARY"
-          # Append the detailed report file if it exists
           if [ -f "lychee-report.md" ]; then
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             cat lychee-report.md >> "$GITHUB_STEP_SUMMARY"
@@ -105,8 +110,7 @@ jobs:
           fi
 
       - name: Fail Job on Broken Links
-        # This step only runs if the lychee action produced a non-zero exit code
         if: steps.lychee.outputs.exit_code != '0'
         run: |
-          echo "Broken links were found. See the report in the job summary for details."
+          echo "The link checker job failed. See the report in the job summary for details."
           exit 1
