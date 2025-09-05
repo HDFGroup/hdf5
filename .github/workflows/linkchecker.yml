@@ -72,30 +72,31 @@ jobs:
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
           output: lychee-report.md
           format: markdown
-          # Don't fail the step immediately; we'll analyze the results first.
-          fail: false
+          # Let the action fail naturally - we'll handle it in the summary step
+          fail: true
 
       - name: Publish Report to Job Summary
         if: always()
         run: |
           echo "## 🔗 Link Checker Report" >> "$GITHUB_STEP_SUMMARY"
           
-          EXIT_CODE="${{ steps.lychee.outputs.exit_code }}"
-
-          if [ "$EXIT_CODE" = '0' ]; then
+          # Check if lychee step succeeded or failed
+          if [ "${{ steps.lychee.outcome }}" = "success" ]; then
             echo "✅ **No broken links found!**" >> "$GITHUB_STEP_SUMMARY"
-          else
+          elif [ "${{ steps.lychee.outcome }}" = "failure" ]; then
             # Count actual broken links marked with the ❌ emoji.
             # Default to 0 if grep finds nothing or fails.
-            FAILED_COUNT=$(grep -c "❌" lychee-report.md || echo 0)
+            FAILED_COUNT=$(grep -c "❌" lychee-report.md 2>/dev/null || echo 0)
 
             if [ "$FAILED_COUNT" -gt 0 ]; then
               echo "❌ **Found $FAILED_COUNT broken link(s)!**" >> "$GITHUB_STEP_SUMMARY"
             else
-              # If exit code is non-zero but no links are marked as failed, it's likely a config/input error.
-              echo "⚠️ **Link checker failed with an error (Exit Code: $EXIT_CODE).**" >> "$GITHUB_STEP_SUMMARY"
-              echo "This may indicate a configuration or network issue, not necessarily a broken link." >> "$GITHUB_STEP_SUMMARY"
+              # If the step failed but no broken links found, it's likely a different error
+              echo "⚠️ **Link checker encountered an error.**" >> "$GITHUB_STEP_SUMMARY"
+              echo "This may indicate a configuration, network, or file access issue." >> "$GITHUB_STEP_SUMMARY"
             fi
+          else
+            echo "⚠️ **Link checker step was skipped or cancelled.**" >> "$GITHUB_STEP_SUMMARY"
           fi
           
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -107,9 +108,3 @@ jobs:
           else
             echo "No detailed report available." >> "$GITHUB_STEP_SUMMARY"
           fi
-
-      - name: Fail Job on Broken Links
-        if: steps.lychee.outputs.exit_code != '0'
-        run: |
-          echo "The link checker job failed. See the report in the job summary for details."
-          exit 1
