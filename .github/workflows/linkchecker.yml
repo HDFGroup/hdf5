@@ -3,6 +3,7 @@ name: Link Checker (lychee)
 on:
   workflow_dispatch:
   push:
+    branches: [ develop ] # Run only on pushes to the develop branch
   pull_request:
     branches: [ develop ]
 
@@ -72,66 +73,21 @@ jobs:
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
           output: lychee-report.md
           format: markdown
-          # Don't fail immediately, let us analyze the results
+          # Don't fail the step immediately; we'll analyze the results first.
           fail: false
 
-      - name: Analyze Link Check Results
-        id: analyze
-        if: always()
-        run: |
-          echo "Analyzing lychee results..."
-          
-          # Check if lychee report exists
-          if [ -f "lychee-report.md" ]; then
-            echo "Report file found"
-            cat lychee-report.md
-            
-            # Count actual errors (not just excluded/ignored) - fixed approach
-            if grep -E "❌|✗|ERROR|FAILED" lychee-report.md > /dev/null 2>&1; then
-              ERRORS=$(grep -cE "❌|✗|ERROR|FAILED" lychee-report.md)
-              BROKEN_LINKS=$(grep -E "❌|✗|ERROR|FAILED" lychee-report.md)
-              HAS_BROKEN_LINKS="true"
-            else
-              ERRORS=0
-              BROKEN_LINKS=""
-              HAS_BROKEN_LINKS="false"
-            fi
-            
-            # Ensure ERRORS is a valid integer
-            ERRORS=${ERRORS:-0}
-            
-            echo "error_count=$ERRORS" >> $GITHUB_OUTPUT
-            echo "has_broken_links=$HAS_BROKEN_LINKS" >> $GITHUB_OUTPUT
-            
-            # Save broken links to a file for the summary
-            if [ "$ERRORS" -gt 0 ]; then
-              echo "$BROKEN_LINKS" > broken_links.txt
-            fi
-          else
-            echo "No report file found"
-            echo "has_broken_links=false" >> $GITHUB_OUTPUT
-            echo "error_count=0" >> $GITHUB_OUTPUT
-          fi
-
       - name: Publish Report to Job Summary
+        # This step runs regardless of the outcome of the link check
         if: always()
         run: |
           echo "## 🔗 Link Checker Report" >> "$GITHUB_STEP_SUMMARY"
           
-          HAS_BROKEN_LINKS="${{ steps.analyze.outputs.has_broken_links }}"
-          ERROR_COUNT="${{ steps.analyze.outputs.error_count }}"
-          
-          if [ "$HAS_BROKEN_LINKS" = "true" ]; then
-            echo "❌ **Found $ERROR_COUNT broken link(s)!**" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "### Broken Links:" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            if [ -f "broken_links.txt" ]; then
-              cat broken_links.txt >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "No broken links file found" >> "$GITHUB_STEP_SUMMARY"
-            fi
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          # Use the exit_code output from the lychee-action for a reliable result.
+          # A non-zero exit code indicates broken links were found.
+          if [ "${{ steps.lychee.outputs.exit_code }}" != '0' ]; then
+            # We can still count the errors from the report for a user-friendly message
+            FAILED_COUNT=$(grep -c "❌" lychee-report.md || true)
+            echo "❌ **Found $FAILED_COUNT broken link(s)!**" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "✅ **No broken links found!**" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -140,6 +96,7 @@ jobs:
           
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### Full Report:" >> "$GITHUB_STEP_SUMMARY"
+          # Append the detailed report file if it exists
           if [ -f "lychee-report.md" ]; then
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             cat lychee-report.md >> "$GITHUB_STEP_SUMMARY"
@@ -149,8 +106,8 @@ jobs:
           fi
 
       - name: Fail Job on Broken Links
-        if: steps.analyze.outputs.has_broken_links == 'true'
+        # This step only runs if the lychee action produced a non-zero exit code
+        if: steps.lychee.outputs.exit_code != '0'
         run: |
-          ERROR_COUNT="${{ steps.analyze.outputs.error_count }}"
-          echo "Found $ERROR_COUNT broken link(s). Failing the job."
+          echo "Broken links were found. See the report in the job summary for details."
           exit 1
