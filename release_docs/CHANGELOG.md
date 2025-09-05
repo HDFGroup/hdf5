@@ -107,7 +107,6 @@ HDF5 release, platforms tested, and known problems in this release.
    | `DISABLE_PDB_FILES` | to | `HDF5_DISABLE_PDB_FILES` | 
    | `ONLY_SHARED_LIBS` | to | `HDF5_ONLY_SHARED_LIBS` |
    | `ALLOW_UNSUPPORTED` | to | `HDF5_ALLOW_UNSUPPORTED` |
-   | `ALLOW_UNSUPPORTED` | to | `HDF5_ALLOW_UNSUPPORTED` |
    | `TEST_SHELL_SCRIPTS` | to | `HDF5_TEST_SHELL_SCRIPTS` |
 
   All other HDF5 library CMake options are prefixed with `HDF5_`
