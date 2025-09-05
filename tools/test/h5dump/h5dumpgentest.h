@@ -135,4 +135,6 @@ void gent_trefer_obj(void);
 void gent_trefer_param(void);
 void gent_trefer_reg(void);
 void gent_trefer_reg_1d(void);
+
+int gent_test_reference_external(void);
 #endif /* H5DUMP_GENTEST_H */
