@@ -3,7 +3,6 @@ name: Link Checker (lychee)
 on:
   workflow_dispatch:
   push:
-    branches: [ develop ] # Run only on pushes to the develop branch
   pull_request:
     branches: [ develop ]
 
