@@ -274,6 +274,8 @@ gen_h5dump_files(void)
     gent_trefer_reg();
     gent_trefer_reg_1d();
 
+    nerrors += gent_test_reference_external();
+
     return nerrors;
 }
 
