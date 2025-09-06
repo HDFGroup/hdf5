@@ -16,12 +16,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.foreign.Arena;
+import java.lang.foreign.FunctionDescriptor;
+import java.lang.foreign.Linker;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SequenceLayout;
 import java.lang.foreign.ValueLayout;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.VarHandle;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
@@ -268,14 +273,18 @@ public class TestH5Lbasic {
             }
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id)
+            {
+                iterdata.add(id);
+            }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
             public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
-                //((H5L_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5L_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }
@@ -315,14 +324,18 @@ public class TestH5Lbasic {
             }
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id)
+            {
+                iterdata.add(id);
+            }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
             public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
-                //((H5L_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5L_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }
@@ -355,14 +368,18 @@ public class TestH5Lbasic {
             }
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id)
+            {
+                iterdata.add(id);
+            }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
             public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
-                //((H5L_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5L_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }
@@ -402,21 +419,18 @@ public class TestH5Lbasic {
             }
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
-            //            public static final FunctionDescriptor DESC =
-            //                    FunctionDescriptor.of();
-            //
-            //                public static final MemorySegment ADDR = findOrThrow("H5L_iter_data");
-            //
-            //                public static final MethodHandle HANDLE =
-            //                Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id)
+            {
+                iterdata.add(id);
+            }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
             public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
-                //((H5L_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5L_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }

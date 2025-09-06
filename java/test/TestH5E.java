@@ -326,7 +326,11 @@ public class TestH5E {
             }
         }
         class H5E_walk_data implements H5E_walk_t {
-            public ArrayList<wdata> walkdata = new ArrayList<wdata>();
+            static public ArrayList<wdata> walkdata = new ArrayList<wdata>();
+            static void add_iter_data(wdata id)
+            {
+                walkdata.add(id);
+            }
         }
         H5E_walk_t walk_data = new H5E_walk_data();
         class H5E_walk_callback implements H5E_walk_cb {
@@ -335,8 +339,7 @@ public class TestH5E {
                 wdata wd = new wdata((String)H5E_error2_t.desc(info).getString(0),
                                      (String)H5E_error2_t.func_name(info).getString(0),
                                      (int)H5E_error2_t.line(info));
-                // TODO fix
-                //((H5E_walk_data)op_data).walkdata.add(wd);
+                ((H5E_walk_data)walk_data).add_iter_data(wd);
                 return 0;
             }
         }

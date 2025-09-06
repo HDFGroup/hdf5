@@ -13,6 +13,12 @@
 package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SequenceLayout;
+import java.lang.foreign.SymbolLookup;
+import java.lang.foreign.ValueLayout;
 
 /**
  * Information struct for group (for H5Gget_info/H5Gget_info_by_name/H5Gget_info_by_idx)
@@ -29,6 +35,16 @@ public class H5_ih_info_t implements Serializable {
     {
         this.index_size = index_size;
         this.heap_size  = heap_size;
+    }
+
+    public H5_ih_info_t(MemorySegment info_segment)
+    {
+        MemoryLayout ilayout = MemoryLayout.structLayout(
+                ValueLayout.JAVA_LONG.withName("index_size"),
+                ValueLayout.JAVA_LONG.withName("heap_size"));
+
+        this.index_size = info_segment.get(ValueLayout.JAVA_LONG, ilayout.byteOffset(MemoryLayout.PathElement.groupElement("index_size")));
+        this.heap_size  = info_segment.get(ValueLayout.JAVA_LONG, ilayout.byteOffset(MemoryLayout.PathElement.groupElement("heap_size")));
     }
 
     @Override

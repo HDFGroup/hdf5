@@ -550,10 +550,13 @@ public class TestH5Plist {
             }
         }
         class H5P_iter_data implements H5P_iterate_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static idata get_iter_data(int idx)
+            {
+                return iterdata.get(idx);
+            }
         }
         H5P_iterate_t iter_data = new H5P_iter_data();
-
         class H5P_iter_callback implements H5P_iterate_cb {
             public int apply(long list_id, MemorySegment name, MemorySegment op_data)
             {
@@ -800,7 +803,11 @@ public class TestH5Plist {
     //            }
     //        }
     //        class H5P_cls_create_data implements H5P_cls_create_func_t {
-    //            public ArrayList<cdata> clsdata = new ArrayList<cdata>();
+    //            static public ArrayList<cdata> clsdata = new ArrayList<cdata>();
+    //            static void add_iter_data(cdata id)
+    //            {
+    //                clsdata.add(id);
+    //            }
     //        }
     //        H5P_cls_create_func_t cls_create_data = new H5P_cls_create_data();
     //
@@ -821,7 +828,7 @@ public class TestH5Plist {
     //        H5P_cls_copy_func_t cls_copy_data = new H5P_cls_copy_data();
     //
     //        class H5P_cls_copy_callback implements H5P_cls_copy_func_cb {
-    //            public int callback(long list_id1, long list_id2, H5P_cls_copy_func_t cls_data) {
+    //            public int apply(long list_id1, long list_id2, H5P_cls_copy_func_t cls_data) {
     //                cdata cd = ((H5P_cls_copy_data)cls_copy_data).clsdata.get(0);
     //                cd.cls_count++;
     //                cd.cls_id = list_id1;
@@ -836,7 +843,7 @@ public class TestH5Plist {
     //        H5P_cls_close_func_t cls_close_data = new H5P_cls_close_data();
     //
     //        class H5P_cls_close_callback implements H5P_cls_close_func_cb {
-    //            public int callback(long list_id, H5P_cls_close_func_t cls_data) {
+    //            public int apply(long list_id, H5P_cls_close_func_t cls_data) {
     //                cdata cd = ((H5P_cls_close_data)cls_close_data).clsdata.get(0);
     //                cd.cls_count++;
     //                cd.cls_id = list_id;

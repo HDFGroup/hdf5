@@ -414,14 +414,18 @@ public class TestH5Ocreate {
             }
         }
         class H5O_iter_data implements H5O_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id)
+            {
+                iterdata.add(id);
+            }
         }
         H5O_iterate_opdata_t iter_data = new H5O_iter_data();
         class H5O_iter_callback implements H5O_iterate_t {
             public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
-                //((H5O_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5O_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }

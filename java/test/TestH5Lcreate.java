@@ -524,7 +524,7 @@ public class TestH5Lcreate {
         assertTrue("Link Type", link_type == HDF5Constants.H5L_TYPE_EXTERNAL);
         assertFalse("H5Lget_value ", link_value[0] == null);
         assertFalse("H5Lget_value ", link_value[1] == null);
-        assertTrue("Link Value ", link_value[0].compareTo("DT1") == 0);
+        assertTrue("Link Value " + link_value[0], link_value[0].compareTo("DT1") == 0);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -863,14 +863,18 @@ public class TestH5Lcreate {
             }
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id)
+            {
+                iterdata.add(id);
+            }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
             public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
-                //((H5L_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5L_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }
@@ -935,14 +939,18 @@ public class TestH5Lcreate {
             }
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id)
+            {
+                iterdata.add(id);
+            }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
             public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
-                //((H5L_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5L_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }
