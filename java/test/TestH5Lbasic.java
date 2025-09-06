@@ -274,10 +274,7 @@ public class TestH5Lbasic {
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
             static public ArrayList<idata> iterdata = new ArrayList<idata>();
-            static void add_iter_data(idata id)
-            {
-                iterdata.add(id);
-            }
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
@@ -325,10 +322,7 @@ public class TestH5Lbasic {
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
             static public ArrayList<idata> iterdata = new ArrayList<idata>();
-            static void add_iter_data(idata id)
-            {
-                iterdata.add(id);
-            }
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
@@ -369,10 +363,7 @@ public class TestH5Lbasic {
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
             static public ArrayList<idata> iterdata = new ArrayList<idata>();
-            static void add_iter_data(idata id)
-            {
-                iterdata.add(id);
-            }
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
@@ -420,10 +411,7 @@ public class TestH5Lbasic {
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
             static public ArrayList<idata> iterdata = new ArrayList<idata>();
-            static void add_iter_data(idata id)
-            {
-                iterdata.add(id);
-            }
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {

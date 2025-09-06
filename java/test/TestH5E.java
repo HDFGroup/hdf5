@@ -327,10 +327,7 @@ public class TestH5E {
         }
         class H5E_walk_data implements H5E_walk_t {
             static public ArrayList<wdata> walkdata = new ArrayList<wdata>();
-            static void add_iter_data(wdata id)
-            {
-                walkdata.add(id);
-            }
+            static void add_iter_data(wdata id) { walkdata.add(id); }
         }
         H5E_walk_t walk_data = new H5E_walk_data();
         class H5E_walk_callback implements H5E_walk_cb {

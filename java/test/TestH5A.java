@@ -1226,10 +1226,7 @@ public class TestH5A {
         }
         class H5A_iter_data implements H5A_iterate_t {
             static public ArrayList<idata> iterdata = new ArrayList<idata>();
-            static void add_iter_data(idata id)
-            {
-                iterdata.add(id);
-            }
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5A_iterate_t iter_data = new H5A_iter_data();
         class H5A_iter_callback implements H5A_iterate_cb {
@@ -1237,7 +1234,7 @@ public class TestH5A {
                              MemorySegment op_data)
             {
                 String name = attr_name.getString(0, StandardCharsets.UTF_8);
-                idata id = new idata(name);
+                idata id    = new idata(name);
                 ((H5A_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
@@ -1325,10 +1322,7 @@ public class TestH5A {
         }
         class H5A_iter_data implements H5A_iterate_t {
             static public ArrayList<idata> iterdata = new ArrayList<idata>();
-            static void add_iter_data(idata id)
-            {
-                iterdata.add(id);
-            }
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5A_iterate_t iter_data = new H5A_iter_data();
         class H5A_iter_callback implements H5A_iterate_cb {
@@ -1336,7 +1330,7 @@ public class TestH5A {
                              MemorySegment op_data)
             {
                 String name = attr_name.getString(0, StandardCharsets.UTF_8);
-                idata id = new idata(name);
+                idata id    = new idata(name);
                 ((H5A_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }

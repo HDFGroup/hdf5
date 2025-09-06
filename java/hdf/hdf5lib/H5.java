@@ -2377,40 +2377,40 @@ public class H5 implements java.io.Serializable {
         is1D         = (cname.lastIndexOf('[') == cname.indexOf('['));
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
 
-//        if (is1D && (dname == 'B')) {
-//            status = H5Awrite(attr_id, mem_type_id, (byte[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'S')) {
-//            status = H5Awrite(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'I')) {
-//            status = H5Awrite(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'J')) {
-//            status = H5Awrite(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'F')) {
-//            status = H5Awrite(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'D')) {
-//            status = H5Awrite(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dataClass.getComponentType() == String.class)) {
-//            log.trace("H5Dwrite_string type");
-//            status = H5Awrite(attr_id, mem_type_id, (String[])obj);
-//        }
-//        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-//            log.trace("H5AwriteVL type");
-//            status = H5Awrite(attr_id, mem_type_id, (Object[])obj);
-//        }
-//        else {
-            HDFArray theArray = new HDFArray(obj);
-            byte[] buf        = theArray.byteify();
+        //        if (is1D && (dname == 'B')) {
+        //            status = H5Awrite(attr_id, mem_type_id, (byte[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'S')) {
+        //            status = H5Awrite(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'I')) {
+        //            status = H5Awrite(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'J')) {
+        //            status = H5Awrite(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'F')) {
+        //            status = H5Awrite(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'D')) {
+        //            status = H5Awrite(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dataClass.getComponentType() == String.class)) {
+        //            log.trace("H5Dwrite_string type");
+        //            status = H5Awrite(attr_id, mem_type_id, (String[])obj);
+        //        }
+        //        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+        //            log.trace("H5AwriteVL type");
+        //            status = H5Awrite(attr_id, mem_type_id, (Object[])obj);
+        //        }
+        //        else {
+        HDFArray theArray = new HDFArray(obj);
+        byte[] buf        = theArray.byteify();
 
-            status   = H5Awrite(attr_id, mem_type_id, buf);
-            buf      = null;
-            theArray = null;
-//        }
+        status   = H5Awrite(attr_id, mem_type_id, buf);
+        buf      = null;
+        theArray = null;
+        //        }
 
         return status;
     }
@@ -3652,9 +3652,8 @@ public class H5 implements java.io.Serializable {
         }
         else if (is1D && (dname == 'I')) {
             log.trace("H5Dread_dname_I");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
-                                 (int[])obj, isCriticalPinning);
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (int[])obj,
+                             isCriticalPinning);
         }
         else if (is1D && (dname == 'J')) {
             log.trace("H5Dread_dname_J");
@@ -4444,57 +4443,57 @@ public class H5 implements java.io.Serializable {
         is1D         = (cname.lastIndexOf('[') == cname.indexOf('['));
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
 
-//        if (is1D && (dname == 'B')) {
-//            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-//                              (byte[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'S')) {
-//            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-//            xfer_plist_id,
-//                                    (short[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'I')) {
-//            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-//            xfer_plist_id,
-//                                  (int[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'J')) {
-//            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-//            xfer_plist_id,
-//                                   (long[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'F')) {
-//            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-//            xfer_plist_id,
-//                                    (float[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dname == 'D')) {
-//            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-//            xfer_plist_id,
-//                                     (double[])obj, isCriticalPinning);
-//        }
-//        else if (is1D && (dataClass.getComponentType() == String.class)) {
-//            log.trace("H5Dwrite_string type");
-//            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-//            xfer_plist_id,
-//                                     (String[])obj);
-//        }
-//        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-//            log.trace("H5DwriteVL type");
-//            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-//                                (Object[])obj);
-//        }
-//        else {
-            HDFArray theArray = new HDFArray(obj);
-            byte[] buf        = theArray.byteify();
+        //        if (is1D && (dname == 'B')) {
+        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+        //                              (byte[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'S')) {
+        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
+        //            xfer_plist_id,
+        //                                    (short[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'I')) {
+        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
+        //            xfer_plist_id,
+        //                                  (int[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'J')) {
+        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
+        //            xfer_plist_id,
+        //                                   (long[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'F')) {
+        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
+        //            xfer_plist_id,
+        //                                    (float[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dname == 'D')) {
+        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
+        //            xfer_plist_id,
+        //                                     (double[])obj, isCriticalPinning);
+        //        }
+        //        else if (is1D && (dataClass.getComponentType() == String.class)) {
+        //            log.trace("H5Dwrite_string type");
+        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
+        //            xfer_plist_id,
+        //                                     (String[])obj);
+        //        }
+        //        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+        //            log.trace("H5DwriteVL type");
+        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+        //                                (Object[])obj);
+        //        }
+        //        else {
+        HDFArray theArray = new HDFArray(obj);
+        byte[] buf        = theArray.byteify();
 
-            // will raise exception on error
-            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
+        // will raise exception on error
+        status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
 
-            // clean up these: assign 'null' as hint to gc()
-            buf      = null;
-            theArray = null;
-//        }
+        // clean up these: assign 'null' as hint to gc()
+        buf      = null;
+        theArray = null;
+        //        }
 
         return status;
     }
@@ -8318,7 +8317,7 @@ public class H5 implements java.io.Serializable {
         System.out.println();
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
-            MemorySegment name_segment  = arena.allocateFrom(name);
+            MemorySegment name_segment = arena.allocateFrom(name);
             System.out.println("H5Lget_value: name=" + name_segment.getString(0, StandardCharsets.UTF_8));
             MemorySegment linfo_segment = arena.allocate(H5L_info2_t.sizeof());
             if (H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) < 0) {
@@ -8342,7 +8341,8 @@ public class H5 implements java.io.Serializable {
                                                           val_size + 1, lapl_id) < 0) {
                 h5libraryError();
             }
-            System.out.println("H5Lget_val: buffer=" + link_value_segment.getString(0, StandardCharsets.UTF_8));
+            System.out.println("H5Lget_val: buffer=" +
+                               link_value_segment.getString(0, StandardCharsets.UTF_8));
             if (link_type == H5L_TYPE_EXTERNAL()) {
                 MemorySegment file_name_segment = arena.allocate(val_size + 1);
                 MemorySegment obj_name_segment  = arena.allocate(val_size + 1);
@@ -8353,7 +8353,8 @@ public class H5 implements java.io.Serializable {
                 // Convert the MemorySegment to a String
                 link_value[0] = obj_name_segment.getString(0, StandardCharsets.UTF_8);
                 link_value[1] = file_name_segment.getString(0, StandardCharsets.UTF_8);
-                System.out.println("H5Lget_value: external link to file " + link_value[1] + " name " + link_value[0]);
+                System.out.println("H5Lget_value: external link to file " + link_value[1] + " name " +
+                                   link_value[0]);
             }
             else if (link_type == H5L_TYPE_SOFT()) {
                 // Convert the MemorySegment to a String
@@ -8407,8 +8408,9 @@ public class H5 implements java.io.Serializable {
         System.out.println();
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
-            MemorySegment name_segment  = arena.allocateFrom(group_name);
-            System.out.println("H5Lget_value_by_idx: name=" + name_segment.getString(0, StandardCharsets.UTF_8));
+            MemorySegment name_segment = arena.allocateFrom(group_name);
+            System.out.println("H5Lget_value_by_idx: name=" +
+                               name_segment.getString(0, StandardCharsets.UTF_8));
             MemorySegment linfo_segment = arena.allocate(H5L_info2_t.sizeof());
             if (H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n, linfo_segment, lapl_id) < 0) {
                 h5libraryError();
@@ -8432,7 +8434,8 @@ public class H5 implements java.io.Serializable {
                                                                  lapl_id) < 0) {
                 h5libraryError();
             }
-            System.out.println("H5Lget_val_by_idx: buffer=" + link_value_segment.getString(0, StandardCharsets.UTF_8));
+            System.out.println("H5Lget_val_by_idx: buffer=" +
+                               link_value_segment.getString(0, StandardCharsets.UTF_8));
             if (link_type == H5L_TYPE_EXTERNAL()) {
                 MemorySegment file_name_segment = arena.allocate(val_size + 1);
                 MemorySegment obj_name_segment  = arena.allocate(val_size + 1);
@@ -8443,7 +8446,8 @@ public class H5 implements java.io.Serializable {
                 // Convert the MemorySegment to a String
                 link_value[0] = obj_name_segment.getString(0, StandardCharsets.UTF_8);
                 link_value[1] = file_name_segment.getString(0, StandardCharsets.UTF_8);
-                System.out.println("H5Lget_value_by_idx: external link to file " + link_value[1] + " name " + link_value[0]);
+                System.out.println("H5Lget_value_by_idx: external link to file " + link_value[1] + " name " +
+                                   link_value[0]);
             }
             else {
                 // Convert the MemorySegment to a String
@@ -8858,8 +8862,8 @@ public class H5 implements java.io.Serializable {
             MemorySegment src_name_segment = arena.allocateFrom(src_name);
             MemorySegment dst_name_segment = arena.allocateFrom(dst_name);
             // Call the native method to copy the object
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Ocopy(src_loc_id, src_name_segment, dst_loc_id, dst_name_segment,
-                                                       ocpypl_id, lcpl_id) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Ocopy(src_loc_id, src_name_segment, dst_loc_id,
+                                                       dst_name_segment, ocpypl_id, lcpl_id) < 0)
                 h5libraryError();
         }
     }

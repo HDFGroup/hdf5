@@ -551,10 +551,7 @@ public class TestH5Plist {
         }
         class H5P_iter_data implements H5P_iterate_t {
             static public ArrayList<idata> iterdata = new ArrayList<idata>();
-            static idata get_iter_data(int idx)
-            {
-                return iterdata.get(idx);
-            }
+            static idata get_iter_data(int idx) { return iterdata.get(idx); }
         }
         H5P_iterate_t iter_data = new H5P_iter_data();
         class H5P_iter_callback implements H5P_iterate_cb {

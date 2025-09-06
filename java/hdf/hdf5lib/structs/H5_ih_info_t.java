@@ -39,12 +39,13 @@ public class H5_ih_info_t implements Serializable {
 
     public H5_ih_info_t(MemorySegment info_segment)
     {
-        MemoryLayout ilayout = MemoryLayout.structLayout(
-                ValueLayout.JAVA_LONG.withName("index_size"),
-                ValueLayout.JAVA_LONG.withName("heap_size"));
+        MemoryLayout ilayout = MemoryLayout.structLayout(ValueLayout.JAVA_LONG.withName("index_size"),
+                                                         ValueLayout.JAVA_LONG.withName("heap_size"));
 
-        this.index_size = info_segment.get(ValueLayout.JAVA_LONG, ilayout.byteOffset(MemoryLayout.PathElement.groupElement("index_size")));
-        this.heap_size  = info_segment.get(ValueLayout.JAVA_LONG, ilayout.byteOffset(MemoryLayout.PathElement.groupElement("heap_size")));
+        this.index_size = info_segment.get(
+            ValueLayout.JAVA_LONG, ilayout.byteOffset(MemoryLayout.PathElement.groupElement("index_size")));
+        this.heap_size = info_segment.get(
+            ValueLayout.JAVA_LONG, ilayout.byteOffset(MemoryLayout.PathElement.groupElement("heap_size")));
     }
 
     @Override
