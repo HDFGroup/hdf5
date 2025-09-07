@@ -86,7 +86,7 @@ public class H5F_info2_t implements Serializable {
         MemorySegment free_segment    = org.hdfgroup.javahdf5.H5F_info2_t.free(finfo_segment);
         MemorySegment sohm_segment    = org.hdfgroup.javahdf5.H5F_info2_t.sohm(finfo_segment);
         MemorySegment sohm_ih_segment = org.hdfgroup.javahdf5.H5F_info2_t.sohm.msgs_info(sohm_segment);
-        this.sohm_msgs_info = new hdf.hdf5lib.structs.H5_ih_info_t(
+        this.sohm_msgs_info           = new hdf.hdf5lib.structs.H5_ih_info_t(
             org.hdfgroup.javahdf5.H5_ih_info_t.index_size(sohm_ih_segment),
             org.hdfgroup.javahdf5.H5_ih_info_t.heap_size(sohm_ih_segment));
         this.super_version  = org.hdfgroup.javahdf5.H5F_info2_t.super_.version(super_segment);
