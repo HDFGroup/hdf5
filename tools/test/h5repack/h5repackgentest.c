@@ -5776,6 +5776,7 @@ out:
     return ret;
 }
 
+/* TODO: This is duplicated from gen_filespace.c. Eventually, this should be centralized somewhere. */
 int gen_filespaces(void)
 {
     hid_t                 fid  = H5I_INVALID_HID; /* File ID */
