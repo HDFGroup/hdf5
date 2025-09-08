@@ -342,7 +342,25 @@ gen_h5repack_files(void)
         nerrors += (generate_f32le(external) < 0 ? 1 : 0);
     } /* end for external data storage or not */
 
+    Test_Extlink_Copy();
+
+    gent_group_creation_order();
+
+    gent_extlink();
+    gent_extlinks();
+    gent_softlink2();
+    gent_attrreg();
+    gent_datareg();
+    gent_family();
+
+    nerrors += (gent_onion_1d_dset() < 0 ? 1 : 0);
+    nerrors += (gent_onion_create_delete_objects() < 0 ? 1 : 0);
+    nerrors += (gent_onion_dset_extension() < 0 ? 1 : 0);
+
     nerrors += (make_h5repack_testfiles() < 0 ? 1 : 0);
+    nerrors += (gen_filespaces() < 0 ? 1 : 0);
+
+    nerrors += (test_attributes(H5DIFF_FILE5, 0) < 0 ? 1 : 0);
     return nerrors;
 }
 
