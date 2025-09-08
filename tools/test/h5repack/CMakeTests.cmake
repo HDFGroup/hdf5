@@ -292,6 +292,8 @@ endmacro ()
 #   ERR_REF <string> - value for TEST_ERRREF (default empty)
 #   STAT_ARG <arg> - argument to pass to h5stat (required if STAT_CHECK is provided)
 #   STAT_RESULT_CODE <code> - expected return code from h5stat (default 0)
+#   LAYOUT_DSET <dset> - dataset to use for layout verification tests
+#   LAYOUT_FILTER <filter> - filter to use for layout verification tests
 #
 # OPTIONAL FLAGS
 #   ERROR_STACK - pass the '--enable-error-stack' flag to h5repack and h5diff
@@ -307,7 +309,7 @@ macro (ADD_H5_TEST testname)
   # === Argument handling ===
   cmake_parse_arguments(ARG
     "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK;DUMP_NO_OPT;FULL_DIFF;STAT_CHECK" # flags
-    "TEST_TYPE;TEST_FILE;RESULT_CODE;DIFF_RESULT_CODE;ERR_REF;STAT_ARG;STAT_RESULT_CODE" # single arg
+    "TEST_TYPE;TEST_FILE;RESULT_CODE;DIFF_RESULT_CODE;ERR_REF;STAT_ARG;STAT_RESULT_CODE;LAYOUT_DSET;LAYOUT_FILTER" # single arg
     "" # multi arg
     ${ARGN}
   )
@@ -321,12 +323,28 @@ macro (ADD_H5_TEST testname)
     message(FATAL_ERROR "ADD_H5_TEST: TEST_FILE is a required argument")
   endif ()
 
+  # Default values for local variables
   set (ARG_CLEANUP_FILES "")
   set (ARG_CLEANUP_DEPENDS "")
 
   set (ctest_testname ${testname})
 
-  # TODO: h5dump file cleanup
+  set (ARG_FILTER_IN "")
+  set (ARG_FILTER_OUT "")
+  set (ARG_REF_FILE "")
+
+  set (ARG_DUMP_SKIP_COMPARE FALSE)
+  set (ARG_DUMP_OPTIONS "-q;creation_order;-pH;")
+  set (ARG_NOT_LAYOUT_FILTER "")
+  set (ARG_DUMP_GREP_FILTER "")
+  set (ARG_DUMP_REFERENCE "${testname}.${ARG_TEST_FILE}.ddl")
+
+  set (ARG_STDOUT_FILE "${ARG_TEST_FILE}-${testname}.out")
+  set (ARG_ERROR_STACK_FLAG "")
+
+  # Whether to perform comparison in runTest or locally with h5diff
+  set(ARG_COMPARE_LOCAL true)
+
   if (${ARG_STAT_CHECK})
     if (NOT DEFINED ARG_STAT_ARG)
       message(FATAL_ERROR "ADD_H5_TEST: STAT_ARG is a required argument when STAT_CHECK is provided")
@@ -343,8 +361,6 @@ macro (ADD_H5_TEST testname)
   # Process optional arguments
   if (ARG_ERROR_STACK)
     set(ARG_ERROR_STACK_FLAG "--enable-error-stack")
-  else()
-    set(ARG_ERROR_STACK_FLAG "")
   endif ()
 
   if (NOT DEFINED ARG_RESULT_CODE)
@@ -360,9 +376,50 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   if (ARG_DUMP_NO_OPT)
-    set (DUMP_OPTIONS "")
-  else()
-    set (DUMP_OPTIONS "-q;creation_order;-pH;")
+    set (ARG_DUMP_OPTIONS "")
+  endif()
+
+  if (DEFINED ARG_LAYOUT_DSET OR DEFINED ARG_LAYOUT_FILTER)
+    if (NOT DEFINED ARG_LAYOUT_DSET OR NOT DEFINED ARG_LAYOUT_FILTER)
+      message(FATAL_ERROR "ADD_H5_TEST: Both LAYOUT_DSET and LAYOUT_FILTER must be provided for layout verification tests")
+    endif ()
+    
+    if (${ARG_DUMP_CHECK})
+      message(FATAL_ERROR "ADD_H5_TEST: DUMP_CHECK cannot be used with layout verification tests")
+    endif ()
+
+    # Skip verify layout tests if memchecker enabled
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      set (ARG_TEST_TYPE "SKIP")
+    endif ()
+
+    set (ctest_filename "VERIFY_LAYOUT-${testname}")
+    set (ARG_DUMP_SKIP_COMPARE TRUE)
+    set (ARG_STDOUT_FILE "${ARG_TEST_FILE}-${testname}-v.out")
+    set (ARG_DUMP_REFERENCE "${testfilter}")
+    # If an error result code is provided, change the h5dump call in the following ways
+    # - remove use of dset in args
+    # - change expected result code to 0
+    # - change the layout filter provided to TEST_GREP_FILTER
+    if (${ARG_RESULT_CODE})
+      set(ARG_DUMP_OPTIONS "-pH;")
+
+      if (${ARG_LAYOUT_FILTER} STREQUAL "CHUNKED")
+        set (ARG_NOT_LAYOUT_FILTER "(CONTIGUOUS|COMPACT)")
+      elseif (${ARG_LAYOUT_FILTER} STREQUAL "CONTIGUOUS")
+        set (ARG_NOT_LAYOUT_FILTER "(CHUNK|COMPACT)")
+      elseif (${ARG_LAYOUT_FILTER} STREQUAL "COMPACT")
+        set (ARG_NOT_LAYOUT_FILTER "(CONTIGUOUS|CHUNK)")
+      else ()
+        message(FATAL_ERROR "ADD_H5_TEST: Invalid LAYOUT_FILTER value ${ARG_LAYOUT_FILTER}. Must be CONTIGUOUS, CHUNKED, or COMPACT")
+      endif ()
+
+      set(ARG_DUMP_GREP_FILTER ${ARG_NOT_LAYOUT_FILTER})
+      set(ARG_RESULT_CODE 0)
+    else ()
+      set (ARG_DUMP_OPTIONS "-d;${ARG_LAYOUT_DSET};-pH;")
+      set (ARG_DUMP_GREP_FILTER ${ARG_LAYOUT_FILTER})
+    endif ()
   endif()
 
   # Check for incompatible options
@@ -380,9 +437,6 @@ macro (ADD_H5_TEST testname)
   if (${ARG_GZIP_FILTER} AND ${ARG_SIZE_FILTER})
     message(FATAL_ERROR "ADD_H5_TEST: GZIP_FILTER and SIZE_FILTER options are incompatible")
   endif ()
-
-  # Whether to perform comparison in runTest or locally with h5diff
-  set(ARG_COMPARE_LOCAL true)
 
   if (ARG_GZIP_FILTER)
     set(ARG_FILTER_IN "GZIP   \\(0\\.[0-9][0-9][0-9]:1\\);O?...ing file[^\n]+\n")
@@ -443,7 +497,7 @@ macro (ADD_H5_TEST testname)
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
               -D "TEST_ARGS:STRING=${ARG_ERROR_STACK_FLAG};${ARG_UNPARSED_ARGUMENTS};-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
+              -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
               -D "TEST_EXPECT=${ARG_RESULT_CODE}"
               -D "TEST_SKIP_COMPARE=${ARG_COMPARE_LOCAL}"
               -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
@@ -462,7 +516,7 @@ macro (ADD_H5_TEST testname)
     endif ()
 
     # If we're doing local comparison, add h5diff test
-    if (${ARG_COMPARE_LOCAL} AND NOT ${ARG_FULL_DIFF})
+    if ((${ARG_COMPARE_LOCAL} AND NOT ${ARG_FULL_DIFF}) OR DEFINED ARG_LAYOUT_DSET)
       # h5diff directly
       add_test (
           NAME H5REPACK-${ctest_testname}_DFF
@@ -500,20 +554,23 @@ macro (ADD_H5_TEST testname)
       list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK_DIFF-${testname}_DFF")
     endif()
 
-    if (${ARG_DUMP_CHECK})
+    if (${ARG_DUMP_CHECK} OR DEFINED ARG_LAYOUT_DSET)
       # Perform check via h5dump
       add_test (
         NAME H5REPACK-${ctest_testname}-h5dump
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${DUMP_OPTIONS};${ARG_MAIN_OUT_FILE}"
+            -D "TEST_ARGS:STRING=${ARG_DUMP_OPTIONS};${ARG_MAIN_OUT_FILE}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
+            -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_SKIP_COMPARE=${ARG_DUMP_SKIP_COMPARE}"
+            -D "TEST_GREP_FILTER=${ARG_DUMP_GREP_FILTER}"
+            -D "TEST_GREP_EXPECT=${ARG_RESULT_CODE}"
             -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
             -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
-            -D "TEST_REFERENCE=${testname}.${ARG_TEST_FILE}.ddl"
+            -D "TEST_REFERENCE=${ARG_DUMP_REFERENCE}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK-${ctest_testname}-h5dump PROPERTIES
@@ -534,7 +591,7 @@ macro (ADD_H5_TEST testname)
               -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
               -D "TEST_ARGS:STRING=-S;-s;out-${ARG_STAT_ARG}.${ARG_TEST_FILE}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
+              -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
               -D "TEST_EXPECT=${ARG_STAT_RESULT_CODE}"
               -D "TEST_REFERENCE=${ARG_STAT_ARG}.${ARG_TEST_FILE}.ddl"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
@@ -555,109 +612,11 @@ macro (ADD_H5_TEST testname)
       COMMAND ${CMAKE_COMMAND} -E remove ${ARG_CLEANUP_FILES}
     )
     # Only set dependencies if necessary
-    if (NOT ${ARG_CLEANUP_DEPENDS} STREQUAL "")
+    if (NOT "${ARG_CLEANUP_DEPENDS}" STREQUAL "")
       set_tests_properties (H5REPACK-${ctest_testname}-clean-objects PROPERTIES
-          DEPENDS ${ARG_CLEANUP_DEPENDS}
+          DEPENDS "${ARG_CLEANUP_DEPENDS}"
       )
     endif()
-  endif ()
-endmacro ()
-
-macro (ADD_H5_VERIFY_TEST testname testtype resultcode testfile testdset testfilter)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP -d ${testdset} -pH ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_VERIFY_LAYOUT-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-      )
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES
-          DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects
-      )
-      if ("H5REPACK_VERIFY_LAYOUT-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}_DFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES
-          DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}
-      )
-      if ("H5REPACK_VERIFY_LAYOUT-${testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES DISABLED true)
-      endif ()
-      if (NOT ${resultcode})
-        add_test (
-            NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-d;${testdset};-pH;out-${testname}.${testfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_SKIP_COMPARE=TRUE"
-                -D "TEST_GREP_FILTER:STRING=${testfilter}"
-                -D "TEST_REFERENCE=${testfilter}"
-                -D "TEST_GREP_COMPARE=TRUE"
-                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-        )
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES
-            DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF
-        )
-      else ()
-        if ("${testfilter}" STREQUAL "CHUNKED")
-          set (nottestfilter "(CONTIGUOUS|COMPACT)")
-        endif ()
-        if ("${testfilter}" STREQUAL "CONTIGUOUS")
-          set (nottestfilter "(CHUNK|COMPACT)")
-        endif ()
-        if ("${testfilter}" STREQUAL "COMPACT")
-          set (nottestfilter "(CONTIGUOUS|CHUNK)")
-        endif ()
-        add_test (
-            NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-pH;out-${testname}.${testfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
-                -D "TEST_EXPECT=0"
-                -D "TEST_SKIP_COMPARE=TRUE"
-                -D "TEST_GREP_EXPECT=${resultcode}"
-                -D "TEST_GREP_FILTER:STRING=${nottestfilter}"
-                -D "TEST_REFERENCE=${testfilter}"
-                -D "TEST_GREP_COMPARE=TRUE"
-                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-        )
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES
-            DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF
-        )
-      endif ()
-      if ("H5REPACK_VERIFY_LAYOUT-${testname}_DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DMP
-      )
-    endif ()
   endif ()
 endmacro ()
 
@@ -1473,30 +1432,30 @@ ADD_H5_TEST (SPT_FSM_AGGR TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG SPT 
 #########################################################
 # layout options (these files have no filters)
 #########################################################
-ADD_H5_VERIFY_TEST (dset2_chunk_20x10 "TEST" 0 ${FILE4} dset2 CHUNKED --layout=dset2:CHUNK=20x10)
-ADD_H5_VERIFY_TEST (chunk_20x10 "TEST" 1 ${FILE4} null CHUNKED -l CHUNK=20x10)
-ADD_H5_VERIFY_TEST (dset2_conti "TEST" 0 ${FILE4} dset2 CONTIGUOUS -l dset2:CONTI)
-ADD_H5_VERIFY_TEST (conti "TEST" 1 ${FILE4} null CONTIGUOUS -l CONTI)
-ADD_H5_VERIFY_TEST (dset2_compa "TEST" 0 ${FILE4} dset2 COMPACT -l dset2:COMPA)
-ADD_H5_VERIFY_TEST (compa "TEST" 1 ${FILE4} null COMPACT -l COMPA)
+ADD_H5_TEST (dset2_chunk_20x10 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset2 LAYOUT_FILTER CHUNKED --layout=dset2:CHUNK=20x10)
+ADD_H5_TEST (chunk_20x10 TEST_TYPE "TEST" RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER CHUNKED -l CHUNK=20x10)
+ADD_H5_TEST (dset2_conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset2 LAYOUT_FILTER CONTIGUOUS -l dset2:CONTI)
+ADD_H5_TEST (conti TEST_TYPE "TEST" RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER CONTIGUOUS -l CONTI)
+ADD_H5_TEST (dset2_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset2 LAYOUT_FILTER COMPACT -l dset2:COMPA)
+ADD_H5_TEST (compa TEST_TYPE "TEST" RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER COMPACT -l COMPA)
 ADD_H5_TEST (dset2_chunk_20x10-errstk TEST_TYPE "TEST" RESULT_CODE 0 ERR_REF "dimensionality of chunks doesn't match the dataspace" TEST_FILE ${FILE4} --layout=dset2:CHUNK=20x10x5 ERROR_STACK)
 
 ################################################################
 # layout conversions (file has no filters)
 ###############################################################
-ADD_H5_VERIFY_TEST (dset_compa_conti "TEST" 0 ${FILE4} dset_compact CONTIGUOUS -l dset_compact:CONTI)
-ADD_H5_VERIFY_TEST (dset_compa_chunk "TEST" 0 ${FILE4} dset_compact CHUNKED -l dset_compact:CHUNK=2x5)
-ADD_H5_VERIFY_TEST (dset_compa_compa "TEST" 0 ${FILE4} dset_compact COMPACT -l dset_compact:COMPA)
-ADD_H5_VERIFY_TEST (dset_conti_compa "TEST" 0 ${FILE4} dset_contiguous COMPACT -l dset_contiguous:COMPA)
-ADD_H5_VERIFY_TEST (dset_conti_chunk "TEST" 0 ${FILE4} dset_contiguous CHUNKED -l dset_contiguous:CHUNK=3x6)
-ADD_H5_VERIFY_TEST (dset_conti_conti "TEST" 0 ${FILE4} dset_contiguous CONTIGUOUS -l dset_contiguous:CONTI)
-ADD_H5_VERIFY_TEST (chunk_compa "TEST" 0 ${FILE4} dset_chunk COMPACT -l dset_chunk:COMPA)
-ADD_H5_VERIFY_TEST (chunk_conti "TEST" 0 ${FILE4} dset_chunk CONTIGUOUS -l dset_chunk:CONTI)
-ADD_H5_VERIFY_TEST (chunk_18x13 "TEST" 0 ${FILE4} dset_chunk CHUNKED -l dset_chunk:CHUNK=18x13)
+ADD_H5_TEST (dset_compa_conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_compact LAYOUT_FILTER CONTIGUOUS -l dset_compact:CONTI)
+ADD_H5_TEST (dset_compa_chunk TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_compact LAYOUT_FILTER CHUNKED -l dset_compact:CHUNK=2x5)
+ADD_H5_TEST (dset_compa_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_compact LAYOUT_FILTER COMPACT -l dset_compact:COMPA)
+ADD_H5_TEST (dset_conti_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_contiguous LAYOUT_FILTER COMPACT -l dset_contiguous:COMPA)
+ADD_H5_TEST (dset_conti_chunk TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_contiguous LAYOUT_FILTER CHUNKED -l dset_contiguous:CHUNK=3x6)
+ADD_H5_TEST (dset_conti_conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_contiguous LAYOUT_FILTER CONTIGUOUS -l dset_contiguous:CONTI)
+ADD_H5_TEST (chunk_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_chunk LAYOUT_FILTER COMPACT -l dset_chunk:COMPA)
+ADD_H5_TEST (chunk_conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_chunk LAYOUT_FILTER CONTIGUOUS -l dset_chunk:CONTI)
+ADD_H5_TEST (chunk_18x13 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_chunk LAYOUT_FILTER CHUNKED -l dset_chunk:CHUNK=18x13)
 
 # test convert small size dataset ( < 1k) to compact layout without -m
-ADD_H5_VERIFY_TEST (contig_small_compa "TEST" 0 ${FILE18} contig_small COMPACT -l contig_small:COMPA)
-ADD_H5_VERIFY_TEST (contig_small_fixed_compa "TEST" 0 ${FILE18} chunked_small_fixed COMPACT -l chunked_small_fixed:COMPA)
+ADD_H5_TEST (contig_small_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE18} LAYOUT_DSET contig_small LAYOUT_FILTER COMPACT -l contig_small:COMPA)
+ADD_H5_TEST (contig_small_fixed_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE18} LAYOUT_DSET chunked_small_fixed LAYOUT_FILTER COMPACT -l chunked_small_fixed:COMPA)
 
 #---------------------------------------------------------------------------
 # Test file contains chunked datasets (need multiple dsets) with
@@ -1504,14 +1463,14 @@ ADD_H5_VERIFY_TEST (contig_small_fixed_compa "TEST" 0 ${FILE18} chunked_small_fi
 # Use first dset to test.
 #---------------------------------------------------------------------------
 # chunk to chunk - specify chunk dim bigger than any current dim
-ADD_H5_VERIFY_TEST (chunk2chunk "TEST" 0 ${FILE19} chunk_unlimit1 CHUNK -l chunk_unlimit1:CHUNK=100x300)
+ADD_H5_TEST (chunk2chunk TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit1 LAYOUT_FILTER CHUNK -l chunk_unlimit1:CHUNK=100x300)
 
 # chunk to contiguous
-ADD_H5_VERIFY_TEST (chunk2conti "TEST" 0 ${FILE19} chunk_unlimit1 CONTI -l chunk_unlimit1:CONTI)
+ADD_H5_TEST (chunk2conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit1 LAYOUT_FILTER CONTI -l chunk_unlimit1:CONTI)
 
 # chunk to compact - convert big dataset (should be > 64k) for this purpose,
 # should remain as original layout (chunk)
-ADD_H5_VERIFY_TEST (chunk2compa "TEST" 0 ${FILE19} chunk_unlimit1 CHUNK -l chunk_unlimit1:COMPA)
+ADD_H5_TEST (chunk2compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit1 LAYOUT_FILTER CHUNK -l chunk_unlimit1:COMPA)
 
 #--------------------------------------------------------------------------
 # Test -f for some specific cases. Chunked dataset with unlimited max dims.
@@ -1521,13 +1480,13 @@ ADD_H5_VERIFY_TEST (chunk2compa "TEST" 0 ${FILE19} chunk_unlimit1 CHUNK -l chunk
 # - should not change max dims from unlimit
 
 # chunk dim is bigger than dataset dim. ( dset size < 64k )
-ADD_H5_VERIFY_TEST (error1 "TEST" 0 ${FILE19} chunk_unlimit1 H5S_UNLIMITED -f chunk_unlimit1:NONE)
+ADD_H5_TEST (error1 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit1 LAYOUT_FILTER H5S_UNLIMITED -f chunk_unlimit1:NONE)
 
 # chunk dim is bigger than dataset dim. ( dset size > 64k )
-ADD_H5_VERIFY_TEST (error2 "TEST" 0 ${FILE19} chunk_unlimit2 H5S_UNLIMITED -f chunk_unlimit2:NONE)
+ADD_H5_TEST (error2 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit2 LAYOUT_FILTER H5S_UNLIMITED -f chunk_unlimit2:NONE)
 
 # chunk dims are smaller than dataset dims. ( dset size < 64k )
-ADD_H5_VERIFY_TEST (error3 "TEST" 0 ${FILE19} chunk_unlimit3 H5S_UNLIMITED -f chunk_unlimit3:NONE)
+ADD_H5_TEST (error3 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit3 LAYOUT_FILTER H5S_UNLIMITED -f chunk_unlimit3:NONE)
 
 # file input - should not fail
 ADD_H5_TEST (error4 TEST_TYPE "TEST" TEST_FILE ${FILE19} -f NONE ERROR_STACK)
@@ -1538,9 +1497,9 @@ ADD_H5_TEST (error4 TEST_TYPE "TEST" TEST_FILE ${FILE19} -f NONE ERROR_STACK)
 # (HDFFV-8214)
 #--------------------------------------------------------------------------
 # chunk dim is bigger than dataset dim. should succeed.
-ADD_H5_VERIFY_TEST (ckdim_biger "TEST" 0 ${FILE19} chunk_unlimit2 CONTI -l chunk_unlimit2:CONTI)
+ADD_H5_TEST (ckdim_biger TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit2 LAYOUT_FILTER CONTI -l chunk_unlimit2:CONTI)
 # chunk dim is smaller than dataset dim. should succeed.
-ADD_H5_VERIFY_TEST (ckdim_smaller "TEST" 0 ${FILE19} chunk_unlimit3 CONTI -l chunk_unlimit3:CONTI)
+ADD_H5_TEST (ckdim_smaller TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit3 LAYOUT_FILTER CONTI -l chunk_unlimit3:CONTI)
 
 
 
@@ -1556,7 +1515,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_VERIFY_TEST (layout_long_switches ${TESTTYPE} 1 ${FILE4} null CHUNKED ${arg})
+ADD_H5_TEST (layout_long_switches TEST_TYPE ${TESTTYPE} RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER CHUNKED ${arg})
 
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
 set (arg -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype])
@@ -1564,7 +1523,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_VERIFY_TEST (layout_short_switches ${TESTTYPE} 1 ${FILE4} null CHUNKED ${arg})
+ADD_H5_TEST (layout_short_switches TEST_TYPE ${TESTTYPE} RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER CHUNKED ${arg})
 
 # several global filters
 set (arg ${FILE4} --filter GZIP=1 --filter SHUF)
