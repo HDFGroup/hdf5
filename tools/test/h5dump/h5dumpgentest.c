@@ -686,10 +686,11 @@ gent_softlink(void)
 #define NX 4
 #define NY 2
 int
-gent_softlink2(void)
+gent_softlink2(bool big_endian_committed)
 {
     hid_t   fileid1 = H5I_INVALID_HID;
     hid_t   gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;
+    hid_t   target_type = H5I_INVALID_HID;
     hid_t   datatype = H5I_INVALID_HID;
     hid_t   dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID;
     hid_t   dataspace = H5I_INVALID_HID;
@@ -729,7 +730,14 @@ gent_softlink2(void)
     /*-----------------------------------------------------------------------
      * Named datatype
      *------------------------------------------------------------------------*/
-    datatype = H5Tcopy(H5T_NATIVE_INT);
+    if (big_endian_committed) {
+        target_type = H5T_STD_I32BE;
+    } else {
+        target_type = H5T_NATIVE_INT;
+    }
+    
+    datatype = H5Tcopy(target_type);
+
     status   = H5Tcommit2(fileid1, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
         fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", FILE4_1);
@@ -748,13 +756,10 @@ gent_softlink2(void)
     dimsf[1]  = NY;
     dataspace = H5Screate_simple(2, dimsf, NULL);
 
-    /*
-     * We will store little endian INT numbers.
-     */
-
     /*---------------
      * dset1
      */
+
     /* Create a new dataset as sample object */
     dset1 = H5Dcreate2(fileid1, "/dset1", H5T_STD_I32BE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset1 < 0) {
@@ -774,14 +779,14 @@ gent_softlink2(void)
      * dset2
      */
     /* Create a new dataset as sample object */
-    dset2 = H5Dcreate2(fileid1, "/dset2", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset2 = H5Dcreate2(fileid1, "/dset2", target_type, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset2 < 0) {
         fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
 
-    status = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+    status = H5Dwrite(dset2, target_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
     if (status < 0) {
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
         status = FAIL;

@@ -155,7 +155,7 @@ gen_h5dump_files(void)
     gent_group();
     gent_attribute();
     gent_softlink();
-    nerrors += (gent_softlink2() < 0 ? 1 : 0);
+    nerrors += (gent_softlink2(false) < 0 ? 1 : 0);
     gent_dataset();
     gent_hardlink();
     gent_extlink();
@@ -348,7 +348,7 @@ gen_h5repack_files(void)
 
     gent_extlink();
     gent_extlinks();
-    gent_softlink2();
+    gent_softlink2(true);
     gent_attrreg();
     gent_datareg(true);
     gent_family();
@@ -423,7 +423,7 @@ gen_h5ls_files(void)
     gent_group();
     gent_dataset();
     gent_softlink();
-    gent_softlink2();
+    gent_softlink2(false);
     gent_str();
 
     gent_vldatatypes();

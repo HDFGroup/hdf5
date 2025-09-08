@@ -22,7 +22,7 @@ void gent_dataset(void);
 void gent_dataset2(void);
 void gent_attribute(void);
 void gent_softlink(void);
-int  gent_softlink2(void);
+int  gent_softlink2(bool big_endian_committed);
 void gent_hardlink(void);
 void gent_extlink(void);
 void gent_udlink(void);
