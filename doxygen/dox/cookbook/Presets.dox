@@ -567,42 +567,42 @@ The ci-StdPlugins preset inherits the following settings:
 The ci-StdPlugins preset sets the following cache variables:
 \li  "PLUGIN_USE_LOCALCONTENT": "OFF"
 
-The ci-PluginsVars preset sets the following cache variables:
+The ci-PluginsVars preset sets the following cache variables (see the https://\SRCURL/config/CacheURLs.cmake file for the latest versions):
 \li  "HDF5_ENABLE_PLUGIN_SUPPORT": "ON"
 \li  "H5PL_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"}
 \li  "PLUGIN_PACKAGE_NAME": {"type": "STRING", "value": "pl"}
-\li  "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"}
+\li  "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "hdf5_plugins download"}
 \li  "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}
 
-The ci-base-plugins preset sets the following cache variables:
+The ci-base-plugins preset sets the following cache variables (see the https://\SRCURL/config/CacheURLs.cmake file for the latest versions):
 \li  "BITGROOM_PACKAGE_NAME": {"type": "STRING", "value": "bitgroom"},
 \li  "BITROUND_PACKAGE_NAME": {"type": "STRING", "value": "bitround"},
-\li  "BSHUF_TGZ_NAME": {"type": "STRING", "value": "bitshuffle-0.5.2.tar.gz"}
+\li  "BSHUF_TGZ_NAME": {"type": "STRING", "value": "bitshuffle-x.y.z.tar.gz"}
 \li  "BSHUF_PACKAGE_NAME": {"type": "STRING", "value": "bshuf"}
-\li  "BLOSC_TGZ_NAME": {"type": "STRING", "value": "c-blosc-1.21.6.tar.gz"}
+\li  "BLOSC_TGZ_NAME": {"type": "STRING", "value": "c-blosc-x.y.z.tar.gz"}
 \li  "BLOSC_PACKAGE_NAME": {"type": "STRING", "value": "blosc"}
-\li  "BLOSC_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"}
+\li  "BLOSC_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-x.y.z.tar.gz"}
 \li  "BLOSC_ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"}
-\li  "BLOSC2_TGZ_NAME": {"type": "STRING", "value": "c-blosc2-2.17.1.tar.gz"}
+\li  "BLOSC2_TGZ_NAME": {"type": "STRING", "value": "c-blosc2-x.y.z.tar.gz"}
 \li  "BLOSC2_PACKAGE_NAME": {"type": "STRING", "value": "blosc2"}
-\li  "BLOSC2_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"}
+\li  "BLOSC2_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-x.y.z.tar.gz"}
 \li  "BLOSC2_ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"}
-\li  "BZ2_TGZ_NAME": {"type": "STRING", "value": "bzip2-bzip2-1.0.8.tar.gz"}
+\li  "BZ2_TGZ_NAME": {"type": "STRING", "value": "bzip2-bzip2-x.y.z.tar.gz"}
 \li  "BZ2_PACKAGE_NAME": {"type": "STRING", "value": "bz2"}
-\li  "FPZIP_TGZ_NAME": {"type": "STRING", "value": "fpzip-1.3.0.tar.gz"}
+\li  "FPZIP_TGZ_NAME": {"type": "STRING", "value": "fpzip-x.y.z.tar.gz"}
 \li  "FPZIP_PACKAGE_NAME": {"type": "STRING", "value": "fpzip"}
 \li  "JPEG_TGZ_NAME": {"type": "STRING", "value": "jpegsrc.v9e.tar.gz"}
 \li  "JPEG_PACKAGE_NAME": {"type": "STRING", "value": "jpeg"}
 \li  "BUILD_LZ4_LIBRARY_SOURCE": "ON"
-\li  "LZ4_TGZ_NAME": {"type": "STRING", "value": "lz4-1.10.0.tar.gz"}
+\li  "LZ4_TGZ_NAME": {"type": "STRING", "value": "lz4-x.y.z.tar.gz"}
 \li  "LZ4_PACKAGE_NAME": {"type": "STRING", "value": "lz4"}
-\li  "LZF_TGZ_NAME": {"type": "STRING", "value": "liblzf-3.6.tar.gz"}
+\li  "LZF_TGZ_NAME": {"type": "STRING", "value": "liblzf-x.y.z.tar.gz"}
 \li  "LZF_PACKAGE_NAME": {"type": "STRING", "value": "lzf"}
-\li  "SZ_TGZ_NAME": {"type": "STRING", "value": "SZ-2.1.12.5.tar.gz"}
+\li  "SZ_TGZ_NAME": {"type": "STRING", "value": "SZ-x.y.z.tar.gz"}
 \li  "SZ_PACKAGE_NAME": {"type": "STRING", "value": "SZ"}
-\li  "ZFP_TGZ_NAME": {"type": "STRING", "value": "zfp-1.0.1.tar.gz"}
+\li  "ZFP_TGZ_NAME": {"type": "STRING", "value": "zfp-x.y.z.tar.gz"}
 \li  "ZFP_PACKAGE_NAME": {"type": "STRING", "value": "zfp"}
-\li  "ZSTD_TGZ_NAME": {"type": "STRING", "value": "zstd-1.5.7.tar.gz"}
+\li  "ZSTD_TGZ_NAME": {"type": "STRING", "value": "zstd-x.y.z.tar.gz"}
 \li  "ZSTD_PACKAGE_NAME": {"type": "STRING", "value": "zstd"}
 
 The ci-StdCompression preset inherits the following settings:
@@ -617,16 +617,16 @@ The ci-StdCompression preset sets the following cache variables:
 \li  "HDF5_USE_ZLIB_STATIC": "ON"
 \li  "HDF5_USE_LIBAEC_STATIC": "ON"
 
-The ci-CompressionVars preset sets the following cache variables:
+The ci-CompressionVars preset sets the following cache variables (see the https://\SRCURL/config/CacheURLs.cmake file for the latest versions):
 \li  "ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"}
-\li  "ZLIB_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/madler/zlib/releases/download/v1.3.1"}
-\li  "ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"}
+\li  "ZLIB_TGZ_ORIGPATH": {"type": "STRING", "value": "zlib download"}
+\li  "ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-x.y.z.tar.gz"}
 \li  "ZLIBNG_PACKAGE_NAME": {"type": "STRING", "value": "zlib-ng"}
-\li  "ZLIBNG_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags"}
-\li  "ZLIBNG_TGZ_NAME": {"type": "STRING", "value": "2.2.4.tar.gz"}
+\li  "ZLIBNG_TGZ_ORIGPATH": {"type": "STRING", "value": "zlib-ng download"}
+\li  "ZLIBNG_TGZ_NAME": {"type": "STRING", "value": "x.y.z.tar.gz"}
 \li  "LIBAEC_PACKAGE_NAME": {"type": "STRING", "value": "libaec"}
-\li  "LIBAEC_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"}
-\li  "LIBAEC_TGZ_NAME": {"type": "STRING", "value": "libaec-1.1.3.tar.gz"}
+\li  "LIBAEC_TGZ_ORIGPATH": {"type": "STRING", "value": "libaec download"}
+\li  "LIBAEC_TGZ_NAME": {"type": "STRING", "value": "libaec-x.y.z.tar.gz"}
 
 The ci-base-tgz preset inherits the following settings:
 \li  ci-base

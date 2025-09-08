@@ -32,8 +32,20 @@ jobs:
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 
-  call-workflow-ctest:
+  call-aws-c-s3-build:
     needs: call-workflow-tarball
+    name: "Build aws-c-s3 library"
+    uses: ./.github/workflows/vfd-ros3.yml
+    with:
+      build_mode: "Release"
+      build_aws_c_s3_only: true
+      aws_c_s3_build_type: "source"
+      # Use latest release for building from source on Ubuntu
+      # until a package is available to install 
+      aws_c_s3_tag: "v0.8.0"
+
+  call-workflow-ctest:
+    needs: [call-workflow-tarball, call-aws-c-s3-build]
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       cmake_version: "latest"

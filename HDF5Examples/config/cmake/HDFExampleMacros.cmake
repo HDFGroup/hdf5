@@ -167,6 +167,9 @@ macro (HDF5_SUPPORT)
     message (STATUS "HDF5 Fortran libs: static:${HDF5_static_Fortran_FOUND} and shared:${HDF5_shared_Fortran_FOUND}")
     message (STATUS "HDF5 Java libs: ${HDF5_Java_FOUND}")
     if (HDF5_FOUND)
+      if (HDF5_VERSION VERSION_LESS "2.0.0")
+        EXTERNAL_HDF5_STATUS ()
+      endif ()
       if (NOT HDF5_static_C_FOUND AND NOT HDF5_shared_C_FOUND)
         #find library from non-dual-binary package
         set (FIND_HDF_COMPONENTS C)
@@ -191,6 +194,9 @@ macro (HDF5_SUPPORT)
         message (STATUS "HDF5 find comps: ${FIND_HDF_COMPONENTS}")
 
         find_package (HDF5 NAMES ${SEARCH_PACKAGE_NAME} COMPONENTS ${FIND_HDF_COMPONENTS})
+        if (HDF5_VERSION VERSION_LESS "2.0.0")
+          EXTERNAL_HDF5_STATUS ()
+        endif ()
         message (STATUS "HDF5 libs:${HDF5_FOUND} C:${HDF5_C_FOUND} Fortran:${HDF5_Fortran_FOUND} Java:${HDF5_Java_FOUND}")
         set (H5EX_HDF5_LINK_LIBS ${H5EX_HDF5_LINK_LIBS} ${HDF5_LIBRARIES})
         if (HDF5_PROVIDES_SHARED_LIBS)
@@ -315,6 +321,9 @@ macro (HDF5_SUPPORT)
       endif ()
     else ()
       find_package (HDF5) # Legacy find
+      if (HDF5_VERSION VERSION_LESS "2.0.0")
+        EXTERNAL_HDF5_STATUS ()
+      endif ()
       #Legacy find_package does not set HDF5_TOOLS_DIR, so we set it here
       set (HDF5_TOOLS_DIR ${HDF5_LIBRARY_DIRS}/../bin)
       #Legacy find_package does not set HDF5_PROVIDES_SHARED_LIBS, so we set it here
@@ -425,4 +434,42 @@ macro (APIVersion version xyapi)
   if (${EXAMPLE_VARNAME}_USE_200_API AND ${xyapi} GREATER 200)
     set (${xyapi} "200")
   endif ()
+endmacro ()
+
+#
+# This macro is used to convert HDF5 1.X built CMake hdf5-config.cmake variables to HDF5 2.x built names.
+macro (EXTERNAL_HDF5_STATUS) # add argument REV to convert from 2.x to 1.x names
+    #-----------------------------------------------------------------------------
+    # Languages:
+    #-----------------------------------------------------------------------------
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN     ${HDF5_PACKAGE_NAME}_BUILD_FORTRAN)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_CPP_LIB     ${HDF5_PACKAGE_NAME}_BUILD_CPP_LIB)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA        ${HDF5_PACKAGE_NAME}_BUILD_JAVA)
+    #-----------------------------------------------------------------------------
+    # Features:
+    #-----------------------------------------------------------------------------
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_HL_LIB          ${HDF5_PACKAGE_NAME}_BUILD_HL_LIB)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS     ${HDF5_PACKAGE_NAME}_BUILD_SHARED_LIBS)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS     ${HDF5_PACKAGE_NAME}_BUILD_STATIC_LIBS)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS         ${HDF5_PACKAGE_NAME}_ENABLE_THREADSAFE)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_THREADSAFE      ${HDF5_PACKAGE_NAME}_ENABLE_THREADSAFE)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_PARALLEL        ${HDF5_PACKAGE_NAME}_ENABLE_PARALLEL)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_DEPRECATED_SYMBOLS ${HDF5_PACKAGE_NAME}_ENABLE_DEPRECATED_SYMBOLS)
+    #-----------------------------------------------------------------------------
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_TOOLS           ${HDF5_PACKAGE_NAME}_BUILD_TOOLS)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_TOOLS    ${HDF5_PACKAGE_NAME}_BUILD_STATIC_TOOLS)
+    #-----------------------------------------------------------------------------
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_NONSTANDARD_FEATURE_FLOAT16 ${HDF5_PACKAGE_NAME}_ENABLE_NONSTANDARD_FEATURE_FLOAT16)
+    #-----------------------------------------------------------------------------
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_ZLIB_SUPPORT   ${HDF5_PACKAGE_NAME}_ENABLE_Z_LIB_SUPPORT)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT   ${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_ENCODING  ${HDF5_PACKAGE_NAME}_ENABLE_SZIP_ENCODING)
+    #-----------------------------------------------------------------------------
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_MAP_API        ${HDF5_PACKAGE_NAME}_ENABLE_MAP_API)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_DIRECT_VFD     ${HDF5_PACKAGE_NAME}_ENABLE_DIRECT_VFD)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_MIRROR_VFD     ${HDF5_PACKAGE_NAME}_ENABLE_MIRROR_VFD)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_ROS3_VFD       ${HDF5_PACKAGE_NAME}_ENABLE_ROS3_VFD)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_HDFS_VFD       ${HDF5_PACKAGE_NAME}_ENABLE_HDFS)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_SUBFILING_VFD  ${HDF5_PACKAGE_NAME}_ENABLE_SUBFILING_VFD)
+    set (${HDF5_PACKAGE_NAME}_PROVIDES_PLUGIN_SUPPORT ${HDF5_PACKAGE_NAME}_ENABLE_PLUGIN_SUPPORT)
 endmacro ()
