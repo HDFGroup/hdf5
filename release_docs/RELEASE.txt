@@ -841,6 +841,16 @@ Bug Fixes since HDF5-2.0.0 release
 
       Fixes GitHub issue #4952
 
+    - Fixed messages being able to be modified to shared when they are 
+      not sharable
+
+      The message flags field can be modified such that a message that is 
+      not sharable according to the share_flags field in H5O_msg_class_t
+      can be treated as sharable. A check has been added to make sure 
+      messages that are not sharable can't be modified so that they
+      indicate they can be shared.
+
+      Fixes GitHub issue #5329
 
     Java Library
     ------------
