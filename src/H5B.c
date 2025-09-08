@@ -1434,7 +1434,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
         ret_value = H5B_INS_NOOP;
 
     /* Patch keys in neighboring trees if necessary */
-    if (*lt_key_changed && H5_addr_defined(bt->left)) {
+    if (*lt_key_changed && bt != NULL && H5_addr_defined(bt->left)) {
         assert(type->critical_key == H5B_LEFT);
         assert(level > 0);
 
@@ -1449,7 +1449,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node from tree");
         sibling = NULL; /* Make certain future references will be caught */
     }                   /* end if */
-    else if (*rt_key_changed && H5_addr_defined(bt->right)) {
+    else if (*rt_key_changed && bt != NULL && H5_addr_defined(bt->right)) {
         assert(type->critical_key == H5B_RIGHT);
         assert(level > 0);
 
