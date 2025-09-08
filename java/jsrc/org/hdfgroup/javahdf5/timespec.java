@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -22,19 +22,21 @@ import java.util.stream.*;
  */
 public class timespec {
 
-    timespec()
-    {
+    timespec() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout.structLayout(hdf5_h.C_LONG.withName("tv_sec"), hdf5_h.C_LONG.withName("tv_nsec"))
-            .withName("timespec");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_LONG.withName("tv_sec"),
+        hdf5_h.C_LONG.withName("tv_nsec")
+    ).withName("timespec");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfLong tv_sec$LAYOUT = (OfLong)$LAYOUT.select(groupElement("tv_sec"));
 
@@ -44,7 +46,9 @@ public class timespec {
      * __time_t tv_sec
      * }
      */
-    public static final OfLong tv_sec$layout() { return tv_sec$LAYOUT; }
+    public static final OfLong tv_sec$layout() {
+        return tv_sec$LAYOUT;
+    }
 
     private static final long tv_sec$OFFSET = 0;
 
@@ -54,7 +58,9 @@ public class timespec {
      * __time_t tv_sec
      * }
      */
-    public static final long tv_sec$offset() { return tv_sec$OFFSET; }
+    public static final long tv_sec$offset() {
+        return tv_sec$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -62,7 +68,9 @@ public class timespec {
      * __time_t tv_sec
      * }
      */
-    public static long tv_sec(MemorySegment struct) { return struct.get(tv_sec$LAYOUT, tv_sec$OFFSET); }
+    public static long tv_sec(MemorySegment struct) {
+        return struct.get(tv_sec$LAYOUT, tv_sec$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -70,8 +78,7 @@ public class timespec {
      * __time_t tv_sec
      * }
      */
-    public static void tv_sec(MemorySegment struct, long fieldValue)
-    {
+    public static void tv_sec(MemorySegment struct, long fieldValue) {
         struct.set(tv_sec$LAYOUT, tv_sec$OFFSET, fieldValue);
     }
 
@@ -83,7 +90,9 @@ public class timespec {
      * __syscall_slong_t tv_nsec
      * }
      */
-    public static final OfLong tv_nsec$layout() { return tv_nsec$LAYOUT; }
+    public static final OfLong tv_nsec$layout() {
+        return tv_nsec$LAYOUT;
+    }
 
     private static final long tv_nsec$OFFSET = 8;
 
@@ -93,7 +102,9 @@ public class timespec {
      * __syscall_slong_t tv_nsec
      * }
      */
-    public static final long tv_nsec$offset() { return tv_nsec$OFFSET; }
+    public static final long tv_nsec$offset() {
+        return tv_nsec$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -101,7 +112,9 @@ public class timespec {
      * __syscall_slong_t tv_nsec
      * }
      */
-    public static long tv_nsec(MemorySegment struct) { return struct.get(tv_nsec$LAYOUT, tv_nsec$OFFSET); }
+    public static long tv_nsec(MemorySegment struct) {
+        return struct.get(tv_nsec$LAYOUT, tv_nsec$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -109,8 +122,7 @@ public class timespec {
      * __syscall_slong_t tv_nsec
      * }
      */
-    public static void tv_nsec(MemorySegment struct, long fieldValue)
-    {
+    public static void tv_nsec(MemorySegment struct, long fieldValue) {
         struct.set(tv_nsec$LAYOUT, tv_nsec$OFFSET, fieldValue);
     }
 
@@ -118,8 +130,7 @@ public class timespec {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -131,14 +142,15 @@ public class timespec {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -146,8 +158,7 @@ public class timespec {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -155,9 +166,8 @@ public class timespec {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

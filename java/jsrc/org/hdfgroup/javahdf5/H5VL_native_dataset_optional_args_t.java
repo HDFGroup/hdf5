@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -37,31 +37,29 @@ import java.util.stream.*;
  */
 public class H5VL_native_dataset_optional_args_t {
 
-    H5VL_native_dataset_optional_args_t()
-    {
+    H5VL_native_dataset_optional_args_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .unionLayout(
-                H5VL_native_dataset_optional_args_t.get_chunk_idx_type.layout().withName(
-                    "get_chunk_idx_type"),
-                H5VL_native_dataset_get_chunk_storage_size_t.layout().withName("get_chunk_storage_size"),
-                H5VL_native_dataset_get_num_chunks_t.layout().withName("get_num_chunks"),
-                H5VL_native_dataset_get_chunk_info_by_idx_t.layout().withName("get_chunk_info_by_idx"),
-                H5VL_native_dataset_get_chunk_info_by_coord_t.layout().withName("get_chunk_info_by_coord"),
-                H5VL_native_dataset_chunk_read_t.layout().withName("chunk_read"),
-                H5VL_native_dataset_chunk_write_t.layout().withName("chunk_write"),
-                H5VL_native_dataset_get_vlen_buf_size_t.layout().withName("get_vlen_buf_size"),
-                H5VL_native_dataset_optional_args_t.get_offset.layout().withName("get_offset"),
-                H5VL_native_dataset_optional_args_t.chunk_iter.layout().withName("chunk_iter"))
-            .withName("H5VL_native_dataset_optional_args_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
+        H5VL_native_dataset_optional_args_t.get_chunk_idx_type.layout().withName("get_chunk_idx_type"),
+        H5VL_native_dataset_get_chunk_storage_size_t.layout().withName("get_chunk_storage_size"),
+        H5VL_native_dataset_get_num_chunks_t.layout().withName("get_num_chunks"),
+        H5VL_native_dataset_get_chunk_info_by_idx_t.layout().withName("get_chunk_info_by_idx"),
+        H5VL_native_dataset_get_chunk_info_by_coord_t.layout().withName("get_chunk_info_by_coord"),
+        H5VL_native_dataset_chunk_read_t.layout().withName("chunk_read"),
+        H5VL_native_dataset_chunk_write_t.layout().withName("chunk_write"),
+        H5VL_native_dataset_get_vlen_buf_size_t.layout().withName("get_vlen_buf_size"),
+        H5VL_native_dataset_optional_args_t.get_offset.layout().withName("get_offset"),
+        H5VL_native_dataset_optional_args_t.chunk_iter.layout().withName("chunk_iter")
+    ).withName("H5VL_native_dataset_optional_args_t");
 
     /**
      * The layout of this union
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     /**
      * {@snippet lang=c :
@@ -72,21 +70,22 @@ public class H5VL_native_dataset_optional_args_t {
      */
     public static class get_chunk_idx_type {
 
-        get_chunk_idx_type()
-        {
+        get_chunk_idx_type() {
             // Should not be called directly
         }
 
-        private static final GroupLayout $LAYOUT =
-            MemoryLayout.structLayout(hdf5_h.C_POINTER.withName("idx_type")).withName("$anon$141:5");
+        private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+            hdf5_h.C_POINTER.withName("idx_type")
+        ).withName("$anon$141:5");
 
         /**
          * The layout of this struct
          */
-        public static final GroupLayout layout() { return $LAYOUT; }
+        public static final GroupLayout layout() {
+            return $LAYOUT;
+        }
 
-        private static final AddressLayout idx_type$LAYOUT =
-            (AddressLayout)$LAYOUT.select(groupElement("idx_type"));
+        private static final AddressLayout idx_type$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("idx_type"));
 
         /**
          * Layout for field:
@@ -94,7 +93,9 @@ public class H5VL_native_dataset_optional_args_t {
          * H5D_chunk_index_t *idx_type
          * }
          */
-        public static final AddressLayout idx_type$layout() { return idx_type$LAYOUT; }
+        public static final AddressLayout idx_type$layout() {
+            return idx_type$LAYOUT;
+        }
 
         private static final long idx_type$OFFSET = 0;
 
@@ -104,7 +105,9 @@ public class H5VL_native_dataset_optional_args_t {
          * H5D_chunk_index_t *idx_type
          * }
          */
-        public static final long idx_type$offset() { return idx_type$OFFSET; }
+        public static final long idx_type$offset() {
+            return idx_type$OFFSET;
+        }
 
         /**
          * Getter for field:
@@ -112,8 +115,7 @@ public class H5VL_native_dataset_optional_args_t {
          * H5D_chunk_index_t *idx_type
          * }
          */
-        public static MemorySegment idx_type(MemorySegment struct)
-        {
+        public static MemorySegment idx_type(MemorySegment struct) {
             return struct.get(idx_type$LAYOUT, idx_type$OFFSET);
         }
 
@@ -123,8 +125,7 @@ public class H5VL_native_dataset_optional_args_t {
          * H5D_chunk_index_t *idx_type
          * }
          */
-        public static void idx_type(MemorySegment struct, MemorySegment fieldValue)
-        {
+        public static void idx_type(MemorySegment struct, MemorySegment fieldValue) {
             struct.set(idx_type$LAYOUT, idx_type$OFFSET, fieldValue);
         }
 
@@ -132,8 +133,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
          * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
          */
-        public static MemorySegment asSlice(MemorySegment array, long index)
-        {
+        public static MemorySegment asSlice(MemorySegment array, long index) {
             return array.asSlice(layout().byteSize() * index);
         }
 
@@ -145,8 +145,7 @@ public class H5VL_native_dataset_optional_args_t {
         /**
          * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
          */
-        public static MemorySegment allocate(SegmentAllocator allocator)
-        {
+        public static MemorySegment allocate(SegmentAllocator allocator) {
             return allocator.allocate(layout());
         }
 
@@ -154,8 +153,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Allocate an array of size {@code elementCount} using {@code allocator}.
          * The returned segment has size {@code elementCount * layout().byteSize()}.
          */
-        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-        {
+        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
             return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
         }
 
@@ -163,9 +161,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
             return reinterpret(addr, 1, arena, cleanup);
         }
 
@@ -173,15 +169,12 @@ public class H5VL_native_dataset_optional_args_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code elementCount * layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
             return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
         }
     }
 
-    private static final GroupLayout get_chunk_idx_type$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("get_chunk_idx_type"));
+    private static final GroupLayout get_chunk_idx_type$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("get_chunk_idx_type"));
 
     /**
      * Layout for field:
@@ -191,7 +184,9 @@ public class H5VL_native_dataset_optional_args_t {
      * } get_chunk_idx_type
      * }
      */
-    public static final GroupLayout get_chunk_idx_type$layout() { return get_chunk_idx_type$LAYOUT; }
+    public static final GroupLayout get_chunk_idx_type$layout() {
+        return get_chunk_idx_type$LAYOUT;
+    }
 
     private static final long get_chunk_idx_type$OFFSET = 0;
 
@@ -203,7 +198,9 @@ public class H5VL_native_dataset_optional_args_t {
      * } get_chunk_idx_type
      * }
      */
-    public static final long get_chunk_idx_type$offset() { return get_chunk_idx_type$OFFSET; }
+    public static final long get_chunk_idx_type$offset() {
+        return get_chunk_idx_type$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -213,8 +210,7 @@ public class H5VL_native_dataset_optional_args_t {
      * } get_chunk_idx_type
      * }
      */
-    public static MemorySegment get_chunk_idx_type(MemorySegment union)
-    {
+    public static MemorySegment get_chunk_idx_type(MemorySegment union) {
         return union.asSlice(get_chunk_idx_type$OFFSET, get_chunk_idx_type$LAYOUT.byteSize());
     }
 
@@ -226,14 +222,11 @@ public class H5VL_native_dataset_optional_args_t {
      * } get_chunk_idx_type
      * }
      */
-    public static void get_chunk_idx_type(MemorySegment union, MemorySegment fieldValue)
-    {
-        MemorySegment.copy(fieldValue, 0L, union, get_chunk_idx_type$OFFSET,
-                           get_chunk_idx_type$LAYOUT.byteSize());
+    public static void get_chunk_idx_type(MemorySegment union, MemorySegment fieldValue) {
+        MemorySegment.copy(fieldValue, 0L, union, get_chunk_idx_type$OFFSET, get_chunk_idx_type$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout get_chunk_storage_size$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("get_chunk_storage_size"));
+    private static final GroupLayout get_chunk_storage_size$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("get_chunk_storage_size"));
 
     /**
      * Layout for field:
@@ -241,7 +234,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_storage_size_t get_chunk_storage_size
      * }
      */
-    public static final GroupLayout get_chunk_storage_size$layout() { return get_chunk_storage_size$LAYOUT; }
+    public static final GroupLayout get_chunk_storage_size$layout() {
+        return get_chunk_storage_size$LAYOUT;
+    }
 
     private static final long get_chunk_storage_size$OFFSET = 0;
 
@@ -251,7 +246,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_storage_size_t get_chunk_storage_size
      * }
      */
-    public static final long get_chunk_storage_size$offset() { return get_chunk_storage_size$OFFSET; }
+    public static final long get_chunk_storage_size$offset() {
+        return get_chunk_storage_size$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -259,8 +256,7 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_storage_size_t get_chunk_storage_size
      * }
      */
-    public static MemorySegment get_chunk_storage_size(MemorySegment union)
-    {
+    public static MemorySegment get_chunk_storage_size(MemorySegment union) {
         return union.asSlice(get_chunk_storage_size$OFFSET, get_chunk_storage_size$LAYOUT.byteSize());
     }
 
@@ -270,14 +266,11 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_storage_size_t get_chunk_storage_size
      * }
      */
-    public static void get_chunk_storage_size(MemorySegment union, MemorySegment fieldValue)
-    {
-        MemorySegment.copy(fieldValue, 0L, union, get_chunk_storage_size$OFFSET,
-                           get_chunk_storage_size$LAYOUT.byteSize());
+    public static void get_chunk_storage_size(MemorySegment union, MemorySegment fieldValue) {
+        MemorySegment.copy(fieldValue, 0L, union, get_chunk_storage_size$OFFSET, get_chunk_storage_size$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout get_num_chunks$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("get_num_chunks"));
+    private static final GroupLayout get_num_chunks$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("get_num_chunks"));
 
     /**
      * Layout for field:
@@ -285,7 +278,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_num_chunks_t get_num_chunks
      * }
      */
-    public static final GroupLayout get_num_chunks$layout() { return get_num_chunks$LAYOUT; }
+    public static final GroupLayout get_num_chunks$layout() {
+        return get_num_chunks$LAYOUT;
+    }
 
     private static final long get_num_chunks$OFFSET = 0;
 
@@ -295,7 +290,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_num_chunks_t get_num_chunks
      * }
      */
-    public static final long get_num_chunks$offset() { return get_num_chunks$OFFSET; }
+    public static final long get_num_chunks$offset() {
+        return get_num_chunks$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -303,8 +300,7 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_num_chunks_t get_num_chunks
      * }
      */
-    public static MemorySegment get_num_chunks(MemorySegment union)
-    {
+    public static MemorySegment get_num_chunks(MemorySegment union) {
         return union.asSlice(get_num_chunks$OFFSET, get_num_chunks$LAYOUT.byteSize());
     }
 
@@ -314,13 +310,11 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_num_chunks_t get_num_chunks
      * }
      */
-    public static void get_num_chunks(MemorySegment union, MemorySegment fieldValue)
-    {
+    public static void get_num_chunks(MemorySegment union, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, union, get_num_chunks$OFFSET, get_num_chunks$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout get_chunk_info_by_idx$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("get_chunk_info_by_idx"));
+    private static final GroupLayout get_chunk_info_by_idx$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("get_chunk_info_by_idx"));
 
     /**
      * Layout for field:
@@ -328,7 +322,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_info_by_idx_t get_chunk_info_by_idx
      * }
      */
-    public static final GroupLayout get_chunk_info_by_idx$layout() { return get_chunk_info_by_idx$LAYOUT; }
+    public static final GroupLayout get_chunk_info_by_idx$layout() {
+        return get_chunk_info_by_idx$LAYOUT;
+    }
 
     private static final long get_chunk_info_by_idx$OFFSET = 0;
 
@@ -338,7 +334,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_info_by_idx_t get_chunk_info_by_idx
      * }
      */
-    public static final long get_chunk_info_by_idx$offset() { return get_chunk_info_by_idx$OFFSET; }
+    public static final long get_chunk_info_by_idx$offset() {
+        return get_chunk_info_by_idx$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -346,8 +344,7 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_info_by_idx_t get_chunk_info_by_idx
      * }
      */
-    public static MemorySegment get_chunk_info_by_idx(MemorySegment union)
-    {
+    public static MemorySegment get_chunk_info_by_idx(MemorySegment union) {
         return union.asSlice(get_chunk_info_by_idx$OFFSET, get_chunk_info_by_idx$LAYOUT.byteSize());
     }
 
@@ -357,14 +354,11 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_info_by_idx_t get_chunk_info_by_idx
      * }
      */
-    public static void get_chunk_info_by_idx(MemorySegment union, MemorySegment fieldValue)
-    {
-        MemorySegment.copy(fieldValue, 0L, union, get_chunk_info_by_idx$OFFSET,
-                           get_chunk_info_by_idx$LAYOUT.byteSize());
+    public static void get_chunk_info_by_idx(MemorySegment union, MemorySegment fieldValue) {
+        MemorySegment.copy(fieldValue, 0L, union, get_chunk_info_by_idx$OFFSET, get_chunk_info_by_idx$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout get_chunk_info_by_coord$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("get_chunk_info_by_coord"));
+    private static final GroupLayout get_chunk_info_by_coord$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("get_chunk_info_by_coord"));
 
     /**
      * Layout for field:
@@ -372,8 +366,7 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_info_by_coord_t get_chunk_info_by_coord
      * }
      */
-    public static final GroupLayout get_chunk_info_by_coord$layout()
-    {
+    public static final GroupLayout get_chunk_info_by_coord$layout() {
         return get_chunk_info_by_coord$LAYOUT;
     }
 
@@ -385,7 +378,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_info_by_coord_t get_chunk_info_by_coord
      * }
      */
-    public static final long get_chunk_info_by_coord$offset() { return get_chunk_info_by_coord$OFFSET; }
+    public static final long get_chunk_info_by_coord$offset() {
+        return get_chunk_info_by_coord$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -393,8 +388,7 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_info_by_coord_t get_chunk_info_by_coord
      * }
      */
-    public static MemorySegment get_chunk_info_by_coord(MemorySegment union)
-    {
+    public static MemorySegment get_chunk_info_by_coord(MemorySegment union) {
         return union.asSlice(get_chunk_info_by_coord$OFFSET, get_chunk_info_by_coord$LAYOUT.byteSize());
     }
 
@@ -404,14 +398,11 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_chunk_info_by_coord_t get_chunk_info_by_coord
      * }
      */
-    public static void get_chunk_info_by_coord(MemorySegment union, MemorySegment fieldValue)
-    {
-        MemorySegment.copy(fieldValue, 0L, union, get_chunk_info_by_coord$OFFSET,
-                           get_chunk_info_by_coord$LAYOUT.byteSize());
+    public static void get_chunk_info_by_coord(MemorySegment union, MemorySegment fieldValue) {
+        MemorySegment.copy(fieldValue, 0L, union, get_chunk_info_by_coord$OFFSET, get_chunk_info_by_coord$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout chunk_read$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("chunk_read"));
+    private static final GroupLayout chunk_read$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("chunk_read"));
 
     /**
      * Layout for field:
@@ -419,7 +410,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_chunk_read_t chunk_read
      * }
      */
-    public static final GroupLayout chunk_read$layout() { return chunk_read$LAYOUT; }
+    public static final GroupLayout chunk_read$layout() {
+        return chunk_read$LAYOUT;
+    }
 
     private static final long chunk_read$OFFSET = 0;
 
@@ -429,7 +422,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_chunk_read_t chunk_read
      * }
      */
-    public static final long chunk_read$offset() { return chunk_read$OFFSET; }
+    public static final long chunk_read$offset() {
+        return chunk_read$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -437,8 +432,7 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_chunk_read_t chunk_read
      * }
      */
-    public static MemorySegment chunk_read(MemorySegment union)
-    {
+    public static MemorySegment chunk_read(MemorySegment union) {
         return union.asSlice(chunk_read$OFFSET, chunk_read$LAYOUT.byteSize());
     }
 
@@ -448,13 +442,11 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_chunk_read_t chunk_read
      * }
      */
-    public static void chunk_read(MemorySegment union, MemorySegment fieldValue)
-    {
+    public static void chunk_read(MemorySegment union, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, union, chunk_read$OFFSET, chunk_read$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout chunk_write$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("chunk_write"));
+    private static final GroupLayout chunk_write$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("chunk_write"));
 
     /**
      * Layout for field:
@@ -462,7 +454,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_chunk_write_t chunk_write
      * }
      */
-    public static final GroupLayout chunk_write$layout() { return chunk_write$LAYOUT; }
+    public static final GroupLayout chunk_write$layout() {
+        return chunk_write$LAYOUT;
+    }
 
     private static final long chunk_write$OFFSET = 0;
 
@@ -472,7 +466,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_chunk_write_t chunk_write
      * }
      */
-    public static final long chunk_write$offset() { return chunk_write$OFFSET; }
+    public static final long chunk_write$offset() {
+        return chunk_write$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -480,8 +476,7 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_chunk_write_t chunk_write
      * }
      */
-    public static MemorySegment chunk_write(MemorySegment union)
-    {
+    public static MemorySegment chunk_write(MemorySegment union) {
         return union.asSlice(chunk_write$OFFSET, chunk_write$LAYOUT.byteSize());
     }
 
@@ -491,13 +486,11 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_chunk_write_t chunk_write
      * }
      */
-    public static void chunk_write(MemorySegment union, MemorySegment fieldValue)
-    {
+    public static void chunk_write(MemorySegment union, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, union, chunk_write$OFFSET, chunk_write$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout get_vlen_buf_size$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("get_vlen_buf_size"));
+    private static final GroupLayout get_vlen_buf_size$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("get_vlen_buf_size"));
 
     /**
      * Layout for field:
@@ -505,7 +498,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_vlen_buf_size_t get_vlen_buf_size
      * }
      */
-    public static final GroupLayout get_vlen_buf_size$layout() { return get_vlen_buf_size$LAYOUT; }
+    public static final GroupLayout get_vlen_buf_size$layout() {
+        return get_vlen_buf_size$LAYOUT;
+    }
 
     private static final long get_vlen_buf_size$OFFSET = 0;
 
@@ -515,7 +510,9 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_vlen_buf_size_t get_vlen_buf_size
      * }
      */
-    public static final long get_vlen_buf_size$offset() { return get_vlen_buf_size$OFFSET; }
+    public static final long get_vlen_buf_size$offset() {
+        return get_vlen_buf_size$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -523,8 +520,7 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_vlen_buf_size_t get_vlen_buf_size
      * }
      */
-    public static MemorySegment get_vlen_buf_size(MemorySegment union)
-    {
+    public static MemorySegment get_vlen_buf_size(MemorySegment union) {
         return union.asSlice(get_vlen_buf_size$OFFSET, get_vlen_buf_size$LAYOUT.byteSize());
     }
 
@@ -534,10 +530,8 @@ public class H5VL_native_dataset_optional_args_t {
      * H5VL_native_dataset_get_vlen_buf_size_t get_vlen_buf_size
      * }
      */
-    public static void get_vlen_buf_size(MemorySegment union, MemorySegment fieldValue)
-    {
-        MemorySegment.copy(fieldValue, 0L, union, get_vlen_buf_size$OFFSET,
-                           get_vlen_buf_size$LAYOUT.byteSize());
+    public static void get_vlen_buf_size(MemorySegment union, MemorySegment fieldValue) {
+        MemorySegment.copy(fieldValue, 0L, union, get_vlen_buf_size$OFFSET, get_vlen_buf_size$LAYOUT.byteSize());
     }
 
     /**
@@ -549,21 +543,22 @@ public class H5VL_native_dataset_optional_args_t {
      */
     public static class get_offset {
 
-        get_offset()
-        {
+        get_offset() {
             // Should not be called directly
         }
 
-        private static final GroupLayout $LAYOUT =
-            MemoryLayout.structLayout(hdf5_h.C_POINTER.withName("offset")).withName("$anon$167:5");
+        private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+            hdf5_h.C_POINTER.withName("offset")
+        ).withName("$anon$167:5");
 
         /**
          * The layout of this struct
          */
-        public static final GroupLayout layout() { return $LAYOUT; }
+        public static final GroupLayout layout() {
+            return $LAYOUT;
+        }
 
-        private static final AddressLayout offset$LAYOUT =
-            (AddressLayout)$LAYOUT.select(groupElement("offset"));
+        private static final AddressLayout offset$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("offset"));
 
         /**
          * Layout for field:
@@ -571,7 +566,9 @@ public class H5VL_native_dataset_optional_args_t {
          * haddr_t *offset
          * }
          */
-        public static final AddressLayout offset$layout() { return offset$LAYOUT; }
+        public static final AddressLayout offset$layout() {
+            return offset$LAYOUT;
+        }
 
         private static final long offset$OFFSET = 0;
 
@@ -581,7 +578,9 @@ public class H5VL_native_dataset_optional_args_t {
          * haddr_t *offset
          * }
          */
-        public static final long offset$offset() { return offset$OFFSET; }
+        public static final long offset$offset() {
+            return offset$OFFSET;
+        }
 
         /**
          * Getter for field:
@@ -589,8 +588,7 @@ public class H5VL_native_dataset_optional_args_t {
          * haddr_t *offset
          * }
          */
-        public static MemorySegment offset(MemorySegment struct)
-        {
+        public static MemorySegment offset(MemorySegment struct) {
             return struct.get(offset$LAYOUT, offset$OFFSET);
         }
 
@@ -600,8 +598,7 @@ public class H5VL_native_dataset_optional_args_t {
          * haddr_t *offset
          * }
          */
-        public static void offset(MemorySegment struct, MemorySegment fieldValue)
-        {
+        public static void offset(MemorySegment struct, MemorySegment fieldValue) {
             struct.set(offset$LAYOUT, offset$OFFSET, fieldValue);
         }
 
@@ -609,8 +606,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
          * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
          */
-        public static MemorySegment asSlice(MemorySegment array, long index)
-        {
+        public static MemorySegment asSlice(MemorySegment array, long index) {
             return array.asSlice(layout().byteSize() * index);
         }
 
@@ -622,8 +618,7 @@ public class H5VL_native_dataset_optional_args_t {
         /**
          * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
          */
-        public static MemorySegment allocate(SegmentAllocator allocator)
-        {
+        public static MemorySegment allocate(SegmentAllocator allocator) {
             return allocator.allocate(layout());
         }
 
@@ -631,8 +626,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Allocate an array of size {@code elementCount} using {@code allocator}.
          * The returned segment has size {@code elementCount * layout().byteSize()}.
          */
-        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-        {
+        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
             return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
         }
 
@@ -640,9 +634,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
             return reinterpret(addr, 1, arena, cleanup);
         }
 
@@ -650,15 +642,12 @@ public class H5VL_native_dataset_optional_args_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code elementCount * layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
             return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
         }
     }
 
-    private static final GroupLayout get_offset$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("get_offset"));
+    private static final GroupLayout get_offset$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("get_offset"));
 
     /**
      * Layout for field:
@@ -668,7 +657,9 @@ public class H5VL_native_dataset_optional_args_t {
      * } get_offset
      * }
      */
-    public static final GroupLayout get_offset$layout() { return get_offset$LAYOUT; }
+    public static final GroupLayout get_offset$layout() {
+        return get_offset$LAYOUT;
+    }
 
     private static final long get_offset$OFFSET = 0;
 
@@ -680,7 +671,9 @@ public class H5VL_native_dataset_optional_args_t {
      * } get_offset
      * }
      */
-    public static final long get_offset$offset() { return get_offset$OFFSET; }
+    public static final long get_offset$offset() {
+        return get_offset$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -690,8 +683,7 @@ public class H5VL_native_dataset_optional_args_t {
      * } get_offset
      * }
      */
-    public static MemorySegment get_offset(MemorySegment union)
-    {
+    public static MemorySegment get_offset(MemorySegment union) {
         return union.asSlice(get_offset$OFFSET, get_offset$LAYOUT.byteSize());
     }
 
@@ -703,8 +695,7 @@ public class H5VL_native_dataset_optional_args_t {
      * } get_offset
      * }
      */
-    public static void get_offset(MemorySegment union, MemorySegment fieldValue)
-    {
+    public static void get_offset(MemorySegment union, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, union, get_offset$OFFSET, get_offset$LAYOUT.byteSize());
     }
 
@@ -718,19 +709,21 @@ public class H5VL_native_dataset_optional_args_t {
      */
     public static class chunk_iter {
 
-        chunk_iter()
-        {
+        chunk_iter() {
             // Should not be called directly
         }
 
-        private static final GroupLayout $LAYOUT =
-            MemoryLayout.structLayout(hdf5_h.C_POINTER.withName("op"), hdf5_h.C_POINTER.withName("op_data"))
-                .withName("$anon$172:5");
+        private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+            hdf5_h.C_POINTER.withName("op"),
+            hdf5_h.C_POINTER.withName("op_data")
+        ).withName("$anon$172:5");
 
         /**
          * The layout of this struct
          */
-        public static final GroupLayout layout() { return $LAYOUT; }
+        public static final GroupLayout layout() {
+            return $LAYOUT;
+        }
 
         private static final AddressLayout op$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("op"));
 
@@ -740,7 +733,9 @@ public class H5VL_native_dataset_optional_args_t {
          * H5D_chunk_iter_op_t op
          * }
          */
-        public static final AddressLayout op$layout() { return op$LAYOUT; }
+        public static final AddressLayout op$layout() {
+            return op$LAYOUT;
+        }
 
         private static final long op$OFFSET = 0;
 
@@ -750,7 +745,9 @@ public class H5VL_native_dataset_optional_args_t {
          * H5D_chunk_iter_op_t op
          * }
          */
-        public static final long op$offset() { return op$OFFSET; }
+        public static final long op$offset() {
+            return op$OFFSET;
+        }
 
         /**
          * Getter for field:
@@ -758,7 +755,9 @@ public class H5VL_native_dataset_optional_args_t {
          * H5D_chunk_iter_op_t op
          * }
          */
-        public static MemorySegment op(MemorySegment struct) { return struct.get(op$LAYOUT, op$OFFSET); }
+        public static MemorySegment op(MemorySegment struct) {
+            return struct.get(op$LAYOUT, op$OFFSET);
+        }
 
         /**
          * Setter for field:
@@ -766,13 +765,11 @@ public class H5VL_native_dataset_optional_args_t {
          * H5D_chunk_iter_op_t op
          * }
          */
-        public static void op(MemorySegment struct, MemorySegment fieldValue)
-        {
+        public static void op(MemorySegment struct, MemorySegment fieldValue) {
             struct.set(op$LAYOUT, op$OFFSET, fieldValue);
         }
 
-        private static final AddressLayout op_data$LAYOUT =
-            (AddressLayout)$LAYOUT.select(groupElement("op_data"));
+        private static final AddressLayout op_data$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("op_data"));
 
         /**
          * Layout for field:
@@ -780,7 +777,9 @@ public class H5VL_native_dataset_optional_args_t {
          * void *op_data
          * }
          */
-        public static final AddressLayout op_data$layout() { return op_data$LAYOUT; }
+        public static final AddressLayout op_data$layout() {
+            return op_data$LAYOUT;
+        }
 
         private static final long op_data$OFFSET = 8;
 
@@ -790,7 +789,9 @@ public class H5VL_native_dataset_optional_args_t {
          * void *op_data
          * }
          */
-        public static final long op_data$offset() { return op_data$OFFSET; }
+        public static final long op_data$offset() {
+            return op_data$OFFSET;
+        }
 
         /**
          * Getter for field:
@@ -798,8 +799,7 @@ public class H5VL_native_dataset_optional_args_t {
          * void *op_data
          * }
          */
-        public static MemorySegment op_data(MemorySegment struct)
-        {
+        public static MemorySegment op_data(MemorySegment struct) {
             return struct.get(op_data$LAYOUT, op_data$OFFSET);
         }
 
@@ -809,8 +809,7 @@ public class H5VL_native_dataset_optional_args_t {
          * void *op_data
          * }
          */
-        public static void op_data(MemorySegment struct, MemorySegment fieldValue)
-        {
+        public static void op_data(MemorySegment struct, MemorySegment fieldValue) {
             struct.set(op_data$LAYOUT, op_data$OFFSET, fieldValue);
         }
 
@@ -818,8 +817,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
          * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
          */
-        public static MemorySegment asSlice(MemorySegment array, long index)
-        {
+        public static MemorySegment asSlice(MemorySegment array, long index) {
             return array.asSlice(layout().byteSize() * index);
         }
 
@@ -831,8 +829,7 @@ public class H5VL_native_dataset_optional_args_t {
         /**
          * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
          */
-        public static MemorySegment allocate(SegmentAllocator allocator)
-        {
+        public static MemorySegment allocate(SegmentAllocator allocator) {
             return allocator.allocate(layout());
         }
 
@@ -840,8 +837,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Allocate an array of size {@code elementCount} using {@code allocator}.
          * The returned segment has size {@code elementCount * layout().byteSize()}.
          */
-        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-        {
+        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
             return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
         }
 
@@ -849,9 +845,7 @@ public class H5VL_native_dataset_optional_args_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
             return reinterpret(addr, 1, arena, cleanup);
         }
 
@@ -859,15 +853,12 @@ public class H5VL_native_dataset_optional_args_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code elementCount * layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
             return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
         }
     }
 
-    private static final GroupLayout chunk_iter$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("chunk_iter"));
+    private static final GroupLayout chunk_iter$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("chunk_iter"));
 
     /**
      * Layout for field:
@@ -878,7 +869,9 @@ public class H5VL_native_dataset_optional_args_t {
      * } chunk_iter
      * }
      */
-    public static final GroupLayout chunk_iter$layout() { return chunk_iter$LAYOUT; }
+    public static final GroupLayout chunk_iter$layout() {
+        return chunk_iter$LAYOUT;
+    }
 
     private static final long chunk_iter$OFFSET = 0;
 
@@ -891,7 +884,9 @@ public class H5VL_native_dataset_optional_args_t {
      * } chunk_iter
      * }
      */
-    public static final long chunk_iter$offset() { return chunk_iter$OFFSET; }
+    public static final long chunk_iter$offset() {
+        return chunk_iter$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -902,8 +897,7 @@ public class H5VL_native_dataset_optional_args_t {
      * } chunk_iter
      * }
      */
-    public static MemorySegment chunk_iter(MemorySegment union)
-    {
+    public static MemorySegment chunk_iter(MemorySegment union) {
         return union.asSlice(chunk_iter$OFFSET, chunk_iter$LAYOUT.byteSize());
     }
 
@@ -916,8 +910,7 @@ public class H5VL_native_dataset_optional_args_t {
      * } chunk_iter
      * }
      */
-    public static void chunk_iter(MemorySegment union, MemorySegment fieldValue)
-    {
+    public static void chunk_iter(MemorySegment union, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, union, chunk_iter$OFFSET, chunk_iter$LAYOUT.byteSize());
     }
 
@@ -925,8 +918,7 @@ public class H5VL_native_dataset_optional_args_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -938,14 +930,15 @@ public class H5VL_native_dataset_optional_args_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -953,8 +946,7 @@ public class H5VL_native_dataset_optional_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -962,9 +954,8 @@ public class H5VL_native_dataset_optional_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

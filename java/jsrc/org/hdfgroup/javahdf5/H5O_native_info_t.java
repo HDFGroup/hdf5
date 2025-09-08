@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -25,21 +25,21 @@ import java.util.stream.*;
  */
 public class H5O_native_info_t {
 
-    H5O_native_info_t()
-    {
+    H5O_native_info_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(H5O_hdr_info_t.layout().withName("hdr"),
-                          H5O_native_info_t.meta_size.layout().withName("meta_size"))
-            .withName("H5O_native_info_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        H5O_hdr_info_t.layout().withName("hdr"),
+        H5O_native_info_t.meta_size.layout().withName("meta_size")
+    ).withName("H5O_native_info_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final GroupLayout hdr$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("hdr"));
 
@@ -49,7 +49,9 @@ public class H5O_native_info_t {
      * H5O_hdr_info_t hdr
      * }
      */
-    public static final GroupLayout hdr$layout() { return hdr$LAYOUT; }
+    public static final GroupLayout hdr$layout() {
+        return hdr$LAYOUT;
+    }
 
     private static final long hdr$OFFSET = 0;
 
@@ -59,7 +61,9 @@ public class H5O_native_info_t {
      * H5O_hdr_info_t hdr
      * }
      */
-    public static final long hdr$offset() { return hdr$OFFSET; }
+    public static final long hdr$offset() {
+        return hdr$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -67,8 +71,7 @@ public class H5O_native_info_t {
      * H5O_hdr_info_t hdr
      * }
      */
-    public static MemorySegment hdr(MemorySegment struct)
-    {
+    public static MemorySegment hdr(MemorySegment struct) {
         return struct.asSlice(hdr$OFFSET, hdr$LAYOUT.byteSize());
     }
 
@@ -78,8 +81,7 @@ public class H5O_native_info_t {
      * H5O_hdr_info_t hdr
      * }
      */
-    public static void hdr(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void hdr(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, hdr$OFFSET, hdr$LAYOUT.byteSize());
     }
 
@@ -93,20 +95,21 @@ public class H5O_native_info_t {
      */
     public static class meta_size {
 
-        meta_size()
-        {
+        meta_size() {
             // Should not be called directly
         }
 
-        private static final GroupLayout $LAYOUT =
-            MemoryLayout
-                .structLayout(H5_ih_info_t.layout().withName("obj"), H5_ih_info_t.layout().withName("attr"))
-                .withName("$anon$166:5");
+        private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+            H5_ih_info_t.layout().withName("obj"),
+            H5_ih_info_t.layout().withName("attr")
+        ).withName("$anon$166:5");
 
         /**
          * The layout of this struct
          */
-        public static final GroupLayout layout() { return $LAYOUT; }
+        public static final GroupLayout layout() {
+            return $LAYOUT;
+        }
 
         private static final GroupLayout obj$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("obj"));
 
@@ -116,7 +119,9 @@ public class H5O_native_info_t {
          * H5_ih_info_t obj
          * }
          */
-        public static final GroupLayout obj$layout() { return obj$LAYOUT; }
+        public static final GroupLayout obj$layout() {
+            return obj$LAYOUT;
+        }
 
         private static final long obj$OFFSET = 0;
 
@@ -126,7 +131,9 @@ public class H5O_native_info_t {
          * H5_ih_info_t obj
          * }
          */
-        public static final long obj$offset() { return obj$OFFSET; }
+        public static final long obj$offset() {
+            return obj$OFFSET;
+        }
 
         /**
          * Getter for field:
@@ -134,8 +141,7 @@ public class H5O_native_info_t {
          * H5_ih_info_t obj
          * }
          */
-        public static MemorySegment obj(MemorySegment struct)
-        {
+        public static MemorySegment obj(MemorySegment struct) {
             return struct.asSlice(obj$OFFSET, obj$LAYOUT.byteSize());
         }
 
@@ -145,8 +151,7 @@ public class H5O_native_info_t {
          * H5_ih_info_t obj
          * }
          */
-        public static void obj(MemorySegment struct, MemorySegment fieldValue)
-        {
+        public static void obj(MemorySegment struct, MemorySegment fieldValue) {
             MemorySegment.copy(fieldValue, 0L, struct, obj$OFFSET, obj$LAYOUT.byteSize());
         }
 
@@ -158,7 +163,9 @@ public class H5O_native_info_t {
          * H5_ih_info_t attr
          * }
          */
-        public static final GroupLayout attr$layout() { return attr$LAYOUT; }
+        public static final GroupLayout attr$layout() {
+            return attr$LAYOUT;
+        }
 
         private static final long attr$OFFSET = 16;
 
@@ -168,7 +175,9 @@ public class H5O_native_info_t {
          * H5_ih_info_t attr
          * }
          */
-        public static final long attr$offset() { return attr$OFFSET; }
+        public static final long attr$offset() {
+            return attr$OFFSET;
+        }
 
         /**
          * Getter for field:
@@ -176,8 +185,7 @@ public class H5O_native_info_t {
          * H5_ih_info_t attr
          * }
          */
-        public static MemorySegment attr(MemorySegment struct)
-        {
+        public static MemorySegment attr(MemorySegment struct) {
             return struct.asSlice(attr$OFFSET, attr$LAYOUT.byteSize());
         }
 
@@ -187,8 +195,7 @@ public class H5O_native_info_t {
          * H5_ih_info_t attr
          * }
          */
-        public static void attr(MemorySegment struct, MemorySegment fieldValue)
-        {
+        public static void attr(MemorySegment struct, MemorySegment fieldValue) {
             MemorySegment.copy(fieldValue, 0L, struct, attr$OFFSET, attr$LAYOUT.byteSize());
         }
 
@@ -196,8 +203,7 @@ public class H5O_native_info_t {
          * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
          * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
          */
-        public static MemorySegment asSlice(MemorySegment array, long index)
-        {
+        public static MemorySegment asSlice(MemorySegment array, long index) {
             return array.asSlice(layout().byteSize() * index);
         }
 
@@ -209,8 +215,7 @@ public class H5O_native_info_t {
         /**
          * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
          */
-        public static MemorySegment allocate(SegmentAllocator allocator)
-        {
+        public static MemorySegment allocate(SegmentAllocator allocator) {
             return allocator.allocate(layout());
         }
 
@@ -218,8 +223,7 @@ public class H5O_native_info_t {
          * Allocate an array of size {@code elementCount} using {@code allocator}.
          * The returned segment has size {@code elementCount * layout().byteSize()}.
          */
-        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-        {
+        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
             return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
         }
 
@@ -227,9 +231,7 @@ public class H5O_native_info_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
             return reinterpret(addr, 1, arena, cleanup);
         }
 
@@ -237,15 +239,12 @@ public class H5O_native_info_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code elementCount * layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
             return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
         }
     }
 
-    private static final GroupLayout meta_size$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("meta_size"));
+    private static final GroupLayout meta_size$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("meta_size"));
 
     /**
      * Layout for field:
@@ -256,7 +255,9 @@ public class H5O_native_info_t {
      * } meta_size
      * }
      */
-    public static final GroupLayout meta_size$layout() { return meta_size$LAYOUT; }
+    public static final GroupLayout meta_size$layout() {
+        return meta_size$LAYOUT;
+    }
 
     private static final long meta_size$OFFSET = 64;
 
@@ -269,7 +270,9 @@ public class H5O_native_info_t {
      * } meta_size
      * }
      */
-    public static final long meta_size$offset() { return meta_size$OFFSET; }
+    public static final long meta_size$offset() {
+        return meta_size$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -280,8 +283,7 @@ public class H5O_native_info_t {
      * } meta_size
      * }
      */
-    public static MemorySegment meta_size(MemorySegment struct)
-    {
+    public static MemorySegment meta_size(MemorySegment struct) {
         return struct.asSlice(meta_size$OFFSET, meta_size$LAYOUT.byteSize());
     }
 
@@ -294,8 +296,7 @@ public class H5O_native_info_t {
      * } meta_size
      * }
      */
-    public static void meta_size(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void meta_size(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, meta_size$OFFSET, meta_size$LAYOUT.byteSize());
     }
 
@@ -303,8 +304,7 @@ public class H5O_native_info_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -316,14 +316,15 @@ public class H5O_native_info_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -331,8 +332,7 @@ public class H5O_native_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -340,9 +340,8 @@ public class H5O_native_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

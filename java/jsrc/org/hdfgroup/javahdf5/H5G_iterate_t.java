@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -19,8 +19,7 @@ import java.util.stream.*;
  */
 public class H5G_iterate_t {
 
-    H5G_iterate_t()
-    {
+    H5G_iterate_t() {
         // Should not be called directly
     }
 
@@ -31,23 +30,27 @@ public class H5G_iterate_t {
         int apply(long group, MemorySegment name, MemorySegment op_data);
     }
 
-    private static final FunctionDescriptor $DESC =
-        FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
+    private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
+        hdf5_h.C_INT,
+        hdf5_h.C_LONG,
+        hdf5_h.C_POINTER,
+        hdf5_h.C_POINTER
+    );
 
     /**
      * The descriptor of this function pointer
      */
-    public static FunctionDescriptor descriptor() { return $DESC; }
+    public static FunctionDescriptor descriptor() {
+        return $DESC;
+    }
 
-    private static final MethodHandle UP$MH =
-        hdf5_h.upcallHandle(H5G_iterate_t.Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH = hdf5_h.upcallHandle(H5G_iterate_t.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(H5G_iterate_t.Function fi, Arena arena)
-    {
+    public static MemorySegment allocate(H5G_iterate_t.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 
@@ -56,13 +59,12 @@ public class H5G_iterate_t {
     /**
      * Invoke the upcall stub {@code funcPtr}, with given parameters
      */
-    public static int invoke(MemorySegment funcPtr, long group, MemorySegment name, MemorySegment op_data)
-    {
+    public static int invoke(MemorySegment funcPtr,long group, MemorySegment name, MemorySegment op_data) {
         try {
-            return (int)DOWN$MH.invokeExact(funcPtr, group, name, op_data);
-        }
-        catch (Throwable ex$) {
+            return (int) DOWN$MH.invokeExact(funcPtr, group, name, op_data);
+        } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
     }
 }
+

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -22,24 +22,23 @@ import java.util.stream.*;
  */
 public class H5VL_native_file_get_mdc_logging_status_t {
 
-    H5VL_native_file_get_mdc_logging_status_t()
-    {
+    H5VL_native_file_get_mdc_logging_status_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_POINTER.withName("is_enabled"),
-                          hdf5_h.C_POINTER.withName("is_currently_logging"))
-            .withName("H5VL_native_file_get_mdc_logging_status_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_POINTER.withName("is_enabled"),
+        hdf5_h.C_POINTER.withName("is_currently_logging")
+    ).withName("H5VL_native_file_get_mdc_logging_status_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
-    private static final AddressLayout is_enabled$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("is_enabled"));
+    private static final AddressLayout is_enabled$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("is_enabled"));
 
     /**
      * Layout for field:
@@ -47,7 +46,9 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * hbool_t *is_enabled
      * }
      */
-    public static final AddressLayout is_enabled$layout() { return is_enabled$LAYOUT; }
+    public static final AddressLayout is_enabled$layout() {
+        return is_enabled$LAYOUT;
+    }
 
     private static final long is_enabled$OFFSET = 0;
 
@@ -57,7 +58,9 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * hbool_t *is_enabled
      * }
      */
-    public static final long is_enabled$offset() { return is_enabled$OFFSET; }
+    public static final long is_enabled$offset() {
+        return is_enabled$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -65,8 +68,7 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * hbool_t *is_enabled
      * }
      */
-    public static MemorySegment is_enabled(MemorySegment struct)
-    {
+    public static MemorySegment is_enabled(MemorySegment struct) {
         return struct.get(is_enabled$LAYOUT, is_enabled$OFFSET);
     }
 
@@ -76,13 +78,11 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * hbool_t *is_enabled
      * }
      */
-    public static void is_enabled(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void is_enabled(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(is_enabled$LAYOUT, is_enabled$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout is_currently_logging$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("is_currently_logging"));
+    private static final AddressLayout is_currently_logging$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("is_currently_logging"));
 
     /**
      * Layout for field:
@@ -90,7 +90,9 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * hbool_t *is_currently_logging
      * }
      */
-    public static final AddressLayout is_currently_logging$layout() { return is_currently_logging$LAYOUT; }
+    public static final AddressLayout is_currently_logging$layout() {
+        return is_currently_logging$LAYOUT;
+    }
 
     private static final long is_currently_logging$OFFSET = 8;
 
@@ -100,7 +102,9 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * hbool_t *is_currently_logging
      * }
      */
-    public static final long is_currently_logging$offset() { return is_currently_logging$OFFSET; }
+    public static final long is_currently_logging$offset() {
+        return is_currently_logging$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -108,8 +112,7 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * hbool_t *is_currently_logging
      * }
      */
-    public static MemorySegment is_currently_logging(MemorySegment struct)
-    {
+    public static MemorySegment is_currently_logging(MemorySegment struct) {
         return struct.get(is_currently_logging$LAYOUT, is_currently_logging$OFFSET);
     }
 
@@ -119,8 +122,7 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * hbool_t *is_currently_logging
      * }
      */
-    public static void is_currently_logging(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void is_currently_logging(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(is_currently_logging$LAYOUT, is_currently_logging$OFFSET, fieldValue);
     }
 
@@ -128,8 +130,7 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -141,14 +142,15 @@ public class H5VL_native_file_get_mdc_logging_status_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -156,8 +158,7 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -165,9 +166,8 @@ public class H5VL_native_file_get_mdc_logging_status_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

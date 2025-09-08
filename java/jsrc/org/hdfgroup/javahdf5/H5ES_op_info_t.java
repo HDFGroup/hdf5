@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -29,28 +29,31 @@ import java.util.stream.*;
  */
 public class H5ES_op_info_t {
 
-    H5ES_op_info_t()
-    {
+    H5ES_op_info_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_POINTER.withName("api_name"), hdf5_h.C_POINTER.withName("api_args"),
-                          hdf5_h.C_POINTER.withName("app_file_name"),
-                          hdf5_h.C_POINTER.withName("app_func_name"), hdf5_h.C_INT.withName("app_line_num"),
-                          MemoryLayout.paddingLayout(4), hdf5_h.C_LONG.withName("op_ins_count"),
-                          hdf5_h.C_LONG.withName("op_ins_ts"), hdf5_h.C_LONG.withName("op_exec_ts"),
-                          hdf5_h.C_LONG.withName("op_exec_time"))
-            .withName("H5ES_op_info_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_POINTER.withName("api_name"),
+        hdf5_h.C_POINTER.withName("api_args"),
+        hdf5_h.C_POINTER.withName("app_file_name"),
+        hdf5_h.C_POINTER.withName("app_func_name"),
+        hdf5_h.C_INT.withName("app_line_num"),
+        MemoryLayout.paddingLayout(4),
+        hdf5_h.C_LONG.withName("op_ins_count"),
+        hdf5_h.C_LONG.withName("op_ins_ts"),
+        hdf5_h.C_LONG.withName("op_exec_ts"),
+        hdf5_h.C_LONG.withName("op_exec_time")
+    ).withName("H5ES_op_info_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
-    private static final AddressLayout api_name$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("api_name"));
+    private static final AddressLayout api_name$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("api_name"));
 
     /**
      * Layout for field:
@@ -58,7 +61,9 @@ public class H5ES_op_info_t {
      * const char *api_name
      * }
      */
-    public static final AddressLayout api_name$layout() { return api_name$LAYOUT; }
+    public static final AddressLayout api_name$layout() {
+        return api_name$LAYOUT;
+    }
 
     private static final long api_name$OFFSET = 0;
 
@@ -68,7 +73,9 @@ public class H5ES_op_info_t {
      * const char *api_name
      * }
      */
-    public static final long api_name$offset() { return api_name$OFFSET; }
+    public static final long api_name$offset() {
+        return api_name$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -76,8 +83,7 @@ public class H5ES_op_info_t {
      * const char *api_name
      * }
      */
-    public static MemorySegment api_name(MemorySegment struct)
-    {
+    public static MemorySegment api_name(MemorySegment struct) {
         return struct.get(api_name$LAYOUT, api_name$OFFSET);
     }
 
@@ -87,13 +93,11 @@ public class H5ES_op_info_t {
      * const char *api_name
      * }
      */
-    public static void api_name(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void api_name(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(api_name$LAYOUT, api_name$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout api_args$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("api_args"));
+    private static final AddressLayout api_args$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("api_args"));
 
     /**
      * Layout for field:
@@ -101,7 +105,9 @@ public class H5ES_op_info_t {
      * char *api_args
      * }
      */
-    public static final AddressLayout api_args$layout() { return api_args$LAYOUT; }
+    public static final AddressLayout api_args$layout() {
+        return api_args$LAYOUT;
+    }
 
     private static final long api_args$OFFSET = 8;
 
@@ -111,7 +117,9 @@ public class H5ES_op_info_t {
      * char *api_args
      * }
      */
-    public static final long api_args$offset() { return api_args$OFFSET; }
+    public static final long api_args$offset() {
+        return api_args$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -119,8 +127,7 @@ public class H5ES_op_info_t {
      * char *api_args
      * }
      */
-    public static MemorySegment api_args(MemorySegment struct)
-    {
+    public static MemorySegment api_args(MemorySegment struct) {
         return struct.get(api_args$LAYOUT, api_args$OFFSET);
     }
 
@@ -130,13 +137,11 @@ public class H5ES_op_info_t {
      * char *api_args
      * }
      */
-    public static void api_args(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void api_args(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(api_args$LAYOUT, api_args$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout app_file_name$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("app_file_name"));
+    private static final AddressLayout app_file_name$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("app_file_name"));
 
     /**
      * Layout for field:
@@ -144,7 +149,9 @@ public class H5ES_op_info_t {
      * const char *app_file_name
      * }
      */
-    public static final AddressLayout app_file_name$layout() { return app_file_name$LAYOUT; }
+    public static final AddressLayout app_file_name$layout() {
+        return app_file_name$LAYOUT;
+    }
 
     private static final long app_file_name$OFFSET = 16;
 
@@ -154,7 +161,9 @@ public class H5ES_op_info_t {
      * const char *app_file_name
      * }
      */
-    public static final long app_file_name$offset() { return app_file_name$OFFSET; }
+    public static final long app_file_name$offset() {
+        return app_file_name$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -162,8 +171,7 @@ public class H5ES_op_info_t {
      * const char *app_file_name
      * }
      */
-    public static MemorySegment app_file_name(MemorySegment struct)
-    {
+    public static MemorySegment app_file_name(MemorySegment struct) {
         return struct.get(app_file_name$LAYOUT, app_file_name$OFFSET);
     }
 
@@ -173,13 +181,11 @@ public class H5ES_op_info_t {
      * const char *app_file_name
      * }
      */
-    public static void app_file_name(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void app_file_name(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(app_file_name$LAYOUT, app_file_name$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout app_func_name$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("app_func_name"));
+    private static final AddressLayout app_func_name$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("app_func_name"));
 
     /**
      * Layout for field:
@@ -187,7 +193,9 @@ public class H5ES_op_info_t {
      * const char *app_func_name
      * }
      */
-    public static final AddressLayout app_func_name$layout() { return app_func_name$LAYOUT; }
+    public static final AddressLayout app_func_name$layout() {
+        return app_func_name$LAYOUT;
+    }
 
     private static final long app_func_name$OFFSET = 24;
 
@@ -197,7 +205,9 @@ public class H5ES_op_info_t {
      * const char *app_func_name
      * }
      */
-    public static final long app_func_name$offset() { return app_func_name$OFFSET; }
+    public static final long app_func_name$offset() {
+        return app_func_name$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -205,8 +215,7 @@ public class H5ES_op_info_t {
      * const char *app_func_name
      * }
      */
-    public static MemorySegment app_func_name(MemorySegment struct)
-    {
+    public static MemorySegment app_func_name(MemorySegment struct) {
         return struct.get(app_func_name$LAYOUT, app_func_name$OFFSET);
     }
 
@@ -216,8 +225,7 @@ public class H5ES_op_info_t {
      * const char *app_func_name
      * }
      */
-    public static void app_func_name(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void app_func_name(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(app_func_name$LAYOUT, app_func_name$OFFSET, fieldValue);
     }
 
@@ -229,7 +237,9 @@ public class H5ES_op_info_t {
      * unsigned int app_line_num
      * }
      */
-    public static final OfInt app_line_num$layout() { return app_line_num$LAYOUT; }
+    public static final OfInt app_line_num$layout() {
+        return app_line_num$LAYOUT;
+    }
 
     private static final long app_line_num$OFFSET = 32;
 
@@ -239,7 +249,9 @@ public class H5ES_op_info_t {
      * unsigned int app_line_num
      * }
      */
-    public static final long app_line_num$offset() { return app_line_num$OFFSET; }
+    public static final long app_line_num$offset() {
+        return app_line_num$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -247,8 +259,7 @@ public class H5ES_op_info_t {
      * unsigned int app_line_num
      * }
      */
-    public static int app_line_num(MemorySegment struct)
-    {
+    public static int app_line_num(MemorySegment struct) {
         return struct.get(app_line_num$LAYOUT, app_line_num$OFFSET);
     }
 
@@ -258,8 +269,7 @@ public class H5ES_op_info_t {
      * unsigned int app_line_num
      * }
      */
-    public static void app_line_num(MemorySegment struct, int fieldValue)
-    {
+    public static void app_line_num(MemorySegment struct, int fieldValue) {
         struct.set(app_line_num$LAYOUT, app_line_num$OFFSET, fieldValue);
     }
 
@@ -271,7 +281,9 @@ public class H5ES_op_info_t {
      * uint64_t op_ins_count
      * }
      */
-    public static final OfLong op_ins_count$layout() { return op_ins_count$LAYOUT; }
+    public static final OfLong op_ins_count$layout() {
+        return op_ins_count$LAYOUT;
+    }
 
     private static final long op_ins_count$OFFSET = 40;
 
@@ -281,7 +293,9 @@ public class H5ES_op_info_t {
      * uint64_t op_ins_count
      * }
      */
-    public static final long op_ins_count$offset() { return op_ins_count$OFFSET; }
+    public static final long op_ins_count$offset() {
+        return op_ins_count$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -289,8 +303,7 @@ public class H5ES_op_info_t {
      * uint64_t op_ins_count
      * }
      */
-    public static long op_ins_count(MemorySegment struct)
-    {
+    public static long op_ins_count(MemorySegment struct) {
         return struct.get(op_ins_count$LAYOUT, op_ins_count$OFFSET);
     }
 
@@ -300,8 +313,7 @@ public class H5ES_op_info_t {
      * uint64_t op_ins_count
      * }
      */
-    public static void op_ins_count(MemorySegment struct, long fieldValue)
-    {
+    public static void op_ins_count(MemorySegment struct, long fieldValue) {
         struct.set(op_ins_count$LAYOUT, op_ins_count$OFFSET, fieldValue);
     }
 
@@ -313,7 +325,9 @@ public class H5ES_op_info_t {
      * uint64_t op_ins_ts
      * }
      */
-    public static final OfLong op_ins_ts$layout() { return op_ins_ts$LAYOUT; }
+    public static final OfLong op_ins_ts$layout() {
+        return op_ins_ts$LAYOUT;
+    }
 
     private static final long op_ins_ts$OFFSET = 48;
 
@@ -323,7 +337,9 @@ public class H5ES_op_info_t {
      * uint64_t op_ins_ts
      * }
      */
-    public static final long op_ins_ts$offset() { return op_ins_ts$OFFSET; }
+    public static final long op_ins_ts$offset() {
+        return op_ins_ts$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -331,8 +347,7 @@ public class H5ES_op_info_t {
      * uint64_t op_ins_ts
      * }
      */
-    public static long op_ins_ts(MemorySegment struct)
-    {
+    public static long op_ins_ts(MemorySegment struct) {
         return struct.get(op_ins_ts$LAYOUT, op_ins_ts$OFFSET);
     }
 
@@ -342,8 +357,7 @@ public class H5ES_op_info_t {
      * uint64_t op_ins_ts
      * }
      */
-    public static void op_ins_ts(MemorySegment struct, long fieldValue)
-    {
+    public static void op_ins_ts(MemorySegment struct, long fieldValue) {
         struct.set(op_ins_ts$LAYOUT, op_ins_ts$OFFSET, fieldValue);
     }
 
@@ -355,7 +369,9 @@ public class H5ES_op_info_t {
      * uint64_t op_exec_ts
      * }
      */
-    public static final OfLong op_exec_ts$layout() { return op_exec_ts$LAYOUT; }
+    public static final OfLong op_exec_ts$layout() {
+        return op_exec_ts$LAYOUT;
+    }
 
     private static final long op_exec_ts$OFFSET = 56;
 
@@ -365,7 +381,9 @@ public class H5ES_op_info_t {
      * uint64_t op_exec_ts
      * }
      */
-    public static final long op_exec_ts$offset() { return op_exec_ts$OFFSET; }
+    public static final long op_exec_ts$offset() {
+        return op_exec_ts$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -373,8 +391,7 @@ public class H5ES_op_info_t {
      * uint64_t op_exec_ts
      * }
      */
-    public static long op_exec_ts(MemorySegment struct)
-    {
+    public static long op_exec_ts(MemorySegment struct) {
         return struct.get(op_exec_ts$LAYOUT, op_exec_ts$OFFSET);
     }
 
@@ -384,8 +401,7 @@ public class H5ES_op_info_t {
      * uint64_t op_exec_ts
      * }
      */
-    public static void op_exec_ts(MemorySegment struct, long fieldValue)
-    {
+    public static void op_exec_ts(MemorySegment struct, long fieldValue) {
         struct.set(op_exec_ts$LAYOUT, op_exec_ts$OFFSET, fieldValue);
     }
 
@@ -397,7 +413,9 @@ public class H5ES_op_info_t {
      * uint64_t op_exec_time
      * }
      */
-    public static final OfLong op_exec_time$layout() { return op_exec_time$LAYOUT; }
+    public static final OfLong op_exec_time$layout() {
+        return op_exec_time$LAYOUT;
+    }
 
     private static final long op_exec_time$OFFSET = 64;
 
@@ -407,7 +425,9 @@ public class H5ES_op_info_t {
      * uint64_t op_exec_time
      * }
      */
-    public static final long op_exec_time$offset() { return op_exec_time$OFFSET; }
+    public static final long op_exec_time$offset() {
+        return op_exec_time$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -415,8 +435,7 @@ public class H5ES_op_info_t {
      * uint64_t op_exec_time
      * }
      */
-    public static long op_exec_time(MemorySegment struct)
-    {
+    public static long op_exec_time(MemorySegment struct) {
         return struct.get(op_exec_time$LAYOUT, op_exec_time$OFFSET);
     }
 
@@ -426,8 +445,7 @@ public class H5ES_op_info_t {
      * uint64_t op_exec_time
      * }
      */
-    public static void op_exec_time(MemorySegment struct, long fieldValue)
-    {
+    public static void op_exec_time(MemorySegment struct, long fieldValue) {
         struct.set(op_exec_time$LAYOUT, op_exec_time$OFFSET, fieldValue);
     }
 
@@ -435,8 +453,7 @@ public class H5ES_op_info_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -448,14 +465,15 @@ public class H5ES_op_info_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -463,8 +481,7 @@ public class H5ES_op_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -472,9 +489,8 @@ public class H5ES_op_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,22 +24,25 @@ import java.util.stream.*;
  */
 public class H5G_info_t {
 
-    H5G_info_t()
-    {
+    H5G_info_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_INT.withName("storage_type"), MemoryLayout.paddingLayout(4),
-                          hdf5_h.C_LONG.withName("nlinks"), hdf5_h.C_LONG.withName("max_corder"),
-                          hdf5_h.C_BOOL.withName("mounted"), MemoryLayout.paddingLayout(7))
-            .withName("H5G_info_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_INT.withName("storage_type"),
+        MemoryLayout.paddingLayout(4),
+        hdf5_h.C_LONG.withName("nlinks"),
+        hdf5_h.C_LONG.withName("max_corder"),
+        hdf5_h.C_BOOL.withName("mounted"),
+        MemoryLayout.paddingLayout(7)
+    ).withName("H5G_info_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfInt storage_type$LAYOUT = (OfInt)$LAYOUT.select(groupElement("storage_type"));
 
@@ -49,7 +52,9 @@ public class H5G_info_t {
      * H5G_storage_type_t storage_type
      * }
      */
-    public static final OfInt storage_type$layout() { return storage_type$LAYOUT; }
+    public static final OfInt storage_type$layout() {
+        return storage_type$LAYOUT;
+    }
 
     private static final long storage_type$OFFSET = 0;
 
@@ -59,7 +64,9 @@ public class H5G_info_t {
      * H5G_storage_type_t storage_type
      * }
      */
-    public static final long storage_type$offset() { return storage_type$OFFSET; }
+    public static final long storage_type$offset() {
+        return storage_type$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -67,8 +74,7 @@ public class H5G_info_t {
      * H5G_storage_type_t storage_type
      * }
      */
-    public static int storage_type(MemorySegment struct)
-    {
+    public static int storage_type(MemorySegment struct) {
         return struct.get(storage_type$LAYOUT, storage_type$OFFSET);
     }
 
@@ -78,8 +84,7 @@ public class H5G_info_t {
      * H5G_storage_type_t storage_type
      * }
      */
-    public static void storage_type(MemorySegment struct, int fieldValue)
-    {
+    public static void storage_type(MemorySegment struct, int fieldValue) {
         struct.set(storage_type$LAYOUT, storage_type$OFFSET, fieldValue);
     }
 
@@ -91,7 +96,9 @@ public class H5G_info_t {
      * hsize_t nlinks
      * }
      */
-    public static final OfLong nlinks$layout() { return nlinks$LAYOUT; }
+    public static final OfLong nlinks$layout() {
+        return nlinks$LAYOUT;
+    }
 
     private static final long nlinks$OFFSET = 8;
 
@@ -101,7 +108,9 @@ public class H5G_info_t {
      * hsize_t nlinks
      * }
      */
-    public static final long nlinks$offset() { return nlinks$OFFSET; }
+    public static final long nlinks$offset() {
+        return nlinks$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -109,7 +118,9 @@ public class H5G_info_t {
      * hsize_t nlinks
      * }
      */
-    public static long nlinks(MemorySegment struct) { return struct.get(nlinks$LAYOUT, nlinks$OFFSET); }
+    public static long nlinks(MemorySegment struct) {
+        return struct.get(nlinks$LAYOUT, nlinks$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -117,8 +128,7 @@ public class H5G_info_t {
      * hsize_t nlinks
      * }
      */
-    public static void nlinks(MemorySegment struct, long fieldValue)
-    {
+    public static void nlinks(MemorySegment struct, long fieldValue) {
         struct.set(nlinks$LAYOUT, nlinks$OFFSET, fieldValue);
     }
 
@@ -130,7 +140,9 @@ public class H5G_info_t {
      * int64_t max_corder
      * }
      */
-    public static final OfLong max_corder$layout() { return max_corder$LAYOUT; }
+    public static final OfLong max_corder$layout() {
+        return max_corder$LAYOUT;
+    }
 
     private static final long max_corder$OFFSET = 16;
 
@@ -140,7 +152,9 @@ public class H5G_info_t {
      * int64_t max_corder
      * }
      */
-    public static final long max_corder$offset() { return max_corder$OFFSET; }
+    public static final long max_corder$offset() {
+        return max_corder$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -148,8 +162,7 @@ public class H5G_info_t {
      * int64_t max_corder
      * }
      */
-    public static long max_corder(MemorySegment struct)
-    {
+    public static long max_corder(MemorySegment struct) {
         return struct.get(max_corder$LAYOUT, max_corder$OFFSET);
     }
 
@@ -159,8 +172,7 @@ public class H5G_info_t {
      * int64_t max_corder
      * }
      */
-    public static void max_corder(MemorySegment struct, long fieldValue)
-    {
+    public static void max_corder(MemorySegment struct, long fieldValue) {
         struct.set(max_corder$LAYOUT, max_corder$OFFSET, fieldValue);
     }
 
@@ -172,7 +184,9 @@ public class H5G_info_t {
      * hbool_t mounted
      * }
      */
-    public static final OfBoolean mounted$layout() { return mounted$LAYOUT; }
+    public static final OfBoolean mounted$layout() {
+        return mounted$LAYOUT;
+    }
 
     private static final long mounted$OFFSET = 24;
 
@@ -182,7 +196,9 @@ public class H5G_info_t {
      * hbool_t mounted
      * }
      */
-    public static final long mounted$offset() { return mounted$OFFSET; }
+    public static final long mounted$offset() {
+        return mounted$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -190,7 +206,9 @@ public class H5G_info_t {
      * hbool_t mounted
      * }
      */
-    public static boolean mounted(MemorySegment struct) { return struct.get(mounted$LAYOUT, mounted$OFFSET); }
+    public static boolean mounted(MemorySegment struct) {
+        return struct.get(mounted$LAYOUT, mounted$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -198,8 +216,7 @@ public class H5G_info_t {
      * hbool_t mounted
      * }
      */
-    public static void mounted(MemorySegment struct, boolean fieldValue)
-    {
+    public static void mounted(MemorySegment struct, boolean fieldValue) {
         struct.set(mounted$LAYOUT, mounted$OFFSET, fieldValue);
     }
 
@@ -207,8 +224,7 @@ public class H5G_info_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -220,14 +236,15 @@ public class H5G_info_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -235,8 +252,7 @@ public class H5G_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -244,9 +260,8 @@ public class H5G_info_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

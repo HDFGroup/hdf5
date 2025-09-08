@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -27,24 +27,27 @@ import java.util.stream.*;
  */
 public class H5FD_splitter_vfd_config_t {
 
-    H5FD_splitter_vfd_config_t()
-    {
+    H5FD_splitter_vfd_config_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_INT.withName("magic"), hdf5_h.C_INT.withName("version"),
-                          hdf5_h.C_LONG.withName("rw_fapl_id"), hdf5_h.C_LONG.withName("wo_fapl_id"),
-                          MemoryLayout.sequenceLayout(4097, hdf5_h.C_CHAR).withName("wo_path"),
-                          MemoryLayout.sequenceLayout(4097, hdf5_h.C_CHAR).withName("log_file_path"),
-                          hdf5_h.C_BOOL.withName("ignore_wo_errs"), MemoryLayout.paddingLayout(5))
-            .withName("H5FD_splitter_vfd_config_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_INT.withName("magic"),
+        hdf5_h.C_INT.withName("version"),
+        hdf5_h.C_LONG.withName("rw_fapl_id"),
+        hdf5_h.C_LONG.withName("wo_fapl_id"),
+        MemoryLayout.sequenceLayout(4097, hdf5_h.C_CHAR).withName("wo_path"),
+        MemoryLayout.sequenceLayout(4097, hdf5_h.C_CHAR).withName("log_file_path"),
+        hdf5_h.C_BOOL.withName("ignore_wo_errs"),
+        MemoryLayout.paddingLayout(5)
+    ).withName("H5FD_splitter_vfd_config_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfInt magic$LAYOUT = (OfInt)$LAYOUT.select(groupElement("magic"));
 
@@ -54,7 +57,9 @@ public class H5FD_splitter_vfd_config_t {
      * int32_t magic
      * }
      */
-    public static final OfInt magic$layout() { return magic$LAYOUT; }
+    public static final OfInt magic$layout() {
+        return magic$LAYOUT;
+    }
 
     private static final long magic$OFFSET = 0;
 
@@ -64,7 +69,9 @@ public class H5FD_splitter_vfd_config_t {
      * int32_t magic
      * }
      */
-    public static final long magic$offset() { return magic$OFFSET; }
+    public static final long magic$offset() {
+        return magic$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -72,7 +79,9 @@ public class H5FD_splitter_vfd_config_t {
      * int32_t magic
      * }
      */
-    public static int magic(MemorySegment struct) { return struct.get(magic$LAYOUT, magic$OFFSET); }
+    public static int magic(MemorySegment struct) {
+        return struct.get(magic$LAYOUT, magic$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -80,8 +89,7 @@ public class H5FD_splitter_vfd_config_t {
      * int32_t magic
      * }
      */
-    public static void magic(MemorySegment struct, int fieldValue)
-    {
+    public static void magic(MemorySegment struct, int fieldValue) {
         struct.set(magic$LAYOUT, magic$OFFSET, fieldValue);
     }
 
@@ -93,7 +101,9 @@ public class H5FD_splitter_vfd_config_t {
      * unsigned int version
      * }
      */
-    public static final OfInt version$layout() { return version$LAYOUT; }
+    public static final OfInt version$layout() {
+        return version$LAYOUT;
+    }
 
     private static final long version$OFFSET = 4;
 
@@ -103,7 +113,9 @@ public class H5FD_splitter_vfd_config_t {
      * unsigned int version
      * }
      */
-    public static final long version$offset() { return version$OFFSET; }
+    public static final long version$offset() {
+        return version$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -111,7 +123,9 @@ public class H5FD_splitter_vfd_config_t {
      * unsigned int version
      * }
      */
-    public static int version(MemorySegment struct) { return struct.get(version$LAYOUT, version$OFFSET); }
+    public static int version(MemorySegment struct) {
+        return struct.get(version$LAYOUT, version$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -119,8 +133,7 @@ public class H5FD_splitter_vfd_config_t {
      * unsigned int version
      * }
      */
-    public static void version(MemorySegment struct, int fieldValue)
-    {
+    public static void version(MemorySegment struct, int fieldValue) {
         struct.set(version$LAYOUT, version$OFFSET, fieldValue);
     }
 
@@ -132,7 +145,9 @@ public class H5FD_splitter_vfd_config_t {
      * hid_t rw_fapl_id
      * }
      */
-    public static final OfLong rw_fapl_id$layout() { return rw_fapl_id$LAYOUT; }
+    public static final OfLong rw_fapl_id$layout() {
+        return rw_fapl_id$LAYOUT;
+    }
 
     private static final long rw_fapl_id$OFFSET = 8;
 
@@ -142,7 +157,9 @@ public class H5FD_splitter_vfd_config_t {
      * hid_t rw_fapl_id
      * }
      */
-    public static final long rw_fapl_id$offset() { return rw_fapl_id$OFFSET; }
+    public static final long rw_fapl_id$offset() {
+        return rw_fapl_id$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -150,8 +167,7 @@ public class H5FD_splitter_vfd_config_t {
      * hid_t rw_fapl_id
      * }
      */
-    public static long rw_fapl_id(MemorySegment struct)
-    {
+    public static long rw_fapl_id(MemorySegment struct) {
         return struct.get(rw_fapl_id$LAYOUT, rw_fapl_id$OFFSET);
     }
 
@@ -161,8 +177,7 @@ public class H5FD_splitter_vfd_config_t {
      * hid_t rw_fapl_id
      * }
      */
-    public static void rw_fapl_id(MemorySegment struct, long fieldValue)
-    {
+    public static void rw_fapl_id(MemorySegment struct, long fieldValue) {
         struct.set(rw_fapl_id$LAYOUT, rw_fapl_id$OFFSET, fieldValue);
     }
 
@@ -174,7 +189,9 @@ public class H5FD_splitter_vfd_config_t {
      * hid_t wo_fapl_id
      * }
      */
-    public static final OfLong wo_fapl_id$layout() { return wo_fapl_id$LAYOUT; }
+    public static final OfLong wo_fapl_id$layout() {
+        return wo_fapl_id$LAYOUT;
+    }
 
     private static final long wo_fapl_id$OFFSET = 16;
 
@@ -184,7 +201,9 @@ public class H5FD_splitter_vfd_config_t {
      * hid_t wo_fapl_id
      * }
      */
-    public static final long wo_fapl_id$offset() { return wo_fapl_id$OFFSET; }
+    public static final long wo_fapl_id$offset() {
+        return wo_fapl_id$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -192,8 +211,7 @@ public class H5FD_splitter_vfd_config_t {
      * hid_t wo_fapl_id
      * }
      */
-    public static long wo_fapl_id(MemorySegment struct)
-    {
+    public static long wo_fapl_id(MemorySegment struct) {
         return struct.get(wo_fapl_id$LAYOUT, wo_fapl_id$OFFSET);
     }
 
@@ -203,13 +221,11 @@ public class H5FD_splitter_vfd_config_t {
      * hid_t wo_fapl_id
      * }
      */
-    public static void wo_fapl_id(MemorySegment struct, long fieldValue)
-    {
+    public static void wo_fapl_id(MemorySegment struct, long fieldValue) {
         struct.set(wo_fapl_id$LAYOUT, wo_fapl_id$OFFSET, fieldValue);
     }
 
-    private static final SequenceLayout wo_path$LAYOUT =
-        (SequenceLayout)$LAYOUT.select(groupElement("wo_path"));
+    private static final SequenceLayout wo_path$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("wo_path"));
 
     /**
      * Layout for field:
@@ -217,7 +233,9 @@ public class H5FD_splitter_vfd_config_t {
      * char wo_path[4097]
      * }
      */
-    public static final SequenceLayout wo_path$layout() { return wo_path$LAYOUT; }
+    public static final SequenceLayout wo_path$layout() {
+        return wo_path$LAYOUT;
+    }
 
     private static final long wo_path$OFFSET = 24;
 
@@ -227,7 +245,9 @@ public class H5FD_splitter_vfd_config_t {
      * char wo_path[4097]
      * }
      */
-    public static final long wo_path$offset() { return wo_path$OFFSET; }
+    public static final long wo_path$offset() {
+        return wo_path$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -235,8 +255,7 @@ public class H5FD_splitter_vfd_config_t {
      * char wo_path[4097]
      * }
      */
-    public static MemorySegment wo_path(MemorySegment struct)
-    {
+    public static MemorySegment wo_path(MemorySegment struct) {
         return struct.asSlice(wo_path$OFFSET, wo_path$LAYOUT.byteSize());
     }
 
@@ -246,12 +265,11 @@ public class H5FD_splitter_vfd_config_t {
      * char wo_path[4097]
      * }
      */
-    public static void wo_path(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void wo_path(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, wo_path$OFFSET, wo_path$LAYOUT.byteSize());
     }
 
-    private static long[] wo_path$DIMS = {4097};
+    private static long[] wo_path$DIMS = { 4097 };
 
     /**
      * Dimensions for array field:
@@ -259,7 +277,9 @@ public class H5FD_splitter_vfd_config_t {
      * char wo_path[4097]
      * }
      */
-    public static long[] wo_path$dimensions() { return wo_path$DIMS; }
+    public static long[] wo_path$dimensions() {
+        return wo_path$DIMS;
+    }
     private static final VarHandle wo_path$ELEM_HANDLE = wo_path$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -268,8 +288,7 @@ public class H5FD_splitter_vfd_config_t {
      * char wo_path[4097]
      * }
      */
-    public static byte wo_path(MemorySegment struct, long index0)
-    {
+    public static byte wo_path(MemorySegment struct, long index0) {
         return (byte)wo_path$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -279,13 +298,11 @@ public class H5FD_splitter_vfd_config_t {
      * char wo_path[4097]
      * }
      */
-    public static void wo_path(MemorySegment struct, long index0, byte fieldValue)
-    {
+    public static void wo_path(MemorySegment struct, long index0, byte fieldValue) {
         wo_path$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
-    private static final SequenceLayout log_file_path$LAYOUT =
-        (SequenceLayout)$LAYOUT.select(groupElement("log_file_path"));
+    private static final SequenceLayout log_file_path$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("log_file_path"));
 
     /**
      * Layout for field:
@@ -293,7 +310,9 @@ public class H5FD_splitter_vfd_config_t {
      * char log_file_path[4097]
      * }
      */
-    public static final SequenceLayout log_file_path$layout() { return log_file_path$LAYOUT; }
+    public static final SequenceLayout log_file_path$layout() {
+        return log_file_path$LAYOUT;
+    }
 
     private static final long log_file_path$OFFSET = 4121;
 
@@ -303,7 +322,9 @@ public class H5FD_splitter_vfd_config_t {
      * char log_file_path[4097]
      * }
      */
-    public static final long log_file_path$offset() { return log_file_path$OFFSET; }
+    public static final long log_file_path$offset() {
+        return log_file_path$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -311,8 +332,7 @@ public class H5FD_splitter_vfd_config_t {
      * char log_file_path[4097]
      * }
      */
-    public static MemorySegment log_file_path(MemorySegment struct)
-    {
+    public static MemorySegment log_file_path(MemorySegment struct) {
         return struct.asSlice(log_file_path$OFFSET, log_file_path$LAYOUT.byteSize());
     }
 
@@ -322,12 +342,11 @@ public class H5FD_splitter_vfd_config_t {
      * char log_file_path[4097]
      * }
      */
-    public static void log_file_path(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void log_file_path(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, log_file_path$OFFSET, log_file_path$LAYOUT.byteSize());
     }
 
-    private static long[] log_file_path$DIMS = {4097};
+    private static long[] log_file_path$DIMS = { 4097 };
 
     /**
      * Dimensions for array field:
@@ -335,9 +354,10 @@ public class H5FD_splitter_vfd_config_t {
      * char log_file_path[4097]
      * }
      */
-    public static long[] log_file_path$dimensions() { return log_file_path$DIMS; }
-    private static final VarHandle log_file_path$ELEM_HANDLE =
-        log_file_path$LAYOUT.varHandle(sequenceElement());
+    public static long[] log_file_path$dimensions() {
+        return log_file_path$DIMS;
+    }
+    private static final VarHandle log_file_path$ELEM_HANDLE = log_file_path$LAYOUT.varHandle(sequenceElement());
 
     /**
      * Indexed getter for field:
@@ -345,8 +365,7 @@ public class H5FD_splitter_vfd_config_t {
      * char log_file_path[4097]
      * }
      */
-    public static byte log_file_path(MemorySegment struct, long index0)
-    {
+    public static byte log_file_path(MemorySegment struct, long index0) {
         return (byte)log_file_path$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -356,13 +375,11 @@ public class H5FD_splitter_vfd_config_t {
      * char log_file_path[4097]
      * }
      */
-    public static void log_file_path(MemorySegment struct, long index0, byte fieldValue)
-    {
+    public static void log_file_path(MemorySegment struct, long index0, byte fieldValue) {
         log_file_path$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
-    private static final OfBoolean ignore_wo_errs$LAYOUT =
-        (OfBoolean)$LAYOUT.select(groupElement("ignore_wo_errs"));
+    private static final OfBoolean ignore_wo_errs$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("ignore_wo_errs"));
 
     /**
      * Layout for field:
@@ -370,7 +387,9 @@ public class H5FD_splitter_vfd_config_t {
      * hbool_t ignore_wo_errs
      * }
      */
-    public static final OfBoolean ignore_wo_errs$layout() { return ignore_wo_errs$LAYOUT; }
+    public static final OfBoolean ignore_wo_errs$layout() {
+        return ignore_wo_errs$LAYOUT;
+    }
 
     private static final long ignore_wo_errs$OFFSET = 8218;
 
@@ -380,7 +399,9 @@ public class H5FD_splitter_vfd_config_t {
      * hbool_t ignore_wo_errs
      * }
      */
-    public static final long ignore_wo_errs$offset() { return ignore_wo_errs$OFFSET; }
+    public static final long ignore_wo_errs$offset() {
+        return ignore_wo_errs$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -388,8 +409,7 @@ public class H5FD_splitter_vfd_config_t {
      * hbool_t ignore_wo_errs
      * }
      */
-    public static boolean ignore_wo_errs(MemorySegment struct)
-    {
+    public static boolean ignore_wo_errs(MemorySegment struct) {
         return struct.get(ignore_wo_errs$LAYOUT, ignore_wo_errs$OFFSET);
     }
 
@@ -399,8 +419,7 @@ public class H5FD_splitter_vfd_config_t {
      * hbool_t ignore_wo_errs
      * }
      */
-    public static void ignore_wo_errs(MemorySegment struct, boolean fieldValue)
-    {
+    public static void ignore_wo_errs(MemorySegment struct, boolean fieldValue) {
         struct.set(ignore_wo_errs$LAYOUT, ignore_wo_errs$OFFSET, fieldValue);
     }
 
@@ -408,8 +427,7 @@ public class H5FD_splitter_vfd_config_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -421,14 +439,15 @@ public class H5FD_splitter_vfd_config_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -436,8 +455,7 @@ public class H5FD_splitter_vfd_config_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -445,9 +463,8 @@ public class H5FD_splitter_vfd_config_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

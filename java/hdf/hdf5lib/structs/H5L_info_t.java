@@ -59,4 +59,27 @@ public class H5L_info_t implements Serializable {
         this.token        = HDF5Constants.H5O_TOKEN_UNDEF;
         this.val_size     = val_size;
     }
+
+    /** Constructor for using val_size portion of C union */
+    public H5L_info_t(MemorySegment linfo_segment)
+    {
+        // Unpack the H5L_info2_t from the MemorySegment
+        MemorySegment u_segment = org.hdfgroup.javahdf5.H5L_info2_t.u(linfo_segment);
+        if (org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment) == HDF5Constants.H5L_TYPE_HARD) {
+            this.token        = new hdf.hdf5lib.structs.H5O_token_t(org.hdfgroup.javahdf5.H5L_info2_t.u.token(u_segment));
+            this.type         = org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment);
+            this.corder_valid = org.hdfgroup.javahdf5.H5L_info2_t.corder_valid(linfo_segment);
+            this.corder       = org.hdfgroup.javahdf5.H5L_info2_t.corder(linfo_segment);
+            this.cset         = org.hdfgroup.javahdf5.H5L_info2_t.cset(linfo_segment);
+            this.val_size     = -1;
+        }
+        else {
+            this.type         = org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment);
+            this.corder_valid = org.hdfgroup.javahdf5.H5L_info2_t.corder_valid(linfo_segment);
+            this.corder       = org.hdfgroup.javahdf5.H5L_info2_t.corder(linfo_segment);
+            this.cset         = org.hdfgroup.javahdf5.H5L_info2_t.cset(linfo_segment);
+            this.token        = HDF5Constants.H5O_TOKEN_UNDEF;
+            this.val_size     = org.hdfgroup.javahdf5.H5L_info2_t.u.val_size(u_segment);
+        }
+    }
 }

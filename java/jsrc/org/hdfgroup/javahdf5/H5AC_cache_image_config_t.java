@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,22 +24,24 @@ import java.util.stream.*;
  */
 public class H5AC_cache_image_config_t {
 
-    H5AC_cache_image_config_t()
-    {
+    H5AC_cache_image_config_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_INT.withName("version"), hdf5_h.C_BOOL.withName("generate_image"),
-                          hdf5_h.C_BOOL.withName("save_resize_status"), MemoryLayout.paddingLayout(2),
-                          hdf5_h.C_INT.withName("entry_ageout"))
-            .withName("H5AC_cache_image_config_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_INT.withName("version"),
+        hdf5_h.C_BOOL.withName("generate_image"),
+        hdf5_h.C_BOOL.withName("save_resize_status"),
+        MemoryLayout.paddingLayout(2),
+        hdf5_h.C_INT.withName("entry_ageout")
+    ).withName("H5AC_cache_image_config_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfInt version$LAYOUT = (OfInt)$LAYOUT.select(groupElement("version"));
 
@@ -49,7 +51,9 @@ public class H5AC_cache_image_config_t {
      * int version
      * }
      */
-    public static final OfInt version$layout() { return version$LAYOUT; }
+    public static final OfInt version$layout() {
+        return version$LAYOUT;
+    }
 
     private static final long version$OFFSET = 0;
 
@@ -59,7 +63,9 @@ public class H5AC_cache_image_config_t {
      * int version
      * }
      */
-    public static final long version$offset() { return version$OFFSET; }
+    public static final long version$offset() {
+        return version$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -67,7 +73,9 @@ public class H5AC_cache_image_config_t {
      * int version
      * }
      */
-    public static int version(MemorySegment struct) { return struct.get(version$LAYOUT, version$OFFSET); }
+    public static int version(MemorySegment struct) {
+        return struct.get(version$LAYOUT, version$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -75,13 +83,11 @@ public class H5AC_cache_image_config_t {
      * int version
      * }
      */
-    public static void version(MemorySegment struct, int fieldValue)
-    {
+    public static void version(MemorySegment struct, int fieldValue) {
         struct.set(version$LAYOUT, version$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean generate_image$LAYOUT =
-        (OfBoolean)$LAYOUT.select(groupElement("generate_image"));
+    private static final OfBoolean generate_image$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("generate_image"));
 
     /**
      * Layout for field:
@@ -89,7 +95,9 @@ public class H5AC_cache_image_config_t {
      * hbool_t generate_image
      * }
      */
-    public static final OfBoolean generate_image$layout() { return generate_image$LAYOUT; }
+    public static final OfBoolean generate_image$layout() {
+        return generate_image$LAYOUT;
+    }
 
     private static final long generate_image$OFFSET = 4;
 
@@ -99,7 +107,9 @@ public class H5AC_cache_image_config_t {
      * hbool_t generate_image
      * }
      */
-    public static final long generate_image$offset() { return generate_image$OFFSET; }
+    public static final long generate_image$offset() {
+        return generate_image$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -107,8 +117,7 @@ public class H5AC_cache_image_config_t {
      * hbool_t generate_image
      * }
      */
-    public static boolean generate_image(MemorySegment struct)
-    {
+    public static boolean generate_image(MemorySegment struct) {
         return struct.get(generate_image$LAYOUT, generate_image$OFFSET);
     }
 
@@ -118,13 +127,11 @@ public class H5AC_cache_image_config_t {
      * hbool_t generate_image
      * }
      */
-    public static void generate_image(MemorySegment struct, boolean fieldValue)
-    {
+    public static void generate_image(MemorySegment struct, boolean fieldValue) {
         struct.set(generate_image$LAYOUT, generate_image$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean save_resize_status$LAYOUT =
-        (OfBoolean)$LAYOUT.select(groupElement("save_resize_status"));
+    private static final OfBoolean save_resize_status$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("save_resize_status"));
 
     /**
      * Layout for field:
@@ -132,7 +139,9 @@ public class H5AC_cache_image_config_t {
      * hbool_t save_resize_status
      * }
      */
-    public static final OfBoolean save_resize_status$layout() { return save_resize_status$LAYOUT; }
+    public static final OfBoolean save_resize_status$layout() {
+        return save_resize_status$LAYOUT;
+    }
 
     private static final long save_resize_status$OFFSET = 5;
 
@@ -142,7 +151,9 @@ public class H5AC_cache_image_config_t {
      * hbool_t save_resize_status
      * }
      */
-    public static final long save_resize_status$offset() { return save_resize_status$OFFSET; }
+    public static final long save_resize_status$offset() {
+        return save_resize_status$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -150,8 +161,7 @@ public class H5AC_cache_image_config_t {
      * hbool_t save_resize_status
      * }
      */
-    public static boolean save_resize_status(MemorySegment struct)
-    {
+    public static boolean save_resize_status(MemorySegment struct) {
         return struct.get(save_resize_status$LAYOUT, save_resize_status$OFFSET);
     }
 
@@ -161,8 +171,7 @@ public class H5AC_cache_image_config_t {
      * hbool_t save_resize_status
      * }
      */
-    public static void save_resize_status(MemorySegment struct, boolean fieldValue)
-    {
+    public static void save_resize_status(MemorySegment struct, boolean fieldValue) {
         struct.set(save_resize_status$LAYOUT, save_resize_status$OFFSET, fieldValue);
     }
 
@@ -174,7 +183,9 @@ public class H5AC_cache_image_config_t {
      * int entry_ageout
      * }
      */
-    public static final OfInt entry_ageout$layout() { return entry_ageout$LAYOUT; }
+    public static final OfInt entry_ageout$layout() {
+        return entry_ageout$LAYOUT;
+    }
 
     private static final long entry_ageout$OFFSET = 8;
 
@@ -184,7 +195,9 @@ public class H5AC_cache_image_config_t {
      * int entry_ageout
      * }
      */
-    public static final long entry_ageout$offset() { return entry_ageout$OFFSET; }
+    public static final long entry_ageout$offset() {
+        return entry_ageout$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -192,8 +205,7 @@ public class H5AC_cache_image_config_t {
      * int entry_ageout
      * }
      */
-    public static int entry_ageout(MemorySegment struct)
-    {
+    public static int entry_ageout(MemorySegment struct) {
         return struct.get(entry_ageout$LAYOUT, entry_ageout$OFFSET);
     }
 
@@ -203,8 +215,7 @@ public class H5AC_cache_image_config_t {
      * int entry_ageout
      * }
      */
-    public static void entry_ageout(MemorySegment struct, int fieldValue)
-    {
+    public static void entry_ageout(MemorySegment struct, int fieldValue) {
         struct.set(entry_ageout$LAYOUT, entry_ageout$OFFSET, fieldValue);
     }
 
@@ -212,8 +223,7 @@ public class H5AC_cache_image_config_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -225,14 +235,15 @@ public class H5AC_cache_image_config_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -240,8 +251,7 @@ public class H5AC_cache_image_config_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -249,9 +259,8 @@ public class H5AC_cache_image_config_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

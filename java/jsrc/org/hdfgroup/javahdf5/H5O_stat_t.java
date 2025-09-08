@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,21 +24,23 @@ import java.util.stream.*;
  */
 public class H5O_stat_t {
 
-    H5O_stat_t()
-    {
+    H5O_stat_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_LONG.withName("size"), hdf5_h.C_LONG.withName("free"),
-                          hdf5_h.C_INT.withName("nmesgs"), hdf5_h.C_INT.withName("nchunks"))
-            .withName("H5O_stat_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_LONG.withName("size"),
+        hdf5_h.C_LONG.withName("free"),
+        hdf5_h.C_INT.withName("nmesgs"),
+        hdf5_h.C_INT.withName("nchunks")
+    ).withName("H5O_stat_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfLong size$LAYOUT = (OfLong)$LAYOUT.select(groupElement("size"));
 
@@ -48,7 +50,9 @@ public class H5O_stat_t {
      * hsize_t size
      * }
      */
-    public static final OfLong size$layout() { return size$LAYOUT; }
+    public static final OfLong size$layout() {
+        return size$LAYOUT;
+    }
 
     private static final long size$OFFSET = 0;
 
@@ -58,7 +62,9 @@ public class H5O_stat_t {
      * hsize_t size
      * }
      */
-    public static final long size$offset() { return size$OFFSET; }
+    public static final long size$offset() {
+        return size$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -66,7 +72,9 @@ public class H5O_stat_t {
      * hsize_t size
      * }
      */
-    public static long size(MemorySegment struct) { return struct.get(size$LAYOUT, size$OFFSET); }
+    public static long size(MemorySegment struct) {
+        return struct.get(size$LAYOUT, size$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -74,8 +82,7 @@ public class H5O_stat_t {
      * hsize_t size
      * }
      */
-    public static void size(MemorySegment struct, long fieldValue)
-    {
+    public static void size(MemorySegment struct, long fieldValue) {
         struct.set(size$LAYOUT, size$OFFSET, fieldValue);
     }
 
@@ -87,7 +94,9 @@ public class H5O_stat_t {
      * hsize_t free
      * }
      */
-    public static final OfLong free$layout() { return free$LAYOUT; }
+    public static final OfLong free$layout() {
+        return free$LAYOUT;
+    }
 
     private static final long free$OFFSET = 8;
 
@@ -97,7 +106,9 @@ public class H5O_stat_t {
      * hsize_t free
      * }
      */
-    public static final long free$offset() { return free$OFFSET; }
+    public static final long free$offset() {
+        return free$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -105,7 +116,9 @@ public class H5O_stat_t {
      * hsize_t free
      * }
      */
-    public static long free(MemorySegment struct) { return struct.get(free$LAYOUT, free$OFFSET); }
+    public static long free(MemorySegment struct) {
+        return struct.get(free$LAYOUT, free$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -113,8 +126,7 @@ public class H5O_stat_t {
      * hsize_t free
      * }
      */
-    public static void free(MemorySegment struct, long fieldValue)
-    {
+    public static void free(MemorySegment struct, long fieldValue) {
         struct.set(free$LAYOUT, free$OFFSET, fieldValue);
     }
 
@@ -126,7 +138,9 @@ public class H5O_stat_t {
      * unsigned int nmesgs
      * }
      */
-    public static final OfInt nmesgs$layout() { return nmesgs$LAYOUT; }
+    public static final OfInt nmesgs$layout() {
+        return nmesgs$LAYOUT;
+    }
 
     private static final long nmesgs$OFFSET = 16;
 
@@ -136,7 +150,9 @@ public class H5O_stat_t {
      * unsigned int nmesgs
      * }
      */
-    public static final long nmesgs$offset() { return nmesgs$OFFSET; }
+    public static final long nmesgs$offset() {
+        return nmesgs$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -144,7 +160,9 @@ public class H5O_stat_t {
      * unsigned int nmesgs
      * }
      */
-    public static int nmesgs(MemorySegment struct) { return struct.get(nmesgs$LAYOUT, nmesgs$OFFSET); }
+    public static int nmesgs(MemorySegment struct) {
+        return struct.get(nmesgs$LAYOUT, nmesgs$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -152,8 +170,7 @@ public class H5O_stat_t {
      * unsigned int nmesgs
      * }
      */
-    public static void nmesgs(MemorySegment struct, int fieldValue)
-    {
+    public static void nmesgs(MemorySegment struct, int fieldValue) {
         struct.set(nmesgs$LAYOUT, nmesgs$OFFSET, fieldValue);
     }
 
@@ -165,7 +182,9 @@ public class H5O_stat_t {
      * unsigned int nchunks
      * }
      */
-    public static final OfInt nchunks$layout() { return nchunks$LAYOUT; }
+    public static final OfInt nchunks$layout() {
+        return nchunks$LAYOUT;
+    }
 
     private static final long nchunks$OFFSET = 20;
 
@@ -175,7 +194,9 @@ public class H5O_stat_t {
      * unsigned int nchunks
      * }
      */
-    public static final long nchunks$offset() { return nchunks$OFFSET; }
+    public static final long nchunks$offset() {
+        return nchunks$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -183,7 +204,9 @@ public class H5O_stat_t {
      * unsigned int nchunks
      * }
      */
-    public static int nchunks(MemorySegment struct) { return struct.get(nchunks$LAYOUT, nchunks$OFFSET); }
+    public static int nchunks(MemorySegment struct) {
+        return struct.get(nchunks$LAYOUT, nchunks$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -191,8 +214,7 @@ public class H5O_stat_t {
      * unsigned int nchunks
      * }
      */
-    public static void nchunks(MemorySegment struct, int fieldValue)
-    {
+    public static void nchunks(MemorySegment struct, int fieldValue) {
         struct.set(nchunks$LAYOUT, nchunks$OFFSET, fieldValue);
     }
 
@@ -200,8 +222,7 @@ public class H5O_stat_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -213,14 +234,15 @@ public class H5O_stat_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -228,8 +250,7 @@ public class H5O_stat_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -237,9 +258,8 @@ public class H5O_stat_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

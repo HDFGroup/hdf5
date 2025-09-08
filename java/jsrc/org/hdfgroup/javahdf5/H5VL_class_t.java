@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -41,37 +41,41 @@ import java.util.stream.*;
  */
 public class H5VL_class_t {
 
-    H5VL_class_t()
-    {
+    H5VL_class_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_INT.withName("version"), hdf5_h.C_INT.withName("value"),
-                          hdf5_h.C_POINTER.withName("name"), hdf5_h.C_INT.withName("conn_version"),
-                          MemoryLayout.paddingLayout(4), hdf5_h.C_LONG.withName("cap_flags"),
-                          hdf5_h.C_POINTER.withName("initialize"), hdf5_h.C_POINTER.withName("terminate"),
-                          H5VL_info_class_t.layout().withName("info_cls"),
-                          H5VL_wrap_class_t.layout().withName("wrap_cls"),
-                          H5VL_attr_class_t.layout().withName("attr_cls"),
-                          H5VL_dataset_class_t.layout().withName("dataset_cls"),
-                          H5VL_datatype_class_t.layout().withName("datatype_cls"),
-                          H5VL_file_class_t.layout().withName("file_cls"),
-                          H5VL_group_class_t.layout().withName("group_cls"),
-                          H5VL_link_class_t.layout().withName("link_cls"),
-                          H5VL_object_class_t.layout().withName("object_cls"),
-                          H5VL_introspect_class_t.layout().withName("introspect_cls"),
-                          H5VL_request_class_t.layout().withName("request_cls"),
-                          H5VL_blob_class_t.layout().withName("blob_cls"),
-                          H5VL_token_class_t.layout().withName("token_cls"),
-                          hdf5_h.C_POINTER.withName("optional"))
-            .withName("H5VL_class_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_INT.withName("version"),
+        hdf5_h.C_INT.withName("value"),
+        hdf5_h.C_POINTER.withName("name"),
+        hdf5_h.C_INT.withName("conn_version"),
+        MemoryLayout.paddingLayout(4),
+        hdf5_h.C_LONG.withName("cap_flags"),
+        hdf5_h.C_POINTER.withName("initialize"),
+        hdf5_h.C_POINTER.withName("terminate"),
+        H5VL_info_class_t.layout().withName("info_cls"),
+        H5VL_wrap_class_t.layout().withName("wrap_cls"),
+        H5VL_attr_class_t.layout().withName("attr_cls"),
+        H5VL_dataset_class_t.layout().withName("dataset_cls"),
+        H5VL_datatype_class_t.layout().withName("datatype_cls"),
+        H5VL_file_class_t.layout().withName("file_cls"),
+        H5VL_group_class_t.layout().withName("group_cls"),
+        H5VL_link_class_t.layout().withName("link_cls"),
+        H5VL_object_class_t.layout().withName("object_cls"),
+        H5VL_introspect_class_t.layout().withName("introspect_cls"),
+        H5VL_request_class_t.layout().withName("request_cls"),
+        H5VL_blob_class_t.layout().withName("blob_cls"),
+        H5VL_token_class_t.layout().withName("token_cls"),
+        hdf5_h.C_POINTER.withName("optional")
+    ).withName("H5VL_class_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfInt version$LAYOUT = (OfInt)$LAYOUT.select(groupElement("version"));
 
@@ -81,7 +85,9 @@ public class H5VL_class_t {
      * unsigned int version
      * }
      */
-    public static final OfInt version$layout() { return version$LAYOUT; }
+    public static final OfInt version$layout() {
+        return version$LAYOUT;
+    }
 
     private static final long version$OFFSET = 0;
 
@@ -91,7 +97,9 @@ public class H5VL_class_t {
      * unsigned int version
      * }
      */
-    public static final long version$offset() { return version$OFFSET; }
+    public static final long version$offset() {
+        return version$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -99,7 +107,9 @@ public class H5VL_class_t {
      * unsigned int version
      * }
      */
-    public static int version(MemorySegment struct) { return struct.get(version$LAYOUT, version$OFFSET); }
+    public static int version(MemorySegment struct) {
+        return struct.get(version$LAYOUT, version$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -107,8 +117,7 @@ public class H5VL_class_t {
      * unsigned int version
      * }
      */
-    public static void version(MemorySegment struct, int fieldValue)
-    {
+    public static void version(MemorySegment struct, int fieldValue) {
         struct.set(version$LAYOUT, version$OFFSET, fieldValue);
     }
 
@@ -120,7 +129,9 @@ public class H5VL_class_t {
      * H5VL_class_value_t value
      * }
      */
-    public static final OfInt value$layout() { return value$LAYOUT; }
+    public static final OfInt value$layout() {
+        return value$LAYOUT;
+    }
 
     private static final long value$OFFSET = 4;
 
@@ -130,7 +141,9 @@ public class H5VL_class_t {
      * H5VL_class_value_t value
      * }
      */
-    public static final long value$offset() { return value$OFFSET; }
+    public static final long value$offset() {
+        return value$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -138,7 +151,9 @@ public class H5VL_class_t {
      * H5VL_class_value_t value
      * }
      */
-    public static int value(MemorySegment struct) { return struct.get(value$LAYOUT, value$OFFSET); }
+    public static int value(MemorySegment struct) {
+        return struct.get(value$LAYOUT, value$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -146,8 +161,7 @@ public class H5VL_class_t {
      * H5VL_class_value_t value
      * }
      */
-    public static void value(MemorySegment struct, int fieldValue)
-    {
+    public static void value(MemorySegment struct, int fieldValue) {
         struct.set(value$LAYOUT, value$OFFSET, fieldValue);
     }
 
@@ -159,7 +173,9 @@ public class H5VL_class_t {
      * const char *name
      * }
      */
-    public static final AddressLayout name$layout() { return name$LAYOUT; }
+    public static final AddressLayout name$layout() {
+        return name$LAYOUT;
+    }
 
     private static final long name$OFFSET = 8;
 
@@ -169,7 +185,9 @@ public class H5VL_class_t {
      * const char *name
      * }
      */
-    public static final long name$offset() { return name$OFFSET; }
+    public static final long name$offset() {
+        return name$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -177,7 +195,9 @@ public class H5VL_class_t {
      * const char *name
      * }
      */
-    public static MemorySegment name(MemorySegment struct) { return struct.get(name$LAYOUT, name$OFFSET); }
+    public static MemorySegment name(MemorySegment struct) {
+        return struct.get(name$LAYOUT, name$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -185,8 +205,7 @@ public class H5VL_class_t {
      * const char *name
      * }
      */
-    public static void name(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void name(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(name$LAYOUT, name$OFFSET, fieldValue);
     }
 
@@ -198,7 +217,9 @@ public class H5VL_class_t {
      * unsigned int conn_version
      * }
      */
-    public static final OfInt conn_version$layout() { return conn_version$LAYOUT; }
+    public static final OfInt conn_version$layout() {
+        return conn_version$LAYOUT;
+    }
 
     private static final long conn_version$OFFSET = 16;
 
@@ -208,7 +229,9 @@ public class H5VL_class_t {
      * unsigned int conn_version
      * }
      */
-    public static final long conn_version$offset() { return conn_version$OFFSET; }
+    public static final long conn_version$offset() {
+        return conn_version$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -216,8 +239,7 @@ public class H5VL_class_t {
      * unsigned int conn_version
      * }
      */
-    public static int conn_version(MemorySegment struct)
-    {
+    public static int conn_version(MemorySegment struct) {
         return struct.get(conn_version$LAYOUT, conn_version$OFFSET);
     }
 
@@ -227,8 +249,7 @@ public class H5VL_class_t {
      * unsigned int conn_version
      * }
      */
-    public static void conn_version(MemorySegment struct, int fieldValue)
-    {
+    public static void conn_version(MemorySegment struct, int fieldValue) {
         struct.set(conn_version$LAYOUT, conn_version$OFFSET, fieldValue);
     }
 
@@ -240,7 +261,9 @@ public class H5VL_class_t {
      * uint64_t cap_flags
      * }
      */
-    public static final OfLong cap_flags$layout() { return cap_flags$LAYOUT; }
+    public static final OfLong cap_flags$layout() {
+        return cap_flags$LAYOUT;
+    }
 
     private static final long cap_flags$OFFSET = 24;
 
@@ -250,7 +273,9 @@ public class H5VL_class_t {
      * uint64_t cap_flags
      * }
      */
-    public static final long cap_flags$offset() { return cap_flags$OFFSET; }
+    public static final long cap_flags$offset() {
+        return cap_flags$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -258,8 +283,7 @@ public class H5VL_class_t {
      * uint64_t cap_flags
      * }
      */
-    public static long cap_flags(MemorySegment struct)
-    {
+    public static long cap_flags(MemorySegment struct) {
         return struct.get(cap_flags$LAYOUT, cap_flags$OFFSET);
     }
 
@@ -269,8 +293,7 @@ public class H5VL_class_t {
      * uint64_t cap_flags
      * }
      */
-    public static void cap_flags(MemorySegment struct, long fieldValue)
-    {
+    public static void cap_flags(MemorySegment struct, long fieldValue) {
         struct.set(cap_flags$LAYOUT, cap_flags$OFFSET, fieldValue);
     }
 
@@ -281,8 +304,7 @@ public class H5VL_class_t {
      */
     public static class initialize {
 
-        initialize()
-        {
+        initialize() {
             // Should not be called directly
         }
 
@@ -293,22 +315,25 @@ public class H5VL_class_t {
             int apply(long _x0);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG);
+        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
+            hdf5_h.C_INT,
+            hdf5_h.C_LONG
+        );
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() { return $DESC; }
+        public static FunctionDescriptor descriptor() {
+            return $DESC;
+        }
 
-        private static final MethodHandle UP$MH =
-            hdf5_h.upcallHandle(initialize.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(initialize.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(initialize.Function fi, Arena arena)
-        {
+        public static MemorySegment allocate(initialize.Function fi, Arena arena) {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -317,19 +342,16 @@ public class H5VL_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr, long _x0)
-        {
+        public static int invoke(MemorySegment funcPtr,long _x0) {
             try {
-                return (int)DOWN$MH.invokeExact(funcPtr, _x0);
-            }
-            catch (Throwable ex$) {
+                return (int) DOWN$MH.invokeExact(funcPtr, _x0);
+            } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout initialize$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("initialize"));
+    private static final AddressLayout initialize$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("initialize"));
 
     /**
      * Layout for field:
@@ -337,7 +359,9 @@ public class H5VL_class_t {
      * herr_t (*initialize)(hid_t)
      * }
      */
-    public static final AddressLayout initialize$layout() { return initialize$LAYOUT; }
+    public static final AddressLayout initialize$layout() {
+        return initialize$LAYOUT;
+    }
 
     private static final long initialize$OFFSET = 32;
 
@@ -347,7 +371,9 @@ public class H5VL_class_t {
      * herr_t (*initialize)(hid_t)
      * }
      */
-    public static final long initialize$offset() { return initialize$OFFSET; }
+    public static final long initialize$offset() {
+        return initialize$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -355,8 +381,7 @@ public class H5VL_class_t {
      * herr_t (*initialize)(hid_t)
      * }
      */
-    public static MemorySegment initialize(MemorySegment struct)
-    {
+    public static MemorySegment initialize(MemorySegment struct) {
         return struct.get(initialize$LAYOUT, initialize$OFFSET);
     }
 
@@ -366,8 +391,7 @@ public class H5VL_class_t {
      * herr_t (*initialize)(hid_t)
      * }
      */
-    public static void initialize(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void initialize(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(initialize$LAYOUT, initialize$OFFSET, fieldValue);
     }
 
@@ -378,8 +402,7 @@ public class H5VL_class_t {
      */
     public static class terminate {
 
-        terminate()
-        {
+        terminate() {
             // Should not be called directly
         }
 
@@ -390,22 +413,23 @@ public class H5VL_class_t {
             int apply();
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(hdf5_h.C_INT);
+        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
+            hdf5_h.C_INT);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() { return $DESC; }
+        public static FunctionDescriptor descriptor() {
+            return $DESC;
+        }
 
-        private static final MethodHandle UP$MH =
-            hdf5_h.upcallHandle(terminate.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(terminate.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(terminate.Function fi, Arena arena)
-        {
+        public static MemorySegment allocate(terminate.Function fi, Arena arena) {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -414,19 +438,16 @@ public class H5VL_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr)
-        {
+        public static int invoke(MemorySegment funcPtr) {
             try {
-                return (int)DOWN$MH.invokeExact(funcPtr);
-            }
-            catch (Throwable ex$) {
+                return (int) DOWN$MH.invokeExact(funcPtr);
+            } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout terminate$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("terminate"));
+    private static final AddressLayout terminate$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("terminate"));
 
     /**
      * Layout for field:
@@ -434,7 +455,9 @@ public class H5VL_class_t {
      * herr_t (*terminate)(void)
      * }
      */
-    public static final AddressLayout terminate$layout() { return terminate$LAYOUT; }
+    public static final AddressLayout terminate$layout() {
+        return terminate$LAYOUT;
+    }
 
     private static final long terminate$OFFSET = 40;
 
@@ -444,7 +467,9 @@ public class H5VL_class_t {
      * herr_t (*terminate)(void)
      * }
      */
-    public static final long terminate$offset() { return terminate$OFFSET; }
+    public static final long terminate$offset() {
+        return terminate$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -452,8 +477,7 @@ public class H5VL_class_t {
      * herr_t (*terminate)(void)
      * }
      */
-    public static MemorySegment terminate(MemorySegment struct)
-    {
+    public static MemorySegment terminate(MemorySegment struct) {
         return struct.get(terminate$LAYOUT, terminate$OFFSET);
     }
 
@@ -463,8 +487,7 @@ public class H5VL_class_t {
      * herr_t (*terminate)(void)
      * }
      */
-    public static void terminate(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void terminate(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(terminate$LAYOUT, terminate$OFFSET, fieldValue);
     }
 
@@ -476,7 +499,9 @@ public class H5VL_class_t {
      * H5VL_info_class_t info_cls
      * }
      */
-    public static final GroupLayout info_cls$layout() { return info_cls$LAYOUT; }
+    public static final GroupLayout info_cls$layout() {
+        return info_cls$LAYOUT;
+    }
 
     private static final long info_cls$OFFSET = 48;
 
@@ -486,7 +511,9 @@ public class H5VL_class_t {
      * H5VL_info_class_t info_cls
      * }
      */
-    public static final long info_cls$offset() { return info_cls$OFFSET; }
+    public static final long info_cls$offset() {
+        return info_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -494,8 +521,7 @@ public class H5VL_class_t {
      * H5VL_info_class_t info_cls
      * }
      */
-    public static MemorySegment info_cls(MemorySegment struct)
-    {
+    public static MemorySegment info_cls(MemorySegment struct) {
         return struct.asSlice(info_cls$OFFSET, info_cls$LAYOUT.byteSize());
     }
 
@@ -505,8 +531,7 @@ public class H5VL_class_t {
      * H5VL_info_class_t info_cls
      * }
      */
-    public static void info_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void info_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, info_cls$OFFSET, info_cls$LAYOUT.byteSize());
     }
 
@@ -518,7 +543,9 @@ public class H5VL_class_t {
      * H5VL_wrap_class_t wrap_cls
      * }
      */
-    public static final GroupLayout wrap_cls$layout() { return wrap_cls$LAYOUT; }
+    public static final GroupLayout wrap_cls$layout() {
+        return wrap_cls$LAYOUT;
+    }
 
     private static final long wrap_cls$OFFSET = 96;
 
@@ -528,7 +555,9 @@ public class H5VL_class_t {
      * H5VL_wrap_class_t wrap_cls
      * }
      */
-    public static final long wrap_cls$offset() { return wrap_cls$OFFSET; }
+    public static final long wrap_cls$offset() {
+        return wrap_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -536,8 +565,7 @@ public class H5VL_class_t {
      * H5VL_wrap_class_t wrap_cls
      * }
      */
-    public static MemorySegment wrap_cls(MemorySegment struct)
-    {
+    public static MemorySegment wrap_cls(MemorySegment struct) {
         return struct.asSlice(wrap_cls$OFFSET, wrap_cls$LAYOUT.byteSize());
     }
 
@@ -547,8 +575,7 @@ public class H5VL_class_t {
      * H5VL_wrap_class_t wrap_cls
      * }
      */
-    public static void wrap_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void wrap_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, wrap_cls$OFFSET, wrap_cls$LAYOUT.byteSize());
     }
 
@@ -560,7 +587,9 @@ public class H5VL_class_t {
      * H5VL_attr_class_t attr_cls
      * }
      */
-    public static final GroupLayout attr_cls$layout() { return attr_cls$LAYOUT; }
+    public static final GroupLayout attr_cls$layout() {
+        return attr_cls$LAYOUT;
+    }
 
     private static final long attr_cls$OFFSET = 136;
 
@@ -570,7 +599,9 @@ public class H5VL_class_t {
      * H5VL_attr_class_t attr_cls
      * }
      */
-    public static final long attr_cls$offset() { return attr_cls$OFFSET; }
+    public static final long attr_cls$offset() {
+        return attr_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -578,8 +609,7 @@ public class H5VL_class_t {
      * H5VL_attr_class_t attr_cls
      * }
      */
-    public static MemorySegment attr_cls(MemorySegment struct)
-    {
+    public static MemorySegment attr_cls(MemorySegment struct) {
         return struct.asSlice(attr_cls$OFFSET, attr_cls$LAYOUT.byteSize());
     }
 
@@ -589,13 +619,11 @@ public class H5VL_class_t {
      * H5VL_attr_class_t attr_cls
      * }
      */
-    public static void attr_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void attr_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, attr_cls$OFFSET, attr_cls$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout dataset_cls$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("dataset_cls"));
+    private static final GroupLayout dataset_cls$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("dataset_cls"));
 
     /**
      * Layout for field:
@@ -603,7 +631,9 @@ public class H5VL_class_t {
      * H5VL_dataset_class_t dataset_cls
      * }
      */
-    public static final GroupLayout dataset_cls$layout() { return dataset_cls$LAYOUT; }
+    public static final GroupLayout dataset_cls$layout() {
+        return dataset_cls$LAYOUT;
+    }
 
     private static final long dataset_cls$OFFSET = 200;
 
@@ -613,7 +643,9 @@ public class H5VL_class_t {
      * H5VL_dataset_class_t dataset_cls
      * }
      */
-    public static final long dataset_cls$offset() { return dataset_cls$OFFSET; }
+    public static final long dataset_cls$offset() {
+        return dataset_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -621,8 +653,7 @@ public class H5VL_class_t {
      * H5VL_dataset_class_t dataset_cls
      * }
      */
-    public static MemorySegment dataset_cls(MemorySegment struct)
-    {
+    public static MemorySegment dataset_cls(MemorySegment struct) {
         return struct.asSlice(dataset_cls$OFFSET, dataset_cls$LAYOUT.byteSize());
     }
 
@@ -632,13 +663,11 @@ public class H5VL_class_t {
      * H5VL_dataset_class_t dataset_cls
      * }
      */
-    public static void dataset_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void dataset_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, dataset_cls$OFFSET, dataset_cls$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout datatype_cls$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("datatype_cls"));
+    private static final GroupLayout datatype_cls$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("datatype_cls"));
 
     /**
      * Layout for field:
@@ -646,7 +675,9 @@ public class H5VL_class_t {
      * H5VL_datatype_class_t datatype_cls
      * }
      */
-    public static final GroupLayout datatype_cls$layout() { return datatype_cls$LAYOUT; }
+    public static final GroupLayout datatype_cls$layout() {
+        return datatype_cls$LAYOUT;
+    }
 
     private static final long datatype_cls$OFFSET = 264;
 
@@ -656,7 +687,9 @@ public class H5VL_class_t {
      * H5VL_datatype_class_t datatype_cls
      * }
      */
-    public static final long datatype_cls$offset() { return datatype_cls$OFFSET; }
+    public static final long datatype_cls$offset() {
+        return datatype_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -664,8 +697,7 @@ public class H5VL_class_t {
      * H5VL_datatype_class_t datatype_cls
      * }
      */
-    public static MemorySegment datatype_cls(MemorySegment struct)
-    {
+    public static MemorySegment datatype_cls(MemorySegment struct) {
         return struct.asSlice(datatype_cls$OFFSET, datatype_cls$LAYOUT.byteSize());
     }
 
@@ -675,8 +707,7 @@ public class H5VL_class_t {
      * H5VL_datatype_class_t datatype_cls
      * }
      */
-    public static void datatype_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void datatype_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, datatype_cls$OFFSET, datatype_cls$LAYOUT.byteSize());
     }
 
@@ -688,7 +719,9 @@ public class H5VL_class_t {
      * H5VL_file_class_t file_cls
      * }
      */
-    public static final GroupLayout file_cls$layout() { return file_cls$LAYOUT; }
+    public static final GroupLayout file_cls$layout() {
+        return file_cls$LAYOUT;
+    }
 
     private static final long file_cls$OFFSET = 312;
 
@@ -698,7 +731,9 @@ public class H5VL_class_t {
      * H5VL_file_class_t file_cls
      * }
      */
-    public static final long file_cls$offset() { return file_cls$OFFSET; }
+    public static final long file_cls$offset() {
+        return file_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -706,8 +741,7 @@ public class H5VL_class_t {
      * H5VL_file_class_t file_cls
      * }
      */
-    public static MemorySegment file_cls(MemorySegment struct)
-    {
+    public static MemorySegment file_cls(MemorySegment struct) {
         return struct.asSlice(file_cls$OFFSET, file_cls$LAYOUT.byteSize());
     }
 
@@ -717,13 +751,11 @@ public class H5VL_class_t {
      * H5VL_file_class_t file_cls
      * }
      */
-    public static void file_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void file_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, file_cls$OFFSET, file_cls$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout group_cls$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("group_cls"));
+    private static final GroupLayout group_cls$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("group_cls"));
 
     /**
      * Layout for field:
@@ -731,7 +763,9 @@ public class H5VL_class_t {
      * H5VL_group_class_t group_cls
      * }
      */
-    public static final GroupLayout group_cls$layout() { return group_cls$LAYOUT; }
+    public static final GroupLayout group_cls$layout() {
+        return group_cls$LAYOUT;
+    }
 
     private static final long group_cls$OFFSET = 360;
 
@@ -741,7 +775,9 @@ public class H5VL_class_t {
      * H5VL_group_class_t group_cls
      * }
      */
-    public static final long group_cls$offset() { return group_cls$OFFSET; }
+    public static final long group_cls$offset() {
+        return group_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -749,8 +785,7 @@ public class H5VL_class_t {
      * H5VL_group_class_t group_cls
      * }
      */
-    public static MemorySegment group_cls(MemorySegment struct)
-    {
+    public static MemorySegment group_cls(MemorySegment struct) {
         return struct.asSlice(group_cls$OFFSET, group_cls$LAYOUT.byteSize());
     }
 
@@ -760,8 +795,7 @@ public class H5VL_class_t {
      * H5VL_group_class_t group_cls
      * }
      */
-    public static void group_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void group_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, group_cls$OFFSET, group_cls$LAYOUT.byteSize());
     }
 
@@ -773,7 +807,9 @@ public class H5VL_class_t {
      * H5VL_link_class_t link_cls
      * }
      */
-    public static final GroupLayout link_cls$layout() { return link_cls$LAYOUT; }
+    public static final GroupLayout link_cls$layout() {
+        return link_cls$LAYOUT;
+    }
 
     private static final long link_cls$OFFSET = 408;
 
@@ -783,7 +819,9 @@ public class H5VL_class_t {
      * H5VL_link_class_t link_cls
      * }
      */
-    public static final long link_cls$offset() { return link_cls$OFFSET; }
+    public static final long link_cls$offset() {
+        return link_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -791,8 +829,7 @@ public class H5VL_class_t {
      * H5VL_link_class_t link_cls
      * }
      */
-    public static MemorySegment link_cls(MemorySegment struct)
-    {
+    public static MemorySegment link_cls(MemorySegment struct) {
         return struct.asSlice(link_cls$OFFSET, link_cls$LAYOUT.byteSize());
     }
 
@@ -802,13 +839,11 @@ public class H5VL_class_t {
      * H5VL_link_class_t link_cls
      * }
      */
-    public static void link_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void link_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, link_cls$OFFSET, link_cls$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout object_cls$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("object_cls"));
+    private static final GroupLayout object_cls$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("object_cls"));
 
     /**
      * Layout for field:
@@ -816,7 +851,9 @@ public class H5VL_class_t {
      * H5VL_object_class_t object_cls
      * }
      */
-    public static final GroupLayout object_cls$layout() { return object_cls$LAYOUT; }
+    public static final GroupLayout object_cls$layout() {
+        return object_cls$LAYOUT;
+    }
 
     private static final long object_cls$OFFSET = 456;
 
@@ -826,7 +863,9 @@ public class H5VL_class_t {
      * H5VL_object_class_t object_cls
      * }
      */
-    public static final long object_cls$offset() { return object_cls$OFFSET; }
+    public static final long object_cls$offset() {
+        return object_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -834,8 +873,7 @@ public class H5VL_class_t {
      * H5VL_object_class_t object_cls
      * }
      */
-    public static MemorySegment object_cls(MemorySegment struct)
-    {
+    public static MemorySegment object_cls(MemorySegment struct) {
         return struct.asSlice(object_cls$OFFSET, object_cls$LAYOUT.byteSize());
     }
 
@@ -845,13 +883,11 @@ public class H5VL_class_t {
      * H5VL_object_class_t object_cls
      * }
      */
-    public static void object_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void object_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, object_cls$OFFSET, object_cls$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout introspect_cls$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("introspect_cls"));
+    private static final GroupLayout introspect_cls$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("introspect_cls"));
 
     /**
      * Layout for field:
@@ -859,7 +895,9 @@ public class H5VL_class_t {
      * H5VL_introspect_class_t introspect_cls
      * }
      */
-    public static final GroupLayout introspect_cls$layout() { return introspect_cls$LAYOUT; }
+    public static final GroupLayout introspect_cls$layout() {
+        return introspect_cls$LAYOUT;
+    }
 
     private static final long introspect_cls$OFFSET = 496;
 
@@ -869,7 +907,9 @@ public class H5VL_class_t {
      * H5VL_introspect_class_t introspect_cls
      * }
      */
-    public static final long introspect_cls$offset() { return introspect_cls$OFFSET; }
+    public static final long introspect_cls$offset() {
+        return introspect_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -877,8 +917,7 @@ public class H5VL_class_t {
      * H5VL_introspect_class_t introspect_cls
      * }
      */
-    public static MemorySegment introspect_cls(MemorySegment struct)
-    {
+    public static MemorySegment introspect_cls(MemorySegment struct) {
         return struct.asSlice(introspect_cls$OFFSET, introspect_cls$LAYOUT.byteSize());
     }
 
@@ -888,13 +927,11 @@ public class H5VL_class_t {
      * H5VL_introspect_class_t introspect_cls
      * }
      */
-    public static void introspect_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void introspect_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, introspect_cls$OFFSET, introspect_cls$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout request_cls$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("request_cls"));
+    private static final GroupLayout request_cls$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("request_cls"));
 
     /**
      * Layout for field:
@@ -902,7 +939,9 @@ public class H5VL_class_t {
      * H5VL_request_class_t request_cls
      * }
      */
-    public static final GroupLayout request_cls$layout() { return request_cls$LAYOUT; }
+    public static final GroupLayout request_cls$layout() {
+        return request_cls$LAYOUT;
+    }
 
     private static final long request_cls$OFFSET = 520;
 
@@ -912,7 +951,9 @@ public class H5VL_class_t {
      * H5VL_request_class_t request_cls
      * }
      */
-    public static final long request_cls$offset() { return request_cls$OFFSET; }
+    public static final long request_cls$offset() {
+        return request_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -920,8 +961,7 @@ public class H5VL_class_t {
      * H5VL_request_class_t request_cls
      * }
      */
-    public static MemorySegment request_cls(MemorySegment struct)
-    {
+    public static MemorySegment request_cls(MemorySegment struct) {
         return struct.asSlice(request_cls$OFFSET, request_cls$LAYOUT.byteSize());
     }
 
@@ -931,8 +971,7 @@ public class H5VL_class_t {
      * H5VL_request_class_t request_cls
      * }
      */
-    public static void request_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void request_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, request_cls$OFFSET, request_cls$LAYOUT.byteSize());
     }
 
@@ -944,7 +983,9 @@ public class H5VL_class_t {
      * H5VL_blob_class_t blob_cls
      * }
      */
-    public static final GroupLayout blob_cls$layout() { return blob_cls$LAYOUT; }
+    public static final GroupLayout blob_cls$layout() {
+        return blob_cls$LAYOUT;
+    }
 
     private static final long blob_cls$OFFSET = 568;
 
@@ -954,7 +995,9 @@ public class H5VL_class_t {
      * H5VL_blob_class_t blob_cls
      * }
      */
-    public static final long blob_cls$offset() { return blob_cls$OFFSET; }
+    public static final long blob_cls$offset() {
+        return blob_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -962,8 +1005,7 @@ public class H5VL_class_t {
      * H5VL_blob_class_t blob_cls
      * }
      */
-    public static MemorySegment blob_cls(MemorySegment struct)
-    {
+    public static MemorySegment blob_cls(MemorySegment struct) {
         return struct.asSlice(blob_cls$OFFSET, blob_cls$LAYOUT.byteSize());
     }
 
@@ -973,13 +1015,11 @@ public class H5VL_class_t {
      * H5VL_blob_class_t blob_cls
      * }
      */
-    public static void blob_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void blob_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, blob_cls$OFFSET, blob_cls$LAYOUT.byteSize());
     }
 
-    private static final GroupLayout token_cls$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("token_cls"));
+    private static final GroupLayout token_cls$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("token_cls"));
 
     /**
      * Layout for field:
@@ -987,7 +1027,9 @@ public class H5VL_class_t {
      * H5VL_token_class_t token_cls
      * }
      */
-    public static final GroupLayout token_cls$layout() { return token_cls$LAYOUT; }
+    public static final GroupLayout token_cls$layout() {
+        return token_cls$LAYOUT;
+    }
 
     private static final long token_cls$OFFSET = 600;
 
@@ -997,7 +1039,9 @@ public class H5VL_class_t {
      * H5VL_token_class_t token_cls
      * }
      */
-    public static final long token_cls$offset() { return token_cls$OFFSET; }
+    public static final long token_cls$offset() {
+        return token_cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -1005,8 +1049,7 @@ public class H5VL_class_t {
      * H5VL_token_class_t token_cls
      * }
      */
-    public static MemorySegment token_cls(MemorySegment struct)
-    {
+    public static MemorySegment token_cls(MemorySegment struct) {
         return struct.asSlice(token_cls$OFFSET, token_cls$LAYOUT.byteSize());
     }
 
@@ -1016,8 +1059,7 @@ public class H5VL_class_t {
      * H5VL_token_class_t token_cls
      * }
      */
-    public static void token_cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void token_cls(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, token_cls$OFFSET, token_cls$LAYOUT.byteSize());
     }
 
@@ -1028,8 +1070,7 @@ public class H5VL_class_t {
      */
     public static class optional {
 
-        optional()
-        {
+        optional() {
             // Should not be called directly
         }
 
@@ -1041,22 +1082,27 @@ public class H5VL_class_t {
         }
 
         private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_POINTER);
+            hdf5_h.C_INT,
+            hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER,
+            hdf5_h.C_LONG,
+            hdf5_h.C_POINTER
+        );
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() { return $DESC; }
+        public static FunctionDescriptor descriptor() {
+            return $DESC;
+        }
 
-        private static final MethodHandle UP$MH =
-            hdf5_h.upcallHandle(optional.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(optional.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(optional.Function fi, Arena arena)
-        {
+        public static MemorySegment allocate(optional.Function fi, Arena arena) {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -1065,20 +1111,16 @@ public class H5VL_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1, long _x2,
-                                 MemorySegment _x3)
-        {
+        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, long _x2, MemorySegment _x3) {
             try {
-                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
-            }
-            catch (Throwable ex$) {
+                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
+            } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout optional$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("optional"));
+    private static final AddressLayout optional$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("optional"));
 
     /**
      * Layout for field:
@@ -1086,7 +1128,9 @@ public class H5VL_class_t {
      * herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **)
      * }
      */
-    public static final AddressLayout optional$layout() { return optional$LAYOUT; }
+    public static final AddressLayout optional$layout() {
+        return optional$LAYOUT;
+    }
 
     private static final long optional$OFFSET = 624;
 
@@ -1096,7 +1140,9 @@ public class H5VL_class_t {
      * herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **)
      * }
      */
-    public static final long optional$offset() { return optional$OFFSET; }
+    public static final long optional$offset() {
+        return optional$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -1104,8 +1150,7 @@ public class H5VL_class_t {
      * herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **)
      * }
      */
-    public static MemorySegment optional(MemorySegment struct)
-    {
+    public static MemorySegment optional(MemorySegment struct) {
         return struct.get(optional$LAYOUT, optional$OFFSET);
     }
 
@@ -1115,8 +1160,7 @@ public class H5VL_class_t {
      * herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **)
      * }
      */
-    public static void optional(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void optional(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(optional$LAYOUT, optional$OFFSET, fieldValue);
     }
 
@@ -1124,8 +1168,7 @@ public class H5VL_class_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -1137,14 +1180,15 @@ public class H5VL_class_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -1152,8 +1196,7 @@ public class H5VL_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -1161,9 +1204,8 @@ public class H5VL_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

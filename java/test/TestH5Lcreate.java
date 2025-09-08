@@ -693,8 +693,8 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info_by_idx: " + err);
         }
-        assertFalse("testH5Lget_value_by_idx_ext ", link_info == null);
-        assertTrue("testH5Lget_value_by_idx_ext link type " + link_info.type,
+        assertFalse("testH5Lget_value_by_idx ", link_info == null);
+        assertTrue("testH5Lget_value_by_idx link type " + link_info.type,
                    link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL);
         try {
             link_type =
@@ -728,8 +728,8 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info_by_idx: " + err);
         }
-        assertFalse("testH5Lget_value_by_idx_ext ", link_info == null);
-        assertTrue("testH5Lget_value_by_idx_ext link type " + link_info.type,
+        assertFalse("testH5Lget_value_by_idx ", link_info == null);
+        assertTrue("testH5Lget_value_by_idx link type " + link_info.type,
                    link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL);
         try {
             link_type =

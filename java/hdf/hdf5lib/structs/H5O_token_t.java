@@ -38,7 +38,9 @@ public class H5O_token_t implements Serializable {
 
     public H5O_token_t(byte[] data) { this.data = data; }
 
-    public H5O_token_t(MemorySegment data) { this.data = data.toArray(ValueLayout.JAVA_BYTE); }
+    public H5O_token_t(MemorySegment data) {
+        this.data = data.toArray(ValueLayout.JAVA_BYTE);
+    }
 
     /**
      * Check if token data is undefined

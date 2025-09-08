@@ -557,8 +557,8 @@ public class TestH5Plist {
         class H5P_iter_callback implements H5P_iterate_cb {
             public int apply(long list_id, MemorySegment name, MemorySegment op_data)
             {
-                // idata id = ((H5P_iter_data)op_data).iterdata.get(0);
-                return -1; // name.compareTo(id.iter_names[id.iter_count++]);
+                idata id = ((idata)((H5P_iter_data)iter_data).iterdata.get(0));
+                return name.getString(0).compareTo(id.iter_names[id.iter_count++]);
             }
         }
         H5P_iterate_cb iter_cb = new H5P_iter_callback();

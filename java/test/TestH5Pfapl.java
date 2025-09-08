@@ -12,6 +12,8 @@
 
 package test;
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -27,6 +29,8 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.exceptions.HDF5PropertyListInterfaceException;
 import hdf.hdf5lib.structs.H5AC_cache_config_t;
+
+import org.hdfgroup.javahdf5.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1082,7 +1086,7 @@ public class TestH5Pfapl {
                        member_addr[HDF5Constants.H5FD_MEM_DEFAULT] == sH5FD_MEM_HADDR);
             assertTrue("H5Pget_fapl_muti: member_addr=" + member_addr[HDF5Constants.H5FD_MEM_SUPER],
                        member_addr[HDF5Constants.H5FD_MEM_SUPER] == sH5FD_MEM_SUPER_HADDR);
-            assertTrue("H5Pget_fapl_muti: member_addr=" + member_addr[HDF5Constants.H5FD_MEM_BTREE],
+            assertTrue("H5Pget_fapl_muti: member_addr=" + member_addr[HDF5Constants.H5FD_MEM_BTREE]+"--"+sH5FD_MEM_BTREE_HADDR,
                        member_addr[HDF5Constants.H5FD_MEM_BTREE] == sH5FD_MEM_BTREE_HADDR);
             assertTrue("H5Pget_fapl_muti: member_addr=" + member_addr[HDF5Constants.H5FD_MEM_DRAW],
                        member_addr[HDF5Constants.H5FD_MEM_DRAW] == sH5FD_MEM_DRAW_HADDR);

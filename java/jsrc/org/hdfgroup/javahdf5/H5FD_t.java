@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -30,25 +30,31 @@ import java.util.stream.*;
  */
 public class H5FD_t {
 
-    H5FD_t()
-    {
+    H5FD_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_LONG.withName("driver_id"), hdf5_h.C_POINTER.withName("cls"),
-                          hdf5_h.C_LONG.withName("fileno"), hdf5_h.C_INT.withName("access_flags"),
-                          MemoryLayout.paddingLayout(4), hdf5_h.C_LONG.withName("feature_flags"),
-                          hdf5_h.C_LONG.withName("maxaddr"), hdf5_h.C_LONG.withName("base_addr"),
-                          hdf5_h.C_LONG.withName("threshold"), hdf5_h.C_LONG.withName("alignment"),
-                          hdf5_h.C_BOOL.withName("paged_aggr"), MemoryLayout.paddingLayout(7))
-            .withName("H5FD_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_LONG.withName("driver_id"),
+        hdf5_h.C_POINTER.withName("cls"),
+        hdf5_h.C_LONG.withName("fileno"),
+        hdf5_h.C_INT.withName("access_flags"),
+        MemoryLayout.paddingLayout(4),
+        hdf5_h.C_LONG.withName("feature_flags"),
+        hdf5_h.C_LONG.withName("maxaddr"),
+        hdf5_h.C_LONG.withName("base_addr"),
+        hdf5_h.C_LONG.withName("threshold"),
+        hdf5_h.C_LONG.withName("alignment"),
+        hdf5_h.C_BOOL.withName("paged_aggr"),
+        MemoryLayout.paddingLayout(7)
+    ).withName("H5FD_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfLong driver_id$LAYOUT = (OfLong)$LAYOUT.select(groupElement("driver_id"));
 
@@ -58,7 +64,9 @@ public class H5FD_t {
      * hid_t driver_id
      * }
      */
-    public static final OfLong driver_id$layout() { return driver_id$LAYOUT; }
+    public static final OfLong driver_id$layout() {
+        return driver_id$LAYOUT;
+    }
 
     private static final long driver_id$OFFSET = 0;
 
@@ -68,7 +76,9 @@ public class H5FD_t {
      * hid_t driver_id
      * }
      */
-    public static final long driver_id$offset() { return driver_id$OFFSET; }
+    public static final long driver_id$offset() {
+        return driver_id$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -76,8 +86,7 @@ public class H5FD_t {
      * hid_t driver_id
      * }
      */
-    public static long driver_id(MemorySegment struct)
-    {
+    public static long driver_id(MemorySegment struct) {
         return struct.get(driver_id$LAYOUT, driver_id$OFFSET);
     }
 
@@ -87,8 +96,7 @@ public class H5FD_t {
      * hid_t driver_id
      * }
      */
-    public static void driver_id(MemorySegment struct, long fieldValue)
-    {
+    public static void driver_id(MemorySegment struct, long fieldValue) {
         struct.set(driver_id$LAYOUT, driver_id$OFFSET, fieldValue);
     }
 
@@ -100,7 +108,9 @@ public class H5FD_t {
      * const H5FD_class_t *cls
      * }
      */
-    public static final AddressLayout cls$layout() { return cls$LAYOUT; }
+    public static final AddressLayout cls$layout() {
+        return cls$LAYOUT;
+    }
 
     private static final long cls$OFFSET = 8;
 
@@ -110,7 +120,9 @@ public class H5FD_t {
      * const H5FD_class_t *cls
      * }
      */
-    public static final long cls$offset() { return cls$OFFSET; }
+    public static final long cls$offset() {
+        return cls$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -118,7 +130,9 @@ public class H5FD_t {
      * const H5FD_class_t *cls
      * }
      */
-    public static MemorySegment cls(MemorySegment struct) { return struct.get(cls$LAYOUT, cls$OFFSET); }
+    public static MemorySegment cls(MemorySegment struct) {
+        return struct.get(cls$LAYOUT, cls$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -126,8 +140,7 @@ public class H5FD_t {
      * const H5FD_class_t *cls
      * }
      */
-    public static void cls(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void cls(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(cls$LAYOUT, cls$OFFSET, fieldValue);
     }
 
@@ -139,7 +152,9 @@ public class H5FD_t {
      * unsigned long fileno
      * }
      */
-    public static final OfLong fileno$layout() { return fileno$LAYOUT; }
+    public static final OfLong fileno$layout() {
+        return fileno$LAYOUT;
+    }
 
     private static final long fileno$OFFSET = 16;
 
@@ -149,7 +164,9 @@ public class H5FD_t {
      * unsigned long fileno
      * }
      */
-    public static final long fileno$offset() { return fileno$OFFSET; }
+    public static final long fileno$offset() {
+        return fileno$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -157,7 +174,9 @@ public class H5FD_t {
      * unsigned long fileno
      * }
      */
-    public static long fileno(MemorySegment struct) { return struct.get(fileno$LAYOUT, fileno$OFFSET); }
+    public static long fileno(MemorySegment struct) {
+        return struct.get(fileno$LAYOUT, fileno$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -165,8 +184,7 @@ public class H5FD_t {
      * unsigned long fileno
      * }
      */
-    public static void fileno(MemorySegment struct, long fieldValue)
-    {
+    public static void fileno(MemorySegment struct, long fieldValue) {
         struct.set(fileno$LAYOUT, fileno$OFFSET, fieldValue);
     }
 
@@ -178,7 +196,9 @@ public class H5FD_t {
      * unsigned int access_flags
      * }
      */
-    public static final OfInt access_flags$layout() { return access_flags$LAYOUT; }
+    public static final OfInt access_flags$layout() {
+        return access_flags$LAYOUT;
+    }
 
     private static final long access_flags$OFFSET = 24;
 
@@ -188,7 +208,9 @@ public class H5FD_t {
      * unsigned int access_flags
      * }
      */
-    public static final long access_flags$offset() { return access_flags$OFFSET; }
+    public static final long access_flags$offset() {
+        return access_flags$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -196,8 +218,7 @@ public class H5FD_t {
      * unsigned int access_flags
      * }
      */
-    public static int access_flags(MemorySegment struct)
-    {
+    public static int access_flags(MemorySegment struct) {
         return struct.get(access_flags$LAYOUT, access_flags$OFFSET);
     }
 
@@ -207,8 +228,7 @@ public class H5FD_t {
      * unsigned int access_flags
      * }
      */
-    public static void access_flags(MemorySegment struct, int fieldValue)
-    {
+    public static void access_flags(MemorySegment struct, int fieldValue) {
         struct.set(access_flags$LAYOUT, access_flags$OFFSET, fieldValue);
     }
 
@@ -220,7 +240,9 @@ public class H5FD_t {
      * unsigned long feature_flags
      * }
      */
-    public static final OfLong feature_flags$layout() { return feature_flags$LAYOUT; }
+    public static final OfLong feature_flags$layout() {
+        return feature_flags$LAYOUT;
+    }
 
     private static final long feature_flags$OFFSET = 32;
 
@@ -230,7 +252,9 @@ public class H5FD_t {
      * unsigned long feature_flags
      * }
      */
-    public static final long feature_flags$offset() { return feature_flags$OFFSET; }
+    public static final long feature_flags$offset() {
+        return feature_flags$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -238,8 +262,7 @@ public class H5FD_t {
      * unsigned long feature_flags
      * }
      */
-    public static long feature_flags(MemorySegment struct)
-    {
+    public static long feature_flags(MemorySegment struct) {
         return struct.get(feature_flags$LAYOUT, feature_flags$OFFSET);
     }
 
@@ -249,8 +272,7 @@ public class H5FD_t {
      * unsigned long feature_flags
      * }
      */
-    public static void feature_flags(MemorySegment struct, long fieldValue)
-    {
+    public static void feature_flags(MemorySegment struct, long fieldValue) {
         struct.set(feature_flags$LAYOUT, feature_flags$OFFSET, fieldValue);
     }
 
@@ -262,7 +284,9 @@ public class H5FD_t {
      * haddr_t maxaddr
      * }
      */
-    public static final OfLong maxaddr$layout() { return maxaddr$LAYOUT; }
+    public static final OfLong maxaddr$layout() {
+        return maxaddr$LAYOUT;
+    }
 
     private static final long maxaddr$OFFSET = 40;
 
@@ -272,7 +296,9 @@ public class H5FD_t {
      * haddr_t maxaddr
      * }
      */
-    public static final long maxaddr$offset() { return maxaddr$OFFSET; }
+    public static final long maxaddr$offset() {
+        return maxaddr$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -280,7 +306,9 @@ public class H5FD_t {
      * haddr_t maxaddr
      * }
      */
-    public static long maxaddr(MemorySegment struct) { return struct.get(maxaddr$LAYOUT, maxaddr$OFFSET); }
+    public static long maxaddr(MemorySegment struct) {
+        return struct.get(maxaddr$LAYOUT, maxaddr$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -288,8 +316,7 @@ public class H5FD_t {
      * haddr_t maxaddr
      * }
      */
-    public static void maxaddr(MemorySegment struct, long fieldValue)
-    {
+    public static void maxaddr(MemorySegment struct, long fieldValue) {
         struct.set(maxaddr$LAYOUT, maxaddr$OFFSET, fieldValue);
     }
 
@@ -301,7 +328,9 @@ public class H5FD_t {
      * haddr_t base_addr
      * }
      */
-    public static final OfLong base_addr$layout() { return base_addr$LAYOUT; }
+    public static final OfLong base_addr$layout() {
+        return base_addr$LAYOUT;
+    }
 
     private static final long base_addr$OFFSET = 48;
 
@@ -311,7 +340,9 @@ public class H5FD_t {
      * haddr_t base_addr
      * }
      */
-    public static final long base_addr$offset() { return base_addr$OFFSET; }
+    public static final long base_addr$offset() {
+        return base_addr$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -319,8 +350,7 @@ public class H5FD_t {
      * haddr_t base_addr
      * }
      */
-    public static long base_addr(MemorySegment struct)
-    {
+    public static long base_addr(MemorySegment struct) {
         return struct.get(base_addr$LAYOUT, base_addr$OFFSET);
     }
 
@@ -330,8 +360,7 @@ public class H5FD_t {
      * haddr_t base_addr
      * }
      */
-    public static void base_addr(MemorySegment struct, long fieldValue)
-    {
+    public static void base_addr(MemorySegment struct, long fieldValue) {
         struct.set(base_addr$LAYOUT, base_addr$OFFSET, fieldValue);
     }
 
@@ -343,7 +372,9 @@ public class H5FD_t {
      * hsize_t threshold
      * }
      */
-    public static final OfLong threshold$layout() { return threshold$LAYOUT; }
+    public static final OfLong threshold$layout() {
+        return threshold$LAYOUT;
+    }
 
     private static final long threshold$OFFSET = 56;
 
@@ -353,7 +384,9 @@ public class H5FD_t {
      * hsize_t threshold
      * }
      */
-    public static final long threshold$offset() { return threshold$OFFSET; }
+    public static final long threshold$offset() {
+        return threshold$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -361,8 +394,7 @@ public class H5FD_t {
      * hsize_t threshold
      * }
      */
-    public static long threshold(MemorySegment struct)
-    {
+    public static long threshold(MemorySegment struct) {
         return struct.get(threshold$LAYOUT, threshold$OFFSET);
     }
 
@@ -372,8 +404,7 @@ public class H5FD_t {
      * hsize_t threshold
      * }
      */
-    public static void threshold(MemorySegment struct, long fieldValue)
-    {
+    public static void threshold(MemorySegment struct, long fieldValue) {
         struct.set(threshold$LAYOUT, threshold$OFFSET, fieldValue);
     }
 
@@ -385,7 +416,9 @@ public class H5FD_t {
      * hsize_t alignment
      * }
      */
-    public static final OfLong alignment$layout() { return alignment$LAYOUT; }
+    public static final OfLong alignment$layout() {
+        return alignment$LAYOUT;
+    }
 
     private static final long alignment$OFFSET = 64;
 
@@ -395,7 +428,9 @@ public class H5FD_t {
      * hsize_t alignment
      * }
      */
-    public static final long alignment$offset() { return alignment$OFFSET; }
+    public static final long alignment$offset() {
+        return alignment$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -403,8 +438,7 @@ public class H5FD_t {
      * hsize_t alignment
      * }
      */
-    public static long alignment(MemorySegment struct)
-    {
+    public static long alignment(MemorySegment struct) {
         return struct.get(alignment$LAYOUT, alignment$OFFSET);
     }
 
@@ -414,8 +448,7 @@ public class H5FD_t {
      * hsize_t alignment
      * }
      */
-    public static void alignment(MemorySegment struct, long fieldValue)
-    {
+    public static void alignment(MemorySegment struct, long fieldValue) {
         struct.set(alignment$LAYOUT, alignment$OFFSET, fieldValue);
     }
 
@@ -427,7 +460,9 @@ public class H5FD_t {
      * hbool_t paged_aggr
      * }
      */
-    public static final OfBoolean paged_aggr$layout() { return paged_aggr$LAYOUT; }
+    public static final OfBoolean paged_aggr$layout() {
+        return paged_aggr$LAYOUT;
+    }
 
     private static final long paged_aggr$OFFSET = 72;
 
@@ -437,7 +472,9 @@ public class H5FD_t {
      * hbool_t paged_aggr
      * }
      */
-    public static final long paged_aggr$offset() { return paged_aggr$OFFSET; }
+    public static final long paged_aggr$offset() {
+        return paged_aggr$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -445,8 +482,7 @@ public class H5FD_t {
      * hbool_t paged_aggr
      * }
      */
-    public static boolean paged_aggr(MemorySegment struct)
-    {
+    public static boolean paged_aggr(MemorySegment struct) {
         return struct.get(paged_aggr$LAYOUT, paged_aggr$OFFSET);
     }
 
@@ -456,8 +492,7 @@ public class H5FD_t {
      * hbool_t paged_aggr
      * }
      */
-    public static void paged_aggr(MemorySegment struct, boolean fieldValue)
-    {
+    public static void paged_aggr(MemorySegment struct, boolean fieldValue) {
         struct.set(paged_aggr$LAYOUT, paged_aggr$OFFSET, fieldValue);
     }
 
@@ -465,8 +500,7 @@ public class H5FD_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -478,14 +512,15 @@ public class H5FD_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -493,8 +528,7 @@ public class H5FD_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -502,9 +536,8 @@ public class H5FD_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -19,8 +19,7 @@ import java.util.stream.*;
  */
 public class H5MM_free_t {
 
-    H5MM_free_t()
-    {
+    H5MM_free_t() {
         // Should not be called directly
     }
 
@@ -31,13 +30,17 @@ public class H5MM_free_t {
         void apply(MemorySegment mem, MemorySegment free_info);
     }
 
-    private static final FunctionDescriptor $DESC =
-        FunctionDescriptor.ofVoid(hdf5_h.C_POINTER, hdf5_h.C_POINTER);
+    private static final FunctionDescriptor $DESC = FunctionDescriptor.ofVoid(
+        hdf5_h.C_POINTER,
+        hdf5_h.C_POINTER
+    );
 
     /**
      * The descriptor of this function pointer
      */
-    public static FunctionDescriptor descriptor() { return $DESC; }
+    public static FunctionDescriptor descriptor() {
+        return $DESC;
+    }
 
     private static final MethodHandle UP$MH = hdf5_h.upcallHandle(H5MM_free_t.Function.class, "apply", $DESC);
 
@@ -45,8 +48,7 @@ public class H5MM_free_t {
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(H5MM_free_t.Function fi, Arena arena)
-    {
+    public static MemorySegment allocate(H5MM_free_t.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 
@@ -55,13 +57,12 @@ public class H5MM_free_t {
     /**
      * Invoke the upcall stub {@code funcPtr}, with given parameters
      */
-    public static void invoke(MemorySegment funcPtr, MemorySegment mem, MemorySegment free_info)
-    {
+    public static void invoke(MemorySegment funcPtr,MemorySegment mem, MemorySegment free_info) {
         try {
-            DOWN$MH.invokeExact(funcPtr, mem, free_info);
-        }
-        catch (Throwable ex$) {
+             DOWN$MH.invokeExact(funcPtr, mem, free_info);
+        } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
     }
 }
+
