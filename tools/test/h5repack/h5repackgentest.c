@@ -39,7 +39,6 @@ const char *FILENAMES[] = {
 
 #define NUM_ELMTS 100
 
-
 #define H5REPACKGENTEST_OOPS                                                                                 \
     {                                                                                                        \
         ret_value = -1;                                                                                      \
@@ -2595,8 +2594,8 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     hsize_t dims3[3]     = {4, 3, 2};
     hsize_t dims3r[3]    = {1, 1, 1};
     char    buf13[24][2] = {
-        "ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz", "AB",
-        "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
+           "ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz", "AB",
+           "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
     char       buf23[4][3][2];                                                /* bitfield, opaque */
     s_t        buf33[4][3][2];                                                /* compound */
     hobj_ref_t buf43[1][1][1];                                                /* reference */
@@ -3486,8 +3485,8 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t dims3[3]     = {4, 3, 2};
     char    buf13[24][2] = {
-        "ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz", "AB",
-        "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
+           "ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz", "AB",
+           "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
     char       buf23[4][3][2];                                                /* bitfield, opaque */
     s_t        buf33[4][3][2];                                                /* compound */
     hobj_ref_t buf43[4][3][2];                                                /* reference */
@@ -5406,9 +5405,9 @@ make_complex_attr_references(hid_t loc_id)
     hid_t   objgid = 0, objdid = 0, objtid = 0, objsid = 0;
     hsize_t obj_dims[RANK_OBJ]           = {DIM0_OBJ, DIM1_OBJ};
     int     obj_data[DIM0_OBJ][DIM1_OBJ] = {
-        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},           {10, 11, 12, 13, 14, 15, 16, 17, 18, 19},
-        {20, 21, 22, 23, 24, 25, 26, 27, 28, 29}, {30, 31, 32, 33, 34, 35, 36, 37, 38, 39},
-        {40, 41, 42, 43, 44, 45, 46, 47, 48, 49}, {50, 51, 52, 53, 54, 55, 56, 57, 58, 59}};
+            {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},           {10, 11, 12, 13, 14, 15, 16, 17, 18, 19},
+            {20, 21, 22, 23, 24, 25, 26, 27, 28, 29}, {30, 31, 32, 33, 34, 35, 36, 37, 38, 39},
+            {40, 41, 42, 43, 44, 45, 46, 47, 48, 49}, {50, 51, 52, 53, 54, 55, 56, 57, 58, 59}};
 
     /*
      * group main
@@ -5777,7 +5776,8 @@ out:
 }
 
 /* TODO: This is duplicated from gen_filespace.c. Eventually, this should be centralized somewhere. */
-int gen_filespaces(void)
+int
+gen_filespaces(void)
 {
     hid_t                 fid  = H5I_INVALID_HID; /* File ID */
     hid_t                 fcpl = H5I_INVALID_HID; /* File creation property list */
