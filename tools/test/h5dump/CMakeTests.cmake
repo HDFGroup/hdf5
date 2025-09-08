@@ -555,23 +555,11 @@ macro (ADD_H5_TEST testname)
   endif()
 
   # Set up list of files to clean up
-  set(CLEANUP_FILES "")
+  set(DO_CLEANUP FALSE)
   set(CLEANUP_DEPENDENCIES "")
 
-  if (DEFINED ARG_TARGET_FILE)
-    list(APPEND CLEANUP_FILES "${testname}.txt")
-  endif ()
-
-  if (DEFINED ARG_OUTPUT_FILE)
-    list(APPEND CLEANUP_FILES "${ARG_OUTPUT_FILE}.txt")
-  endif ()
-
-  if (DEFINED ARG_DDL_FILE)
-    list(APPEND CLEANUP_FILES "${ARG_DDL_FILE}.txt")
-  endif ()
-
-  if (DEFINED ARG_ANY_PATHS OR ${ARG_BINFILE})
-    list(APPEND CLEANUP_FILES "${testname}.bin")
+  if (DEFINED ARG_TARGET_FILE OR DEFINED ARG_OUTPUT_FILE OR DEFINED ARG_DDL_FILE OR DEFINED ARG_ANY_PATHS OR ${ARG_BINFILE})
+    set(DO_CLEANUP TRUE)
   endif ()
 
   if (DEFINED ARG_ENVVAL AND NOT DEFINED ARG_ENVVAR)
@@ -625,11 +613,15 @@ macro (ADD_H5_TEST testname)
     )
   else()
     # Cleanup if test produces artifacts
-    if (CLEANUP_FILES)
+    if (${DO_CLEANUP})
       add_test (
           NAME H5DUMP-${ctest_testname}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
-              "${CLEANUP_FILES}"
+            "${testname}.txt"
+            "${ARG_OUTPUT_FILE}.txt"
+            "${ARG_DDL_FILE}.txt"
+            "${testname}.bin"
+
       )
 
       set_tests_properties (H5DUMP-${ctest_testname}-clear-objects PROPERTIES
@@ -695,11 +687,14 @@ macro (ADD_H5_TEST testname)
       list(APPEND CLEANUP_DEPENDENCIES "H5DUMP-${ctest_testname}-output-cmp")
     endif ()
 
-    if (CLEANUP_FILES)
+    if (${DO_CLEANUP})
       add_test (
         NAME H5DUMP-${ctest_testname}-clean-objects
         COMMAND ${CMAKE_COMMAND} -E remove
-            "${CLEANUP_FILES}"
+          "${testname}.txt"
+          "${ARG_OUTPUT_FILE}.txt"
+          "${ARG_DDL_FILE}.txt"
+          "${testname}.bin"
       )
 
       set_tests_properties (H5DUMP-${ctest_testname}-clean-objects PROPERTIES
