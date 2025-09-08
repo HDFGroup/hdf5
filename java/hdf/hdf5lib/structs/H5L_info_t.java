@@ -66,7 +66,8 @@ public class H5L_info_t implements Serializable {
         // Unpack the H5L_info2_t from the MemorySegment
         MemorySegment u_segment = org.hdfgroup.javahdf5.H5L_info2_t.u(linfo_segment);
         if (org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment) == HDF5Constants.H5L_TYPE_HARD) {
-            this.token        = new hdf.hdf5lib.structs.H5O_token_t(org.hdfgroup.javahdf5.H5L_info2_t.u.token(u_segment));
+            this.token =
+                new hdf.hdf5lib.structs.H5O_token_t(org.hdfgroup.javahdf5.H5L_info2_t.u.token(u_segment));
             this.type         = org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment);
             this.corder_valid = org.hdfgroup.javahdf5.H5L_info2_t.corder_valid(linfo_segment);
             this.corder       = org.hdfgroup.javahdf5.H5L_info2_t.corder(linfo_segment);

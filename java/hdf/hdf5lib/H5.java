@@ -7171,7 +7171,7 @@ public class H5 implements java.io.Serializable {
         }
 
         oname[0] = H5Lget_name_by_idx(loc_id, name, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC,
-                                        idx, HDF5Constants.H5P_DEFAULT);
+                                      idx, HDF5Constants.H5P_DEFAULT);
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(name);
@@ -8138,7 +8138,8 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(name);
             MemorySegment linfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5L_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) <
+                0) {
                 h5libraryError();
             }
             info = new hdf.hdf5lib.structs.H5L_info_t(linfo_segment);
@@ -8189,7 +8190,8 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(group_name);
             MemorySegment linfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5L_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n, linfo_segment, lapl_id) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n,
+                                                                   linfo_segment, lapl_id) < 0) {
                 h5libraryError();
             }
             info = new hdf.hdf5lib.structs.H5L_info_t(linfo_segment);
@@ -8290,15 +8292,16 @@ public class H5 implements java.io.Serializable {
         int link_type = -1;
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
-            MemorySegment name_segment = arena.allocateFrom(name);
+            MemorySegment name_segment  = arena.allocateFrom(name);
             MemorySegment linfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5L_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) <
+                0) {
                 h5libraryError();
             }
             // Unpack the H5L_info2_t from the MemorySegment
-            MemorySegment u_segment    = org.hdfgroup.javahdf5.H5L_info2_t.u(linfo_segment);
-            long val_size = org.hdfgroup.javahdf5.H5L_info2_t.u.val_size(u_segment);
-            link_type     = org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment);
+            MemorySegment u_segment = org.hdfgroup.javahdf5.H5L_info2_t.u(linfo_segment);
+            long val_size           = org.hdfgroup.javahdf5.H5L_info2_t.u.val_size(u_segment);
+            link_type               = org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment);
             if (link_type == H5L_TYPE_ERROR()) {
                 throw new HDF5LibraryException("Invalid link type");
             }
@@ -8322,9 +8325,12 @@ public class H5 implements java.io.Serializable {
                     h5libraryError();
                 // Convert the MemorySegment to a String
                 MemorySegment obj_name_segment_Address = obj_name_segment.getAtIndex(ValueLayout.ADDRESS, 0);
-                MemorySegment retrieved_obj_name_segment = obj_name_segment_Address.reinterpret(val_size, arena, null);
-                MemorySegment file_name_segment_Address = file_name_segment.getAtIndex(ValueLayout.ADDRESS, 0);
-                MemorySegment retrieved_file_name_segment = file_name_segment_Address.reinterpret(val_size, arena, null);
+                MemorySegment retrieved_obj_name_segment =
+                    obj_name_segment_Address.reinterpret(val_size, arena, null);
+                MemorySegment file_name_segment_Address =
+                    file_name_segment.getAtIndex(ValueLayout.ADDRESS, 0);
+                MemorySegment retrieved_file_name_segment =
+                    file_name_segment_Address.reinterpret(val_size, arena, null);
 
                 link_value[0] = retrieved_obj_name_segment.getString(0, StandardCharsets.UTF_8);
                 link_value[1] = retrieved_file_name_segment.getString(0, StandardCharsets.UTF_8);
@@ -8380,15 +8386,16 @@ public class H5 implements java.io.Serializable {
         int link_type = -1;
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
-            MemorySegment name_segment = arena.allocateFrom(group_name);
+            MemorySegment name_segment  = arena.allocateFrom(group_name);
             MemorySegment linfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5L_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n, linfo_segment, lapl_id) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n,
+                                                                   linfo_segment, lapl_id) < 0) {
                 h5libraryError();
             }
             // Unpack the H5L_info2_t from the MemorySegment
             MemorySegment u_segment = org.hdfgroup.javahdf5.H5L_info2_t.u(linfo_segment);
-            long val_size = org.hdfgroup.javahdf5.H5L_info2_t.u.val_size(u_segment);
-            link_type     = org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment);
+            long val_size           = org.hdfgroup.javahdf5.H5L_info2_t.u.val_size(u_segment);
+            link_type               = org.hdfgroup.javahdf5.H5L_info2_t.type(linfo_segment);
             if (link_type == H5L_TYPE_ERROR()) {
                 throw new HDF5LibraryException("Invalid link type");
             }
@@ -8413,9 +8420,12 @@ public class H5 implements java.io.Serializable {
                     h5libraryError();
                 // Convert the MemorySegment to a String
                 MemorySegment obj_name_segment_Address = obj_name_segment.getAtIndex(ValueLayout.ADDRESS, 0);
-                MemorySegment retrieved_obj_name_segment = obj_name_segment_Address.reinterpret(val_size, arena, null);
-                MemorySegment file_name_segment_Address = file_name_segment.getAtIndex(ValueLayout.ADDRESS, 0);
-                MemorySegment retrieved_file_name_segment = file_name_segment_Address.reinterpret(val_size, arena, null);
+                MemorySegment retrieved_obj_name_segment =
+                    obj_name_segment_Address.reinterpret(val_size, arena, null);
+                MemorySegment file_name_segment_Address =
+                    file_name_segment.getAtIndex(ValueLayout.ADDRESS, 0);
+                MemorySegment retrieved_file_name_segment =
+                    file_name_segment_Address.reinterpret(val_size, arena, null);
 
                 link_value[0] = retrieved_obj_name_segment.getString(0, StandardCharsets.UTF_8);
                 link_value[1] = retrieved_file_name_segment.getString(0, StandardCharsets.UTF_8);

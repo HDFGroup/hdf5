@@ -15,9 +15,9 @@ package hdf.hdf5lib;
 import static org.hdfgroup.javahdf5.hdf5_h.*;
 
 import java.lang.foreign.MemorySegment;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.math.BigInteger;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.structs.H5O_token_t;
@@ -709,31 +709,46 @@ public class HDF5Constants {
     /** */
     public static final int H5FD_MEM_NTYPES = H5FD_MEM_NTYPES();
     /** */
-    public static final BigInteger H5FD_BIG_MEM_NTYPES = 
-            new BigInteger(1, ByteBuffer.allocate(Long.SIZE/Byte.SIZE).putLong(H5FD_MEM_NTYPES()).array());
+    public static final BigInteger H5FD_BIG_MEM_NTYPES =
+        new BigInteger(1, ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(H5FD_MEM_NTYPES()).array());
     /** */
-    public static final BigInteger H5FD_BIG_MEM_NTYPES_MINUS = 
-            new BigInteger(1, ByteBuffer.allocate(Long.SIZE/Byte.SIZE).putLong(H5FD_MEM_NTYPES() - 1L).array());
+    public static final BigInteger H5FD_BIG_MEM_NTYPES_MINUS =
+        new BigInteger(1, ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(H5FD_MEM_NTYPES() - 1L).array());
     /** */
-    public static final BigInteger H5FD_BIG_HADDR_MAX = 
-            new BigInteger(1, ByteBuffer.allocate(Long.SIZE/Byte.SIZE).putLong(HADDR_MAX()).array());
+    public static final BigInteger H5FD_BIG_HADDR_MAX =
+        new BigInteger(1, ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(HADDR_MAX()).array());
     /** */
-    public static final long H5FD_DEFAULT_HADDR_SIZE = 
-            H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES).longValue();
+    public static final long H5FD_DEFAULT_HADDR_SIZE =
+        H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES).longValue();
     /** */
     public static final long H5FD_MEM_DEFAULT_SIZE = 0L;
     /** */
     public static final long H5FD_MEM_DEFAULT_SUPER_SIZE = 0L;
     /** */
-    public static final long H5FD_MEM_DEFAULT_BTREE_SIZE = H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS).multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE/Byte.SIZE).putLong(1).array())).longValue();
+    public static final long H5FD_MEM_DEFAULT_BTREE_SIZE =
+        H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS)
+            .multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(1).array()))
+            .longValue();
     /** */
-    public static final long H5FD_MEM_DEFAULT_DRAW_SIZE = H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS).multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE/Byte.SIZE).putLong(2).array())).longValue();
+    public static final long H5FD_MEM_DEFAULT_DRAW_SIZE =
+        H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS)
+            .multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(2).array()))
+            .longValue();
     /** */
-    public static final long H5FD_MEM_DEFAULT_GHEAP_SIZE = H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS).multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE/Byte.SIZE).putLong(3).array())).longValue();
+    public static final long H5FD_MEM_DEFAULT_GHEAP_SIZE =
+        H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS)
+            .multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(3).array()))
+            .longValue();
     /** */
-    public static final long H5FD_MEM_DEFAULT_LHEAP_SIZE = H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS).multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE/Byte.SIZE).putLong(4).array())).longValue();
+    public static final long H5FD_MEM_DEFAULT_LHEAP_SIZE =
+        H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS)
+            .multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(4).array()))
+            .longValue();
     /** */
-    public static final long H5FD_MEM_DEFAULT_OHDR_SIZE = H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS).multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE/Byte.SIZE).putLong(5).array())).longValue();
+    public static final long H5FD_MEM_DEFAULT_OHDR_SIZE =
+        H5FD_BIG_HADDR_MAX.divide(H5FD_BIG_MEM_NTYPES_MINUS)
+            .multiply(new BigInteger(1, ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(5).array()))
+            .longValue();
 
     //    public static final int H5G_DATASET = H5G_DATASET();
     //    public static final int H5G_GROUP = H5G_GROUP();
