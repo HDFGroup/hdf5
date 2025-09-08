@@ -436,18 +436,26 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   if (ARG_GZIP_FILTER)
-    set(ARG_FILTER_IN "GZIP   \\(0\\.[0-9][0-9][0-9]:1\\);O?...ing file[^\n]+\n")
-    set(ARG_FILTER_OUT "GZIP   (0.XXX:1);")
+    list(APPEND ARG_FILTER_IN "GZIP   \\(0\\.[0-9][0-9][0-9]:1\\);O?...ing file[^\n]+\n")
+    list(APPEND ARG_FILTER_OUT "GZIP   (0.XXX:1);")
     set(ARG_REF_FILE "${ARG_TEST_FILE}-${testname}.tst")
     set(ctest_testname "CMP-${ctest_testname}")
     # Don't skip runTest comparison if we're using filters
     set(ARG_COMPARE_LOCAL false)
   elseif (ARG_SIZE_FILTER)
-    set (ARG_FILTER_IN "SIZE [0-9][0-9][0-9][0-9] \\(2\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)")
-    set (ARG_FILTER_OUT "SIZE XXXX (2.XXX:1 COMPRESSION)")
+    list(APPEND ARG_FILTER_IN "SIZE [0-9][0-9][0-9][0-9] \\(2\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)")
+    list(APPEND ARG_FILTER_OUT "SIZE XXXX (2.XXX:1 COMPRESSION)")
     # Don't skip runTest comparison if we're using filters
     set(ARG_COMPARE_LOCAL false)
   endif ()
+
+  # Size/Offset within file will differ across VOL connectors
+  # These are inserted to the list now to be applied after compression-related output masks
+  list (APPEND ARG_FILTER_IN "OFFSET [0-9]+")
+  list (APPEND ARG_FILTER_OUT "OFFSET XXXX")
+
+  list (APPEND ARG_FILTER_IN "SIZE [0-9]+")
+  list (APPEND ARG_FILTER_OUT "SIZE XXXX")
 
   if (${ARG_DUMP_CHECK})
     set(ARG_COMPARE_LOCAL false)
