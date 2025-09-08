@@ -37,7 +37,7 @@ void gent_str(void);
 void gent_str2(void);
 void gent_enum(void);
 void gent_objref(void);
-void gent_datareg(void);
+void gent_datareg(bool undefined_fill_value);
 void gent_attrreg(void);
 void gent_nestcomp(void);
 void gent_opaque(void);

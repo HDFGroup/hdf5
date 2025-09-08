@@ -171,7 +171,7 @@ gen_h5dump_files(void)
     gent_str2();
     gent_enum();
     gent_objref();
-    gent_datareg();
+    gent_datareg(false);
     gent_attrreg();
     gent_nestcomp();
     gent_opaque();
@@ -350,7 +350,7 @@ gen_h5repack_files(void)
     gent_extlinks();
     gent_softlink2();
     gent_attrreg();
-    gent_datareg();
+    gent_datareg(true);
     gent_family();
 
     nerrors += (gent_onion_1d_dset() < 0 ? 1 : 0);
@@ -428,7 +428,7 @@ gen_h5ls_files(void)
 
     gent_vldatatypes();
     gent_compound_dt();
-    gent_datareg();
+    gent_datareg(false);
     gent_empty();
     gent_hardlink();
     gent_loop();

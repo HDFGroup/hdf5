@@ -2238,7 +2238,7 @@ gent_objref(void)
 }
 
 void
-gent_datareg(void)
+gent_datareg(bool undefined_fill_value)
 {
     /*some code is taken from enum.c in the test dir */
 
@@ -2247,6 +2247,7 @@ gent_datareg(void)
         dset2;   /* Dereferenced dataset ID */
     hid_t sid1,  /* Dataspace ID #1  */
         sid2;    /* Dataspace ID #2  */
+    hid_t dcpl_id = H5I_INVALID_HID;
     hsize_t          dims1[] = {SPACE1_DIM1}, dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t          start[SPACE2_RANK];                  /* Starting location of hyperslab */
     hsize_t          stride[SPACE2_RANK];                 /* Stride of hyperslab */
@@ -2272,8 +2273,16 @@ gent_datareg(void)
     /* Create dataspace for datasets */
     sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
 
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+
+    if (undefined_fill_value) {
+        /* Set the fill value to be undefined */
+        H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_IFSET);
+        H5Pset_fill_value(dcpl_id, H5I_INVALID_HID, NULL);
+    }
+
     /* Create a dataset */
-    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_U8BE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_U8BE, sid2, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
 
     for (tu8 = dwbuf, i = 0; i < SPACE2_DIM1 * SPACE2_DIM2; i++)
         *tu8++ = (uint8_t)(i * 3);
@@ -2288,7 +2297,7 @@ gent_datareg(void)
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
 
     /* Create a dataset */
-    dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
 
     /* Create references */
 
@@ -2350,6 +2359,8 @@ gent_datareg(void)
 
     /* Close file */
     H5Fclose(fid1);
+
+    H5Pclose(dcpl_id);
 
     /* Free memory buffers */
     free(wbuf);
