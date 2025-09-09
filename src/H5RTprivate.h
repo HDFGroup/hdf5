@@ -17,6 +17,7 @@
 #define H5RTprivate_H
 
 #include "H5private.h"
+
 /* The overall r-tree structure */
 typedef struct H5RT_t H5RT_t;
 

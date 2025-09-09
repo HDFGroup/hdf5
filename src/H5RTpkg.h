@@ -39,7 +39,7 @@ typedef struct H5RT_node_t {
     hsize_t max[H5S_MAX_RANK]; /* Invalid for root node */
     union {
         H5RT_node_t *nodes[H5RT_MAX_NODE_SIZE];
-        H5RT_leaf_t *leaves[H5RT_MAX_NODE_SIZE];
+        H5RT_leaf_t *leaves;
     } children;
     int nchildren;
     bool children_are_leaves;
