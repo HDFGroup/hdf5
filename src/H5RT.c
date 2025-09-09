@@ -149,6 +149,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         /* For the iteration that sorts along the k-th total dimension, the rank in the exponent here
          * should be k */
         double remaining_ranks = (double) rank - (double) (prev_sort_dim + 1);
+        assert(remaining_ranks >= 1.0);
         int num_slabs = (int) ceil(pow(num_leaf_pages, 1.0 / remaining_ranks));
 
         assert(num_slabs <= H5RT_MAX_NODE_SIZE);
