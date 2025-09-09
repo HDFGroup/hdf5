@@ -551,7 +551,6 @@ public class TestH5Plist {
         }
         class H5P_iter_data implements H5P_iterate_t {
             static public ArrayList<idata> iterdata = new ArrayList<idata>();
-            static idata get_iter_data(int idx) { return iterdata.get(idx); }
         }
         H5P_iterate_t iter_data = new H5P_iter_data();
         class H5P_iter_callback implements H5P_iterate_cb {
@@ -809,7 +808,7 @@ public class TestH5Plist {
     //        H5P_cls_create_func_t cls_create_data = new H5P_cls_create_data();
     //
     //        class H5P_cls_create_callback implements H5P_cls_create_func_cb {
-    //            public int callback(long list_id, H5P_cls_create_func_t cls_data) {
+    //            public int apply(long list_id, H5P_cls_create_func_t cls_data) {
     //                System.err.println("H5P_cls_create_callback enter");
     //                cdata cd = ((H5P_cls_create_data)cls_create_data).clsdata.get(0);
     //                cd.cls_count++;

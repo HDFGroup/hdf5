@@ -10872,6 +10872,8 @@ public class H5 implements java.io.Serializable {
             if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Piterate(plist, idx_segment, op_segment,
                                                                   op_data_segment)) < 0)
                 h5libraryError();
+            if (idx != null)
+                idx[0] = idx_segment.get(ValueLayout.JAVA_INT, 0);
         }
         return status;
     }
