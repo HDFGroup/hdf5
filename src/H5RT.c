@@ -87,7 +87,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RT__fill() */
 
-/* Creates a new R-tree of rank rank, filling it with count leaves.  Takes ownership of the leaves array. */
+/* Creates a new R-tree of rank rank, filling it with count leaves. Takes ownership of the leaves array. */
 H5RT_t *
 H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
 {
@@ -96,11 +96,19 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if (NULL == (rtree = H5FL_MALLOC(H5RT_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed ot allocate memory for R-tree");
+    if (rank < 1 || rank > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid rank");
 
+    if (count == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "r-tree must have at least one leaf");
+
+    if (NULL == (rtree = H5FL_MALLOC(H5RT_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree");
+
+    /* Take ownership of leaves array */
     rtree->leaves = leaves;
 
+    /* Load the provided leaves into the nodes of the new r-tree */
     // TODO - proper sort dim
     if (H5RT__fill(&rtree->root, rank, leaves, count, true, 0) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, NULL, "failed to fill R-tree");
@@ -108,6 +116,9 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
     ret_value = rtree;
 
 done:
+    if (!ret_value && rtree)
+        H5FL_FREE(H5RT_t, rtree);
+
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RT_create() */
 
@@ -150,7 +161,13 @@ H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[])
     H5RT_leaf_t *tail = NULL;
     H5RT_leaf_t *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(NULL)
+
+    assert((hsize_t*)min);
+    assert((hsize_t*)max);
+
+    if (!rtree)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid r-tree");
 
     /* Perform the actual search */
     H5RT__search_recurse(&rtree->root, rtree->rank, min, max, &head, &tail);
@@ -162,6 +179,7 @@ H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[])
     /* Return the linked list */
     ret_value = head;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RT_search() */
 
@@ -170,6 +188,7 @@ H5RT__free_recurse(H5RT_node_t *node)
 {
     FUNC_ENTER_NOAPI_NOERR
 
+    /* Only recurse if the children are more internal nodes */
     if (!node->children_are_leaves)
         for (int i = 0; i < node->nchildren; i++) {
             H5RT__free_recurse(node->children.nodes[i]);
@@ -180,14 +199,20 @@ H5RT__free_recurse(H5RT_node_t *node)
 }
 
 /* Deletes and frees all memory used by the R-tree, including the leaves array */
-void
+herr_t
 H5RT_free(H5RT_t *rtree)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL);
+
+    if (!rtree)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid r-tree");
 
     H5RT__free_recurse(&rtree->root);
     free(rtree->leaves);
     H5FL_FREE(H5RT_t, rtree);
 
-    FUNC_LEAVE_NOAPI_VOID
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
