@@ -280,7 +280,7 @@ macro (ADD_HELP_TEST testname resultcode)
 endmacro ()
 
 #
-# Adds a test that performs h5repack and checks the new file according to passed paramters
+# Adds a test that performs h5repack and checks the new file according to passed parameters
 # 
 # REQUIRED KEYWORDS ARGUMENTS:
 #   TEST_TYPE <testtype> - "TEST", "SKIP", or "LEGACY"
@@ -597,10 +597,10 @@ macro (ADD_H5_TEST testname)
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK-${ctest_testname}-h5stat PROPERTIES
-          DEPENDS H5REPACK_${ctest_testname}
+          DEPENDS H5REPACK-${ctest_testname}
       )
-      if ("H5REPACK_${ctest_testname}-h5stat" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties ("H5REPACK_${ctest_testname}-h5stat" PROPERTIES DISABLED true)
+      if ("H5REPACK-${ctest_testname}-h5stat" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties ("H5REPACK-${ctest_testname}-h5stat" PROPERTIES DISABLED true)
       endif ()
 
       list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5stat")
