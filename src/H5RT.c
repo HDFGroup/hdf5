@@ -29,10 +29,13 @@ H5FL_DEFINE_STATIC(H5RT_node_t);
 herr_t
 H5RT__fill(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, bool root, int last_sort_dim)
 {
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
     /* Calculate the overall min and max for this node, unless this is the root node.  Could instead do this for children in the loop. */
 
     if (count <= H5RT_MAX_NODE_SIZE) {
-        node->children.leaves = leaves;
+        // node->children.leaves = leaves;
         node->nchildren = (int)count;
         node->children_are_leaves = true;
     }
@@ -44,7 +47,7 @@ H5RT__fill(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, bool 
         /* Split into approximately N blocks, where N is the target node size, but no more than H5RT_MAX_NODE_SIZE */
 
         /* Iterate over blocks, allocating the H5RT_node_t for each (in node->children.nodes[i]), and recursively calling this function for each block with parameter node = &node->children.nodes[i], leaves = a pointer to the first leaf in this block, and count = the number of leaves in this block */
-        for (i = 0; i < nblocks; i++){
+        for (size_t i = 0; i < nblocks; i++){
             if (NULL == (node->children.nodes[i] = H5FL_MALLOC(H5RT_node_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed ot allocate memory for R-tree node");
             if (H5RT__fill(node->children.nodes[i], rank, leaves + (i * block_size), min(block_size, leaves_left), false, sort dimension) < 0)
@@ -52,6 +55,9 @@ H5RT__fill(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, bool 
         }
         node->nchildren = nblocks;
     }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RT__fill() */
 
 /* Creates a new R-tree of rank rank, filling it with count leaves.  Takes ownership of the leaves array. */
@@ -107,7 +113,7 @@ static H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t 
 
 /* Returns a linked list of leaves whose bounding boxes intersect with min and max */
 H5RT_leaf_t *
-H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[]
+H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[])
 {
     H5RT_leaf_t *head = NULL;
     H5RT_leaf_t *tail = NULL;
@@ -146,6 +152,8 @@ H5RT__free_recurse(H5RT_node_t *node)
 void
 H5RT_free(H5RT_t *rtree)
 {
+    FUNC_ENTER_NOAPI_NOERR
+
     H5RT__free_recurse(&rtree->root);
     free(rtree->leaves);
     H5FL_FREE(H5RT_t, rtree);

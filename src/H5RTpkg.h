@@ -30,6 +30,9 @@
 // TODO - Choose optmized value
 #define H5RT_MAX_NODE_SIZE 16
 
+/* Forward declaration */
+typedef struct H5RT_node_t H5RT_node_t;
+
 /* Internal node of the r-tree */
 typedef struct H5RT_node_t {
     hsize_t min[H5S_MAX_RANK]; /* Invalid for root node */
