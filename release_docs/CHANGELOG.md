@@ -1,31 +1,28 @@
 # HDF5 2.0.0 - 2025-09-30
 
-## 🔺 HDF5 Changelog
+# 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
 HDF5 release, platforms tested, and known problems in this release. 
 
 *For releases prior to version 2.0.0, please see the [release_archive.txt](release_archive.txt) file and for more details check the HISTORY*.txt files in the HDF5 source.*
 
-## 🔗 Quick Links 
+# 🔗 Quick Links 
 * [HDF5 documentation](https://support.hdfgroup.org/documentation/hdf5/latest/)
 * [Official HDF5 releases](https://support.hdfgroup.org/downloads/index.html) 
 * [Changes from Release to Release and New Features in the HDF5-2.x.y](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdf5#help-and-support)
 
-## 📖 Contents
+# 📖 Contents
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](#--bug-fixes)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [Support for new platforms and languages](#-support-for-new-platforms-and-languages)
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
 * [Known Problems](#-known-problems)
-* [Cmake Installations](#-cmake-installations)
-* [Documentation](#-documentation)
-* [Contributors](#%EF%B8%8F-contributors)
   
-## 🚀 New Features & Improvements
+# 🚀 New Features & Improvements
 
-### Configuration
+## Configuration
 
 - Refactored `HDF5_BUILD/ENABLE_{feature}` variable in hdf5-config.cmake file
 
@@ -35,7 +32,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - CMake minimum version is now 3.26
 
-   The minimum version of CMake is now 3.26, this will remove workarounds to handle versions between 3.18 (previous minimum) and 3.26.
+   The minimum version of CMake is now 3.26; this will remove workarounds to handle versions between 3.18 (the previous minimum) and 3.26.
 
 - Removed `HDF5_ENABLE_THREADS` option
 
@@ -58,13 +55,13 @@ HDF5 release, platforms tested, and known problems in this release.
    | `HDF5_H5CC_CXX_COMPILER` | for the C++ compiler |
    | `HDF5_H5CC_Fortran_COMPILER` | for the Fortran compiler | 
 
-   These default to the currently used compiler, preserving the current behavior. However, they can be overridden by users who need to use a different compiler at runtime, for example when they build via cache.
+   These default to the currently used compiler, preserving the current behavior. However, they can be overridden by users who need to use a different compiler at runtime, for example, when they build via cache.
 
 - Added `CMAKE_INSTALL_PREFIX` to the default plugin path
 
    To help users find their plugins, the default plugin path has been changed to include the `CMAKE_INSTALL_PREFIX`. Adding the install prefix allows users to skip setting the `HDF5_PLUGIN_PATH` environment variable when using plugins with the default lib/plugin location.
 
-- Removed support for autotools build system.
+- Removed support for the autotools build system.
 
 - Converted documentation in the source folder, doc, to doxygen files.
 
@@ -72,7 +69,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    CMake: `HDF5_ENABLE_CONCURRENCY` (ON/OFF) (Default: OFF)
 
-   This option enables support for concurrent multithreaded operation of supported API routines. This option also provides threadsafe execution of all other, non-concurrent operations. The 'concurrency' option thus is a superset of the existing 'threadsafe' option. Both options are currently available, although mutually exclusive. As the 'concurrency' code becomes more stable over time, the 'threadsafe' option may be deprecated in favor of the new 'concurrency' option.
+   This option enables support for concurrent multithreaded operation of supported API routines. This option also provides thread-safe execution of all other, non-concurrent operations. The 'concurrency' option thus is a superset of the existing 'threadsafe' option. Both options are currently available, although mutually exclusive. As the 'concurrency' code becomes more stable over time, the 'threadsafe' option may be deprecated in favor of the new 'concurrency' option.
 
    The following API routines support concurrent multithreaded operation:
    <none yet>
@@ -87,13 +84,13 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Added CMake build mode flags to the libhdf5.settings file
 
-   Flags from the CMake build mode (e.g., optimization) are not a part of `CMAKE_<language>_FLAGS` and were not exported to the libhdf5.settings file. This has been fixed and the C, Fortran, and C++ build mode flags are now exported to the file.
+   Flags from the CMake build mode (e.g., optimization) are not a part of `CMAKE_<language>_FLAGS` and were not exported to the libhdf5.settings file. This has been fixed, and the C, Fortran, and C++ build mode flags are now exported to the file.
 
    This also affects the text output of `H5check_version()` and the libhdf5.settings string stored in the library (for those who use strings(1), etc. to get build info from the binary).
 
-- CMake: Split compiler specific flags into separate files
+- CMake: Split compiler-specific flags into separate files
 
-   The compiler specific flags have been split into separate files to make it easier to maintain and add new compiler flags. The flags for NVHPC, Intel, GNU and Clang compilers are now in separate files included from the current compiler flags files; `HDFCompiler<language>Flags.cmake`.
+   The compiler-specific flags have been split into separate files to make it easier to maintain and add new compiler flags. The flags for NVHPC, Intel, GNU and Clang compilers are now in separate files included from the current compiler flags files; `HDFCompiler<language>Flags.cmake`.
 
 - Added support for native zlib-ng compression
 
@@ -117,7 +114,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Generated files in src are now checked into version control
 
-   These files are infrequently updated and generating them adds a dependency on Perl. The listed files are now checked in and do not need to be recreated when checking out development branches.
+   These files are infrequently updated, and generating them adds a dependency on Perl. The listed files are now checked in and do not need to be recreated when checking out development branches.
    - H5Edefin.h
    - H5Einit.h
    - H5Emajdef.h
@@ -137,7 +134,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The standard for building the library is now C11. We have updated the build files to set the C standard to C11, though some platforms use gnu11 to get some GNU things to work.
 
-### Library 
+## Library 
 
 - Aligned the CMake compiler wrappers with the old Autotools versions
 
@@ -153,7 +150,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Changed the default page buffer size for the ROS3 driver
 
-   Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer size in the FAPL to 64MiB if it was not previously set. This will only have an effect if the file uses paged allocation. Also added the `H5F_PAGE_BUFFER_SIZE_DEFAULT` to allow the user to unset the page buffer size in a FAPL so it can be similarly overridden.
+   Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer size in the FAPL to 64MiB if it was not previously set. This will only have an effect if the file uses paged allocation. Also added the `H5F_PAGE_BUFFER_SIZE_DEFAULT` to allow the user to unset the page buffer size in an FAPL so it can be similarly overridden.
 
 - Default dataset chunk cache size increased
 
@@ -202,11 +199,11 @@ HDF5 release, platforms tested, and known problems in this release.
      - From STS, by using AssumeRoleWithWebIdentity
      - From EC2 instance metadata
 
-   If the ROS3 VFD cannot source credentials from any of these locations, it will fallback to using anonymous credentials.
+   If the ROS3 VFD cannot source credentials from any of these locations, it will fall back to using anonymous credentials.
 
    This functionality effectively deprecates the --s3-cred option for the `h5dump`, `h5ls`, and `h5stat` tools. However, this option has been kept for compatibility reasons and can still be used to force the specified credentials to take precedence over any credentials that the VFD would otherwise try to source.
 
-   Note that with these changes the AWS region to be used must always be specified. However, the region can now be specified in several ways other than just in the FAPL structure. The VFD will search for a specified AWS region in the following order:
+   Note that with these changes, the AWS region to be used must always be specified. However, the region can now be specified in several ways other than just in the FAPL structure. The VFD will search for a specified AWS region in the following order:
      - The FAPL, if `aws_region` is not an empty string
      - The AWS_REGION environment variable
      - The AWS_DEFAULT_REGION environment variable
@@ -217,7 +214,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    New API functions `H5Pset_fapl_ros3_endpoint()` and `H5Pget_fapl_ros3_endpoint()` have been added for use with the ROS3 VFD. These functions set/get an alternate endpoint URL to use when opening files with the ROS3 VFD. This is useful in cases where the application needs to access files that are in a location other than the standard s3.<region-code>.amazonaws.com, which is what the ROS3 VFD uses when an alternate endpoint URL isn't specified. The ROS3 VFD also checks the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate endpoint URL if one isn't specified with `H5Pset_fapl_ros3_endpoint()`.
 
-   Instructions for building the ROS3 VFD with the aws-c-s3 library have been added to release_docs/INSTALL_S3.txt. The ROS3 VFD and information about usage of the driver is described in the HDF5 user's guide.
+   Instructions for building the ROS3 VFD with the aws-c-s3 library have been added to release_docs/INSTALL_S3.txt. The ROS3 VFD and information about the usage of the driver are described in the HDF5 user's guide.
 
 - Renamed some API decorations
 
@@ -234,7 +231,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - The `H5Iregister_type()` signature has changed
 
-   The hash_size parameter has not been used since early versions of HDF5 1.8, so it has been removed and the API call has been versioned.
+   The hash_size parameter has not been used since early versions of HDF5 1.8, so it has been removed, and the API call has been versioned.
 
    The old signature has been renamed to `H5Iregister_type1()` and is considered deprecated:
 
@@ -328,9 +325,9 @@ HDF5 release, platforms tested, and known problems in this release.
 
    Alternative software implementation conversion paths have been added for all of the above for use when native complex number support is not available. All of these conversion paths follow the behavior outlined in the C standard for conversions of complex number values.
 
-   Additionally, a special datatype conversion path has been added between complex number datatypes and array or compound datatypes where the in-memory layout of data is the same between the datatypes and data can be directly converted. This conversion path is subject to the following rules:
-     - An array datatype must consist of exactly two elements where each element is of the same floating-point datatype as the complex number datatype's base floating-point datatype.
-     - A compound datatype must consist of exactly two fields where each field is of the same floating-point datatype as the complex number datatype's base floating-point datatype. The compound datatype must not have any leading or trailing structure padding or any padding between its two fields. The fields must also have compatible names, must have compatible offsets within the datatype and must be in the order of "real" part -> "imaginary" part, such that the compound datatype matches the following representation:
+   Additionally, a special datatype conversion path has been added between complex number datatypes and array or compound datatypes, where the in-memory layout of data is the same between the datatypes and data can be directly converted. This conversion path is subject to the following rules:
+     - An array datatype must consist of exactly two elements, where each element is of the same floating-point datatype as the complex number datatype's base floating-point datatype.
+     - A compound datatype must consist of exactly two fields, where each field is of the same floating-point datatype as the complex number datatype's base floating-point datatype. The compound datatype must not have any leading or trailing structure padding or any padding between its two fields. The fields must also have compatible names, must have compatible offsets within the datatype and must be in the order of "real" part -> "imaginary" part, such that the compound datatype matches the following representation:
         ```
         H5T_COMPOUND {
         <float_type> "r(e)(a)(l)";  OFFSET 0
@@ -345,7 +342,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    Support for the Fortran wrappers has not yet been added.
 
-   Support for the predefined complex number datatypes and the `H5Tcomplex_create` function has been added to the high level library, allowing them to work with the `H5LTtext_to_dtype` and `H5LTdtype_to_text` functions.
+   Support for the predefined complex number datatypes and the `H5Tcomplex_create` function has been added to the high-level library, allowing them to work with the `H5LTtext_to_dtype` and `H5LTdtype_to_text` functions.
 
    Simple example programs showing how to use complex number datatypes have been added in the following files:
     - HDF5Examples/C/H5T/200/h5ex_t_complex.c   (Uses C99 complex number types)
@@ -378,26 +375,26 @@ HDF5 release, platforms tested, and known problems in this release.
 
    Similar to the above. Setting the connector on a non-FAPL had no effect on library behavior, and the connector ID and information could not be read back from that plist later.
 
-### Parallel Library
+## Parallel Library
 
-### Fortran Library
+## Fortran Library
 
-### C++ Library
+## C++ Library
 
-### Java Library
+## Java Library
 
-### Tools
+## Tools
 
 - Added AWS endpoint command option to allow specifying an alternate endpoint URL when using the ROS3 VFD
 
-   The new option is --endpoint-url, which allows the user to set an alternate endpoint URL than the standard "protocol://service-code.region-code.amazonaws.com". If "--endpoint-url" is not specified, the ROS3 VFD will first check the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
+   The new option is --endpoint-url, which allows the user to set an alternate endpoint URL other than the standard "protocol://service-code.region-code.amazonaws.com". If "--endpoint-url" is not specified, the ROS3 VFD will first check the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
 
    This option is supported by the following tools:
       `h5dump`, `h5ls`, `h5stat`
 
-- Specifying ROS3 VFD on the command line not required when using S3 URI
+- Specifying ROS3 VFD on the command line is not required when using S3 URI
 
-   If using an S3 URI to reference HDF5 file in S3 (example: s3://mybucket/myfile.h5) then ROS3 VFD will be automatically selected unless the command-line option for the virtual file driver is used.
+   If using an S3 URI to reference an HDF5 file in S3 (example: s3://mybucket/myfile.h5), then ROS3 VFD will be automatically selected unless the command-line option for the virtual file driver is used.
 
    This feature applies to the following tools: `h5dump`, `h5ls`, `h5stat`.
 
@@ -411,26 +408,26 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Remove the high-level GIF tools
 
-   The high-level GIF tools, `h52gif` and `gif2h5`, have unfixed CVE issues (with no proof-of-concept files). They are not critical tools, are not well maintained, and are an odd fit for building with the library. Because of this, they have been removed. We may move them to a separate repository in the future.
+   The high-level GIF tools, `h52gif` and `gif2h5`, have unfixed CVE issues (with no proof-of-concept files). They are not critical tools, are not well-maintained, and are an odd fit for building with the library. Because of this, they have been removed. We may move them to a separate repository in the future.
 
    This also removes the following configure options:
       CMake: `HDF5_BUILD_HL_GIF_TOOLS`
 
-### High-Level APIs 
+## High-Level APIs 
 
-### C Packet Table API
+## C Packet Table API
 
-### Internal header file
+## Internal header file
 
-### Documentation
+## Documentation
 
 - The COPYING file has been renamed to LICENSE
 
    This is where most people will expect to find license information. The COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5. The licenses are unchanged.
  
-## 🪲  Bug Fixes
+# 🪲  Bug Fixes
 
-### Library
+## Library
 - Fixed an issue with caching in the ROS3 VFD
    The ROS3 VFD uses a very simple caching mechanism that caches the first 16MiB of a file during file open and serves later reads from that cache if the offset + length falls within the cached range of bytes. Combinations of offset + length that extended exactly to the end of the cached range of bytes (for example, offset=0 and len=16777216) would end up not being served from the cache due to an incorrect range check. This has now been fixed.
 
@@ -458,9 +455,9 @@ HDF5 release, platforms tested, and known problems in this release.
 - Fixed a bug in the `H5Oexists` and `H5Oexists_by_name` API routines that would cause those routines to return FAIL instead of FALSE when checking the existence of a non-existent object with a file ID instead of a group ID.
 
 - Fixed a segfault in h5dump when a B-tree node level is corrupted
-   `h5dump` produced a segfault on a mal-formed file because a B-tree node level was corrupted.
+   `h5dump` produced a segfault on a malformed file because a B-tree node level was corrupted.
 
-    An internal function was modified to help detecting when a decoded B-tree node level has an unexpected value and an error will be produced.
+    An internal function was modified to help detect when a decoded B-tree node level has an unexpected value, and an error will be produced.
 
     Fixes GitHub issue [#4432](https://github.com/HDFGroup/hdf5/issues/4432)
 
@@ -480,18 +477,18 @@ HDF5 release, platforms tested, and known problems in this release.
 
    Fixes GitHub issue [#4952](https://github.com/HDFGroup/hdf5/issues/4952)
 
-### Java Library
+## Java Library
 
 - Renamed the Callbacks.java file to H5Callbacks.java
 
   The Callbacks.java file was renamed to H5Callbacks.java to match the file pattern used by doxygen. This change only affects the Java filenames and
  does not change the classname or the package name.
 
-### Configuration
+## Configuration
 
 - Reorganized CMake HDF5 configuration options
 
-   The CMake configuration options have been reorganized to identify the primary options that are relevant to the build. These options are now in a separate file, CMakeBuildOptions.cmake, which is included by the root CMakeLists.txt file. In addition some options have been converted to `cmake_dependent_option()` calls, which allows the options to be hidden from the CMake GUI when they are not relevant to the build.
+   The CMake configuration options have been reorganized to identify the primary options that are relevant to the build. These options are now in a separate file, CMakeBuildOptions.cmake, which is included by the root CMakeLists.txt file. In addition, some options have been converted to `cmake_dependent_option()` calls, which allows the options to be hidden from the CMake GUI when they are not relevant to the build.
 
 - Remove default setting of `CMAKE_DEBUG_POSTFIX`
 
@@ -501,7 +498,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The RPATH settings were removed by a pull-request [#5271](https://github.com/HDFGroup/hdf5/pull/5271), but the settings are needed under certain conditions. These settings have been restored by appending the necessary paths and will not override/overwrite any existing settings.
 
-- When using a system installed zlib library, the shared library is expected to be found in the system library path.
+- When using a system-installed zlib library, the shared library is expected to be found in the system library path.
 
    Setting the `HDF5_MODULE_MODE_ZLIB` option to OFF will force find_package to use config mode first. An installed zlib, or an alternate installed zlib library, is expected to have a correct zlib-config.cmake file for config mode. Current zlib installs usually do not have a zlib-config.cmake file, so the option is set to ON by default.
 
@@ -530,7 +527,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
   There is not a szip module file to use, so the `find_package` only uses `find_package` in config mode. The choice then is to either build szip, with libaec, inline, or find a system installed szip library, built with CMake.
 
-### Tools
+## Tools
 
 - `h5repack` did not properly parse User Defined filters
 
@@ -544,25 +541,25 @@ HDF5 release, platforms tested, and known problems in this release.
 
   Fixes GitHub issue [#5414](https://github.com/HDFGroup/hdf5/issues/5414)
 
-### Performance
+## Performance
 
-### Fortran API
+## Fortran API
 
-### High-Level Library
+## High-Level Library
 
 - Fixed an issue with H5TB functions
 
    The H5TB functions were not correctly creating the FILL_INFO attribute for tables. This has been fixed by using the field offsets array from the call to H5TBAget_fill instead of using the compound type member offsets from the H5Tget_member_offset call for each compound type.
 
-### Fortran High-Level APIs
+## Fortran High-Level APIs
 
-### Documentation
+## Documentation
 
-### F90 APIs
+## F90 APIs
 
-### C++ APIs
+## C++ APIs
 
-### Testing
+## Testing
 
 - Fixed an allocation in the t_bigio parallel test on 32-bit systems
 
@@ -576,19 +573,19 @@ HDF5 release, platforms tested, and known problems in this release.
 
     An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests (mpiodup, props, fapl_preserve) to fail. These tests are now skipped for that release of OpenMPI. The issue has been fixed in the 5.0.6 release of OpenMPI.
 
-## ⚠️ Breaking Changes
+# ⚠️ Breaking Changes
 
 - **Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT**
 
    The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
 
-## ✨ Support for new platforms and languages
+# ✨ Support for new platforms and languages
 
-## ☑️ Platforms Tested 
+# ☑️ Platforms Tested 
 
 Data to come from cdash.
 
-## ⛔ Known Problems
+# ⛔ Known Problems
 
 -  When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library
 fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
@@ -643,7 +640,7 @@ fails to initialize due to not being able to detect the byte order of the _Float
 
 -  Known problems in previous releases can be found in the HISTORY*.txt files in the HDF5 source. Please report any new problems found to help@hdfgroup.org.
 
-## <img src="Cmake_logo.svg" alt="Cmake logo" width=24> CMake Installations
+# <img src="Cmake_logo.svg" alt="Cmake logo" width=24> CMake Installations
 
 See the AutotoolsToCMakeOptions.md file for CMake options for former Autotools options. CMake produces the following set of folders; bin, include, lib and share. The LICENSE and RELEASE.txt file are placed in the share folder.
 
@@ -670,8 +667,3 @@ The issues with the gif tool are:
 These CVE issues have not yet been addressed and are avoided by not building the gif tool by default. Enable building the High-Level tools with this options:
 
    cmake: `HDF5_BUILD_HL_GIF_TOOLS=ON`
-
-## 📝 Documentation
-
-## ❤️ Contributors
-A huge thank you to our contributors for this release: @username1, @username2, and @username3!
