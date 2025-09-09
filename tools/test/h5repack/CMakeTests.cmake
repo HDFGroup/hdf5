@@ -471,7 +471,7 @@ macro (ADD_H5_TEST testname)
     if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5REPACK-${ctest_testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/ARG_TEST_FILEs/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
       )
       set_property(TEST H5REPACK-${ctest_testname} PROPERTY DISABLED true)
     endif ()
