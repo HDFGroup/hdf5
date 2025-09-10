@@ -52,4 +52,6 @@ struct H5RT_t {
     int rank;
 };
 
+bool H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[]);
+
 #endif /* H5RTpkg_H */
