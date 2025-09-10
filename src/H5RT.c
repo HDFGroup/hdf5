@@ -208,7 +208,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         node->children.leaves     = leaves;
     }
     else {
-        /* Recusrive case - there will be child nodes */
+        /* Recursive case - there will be child nodes */
         node->children_are_leaves = false;
 
         /* Sort hyper-rectangles in this region by the first unsorted coordinate of their midpoints */

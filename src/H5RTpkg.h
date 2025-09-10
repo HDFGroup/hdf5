@@ -27,7 +27,7 @@
 
 /* Other private headers needed by this file */
 
-// TODO - Choose optmized value
+// TODO - Choose optimized value
 #define H5RT_MAX_NODE_SIZE 16
 
 /* Forward declaration */
