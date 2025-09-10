@@ -65,9 +65,7 @@ use strict;
 # If the version number is changed (either `-s' or `-i' was used on
 # the command line) then the version line of the README.md and RELEASE.txt files
 # one directory above the H5public.h file is also modified so it looks
-# something like: This is hdf5-1.2.3-pre1 currently under development.
-# The AC_INIT macro in configure.ac will also change in this case to be
-# something like: AC_INIT([HDF5], [hdf5-1.2.3-pre1], [help@hdfgroup.org])
+# something like: This is hdf5-2.0.1-1 currently under development.
 # Version changes are also reflected in the Windows-maintained H5pubconf.h
 # file.
 #
@@ -157,11 +155,10 @@ while ($_ = shift) {
 die "mutually exclusive options given\n" if $set && $inc;
 
 # Determine file to use as H5public.h, README.md,
-# release_docs/RELEASE.txt, configure.ac, windows/src/H5pubconf.h
+# release_docs/RELEASE.txt, windows/src/H5pubconf.h
 # config/lt_vers.am and config/cmake/scripts/HDF5config.cmake. 
-# The README.md, release_docs/RELEASE.txt, configure.ac, 
-# windows/src/H5pubconf.h, config/lt_vers.am and
-# config/cmake/scripts/HDF5config.cmake
+# The README.md, release_docs/RELEASE.txt, # windows/src/H5pubconf.h,
+# config/lt_vers.am and config/cmake/scripts/HDF5config.cmake
 # files are always in the directory above H5public.h
 unless ($file) {
   for (@files) {
@@ -178,6 +175,10 @@ die "unable to read file: $LT_VERS\n" unless -r $file;
 my $HDF5CONFIGCMAKE = $file;
 $HDF5CONFIGCMAKE =~ s/[^\/]*$/..\/config\/cmake\/scripts\/HDF5config.cmake/;
 die "unable to read file: $HDF5CONFIGCMAKE\n" unless -r $file;
+
+my $HDF5EXCONFCMAKE = $file;
+$HDF5EXCONFCMAKE =~ s/[^\/]*$/..\/config\/examples\/HDF5AsSubdirMacros.cmake/;
+die "unable to read file: $HDF5EXCONFCMAKE\n" unless -r $file;
 # README.md
 my $README = $file;
 $README =~ s/[^\/]*$/..\/README.md/;
@@ -190,10 +191,6 @@ die "unable to read file: $RELEASE\n" unless -r $file;
 my $NEWS = $file;
 $NEWS =~ s/[^\/]*$/..\/release_docs\/NEWSLETTER.txt/;
 die "unable to read file: $NEWS\n" unless -r $file;
-# configure.ac
-my $CONFIGURE = $file;
-$CONFIGURE =~ s/[^\/]*$/..\/configure.ac/;
-die "unable to read file: $CONFIGURE\n" unless -r $file;
 my $H5_JAVA = $file;
 $H5_JAVA =~ s/[^\/]*$/..\/java\/src\/hdf\/hdf5lib\/H5.java/;
 die "unable to read file: $H5_JAVA\n" unless -r $file;
@@ -250,9 +247,9 @@ if ($set) {
   $README = "";
   $RELEASE = "";
   $NEWS = "";
-  $CONFIGURE = "";
   $LT_VERS = "";       
   $HDF5CONFIGCMAKE = "";
+  $HDF5EXCONFCMAKE = "";
   @newver = @curver;
 }
 
@@ -362,6 +359,23 @@ if ($HDF5CONFIGCMAKE) {
   write_file($HDF5CONFIGCMAKE, $data);  
 }
 
+# Update the config/examples/HDF5AsSubdirMacros.cmake file
+if ($HDF5EXCONFCMAKE) {
+  my $data = read_file($HDF5EXCONFCMAKE);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq "" 
+     ? sprintf("\"%s\"", "") 
+     : sprintf("\"%s\"", "-".$newver[3])
+     );
+  my $version_string = sprintf("\"%d.%d.%d\"", @newver[0,1,2]);
+
+  $data =~ s/set \(HDF5_VERSION .*\)/set \(HDF5_VERSION $version_string\)/;
+  $data =~ s/set \(HDF5_VERSEXT .*\)/set \(HDF5_VERSEXT $sub_rel_ver_str\)/;
+
+  write_file($HDF5EXCONFCMAKE, $data);  
+}
+
 # Update the java/src/hdf/hdf5lib/H5.java file
 if ($H5_JAVA) {
   my $data = read_file($H5_JAVA);
@@ -436,43 +450,6 @@ sub write_file {
 
     return;
 }
-
-
-sub gen_configure {
-  my ($name, $conf) = @_;
-
-  open FILE, $conf or die "$conf: $!\n";
-  my @contents = <FILE>;
-  close FILE;
-
-  for (my $i = 0; $i < $#contents; ++$i) {
-    if ($contents[$i] =~ /^AC_INIT/) {
-      $contents[$i] = sprintf("AC_INIT([$name], [%d.%d.%d%s], [help\@hdfgroup.org])\n",
-                              @newver[0,1,2],
-                              $newver[3] eq "" ? "" : "-".$newver[3]);
-      last;
-    }
-  }
-
-  open FILE, ">$conf" or die "$conf: $!\n";
-  print FILE @contents;
-  close FILE;
-
-  $conf =~ /^(.*?)\/?configure.ac$/;
-
-  if ($1) {
-    $rc = system("cd $1 && ./autogen.sh >/dev/null 2>/dev/null && rm -rf autom4te.cache");
-  } else {
-    $rc = system("./autogen.sh >/dev/null 2>/dev/null && rm -rf autom4te.cache");
-  }
-  if ($rc) {
-    printf("./autogen.sh failed with exit code %d. Aborted.\n", $rc);
-    exit 1;
-  }
-}
-
-# Update the configure.ac files and regenerate them
-gen_configure("HDF5", $CONFIGURE) if $CONFIGURE;
 
 sub gen_h5pubconf {
     my ($name, $pubconf, @vers) = @_;
