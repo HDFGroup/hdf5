@@ -28,7 +28,7 @@
 H5FL_DEFINE_STATIC(H5RT_t);
 H5FL_DEFINE_STATIC(H5RT_node_t);
 
-static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, bool root, int prev_sort_dim);
+static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, int prev_sort_dim);
 static void H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_leaf_t **head, H5RT_leaf_t **tail);
 static void H5RT__free_recurse(H5RT_node_t *node);
 static bool intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[]);
@@ -85,7 +85,7 @@ static int H5RT__leaf_compare(const void* leaf1, const void* leaf2, void *dim) {
  * See "STR: A Simple and Efficient Algorithm for R-Tree Packing"
  * https://archive.org/details/nasa_techdoc_19970016975/page/n9 */
 static herr_t
-H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, bool root, int prev_sort_dim)
+H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, int prev_sort_dim)
 {
     herr_t ret_value = SUCCEED;
     int sort_dim = -1;
@@ -150,7 +150,12 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
          * should be k */
         double remaining_ranks = (double) rank - (double) (prev_sort_dim + 1);
         assert(remaining_ranks >= 1.0);
-        int num_slabs = (int) ceil(pow(num_leaf_pages, 1.0 / remaining_ranks));
+
+        /* Avoid casting warning */
+        double slabs_d = ceil(pow(num_leaf_pages, 1.0 / remaining_ranks));
+        if (slabs_d > INT_MAX)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "number of slabs overflows int");
+        int num_slabs = (int) slabs_d;
 
         assert(num_slabs <= H5RT_MAX_NODE_SIZE);
 
@@ -175,7 +180,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
             child_leaf_start = leaves + (i * H5RT_MAX_NODE_SIZE);
             assert(child_leaf_start);
         
-            if (H5RT__bulk_load(node->children.nodes[i], rank, child_leaf_start, child_leaf_count, false, sort_dim) < 0)
+            if (H5RT__bulk_load(node->children.nodes[i], rank, child_leaf_start, child_leaf_count, sort_dim) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "failed to fill R-tree");
             
             leaves_left -= H5RT_MAX_NODE_SIZE;
@@ -210,7 +215,7 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
     rtree->leaves = leaves;
 
     /* Populate the r-tree with nodes containing the provided leaves */
-    if (H5RT__bulk_load(&rtree->root, rank, leaves, count, true, -1) < 0)
+    if (H5RT__bulk_load(&rtree->root, rank, leaves, count, -1) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, NULL, "failed to fill R-tree");
 
     ret_value = rtree;
