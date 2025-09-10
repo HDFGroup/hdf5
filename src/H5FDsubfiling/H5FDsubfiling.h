@@ -417,9 +417,28 @@ H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t
  */
 H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 
-/*
- * The caller must call H5free_memory on each of the entries in `filenames`, as well
- * as on `filenames` itself.
+/**
+ * \ingroup FAPL
+ *
+ * \brief Provides a list of subfile names that are associated with an MPI rank identifier.
+ *
+ * \file_id
+ *
+ * \param[out] filenames List of subfile names that are associated with an MPI rank identifier.
+ * \param[out] len The number of subfiles contained in the list.
+ *
+ * \returns \herr_t
+ *
+ * \details H5FDsubfiling_get_file_mapping() retrieves the subfile names associated with a
+ *          specified file identifier and MPI rank identifier. This information is useful,
+ *          for instance, when providing it to `h5fuse` for combining files from local node
+ *          storage.
+ *
+ * \note  The caller must call H5free_memory() on each of the entries in \p filenames, as well
+ *        as on \p filenames itself.
+ *
+ * \since 2.0.0
+ *
  */
 H5_DLL herr_t H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len);
 

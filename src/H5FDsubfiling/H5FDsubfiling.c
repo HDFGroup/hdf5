@@ -665,11 +665,7 @@ done:
             }
         }
         free(filenames_arr);
-
-        *filenames = NULL;
-        *len       = 0;
     }
-
     H5MM_free(base);
     H5MM_free(subfile_dir);
 
