@@ -34,6 +34,41 @@
 #define RTREE_CREATE_TEST_NUM_COUNTS 2
 static const size_t test_counts[RTREE_CREATE_TEST_NUM_COUNTS] = {1, 100};
 
+/* Helper function to generate leaf data */
+static H5RT_leaf_t* generate_leaves(int rank, size_t leaf_count);
+
+/* Helper function to generate leaf data */
+static H5RT_leaf_t* generate_leaves(int rank, size_t leaf_count) {
+    H5RT_leaf_t *ret_value = NULL;
+    H5RT_leaf_t *curr_leaf = NULL;
+
+    assert(rank > 0);
+    assert(leaf_count > 0);
+
+    srand(0);
+
+    if ((ret_value = calloc(leaf_count, sizeof(H5RT_leaf_t))) == NULL)
+        goto done;
+
+    for (size_t i = 0; i < leaf_count; i++) {
+        curr_leaf = ret_value + i;
+
+        for (int d = 0; d < rank; d++) {
+
+            hsize_t min_coord = (hsize_t)rand() % 1000;
+            hsize_t size = 1 + (hsize_t)rand() % leaf_count;
+            curr_leaf->mid[d] = min_coord;
+            curr_leaf->max[d] = min_coord + size;
+            // TODO: Potential edge case where target leaf won't be found,
+            // due to using midpoints to sort where midpoint gets rounded
+            curr_leaf->mid[d] = (curr_leaf->max[d] + curr_leaf->min[d]) / 2;
+        }
+    }
+
+done:
+    return ret_value;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    test_rtree_create
  *
@@ -50,34 +85,16 @@ test_rtree_create(void)
     H5RT_t *tree = NULL;
     size_t leaf_count = 0;
     H5RT_leaf_t *leaves = NULL;
-    H5RT_leaf_t *curr_leaf = NULL;
 
     TESTING("R-tree creation");
-
-    srand(0);
 
     for (int cnt_idx = 0; cnt_idx < RTREE_CREATE_TEST_NUM_COUNTS; cnt_idx++) {
         leaf_count = test_counts[cnt_idx];
 
         for (int rank = 1; rank < RTREE_CREATE_TEST_RANK; rank++) {
             /* Create the data to populate the r-tree */
-            if ((leaves = calloc(leaf_count, sizeof(H5RT_leaf_t))) == NULL)
+            if ((leaves = generate_leaves(rank, leaf_count)) == NULL)
                 FAIL_STACK_ERROR;
-
-            for (size_t i = 0; i < leaf_count; i++) {
-                curr_leaf = leaves + i;
-                
-                for (int d = 0; d < rank; d++) {
-
-                    hsize_t min_coord = (hsize_t)rand() % 1000;
-                    hsize_t size = 1 + (hsize_t)rand() % leaf_count;
-                    curr_leaf->mid[d] = min_coord;
-                    curr_leaf->max[d] = min_coord + size;
-                    // TODO: Potential edge case where target leaf won't be found,
-                    // due to using midpoints to sort where midpoint gets rounded
-                    curr_leaf->mid[d] = (curr_leaf->max[d] + curr_leaf->min[d]) / 2;
-                }
-            }
 
             if ((tree = H5RT_create(rank, leaves, leaf_count)) == NULL)
                 FAIL_STACK_ERROR;
@@ -98,32 +115,6 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_rtree_bulk_load
- *
- * Purpose:     Test STR bulk loading algorithm
- *
- * Return:      Success: SUCCEED
- *              Failure: FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_rtree_bulk_load(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    TESTING("R-tree STR bulk loading");
-
-    /* TODO: Implement STR bulk loading tests */
-    
-    PASSED();
-    return SUCCEED;
-
-error:
-    return FAIL;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    test_rtree_search
  *
  * Purpose:     Test R-tree spatial query operations
@@ -136,7 +127,7 @@ error:
 static herr_t
 test_rtree_search(void)
 {
-    herr_t ret_value = SUCCEED;
+    //herr_t ret_value = SUCCEED;
 
     TESTING("R-tree spatial queries");
 
@@ -145,8 +136,8 @@ test_rtree_search(void)
     PASSED();
     return SUCCEED;
 
-error:
-    return FAIL;
+//error:
+//    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -162,7 +153,7 @@ error:
 static herr_t
 test_rtree_stress(void)
 {
-    herr_t ret_value = SUCCEED;
+    //herr_t ret_value = SUCCEED;
 
     TESTING("R-tree stress tests");
 
@@ -171,8 +162,8 @@ test_rtree_stress(void)
     PASSED();
     return SUCCEED;
 
-error:
-    return FAIL;
+//error:
+//    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -188,7 +179,7 @@ error:
 static herr_t
 test_rtree_errors(void)
 {
-    herr_t ret_value = SUCCEED;
+    //herr_t ret_value = SUCCEED;
 
     TESTING("R-tree error handling");
 
@@ -197,8 +188,8 @@ test_rtree_errors(void)
     PASSED();
     return SUCCEED;
 
-error:
-    return FAIL;
+//error:
+//    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -218,9 +209,10 @@ main(void)
     
     printf("Testing R-tree spatial indexing...\n");
 
+    H5open();
+
     /* Run tests */
     nerrors += test_rtree_create() < 0 ? 1 : 0;
-    nerrors += test_rtree_bulk_load() < 0 ? 1 : 0;
     nerrors += test_rtree_search() < 0 ? 1 : 0;
     nerrors += test_rtree_stress() < 0 ? 1 : 0;
     nerrors += test_rtree_errors() < 0 ? 1 : 0;
