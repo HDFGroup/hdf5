@@ -30,7 +30,9 @@
 #include "H5CXprivate.h" /* API Contexts */
 #include "H5VLprivate.h" /* Virtual Object Layer */
 
-const char *FILENAME[] = {"rtree", "rtree_tmp", NULL};
+#define RTREE_CREATE_TEST_RANK 8
+#define RTREE_CREATE_TEST_NUM_COUNTS 2
+static const size_t test_counts[RTREE_CREATE_TEST_NUM_COUNTS] = {1, 100};
 
 /*-------------------------------------------------------------------------
  * Function:    test_rtree_create
@@ -45,12 +47,49 @@ const char *FILENAME[] = {"rtree", "rtree_tmp", NULL};
 static herr_t
 test_rtree_create(void)
 {
-    herr_t ret_value = SUCCEED;
+    H5RT_t *tree = NULL;
+    size_t leaf_count = 0;
+    H5RT_leaf_t *leaves = NULL;
+    H5RT_leaf_t *curr_leaf = NULL;
 
     TESTING("R-tree creation");
 
-    /* TODO: Implement basic R-tree creation test */
-    
+    srand(0);
+
+    for (int cnt_idx = 0; cnt_idx < RTREE_CREATE_TEST_NUM_COUNTS; cnt_idx++) {
+        leaf_count = test_counts[cnt_idx];
+
+        for (int rank = 1; rank < RTREE_CREATE_TEST_RANK; rank++) {
+            /* Create the data to populate the r-tree */
+            if ((leaves = calloc(leaf_count, sizeof(H5RT_leaf_t))) == NULL)
+                FAIL_STACK_ERROR;
+
+            for (size_t i = 0; i < leaf_count; i++) {
+                curr_leaf = leaves + i;
+                
+                for (int d = 0; d < rank; d++) {
+
+                    hsize_t min_coord = (hsize_t)rand() % 1000;
+                    hsize_t size = 1 + (hsize_t)rand() % leaf_count;
+                    curr_leaf->mid[d] = min_coord;
+                    curr_leaf->max[d] = min_coord + size;
+                    // TODO: Potential edge case where target leaf won't be found,
+                    // due to using midpoints to sort where midpoint gets rounded
+                    curr_leaf->mid[d] = (curr_leaf->max[d] + curr_leaf->min[d]) / 2;
+                }
+            }
+
+            if ((tree = H5RT_create(rank, leaves, leaf_count)) == NULL)
+                FAIL_STACK_ERROR;
+            
+            /* Ownership of memory has transferred */
+            leaves = NULL;
+
+            if (H5RT_free(tree) < 0)
+                FAIL_STACK_ERROR;
+        }
+    }
+
     PASSED();
     return SUCCEED;
 

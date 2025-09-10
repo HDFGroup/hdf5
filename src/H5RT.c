@@ -28,7 +28,7 @@
 H5FL_DEFINE_STATIC(H5RT_t);
 H5FL_DEFINE_STATIC(H5RT_node_t);
 
-herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, bool root, int prev_sort_dim);
+static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, bool root, int prev_sort_dim);
 static void H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_leaf_t **head, H5RT_leaf_t **tail);
 static void H5RT__free_recurse(H5RT_node_t *node);
 static bool intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[]);
@@ -84,7 +84,7 @@ static int H5RT__leaf_compare(const void* leaf1, const void* leaf2, void *dim) {
  * This is an implementation of the sort-tile-recursive (STR) algorithm.
  * See "STR: A Simple and Efficient Algorithm for R-Tree Packing"
  * https://archive.org/details/nasa_techdoc_19970016975/page/n9 */
-herr_t
+static herr_t
 H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, bool root, int prev_sort_dim)
 {
     herr_t ret_value = SUCCEED;
@@ -93,7 +93,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
     size_t child_leaf_count = 0;
     H5RT_leaf_t *child_leaf_start = NULL;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     if (!node)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid node");
@@ -240,7 +240,7 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
     H5RT_leaf_t *curr_leaf = NULL;
     H5RT_node_t *curr_node = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     assert(node);
     assert(head);
@@ -320,7 +320,7 @@ done:
 static void
 H5RT__free_recurse(H5RT_node_t *node)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Only recurse if the children are more internal nodes */
     if (!node->children_are_leaves)
