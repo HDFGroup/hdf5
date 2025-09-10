@@ -41,15 +41,15 @@ typedef struct H5RT_node_t {
         H5RT_node_t *nodes[H5RT_MAX_NODE_SIZE];
         H5RT_leaf_t *leaves;
     } children;
-    int nchildren;
+    int  nchildren;
     bool children_are_leaves;
 } H5RT_node_t;
 
 /* Overall r-tree */
 struct H5RT_t {
-    H5RT_node_t root;
+    H5RT_node_t  root;
     H5RT_leaf_t *leaves; // TODO: Head of a LL of leaves?
-    int rank;
+    int          rank;
 };
 
 bool H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[]);

@@ -28,14 +28,17 @@
 H5FL_DEFINE_STATIC(H5RT_t);
 H5FL_DEFINE_STATIC(H5RT_node_t);
 
-static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, int prev_sort_dim);
-static void H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_leaf_t **head, H5RT_leaf_t **tail);
-static void H5RT__free_recurse(H5RT_node_t *node);
+static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count,
+                              int prev_sort_dim);
+static void   H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[],
+                                   H5RT_leaf_t **head, H5RT_leaf_t **tail);
+static void   H5RT__free_recurse(H5RT_node_t *node);
 
-static int H5RT__leaf_compare(const void* leaf1, const void* leaf2, void *dim);
+static int H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
 
 /* Check if two hyper-rectangles specified by (min1, max1) and (min2, max2) intersect */
-bool H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[])
+bool
+H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[])
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -51,36 +54,42 @@ bool H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t mi
  * 0 if leaf1 == leaf2
  * 1 if leaf1 > leaf2
  */
-static int H5RT__leaf_compare(const void* leaf1, const void* leaf2, void *dim) {
-    const H5RT_leaf_t* l1 = NULL;
-    const H5RT_leaf_t* l2 = NULL;
-    int sort_dim = 0;
-    int ret_value = 0;
+static int
+H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
+{
+    const H5RT_leaf_t *l1        = NULL;
+    const H5RT_leaf_t *l2        = NULL;
+    int                sort_dim  = 0;
+    int                ret_value = 0;
 
     assert(leaf1);
     assert(leaf2);
     assert(dim);
 
-    l1 = (const H5RT_leaf_t*)leaf1;
-    l2 = (const H5RT_leaf_t*)leaf2;
-    sort_dim = *(int*)dim;
+    l1       = (const H5RT_leaf_t *)leaf1;
+    l2       = (const H5RT_leaf_t *)leaf2;
+    sort_dim = *(int *)dim;
 
     FUNC_ENTER_PACKAGE_NOERR
-
 
     /* Compare based on the midpoint of the specified dimension */
     if (l1->mid[sort_dim] < l2->mid[sort_dim]) {
         ret_value = -1;
-    } else if (l1->mid[sort_dim] > l2->mid[sort_dim]) {
+    }
+    else if (l1->mid[sort_dim] > l2->mid[sort_dim]) {
         ret_value = 1;
-    } else {
+    }
+    else {
         ret_value = 0;
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-static herr_t H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_out, size_t *slab_size_out, int rank) {
+static herr_t
+H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_out, size_t *slab_size_out,
+                    int rank)
+{
     assert(node_capacity > 0);
     assert(leaf_count > 0);
     assert(slab_count_out);
@@ -90,31 +99,32 @@ static herr_t H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_
     FUNC_ENTER_PACKAGE
 
     double num_slabs_d = -1.0;
-    size_t num_slabs = 0;
+    size_t num_slabs   = 0;
     double slab_size_d = -1.0;
-    size_t slab_size = 0;
-    
+    size_t slab_size   = 0;
+
     double P = 0.0;
 
     if (leaf_count <= node_capacity) {
         /* All leaves will fit into a single node */
         num_slabs = 1;
         slab_size = leaf_count;
-    } else {
+    }
+    else {
         /* Use intermediate variable to avoid warnings */
-        slab_size_d = ceil((double) leaf_count / (double) node_capacity);
+        slab_size_d = ceil((double)leaf_count / (double)node_capacity);
 
         if (slab_size_d > SIZE_MAX)
             HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "slab size overflows size_t");
         assert(slab_size_d > 0.0);
-        slab_size = (size_t) slab_size_d;
+        slab_size = (size_t)slab_size_d;
         assert(slab_size > 0);
 
-        num_slabs_d = ceil((double) leaf_count / (double) slab_size);
+        num_slabs_d = ceil((double)leaf_count / (double)slab_size);
         if (num_slabs_d > SIZE_MAX)
             HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "number of slabs overflows size_t");
         assert(num_slabs_d > 0.0);
-        num_slabs = (size_t) num_slabs_d;
+        num_slabs = (size_t)num_slabs_d;
     }
 
     assert(slab_size > 0);
@@ -125,7 +135,7 @@ static herr_t H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_
 done:
     if (ret_value == SUCCEED) {
         *slab_count_out = num_slabs;
-        *slab_size_out = slab_size;
+        *slab_size_out  = slab_size;
     }
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -145,15 +155,15 @@ done:
 static herr_t
 H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, int prev_sort_dim)
 {
-    herr_t ret_value = SUCCEED;
-    size_t leaves_left = 0; /* Leaves left to partition */
-    size_t child_leaf_count = 0;
+    herr_t       ret_value        = SUCCEED;
+    size_t       leaves_left      = 0; /* Leaves left to partition */
+    size_t       child_leaf_count = 0;
     H5RT_leaf_t *child_leaf_start = NULL;
-    
+
     bool this_rank_sorted = false;
-    int effective_rank = 0;
-    int sort_dim = -1;
-    
+    int  effective_rank   = 0;
+    int  sort_dim         = -1;
+
     size_t num_slabs = 0;
     size_t slab_size = 0;
 
@@ -171,7 +181,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid previous sort dimension");
 
     this_rank_sorted = (prev_sort_dim == (rank - 1));
-    effective_rank = rank - (prev_sort_dim + 1);
+    effective_rank   = rank - (prev_sort_dim + 1);
     if (effective_rank < 1)
         effective_rank = 1;
 
@@ -193,10 +203,11 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
 
     if (count <= H5RT_MAX_NODE_SIZE) {
         /* Base Case - All leaves will fit into this node */
-        node->nchildren = (int)count;
+        node->nchildren           = (int)count;
         node->children_are_leaves = true;
-        node->children.leaves = leaves;
-    } else {
+        node->children.leaves     = leaves;
+    }
+    else {
         /* Recusrive case - there will be child nodes */
         node->children_are_leaves = false;
 
@@ -205,7 +216,8 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
             assert(prev_sort_dim < rank - 1);
             sort_dim = prev_sort_dim + 1;
             qsort_r(leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, &sort_dim);
-        } else {
+        }
+        else {
             sort_dim = prev_sort_dim;
         }
 
@@ -213,13 +225,13 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
 
         /* Compute # slabs and slab size */
         H5RT__compute_slabs(H5RT_MAX_NODE_SIZE, count, &num_slabs, &slab_size, effective_rank);
-      
+
         node->nchildren = (int)num_slabs;
 
         /* Persistent pointer that is moved forward after each assignment
          * of a region leaves to a child node */
         child_leaf_start = leaves;
-        leaves_left = count;
+        leaves_left      = count;
 
         /* Recurse down to the next dimension to process each slab/region */
         for (int i = 0; i < node->nchildren; i++) {
@@ -237,10 +249,12 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
             assert(child_leaf_count > 0);
             assert(child_leaf_count < count);
 
-            /* Recursively fill this child node with leaves from 'child_leaf_start' to 'child_leaf_start' + 'child_leaf_count' */
-            if (H5RT__bulk_load(node->children.nodes[i], rank, child_leaf_start, child_leaf_count, sort_dim) < 0)
+            /* Recursively fill this child node with leaves from 'child_leaf_start' to 'child_leaf_start' +
+             * 'child_leaf_count' */
+            if (H5RT__bulk_load(node->children.nodes[i], rank, child_leaf_start, child_leaf_count, sort_dim) <
+                0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "failed to fill R-tree");
-            
+
             /* The next 'child_leaf_count' leaves are now assigned */
             child_leaf_start += child_leaf_count;
             leaves_left -= child_leaf_count;
@@ -255,7 +269,7 @@ done:
 H5RT_t *
 H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
 {
-    H5RT_t *rtree = NULL;
+    H5RT_t *rtree     = NULL;
     H5RT_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
@@ -298,7 +312,8 @@ done:
  *     tail (out): Tail of the linked list of results. Should be NULL on initial call.
  */
 static void
-H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_leaf_t **head, H5RT_leaf_t **tail)
+H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_leaf_t **head,
+                     H5RT_leaf_t **tail)
 {
     hsize_t *curr_min = NULL;
     hsize_t *curr_max = NULL;
@@ -316,8 +331,8 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
     for (int i = 0; i < node->nchildren; i++)
         if (node->children_are_leaves) {
             curr_leaf = node->children.leaves + i;
-            curr_min = curr_leaf->min;
-            curr_max = curr_leaf->max;
+            curr_min  = curr_leaf->min;
+            curr_max  = curr_leaf->max;
 
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
                 /* We found an intersecting leaf, add it to the linked list of leaves */
@@ -337,34 +352,34 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
         else {
             /* This is an internal node in the r-tree */
             curr_node = node->children.nodes[i];
-            curr_min = curr_node->min;
-            curr_max = curr_node->max;
+            curr_min  = curr_node->min;
+            curr_max  = curr_node->max;
 
             /* Only recurse into child node if its bounding box overlaps with the search region */
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
                 /* We found an intersecting internal node, recurse into it */
                 H5RT__search_recurse(curr_node, rank, min, max, head, tail);
-            }  
+            }
         }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5RT__search_recurse() */
 
 /* Returns a linked list of leaves whose bounding boxes intersect with min and max
- * TBD: The information used to assemble the return structure is 
+ * TBD: The information used to assemble the return structure is
  * stored in the leaves themselves, so subsequent/concurrent searches
  * will make previous search results invalid */
 H5RT_leaf_t *
 H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[])
 {
-    H5RT_leaf_t *head = NULL;
-    H5RT_leaf_t *tail = NULL;
+    H5RT_leaf_t *head      = NULL;
+    H5RT_leaf_t *tail      = NULL;
     H5RT_leaf_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
-    assert((hsize_t*)min);
-    assert((hsize_t*)max);
+    assert((hsize_t *)min);
+    assert((hsize_t *)max);
 
     if (!rtree)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid r-tree");

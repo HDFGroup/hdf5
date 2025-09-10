@@ -22,7 +22,7 @@
 /*
  * This file needs to access private datatypes from the H5RT package.
  */
-#define H5RT_FRIEND    /*suppress error about including H5RTpkg */
+#define H5RT_FRIEND /*suppress error about including H5RTpkg */
 #define H5RT_TESTING
 #include "H5RTpkg.h"
 
@@ -31,22 +31,25 @@
 #include "H5VLprivate.h" /* Virtual Object Layer */
 
 #define RTREE_TEST_BASE_COORD 10000
-#define RTREE_TEST_BASE_SIZE 1000
+#define RTREE_TEST_BASE_SIZE  1000
 
-#define RTREE_TEST_CREATE_RANK 8
+#define RTREE_TEST_CREATE_RANK       8
 #define RTREE_TEST_CREATE_NUM_COUNTS 4
 static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {1, 100, 500, 10000};
 
 /* Helper function to generate leaf data */
-static H5RT_leaf_t* generate_leaves(int rank, size_t leaf_count);
+static H5RT_leaf_t *generate_leaves(int rank, size_t leaf_count);
 
 /* For manul verification of r-tree results */
-static H5RT_leaf_t **manual_search(H5RT_leaf_t *leaves, size_t leaf_count, int rank, hsize_t min[], hsize_t max[], size_t *results_count);
+static H5RT_leaf_t **manual_search(H5RT_leaf_t *leaves, size_t leaf_count, int rank, hsize_t min[],
+                                   hsize_t max[], size_t *results_count);
 
 static size_t get_num_leaves(H5RT_leaf_t *results_arr);
 
 /* Helper function to generate leaf data */
-static H5RT_leaf_t* generate_leaves(int rank, size_t leaf_count) {
+static H5RT_leaf_t *
+generate_leaves(int rank, size_t leaf_count)
+{
     H5RT_leaf_t *ret_value = NULL;
     H5RT_leaf_t *curr_leaf = NULL;
 
@@ -62,7 +65,7 @@ static H5RT_leaf_t* generate_leaves(int rank, size_t leaf_count) {
         for (int d = 0; d < rank; d++) {
 
             hsize_t min_coord = (hsize_t)rand() % RTREE_TEST_BASE_COORD;
-            hsize_t size = 1 + (hsize_t)rand() % RTREE_TEST_BASE_SIZE;
+            hsize_t size      = 1 + (hsize_t)rand() % RTREE_TEST_BASE_SIZE;
             curr_leaf->mid[d] = min_coord;
             curr_leaf->max[d] = min_coord + size;
             curr_leaf->mid[d] = (curr_leaf->max[d] + curr_leaf->min[d]) / 2;
@@ -73,9 +76,11 @@ done:
     return ret_value;
 }
 
-static size_t get_num_leaves(H5RT_leaf_t *results_arr) {
-    size_t count = 0;
-    H5RT_leaf_t *curr = results_arr;
+static size_t
+get_num_leaves(H5RT_leaf_t *results_arr)
+{
+    size_t       count = 0;
+    H5RT_leaf_t *curr  = results_arr;
 
     if (!results_arr)
         return 0;
@@ -88,17 +93,19 @@ static size_t get_num_leaves(H5RT_leaf_t *results_arr) {
     return count;
 }
 
-static H5RT_leaf_t**
-manual_search(H5RT_leaf_t *leaves, size_t leaf_count, int rank, hsize_t min[], hsize_t max[], size_t *results_count) {
+static H5RT_leaf_t **
+manual_search(H5RT_leaf_t *leaves, size_t leaf_count, int rank, hsize_t min[], hsize_t max[],
+              size_t *results_count)
+{
     H5RT_leaf_t **ret_value = NULL;
-    H5RT_leaf_t **results = NULL;
+    H5RT_leaf_t **results   = NULL;
 
     assert(leaves);
     assert(results_count);
 
-    /* Allocate maximum possible results size 
+    /* Allocate maximum possible results size
      * May need to optimize if this makes testing times impractical */
-    if ((results = calloc(leaf_count, sizeof(H5RT_leaf_t*))) == NULL)
+    if ((results = calloc(leaf_count, sizeof(H5RT_leaf_t *))) == NULL)
         goto done;
 
     for (size_t i = 0; i < leaf_count; i++) {
@@ -128,9 +135,9 @@ done:
 static herr_t
 test_rtree_create(void)
 {
-    H5RT_t *tree = NULL;
-    size_t leaf_count = 0;
-    H5RT_leaf_t *leaves = NULL;
+    H5RT_t      *tree       = NULL;
+    size_t       leaf_count = 0;
+    H5RT_leaf_t *leaves     = NULL;
 
     TESTING("R-tree creation");
     srand(0);
@@ -145,7 +152,7 @@ test_rtree_create(void)
 
             if ((tree = H5RT_create(rank, leaves, leaf_count)) == NULL)
                 FAIL_STACK_ERROR;
-            
+
             /* Ownership of memory has transferred */
             leaves = NULL;
 
@@ -177,18 +184,18 @@ error:
 static herr_t
 test_rtree_search(void)
 {
-    H5RT_t *tree = NULL;
-    size_t leaf_count = 0;
-    H5RT_leaf_t *leaves = NULL;
+    H5RT_t      *tree        = NULL;
+    size_t       leaf_count  = 0;
+    H5RT_leaf_t *leaves      = NULL;
     H5RT_leaf_t *leaves_temp = NULL;
 
     H5RT_leaf_t *results_head = NULL;
-    hsize_t min[H5S_MAX_RANK];
-    hsize_t max[H5S_MAX_RANK];
-    hsize_t size = 0;
+    hsize_t      min[H5S_MAX_RANK];
+    hsize_t      max[H5S_MAX_RANK];
+    hsize_t      size = 0;
 
-    H5RT_leaf_t **manual_results = NULL;
-    size_t num_manual_results = 0;
+    H5RT_leaf_t **manual_results     = NULL;
+    size_t        num_manual_results = 0;
 
     TESTING("R-tree spatial queries");
     srand(0);
@@ -210,12 +217,12 @@ test_rtree_search(void)
 
             /* Ownership is transferred - keep temp pointer for manual search */
             leaves_temp = leaves;
-            leaves = NULL;
+            leaves      = NULL;
 
             /* Setup search criteria */
             for (int r = 0; r < rank; r++) {
-                min[r] = (hsize_t) (rand() % RTREE_TEST_BASE_COORD);
-                size = 1 + (hsize_t) (rand() % RTREE_TEST_BASE_SIZE);
+                min[r] = (hsize_t)(rand() % RTREE_TEST_BASE_COORD);
+                size   = 1 + (hsize_t)(rand() % RTREE_TEST_BASE_SIZE);
                 max[r] = min[r] + size;
             }
 
@@ -243,7 +250,7 @@ test_rtree_search(void)
                 /* Order of results in each list may differ, so we need to check each result individually */
                 for (size_t i = 0; i < num_manual_results; i++) {
                     H5RT_leaf_t *manual_leaf = manual_results[i];
-                    bool found = false;
+                    bool         found       = false;
 
                     /* Check if this manual result is in the r-tree results */
                     for (H5RT_leaf_t *curr = results_head; curr != NULL; curr = curr->next) {
@@ -260,7 +267,7 @@ test_rtree_search(void)
 
             /* Cleanup for next iteration */
             free(manual_results);
-            manual_results = NULL;
+            manual_results     = NULL;
             num_manual_results = 0;
 
             if (H5RT_free(tree) < 0)
@@ -298,7 +305,7 @@ int
 main(void)
 {
     int nerrors = 0;
-    
+
     printf("Testing R-tree spatial indexing...\n");
 
     H5open();
