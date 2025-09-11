@@ -26,7 +26,7 @@
  * Information struct for H5Aget_info() / H5Aget_info_by_idx()
  */
 typedef struct {
-    hbool_t           corder_valid; /**< Indicate if creation order is valid */
+    bool              corder_valid; /**< Indicate if creation order is valid */
     H5O_msg_crt_idx_t corder;       /**< Creation order                 */
     H5T_cset_t        cset;         /**< Character set of attribute name */
     hsize_t           data_size;    /**< Size of raw data		  */
@@ -333,9 +333,9 @@ H5_DLL htri_t H5Aexists(hid_t obj_id, const char *attr_name);
  */
 #ifndef H5_DOXYGEN
 H5_DLL herr_t H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
-                              const char *attr_name, hbool_t *exists, hid_t es_id);
+                              const char *attr_name, bool *exists, hid_t es_id);
 #else
-H5_DLL herr_t H5Aexists_async(hid_t obj_id, const char *attr_name, hbool_t *exists, hid_t es_id);
+H5_DLL herr_t H5Aexists_async(hid_t obj_id, const char *attr_name, bool *exists, hid_t es_id);
 #endif
 
 /*-------------------------------------------------------------------------*/
@@ -376,11 +376,11 @@ H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name, const char *
  */
 #ifndef H5_DOXYGEN
 H5_DLL herr_t H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
-                                      hid_t loc_id, const char *obj_name, const char *attr_name,
-                                      hbool_t *exists, hid_t lapl_id, hid_t es_id);
+                                      hid_t loc_id, const char *obj_name, const char *attr_name, bool *exists,
+                                      hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL herr_t H5Aexists_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name,
-                                      hbool_t *exists, hid_t lapl_id, hid_t es_id);
+H5_DLL herr_t H5Aexists_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name, bool *exists,
+                                      hid_t lapl_id, hid_t es_id);
 #endif
 
 /*-------------------------------------------------------------------------*/
