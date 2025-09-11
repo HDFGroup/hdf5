@@ -34,7 +34,7 @@ static void   H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], h
 static void   H5RT__free_recurse(H5RT_node_t *node);
 
 #if defined(H5_HAVE_DARWIN) || defined(H5_HAVE_WIN32_API)
-static int H5RT__leaf_compare(void * dim, const void *leaf1, const void *leaf2);
+static int H5RT__leaf_compare(void *dim, const void *leaf1, const void *leaf2);
 #else
 static int H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
 #endif
@@ -59,12 +59,12 @@ H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[],
  */
 #if defined(H5_HAVE_DARWIN) || defined(H5_HAVE_WIN32_API)
 static int
-H5RT__leaf_compare(void * dim, const void *leaf1, const void *leaf2)
+H5RT__leaf_compare(void *dim, const void *leaf1, const void *leaf2)
 #else
 static int
 H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
 #endif
-    {
+{
     const H5RT_leaf_t *l1        = NULL;
     const H5RT_leaf_t *l2        = NULL;
     int                sort_dim  = 0;
@@ -119,14 +119,14 @@ H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_
         /* Use intermediate variable to avoid warnings */
         slab_size_d = ceil((double)leaf_count / (double)node_capacity);
 
-        if (slab_size_d > (double) SIZE_MAX)
+        if (slab_size_d > (double)SIZE_MAX)
             HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "slab size overflows size_t");
         assert(slab_size_d > 0.0);
         slab_size = (size_t)slab_size_d;
         assert(slab_size > 0);
 
         num_slabs_d = ceil((double)leaf_count / (double)slab_size);
-        if (num_slabs_d > (double) SIZE_MAX)
+        if (num_slabs_d > (double)SIZE_MAX)
             HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "number of slabs overflows size_t");
         assert(num_slabs_d > 0.0);
         num_slabs = (size_t)num_slabs_d;
@@ -217,13 +217,13 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
             assert(prev_sort_dim < rank - 1);
             sort_dim = prev_sort_dim + 1;
 #if defined(H5_HAVE_WIN32_API)
-        /* Windows version is named qsort_s() */
-        qsort_s((void*) leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void*) &sort_dim);
+            /* Windows version is named qsort_s() */
+            qsort_s((void *)leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void *)&sort_dim);
 #elif defined(H5_HAVE_DARWIN)
-        /* MacOS version has unique argument order */
-        qsort_r((void*) leaves, count, sizeof(H5RT_leaf_t), (void*) &sort_dim, H5RT__leaf_compare);
+            /* MacOS version has unique argument order */
+            qsort_r((void *)leaves, count, sizeof(H5RT_leaf_t), (void *)&sort_dim, H5RT__leaf_compare);
 #else
-        qsort_r((void*) leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void*) &sort_dim);
+            qsort_r((void *)leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void *)&sort_dim);
 #endif
         }
         else {
