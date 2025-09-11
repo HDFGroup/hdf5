@@ -13,8 +13,7 @@
 /****************/
 /* Module Setup */
 /****************/
-// TODO - proper module setup
-#define H5RT_MODULE
+#include "H5RTmodule.h" /* This source code file is part of the H5RT module */
 
 #include "H5RTpkg.h"
 
