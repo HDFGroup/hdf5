@@ -34,7 +34,11 @@ static void   H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], h
                                    H5RT_leaf_t **head, H5RT_leaf_t **tail);
 static void   H5RT__free_recurse(H5RT_node_t *node);
 
+#if H5_HAVE_DARWIN || H5_HAVE_WIN32_API
+static int H5RT__leaf_compare(void * dim, const void *leaf1, const void *leaf2);
+#else
 static int H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
+#endif
 
 /* Check if two hyper-rectangles specified by (min1, max1) and (min2, max2) intersect */
 bool
@@ -54,9 +58,14 @@ H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[],
  * 0 if leaf1 == leaf2
  * 1 if leaf1 > leaf2
  */
+#if H5_HAVE_DARWIN || H5_HAVE_WIN32_API
+static int
+H5RT__leaf_compare(void * dim, const void *leaf1, const void *leaf2)
+#else
 static int
 H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
-{
+#endif
+    {
     const H5RT_leaf_t *l1        = NULL;
     const H5RT_leaf_t *l2        = NULL;
     int                sort_dim  = 0;
@@ -208,7 +217,15 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         if (!this_rank_sorted) {
             assert(prev_sort_dim < rank - 1);
             sort_dim = prev_sort_dim + 1;
-            qsort_r(leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, &sort_dim);
+#ifdef H5_HAVE_WIN32_API
+        /* Windows version is named qsort_s() */
+        qsort_s((void*) leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void*) &sort_dim);
+#elif H5_HAVE_DARWIN
+        /* MacOS version has unique argument order */
+        qsort_r((void*) leaves, count, sizeof(H5RT_leaf_t), (void*) &sort_dim, H5RT__leaf_compare);
+#else
+        qsort_r((void*) leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void*) &sort_dim);
+#endif
         }
         else {
             sort_dim = prev_sort_dim;
