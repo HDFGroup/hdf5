@@ -1,10 +1,10 @@
-name: Link Checker (lychee)
+name: Link Checker
 
 on:
   workflow_dispatch:
-  push:
   pull_request:
-    branches: [ develop ]
+    types: [closed]
+    branches: [develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
