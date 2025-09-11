@@ -66,7 +66,7 @@ generate_leaves(int rank, size_t leaf_count)
 
             hsize_t min_coord = (hsize_t)rand() % RTREE_TEST_BASE_COORD;
             hsize_t size      = 1 + (hsize_t)rand() % RTREE_TEST_BASE_SIZE;
-            curr_leaf->mid[d] = min_coord;
+            curr_leaf->min[d] = min_coord;
             curr_leaf->max[d] = min_coord + size;
             curr_leaf->mid[d] = (curr_leaf->max[d] + curr_leaf->min[d]) / 2;
         }
