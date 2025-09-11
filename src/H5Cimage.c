@@ -2601,7 +2601,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size,
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     pf_entry_ptr->prefetch_type_id = *p++;
-    if (pf_entry_ptr->prefetch_type_id < H5AC_BT_ID || pf_entry_ptr->prefetch_type_id > H5AC_NTYPES)
+    if (pf_entry_ptr->prefetch_type_id < H5AC_BT_ID || pf_entry_ptr->prefetch_type_id >= H5AC_NTYPES)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "type id is out of valid range");
 
     /* Decode flags */
@@ -2685,7 +2685,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size,
 
     /* Validate address range */
     eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT);
-    if (!H5_addr_defined(pf_entry_ptr->addr) || H5_addr_ge(pf_entry_ptr->addr, eoa) ||
+    if (!H5_addr_defined(pf_entry_ptr->addr) ||
         H5_addr_overflow(pf_entry_ptr->addr, pf_entry_ptr->size) ||
         H5_addr_ge(pf_entry_ptr->addr + pf_entry_ptr->size, eoa))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid entry address range");
