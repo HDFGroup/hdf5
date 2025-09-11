@@ -74,21 +74,19 @@ If using 4 processes, then process 1 would look like:
 
 The code would look like the following:
 \code
-    71      /*
-    72       * Each process defines dataset in memory and writes it to the hyperslab
-    73       * in the file.
-    74       */
+    72      // Each process defines dataset in memory and writes it to the hyperslab
+    73      // in the file.
+    74       
     75      count[0] = dimsf[0]/mpi_size;
     76      count[1] = dimsf[1];
     77      offset[0] = mpi_rank * count[0];
     78      offset[1] = 0;
     79      memspace = H5Screate_simple(RANK, count, NULL);
     80
-    81      /*
-    82       * Select hyperslab in the file.
-    83       */
-    84      filespace = H5Dget_space(dset_id);
-    85      H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL);
+    81      // Select hyperslab in the file.
+    82
+    83      filespace = H5Dget_space(dset_id);
+    84      H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL);
 \endcode
 
 Below is the example program:
