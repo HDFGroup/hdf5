@@ -121,26 +121,36 @@ typedef struct H5FD_stdio_t {
 
 /* Platform-independent names for some file-oriented functions */
 
+/* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
+ * so on Windows we define my_off_t to be int64_t, which is equivalent to __int64,
+ * the type of the st_size field of the _stati64 struct.
+ */
+#ifdef H5_HAVE_WIN32_API
+typedef int64_t my_off_t;
+#else
+typedef off_t my_off_t;
+#endif
+
 #ifdef H5_HAVE_WIN32_API
 /* Windows and MinGW */
-#define file_ftell _ftelli64
+#define my_ftell _ftelli64
 #else
 /* Everyone else */
-#define file_ftell ftello
+#define my_ftell ftello
 #endif
 
 #if defined(H5_HAVE_WIN32_API) && !defined(H5_HAVE_MINGW)
 /* Windows (but NOT MinGW) */
-#define file_fseek     _fseeki64
-#define file_ftruncate _chsize_s
+#define my_fseek     _fseeki64
+#define my_ftruncate _chsize_s
 #else
 /* Everyone else */
-#define file_fseek     fseeko
-#define file_ftruncate ftruncate
+#define my_fseek     fseeko
+#define my_ftruncate ftruncate
 #endif
 
 /* These macros check for overflow of various quantities.  These macros
- * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
+ * assume that my_off_t is signed and haddr_t and size_t are unsigned.
  *
  * MY_ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
  *                     is too large to be represented by the second argument
@@ -153,12 +163,12 @@ typedef struct H5FD_stdio_t {
  *                     which can be addressed entirely by the second
  *                     argument of the file seek function.
  */
-#define MY_MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MY_MAXADDR          (((haddr_t)1 << (8 * sizeof(my_off_t) - 1)) - 1)
 #define MY_ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MY_MAXADDR))
 #define MY_SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MY_MAXADDR)
 #define MY_REGION_OVERFLOW(A, Z)                                                                             \
     (MY_ADDR_OVERFLOW(A) || MY_SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) ||                               \
-     (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
+     (my_off_t)((A) + (Z)) < (my_off_t)(A))
 
 /* Prototypes */
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
@@ -310,7 +320,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 #endif /* H5_HAVE_WIN32_API */
 
     /* Sanity check on file offsets */
-    assert(sizeof(HDoff_t) >= sizeof(size_t));
+    assert(sizeof(my_off_t) >= sizeof(size_t));
 
     /* Quiet compiler */
     (void)fapl_id;
@@ -375,11 +385,11 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->op           = H5FD_STDIO_OP_SEEK;
     file->pos          = HADDR_UNDEF;
     file->write_access = write_access; /* Note the write_access for later */
-    if (file_fseek(file->fp, 0, SEEK_END) < 0) {
+    if (my_fseek(file->fp, 0, SEEK_END) < 0) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
     }
     else {
-        HDoff_t x = file_ftell(file->fp);
+        my_off_t x = my_ftell(file->fp);
         assert(x >= 0);
         file->eof = (haddr_t)x;
     }
@@ -755,7 +765,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl
 
     /* Seek to the correct file position. */
     if (!(file->op == H5FD_STDIO_OP_READ || file->op == H5FD_STDIO_OP_SEEK) || file->pos != addr) {
-        if (file_fseek(file->fp, (HDoff_t)addr, SEEK_SET) < 0) {
+        if (my_fseek(file->fp, (my_off_t)addr, SEEK_SET) < 0) {
             file->op  = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
@@ -846,7 +856,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 
     /* Seek to the correct file position. */
     if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) || file->pos != addr) {
-        if (file_fseek(file->fp, (HDoff_t)addr, SEEK_SET) < 0) {
+        if (my_fseek(file->fp, (my_off_t)addr, SEEK_SET) < 0) {
             file->op  = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
@@ -1002,7 +1012,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, bool /*UNUSED*/ clo
             rewind(file->fp);
 
             /* Truncate file to proper length */
-            if (-1 == file_ftruncate(file->fd, (HDoff_t)file->eoa))
+            if (-1 == my_ftruncate(file->fd, (my_off_t)file->eoa))
                 H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR,
                             "unable to truncate/extend file properly", -1);
 #endif /* H5_HAVE_WIN32_API */

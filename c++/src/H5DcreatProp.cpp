@@ -649,10 +649,10 @@ DSetCreatPropList::setFletcher32() const
 ///             which is a 32-bit signed long value on Windows, which limited
 ///             the valid offset that can be set to 2 GiB.
 ///
-///\version     2.0.0 \p offset parameter type changed to HDoff_t from off_t.
+///\version     2.0.0 \p offset parameter type changed to uint64_t from off_t.
 //--------------------------------------------------------------------------
 void
-DSetCreatPropList::setExternal(const char *name, HDoff_t offset, hsize_t size) const
+DSetCreatPropList::setExternal(const char *name, uint64_t offset, hsize_t size) const
 {
     herr_t ret_value = H5Pset_external(id, name, offset, size);
     if (ret_value < 0) {
@@ -702,10 +702,10 @@ DSetCreatPropList::getExternalCount() const
 ///             which is a 32-bit signed long value on Windows, which limited
 ///             the valid offset that can be returned to 2 GiB.
 ///
-///\version     2.0.0 \p offset parameter type changed to HDoff_t from off_t.
+///\version     2.0.0 \p offset parameter type changed to uint64_t from off_t.
 //--------------------------------------------------------------------------
 void
-DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char *name, HDoff_t &offset,
+DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char *name, uint64_t &offset,
                                hsize_t &size) const
 {
     herr_t ret_value = H5Pget_external(id, idx, name_size, name, &offset, &size);

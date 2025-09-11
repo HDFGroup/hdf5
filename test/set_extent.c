@@ -1838,9 +1838,9 @@ test_external(hid_t fapl, bool use_select_io)
 
     {
 
-        char    name[256];   /*external file name        */
-        HDoff_t file_offset; /*external file offset        */
-        hsize_t file_size;   /*sizeof external file segment    */
+        char     name[256];   /* External file name */
+        uint64_t file_offset; /* External file offset */
+        hsize_t  file_size;   /* Size of external file segment */
 
         if (H5Pget_external(dcpl, 0, sizeof(name), name, &file_offset, &file_size) < 0)
             FAIL_STACK_ERROR;

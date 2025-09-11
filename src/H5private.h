@@ -594,9 +594,25 @@ typedef double _Complex H5_double_complex;
 typedef long double _Complex H5_ldouble_complex;
 #endif
 
+/* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
+ * so on Windows we define HDoff_t to be int64_t, which is equivalent to __int64,
+ * the type of the st_size field of the _stati64 struct.
+ */
+#ifdef H5_HAVE_WIN32_API
+/**
+ * Platform-independent offset
+ */
+typedef int64_t HDoff_t;
+#else
+/**
+ * Platform-independent offset
+ */
+typedef off_t HDoff_t;
+#endif
+
 /* __int64 is the correct type for the st_size field of the _stati64
  * struct on Windows (MSDN isn't very clear about this). POSIX systems use
- * off_t. Both of these are typedef'd to HDoff_t in H5public.h.
+ * off_t. Both of these are typedef'd to HDoff_t above.
  */
 typedef HDoff_t h5_stat_size_t;
 

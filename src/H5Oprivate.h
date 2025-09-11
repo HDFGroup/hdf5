@@ -377,10 +377,10 @@ typedef struct H5O_link_t {
 #define H5O_EFL_UNLIMITED H5F_UNLIMITED /*max possible file size	     */
 
 typedef struct H5O_efl_entry_t {
-    size_t  name_offset; /*offset of name within heap	     */
-    char   *name;        /*malloc'd name			     */
-    HDoff_t offset;      /*offset of data within file	     */
-    hsize_t size;        /*size allocated within file	     */
+    size_t   name_offset; /* Offset of name within heap */
+    char    *name;        /* Malloc'd name */
+    uint64_t offset;      /* Offset of data within file */
+    hsize_t  size;        /* Size allocated within file */
 } H5O_efl_entry_t;
 
 typedef struct H5O_efl_t {

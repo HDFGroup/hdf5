@@ -1623,16 +1623,13 @@ CONTAINS
 !! \param bytes  Size of the external file data.
 !! \param hdferr \fortran_error
 !!
-!! \note On Windows, off_t is typically a 32-bit signed long value, which
-!!       limits the valid offset that can be set to 2 GiB.
-!!
 !! See C API: @ref H5Pset_external()
 !!
   SUBROUTINE h5pset_external_f(prp_id, name, offset, bytes, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     CHARACTER(LEN=*), INTENT(IN) :: name
-    INTEGER(OFF_T), INTENT(IN) :: offset
+    INTEGER(C_INT64_T), INTENT(IN) :: offset
     INTEGER(HSIZE_T), INTENT(IN) :: bytes
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER :: namelen
@@ -1641,12 +1638,12 @@ CONTAINS
        INTEGER FUNCTION h5pset_external_c(prp_id, name,namelen, offset, bytes) &
             BIND(C,NAME='h5pset_external_c')
          IMPORT :: C_CHAR
-         IMPORT :: HID_T, OFF_T, HSIZE_T
+         IMPORT :: HID_T, C_INT64_T, HSIZE_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER :: namelen
-         INTEGER(OFF_T), INTENT(IN) :: offset
+         INTEGER(C_INT64_T), INTENT(IN) :: offset
          INTEGER(HSIZE_T), INTENT(IN) :: bytes
        END FUNCTION h5pset_external_c
     END INTERFACE
@@ -1697,9 +1694,6 @@ CONTAINS
 !! \param bytes     Size of the external file data.
 !! \param hdferr    \fortran_error
 !!
-!! \note On Windows, off_t is typically a 32-bit signed long value, which
-!!       limits the valid offset that can be returned to 2 GiB.
-!!
 !! See C API: @ref H5Pget_external()
 !!
   SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset, bytes, hdferr)
@@ -1708,20 +1702,20 @@ CONTAINS
     INTEGER, INTENT(IN) :: idx
     INTEGER(SIZE_T), INTENT(IN) :: name_size
     CHARACTER(LEN=*), INTENT(OUT) :: name
-    INTEGER(OFF_T), INTENT(OUT) :: offset
+    INTEGER(C_INT64_T), INTENT(OUT) :: offset
     INTEGER(HSIZE_T), INTENT(OUT) :: bytes
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5pget_external_c(prp_id, idx, name_size, name, offset, bytes) &
             BIND(C,NAME='h5pget_external_c')
          IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T, OFF_T
+         IMPORT :: HID_T, SIZE_T, HSIZE_T, C_INT64_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: idx
          INTEGER(SIZE_T), INTENT(IN) :: name_size
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
-         INTEGER(OFF_T), INTENT(OUT) :: offset
+         INTEGER(C_INT64_T), INTENT(OUT) :: offset
          INTEGER(HSIZE_T), INTENT(OUT) :: bytes
        END FUNCTION h5pget_external_c
     END INTERFACE

@@ -426,11 +426,11 @@ H5FC_DLL int_f h5pget_filter_c(hid_t_f *prp_id, int_f *filter_number, int_f *fla
                                int_f *cd_values, size_t_f *namelen, _fcd name, int_f *filter_id);
 H5FC_DLL int_f h5pget_filter_by_id_c(hid_t_f *prp_id, int_f *filter_id, int_f *flags, size_t_f *cd_nelmts,
                                      int_f *cd_values, size_t_f *namelen, _fcd name);
-H5FC_DLL int_f h5pset_external_c(hid_t_f *prp_id, _fcd name, int_f *namelen, off_t_f *offset,
+H5FC_DLL int_f h5pset_external_c(hid_t_f *prp_id, _fcd name, int_f *namelen, uint64_t_f *offset,
                                  hsize_t_f *bytes);
 H5FC_DLL int_f h5pget_external_count_c(hid_t_f *prp_id, int_f *count);
-H5FC_DLL int_f h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, off_t_f *offset,
-                                 hsize_t_f *bytes);
+H5FC_DLL int_f h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name,
+                                 uint64_t_f *offset, hsize_t_f *bytes);
 H5FC_DLL int_f h5pget_btree_ratios_c(hid_t_f *prp_id, real_f *left, real_f *middle, real_f *right);
 H5FC_DLL int_f h5pset_btree_ratios_c(hid_t_f *prp_id, real_f *left, real_f *middle, real_f *right);
 H5FC_DLL int_f h5pset_fclose_degree_c(hid_t_f *fapl, int_f *degree);

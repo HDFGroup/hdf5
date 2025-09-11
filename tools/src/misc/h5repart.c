@@ -376,7 +376,7 @@ main(int argc, char *argv[])
          * needed. The first member is extended to the logical member size
          * but other members might be smaller if they end with a hole.
          */
-        dst_offset = dst_offset + (off_t)n;
+        dst_offset = dst_offset + (HDoff_t)n;
         if (dst_is_family && dst_offset == dst_size) {
             if (0 == dst_membno) {
                 if (HDlseek(dst, dst_size - 1, SEEK_SET) < 0) {

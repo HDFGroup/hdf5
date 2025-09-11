@@ -50,7 +50,7 @@ SUBROUTINE external_test(cleanup, total_error)
   INTEGER(HSIZE_T), DIMENSION(1) :: cur_size !data space current size
   INTEGER(HSIZE_T), DIMENSION(1) :: max_size !data space maximum size
   CHARACTER(LEN=256) :: name !external file name
-  INTEGER(OFF_T) :: file_offset !external file offset
+  INTEGER(C_INT64_T) :: file_offset !external file offset
   INTEGER(HSIZE_T) :: file_size   !sizeof external file segment
   INTEGER :: error !error code
   INTEGER(SIZE_T) :: int_size !size of integer
@@ -134,7 +134,7 @@ SUBROUTINE external_test(cleanup, total_error)
   CALL h5tget_size_f(H5T_NATIVE_INTEGER, int_size, error)
   CALL check("h5tget_size_f",error,total_error)
   file_size = int_size * max_size(1)
-  CALL h5pset_external_f(plist_id, "ext1.data", INT(0,off_t), file_size, error)
+  CALL h5pset_external_f(plist_id, "ext1.data", INT(0,uint64_t), file_size, error)
   CALL check("h5pset_external_f",error,total_error)
   CALL h5screate_simple_f(RANK, cur_size, space_id, error, max_size)
   CALL check("h5screate_simple_f", error, total_error)

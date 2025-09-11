@@ -654,17 +654,12 @@ New Features
       developers who wish to provide an ID for their driver should create
       a routine specific to their individual implementation.
 
-    - H5Pset_external() now uses HDoff_t, which is always a 64-bit type
+    - H5P(set|get)_external() now take a uint64_t offset parameter
 
-      The H5Pset_external() call took an off_t parameter in HDF5 1.14.x and
-      earlier. On POSIX systems, off_t is specified as a 64-bit type via
-      POSIX large-file support (LFS). On Windows, however, off_t is defined
-      as a 32-bit type, even on 64-bit Windows.
-
-      HDoff_t has been added to H5public.h and is defined to be int64_t on
-      Windows and the library has been updated to use HDoff_t in place of
-      off_t throughout. The H5Pset_external() offset parameter has also been
-      updated to be HDoff_t.
+      These calls took an off_t parameter in HDF5 1.14.x and earlier. On POSIX
+      systems, off_t is specified as a 64-bit type via POSIX large-file support
+      (LFS). On Windows, however, off_t is defined as a 32-bit type, even on
+      64-bit Windows, which limited external files to 2 GiB.
 
       There is no API compatibility wrapper for this change.
 
@@ -969,7 +964,10 @@ Bug Fixes since HDF5-2.0.0 release
 
     Fortran API
     -----------
-    -
+    - The offset parameter for H5P(set|get)_external_f() is now always a 64-bit type
+
+      The parameter was changed from an INTEGER of KIND OFF_T to C_INT64_T, and
+      OFF_T is no longer a defined INTEGER KIND.
 
 
     High-Level Library
@@ -999,7 +997,10 @@ Bug Fixes since HDF5-2.0.0 release
 
     C++ APIs
     --------
-    -
+    - The offset parameter in (get|set)External is now a uint64_t
+
+      This has been changed from off_t. See the main library section for
+      the justification.
 
 
     Testing

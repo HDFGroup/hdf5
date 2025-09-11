@@ -316,7 +316,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
             HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name");
         if ((fd = HDopen(full_name, O_RDONLY)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file");
-        if (HDlseek(fd, (HDoff_t)(efl->slot[u].offset + (HDoff_t)skip), SEEK_SET) < 0)
+        if (HDlseek(fd, (HDoff_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file");
 #ifndef NDEBUG
         tempto_read = MIN((size_t)(efl->slot[u].size - skip), (hsize_t)size);
@@ -434,7 +434,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
             else
                 HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file");
         } /* end if */
-        if (HDlseek(fd, (HDoff_t)(efl->slot[u].offset + (HDoff_t)skip), SEEK_SET) < 0)
+        if (HDlseek(fd, (HDoff_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file");
 #ifndef NDEBUG
         tempto_write = MIN(efl->slot[u].size - skip, (hsize_t)size);

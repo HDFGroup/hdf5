@@ -570,13 +570,13 @@ SUBROUTINE external_test_offset(cleanup,total_error)
 
   CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
   CALL check("h5pcreate_f", error, total_error)
-  CALL h5pset_external_f(dcpl, "extern_1a.raw", INT(0,off_t), sizeof_part, error)
+  CALL h5pset_external_f(dcpl, "extern_1a.raw", INT(0,uint64_t), sizeof_part, error)
   CALL check("h5pset_external_f",error,total_error)
-  CALL h5pset_external_f(dcpl, "extern_2a.raw", INT(10,off_t), sizeof_part, error)
+  CALL h5pset_external_f(dcpl, "extern_2a.raw", INT(10,uint64_t), sizeof_part, error)
   CALL check("h5pset_external_f",error,total_error)
-  CALL h5pset_external_f(dcpl, "extern_3a.raw", INT(20,off_t), sizeof_part, error)
+  CALL h5pset_external_f(dcpl, "extern_3a.raw", INT(20,uint64_t), sizeof_part, error)
   CALL check("h5pset_external_f",error,total_error)
-  CALL h5pset_external_f(dcpl, "extern_4a.raw", INT(30,off_t), sizeof_part, error)
+  CALL h5pset_external_f(dcpl, "extern_4a.raw", INT(30,uint64_t), sizeof_part, error)
   CALL check("h5pset_external_f",error,total_error)
 
   cur_size(1) = 100

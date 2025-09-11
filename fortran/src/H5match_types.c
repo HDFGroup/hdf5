@@ -295,17 +295,6 @@ main(void)
             return -1;
     }
 
-    /* off_t */
-    for (i = 0; i < FORTRAN_NUM_INTEGER_KINDS; i++) {
-        if (IntKinds_SizeOf[i] == H5_SIZEOF_OFF_T) {
-            writeToFiles("int", "OFF_T", "off_t_f", IntKinds[i]);
-            break;
-        }
-        if (i == (FORTRAN_NUM_INTEGER_KINDS - 1))
-            /* Error: couldn't find a size for off_t */
-            return -1;
-    }
-
     /* size_t */
     for (i = 0; i < FORTRAN_NUM_INTEGER_KINDS; i++) {
         if (IntKinds_SizeOf[i] == H5_SIZEOF_SIZE_T) {

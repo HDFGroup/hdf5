@@ -1466,7 +1466,6 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
     /* Sanity check */
     assert(efl);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDcompile_assert(sizeof(HDoff_t) <= sizeof(uint64_t));
     HDcompile_assert(sizeof(hsize_t) <= sizeof(uint64_t));
     assert(size);
 
@@ -1550,7 +1549,6 @@ H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
     assert(*pp);
     assert(efl);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDcompile_assert(sizeof(HDoff_t) <= sizeof(uint64_t));
     HDcompile_assert(sizeof(hsize_t) <= sizeof(uint64_t));
 
     /* Set property to default value */
@@ -1589,7 +1587,7 @@ H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
         enc_size = *(*pp)++;
         assert(enc_size < 256);
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
-        efl->slot[u].offset = (HDoff_t)enc_value;
+        efl->slot[u].offset = enc_value;
 
         /* Decode size */
         enc_size = *(*pp)++;
@@ -2669,7 +2667,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
+H5Pset_external(hid_t plist_id, const char *name, uint64_t offset, hsize_t size)
 {
     size_t          idx;
     hsize_t         total, tmp;
@@ -2682,8 +2680,6 @@ H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
     /* Check arguments */
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
-    if (offset < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "negative external file offset");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE, false)))
@@ -2784,7 +2780,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/, HDoff_t *offset /*out*/,
+H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/, uint64_t *offset /*out*/,
                 hsize_t *size /*out*/)
 {
     H5O_efl_t       efl;
