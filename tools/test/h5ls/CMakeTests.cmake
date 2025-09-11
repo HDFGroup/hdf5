@@ -245,54 +245,53 @@ macro (ADD_H5_TEST testname)
       set (vol_workdir "${PROJECT_BINARY_DIR}/${vol}/testfiles")
     endif ()
 
-    if (${ARG_SKIP_TEST}) 
-      add_test(NAME ${vol_prefix}H5LS-${testname}-SKIPPED
-               COMMAND ${CMAKE_COMMAND} -E echo "Skipping test ${vol_prefix}H5LS-${testname}"
-      )
-    else()
-      # If using memchecker add tests without using scripts
-      if (HDF5_ENABLE_USING_MEMCHECKER)
-        add_test (NAME ${vol_prefix}H5LS-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARG_UNPARSED_ARGUMENTS})
 
-        if ("${ARG_RESULT_CODE}" STREQUAL "1")
-          set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES WILL_FAIL "true")
-        endif ()
-      else ()
-        # Remove any output file left over from previous test run
-        add_test (
-            NAME ${vol_prefix}H5LS-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-                -D "TEST_ARGS=${ARG_UNPARSED_ARGUMENTS}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${testname}.out"
-                -D "TEST_EXPECT=${ARG_RESULT_CODE}"
-                -D "TEST_ERRREF=${ARG_RESULT_ERRCHECK}"
-                -D "TEST_REFERENCE=${testname}.ls"
-                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-        )
-      endif ()
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME ${vol_prefix}H5LS-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARG_UNPARSED_ARGUMENTS})
 
-      if (${ARG_WILL_FAIL})
+      if ("${ARG_RESULT_CODE}" STREQUAL "1")
         set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES WILL_FAIL "true")
       endif ()
-
-      set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES
-          WORKING_DIRECTORY "${vol_workdir}"
+    else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME ${vol_prefix}H5LS-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_ARGS=${ARG_UNPARSED_ARGUMENTS}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+              -D "TEST_ERRREF=${ARG_RESULT_ERRCHECK}"
+              -D "TEST_REFERENCE=${testname}.ls"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+    endif ()
 
-      if ("${vol_prefix}H5LS-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES DISABLED true)
-      endif ()
-    
-      if (NOT "${vol} " STREQUAL "native")
-        set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES
-          ENVIRONMENT "${vol_env}"
-          FIXTURES_REQUIRED h5ls_vol_files
-        )
-      endif ()
-    endif () # end if SKIP_TEST
+    if (${ARG_WILL_FAIL})
+      set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES WILL_FAIL "true")
+    endif ()
+
+    set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES
+        WORKING_DIRECTORY "${vol_workdir}"
+    )
+
+    if ("${vol_prefix}H5LS-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES DISABLED true)
+    endif ()
+
+    if (NOT "${vol} " STREQUAL "native")
+      set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES
+        ENVIRONMENT "${vol_env}"
+        FIXTURES_REQUIRED h5ls_vol_files
+      )
+    endif ()
+
+    if (${ARG_SKIP_TEST})
+      set_tests_properties( ${vol_prefix}H5LS-${testname} PROPERTIES DISABLED true)
+    endif()
 
   endforeach() # per-VOL loop
 endmacro ()
