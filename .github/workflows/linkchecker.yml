@@ -16,6 +16,8 @@ permissions:
 jobs:
   check-links:
     name: Check Documentation Links
+    build:
+      if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
