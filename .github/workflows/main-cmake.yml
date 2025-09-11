@@ -1,4 +1,4 @@
-name: hdf5 dev CMake CI
+name: hdf5 dev CI
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -32,7 +32,7 @@ permissions:
 jobs:
 
   # A workflow that builds the library and runs all the tests
-  CMake_build_and_test:
+  Build_and_test:
     strategy:
       # The current matrix has one dimensions:
       #
@@ -53,7 +53,7 @@ jobs:
 
         include:
 
-          # Windows w/ MSVC + CMake
+          # Windows w/ MSVC
           #
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
@@ -74,7 +74,7 @@ jobs:
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             run_tests: true
 
-          # Linux (Ubuntu) w/ gcc + CMake
+          # Linux (Ubuntu) w/ gcc
           #
           - name: "Ubuntu gcc"
             ostype: ubuntu
@@ -94,7 +94,7 @@ jobs:
             generator: "-G Ninja"
             run_tests: true
 
-          # MacOS w/ Clang + CMake
+          # MacOS w/ Clang
           #
           - name: "MacOS Clang"
             ostype: macos
@@ -129,7 +129,7 @@ jobs:
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
 
-      - name: Install CMake Dependencies (Linux)
+      - name: Install Dependencies (Linux)
         run: |
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
@@ -170,8 +170,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -203,7 +203,7 @@ jobs:
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
 
-      - name: CMake Configure (Thread-Safe)
+      - name: Configure (Thread-Safe)
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -233,7 +233,7 @@ jobs:
         shell: bash
         if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
 
-      - name: CMake Configure (Concurrency)
+      - name: Configure (Concurrency)
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -261,22 +261,22 @@ jobs:
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests }}
 
-      - name: CMake Run Package
+      - name: Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
 #        if: ${{ (matrix.ostype != 'macos') && (inputs.build_mode != 'Debug') }}
 
-#      - name: CMake Run Package (Mac_latest)
+#      - name: Run Package (Mac_latest)
 #        run: cpack -C ${{ inputs.build_mode }} -G STGZ -V
 #        if: ${{ (matrix.ostype == 'macos') }}
 
@@ -284,7 +284,7 @@ jobs:
         run: |
               ls -l ${{ runner.workspace }}/build
 
-      # Save files created by ctest script
+      # Save files created by CTest script
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@v4
         with:
@@ -402,7 +402,7 @@ jobs:
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
 
-      - name: Install CMake Dependencies (Linux)
+      - name: Install Dependencies (Linux)
         run: |
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
@@ -443,8 +443,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -474,12 +474,12 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests }}

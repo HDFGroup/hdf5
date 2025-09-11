@@ -1,4 +1,4 @@
-name: hdf5 dev CMake special CI
+name: hdf5 dev special CI
 
 # Controls when the action will run. Triggers the workflow on a call
 on:
@@ -12,7 +12,7 @@ permissions:
 # run in parallel.
 jobs:
   #
-  # SPECIAL CMake BUILDS
+  # SPECIAL BUILDS
   #
   # These are not built into the matrix and instead
   # become NEW configs as their name would clobber one of the matrix
@@ -38,8 +38,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -62,17 +62,17 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: |
           ctest . --parallel 2 -C Debug -V -E "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Expected to Fail Tests
+      - name: Run Expected to Fail Tests
         run: |
           ctest . --parallel 2 -C Debug -V -R "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build
@@ -97,8 +97,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -121,14 +121,14 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       #
       # RUN TESTS
       #
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
@@ -151,8 +151,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -175,14 +175,14 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       #
       # RUN TESTS
       #
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
@@ -205,8 +205,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -229,12 +229,12 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
@@ -257,8 +257,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -281,12 +281,12 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
@@ -309,8 +309,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -334,12 +334,12 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
@@ -367,7 +367,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      - name: CMake Configure (Windows)
+      - name: Configure (Windows)
         shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -377,7 +377,7 @@ jobs:
           Set-Location -Path "${{ runner.workspace }}\\build"
           cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=OFF -DHDF5_BUILD_CPP_LIB:BOOL=ON -DHDF5_BUILD_FORTRAN=ON -DHDF5_BUILD_JAVA=ON -DHDF5_BUILD_DOC=OFF -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF -DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF -DHDF5_DEFAULT_API_VERSION:STRING=v200 ${{ github.workspace }}
 
-      - name: CMake Build (Windows)
+      - name: Build (Windows)
         shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -386,7 +386,7 @@ jobs:
           cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests (Windows)
+      - name: Run Tests (Windows)
         shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -414,8 +414,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -443,12 +443,12 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
@@ -471,8 +471,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -496,12 +496,12 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Release
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C Release -V
         working-directory: ${{ runner.workspace }}/build
 
@@ -524,8 +524,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -549,12 +549,12 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Release
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
+      - name: Run Tests
         run: ctest . --parallel 2 -C Release -V
         working-directory: ${{ runner.workspace }}/build
 
@@ -577,8 +577,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -602,7 +602,7 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Release
         working-directory: ${{ runner.workspace }}/build
 
@@ -625,8 +625,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CMAKE CONFIGURE
-      - name: CMake Configure
+      # CONFIGURE
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -650,7 +650,7 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Release
         working-directory: ${{ runner.workspace }}/build
 

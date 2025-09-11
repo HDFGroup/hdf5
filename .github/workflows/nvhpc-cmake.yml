@@ -1,4 +1,4 @@
-name: hdf5 dev CMake nvhpc
+name: hdf5 dev nvhpc
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -49,7 +49,7 @@ jobs:
           echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/cuda/${{ env.CUDAVERDOT }}/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/lib" >> $GITHUB_ENV
           echo "DESTDIR=/tmp" >> $GITHUB_ENV
 
-      - name: CMake Configure
+      - name: Configure
         shell: bash
         run: |
           export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin:$PATH
@@ -67,27 +67,27 @@ jobs:
           -DMPIEXEC_PREFLAGS:STRING="--mca;opal_warn_on_missing_libcuda;0" \
           $GITHUB_WORKSPACE
 
-      - name: CMake Build
+      - name: Build
         shell: bash
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       # Skipping dt_arith and dtransform while we investigate long double failures
-      - name: CMake Run Tests
+      - name: Run Tests
         shell: bash
         run: |
           ctest . -E "MPI_TEST|H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Expected To Fail Tests
+      - name: Run Expected To Fail Tests
         shell: bash
         run: |
           ctest . -R "H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
 
-      - name: CMake Run Parallel Tests
+      - name: Run Parallel Tests
         shell: bash
         run: |
           ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }} -V
