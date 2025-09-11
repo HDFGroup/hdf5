@@ -87,8 +87,7 @@ H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
 }
 
 static herr_t
-H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_out, size_t *slab_size_out,
-                    int rank)
+H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_out, size_t *slab_size_out)
 {
     assert(node_capacity > 0);
     assert(leaf_count > 0);
@@ -102,8 +101,6 @@ H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_
     size_t num_slabs   = 0;
     double slab_size_d = -1.0;
     size_t slab_size   = 0;
-
-    double P = 0.0;
 
     if (leaf_count <= node_capacity) {
         /* All leaves will fit into a single node */
@@ -161,7 +158,6 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
     H5RT_leaf_t *child_leaf_start = NULL;
 
     bool this_rank_sorted = false;
-    int  effective_rank   = 0;
     int  sort_dim         = -1;
 
     size_t num_slabs = 0;
@@ -181,9 +177,6 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid previous sort dimension");
 
     this_rank_sorted = (prev_sort_dim == (rank - 1));
-    effective_rank   = rank - (prev_sort_dim + 1);
-    if (effective_rank < 1)
-        effective_rank = 1;
 
     /* Compute the max/min bounds of the provided node */
     /* Initial values */
@@ -224,7 +217,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         /* After leaves are sorted in the current dimension, partition the hyper-rectangles into slabs */
 
         /* Compute # slabs and slab size */
-        H5RT__compute_slabs(H5RT_MAX_NODE_SIZE, count, &num_slabs, &slab_size, effective_rank);
+        H5RT__compute_slabs(H5RT_MAX_NODE_SIZE, count, &num_slabs, &slab_size);
 
         node->nchildren = (int)num_slabs;
 

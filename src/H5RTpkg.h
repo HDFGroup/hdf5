@@ -48,7 +48,7 @@ typedef struct H5RT_node_t {
 /* Overall r-tree */
 struct H5RT_t {
     H5RT_node_t  root;
-    H5RT_leaf_t *leaves; // TODO: Head of a LL of leaves?
+    H5RT_leaf_t *leaves;
     int          rank;
 };
 
