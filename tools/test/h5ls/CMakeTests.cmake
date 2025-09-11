@@ -448,48 +448,59 @@ ADD_H5_TEST (tsoftlinks-nodangle-1 RESULT_CODE 1 -w80 --follow-symlinks --no-dan
 # when used file with no dangling links - expected exit code 0
 ADD_H5_TEST (thlinks-nodangle-1 RESULT_CODE 0 -w80 --follow-symlinks --no-dangling-links thlink.h5)
 
-# If float16 support is enabled, float16 tests should pass and nosupport tests should fail
-# If float16 support is disabled, float16 tests should fail and nosupport tests should pass
-if (${${HDF_PREFIX}_HAVE__FLOAT16})
-  set (F16_SUPPORT_OUTCOME "")
-  set (F16_NOSUPPORT_OUTCOME "WILL_FAIL")
-else()
-  set (F16_SUPPORT_OUTCOME "WILL_FAIL")
-  set (F16_NOSUPPORT_OUTCOME "")
-endif()
-
 # tests for _Float16 type
-# If support is available for _Float16 type, the second test
-# will fail as the type will be printed out as "native _Float16"
-# rather than "IEEE 16-bit little-endian float".
-if (H5_WORDS_BIGENDIAN)
-  ADD_H5_TEST (tfloat16_be RESULT_CODE 0 -w80 -v tfloat16_be.h5 ${F16_SUPPORT_OUTCOME})
-  ADD_H5_TEST (tfloat16_be_nosupport RESULT_CODE 0 -w80 -v tfloat16_be.h5 ${F16_NOSUPPORT_OUTCOME})
+if (${${HDF_PREFIX}_HAVE__FLOAT16})
+  # If support is available for _Float16 type, the second test
+  # will fail as the type will be printed out as "native _Float16"
+  # rather than "IEEE 16-bit little-endian float".
+  if (H5_WORDS_BIGENDIAN)
+    ADD_H5_TEST (tfloat16_be RESULT_CODE 0 -w80 -v tfloat16_be.h5)
+    ADD_H5_TEST (tfloat16_be_nosupport RESULT_CODE 0 -w80 -v tfloat16_be.h5 WILL_FAIL)
+  else ()
+    ADD_H5_TEST (tfloat16 RESULT_CODE 0 -w80 -v tfloat16.h5)
+    ADD_H5_TEST (tfloat16_nosupport RESULT_CODE 0 -w80 -v tfloat16.h5 WILL_FAIL)
+  endif ()
 else ()
-  ADD_H5_TEST (tfloat16 RESULT_CODE 0 -w80 -v tfloat16.h5 ${F16_SUPPORT_OUTCOME})
-  ADD_H5_TEST (tfloat16_nosupport RESULT_CODE 0 -w80 -v tfloat16.h5 ${F16_NOSUPPORT_OUTCOME})
-endif ()
-
-# if complex support is enabled, complex tests should pass and nosupport tests should fail
-# if complex support is disabled, complex tests should fail and nosupport tests should pass
-if (${${HDF_PREFIX}_HAVE_COMPLEX_NUMBERS})
-  set(CMPLX_SUPPORT_OUTCOME "")
-  set(CMPLX_NOSUPPORT_OUTCOME "WILL_FAIL")
-else ()
-  set(CMPLX_SUPPORT_OUTCOME "WILL_FAIL")
-  set(CMPLX_NOSUPPORT_OUTCOME "")
+  # If support is NOT available for _Float16 type, the first two tests
+  # will fail as the types will be printed out as
+  # "IEEE 16-bit little-endian float" and "IEEE 16-bit big-endian float"
+  # rather than "native _Float16"
+  ADD_H5_TEST (tfloat16 RESULT_CODE 0 -w80 -v tfloat16.h5 WILL_FAIL)
+  ADD_H5_TEST (tfloat16_be RESULT_CODE 0 -w80 -v tfloat16_be.h5 WILL_FAIL)
+  ADD_H5_TEST (tfloat16_nosupport RESULT_CODE 0 -w80 -v tfloat16.h5)
+  ADD_H5_TEST (tfloat16_be_nosupport RESULT_CODE 0 -w80 -v tfloat16_be.h5)
 endif ()
 
 # tests for complex numbers
-# If support is available for complex numbers, the second test
-# will fail as the type will be printed out as "native float _Complex",
-# for example, rather than "complex number of native float".
-if (H5_WORDS_BIGENDIAN)
-  ADD_H5_TEST (tcomplex_be RESULT_CODE 0 -w80 -v tcomplex_be.h5 ${CMPLX_SUPPORT_OUTCOME})
-  ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5 ${CMPLX_NOSUPPORT_OUTCOME})
+if (${${HDF_PREFIX}_HAVE_COMPLEX_NUMBERS})
+  # If support is available for complex numbers, the second test
+  # will fail as the type will be printed out as "native float _Complex",
+  # for example, rather than "complex number of native float".
+  if (H5_WORDS_BIGENDIAN)
+    ADD_H5_TEST (tcomplex_be RESULT_CODE 0 -w80 -v tcomplex_be.h5)
+    ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5 ILL_FAIL)
+  else ()
+    ADD_H5_TEST (tcomplex RESULT_CODE 0 -w80 -v tcomplex.h5)
+    ADD_H5_TEST (tcomplex_nosupport RESULT_CODE 0 -w80 -v tcomplex.h5 WILL_FAIL)
+  endif ()
 else ()
-  ADD_H5_TEST (tcomplex RESULT_CODE 0 -w80 -v tcomplex.h5 ${CMPLX_SUPPORT_OUTCOME})
-  ADD_H5_TEST (tcomplex_nosupport RESULT_CODE 0 -w80 -v tcomplex.h5 ${CMPLX_NOSUPPORT_OUTCOME})
+  # If support is NOT available for complex numbers, the first two tests
+  # will fail as the types will be printed out as "complex number of native float"
+  # or "complex number of IEEE 32-bit little-endian float", for example, rather
+  # than "native float _Complex". One of the second two tests will also fail,
+  # depending on the endian-ness of the machine, as the types will be printed
+  # out as "complex number of IEEE 32-bit little-endian float", for example,
+  # rather than "complex number of native float".
+  ADD_H5_TEST (tcomplex RESULT_CODE 0 -w80 -v tcomplex.h5 WILL_FAIL)
+  ADD_H5_TEST (tcomplex_be RESULT_CODE 0 -w80 -v tcomplex_be.h5 WILL_FAIL)
+
+  if (H5_WORDS_BIGENDIAN)
+    ADD_H5_TEST (tcomplex_nosupport RESULT_CODE 0 -w80 -v tcomplex.h5 WILL_FAIL)
+    ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5)
+  else ()
+    ADD_H5_TEST (tcomplex_nosupport RESULT_CODE 0 -w80 -v tcomplex.h5)
+    ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5 WILL_FAIL)
+  endif ()
 endif ()
 
 # test for wildcards in filename (does not work with cmake)
