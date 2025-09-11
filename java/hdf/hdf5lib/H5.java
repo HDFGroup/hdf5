@@ -7152,19 +7152,26 @@ public class H5 implements java.io.Serializable {
         }
 
         StructLayout info_ptr_t = MemoryLayout.structLayout(
-            ValueLayout.ADDRESS.withName("objname"), ValueLayout.ADDRESS.withName("obj_token"),
-            ValueLayout.JAVA_LONG.withName("fno"), ValueLayout.JAVA_INT.withName("otype"),
-            ValueLayout.JAVA_INT.withName("ltype"));
+                ValueLayout.ADDRESS.withName("objname"),
+                ValueLayout.ADDRESS.withName("obj_token"),
+                ValueLayout.JAVA_LONG.withName("fno"),
+                ValueLayout.JAVA_INT.withName("otype"),
+                ValueLayout.JAVA_INT.withName("ltype")
+        );
 
         StructLayout info_all_t = MemoryLayout.structLayout(
-            MemoryLayout.sequenceLayout(n, MemoryLayout
-                                               .structLayout(ValueLayout.ADDRESS.withName("objname"),
-                                                             ValueLayout.ADDRESS.withName("obj_token"),
-                                                             ValueLayout.JAVA_LONG.withName("fno"),
-                                                             ValueLayout.JAVA_INT.withName("otype"),
-                                                             ValueLayout.JAVA_INT.withName("ltype"))
-                                               .withName("data")),
-            ValueLayout.JAVA_LONG.withName("idxnum"), ValueLayout.JAVA_INT.withName("count"));
+                MemoryLayout.sequenceLayout(n,
+                    MemoryLayout.structLayout(
+                        ValueLayout.ADDRESS.withName("objname"),
+                        ValueLayout.ADDRESS.withName("obj_token"),
+                        ValueLayout.JAVA_LONG.withName("fno"),
+                        ValueLayout.JAVA_INT.withName("otype"),
+                        ValueLayout.JAVA_INT.withName("ltype")
+                    ).withName("data")
+                ),
+                ValueLayout.JAVA_LONG.withName("idxnum"),
+                ValueLayout.JAVA_INT.withName("count")
+        );
 
         long DATA_OFFSET          = 0L; // info_all_t.byteOffset(PathElement.groupElement("data"));
         VarHandle objnameHandle   = info_ptr_t.arrayElementVarHandle(PathElement.groupElement("objname"));
@@ -7423,32 +7430,19 @@ public class H5 implements java.io.Serializable {
             );
 
         StructLayout info_all_t = MemoryLayout.structLayout(
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemoryLayout
-                .sequenceLayout(n, MemoryLayout.structLayout(ValueLayout.ADDRESS.withName("objname"),
-                                                             ValueLayout.ADDRESS.withName("obj_token"),
-                                                             ValueLayout.JAVA_INT.withName("otype"),
-                                                             ValueLayout.JAVA_INT.withName("ltype")))
-                .withName("data"),
-            ValueLayout.JAVA_LONG.withName("idxnum"), // unsigned long  idxnum
-            ValueLayout.JAVA_INT.withName("count")    // int            count
-=======
-            MemoryLayout.sequenceLayout(n, MemoryLayout
-                                               .structLayout(ValueLayout.ADDRESS.withName("objname"),
-                                                             ValueLayout.ADDRESS.withName("obj_token"),
-                                                             ValueLayout.JAVA_INT.withName("otype"),
-                                                             ValueLayout.JAVA_INT.withName("ltype"))
-                                               .withName("data")),
-            ValueLayout.JAVA_LONG.withName("idxnum"), // unsigned long  idxnum
-            ValueLayout.JAVA_INT.withName("count")    // int            count
->>>>>>> 2fdd75e Fixed Gobj_info compat functions
+                MemoryLayout.sequenceLayout(n,
+                        MemoryLayout.structLayout(
+                            ValueLayout.ADDRESS.withName("objname"),
+                            ValueLayout.ADDRESS.withName("obj_token"),
+                            ValueLayout.JAVA_INT.withName("otype"),
+                            ValueLayout.JAVA_INT.withName("ltype")
+                        ).withName("data")
+                    ),
+                ValueLayout.JAVA_LONG.withName("idxnum"),          // unsigned long  idxnum
+                ValueLayout.JAVA_INT.withName("count")             // int            count
         );
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-        long DATA_OFFSET          = info_all_t.byteOffset(PathElement.groupElement("data"));
-=======
-        long DATA_OFFSET = 0L; // info_all_t.byteOffset(PathElement.groupElement("data"));
->>>>>>> 2fdd75e Fixed Gobj_info compat functions
+        long DATA_OFFSET = 0L;//info_all_t.byteOffset(PathElement.groupElement("data"));
         VarHandle objnameHandle   = info_ptr_t.arrayElementVarHandle(PathElement.groupElement("objname"));
         VarHandle otypeHandle     = info_ptr_t.arrayElementVarHandle(PathElement.groupElement("otype"));
         VarHandle ltypeHandle     = info_ptr_t.arrayElementVarHandle(PathElement.groupElement("ltype"));
@@ -7461,22 +7455,13 @@ public class H5 implements java.io.Serializable {
             class H5L_iter_callback implements H5L_iterate_t {
                 public int apply(long loc_id, MemorySegment name, MemorySegment info, MemorySegment op_data)
                 {
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-                    int ret     = -1;
-                    long idxnum = (long)idxnumHandle.get(op_data, 0);
-                    int count   = (int)countHandle.get(op_data, 0);
-                    objnameHandle.set(op_data, DATA_OFFSET, (long)count, name);
-                    int ltype = (int)H5L_info2_t.type(info);
-                    ltypeHandle.set(op_data, DATA_OFFSET, (long)count, ltype);
-=======
-                    int ret = -1;
-                    long idxnum = (long)idxnumHandle.get(op_data, 0);
-                    int count = (int)countHandle.get(op_data, 0);
+                    int ret                = -1;
+                    long idxnum            = (long) idxnumHandle.get(op_data, 0);
+                    int count              = (int) countHandle.get(op_data, 0);
                     MemorySegment name_seg = arena.allocateFrom(name.getString(0));
-                    objnameHandle.set(op_data, DATA_OFFSET, (long)count, name_seg);
-                    int ltype = (int)H5L_info2_t.type(info);
-                    ltypeHandle.set(op_data, DATA_OFFSET, (long)count, ltype);
->>>>>>> 2fdd75e Fixed Gobj_info compat functions
+                    objnameHandle.set(op_data, DATA_OFFSET, (long) count, name_seg);
+                    int ltype = (int) H5L_info2_t.type(info);
+                    ltypeHandle.set(op_data, DATA_OFFSET, (long) count, ltype);
 
                     MemorySegment info_segment = arena.allocate(H5O_info2_t.sizeof());
                     if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_info3(loc_id, info_segment,
@@ -7510,30 +7495,18 @@ public class H5 implements java.io.Serializable {
                 h5libraryError();
             }
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            int count = (int)countHandle.get(info, 0);
-            log.trace("H5Gget_obj_info_full: count={}", count);
-=======
-            int count = (int)countHandle.get(info, 0);
+            int count = (int) countHandle.get(info, 0);
             log.trace("H5Gget_obj_info_max: count={}", count);
->>>>>>> 2fdd75e Fixed Gobj_info compat functions
 
             // Read the results from the MemorySegments
             for (int i = 0; i < count; i++) {
                 // Read object name
                 MemorySegment objname_ptr = (MemorySegment)objnameHandle.get(info, DATA_OFFSET, (long)i);
                 if (objname_ptr != null) {
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-                    String objname = objname_ptr.getString(0);
-                    objNames[i]    = objname;
-                    log.trace("H5Gget_obj_info_full: objNames[{}]={}", i, objNames[i]);
-                }
-=======
                     MemorySegment cStringSegment = objname_ptr.reinterpret(256); // or a more precise length
-                    objNames[i] = cStringSegment.getString(0);
+                    objNames[i]                  = cStringSegment.getString(0);
                     log.trace("H5Gget_obj_info_max: objNames[{}]={}", i, objNames[i]);
                 } 
->>>>>>> 2fdd75e Fixed Gobj_info compat functions
                 else {
                     objNames[i] = null;
                 }
@@ -7542,25 +7515,13 @@ public class H5 implements java.io.Serializable {
                 objTypes[i] = otype;
                 log.trace("H5Gget_obj_info_max: objTypes[{}]={}", i, objTypes[i]);
                 // Read link type
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-                int ltype_val = (int)ltypeHandle.get(info, DATA_OFFSET, (long)i);
+                int ltype_val = (int) ltypeHandle.get(info, DATA_OFFSET, (long) i);
                 ltype[i]      = ltype_val;
-                log.trace("H5Gget_obj_info_full: ltype[{}]={}", i, ltype[i]);
-=======
-                int ltype_val = (int)ltypeHandle.get(info, DATA_OFFSET, (long)i);
-                ltype[i] = ltype_val;
                 log.trace("H5Gget_obj_info_max: ltype[{}]={}", i, ltype[i]);
->>>>>>> 2fdd75e Fixed Gobj_info compat functions
                 // Read object token
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
                 MemorySegment token_ptr = (MemorySegment)obj_tokenHandle.get(info, DATA_OFFSET, (long)i);
                 tokens[i]               = new hdf.hdf5lib.structs.H5O_token_t(token_ptr);
                 log.trace("H5Gget_obj_info_full: tokens[{}]={}", i, tokens[i]);
-=======
-                MemorySegment token_ptr = (MemorySegment)obj_tokenHandle.get(info, DATA_OFFSET, (long)i);
-                tokens[i] = new hdf.hdf5lib.structs.H5O_token_t(token_ptr);
-                log.trace("H5Gget_obj_info_max: tokens[{}]={}", i, tokens[i]);
->>>>>>> 2fdd75e Fixed Gobj_info compat functions
             }
             ret = count;
         }
