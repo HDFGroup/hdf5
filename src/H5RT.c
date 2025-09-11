@@ -120,14 +120,14 @@ H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_
         /* Use intermediate variable to avoid warnings */
         slab_size_d = ceil((double)leaf_count / (double)node_capacity);
 
-        if (slab_size_d > SIZE_MAX)
+        if (slab_size_d > (double) SIZE_MAX)
             HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "slab size overflows size_t");
         assert(slab_size_d > 0.0);
         slab_size = (size_t)slab_size_d;
         assert(slab_size > 0);
 
         num_slabs_d = ceil((double)leaf_count / (double)slab_size);
-        if (num_slabs_d > SIZE_MAX)
+        if (num_slabs_d > (double) SIZE_MAX)
             HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "number of slabs overflows size_t");
         assert(num_slabs_d > 0.0);
         num_slabs = (size_t)num_slabs_d;
