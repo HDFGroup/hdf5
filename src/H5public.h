@@ -292,20 +292,8 @@ typedef int htri_t;
  * Use of ssize_t should be discouraged in new code.
  */
 #if H5_SIZEOF_SSIZE_T == 0
-/* Undefine this size, we will re-define it in one of the sections below */
-#undef H5_SIZEOF_SSIZE_T
-#if H5_SIZEOF_SIZE_T == H5_SIZEOF_INT
-typedef int ssize_t;
-#define H5_SIZEOF_SSIZE_T H5_SIZEOF_INT
-#elif H5_SIZEOF_SIZE_T == H5_SIZEOF_LONG
-typedef long ssize_t;
-#define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_SIZE_T == H5_SIZEOF_LONG_LONG
-typedef long long ssize_t;
-#define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG_LONG
-#else /* Can't find matching type for ssize_t */
-#error "nothing appropriate for ssize_t"
-#endif
+typedef ptrdiff_t ssize_t;
+#define H5_SIZEOF_SSIZE_T H5_SIZEOF_PTRDIFF_T
 #endif
 
 /**
