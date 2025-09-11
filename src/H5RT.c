@@ -294,6 +294,7 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree");
 
     rtree->rank = rank;
+    rtree->nleaves = count;
 
     /* Take ownership of leaves array */
     rtree->leaves = leaves;
@@ -442,5 +443,45 @@ H5RT_free(H5RT_t *rtree)
     H5FL_FREE(H5RT_t, rtree);
 
 done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/* Deep copy the provided rtree */
+H5RT_t* H5RT_copy(const H5RT_t *rtree) {
+    H5RT_t *ret_value    = NULL;
+    H5RT_t *new_tree     = NULL;
+
+    H5RT_leaf_t *new_leaves = NULL;
+
+    FUNC_ENTER_NOAPI(NULL);
+
+    if (!rtree)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid r-tree");
+
+    assert(rtree->leaves);
+    assert(rtree->nleaves > 0);
+
+    /* Deep copy the array of leaves */
+    if (NULL == (new_leaves = (H5RT_leaf_t *)malloc(rtree->nleaves * sizeof(H5RT_leaf_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree leaves");
+
+    /* If the user-stored data in the r-tree is a pointer, then the new r-tree will have pointers to the same shared data */
+    memcpy(new_leaves, rtree->leaves, rtree->nleaves * sizeof(H5RT_leaf_t));
+
+    if ((new_tree = H5RT_create(rtree->rank, new_leaves, rtree->nleaves)) == NULL)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, NULL, "failed to create new r-tree");
+
+    ret_value = new_tree;
+
+done:   
+    if (!ret_value) {
+        if (new_tree) {
+            if (H5RT_free(new_tree) < 0)
+                HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "unable to free partially copied r-tree");
+        } else if (new_leaves) {
+            free(new_leaves);
+        }
+    }
+
     FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -292,6 +292,145 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_rtree_copy
+ *
+ * Purpose:     Test R-tree deep copy functionality
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_rtree_copy(void) {
+    H5RT_t *tree = NULL;
+    H5RT_t *tree_copy = NULL;
+    size_t       leaf_count = 0;
+    H5RT_leaf_t *leaves = NULL;
+
+    H5RT_leaf_t *results_head = NULL;
+    hsize_t      min[H5S_MAX_RANK];
+    hsize_t      max[H5S_MAX_RANK];
+    hsize_t      size = 0;
+
+    H5RT_leaf_t **manual_results     = NULL;
+    size_t        num_manual_results = 0;
+
+    TESTING("R-tree copy");
+    srand(0);
+
+    for (int cnt_idx = 0; cnt_idx < RTREE_TEST_CREATE_NUM_COUNTS; cnt_idx++) {
+        leaf_count = test_counts[cnt_idx];
+
+        for (int rank = 1; rank < RTREE_TEST_CREATE_RANK; rank++) {
+            memset(min, 0, H5S_MAX_RANK * sizeof(hsize_t));
+            memset(max, 0, H5S_MAX_RANK * sizeof(hsize_t));
+
+            /* Create data */
+            if ((leaves = generate_leaves(rank, leaf_count)) == NULL)
+                FAIL_STACK_ERROR;
+
+            /* Create original tree */
+            if ((tree = H5RT_create(rank, leaves, leaf_count)) == NULL)
+                FAIL_STACK_ERROR;
+
+            /* Ownership is transferred */
+            leaves      = NULL;
+
+            /* Deep copy the tree */
+            if ((tree_copy = H5RT_copy(tree)) == NULL)
+                FAIL_STACK_ERROR;
+
+            /* Delete the original tree */
+            if (H5RT_free(tree) < 0)
+                FAIL_STACK_ERROR;
+            tree = NULL;
+
+            /* Setup search criteria */
+            for (int r = 0; r < rank; r++) {
+                min[r] = (hsize_t)(rand() % RTREE_TEST_BASE_COORD);
+                size   = 1 + (hsize_t)(rand() % RTREE_TEST_BASE_SIZE);
+                max[r] = min[r] + size;
+            }
+
+            /* Perform search on copied tree */
+            results_head = H5RT_search(tree_copy, min, max);
+
+            /* Perform manual search for comparison using original leaf data */
+            manual_results = manual_search(tree_copy->leaves, leaf_count, rank, min, max, &num_manual_results);
+
+            /* Check equality - verifying that the copied tree works correctly */
+            if (!results_head && (num_manual_results > 0))
+                FAIL_PUTS_ERROR("Copied R-tree search found no results, but manual search found results");
+
+            if (results_head && (num_manual_results == 0))
+                FAIL_PUTS_ERROR("Copied R-tree search found results, but manual search found no results");
+
+            size_t num_rtree_results = get_num_leaves(results_head);
+
+            if (num_manual_results != num_rtree_results) {
+                FAIL_PUTS_ERROR("Copied R-tree search and manual search found different number of results");
+            }
+
+            if (results_head && num_manual_results > 0) {
+                /* Order of results in each list may differ, so we need to check each result individually */
+                /* We compare based on coordinates since the copied tree has different leaf pointers */
+                for (size_t i = 0; i < num_manual_results; i++) {
+                    H5RT_leaf_t *manual_leaf = manual_results[i];
+                    bool         found       = false;
+
+                    /* Check if this manual result coordinates match any in the copied tree results */
+                    for (H5RT_leaf_t *curr = results_head; curr != NULL; curr = curr->next) {
+                        bool coords_match = true;
+                        for (int d = 0; d < rank; d++) {
+                            if (curr->min[d] != manual_leaf->min[d] || 
+                                curr->max[d] != manual_leaf->max[d]) {
+                                coords_match = false;
+                                break;
+                            }
+                        }
+                        if (coords_match) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                        FAIL_PUTS_ERROR("Copied R-tree search missing a result found in manual search");
+                }
+            }
+
+            /* Cleanup for next iteration */
+            free(manual_results);
+            manual_results     = NULL;
+            num_manual_results = 0;
+
+            if (H5RT_free(tree_copy) < 0)
+                FAIL_STACK_ERROR;
+            tree_copy = NULL;
+        }
+    }
+
+    PASSED();
+    return SUCCEED;
+    
+error:
+    if (leaves)
+        free(leaves);
+
+    if (tree)
+        H5RT_free(tree);
+
+    if (tree_copy)
+        H5RT_free(tree_copy);
+
+    if (manual_results)
+        free(manual_results);
+
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the R-tree functionality
@@ -313,7 +452,8 @@ main(void)
     /* Run tests */
     nerrors += test_rtree_create() < 0 ? 1 : 0;
     nerrors += test_rtree_search() < 0 ? 1 : 0;
-
+    nerrors += test_rtree_copy() < 0 ? 1 : 0;
+    
     if (nerrors)
         goto error;
 

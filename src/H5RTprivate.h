@@ -33,5 +33,5 @@ typedef struct H5RT_leaf_t {
 H5_DLL H5RT_t      *H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count);
 H5_DLL H5RT_leaf_t *H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[]);
 H5_DLL herr_t       H5RT_free(H5RT_t *rtree);
-
+H5_DLL H5RT_t      *H5RT_copy(const H5RT_t *rtree);
 #endif /* H5RTprivate_H */

@@ -50,6 +50,7 @@ struct H5RT_t {
     H5RT_node_t  root;
     H5RT_leaf_t *leaves;
     int          rank;
+    size_t       nleaves;
 };
 
 H5_DLL bool H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[]);
