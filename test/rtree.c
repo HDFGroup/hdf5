@@ -40,11 +40,76 @@ static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {1, 100, 500, 10
 /* Helper function to generate leaf data */
 static H5RT_leaf_t *generate_leaves(int rank, size_t leaf_count);
 
-/* For manul verification of r-tree results */
+/* For manual verification of r-tree results */
 static H5RT_leaf_t **manual_search(H5RT_leaf_t *leaves, size_t leaf_count, int rank, hsize_t min[],
                                    hsize_t max[], size_t *results_count);
 
 static size_t get_num_leaves(H5RT_leaf_t *results_arr);
+
+/* Helper function to compare r-tree search results to linear search */
+static herr_t verify_rtree_search(H5RT_leaf_t *results_head, H5RT_leaf_t *leaves, size_t leaf_count, hsize_t min[],
+                                 hsize_t max[], int rank);
+
+
+static herr_t verify_rtree_search(H5RT_leaf_t *results_head, H5RT_leaf_t *leaves, size_t leaf_count, hsize_t min[],
+                                 hsize_t max[], int rank) {
+    H5RT_leaf_t **manual_results     = NULL;
+    size_t        num_manual_results = 0;
+    size_t num_rtree_results = 0;
+    herr_t ret_value = SUCCEED;
+
+    /* Perform manual search for comparison */
+    manual_results = manual_search(leaves, leaf_count, rank, min, max, &num_manual_results);
+
+    /* Check equality */
+    if (!results_head && (num_manual_results > 0)) {
+        puts("R-tree search found no results, but manual search found results");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (results_head && (num_manual_results == 0)) {
+        puts("R-tree search found results, but manual search found no results");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    num_rtree_results = get_num_leaves(results_head);
+
+    if (num_manual_results != num_rtree_results) {
+        puts("R-tree search and manual search found different number of results");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (results_head && num_manual_results > 0) {
+        /* Order of results in each list may differ, so we need to check each result individually */
+        for (size_t i = 0; i < num_manual_results; i++) {
+            H5RT_leaf_t *manual_leaf = manual_results[i];
+            bool         found       = false;
+
+            /* Check if this manual result is in the r-tree results */
+            for (H5RT_leaf_t *curr = results_head; curr != NULL; curr = curr->next) {
+                if (curr == manual_leaf) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                puts("R-tree search missing a result found in manual search");
+                ret_value = FAIL;
+                goto done;
+            }
+        }
+    }
+
+done:
+    if (manual_results)
+        free(manual_results);
+
+    return ret_value;
+}
 
 /* Helper function to generate leaf data */
 static H5RT_leaf_t *
@@ -194,9 +259,6 @@ test_rtree_search(void)
     hsize_t      max[H5S_MAX_RANK];
     hsize_t      size = 0;
 
-    H5RT_leaf_t **manual_results     = NULL;
-    size_t        num_manual_results = 0;
-
     TESTING("R-tree spatial queries");
     srand(0);
 
@@ -230,45 +292,9 @@ test_rtree_search(void)
             /* Don't check for NULL yet - if no matches are found, NULL is a valid response */
             results_head = H5RT_search(tree, min, max);
 
-            /* Perform manual search for comparison */
-            manual_results = manual_search(leaves_temp, leaf_count, rank, min, max, &num_manual_results);
-
-            /* Check equality */
-            if (!results_head && (num_manual_results > 0))
-                FAIL_PUTS_ERROR("R-tree search found no results, but manual search found results");
-
-            if (results_head && (num_manual_results == 0))
-                FAIL_PUTS_ERROR("R-tree search found results, but manual search found no results");
-
-            size_t num_rtree_results = get_num_leaves(results_head);
-
-            if (num_manual_results != num_rtree_results) {
-                FAIL_PUTS_ERROR("R-tree search and manual search found different number of results");
-            }
-
-            if (results_head && num_manual_results > 0) {
-                /* Order of results in each list may differ, so we need to check each result individually */
-                for (size_t i = 0; i < num_manual_results; i++) {
-                    H5RT_leaf_t *manual_leaf = manual_results[i];
-                    bool         found       = false;
-
-                    /* Check if this manual result is in the r-tree results */
-                    for (H5RT_leaf_t *curr = results_head; curr != NULL; curr = curr->next) {
-                        if (curr == manual_leaf) {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found)
-                        FAIL_PUTS_ERROR("R-tree search missing a result found in manual search");
-                }
-            }
-
-            /* Cleanup for next iteration */
-            free(manual_results);
-            manual_results     = NULL;
-            num_manual_results = 0;
+            /* Verify that results are equivalent to a manual search */
+            if (verify_rtree_search(results_head, leaves_temp, leaf_count, min, max, rank) < 0)
+                FAIL_STACK_ERROR;
 
             if (H5RT_free(tree) < 0)
                 FAIL_STACK_ERROR;
@@ -284,9 +310,6 @@ error:
 
     if (tree)
         H5RT_free(tree);
-
-    if (manual_results)
-        free(manual_results);
 
     return FAIL;
 }
@@ -312,9 +335,6 @@ test_rtree_copy(void) {
     hsize_t      min[H5S_MAX_RANK];
     hsize_t      max[H5S_MAX_RANK];
     hsize_t      size = 0;
-
-    H5RT_leaf_t **manual_results     = NULL;
-    size_t        num_manual_results = 0;
 
     TESTING("R-tree copy");
     srand(0);
@@ -356,54 +376,9 @@ test_rtree_copy(void) {
             /* Perform search on copied tree */
             results_head = H5RT_search(tree_copy, min, max);
 
-            /* Perform manual search for comparison using original leaf data */
-            manual_results = manual_search(tree_copy->leaves, leaf_count, rank, min, max, &num_manual_results);
-
-            /* Check equality - verifying that the copied tree works correctly */
-            if (!results_head && (num_manual_results > 0))
-                FAIL_PUTS_ERROR("Copied R-tree search found no results, but manual search found results");
-
-            if (results_head && (num_manual_results == 0))
-                FAIL_PUTS_ERROR("Copied R-tree search found results, but manual search found no results");
-
-            size_t num_rtree_results = get_num_leaves(results_head);
-
-            if (num_manual_results != num_rtree_results) {
-                FAIL_PUTS_ERROR("Copied R-tree search and manual search found different number of results");
-            }
-
-            if (results_head && num_manual_results > 0) {
-                /* Order of results in each list may differ, so we need to check each result individually */
-                /* We compare based on coordinates since the copied tree has different leaf pointers */
-                for (size_t i = 0; i < num_manual_results; i++) {
-                    H5RT_leaf_t *manual_leaf = manual_results[i];
-                    bool         found       = false;
-
-                    /* Check if this manual result coordinates match any in the copied tree results */
-                    for (H5RT_leaf_t *curr = results_head; curr != NULL; curr = curr->next) {
-                        bool coords_match = true;
-                        for (int d = 0; d < rank; d++) {
-                            if (curr->min[d] != manual_leaf->min[d] || 
-                                curr->max[d] != manual_leaf->max[d]) {
-                                coords_match = false;
-                                break;
-                            }
-                        }
-                        if (coords_match) {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found)
-                        FAIL_PUTS_ERROR("Copied R-tree search missing a result found in manual search");
-                }
-            }
-
-            /* Cleanup for next iteration */
-            free(manual_results);
-            manual_results     = NULL;
-            num_manual_results = 0;
+            /* Verify that results are equivalent to a manual search */
+            if (verify_rtree_search(results_head, tree_copy->leaves, leaf_count, min, max, rank) < 0)
+                FAIL_STACK_ERROR;
 
             if (H5RT_free(tree_copy) < 0)
                 FAIL_STACK_ERROR;
@@ -423,9 +398,6 @@ error:
 
     if (tree_copy)
         H5RT_free(tree_copy);
-
-    if (manual_results)
-        free(manual_results);
 
     return FAIL;
 }
