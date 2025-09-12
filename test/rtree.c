@@ -89,7 +89,7 @@ static herr_t verify_rtree_search(H5RT_leaf_t *results_head, H5RT_leaf_t *leaves
             bool         found       = false;
 
             /* Check if this manual result is in the r-tree results */
-            for (H5RT_leaf_t *curr = results_head; curr != NULL; curr = curr->next) {
+            for (H5RT_leaf_t *curr = results_head; curr != NULL; curr = curr->next_result) {
                 if (curr == manual_leaf) {
                     found = true;
                     break;
@@ -152,7 +152,7 @@ get_num_leaves(H5RT_leaf_t *results_arr)
 
     while (curr) {
         count++;
-        curr = curr->next;
+        curr = curr->next_result;
     }
 
     return count;
@@ -289,8 +289,8 @@ test_rtree_search(void)
             }
 
             /* Perform r-tree search */
-            /* Don't check for NULL yet - if no matches are found, NULL is a valid response */
-            results_head = H5RT_search(tree, min, max);
+            if (H5RT_search(tree, min, max, &results_head) < 0)
+                FAIL_STACK_ERROR;
 
             /* Verify that results are equivalent to a manual search */
             if (verify_rtree_search(results_head, leaves_temp, leaf_count, min, max, rank) < 0)
@@ -374,7 +374,8 @@ test_rtree_copy(void) {
             }
 
             /* Perform search on copied tree */
-            results_head = H5RT_search(tree_copy, min, max);
+            if (H5RT_search(tree_copy, min, max, &results_head) < 0)
+                FAIL_STACK_ERROR;
 
             /* Verify that results are equivalent to a manual search */
             if (verify_rtree_search(results_head, tree_copy->leaves, leaf_count, min, max, rank) < 0)

@@ -274,7 +274,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RT__bulk_load() */
 
-/* Creates a new R-tree of rank rank, filling it with count leaves. Takes ownership of the leaves array. */
+/*-------------------------------------------------------------------------
+ * Function:    H5RT_create
+ *
+ * Purpose:     Create a new R-tree from the provided array of 'count'
+ *               leaves, each with 'rank' spatial dimensions.
+ *
+ *              On success, the R-tree takes ownership of the caller-allocated
+ *               leaves array.
+ *
+ * Return:      A valid pointer to the new R-tree on success/NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 H5RT_t *
 H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
 {
@@ -315,11 +327,11 @@ done:
 /*
  *  Parameters:
  *     node (in): Node from which to begin the search.
- *     rank (in): rank of r-tree.
+ *     rank (in): rank of the hyper-rectangles
  *     min (in): Minimum bounds of spatial search, should have 'rank' dims.
  *     max (in): Maximum bounds of spatial search, should have 'rank' dims.
- *     head (out): Head of the linked list of results. Should be NULL on initial call.
- *     tail (out): Tail of the linked list of results. Should be NULL on initial call.
+ *     head (out): Head of the linked list of results.
+ *     tail (out): Tail of the linked list of results.
  */
 static void
 H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_leaf_t **head,
@@ -348,7 +360,7 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
                 /* We found an intersecting leaf, add it to the linked list of leaves */
                 if (*tail) {
                     assert(*head);
-                    (*tail)->next = curr_leaf;
+                    (*tail)->next_result = curr_leaf;
                 }
                 else {
                     /* This is the first leaf to be returned - mark it as head */
@@ -375,34 +387,45 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5RT__search_recurse() */
 
-/* Returns a linked list of leaves whose bounding boxes intersect with min and max
- * TBD: The information used to assemble the return structure is
- * stored in the leaves themselves, so subsequent/concurrent searches
- * will make previous search results invalid */
-H5RT_leaf_t *
-H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[])
+/*-------------------------------------------------------------------------
+ * Function:    H5RT_search
+ *
+ * Purpose:     Search the r-tree for leaves whose bounding boxes
+ *              intersect with the provided min and max bounds.
+ *
+ *              NOTE: The returned linked list is built using the
+ *              'next_result' pointer in the leaves themselves,
+ *              so subsequent/concurrent searches will invalidate
+ *              previous search results.
+ * 
+* Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_leaf_t **results_out)
 {
     H5RT_leaf_t *head      = NULL;
     H5RT_leaf_t *tail      = NULL;
-    H5RT_leaf_t *ret_value = NULL;
+    herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert((hsize_t *)min);
     assert((hsize_t *)max);
 
     if (!rtree)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid r-tree");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid r-tree");
 
     /* Perform the actual search */
     H5RT__search_recurse(&rtree->root, rtree->rank, min, max, &head, &tail);
 
-    /* Terminate the linked list (since we don't clean up the "next" pointers in general */
+    /* Terminate the linked list (since we don't clean up the "next_result" pointers in general */
     if (tail)
-        tail->next = NULL;
+        tail->next_result = NULL;
 
     /* Return the linked list */
-    ret_value = head;
+    *results_out = head;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -427,7 +450,16 @@ H5RT__free_recurse(H5RT_node_t *node)
     FUNC_LEAVE_NOAPI_VOID
 }
 
-/* Deletes and frees all memory used by the R-tree, including the leaves array */
+/*-------------------------------------------------------------------------
+ * Function:    H5RT_free
+ *
+ * Purpose:     Release the memory associated with an r-tree.
+ *              The data pointed to by the leaves is left as-is.
+ * 
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5RT_free(H5RT_t *rtree)
 {
@@ -446,7 +478,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-/* Deep copy the provided rtree */
+/*-------------------------------------------------------------------------
+ * Function:    H5RT_copy
+ *
+ * Purpose:     Deep-copy the provided r-tree
+ *
+ *              NOTE:  The 'record' pointers in the leaves are shallow-copied.
+ * 
+ * Return:      A valid pointer to the new r-tree on success/NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 H5RT_t* H5RT_copy(const H5RT_t *rtree) {
     H5RT_t *ret_value    = NULL;
     H5RT_t *new_tree     = NULL;
