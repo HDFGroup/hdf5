@@ -47,16 +47,17 @@ static H5RT_leaf_t **manual_search(H5RT_leaf_t *leaves, size_t leaf_count, int r
 static size_t get_num_leaves(H5RT_leaf_t *results_arr);
 
 /* Helper function to compare r-tree search results to linear search */
-static herr_t verify_rtree_search(H5RT_leaf_t *results_head, H5RT_leaf_t *leaves, size_t leaf_count, hsize_t min[],
-                                 hsize_t max[], int rank);
+static herr_t verify_rtree_search(H5RT_leaf_t *results_head, H5RT_leaf_t *leaves, size_t leaf_count,
+                                  hsize_t min[], hsize_t max[], int rank);
 
-
-static herr_t verify_rtree_search(H5RT_leaf_t *results_head, H5RT_leaf_t *leaves, size_t leaf_count, hsize_t min[],
-                                 hsize_t max[], int rank) {
+static herr_t
+verify_rtree_search(H5RT_leaf_t *results_head, H5RT_leaf_t *leaves, size_t leaf_count, hsize_t min[],
+                    hsize_t max[], int rank)
+{
     H5RT_leaf_t **manual_results     = NULL;
     size_t        num_manual_results = 0;
-    size_t num_rtree_results = 0;
-    herr_t ret_value = SUCCEED;
+    size_t        num_rtree_results  = 0;
+    herr_t        ret_value          = SUCCEED;
 
     /* Perform manual search for comparison */
     manual_results = manual_search(leaves, leaf_count, rank, min, max, &num_manual_results);
@@ -325,11 +326,12 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_rtree_copy(void) {
-    H5RT_t *tree = NULL;
-    H5RT_t *tree_copy = NULL;
+test_rtree_copy(void)
+{
+    H5RT_t      *tree       = NULL;
+    H5RT_t      *tree_copy  = NULL;
     size_t       leaf_count = 0;
-    H5RT_leaf_t *leaves = NULL;
+    H5RT_leaf_t *leaves     = NULL;
 
     H5RT_leaf_t *results_head = NULL;
     hsize_t      min[H5S_MAX_RANK];
@@ -355,7 +357,7 @@ test_rtree_copy(void) {
                 FAIL_STACK_ERROR;
 
             /* Ownership is transferred */
-            leaves      = NULL;
+            leaves = NULL;
 
             /* Deep copy the tree */
             if ((tree_copy = H5RT_copy(tree)) == NULL)
@@ -389,7 +391,7 @@ test_rtree_copy(void) {
 
     PASSED();
     return SUCCEED;
-    
+
 error:
     if (leaves)
         free(leaves);
@@ -426,7 +428,7 @@ main(void)
     nerrors += test_rtree_create() < 0 ? 1 : 0;
     nerrors += test_rtree_search() < 0 ? 1 : 0;
     nerrors += test_rtree_copy() < 0 ? 1 : 0;
-    
+
     if (nerrors)
         goto error;
 

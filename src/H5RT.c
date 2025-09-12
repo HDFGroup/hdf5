@@ -305,7 +305,7 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
     if (NULL == (rtree = H5FL_CALLOC(H5RT_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree");
 
-    rtree->rank = rank;
+    rtree->rank    = rank;
     rtree->nleaves = count;
 
     /* Take ownership of leaves array */
@@ -397,8 +397,8 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
  *              'next_result' pointer in the leaves themselves,
  *              so subsequent/concurrent searches will invalidate
  *              previous search results.
- * 
-* Return:      Non-negative on success/Negative on failure
+ *
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -455,7 +455,7 @@ H5RT__free_recurse(H5RT_node_t *node)
  *
  * Purpose:     Release the memory associated with an r-tree.
  *              The data pointed to by the leaves is left as-is.
- * 
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
@@ -484,14 +484,16 @@ done:
  * Purpose:     Deep-copy the provided r-tree
  *
  *              NOTE:  The 'record' pointers in the leaves are shallow-copied.
- * 
+ *
  * Return:      A valid pointer to the new r-tree on success/NULL on failure
  *
  *-------------------------------------------------------------------------
  */
-H5RT_t* H5RT_copy(const H5RT_t *rtree) {
-    H5RT_t *ret_value    = NULL;
-    H5RT_t *new_tree     = NULL;
+H5RT_t *
+H5RT_copy(const H5RT_t *rtree)
+{
+    H5RT_t *ret_value = NULL;
+    H5RT_t *new_tree  = NULL;
 
     H5RT_leaf_t *new_leaves = NULL;
 
@@ -507,7 +509,8 @@ H5RT_t* H5RT_copy(const H5RT_t *rtree) {
     if (NULL == (new_leaves = (H5RT_leaf_t *)malloc(rtree->nleaves * sizeof(H5RT_leaf_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree leaves");
 
-    /* If the user-stored data in the r-tree is a pointer, then the new r-tree will have pointers to the same shared data */
+    /* If the user-stored data in the r-tree is a pointer, then the new r-tree will have pointers to the same
+     * shared data */
     memcpy(new_leaves, rtree->leaves, rtree->nleaves * sizeof(H5RT_leaf_t));
 
     if ((new_tree = H5RT_create(rtree->rank, new_leaves, rtree->nleaves)) == NULL)
@@ -515,12 +518,13 @@ H5RT_t* H5RT_copy(const H5RT_t *rtree) {
 
     ret_value = new_tree;
 
-done:   
+done:
     if (!ret_value) {
         if (new_tree) {
             if (H5RT_free(new_tree) < 0)
                 HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "unable to free partially copied r-tree");
-        } else if (new_leaves) {
+        }
+        else if (new_leaves) {
             free(new_leaves);
         }
     }
