@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-12</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -152,7 +152,7 @@ Global variables/structures</h1>
 <h2><a class="anchor" id="subsec_tsafe_global_var"></a>
 Global library initialization variable</h2>
 <p>In the threadsafe implementation, the global library initialization variable <code>H5_libinit_g</code> is changed to a global structure consisting of the variable with its associated lock (locks are explained in section <a class="el" href="#subsec_tsafe_impl_locks">Recursive Locks</a>): </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a>  H5_libinit_g = FALSE;</div>
-<div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition</b> H5public.h:268</div></div>
+<div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition</b> H5public.h:280</div></div>
 </div><!-- fragment --><p>becomes </p><div class="fragment"><div class="line">H5_api_t H5_g;</div>
 </div><!-- fragment --><p>where <code>H5_api_t</code> is </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span>H5_api_struct {</div>
 <div class="line">  H5_mutex_t init_lock;           <span class="comment">// API entrance mutex</span></div>
