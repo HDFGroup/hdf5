@@ -13,9 +13,9 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdf5#help-and-support)
 
 ## 📖 Contents
+* [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](#--bug-fixes)
-* [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [Support for new platforms and languages](#-support-for-new-platforms-and-languages)
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
 * [Known Problems](#-known-problems)
@@ -23,6 +23,16 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Documentation](#-documentation)
 * [Contributors](#%EF%B8%8F-contributors)
   
+## ⚠️ Breaking Changes
+
+- **Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT**
+
+   The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
+
+- Autotools support was removed from HDF5
+
+   CMake is now the build system available in HDF5 code.  Version 3.26 or later is required.  See the list of Autotools and CMake build options to find the nearest equivalents.
+
 ## 🚀 New Features & Improvements
 
 ### Configuration
@@ -138,6 +148,10 @@ HDF5 release, platforms tested, and known problems in this release.
    The standard for building the library is now C11. We have updated the build files to set the C standard to C11, though some platforms use gnu11 to get some GNU things to work.
 
 ### Library 
+
+    - Improved performance of opening a virtual dataset with many mappings
+
+   When opening a virtual dataset, the library would previously decode the mappings in the object header package, then copy them to the dataset struct, then copy them to the internal DCPL. Copying the VDS mappings could be very expensive if there were many mappings. Changed this to delay decoding the mappings until the dataset code, and delay copying the layout to the DCPL until it is needed. This results in only the decoding and no copies in most use cases, as opposed to the decoding and two copies with the previous code.
 
 - Aligned the CMake compiler wrappers with the old Autotools versions
 
@@ -409,11 +423,11 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The new option is --lformat, which allows the user to set the floating point format for long double. The default format is %Lg. There is already an option --format to set the floating point format for double and float. The default format is %g.
 
-- Remove the high-level GIF tools
+- Removed the high-level GIF tools
 
    The high-level GIF tools, `h52gif` and `gif2h5`, have unfixed CVE issues (with no proof-of-concept files). They are not critical tools, are not well maintained, and are an odd fit for building with the library. Because of this, they have been removed. We may move them to a separate repository in the future.
 
-   This also removes the following configure options:
+   This also removed the following configure options:
       CMake: `HDF5_BUILD_HL_GIF_TOOLS`
 
 ### High-Level APIs 
@@ -431,6 +445,14 @@ HDF5 release, platforms tested, and known problems in this release.
 ## 🪲  Bug Fixes
 
 ### Library
+- Revised handling of Unicode filenames on Windows
+
+   In the HDF5 1.14.4 release, a change was made to address some issues with the library's handling of code pages and file paths on Windows.  This change introduced other issues with the handling of UTF-8 file names that caused breakage for software using the 1.14.4 and 1.14.5 releases of HDF5. That change was reverted for the 1.14.6 release and the behavior has been slightly modified for this release.
+
+   On Windows, the library once again assumes that filename strings will be UTF-8 encoded strings and will attempt to convert them to UTF-16 before passing them to Windows API functions. However, if the library fails to convert a filename string to UTF-16, it will now fallback to the equivalent Windows "ANSI" API functions which will interpret the string according to the active Windows code page.
+
+   Support for a new environment variable, HDF5_PREFER_WINDOWS_CODE_PAGE, was added in order to instruct HDF5 to prefer interpreting filenames according to the active Windows code page rather than assuming UTF-8 encoding. If this environment variable is set to "1" or "TRUE" (case-insensitive), the active code page will be preferred. If it is unset or set to "0" or "FALSE" (case-insensitive), UTF-8 will be preferred.
+
 - Fixed an issue with caching in the ROS3 VFD
    The ROS3 VFD uses a very simple caching mechanism that caches the first 16MiB of a file during file open and serves later reads from that cache if the offset + length falls within the cached range of bytes. Combinations of offset + length that extended exactly to the end of the cached range of bytes (for example, offset=0 and len=16777216) would end up not being served from the cache due to an incorrect range check. This has now been fixed.
 
@@ -575,12 +597,6 @@ HDF5 release, platforms tested, and known problems in this release.
 - Added skipping of a few parallel tests for OpenMPI 5.0.5
 
     An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests (mpiodup, props, fapl_preserve) to fail. These tests are now skipped for that release of OpenMPI. The issue has been fixed in the 5.0.6 release of OpenMPI.
-
-## ⚠️ Breaking Changes
-
-- **Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT**
-
-   The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
 
 ## ✨ Support for new platforms and languages
 
