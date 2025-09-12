@@ -73,7 +73,7 @@ If using 4 processes, then process 1 would look like:
 </table>
 
 The code would look like the following:
-\code
+\code{.c}
     72      // Each process defines dataset in memory and writes it to the hyperslab
     73      // in the file.
     74       
@@ -241,7 +241,7 @@ hyperslab in a file that consists of regularly spaced rows.
 \section secIntroParRegularSpacedC Writing Regularly Spaced Columns in C
 In this example, you have two processes that write to the same dataset, each writing to
 every other column in the dataset. For each process the hyperslab in the file is set up as follows:
-\code
+\code{.c}
     89      count[0] = 1;
     90      count[1] = dimsm[1];
     91      offset[0] = 0;
