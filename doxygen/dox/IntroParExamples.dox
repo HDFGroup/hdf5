@@ -1,4 +1,4 @@
-\page IntroParContHyperslab Writing by Contiguous Hyperslab
+/** \page IntroParContHyperslab Writing by Contiguous Hyperslab
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
 <hr>
@@ -74,19 +74,21 @@ If using 4 processes, then process 1 would look like:
 
 The code would look like the following:
 \code
-    72      // Each process defines dataset in memory and writes it to the hyperslab
-    73      // in the file.
-    74       
-    75      count[0] = dimsf[0]/mpi_size
-    76      count[1] = dimsf[1]
-    77      offset[0] = mpi_rank * count[0]
-    78      offset[1] = 0
-    79      memspace = H5Screate_simple(RANK, count, NULL)
+    71      /*
+    72       * Each process defines dataset in memory and writes it to the hyperslab
+    73       * in the file.
+    74       */
+    75      count[0] = dimsf[0]/mpi_size;
+    76      count[1] = dimsf[1];
+    77      offset[0] = mpi_rank * count[0];
+    78      offset[1] = 0;
+    79      memspace = H5Screate_simple(RANK, count, NULL);
     80
-    81      // Select hyperslab in the file.
-    82
-    83      filespace = H5Dget_space(dset_id)
-    84      H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL)
+    81      /*
+    82       * Select hyperslab in the file.
+    83       */
+    84      filespace = H5Dget_space(dset_id);
+    85      H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL);
 \endcode
 
 Below is the example program:
@@ -242,14 +244,14 @@ hyperslab in a file that consists of regularly spaced rows.
 In this example, you have two processes that write to the same dataset, each writing to
 every other column in the dataset. For each process the hyperslab in the file is set up as follows:
 \code
-    89      count[0] = 1
-    90      count[1] = dimsm[1]
-    91      offset[0] = 0
-    92      offset[1] = mpi_rank
-    93      stride[0] = 1
-    94      stride[1] = 2
-    95      block[0] = dimsf[0]
-    96      block[1] = 1
+    89      count[0] = 1;
+    90      count[1] = dimsm[1];
+    91      offset[0] = 0;
+    92      offset[1] = mpi_rank;
+    93      stride[0] = 1;
+    94      stride[1] = 2;
+    95      block[0] = dimsf[0];
+    96      block[1] = 1;
 \endcode
 
 The stride is 2 for dimension 1 to indicate that every other position along this
@@ -564,3 +566,4 @@ The \ref sec_cltools_h5dump utility is written in C so the output is in C order.
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
 
+*/
