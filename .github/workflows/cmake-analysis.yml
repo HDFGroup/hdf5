@@ -1,4 +1,4 @@
-name: hdf5 dev ctest analysis runs
+name: hdf5 dev CTest analysis runs
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -29,7 +29,7 @@ jobs:
     name: "Ubuntu GCC Coverage"
     runs-on: ubuntu-22.04
     steps:
-    - name: Install CMake Dependencies (Linux_coverage)
+    - name: Install Dependencies (Linux_coverage)
       run: |
         sudo apt update
         sudo apt-get install ninja-build doxygen graphviz curl build-essential
@@ -104,14 +104,14 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
 
-    - name: Run ctest (Linux_coverage)
+    - name: Run CTest (Linux_coverage)
       run: |
         cd "${{ runner.workspace }}/hdf5"
         ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}_COV,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
       shell: bash
       continue-on-error: true
 
-    # Save log files created by ctest script
+    # Save log files created by CTest script
     - name: Save log (Linux_coverage)
       uses: actions/upload-artifact@v4
       with:
@@ -125,7 +125,7 @@ jobs:
     name: "Ubuntu Clang LeakSanitizer"
     runs-on: ubuntu-22.04
     steps:
-      - name: Install CMake Dependencies (Linux_Leak)
+      - name: Install Dependencies (Linux_Leak)
         run: |
           sudo apt update
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
@@ -205,14 +205,14 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (Linux_Leak)
+      - name: Run CTest (Linux_Leak)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-LEAK,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Linux_Leak)
         uses: actions/upload-artifact@v4
         with:
@@ -226,7 +226,7 @@ jobs:
     name: "Ubuntu Clang AddressSanitizer"
     runs-on: ubuntu-22.04
     steps:
-      - name: Install CMake Dependencies (Linux_Address)
+      - name: Install Dependencies (Linux_Address)
         run: |
           sudo apt update
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
@@ -306,14 +306,14 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (Linux_Address)
+      - name: Run CTest (Linux_Address)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-ADDR,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Linux_Address)
         uses: actions/upload-artifact@v4
         with:
@@ -327,7 +327,7 @@ jobs:
     name: "Ubuntu Clang UndefinedBehaviorSanitizer"
     runs-on: ubuntu-22.04
     steps:
-      - name: Install CMake Dependencies (Linux_UndefinedBehavior)
+      - name: Install Dependencies (Linux_UndefinedBehavior)
         run: |
           sudo apt update
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
@@ -407,14 +407,14 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (Linux_UndefinedBehavior)
+      - name: Run CTest (Linux_UndefinedBehavior)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-UNDEF,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Linux_UndefinedBehavior)
         uses: actions/upload-artifact@v4
         with:

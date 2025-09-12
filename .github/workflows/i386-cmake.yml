@@ -1,4 +1,4 @@
-name: hdf5 dev CMake i386
+name: hdf5 dev i386
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -30,7 +30,7 @@ jobs:
             libgit2-dev
             cmake
 
-      - name: CMake Configure
+      - name: Configure
         shell: alpine.sh --root {0}
         run: |
           mkdir build
@@ -46,13 +46,13 @@ jobs:
           -DHDF5_BUILD_JAVA:BOOL=OFF \
           ..
 
-      - name: CMake Build
+      - name: Build
         shell: alpine.sh --root {0}
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         shell: alpine.sh --root {0}
         run: |
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -VV

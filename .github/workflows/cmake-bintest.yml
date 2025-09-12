@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   test_binary_win:
-  # Windows w/ MSVC + CMake
+  # Windows w/ MSVC
   #
     name: "Windows MSVC Binary Test"
     runs-on: windows-latest
@@ -80,7 +80,7 @@ jobs:
               Get-ChildItem -Path ${{ runner.workspace }}
         shell: pwsh
 
-      - name: Run ctest (Windows)
+      - name: Run CTest (Windows)
         env:
           HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
@@ -90,12 +90,12 @@ jobs:
         shell: bash
 
   test_binary_linux:
-  # Linux (Ubuntu) w/ gcc + CMake
+  # Linux (Ubuntu) w/ gcc
   #
     name: "Ubuntu gcc Binary Test"
     runs-on: ubuntu-latest
     steps:
-      - name: Install CMake Dependencies (Linux)
+      - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz
@@ -134,7 +134,7 @@ jobs:
               ls -l ${{ github.workspace }}
               ls ${{ runner.workspace }}
 
-      - name: Run ctest (Linux)
+      - name: Run CTest (Linux)
         env:
           HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
@@ -144,7 +144,7 @@ jobs:
         shell: bash
 
   test_binary_mac_latest:
-  # MacOS w/ Clang + CMake
+  # MacOS w/ Clang
   #
     name: "MacOS Clang Binary Test"
     runs-on: macos-latest
@@ -194,7 +194,7 @@ jobs:
           compiler: gcc
           version: 14
 
-      - name: Run ctest (MacOS_latest)
+      - name: Run CTest (MacOS_latest)
         id: run-ctest
         env:
           HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
@@ -205,12 +205,12 @@ jobs:
         shell: bash
 
   test_h5cc_linux:
-  # Linux (Ubuntu) w/ gcc + CMake
+  # Linux (Ubuntu) w/ gcc
   #
     name: "Ubuntu h5cc Binary Test"
     runs-on: ubuntu-latest
     steps:
-      - name: Install CMake Dependencies (Linux)
+      - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz

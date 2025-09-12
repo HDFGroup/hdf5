@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       build_mode:
-        description: "CMake build type (CMAKE_BUILD_TYPE)"
+        description: "Build type (CMAKE_BUILD_TYPE)"
         required: true
         type: string
 
@@ -36,7 +36,7 @@ jobs:
 #            mpi_lib: "MPICH"
 
     # Sets the job's name from the properties
-    name: "Test HDF5 Subfiling VFD (CMake ${{ inputs.build_mode }}) on ${{ matrix.os_name }} with ${{ matrix.mpi_lib }}"
+    name: "Test HDF5 Subfiling VFD (${{ inputs.build_mode }}) on ${{ matrix.os_name }} with ${{ matrix.mpi_lib }}"
 
     runs-on: ${{ matrix.os }}
 
