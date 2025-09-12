@@ -225,15 +225,15 @@ H5HL__fl_deserialize(H5HL_t *heap)
     /* check arguments */
     assert(heap);
     assert(!heap->freelist);
-
+    HDcompile_assert(sizeof(hsize_t) == sizeof(uint64_t));
+    
     /* Build free list */
     free_block = heap->free_block;
     while (H5HL_FREE_NULL != free_block) {
         const uint8_t *image; /* Pointer into image buffer */
 
         /* Sanity check */
-        HDcompile_assert(sizeof(hsize_t) == sizeof(uint64_t));
-
+        
         if (free_block > UINT64_MAX - (2 * heap->sizeof_size))
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "decoded heap block address overflow");
 
