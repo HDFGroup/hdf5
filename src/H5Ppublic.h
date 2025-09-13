@@ -7105,8 +7105,8 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *      <td>Replaced with a single \TText{%} (percent) character.</td>
  *      </tr>
  *      <tr>
- *      <td><code>%<d>b</code></td>
- *      <td>Where <code><d></code> is the virtual dataset dimension axis (0-based)
+ *      <td><code>%\<d\>b</code></td>
+ *      <td>Where <code>\<d\></code> is the virtual dataset dimension axis (0-based)
  *          and \TText{b} indicates that the block count of the selection in that
  *          dimension should be used. The full expression (for example, \TText{%0b})
  *          is replaced with a single numeric value when the mapping is evaluated at
