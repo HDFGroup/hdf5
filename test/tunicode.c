@@ -36,26 +36,436 @@
 #define COMP_DOUBLE_VAL 42.0
 
 /* Test function prototypes */
-void test_fl_string(hid_t fid, const char *string);
-void test_strpad(hid_t fid, const char *string);
-void test_vl_string(hid_t fid, const char *string);
-void test_objnames(hid_t fid, const char *string);
-void test_attrname(hid_t fid, const char *string);
-void test_compound(hid_t fid, const char *string);
-void test_enum(hid_t fid, const char *string);
-void test_opaque(hid_t fid, const char *string);
+static void test_utf8_filenames(void);
+static void test_utf8_conv_failure(void);
+static void test_code_page_override(void);
+static void test_fl_string(hid_t fid, const char *string);
+static void test_strpad(hid_t fid, const char *string);
+static void test_vl_string(hid_t fid, const char *string);
+static void test_objnames(hid_t fid, const char *string);
+static void test_attrname(hid_t fid, const char *string);
+static void test_compound(hid_t fid, const char *string);
+static void test_enum(hid_t fid, const char *string);
+static void test_opaque(hid_t fid, const char *string);
 
 /* Utility function prototypes */
-static hid_t mkstr(size_t len, H5T_str_t strpad);
-unsigned int write_char(unsigned int c, char *test_string, unsigned int cur_pos);
-void         dump_string(const char *string);
+static hid_t        mkstr(size_t len, H5T_str_t strpad);
+static unsigned int write_char(unsigned int c, char *test_string, unsigned int cur_pos);
+
+#ifdef DEBUG
+static void dump_string(const char *string);
+#endif
+
+/*
+ * A test to check that files with UTF-8 filenames can be correctly
+ * created, opened and deleted. On Windows specifically, this is to
+ * test that the filename is converted to UTF-16 rather than being
+ * interpreted according to the current code page.
+ *
+ * The filenames used for this test are simple examples taken from
+ * a reported regression in the 1.14.4 and 1.14.5 releases.
+ */
+static void
+test_utf8_filenames(void)
+{
+    const char *euro_filename = u8"€.h5";
+    const char *quot_filename = u8"‚.h5"; /* U+201A "Single Low-9 Quotation Mark" */
+    const char *chin_filename = u8"漢字.h5";
+    hid_t       fid           = H5I_INVALID_HID;
+    char       *env           = NULL;
+    herr_t      ret;
+    int         acc_ret;
+#ifdef H5_HAVE_WIN32_API
+    wchar_t *wfilename = NULL;
+#endif
+
+    /*
+     * If the HDF5_PREFER_WINDOWS_CODE_PAGE environment variable
+     * is set to a true value, skip this test as the filenames
+     * are intended to be UTF-8 strings and may not map to the
+     * active code page.
+     */
+    env = getenv(HDF5_PREFER_WINDOWS_CODE_PAGE);
+    if (env && (*env != '\0')) {
+        if (0 == HDstrcasecmp(env, "true") || 0 == strcmp(env, "1")) {
+            MESSAGE(5,
+                    ("Testing UTF-8 filenames -- SKIPPED due to HDF5_PREFER_WINDOWS_CODE_PAGE being true\n"));
+            return;
+        }
+    }
+
+    MESSAGE(5, ("Testing UTF-8 filenames\n"));
+
+    fid = H5Fcreate(euro_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    errno = 0;
+#ifdef H5_HAVE_WIN32_API
+    /* On Windows, convert filename to UTF-16 and check for
+     * existence with wide-character _waccess.
+     */
+    ret = H5_get_utf16_str(euro_filename, &wfilename, NULL);
+    CHECK(ret, FAIL, "H5_get_utf16_str");
+
+    acc_ret = _waccess(wfilename, 0);
+#else
+    acc_ret = HDaccess(euro_filename, F_OK);
+#endif
+
+    VERIFY(acc_ret, 0, "file existence check");
+
+    fid = H5Fopen(euro_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    if (GetTestCleanup()) {
+        ret = H5Fdelete(euro_filename, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Fdelete");
+
+        /* Make sure file was deleted */
+        errno = 0;
+#ifdef H5_HAVE_WIN32_API
+        acc_ret = _waccess(wfilename, 0);
+#else
+        acc_ret = HDaccess(euro_filename, F_OK);
+#endif
+        CHECK(acc_ret, 0, "file existence check");
+    }
+
+#ifdef H5_HAVE_WIN32_API
+    H5MM_xfree(wfilename);
+#endif
+
+    fid = H5Fcreate(quot_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    errno = 0;
+#ifdef H5_HAVE_WIN32_API
+    /* On Windows, convert filename to UTF-16 and check for
+     * existence with wide-character _waccess.
+     */
+    ret = H5_get_utf16_str(quot_filename, &wfilename, NULL);
+    CHECK(ret, FAIL, "H5_get_utf16_str");
+
+    acc_ret = _waccess(wfilename, 0);
+#else
+    acc_ret = HDaccess(quot_filename, F_OK);
+#endif
+
+    VERIFY(acc_ret, 0, "file existence check");
+
+    fid = H5Fopen(quot_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    if (GetTestCleanup()) {
+        ret = H5Fdelete(quot_filename, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Fdelete");
+
+        /* Make sure file was deleted */
+        errno = 0;
+#ifdef H5_HAVE_WIN32_API
+        acc_ret = _waccess(wfilename, 0);
+#else
+        acc_ret = HDaccess(quot_filename, F_OK);
+#endif
+        CHECK(acc_ret, 0, "file existence check");
+    }
+
+#ifdef H5_HAVE_WIN32_API
+    H5MM_xfree(wfilename);
+#endif
+
+    fid = H5Fcreate(chin_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    errno = 0;
+#ifdef H5_HAVE_WIN32_API
+    /* On Windows, convert filename to UTF-16 and check for
+     * existence with wide-character _waccess.
+     */
+    ret = H5_get_utf16_str(chin_filename, &wfilename, NULL);
+    CHECK(ret, FAIL, "H5_get_utf16_str");
+
+    acc_ret = _waccess(wfilename, 0);
+#else
+    acc_ret = HDaccess(chin_filename, F_OK);
+#endif
+
+    VERIFY(acc_ret, 0, "file existence check");
+
+    fid = H5Fopen(chin_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    if (GetTestCleanup()) {
+        ret = H5Fdelete(chin_filename, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Fdelete");
+
+        /* Make sure file was deleted */
+        errno = 0;
+#ifdef H5_HAVE_WIN32_API
+        acc_ret = _waccess(wfilename, 0);
+#else
+        acc_ret = HDaccess(chin_filename, F_OK);
+#endif
+        CHECK(acc_ret, 0, "file existence check");
+    }
+
+#ifdef H5_HAVE_WIN32_API
+    H5MM_xfree(wfilename);
+#endif
+}
+
+/*
+ * A test to check that the library falls back to code page
+ * "ANSI" functions on Windows when a filename cannot be
+ * converted using MultiByteToWideChar().
+ */
+static void
+test_utf8_conv_failure(void)
+{
+#ifdef H5_HAVE_WIN32_API
+    /* Byte sequence for string 'ハローワールド' or 'Hello World' in Shift JIS. (NOTE: invalid UTF-8) */
+    const char *filename = "\x83\x6E\x83\x8D\x81\x5B\x83\x8F\x81\x5B\x83\x8B\x83\x68"
+                           ".h5";
+    wchar_t     wfilename[64];
+    hid_t       fid = H5I_INVALID_HID;
+    herr_t      ret;
+    int         int_ret;
+
+    /*
+     * If the current code page would cause a failure in the fallback
+     * pathway (for example, if the current code page is UTF-8), skip
+     * this test.
+     */
+    int_ret = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, filename, -1, wfilename, 64);
+    if (0 == int_ret) {
+        DWORD last_error = GetLastError();
+        UINT  code_page  = GetACP();
+        if (ERROR_NO_UNICODE_TRANSLATION == last_error || ERROR_INVALID_FLAGS == last_error) {
+            MESSAGE(5, ("Testing UTF-8 filename conversion failure fallback -- SKIPPED due to active code "
+                        "page (%u)\n",
+                        code_page));
+            return;
+        }
+    }
+
+    MESSAGE(5, ("Testing UTF-8 filename conversion failure fallback\n"));
+
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Make sure file wasn't created with UTF-16 name but rather
+     * the code page-specific name. MultiByteToWideChar() is used
+     * directly as the byte sequence is invalid UTF-8 and would
+     * cause H5_get_utf16_str() to fail.
+     */
+    int_ret = MultiByteToWideChar(CP_UTF8, 0, filename, -1, wfilename, 64);
+    CHECK(int_ret, 0, "MultiByteToWideChar");
+
+    errno   = 0;
+    int_ret = _waccess(wfilename, 0);
+    CHECK(int_ret, 0, "file existence check");
+
+    int_ret = HDaccess(filename, F_OK);
+    VERIFY(int_ret, 0, "file existence check");
+
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    if (GetTestCleanup()) {
+        ret = H5Fdelete(filename, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Fdelete");
+
+        /* Make sure file was deleted */
+        errno   = 0;
+        int_ret = HDaccess(filename, F_OK);
+        CHECK(int_ret, 0, "file existence check");
+    }
+#else
+    MESSAGE(5, ("Testing UTF-8 filename conversion failure fallback -- SKIPPED (no Windows API)\n"));
+#endif
+}
+
+/*
+ * A test to check that the HDF5_PREFER_WINDOWS_CODE_PAGE environment
+ * variable overrides functions to use the active Windows code page
+ * instead of treating input as UTF-8. This test is specific to Windows,
+ * but serves as just another test of byte sequence filenames on other
+ * platforms.
+ */
+static void
+test_code_page_override(void)
+{
+    const char *filename = "\xc3\x9f"; /* UTF-8 'ß' / Windows code page 1252 'ÃŸ' */
+    hid_t       fid      = H5I_INVALID_HID;
+    char       *env      = NULL;
+    herr_t      ret;
+    int         int_ret;
+
+#ifdef H5_HAVE_WIN32_API
+    /* Perform some initial Windows-specific tests to see if this test
+     * needs to be skipped
+     */
+    {
+        wchar_t conv_buffer[32];
+        DWORD   last_error;
+        UINT    code_page;
+
+        code_page = GetACP();
+
+        int_ret = HDaccess(filename, F_OK);
+        if (0 != int_ret) {
+            last_error = GetLastError();
+            if (ERROR_NO_UNICODE_TRANSLATION == last_error) {
+                MESSAGE(5, ("Testing code pages environment variable override -- SKIPPED due to active code "
+                            "page (%u)\n",
+                            code_page));
+                return;
+            }
+        }
+
+        int_ret = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, filename, -1, conv_buffer, 32);
+        if (0 != int_ret) {
+            last_error = GetLastError();
+            if (ERROR_NO_UNICODE_TRANSLATION == last_error || ERROR_INVALID_FLAGS == last_error) {
+                MESSAGE(5, ("Testing code pages environment variable override -- SKIPPED due to active code "
+                            "page (%u)\n",
+                            code_page));
+                return;
+            }
+        }
+    }
+#endif
+
+    MESSAGE(5, ("Testing code pages environment variable override\n"));
+
+    /* Make sure environment variable is set to known value */
+    env = getenv(HDF5_PREFER_WINDOWS_CODE_PAGE);
+    HDsetenv(HDF5_PREFER_WINDOWS_CODE_PAGE, "TRUE", 1);
+
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Just make sure the file is accessible with the code page function */
+    int_ret = HDaccess(filename, F_OK);
+    VERIFY(int_ret, 0, "file existence check");
+
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    if (GetTestCleanup()) {
+        ret = H5Fdelete(filename, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Fdelete");
+
+        /* Make sure file was deleted */
+        errno   = 0;
+        int_ret = HDaccess(filename, F_OK);
+        CHECK(int_ret, 0, "file existence check");
+    }
+
+    /* Reset environment variable for later tests */
+    if (env && (*env != '\0'))
+        HDsetenv(HDF5_PREFER_WINDOWS_CODE_PAGE, env, 1);
+}
+
+/*
+ * Create a string of random Unicode characters, then run each test with
+ * that string.
+ */
+static void
+test_random_utf8_strings(void)
+{
+    char         test_string[MAX_STRING_LENGTH];
+    unsigned int cur_pos = 0;   /* Current position in test_string */
+    unsigned int unicode_point; /* Unicode code point for a single character */
+    hid_t        fid;           /* ID of file */
+    int          x;             /* Temporary variable */
+    herr_t       ret;           /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing UTF-8 Encoding\n"));
+
+    /* Create a random string with length NUM_CHARS */
+    srand((unsigned)time(NULL));
+
+    memset(test_string, 0, sizeof(test_string));
+    for (x = 0; x < NUM_CHARS; x++) {
+        /* We need to avoid unprintable characters (codes 0-31) and the
+         * . and / characters, since they aren't allowed in path names.
+         */
+        unicode_point = (unsigned)(rand() % (MAX_CODE_POINT - 32)) + 32;
+        if (unicode_point != 46 && unicode_point != 47)
+            cur_pos = write_char(unicode_point, test_string, cur_pos);
+    }
+
+    /* Avoid unlikely case of the null string */
+    if (cur_pos == 0) {
+        test_string[cur_pos] = 'Q';
+        cur_pos++;
+    }
+    test_string[cur_pos] = '\0';
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    test_fl_string(fid, test_string);
+    test_strpad(fid, "abcdefgh");
+    test_strpad(fid, test_string);
+    test_vl_string(fid, test_string);
+    test_objnames(fid, test_string);
+    test_attrname(fid, test_string);
+    test_compound(fid, test_string);
+    test_enum(fid, test_string);
+    test_opaque(fid, test_string);
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* This function could be useful in debugging if certain strings
+     * create errors.
+     */
+#ifdef DEBUG
+    dump_string(test_string);
+#endif /* DEBUG */
+}
 
 /*
  * test_fl_string
  * Tests that UTF-8 can be used for fixed-length string data.
  * Writes the string to a dataset and reads it back again.
  */
-void
+static void
 test_fl_string(hid_t fid, const char *string)
 {
     hid_t      dtype_id, space_id, dset_id;
@@ -68,7 +478,7 @@ test_fl_string(hid_t fid, const char *string)
      * correctly (it should default to ASCII and can be set to UTF8)
      */
     dtype_id = H5Tcopy(H5T_C_S1);
-    CHECK(dtype_id, FAIL, "H5Tcopy");
+    CHECK(dtype_id, H5I_INVALID_HID, "H5Tcopy");
     ret = H5Tset_size(dtype_id, (size_t)MAX_STRING_LENGTH);
     CHECK(ret, FAIL, "H5Tset_size");
     cset = H5Tget_cset(dtype_id);
@@ -80,11 +490,11 @@ test_fl_string(hid_t fid, const char *string)
 
     /* Create dataspace for a dataset */
     space_id = H5Screate_simple(RANK, &dims, NULL);
-    CHECK(space_id, FAIL, "H5Screate_simple");
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
 
     /* Create a dataset */
     dset_id = H5Dcreate2(fid, DSET1_NAME, dtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dset_id, FAIL, "H5Dcreate2");
+    CHECK(dset_id, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Write UTF-8 string to dataset */
     ret = H5Dwrite(dset_id, dtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, string);
@@ -113,7 +523,7 @@ test_fl_string(hid_t fid, const char *string)
  * Borrows heavily from dtypes.c, but is more complicated because
  * the string is randomly generated.
  */
-void
+static void
 test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
 {
     /* buf is used to hold the data that H5Tconvert operates on. */
@@ -154,12 +564,12 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     big_len = length + 1; /* +1 byte for final NULL */
     assert((2 * big_len) <= sizeof(cmpbuf));
     src_type = mkstr(big_len, H5T_STR_NULLTERM);
-    CHECK(src_type, FAIL, "mkstr");
+    CHECK(src_type, H5I_INVALID_HID, "mkstr");
     /* Create a dst_type that holds half of the UTF-8 string and a final
      * NULL */
     small_len = (length + 1) / 2;
     dst_type  = mkstr(small_len, H5T_STR_NULLTERM);
-    CHECK(dst_type, FAIL, "mkstr");
+    CHECK(dst_type, H5I_INVALID_HID, "mkstr");
 
     /* Fill the buffer with two copies of the UTF-8 string, each with a
      * terminating NULL.  It will look like "abcdefg\0abcdefg\0". */
@@ -217,11 +627,11 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     big_len = length;
     assert((2 * big_len) <= sizeof(cmpbuf));
     src_type = mkstr(big_len, H5T_STR_NULLPAD);
-    CHECK(src_type, FAIL, "mkstr");
+    CHECK(src_type, H5I_INVALID_HID, "mkstr");
     /* Create a dst_type that holds half of the UTF-8 string */
     small_len = length / 2;
     dst_type  = mkstr(small_len, H5T_STR_NULLPAD);
-    CHECK(dst_type, FAIL, "mkstr");
+    CHECK(dst_type, H5I_INVALID_HID, "mkstr");
 
     /* Fill the buffer with two copies of the UTF-8 string.
      * It will look like "abcdefghabcdefgh". */
@@ -264,9 +674,9 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
        use the same values of length, small_len, and big_len. */
 
     src_type = mkstr(big_len, H5T_STR_SPACEPAD);
-    CHECK(src_type, FAIL, "mkstr");
+    CHECK(src_type, H5I_INVALID_HID, "mkstr");
     dst_type = mkstr(small_len, H5T_STR_SPACEPAD);
-    CHECK(src_type, FAIL, "mkstr");
+    CHECK(src_type, H5I_INVALID_HID, "mkstr");
 
     /* Fill the buffer with two copies of the UTF-8 string.
      * It will look like "abcdefghabcdefgh". */
@@ -310,7 +720,7 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
  * test_vl_string
  * Tests variable-length string datatype with UTF-8 strings.
  */
-void
+static void
 test_vl_string(hid_t fid, const char *string)
 {
     hid_t   type_id, space_id, dset_id;
@@ -321,17 +731,17 @@ test_vl_string(hid_t fid, const char *string)
 
     /* Create dataspace for datasets */
     space_id = H5Screate_simple(RANK, &dims, NULL);
-    CHECK(space_id, FAIL, "H5Screate_simple");
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
 
     /* Create a datatype to refer to */
     type_id = H5Tcopy(H5T_C_S1);
-    CHECK(type_id, FAIL, "H5Tcopy");
+    CHECK(type_id, H5I_INVALID_HID, "H5Tcopy");
     ret = H5Tset_size(type_id, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Create a dataset */
     dset_id = H5Dcreate2(fid, VL_DSET1_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dset_id, FAIL, "H5Dcreate2");
+    CHECK(dset_id, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Write dataset to disk */
     ret = H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &string);
@@ -372,7 +782,7 @@ test_vl_string(hid_t fid, const char *string)
  * was added to links it didn't change how they were stored in the file,
  * -JML 2/2/2006
  */
-void
+static void
 test_objnames(hid_t fid, const char *string)
 {
     hid_t      grp_id, grp1_id, grp2_id, grp3_id;
@@ -390,7 +800,7 @@ test_objnames(hid_t fid, const char *string)
 
     /* Create a group with a UTF-8 name */
     grp_id = H5Gcreate2(fid, string, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(grp_id, FAIL, "H5Gcreate2");
+    CHECK(grp_id, H5I_INVALID_HID, "H5Gcreate2");
 
     if (vol_is_native) {
         /* Set a comment on the group to test that we can access the group
@@ -409,12 +819,12 @@ test_objnames(hid_t fid, const char *string)
 
     /* Create a new dataset with a UTF-8 name */
     grp1_id = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(grp1_id, FAIL, "H5Gcreate2");
+    CHECK(grp1_id, H5I_INVALID_HID, "H5Gcreate2");
 
     space_id = H5Screate_simple(RANK, &dims, NULL);
-    CHECK(space_id, FAIL, "H5Screate_simple");
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
     dset_id = H5Dcreate2(grp1_id, string, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dset_id, FAIL, "H5Dcreate2");
+    CHECK(dset_id, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Make sure that dataset can be opened again */
     ret = H5Dclose(dset_id);
@@ -423,7 +833,7 @@ test_objnames(hid_t fid, const char *string)
     CHECK(ret, FAIL, "H5Sclose");
 
     dset_id = H5Dopen2(grp1_id, string, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Dopen2");
+    CHECK(ret, H5I_INVALID_HID, "H5Dopen2");
     ret = H5Dclose(dset_id);
     CHECK(ret, FAIL, "H5Dclose");
     ret = H5Gclose(grp1_id);
@@ -431,17 +841,17 @@ test_objnames(hid_t fid, const char *string)
 
     /* Do the same for a named datatype */
     grp2_id = H5Gcreate2(fid, GROUP2_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(grp2_id, FAIL, "H5Gcreate2");
+    CHECK(grp2_id, H5I_INVALID_HID, "H5Gcreate2");
 
     type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
-    CHECK(type_id, FAIL, "H5Tcreate");
+    CHECK(type_id, H5I_INVALID_HID, "H5Tcreate");
     ret = H5Tcommit2(grp2_id, string, type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(type_id, FAIL, "H5Tcommit2");
     ret = H5Tclose(type_id);
     CHECK(type_id, FAIL, "H5Tclose");
 
     type_id = H5Topen2(grp2_id, string, H5P_DEFAULT);
-    CHECK(type_id, FAIL, "H5Topen2");
+    CHECK(type_id, H5I_INVALID_HID, "H5Topen2");
     ret = H5Tclose(type_id);
     CHECK(type_id, FAIL, "H5Tclose");
 
@@ -449,10 +859,10 @@ test_objnames(hid_t fid, const char *string)
      * can refer to objects named in UTF-8 */
     if (vol_is_native) {
         space_id = H5Screate_simple(RANK, &dims, NULL);
-        CHECK(space_id, FAIL, "H5Screate_simple");
+        CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
         dset_id =
             H5Dcreate2(grp2_id, DSET3_NAME, H5T_STD_REF_OBJ, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Dcreate2");
+        CHECK(ret, H5I_INVALID_HID, "H5Dcreate2");
 
         /* Create reference to named datatype */
         ret = H5Rcreate(&obj_ref, grp2_id, string, H5R_OBJECT, (hid_t)-1);
@@ -465,7 +875,7 @@ test_objnames(hid_t fid, const char *string)
 
         /* Ensure that we can open named datatype using object reference */
         type_id = H5Rdereference2(dset_id, H5P_DEFAULT, H5R_OBJECT, &obj_ref);
-        CHECK(type_id, FAIL, "H5Rdereference2");
+        CHECK(type_id, H5I_INVALID_HID, "H5Rdereference2");
         ret = H5Tcommitted(type_id);
         VERIFY(ret, 1, "H5Tcommitted");
 
@@ -486,7 +896,7 @@ test_objnames(hid_t fid, const char *string)
      * link a name in UTF-8.  Ensure that the soft link works. */
 
     grp3_id = H5Gcreate2(fid, GROUP3_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(grp3_id, FAIL, "H5Gcreate2");
+    CHECK(grp3_id, H5I_INVALID_HID, "H5Gcreate2");
 
     ret = H5Lcreate_hard(fid, GROUP2_NAME, grp3_id, GROUP2_NAME, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Lcreate_hard");
@@ -498,7 +908,7 @@ test_objnames(hid_t fid, const char *string)
 
     /* Open named datatype using soft link */
     type_id = H5Topen2(grp3_id, string, H5P_DEFAULT);
-    CHECK(type_id, FAIL, "H5Topen2");
+    CHECK(type_id, H5I_INVALID_HID, "H5Topen2");
 
     ret = H5Tclose(type_id);
     CHECK(type_id, FAIL, "H5Tclose");
@@ -510,7 +920,7 @@ test_objnames(hid_t fid, const char *string)
  * test_attrname
  * Test that attributes can deal with UTF-8 strings
  */
-void
+static void
 test_attrname(hid_t fid, const char *string)
 {
     hid_t   group_id, attr_id;
@@ -524,18 +934,18 @@ test_attrname(hid_t fid, const char *string)
      * name and value are UTF-8 strings.
      */
     group_id = H5Gcreate2(fid, GROUP4_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(group_id, FAIL, "H5Gcreate2");
+    CHECK(group_id, H5I_INVALID_HID, "H5Gcreate2");
 
     space_id = H5Screate_simple(RANK, &dims, NULL);
-    CHECK(space_id, FAIL, "H5Screate_simple");
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
     dtype_id = H5Tcopy(H5T_C_S1);
-    CHECK(dtype_id, FAIL, "H5Tcopy");
+    CHECK(dtype_id, H5I_INVALID_HID, "H5Tcopy");
     ret = H5Tset_size(dtype_id, (size_t)MAX_STRING_LENGTH);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Create the attribute and check that its name is correct */
     attr_id = H5Acreate2(group_id, string, dtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(attr_id, FAIL, "H5Acreate2");
+    CHECK(attr_id, H5I_INVALID_HID, "H5Acreate2");
     size = H5Aget_name(attr_id, (size_t)MAX_STRING_LENGTH, read_buf);
     CHECK(size, FAIL, "H5Aget_name");
     ret = strcmp(read_buf, string);
@@ -565,7 +975,7 @@ test_attrname(hid_t fid, const char *string)
  * test_compound
  * Test that compound datatypes can have UTF-8 field names.
  */
-void
+static void
 test_compound(hid_t fid, const char *string)
 {
     /* Define two compound structures, s1_t and s2_t.
@@ -599,7 +1009,7 @@ test_compound(hid_t fid, const char *string)
 
     /* Create compound datatypes using UTF-8 field name */
     s1_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
-    CHECK(s1_tid, FAIL, "H5Tcreate");
+    CHECK(s1_tid, H5I_INVALID_HID, "H5Tcreate");
     ret = H5Tinsert(s1_tid, string, HOFFSET(s1_t, a), H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Tinsert");
 
@@ -617,7 +1027,7 @@ test_compound(hid_t fid, const char *string)
 
     /* Create second datatype, with only two fields. */
     s2_tid = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
-    CHECK(s2_tid, FAIL, "H5Tcreate");
+    CHECK(s2_tid, H5I_INVALID_HID, "H5Tcreate");
     ret = H5Tinsert(s2_tid, "c_name", HOFFSET(s2_t, c), H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
     ret = H5Tinsert(s2_tid, string, HOFFSET(s2_t, a), H5T_NATIVE_INT);
@@ -625,9 +1035,9 @@ test_compound(hid_t fid, const char *string)
 
     /* Create the dataspace and dataset. */
     space_id = H5Screate_simple(1, &dim, NULL);
-    CHECK(space_id, FAIL, "H5Screate_simple");
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
     dset_id = H5Dcreate2(fid, DSET4_NAME, s1_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dset_id, FAIL, "H5Dcreate2");
+    CHECK(dset_id, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Write data to the dataset. */
     ret = H5Dwrite(dset_id, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &s1);
@@ -655,7 +1065,7 @@ test_compound(hid_t fid, const char *string)
  * test_enum
  * Test that enumerated datatypes can have UTF-8 member names.
  */
-void
+static void
 test_enum(hid_t H5_ATTR_UNUSED fid, const char *string)
 {
     /* Define an enumerated type */
@@ -668,7 +1078,7 @@ test_enum(hid_t H5_ATTR_UNUSED fid, const char *string)
 
     /* Create an enumerated datatype in HDF5 with a UTF-8 member name*/
     type_id = H5Tcreate(H5T_ENUM, sizeof(c_e1));
-    CHECK(type_id, FAIL, "H5Tcreate");
+    CHECK(type_id, H5I_INVALID_HID, "H5Tcreate");
     val = E1_RED;
     ret = H5Tenum_insert(type_id, "RED", &val);
     CHECK(ret, FAIL, "H5Tenum_insert");
@@ -700,7 +1110,7 @@ test_enum(hid_t H5_ATTR_UNUSED fid, const char *string)
  * test_opaque
  * Test comments on opaque datatypes
  */
-void
+static void
 test_opaque(hid_t H5_ATTR_UNUSED fid, const char *string)
 {
     hid_t  type_id;
@@ -709,7 +1119,7 @@ test_opaque(hid_t H5_ATTR_UNUSED fid, const char *string)
 
     /* Create an opaque type and give it a UTF-8 tag */
     type_id = H5Tcreate(H5T_OPAQUE, (size_t)4);
-    CHECK(type_id, FAIL, "H5Tcreate");
+    CHECK(type_id, H5I_INVALID_HID, "H5Tcreate");
     ret = H5Tset_tag(type_id, string);
     CHECK(ret, FAIL, "H5Tset_tag");
 
@@ -747,7 +1157,7 @@ mkstr(size_t len, H5T_str_t strpad)
  * Append a unicode code point c to test_string in UTF-8 encoding.
  * Return the new end of the string.
  */
-unsigned int
+static unsigned int
 write_char(unsigned int c, char *test_string, unsigned int cur_pos)
 {
     if (c < 0x80) {
@@ -776,11 +1186,12 @@ write_char(unsigned int c, char *test_string, unsigned int cur_pos)
     return cur_pos;
 }
 
+#ifdef DEBUG
 /* dump_string
  * Print a string both as text (which will look like garbage) and as hex.
  * The text display is not guaranteed to be accurate--certain characters
  * could confuse printf (e.g., '\n'). */
-void
+static void
 dump_string(const char *string)
 {
     size_t length;
@@ -796,68 +1207,20 @@ dump_string(const char *string)
 
     printf("\n");
 }
+#endif
 
-/* Main test.
- * Create a string of random Unicode characters, then run each test with
- * that string.
+/*
+ * Main test - test various aspects of unicode support
  */
 void
 test_unicode(void H5_ATTR_UNUSED *params)
 {
-    char         test_string[MAX_STRING_LENGTH];
-    unsigned int cur_pos = 0;   /* Current position in test_string */
-    unsigned int unicode_point; /* Unicode code point for a single character */
-    hid_t        fid;           /* ID of file */
-    int          x;             /* Temporary variable */
-    herr_t       ret;           /* Generic return value */
+    MESSAGE(5, ("Testing Unicode support\n"));
 
-    /* Output message about test being performed */
-    MESSAGE(5, ("Testing UTF-8 Encoding\n"));
-
-    /* Create a random string with length NUM_CHARS */
-    srand((unsigned)time(NULL));
-
-    memset(test_string, 0, sizeof(test_string));
-    for (x = 0; x < NUM_CHARS; x++) {
-        /* We need to avoid unprintable characters (codes 0-31) and the
-         * . and / characters, since they aren't allowed in path names.
-         */
-        unicode_point = (unsigned)(rand() % (MAX_CODE_POINT - 32)) + 32;
-        if (unicode_point != 46 && unicode_point != 47)
-            cur_pos = write_char(unicode_point, test_string, cur_pos);
-    }
-
-    /* Avoid unlikely case of the null string */
-    if (cur_pos == 0) {
-        test_string[cur_pos] = 'Q';
-        cur_pos++;
-    }
-    test_string[cur_pos] = '\0';
-
-    /* Create file */
-    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(fid, FAIL, "H5Fcreate");
-
-    test_fl_string(fid, test_string);
-    test_strpad(fid, "abcdefgh");
-    test_strpad(fid, test_string);
-    test_vl_string(fid, test_string);
-    test_objnames(fid, test_string);
-    test_attrname(fid, test_string);
-    test_compound(fid, test_string);
-    test_enum(fid, test_string);
-    test_opaque(fid, test_string);
-
-    /* Close file */
-    ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");
-
-    /* This function could be useful in debugging if certain strings
-     * create errors.
-     */
-#ifdef DEBUG
-    dump_string(test_string);
-#endif /* DEBUG */
+    test_utf8_filenames();
+    test_utf8_conv_failure();
+    test_code_page_override();
+    test_random_utf8_strings();
 }
 
 /* cleanup_unicode(void)
