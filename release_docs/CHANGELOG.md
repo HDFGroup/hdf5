@@ -28,7 +28,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Autotools support was removed from HDF5
 
-   CMake is now the build system available in HDF5 code.  Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for CMake options to use in place of former Autotools options. 
+   CMake is now the build system available in HDF5 code.  Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options. 
 
 # 🚀 New Features & Improvements
 
@@ -650,36 +650,7 @@ fails to initialize due to not being able to detect the byte order of the _Float
    MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
    cray-mpich on theta and with XL compilers on ppc64le platforms.
 
-   MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
-
 - File space may not be released when overwriting or deleting certain nested variable length or reference types.
 
 -  Known problems in previous releases can be found in the HISTORY*.txt files in the HDF5 source. Please report any new problems found to help@hdfgroup.org.
 
-# <img src="Cmake_logo.svg" alt="Cmake logo" width=24> CMake Installations
-
-See the AutotoolsToCMakeOptions.md file for CMake options for former Autotools options. CMake produces the following set of folders; bin, include, lib and share. The LICENSE and RELEASE.txt file are placed in the share folder.
-
-The bin folder contains the tools and the build scripts. Additionally, CMake creates dynamic versions of the tools with the suffix "-shared". 
-
-   ```
-   build scripts
-   /-------------
-   CMake: h5c++, h5cc, h5hlc++, h5hlcc
-   ```
-
-The include folder holds the header files and the fortran mod files. CMake places the fortran mod files into separate shared and static subfolders, however the use of `HDF5_INSTALL_MOD_FORTRAN` places one set of mod files into the include folder. Because CMake produces a tools library, the header files for tools will appear in the include folder.
-
-The lib folder contains the library files, and CMake adds the pkgconfig subfolder with the hdf5*.pc files used by the bin/build scripts created by the CMake build. CMake separates the C interface code from the fortran code by creating C-stub libraries for each Fortran library. In addition, only CMake installs the tools library. The names of the szip libraries are different between the build systems.
-
-CMake builds include a number of CMake specific files for support of CMake's find_package and support for the HDF5 Examples CMake project.
-
-The issues with the gif tool are:
-
-   HDFFV-10592 CVE-2018-17433
-   HDFFV-10593 CVE-2018-17436
-   HDFFV-11048 CVE-2020-10809
-
-These CVE issues have not yet been addressed and are avoided by not building the gif tool by default. Enable building the High-Level tools with this options:
-
-   cmake: `HDF5_BUILD_HL_GIF_TOOLS=ON`
