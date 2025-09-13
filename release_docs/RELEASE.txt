@@ -780,6 +780,30 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Revised handling of Unicode filenames on Windows
+
+      In the HDF5 1.14.4 release, a change was made to address some issues
+      with the library's handling of code pages and file paths on Windows.
+      This change introduced other issues with the handling of UTF-8 file
+      names that caused breakage for software using the 1.14.4 and 1.14.5
+      releases of HDF5. That change was reverted for the 1.14.6 release
+      and the behavior has been slightly modified for this release.
+
+      On Windows, the library once again assumes that filename strings will
+      be UTF-8 encoded strings and will attempt to convert them to UTF-16
+      before passing them to Windows API functions. However, if the library
+      fails to convert a filename string to UTF-16, it will now fallback to
+      the equivalent Windows "ANSI" API functions which will interpret the
+      string according to the active Windows code page.
+
+      Support for a new environment variable, HDF5_PREFER_WINDOWS_CODE_PAGE,
+      was added in order to instruct HDF5 to prefer interpreting filenames
+      according to the active Windows code page rather than assuming UTF-8
+      encoding. If this environment variable is set to "1" or "TRUE"
+      (case-insensitive), the active code page will be preferred. If it is
+      unset or set to "0" or "FALSE" (case-insensitive), UTF-8 will be
+      preferred.
+    
     - Fixed an issue with caching in the ROS3 VFD
 
       The ROS3 VFD uses a very simple caching mechanism that caches the

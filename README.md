@@ -19,6 +19,7 @@ HDF5 version 2.0.0-2 currently under development
 [![HDF5 VFD build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vfd.yml?branch=develop&label=HDF5-VFD)](https://github.com/HDFGroup/hdf5/actions/workflows/vfd.yml?query=branch%3Adevelop)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
 [![OSS-Fuzz Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/hdf5.svg)](https://oss-fuzz-build-logs.storage.googleapis.com/index.html#hdf5)
+[![Link Checker Status](https://github.com/HDFGroup/hdf5/actions/workflows/link-checker.yml/badge.svg)](https://github.com/HDFGroup/hdf5/actions/workflows/link-checker.yml)
 
 [HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
 

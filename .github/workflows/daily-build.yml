@@ -81,7 +81,7 @@ jobs:
 
   call-release-cmake-cygwin:
     needs: [get-old-names, call-workflow-tarball]
-    name: "CMake Cygwin Workflows"
+    name: "Cygwin Workflows"
     uses: ./.github/workflows/cygwin-cmake.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
@@ -119,7 +119,7 @@ jobs:
 
   call-developer-cmake:
     needs: [get-old-names, call-workflow-tarball]
-    name: "CMake Developer Workflows"
+    name: "Developer Workflows"
     uses: ./.github/workflows/dev-cmake.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
