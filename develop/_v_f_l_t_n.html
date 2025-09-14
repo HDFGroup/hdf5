@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-13</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -604,7 +604,7 @@ Optimization Functions</h1>
 <tr>
 <td><code>H5FD_FEAT_DATA_SIEVE (0x00000004)</code> </td><td>Defining the H5FD_FEAT_DATA_SIEVE for a VFL driver means that the library will attempt to cache raw data as it is read from/written to a file in a "data sieve" buffer.  </td></tr>
 </table>
-<p>See Rajeev Thakur's papers: <a href="http://www.mcs.anl.gov/~thakur/papers/romio-coll.ps.gz">http://www.mcs.anl.gov/~thakur/papers/romio-coll.ps.gz</a> <a href="http://www.mcs.anl.gov/~thakur/papers/mpio-high-perf.ps.gz">http://www.mcs.anl.gov/~thakur/papers/mpio-high-perf.ps.gz</a></p>
+<p>See Rajeev Thakur's papers: <a href="https://web.cels.anl.gov/~thakur/papers/mpio-impl.pdf">https://web.cels.anl.gov/~thakur/papers/mpio-impl.pdf</a> <a href="https://web.cels.anl.gov/~thakur/papers/romio-coll.pdf">https://web.cels.anl.gov/~thakur/papers/romio-coll.pdf</a></p>
 <h1><a class="anchor" id="sec_vfl_reg"></a>
 Registration of a Driver</h1>
 <p>Before a driver can be used the HDF5 library needs to be told of its existence. This is done by registering the driver, which results in a driver identification number. Instead of passing many arguments to the registration function, the driver information is entered into a structure and the address of the structure is passed to the registration function where it is copied. This allows the HDF5 API to be extended while providing backward compatibility at the source level.</p>
