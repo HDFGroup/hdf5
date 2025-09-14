@@ -152,7 +152,7 @@ main(void)
     int  RealKinds[]        = H5_FORTRAN_REAL_KINDS;
     int  RealKinds_SizeOf[] = H5_FORTRAN_REAL_KINDS_SIZEOF;
     char Real_C_TYPES[10][32];
-    int  Real_C_TYPES_Y = 32; /* Has to match second dimension of Real_C_TYPES */
+    int  Real_C_TYPES_Y = 31; /* Has to match second dimension of Real_C_TYPES - 1 */
 
     int FORTRAN_NUM_INTEGER_KINDS = H5_FORTRAN_NUM_INTEGER_KINDS;
     int H5_FORTRAN_NUM_REAL_KINDS;
