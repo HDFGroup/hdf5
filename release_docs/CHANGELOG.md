@@ -548,12 +548,18 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed security issue CVE-2025-7068
+
+   Failures during the discard process on a metadata cache entry could cause the library to skip calling the callback to free the cache entry. This could result in resource leaks and issues with flushing and closing the metadata cache during file close. This has been fixed by noting errors during the discard process, but attempting to fully free a cache entry before signalling that an error has occurred.
+
+   Fixes GitHub issue #5578
+
 ### Fix bugs in object header operations
 
    In some rare circumstances, such as deleting hard links that point to their own parent group in a file using the new file format, memory corruption could occur due to recursive operations changing data structures being operated on by multiple levels of recursion. Made changes to delay changing the data structure in a dangerous way until recursion is complete.
 
    Fixes GitHub issue #5854
-
 
 ### Fixed security issues CVE-2025-6816, CVE-2025-6856 and CVE-2025-2923
 
@@ -580,7 +586,7 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
    Fixes GitHub issue #5861
 
 ### Fixed security issue CVE-2025-2153
-   
+
    The message flags field could be modified such that a message that is not sharable according to the share_flags field in H5O_msg_class_t can be treated as sharable. An assert has been added in H5O__msg_write_real to make sure messages that are not sharable can't be modified to shared. Additionally, the check in H5O__chunk_deserialize that catches unsharable messages being marked as sharable has been improved.
 
    Fixes GitHub issue #5329
