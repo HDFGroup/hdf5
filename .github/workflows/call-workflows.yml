@@ -26,7 +26,7 @@ permissions:
 jobs:
     call-workflow-special-cmake:
       name: "Special Workflows"
-      uses: ./.github/workflows/main-cmake-spc.yml
+      uses: ./.github/workflows/main-spc.yml
 
     call-workflow-ros3-cmake:
       name: "ROS3 VFD Workflows"
@@ -41,7 +41,7 @@ jobs:
 
     call-debug-concurrent-cmake:
         name: "Debug Concurrency Workflows"
-        uses: ./.github/workflows/main-cmake.yml
+        uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
             concurrent: "CC"
@@ -50,7 +50,7 @@ jobs:
 
     call-release-concurrent-cmake:
         name: "Release Concurrency Workflows"
-        uses: ./.github/workflows/main-cmake.yml
+        uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
             concurrent: "CC"
@@ -59,7 +59,7 @@ jobs:
 
     call-debug-thread-cmake:
         name: "Debug Thread-Safety Workflows"
-        uses: ./.github/workflows/main-cmake.yml
+        uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -68,7 +68,7 @@ jobs:
 
     call-release-thread-cmake:
         name: "Release Thread-Safety Workflows"
-        uses: ./.github/workflows/main-cmake.yml
+        uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -77,7 +77,7 @@ jobs:
 
     call-debug-cmake:
         name: "Debug Workflows"
-        uses: ./.github/workflows/main-cmake.yml
+        uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -86,7 +86,7 @@ jobs:
 
     call-release-cmake:
         name: "Release Workflows"
-        uses: ./.github/workflows/main-cmake.yml
+        uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -96,7 +96,7 @@ jobs:
 
     call-release-cmake4:
         name: "CMake 4 Release Workflows"
-        uses: ./.github/workflows/main-cmake.yml
+        uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -105,7 +105,7 @@ jobs:
 
     call-release-cmakeMin:
         name: "Minimum Release Workflows"
-        uses: ./.github/workflows/main-cmake.yml
+        uses: ./.github/workflows/main.yml
         with:
             cmake_version: "3.26.0"
             concurrent: ""
@@ -114,7 +114,7 @@ jobs:
 
     call-arm64-cmake:
         name: "arm64 Workflows"
-        uses: ./.github/workflows/arm-main-cmake.yml
+        uses: ./.github/workflows/arm-main.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -124,7 +124,7 @@ jobs:
 
     call-debug-arm64-cmake:
         name: "arm64 Workflows"
-        uses: ./.github/workflows/arm-main-cmake.yml
+        uses: ./.github/workflows/arm-main.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -133,7 +133,7 @@ jobs:
 
     call-arm64-cmake4:
         name: "CMake 4 arm64 Workflows"
-        uses: ./.github/workflows/arm-main-cmake.yml
+        uses: ./.github/workflows/arm-main.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -143,70 +143,70 @@ jobs:
     call-release-bintest:
         name: "Test Release Binaries"
         needs: call-release-cmake
-        uses: ./.github/workflows/cmake-bintest.yml
+        uses: ./.github/workflows/bintest.yml
         with:
             build_mode: "Release"
 
     call-release-par:
         name: "Parallel Release Workflows"
-        uses: ./.github/workflows/main-cmake-par.yml
+        uses: ./.github/workflows/main-par.yml
         with:
             build_mode: "Release"
 
     call-debug-par:
         name: "Parallel Debug Workflows"
-        uses: ./.github/workflows/main-cmake-par.yml
+        uses: ./.github/workflows/main-par.yml
         with:
             build_mode: "Debug"
 
     call-release-special-par:
         name: "Parallel Release Special Workflows"
-        uses: ./.github/workflows/main-cmake-par-spc.yml
+        uses: ./.github/workflows/main-par-spc.yml
         with:
             build_mode: "Release"
 
     call-debug-special-par:
         name: "Parallel Debug Special Workflows"
-        uses: ./.github/workflows/main-cmake-par-spc.yml
+        uses: ./.github/workflows/main-par-spc.yml
         with:
             build_mode: "Debug"
 
     call-release-cmake-intel:
         name: "Intel Workflows"
-        uses: ./.github/workflows/intel-cmake.yml
+        uses: ./.github/workflows/intel.yml
         with:
             build_mode: "Release"
 
     call-release-cmake-nvhpc:
         name: "nvhpc Workflows"
-        uses: ./.github/workflows/nvhpc-cmake.yml
+        uses: ./.github/workflows/nvhpc.yml
         with:
             build_mode: "Release"
 
     call-release-cmake-aocc:
         name: "aocc Workflows"
-        uses: ./.github/workflows/aocc-cmake.yml
+        uses: ./.github/workflows/aocc.yml
         with:
             build_mode: "Release"
 
     call-release-cmake-xpr:
         name: "TestExpress Workflows"
-        uses: ./.github/workflows/testxpr-cmake.yml
+        uses: ./.github/workflows/testxpr.yml
 
 #    call-release-cmake-julia:
 #        name: "Julia Workflows"
-#        uses: ./.github/workflows/julia-cmake.yml
+#        uses: ./.github/workflows/julia.yml
 #        with:
 #         build_mode: "Release"
 
     call-release-cmake-msys2:
         name: "Msys2 Workflows"
-        uses: ./.github/workflows/msys2-cmake.yml
+        uses: ./.github/workflows/msys2.yml
         with:
           build_mode: "Release"
 
     call-release-cmake-i386:
         name: "i386 Workflows"
-        uses: ./.github/workflows/i386-cmake.yml
+        uses: ./.github/workflows/i386.yml
         with:
             build_mode: "Release"

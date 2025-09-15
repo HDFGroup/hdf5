@@ -82,7 +82,7 @@ jobs:
   call-release-cmake-cygwin:
     needs: [get-old-names, call-workflow-tarball]
     name: "Cygwin Workflows"
-    uses: ./.github/workflows/cygwin-cmake.yml
+    uses: ./.github/workflows/cygwin.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_environ: snapshots
@@ -90,7 +90,7 @@ jobs:
 
   call-workflow-c-script:
     needs: [get-old-names, call-workflow-tarball, call-aws-c-s3-build]
-    uses: ./.github/workflows/cmake-script.yml
+    uses: ./.github/workflows/script.yml
     with:
       cmake_version: "latest"
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
@@ -99,7 +99,7 @@ jobs:
 
   call-workflow-par-script:
     needs: [get-old-names, call-workflow-tarball]
-    uses: ./.github/workflows/cmake-par-script.yml
+    uses: ./.github/workflows/par-script.yml
     with:
       cmake_version: "latest"
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
@@ -109,7 +109,7 @@ jobs:
 
   call-workflow-par-source:
     needs: [get-old-names, call-workflow-tarball]
-    uses: ./.github/workflows/cmake-par-source.yml
+    uses: ./.github/workflows/par-source.yml
     with:
       cmake_version: "latest"
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
@@ -120,14 +120,14 @@ jobs:
   call-developer-cmake:
     needs: [get-old-names, call-workflow-tarball]
     name: "Developer Workflows"
-    uses: ./.github/workflows/dev-cmake.yml
+    uses: ./.github/workflows/dev.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-sanitizers:
     needs: [get-old-names, call-workflow-tarball]
-    uses: ./.github/workflows/cmake-analysis.yml
+    uses: ./.github/workflows/analysis.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_environ: snapshots
@@ -135,7 +135,7 @@ jobs:
 
   call-workflow-ctest:
     needs: [get-old-names, call-workflow-tarball, call-aws-c-s3-build]
-    uses: ./.github/workflows/cmake-ctest.yml
+    uses: ./.github/workflows/ctest.yml
     with:
       cmake_version: 'latest'
       preset_name: ci-StdShar
