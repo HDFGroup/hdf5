@@ -2578,7 +2578,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size
     bool               file_is_rw;
     const uint8_t     *p;
     const uint8_t     *p_end     = *buf + *buf_size - 1; /* Pointer to last valid byte in buffer */
-    H5C_cache_entry_t *ret_value = NULL;                /* Return value */
+    H5C_cache_entry_t *ret_value = NULL;                 /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2748,7 +2748,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size
 
     /* Update buffer pointer and buffer len */
     *buf_size = *buf_size - (p - *buf);
-    *buf = p;
+    *buf      = p;
 
     ret_value = pf_entry_ptr;
 
