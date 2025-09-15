@@ -38,9 +38,7 @@
  * on Windows, though it doesn't necessarily contain all the POSIX types
  * we need for HDF5 (e.g. ssize_t).
  */
-#ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
