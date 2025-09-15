@@ -1,4 +1,4 @@
-name: hdf5 dev CMake cygwin
+name: hdf5 dev cygwin
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -107,7 +107,7 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DENABLE_ZFP:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DENABLE_ZSTD:BOOL=OFF")
 
-      - name: Run ctest (Cygwin)
+      - name: Run CTest (Cygwin)
         shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
         run: |
           export PATH=/usr/bin:$PATH
@@ -115,7 +115,7 @@ jobs:
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-CYG,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Cygwin)
         uses: actions/upload-artifact@v4
         with:

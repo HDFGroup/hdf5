@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       build_mode:
-        description: "CMake build type (CMAKE_BUILD_TYPE)"
+        description: "Build type (CMAKE_BUILD_TYPE)"
         required: true
         type: string
       build_aws_c_s3_only:
@@ -321,7 +321,7 @@ jobs:
         uses: actions/checkout@v4.1.7
 
       # For Windows, use vcpkg toolchain file to allow find_package() calls to resolve
-      - name: "CMake Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
+      - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name == 'Windows MSVC' }}
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -347,7 +347,7 @@ jobs:
             $GITHUB_WORKSPACE
         shell: bash
 
-      - name: "CMake Configure (ROS3 testing: ${{ matrix.test_ros3 }})"
+      - name: "Configure (ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name != 'Windows MSVC' }}
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -372,11 +372,11 @@ jobs:
             $GITHUB_WORKSPACE
         shell: bash
 
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         if: matrix.test_ros3 == 'ON'
         run: |
           # For now, just run S3 tests
@@ -417,7 +417,7 @@ jobs:
       - name: Get HDF5 sources
         uses: actions/checkout@v4.1.7
 
-      - name: CMake Configure
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -441,11 +441,11 @@ jobs:
             $GITHUB_WORKSPACE
         shell: bash
 
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         run: |
           # For now, just run S3 tests
           ctest . -C ${{ inputs.build_mode }} -R "S3TEST" -V

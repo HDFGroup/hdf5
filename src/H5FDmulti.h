@@ -70,9 +70,9 @@ H5_DLLVAR hid_t H5FD_MULTI_id_g;
  *          usage type that will be associated with a file.
  *
  *          The array \p memb_name should be a name generator (a
- *          \TText{printf}-style format with a \TText{%s} which will be replaced
+ *          \TText{printf}-style format with a \TText{%%s} which will be replaced
  *          with the name passed to H5FDopen(), usually from H5Fcreate() or
- *          H5Fopen()).
+ *          H5Fopen()). There must be no other format specifiers in the string.
  *
  *          The array \p memb_addr specifies the offsets within the virtual
  *          address space, from 0 (zero) to #HADDR_MAX, at which each type of
@@ -102,7 +102,7 @@ H5_DLLVAR hid_t H5FD_MULTI_id_g;
  *          \p memb_name
  *          </td>
  *          <td>
- *          The default string is \TText{%s-X.h5} where \c X is one of the following letters:
+ *          The default string is \TText{%%s-X.h5} where \c X is one of the following letters:
  *          - \c s for #H5FD_MEM_SUPER
  *          - \c b for #H5FD_MEM_BTREE
  *          - \c r for #H5FD_MEM_DRAW
@@ -209,7 +209,7 @@ H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid
  *          \p meta_ext is the filename extension for the metadata file. The
  *          extension is appended to the name passed to H5FDopen(), usually from
  *          H5Fcreate() or H5Fopen(), to form the name of the metadata file. If
- *          the string \TText{%s} is used in the extension, it works like the
+ *          the string \TText{%%s} is used in the extension, it works like the
  *          name generator as in H5Pset_fapl_multi().
  *
  *          \p meta_plist_id is the file access property list identifier for the
@@ -218,8 +218,9 @@ H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid
  *          \p raw_ext is the filename extension for the raw data file. The
  *          extension is appended to the name passed to H5FDopen(), usually from
  *          H5Fcreate() or H5Fopen(), to form the name of the raw data file. If
- *          the string \TText{%s} is used in the extension, it works like the
- *          name generator as in H5Pset_fapl_multi().
+ *          the string \TText{%%s} is used in the extension, it works like the
+ *          name generator as in H5Pset_fapl_multi(). There must be no other
+ *          format specifiers in the string.
  *
  *          \p raw_plist_id is the file access property list identifier for the
  *          raw data file.

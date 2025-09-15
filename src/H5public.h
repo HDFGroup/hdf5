@@ -16,23 +16,11 @@
 #ifndef H5public_H
 #define H5public_H
 
-/* Include files for public use... */
-/*
- * Since H5pubconf.h is a generated header file, it is messy to try
- * to put a #ifndef H5pubconf_H ... #endif guard in it.
- * HDF5 has set an internal rule that it is being included here.
- * Source files should NOT include H5pubconf.h directly but include
- * it via H5public.h.  The #ifndef H5public_H guard above would
- * prevent repeated include.
- */
-#include "H5pubconf.h" /* From configure */
+/* Configure options */
+#include "H5pubconf.h"
 
 /* API Version macro wrapper definitions */
 #include "H5version.h"
-
-#ifdef H5_HAVE_FEATURES_H
-#include <features.h> /* For setting POSIX, BSD, etc. compatibility */
-#endif
 
 /* C library header files for things that appear in HDF5 public headers */
 #ifdef __cplusplus
@@ -87,15 +75,15 @@
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE ""
+#define H5_VERS_SUBRELEASE "2"
 /**
  * Short version string
  */
-#define H5_VERS_STR "2.0.0"
+#define H5_VERS_STR "2.0.0-2"
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 2.0.0"
+#define H5_VERS_INFO "HDF5 library version: 2.0.0-2"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
@@ -222,8 +210,8 @@
  * opening a file. Valid values for this environment variable are
  * as follows:
  *
- *  "TRUE" or "1"  - Request that file locks should be used
- *  "FALSE" or "0" - Request that file locks should NOT be used
+ *  "TRUE" or "1"  - Request that file locks should be used <br />
+ *  "FALSE" or "0" - Request that file locks should NOT be used <br />
  *  "BEST_EFFORT"  - Request that file locks should be used and
  *                     that any locking errors caused by file
  *                     locking being disabled on the system
@@ -238,6 +226,18 @@
  * \since 1.14.0
  */
 #define HDF5_NOCLEANUP "HDF5_NOCLEANUP"
+/**
+ * Macro for environment variable used to instruct HDF5 to prefer
+ * Windows code pages over UTF-8 for functions that accept 'char *'
+ * parameters. Valid values for this environment variable are as
+ * follows (case-insensitive):
+ *
+ * "TRUE" or "1"  - Request that Windows code pages be preferred <br />
+ * "FALSE" or "0" - Request that UTF-8 be preferred <br />
+ *
+ * \since 2.0.0
+ */
+#define HDF5_PREFER_WINDOWS_CODE_PAGE "HDF5_PREFER_WINDOWS_CODE_PAGE"
 
 /**
  * Status return values.  Failed integer functions in HDF5 result almost
