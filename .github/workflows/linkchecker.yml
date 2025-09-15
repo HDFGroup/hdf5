@@ -48,7 +48,7 @@ jobs:
             --verbose
             --base ${{ steps.build_docs.outputs.html_path }}
             --max-retries 4
-            --max-concurrency 8
+            --max-concurrency 4
             --retry-wait-time 10
             --timeout 30
             --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"

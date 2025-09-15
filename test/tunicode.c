@@ -35,6 +35,9 @@
 #define COMP_FLOAT_VAL  (-42.0F)
 #define COMP_DOUBLE_VAL 42.0
 
+/* Size of buffer used for temporary filenames */
+#define TEMP_FILENAME_BUF_SIZE 128
+
 /* Test function prototypes */
 static void test_utf8_filenames(void);
 static void test_utf8_conv_failure(void);
@@ -72,12 +75,28 @@ test_utf8_filenames(void)
     const char *quot_filename = u8"‚.h5"; /* U+201A "Single Low-9 Quotation Mark" */
     const char *chin_filename = u8"漢字.h5";
     hid_t       fid           = H5I_INVALID_HID;
+    hid_t       fapl          = H5I_INVALID_HID;
     char       *env           = NULL;
+    char        fixed_filename[TEMP_FILENAME_BUF_SIZE];
     herr_t      ret;
     int         acc_ret;
 #ifdef H5_HAVE_WIN32_API
     wchar_t *wfilename = NULL;
 #endif
+
+    /*
+     * If the filenames would be perturbed by h5_fixname() due to
+     * a specific VFD being used, skip this test as the filename
+     * could be unpredictable and cause unexpected failures.
+     */
+    fapl = h5_fileaccess();
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+    h5_fixname(u8"€", fapl, fixed_filename, TEMP_FILENAME_BUF_SIZE);
+    H5Pclose(fapl);
+    if (0 != strcmp(euro_filename, fixed_filename)) {
+        MESSAGE(5, ("Testing UTF-8 filenames -- SKIPPED due to unpredictable test filenames\n"));
+        return;
+    }
 
     /*
      * If the HDF5_PREFER_WINDOWS_CODE_PAGE environment variable
@@ -245,9 +264,27 @@ test_utf8_conv_failure(void)
     const char *filename = "\x83\x6E\x83\x8D\x81\x5B\x83\x8F\x81\x5B\x83\x8B\x83\x68"
                            ".h5";
     wchar_t     wfilename[64];
-    hid_t       fid = H5I_INVALID_HID;
+    hid_t       fid  = H5I_INVALID_HID;
+    hid_t       fapl = H5I_INVALID_HID;
+    char        fixed_filename[TEMP_FILENAME_BUF_SIZE];
     herr_t      ret;
     int         int_ret;
+
+    /*
+     * If the filename would be perturbed by h5_fixname() due to
+     * a specific VFD being used, skip this test as the filename
+     * could be unpredictable and cause unexpected failures.
+     */
+    fapl = h5_fileaccess();
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+    h5_fixname("\x83\x6E\x83\x8D\x81\x5B\x83\x8F\x81\x5B\x83\x8B\x83\x68", fapl, fixed_filename,
+               TEMP_FILENAME_BUF_SIZE);
+    H5Pclose(fapl);
+    if (0 != strcmp(filename, fixed_filename)) {
+        MESSAGE(5, ("Testing UTF-8 filename conversion failure fallback -- SKIPPED due to unpredictable test "
+                    "filenames\n"));
+        return;
+    }
 
     /*
      * If the current code page would cause a failure in the fallback
@@ -319,11 +356,29 @@ test_utf8_conv_failure(void)
 static void
 test_code_page_override(void)
 {
-    const char *filename = "\xc3\x9f"; /* UTF-8 'ß' / Windows code page 1252 'ÃŸ' */
+    const char *filename = "\xc3\x9f"
+                           ".h5"; /* UTF-8 'ß' / Windows code page 1252 'ÃŸ' */
     hid_t       fid      = H5I_INVALID_HID;
+    hid_t       fapl     = H5I_INVALID_HID;
     char       *env      = NULL;
+    char        fixed_filename[TEMP_FILENAME_BUF_SIZE];
     herr_t      ret;
     int         int_ret;
+
+    /*
+     * If the filename would be perturbed by h5_fixname() due to
+     * a specific VFD being used, skip this test as the filename
+     * could be unpredictable and cause unexpected failures.
+     */
+    fapl = h5_fileaccess();
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+    h5_fixname("\xc3\x9f", fapl, fixed_filename, TEMP_FILENAME_BUF_SIZE);
+    H5Pclose(fapl);
+    if (0 != strcmp(filename, fixed_filename)) {
+        MESSAGE(5, ("Testing code pages environment variable override -- SKIPPED due to unpredictable test "
+                    "filenames"));
+        return;
+    }
 
 #ifdef H5_HAVE_WIN32_API
     /* Perform some initial Windows-specific tests to see if this test

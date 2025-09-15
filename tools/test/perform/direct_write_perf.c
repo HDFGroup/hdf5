@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/types.h>
 
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -40,10 +41,6 @@
 
 #ifdef H5_HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
-
-#ifdef H5_HAVE_SYS_TYPES_H
-#include <sys/types.h>
 #endif
 
 #ifdef H5_HAVE_UNISTD_H
