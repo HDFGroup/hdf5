@@ -290,7 +290,7 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
     /* Broadcast skip decision to all ranks */
     MPI_Bcast(&skip_validation, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if (skip_validation) {
-        return SUCCEED;  /* Skip validation if h5fuse script not found */
+        return SUCCEED; /* Skip validation if h5fuse script not found */
     }
 
     /* Build comma-separated list of subfiles for h5fuse */
