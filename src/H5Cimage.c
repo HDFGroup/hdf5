@@ -2748,7 +2748,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size
 
     /* Update buffer pointer and buffer len */
     *buf_size -= (hsize_t)(p - *buf);
-    *buf      = p;
+    *buf = p;
 
     ret_value = pf_entry_ptr;
 
