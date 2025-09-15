@@ -418,7 +418,7 @@ H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t
 H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 
 /**
- * \ingroup FAPL
+ * \ingroup H5VFD
  *
  * \brief Provides a list of subfile names that are associated with an MPI rank identifier.
  *

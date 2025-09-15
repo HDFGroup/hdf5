@@ -190,8 +190,8 @@ while getopts "hpqrvf:l:" option; do
       v) # verbose output
          verbose="true";;
       l) # process a list of subfiles
-         # Split the comma-sperated list into an array
-         IFS=', ' read -r -a subf_list <<< "${OPTARG}";;
+         # Split the comma-separated list into an array
+         IFS=',' read -r -a subf_list <<< "${OPTARG}";;
      \?) # Invalid option
          echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
          usage
@@ -285,7 +285,7 @@ else
   for i in "${subfiles[@]}"; do
       subfile="${subfile_dir}/${i}"
       match=0
-      for ((j=0; j<nsubfiles; ++j)); do
+      for ((j=0; j<${#subf_list[@]}; ++j)); do
           if [[ "${subf_list[j]}" == "$subfile" ]]; then
              unset "subf_list[$j]"  # Use unset within loop for proper removal
              match=1

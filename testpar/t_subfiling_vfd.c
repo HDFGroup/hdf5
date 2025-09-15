@@ -276,13 +276,22 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
         goto done;
     }
 
-    FILE *h5fuse_script;
+    /* Check if h5fuse script exists - similar to test_subfiling_h5fuse() */
+    int skip_validation = 0;
+    if (MAINPROCESS) {
+        FILE *h5fuse_script;
+        h5fuse_script = fopen("./h5fuse", "r");
+        if (h5fuse_script)
+            fclose(h5fuse_script);
+        else
+            skip_validation = 1;
+    }
 
-    h5fuse_script = fopen("h5fuse", "r");
-    if (h5fuse_script)
-        fclose(h5fuse_script);
-    else
-        return SUCCEED;
+    /* Broadcast skip decision to all ranks */
+    MPI_Bcast(&skip_validation, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (skip_validation) {
+        return SUCCEED;  /* Skip validation if h5fuse script not found */
+    }
 
     /* Build comma-separated list of subfiles for h5fuse */
     subfile_list[0] = '\0';
@@ -306,11 +315,11 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
     /* Construct h5fuse command with proper arguments */
     if (config_filename && access(config_filename, F_OK) == 0) {
         /* Use configuration file if available */
-        snprintf(h5fuse_cmd, 4096, "h5fuse -q -f %s -l %s", config_filename, subfile_list);
+        snprintf(h5fuse_cmd, 4096, "./h5fuse -q -f %s -l %s", config_filename, subfile_list);
     }
     else {
         /* Use subfile list only */
-        snprintf(h5fuse_cmd, 4096, "h5fuse -q -l %s", subfile_list);
+        snprintf(h5fuse_cmd, 4096, "./h5fuse -q -l %s", subfile_list);
     }
 
     system_ret = system(h5fuse_cmd);
