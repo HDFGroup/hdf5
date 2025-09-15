@@ -502,6 +502,12 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ## Library
 
+### Fixed security issues CVE-2025-6816, CVE-2025-6856 and CVE-2025-2923
+
+   A specially constructed HDF5 file could contain a corrupted object header with a continuation message that points back to itself. This could result in an internal buffer being allocated with too small of a size, leading to a heap buffer overflow. This has been fixed by checking the expected number of object header chunks against the actual value as chunks are being deserialized.
+
+   Fixes GitHub issues #5571, #5574 and #5381
+
 ### Fixed security issue CVE-2025-6750
 
    A heap buffer overflow occurred because an mtime message was not properly decoded, resulting in a buffer of size 0 being passed into the encoder.  This has been fixed by decoding old and new mtime messages which will allow invalid message size to be detected.
