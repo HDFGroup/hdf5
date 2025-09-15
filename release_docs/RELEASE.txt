@@ -894,6 +894,13 @@ Bug Fixes since HDF5-2.0.0 release
 
       Fixes GitHub issue #4952
 
+    - Check for overflow in decoded heap block addresses
+
+      Currently, we do not check for overflow when decoding addresses from
+      the heap, which can cause overflow problems. We've added a check in 
+      H5HL__fl_deserialize to ensure no overflow can occur.
+
+      Fixes GitHub issue #5382
 
     Java Library
     ------------
