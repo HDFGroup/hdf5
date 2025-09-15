@@ -738,7 +738,9 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
             name = temp;
         }
         else
-            HGOTO_ERROR(H5E_VFL, H5E_FILEEXISTS, NULL, "file names not unique");
+            HGOTO_ERROR(H5E_VFL, H5E_FILEEXISTS, NULL,
+                        "differing member numbers do not produce unique member file names - try inserting "
+                        "\"%%06d\" into the file name string");
     }
 
     /* Open all the family members */

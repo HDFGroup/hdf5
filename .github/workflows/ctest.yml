@@ -1,4 +1,4 @@
-name: hdf5 dev ctest runs
+name: hdf5 dev CTest runs
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -73,7 +73,7 @@ jobs:
       - run: echo "signing is ${{ steps.set-signing-state.outputs.BINSIGN }}."
 
   build_and_test_win:
-  # Windows w/ MSVC + CMake
+  # Windows w/ MSVC
   #
     name: "Windows MSVC CTest"
     runs-on: windows-latest
@@ -155,7 +155,7 @@ jobs:
             json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
-      - name: Run ctest (Windows)
+      - name: Run CTest (Windows)
         env:
           BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
@@ -205,7 +205,7 @@ jobs:
               Get-ChildItem -Path ${{ runner.workspace }}
         shell: pwsh
 
-      # Save files created by ctest script
+      # Save files created by CTest script
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@v4
         with:
@@ -221,13 +221,13 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_linux:
-  # Linux (Ubuntu) w/ gcc + CMake
+  # Linux (Ubuntu) w/ gcc
   #
-    name: "Ubuntu gcc CMake"
+    name: "Ubuntu gcc"
     runs-on: ubuntu-latest
     needs: [check-secret]
     steps:
-      - name: Install CMake Dependencies (Linux)
+      - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build graphviz
@@ -277,7 +277,7 @@ jobs:
       - name: Uncompress source (Linux)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Run ctest (Linux)
+      - name: Run CTest (Linux)
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-GNUC --fresh
@@ -314,7 +314,7 @@ jobs:
               ls ${{ github.workspace }}
               ls -l ${{ runner.workspace }}
 
-      # Save files created by ctest script
+      # Save files created by CTest script
       - name: Save published binary (Linux)
         uses: actions/upload-artifact@v4
         with:
@@ -336,7 +336,7 @@ jobs:
               path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      # Save doxygen files created by ctest script
+      # Save doxygen files created by CTest script
       - name: Save published doxygen (Linux)
         uses: actions/upload-artifact@v4
         with:
@@ -345,9 +345,9 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_mac_latest:
-  # MacOS w/ Clang + CMake
+  # MacOS w/ Clang
   #
-    name: "MacOS Clang CMake"
+    name: "MacOS Clang"
     runs-on: macos-latest
     needs: [check-secret]
     steps:
@@ -441,7 +441,7 @@ jobs:
           compiler: gcc
           version: 14
 
-      - name: Run ctest (MacOS_latest)
+      - name: Run CTest (MacOS_latest)
         id: run-ctest
         env:
           BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
@@ -561,7 +561,7 @@ jobs:
               ls ${{ github.workspace }}
               ls -l ${{ runner.workspace }}
 
-      # Save files created by ctest script
+      # Save files created by CTest script
       - name: Save published binary (MacOS_latest)
         uses: actions/upload-artifact@v4
         with:
@@ -577,12 +577,12 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
-  # Linux S3 (Ubuntu) w/ gcc + CMake
+  # Linux S3 (Ubuntu) w/ gcc
   #
-    name: "Ubuntu gcc CMake S3"
+    name: "Ubuntu gcc S3"
     runs-on: ubuntu-latest
     steps:
-      - name: Install CMake Dependencies (Linux S3)
+      - name: Install Dependencies (Linux S3)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen
@@ -640,7 +640,7 @@ jobs:
       - name: Uncompress source (Linux S3)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Run ctest (Linux S3)
+      - name: Run CTest (Linux S3)
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-GNUC-S3 --fresh
@@ -663,7 +663,7 @@ jobs:
               ls ${{ github.workspace }}
               ls -l ${{ runner.workspace }}
 
-      # Save files created by ctest script
+      # Save files created by CTest script
       - name: Save published binary (Linux S3)
         uses: actions/upload-artifact@v4
         with:
@@ -673,7 +673,7 @@ jobs:
 
 ####### intel builds
   build_and_test_win_intel:
-  # Windows w/ OneAPI + CMake
+  # Windows w/ OneAPI
   #
     name: "Windows Intel CTest"
     runs-on: windows-latest
@@ -748,7 +748,7 @@ jobs:
             json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
-      - name: Run ctest (Windows_intel) with oneapi
+      - name: Run CTest (Windows_intel) with oneapi
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
@@ -801,7 +801,7 @@ jobs:
               Get-ChildItem -Path ${{ runner.workspace }}
         shell: pwsh
 
-      # Save files created by ctest script
+      # Save files created by CTest script
       - name: Save published binary (Windows_intel)
         uses: actions/upload-artifact@v4
         with:
@@ -817,13 +817,13 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_linux_intel:
-  # Linux (Ubuntu) w/ OneAPI + CMake
+  # Linux (Ubuntu) w/ OneAPI
   #
-    name: "Ubuntu Intel CMake"
+    name: "Ubuntu Intel"
     runs-on: ubuntu-latest
     needs: [check-secret]
     steps:
-      - name: Install CMake Dependencies (Linux_intel)
+      - name: Install Dependencies (Linux_intel)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz
@@ -869,7 +869,7 @@ jobs:
       - name: Uncompress source (Linux_intel)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Run ctest (Linux_intel)
+      - name: Run CTest (Linux_intel)
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
@@ -895,7 +895,7 @@ jobs:
               ls ${{ github.workspace }}
               ls -l ${{ runner.workspace }}
 
-      # Save files created by ctest script
+      # Save files created by CTest script
       - name: Save published binary (Linux_intel)
         uses: actions/upload-artifact@v4
         with:

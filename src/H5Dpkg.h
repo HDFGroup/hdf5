@@ -111,6 +111,43 @@
                                                                           (DINFO)->type_info.dst_type_size); \
     }
 
+/* Macro to add a virtual dataset source file or dataset name to a hash table for storing these names */
+#define H5D_VIRTUAL_FIND_OR_ADD_NAME(NAME_TYPE, LAYOUT, STR, STRLEN, ENT, ERR)                               \
+    do {                                                                                                     \
+        /* Check for source name in hash table. While this normally shouldn't be                             \
+         * necessary if it is version 1 or greater and it is at least as long as "size of                    \
+         * lengths", we should still check since if we don't and it's not shared in the                      \
+         * file for whatever reason it could cause the library to insert a duplicate key                     \
+         * if it rebuilds the hash table. */                                                                 \
+        H5O_storage_virtual_ent_t *_tmp_ent = NULL; /* Temporary VDS entry pointer */                        \
+                                                                                                             \
+        if ((ENT) > (LAYOUT)->storage.u.virt.list)                                                           \
+            HASH_FIND(hh_source_##NAME_TYPE, (LAYOUT)->storage.u.virt.source_##NAME_TYPE##_hash_table, STR,  \
+                      STRLEN, _tmp_ent);                                                                     \
+        if (_tmp_ent) {                                                                                      \
+            /* Found source name in previous mapping, use link to that mapping's source name */              \
+            assert(_tmp_ent >= (LAYOUT)->storage.u.virt.list && _tmp_ent < (ENT));                           \
+            (ENT)->source_##NAME_TYPE##_orig = (size_t)(_tmp_ent - (LAYOUT)->storage.u.virt.list);           \
+            (ENT)->source_##NAME_TYPE##_name = _tmp_ent->source_##NAME_TYPE##_name;                          \
+        }                                                                                                    \
+        else {                                                                                               \
+            /* Did not find source name, copy it to the entry and add it to the hash table */                \
+            if (NULL == ((ENT)->source_##NAME_TYPE##_name = (char *)H5MM_malloc((STRLEN) + 1)))              \
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, ERR, "unable to allocate memory for source name");   \
+            (ENT)->source_##NAME_TYPE##_orig = SIZE_MAX;                                                     \
+            H5MM_memcpy((ENT)->source_##NAME_TYPE##_name, STR, (STRLEN) + 1);                                \
+                                                                                                             \
+            /* Add to source name hash table. If we eventually make the library                              \
+             * resilient to repeated strings not stored shared in memory, possibly by                        \
+             * permanently disabling the hash table, or marking it as needing a careful                      \
+             * rebuild, we can avoid this step if the version is 1 or greater and the name                   \
+             * is at least as long as "size of lengths". See comment above about HASH_FIND                   \
+             * line. */                                                                                      \
+            HASH_ADD_KEYPTR(hh_source_##NAME_TYPE, (LAYOUT)->storage.u.virt.source_##NAME_TYPE##_hash_table, \
+                            (ENT)->source_##NAME_TYPE##_name, STRLEN, ENT);                                  \
+        }                                                                                                    \
+    } while (0)
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -768,6 +805,7 @@ H5_DLL herr_t H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src
 
 /* Functions that operate on virtual dataset storage */
 H5_DLL herr_t H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout);
+H5_DLL herr_t H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout);
 H5_DLL herr_t H5D__virtual_copy_layout(H5O_layout_t *layout);
 H5_DLL herr_t H5D__virtual_set_extent_unlim(const H5D_t *dset);
 H5_DLL herr_t H5D__virtual_reset_layout(H5O_layout_t *layout);

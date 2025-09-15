@@ -269,9 +269,15 @@ extern "C" {
  *          container_name can be opened with the file access property list
  *          \p fapl_id.
  *
+ * \parblock
  * \note The H5Fis_accessible() function enables files to be checked with a
  *       given file access property list, unlike H5Fis_hdf5(), which only uses
  *       the default file driver when opening a file.
+ * \endparblock
+ *
+ * \parblock
+ * \unicode_filename_note
+ * \endparblock
  *
  * \since 1.12.0
  *
@@ -320,13 +326,21 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  * \par Example
  * \snippet H5F_examples.c minimal
  *
+ * \parblock
  * \note  #H5F_ACC_TRUNC and #H5F_ACC_EXCL are mutually exclusive; use
  *        exactly one.
+ * \endparblock
  *
+ * \parblock
  * \note An additional flag, #H5F_ACC_DEBUG, prints debug information. This
  *       flag can be combined with one of the above values using the bit-wise
  *       OR operator (\c |), but it is used only by HDF5 library developers;
  *       \Emph{it is neither tested nor supported for use in applications}.
+ * \endparblock
+ *
+ * \parblock
+ * \unicode_filename_note
+ * \endparblock
  *
  * \attention \Bold{Special case — File creation in the case of an already-open file:}
  *            If a file being created is already opened, by either a previous
@@ -420,8 +434,14 @@ H5_DLL hid_t H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id
  * \par Example
  * \snippet H5F_examples.c open
  *
+ * \parblock
  * \note  #H5F_ACC_RDWR and #H5F_ACC_RDONLY are mutually exclusive; use
  *        exactly one.
+ * \endparblock
+ *
+ * \parblock
+ * \unicode_filename_note
+ * \endparblock
  *
  * \attention \Bold{Special cases — Multiple opens:} A file can often be opened
  *            with a new H5Fopen() call without closing an already-open
@@ -665,6 +685,10 @@ H5_DLL herr_t H5Fclose_async(hid_t file_id, hid_t es_id);
  *          For all implementations, H5Fdelete() will first check if the file
  *          is an HDF5 file via H5Fis_accessible(). This is done to ensure that
  *          H5Fdelete() cannot be used as an arbitrary file deletion call.
+ *
+ * \parblock
+ * \unicode_filename_note
+ * \endparblock
  *
  * \since 1.12.0
  *
@@ -1957,6 +1981,10 @@ H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
  * \return \htri_t
  *
  * \details H5Fis_hdf5() determines whether a file is in the HDF5 format.
+ *
+ * \parblock
+ * \unicode_filename_note
+ * \endparblock
  *
  * \since 1.0.0
  * \deprecated 1.12.0 Deprecated in favor of the function H5Fis_accessible()

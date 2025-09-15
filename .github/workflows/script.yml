@@ -1,4 +1,4 @@
-name: hdf5 dev ctest script runs
+name: hdf5 dev CTest script runs
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   build_and_test_win:
-  # Windows w/ MSVC + CMake
+  # Windows w/ MSVC
   #
     name: "Windows MSVC CTest"
     runs-on: windows-latest
@@ -127,14 +127,14 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest script (Windows)
+      - name: Run CTest script (Windows)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Windows_intel)
         uses: actions/upload-artifact@v4
         with:
@@ -143,12 +143,12 @@ jobs:
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_linux:
-  # Linux (Ubuntu) w/ gcc + CMake
+  # Linux (Ubuntu) w/ gcc
   #
-    name: "Ubuntu gcc CMake"
+    name: "Ubuntu gcc"
     runs-on: ubuntu-latest
     steps:
-      - name: Install CMake Dependencies (Linux)
+      - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build graphviz curl
@@ -225,14 +225,14 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (Linux)
+      - name: Run CTest (Linux)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-GCC,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Linux)
         uses: actions/upload-artifact@v4
         with:
@@ -241,9 +241,9 @@ jobs:
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_mac_latest:
-  # MacOS w/ Clang + CMake
+  # MacOS w/ Clang
   #
-    name: "MacOS Clang CMake"
+    name: "MacOS Clang"
     runs-on: macos-latest
     steps:
       - name: Install Dependencies (MacOS_latest)
@@ -347,7 +347,7 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (MacOS_latest)
+      - name: Run CTest (MacOS_latest)
         id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5"
@@ -355,7 +355,7 @@ jobs:
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (MacOS_latest)
         uses: actions/upload-artifact@v4
         with:
@@ -364,12 +364,12 @@ jobs:
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
-  # Linux S3 (Ubuntu) w/ gcc + CMake
+  # Linux S3 (Ubuntu) w/ gcc
   #
-    name: "Ubuntu gcc CMake S3"
+    name: "Ubuntu gcc S3"
     runs-on: ubuntu-latest
     steps:
-      - name: Install CMake Dependencies (Linux S3)
+      - name: Install Dependencies (Linux S3)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen
@@ -460,14 +460,14 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (Linux S3)
+      - name: Run CTest (Linux S3)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-S3,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Linux S3)
         uses: actions/upload-artifact@v4
         with:
@@ -477,7 +477,7 @@ jobs:
 
 ####### intel builds
   build_and_test_win_intel:
-  # Windows w/ OneAPI + CMake
+  # Windows w/ OneAPI
   #
     name: "Windows Intel CTest"
     runs-on: windows-latest
@@ -571,7 +571,7 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (Windows_intel) with oneapi
+      - name: Run CTest (Windows_intel) with oneapi
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
@@ -581,7 +581,7 @@ jobs:
         shell: pwsh
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Windows_intel)
         uses: actions/upload-artifact@v4
         with:
@@ -590,12 +590,12 @@ jobs:
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_linux_intel:
-  # Linux (Ubuntu) w/ OneAPI + CMake
+  # Linux (Ubuntu) w/ OneAPI
   #
-    name: "Ubuntu Intel CMake"
+    name: "Ubuntu Intel"
     runs-on: ubuntu-latest
     steps:
-      - name: Install CMake Dependencies (Linux_intel)
+      - name: Install Dependencies (Linux_intel)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz curl
@@ -674,7 +674,7 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (Linux_intel)
+      - name: Run CTest (Linux_intel)
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
@@ -684,7 +684,7 @@ jobs:
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Linux_intel)
         uses: actions/upload-artifact@v4
         with:
@@ -694,12 +694,12 @@ jobs:
 
 ####### clang builds
   build_and_test_linux_clang:
-  # Linux (Ubuntu) w/ clang + CMake
+  # Linux (Ubuntu) w/ clang
   #
-    name: "Ubuntu Clang CMake"
+    name: "Ubuntu Clang"
     runs-on: ubuntu-22.04
     steps:
-      - name: Install CMake Dependencies (Linux_clang)
+      - name: Install Dependencies (Linux_clang)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
@@ -792,14 +792,14 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest (Linux_clang)
+      - name: Run CTest (Linux_clang)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-Clang,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (Linux_clang)
         uses: actions/upload-artifact@v4
         with:
