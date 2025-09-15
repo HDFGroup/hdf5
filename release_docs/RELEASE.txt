@@ -217,6 +217,12 @@ New Features
 
     Library:
     --------
+    - H5public.h no longer includes features.h
+
+      features.h is supposed to be included by glibc headers and not used in
+      application code. It is unnecessary given our use of feature test macros
+      like _POSIX_C_SOURCE and has been removed.
+
     - Improved performance of opening a virtual dataset with many mappings
 
       When opening a virtual dataset, the library would previously decode

@@ -22,10 +22,6 @@
 /* API Version macro wrapper definitions */
 #include "H5version.h"
 
-#ifdef H5_HAVE_FEATURES_H
-#include <features.h> /* For setting POSIX, BSD, etc. compatibility */
-#endif
-
 /* C library header files for things that appear in HDF5 public headers */
 #ifdef __cplusplus
 #include <cinttypes>
