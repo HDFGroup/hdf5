@@ -239,7 +239,6 @@ error:
     return H5I_INVALID_HID;
 }
 
-
 /* Helper function to cleanup file mapping memory */
 static void
 cleanup_file_mapping_memory(char **filenames, size_t len)
