@@ -276,15 +276,13 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
         goto done;
     }
 
-    if (MAINPROCESS) {
-        FILE *h5fuse_script;
+    FILE *h5fuse_script;
 
-        h5fuse_script = fopen("h5fuse", "r");
-        if (h5fuse_script)
-            fclose(h5fuse_script);
-        else
-            return SUCCEED;
-    }
+    h5fuse_script = fopen("h5fuse", "r");
+    if (h5fuse_script)
+        fclose(h5fuse_script);
+    else
+        return SUCCEED;
 
     /* Build comma-separated list of subfiles for h5fuse */
     subfile_list[0] = '\0';
@@ -569,10 +567,16 @@ test_create_and_close(void)
     mpi_code_g = MPI_Barrier(comm_g);
     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
+    /* All ranks participate in validation result synchronization */
+    int validation_result = 1; /* Default to success */
     if (len > 0) {
-        ret = validate_file_with_h5fuse(config_filename, filenames, len, SUBF_FILENAME);
-        VRFY((ret >= 0), "h5fuse validation succeeded");
+        ret               = validate_file_with_h5fuse(config_filename, filenames, len, SUBF_FILENAME);
+        validation_result = (ret >= 0) ? 1 : 0;
     }
+
+    /* Synchronize validation result across all ranks */
+    MPI_Allreduce(MPI_IN_PLACE, &validation_result, 1, MPI_INT, MPI_LAND, comm_g);
+    VRFY(validation_result, "h5fuse validation succeeded");
 
     /* Cleanup */
     cleanup_file_mapping_memory(filenames, len);
@@ -655,6 +659,23 @@ test_subfiling_get_file_mapping_ioc_selection(void)
 
             /* Validate that the number of subfiles matches expected IOC count */
             VRFY((len_total == (size_t)expected_ioc_count), "Number of subfiles matches expected IOC count");
+
+            /* All ranks participate in h5fuse validation result synchronization */
+            int   validation_result = 1; /* Default to success */
+            char *config_filename   = NULL;
+            if (len > 0) {
+                config_filename   = find_config_file(filename);
+                ret               = validate_file_with_h5fuse(config_filename, filenames, len, filename);
+                validation_result = (ret >= 0) ? 1 : 0;
+            }
+
+            /* Synchronize validation result across all ranks */
+            MPI_Allreduce(MPI_IN_PLACE, &validation_result, 1, MPI_INT, MPI_LAND, comm_g);
+            VRFY(validation_result, "h5fuse validation succeeded for IOC selection");
+
+            if (config_filename) {
+                free(config_filename);
+            }
 
             cleanup_file_mapping_memory(filenames, len);
 
@@ -866,15 +887,30 @@ test_subfiling_get_file_mapping_with_io(void)
     /* Verify mapping consistency */
     VRFY((len_before == len_after), "File mapping length unchanged after I/O");
 
-    //    if (len_before > 0 && len_after > 0) {
     for (size_t i = 0; i < len_before; i++) {
         VRFY((strcmp(filenames_before[i], filenames_after[i]) == 0), "File mapping unchanged after I/O");
+    }
+
+    /* All ranks participate in h5fuse validation with actual data */
+    int   validation_result = 1; /* Default to success */
+    char *config_filename   = NULL;
+    if (len_after > 0) {
+        config_filename = find_config_file(SUBF_FILENAME_IO);
+        ret = validate_file_with_h5fuse(config_filename, filenames_after, len_after, SUBF_FILENAME_IO);
+        validation_result = (ret >= 0) ? 1 : 0;
+    }
+
+    /* Synchronize validation result across all ranks */
+    MPI_Allreduce(MPI_IN_PLACE, &validation_result, 1, MPI_INT, MPI_LAND, comm_g);
+    VRFY(validation_result, "h5fuse validation with I/O data succeeded");
+
+    if (config_filename) {
+        free(config_filename);
     }
 
     /* All ranks participate in cleanup */
     cleanup_file_mapping_memory(filenames_before, len_before);
     cleanup_file_mapping_memory(filenames_after, len_after);
-    //    }
 
     /* Cleanup */
     free(write_buf);
