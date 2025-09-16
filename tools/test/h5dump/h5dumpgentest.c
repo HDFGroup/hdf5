@@ -730,12 +730,19 @@ gent_softlink2(bool big_endian_committed)
     /*-----------------------------------------------------------------------
      * Named datatype
      *------------------------------------------------------------------------*/
-    if (big_endian_committed) {
-        target_type = H5T_STD_I32BE;
-    } else {
-        target_type = H5T_NATIVE_INT;
+    if ((target_type = H5Tcopy(H5T_NATIVE_INT)) < 0) {
+        fprintf(stderr, "Error: %s> H5Tcopy failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
     }
-    
+
+    if (big_endian_committed) {
+        if (H5Tset_order(target_type, H5T_ORDER_BE) < 0) {
+            status = FAIL;
+            goto out;
+        }
+    }
+
     datatype = H5Tcopy(target_type);
 
     status   = H5Tcommit2(fileid1, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
