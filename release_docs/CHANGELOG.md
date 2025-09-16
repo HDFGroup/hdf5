@@ -146,7 +146,19 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ## Library 
 
-    - Improved performance of opening a virtual dataset with many mappings
+- Removed hbool_t from public API calls
+
+   The hbool_t type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
+
+   It had been previously purged from the bulk of the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
+
+   The hbool_t typedef remains in H5public.h so existing code does not need to be updated.
+
+- H5public.h no longer includes features.h
+
+   features.h is supposed to be included by glibc headers and not used in application code. It is unnecessary given our use of feature test macros like _POSIX_C_SOURCE and has been removed.
+
+- Improved performance of opening a virtual dataset with many mappings
 
    When opening a virtual dataset, the library would previously decode the mappings in the object header package, then copy them to the dataset struct, then copy them to the internal DCPL. Copying the VDS mappings could be very expensive if there were many mappings. Changed this to delay decoding the mappings until the dataset code, and delay copying the layout to the DCPL until it is needed. This results in only the decoding and no copies in most use cases, as opposed to the decoding and two copies with the previous code.
 
@@ -442,6 +454,12 @@ HDF5 release, platforms tested, and known problems in this release.
 # 🪲  Bug Fixes
 
 ## Library
+- Check for overflow in decoded heap block addresses
+
+   Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in H5HL__fl_deserialize to ensure no overflow can occur.
+
+   Fixes GitHub issue #5382
+
 - Revised handling of Unicode filenames on Windows
 
    In the HDF5 1.14.4 release, a change was made to address some issues with the library's handling of code pages and file paths on Windows.  This change introduced other issues with the handling of UTF-8 file names that caused breakage for software using the 1.14.4 and 1.14.5 releases of HDF5. That change was reverted for the 1.14.6 release and the behavior has been slightly modified for this release.
@@ -456,7 +474,7 @@ HDF5 release, platforms tested, and known problems in this release.
 - Fixed an error with `H5Fget_file_image()` with the latest file format
    When using `H5Fget_file_image()` on a file created with the latest file format (or any format newer than the earliest), the library failed to recalculate the superblock checksum after changing the access flags in the superblock, causing any subsequent attempt to open the returned file image to fail due to the checksum failing to verify. Fixed `H5Fget_file_image()` to recalculate the checksum.
 
-   Fixes GitHub issue [#1915](https://github.com/HDFGroup/hdf5/issues/1915)
+   Fixed GitHub issue [#1915](https://github.com/HDFGroup/hdf5/issues/1915)
 
 - Fixed an assertion failure in `H5S__hyper_make_spans()`
 
@@ -481,7 +499,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
     An internal function was modified to help detect when a decoded B-tree node level has an unexpected value, and an error will be produced.
 
-    Fixes GitHub issue [#4432](https://github.com/HDFGroup/hdf5/issues/4432)
+    Fixed GitHub issue [#4432](https://github.com/HDFGroup/hdf5/issues/4432)
 
 - Fixed `H5Ovisit2` to recursively visit all objects
 
@@ -489,7 +507,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
     This behavior occurred when the fields are not `H5O_INFO_BASIC` or `H5O_INFO_ALL` because an internal function did not obtain the basic information needed by its caller.  This problem is now fixed.
 
-   Fixes GitHub issue [#4941](https://github.com/HDFGroup/hdf5/issues/4941)
+   Fixed GitHub issue [#4941](https://github.com/HDFGroup/hdf5/issues/4941)
 
 - Only clear `FE_INVALID` when that symbol is present on the system
 
@@ -497,7 +515,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    We've added an #ifdef `FE_INVALID` block around the exception clearing code to correct this.
 
-   Fixes GitHub issue [#4952](https://github.com/HDFGroup/hdf5/issues/4952)
+   Fixed GitHub issue [#4952](https://github.com/HDFGroup/hdf5/issues/4952)
 
 ## Java Library
 
@@ -547,7 +565,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Removed the module search `find_package` for szip library
 
-  There is not a szip module file to use, so the `find_package` only uses `find_package` in config mode. The choice then is to either build szip, with libaec, inline, or find a system installed szip library, built with CMake.
+  There is not an szip module file to use, so the `find_package` only uses `find_package` in config mode. The choice then is to either build szip, with libaec, inline, or find a system installed szip library, built with CMake.
 
 ## Tools
 
@@ -555,13 +573,13 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The `h5repack` tool did not properly parse user-defined filter command-line arguments when the number of elements value was 0 (zero). Also, using a colon without a preceding object was enforced to behave the same as not using a colon.
 
-   Fixes GitHub issue [#5132](https://github.com/HDFGroup/hdf5/issues/5132)
+   Fixed GitHub issue [#5132](https://github.com/HDFGroup/hdf5/issues/5132)
 
 - Changed the default value for number of cd_values in filters.
 
    The tools used an arbitrary value 0f 20 for the number of cd_values used in a filter. Created a new define `DEFAULT_CDELEMTS` in H5tools.h for the default value, which currently matches the library restriction of 256.
 
-  Fixes GitHub issue [#5414](https://github.com/HDFGroup/hdf5/issues/5414)
+  Fixed GitHub issue [#5414](https://github.com/HDFGroup/hdf5/issues/5414)
 
 ## Performance
 
@@ -589,7 +607,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The test has been fixed by limiting the buffer to 2 GiB on 32-bit systems.
 
-   Fixes GitHub [#2510](https://github.com/HDFGroup/hdf5/issues/2510)
+   Fixed GitHub [#2510](https://github.com/HDFGroup/hdf5/issues/2510)
 
 - Added skipping of a few parallel tests for OpenMPI 5.0.5
 
