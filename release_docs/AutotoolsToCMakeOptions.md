@@ -1,3 +1,21 @@
+# <img src="Cmake_logo.svg" alt="Cmake logo" width=24> CMake Installations
+
+CMake produces the following set of folders; bin, include, lib and share. The LICENSE and RELEASE.txt file are placed in the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake creates dynamic versions of the tools with the suffix "-shared".
+
+   ```
+   build scripts
+   /-------------
+   CMake: h5c++, h5cc, h5hlc++, h5hlcc
+   ```
+
+The include folder holds the header files and the fortran mod files. CMake places the fortran mod files into separate shared and static subfolders, however the use of `HDF5_INSTALL_MOD_FORTRAN` places one set of mod files into the include folder. Because CMake produces a tools library, the header files for tools will appear in the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig subfolder with the hdf5*.pc files used by the bin/build scripts created by the CMake build. CMake separates the C interface code from the fortran code by creating C-stub libraries for each Fortran library. In addition, only CMake installs the tools library. The names of the szip libraries are different between the build systems.
+
+CMake builds include a number of CMake specific files for support of CMake's find_package and support for the HDF5 Examples CMake project.
+
 # How To Convert Autotools Build Options to CMake Options
 
 ## Introduction
