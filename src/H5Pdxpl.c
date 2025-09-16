@@ -1162,7 +1162,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_preserve(hid_t plist_id, hbool_t status)
+H5Pset_preserve(hid_t plist_id, bool status)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     H5T_bkg_t       need_bkg;            /* Value for background buffer type */
@@ -2550,7 +2550,7 @@ H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value /*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf)
+H5Pset_modify_write_buf(hid_t plist_id, bool modify_write_buf)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -2583,7 +2583,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf /*out*/)
+H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */

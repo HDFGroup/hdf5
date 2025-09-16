@@ -1,4 +1,4 @@
-name: hdf5 dev parallel from source ctest script runs
+name: hdf5 dev parallel from source CTest script runs
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -43,7 +43,7 @@ jobs:
     with:
       build_mode: ${{ inputs.build_mode }}
 
-  CMake_build_parallel_src_openmpi:
+  Build_parallel_src_openmpi:
     needs: Build_openmpi_source
     name: "Parallel OpenMPI GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
@@ -148,14 +148,14 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest script (OpenMPI)
+      - name: Run CTest script (OpenMPI)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-OpenMPI-source,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (OpenMPI)
         uses: actions/upload-artifact@v4
         with:
@@ -163,7 +163,7 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/hdf5.log
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-  CMake_build_parallel_src_mpich:
+  Build_parallel_src_mpich:
     needs: Build_mpich_source
     name: "Parallel Mpich GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
@@ -270,14 +270,14 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run ctest script (MPICH)
+      - name: Run CTest script (MPICH)
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-MPICH-source,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by ctest script
+      # Save log files created by CTest script
       - name: Save log (MPICH)
         uses: actions/upload-artifact@v4
         with:

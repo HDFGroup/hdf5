@@ -152,6 +152,7 @@ main(void)
     int  RealKinds[]        = H5_FORTRAN_REAL_KINDS;
     int  RealKinds_SizeOf[] = H5_FORTRAN_REAL_KINDS_SIZEOF;
     char Real_C_TYPES[10][32];
+    int  Real_C_TYPES_Y = 31; /* Has to match second dimension of Real_C_TYPES - 1 */
 
     int FORTRAN_NUM_INTEGER_KINDS = H5_FORTRAN_NUM_INTEGER_KINDS;
     int H5_FORTRAN_NUM_REAL_KINDS;
@@ -357,8 +358,9 @@ main(void)
 
     for (i = 0; i < H5_FORTRAN_NUM_REAL_KINDS; i++) {
         if (RealKinds[i] > 0) {
-            snprintf(chrA, sizeof(chrA), "Fortran_REAL_%s", Real_C_TYPES[i]);
-            snprintf(chrB, sizeof(chrB), "real_%s_f", Real_C_TYPES[i]);
+            /* Limit snprintf to Real_C_TYPES_Y characters to quiet warnings */
+            snprintf(chrA, sizeof(chrA), "Fortran_REAL_%.*s", Real_C_TYPES_Y, Real_C_TYPES[i]);
+            snprintf(chrB, sizeof(chrB), "real_%.*s_f", Real_C_TYPES_Y, Real_C_TYPES[i]);
             writeToFiles("float", chrA, chrB, RealKinds[i]);
         }
     }

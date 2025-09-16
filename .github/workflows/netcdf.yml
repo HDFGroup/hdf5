@@ -37,7 +37,7 @@ jobs:
     - name: Checkout HDF5
       uses: actions/checkout@v4.1.7
 
-    - name: CMake Configure
+    - name: Configure
       run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -59,7 +59,7 @@ jobs:
             $GITHUB_WORKSPACE
       shell: bash
 
-    - name: CMake Build
+    - name: Build
       run: cmake --build . --parallel 3 --config Release
       working-directory: ${{ runner.workspace }}/build
 

@@ -1,4 +1,4 @@
-name: hdf5 Developer Mode CMake CI
+name: hdf5 Developer Mode CI
 
 on:
   workflow_call:
@@ -57,7 +57,7 @@ jobs:
               ls -l ${{ github.workspace }}
               ls ${{ runner.workspace }}
 
-      - name: CMake Configure
+      - name: Configure
         shell: bash
         run: |
             mkdir "${{ runner.workspace }}/build"
@@ -79,11 +79,11 @@ jobs:
                  -DHDF_TEST_EXPRESS=0 \
                  ${{ github.workspace }}/hdfsrc
 
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Developer
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         env:
           HDF5TestExpress: 0
         run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
@@ -150,27 +150,27 @@ jobs:
         run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
         shell: bash
 
-      - name: CMake Configure (Windows)
+      - name: Configure (Windows)
         shell: pwsh
         run: |
           mkdir "${{ runner.workspace }}/build"
           Set-Location -Path "${{ runner.workspace }}\\build"
           cmake -C ${{ github.workspace }}/hdfsrc/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=Developer -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_DEBUG_H5B2=ON -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON -DHDF5_ENABLE_PARALLEL:BOOL=OFF -DHDF5_BUILD_CPP_LIB=OFF -DHDF5_BUILD_FORTRAN=OFF -DHDF5_BUILD_JAVA=OFF -DHDF5_BUILD_DOC=OFF -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF -DHDF_TEST_EXPRESS=0 ${{ github.workspace }}/hdfsrc
 
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Developer
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         env:
           HDF5TestExpress: 0
         run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
         working-directory: ${{ runner.workspace }}/build
 
   build_and_test_mac_latest:
-  # MacOS w/ Clang + CMake
+  # MacOS w/ Clang
   #
-    name: "MacOS Clang CMake"
+    name: "MacOS Clang"
     runs-on: macos-latest
     steps:
       - name: Install Dependencies (MacOS_latest)
@@ -221,7 +221,7 @@ jobs:
       - name: Uncompress source (MacOS_latest)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: CMake Configure
+      - name: Configure
         shell: bash
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -243,11 +243,11 @@ jobs:
                -DHDF_TEST_EXPRESS=0 \
                ${{ github.workspace }}/hdfsrc
 
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Developer
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         env:
           HDF5TestExpress: 0
         run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
@@ -255,12 +255,12 @@ jobs:
 
   ####### clang builds
   build_and_test_linux_clang:
-    # Linux (Ubuntu) w/ clang + CMake
+    # Linux (Ubuntu) w/ clang
     #
-    name: "Ubuntu Clang CMake"
+    name: "Ubuntu Clang"
     runs-on: ubuntu-22.04
     steps:
-      - name: Install CMake Dependencies (Linux_clang)
+      - name: Install Dependencies (Linux_clang)
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
@@ -312,7 +312,7 @@ jobs:
       - name: Uncompress source (Linux_clang)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: CMake Configure
+      - name: Configure
         shell: bash
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -334,11 +334,11 @@ jobs:
                -DHDF_TEST_EXPRESS=0 \
                ${{ github.workspace }}/hdfsrc
 
-      - name: CMake Build
+      - name: Build
         run: cmake --build . --parallel 3 --config Developer
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         env:
           HDF5TestExpress: 0
         run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
