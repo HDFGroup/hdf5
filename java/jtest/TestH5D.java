@@ -826,9 +826,9 @@ public class TestH5D {
         final int SPACE_FILL = 254;
 
         class H5D_iter_data extends H5D_operator_t {
-            public int fill_value;       /* The fill value to check */
-            public long fill_curr_coord; /* Current coordinate to examine */
             public long[] fill_coords;   /* Pointer to selection's coordinates */
+            public long fill_curr_coord; /* Current coordinate to examine */
+            public int fill_value;       /* The fill value to check */
         }
 
         H5D_operator_t iter_data = new H5D_iter_data();
@@ -910,9 +910,9 @@ public class TestH5D {
         final int SPACE_FILL = 254;
 
         class H5D_iter_data extends H5D_operator_t {
-            public int fill_value;       /* The fill value to check */
-            public long fill_curr_coord; /* Current coordinate to examine */
             public long[] fill_coords;   /* Pointer to selection's coordinates */
+            public long fill_curr_coord; /* Current coordinate to examine */
+            public int fill_value;       /* The fill value to check */
         }
 
         H5D_operator_t iter_data = new H5D_iter_data();
