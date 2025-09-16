@@ -27,10 +27,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y wine64 winbind
-          # Optional: Start a persistent wineserver
-          wineserver -k # Kill a potential old server
-          wineserver -p # Start a new server
-          wine64 wineboot # Run a process to start up all background wine processes
 
       - name: Verify Wine64 installation
         run: wine64 --version
