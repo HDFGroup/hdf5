@@ -1007,7 +1007,8 @@ H5C__load_entry(H5F_t *f,
     /* Call the get_initial_load_size callback, to retrieve the initial size of image */
     if (type->get_initial_load_size(udata, &len) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image size");
-    assert(len > 0);
+    if (len == 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid size of image");
 
     /* Check for possible speculative read off the end of the file */
     if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
