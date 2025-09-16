@@ -54,6 +54,7 @@
 #define H5D_ACS_VDS_PREFIX_NAME           "vds_prefix"           /* VDS file prefix */
 #define H5D_ACS_APPEND_FLUSH_NAME         "append_flush"         /* Append flush actions */
 #define H5D_ACS_EFILE_PREFIX_NAME         "external file prefix" /* External file prefix */
+#define H5D_ACS_USE_TREE_NAME             "tree"             /* Whether to use spatial tree */
 
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME          "max_temp_buf"        /* Maximum temp buffer size */

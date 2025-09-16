@@ -30,11 +30,23 @@
 #include "H5CXprivate.h" /* API Contexts */
 #include "H5VLprivate.h" /* Virtual Object Layer */
 
+#define H5D_FRIEND /*suppress error about including H5Dpkg */
+#define H5D_TESTING
+#include "H5Dpkg.h"      /* Datasets */
+
 #define RTREE_TEST_BASE_COORD 10000
 #define RTREE_TEST_BASE_SIZE  1000
 
 #define RTREE_TEST_CREATE_RANK       8
 #define RTREE_TEST_CREATE_NUM_COUNTS 4
+
+#define RTREE_DAPL_FILENAME     "vds_rtree_test.h5"
+#define RTREE_DAPL_SRC_FILENAME "vds_src_rtree_test.h5"
+#define RTREE_DAPL_VDS_NAME     "vdset"
+#define RTREE_DAPL_SRC_DATASET_NAME "src_dset"
+
+#define RTREE_DAPL_DATASET_DIM1 10
+#define RTREE_DAPL_DATASET_DIM2 10
 
 static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {1, 100, 500, 10000};
 
@@ -51,6 +63,9 @@ static H5RT_leaf_t **manual_search(H5RT_leaf_t *leaves, size_t leaf_count, int r
 /* Helper function to compare r-tree search results to linear search */
 static herr_t verify_rtree_search(H5RT_result_set_t *result_set, H5RT_leaf_t *leaves, size_t leaf_count,
                                   hsize_t min[], hsize_t max[], int rank);
+
+/* Helper to create and initialize virtual dset in a file */
+static hid_t create_virtual_dataset(hid_t file_id, hid_t dapl_id);
 
 static herr_t
 verify_rtree_search(H5RT_result_set_t *result_set, H5RT_leaf_t *leaves, size_t leaf_count, hsize_t min[],
@@ -416,6 +431,265 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    create_virtual_dataset
+ *
+ * Purpose:     Helper function to create a virtual dataset with mappings
+ *
+ * Return:      Success: dataset ID
+ *              Failure: H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+create_virtual_dataset(hid_t file_id, hid_t dapl_id)
+{
+    hid_t   vspace_id = H5I_INVALID_HID;
+    hid_t   srcspace_id = H5I_INVALID_HID;
+    hid_t   srcfile_id = H5I_INVALID_HID;
+    hid_t   srcdset_id = H5I_INVALID_HID;
+    hid_t   vdset_id = H5I_INVALID_HID;
+    hid_t   dcpl_id  = H5I_INVALID_HID;
+    hsize_t dims[2] = {RTREE_DAPL_DATASET_DIM1, RTREE_DAPL_DATASET_DIM2};
+    int     wbuf[RTREE_DAPL_DATASET_DIM1][RTREE_DAPL_DATASET_DIM2];
+    int     i, j;
+
+    if ((vspace_id = H5Screate_simple(2, dims, NULL)) < 0)
+        goto error;
+
+    if ((srcspace_id = H5Screate_simple(2, dims, NULL)) < 0)
+        goto error;
+
+    /* Create source file */
+    if ((srcfile_id = H5Fcreate(RTREE_DAPL_SRC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Create source dataset */
+    if ((srcdset_id = H5Dcreate2(srcfile_id, RTREE_DAPL_SRC_DATASET_NAME, H5T_NATIVE_INT, srcspace_id,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+
+    if (H5Pset_virtual(dcpl_id, vspace_id, "vds_src_rtree_test.h5", RTREE_DAPL_SRC_DATASET_NAME, srcspace_id) < 0)
+        goto error;
+
+    /* Create virtual dataset */
+    if ((vdset_id = H5Dcreate2(file_id, RTREE_DAPL_VDS_NAME, H5T_NATIVE_INT, vspace_id,
+                              H5P_DEFAULT, dcpl_id, dapl_id)) < 0)
+        goto error;
+
+    /* Initialize and write data to source dataset */
+    for (i = 0; i < RTREE_DAPL_DATASET_DIM1; i++)
+        for (j = 0; j < RTREE_DAPL_DATASET_DIM2; j++)
+            wbuf[i][j] = i * RTREE_DAPL_DATASET_DIM2 + j;
+
+    if (H5Dwrite(srcdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        goto error;
+
+    /* Cleanup */
+    if (H5Sclose(vspace_id) < 0)
+        goto error;
+    if (H5Sclose(srcspace_id) < 0)
+        goto error;
+    if (H5Dclose(srcdset_id) < 0)
+        goto error;
+    if (H5Fclose(srcfile_id) < 0)
+        goto error;
+    if (H5Pclose(dcpl_id) < 0)
+        goto error;
+
+    return vdset_id;
+error:
+    /* Cleanup */
+    H5E_BEGIN_TRY {
+        H5Sclose(vspace_id);
+        H5Sclose(srcspace_id);
+        H5Dclose(srcdset_id);
+        H5Fclose(srcfile_id);
+        H5Dclose(vdset_id);
+        H5Pclose(dcpl_id);
+    } H5E_END_TRY;
+
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_rtree_dapl
+ *
+ * Purpose:     Test R-tree options on the DCPL
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_rtree_dapl(bool use_tree)
+{
+    hid_t  file_id = H5I_INVALID_HID;
+    hid_t  dapl_id = H5I_INVALID_HID;
+    hid_t  vdset_id = H5I_INVALID_HID;
+
+    int rbuf[RTREE_DAPL_DATASET_DIM1][RTREE_DAPL_DATASET_DIM2];
+    const char *test_str = NULL;
+
+    /* Internal values for introspection */
+    H5D_t *dset = NULL;
+    H5O_storage_virtual_t *storage = NULL;
+
+    /* Inverse of use_tree for re-open part of test */
+    bool use_tree_inverse = !use_tree;
+
+    if (use_tree) {
+        test_str = "spatial tree option enabled";
+    } else {
+        test_str = "spatial tree option disabled";
+    }
+
+    TESTING(test_str);
+
+    /* Create file */
+    if ((file_id = H5Fcreate(RTREE_DAPL_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create DAPL */
+    if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Set the spatial tree property */
+    if (H5Pset_dset_use_spatial_tree(dapl_id, use_tree) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create virtual dataset with some mappings */
+    if ((vdset_id = create_virtual_dataset(file_id, dapl_id)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Read the entire virtual dataset to force tree initialization */
+    if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify read data matches expected pattern from create_virtual_dataset */
+    for (int i = 0; i < RTREE_DAPL_DATASET_DIM1; i++) {
+        for (int j = 0; j < RTREE_DAPL_DATASET_DIM2; j++) {
+            int expected = i * RTREE_DAPL_DATASET_DIM2 + j;
+            if (rbuf[i][j] != expected) {
+                printf("Data mismatch at [%d][%d]: expected %d, got %d\n", i, j, expected, rbuf[i][j]);
+                FAIL_STACK_ERROR;
+            }
+        }
+    }
+
+    /* Get the dataset object - this is using internal API for testing */
+    if (NULL == (dset = (H5D_t *)H5VL_object(vdset_id)))
+        FAIL_STACK_ERROR;
+
+    if (dset->shared->layout.type != H5D_VIRTUAL)
+        FAIL_STACK_ERROR;
+
+    /* Get the virtual storage structure */
+    storage = &(dset->shared->layout.storage.u.virt);
+
+    /* Verify tree existence matches expectation */
+    if (use_tree) {
+        if (storage->tree == NULL) {
+            puts("Expected spatial tree to exist but it was NULL");
+            FAIL_STACK_ERROR;
+        }
+        if (storage->is_in_tree == NULL) {
+            puts("Expected is_in_tree array to exist but it was NULL");
+            FAIL_STACK_ERROR;
+        }
+    } else {
+        if (storage->tree != NULL) {
+            puts("Expected spatial tree to be NULL but it exists");
+            FAIL_STACK_ERROR;
+        }
+        if (storage->is_in_tree != NULL) {
+            puts("Expected is_in_tree array to be NULL but it exists");
+            FAIL_STACK_ERROR;
+        }
+    }
+
+    /* Close the dataset and re-open it with the opposite value set in DAPL */
+    if (H5Dclose(vdset_id) < 0)
+        FAIL_STACK_ERROR;
+    vdset_id = H5I_INVALID_HID;
+
+    if (H5Pset_dset_use_spatial_tree(dapl_id, use_tree_inverse) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((vdset_id = H5Dopen2(file_id, RTREE_DAPL_VDS_NAME, dapl_id)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Read the entire virtual dataset to force tree initialization */
+    if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify read data matches expected pattern from create_virtual_dataset */
+    for (int i = 0; i < RTREE_DAPL_DATASET_DIM1; i++) {
+        for (int j = 0; j < RTREE_DAPL_DATASET_DIM2; j++) {
+            int expected = i * RTREE_DAPL_DATASET_DIM2 + j;
+            if (rbuf[i][j] != expected) {
+                printf("Data mismatch after re-open at [%d][%d]: expected %d, got %d\n", i, j, expected, rbuf[i][j]);
+                FAIL_STACK_ERROR;
+            }
+        }
+    }
+
+    /* Get the dataset object - this is using internal API for testing */
+    if (NULL == (dset = (H5D_t *)H5VL_object(vdset_id)))
+        FAIL_STACK_ERROR;
+
+    if (dset->shared->layout.type != H5D_VIRTUAL)
+        FAIL_STACK_ERROR;
+
+
+    storage = &(dset->shared->layout.storage.u.virt);
+
+    /* Verify tree existence matches expectation */
+    if (use_tree_inverse) {
+        if (storage->tree == NULL) {
+            puts("Expected spatial tree to exist but it was NULL");
+            FAIL_STACK_ERROR;
+        }
+        if (storage->is_in_tree == NULL) {
+            puts("Expected is_in_tree array to exist but it was NULL");
+            FAIL_STACK_ERROR;
+        }
+    } else {
+        if (storage->tree != NULL) {
+            puts("Expected spatial tree to be NULL but it exists");
+            FAIL_STACK_ERROR;
+        }
+        if (storage->is_in_tree != NULL) {
+            puts("Expected is_in_tree array to be NULL but it exists");
+            FAIL_STACK_ERROR;
+        }
+    }
+
+    /* Cleanup */
+    if (H5Dclose(vdset_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dapl_id) < 0)
+         FAIL_STACK_ERROR;
+    if (H5Fclose(file_id) < 0)
+            FAIL_STACK_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(vdset_id);
+        H5Pclose(dapl_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the R-tree functionality
@@ -438,6 +712,10 @@ main(void)
     nerrors += test_rtree_create() < 0 ? 1 : 0;
     nerrors += test_rtree_search() < 0 ? 1 : 0;
     nerrors += test_rtree_copy() < 0 ? 1 : 0;
+
+    /* Test spatial tree with DCPL property enabled */
+    nerrors += test_rtree_dapl(true) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(false) < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;

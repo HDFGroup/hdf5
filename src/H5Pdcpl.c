@@ -87,9 +87,9 @@
     }
 #define H5D_DEF_STORAGE_VIRTUAL_INIT                                                                         \
     {                                                                                                        \
-        {HADDR_UNDEF, 0}, 0, NULL, 0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                       \
-                                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                      \
-            H5D_VDS_ERROR, HSIZE_UNDEF, -1, -1, false, NULL, NULL                                            \
+        {HADDR_UNDEF, 0}, 0, NULL, 0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \
+                                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},             \
+            H5D_VDS_ERROR, HSIZE_UNDEF, -1, -1, false, NULL, NULL, NULL, NULL                                \
     }
 #define H5D_DEF_STORAGE_COMPACT                                                                              \
     {                                                                                                        \
@@ -2119,6 +2119,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
     /* Expand list if necessary */
     if (virtual_layout.storage.u.virt.list_nused == virtual_layout.storage.u.virt.list_nalloc) {
         H5O_storage_virtual_ent_t *x; /* Pointer to the new list */
+        bool *y; /* Pointer to the new is_in_tree list */
         size_t    new_alloc = MAX(H5D_VIRTUAL_DEF_LIST_SIZE, virtual_layout.storage.u.virt.list_nalloc * 2);
         ptrdiff_t buf_diff;
 
@@ -2130,6 +2131,11 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
         virtual_layout.storage.u.virt.list        = x;
         virtual_layout.storage.u.virt.list_nalloc = new_alloc;
 
+        /* Expand size of is_in_tree list */
+        if (NULL == (y = (bool *)H5MM_realloc(virtual_layout.storage.u.virt.is_in_tree, new_alloc * sizeof(bool))))
+            HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't reallocate virtual dataset mapping is_in_tree list");
+        virtual_layout.storage.u.virt.is_in_tree = y;
+        
         /* Adjust pointers in the hash tables in case realloc moved the buffers, and hence all the elements
          * and hash handles in the hash tables */
         HASH_ADJUST_PTRS(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table, buf_diff);
@@ -2213,9 +2219,8 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
     if (H5D_virtual_update_min_dims(&virtual_layout, virtual_layout.storage.u.virt.list_nused) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to update virtual dataset minimum dimensions");
 
-    /* Finish adding entry */
+    /* Finish adding entry to list */
     virtual_layout.storage.u.virt.list_nused++;
-
 done:
     /* Set VDS layout information in property list */
     /* (Even on failure, so there's not a mangled layout struct in the list) */
@@ -2257,7 +2262,6 @@ done:
             virtual_layout.storage.u.virt.list =
                 (H5O_storage_virtual_ent_t *)H5MM_xfree(virtual_layout.storage.u.virt.list);
     } /* end if */
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_virtual() */
 
