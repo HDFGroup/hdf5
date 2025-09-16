@@ -22,6 +22,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+
+      - name: Install Wine64 and dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo mkdir -pm755 /etc/apt/keyrings
+          sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+          sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/$(lsb_release -cs)/winehq-$(lsb_release -cs).sources
+          sudo apt update
+          sudo apt install --install-recommends winehq-stable
+          # Install win64 components (required for 64-bit applications)
+          # These can sometimes be auto-installed but it's safer to ensure they are present
+          WINEARCH=win64 winecfg # This will setup the win64 environment
+
+      - name: Install MinGW64 Cross-Compiler
+        run: |
+          sudo apt update
           sudo apt-get install -y mingw-w64
           sudo apt-get install gfortran-mingw-w64-x86-64-win32
 
