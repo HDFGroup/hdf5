@@ -44,7 +44,7 @@ extern "C" {
 
 /* Global var whose value comes from environment variable */
 /* (Defined in H5FDmpio.c) */
-H5_DLLVAR hbool_t H5FD_mpi_opt_types_g;
+H5_DLLVAR bool H5FD_mpi_opt_types_g;
 
 /** @private
  *

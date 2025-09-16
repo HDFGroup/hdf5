@@ -163,7 +163,7 @@
  *      number or an error will be raised. Currently, this field should be set
  *      to #H5FD_CURR_ROS3_FAPL_T_VERSION.
  *
- * \var hbool_t H5FD_ros3_fapl_t::authenticate
+ * \var bool H5FD_ros3_fapl_t::authenticate
  *      A Boolean which specifies if security credentials from this structure
  *      should be used for accessing a S3 bucket.
  *
@@ -215,7 +215,7 @@
  */
 typedef struct H5FD_ros3_fapl_t {
     int32_t version;
-    hbool_t authenticate;
+    bool    authenticate;
     char    aws_region[H5FD_ROS3_MAX_REGION_LEN + 1];
     char    secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN + 1];
     char    secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1];

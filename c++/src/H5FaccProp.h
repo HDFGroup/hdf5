@@ -49,10 +49,10 @@ class H5CPP_DLL FileAccPropList : public PropList {
 
     // Modifies this file access property list to use the H5FD_CORE
     // driver.
-    void setCore(size_t increment, hbool_t backing_store) const;
+    void setCore(size_t increment, bool backing_store) const;
 
     // Queries H5FD_CORE driver properties.
-    void getCore(size_t &increment, hbool_t &backing_store) const;
+    void getCore(size_t &increment, bool &backing_store) const;
 
     // Sets this file access properties list to the family driver.
     void setFamily(hsize_t memb_size, const FileAccPropList &memb_plist) const;
@@ -122,10 +122,10 @@ class H5CPP_DLL FileAccPropList : public PropList {
     unsigned getGcReferences() const;
 
     // Sets file locking parameters.
-    void setFileLocking(hbool_t use_file_locking, hbool_t ignore_when_disabled) const;
+    void setFileLocking(bool use_file_locking, bool ignore_when_disabled) const;
 
     // Gets file locking parameters.
-    void getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_disabled) const;
+    void getFileLocking(bool &use_file_locking, bool &ignore_when_disabled) const;
 
     // Sets bounds on versions of library format to be used when creating
     // or writing objects.

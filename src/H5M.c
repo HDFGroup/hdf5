@@ -1217,7 +1217,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists, hid_t dxpl_id)
+H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, bool *exists, hid_t dxpl_id)
 {
     H5VL_object_t       *vol_obj = NULL;
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */

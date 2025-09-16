@@ -1191,7 +1191,7 @@ done:
  *--------------------------------------------------------------------------*/
 herr_t
 H5Lexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name,
-                hbool_t *exists, hid_t lapl_id, hid_t es_id)
+                bool *exists, hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void          *token     = NULL;            /* Request token for async operation        */
