@@ -3327,7 +3327,7 @@ out:
 }
 
 htri_t
-H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
+H5LTpath_valid(hid_t loc_id, const char *path, bool check_object_valid)
 {
     char      *tmp_path = NULL; /* Temporary copy of the path */
     char      *curr_name;       /* Pointer to current component of path name */

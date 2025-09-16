@@ -2381,7 +2381,7 @@ done:
  *--------------------------------------------------------------------------*/
 herr_t
 H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
-                const char *attr_name, hbool_t *attr_exists, hid_t es_id)
+                const char *attr_name, bool *attr_exists, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     void          *token     = NULL;            /* Request token for async operation        */
@@ -2491,7 +2491,7 @@ done:
  *--------------------------------------------------------------------------*/
 herr_t
 H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
-                        const char *obj_name, const char *attr_name, hbool_t *attr_exists, hid_t lapl_id,
+                        const char *obj_name, const char *attr_name, bool *attr_exists, hid_t lapl_id,
                         hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
