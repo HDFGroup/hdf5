@@ -769,10 +769,8 @@ public class TestH5D {
 
         MemoryLayout iterLayout = MemoryLayout.structLayout(
             MemoryLayout.sequenceLayout(SPACE_RANK, ValueLayout.JAVA_LONG).withName("fill_coords"),
-            ValueLayout.JAVA_LONG.withName("fill_curr_coord"),
-            ValueLayout.JAVA_INT.withName("fill_value")
-        );
-        VarHandle coordsHandle     = iterLayout.arrayElementVarHandle(PathElement.groupElement("fill_coords"));
+            ValueLayout.JAVA_LONG.withName("fill_curr_coord"), ValueLayout.JAVA_INT.withName("fill_value"));
+        VarHandle coordsHandle = iterLayout.arrayElementVarHandle(PathElement.groupElement("fill_coords"));
         VarHandle curr_coordHandle = iterLayout.varHandle(PathElement.groupElement("fill_curr_coord"));
         VarHandle valueHandle      = iterLayout.varHandle(PathElement.groupElement("fill_value"));
         class H5D_iter_data implements H5D_iterate_t {
@@ -788,7 +786,7 @@ public class TestH5D {
                              MemorySegment operator_data)
             {
                 // Check value in current buffer location
-                int element           = elem.get(ValueLayout.JAVA_INT, 0);
+                int element = elem.get(ValueLayout.JAVA_INT, 0);
                 if (element != (int)valueHandle.get(operator_data, 0, 0))
                     return -1;
                 // Check number of dimensions
@@ -863,10 +861,8 @@ public class TestH5D {
 
         MemoryLayout iterLayout = MemoryLayout.structLayout(
             MemoryLayout.sequenceLayout(SPACE_RANK, ValueLayout.JAVA_LONG).withName("fill_coords"),
-            ValueLayout.JAVA_LONG.withName("fill_curr_coord"),
-            ValueLayout.JAVA_INT.withName("fill_value")
-        );
-        VarHandle coordsHandle     = iterLayout.arrayElementVarHandle(PathElement.groupElement("fill_coords"));
+            ValueLayout.JAVA_LONG.withName("fill_curr_coord"), ValueLayout.JAVA_INT.withName("fill_value"));
+        VarHandle coordsHandle = iterLayout.arrayElementVarHandle(PathElement.groupElement("fill_coords"));
         VarHandle curr_coordHandle = iterLayout.varHandle(PathElement.groupElement("fill_curr_coord"));
         VarHandle valueHandle      = iterLayout.varHandle(PathElement.groupElement("fill_value"));
 
@@ -883,7 +879,7 @@ public class TestH5D {
                              MemorySegment operator_data)
             {
                 // Check value in current buffer location
-                int element           = elem.get(ValueLayout.JAVA_INT, 0);
+                int element = elem.get(ValueLayout.JAVA_INT, 0);
                 if (element != (int)valueHandle.get(operator_data, 0, 0))
                     return -1;
                 // Check number of dimensions
@@ -893,7 +889,7 @@ public class TestH5D {
                 long[] fill_coords   = new long[ndim];
                 long fill_curr_coord = (long)curr_coordHandle.get(operator_data, 0, 0);
                 for (int i = 0; i < ndim; i++)
-                    fill_coords[i]       = (long)coordsHandle.get(operator_data, 0L, 2 * fill_curr_coord + i);
+                    fill_coords[i] = (long)coordsHandle.get(operator_data, 0L, 2 * fill_curr_coord + i);
 
                 fill_curr_coord++;
                 curr_coordHandle.set(operator_data, 0, fill_curr_coord);
