@@ -25,15 +25,15 @@ jobs:
 
       - name: Install Wine64 and dependencies
         run: |
-          sudo dpkg --add-architecture i386
-          sudo mkdir -pm755 /etc/apt/keyrings
-          sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-          sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/$(lsb_release -cs)/winehq-$(lsb_release -cs).sources
           sudo apt update
-          sudo apt install --install-recommends winehq-stable
-          # Install win64 components (required for 64-bit applications)
-          # These can sometimes be auto-installed but it's safer to ensure they are present
-          WINEARCH=win64 winecfg # This will setup the win64 environment
+          sudo apt install -y wine64 winbind
+          # Optional: Start a persistent wineserver
+          wineserver -k # Kill a potential old server
+          wineserver -p # Start a new server
+          wine64 wineboot # Run a process to start up all background wine processes
+
+      - name: Verify Wine64 installation
+        run: wine64 --version
 
       - name: Install MinGW64 Cross-Compiler
         run: |
