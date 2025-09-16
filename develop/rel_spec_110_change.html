@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -239,8 +239,8 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <li><a class="el" href="group___f_a_p_l.html#ga6e850a0319dc6839e2dd06a0522b3831" title="Gets splitter driver properties from the the file access property list.">H5Pget_fapl_splitter</a> - Retrieves information for a splitter file access property list </li>
 <li><a class="el" href="group___f_a_p_l.html#ga6e850a0319dc6839e2dd06a0522b3831" title="Gets splitter driver properties from the the file access property list.">H5Pget_fapl_splitter</a> - Retrieves information for a splitter file access property list </li>
 <li><a class="el" href="group___f_a_p_l.html#gacba378b6c9258d33da609ff7241d64c5" title="Sets the file access property list to use the splitter driver.">H5Pset_fapl_splitter</a> - Sets the file access property list to use the splitter driver </li>
-<li><a class="el" href="group___f_a_p_l.html#ga5de19a5a8ac23ca417aa2d49d708dc2d" title="Retrieves the file locking property values.">H5Pget_file_locking</a> - Gets the file locking property values </li>
-<li><a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> - Sets the file locking property values </li>
+<li><a class="el" href="group___f_a_p_l.html#ga6f68d03de151117cefa29b571865a394" title="Retrieves the file locking property values.">H5Pget_file_locking</a> - Gets the file locking property values </li>
+<li><a class="el" href="group___f_a_p_l.html#gaae4de80c533a38da9f269c02b8e71de2" title="Sets the file locking property values.">H5Pset_file_locking</a> - Sets the file locking property values </li>
 <li><a class="el" href="group___h5.html#ga2310d963a6f48ec12fda8c0c8bbefbbb" title="Gets the current size of the free lists used to manage memory.">H5get_free_list_sizes</a> - Gets the current size of the free lists used to manage memory </li>
 <li><a class="el" href="group___h5_s.html#gae7578a93bb7b22989bcb737f26b60ad1" title="Performs an operation on a hyperslab and an existing selection and returns the resulting selection.">H5Scombine_hyperslab</a> - Performs an operation on a hyperslab and an existing selection and returns the resulting selection </li>
 <li><a class="el" href="group___h5_s.html#ga356600d12d3cf0db53cc27b212d75b08" title="Combine two hyperslab selections with an operation, returning a dataspace with the resulting selectio...">H5Scombine_select</a> - Combines two hyperslab selections with an operation, returning a dataspace with the resulting selection </li>
@@ -253,8 +253,8 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 </ul>
 <h4>In the C++ API</h4>
 <p>The following C++ wrappers were added: </p><ul>
-<li><code>FileAccPropList::getFileLocking</code> - See <a class="el" href="group___f_a_p_l.html#ga5de19a5a8ac23ca417aa2d49d708dc2d" title="Retrieves the file locking property values.">H5Pget_file_locking</a> for details </li>
-<li><code>FileAccPropList::setFileLocking</code> - See <a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> for details</li>
+<li><code>FileAccPropList::getFileLocking</code> - See <a class="el" href="group___f_a_p_l.html#ga6f68d03de151117cefa29b571865a394" title="Retrieves the file locking property values.">H5Pget_file_locking</a> for details </li>
+<li><code>FileAccPropList::setFileLocking</code> - See <a class="el" href="group___f_a_p_l.html#gaae4de80c533a38da9f269c02b8e71de2" title="Sets the file locking property values.">H5Pset_file_locking</a> for details</li>
 </ul>
 <h2><a class="anchor" id="subsec_rel_spec_110_change_7versus6_compat"></a>
 Compatibility Notes and Reports</h2>
@@ -287,10 +287,10 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <li><a class="el" href="group___h5_d.html#gaccff213d3e0765b86f66d08dd9959807" title="Retrieves information about a chunk specified by its index.">H5Dget_chunk_info</a> - Retrieves information about a chunk specified by the chunk index </li>
 <li><a class="el" href="group___h5_d.html#ga408a49c6ec59c5b65ce4c791f8d26cb0" title="Retrieves information about a chunk specified by its coordinates.">H5Dget_chunk_info_by_coord</a> - Retrieves information about a chunk specified by its coordinates </li>
 <li><a class="el" href="group___h5_d.html#ga8e15897dcc5799d6c09806644b492d7a" title="Retrieves number of chunks that have nonempty intersection with a specified selection.">H5Dget_num_chunks</a> - Retrieves number of chunks that have nonempty intersection with a specified selection </li>
-<li><a class="el" href="group___h5_f.html#gacbf3ba8b36750c42b49740567a9732c4" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a> - Retrieves the setting for determining whether the specified file does or does not create minimized dataset object headers </li>
-<li><a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a> - Sets the flag to create minimized dataset object headers </li>
-<li><a class="el" href="group___d_c_p_l.html#ga2fd4f0446a38186db8256cef4c97a970" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint</a> - Retrieves the setting for determining whether the specified DCPL does or does not create minimized dataset object headers </li>
-<li><a class="el" href="group___d_c_p_l.html#gaf5ae8c0257c02e3fbe50bde70b1eb8be" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint</a> - Sets the flag to create minimized dataset object headers</li>
+<li><a class="el" href="group___h5_f.html#gae688a27695349925f08eaa3c44f99265" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a> - Retrieves the setting for determining whether the specified file does or does not create minimized dataset object headers </li>
+<li><a class="el" href="group___h5_f.html#gaddd372973b35cde53300817d3ffaee5a" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a> - Sets the flag to create minimized dataset object headers </li>
+<li><a class="el" href="group___d_c_p_l.html#gacc70605145caa8ec9ca197aedaa38238" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint</a> - Retrieves the setting for determining whether the specified DCPL does or does not create minimized dataset object headers </li>
+<li><a class="el" href="group___d_c_p_l.html#gac6f61bff4d01bc98f67162d95a1b501a" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint</a> - Sets the flag to create minimized dataset object headers</li>
 </ul>
 <p>The following changed in this release: </p><ul>
 <li><a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a> </li>
@@ -306,10 +306,10 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 </ul>
 <h4>In the Fortran API</h4>
 <p>The following Fortran wrappers were added or changed: </p><ul>
-<li><a class="el" href="group___f_h5_f.html#gaceb86e903eddc57846c8a249ab5b0a66" title="Gets the value of the &quot;minimize dataset headers&quot; value which creates smaller dataset object headers w...">h5f.h5fget_dset_no_attrs_hint_f</a> - Wrappers for the dataset object header minimization calls. See <a class="el" href="group___h5_f.html#gacbf3ba8b36750c42b49740567a9732c4" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a>. </li>
-<li><a class="el" href="group___f_h5_f.html#gafda7e4a737f10a9be280afcdbf468e61" title="Sets the value of the &quot;minimize dataset headers&quot; value which creates smaller dataset object headers w...">h5f.h5fset_dset_no_attrs_hint_f</a> - Wrappers for the dataset object header minimization calls. See <a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a>. </li>
-<li><a class="el" href="group___f_h5_p.html#ga7cc4d157c8502632af18454424aa58d6" title="Gets the value of the &quot;minimize dataset headers&quot; value which creates smaller dataset object headers w...">h5p.h5pget_dset_no_attrs_hint_f</a> - Wrappers for the dataset object header minimization calls. See <a class="el" href="group___d_c_p_l.html#ga2fd4f0446a38186db8256cef4c97a970" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint</a>. </li>
-<li><a class="el" href="group___f_h5_p.html#ga3b2e599c1c38c395d6d9b1cdddee4f6a" title="Sets the value of the &quot;minimize dataset headers&quot; value which creates smaller dataset object headers w...">h5p.h5pset_dset_no_attrs_hint_f</a> - Wrappers for the dataset object header minimization calls. See <a class="el" href="group___d_c_p_l.html#gaf5ae8c0257c02e3fbe50bde70b1eb8be" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint</a>. </li>
+<li><a class="el" href="group___f_h5_f.html#gaceb86e903eddc57846c8a249ab5b0a66" title="Gets the value of the &quot;minimize dataset headers&quot; value which creates smaller dataset object headers w...">h5f.h5fget_dset_no_attrs_hint_f</a> - Wrappers for the dataset object header minimization calls. See <a class="el" href="group___h5_f.html#gae688a27695349925f08eaa3c44f99265" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a>. </li>
+<li><a class="el" href="group___f_h5_f.html#gafda7e4a737f10a9be280afcdbf468e61" title="Sets the value of the &quot;minimize dataset headers&quot; value which creates smaller dataset object headers w...">h5f.h5fset_dset_no_attrs_hint_f</a> - Wrappers for the dataset object header minimization calls. See <a class="el" href="group___h5_f.html#gaddd372973b35cde53300817d3ffaee5a" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a>. </li>
+<li><a class="el" href="group___f_h5_p.html#ga7cc4d157c8502632af18454424aa58d6" title="Gets the value of the &quot;minimize dataset headers&quot; value which creates smaller dataset object headers w...">h5p.h5pget_dset_no_attrs_hint_f</a> - Wrappers for the dataset object header minimization calls. See <a class="el" href="group___d_c_p_l.html#gacc70605145caa8ec9ca197aedaa38238" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint</a>. </li>
+<li><a class="el" href="group___f_h5_p.html#ga3b2e599c1c38c395d6d9b1cdddee4f6a" title="Sets the value of the &quot;minimize dataset headers&quot; value which creates smaller dataset object headers w...">h5p.h5pset_dset_no_attrs_hint_f</a> - Wrappers for the dataset object header minimization calls. See <a class="el" href="group___d_c_p_l.html#gac6f61bff4d01bc98f67162d95a1b501a" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint</a>. </li>
 <li><a class="el" href="group___f_h5_o.html#ga1aa4f84b78f029f048593b1ec0757a63" title="Recursively visits all objects starting from a specified object.">h5o.h5ovisit_f</a> - Added new Fortran 'fields' optional parameter. See <a class="el" href="group___h5_o.html#gaa4ab542f581f4fc9a4eaa95debb29c9e" title="Recursively visits all objects accessible from a specified object.">H5Ovisit2</a>. </li>
 <li><a class="el" href="group___f_h5_o.html#ga40081a5f47dc7900a795c0df62791ff7" title="Retrieves the metadata for an object, identifying the object by location and relative name.">h5o.h5oget_info_by_name_f</a> - Added new Fortran 'fields' optional parameter. See <a class="el" href="group___h5_o.html#ga0090da86c086c1c63a5acfaed39a035e" title="Retrieves the metadata for an object, identifying the object by location and relative name.">H5Oget_info_by_name2</a>. </li>
 <li><a class="el" href="group___f_h5_o.html#gabdbe70d333edbc46cffd791495e3edea" title="Retrieves the metadata for an object specified by an identifier.">h5o.h5oget_info_f</a> - Added new Fortran 'fields' optional parameter. See <a class="el" href="group___h5_o.html#ga06f896e14fe4fa940fbc2bc235e0cf74" title="Retrieves the metadata for an object specified by an identifier.">H5Oget_info2</a>. </li>
@@ -325,10 +325,10 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <h4>In the Java wrapper</h4>
 <p>The following Java wrappers were added or changed: </p><ul>
 <li><a class="el" href="group___h5_f.html#ga4b833c33fe2e141a26b6f2ad559d3610" title="Enables the switch of version bounds setting for a file.">H5Fset_libver_bounds</a> </li>
-<li><a class="el" href="group___h5_f.html#gacbf3ba8b36750c42b49740567a9732c4" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a> </li>
-<li><a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a> </li>
-<li><a class="el" href="group___d_c_p_l.html#ga2fd4f0446a38186db8256cef4c97a970" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint</a> </li>
-<li><a class="el" href="group___d_c_p_l.html#gaf5ae8c0257c02e3fbe50bde70b1eb8be" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint</a></li>
+<li><a class="el" href="group___h5_f.html#gae688a27695349925f08eaa3c44f99265" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a> </li>
+<li><a class="el" href="group___h5_f.html#gaddd372973b35cde53300817d3ffaee5a" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a> </li>
+<li><a class="el" href="group___d_c_p_l.html#gacc70605145caa8ec9ca197aedaa38238" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint</a> </li>
+<li><a class="el" href="group___d_c_p_l.html#gac6f61bff4d01bc98f67162d95a1b501a" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint</a></li>
 </ul>
 <h2><a class="anchor" id="subsec_rel_spec_110_change_5versus4_compat"></a>
 Compatibility Notes and Reports</h2>
@@ -410,8 +410,8 @@ Release 1.10.2 versus 1.10.1</h2>
 <p>See the API Compatibility report for complete details.</p>
 <h4>In the Java API</h4>
 <p>The following Java wrappers were added: </p><ul>
-<li><a class="el" href="group___f_a_p_l.html#gaa44cc0e592608e12082dad9305b3c74d" title="Controls the library&#39;s behavior of evicting metadata associated with a closed object.">H5Pset_evict_on_close</a> - Controls the library's behavior of evicting metadata associated with a closed object </li>
-<li><a class="el" href="group___f_a_p_l.html#ga12789fcfeaea073c13202e6401f404a6" title="Retrieves the file access property list setting that determines whether an HDF5 object will be evicte...">H5Pget_evict_on_close</a> - Retrieves the file access property list setting that determines whether an HDF5 object will be evicted from the library's metadata cache when closed </li>
+<li><a class="el" href="group___f_a_p_l.html#gaca1f462af9b441a0fdc6d0da6d4e17de" title="Controls the library&#39;s behavior of evicting metadata associated with a closed object.">H5Pset_evict_on_close</a> - Controls the library's behavior of evicting metadata associated with a closed object </li>
+<li><a class="el" href="group___f_a_p_l.html#ga465a52e20e031a604b719bbfe9883b66" title="Retrieves the file access property list setting that determines whether an HDF5 object will be evicte...">H5Pget_evict_on_close</a> - Retrieves the file access property list setting that determines whether an HDF5 object will be evicted from the library's metadata cache when closed </li>
 <li><a class="el" href="group___d_c_p_l.html#ga8e60618d9030dc1b99ad9c8ff7867873" title="Sets the edge chunk option in a dataset creation property list.">H5Pset_chunk_opts</a> - Sets the edge chunk option in a dataset creation property list </li>
 <li><a class="el" href="group___d_c_p_l.html#ga6e8d8f6a14b79bd110e27666d95031cf" title="Retrieves the edge chunk option setting from a dataset creation property list.">H5Pget_chunk_opts</a> - Retrieves the edge chunk option setting from a dataset creation property list </li>
 <li><a class="el" href="group___d_a_p_l.html#gad487f84157fd0944cbe1cbd4dea4e1b8" title="Sets the external dataset storage file prefix in the dataset access property list.">H5Pset_efile_prefix</a> - Sets the external dataset storage file prefix in the dataset access property list </li>
@@ -457,9 +457,9 @@ New Features</h3>
 <li><b>Metadata Cache Evict on Close:</b><br  />
  <ul>
 <li>
-<a class="el" href="group___f_a_p_l.html#ga12789fcfeaea073c13202e6401f404a6" title="Retrieves the file access property list setting that determines whether an HDF5 object will be evicte...">H5Pget_evict_on_close</a> - Retrieves the property list setting that determines whether an HDF5 object will be evicted from the library's metadata cache when it is closed. </li>
+<a class="el" href="group___f_a_p_l.html#ga465a52e20e031a604b719bbfe9883b66" title="Retrieves the file access property list setting that determines whether an HDF5 object will be evicte...">H5Pget_evict_on_close</a> - Retrieves the property list setting that determines whether an HDF5 object will be evicted from the library's metadata cache when it is closed. </li>
 <li>
-<a class="el" href="group___f_a_p_l.html#gaa44cc0e592608e12082dad9305b3c74d" title="Controls the library&#39;s behavior of evicting metadata associated with a closed object.">H5Pset_evict_on_close</a> - Controls the library's behavior of evicting metadata associated with a closed object. </li>
+<a class="el" href="group___f_a_p_l.html#gaca1f462af9b441a0fdc6d0da6d4e17de" title="Controls the library&#39;s behavior of evicting metadata associated with a closed object.">H5Pset_evict_on_close</a> - Controls the library's behavior of evicting metadata associated with a closed object. </li>
 </ul>
 </li>
 <li><b>Paged Aggregation:</b><br  />
@@ -469,9 +469,9 @@ New Features</h3>
 <li>
 <a class="el" href="group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963" title="Sets the file space page size for a file creation property list.">H5Pset_file_space_page_size</a> - Sets the file space page size (used with paged aggregation) for a file creation property list. </li>
 <li>
-<a class="el" href="group___f_c_p_l.html#ga54cf6ca4f897ba9ee3695a15fe8e6029" title="Retrieves the file space handling strategy, persisting free-space condition and threshold value for a...">H5Pget_file_space_strategy</a> - Retrieves the file space handling strategy for a file creation property list. </li>
+<a class="el" href="group___f_c_p_l.html#gae43e976d78a41b3b181fa10f8c77f522" title="Retrieves the file space handling strategy, persisting free-space condition and threshold value for a...">H5Pget_file_space_strategy</a> - Retrieves the file space handling strategy for a file creation property list. </li>
 <li>
-<a class="el" href="group___f_c_p_l.html#ga167ff65f392ca3b7f1933b1cee1b9f70" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy</a> - Sets the file space allocation strategy for a file creation property list. </li>
+<a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy</a> - Sets the file space allocation strategy for a file creation property list. </li>
 </ul>
 </li>
 <li><b>Page Buffering:</b><br  />
@@ -546,7 +546,7 @@ Release 1.10.0 versus Release 1.8.16</h2>
 <li><a class="el" href="group___f_a_p_l.html#gab4a4a788af5b6e88381dda0df2efbf19" title="Sets a callback function to invoke when an object flush occurs in the file.">H5Pset_object_flush_cb</a> - Sets a callback function to invoke when an object flush occurs in the file. </li>
 <li><a class="el" href="group___h5_o.html#ga0908be309da1fb4f771c1e264fac22ae" title="Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage.">H5Odisable_mdc_flushes</a> - Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage. </li>
 <li><a class="el" href="group___h5_o.html#ga21014920bdabf6973e233796d7174156" title="Enables flushing of dirty metadata entries from a file&#39;s metadata cache.">H5Oenable_mdc_flushes</a> - Returns the cache entries associated with an HDF5 object to the default metadata flush and eviction algorithm. </li>
-<li><a class="el" href="group___h5_o.html#gab2fa388aadd1ff154ee150cbb4884c1c" title="Retrieves comment for specified object.">H5Oare_mdc_flushes_disabled</a> - Determines if an HDF5 object (dataset, group, committed datatype) has had flushes of metadata entries disabled. </li>
+<li><a class="el" href="group___h5_o.html#gac3b3b768a1c50be46e63cf5a631b30e3" title="Retrieves comment for specified object.">H5Oare_mdc_flushes_disabled</a> - Determines if an HDF5 object (dataset, group, committed datatype) has had flushes of metadata entries disabled. </li>
 <li>H5Fdisable_mdc_flushes - Globally prevents dirty metadata entries from being flushed from the metadata cache to storage. </li>
 <li>H5Fenable_mdc_flushes - Returns a file's metadata cache to the standard eviction and flushing algorithm. </li>
 <li>H5Fare_mdc_flushes_disabled - Determines if flushes have been globally disabled for a file's metadata cache. </li>
@@ -559,10 +559,10 @@ Release 1.10.0 versus Release 1.8.16</h2>
 </ul>
 <h4>Collective Metadata I/O:</h4>
 <ul>
-<li><a class="el" href="group___f_a_p_l.html#ga6380f9929cf42c8203813f7e72dde35c" title="Sets metadata write mode to be collective or independent (default)">H5Pset_coll_metadata_write</a> and <a class="el" href="group___f_h5_p.html#ga6ff24389ab859314827e2dbdfae2fff5" title="Sets metadata writes to collective or independent. Default setting is independent (false).">h5p.h5pset_coll_metadata_write_f</a> - Establishes I/O mode property setting, collective or independent, for metadata writes. </li>
-<li><a class="el" href="group___f_a_p_l.html#gac83ab4e788a5b6e0d578f40ca67d8d00" title="Retrieves metadata write mode setting.">H5Pget_coll_metadata_write</a> and <a class="el" href="group___f_h5_p.html#ga2b0822a557a3c71bd363b877030c1933" title="Retrieves metadata write mode from the file access property list.">h5p.h5pget_coll_metadata_write_f</a> - Retrieves I/O mode property setting for metadata writes. </li>
-<li><a class="el" href="group___g_a_p_l.html#ga5bc0b1fc7e1e3961bf0b441e722949eb" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops</a> and <a class="el" href="group___f_h5_p.html#ga2f474900ac573840b49dc1e7c535ad57" title="Sets requirement whether HDF5 metadata read operations using the access property list are required to...">h5p.h5pset_all_coll_metadata_ops_f</a> - Establishes I/O mode, collective or independent, for metadata read operations. </li>
-<li><a class="el" href="group___g_a_p_l.html#ga8792cbe7eeace1382f588ed12a92092a" title="Retrieves metadata read mode setting.">H5Pget_all_coll_metadata_ops</a> and <a class="el" href="group___f_h5_p.html#ga2c510b552cd963653ddd278e2099324e" title="Retrieves metadata read mode from the access property list.">h5p.h5pget_all_coll_metadata_ops_f</a> - Retrieves I/O mode for metadata read operations.</li>
+<li><a class="el" href="group___f_a_p_l.html#ga0163bef7ee102029286830c2c30162ca" title="Sets metadata write mode to be collective or independent (default)">H5Pset_coll_metadata_write</a> and <a class="el" href="group___f_h5_p.html#ga6ff24389ab859314827e2dbdfae2fff5" title="Sets metadata writes to collective or independent. Default setting is independent (false).">h5p.h5pset_coll_metadata_write_f</a> - Establishes I/O mode property setting, collective or independent, for metadata writes. </li>
+<li><a class="el" href="group___f_a_p_l.html#ga565428cd6c090a8c7836b7adf7720403" title="Retrieves metadata write mode setting.">H5Pget_coll_metadata_write</a> and <a class="el" href="group___f_h5_p.html#ga2b0822a557a3c71bd363b877030c1933" title="Retrieves metadata write mode from the file access property list.">h5p.h5pget_coll_metadata_write_f</a> - Retrieves I/O mode property setting for metadata writes. </li>
+<li><a class="el" href="group___g_a_p_l.html#gac45976cb82e4d3f085f191e5872d0316" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops</a> and <a class="el" href="group___f_h5_p.html#ga2f474900ac573840b49dc1e7c535ad57" title="Sets requirement whether HDF5 metadata read operations using the access property list are required to...">h5p.h5pset_all_coll_metadata_ops_f</a> - Establishes I/O mode, collective or independent, for metadata read operations. </li>
+<li><a class="el" href="group___g_a_p_l.html#gaa278583dd1a989fa35a915def6518126" title="Retrieves metadata read mode setting.">H5Pget_all_coll_metadata_ops</a> and <a class="el" href="group___f_h5_p.html#ga2c510b552cd963653ddd278e2099324e" title="Retrieves metadata read mode from the access property list.">h5p.h5pget_all_coll_metadata_ops_f</a> - Retrieves I/O mode for metadata read operations.</li>
 </ul>
 <h4>Fine-tuning the Metadata Cache:</h4>
 <ul>
@@ -581,8 +581,8 @@ Release 1.10.0 versus Release 1.8.16</h2>
 </ul>
 <h4>Logging APIs:</h4>
 <ul>
-<li><a class="el" href="group___f_a_p_l.html#ga4d7206c5679d7243410058eceae59b2c" title="Sets metadata cache logging options.">H5Pset_mdc_log_options</a> - Sets metadata cache logging options. </li>
-<li><a class="el" href="group___f_a_p_l.html#gaa3a1ca6e294cc5074933239cc3d0e4a3" title="Gets metadata cache logging options.">H5Pget_mdc_log_options</a> - Gets metadata cache logging options. </li>
+<li><a class="el" href="group___f_a_p_l.html#ga33ef5eda9cd47bfe827ea16d835a88ef" title="Sets metadata cache logging options.">H5Pset_mdc_log_options</a> - Sets metadata cache logging options. </li>
+<li><a class="el" href="group___f_a_p_l.html#ga5da8039847bcbf091e92138b84c97374" title="Gets metadata cache logging options.">H5Pget_mdc_log_options</a> - Gets metadata cache logging options. </li>
 <li><a class="el" href="group___m_d_c.html#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging</a> - Starts logging metadata cache events if logging was previously enabled. </li>
 <li><a class="el" href="group___m_d_c.html#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging</a> - Stops logging metadata cache events if logging was previously enabled and is currently ongoing. </li>
 <li>H5Pget_mdc_logging_status - Gets the current metadata cache logging status.</li>
@@ -643,7 +643,7 @@ Release 1.10.0 versus Release 1.8.16</h2>
 <p>The following new functions appear in HDF5 Release 1.10.0 but are not yet documented: </p><ul>
 <li>H5Dformat_convert </li>
 <li>H5Dget_chunk_index_type </li>
-<li><a class="el" href="_h5_f_ddevelop_8h.html#a8d1d98a681375a4203bfd74b70b3aadd">H5FDlock</a> </li>
+<li><a class="el" href="_h5_f_ddevelop_8h.html#aa39b2020fc58111aa8e8e41b33af3406">H5FDlock</a> </li>
 <li><a class="el" href="_h5_f_ddevelop_8h.html#aebafd003d12e6ec7b56548ce5c169b9d">H5FDunlock</a> </li>
 <li>H5Fformat_convert </li>
 <li><a class="el" href="group___h5_l_t.html#ga258e1d3f27bfc98ea9e1868f571fb76b" title="Retrieves the current dimension sizes of a dataset.">H5LDget_dset_dims</a> </li>

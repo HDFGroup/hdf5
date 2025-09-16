@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -382,9 +382,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga3e30142e15ccf9a08bfc91ca9925c14d" id="r_ga3e30142e15ccf9a08bfc91ca9925c14d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3e30142e15ccf9a08bfc91ca9925c14d">H5Gget_num_objs</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *num_objs)</td></tr>
 <tr class="memdesc:ga3e30142e15ccf9a08bfc91ca9925c14d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns number of objects in the group specified by its identifier.  <br /></td></tr>
 <tr class="separator:ga3e30142e15ccf9a08bfc91ca9925c14d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad75244979da933ba0b3ad25258850a6b" id="r_gad75244979da933ba0b3ad25258850a6b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad75244979da933ba0b3ad25258850a6b">H5Gget_objinfo</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, const char *name, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> follow_link, <a class="el" href="struct_h5_g__stat__t.html">H5G_stat_t</a> *statbuf)</td></tr>
-<tr class="memdesc:gad75244979da933ba0b3ad25258850a6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about an object.  <br /></td></tr>
-<tr class="separator:gad75244979da933ba0b3ad25258850a6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga471d40a03e09a9d7fe0c7c7c31a453fa" id="r_ga471d40a03e09a9d7fe0c7c7c31a453fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga471d40a03e09a9d7fe0c7c7c31a453fa">H5Gget_objinfo</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, const char *name, bool follow_link, <a class="el" href="struct_h5_g__stat__t.html">H5G_stat_t</a> *statbuf)</td></tr>
+<tr class="memdesc:ga471d40a03e09a9d7fe0c7c7c31a453fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about an object.  <br /></td></tr>
+<tr class="separator:ga471d40a03e09a9d7fe0c7c7c31a453fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga80180e7b819d3c9b3b3f1895e9baaf5b" id="r_ga80180e7b819d3c9b3b3f1895e9baaf5b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga80180e7b819d3c9b3b3f1895e9baaf5b">H5Gget_objname_by_idx</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> idx, char *name, size_t size)</td></tr>
 <tr class="memdesc:ga80180e7b819d3c9b3b3f1895e9baaf5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the name of an object specified by an index.  <br /></td></tr>
 <tr class="separator:ga80180e7b819d3c9b3b3f1895e9baaf5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -840,7 +840,7 @@ Functions</h2></td></tr>
 <div class="line">    <a class="code hl_enumeration" href="_h5_gpublic_8h.html#aaadde411516426f400ed4db91bd8e08c">H5G_storage_type_t</a> <a class="code hl_variable" href="struct_h5_g__info__t.html#a36284d2618eefc8e8408ac6a58d2728a">storage_type</a>; </div>
 <div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>            <a class="code hl_variable" href="struct_h5_g__info__t.html#ae1a56f51943bb51479442045a6561454">nlinks</a>;       </div>
 <div class="line">    int64_t            <a class="code hl_variable" href="struct_h5_g__info__t.html#a24109e19a1737b1f795f651f4e6d9f5d">max_corder</a>;   </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a>            <a class="code hl_variable" href="struct_h5_g__info__t.html#a7b3769ffcce93e1ed205cf6d8d84423a">mounted</a>;      </div>
+<div class="line">    <span class="keywordtype">bool</span>               <a class="code hl_variable" href="struct_h5_g__info__t.html#a14eb553c9586c0259b643ca35708f0d5">mounted</a>;      </div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_g__info__t.html">H5G_info_t</a>;</div>
 </div><!-- fragment --><p> Possible values of <code class="param">storage_type</code> are: </p><table class="doxtable">
 <tr>
@@ -987,7 +987,7 @@ Functions</h2></td></tr>
 <div class="line">    <a class="code hl_enumeration" href="_h5_gpublic_8h.html#aaadde411516426f400ed4db91bd8e08c">H5G_storage_type_t</a> <a class="code hl_variable" href="struct_h5_g__info__t.html#a36284d2618eefc8e8408ac6a58d2728a">storage_type</a>; </div>
 <div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>            <a class="code hl_variable" href="struct_h5_g__info__t.html#ae1a56f51943bb51479442045a6561454">nlinks</a>;       </div>
 <div class="line">    int64_t            <a class="code hl_variable" href="struct_h5_g__info__t.html#a24109e19a1737b1f795f651f4e6d9f5d">max_corder</a>;   </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a>            <a class="code hl_variable" href="struct_h5_g__info__t.html#a7b3769ffcce93e1ed205cf6d8d84423a">mounted</a>;      </div>
+<div class="line">    <span class="keywordtype">bool</span>               <a class="code hl_variable" href="struct_h5_g__info__t.html#a14eb553c9586c0259b643ca35708f0d5">mounted</a>;      </div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_g__info__t.html">H5G_info_t</a>;</div>
 </div><!-- fragment --><p> Possible values of <code class="param">storage_type</code> are: </p><table class="doxtable">
 <tr>
@@ -1048,7 +1048,7 @@ Functions</h2></td></tr>
 <p>The parameter <code class="param">name</code> must be a symbolic link pointing to the desired object and must be defined relative to <code class="param">loc_id</code>.</p>
 <p>If size is smaller than the size of the returned object name, then the name stored in the buffer value will not be <code>NULL</code> terminated.</p>
 <p>This function fails if <code class="param">name</code> is not a symbolic link. The presence of a symbolic link can be tested by passing zero for <code class="param">size</code> and <code class="param">NULL</code> for value.</p>
-<p>This function should be used only after <a class="el" href="group___h5_l.html#gacc2ad7f2b402c4bf9bb122d7f43b98dc" title="Returns information about a link.">H5Lget_info1()</a> (or the deprecated function <a class="el" href="#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo()</a>) has been called to verify that name is a symbolic link.</p>
+<p>This function should be used only after <a class="el" href="group___h5_l.html#gacc2ad7f2b402c4bf9bb122d7f43b98dc" title="Returns information about a link.">H5Lget_info1()</a> (or the deprecated function <a class="el" href="#ga471d40a03e09a9d7fe0c7c7c31a453fa" title="Returns information about an object.">H5Gget_objinfo()</a>) has been called to verify that name is a symbolic link.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
@@ -1090,8 +1090,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gad75244979da933ba0b3ad25258850a6b" name="gad75244979da933ba0b3ad25258850a6b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gad75244979da933ba0b3ad25258850a6b">&#9670;&#160;</a></span>H5Gget_objinfo()</h2>
+<a id="ga471d40a03e09a9d7fe0c7c7c31a453fa" name="ga471d40a03e09a9d7fe0c7c7c31a453fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga471d40a03e09a9d7fe0c7c7c31a453fa">&#9670;&#160;</a></span>H5Gget_objinfo()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1109,7 +1109,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></td>          <td class="paramname"><span class="paramname"><em>follow_link</em></span>, </td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>follow_link</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1132,12 +1132,12 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000048">Deprecated</a></b></dt><dd>This function is deprecated in favor of the functions <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info()</a> and <a class="el" href="group___h5_l.html#gacc2ad7f2b402c4bf9bb122d7f43b98dc" title="Returns information about a link.">H5Lget_info1()</a>.</dd></dl>
-<p><a class="el" href="#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo()</a> returns information about the specified object through the <code class="param">statbuf</code> argument.</p>
-<p>A file or group identifier, <code class="param">loc_id</code>, and an object name, <code class="param">name</code>, relative to <code class="param">loc_id</code>, are commonly used to specify the object. However, if the object identifier is already known to the application, an alternative approach is to use that identifier, <code>obj_id</code>, in place of <code class="param">loc_id</code>, and a dot (<code></code>.) in place of <code class="param">name</code>. Thus, the alternative versions of the first portion of an <a class="el" href="#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo()</a> call would be as follows: </p><div class="fragment"><div class="line"><a class="code hl_function" href="#gad75244979da933ba0b3ad25258850a6b">H5Gget_objinfo</a> (loc_id name  ...)</div>
-<div class="line"><a class="code hl_function" href="#gad75244979da933ba0b3ad25258850a6b">H5Gget_objinfo</a> (obj_id .     ...)</div>
-<div class="ttc" id="agroup___h5_g_html_gad75244979da933ba0b3ad25258850a6b"><div class="ttname"><a href="#gad75244979da933ba0b3ad25258850a6b">H5Gget_objinfo</a></div><div class="ttdeci">herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *statbuf)</div><div class="ttdoc">Returns information about an object.</div></div>
+<p><a class="el" href="#ga471d40a03e09a9d7fe0c7c7c31a453fa" title="Returns information about an object.">H5Gget_objinfo()</a> returns information about the specified object through the <code class="param">statbuf</code> argument.</p>
+<p>A file or group identifier, <code class="param">loc_id</code>, and an object name, <code class="param">name</code>, relative to <code class="param">loc_id</code>, are commonly used to specify the object. However, if the object identifier is already known to the application, an alternative approach is to use that identifier, <code>obj_id</code>, in place of <code class="param">loc_id</code>, and a dot (<code></code>.) in place of <code class="param">name</code>. Thus, the alternative versions of the first portion of an <a class="el" href="#ga471d40a03e09a9d7fe0c7c7c31a453fa" title="Returns information about an object.">H5Gget_objinfo()</a> call would be as follows: </p><div class="fragment"><div class="line"><a class="code hl_function" href="#ga471d40a03e09a9d7fe0c7c7c31a453fa">H5Gget_objinfo</a> (loc_id name  ...)</div>
+<div class="line"><a class="code hl_function" href="#ga471d40a03e09a9d7fe0c7c7c31a453fa">H5Gget_objinfo</a> (obj_id .     ...)</div>
+<div class="ttc" id="agroup___h5_g_html_ga471d40a03e09a9d7fe0c7c7c31a453fa"><div class="ttname"><a href="#ga471d40a03e09a9d7fe0c7c7c31a453fa">H5Gget_objinfo</a></div><div class="ttdeci">herr_t H5Gget_objinfo(hid_t loc_id, const char *name, bool follow_link, H5G_stat_t *statbuf)</div><div class="ttdoc">Returns information about an object.</div></div>
 </div><!-- fragment --><p>If the object is a symbolic link and follow_link is zero (0), then the information returned describes the link itself; otherwise the link is followed and the information returned describes the object to which the link points. If <code class="param">follow_link</code> is non-zero but the final symbolic link is dangling (does not point to anything), then an error is returned. The <code class="param">statbuf</code> fields are undefined for an error. The existence of an object can be tested by calling this function with a <code>NULL</code> <code class="param">statbuf</code>.</p>
-<p><a class="el" href="#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo()</a> fills in the following data structure (defined in <a class="el" href="_h5_gpublic_8h.html">H5Gpublic.h</a>): </p><div class="fragment"><div class="line"></div>
+<p><a class="el" href="#ga471d40a03e09a9d7fe0c7c7c31a453fa" title="Returns information about an object.">H5Gget_objinfo()</a> fills in the following data structure (defined in <a class="el" href="_h5_gpublic_8h.html">H5Gpublic.h</a>): </p><div class="fragment"><div class="line"></div>
 <div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct_h5_g__stat__t.html">H5G_stat_t</a> {</div>
 <div class="line">    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code hl_variable" href="struct_h5_g__stat__t.html#a3e6af6ccd452ff6ff53a6aadc5a33860">fileno</a>[2]; </div>
 <div class="line">    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code hl_variable" href="struct_h5_g__stat__t.html#a871980f2e438ab5b2d466163496b8d84">objno</a>[2];  </div>

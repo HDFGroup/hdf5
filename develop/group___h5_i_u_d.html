@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -173,7 +173,7 @@ $(function(){initNavTree('group___h5_i_u_d.html',''); initResizable(true); });
 <div class="line"><span class="lineno">  140</span>        printf(<span class="stringliteral">&quot;New identifier type ID: %d\n&quot;</span>, type);</div>
 <div class="line"><span class="lineno">  141</span> </div>
 <div class="line"><span class="lineno">  142</span>        <span class="comment">// create a new object</span></div>
-<div class="line"><span class="lineno">  143</span>        <span class="keywordflow">if</span> ((obj = <a class="code hl_function" href="group___h5.html#ga7459a8634b40225f3f6d81eb08acf399">H5allocate_memory</a>(10 * <span class="keyword">sizeof</span>(<span class="keywordtype">int</span>), 0)) == NULL) {</div>
+<div class="line"><span class="lineno">  143</span>        <span class="keywordflow">if</span> ((obj = <a class="code hl_function" href="group___h5.html#ga22628978a6ac53bee610ea5d22e48683">H5allocate_memory</a>(10 * <span class="keyword">sizeof</span>(<span class="keywordtype">int</span>), 0)) == NULL) {</div>
 <div class="line"><span class="lineno">  144</span>            ret_val = EXIT_FAILURE;</div>
 <div class="line"><span class="lineno">  145</span>            <span class="keywordflow">goto</span> fail_obj;</div>
 <div class="line"><span class="lineno">  146</span>        }</div>
@@ -186,7 +186,7 @@ $(function(){initNavTree('group___h5_i_u_d.html',''); initResizable(true); });
 <div class="line"><span class="lineno">  153</span>        printf(<span class="stringliteral">&quot;New object identifier: %ld\n&quot;</span>, obj_id);</div>
 <div class="line"><span class="lineno">  154</span> </div>
 <div class="line"><span class="lineno">  155</span>fail_id:</div>
-<div class="line"><span class="lineno">  156</span>        <a class="code hl_function" href="#ga97966e203f0967fc19b38b93c2972c08">H5Iclear_type</a>(type, 1);</div>
+<div class="line"><span class="lineno">  156</span>        <a class="code hl_function" href="#gab019005507b8a02b16538b864dd094c7">H5Iclear_type</a>(type, 1);</div>
 <div class="line"><span class="lineno">  157</span>fail_obj:</div>
 <div class="line"><span class="lineno">  158</span>        <a class="code hl_function" href="#gaabc75ed99fd6b206154b899fac64977e">H5Idestroy_type</a>(type);</div>
 <div class="line"><span class="lineno">  159</span>fail_register:;</div>
@@ -242,7 +242,7 @@ $(function(){initNavTree('group___h5_i_u_d.html',''); initResizable(true); });
 <div class="line"><span class="lineno">  211</span>        assert(<a class="code hl_function" href="group___h5_i.html#ga3fd0c157704573965cafd6e1aa7f368f">H5Iinc_ref</a>(obj_id) == 2);</div>
 <div class="line"><span class="lineno">  212</span> </div>
 <div class="line"><span class="lineno">  213</span>        <span class="comment">// force the deletion of all IDs regardless of reference count</span></div>
-<div class="line"><span class="lineno">  214</span>        <a class="code hl_function" href="#ga97966e203f0967fc19b38b93c2972c08">H5Iclear_type</a>(type, 1);</div>
+<div class="line"><span class="lineno">  214</span>        <a class="code hl_function" href="#gab019005507b8a02b16538b864dd094c7">H5Iclear_type</a>(type, 1);</div>
 <div class="line"><span class="lineno">  215</span>fail_id:</div>
 <div class="line"><span class="lineno">  216</span>        <a class="code hl_function" href="#gaabc75ed99fd6b206154b899fac64977e">H5Idestroy_type</a>(type);</div>
 <div class="line"><span class="lineno">  217</span>fail_register:;</div>
@@ -269,9 +269,9 @@ $(function(){initNavTree('group___h5_i_u_d.html',''); initResizable(true); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga97966e203f0967fc19b38b93c2972c08" id="r_ga97966e203f0967fc19b38b93c2972c08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga97966e203f0967fc19b38b93c2972c08">H5Iclear_type</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> force)</td></tr>
-<tr class="memdesc:ga97966e203f0967fc19b38b93c2972c08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes all identifiers of the given type.  <br /></td></tr>
-<tr class="separator:ga97966e203f0967fc19b38b93c2972c08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab019005507b8a02b16538b864dd094c7" id="r_gab019005507b8a02b16538b864dd094c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab019005507b8a02b16538b864dd094c7">H5Iclear_type</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type, bool force)</td></tr>
+<tr class="memdesc:gab019005507b8a02b16538b864dd094c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes all identifiers of the given type.  <br /></td></tr>
+<tr class="separator:gab019005507b8a02b16538b864dd094c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3d29394ea751712e8ef5f9548f611e57" id="r_ga3d29394ea751712e8ef5f9548f611e57"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3d29394ea751712e8ef5f9548f611e57">H5Idec_type_ref</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
 <tr class="memdesc:ga3d29394ea751712e8ef5f9548f611e57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrements the reference count on an identifier type.  <br /></td></tr>
 <tr class="separator:ga3d29394ea751712e8ef5f9548f611e57"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -313,8 +313,8 @@ Functions</h2></td></tr>
 <tr class="separator:gac137a599a2055909918e55955a69dfad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ga97966e203f0967fc19b38b93c2972c08" name="ga97966e203f0967fc19b38b93c2972c08"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga97966e203f0967fc19b38b93c2972c08">&#9670;&#160;</a></span>H5Iclear_type()</h2>
+<a id="gab019005507b8a02b16538b864dd094c7" name="gab019005507b8a02b16538b864dd094c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab019005507b8a02b16538b864dd094c7">&#9670;&#160;</a></span>H5Iclear_type()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -327,7 +327,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></td>          <td class="paramname"><span class="paramname"><em>force</em></span>&#160;)</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>force</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -341,7 +341,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga97966e203f0967fc19b38b93c2972c08" title="Deletes all identifiers of the given type.">H5Iclear_type()</a> deletes all identifiers of the type identified by the argument <code class="param">type</code>.</p>
+<p><a class="el" href="#gab019005507b8a02b16538b864dd094c7" title="Deletes all identifiers of the given type.">H5Iclear_type()</a> deletes all identifiers of the type identified by the argument <code class="param">type</code>.</p>
 <p>The identifier type's free function is first called on all of these identifiers to free their memory, then they are removed from the type.</p>
 <p>If the <code class="param">force</code> flag is set to false, only those identifiers whose reference counts are equal to 1 will be deleted, and all other identifiers will be entirely unchanged. If the force flag is true, all identifiers of this type will be deleted.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
@@ -650,7 +650,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="#gab57559f14a16d4375815e45054abad16" title="Creates and returns a new ID type.">H5Iregister_type1()</a> allocates space for a new ID type and returns an identifier for it.</p>
 <p>The <code class="param">hash_size</code> parameter indicates the minimum size of the hash table used to store IDs in the new type. This parameter is unused in 1.8.13 and later, when the implementation of ID storage changed.</p>
 <p>The <code class="param">reserved</code> parameter indicates the number of IDs in this new type to be reserved. Reserved IDs are valid IDs which are not associated with any storage within the library.</p>
-<p>The <code class="param">free_func</code> parameter is a function pointer to a function which returns an <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> and accepts a <code>void*</code>. The purpose of this function is to deallocate memory for a single ID. It will be called by <a class="el" href="#ga97966e203f0967fc19b38b93c2972c08" title="Deletes all identifiers of the given type.">H5Iclear_type()</a> and <a class="el" href="#gaabc75ed99fd6b206154b899fac64977e" title="Removes an identifier type and all identifiers within that type.">H5Idestroy_type()</a> on each ID. This function is NOT called by <a class="el" href="#gaa297aca26ed0383a6e126b92454c619a" title="Removes an ID from its type.">H5Iremove_verify()</a>. The <code>void*</code> will be the same pointer which was passed in to the <a class="el" href="#gab90ab765fa23e8ffbafa228d3c8e82c5" title="Registers an object under a type and returns an ID for it.">H5Iregister()</a> function. The <code class="param">free_func</code> function should return 0 on success and -1 on failure.</p>
+<p>The <code class="param">free_func</code> parameter is a function pointer to a function which returns an <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> and accepts a <code>void*</code>. The purpose of this function is to deallocate memory for a single ID. It will be called by <a class="el" href="#gab019005507b8a02b16538b864dd094c7" title="Deletes all identifiers of the given type.">H5Iclear_type()</a> and <a class="el" href="#gaabc75ed99fd6b206154b899fac64977e" title="Removes an identifier type and all identifiers within that type.">H5Idestroy_type()</a> on each ID. This function is NOT called by <a class="el" href="#gaa297aca26ed0383a6e126b92454c619a" title="Removes an ID from its type.">H5Iremove_verify()</a>. The <code>void*</code> will be the same pointer which was passed in to the <a class="el" href="#gab90ab765fa23e8ffbafa228d3c8e82c5" title="Registers an object under a type and returns an ID for it.">H5Iregister()</a> function. The <code class="param">free_func</code> function should return 0 on success and -1 on failure.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000051">Deprecated</a></b></dt><dd>2.0.0 Deprecated in favor of the function <a class="el" href="#gad698dd84ea83ade847ffd6c49bc865e2" title="Creates and returns a new ID type.">H5Iregister_type2()</a></dd></dl>
 
@@ -686,7 +686,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns the type identifier on success, negative on failure.</dd></dl>
 <p><a class="el" href="#gad698dd84ea83ade847ffd6c49bc865e2" title="Creates and returns a new ID type.">H5Iregister_type2()</a> allocates space for a new ID type and returns an identifier for it.</p>
 <p>The <code class="param">reserved</code> parameter indicates the number of IDs in this new type to be reserved. Reserved IDs are valid IDs which are not associated with any storage within the library.</p>
-<p>The <code class="param">free_func</code> parameter is a function pointer to a function which returns an <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> and accepts a <code>void*</code>. The purpose of this function is to deallocate memory for a single ID. It will be called by <a class="el" href="#ga97966e203f0967fc19b38b93c2972c08" title="Deletes all identifiers of the given type.">H5Iclear_type()</a> and <a class="el" href="#gaabc75ed99fd6b206154b899fac64977e" title="Removes an identifier type and all identifiers within that type.">H5Idestroy_type()</a> on each ID. This function is NOT called by <a class="el" href="#gaa297aca26ed0383a6e126b92454c619a" title="Removes an ID from its type.">H5Iremove_verify()</a>. The <code>void*</code> will be the same pointer which was passed in to the <a class="el" href="#gab90ab765fa23e8ffbafa228d3c8e82c5" title="Registers an object under a type and returns an ID for it.">H5Iregister()</a> function. The <code class="param">free_func</code> function should return 0 on success and -1 on failure.</p>
+<p>The <code class="param">free_func</code> parameter is a function pointer to a function which returns an <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> and accepts a <code>void*</code>. The purpose of this function is to deallocate memory for a single ID. It will be called by <a class="el" href="#gab019005507b8a02b16538b864dd094c7" title="Deletes all identifiers of the given type.">H5Iclear_type()</a> and <a class="el" href="#gaabc75ed99fd6b206154b899fac64977e" title="Removes an identifier type and all identifiers within that type.">H5Idestroy_type()</a> on each ID. This function is NOT called by <a class="el" href="#gaa297aca26ed0383a6e126b92454c619a" title="Removes an ID from its type.">H5Iremove_verify()</a>. The <code>void*</code> will be the same pointer which was passed in to the <a class="el" href="#gab90ab765fa23e8ffbafa228d3c8e82c5" title="Registers an object under a type and returns an ID for it.">H5Iregister()</a> function. The <code class="param">free_func</code> function should return 0 on success and -1 on failure.</p>
 <dl class="section since"><dt>Since</dt><dd>2.0.0 </dd></dl>
 
 </div>

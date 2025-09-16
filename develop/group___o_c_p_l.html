@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -159,7 +159,7 @@ $(function(){initNavTree('group___o_c_p_l.html',''); initResizable(true); });
 <tr>
 <td><a class="el" href="#gacbad1ca36a61246b439a25f28e7575fb" title="Returns the number of filters in the pipeline.">H5Pget_nfilters</a> </td><td>Returns information about the specified filter.  </td></tr>
 <tr>
-<td><a class="el" href="#gafa87fab7ebb6c4a8da9a75a86cc62fa3" title="Sets the recording of times associated with an object.">H5Pset_obj_track_times</a>/<a class="el" href="#gad99400915d340da978dd6ac5676122c6" title="Determines whether times associated with an object are being recorded.">H5Pget_obj_track_times</a> </td><td>Sets/gets the recording of times associated with an object.  </td></tr>
+<td><a class="el" href="#gaa7b3060438fc9255ce00b8a0e0010802" title="Sets the recording of times associated with an object.">H5Pset_obj_track_times</a>/<a class="el" href="#ga36167da0de63a1940d6d7ffb77e2291d" title="Determines whether times associated with an object are being recorded.">H5Pget_obj_track_times</a> </td><td>Sets/gets the recording of times associated with an object.  </td></tr>
 <tr>
 <td><a class="el" href="#ga12a358b3725a889c1768bbd2b5f541d8" title="Modifies a filter in the filter pipeline.">H5Pmodify_filter</a> </td><td>Modifies a filter in the filter pipeline.  </td></tr>
 <tr>
@@ -194,9 +194,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gacbad1ca36a61246b439a25f28e7575fb" id="r_gacbad1ca36a61246b439a25f28e7575fb"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gacbad1ca36a61246b439a25f28e7575fb">H5Pget_nfilters</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id)</td></tr>
 <tr class="memdesc:gacbad1ca36a61246b439a25f28e7575fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of filters in the pipeline.  <br /></td></tr>
 <tr class="separator:gacbad1ca36a61246b439a25f28e7575fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad99400915d340da978dd6ac5676122c6" id="r_gad99400915d340da978dd6ac5676122c6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad99400915d340da978dd6ac5676122c6">H5Pget_obj_track_times</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *track_times)</td></tr>
-<tr class="memdesc:gad99400915d340da978dd6ac5676122c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether times associated with an object are being recorded.  <br /></td></tr>
-<tr class="separator:gad99400915d340da978dd6ac5676122c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga36167da0de63a1940d6d7ffb77e2291d" id="r_ga36167da0de63a1940d6d7ffb77e2291d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga36167da0de63a1940d6d7ffb77e2291d">H5Pget_obj_track_times</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool *track_times)</td></tr>
+<tr class="memdesc:ga36167da0de63a1940d6d7ffb77e2291d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether times associated with an object are being recorded.  <br /></td></tr>
+<tr class="separator:ga36167da0de63a1940d6d7ffb77e2291d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga12a358b3725a889c1768bbd2b5f541d8" id="r_ga12a358b3725a889c1768bbd2b5f541d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga12a358b3725a889c1768bbd2b5f541d8">H5Pmodify_filter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a> filter, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[])</td></tr>
 <tr class="memdesc:ga12a358b3725a889c1768bbd2b5f541d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies a filter in the filter pipeline.  <br /></td></tr>
 <tr class="separator:ga12a358b3725a889c1768bbd2b5f541d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -215,9 +215,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8bc81abfbd0393b0a46e121f817a3f81" id="r_ga8bc81abfbd0393b0a46e121f817a3f81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8bc81abfbd0393b0a46e121f817a3f81">H5Pset_fletcher32</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id)</td></tr>
 <tr class="memdesc:ga8bc81abfbd0393b0a46e121f817a3f81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up use of the Fletcher32 checksum filter.  <br /></td></tr>
 <tr class="separator:ga8bc81abfbd0393b0a46e121f817a3f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gafa87fab7ebb6c4a8da9a75a86cc62fa3" id="r_gafa87fab7ebb6c4a8da9a75a86cc62fa3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gafa87fab7ebb6c4a8da9a75a86cc62fa3">H5Pset_obj_track_times</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> track_times)</td></tr>
-<tr class="memdesc:gafa87fab7ebb6c4a8da9a75a86cc62fa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the recording of times associated with an object.  <br /></td></tr>
-<tr class="separator:gafa87fab7ebb6c4a8da9a75a86cc62fa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa7b3060438fc9255ce00b8a0e0010802" id="r_gaa7b3060438fc9255ce00b8a0e0010802"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa7b3060438fc9255ce00b8a0e0010802">H5Pset_obj_track_times</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool track_times)</td></tr>
+<tr class="memdesc:gaa7b3060438fc9255ce00b8a0e0010802"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the recording of times associated with an object.  <br /></td></tr>
+<tr class="separator:gaa7b3060438fc9255ce00b8a0e0010802"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga2a54d1ff8d7a0d0e8d652f373c18bc37" name="ga2a54d1ff8d7a0d0e8d652f373c18bc37"></a>
@@ -494,8 +494,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gad99400915d340da978dd6ac5676122c6" name="gad99400915d340da978dd6ac5676122c6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gad99400915d340da978dd6ac5676122c6">&#9670;&#160;</a></span>H5Pget_obj_track_times()</h2>
+<a id="ga36167da0de63a1940d6d7ffb77e2291d" name="ga36167da0de63a1940d6d7ffb77e2291d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga36167da0de63a1940d6d7ffb77e2291d">&#9670;&#160;</a></span>H5Pget_obj_track_times()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -508,7 +508,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *</td>          <td class="paramname"><span class="paramname"><em>track_times</em></span>&#160;)</td>
+          <td class="paramtype">bool *</td>          <td class="paramname"><span class="paramname"><em>track_times</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -522,11 +522,11 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#gad99400915d340da978dd6ac5676122c6" title="Determines whether times associated with an object are being recorded.">H5Pget_obj_track_times()</a> queries the object creation property list, <code class="param">plist_id</code>, to determine whether object times are being recorded.</p>
+<p><a class="el" href="#ga36167da0de63a1940d6d7ffb77e2291d" title="Determines whether times associated with an object are being recorded.">H5Pget_obj_track_times()</a> queries the object creation property list, <code class="param">plist_id</code>, to determine whether object times are being recorded.</p>
 <p>If <code class="param">track_times</code> is returned as 1, times are being recorded; if <code class="param">track_times</code> is returned as 0, times are not being recorded.</p>
 <p>Time data can be retrieved with <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info()</a>, which will return it in the <a class="el" href="_h5version_8h.html#a5f76b0cdd6d68d61f11e46d4f06e50d4">H5O_info_t</a> struct.</p>
 <p>If times are not tracked, they will be reported as follows when queried: 12:00 AM UDT, Jan. 1, 1970</p>
-<p>See <a class="el" href="#gafa87fab7ebb6c4a8da9a75a86cc62fa3" title="Sets the recording of times associated with an object.">H5Pset_obj_track_times()</a> for further discussion.</p>
+<p>See <a class="el" href="#gaa7b3060438fc9255ce00b8a0e0010802" title="Sets the recording of times associated with an object.">H5Pset_obj_track_times()</a> for further discussion.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
@@ -903,8 +903,8 @@ As a result of this fix, an HDF5 library of Release 1.6.0 through Release 1.6.2 
 
 </div>
 </div>
-<a id="gafa87fab7ebb6c4a8da9a75a86cc62fa3" name="gafa87fab7ebb6c4a8da9a75a86cc62fa3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gafa87fab7ebb6c4a8da9a75a86cc62fa3">&#9670;&#160;</a></span>H5Pset_obj_track_times()</h2>
+<a id="gaa7b3060438fc9255ce00b8a0e0010802" name="gaa7b3060438fc9255ce00b8a0e0010802"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa7b3060438fc9255ce00b8a0e0010802">&#9670;&#160;</a></span>H5Pset_obj_track_times()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -917,7 +917,7 @@ As a result of this fix, an HDF5 library of Release 1.6.0 through Release 1.6.2 
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></td>          <td class="paramname"><span class="paramname"><em>track_times</em></span>&#160;)</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>track_times</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -931,7 +931,7 @@ As a result of this fix, an HDF5 library of Release 1.6.0 through Release 1.6.2 
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#gafa87fab7ebb6c4a8da9a75a86cc62fa3" title="Sets the recording of times associated with an object.">H5Pset_obj_track_times()</a> sets a property in the object creation property list, <code class="param">plist_id</code>, that governs the recording of times associated with an object.</p>
+<p><a class="el" href="#gaa7b3060438fc9255ce00b8a0e0010802" title="Sets the recording of times associated with an object.">H5Pset_obj_track_times()</a> sets a property in the object creation property list, <code class="param">plist_id</code>, that governs the recording of times associated with an object.</p>
 <p>If <code class="param">track_times</code> is set to 1, time data will be recorded. If <code class="param">track_times</code> is set to 0, time data will not be recorded.</p>
 <p>Time data can be retrieved with <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info()</a>, which will return it in the <a class="el" href="_h5version_8h.html#a5f76b0cdd6d68d61f11e46d4f06e50d4">H5O_info_t</a> struct.</p>
 <p>If times are not tracked, they will be reported as follows when queried: <code> 12:00 AM UDT, Jan. 1, 1970</code></p>

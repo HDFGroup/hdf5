@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -169,20 +169,20 @@ New Collective Metadata I/O Functions</h2>
 <tr>
 <th>API </th><th>Description  </th></tr>
 <tr>
-<td><a class="el" href="group___f_a_p_l.html#ga6380f9929cf42c8203813f7e72dde35c" title="Sets metadata write mode to be collective or independent (default)">H5Pset_coll_metadata_write</a> </td><td>Establishes I/O mode property setting, collective or independent, for metadata writes  </td></tr>
+<td><a class="el" href="group___f_a_p_l.html#ga0163bef7ee102029286830c2c30162ca" title="Sets metadata write mode to be collective or independent (default)">H5Pset_coll_metadata_write</a> </td><td>Establishes I/O mode property setting, collective or independent, for metadata writes  </td></tr>
 <tr>
-<td><a class="el" href="group___f_a_p_l.html#gac83ab4e788a5b6e0d578f40ca67d8d00" title="Retrieves metadata write mode setting.">H5Pget_coll_metadata_write</a> </td><td>Retrieves I/O mode property setting for metadata writes  </td></tr>
+<td><a class="el" href="group___f_a_p_l.html#ga565428cd6c090a8c7836b7adf7720403" title="Retrieves metadata write mode setting.">H5Pget_coll_metadata_write</a> </td><td>Retrieves I/O mode property setting for metadata writes  </td></tr>
 <tr>
-<td><a class="el" href="group___g_a_p_l.html#ga5bc0b1fc7e1e3961bf0b441e722949eb" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops</a> </td><td>Establishes I/O mode, collective or independent, for metadata read operations  </td></tr>
+<td><a class="el" href="group___g_a_p_l.html#gac45976cb82e4d3f085f191e5872d0316" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops</a> </td><td>Establishes I/O mode, collective or independent, for metadata read operations  </td></tr>
 <tr>
-<td><a class="el" href="group___g_a_p_l.html#ga8792cbe7eeace1382f588ed12a92092a" title="Retrieves metadata read mode setting.">H5Pget_all_coll_metadata_ops</a> </td><td>Retrieves I/O mode for metadata read operations  </td></tr>
+<td><a class="el" href="group___g_a_p_l.html#gaa278583dd1a989fa35a915def6518126" title="Retrieves metadata read mode setting.">H5Pget_all_coll_metadata_ops</a> </td><td>Retrieves I/O mode for metadata read operations  </td></tr>
 </table>
 <h2><a class="anchor" id="subsec_collective_metadata_io_apis_reference"></a>
 Additional API Reference</h2>
 <h3><a class="anchor" id="subsubsec_collective_metadata_io_apis_reference_may"></a>
 Functions with No Access Property List Parameter that May Generate Metadata Reads</h3>
 <p>Currently there are several operations in HDF5 that can issue metadata reads from the metadata cache, but that take no property list. It is therefore not possible set a collective requirement individually for those operations. The only solution with the HDF5 1.10.0 release is to set the collective requirement globally on <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen</a> or <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate</a> for all metadata operations to be collective.</p>
-<p>The following is a list of those functions in the HDF5 library. This list is integral to the discussion in the <a class="el" href="group___g_a_p_l.html#ga5bc0b1fc7e1e3961bf0b441e722949eb" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops</a> entry: </p><table class="doxtable">
+<p>The following is a list of those functions in the HDF5 library. This list is integral to the discussion in the <a class="el" href="group___g_a_p_l.html#gac45976cb82e4d3f085f191e5872d0316" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops</a> entry: </p><table class="doxtable">
 <tr>
 <th>API  </th></tr>
 <tr>

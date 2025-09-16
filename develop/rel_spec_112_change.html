@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -179,10 +179,10 @@ Release 1.12.2 versus Release 1.12.1</h2>
 <h3><a class="anchor" id="subsubsec_rel_spec_112_change_2versus1_new"></a>
 New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <p>The following are new C functions in this release: </p><ul>
-<li><a class="el" href="group___h5_d_s.html#gad51e0c0aa57fd62fd60b74a4db96532f" title="Determines if new references are used with dimension scales.">H5DSwith_new_ref</a> - Determines if new references are used with dimension scales </li>
+<li><a class="el" href="group___h5_d_s.html#gafd2a9719c14946b1478e3e79736b3094" title="Determines if new references are used with dimension scales.">H5DSwith_new_ref</a> - Determines if new references are used with dimension scales </li>
 <li><a class="el" href="group___h5_l_t.html#ga090c3e4f719a5d60bf1d4b8961109371" title="Reads an attribute from disk.">H5LTget_attribute_ullong</a> - Reads an unsigned long long attribute </li>
 <li><a class="el" href="group___h5_l_t.html#ga52a1e4f75326987651d75284d457d9e4" title="Creates and writes an attribute.">H5LTset_attribute_ullong</a> - Create an unsigned long long attribute </li>
-<li><a class="el" href="group___h5_v_l.html#gad7fa2adf3bb8a834169ef2fa50c76827" title="Determines whether an object ID represents a native VOL connector object.">H5VLobject_is_native</a> - Determines whether an object ID represents a native VOL connector object</li>
+<li><a class="el" href="group___h5_v_l.html#ga7c9103049619e06acff40930a21d3caf" title="Determines whether an object ID represents a native VOL connector object.">H5VLobject_is_native</a> - Determines whether an object ID represents a native VOL connector object</li>
 </ul>
 <p>See API Compatibility Reports for 1.12.2 for complete details.</p>
 <h2><a class="anchor" id="subsec_rel_spec_112_change_1versus0"></a>
@@ -193,8 +193,8 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <p>The following are new C functions in this release: </p><ul>
 <li><a class="el" href="group___f_a_p_l.html#ga6e850a0319dc6839e2dd06a0522b3831" title="Gets splitter driver properties from the the file access property list.">H5Pget_fapl_splitter</a> - Retrieves information for a splitter file access property list </li>
 <li><a class="el" href="group___f_a_p_l.html#gacba378b6c9258d33da609ff7241d64c5" title="Sets the file access property list to use the splitter driver.">H5Pset_fapl_splitter</a> - Sets the file access property list to use the splitter driver </li>
-<li><a class="el" href="group___f_a_p_l.html#ga5de19a5a8ac23ca417aa2d49d708dc2d" title="Retrieves the file locking property values.">H5Pget_file_locking</a> - Gets the file locking property values </li>
-<li><a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> - Sets the file locking property values </li>
+<li><a class="el" href="group___f_a_p_l.html#ga6f68d03de151117cefa29b571865a394" title="Retrieves the file locking property values.">H5Pget_file_locking</a> - Gets the file locking property values </li>
+<li><a class="el" href="group___f_a_p_l.html#gaae4de80c533a38da9f269c02b8e71de2" title="Sets the file locking property values.">H5Pset_file_locking</a> - Sets the file locking property values </li>
 <li><a class="el" href="group___h5.html#ga2310d963a6f48ec12fda8c0c8bbefbbb" title="Gets the current size of the free lists used to manage memory.">H5get_free_list_sizes</a> - Gets the current size of the free lists used to manage memory </li>
 <li><a class="el" href="group___h5_s.html#ga411bbc06a31814bff9f476712c2a791c" title="Resets a dataspace selection iterator back to an initial state.">H5Ssel_iter_reset</a> - Resets a dataspace selection iterator back to an initial state </li>
 <li><a class="el" href="group___h5_v_l.html#ga17ef00e528d99eda5879d749c2a12043" title="Determine if a VOL connector supports a particular optional callback operation.">H5VLquery_optional</a> - Determines whether a VOL connector supports a particular optional callback operation</li>
@@ -202,8 +202,8 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <h4>In the C++ Wrapper</h4>
 <p>The following C++ wrappers were added: </p><ul>
 <li><code>DataSet::operator=</code> - <code>Operator=</code> for DataSet class </li>
-<li><code>FileAccPropList::getFileLocking</code> - See <a class="el" href="group___f_a_p_l.html#ga5de19a5a8ac23ca417aa2d49d708dc2d" title="Retrieves the file locking property values.">H5Pget_file_locking</a> for details </li>
-<li><code>FileAccPropList::setFileLocking</code> - See <a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> for details</li>
+<li><code>FileAccPropList::getFileLocking</code> - See <a class="el" href="group___f_a_p_l.html#ga6f68d03de151117cefa29b571865a394" title="Retrieves the file locking property values.">H5Pget_file_locking</a> for details </li>
+<li><code>FileAccPropList::setFileLocking</code> - See <a class="el" href="group___f_a_p_l.html#gaae4de80c533a38da9f269c02b8e71de2" title="Sets the file locking property values.">H5Pset_file_locking</a> for details</li>
 </ul>
 <p>See the API Compatibility report for complete details.</p>
 <h3><a class="anchor" id="subsubsec_rel_spec_112_change_1versus0_compat"></a>

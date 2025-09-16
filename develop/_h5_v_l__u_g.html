@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -234,7 +234,7 @@ Connector-Specific Registration Calls</h3>
 <h3><a class="anchor" id="subsubsec_vol_connect_set_vol"></a>
 H5Pset_vol()</h3>
 <p>The is the main library API call for setting the VOL connector in a file access property list. Its signature is: </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_function" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol</a>(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_vol_id, <span class="keyword">const</span> <span class="keywordtype">void</span> new_vol_info)</div>
-<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:266</div></div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:252</div></div>
 <div class="ttc" id="agroup___f_a_p_l_html_ga8aaa97e70b2544c3d95d908e1ae5b0f0"><div class="ttname"><a href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol</a></div><div class="ttdeci">herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)</div><div class="ttdoc">Set the file VOL connector for a file access property list.</div></div>
 </div><!-- fragment --><p>It takes the ID of the file access property list, the ID of the registered VOL connector, and a pointer to whatever connector-specific data the connector is expecting. This will usually be a data struct specified in the connector's header or a NULL pointer if the connecter requires no special information (as in the native VOL connector).</p>
 <p>As mentioned above, many connectors will provide their own replacement for this call. See the connector's documentation for more information.</p>
@@ -274,13 +274,13 @@ haddr_t → H5O_token_t</h3>
 <p>As a part of the VOL work, the HDF5 API was updated to replace the <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> type with a new <a class="el" href="struct_h5_o__token__t.html">H5O_token_t</a> type that represents a more generic object location. These tokens appear as an opaque byte array of <a class="el" href="_h5public_8h.html#ac91e46b83ee173747f9792b33755ff0e">H5O_MAX_TOKEN_SIZE</a> bytes that is only meaningful for a particular VOL connector. They are not intended for interpretation outside of a VOL connector, though a connector author may provide an API call to convert their tokens to something meaningful for the storage. </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct_h5_o__token__t.html">H5O_token_t</a> {</div>
 <div class="line">    uint8_t <a class="code hl_variable" href="struct_h5_o__token__t.html#adaac031833a234d10c1ff3130f6aa4cc">__data</a>[<a class="code hl_define" href="_h5public_8h.html#ac91e46b83ee173747f9792b33755ff0e">H5O_MAX_TOKEN_SIZE</a>];</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_o__token__t.html">H5O_token_t</a>;</div>
-<div class="ttc" id="a_h5public_8h_html_ac91e46b83ee173747f9792b33755ff0e"><div class="ttname"><a href="_h5public_8h.html#ac91e46b83ee173747f9792b33755ff0e">H5O_MAX_TOKEN_SIZE</a></div><div class="ttdeci">#define H5O_MAX_TOKEN_SIZE</div><div class="ttdef"><b>Definition</b> H5public.h:452</div></div>
-<div class="ttc" id="astruct_h5_o__token__t_html"><div class="ttname"><a href="struct_h5_o__token__t.html">H5O_token_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:461</div></div>
-<div class="ttc" id="astruct_h5_o__token__t_html_adaac031833a234d10c1ff3130f6aa4cc"><div class="ttname"><a href="struct_h5_o__token__t.html#adaac031833a234d10c1ff3130f6aa4cc">H5O_token_t::__data</a></div><div class="ttdeci">uint8_t __data[(16)]</div><div class="ttdef"><b>Definition</b> H5public.h:462</div></div>
+<div class="ttc" id="a_h5public_8h_html_ac91e46b83ee173747f9792b33755ff0e"><div class="ttname"><a href="_h5public_8h.html#ac91e46b83ee173747f9792b33755ff0e">H5O_MAX_TOKEN_SIZE</a></div><div class="ttdeci">#define H5O_MAX_TOKEN_SIZE</div><div class="ttdef"><b>Definition</b> H5public.h:438</div></div>
+<div class="ttc" id="astruct_h5_o__token__t_html"><div class="ttname"><a href="struct_h5_o__token__t.html">H5O_token_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:447</div></div>
+<div class="ttc" id="astruct_h5_o__token__t_html_adaac031833a234d10c1ff3130f6aa4cc"><div class="ttname"><a href="struct_h5_o__token__t.html#adaac031833a234d10c1ff3130f6aa4cc">H5O_token_t::__data</a></div><div class="ttdeci">uint8_t __data[(16)]</div><div class="ttdef"><b>Definition</b> H5public.h:448</div></div>
 </div><!-- fragment --><p>As an example, in the native VOL connector, the token stores an <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> address and addresses can be converted to and from tokens using <a class="el" href="group___h5_v_l_n_a_t.html#ga09ca3912386a8c8c66edbcbbe2c10c1f" title="Convert a haddr_t address to a native VOL connector token.">H5VLnative_addr_to_token()</a> and <a class="el" href="group___h5_v_l_n_a_t.html#ga7136f48f79f4b88d87002d5c218ceb40" title="Convert a native VOL connector token to a haddr_t address.">H5VLnative_token_to_addr()</a>.</p>
 <div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_function" href="group___h5_v_l_n_a_t.html#ga09ca3912386a8c8c66edbcbbe2c10c1f">H5VLnative_addr_to_token</a>(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <a class="code hl_typedef" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> addr, <a class="code hl_struct" href="struct_h5_o__token__t.html">H5O_token_t</a> *token)</div>
 <div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_function" href="group___h5_v_l_n_a_t.html#ga7136f48f79f4b88d87002d5c218ceb40">H5VLnative_token_to_addr</a>(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <a class="code hl_struct" href="struct_h5_o__token__t.html">H5O_token_t</a> token, <a class="code hl_typedef" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *addr)</div>
-<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:379</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:365</div></div>
 <div class="ttc" id="agroup___h5_v_l_n_a_t_html_ga09ca3912386a8c8c66edbcbbe2c10c1f"><div class="ttname"><a href="group___h5_v_l_n_a_t.html#ga09ca3912386a8c8c66edbcbbe2c10c1f">H5VLnative_addr_to_token</a></div><div class="ttdeci">herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)</div><div class="ttdoc">Convert a haddr_t address to a native VOL connector token.</div></div>
 <div class="ttc" id="agroup___h5_v_l_n_a_t_html_ga7136f48f79f4b88d87002d5c218ceb40"><div class="ttname"><a href="group___h5_v_l_n_a_t.html#ga7136f48f79f4b88d87002d5c218ceb40">H5VLnative_token_to_addr</a></div><div class="ttdeci">herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)</div><div class="ttdoc">Convert a native VOL connector token to a haddr_t address.</div></div>
 </div><!-- fragment --><p>Several API calls have also been added to compare tokens and convert tokens to and from strings.</p>
@@ -296,7 +296,7 @@ Specific API Call Substitutions</h3>
 <h4><a class="el" href="group___h5_f.html#ga6055c2ea3438bd4aaf221eba66843225" title="Determines whether a file is in the HDF5 format.">H5Fis_hdf5()</a> → <a class="el" href="group___h5_f.html#ga584471c3b98453b9b04a4bf9af847442" title="Checks if a file can be opened with a given file access property list.">H5Fis_accessible()</a></h4>
 <p><a class="el" href="group___h5_f.html#ga6055c2ea3438bd4aaf221eba66843225">H5Fis_hdf5()</a> does not take a file access property list (fapl). As this is where the VOL connector is specified, this call cannot be used with arbitrary connectors. As a VOL-enabled replacement, <a class="el" href="group___h5_f.html#ga584471c3b98453b9b04a4bf9af847442">H5Fis_accessible()</a> has been added to the library. It has the same semantics as <a class="el" href="group___h5_f.html#ga6055c2ea3438bd4aaf221eba66843225">H5Fis_hdf5()</a>, but takes a fapl so it can work with any VOL connector.</p>
 <p>Note that, at this time, <a class="el" href="group___h5_f.html#ga6055c2ea3438bd4aaf221eba66843225">H5Fis_hdf5()</a> always uses the native VOL connector, regardless of the settings of environment variables, etc. </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a> <a class="code hl_function" href="group___h5_f.html#ga584471c3b98453b9b04a4bf9af847442">H5Fis_accessible</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *container_name, <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id)</div>
-<div class="ttc" id="a_h5public_8h_html_aa8f6c28736dbd0f18388c67911d38aca"><div class="ttname"><a href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></div><div class="ttdeci">int htri_t</div><div class="ttdef"><b>Definition</b> H5public.h:296</div></div>
+<div class="ttc" id="a_h5public_8h_html_aa8f6c28736dbd0f18388c67911d38aca"><div class="ttname"><a href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></div><div class="ttdeci">int htri_t</div><div class="ttdef"><b>Definition</b> H5public.h:282</div></div>
 <div class="ttc" id="agroup___h5_f_html_ga584471c3b98453b9b04a4bf9af847442"><div class="ttname"><a href="group___h5_f.html#ga584471c3b98453b9b04a4bf9af847442">H5Fis_accessible</a></div><div class="ttdeci">htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id)</div><div class="ttdoc">Checks if a file can be opened with a given file access property list.</div></div>
 </div><!-- fragment --><p>Note also that an error is only returned if it is not possible to determine if a file (or container) is accessible. It is not an error to return 'false' for whether the file is accessible.</p>
 <h4>H5Oget_info[1|2]() → <a class="el" href="group___h5_o.html#gaf0fbf7d780a1eefce920facadb198013" title="Retrieves the metadata for an object specified by an identifier.">H5Oget_info3()</a> and <a class="el" href="group___h5_o.html#ga677d99ab106e2032b991b75b75de0e46" title="Retrieve native file format information about an object.">H5Oget_native_info()</a></h4>
@@ -308,9 +308,9 @@ Specific API Call Substitutions</h3>
 <div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_function" href="group___h5_o.html#gafa2f8884f7d3e7fd9b8549f5b59fd9eb">H5Oget_info_by_idx3</a>(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, <span class="keyword">const</span> <span class="keywordtype">char</span> *group_name, <a class="code hl_enumeration" href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3">H5_index_t</a> idx_type,</div>
 <div class="line">                           <a class="code hl_enumeration" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9">H5_iter_order_t</a> order, <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> n, <a class="code hl_struct" href="struct_h5_o__info2__t.html">H5O_info2_t</a> *oinfo,</div>
 <div class="line">                           <span class="keywordtype">unsigned</span> fields, <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> lapl_id)</div>
-<div class="ttc" id="a_h5public_8h_html_a6a6ddd1504d1ed61939d46d91d9441b9"><div class="ttname"><a href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9">H5_iter_order_t</a></div><div class="ttdeci">H5_iter_order_t</div><div class="ttdef"><b>Definition</b> H5public.h:403</div></div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:328</div></div>
-<div class="ttc" id="a_h5public_8h_html_a8203c78e10ab2d89d8bce688a31afad3"><div class="ttname"><a href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3">H5_index_t</a></div><div class="ttdeci">H5_index_t</div><div class="ttdef"><b>Definition</b> H5public.h:426</div></div>
+<div class="ttc" id="a_h5public_8h_html_a6a6ddd1504d1ed61939d46d91d9441b9"><div class="ttname"><a href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9">H5_iter_order_t</a></div><div class="ttdeci">H5_iter_order_t</div><div class="ttdef"><b>Definition</b> H5public.h:389</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:314</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8203c78e10ab2d89d8bce688a31afad3"><div class="ttname"><a href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3">H5_index_t</a></div><div class="ttdeci">H5_index_t</div><div class="ttdef"><b>Definition</b> H5public.h:412</div></div>
 <div class="ttc" id="agroup___h5_o_html_gabb69c962999e027cef0079bbb1282199"><div class="ttname"><a href="group___h5_o.html#gabb69c962999e027cef0079bbb1282199">H5Oget_info_by_name3</a></div><div class="ttdeci">herr_t H5Oget_info_by_name3(hid_t loc_id, const char *name, H5O_info2_t *oinfo, unsigned fields, hid_t lapl_id)</div><div class="ttdoc">Retrieves the metadata for an object, identifying the object by location and relative name.</div></div>
 <div class="ttc" id="agroup___h5_o_html_gaf0fbf7d780a1eefce920facadb198013"><div class="ttname"><a href="group___h5_o.html#gaf0fbf7d780a1eefce920facadb198013">H5Oget_info3</a></div><div class="ttdeci">herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields)</div><div class="ttdoc">Retrieves the metadata for an object specified by an identifier.</div></div>
 <div class="ttc" id="agroup___h5_o_html_gafa2f8884f7d3e7fd9b8549f5b59fd9eb"><div class="ttname"><a href="group___h5_o.html#gafa2f8884f7d3e7fd9b8549f5b59fd9eb">H5Oget_info_by_idx3</a></div><div class="ttdeci">herr_t H5Oget_info_by_idx3(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info2_t *oinfo, unsigned fields, hid_t lapl_id)</div><div class="ttdoc">Retrieves the metadata for an object, identifying the object by an index position.</div></div>
@@ -357,7 +357,7 @@ Specific API Call Substitutions</h3>
 <div class="line">        <a class="code hl_struct" href="struct_h5__ih__info__t.html">H5_ih_info_t</a> <a class="code hl_variable" href="struct_h5_o__native__info__t.html#aba95c19d6477004a0fa4591e467412b6">attr</a>; <span class="comment">// v2 B-tree &amp; heap for attributes</span></div>
 <div class="line">    } <a class="code hl_variable" href="struct_h5_o__native__info__t.html#a73a8b12326b16b529bf531d6023ad8b8">meta_size</a>;</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_o__native__info__t.html">H5O_native_info_t</a>;</div>
-<div class="ttc" id="astruct_h5__ih__info__t_html"><div class="ttname"><a href="struct_h5__ih__info__t.html">H5_ih_info_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:438</div></div>
+<div class="ttc" id="astruct_h5__ih__info__t_html"><div class="ttname"><a href="struct_h5__ih__info__t.html">H5_ih_info_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:424</div></div>
 <div class="ttc" id="astruct_h5_o__hdr__info__t_html"><div class="ttname"><a href="struct_h5_o__hdr__info__t.html">H5O_hdr_info_t</a></div><div class="ttdef"><b>Definition</b> H5Opublic.h:122</div></div>
 <div class="ttc" id="astruct_h5_o__native__info__t_html_a6cfeed1003ece5686449118f36dce19f"><div class="ttname"><a href="struct_h5_o__native__info__t.html#a6cfeed1003ece5686449118f36dce19f">H5O_native_info_t::hdr</a></div><div class="ttdeci">H5O_hdr_info_t hdr</div><div class="ttdef"><b>Definition</b> H5Opublic.h:165</div></div>
 <div class="ttc" id="astruct_h5_o__native__info__t_html_a73a8b12326b16b529bf531d6023ad8b8"><div class="ttname"><a href="struct_h5_o__native__info__t.html#a73a8b12326b16b529bf531d6023ad8b8">H5O_native_info_t::meta_size</a></div><div class="ttdeci">struct H5O_native_info_t::@260162027145300125277002203123231341201164141000 meta_size</div></div>
@@ -541,7 +541,7 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td>H5Fformat_convert </td><td>Internal API routines  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#gacbf3ba8b36750c42b49740567a9732c4" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a> </td><td></td></tr>
+<td><a class="el" href="group___h5_f.html#gae688a27695349925f08eaa3c44f99265" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___h5_f.html#ga4c18bddafc652203944d889a602bd53f" title="Retrieves the file&#39;s end-of-allocation (EOA)">H5Fget_eoa</a> </td><td></td></tr>
 <tr>
@@ -563,13 +563,13 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td><a class="el" href="group___m_d_c.html#ga7b37da15ff80c4aa5c275649f1f45b0a" title="Obtains information about a cache image if it exists.">H5Fget_mdc_image_info</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___m_d_c.html#ga998ebdc7b5190cf3d0fdf2fbe71e9780" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status</a> </td><td></td></tr>
+<td><a class="el" href="group___m_d_c.html#ga5d1d9a5b7df6e6fb92700bacb4c917d6" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___m_d_c.html#gacda6cbd60d3c50b59f801eba4e5a335f" title="Obtains current metadata cache size data for specified file.">H5Fget_mdc_size</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___s_w_m_r.html#gaa80bd62f19993e414e383db7d1623e5f" title="Retrieves the collection of read retries for metadata entries with checksum.">H5Fget_metadata_read_retry_info</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___p_h5_f.html#ga849316b77788799fecb321a87d987ade" title="Retrieves the atomicity mode in use.">H5Fget_mpi_atomicity</a> </td><td></td></tr>
+<td><a class="el" href="group___p_h5_f.html#ga5356a1bee667b2a7dd1b657c820755fd" title="Retrieves the atomicity mode in use.">H5Fget_mpi_atomicity</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___h5_f.html#ga0663defe0143631f4292267c21e94202" title="Retrieves statistics about page access when it is enabled.">H5Fget_page_buffering_stats</a> </td><td></td></tr>
 <tr>
@@ -583,15 +583,15 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td><a class="el" href="group___h5_f.html#ga7ef1c0aab9a7a9112a8d0a788ec8696c" title="Resets the page buffer statistics.">H5Freset_page_buffering_stats</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a> </td><td></td></tr>
+<td><a class="el" href="group___h5_f.html#gaddd372973b35cde53300817d3ffaee5a" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#gae920c2acac63c0039db5c2845fb8e5bb" title="Sets the latest version of the library to be used for writing objects.">H5Fset_latest_format</a> </td><td>deprecated  </td></tr>
+<td><a class="el" href="group___h5_f.html#gaa2a6549a4b661e70ededfabea6faf0fa" title="Sets the latest version of the library to be used for writing objects.">H5Fset_latest_format</a> </td><td>deprecated  </td></tr>
 <tr>
 <td><a class="el" href="group___h5_f.html#ga4b833c33fe2e141a26b6f2ad559d3610" title="Enables the switch of version bounds setting for a file.">H5Fset_libver_bounds</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___m_d_c.html#ga81bc06be69131484eb04d01511b9c8f8" title="Attempts to configure metadata cache of target file.">H5Fset_mdc_config</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___p_h5_f.html#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity</a> </td><td></td></tr>
+<td><a class="el" href="group___p_h5_f.html#gaaefabc54e36a2d13325e9a853400f359" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___m_d_c.html#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging</a> </td><td></td></tr>
 <tr>
@@ -609,7 +609,7 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td><a class="el" href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00" title="Retrieves information about a group, according to the group&#39;s position within an index.">H5Gget_info_by_idx</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___h5_g.html#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo</a> </td><td>deprecated  </td></tr>
+<td><a class="el" href="group___h5_g.html#ga471d40a03e09a9d7fe0c7c7c31a453fa" title="Returns information about an object.">H5Gget_objinfo</a> </td><td>deprecated  </td></tr>
 <tr>
 <td><a class="el" href="group___h5_g.html#ga80180e7b819d3c9b3b3f1895e9baaf5b" title="Returns the name of an object specified by an index.">H5Gget_objname_by_idx</a> </td><td>deprecated  </td></tr>
 <tr>
@@ -629,7 +629,7 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td><a class="el" href="group___t_r_a_v.html#ga1f1ba1bb4d44f2c111990024809417ac" title="Recursively visits all links starting from a specified group.">H5Lvisit_by_name1</a> </td><td>deprecated  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_o.html#gab2fa388aadd1ff154ee150cbb4884c1c" title="Retrieves comment for specified object.">H5Oare_mdc_flushes_disabled</a> </td><td></td></tr>
+<td><a class="el" href="group___h5_o.html#gac3b3b768a1c50be46e63cf5a631b30e3" title="Retrieves comment for specified object.">H5Oare_mdc_flushes_disabled</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___h5_o.html#ga0908be309da1fb4f771c1e264fac22ae" title="Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage.">H5Odisable_mdc_flushes</a> </td><td></td></tr>
 <tr>
@@ -779,7 +779,7 @@ List of Native VOL Optional Operation Values By Subclass</h3>
 <tr>
 <td><a class="el" href="group___m_d_c.html#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a43644b7a555039664e5838917dc8b19f">H5VL_NATIVE_FILE_STOP_MDC_LOGGING</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___m_d_c.html#ga998ebdc7b5190cf3d0fdf2fbe71e9780" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a45ab72336cb9193e0e588685773b525f">H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS</a>  </td></tr>
+<td><a class="el" href="group___m_d_c.html#ga5d1d9a5b7df6e6fb92700bacb4c917d6" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a45ab72336cb9193e0e588685773b525f">H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS</a>  </td></tr>
 <tr>
 <td>H5Fformat_convert (internal) </td><td><a class="el" href="_h5_v_lnative_8h.html#aa0ee2a329e7eedb415411a266a8c48fd">H5VL_NATIVE_FILE_FORMAT_CONVERT</a>  </td></tr>
 <tr>
@@ -793,21 +793,21 @@ List of Native VOL Optional Operation Values By Subclass</h3>
 <tr>
 <td><a class="el" href="group___h5_f.html#gadbe82c1f6e16c21062fabd20b0ffccd4" title="Sets the file&#39; EOA to the maximum of (EOA, EOF) + increment.">H5Fincrement_filesize</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#aa7c0ecdd8fb3f1725ddc647cc15426f3">H5VL_NATIVE_FILE_INCR_FILESIZE</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#gae920c2acac63c0039db5c2845fb8e5bb" title="Sets the latest version of the library to be used for writing objects.">H5Fset_latest_format</a>/<a class="el" href="group___h5_f.html#ga4b833c33fe2e141a26b6f2ad559d3610" title="Enables the switch of version bounds setting for a file.">H5Fset_libver_bounds</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a434d6fea6ce5575042b6ffec0dff58c7">H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS</a>  </td></tr>
+<td><a class="el" href="group___h5_f.html#gaa2a6549a4b661e70ededfabea6faf0fa" title="Sets the latest version of the library to be used for writing objects.">H5Fset_latest_format</a>/<a class="el" href="group___h5_f.html#ga4b833c33fe2e141a26b6f2ad559d3610" title="Enables the switch of version bounds setting for a file.">H5Fset_libver_bounds</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a434d6fea6ce5575042b6ffec0dff58c7">H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#gacbf3ba8b36750c42b49740567a9732c4" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a08d3e870d99f7098c354640b7346597b">H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG</a>  </td></tr>
+<td><a class="el" href="group___h5_f.html#gae688a27695349925f08eaa3c44f99265" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a08d3e870d99f7098c354640b7346597b">H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a9c87d8969f22eb8e3002ceb98b001f90">H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG</a>  </td></tr>
+<td><a class="el" href="group___h5_f.html#gaddd372973b35cde53300817d3ffaee5a" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a9c87d8969f22eb8e3002ceb98b001f90">H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___p_h5_f.html#ga849316b77788799fecb321a87d987ade" title="Retrieves the atomicity mode in use.">H5Fget_mpi_atomicity</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a006f5bedc78630dc1b39671151823d78">H5VL_NATIVE_FILE_GET_MPI_ATOMICITY</a>  </td></tr>
+<td><a class="el" href="group___p_h5_f.html#ga5356a1bee667b2a7dd1b657c820755fd" title="Retrieves the atomicity mode in use.">H5Fget_mpi_atomicity</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a006f5bedc78630dc1b39671151823d78">H5VL_NATIVE_FILE_GET_MPI_ATOMICITY</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___p_h5_f.html#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#aedfd9c1c6b47a9982c804e66a2c2e9dd">H5VL_NATIVE_FILE_SET_MPI_ATOMICITY</a>  </td></tr>
+<td><a class="el" href="group___p_h5_f.html#gaaefabc54e36a2d13325e9a853400f359" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#aedfd9c1c6b47a9982c804e66a2c2e9dd">H5VL_NATIVE_FILE_SET_MPI_ATOMICITY</a>  </td></tr>
 <tr>
 <td>Adjust file after open, with wrapping context </td><td><a class="el" href="_h5_v_lnative_8h.html#a087662fec2c046e4ede6a7176209babc">H5VL_NATIVE_FILE_POST_OPEN</a>  </td></tr>
 <tr>
 <th rowspan="2">H5VL_SUBCLS_GROUP </th><td><a class="el" href="group___h5_g.html#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate</a> (deprecated routine) </td><td><a class="el" href="_h5_v_lnative_8h.html#a6e84a71e8968331693da4bd1ffe02783">H5VL_NATIVE_GROUP_ITERATE_OLD</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_g.html#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo</a> (deprecated routine) </td><td><a class="el" href="_h5_v_lnative_8h.html#a060b202dbbb4ce73a85d94de9d33bcb5">H5VL_NATIVE_GROUP_GET_OBJINFO</a>  </td></tr>
+<td><a class="el" href="group___h5_g.html#ga471d40a03e09a9d7fe0c7c7c31a453fa" title="Returns information about an object.">H5Gget_objinfo</a> (deprecated routine) </td><td><a class="el" href="_h5_v_lnative_8h.html#a060b202dbbb4ce73a85d94de9d33bcb5">H5VL_NATIVE_GROUP_GET_OBJINFO</a>  </td></tr>
 <tr>
 <th rowspan="6">H5VL_SUBCLS_OBJECT </th><td><a class="el" href="group___h5_g.html#gac5a1c3e1ed4264d92cc02ca20afc57f4" title="Retrieves comment for specified object.">H5Gget_comment</a>, <a class="el" href="group___h5_o.html#gaa1511ce5e2fe01ce7ea58f2f851d694b" title="Retrieves comment for specified object.">H5Oget_comment</a>, <a class="el" href="group___h5_o.html#gae6d92d597c5a292d342a1bda91e41171" title="Retrieves comment for specified object.">H5Oget_comment_by_name</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a606309d1a8734beeffb0fe241b30e1e7">H5VL_NATIVE_OBJECT_GET_COMMENT</a>  </td></tr>
 <tr>
@@ -817,7 +817,7 @@ List of Native VOL Optional Operation Values By Subclass</h3>
 <tr>
 <td><a class="el" href="group___h5_o.html#ga21014920bdabf6973e233796d7174156" title="Enables flushing of dirty metadata entries from a file&#39;s metadata cache.">H5Oenable_mdc_flushes</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a844314a5498935a7570fc69779a6eff3">H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_o.html#gab2fa388aadd1ff154ee150cbb4884c1c" title="Retrieves comment for specified object.">H5Oare_mdc_flushes_disabled</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a6a27db65f6b7711c13b46d6e9f98d18b">H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED</a>  </td></tr>
+<td><a class="el" href="group___h5_o.html#gac3b3b768a1c50be46e63cf5a631b30e3" title="Retrieves comment for specified object.">H5Oare_mdc_flushes_disabled</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a6a27db65f6b7711c13b46d6e9f98d18b">H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED</a>  </td></tr>
 <tr>
 <td><a class="el" href="group___h5_o.html#ga677d99ab106e2032b991b75b75de0e46" title="Retrieve native file format information about an object.">H5Oget_native_info</a>, <a class="el" href="group___h5_o.html#gafa6570d8b0ef6e2aff75093e1f99f67e" title="Retrieve native file format information about an object according to the order of an index.">H5Oget_native_info_by_idx</a>, <a class="el" href="group___h5_o.html#ga296ded21aeac3921fee07272353b8476" title="Retrieve native file format information about an object given its name.">H5Oget_native_info_by_name</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#af4a0fd6a4385f0eac1c34df9b7bece80">H5VL_NATIVE_OBJECT_GET_NATIVE_INFO</a>/td&gt;  </td></tr>
 </table>

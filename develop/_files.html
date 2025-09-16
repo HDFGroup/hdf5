@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -146,7 +146,7 @@ Files</h1>
 <h2><a class="anchor" id="CB_FreeSpace"></a>
 Tracking Free Space in HDF5 Files</h2>
 <dl class="section user"><dt>Problem</dt><dd>You sometimes delete objects in HDF5 files and don't have new content to use the free space, but would like to reuse it in the future.</dd></dl>
-<dl class="section user"><dt>Solution</dt><dd>At file creation time, set the file space management strategy and persistence of free space tracking information via <a class="el" href="group___f_c_p_l.html#ga167ff65f392ca3b7f1933b1cee1b9f70" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy()</a>.</dd></dl>
+<dl class="section user"><dt>Solution</dt><dd>At file creation time, set the file space management strategy and persistence of free space tracking information via <a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy()</a>.</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This feature is only supported in HDF5 1.10.1+.</dd></dl>
 <div class="fragment"><div class="line"><span class="lineno">   15</span>    {</div>
 <div class="line"><span class="lineno">   16</span>        __label__ fail_fcpl, fail_fapl, fail_file;</div>
@@ -157,7 +157,7 @@ Tracking Free Space in HDF5 Files</h2>
 <div class="line"><span class="lineno">   21</span>            <span class="keywordflow">goto</span> fail_fcpl;</div>
 <div class="line"><span class="lineno">   22</span>        }</div>
 <div class="line"><span class="lineno">   23</span><span class="preprocessor">#if H5_VERSION_GE(1, 10, 1)</span></div>
-<div class="line"><span class="lineno">   24</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="group___f_c_p_l.html#ga167ff65f392ca3b7f1933b1cee1b9f70">H5Pset_file_space_strategy</a>(fcpl, <a class="code hl_enumvalue" href="_h5_fpublic_8h.html#a9cc492c4b5c936e48716a8dab3691bcca4eb2323fa7feed13452676d57cc27a87">H5F_FSPACE_STRATEGY_FSM_AGGR</a>, 1, 4096) &lt; 0) {</div>
+<div class="line"><span class="lineno">   24</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e">H5Pset_file_space_strategy</a>(fcpl, <a class="code hl_enumvalue" href="_h5_fpublic_8h.html#a9cc492c4b5c936e48716a8dab3691bcca4eb2323fa7feed13452676d57cc27a87">H5F_FSPACE_STRATEGY_FSM_AGGR</a>, 1, 4096) &lt; 0) {</div>
 <div class="line"><span class="lineno">   25</span><span class="preprocessor">#else</span></div>
 <div class="line"><span class="lineno">   26</span><span class="preprocessor">#error HDF5 1.10.1+ required</span></div>
 <div class="line"><span class="lineno">   27</span><span class="preprocessor">#endif</span></div>

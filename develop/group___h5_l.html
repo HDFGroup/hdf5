@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -816,7 +816,7 @@ Note that the function accepts link names and path names. This is potentially mi
 <p><a class="el" href="#gacc2ad7f2b402c4bf9bb122d7f43b98dc" title="Returns information about a link.">H5Lget_info1()</a> returns information about name in the data structure <a class="el" href="struct_h5_l__info1__t.html">H5L_info1_t</a>, which is described below and defined in <a class="el" href="_h5_lpublic_8h.html">H5Lpublic.h</a>. This structure is returned in the buffer <code class="param">linfo</code>. </p><div class="fragment"><div class="line"></div>
 <div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
 <div class="line">    <a class="code hl_enumeration" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48">H5L_type_t</a> type;         </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a>    corder_valid; </div>
+<div class="line">    <span class="keywordtype">bool</span>       corder_valid; </div>
 <div class="line">    int64_t    corder;       </div>
 <div class="line">    <a class="code hl_enumeration" href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71a">H5T_cset_t</a> cset;         </div>
 <div class="line">    <span class="keyword">union </span>{</div>
@@ -902,7 +902,7 @@ Note that the function accepts link names and path names. This is potentially mi
 <p><code class="param">lapl_id</code> is the link access property list associated with the link name. In the general case, when default link access properties are acceptable, this can be passed in as <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>. An example of a situation that requires a non-default link access property list is when the link is an external link; an external link may require that a link prefix be set in a link access property list (see <a class="el" href="group___l_a_p_l.html#gafa5eced13ba3a00cdd65669626dc7294" title="Sets prefix to be applied to external link paths.">H5Pset_elink_prefix()</a>).</p>
 <p><a class="el" href="#ga65e63c6e880fd0183c40486d6748e400" title="Returns information about a link.">H5Lget_info2()</a> returns information about name in the data structure <a class="el" href="struct_h5_l__info2__t.html" title="Information struct for links.">H5L_info2_t</a>, which is described below and defined in <a class="el" href="_h5_lpublic_8h.html">H5Lpublic.h</a>. This structure is returned in the buffer <code class="param">linfo</code>. </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
 <div class="line">    <a class="code hl_enumeration" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48">H5L_type_t</a> type;         </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a>    corder_valid; </div>
+<div class="line">    <span class="keywordtype">bool</span>       corder_valid; </div>
 <div class="line">    int64_t    corder;       </div>
 <div class="line">    <a class="code hl_enumeration" href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71a">H5T_cset_t</a> cset;         </div>
 <div class="line">    <span class="keyword">union </span>{</div>

@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,7 +141,7 @@ $(function(){initNavTree('maybe_metadata_reads.html',''); initResizable(true); }
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Currently there are several operations in HDF5 that can issue metadata reads from the metadata cache, but that take no property list. It is therefore not possible to set a collective requirement individually for those operations. The only solution with the HDF5 1.10.0 release is to set the collective requirement globally on <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> or <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate()</a> for all metadata operations to be collective.</p>
-<p>The following is a list of those functions in the HDF5 library. This list is integral to the discussion in the <a class="el" href="group___g_a_p_l.html#ga5bc0b1fc7e1e3961bf0b441e722949eb" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops()</a> entry:</p>
+<p>The following is a list of those functions in the HDF5 library. This list is integral to the discussion in the <a class="el" href="group___g_a_p_l.html#gac45976cb82e4d3f085f191e5872d0316" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops()</a> entry:</p>
 <p><a class="el" href="group___h5_a.html#gab70871e205d57450c83efd9912be2b5c" title="Writes data to an attribute.">H5Awrite()</a>, <a class="el" href="group___h5_a.html#gaacb27a997f7c98e8a833d0fd63b58f1c" title="Reads the value of an attribute.">H5Aread()</a>, <a class="el" href="group___h5_a.html#ga490dcd6db246c1fda7295badfce28203" title="Renames an attribute.">H5Arename()</a>, <a class="el" href="group___h5_a.html#ga9315a22b60468b6e996559b1b8a77251" title="Calls a user-defined function for each attribute on an object.">H5Aiterate2()</a>, <a class="el" href="group___h5_a.html#gada9fa3d6db52329f1fd55662de6ff6ba" title="Deletes an attribute from a specified location.">H5Adelete()</a>, <a class="el" href="group___h5_a.html#ga293b5be270d90cd5e47f782ca9aec80b" title="Determines whether an attribute with a given name exists on an object.">H5Aexists()</a></p>
 <p><a class="el" href="group___h5_d.html#ga7639ef5c12cb906c71670ce73b856a4c" title="Determines whether space has been allocated for a dataset.">H5Dget_space_status()</a>, <a class="el" href="group___h5_d.html#gafb249479a493e80891f0c7f5d8a91b00" title="Returns the amount of storage allocated for a dataset.">H5Dget_storage_size()</a>, <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent()</a>, H5Ddebug(), <a class="el" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a>, <a class="el" href="group___h5_d.html#ga8848f14f4aba8e6160c3d8bb7f1be163" title="Returns an identifier for a copy of the dataset creation property list for a dataset.">H5Dget_create_plist()</a>, <a class="el" href="group___h5_d.html#gad42a46be153d895d8c28a11ebf5a0d0a" title="Returns an identifier for a copy of the dataspace for a dataset.">H5Dget_space()</a> (for virtual datasets)</p>
 <p><a class="el" href="group___h5_g.html#ga0b959a53cbffa48f5d68ce33b43b7ed8" title="Gets a group creation property list identifier.">H5Gget_create_plist()</a>, <a class="el" href="group___h5_g.html#gad4be126ab7bbf2001435e8e70089f3d3" title="Retrieves information about a group.">H5Gget_info()</a>, <a class="el" href="group___h5_g.html#ga8dbe20b390d2504f0bd3589ed8f4e221" title="Closes the specified group.">H5Gclose()</a></p>
@@ -155,10 +155,10 @@ $(function(){initNavTree('maybe_metadata_reads.html',''); initResizable(true); }
 <p>In addition, <b>most</b> deprecated functions fall into this category.</p>
 <p>The HDF Group may address the above limitation in a future major release, but no decision has been made at this time. Such a change might, for example, include adding new versions of some or all the above functions with an extra property list parameter to allow an individual setting for the collective calling requirement.</p>
 <dl class="section see"><dt>See also</dt><dd><ul>
-<li><a class="el" href="group___g_a_p_l.html#ga8792cbe7eeace1382f588ed12a92092a" title="Retrieves metadata read mode setting.">H5Pget_all_coll_metadata_ops()</a> </li>
-<li><a class="el" href="group___f_a_p_l.html#gac83ab4e788a5b6e0d578f40ca67d8d00" title="Retrieves metadata write mode setting.">H5Pget_coll_metadata_write()</a> </li>
-<li><a class="el" href="group___g_a_p_l.html#ga5bc0b1fc7e1e3961bf0b441e722949eb" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops()</a> </li>
-<li><a class="el" href="group___f_a_p_l.html#ga6380f9929cf42c8203813f7e72dde35c" title="Sets metadata write mode to be collective or independent (default)">H5Pset_coll_metadata_write()</a> </li>
+<li><a class="el" href="group___g_a_p_l.html#gaa278583dd1a989fa35a915def6518126" title="Retrieves metadata read mode setting.">H5Pget_all_coll_metadata_ops()</a> </li>
+<li><a class="el" href="group___f_a_p_l.html#ga565428cd6c090a8c7836b7adf7720403" title="Retrieves metadata write mode setting.">H5Pget_coll_metadata_write()</a> </li>
+<li><a class="el" href="group___g_a_p_l.html#gac45976cb82e4d3f085f191e5872d0316" title="Sets metadata I/O mode for read operations to be collective or independent (default)">H5Pset_all_coll_metadata_ops()</a> </li>
+<li><a class="el" href="group___f_a_p_l.html#ga0163bef7ee102029286830c2c30162ca" title="Sets metadata write mode to be collective or independent (default)">H5Pset_coll_metadata_write()</a> </li>
 <li><a class="el" href="maybe_metadata_reads.html">Functions with No Access Property List Parameter that May Generate Metadata Reads</a> </li>
 </ul>
 </dd></dl>

@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -190,7 +190,7 @@ $(function(){initNavTree('group___d_x_p_l.html',''); initResizable(true); });
 <tr>
 <td><a class="el" href="#ga252fe801869970c14a5e800a1ea7ab84" title="Retrieves the type(s) of I/O that HDF5 actually performed on raw data during the last I/O call.">H5Pget_actual_selection_io_mode</a> </td><td>Gets the type(s) (scalar, vector, selection) of raw data I/O performed on the last I/O call.  </td></tr>
 <tr>
-<td><a class="el" href="#ga6f65ca81d8a10015513a69fe76c5d542" title="Allows the library to modify the contents of the write buffer.">H5Pset_modify_write_buf</a>/<a class="el" href="#ga7a3e4d3f7b5c276873d00af3f92cdc22" title="Retrieves the &quot;modify write buffer&quot; property.">H5Pget_modify_write_buf</a> </td><td>Sets/gets a flag allowing the library to modify the contents of the write buffer.  </td></tr>
+<td><a class="el" href="#ga8ebd4b1ffbae81732cdbf1195c8d7c11" title="Allows the library to modify the contents of the write buffer.">H5Pset_modify_write_buf</a>/<a class="el" href="#ga417d80e0d7fc4eba52c8f1c4713a0c7b" title="Retrieves the &quot;modify write buffer&quot; property.">H5Pget_modify_write_buf</a> </td><td>Sets/gets a flag allowing the library to modify the contents of the write buffer.  </td></tr>
 <tr>
 <td>H5Pset_preserve/H5Pget_preserve </td><td>No longer available, deprecated as it no longer has any effect.  </td></tr>
 </table>
@@ -218,9 +218,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa55e7a6dd26a8df51b331febfeeb376b" id="r_gaa55e7a6dd26a8df51b331febfeeb376b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa55e7a6dd26a8df51b331febfeeb376b">H5Pget_hyper_vector_size</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t *size)</td></tr>
 <tr class="memdesc:gaa55e7a6dd26a8df51b331febfeeb376b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves number of I/O vectors to be read/written in hyperslab I/O.  <br /></td></tr>
 <tr class="separator:gaa55e7a6dd26a8df51b331febfeeb376b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7a3e4d3f7b5c276873d00af3f92cdc22" id="r_ga7a3e4d3f7b5c276873d00af3f92cdc22"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7a3e4d3f7b5c276873d00af3f92cdc22">H5Pget_modify_write_buf</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *modify_write_buf)</td></tr>
-<tr class="memdesc:ga7a3e4d3f7b5c276873d00af3f92cdc22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the "modify write buffer" property.  <br /></td></tr>
-<tr class="separator:ga7a3e4d3f7b5c276873d00af3f92cdc22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga417d80e0d7fc4eba52c8f1c4713a0c7b" id="r_ga417d80e0d7fc4eba52c8f1c4713a0c7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga417d80e0d7fc4eba52c8f1c4713a0c7b">H5Pget_modify_write_buf</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool *modify_write_buf)</td></tr>
+<tr class="memdesc:ga417d80e0d7fc4eba52c8f1c4713a0c7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the "modify write buffer" property.  <br /></td></tr>
+<tr class="separator:ga417d80e0d7fc4eba52c8f1c4713a0c7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga37ec8c3b3f1880ed6e1b300bc4ee9ed5" id="r_ga37ec8c3b3f1880ed6e1b300bc4ee9ed5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga37ec8c3b3f1880ed6e1b300bc4ee9ed5">H5Pget_mpio_actual_chunk_opt_mode</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5_ppublic_8h.html#a3d1f48e6c05b649980ddc5837e227956">H5D_mpio_actual_chunk_opt_mode_t</a> *actual_chunk_opt_mode)</td></tr>
 <tr class="memdesc:ga37ec8c3b3f1880ed6e1b300bc4ee9ed5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the type of chunk optimization that HDF5 actually performed on the last parallel I/O call (not necessarily the type requested)  <br /></td></tr>
 <tr class="separator:ga37ec8c3b3f1880ed6e1b300bc4ee9ed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -281,12 +281,12 @@ Functions</h2></td></tr>
 <tr class="memitem:gad8c1582c86e3316c70b0658b3b8e2071" id="r_gad8c1582c86e3316c70b0658b3b8e2071"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad8c1582c86e3316c70b0658b3b8e2071">H5Pset_hyper_vector_size</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, size_t size)</td></tr>
 <tr class="memdesc:gad8c1582c86e3316c70b0658b3b8e2071"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets number of I/O vectors to be read/written in hyperslab I/O.  <br /></td></tr>
 <tr class="separator:gad8c1582c86e3316c70b0658b3b8e2071"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga6f65ca81d8a10015513a69fe76c5d542" id="r_ga6f65ca81d8a10015513a69fe76c5d542"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga6f65ca81d8a10015513a69fe76c5d542">H5Pset_modify_write_buf</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> modify_write_buf)</td></tr>
-<tr class="memdesc:ga6f65ca81d8a10015513a69fe76c5d542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows the library to modify the contents of the write buffer.  <br /></td></tr>
-<tr class="separator:ga6f65ca81d8a10015513a69fe76c5d542"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae8b87209ba6a3943eb614b6dfe55e588" id="r_gae8b87209ba6a3943eb614b6dfe55e588"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae8b87209ba6a3943eb614b6dfe55e588">H5Pset_preserve</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> status)</td></tr>
-<tr class="memdesc:gae8b87209ba6a3943eb614b6dfe55e588"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the dataset transfer property list <code class="param">status</code>.  <br /></td></tr>
-<tr class="separator:gae8b87209ba6a3943eb614b6dfe55e588"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8ebd4b1ffbae81732cdbf1195c8d7c11" id="r_ga8ebd4b1ffbae81732cdbf1195c8d7c11"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8ebd4b1ffbae81732cdbf1195c8d7c11">H5Pset_modify_write_buf</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool modify_write_buf)</td></tr>
+<tr class="memdesc:ga8ebd4b1ffbae81732cdbf1195c8d7c11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows the library to modify the contents of the write buffer.  <br /></td></tr>
+<tr class="separator:ga8ebd4b1ffbae81732cdbf1195c8d7c11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga55445d27d058dadcd34fdba93344855e" id="r_ga55445d27d058dadcd34fdba93344855e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga55445d27d058dadcd34fdba93344855e">H5Pset_preserve</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool status)</td></tr>
+<tr class="memdesc:ga55445d27d058dadcd34fdba93344855e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the dataset transfer property list <code class="param">status</code>.  <br /></td></tr>
+<tr class="separator:ga55445d27d058dadcd34fdba93344855e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7d4d11c9c273d5a5ce2d174d66e4fa10" id="r_ga7d4d11c9c273d5a5ce2d174d66e4fa10"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7d4d11c9c273d5a5ce2d174d66e4fa10">H5Pset_selection_io</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5_ppublic_8h.html#a830b3ed265553177c07dd644f83ea795">H5D_selection_io_mode_t</a> selection_io_mode)</td></tr>
 <tr class="memdesc:ga7d4d11c9c273d5a5ce2d174d66e4fa10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the selection I/O mode.  <br /></td></tr>
 <tr class="separator:ga7d4d11c9c273d5a5ce2d174d66e4fa10"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -569,8 +569,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga7a3e4d3f7b5c276873d00af3f92cdc22" name="ga7a3e4d3f7b5c276873d00af3f92cdc22"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga7a3e4d3f7b5c276873d00af3f92cdc22">&#9670;&#160;</a></span>H5Pget_modify_write_buf()</h2>
+<a id="ga417d80e0d7fc4eba52c8f1c4713a0c7b" name="ga417d80e0d7fc4eba52c8f1c4713a0c7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga417d80e0d7fc4eba52c8f1c4713a0c7b">&#9670;&#160;</a></span>H5Pget_modify_write_buf()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -583,7 +583,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *</td>          <td class="paramname"><span class="paramname"><em>modify_write_buf</em></span>&#160;)</td>
+          <td class="paramtype">bool *</td>          <td class="paramname"><span class="paramname"><em>modify_write_buf</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -597,7 +597,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga7a3e4d3f7b5c276873d00af3f92cdc22" title="Retrieves the &quot;modify write buffer&quot; property.">H5Pget_modify_write_buf()</a> gets the "modify write buffer" property from the dataset transfer property list <code class="param">plist_id</code>. This property determines whether the library is allowed to modify the contents of write buffers passed to HDF5 API routines that are passed <code class="param">plist_id</code>. The default value for modify_write_buf is false.</p>
+<p><a class="el" href="#ga417d80e0d7fc4eba52c8f1c4713a0c7b" title="Retrieves the &quot;modify write buffer&quot; property.">H5Pget_modify_write_buf()</a> gets the "modify write buffer" property from the dataset transfer property list <code class="param">plist_id</code>. This property determines whether the library is allowed to modify the contents of write buffers passed to HDF5 API routines that are passed <code class="param">plist_id</code>. The default value for modify_write_buf is false.</p>
 <dl class="section since"><dt>Since</dt><dd>1.14.1 </dd></dl>
 
 </div>
@@ -1456,8 +1456,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga6f65ca81d8a10015513a69fe76c5d542" name="ga6f65ca81d8a10015513a69fe76c5d542"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga6f65ca81d8a10015513a69fe76c5d542">&#9670;&#160;</a></span>H5Pset_modify_write_buf()</h2>
+<a id="ga8ebd4b1ffbae81732cdbf1195c8d7c11" name="ga8ebd4b1ffbae81732cdbf1195c8d7c11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8ebd4b1ffbae81732cdbf1195c8d7c11">&#9670;&#160;</a></span>H5Pset_modify_write_buf()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1470,7 +1470,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></td>          <td class="paramname"><span class="paramname"><em>modify_write_buf</em></span>&#160;)</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>modify_write_buf</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1484,15 +1484,15 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga6f65ca81d8a10015513a69fe76c5d542" title="Allows the library to modify the contents of the write buffer.">H5Pset_modify_write_buf()</a> sets whether the library is allowed to modify the contents of write buffers passed to HDF5 API routines that are passed the dataset transfer property list <code class="param">plist_id</code>. The default value for modify_write_buf is false.</p>
+<p><a class="el" href="#ga8ebd4b1ffbae81732cdbf1195c8d7c11" title="Allows the library to modify the contents of the write buffer.">H5Pset_modify_write_buf()</a> sets whether the library is allowed to modify the contents of write buffers passed to HDF5 API routines that are passed the dataset transfer property list <code class="param">plist_id</code>. The default value for modify_write_buf is false.</p>
 <p>This function can be used to allow the library to perform in-place type conversion on write operations to save memory space. After making an API call with this parameter set to true, the contents of the write buffer are undefined.</p>
 <dl class="section note"><dt>Note</dt><dd>When modify_write_buf is set to true the library may violate the const qualifier on the API parameter for the write buffer.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.14.1 </dd></dl>
 
 </div>
 </div>
-<a id="gae8b87209ba6a3943eb614b6dfe55e588" name="gae8b87209ba6a3943eb614b6dfe55e588"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gae8b87209ba6a3943eb614b6dfe55e588">&#9670;&#160;</a></span>H5Pset_preserve()</h2>
+<a id="ga55445d27d058dadcd34fdba93344855e" name="ga55445d27d058dadcd34fdba93344855e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga55445d27d058dadcd34fdba93344855e">&#9670;&#160;</a></span>H5Pset_preserve()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1505,7 +1505,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></td>          <td class="paramname"><span class="paramname"><em>status</em></span>&#160;)</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>status</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1520,7 +1520,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000072">Deprecated</a></b></dt><dd>This function is deprecated as it no longer has any effect; compound datatype field preservation is now core functionality in the HDF5 library.</dd></dl>
-<p><a class="el" href="#gae8b87209ba6a3943eb614b6dfe55e588" title="Sets the dataset transfer property list status.">H5Pset_preserve()</a> sets the dataset transfer property list status to <code>1</code> or <code>0</code>.</p>
+<p><a class="el" href="#ga55445d27d058dadcd34fdba93344855e" title="Sets the dataset transfer property list status.">H5Pset_preserve()</a> sets the dataset transfer property list status to <code>1</code> or <code>0</code>.</p>
 <p>When reading or writing compound datatypes and the destination is partially initialized and the read/write is intended to initialize the other members, one must set this property to <code>1</code>. Otherwise the I/O pipeline treats the destination datapoints as completely uninitialized.</p>
 <dl class="section since"><dt>Since</dt><dd>1.0.0</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.8.2 Deprecated. </dd></dl>
@@ -1565,7 +1565,7 @@ Functions</h2></td></tr>
 <div class="line">} <a class="code hl_enumeration" href="_h5_ppublic_8h.html#a830b3ed265553177c07dd644f83ea795">H5D_selection_io_mode_t</a>;</div>
 </div><!-- fragment --><p> (Click on a enumerator, field, or type for more information.)</p>
 <dl class="section note"><dt>Note</dt><dd>The library may not perform selection I/O as it asks for if the layout callback determines that it is not feasible to do so. Please refer to <a class="el" href="#gad6fa6bfa5956e8c0bd69c22bde65f84c" title="Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call.">H5Pget_no_selection_io_cause()</a> for details.</dd></dl>
-<p>When used with type conversion, selection I/O requires the type conversion buffer (and the background buffer if applicable) be large enough to hold the entirety of the data involved in the I/O. For read operations, the library will use the application's read buffer as the type conversion buffer if the memory type is not smaller than the file type, eliminating the need for a separate type conversion buffer (a background buffer may still be required). For write operations, the library will similarly use the write buffer as a type conversion buffer, but only if <a class="el" href="#ga6f65ca81d8a10015513a69fe76c5d542" title="Allows the library to modify the contents of the write buffer.">H5Pset_modify_write_buf()</a> is used to allow the library to modify the contents of the write buffer.</p>
+<p>When used with type conversion, selection I/O requires the type conversion buffer (and the background buffer if applicable) be large enough to hold the entirety of the data involved in the I/O. For read operations, the library will use the application's read buffer as the type conversion buffer if the memory type is not smaller than the file type, eliminating the need for a separate type conversion buffer (a background buffer may still be required). For write operations, the library will similarly use the write buffer as a type conversion buffer, but only if <a class="el" href="#ga8ebd4b1ffbae81732cdbf1195c8d7c11" title="Allows the library to modify the contents of the write buffer.">H5Pset_modify_write_buf()</a> is used to allow the library to modify the contents of the write buffer.</p>
 <dl class="section since"><dt>Since</dt><dd>1.14.1 </dd></dl>
 
 </div>

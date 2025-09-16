@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['same_5ffile_0',['same_file',['../struct_h5_v_l__file__specific__args__t.html#aa9e470d8c63cf76ec096dc912842439b',1,'H5VL_file_specific_args_t']]],
-  ['save_5fresize_5fstatus_1',['save_resize_status',['../struct_h5_a_c__cache__image__config__t.html#a4e3d7f62b6ed0d946acf335dc314e303',1,'H5AC_cache_image_config_t']]],
+  ['same_5ffile_0',['same_file',['../struct_h5_v_l__file__specific__args__t.html#a93490219313b1226d213c03bc29a842e',1,'H5VL_file_specific_args_t']]],
+  ['save_5fresize_5fstatus_1',['save_resize_status',['../struct_h5_a_c__cache__image__config__t.html#aa8b1987de42d9297f927db576c72271f',1,'H5AC_cache_image_config_t']]],
   ['sb_5fdecode_2',['sb_decode',['../struct_h5_f_d__class__t.html#a30e2e88cdf2e92deca3b0fa8117710a4',1,'H5FD_class_t']]],
   ['sb_5fencode_3',['sb_encode',['../struct_h5_f_d__class__t.html#aad3b6178d2535f08d54d534a217869ca',1,'H5FD_class_t']]],
   ['sb_5fsize_4',['sb_size',['../struct_h5_f_d__class__t.html#a7758686077962f9b8413649b7fa4e257',1,'H5FD_class_t']]],
@@ -19,7 +19,7 @@ var searchData=
   ['set_5fcomment_16',['set_comment',['../union_h5_v_l__native__object__optional__args__t.html#a4a0a6bb5964336615dc3e9851cbb9a11',1,'H5VL_native_object_optional_args_t']]],
   ['set_5feoa_17',['set_eoa',['../struct_h5_f_d__class__t.html#a67842cf2f80fbe5867191635f39f0717',1,'H5FD_class_t']]],
   ['set_5fextent_18',['set_extent',['../struct_h5_v_l__dataset__specific__args__t.html#aa04b8385940fc26b3bfe1966a79eda51',1,'H5VL_dataset_specific_args_t']]],
-  ['set_5finitial_5fsize_19',['set_initial_size',['../classhdf_1_1hdf5lib_1_1structs_1_1_h5_a_c__cache__config__t.html#a2691bc6d357356e84ba3c393f87dfd52',1,'hdf.hdf5lib.structs.H5AC_cache_config_t.set_initial_size'],['../struct_h5_a_c__cache__config__t.html#a707198a337ece01a37dfec6e01275d82',1,'H5AC_cache_config_t::set_initial_size']]],
+  ['set_5finitial_5fsize_19',['set_initial_size',['../classhdf_1_1hdf5lib_1_1structs_1_1_h5_a_c__cache__config__t.html#a2691bc6d357356e84ba3c393f87dfd52',1,'hdf.hdf5lib.structs.H5AC_cache_config_t.set_initial_size'],['../struct_h5_a_c__cache__config__t.html#a5bfa4ced2bee62567910bb14dd28265b',1,'H5AC_cache_config_t::set_initial_size']]],
   ['set_5flibver_5fbounds_20',['set_libver_bounds',['../union_h5_v_l__native__file__optional__args__t.html#acd50cc37889ab68fff3228d3f697152a',1,'H5VL_native_file_optional_args_t']]],
   ['set_5flocal_21',['set_local',['../struct_h5_z__class2__t.html#a5d89ab9372734010a5c500ea3e694a03',1,'H5Z_class2_t::set_local'],['../struct_h5_z__class1__t.html#a5d89ab9372734010a5c500ea3e694a03',1,'H5Z_class1_t::set_local']]],
   ['set_5fmdc_5fconfig_22',['set_mdc_config',['../union_h5_v_l__native__file__optional__args__t.html#a042efcd2acd6e51b85b4e0c4f4816ec3',1,'H5VL_native_file_optional_args_t']]],

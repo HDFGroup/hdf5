@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -151,19 +151,18 @@ Library header files and conditional compilation</h1>
 Global variables/structures</h1>
 <h2><a class="anchor" id="subsec_tsafe_global_var"></a>
 Global library initialization variable</h2>
-<p>In the threadsafe implementation, the global library initialization variable <code>H5_libinit_g</code> is changed to a global structure consisting of the variable with its associated lock (locks are explained in section <a class="el" href="#subsec_tsafe_impl_locks">Recursive Locks</a>): </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a>  H5_libinit_g = FALSE;</div>
-<div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition</b> H5public.h:280</div></div>
+<p>In the threadsafe implementation, the global library initialization variable <code>H5_libinit_g</code> is changed to a global structure consisting of the variable with its associated lock (locks are explained in section <a class="el" href="#subsec_tsafe_impl_locks">Recursive Locks</a>): </p><div class="fragment"><div class="line"><span class="keywordtype">bool</span>  H5_libinit_g = FALSE;</div>
 </div><!-- fragment --><p>becomes </p><div class="fragment"><div class="line">H5_api_t H5_g;</div>
 </div><!-- fragment --><p>where <code>H5_api_t</code> is </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span>H5_api_struct {</div>
 <div class="line">  H5_mutex_t init_lock;           <span class="comment">// API entrance mutex</span></div>
-<div class="line">  <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> H5_libinit_g;</div>
+<div class="line">  <span class="keywordtype">bool</span>       H5_libinit_g;</div>
 <div class="line">} H5_api_t;</div>
 </div><!-- fragment --><p>All former references to <code>H5_libinit_g</code> in the library are now made using the macro <code>H5_INIT_GLOBAL</code>. If the threadsafe library is to be used, the macro is set to <code>H5_g.H5_libinit_g</code> instead.</p>
 <h2><a class="anchor" id="subsec_tsafe_global_serial"></a>
 Global serialization variable</h2>
 <p>A new global boolean variable <code>H5_allow_concurrent_g</code> is used to determine if multiple threads are allowed to an API call simultaneously. This is set to <code>FALSE</code>.</p>
 <p>All APIs that are allowed to do so have their own local variable that shadows the global variable and is set to <code>TRUE</code>. In phase 1, no such APIs exist.</p>
-<p>It is defined in <code>H5.c</code> as follows: </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> H5_allow_concurrent_g = FALSE;</div>
+<p>It is defined in <code>H5.c</code> as follows: </p><div class="fragment"><div class="line"><span class="keywordtype">bool</span> H5_allow_concurrent_g = FALSE;</div>
 </div><!-- fragment --><h2><a class="anchor" id="subsec_tsafe_global_init"></a>
 Global thread initialization variable</h2>
 <p>The global variable <code>H5_first_init_g</code> of type <code>pthread_once_t</code> is used to allow only the first thread in the application process to call an initialization function using <code>pthread_once</code>. All subsequent calls to <code>pthread_once</code> by any thread are disregarded.</p>

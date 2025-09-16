@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -380,7 +380,7 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 </li>
 </ul>
 <p><b>The following new C function has been added</b>: This function reports whether the linked version of the HDF5 Library was built with the thread-safety feature enabled. </p><ul>
-<li><a class="el" href="group___h5.html#ga70bfde4acd009cdd7bcd2f54c594e28a" title="Determines whether the HDF5 library was built with the thread-safety feature enabled.">H5is_library_threadsafe</a></li>
+<li><a class="el" href="group___h5.html#gaae7a734fe6c8080bff45b9142a173bc5" title="Determines whether the HDF5 library was built with the thread-safety feature enabled.">H5is_library_threadsafe</a></li>
 </ul>
 <p><b>The following flag has been removed</b>: </p><ul>
 <li><a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c487fac04c42423">H5F_ACC_DEBUG</a> flag for H5Fopen/create<br  />
@@ -448,7 +448,7 @@ Release 1.8.15 of May 2015 versus Release 1.8.14</h2>
 New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <h4>In the C Interface (main library)</h4>
 <p><b>The following new C functions have been added</b>: Memory allocation functions that use the library's allocator. </p><ul>
-<li><a class="el" href="group___h5.html#ga7459a8634b40225f3f6d81eb08acf399" title="Allocates memory that will be freed later internally.">H5allocate_memory</a> </li>
+<li><a class="el" href="group___h5.html#ga22628978a6ac53bee610ea5d22e48683" title="Allocates memory that will be freed later internally.">H5allocate_memory</a> </li>
 <li><a class="el" href="group___h5.html#gab8024266aca102414ba2960e27ddb7c2" title="Resizes and, if required, re-allocates memory that will later be freed internally by the HDF5 library...">H5resize_memory</a></li>
 </ul>
 <p>The following functions enable programmatic control of the loading of dynamic plugin filters in user applications: </p><ul>
@@ -512,7 +512,7 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <li>No new C functions have been added.</li>
 </ul>
 <p>The behavior of the following C function has been changed: </p><ul>
-<li><a class="el" href="group___f_a_p_l.html#ga237e300b96222a259896b24cf52405b0" title="Sets write tracking information for core driver, H5FD_CORE.">H5Pset_core_write_tracking</a>, The function <a class="el" href="group___f_a_p_l.html#ga237e300b96222a259896b24cf52405b0" title="Sets write tracking information for core driver, H5FD_CORE.">H5Pset_core_write_tracking</a> has been modified to enforce the limitation that the value of the page_size parameter cannot equal 0 (zero):</li>
+<li><a class="el" href="group___f_a_p_l.html#gada5811359151b195aa5e1172becd0250" title="Sets write tracking information for core driver, H5FD_CORE.">H5Pset_core_write_tracking</a>, The function <a class="el" href="group___f_a_p_l.html#gada5811359151b195aa5e1172becd0250" title="Sets write tracking information for core driver, H5FD_CORE.">H5Pset_core_write_tracking</a> has been modified to enforce the limitation that the value of the page_size parameter cannot equal 0 (zero):</li>
 </ul>
 <p><b>The following performance optimization has been implemented in the Parallel HDF5 library</b>: The algorithm for writing chunk fill values for new datasets has been optimized to write out all chunk fill values collectively in a single MPI-IO call. This was previously done independently by rank 0 (zero) one block at a time. This optimization should produce a significant performance improvement when creating chunked datasets in parallel, most notably when chunk dimensions are relatively small. This optimization will be evident in use of the following function: </p><ul>
 <li><a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a></li>
@@ -571,9 +571,9 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
  This function can also be useful in any case where the library uses a different memory manager than the application, such as when a debug memory manager is in use or when the HDF5 Library is wrapped for use in a managed language like Python or Java.</li>
 </ul>
 <p><b>New configuration property for the CORE driver</b>: </p><ul>
-<li><a class="el" href="group___f_a_p_l.html#ga237e300b96222a259896b24cf52405b0" title="Sets write tracking information for core driver, H5FD_CORE.">H5Pset_core_write_tracking</a> - This function sets a property in the file access property list to track the dirty regions in the file and write out only the changed regions on flush or close operations. This function is used with the CORE driver, <a class="el" href="group___f_a_p_l.html#gab2f2ecb6cdd3a94b1a26212d7119cfb6" title="Modifies the file access property list to use the H5FD_CORE driver.">H5Pset_fapl_core</a>.<br  />
+<li><a class="el" href="group___f_a_p_l.html#gada5811359151b195aa5e1172becd0250" title="Sets write tracking information for core driver, H5FD_CORE.">H5Pset_core_write_tracking</a> - This function sets a property in the file access property list to track the dirty regions in the file and write out only the changed regions on flush or close operations. This function is used with the CORE driver, <a class="el" href="group___f_a_p_l.html#gac9f8c916dbe7b5e4ef23e9a7b15f370f" title="Modifies the file access property list to use the H5FD_CORE driver.">H5Pset_fapl_core</a>.<br  />
  Additionally, a page aggregation size can be set that will aggregate small writes into larger writes. For example, setting a 1 mebibyte (1 MiB) page aggregation size will logically partition the the in-memory file into 1 MiB pages that will be written out in their entirety if even a single byte is dirtied. </li>
-<li><a class="el" href="group___f_a_p_l.html#ga60ec714459a4911d28e46deb201f4f2e" title="Gets information about the write tracking feature used by the core VFD.">H5Pget_core_write_tracking</a> - This function retrieves the property set by <a class="el" href="group___f_a_p_l.html#ga237e300b96222a259896b24cf52405b0" title="Sets write tracking information for core driver, H5FD_CORE.">H5Pset_core_write_tracking</a>.</li>
+<li><a class="el" href="group___f_a_p_l.html#ga767be5f6f42a14bb1550c47ac08ad469" title="Gets information about the write tracking feature used by the core VFD.">H5Pget_core_write_tracking</a> - This function retrieves the property set by <a class="el" href="group___f_a_p_l.html#gada5811359151b195aa5e1172becd0250" title="Sets write tracking information for core driver, H5FD_CORE.">H5Pset_core_write_tracking</a>.</li>
 </ul>
 <p><b>The following C functions have been modified</b>: </p><ul>
 <li><a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name</a> - The function signature has been changed to return the size of the buffer required to read the name (not including the NULL terminator) if the name parameter is passed as NULL. The size parameter is ignored in this case. </li>
@@ -877,8 +877,8 @@ New and Changed Functions</h3>
 <li><a class="el" href="group___o_c_p_y_p_l.html#ga4b8d6496ac56b167dba16729a8bd7adf" title="Clears the list of paths stored in the object copy property list.">H5Pfree_merge_committed_dtype_paths</a> Use of this capability is described in <a class="el" href="copying_committed.html">Copying Committed Datatypes with H5Ocopy</a>.</li>
 </ul>
 <p>The following C functions and Fortran subroutines were added to provide a mechanism to ensure sequential consistency in parallel environments using MPI I/O: </p><ul>
-<li><a class="el" href="group___p_h5_f.html#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity</a> </li>
-<li><a class="el" href="group___p_h5_f.html#ga849316b77788799fecb321a87d987ade" title="Retrieves the atomicity mode in use.">H5Fget_mpi_atomicity</a> </li>
+<li><a class="el" href="group___p_h5_f.html#gaaefabc54e36a2d13325e9a853400f359" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity</a> </li>
+<li><a class="el" href="group___p_h5_f.html#ga5356a1bee667b2a7dd1b657c820755fd" title="Retrieves the atomicity mode in use.">H5Fget_mpi_atomicity</a> </li>
 <li>h5fset_mpi_atomicity_f </li>
 <li>h5fget_mpi_atomicity_f</li>
 </ul>
@@ -1358,7 +1358,7 @@ The tool's error return code has been changed to 2.</li>
 <p>With no change in the command-line syntax, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> now prints a compression ratio when compression filters are in use.</p>
 <h4>Deprecated Functions</h4>
 <p>The following functions are deprecated as of this release: </p><ul>
-<li><a class="el" href="group___d_x_p_l.html#gae8b87209ba6a3943eb614b6dfe55e588" title="Sets the dataset transfer property list status.">H5Pset_preserve</a> and <a class="el" href="group___d_x_p_l.html#gacca1a094d70c3b2277175145142fda10" title="Checks status of the dataset transfer property list (DEPRECATED)">H5Pget_preserve</a> - The original role of these functions is now part of the core HDF5 Library functionality.</li>
+<li><a class="el" href="group___d_x_p_l.html#ga55445d27d058dadcd34fdba93344855e" title="Sets the dataset transfer property list status.">H5Pset_preserve</a> and <a class="el" href="group___d_x_p_l.html#gacca1a094d70c3b2277175145142fda10" title="Checks status of the dataset transfer property list (DEPRECATED)">H5Pget_preserve</a> - The original role of these functions is now part of the core HDF5 Library functionality.</li>
 </ul>
 <h4>Changed File Installation</h4>
 <p>The file libhdf5_fortran.settings is no longer installed with the HDF5 Library; the original content of that file is now included in libhdf5.settings.</p>
@@ -1785,7 +1785,7 @@ New Functions and Tools</h3>
 <li><a class="el" href="group___h5_i_u_d.html#ga991d7305ffbd4fdd84432b58f704fd3b" title="Retrieves the reference count on an ID type.">H5Iget_type_ref</a> <code>int <a class="el" href="group___h5_i_u_d.html#ga991d7305ffbd4fdd84432b58f704fd3b" title="Retrieves the reference count on an ID type.">H5Iget_type_ref(H5I_type_t type)</a></code></li>
 </ul>
 <p>Other identifier API (H5I) enhancements </p><ul>
-<li><a class="el" href="group___h5_i_u_d.html#ga97966e203f0967fc19b38b93c2972c08" title="Deletes all identifiers of the given type.">H5Iclear_type</a> <code><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___h5_i_u_d.html#ga97966e203f0967fc19b38b93c2972c08" title="Deletes all identifiers of the given type.">H5Iclear_type(H5I_type_t type, hbool_t force)</a></code> </li>
+<li><a class="el" href="group___h5_i_u_d.html#gab019005507b8a02b16538b864dd094c7" title="Deletes all identifiers of the given type.">H5Iclear_type</a> <code><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___h5_i_u_d.html#gab019005507b8a02b16538b864dd094c7" title="Deletes all identifiers of the given type.">H5Iclear_type(H5I_type_t type, hbool_t force)</a></code> </li>
 <li><a class="el" href="group___h5_i_u_d.html#ga839170c17fb8be7e14d16ee74a314a33" title="Returns the number of identifiers in a given identifier type.">H5Inmembers</a> <code>int <a class="el" href="group___h5_i_u_d.html#ga839170c17fb8be7e14d16ee74a314a33" title="Returns the number of identifiers in a given identifier type.">H5Inmembers(H5I_type_t type, hsize_t *num_members)</a></code> </li>
 <li><a class="el" href="group___h5_i_u_d.html#ga82b68eac53ed4c55efd98ab4d0eb9035" title="Returns the object referenced by an ID.">H5Iobject_verify</a> <code>void * <a class="el" href="group___h5_i_u_d.html#ga82b68eac53ed4c55efd98ab4d0eb9035" title="Returns the object referenced by an ID.">H5Iobject_verify(hid_t id, H5I_type_t id_type)</a></code> </li>
 <li><a class="el" href="group___h5_i_u_d.html#gaa297aca26ed0383a6e126b92454c619a" title="Removes an ID from its type.">H5Iremove_verify</a> <code>void * <a class="el" href="group___h5_i_u_d.html#gaa297aca26ed0383a6e126b92454c619a" title="Removes an ID from its type.">H5Iremove_verify(hid_t id, H5I_type_t id_type)</a></code> </li>

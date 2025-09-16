@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -217,7 +217,7 @@ Disabling the locks</h1>
 <p>There are several ways to disable the locks, depending on which version of the HDF5 library you are working with. This section will describe the file lock disable schemes as they exist in late 2022. The current library versions at this time were 1.10.9, 1.12.3, and 1.13.2. File locks are not present in HDF5 1.8. The lock feature matrix later in this document will describe the limitations of earlier versions.</p>
 <h2><a class="anchor" id="subsec_filelock_disable_config"></a>
 Configure option</h2>
-<p>You can set the file locking defaults at configure time. This sets the defaults for the associated properties in the fapl. Users can override the configure defaults using <a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> or the <code>HDF5_USE_FILE_LOCKING</code> environment variable. </p><h4>CMake</h4>
+<p>You can set the file locking defaults at configure time. This sets the defaults for the associated properties in the fapl. Users can override the configure defaults using <a class="el" href="group___f_a_p_l.html#gaae4de80c533a38da9f269c02b8e71de2" title="Sets the file locking property values.">H5Pset_file_locking</a> or the <code>HDF5_USE_FILE_LOCKING</code> environment variable. </p><h4>CMake</h4>
 <ul>
 <li>set <code>IGNORE_DISABLED_FILE_LOCK</code> to <code>ON</code> to ignore file locks when they </li>
 <li>are disabled on the file system (default: <code>ON</code>). </li>
@@ -225,9 +225,9 @@ Configure option</h2>
 </ul>
 <h1><a class="anchor" id="sec_filelock_funcset"></a>
 H5Pset_file_locking</h1>
-<p>This <a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> API call can be used to override the configure defaults. It takes <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> parameters for both the file locking and "ignore file locks when
+<p>This <a class="el" href="group___f_a_p_l.html#gaae4de80c533a38da9f269c02b8e71de2" title="Sets the file locking property values.">H5Pset_file_locking</a> API call can be used to override the configure defaults. It takes Boolean parameters for both the file locking and "ignore file locks when
 disabled on the file system" parameters. The values set here can be overridden by the file locking environment variable.</p>
-<p>There is a corresponding <a class="el" href="group___f_a_p_l.html#ga5de19a5a8ac23ca417aa2d49d708dc2d" title="Retrieves the file locking property values.">H5Pget_file_locking</a> call that can be used to check the currently set values of both properties in the fapl. <b>NOTE</b> that this call just checks the property list values. It does <b>NOT</b> check the environment variables!</p>
+<p>There is a corresponding <a class="el" href="group___f_a_p_l.html#ga6f68d03de151117cefa29b571865a394" title="Retrieves the file locking property values.">H5Pget_file_locking</a> call that can be used to check the currently set values of both properties in the fapl. <b>NOTE</b> that this call just checks the property list values. It does <b>NOT</b> check the environment variables!</p>
 <h1><a class="anchor" id="sec_filelock_env"></a>
 Environment variables</h1>
 <p>The <code>HDF5_USE_FILE_LOCKING</code> environment variable overrides all other file locking settings.</p>
@@ -251,7 +251,7 @@ Environment variables</h1>
 Lock disable scheme interactions</h1>
 <p>As mentioned above and reiterated here: </p><ul>
 <li>Configure-time settings set fapl defaults </li>
-<li><a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> overrides configure-time defaults </li>
+<li><a class="el" href="group___f_a_p_l.html#gaae4de80c533a38da9f269c02b8e71de2" title="Sets the file locking property values.">H5Pset_file_locking</a> overrides configure-time defaults </li>
 <li>The environment variable setting overrides all</li>
 </ul>
 <p>If you want to check that file locking is on, you'll need to check the fapl setting AND check the environment variable, which can override the fapl.</p>
@@ -283,7 +283,7 @@ Configure Option and Environment Variable</h2>
 </ul>
 <table class="doxtable">
 <tr>
-<th>Version</th><th>Has locks</th><th>Configure option</th><th><a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a></th><th><code>HDF5_USE_FILE_LOCKING</code> </th></tr>
+<th>Version</th><th>Has locks</th><th>Configure option</th><th><a class="el" href="group___f_a_p_l.html#gaae4de80c533a38da9f269c02b8e71de2" title="Sets the file locking property values.">H5Pset_file_locking</a></th><th><code>HDF5_USE_FILE_LOCKING</code> </th></tr>
 <tr>
 <td>1.8.x</td><td>No</td><td>-</td><td>-</td><td>- </td></tr>
 <tr>

@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -155,9 +155,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga7b37da15ff80c4aa5c275649f1f45b0a" id="r_ga7b37da15ff80c4aa5c275649f1f45b0a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7b37da15ff80c4aa5c275649f1f45b0a">H5Fget_mdc_image_info</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *image_addr, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *image_size)</td></tr>
 <tr class="memdesc:ga7b37da15ff80c4aa5c275649f1f45b0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtains information about a cache image if it exists.  <br /></td></tr>
 <tr class="separator:ga7b37da15ff80c4aa5c275649f1f45b0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga998ebdc7b5190cf3d0fdf2fbe71e9780" id="r_ga998ebdc7b5190cf3d0fdf2fbe71e9780"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga998ebdc7b5190cf3d0fdf2fbe71e9780">H5Fget_mdc_logging_status</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *is_enabled, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *is_currently_logging)</td></tr>
-<tr class="memdesc:ga998ebdc7b5190cf3d0fdf2fbe71e9780"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current metadata cache logging status.  <br /></td></tr>
-<tr class="separator:ga998ebdc7b5190cf3d0fdf2fbe71e9780"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5d1d9a5b7df6e6fb92700bacb4c917d6" id="r_ga5d1d9a5b7df6e6fb92700bacb4c917d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga5d1d9a5b7df6e6fb92700bacb4c917d6">H5Fget_mdc_logging_status</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, bool *is_enabled, bool *is_currently_logging)</td></tr>
+<tr class="memdesc:ga5d1d9a5b7df6e6fb92700bacb4c917d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current metadata cache logging status.  <br /></td></tr>
+<tr class="separator:ga5d1d9a5b7df6e6fb92700bacb4c917d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacda6cbd60d3c50b59f801eba4e5a335f" id="r_gacda6cbd60d3c50b59f801eba4e5a335f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gacda6cbd60d3c50b59f801eba4e5a335f">H5Fget_mdc_size</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr, size_t *cur_size_ptr, int *cur_num_entries_ptr)</td></tr>
 <tr class="memdesc:gacda6cbd60d3c50b59f801eba4e5a335f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtains current metadata cache size data for specified file.  <br /></td></tr>
 <tr class="separator:gacda6cbd60d3c50b59f801eba4e5a335f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -209,17 +209,17 @@ Functions</h2></td></tr>
 <div class="line">    <span class="comment">/* general configuration fields: */</span></div>
 <div class="line">    <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#aad880fc4455c253781e8968f2239d56f">version</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#aab04b3e770d1c2decc03f6fd94b64b17">rpt_fcn_enabled</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#af6bef1101778934a0f7d54963db4a9f5">rpt_fcn_enabled</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a6c03d051d5efb0e64bdca5d0b354a8b1">open_trace_file</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ae92fb5b442027a53da62a853b9be7636">open_trace_file</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#aced3486ae892a53209b7aae069a34be9">close_trace_file</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ab047662ba4d5dd6eb32835b472c38fb0">close_trace_file</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">char</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a92e7d20eb2b7b353961c64558ddac080">trace_file_name</a>[<a class="code hl_define" href="_h5_a_cpublic_8h.html#a717f1f3545cfc3d1b2208c96cc0c3bd3">H5AC__MAX_TRACE_FILE_NAME_LEN</a> + 1];</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a3d6e32c7a9bf8f65848c6840e1de8c6e">evictions_enabled</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a1b7d261ea3c2cd28446253e8f3b67e0a">evictions_enabled</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a707198a337ece01a37dfec6e01275d82">set_initial_size</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a5bfa4ced2bee62567910bb14dd28265b">set_initial_size</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a649236e7dd714855a50f122aa5caca9f">initial_size</a>;</div>
 <div class="line"> </div>
@@ -238,7 +238,7 @@ Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">double</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ac504dff76b24ab9f15536c51aec9fbbb">increment</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a322f2a955e71ab7ede483e991e76f806">apply_max_increment</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#aef1ae6503a0ae34abacce69d2996628e">apply_max_increment</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ad5a729f1d611f2780679a35b3524052c">max_increment</a>;</div>
 <div class="line"> </div>
@@ -255,13 +255,13 @@ Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">double</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a54007d3f2afb718b437f499a5c8b46d9">decrement</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ac2c89a735413e4c36d6f463c4890ab42">apply_max_decrement</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a7ef00e6aab4e781e1e9b1344b3e23460">apply_max_decrement</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a75e875a61c9da7f82482d0f6fe6e7152">max_decrement</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a7ac41e345300bdecd9943e855d55b71b">epochs_before_eviction</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a6c5cff8e8a21230cc7f21859d8d6bd22">apply_empty_reserve</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a14cfe890a5a58b493084730c988aa4ec">apply_empty_reserve</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">double</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a9c1ae995513b55737aad09e11beff733">empty_reserve</a>;</div>
 <div class="line"> </div>
@@ -351,8 +351,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga998ebdc7b5190cf3d0fdf2fbe71e9780" name="ga998ebdc7b5190cf3d0fdf2fbe71e9780"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga998ebdc7b5190cf3d0fdf2fbe71e9780">&#9670;&#160;</a></span>H5Fget_mdc_logging_status()</h2>
+<a id="ga5d1d9a5b7df6e6fb92700bacb4c917d6" name="ga5d1d9a5b7df6e6fb92700bacb4c917d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5d1d9a5b7df6e6fb92700bacb4c917d6">&#9670;&#160;</a></span>H5Fget_mdc_logging_status()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -365,12 +365,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *</td>          <td class="paramname"><span class="paramname"><em>is_enabled</em></span>, </td>
+          <td class="paramtype">bool *</td>          <td class="paramname"><span class="paramname"><em>is_enabled</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *</td>          <td class="paramname"><span class="paramname"><em>is_currently_logging</em></span>&#160;)</td>
+          <td class="paramtype">bool *</td>          <td class="paramname"><span class="paramname"><em>is_currently_logging</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -387,7 +387,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p>The metadata cache is a central part of the HDF5 library through which all <em>file metadata</em> reads and writes take place. File metadata is normally invisible to the user and is used by the library for purposes such as locating and indexing data. File metadata should not be confused with user metadata, which consists of attributes created by users and attached to HDF5 objects such as datasets via H5A API calls.</p>
 <p>Due to the complexity of the cache, a trace/logging feature has been created that can be used by HDF5 developers for debugging and performance analysis. The functions that control this functionality will normally be of use to a very limited number of developers outside of The HDF Group. The functions have been documented to help users create logs that can be sent with bug reports.</p>
-<p>Control of the log functionality is straightforward. Logging is enabled via the <a class="el" href="group___f_a_p_l.html#ga4d7206c5679d7243410058eceae59b2c" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a> function, which will modify the file access property list used to open or create a file. This function has a flag that determines whether logging begins at file open or starts in a paused state. Log messages can then be controlled via the <a class="el" href="#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging()</a> and <a class="el" href="#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging()</a> functions. <a class="el" href="group___f_a_p_l.html#gaa3a1ca6e294cc5074933239cc3d0e4a3" title="Gets metadata cache logging options.">H5Pget_mdc_log_options()</a> can be used to examine a file access property list, and <a class="el" href="#ga998ebdc7b5190cf3d0fdf2fbe71e9780" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status()</a> will return the current state of the logging flags.</p>
+<p>Control of the log functionality is straightforward. Logging is enabled via the <a class="el" href="group___f_a_p_l.html#ga33ef5eda9cd47bfe827ea16d835a88ef" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a> function, which will modify the file access property list used to open or create a file. This function has a flag that determines whether logging begins at file open or starts in a paused state. Log messages can then be controlled via the <a class="el" href="#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging()</a> and <a class="el" href="#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging()</a> functions. <a class="el" href="group___f_a_p_l.html#ga5da8039847bcbf091e92138b84c97374" title="Gets metadata cache logging options.">H5Pget_mdc_log_options()</a> can be used to examine a file access property list, and <a class="el" href="#ga5d1d9a5b7df6e6fb92700bacb4c917d6" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status()</a> will return the current state of the logging flags.</p>
 <p>The log format is described in the <a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/Design-MetadataCache-Logging-THG20140224-v4.pdf">Design: Metadata Cache Logging</a> document.</p>
 <dl class="section note"><dt>Note</dt><dd>Unlike <a class="el" href="#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging()</a> and <a class="el" href="#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging()</a>, this function can be called on any open file identifier.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
@@ -511,17 +511,17 @@ Functions</h2></td></tr>
 <div class="line">    <span class="comment">/* general configuration fields: */</span></div>
 <div class="line">    <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#aad880fc4455c253781e8968f2239d56f">version</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#aab04b3e770d1c2decc03f6fd94b64b17">rpt_fcn_enabled</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#af6bef1101778934a0f7d54963db4a9f5">rpt_fcn_enabled</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a6c03d051d5efb0e64bdca5d0b354a8b1">open_trace_file</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ae92fb5b442027a53da62a853b9be7636">open_trace_file</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#aced3486ae892a53209b7aae069a34be9">close_trace_file</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ab047662ba4d5dd6eb32835b472c38fb0">close_trace_file</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">char</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a92e7d20eb2b7b353961c64558ddac080">trace_file_name</a>[<a class="code hl_define" href="_h5_a_cpublic_8h.html#a717f1f3545cfc3d1b2208c96cc0c3bd3">H5AC__MAX_TRACE_FILE_NAME_LEN</a> + 1];</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a3d6e32c7a9bf8f65848c6840e1de8c6e">evictions_enabled</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a1b7d261ea3c2cd28446253e8f3b67e0a">evictions_enabled</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a707198a337ece01a37dfec6e01275d82">set_initial_size</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a5bfa4ced2bee62567910bb14dd28265b">set_initial_size</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a649236e7dd714855a50f122aa5caca9f">initial_size</a>;</div>
 <div class="line"> </div>
@@ -540,7 +540,7 @@ Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">double</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ac504dff76b24ab9f15536c51aec9fbbb">increment</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a322f2a955e71ab7ede483e991e76f806">apply_max_increment</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#aef1ae6503a0ae34abacce69d2996628e">apply_max_increment</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ad5a729f1d611f2780679a35b3524052c">max_increment</a>;</div>
 <div class="line"> </div>
@@ -557,13 +557,13 @@ Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">double</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a54007d3f2afb718b437f499a5c8b46d9">decrement</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#ac2c89a735413e4c36d6f463c4890ab42">apply_max_decrement</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a7ef00e6aab4e781e1e9b1344b3e23460">apply_max_decrement</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a75e875a61c9da7f82482d0f6fe6e7152">max_decrement</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a7ac41e345300bdecd9943e855d55b71b">epochs_before_eviction</a>;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a6c5cff8e8a21230cc7f21859d8d6bd22">apply_empty_reserve</a>;</div>
+<div class="line">    <span class="keywordtype">bool</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a14cfe890a5a58b493084730c988aa4ec">apply_empty_reserve</a>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">double</span> <a class="code hl_variable" href="struct_h5_a_c__cache__config__t.html#a9c1ae995513b55737aad09e11beff733">empty_reserve</a>;</div>
 <div class="line"> </div>
@@ -602,9 +602,9 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p>The metadata cache is a central part of the HDF5 library through which all <em>file metadata</em> reads and writes take place. File metadata is normally invisible to the user and is used by the library for purposes such as locating and indexing data. File metadata should not be confused with user metadata, which consists of attributes created by users and attached to HDF5 objects such as datasets via H5A API calls.</p>
 <p>Due to the complexity of the cache, a trace/logging feature has been created that can be used by HDF5 developers for debugging and performance analysis. The functions that control this functionality will normally be of use to a very limited number of developers outside of The HDF Group. The functions have been documented to help users create logs that can be sent with bug reports.</p>
-<p>Control of the log functionality is straightforward. Logging is enabled via the <a class="el" href="group___f_a_p_l.html#ga4d7206c5679d7243410058eceae59b2c" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a> function, which will modify the file access property list used to open or create a file. This function has a flag that determines whether logging begins at file open or starts in a paused state. Log messages can then be controlled via the <a class="el" href="#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging()</a> and <a class="el" href="#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging()</a> functions. <a class="el" href="group___f_a_p_l.html#gaa3a1ca6e294cc5074933239cc3d0e4a3" title="Gets metadata cache logging options.">H5Pget_mdc_log_options()</a> can be used to examine a file access property list, and <a class="el" href="#ga998ebdc7b5190cf3d0fdf2fbe71e9780" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status()</a> will return the current state of the logging flags.</p>
+<p>Control of the log functionality is straightforward. Logging is enabled via the <a class="el" href="group___f_a_p_l.html#ga33ef5eda9cd47bfe827ea16d835a88ef" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a> function, which will modify the file access property list used to open or create a file. This function has a flag that determines whether logging begins at file open or starts in a paused state. Log messages can then be controlled via the <a class="el" href="#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging()</a> and <a class="el" href="#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging()</a> functions. <a class="el" href="group___f_a_p_l.html#ga5da8039847bcbf091e92138b84c97374" title="Gets metadata cache logging options.">H5Pget_mdc_log_options()</a> can be used to examine a file access property list, and <a class="el" href="#ga5d1d9a5b7df6e6fb92700bacb4c917d6" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status()</a> will return the current state of the logging flags.</p>
 <p>The log format is described in the <a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/Design-MetadataCache-Logging-THG20140224-v4.pdf">Design: Metadata Cache Logging</a> document.</p>
-<dl class="section note"><dt>Note</dt><dd>Logging can only be started or stopped if metadata cache logging was enabled via <a class="el" href="group___f_a_p_l.html#ga4d7206c5679d7243410058eceae59b2c" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a>.<br  />
+<dl class="section note"><dt>Note</dt><dd>Logging can only be started or stopped if metadata cache logging was enabled via <a class="el" href="group___f_a_p_l.html#ga33ef5eda9cd47bfe827ea16d835a88ef" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a>.<br  />
  When enabled and currently logging, the overhead of the logging feature will almost certainly be significant.<br  />
  The log file is opened when the HDF5 file is opened or created and not when this function is called for the first time.<br  />
  This function opens the log file and starts logging metadata cache operations for a particular file. Calling this function when logging has already been enabled will be considered an error.</dd></dl>
@@ -637,9 +637,9 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p>The metadata cache is a central part of the HDF5 library through which all <em>file metadata</em> reads and writes take place. File metadata is normally invisible to the user and is used by the library for purposes such as locating and indexing data. File metadata should not be confused with user metadata, which consists of attributes created by users and attached to HDF5 objects such as datasets via H5A API calls.</p>
 <p>Due to the complexity of the cache, a trace/logging feature has been created that can be used by HDF5 developers for debugging and performance analysis. The functions that control this functionality will normally be of use to a very limited number of developers outside of The HDF Group. The functions have been documented to help users create logs that can be sent with bug reports.</p>
-<p>Control of the log functionality is straightforward. Logging is enabled via the <a class="el" href="group___f_a_p_l.html#ga4d7206c5679d7243410058eceae59b2c" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a> function, which will modify the file access property list used to open or create a file. This function has a flag that determines whether logging begins at file open or starts in a paused state. Log messages can then be controlled via the <a class="el" href="#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging()</a> and <a class="el" href="#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging()</a> functions. <a class="el" href="group___f_a_p_l.html#gaa3a1ca6e294cc5074933239cc3d0e4a3" title="Gets metadata cache logging options.">H5Pget_mdc_log_options()</a> can be used to examine a file access property list, and <a class="el" href="#ga998ebdc7b5190cf3d0fdf2fbe71e9780" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status()</a> will return the current state of the logging flags.</p>
+<p>Control of the log functionality is straightforward. Logging is enabled via the <a class="el" href="group___f_a_p_l.html#ga33ef5eda9cd47bfe827ea16d835a88ef" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a> function, which will modify the file access property list used to open or create a file. This function has a flag that determines whether logging begins at file open or starts in a paused state. Log messages can then be controlled via the <a class="el" href="#ga378fb5863071278b47070cf205f53e67" title="Starts logging metadata cache events if logging was previously enabled.">H5Fstart_mdc_logging()</a> and <a class="el" href="#ga78627b23010f82002b837f4d312bf234" title="Stops logging metadata cache events if logging was previously enabled and is currently ongoing.">H5Fstop_mdc_logging()</a> functions. <a class="el" href="group___f_a_p_l.html#ga5da8039847bcbf091e92138b84c97374" title="Gets metadata cache logging options.">H5Pget_mdc_log_options()</a> can be used to examine a file access property list, and <a class="el" href="#ga5d1d9a5b7df6e6fb92700bacb4c917d6" title="Gets the current metadata cache logging status.">H5Fget_mdc_logging_status()</a> will return the current state of the logging flags.</p>
 <p>The log format is described in the <a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/Design-MetadataCache-Logging-THG20140224-v4.pdf">Design: Metadata Cache Logging</a> document.</p>
-<dl class="section note"><dt>Note</dt><dd>Logging can only be started or stopped if metadata cache logging was enabled via <a class="el" href="group___f_a_p_l.html#ga4d7206c5679d7243410058eceae59b2c" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a>.<br  />
+<dl class="section note"><dt>Note</dt><dd>Logging can only be started or stopped if metadata cache logging was enabled via <a class="el" href="group___f_a_p_l.html#ga33ef5eda9cd47bfe827ea16d835a88ef" title="Sets metadata cache logging options.">H5Pset_mdc_log_options()</a>.<br  />
  This function only suspends the logging operations. The log file will remain open and will not be closed until the HDF5 file is closed.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 

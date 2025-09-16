@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -265,7 +265,7 @@ This line includes the H5LT module in Fortran applications: <div class="fragment
 </li>
 <li>Path and object function<ul>
 <li>Query path and object function<ul>
-<li><a class="el" href="#gaf07689780191996541a9eb0cf62e9139">H5LTpath_valid</a></li>
+<li><a class="el" href="#ga39038c92a8dcbe7bb542661572112089">H5LTpath_valid</a></li>
 </ul>
 </li>
 </ul>
@@ -382,9 +382,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gae2834cca05d6c4787f51933cc521f8fb" id="r_gae2834cca05d6c4787f51933cc521f8fb"><td class="memItemLeft" align="right" valign="top">H5HL_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae2834cca05d6c4787f51933cc521f8fb">H5LTopen_file_image</a> (void *buf_ptr, size_t buf_size, unsigned flags)</td></tr>
 <tr class="memdesc:gae2834cca05d6c4787f51933cc521f8fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens an HDF5 file image in memory.  <br /></td></tr>
 <tr class="separator:gae2834cca05d6c4787f51933cc521f8fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf07689780191996541a9eb0cf62e9139" id="r_gaf07689780191996541a9eb0cf62e9139"><td class="memItemLeft" align="right" valign="top">H5HL_DLL <a class="el" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaf07689780191996541a9eb0cf62e9139">H5LTpath_valid</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, const char *path, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> check_object_valid)</td></tr>
-<tr class="memdesc:gaf07689780191996541a9eb0cf62e9139"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object.  <br /></td></tr>
-<tr class="separator:gaf07689780191996541a9eb0cf62e9139"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga39038c92a8dcbe7bb542661572112089" id="r_ga39038c92a8dcbe7bb542661572112089"><td class="memItemLeft" align="right" valign="top">H5HL_DLL <a class="el" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga39038c92a8dcbe7bb542661572112089">H5LTpath_valid</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, const char *path, bool check_object_valid)</td></tr>
+<tr class="memdesc:ga39038c92a8dcbe7bb542661572112089"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object.  <br /></td></tr>
+<tr class="separator:ga39038c92a8dcbe7bb542661572112089"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadf06e39ac477b18f34c351fd40a8c9fd" id="r_gadf06e39ac477b18f34c351fd40a8c9fd"><td class="memItemLeft" align="right" valign="top">H5HL_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadf06e39ac477b18f34c351fd40a8c9fd">H5LTread_dataset</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, const char *dset_name, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, void *buffer)</td></tr>
 <tr class="memdesc:gadf06e39ac477b18f34c351fd40a8c9fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a dataset from disk.  <br /></td></tr>
 <tr class="separator:gadf06e39ac477b18f34c351fd40a8c9fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2178,8 +2178,8 @@ This function is part of the file image operations feature set. It is highly rec
 
 </div>
 </div>
-<a id="gaf07689780191996541a9eb0cf62e9139" name="gaf07689780191996541a9eb0cf62e9139"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaf07689780191996541a9eb0cf62e9139">&#9670;&#160;</a></span>H5LTpath_valid()</h2>
+<a id="ga39038c92a8dcbe7bb542661572112089" name="ga39038c92a8dcbe7bb542661572112089"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga39038c92a8dcbe7bb542661572112089">&#9670;&#160;</a></span>H5LTpath_valid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2197,7 +2197,7 @@ This function is part of the file image operations feature set. It is highly rec
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></td>          <td class="paramname"><span class="paramname"><em>check_object_valid</em></span>&#160;)</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>check_object_valid</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2223,10 +2223,10 @@ If <code class="param">check_object_valid</code> is set to <code>TRUE:</code> </
 Returns <code>TRUE</code> if the path is valid and resolves to an HDF5 object; otherwise returns <code>FALSE</code>.</dd>
 <dd>
 Upon error, returns a negative value.</dd></dl>
-<p><a class="el" href="#gaf07689780191996541a9eb0cf62e9139" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> checks the validity of <code class="param">path</code> relative to the identifier of an object, <code class="param">loc_id</code>. Optionally, <code class="param">check_object_valid</code> can be set to determine whether the final component of <code class="param">path</code> resolves to an HDF5 object; if not, the final component is a dangling link.</p>
+<p><a class="el" href="#ga39038c92a8dcbe7bb542661572112089" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> checks the validity of <code class="param">path</code> relative to the identifier of an object, <code class="param">loc_id</code>. Optionally, <code class="param">check_object_valid</code> can be set to determine whether the final component of <code class="param">path</code> resolves to an HDF5 object; if not, the final component is a dangling link.</p>
 <p>The meaning of the function's return value depends on the value of <code class="param">check_object_valid:</code> </p>
-<p>If <code class="param">check_object_valid</code> is set to <code>FALSE</code>, <a class="el" href="#gaf07689780191996541a9eb0cf62e9139" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> will check all links in <code class="param">path</code> to verify that they exist. If all the links in <code class="param">path</code> exist, the function will return <code>TRUE</code>; otherwise the function will return <code>FALSE</code>.</p>
-<p>If <code class="param">check_object_valid</code> is set to <code>TRUE</code>, <a class="el" href="#gaf07689780191996541a9eb0cf62e9139" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> will first check the links in <code class="param">path</code>, as described above. If all the links exist, <code class="param">check_object_valid</code> will then determine whether the final component of <code class="param">path</code> resolves to an actual HDF5 object. <a class="el" href="#gaf07689780191996541a9eb0cf62e9139" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> will return <code>TRUE</code> if all the links in <code class="param">path</code> exist and the final component resolves to an actual object; otherwise, it will return <code>FALSE</code>.</p>
+<p>If <code class="param">check_object_valid</code> is set to <code>FALSE</code>, <a class="el" href="#ga39038c92a8dcbe7bb542661572112089" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> will check all links in <code class="param">path</code> to verify that they exist. If all the links in <code class="param">path</code> exist, the function will return <code>TRUE</code>; otherwise the function will return <code>FALSE</code>.</p>
+<p>If <code class="param">check_object_valid</code> is set to <code>TRUE</code>, <a class="el" href="#ga39038c92a8dcbe7bb542661572112089" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> will first check the links in <code class="param">path</code>, as described above. If all the links exist, <code class="param">check_object_valid</code> will then determine whether the final component of <code class="param">path</code> resolves to an actual HDF5 object. <a class="el" href="#ga39038c92a8dcbe7bb542661572112089" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> will return <code>TRUE</code> if all the links in <code class="param">path</code> exist and the final component resolves to an actual object; otherwise, it will return <code>FALSE</code>.</p>
 <p><code class="param">path</code> can be any one of the following:</p>
 <ul>
 <li>An absolute path, which starts with a slash (<code>/</code>) indicating the file's root group, followed by the members</li>
@@ -2234,9 +2234,9 @@ Upon error, returns a negative value.</dd></dl>
 <li>A dot (<code></code>.), if <code class="param">loc_id</code> is the object identifier for the object itself.</li>
 </ul>
 <p>If <code class="param">path</code> is an absolute path, then <code class="param">loc_id</code> can be an identifier for any object in the file as it is used only to identify the file. If <code class="param">path</code> is a relative path, then <code class="param">loc_id</code> must be a file or a group identifier.</p>
-<dl class="section note"><dt>Note</dt><dd><b>Note on Behavior Change:</b> The behavior of <a class="el" href="#gaf07689780191996541a9eb0cf62e9139" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> was changed in the 1.10.0 release in the case where the root group, “/”, is the value of path. This change is described below:<ul>
-<li>Let <code class="param">loc_id</code> denote a valid HDF5 file identifier, and let <code class="param">check_object_valid</code> be set to true or false. A call to <a class="el" href="#gaf07689780191996541a9eb0cf62e9139" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> with arguments <code class="param">loc_id</code>, “/”, and <code class="param">check_object_valid</code> returns a positive value; in other words, H5LTpath_valid(loc_id, "/", check_object_valid) returns a positive value. In HDF5 version 1.8.16, this function returns 0.</li>
-<li>Let ‘root’ denote a valid HDF5 group identifier that refers to the root group of an HDF5 file, and let <code class="param">check_object_valid</code> be set to true or false. A call to <a class="el" href="#gaf07689780191996541a9eb0cf62e9139" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> with arguments ‘root’, “/”, and <code class="param">check_object_valid</code> returns a positive value; in other words, H5LTpath_valid(root, "/", check_object_valid) returns a positive value. In HDF5 version 1.8.16, this function returns 0.</li>
+<dl class="section note"><dt>Note</dt><dd><b>Note on Behavior Change:</b> The behavior of <a class="el" href="#ga39038c92a8dcbe7bb542661572112089" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> was changed in the 1.10.0 release in the case where the root group, “/”, is the value of path. This change is described below:<ul>
+<li>Let <code class="param">loc_id</code> denote a valid HDF5 file identifier, and let <code class="param">check_object_valid</code> be set to true or false. A call to <a class="el" href="#ga39038c92a8dcbe7bb542661572112089" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> with arguments <code class="param">loc_id</code>, “/”, and <code class="param">check_object_valid</code> returns a positive value; in other words, H5LTpath_valid(loc_id, "/", check_object_valid) returns a positive value. In HDF5 version 1.8.16, this function returns 0.</li>
+<li>Let ‘root’ denote a valid HDF5 group identifier that refers to the root group of an HDF5 file, and let <code class="param">check_object_valid</code> be set to true or false. A call to <a class="el" href="#ga39038c92a8dcbe7bb542661572112089" title="Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object...">H5LTpath_valid()</a> with arguments ‘root’, “/”, and <code class="param">check_object_valid</code> returns a positive value; in other words, H5LTpath_valid(root, "/", check_object_valid) returns a positive value. In HDF5 version 1.8.16, this function returns 0.</li>
 </ul>
 </dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.10.0 Function behavior changed in this release. See the “Note on Behavior Change” section above. </dd></dl>
