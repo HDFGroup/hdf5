@@ -1,4 +1,4 @@
-name: hdf5 publishrelease
+name: hdf5 publish release
 
 # Triggers the workflow on demand
 on:

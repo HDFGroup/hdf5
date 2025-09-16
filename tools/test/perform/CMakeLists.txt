@@ -3,7 +3,7 @@
 # Supports static/shared builds and conditional test/formatting targets
 # Tools covered: chunk, iopipe, chunk_cache, overhead, perf_meta, zip_perf
 # Includes logic for ZLIB/NG support and test inclusion
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_PERFORM C)
 
 #-----------------------------------------------------------------------------

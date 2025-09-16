@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_UTILS_SUBFILINGVFD C)
 
 configure_file (${HDF5_UTILS_SUBFILINGVFD_SOURCE_DIR}/h5fuse.in ${HDF5_UTILS_SUBFILINGVFD_BINARY_DIR}/h5fuse @ONLY)

@@ -11,6 +11,6 @@ set (examples
   ph5_hyperslab_by_pattern
   ph5_hyperslab_by_chunk
 )
-if (${HDF5_ENABLE_SUBFILING_VFD})
+if (${HDF5_PROVIDES_SUBFILING_VFD})
     list (APPEND examples ph5_subfiling)
 endif ()

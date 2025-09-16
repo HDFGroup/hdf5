@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5Examples_JAVA_TUTR Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)

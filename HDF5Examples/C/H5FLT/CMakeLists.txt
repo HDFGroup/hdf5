@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5Examples_C_H5FLT C)
 
 set (dyn_examples)
@@ -255,7 +255,7 @@ if (H5EX_BUILD_TESTING)
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
     endif ()
     set (last_test "${EXAMPLE_VARNAME}_${testname}")
-    if (HDF5_BUILD_TOOLS)
+    if (HDF5_PROVIDES_TOOLS)
       if ("${ARGN}" STREQUAL "FILTERALL")
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}

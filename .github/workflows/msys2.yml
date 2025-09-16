@@ -1,4 +1,4 @@
-name: hdf5 dev CMake MSys2 CI
+name: hdf5 dev MSys2 CI
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
 
-  CMake_build_and_test:
+  Build_and_test:
 
     # The type of runner that the job will run on
     runs-on: windows-latest
@@ -54,7 +54,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.1
 
-      - name: CMake Configure
+      - name: Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -72,17 +72,17 @@ jobs:
             -DHDF5_BUILD_DOC:BOOL=OFF \
             $GITHUB_WORKSPACE
 
-      - name: CMake Build
+      - name: Build
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         run: |
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Expected to Fail Tests
+      - name: Run Expected to Fail Tests
         run: |
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build

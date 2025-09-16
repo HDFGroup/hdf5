@@ -4,7 +4,7 @@
 # It handles plugin compilation, formatting, and installation into the plugins directory.
 # It also includes test configuration if enabled.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5COPY C)
 
 #-----------------------------------------------------------------------------

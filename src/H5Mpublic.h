@@ -123,7 +123,7 @@ typedef union H5VL_map_args_t {
     struct {
         hid_t       key_mem_type_id; /**< Memory datatype for key */
         const void *key;             /**< Pointer to key */
-        hbool_t     exists;          /**< Flag indicating whether key exists in map (OUT) */
+        bool        exists;          /**< Flag indicating whether key exists in map (OUT) */
     } exists;
 
     /** H5VL_MAP_PUT */
@@ -547,7 +547,7 @@ H5_DLL herr_t H5Mget_async(hid_t map_id, hid_t key_mem_type_id, const void *key,
  * \since 1.12.0
  *
  */
-H5_DLL herr_t H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists, hid_t dxpl_id);
+H5_DLL herr_t H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, bool *exists, hid_t dxpl_id);
 
 /**
  * \ingroup H5M

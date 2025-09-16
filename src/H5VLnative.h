@@ -257,8 +257,8 @@ typedef struct H5VL_native_file_get_vfd_handle_t {
 
 /* Parameters for native connector's file 'get MDC logging status' operation */
 typedef struct H5VL_native_file_get_mdc_logging_status_t {
-    hbool_t *is_enabled;           /* Whether logging is enabled (OUT) */
-    hbool_t *is_currently_logging; /* Whether currently logging (OUT) */
+    bool *is_enabled;           /* Whether logging is enabled (OUT) */
+    bool *is_currently_logging; /* Whether currently logging (OUT) */
 } H5VL_native_file_get_mdc_logging_status_t;
 
 /* Parameters for native connector's file 'get page buffering stats' operation */
@@ -372,23 +372,23 @@ typedef union H5VL_native_file_optional_args_t {
 
     /* H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG */
     struct {
-        hbool_t *minimize; /* Flag whether dataset object headers are minimal (OUT) */
+        bool *minimize; /* Flag whether dataset object headers are minimal (OUT) */
     } get_min_dset_ohdr_flag;
 
     /* H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG */
     struct {
-        hbool_t minimize; /* Flag whether dataset object headers should be minimal */
+        bool minimize; /* Flag whether dataset object headers should be minimal */
     } set_min_dset_ohdr_flag;
 
 #ifdef H5_HAVE_PARALLEL
     /* H5VL_NATIVE_FILE_GET_MPI_ATOMICITY */
     struct {
-        hbool_t *flag; /* Flag whether MPI atomicity is set for files (OUT) */
+        bool *flag; /* Flag whether MPI atomicity is set for files (OUT) */
     } get_mpi_atomicity;
 
     /* H5VL_NATIVE_FILE_SET_MPI_ATOMICITY */
     struct {
-        hbool_t flag; /* Flag whether to set MPI atomicity for files */
+        bool flag; /* Flag whether to set MPI atomicity for files */
     } set_mpi_atomicity;
 #endif /* H5_HAVE_PARALLEL */
 
@@ -421,7 +421,7 @@ typedef struct H5VL_native_group_iterate_old_t {
 /* Parameters for group 'get objinfo' operation */
 typedef struct H5VL_native_group_get_objinfo_t {
     H5VL_loc_params_t loc_params;  /* Location parameters for iteration */
-    hbool_t           follow_link; /* Whether to follow links for query */
+    bool              follow_link; /* Whether to follow links for query */
     H5G_stat_t       *statbuf;     /* Pointer to object info struct (OUT) */
 } H5VL_native_group_get_objinfo_t;
 
@@ -480,7 +480,7 @@ typedef union H5VL_native_object_optional_args_t {
 
     /* H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED */
     struct {
-        hbool_t *flag; /* Flag whether metadata cache flushes are disabled for this object (OUT) */
+        bool *flag; /* Flag whether metadata cache flushes are disabled for this object (OUT) */
     } are_mdc_flushes_disabled;
 
     /* H5VL_NATIVE_OBJECT_GET_NATIVE_INFO */

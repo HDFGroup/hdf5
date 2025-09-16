@@ -812,8 +812,8 @@ VFL 'write' routine.</td>
 </table>
 
 See Rajeev Thakur's papers:
-http://www.mcs.anl.gov/~thakur/papers/romio-coll.ps.gz
-http://www.mcs.anl.gov/~thakur/papers/mpio-high-perf.ps.gz
+https://web.cels.anl.gov/~thakur/papers/mpio-impl.pdf
+https://web.cels.anl.gov/~thakur/papers/romio-coll.pdf
 
 \section sec_vfl_reg Registration of a Driver
 Before a driver can be used the HDF5 library needs to be told of its existence. This is done by

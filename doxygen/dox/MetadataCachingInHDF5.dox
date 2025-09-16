@@ -840,12 +840,12 @@ The default configuration for the serial case is as follows:
 \code{.c}
 {
   /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-  /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-  /* hbool_t     open_trace_file        = */ FALSE,
-  /* hbool_t     close_trace_file       = */ FALSE,
+  /* bool        rpt_fcn_enabled        = */ FALSE,
+  /* bool        open_trace_file        = */ FALSE,
+  /* bool        close_trace_file       = */ FALSE,
   /* char        trace_file_name[]      = */ "",
-  /* hbool_t     evictions_enabled      = */ TRUE,
-  /* hbool_t     set_initial_size       = */ TRUE,
+  /* bool        evictions_enabled      = */ TRUE,
+  /* bool        set_initial_size       = */ TRUE,
   /* size_t      initial_size           = */ ( 2 * 1024 * 1024),
   /* double      min_clean_fraction     = */ 0.01,
   /* size_t      max_size               = */ (32 * 1024 * 1024),
@@ -854,7 +854,7 @@ The default configuration for the serial case is as follows:
   /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
   /* double      lower_hr_threshold     = */ 0.9,
   /* double      increment              = */ 2.0,
-  /* hbool_t     apply_max_increment    = */ TRUE,
+  /* bool        apply_max_increment    = */ TRUE,
   /* size_t      max_increment          = */ (4 * 1024 * 1024),
   /* enum H5C_cache_flash_incr_mode       */
   /*                    flash_incr_mode = */ H5C_flash_incr__add_space,
@@ -863,10 +863,10 @@ The default configuration for the serial case is as follows:
   /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
   /* double      upper_hr_threshold     = */ 0.999,
   /* double      decrement              = */ 0.9,
-  /* hbool_t     apply_max_decrement    = */ TRUE,
+  /* bool        apply_max_decrement    = */ TRUE,
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),
   /* int         epochs_before_eviction = */ 3,
-  /* hbool_t     apply_empty_reserve    = */ TRUE,
+  /* bool        apply_empty_reserve    = */ TRUE,
   /* double      empty_reserve          = */ 0.1,
   /* int         dirty_bytes_threshold  = */ (256 * 1024)
 }
@@ -877,12 +877,12 @@ The default configuration for the parallel case is as follows:
 \code{.c}
 {
   /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-  /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-  /* hbool_t     open_trace_file        = */ FALSE,
-  /* hbool_t     close_trace_file       = */ FALSE,
+  /* bool        rpt_fcn_enabled        = */ FALSE,
+  /* bool        open_trace_file        = */ FALSE,
+  /* bool        close_trace_file       = */ FALSE,
   /* char        trace_file_name[]      = */ "",
-  /* hbool_t     evictions_enabled      = */ TRUE,
-  /* hbool_t     set_initial_size       = */ TRUE,
+  /* bool        evictions_enabled      = */ TRUE,
+  /* bool        set_initial_size       = */ TRUE,
   /* size_t      initial_size           = */ ( 2 * 1024 * 1024),
   /* double      min_clean_fraction     = */ 0.3,
   /* size_t      max_size               = */ (32 * 1024 * 1024),
@@ -891,7 +891,7 @@ The default configuration for the parallel case is as follows:
   /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
   /* double      lower_hr_threshold     = */ 0.9,
   /* double      increment              = */ 2.0,
-  /* hbool_t     apply_max_increment    = */ TRUE,
+  /* bool        apply_max_increment    = */ TRUE,
   /* size_t      max_increment          = */ (4 * 1024 * 1024),
   /* enum H5C_cache_flash_incr_mode       */
   /*                    flash_incr_mode = */ H5C_flash_incr__add_space,
@@ -900,10 +900,10 @@ The default configuration for the parallel case is as follows:
   /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
   /* double      upper_hr_threshold     = */ 0.999,
   /* double      decrement              = */ 0.9,
-  /* hbool_t     apply_max_decrement    = */ TRUE,
+  /* bool        apply_max_decrement    = */ TRUE,
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),
   /* int         epochs_before_eviction = */ 3,
-  /* hbool_t     apply_empty_reserve    = */ TRUE,
+  /* bool        apply_empty_reserve    = */ TRUE,
   /* double      empty_reserve          = */ 0.1,
   /* int         dirty_bytes_threshold  = */ (256 * 1024)
 }

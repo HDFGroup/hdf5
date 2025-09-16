@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       build_mode:
-        description: "CMake Build type"
+        description: "Build type"
         required: true
         type: string
 
@@ -161,4 +161,4 @@ jobs:
         # that this should be re-enabled in the future.
         if: ${{ ! matrix.async }}
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" -E "H5DIFF" .

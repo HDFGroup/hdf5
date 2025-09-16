@@ -3,7 +3,7 @@
 # Adds VDS subdirectory and includes test scripts for repart, clear, and mkgrp if serial tests are enabled
 # Supports both static and shared builds, and conditional formatting
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_MISC C)
 
 # --------------------------------------------------------------------

@@ -1560,7 +1560,7 @@ H5HL_DLL herr_t H5LTfind_attribute(hid_t loc_id, const char *name);
  *                 See the “Note on Behavior Change” section above.
  *
  */
-H5HL_DLL htri_t H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid);
+H5HL_DLL htri_t H5LTpath_valid(hid_t loc_id, const char *path, bool check_object_valid);
 
 /*-------------------------------------------------------------------------
  *
