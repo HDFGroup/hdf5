@@ -371,7 +371,7 @@
  * Only needed where ssize_t isn't a thing (e.g., Windows)
  */
 #ifndef SSIZE_MAX
-#define SSIZE_MAX SIZE_MAX
+#define SSIZE_MAX PTRDIFF_MAX
 #endif
 
 /*
