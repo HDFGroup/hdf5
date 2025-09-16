@@ -42,12 +42,14 @@ main(void)
     pack_opt_t pack_options;
     diff_opt_t diff_options;
 
-    unsigned    j;     /* Local index variable for testing file space */
-    const char *fname; /* File name for testing file space */
+    unsigned    j     = 0;    /* Local index variable for testing file space */
+    const char *fname = NULL; /* File name for testing file space */
 
     h5_stat_t      file_stat;
     h5_stat_size_t fsize1, fsize2; /* file sizes */
     bool           driver_is_parallel;
+    hid_t          fapl_id = H5I_INVALID_HID;
+
 #if defined(H5_HAVE_FILTER_SZIP)
     int szip_can_encode = 0;
 #endif
@@ -1592,17 +1594,28 @@ main(void)
     /* Remove test files */
     TESTING("    test file cleanup");
 
-    for (size_t i = 0; i < NELMTS(H5REPACK_TEST_H5_FILES); i++) {
-        if (H5Fdelete(H5REPACK_TEST_H5_FILES[i], H5P_DEFAULT) < 0) {
-            printf(" Failed to delete %s", H5REPACK_TEST_H5_FILES[i]);
-            GOERROR;
-        }
+    if ((fapl_id = h5_fileaccess()) < 0) {
+        printf(" Failed to generate FAPL");
+        GOERROR;
     }
-    /* Also clean up H5REPACK_FSPACE_FNAMES array files */
+
+    h5_delete_all_test_files(H5REPACK_TEST_H5_FILES, fapl_id);
+
     for (size_t i = 0; i < NELMTS(H5REPACK_FSPACE_FNAMES); i++) {
-        if (H5Fdelete(H5REPACK_FSPACE_FNAMES[i], H5P_DEFAULT) < 0) {
-            printf(" Failed to delete %s", H5REPACK_FSPACE_FNAMES[i]);
-            GOERROR;
+        h5_delete_test_file(H5REPACK_FSPACE_FNAMES[i], fapl_id);
+    }
+
+    /* Clean up default-driver exclusive files */
+    if (h5_using_default_driver(NULL)) {
+        for (size_t i = 0; i < NELMTS(H5REPACK_DEFAULT_DRIVER_FILES); i++) {
+            h5_delete_test_file(H5REPACK_DEFAULT_DRIVER_FILES[i], fapl_id);
+        }
+
+        for (size_t i = 0; i < NELMTS(H5REPACK_DEFAULT_DRIVER_MISC_FILES); i++) {
+            if (remove(H5REPACK_DEFAULT_DRIVER_MISC_FILES[i]) < 0) {
+                printf(" Failed to delete %s", H5REPACK_DEFAULT_DRIVER_MISC_FILES[i]);
+                GOERROR;
+            }
         }
     }
 
@@ -1611,6 +1624,11 @@ main(void)
             printf(" Failed to delete %s", H5REPACK_TEST_MISC_FILES[i]);
             GOERROR;
         }
+    }
+
+    if (H5Pclose(fapl_id) < 0) {
+        printf(" Failed to close FAPL");
+        GOERROR;
     }
 
     PASSED();
@@ -1623,6 +1641,9 @@ main(void)
 
 error:
     h5tools_close();
+
+    if (fapl_id > 0)
+        H5Pclose(fapl_id);
 
     puts("***** H5REPACK TESTS FAILED *****");
 

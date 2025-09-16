@@ -1,15 +1,11 @@
-> [!NOTE]  
-> HDF5 version 2.0.0 currently under development
+HDF5 version 2.0.0-2 currently under development
 
 > [!WARNING]
 > **Heads Up: HDF5 Dropped Autotools March 10th**
 >
-> The day has passed: the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
+> It's happened—the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
 >
-> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) has been merged into the "develop" branch on **March 10, 2025**. HDF5 2.0, scheduled for release in Fall 2025, will *only* support the CMake build system.
-> 
->If you’d like to learn more about this decision, check out this blog post from November 2022: [Can we remove the autotools?](https://www.hdfgroup.org/2022/11/14/can-we-remove-the-autotools/) and the [HDF5 2.0 planning wiki](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Release-Planning). If you use autotools for your builds, you will need to update your workflows to CMake. 
-
+> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) was merged into the "develop" branch on **March 10, 2025**. Starting with HDF5 2.0, *only* the CMake build system is supported.
 
 ![HDF5 Logo][u3]
 
@@ -23,6 +19,7 @@
 [![HDF5 VFD build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vfd.yml?branch=develop&label=HDF5-VFD)](https://github.com/HDFGroup/hdf5/actions/workflows/vfd.yml?query=branch%3Adevelop)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
 [![OSS-Fuzz Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/hdf5.svg)](https://oss-fuzz-build-logs.storage.googleapis.com/index.html#hdf5)
+[![Link Checker Status](https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml/badge.svg)](https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml)
 
 [HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
 
@@ -52,28 +49,26 @@ to the features and updates included in this release of the library.
 
 Several more files are located within the [release_docs/][u4] directory with specific
 details for several common platforms and configurations.
-
-    INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
-    INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
-    INSTALL_parallel - instructions for building and configuring Parallel HDF5
-    INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
-
-    USING_HDF5_CMake - Build and Install HDF5 Applications with CMake
-    USING_CMake_Examples - Build and Test HDF5 Examples with CMake
+- INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
+- INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
+- INSTALL_parallel - instructions for building and configuring Parallel HDF5
+- INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
+- USING_HDF5_CMake - Build and Install HDF5 Applications with CMake
+- USING_CMake_Examples - Build and Test HDF5 Examples with CMake
 
 
 
 HELP AND SUPPORT
 ----------------
-Information regarding Help Desk and Support services is available at
+The HDF Group staffs a free Help Desk accessible at [https://help.hdfgroup.org](https://help.hdfgroup.org) and also monitors the [Forum](https://forum.hdfgroup.org). Our free support service is community-based and handled as time allows. We’ll do our best to respond to your question as soon as possible, but please note that response times may vary depending on the complexity of the issue and staff availability.
 
-   https://help.hdfgroup.org 
+If you're interested in guaranteed response and resolution times, a dedicated technical account manager, and more benefits (all while supporting the open-source work of The HDF Group), please check out [Priority Support](https://www.hdfgroup.org/solutions/priority-support/).
 
 
 
 FORUM and NEWS
 --------------
-The [HDF Forum](https://forum.hdfgroup.org) is provided for public announcements and discussions
+The [HDF Forum](https://forum.hdfgroup.org) is provided for public announcements, technical questions, and discussions
 of interest to the general HDF5 Community.
 
    - News and Announcements
@@ -85,7 +80,7 @@ of interest to the general HDF5 Community.
 These forums are provided as an open and public service for searching and reading.
 Posting requires completing a simple registration and allows one to join in the
 conversation.  Please read the [instructions](https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
-) pertaining to the Forum's use and configuration.
+) for more information on how to get started.
 
 RELEASE SCHEDULE
 ----------------
@@ -94,23 +89,25 @@ RELEASE SCHEDULE
 
 HDF5 does not follow a regular release schedule. Instead, updates are based on the
 introduction of new features and the resolution of bugs. However, we aim to have at
-least one annual release for each maintenance branch. Please note that the future
-HDF5 releases listed on this schedule are tentative.
-
-> [!IMPORTANT]
-> In subsequent releases after 1.14, HDF5 will adopt [semantic versioning](https://semver.org/).
-> Therefore, the upcoming major release will be designated as 2.0.0.
+least one annual release for each maintenance branch.
 
 | Release | New Features |
 | ------- | ------------ |
 | 2.0.0 | Drop Autotools support, drop the HDF5 <--> GIF tools, add complex number support, update library defaults (cache sizes, etc.) |
 | FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
 
-[A list of planned HDF5 2.0 features and bugfixes can be found here.](https://github.com/orgs/HDFGroup/projects/39/views/14)
+### Release Progress
 
-This list of feature release versions is tentative, and the release
-in which a feature is introduced may change.
+[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-progress-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
+The badge above shows the current progress of release-blocking issues with colors that reflect completion status:
+
+- **🟢 Green (90%+)**:  Readying for Deployment - most blockers completed
+- **🟡 Yellow (60-89%)**:  Nearing Completion - on track for release
+- **🟠 Orange (40-59%)**:  In Development - attention needed
+- **🔴 Red (<40%)**:  Initial Phase - significant blockers remain
+
+Click the badge to view the detailed project board with current release-blocking issues.
 
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
@@ -131,7 +128,7 @@ Development code is available at our Github location:
    https://github.com/HDFGroup/hdf5.git
 
 [u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt
-[u2]: https://github.com/HDFGroup/hdf5/blob/develop/doc/img/release-schedule.png
+[u2]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/img/release-schedule.png
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/doxygen/img/HDF5.png
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
 

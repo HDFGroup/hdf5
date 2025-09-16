@@ -3,7 +3,7 @@
 # Lists all generator source files and iterates to create targets for each
 # Supports both static and shared builds, and conditional formatting
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_MISC_VDS C)
 
 macro (ADD_H5_GENERATOR genfile)

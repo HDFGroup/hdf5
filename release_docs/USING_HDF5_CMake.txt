@@ -33,8 +33,7 @@ I. Preconditions
 
    1. We suggest you obtain the latest CMake for your platform from the Kitware
       web site. The HDF5 z.y.x product requires a minimum CMake version
-      of 3.18. If you are using VS2022, the minimum CMake version is 3.21.
-      CMakePresets.json, requires CMake 3.25 or higher.
+      of 3.26.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
@@ -194,7 +193,7 @@ Given the preconditions in section I, create a CMakeLists.txt file at the
 source root. Include the following text in the file:
 
 ##########################################################
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5MyApp C)
 
 set (LIB_TYPE STATIC) # or SHARED

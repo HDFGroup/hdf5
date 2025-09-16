@@ -158,68 +158,62 @@ add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DE
 ##############################################################################
 ##############################################################################
 
-macro (ADD_H5_TEST resultfile resultcode)
+#
+# Adds a test which performs h5ls according to passed parameters
+#
+# REQUIRED POSITIONAL ARGUMENT:
+# testname - name of test to add. Used as the base name of the output/reference files
+#
+# REQUIRED KEYWORD ARGUMENTS:
+# RESULT_CODE <code> - expected return code after test execution (0, 1, or 2)
+#
+# OPTIONAL KEYWORD ARGUMENTS:
+# RESULT_ERRCHECK <string> - value to pass to test script as TEST_ERRREF
+#                            Ignored if memchecker is enabled.
+#
+macro (ADD_H5_TEST testname)
+  cmake_parse_arguments(ARG
+    "" # flags
+    "RESULT_CODE;RESULT_ERRCHECK" # one-value args
+    "" # multi-value args
+    ${ARGN}
+  )
+
+  # Validate required parameters
+  if (NOT DEFINED ARG_RESULT_CODE)
+    message (FATAL_ERROR "ADD_H5_TEST: RESULT_CODE parameter required")
+  endif ()
+
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
-    set_tests_properties (H5LS-${resultfile} PROPERTIES
+    add_test (NAME H5LS-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARG_UNPARSED_ARGUMENTS})
+    set_tests_properties (H5LS-${testname} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
-    if ("${resultcode}" STREQUAL "1")
-      set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
+    if ("${ARG_RESULT_CODE}" STREQUAL "1")
+      set_tests_properties (H5LS-${testname} PROPERTIES WILL_FAIL "true")
     endif ()
   else ()
     # Remove any output file left over from previous test run
     add_test (
-        NAME H5LS-${resultfile}
+        NAME H5LS-${testname}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-            -D "TEST_ARGS=${ARGN}"
+            -D "TEST_ARGS=${ARG_UNPARSED_ARGUMENTS}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ls"
+            -D "TEST_OUTPUT=${testname}.out"
+            -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_ERRREF=${ARG_RESULT_ERRCHECK}"
+            -D "TEST_REFERENCE=${testname}.ls"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
-  set_tests_properties (H5LS-${resultfile} PROPERTIES
+  set_tests_properties (H5LS-${testname} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
-  if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
-  endif ()
-endmacro ()
-
-macro (ADD_H5_ERR_TEST resultfile resultcode result_errcheck)
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
-    set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if ("${resultcode}" STREQUAL "1")
-      set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
-    endif ()
-  else ()
-    add_test (
-        NAME H5LS-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-            -D "TEST_ARGS=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ls"
-            -D "TEST_ERRREF=${result_errcheck}"
-            -D "TEST_SKIP_COMPARE=true"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (H5LS-${resultfile} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-  )
-  if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
+  if ("H5LS-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5LS-${testname} PROPERTIES DISABLED true)
   endif ()
 endmacro ()
 
@@ -305,75 +299,75 @@ if (H5_HAVE_FILTER_SZIP)
 endif ()
 
 # test the help syntax
-ADD_H5_TEST (help-1 0 -w80 -h)
-ADD_H5_TEST (help-2 0 -w80 --help)
-ADD_H5_TEST (help-3 0 -w80 -?)
+ADD_H5_TEST (help-1 RESULT_CODE 0 -w80 -h)
+ADD_H5_TEST (help-2 RESULT_CODE 0 -w80 --help)
+ADD_H5_TEST (help-3 RESULT_CODE 0 -w80 -?)
 
 # test simple command
-ADD_H5_TEST (tall-1 0 -w80 tall.h5)
-ADD_H5_TEST (tall-2 0 -w80 -r -d tall.h5)
-ADD_H5_TEST (tall-3 0 -w80 -r -d -v -a tall.h5)
-ADD_H5_TEST (tgroup 0 -w80 tgroup.h5)
-ADD_H5_TEST (tgroup-3 0 -w80 tgroup.h5/g1)
+ADD_H5_TEST (tall-1 RESULT_CODE 0 -w80 tall.h5)
+ADD_H5_TEST (tall-2 RESULT_CODE 0 -w80 -r -d tall.h5)
+ADD_H5_TEST (tall-3 RESULT_CODE 0 -w80 -r -d -v -a tall.h5)
+ADD_H5_TEST (tgroup RESULT_CODE 0 -w80 tgroup.h5)
+ADD_H5_TEST (tgroup-3 RESULT_CODE 0 -w80 tgroup.h5/g1)
 
 # test page buffer cache command
-ADD_H5_TEST (tall-pbc 0 -w80 --page-buffer-size=8192 tall.h5)
+ADD_H5_TEST (tall-pbc RESULT_CODE 0 -w80 --page-buffer-size=8192 tall.h5)
 
 # test for displaying groups
 # The following combination of arguments is expected to return an error message
 # and return value 1
-ADD_H5_ERR_TEST (tgroup-1 1 "option not compatible" -w80 -r -g tgroup.h5)
-ADD_H5_TEST (tgroup-2 0 -w80 -g tgroup.h5/g1)
+ADD_H5_TEST (tgroup-1 RESULT_CODE 1 RESULT_ERRCHECK "option not compatible" -w80 -r -g tgroup.h5)
+ADD_H5_TEST (tgroup-2 RESULT_CODE 0 -w80 -g tgroup.h5/g1)
 
 # test for files with groups that have long comments
-ADD_H5_TEST (tgrp_comments 0 -w80 -v -g tgrp_comments.h5/glongcomment)
+ADD_H5_TEST (tgrp_comments RESULT_CODE 0 -w80 -v -g tgrp_comments.h5/glongcomment)
 
 # test for displaying simple space datasets
-ADD_H5_TEST (tdset-1 0 -w80 -r -d tdset.h5)
+ADD_H5_TEST (tdset-1 RESULT_CODE 0 -w80 -r -d tdset.h5)
 
 # tests for displaying chunked datasets
-ADD_H5_TEST (tdset2-1 0 -w80 -r -d tdset2.h5)
-ADD_H5_TEST (tdset2-2 0 -w80 -r -d -v -a tdset2.h5)
+ADD_H5_TEST (tdset2-1 RESULT_CODE 0 -w80 -r -d tdset2.h5)
+ADD_H5_TEST (tdset2-2 RESULT_CODE 0 -w80 -r -d -v -a tdset2.h5)
 
 # test for displaying soft links (dangle)
-ADD_H5_TEST (tslink-1 0 -w80 -r tslink.h5)
+ADD_H5_TEST (tslink-1 RESULT_CODE 0 -w80 -r tslink.h5)
 
 # test for displaying more soft links with --follow-symlinks
-ADD_H5_TEST (tsoftlinks-1 0 --follow-symlinks tsoftlinks.h5)
-ADD_H5_TEST (tsoftlinks-2 0 --follow-symlinks -r tsoftlinks.h5)
-ADD_H5_TEST (tsoftlinks-3 0 --follow-symlinks tsoftlinks.h5/group1)
-ADD_H5_TEST (tsoftlinks-4 0 --follow-symlinks -r tsoftlinks.h5/group1)
-ADD_H5_TEST (tsoftlinks-5 0 --follow-symlinks tsoftlinks.h5/soft_dset1)
+ADD_H5_TEST (tsoftlinks-1 RESULT_CODE 0 --follow-symlinks tsoftlinks.h5)
+ADD_H5_TEST (tsoftlinks-2 RESULT_CODE 0 --follow-symlinks -r tsoftlinks.h5)
+ADD_H5_TEST (tsoftlinks-3 RESULT_CODE 0 --follow-symlinks tsoftlinks.h5/group1)
+ADD_H5_TEST (tsoftlinks-4 RESULT_CODE 0 --follow-symlinks -r tsoftlinks.h5/group1)
+ADD_H5_TEST (tsoftlinks-5 RESULT_CODE 0 --follow-symlinks tsoftlinks.h5/soft_dset1)
 
 # test for displaying external and user-defined links with --follow-symlinks
-ADD_H5_TEST (textlink-1 0 -w80 -r textlink.h5)
-ADD_H5_TEST (textlinksrc-1 0 -w80 --follow-symlinks -r textlinksrc.h5)
-ADD_H5_TEST (textlinksrc-2 0 -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5)
-ADD_H5_TEST (textlinksrc-3 0 -w80 --follow-symlinks -r textlinksrc.h5/ext_link1)
-ADD_H5_TEST (textlinksrc-4 0 -w80 -r textlinksrc.h5)
-ADD_H5_TEST (textlinksrc-5 0 -w80 -r textlinksrc.h5/ext_link1)
-ADD_H5_TEST (textlinksrc-6 0 -w80 --follow-symlinks textlinksrc.h5)
-ADD_H5_TEST (textlinksrc-7 0 -w80 --follow-symlinks textlinksrc.h5/ext_link1)
-ADD_H5_TEST (tudlink-1 0 -w80 -r tudlink.h5)
+ADD_H5_TEST (textlink-1 RESULT_CODE 0 -w80 -r textlink.h5)
+ADD_H5_TEST (textlinksrc-1 RESULT_CODE 0 -w80 --follow-symlinks -r textlinksrc.h5)
+ADD_H5_TEST (textlinksrc-2 RESULT_CODE 0 -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5)
+ADD_H5_TEST (textlinksrc-3 RESULT_CODE 0 -w80 --follow-symlinks -r textlinksrc.h5/ext_link1)
+ADD_H5_TEST (textlinksrc-4 RESULT_CODE 0 -w80 -r textlinksrc.h5)
+ADD_H5_TEST (textlinksrc-5 RESULT_CODE 0 -w80 -r textlinksrc.h5/ext_link1)
+ADD_H5_TEST (textlinksrc-6 RESULT_CODE 0 -w80 --follow-symlinks textlinksrc.h5)
+ADD_H5_TEST (textlinksrc-7 RESULT_CODE 0 -w80 --follow-symlinks textlinksrc.h5/ext_link1)
+ADD_H5_TEST (tudlink-1 RESULT_CODE 0 -w80 -r tudlink.h5)
 
 # test for displaying external links with -E
 # the option -E will be depriciated but keep it for backward compatibility
-ADD_H5_TEST (textlinksrc-1-old 0 -w80 -Er textlinksrc.h5)
-ADD_H5_TEST (textlinksrc-2-old 0 -w80 -Erv textlinksrc.h5/ext_link5)
-ADD_H5_TEST (textlinksrc-3-old 0 -w80 -Er textlinksrc.h5/ext_link1)
-ADD_H5_TEST (textlinksrc-6-old 0 -w80 -E textlinksrc.h5)
-ADD_H5_TEST (textlinksrc-7-old 0 -w80 -E textlinksrc.h5/ext_link1)
+ADD_H5_TEST (textlinksrc-1-old RESULT_CODE 0 -w80 -Er textlinksrc.h5)
+ADD_H5_TEST (textlinksrc-2-old RESULT_CODE 0 -w80 -Erv textlinksrc.h5/ext_link5)
+ADD_H5_TEST (textlinksrc-3-old RESULT_CODE 0 -w80 -Er textlinksrc.h5/ext_link1)
+ADD_H5_TEST (textlinksrc-6-old RESULT_CODE 0 -w80 -E textlinksrc.h5)
+ADD_H5_TEST (textlinksrc-7-old RESULT_CODE 0 -w80 -E textlinksrc.h5/ext_link1)
 
 # tests for no-dangling-links
 # if this option is given on dangling link, h5ls should return exit code 1
 # when used alone , expect to print out help and return exit code 1
-ADD_H5_ERR_TEST (textlinksrc-nodangle-1 1 "no-dangling-links must be used" -w80 --no-dangling-links textlinksrc.h5)
+ADD_H5_TEST (textlinksrc-nodangle-1 RESULT_CODE 1 RESULT_ERRCHECK "no-dangling-links must be used" -w80 --no-dangling-links textlinksrc.h5)
 # external dangling link - expected exit code 1
-ADD_H5_TEST (textlinksrc-nodangle-2 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5)
+ADD_H5_TEST (textlinksrc-nodangle-2 RESULT_CODE 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5)
 # soft dangling link - expected exit code 1
-ADD_H5_TEST (tsoftlinks-nodangle-1 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5)
+ADD_H5_TEST (tsoftlinks-nodangle-1 RESULT_CODE 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5)
 # when used file with no dangling links - expected exit code 0
-ADD_H5_TEST (thlinks-nodangle-1 0 -w80 --follow-symlinks --no-dangling-links thlink.h5)
+ADD_H5_TEST (thlinks-nodangle-1 RESULT_CODE 0 -w80 --follow-symlinks --no-dangling-links thlink.h5)
 
 # tests for _Float16 type
 if (${${HDF_PREFIX}_HAVE__FLOAT16})
@@ -381,12 +375,12 @@ if (${${HDF_PREFIX}_HAVE__FLOAT16})
   # will fail as the type will be printed out as "native _Float16"
   # rather than "IEEE 16-bit little-endian float".
   if (H5_WORDS_BIGENDIAN)
-    ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
-    ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
+    ADD_H5_TEST (tfloat16_be RESULT_CODE 0 -w80 -v tfloat16_be.h5)
+    ADD_H5_TEST (tfloat16_be_nosupport RESULT_CODE 0 -w80 -v tfloat16_be.h5)
     set_tests_properties (H5LS-tfloat16_be_nosupport PROPERTIES WILL_FAIL "true")
   else ()
-    ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
-    ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
+    ADD_H5_TEST (tfloat16 RESULT_CODE 0 -w80 -v tfloat16.h5)
+    ADD_H5_TEST (tfloat16_nosupport RESULT_CODE 0 -w80 -v tfloat16.h5)
     set_tests_properties (H5LS-tfloat16_nosupport PROPERTIES WILL_FAIL "true")
   endif ()
 else ()
@@ -394,12 +388,12 @@ else ()
   # will fail as the types will be printed out as
   # "IEEE 16-bit little-endian float" and "IEEE 16-bit big-endian float"
   # rather than "native _Float16"
-  ADD_H5_TEST (tfloat16 0 -w80 -v tfloat16.h5)
+  ADD_H5_TEST (tfloat16 RESULT_CODE 0 -w80 -v tfloat16.h5)
   set_tests_properties (H5LS-tfloat16 PROPERTIES WILL_FAIL "true")
-  ADD_H5_TEST (tfloat16_be 0 -w80 -v tfloat16_be.h5)
+  ADD_H5_TEST (tfloat16_be RESULT_CODE 0 -w80 -v tfloat16_be.h5)
   set_tests_properties (H5LS-tfloat16_be PROPERTIES WILL_FAIL "true")
-  ADD_H5_TEST (tfloat16_nosupport 0 -w80 -v tfloat16.h5)
-  ADD_H5_TEST (tfloat16_be_nosupport 0 -w80 -v tfloat16_be.h5)
+  ADD_H5_TEST (tfloat16_nosupport RESULT_CODE 0 -w80 -v tfloat16.h5)
+  ADD_H5_TEST (tfloat16_be_nosupport RESULT_CODE 0 -w80 -v tfloat16_be.h5)
 endif ()
 
 # tests for complex numbers
@@ -408,12 +402,12 @@ if (${${HDF_PREFIX}_HAVE_COMPLEX_NUMBERS})
   # will fail as the type will be printed out as "native float _Complex",
   # for example, rather than "complex number of native float".
   if (H5_WORDS_BIGENDIAN)
-    ADD_H5_TEST (tcomplex_be 0 -w80 -v tcomplex_be.h5)
-    ADD_H5_TEST (tcomplex_be_nosupport 0 -w80 -v tcomplex_be.h5)
+    ADD_H5_TEST (tcomplex_be RESULT_CODE 0 -w80 -v tcomplex_be.h5)
+    ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5)
     set_tests_properties (H5LS-tcomplex_be_nosupport PROPERTIES WILL_FAIL "true")
   else ()
-    ADD_H5_TEST (tcomplex 0 -w80 -v tcomplex.h5)
-    ADD_H5_TEST (tcomplex_nosupport 0 -w80 -v tcomplex.h5)
+    ADD_H5_TEST (tcomplex RESULT_CODE 0 -w80 -v tcomplex.h5)
+    ADD_H5_TEST (tcomplex_nosupport RESULT_CODE 0 -w80 -v tcomplex.h5)
     set_tests_properties (H5LS-tcomplex_nosupport PROPERTIES WILL_FAIL "true")
   endif ()
 else ()
@@ -424,97 +418,97 @@ else ()
   # depending on the endian-ness of the machine, as the types will be printed
   # out as "complex number of IEEE 32-bit little-endian float", for example,
   # rather than "complex number of native float".
-  ADD_H5_TEST (tcomplex 0 -w80 -v tcomplex.h5)
+  ADD_H5_TEST (tcomplex RESULT_CODE 0 -w80 -v tcomplex.h5)
   set_tests_properties (H5LS-tcomplex PROPERTIES WILL_FAIL "true")
-  ADD_H5_TEST (tcomplex_be 0 -w80 -v tcomplex_be.h5)
+  ADD_H5_TEST (tcomplex_be RESULT_CODE 0 -w80 -v tcomplex_be.h5)
   set_tests_properties (H5LS-tcomplex_be PROPERTIES WILL_FAIL "true")
 
   if (H5_WORDS_BIGENDIAN)
-    ADD_H5_TEST (tcomplex_nosupport 0 -w80 -v tcomplex.h5)
+    ADD_H5_TEST (tcomplex_nosupport RESULT_CODE 0 -w80 -v tcomplex.h5)
     set_tests_properties (H5LS-tcomplex_nosupport PROPERTIES WILL_FAIL "true")
-    ADD_H5_TEST (tcomplex_be_nosupport 0 -w80 -v tcomplex_be.h5)
+    ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5)
   else ()
-    ADD_H5_TEST (tcomplex_nosupport 0 -w80 -v tcomplex.h5)
-    ADD_H5_TEST (tcomplex_be_nosupport 0 -w80 -v tcomplex_be.h5)
+    ADD_H5_TEST (tcomplex_nosupport RESULT_CODE 0 -w80 -v tcomplex.h5)
+    ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5)
     set_tests_properties (H5LS-tcomplex_be_nosupport PROPERTIES WILL_FAIL "true")
   endif ()
 endif ()
 
 # test for wildcards in filename (does not work with cmake)
-#  ADD_H5_TEST (tstarfile 0 -w80 t*link.h5)
-#  ADD_H5_TEST (tqmarkfile 0 -w80 t?link.h5)
-ADD_H5_TEST (tmultifile 0 -w80 thlink.h5 tslink.h5)
+#  ADD_H5_TEST (tstarfile RESULT_CODE 0 -w80 t*link.h5)
+#  ADD_H5_TEST (tqmarkfile RESULT_CODE 0 -w80 t?link.h5)
+ADD_H5_TEST (tmultifile RESULT_CODE 0 -w80 thlink.h5 tslink.h5)
 
 # tests for hard links
-ADD_H5_TEST (thlink-1 0 -w80 thlink.h5)
+ADD_H5_TEST (thlink-1 RESULT_CODE 0 -w80 thlink.h5)
 
 # tests for compound data types
-ADD_H5_TEST (tcomp-1 0 -w80 -r -d tcompound.h5)
+ADD_H5_TEST (tcomp-1 RESULT_CODE 0 -w80 -r -d tcompound.h5)
 
 #test for the nested compound type
-ADD_H5_TEST (tnestcomp-1 0 -w80 -r -d tnestedcomp.h5)
+ADD_H5_TEST (tnestcomp-1 RESULT_CODE 0 -w80 -r -d tnestedcomp.h5)
 
-ADD_H5_TEST (tnestcomp-2 0 -w80 -r -d -S tnestedcomp.h5)
+ADD_H5_TEST (tnestcomp-2 RESULT_CODE 0 -w80 -r -d -S tnestedcomp.h5)
 
-ADD_H5_TEST (tnestcomp-3 0 -w80 -r -d -l tnestedcomp.h5)
+ADD_H5_TEST (tnestcomp-3 RESULT_CODE 0 -w80 -r -d -l tnestedcomp.h5)
 
-ADD_H5_TEST (tnestcomp-4 0 -w80 -r -d -l -S tnestedcomp.h5)
+ADD_H5_TEST (tnestcomp-4 RESULT_CODE 0 -w80 -r -d -l -S tnestedcomp.h5)
 
 # test for loop detection
-ADD_H5_TEST (tloop-1 0 -w80 -r -d tloop.h5)
+ADD_H5_TEST (tloop-1 RESULT_CODE 0 -w80 -r -d tloop.h5)
 
 # test for string
-ADD_H5_TEST (tstr-1 0 -w80 -r -d tstr.h5)
+ADD_H5_TEST (tstr-1 RESULT_CODE 0 -w80 -r -d tstr.h5)
 
 # test test file created from lib SAF team
-ADD_H5_TEST (tsaf 0 -w80 -r -d tsaf.h5)
+ADD_H5_TEST (tsaf RESULT_CODE 0 -w80 -r -d tsaf.h5)
 
 # test for variable length data types
-ADD_H5_TEST (tvldtypes1 0 -w80 -r -d tvldtypes1.h5)
+ADD_H5_TEST (tvldtypes1 RESULT_CODE 0 -w80 -r -d tvldtypes1.h5)
 
 # test for array data types
-ADD_H5_TEST (tarray1 0 -w80 -r -d tarray1.h5)
+ADD_H5_TEST (tarray1 RESULT_CODE 0 -w80 -r -d tarray1.h5)
 
 # test for empty data
-ADD_H5_TEST (tempty 0 -w80 -d tempty.h5)
+ADD_H5_TEST (tempty RESULT_CODE 0 -w80 -d tempty.h5)
 
 # test for displaying dataset and attribute of null space
-ADD_H5_TEST (tgrpnullspace 0 -w80 -v -S tgrpnullspace.h5)
+ADD_H5_TEST (tgrpnullspace RESULT_CODE 0 -w80 -v -S tgrpnullspace.h5)
 
 # test for all dataset types written to attributes
 # enable -S for avoiding printing NATIVE types
-ADD_H5_TEST (tattr2 0 -w80 -v -S tattr2.h5)
+ADD_H5_TEST (tattr2 RESULT_CODE 0 -w80 -v -S tattr2.h5)
 
 # test for attribute with region references wo verbose mode
 # ( HDFFV-7838, )
 if (H5_WORDS_BIGENDIAN)
-  ADD_H5_TEST (tattrreg_be 0 -w80 -v -d tattrreg.h5)
+  ADD_H5_TEST (tattrreg_be RESULT_CODE 0 -w80 -v -d tattrreg.h5)
 else ()
-  ADD_H5_TEST (tattrreg_le 0 -w80 -v -d tattrreg.h5)
+  ADD_H5_TEST (tattrreg_le RESULT_CODE 0 -w80 -v -d tattrreg.h5)
 endif ()
 
 # test for non-existing file
-ADD_H5_ERR_TEST (nosuchfile 1 "unable to open file" nosuchfile.h5)
+ADD_H5_TEST (nosuchfile RESULT_CODE 1 RESULT_ERRCHECK "unable to open file" nosuchfile.h5)
 
 # test for variable length data types in verbose mode
 if (H5_WORDS_BIGENDIAN)
-  ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
+  ADD_H5_TEST (tvldtypes2be RESULT_CODE 0 -v tvldtypes1.h5)
 else ()
-  ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
+  ADD_H5_TEST (tvldtypes2le RESULT_CODE 0 -v tvldtypes1.h5)
 endif ()
 
 # test for dataset region references data types in verbose mode
 if (H5_WORDS_BIGENDIAN)
-  ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
+  ADD_H5_TEST (tdataregbe RESULT_CODE 0 -v tdatareg.h5)
 else ()
-  ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
+  ADD_H5_TEST (tdataregle RESULT_CODE 0 -v tdatareg.h5)
 endif ()
 
 # test for file with datasets that use Fixed Array chunk indices
 if (USE_FILTER_DEFLATE)
   # data read internal filters
-  ADD_H5_TEST (tdset_idx-1 0 -w80 -d tdset_idx.h5)
-  ADD_H5_TEST (tdset_idx-2 0 -w80 -d -v -a tdset_idx.h5)
+  ADD_H5_TEST (tdset_idx-1 RESULT_CODE 0 -w80 -d tdset_idx.h5)
+  ADD_H5_TEST (tdset_idx-2 RESULT_CODE 0 -w80 -d -v -a tdset_idx.h5)
 endif ()
 
 

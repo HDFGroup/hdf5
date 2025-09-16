@@ -3,7 +3,7 @@
 # Sets up include directories, linking, and formatting for plugin targets
 # Includes test scripts for h5dump, PBITS, VDS, and XML if test tools and serial tests are enabled
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5DUMP C)
 
 #-----------------------------------------------------------------------------

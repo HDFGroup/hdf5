@@ -27,7 +27,7 @@
 # See comments throughout this file for details on configuration variables and options.
 # -----------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5 C)
 
 if (POLICY CMP0074)
@@ -511,6 +511,14 @@ set (H5_LIBVER_DIR       ${H5_VERS_MAJOR}${H5_VERS_MINOR})
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
+
+get_property(IS_MULTI GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT IS_MULTI)
+    message(STATUS "No CMAKE_BUILD_TYPE set -- using Release")
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 include (${HDF_CONFIG_DIR}/HDFMacros.cmake)
 
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
@@ -928,6 +936,7 @@ endif ()
 # Include user macros
 #-----------------------------------------------------------------------------
 include (UserMacros.cmake)
+include (config/CacheURLs.cmake)
 
 #-----------------------------------------------------------------------------
 # Include filter (zlib, szip, etc.) macros
@@ -1240,7 +1249,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
-configure_file (${HDF_CONFIG_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
+configure_file (${HDF5_SRC_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
 
 #-----------------------------------------------------------------------------
 # Option to build examples
