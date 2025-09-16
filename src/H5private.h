@@ -432,6 +432,18 @@
  */
 #define H5_REQUEST_NULL NULL
 
+/*
+ * Does the compiler support the __builtin_expect() syntax?
+ * It's not a problem if not.
+ */
+#if H5_HAVE_BUILTIN_EXPECT
+#define H5_LIKELY(expression)   __builtin_expect(!!(expression), 1)
+#define H5_UNLIKELY(expression) __builtin_expect(!!(expression), 0)
+#else
+#define H5_LIKELY(expression)   (expression)
+#define H5_UNLIKELY(expression) (expression)
+#endif
+
 /* clang-format off */
 /* Address-related macros */
 #define H5_addr_overflow(X,Z)    (HADDR_UNDEF == (X) ||                     \
