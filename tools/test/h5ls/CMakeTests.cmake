@@ -282,7 +282,7 @@ macro (ADD_H5_TEST testname)
       set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES DISABLED true)
     endif ()
 
-    if (NOT "${vol} " STREQUAL "native")
+    if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES
         ENVIRONMENT "${vol_env}"
         FIXTURES_REQUIRED h5ls_vol_files
