@@ -21,7 +21,7 @@ This file contains the changes that were made to a maintenance branch since
 it split off from `develop`. It will also be found in the `develop` branch
 when experimental releases have been created.
 
-### RELEASE.txt
+### CHANGELOG.md (formerly RELEASE.txt)
 
 This is the changelog for the current version of the library.
 
@@ -45,7 +45,7 @@ the history files from those releases and compare them by hand.
 ### MAJOR release
 
 * If there were experimental releases, merge the experimental `HISTORY` file
-  and the current `RELEASE.txt` by category to create a separate, unified
+  and the current `CHANGELOG.md` by category to create a separate, unified
   file that ignores the experimental releases. Don't check this in yet or
   clobber any existing `HISTORY`/`RELEASE` files, but put it someplace handy for
   use in later steps.
@@ -54,11 +54,11 @@ the history files from those releases and compare them by hand.
 
 In develop:
 * Create the new `HISTORY-\[VERSION 1\]-\[VERSION 2\].txt` file
-    * If there is an experimental `HISTORY` file, add `RELEASE.txt` to the beginning of it and use that
-    * Otherwise, start with `RELEASE.txt`
+    * If there is an experimental `HISTORY` file, add `CHANGELOG.md` to the beginning of it and use that
+    * Otherwise, start with `CHANGELOG.md`
     * Add the introduction boilerplate like in the other `HISTORY` files (TOC, etc.)
 * Delete any experimental `HISTORY` file
-* Clear out `RELEASE.txt`
+* Clear out `CHANGELOG.md`
 
 Note that we're KEEPING any experimental release history information in the
 `HISTORY-\[VERSION 1\]-\[VERSION 2\].txt` file, so do NOT use the merged file in
@@ -67,29 +67,29 @@ the above steps!
 In the new maintenance branch:
 * Create the new `HISTORY-\[VERSION\].txt` file
     * If there is an experimental `HISTORY` file use the combined file you created earlier
-    * Otherwise, start with `RELEASE.txt`
+    * Otherwise, start with `CHANGELOG.md`
     * Add the introduction boilerplate like in the other `HISTORY` files (TOC, etc.)
 * Delete any experimental `HISTORY` file
-* Clear out `RELEASE.txt`
+* Clear out `CHANGELOG.md`
 
 * Create the new release branch
 
 In the new release branch:
-* If there were experimental releases, use the combined file you created earlier as `RELEASE.txt`
-* Otherwise the `RELEASE.txt` will be used as-is
+* If there were experimental releases, use the combined file you created earlier as `CHANGELOG.md`
+* Otherwise the `CHANGELOG.md` will be used as-is
 
 ### MINOR release
 
 * Create the release branch
 
 In the maintenance branch:
-* Add the contents of `RELEASE.txt` to the beginnnig of `HISTORY-\[VERSION\].txt`
-* Clear out `RELEASE.txt`
+* Add the contents of `CHANGELOG.md` to the beginnnig of `HISTORY-\[VERSION\].txt`
+* Clear out `CHANGELOG.md`
 
 ### EXPERIMENTAL release
 
-* Add the contents of `RELEASE.txt` to the beginnnig of `HISTORY-\[VERSION\].txt`
-* Clear out `RELEASE.txt`
+* Add the contents of `CHANGELOG.md` to the beginnnig of `HISTORY-\[VERSION\].txt`
+* Clear out `CHANGELOG.md`
 
 ## INSTALL files
 
