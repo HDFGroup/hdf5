@@ -56,7 +56,7 @@ typedef struct H5G_info_t {
     H5G_storage_type_t storage_type; /**< Type of storage for links in group */
     hsize_t            nlinks;       /**< Number of links in group */
     int64_t            max_corder;   /**< Current max. creation order value for group */
-    hbool_t            mounted;      /**< Whether group has a file mounted on it */
+    bool               mounted;      /**< Whether group has a file mounted on it */
 } H5G_info_t;
 //! <!-- [H5G_info_t_snip] -->
 
@@ -1121,8 +1121,7 @@ H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
-                             H5G_stat_t *statbuf /*out*/);
+H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, bool follow_link, H5G_stat_t *statbuf /*out*/);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5G

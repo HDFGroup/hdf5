@@ -247,7 +247,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
+H5Fset_mpi_atomicity(hid_t file_id, bool flag)
 {
     H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */

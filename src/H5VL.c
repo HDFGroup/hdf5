@@ -641,7 +641,7 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_is_native(hid_t obj_id, hbool_t *is_native)
+H5VLobject_is_native(hid_t obj_id, bool *is_native)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = SUCCEED;

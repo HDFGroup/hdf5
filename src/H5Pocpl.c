@@ -375,7 +375,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
+H5Pset_obj_track_times(hid_t plist_id, bool track_times)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     uint8_t         ohdr_flags;          /* Object header flags */
@@ -415,7 +415,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
+H5Pget_obj_track_times(hid_t plist_id, bool *track_times /*out*/)
 {
     herr_t ret_value = SUCCEED; /* return value */
 
