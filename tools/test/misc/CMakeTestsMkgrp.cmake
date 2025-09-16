@@ -157,6 +157,10 @@ macro (ADD_H5_TEST testname)
         COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${ARG_RESULT_OPTION} ${testname}.h5 ${ARG_UNPARSED_ARGUMENTS}
     )
 
+    if ("${vol_prefix}H5MKGRP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (${vol_prefix}H5MKGRP-${testname} PROPERTIES DISABLED true)
+    endif ()
+
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       set_tests_properties (${vol_prefix}H5MKGRP-${testname} PROPERTIES
         DEPENDS ${vol_prefix}H5MKGRP-${testname}-clear-objects
@@ -195,8 +199,8 @@ macro (ADD_H5_TEST testname)
       )
     endif ()
 
-    if ("${vol_prefix}H5MKGRP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (${vol_prefix}H5MKGRP-${testname} PROPERTIES DISABLED true)
+    if ("${vol_prefix}H5MKGRP-${testname}-h5ls" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (${vol_prefix}H5MKGRP-${testname}-h5ls PROPERTIES DISABLED true)
     endif ()
 
     set_tests_properties("${vol_prefix}H5MKGRP-${testname}" PROPERTIES
