@@ -51,7 +51,7 @@ The number of processes that you could use would be 1, 2, 4, or 8. The number of
 <table>
 <tr>
 <th><strong>Processes</strong></th>
-<th><strong>Size of count[0](\# of rows) </strong></th>
+<th><strong>Size of count[0](&#35; of rows) </strong></th>
 </tr><tr>
 <td>1</td><td>8</td>
 </tr><tr>
@@ -163,7 +163,7 @@ columns that could be written by each slab is as follows:
 <table>
 <tr>
 <th><strong>Processes</strong></th>
-<th><strong>Size of count (2)(\# of columns) </strong></th>
+<th><strong>Size of count (2)(&#35; of columns) </strong></th>
 </tr><tr>
 <td>1</td><td>8</td>
 </tr><tr>

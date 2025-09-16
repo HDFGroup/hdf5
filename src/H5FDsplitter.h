@@ -55,7 +55,7 @@ typedef struct H5FD_splitter_vfd_config_t {
     char log_file_path[H5FD_SPLITTER_PATH_MAX + 1]; /**< Path to the log file, which will be created on HDF5
                                                        file open (existing files will be clobbered). Can be
                                                        NULL, in which case no logging output is generated. */
-    hbool_t ignore_wo_errs;                         /**< Whether to ignore errors on the write-only channel */
+    bool ignore_wo_errs;                            /**< Whether to ignore errors on the write-only channel */
 } H5FD_splitter_vfd_config_t;
 //! <!-- [H5FD_splitter_vfd_config_t_snip] -->
 

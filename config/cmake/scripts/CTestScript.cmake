@@ -17,38 +17,40 @@ cmake_minimum_required (VERSION 3.26)
 # -----------------------------------------------------------
 # -- Get environment
 # -----------------------------------------------------------
-if (NOT SITE_OS_NAME)
-  ## machine name not provided - attempt to discover with uname
-  ## -- set hostname
-  ## --------------------------
-  find_program (HOSTNAME_CMD NAMES hostname)
-  execute_process (COMMAND ${HOSTNAME_CMD} OUTPUT_VARIABLE HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set (CTEST_SITE  "${HOSTNAME}${CTEST_SITE_EXT}")
-  find_program (UNAME NAMES uname)
-  macro (getuname name flag)
-    execute_process (COMMAND "${UNAME}" "${flag}" OUTPUT_VARIABLE "${name}" OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endmacro ()
+if (NOT CTEST_BUILD_NAME) # Note! if CTEST_BUILD_NAME is set CTEST_SITE must also be set  
+  if (NOT SITE_OS_NAME)
+    ## machine name not provided - attempt to discover with uname
+    ## -- set hostname
+    ## --------------------------
+    find_program (HOSTNAME_CMD NAMES hostname)
+    execute_process (COMMAND ${HOSTNAME_CMD} OUTPUT_VARIABLE HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set (CTEST_SITE  "${HOSTNAME}${CTEST_SITE_EXT}")
+    find_program (UNAME NAMES uname)
+    macro (getuname name flag)
+      execute_process (COMMAND "${UNAME}" "${flag}" OUTPUT_VARIABLE "${name}" OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endmacro ()
 
-  getuname (osname -s)
-  string(STRIP ${osname} osname)
-  getuname (osrel  -r)
-  string(STRIP ${osrel} osrel)
-  getuname (cpu    -m)
-  string(STRIP ${cpu} cpu)
-  message (STATUS "Dashboard script uname output: ${osname}-${osrel}-${cpu}\n")
+    getuname (osname -s)
+    string(STRIP ${osname} osname)
+    getuname (osrel  -r)
+    string(STRIP ${osrel} osrel)
+    getuname (cpu    -m)
+    string(STRIP ${cpu} cpu)
+    message (STATUS "Dashboard script uname output: ${osname}-${osrel}-${cpu}\n")
 
-  set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}")
-else ()
-  ## machine name provided
-  ## --------------------------
-  if (CMAKE_HOST_UNIX)
-    set (CTEST_BUILD_NAME "${SITE_OS_NAME}-${SITE_OS_VERSION}-${SITE_OS_BITS}-${SITE_COMPILER_NAME}-${SITE_COMPILER_VERSION}")
+    set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}")
   else ()
-    set (CTEST_BUILD_NAME "${SITE_OS_NAME}-${SITE_OS_VERSION}-${SITE_COMPILER_NAME}")
+    ## machine name provided
+    ## --------------------------
+    if (CMAKE_HOST_UNIX)
+      set (CTEST_BUILD_NAME "${SITE_OS_NAME}-${SITE_OS_VERSION}-${SITE_OS_BITS}-${SITE_COMPILER_NAME}-${SITE_COMPILER_VERSION}")
+    else ()
+      set (CTEST_BUILD_NAME "${SITE_OS_NAME}-${SITE_OS_VERSION}-${SITE_COMPILER_NAME}")
+    endif ()
   endif ()
-endif ()
-if (SITE_BUILDNAME_SUFFIX)
-  set (CTEST_BUILD_NAME  "${SITE_BUILDNAME_SUFFIX}-${CTEST_BUILD_NAME}")
+  if (SITE_BUILDNAME_SUFFIX)
+    set (CTEST_BUILD_NAME  "${SITE_BUILDNAME_SUFFIX}-${CTEST_BUILD_NAME}")
+  endif ()
 endif ()
 set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 

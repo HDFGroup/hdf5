@@ -34,7 +34,7 @@ main(void)
     {
         __label__ fail_read;
         unsigned majnum, minnum, relnum;
-        hbool_t  flag;
+        bool     flag;
 
         // retrieve the library version
         if (H5get_libversion(&majnum, &minnum, &relnum) < 0) {

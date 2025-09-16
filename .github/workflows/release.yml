@@ -46,7 +46,7 @@ jobs:
 
   call-workflow-ctest:
     needs: [call-workflow-tarball, call-aws-c-s3-build]
-    uses: ./.github/workflows/cmake-ctest.yml
+    uses: ./.github/workflows/ctest.yml
     with:
       cmake_version: "latest"
       preset_name: ci-StdShar

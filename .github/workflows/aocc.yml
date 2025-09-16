@@ -1,4 +1,4 @@
-name: hdf5 dev PAR CMake aocc ompi
+name: hdf5 dev PAR aocc ompi
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -65,7 +65,7 @@ jobs:
           make
           make install
 
-      - name: CMake Configure
+      - name: Configure
         shell: bash
         run: |
           export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-${{ env.AOCCVERDOT }}/lib:/home/runner/work/hdf5/hdf5/openmpi-${{ env.MPIVERDOT }}-install/lib:/usr/local/lib
@@ -88,19 +88,19 @@ jobs:
           $GITHUB_WORKSPACE
           #cat src/libhdf5.settings
 
-      - name: CMake Build
+      - name: Build
         shell: bash
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Tests
+      - name: Run Tests
         shell: bash
         run: |
           ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
 
-      - name: CMake Run Parallel Tests
+      - name: Run Parallel Tests
         shell: bash
         run: |
           ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }} -V

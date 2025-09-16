@@ -188,7 +188,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Iclear_type(H5I_type_t type, hbool_t force)
+H5Iclear_type(H5I_type_t type, bool force)
 {
     herr_t ret_value = FAIL; /* Return value */
 
