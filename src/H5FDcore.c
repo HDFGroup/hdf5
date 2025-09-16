@@ -494,7 +494,7 @@ H5FD__core_unregister(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
+H5Pset_core_write_tracking(hid_t plist_id, bool is_enabled, size_t page_size)
 {
     H5P_genplist_t         *plist;               /* Property list pointer */
     H5FD_core_fapl_t        fa;                  /* Core VFD info */
@@ -541,7 +541,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled /*out*/, size_t *page_size /*out*/)
+H5Pget_core_write_tracking(hid_t plist_id, bool *is_enabled /*out*/, size_t *page_size /*out*/)
 {
     H5P_genplist_t         *plist;               /* Property list pointer */
     const H5FD_core_fapl_t *fa;                  /* Core VFD info */
@@ -579,7 +579,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
+H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
 {
     H5P_genplist_t  *plist;               /* Property list pointer */
     H5FD_core_fapl_t fa;                  /* Core VFD info */
@@ -616,7 +616,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_store /*out*/)
+H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, bool *backing_store /*out*/)
 {
     H5P_genplist_t         *plist;               /* Property list pointer */
     const H5FD_core_fapl_t *fa;                  /* Core VFD info */

@@ -131,7 +131,7 @@ static const H5I_class_t H5I_ATTR_CLS[1] = {{
 }};
 
 /* Flag indicating "top" of interface has been initialized */
-static hbool_t H5A_top_package_initialize_s = false;
+static bool H5A_top_package_initialize_s = false;
 
 /*-------------------------------------------------------------------------
  * Function: H5A_init

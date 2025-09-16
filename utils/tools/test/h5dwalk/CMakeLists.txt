@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5DWALK)
 
 if (HDF5_BUILD_PARALLEL_TOOLS)

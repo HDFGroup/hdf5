@@ -83,16 +83,16 @@ typedef _Lcomplex H5_ldouble_complex;
 #ifdef __cplusplus
 extern "C" {
 #endif
-H5_DLL int      Wgettimeofday(struct timeval *tv, struct timezone *tz);
-H5_DLL int      Wsetenv(const char *name, const char *value, int overwrite);
-H5_DLL int      Wflock(int fd, int operation);
-H5_DLL herr_t   H5_expand_windows_env_vars(char **env_var);
-H5_DLL wchar_t *H5_get_utf16_str(const char *s);
-H5_DLL int      Wopen(const char *path, int oflag, ...);
-H5_DLL int      Wremove(const char *path);
-H5_DLL int      H5_get_win32_times(H5_timevals_t *tvs);
-H5_DLL char    *H5_strndup(const char *s, size_t n);
-H5_DLL char    *Wstrcasestr_wrap(const char *haystack, const char *needle);
+H5_DLL int    Wgettimeofday(struct timeval *tv, struct timezone *tz);
+H5_DLL int    Wsetenv(const char *name, const char *value, int overwrite);
+H5_DLL int    Wflock(int fd, int operation);
+H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
+H5_DLL herr_t H5_get_utf16_str(const char *s, wchar_t **wstring, uint32_t *win_error);
+H5_DLL int    Wopen(const char *path, int oflag, ...);
+H5_DLL int    Wremove(const char *path);
+H5_DLL int    H5_get_win32_times(H5_timevals_t *tvs);
+H5_DLL char  *H5_strndup(const char *s, size_t n);
+H5_DLL char  *Wstrcasestr_wrap(const char *haystack, const char *needle);
 #ifdef __cplusplus
 }
 #endif

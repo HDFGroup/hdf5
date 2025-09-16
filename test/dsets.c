@@ -16004,7 +16004,7 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
                 char src_fname[FILENAME_BUF_SIZE];
                 char src_dname[FILENAME_BUF_SIZE];
 
-                if (snprintf(src_fname, FILENAME_BUF_SIZE, "%s%s%d.h5", DCPL_LAYOUT_FILENAME, "_src", i) >=
+                if (snprintf(src_fname, FILENAME_BUF_SIZE, "%d%s%s.h5", i, DCPL_LAYOUT_FILENAME, "_src") >=
                     FILENAME_BUF_SIZE)
                     TEST_ERROR;
 
@@ -16141,9 +16141,11 @@ error:
         H5Tclose(type_id);
         H5Sclose(space_id);
         H5Dclose(dset_id);
-        for (int i = 0; i < DCPL_LAYOUT_NUM_SRC_DSETS; i++) {
-            H5Fclose(src_files[i]);
-            H5Dclose(src_dsets[i]);
+        if (layout_type == H5D_VIRTUAL) {
+            for (int i = 0; i < DCPL_LAYOUT_NUM_SRC_DSETS; i++) {
+                H5Fclose(src_files[i]);
+                H5Dclose(src_dsets[i]);
+            }
         }
     }
     H5E_END_TRY;
@@ -16891,13 +16893,10 @@ test_vds_shared_strings(hid_t fapl)
      */
     char file_name[64];
     char dset_name[64];
-    int  shared_file_count = 0;
-    int  shared_dset_count = 0;
 
     for (int i = 0; i < NUM_MAPPINGS_MANY; i++) {
         if (i % 10 == 0) {
             strcpy(file_name, "shared_file.h5");
-            shared_file_count++;
         }
         else {
             snprintf(file_name, sizeof(file_name), "file_%d.h5", i);
@@ -16905,7 +16904,6 @@ test_vds_shared_strings(hid_t fapl)
 
         if (i % 5 == 0) {
             strcpy(dset_name, "/shared_dataset");
-            shared_dset_count++;
         }
         else {
             snprintf(dset_name, sizeof(dset_name), "/dataset_%d", i);
