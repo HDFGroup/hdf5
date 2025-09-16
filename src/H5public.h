@@ -289,9 +289,10 @@ typedef int htri_t;
  *
  * Use of ssize_t should be discouraged in new code.
  */
-#if H5_SIZEOF_SSIZE_T == 0
-typedef ptrdiff_t ssize_t;
-#define H5_SIZEOF_SSIZE_T H5_SIZEOF_PTRDIFF_T
+#ifdef _WIN32
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#define H5_SIZEOF_SSIZE_T SIZE_MAX
 #endif
 
 /**
