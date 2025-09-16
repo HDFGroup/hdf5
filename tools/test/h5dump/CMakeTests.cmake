@@ -651,7 +651,7 @@ macro (ADD_H5_TEST testname)
             -D "TEST_ENV_VALUE:STRING=${ARG_ENVVAL}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+    set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES
         ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
