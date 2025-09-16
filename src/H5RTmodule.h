@@ -23,7 +23,7 @@
  */
 #define H5RT_MODULE
 // TODO
-#define H5_MY_PKG_ERR  H5E_BTREE
+#define H5_MY_PKG_ERR  H5E_RTREE
 #define H5_MY_PKG_INIT NO
 
 #endif /* H5RTmodule_H */

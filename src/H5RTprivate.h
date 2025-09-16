@@ -23,7 +23,7 @@ typedef struct H5RT_t H5RT_t;
 
 /* Struct representing a leaf in the r-tree */
 typedef struct H5RT_leaf_t {
-    void               *record;
+    uintptr_t           record;
     hsize_t             min[H5S_MAX_RANK];
     hsize_t             max[H5S_MAX_RANK];
     hsize_t             mid[H5S_MAX_RANK];
