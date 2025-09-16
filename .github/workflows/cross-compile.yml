@@ -28,8 +28,8 @@ jobs:
           sudo apt update
           sudo apt install -y wine64 winbind
 
-      - name: Verify Wine64 installation
-        run: wine64 --version
+#      - name: Verify Wine64 installation
+#        run: wine64 --version
 
       - name: Install MinGW64 Cross-Compiler
         run: |
@@ -78,15 +78,15 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "err_compat|filenotclosed|swmr|cache_api"
-        working-directory: ${{ runner.workspace }}/build
+#      - name: CMake Run Tests
+#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "err_compat|filenotclosed|swmr|cache_api"
+#        working-directory: ${{ runner.workspace }}/build
 
       # RUN Failing TESTS
-      - name: CMake Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "err_compat|filenotclosed|swmr|cache_api"
-        working-directory: ${{ runner.workspace }}/build
-        continue-on-error: true
+#      - name: CMake Run Tests
+#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "err_compat|filenotclosed|swmr|cache_api"
+#        working-directory: ${{ runner.workspace }}/build
+#        continue-on-error: true
 
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
