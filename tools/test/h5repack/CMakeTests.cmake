@@ -545,7 +545,7 @@ macro (ADD_H5_TEST testname)
           -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_DIFF-${ctest_testname}_DFF PROPERTIES
-          DEPENDS H5REPACK_DIFF-${ctest_testname}
+          DEPENDS H5REPACK-${ctest_testname}
       )
       if ("H5REPACK_DIFF-${ctest_testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5REPACK_DIFF-${ctest_testname}_DFF PROPERTIES DISABLED true)
