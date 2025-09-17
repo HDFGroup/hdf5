@@ -49,7 +49,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 # ⚠️ Breaking Changes
 
-- **Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`**
+- Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
 
    The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
 
