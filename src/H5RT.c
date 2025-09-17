@@ -26,11 +26,12 @@
 
 H5FL_DEFINE_STATIC(H5RT_t);
 H5FL_DEFINE_STATIC(H5RT_node_t);
+H5FL_DEFINE_STATIC(H5RT_result_t);
 
 static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count,
                               int prev_sort_dim);
-static void   H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[],
-                                   H5RT_leaf_t **head, H5RT_leaf_t **tail);
+static herr_t H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[],
+                                   H5RT_result_t **head, H5RT_result_t **tail);
 static void   H5RT__free_recurse(H5RT_node_t *node);
 
 #if defined(H5_HAVE_DARWIN) || defined(H5_HAVE_WIN32_API)
@@ -330,20 +331,22 @@ done:
  *     rank (in): rank of the hyper-rectangles
  *     min (in): Minimum bounds of spatial search, should have 'rank' dims.
  *     max (in): Maximum bounds of spatial search, should have 'rank' dims.
- *     head (out): Head of the linked list of results.
- *     tail (out): Tail of the linked list of results.
+ *     head (out): Head of the linked list of result structures.
+ *     tail (out): Tail of the linked list of result structures.
  */
-static void
-H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_leaf_t **head,
-                     H5RT_leaf_t **tail)
+static herr_t
+H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_result_t **head,
+                     H5RT_result_t **tail)
 {
     hsize_t *curr_min = NULL;
     hsize_t *curr_max = NULL;
 
-    H5RT_leaf_t *curr_leaf = NULL;
-    H5RT_node_t *curr_node = NULL;
+    H5RT_leaf_t   *curr_leaf   = NULL;
+    H5RT_node_t   *curr_node   = NULL;
+    H5RT_result_t *new_result  = NULL;
+    herr_t         ret_value   = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(node);
     assert(head);
@@ -357,18 +360,25 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
             curr_max  = curr_leaf->max;
 
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
-                /* We found an intersecting leaf, add it to the linked list of leaves */
+                /* We found an intersecting leaf, create a result structure for it */
+                if (NULL == (new_result = H5FL_CALLOC(H5RT_result_t)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate result structure");
+
+                new_result->leaf = curr_leaf;
+                new_result->next = NULL;
+
+                /* Add to the linked list of results */
                 if (*tail) {
                     assert(*head);
-                    (*tail)->next_result = curr_leaf;
+                    (*tail)->next = new_result;
                 }
                 else {
-                    /* This is the first leaf to be returned - mark it as head */
+                    /* This is the first result to be returned - mark it as head */
                     assert(*head == NULL);
-                    *head = curr_leaf;
+                    *head = new_result;
                 }
-                /* Newly added leaf is the new tail of result list */
-                *tail = curr_leaf;
+                /* Newly added result is the new tail of result list */
+                *tail = new_result;
             }
         }
         else {
@@ -380,11 +390,13 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
             /* Only recurse into child node if its bounding box overlaps with the search region */
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
                 /* We found an intersecting internal node, recurse into it */
-                H5RT__search_recurse(curr_node, rank, min, max, head, tail);
+                if (H5RT__search_recurse(curr_node, rank, min, max, head, tail) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "recursive search failed");
             }
         }
 
-    FUNC_LEAVE_NOAPI_VOID
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RT__search_recurse() */
 
 /*-------------------------------------------------------------------------
@@ -393,21 +405,20 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
  * Purpose:     Search the r-tree for leaves whose bounding boxes
  *              intersect with the provided min and max bounds.
  *
- *              NOTE: The returned linked list is built using the
- *              'next_result' pointer in the leaves themselves,
- *              so subsequent/concurrent searches will invalidate
- *              previous search results.
+ *              Returns a linked list of H5RT_result_t structures.
+ *              The caller must call H5RT_free_results() to free the
+ *              returned result list.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_leaf_t **results_out)
+H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_t **results_out)
 {
-    H5RT_leaf_t *head      = NULL;
-    H5RT_leaf_t *tail      = NULL;
-    herr_t       ret_value = SUCCEED;
+    H5RT_result_t *head      = NULL;
+    H5RT_result_t *tail      = NULL;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -417,19 +428,55 @@ H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_leaf_t **results_o
     if (!rtree)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid r-tree");
 
-    /* Perform the actual search */
-    H5RT__search_recurse(&rtree->root, rtree->rank, min, max, &head, &tail);
+    if (!results_out)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid results output pointer");
 
-    /* Terminate the linked list (since we don't clean up the "next_result" pointers in general */
-    if (tail)
-        tail->next_result = NULL;
+    /* Perform the actual search */
+    if (H5RT__search_recurse(&rtree->root, rtree->rank, min, max, &head, &tail) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "search failed");
 
     /* Return the linked list */
     *results_out = head;
 
 done:
+    if (ret_value < 0 && head) {
+        /* Clean up partial results on failure */
+        H5RT_free_results(head);
+        *results_out = NULL;
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RT_search() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5RT_free_results
+ *
+ * Purpose:     Free a linked list of search results returned by H5RT_search.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5RT_free_results(H5RT_result_t *results)
+{
+    H5RT_result_t *current = NULL;
+    H5RT_result_t *next    = NULL;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Free all result structures in the linked list */
+    current = results;
+    while (current) {
+        next = current->next;
+        if (H5FL_FREE(H5RT_result_t, current) != NULL)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to free result structure");
+        current = next;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5RT_free_results() */
 
 static void
 H5RT__free_recurse(H5RT_node_t *node)
