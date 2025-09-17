@@ -51,27 +51,27 @@ permissions:
   packages: write
 
 jobs:
-    check-secret:
-      name: Check Secrets exists
-      runs-on: ubuntu-latest
-      outputs:
-        gpg-state: ${{ steps.set-gpg-state.outputs.HAVEGPG }}
-      steps:
-        - name: Identify GPG Status
-          id: set-gpg-state
-          env: 
-              gpg_secret: ${{ secrets.GPG_PRIVATE_KEY }}
-          run: |
-            if [[ '${{ env.gpg_secret }}' == '' ]]
-            then
-              GPG_VAL=$(echo 'notexists')
-            else
-              CPG_VAL=$(echo 'exists')
-            fi
-            echo "HAVEGPG=$GPG_VAL" >> $GITHUB_OUTPUT
-          shell: bash
+  check-secret:
+    name: Check Secrets exists
+    runs-on: ubuntu-latest
+    outputs:
+      gpg-state: ${{ steps.set-gpg-state.outputs.HAVEGPG }}
+    steps:
+      - name: Identify GPG Status
+        id: set-gpg-state
+        env: 
+            gpg_secret: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          if [[ '${{ env.gpg_secret }}' == '' ]]
+          then
+            GPG_VAL=$(echo 'notexists')
+          else
+            CPG_VAL=$(echo 'exists')
+          fi
+          echo "HAVEGPG=$GPG_VAL" >> $GITHUB_OUTPUT
+        shell: bash
 
-        - run: echo "gpg key is ${{ steps.set-gpg-state.outputs.HAVEGPG }}."
+      - run: echo "gpg key is ${{ steps.set-gpg-state.outputs.HAVEGPG }}."
 
   validate-artifacts:
     name: Validate Build Artifacts
