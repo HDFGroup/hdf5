@@ -38,11 +38,11 @@ typedef struct H5RT_result_t {
 } H5RT_result_t;
 
 /* Leaf helper functions */
-H5_DLL H5RT_leaf_t *H5RT_leaf_create(int rank, uintptr_t record);
-H5_DLL herr_t       H5RT_leaf_free(H5RT_leaf_t *leaf);
+H5_DLL herr_t H5RT_leaf_init(H5RT_leaf_t *leaf, int rank, uintptr_t record);
+H5_DLL herr_t H5RT_leaf_cleanup(H5RT_leaf_t *leaf);
 
 /* Main R-tree functions */
-H5_DLL H5RT_t *H5RT_create(int rank, H5RT_leaf_t **leaves, size_t count);
+H5_DLL H5RT_t *H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count);
 H5_DLL herr_t  H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_t **results_out);
 H5_DLL herr_t  H5RT_free_results(H5RT_result_t *results);
 H5_DLL herr_t  H5RT_free(H5RT_t *rtree);
