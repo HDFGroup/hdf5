@@ -551,7 +551,7 @@ macro (ADD_H5_TEST testname)
         set_tests_properties (H5REPACK_DIFF-${ctest_testname}_DFF PROPERTIES DISABLED true)
       endif ()
 
-      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK_DIFF-${testname}_DFF")
+      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK_DIFF-${ctest_testname}_DFF")
     endif()
 
     if (${ARG_DUMP_CHECK} OR DEFINED ARG_LAYOUT_DSET)
