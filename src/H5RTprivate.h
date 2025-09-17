@@ -24,9 +24,11 @@ typedef struct H5RT_t H5RT_t;
 /* Struct representing a leaf in the r-tree */
 typedef struct H5RT_leaf_t {
     uintptr_t record;
-    hsize_t   min[H5S_MAX_RANK];
-    hsize_t   max[H5S_MAX_RANK];
-    hsize_t   mid[H5S_MAX_RANK];
+    int       rank;
+    hsize_t  *min;     /* Points to _coords[0] */
+    hsize_t  *max;     /* Points to _coords[rank] */
+    hsize_t  *mid;     /* Points to _coords[2*rank] */
+    hsize_t  *_coords; /* Private: single allocation for all coordinate arrays */
 } H5RT_leaf_t;
 
 /* Struct representing a search result */
@@ -35,7 +37,12 @@ typedef struct H5RT_result_t {
     struct H5RT_result_t *next;
 } H5RT_result_t;
 
-H5_DLL H5RT_t *H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count);
+/* Leaf helper functions */
+H5_DLL H5RT_leaf_t *H5RT_leaf_create(int rank, uintptr_t record);
+H5_DLL herr_t       H5RT_leaf_free(H5RT_leaf_t *leaf);
+
+/* Main R-tree functions */
+H5_DLL H5RT_t *H5RT_create(int rank, H5RT_leaf_t **leaves, size_t count);
 H5_DLL herr_t  H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_t **results_out);
 H5_DLL herr_t  H5RT_free_results(H5RT_result_t *results);
 H5_DLL herr_t  H5RT_free(H5RT_t *rtree);

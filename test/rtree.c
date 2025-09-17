@@ -40,6 +40,9 @@ static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {1, 100, 500, 10
 /* Helper function to generate leaf data */
 static H5RT_leaf_t *generate_leaves(int rank, size_t leaf_count);
 
+/* Helper function to free leaf data */
+static void free_leaves(H5RT_leaf_t *leaves, size_t leaf_count);
+
 /* For manual verification of r-tree results */
 static H5RT_leaf_t **manual_search(H5RT_leaf_t *leaves, size_t leaf_count, int rank, hsize_t min[],
                                    hsize_t max[], size_t *results_count);
@@ -117,7 +120,6 @@ static H5RT_leaf_t *
 generate_leaves(int rank, size_t leaf_count)
 {
     H5RT_leaf_t *ret_value = NULL;
-    H5RT_leaf_t *curr_leaf = NULL;
 
     assert(rank > 0);
     assert(leaf_count > 0);
@@ -126,20 +128,52 @@ generate_leaves(int rank, size_t leaf_count)
         goto done;
 
     for (size_t i = 0; i < leaf_count; i++) {
-        curr_leaf = ret_value + i;
+        /* Manually allocate coordinate arrays for this leaf */
+        hsize_t *coords = (hsize_t *)calloc(3 * (size_t)rank, sizeof(hsize_t));
+        if (!coords) {
+            /* Clean up already created leaves */
+            for (size_t j = 0; j < i; j++) {
+                free(ret_value[j]._coords);
+            }
+            free(ret_value);
+            ret_value = NULL;
+            goto done;
+        }
 
+        /* Set up the leaf structure */
+        ret_value[i].record  = (uintptr_t)i;
+        ret_value[i].rank    = rank;
+        ret_value[i]._coords = coords;
+        ret_value[i].min     = coords;
+        ret_value[i].max     = coords + rank;
+        ret_value[i].mid     = coords + (2 * rank);
+
+        /* Set coordinates */
         for (int d = 0; d < rank; d++) {
-
-            hsize_t min_coord = (hsize_t)rand() % RTREE_TEST_BASE_COORD;
-            hsize_t size      = 1 + (hsize_t)rand() % RTREE_TEST_BASE_SIZE;
-            curr_leaf->min[d] = min_coord;
-            curr_leaf->max[d] = min_coord + size;
-            curr_leaf->mid[d] = (curr_leaf->max[d] + curr_leaf->min[d]) / 2;
+            hsize_t min_coord   = (hsize_t)rand() % RTREE_TEST_BASE_COORD;
+            hsize_t size        = 1 + (hsize_t)rand() % RTREE_TEST_BASE_SIZE;
+            ret_value[i].min[d] = min_coord;
+            ret_value[i].max[d] = min_coord + size;
+            ret_value[i].mid[d] = (ret_value[i].max[d] + ret_value[i].min[d]) / 2;
         }
     }
 
 done:
     return ret_value;
+}
+
+/* Helper function to free leaf data */
+static void
+free_leaves(H5RT_leaf_t *leaves, size_t leaf_count)
+{
+    if (!leaves)
+        return;
+
+    for (size_t i = 0; i < leaf_count; i++) {
+        if (leaves[i]._coords)
+            free(leaves[i]._coords);
+    }
+    free(leaves);
 }
 
 static size_t
@@ -216,11 +250,11 @@ test_rtree_create(void)
             if ((leaves = generate_leaves(rank, leaf_count)) == NULL)
                 FAIL_STACK_ERROR;
 
-            if ((tree = H5RT_create(rank, leaves, leaf_count)) == NULL)
+            if ((tree = H5RT_create(rank, &leaves, leaf_count)) == NULL)
                 FAIL_STACK_ERROR;
 
             /* Ownership of memory has transferred */
-            leaves = NULL;
+            /* leaves is now NULL */
 
             if (H5RT_free(tree) < 0)
                 FAIL_STACK_ERROR;
@@ -232,7 +266,7 @@ test_rtree_create(void)
 
 error:
     if (leaves)
-        free(leaves);
+        free_leaves(leaves, leaf_count);
 
     return FAIL;
 }
@@ -275,12 +309,11 @@ test_rtree_search(void)
                 FAIL_STACK_ERROR;
 
             /* Create tree */
-            if ((tree = H5RT_create(rank, leaves, leaf_count)) == NULL)
+            leaves_temp = leaves;
+            if ((tree = H5RT_create(rank, &leaves, leaf_count)) == NULL)
                 FAIL_STACK_ERROR;
 
-            /* Ownership is transferred - keep temp pointer for manual search */
-            leaves_temp = leaves;
-            leaves      = NULL;
+            /* Ownership is transferred - leaves is now NULL */
 
             /* Setup search criteria */
             for (int r = 0; r < rank; r++) {
@@ -316,7 +349,7 @@ error:
         H5RT_free_results(results_head);
 
     if (leaves)
-        free(leaves);
+        free_leaves(leaves, leaf_count);
 
     if (tree)
         H5RT_free(tree);
@@ -362,11 +395,11 @@ test_rtree_copy(void)
                 FAIL_STACK_ERROR;
 
             /* Create original tree */
-            if ((tree = H5RT_create(rank, leaves, leaf_count)) == NULL)
+            if ((tree = H5RT_create(rank, &leaves, leaf_count)) == NULL)
                 FAIL_STACK_ERROR;
 
             /* Ownership is transferred */
-            leaves = NULL;
+            /* leaves is now NULL */
 
             /* Deep copy the tree */
             if ((tree_copy = H5RT_copy(tree)) == NULL)
@@ -413,7 +446,7 @@ error:
         H5RT_free_results(results_head);
 
     if (leaves)
-        free(leaves);
+        free_leaves(leaves, leaf_count);
 
     if (tree)
         H5RT_free(tree);

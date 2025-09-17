@@ -27,6 +27,7 @@
 H5FL_DEFINE_STATIC(H5RT_t);
 H5FL_DEFINE_STATIC(H5RT_node_t);
 H5FL_DEFINE_STATIC(H5RT_result_t);
+H5FL_DEFINE_STATIC(H5RT_leaf_t);
 
 static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count,
                               int prev_sort_dim);
@@ -41,6 +42,84 @@ static int H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
 #endif
 
 /* Check if two hyper-rectangles specified by (min1, max1) and (min2, max2) intersect */
+/*-------------------------------------------------------------------------
+ * Function:    H5RT_leaf_create
+ *
+ * Purpose:     Create a new leaf with dynamically allocated coordinates
+ *
+ * Return:      A valid pointer to the new leaf on success/NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+H5RT_leaf_t *
+H5RT_leaf_create(int rank, uintptr_t record)
+{
+    H5RT_leaf_t *leaf      = NULL;
+    H5RT_leaf_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if (rank < 1 || rank > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid rank");
+
+    /* Allocate leaf structure */
+    if (NULL == (leaf = H5FL_CALLOC(H5RT_leaf_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate leaf");
+
+    /* Allocate coordinate arrays as single block: 3 * rank * sizeof(hsize_t) */
+    if (NULL == (leaf->_coords = (hsize_t *)calloc(3 * (size_t)rank, sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate leaf coordinates");
+
+    /* Set up pointers to sections of the coordinate block */
+    leaf->min = leaf->_coords;
+    leaf->max = leaf->_coords + rank;
+    leaf->mid = leaf->_coords + (2 * rank);
+
+    leaf->rank   = rank;
+    leaf->record = record;
+
+    ret_value = leaf;
+
+done:
+    if (!ret_value && leaf) {
+        if (leaf->_coords)
+            free(leaf->_coords);
+        H5FL_FREE(H5RT_leaf_t, leaf);
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5RT_leaf_create() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5RT_leaf_free
+ *
+ * Purpose:     Free a leaf and its coordinate arrays
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5RT_leaf_free(H5RT_leaf_t *leaf)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if (!leaf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid leaf");
+
+    /* Free coordinate arrays */
+    if (leaf->_coords)
+        free(leaf->_coords);
+
+    /* Free leaf structure */
+    H5FL_FREE(H5RT_leaf_t, leaf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5RT_leaf_free() */
+
 bool
 H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[])
 {
@@ -189,7 +268,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
 
     /* Compute the max/min bounds of the provided node */
     /* Initial values */
-    for (size_t i = 0; i < H5S_MAX_RANK; i++) {
+    for (int i = 0; i < rank; i++) {
         node->min[i] = leaves[0].min[i];
         node->max[i] = leaves[0].max[i];
     }
@@ -289,7 +368,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5RT_t *
-H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
+H5RT_create(int rank, H5RT_leaf_t **leaves, size_t count)
 {
     H5RT_t *rtree     = NULL;
     H5RT_t *ret_value = NULL;
@@ -310,10 +389,11 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
     rtree->nleaves = count;
 
     /* Take ownership of leaves array */
-    rtree->leaves = leaves;
+    rtree->leaves = *leaves;
+    *leaves       = NULL; /* Transfer ownership */
 
     /* Populate the r-tree with nodes containing the provided leaves */
-    if (H5RT__bulk_load(&rtree->root, rank, leaves, count, -1) < 0)
+    if (H5RT__bulk_load(&rtree->root, rank, rtree->leaves, count, -1) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, NULL, "failed to fill R-tree");
 
     ret_value = rtree;
@@ -518,6 +598,14 @@ H5RT_free(H5RT_t *rtree)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid r-tree");
 
     H5RT__free_recurse(&rtree->root);
+
+    /* Free each leaf's coordinates (leaf structures are in array, not individually allocated) */
+    for (size_t i = 0; i < rtree->nleaves; i++) {
+        if (rtree->leaves[i]._coords)
+            free(rtree->leaves[i]._coords);
+    }
+
+    /* Free the leaves array */
     free(rtree->leaves);
     H5FL_FREE(H5RT_t, rtree);
 
@@ -556,11 +644,34 @@ H5RT_copy(const H5RT_t *rtree)
     if (NULL == (new_leaves = (H5RT_leaf_t *)malloc(rtree->nleaves * sizeof(H5RT_leaf_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree leaves");
 
-    /* If the user-stored data in the r-tree is a pointer, then the new r-tree will have pointers to the same
-     * shared data */
-    memcpy(new_leaves, rtree->leaves, rtree->nleaves * sizeof(H5RT_leaf_t));
+    /* Deep copy each leaf manually */
+    for (size_t i = 0; i < rtree->nleaves; i++) {
+        const H5RT_leaf_t *src_leaf = &rtree->leaves[i];
 
-    if ((new_tree = H5RT_create(rtree->rank, new_leaves, rtree->nleaves)) == NULL)
+        /* Allocate coordinate arrays for this leaf */
+        hsize_t *coords = (hsize_t *)calloc(3 * (size_t)src_leaf->rank, sizeof(hsize_t));
+        if (!coords) {
+            /* Clean up already copied leaves */
+            for (size_t j = 0; j < i; j++) {
+                if (new_leaves[j]._coords)
+                    free(new_leaves[j]._coords);
+            }
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate leaf coordinates");
+        }
+
+        /* Set up the leaf structure */
+        new_leaves[i].record  = src_leaf->record;
+        new_leaves[i].rank    = src_leaf->rank;
+        new_leaves[i]._coords = coords;
+        new_leaves[i].min     = coords;
+        new_leaves[i].max     = coords + src_leaf->rank;
+        new_leaves[i].mid     = coords + (2 * src_leaf->rank);
+
+        /* Copy coordinate data */
+        memcpy(coords, src_leaf->_coords, 3 * (size_t)src_leaf->rank * sizeof(hsize_t));
+    }
+
+    if ((new_tree = H5RT_create(rtree->rank, &new_leaves, rtree->nleaves)) == NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, NULL, "failed to create new r-tree");
 
     ret_value = new_tree;
@@ -572,6 +683,11 @@ done:
                 HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "unable to free partially copied r-tree");
         }
         else if (new_leaves) {
+            /* Free copied leaves and their coordinates */
+            for (size_t i = 0; i < rtree->nleaves; i++) {
+                if (new_leaves[i]._coords)
+                    free(new_leaves[i]._coords);
+            }
             free(new_leaves);
         }
     }
