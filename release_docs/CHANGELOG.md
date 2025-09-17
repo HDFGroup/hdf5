@@ -209,7 +209,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The default dataset chunk cache size was increased to 8 MiB (8,388,608 bytes).
 
-- The file format has been updated to 4.0<a name="fleformat">
+- The file format has been updated to 4.0<a name="fileformat">
 
    The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
 
