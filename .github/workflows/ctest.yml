@@ -376,7 +376,7 @@ jobs:
           echo "Looking for artifacts in: ${BUILD_DIR}"
 
           # Copy JAR files
-          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
 
           # Copy POM files
           find "${BUILD_DIR}" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;

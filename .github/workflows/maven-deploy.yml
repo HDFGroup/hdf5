@@ -91,7 +91,7 @@ jobs:
       - name: Find JAR files
         id: find-jars
         run: |
-          JAR_FILES=$(find ./artifacts -name "*.jar" -not -name "*test*" | tr '\n' ',' | sed 's/,$//')
+          JAR_FILES=$(find ./artifacts -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" | tr '\n' ',' | sed 's/,$//')
           echo "jar-files=${JAR_FILES}" >> $GITHUB_OUTPUT
           echo "Found JAR files: ${JAR_FILES}"
 
