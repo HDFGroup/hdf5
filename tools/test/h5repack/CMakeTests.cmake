@@ -356,7 +356,7 @@ macro (ADD_H5_TEST testname)
     set (ARG_MAIN_OUT_FILE "out-${testname}.${ARG_TEST_FILE}")
   endif ()
 
-  list (APPEND ARG_CLEANUP_FILES "testfiles/${ARG_MAIN_OUT_FILE}")
+  list (APPEND ARG_CLEANUP_FILES "${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}")
 
   # Process optional arguments
   if (ARG_ERROR_STACK)
