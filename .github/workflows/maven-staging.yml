@@ -126,6 +126,7 @@ jobs:
           mv hdf5/${{ github.workspace }}/* hdf5/ || true
 
       - name: Build HDF5 with Maven support
+        id: buildhdf5
         run: |
           cd ${{ runner.workspace }}/hdf5
 
@@ -137,6 +138,7 @@ jobs:
             echo "Building with Maven release preset"
             PRESET_NAME="ci-StdShar-GNUC-Maven"
           fi
+          echo "preset=$PRESET_NAME" >> $GITHUB_OUTPUT
 
           echo "Using preset: $PRESET_NAME"
 
@@ -147,7 +149,7 @@ jobs:
         id: version-info
         run: |
           # Find the generated POM file
-          POM_FILE=$(find ${{ runner.workspace }}/hdf5/build -name "pom.xml" | head -1)
+          POM_FILE=$(find ${{ runner.workspace }}/hdf5/build/${{ steps.buildhdf5.outputs.preset }} -name "pom.xml" | head -1)
 
           if [ -n "$POM_FILE" ]; then
             VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
@@ -164,11 +166,11 @@ jobs:
           mkdir -p ${{ runner.workspace }}/maven-artifacts
 
           # Find build directory
-          BUILD_DIR=$(find ${{ runner.workspace }}/hdf5/build -name "*Maven*" -type d | head -1)
+          BUILD_DIR=$(find ${{ runner.workspace }}/hdf5/build/${{ steps.buildhdf5.outputs.preset }} -name "*Maven*" -type d | head -1)
 
           if [ -z "$BUILD_DIR" ]; then
             echo "ERROR: Could not find Maven build directory"
-            find ${{ runner.workspace }}/hdf5/build -type d -name "*" | head -10
+            find ${{ runner.workspace }}/hdf5/build/${{ steps.buildhdf5.outputs.preset }} -type d -name "*" | head -10
             exit 1
           fi
 
