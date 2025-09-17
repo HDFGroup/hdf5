@@ -148,7 +148,8 @@
 /* utility functions */
 static int make_dset(hid_t loc_id, const char *name, hid_t sid, hid_t tid, hid_t dcpl, void *buf);
 static int write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name, hid_t tid, void *buf);
-static int write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *dset_name, hid_t tid_dset, hid_t tid_memory, void *buf);
+static int write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *dset_name, hid_t tid_dset,
+                      hid_t tid_memory, void *buf);
 
 /* a filter operation callback function */
 static size_t myfilter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
@@ -5113,7 +5114,8 @@ write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name, hid_t t
  */
 
 static int
-write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *dset_name, hid_t tid_dset, hid_t tid_memory, void *buf)
+write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *dset_name, hid_t tid_dset, hid_t tid_memory,
+           void *buf)
 {
     hid_t  did;
     hid_t  sid;
@@ -13791,14 +13793,15 @@ gent_test_reference_external(void)
     return 0;
 }
 
-int gent_tvms(void)
+int
+gent_tvms(void)
 {
-    hid_t   file_id = H5I_INVALID_HID;
-    hid_t   dataset_id = H5I_INVALID_HID;
+    hid_t   file_id      = H5I_INVALID_HID;
+    hid_t   dataset_id   = H5I_INVALID_HID;
     hid_t   dataspace_id = H5I_INVALID_HID;
-    hsize_t dims[2] = {5, 6};
-    int  data[5][6];
-    int  i, j;
+    hsize_t dims[2]      = {5, 6};
+    int     data[5][6];
+    int     i, j;
 
     /* Initialize the data array */
     for (i = 0; i < 5; i++) {
@@ -13814,8 +13817,8 @@ int gent_tvms(void)
         return -1;
 
     /* Create the dataset with VAX F64 datatype */
-    if ((dataset_id = H5Dcreate2(file_id, "/Array", H5T_VAX_F64, dataspace_id,
-                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dataset_id = H5Dcreate2(file_id, "/Array", H5T_VAX_F64, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
+                                 H5P_DEFAULT)) < 0)
         return -1;
 
     /* Write the data to the dataset */
