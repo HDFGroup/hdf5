@@ -11939,11 +11939,12 @@ test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
 void
 test_attr(void H5_ATTR_UNUSED *params)
 {
-    hid_t    fapl = (H5I_INVALID_HID), fapl2 = (H5I_INVALID_HID), fapl3 = (H5I_INVALID_HID); /* File access property lists */
+    hid_t fapl = (H5I_INVALID_HID), fapl2 = (H5I_INVALID_HID),
+          fapl3   = (H5I_INVALID_HID);                            /* File access property lists */
     hid_t    fcpl = (H5I_INVALID_HID), fcpl2 = (H5I_INVALID_HID); /* File creation property lists */
     hid_t    dcpl = H5I_INVALID_HID;                              /* Dataset creation property list */
-    unsigned fapl_no;                                          /* Which fapl to use */
-    bool new_format; /* Whether to use the new format or not */
+    unsigned fapl_no;                                             /* Which fapl to use */
+    bool     new_format;                                          /* Whether to use the new format or not */
     unsigned use_shared;       /* Whether to use shared attributes or not */
     unsigned minimize_dset_oh; /* Whether to use minimized dataset object headers */
     herr_t   ret;              /* Generic return value */
@@ -11998,17 +11999,17 @@ test_attr(void H5_ATTR_UNUSED *params)
             switch (fapl_no) {
                 case 1:
                     MESSAGE(7, ("testing with default file format\n"));
-                    my_fapl = fapl;
+                    my_fapl    = fapl;
                     new_format = true;
                     break;
                 case 2:
                     MESSAGE(7, ("testing with old file format\n"));
-                    my_fapl = fapl2;
+                    my_fapl    = fapl2;
                     new_format = false;
                     break;
                 case 3:
                     MESSAGE(7, ("testing with new file format\n"));
-                    my_fapl = fapl3;
+                    my_fapl    = fapl3;
                     new_format = true;
                     break;
                 default:

@@ -3202,7 +3202,7 @@ static void
 test_cached_stab_info(void)
 {
     hid_t  file_id;
-    hid_t fapl_id;
+    hid_t  fapl_id;
     hid_t  group_id;
     bool   vol_is_native;
     herr_t ret; /* Generic return value */
@@ -8205,7 +8205,7 @@ test_deprec(const char *driver_name)
         CHECK(ret, FAIL, "H5Pset_file_space_strategy");
 
         tmp_fapl = H5Pcopy(fapl);
-        ret  = H5Pset_alignment(tmp_fapl, (hsize_t)1, (hsize_t)1024);
+        ret      = H5Pset_alignment(tmp_fapl, (hsize_t)1, (hsize_t)1024);
         CHECK(ret, FAIL, "H5Pset_alignment");
 
         /* Creating a file with the non-default file creation property list should

@@ -1578,12 +1578,12 @@ error:
 static int
 test_start_swmr_write(hid_t in_fapl, bool new_format)
 {
-    hid_t   fid       = H5I_INVALID_HID; /* File ID */
-    hid_t   fapl      = H5I_INVALID_HID; /* File access property */
+    hid_t   fid           = H5I_INVALID_HID; /* File ID */
+    hid_t   fapl          = H5I_INVALID_HID; /* File access property */
     hid_t   earliest_fapl = H5I_INVALID_HID; /* FAPL with earliest format */
-    hid_t   gid       = H5I_INVALID_HID; /* Group ID */
-    hid_t   dcpl      = H5I_INVALID_HID; /* Dataset creation property */
-    hid_t   file_fapl = H5I_INVALID_HID; /* File access property for the file */
+    hid_t   gid           = H5I_INVALID_HID; /* Group ID */
+    hid_t   dcpl          = H5I_INVALID_HID; /* Dataset creation property */
+    hid_t   file_fapl     = H5I_INVALID_HID; /* File access property for the file */
     hid_t   did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID, did3 = H5I_INVALID_HID; /* Dataset IDs */
     hid_t   did1_a = H5I_INVALID_HID, did1_b = H5I_INVALID_HID;
     hid_t   sid1 = H5I_INVALID_HID, sid2 = H5I_INVALID_HID, sid3 = H5I_INVALID_HID; /* Dataspace IDs */
