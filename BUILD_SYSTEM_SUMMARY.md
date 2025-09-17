@@ -13,12 +13,13 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 
 #### Main Configuration Files
 - `CMakeLists.txt` - Root build configuration (1,266 lines, highly comprehensive)
-- `CMakeBuildOptions.cmake` - Centralized build option definitions (~80 major options)
+- `CMakeBuildOptions.cmake` - Centralized build option definitions (~80 major options, including Maven deployment)
 - `CMakeFilters.cmake` - Compression filter support (zlib, szip, libaec)
 - `CMakeTests.cmake` - Testing infrastructure configuration
 - `CMakeInstallation.cmake` - Installation and packaging setup
 - `CMakeVOL.cmake` - Virtual Object Layer connector support
 - `CMakePlugins.cmake` - Plugin architecture support
+- `java/src/hdf/hdf5lib/pom.xml.in` - Maven POM template for Java artifacts
 
 #### Build Options Categories
 
@@ -32,6 +33,8 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 - `HDF5_BUILD_CPP_LIB=OFF` - C++ bindings
 - `HDF5_BUILD_FORTRAN=OFF` - Fortran bindings
 - `HDF5_BUILD_JAVA=OFF` - Java JNI bindings
+- `HDF5_ENABLE_MAVEN_DEPLOY=OFF` - Maven repository deployment support
+- `HDF5_MAVEN_SNAPSHOT=OFF` - Build Maven snapshot versions with -SNAPSHOT suffix
 
 **Core Features:**
 - `HDF5_ENABLE_PARALLEL=OFF` - MPI parallel I/O support
@@ -55,9 +58,10 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 
 ### Preset Architecture
 - **Layered inheritance**: Base presets + feature-specific + platform-specific
-- **Hidden presets**: Reusable components (`ci-base`, `ci-Debug`, `ci-Release`)
+- **Hidden presets**: Reusable components (`ci-base`, `ci-Debug`, `ci-Release`, `ci-Maven`, `ci-Maven-Snapshot`)
 - **Platform presets**: `ci-GNUC`, `ci-Clang`, `ci-MSVC`, `ci-macos`
-- **Build type matrix**: Debug, Release (RelWithDebInfo + docs)
+- **Maven presets**: Hidden base configurations for Maven deployment support
+- **Build type matrix**: Debug, Release (RelWithDebInfo + docs), Maven variants
 
 ### Key Preset Patterns
 ```bash
@@ -66,8 +70,14 @@ cmake --workflow --preset ci-StdShar-GNUC --fresh      # GCC
 cmake --workflow --preset ci-StdShar-Clang --fresh     # Clang
 cmake --workflow --preset ci-StdShar-MSVC --fresh      # MSVC
 
-# Naming convention: ci-[Features]-[Compiler]
+# Maven-enabled builds (Java artifacts with deployment support)
+cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Maven release
+cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Maven snapshot
+
+# Naming convention: ci-[Features]-[Compiler][-Maven[-Snapshot]]
 # Features: Std (standard), Min (minimal), StdShar (standard shared)
+# Maven: Adds Maven deployment support with platform-specific JARs
+# Snapshot: Adds -SNAPSHOT suffix for development versions
 ```
 
 ### Preset Configuration Strategy
@@ -137,8 +147,11 @@ ctest -R "H5_api_test"
 - `intel.yml`, `aocc.yml`, `nvhpc.yml` - Vendor compiler support
 
 **Release Infrastructure:**
+- `release.yml` - Main release workflow with optional Maven deployment
 - `release-files.yml` - Automated release packaging
 - `tarball.yml` - Source distribution creation
+- `maven-deploy.yml` - Maven repository deployment workflow
+- `maven-staging.yml` - PR-based Maven testing and validation workflow
 - `daily-schedule.yml` - Scheduled builds with AWS integration
 
 ### Build Matrix Strategy
@@ -163,6 +176,8 @@ ctest -R "H5_api_test"
 ### Distribution Formats
 - **Source tarballs**: Automated via GitHub Actions
 - **Binary packages**: Platform-specific installers
+- **Maven repositories**: GitHub Packages and Maven Central deployment
+- **Java artifacts**: Platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
 - **Container support**: Docker environments for CI
 - **HPC integration**: Specialized configurations for batch systems
 
@@ -186,6 +201,17 @@ ctest -R "H5_api_test"
 3. **Failure isolation**: Use workflow categories to isolate platform/feature issues
 4. **External dependency management**: Plan for compression library updates
 
+### Maven Integration Workflow
+1. **Java Build Configuration**: Enable Maven deployment with `HDF5_ENABLE_MAVEN_DEPLOY=ON`
+2. **Version Management**: Use `HDF5_MAVEN_SNAPSHOT=ON` for development builds with `-SNAPSHOT` suffix
+3. **Preset Selection**: Choose Maven-enabled presets (`ci-StdShar-GNUC-Maven` or `ci-StdShar-GNUC-Maven-Snapshot`)
+4. **Platform Artifacts**: Automatic generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+5. **CI Integration**: Conditional Maven artifact generation in `ctest.yml` workflow via preset system
+6. **PR Testing**: Automated Maven artifact validation for pull requests via `maven-staging.yml`
+7. **Validation Framework**: Pre-deployment validation using `.github/scripts/validate-maven-artifacts.sh`
+8. **Repository Selection**: Choose between GitHub Packages and Maven Central via workflow inputs
+9. **Release Integration**: Optional Maven deployment in release workflow with user control
+
 ## Critical Dependencies
 
 ### Build Dependencies
@@ -193,6 +219,8 @@ ctest -R "H5_api_test"
 - **Ninja**: Preferred generator for cross-platform consistency
 - **Compression libraries**: zlib, szip/libaec (optional but commonly used)
 - **MPI**: Required for parallel builds (MPI-3 standard minimum)
+- **Java 11+**: Required for Java bindings and Maven deployment (when `HDF5_BUILD_JAVA=ON`)
+- **Maven**: Optional for local Maven operations and validation
 
 ### Platform-Specific Requirements
 - **Windows**: Visual Studio 2022, optional NSIS/WiX for packaging
@@ -204,6 +232,7 @@ ctest -R "H5_api_test"
 - **Code formatting**: clang-format integration
 - **Coverage**: Code coverage support for testing
 - **Sanitizers**: Runtime error detection support
+- **Maven validation**: `.github/scripts/validate-maven-artifacts.sh` for pre-deployment validation
 
 ## Future Considerations
 

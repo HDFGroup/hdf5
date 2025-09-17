@@ -9,6 +9,19 @@ on:
         type: string
         required: false
         default: snapshot
+      deploy_maven:
+        description: 'Deploy artifacts to Maven repository'
+        type: boolean
+        required: false
+        default: false
+      maven_repository:
+        description: 'Maven repository type'
+        type: choice
+        options:
+          - github-packages
+          - maven-central-staging
+        required: false
+        default: github-packages
 
 permissions:
   contents: read
@@ -53,6 +66,7 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       snap_name: hdf5-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
+      maven_enabled: ${{ inputs.deploy_maven == true }}
     secrets:
         APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
         APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
@@ -84,4 +98,24 @@ jobs:
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
+
+  call-workflow-maven:
+    needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
+    if: ${{ inputs.deploy_maven == true }}
+    permissions:
+      contents: read
+      packages: write # For GitHub Packages deployment
+    uses: ./.github/workflows/maven-deploy.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      preset_name: ci-StdShar
+      repository_url: ${{ inputs.maven_repository == 'github-packages' && 'https://maven.pkg.github.com/HDFGroup/hdf5' || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
+      repository_id: ${{ inputs.maven_repository == 'github-packages' && 'github' || 'ossrh' }}
+      deploy_snapshots: ${{ needs.log-the-inputs.outputs.rel_tag == 'snapshot' }}
+      dry_run: false
+    secrets:
+      MAVEN_USERNAME: ${{ inputs.maven_repository == 'github-packages' && github.actor || secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_PASSWORD: ${{ inputs.maven_repository == 'github-packages' && secrets.GITHUB_TOKEN || secrets.MAVEN_CENTRAL_PASSWORD }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 

@@ -816,6 +816,20 @@ HDF5_BUILD_TOOLS          "Build HDF5 Tools"                    ON
 HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools"           OFF
 HDF5_BUILD_STATIC_TOOLS   "Build Static Tools Not Shared Tools" OFF
 
+----------------- HDF5 Maven Integration Options ----------------------------
+HDF5_ENABLE_MAVEN_DEPLOY  "Enable Maven repository deployment"  OFF
+HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
+
+  To build HDF5 with Maven deployment support:
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON ../hdf5
+
+  To build Maven snapshot versions for development:
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_MAVEN_SNAPSHOT:BOOL=ON ../hdf5
+
+  Or use the Maven-enabled CMake presets:
+  cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Release version
+  cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Snapshot version
+
 ---------------- HDF5 Folder Build Options ---------------------------------
 Defaults relative to $<INSTALL_PREFIX>
 HDF5_INSTALL_BIN_DIR      "bin"

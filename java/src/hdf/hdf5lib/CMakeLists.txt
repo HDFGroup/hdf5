@@ -125,8 +125,73 @@ file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
 
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR}")
 
-add_jar (${HDF5_JAVA_HDF5_LIB_TARGET} OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}" MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
-install_jar (${HDF5_JAVA_HDF5_LIB_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT libraries)
+# Create main JAR with platform classifier if Maven deployment is enabled
+if (HDF5_ENABLE_MAVEN_DEPLOY)
+  # Determine platform and architecture for Maven classifiers
+  if (WIN32)
+    set (HDF5_MAVEN_PLATFORM "windows")
+  elseif (APPLE)
+    set (HDF5_MAVEN_PLATFORM "macos")
+  else ()
+    set (HDF5_MAVEN_PLATFORM "linux")
+  endif ()
+
+  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+      set (HDF5_MAVEN_ARCHITECTURE "aarch64")
+    else ()
+      set (HDF5_MAVEN_ARCHITECTURE "x86_64")
+    endif ()
+  else ()
+    set (HDF5_MAVEN_ARCHITECTURE "x86")
+  endif ()
+
+  # Set version suffix for snapshots vs releases
+  if (HDF5_MAVEN_SNAPSHOT)
+    set (HDF5_MAVEN_VERSION_SUFFIX "-SNAPSHOT")
+  else ()
+    set (HDF5_MAVEN_VERSION_SUFFIX "")
+  endif ()
+
+  # Create platform-specific JAR with classifier
+  set (HDF5_JAR_CLASSIFIER "${HDF5_MAVEN_PLATFORM}-${HDF5_MAVEN_ARCHITECTURE}")
+  add_jar (${HDF5_JAVA_HDF5_LIB_TARGET}
+    OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}"
+    MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt
+    ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_SOURCES}
+  )
+
+  # Also create a universal JAR without classifier for backward compatibility
+  set (HDF5_JAVA_UNIVERSAL_TARGET "${HDF5_JAVA_HDF5_LIB_TARGET}-universal")
+  add_jar (${HDF5_JAVA_UNIVERSAL_TARGET}
+    OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}"
+    MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt
+    ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_SOURCES}
+  )
+
+  # Install both JARs
+  install_jar (${HDF5_JAVA_HDF5_LIB_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT maven)
+  install_jar (${HDF5_JAVA_UNIVERSAL_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT libraries)
+
+  # Add universal JAR dependency
+  add_dependencies (${HDF5_JAVA_UNIVERSAL_TARGET} ${HDF5_JAVA_JNI_LIB_TARGET})
+  set_target_properties (${HDF5_JAVA_UNIVERSAL_TARGET} PROPERTIES FOLDER libraries/java)
+
+  # Update global variables for both JARs
+  get_target_property (${HDF5_JAVA_UNIVERSAL_TARGET}_JAR_FILE ${HDF5_JAVA_UNIVERSAL_TARGET} JAR_FILE)
+  SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS_TO_EXPORT "${HDF5_JAVA_JARS_TO_EXPORT};${${HDF5_JAVA_UNIVERSAL_TARGET}_JAR_FILE}")
+  SET_GLOBAL_VARIABLE (HDF5_MAVEN_PLATFORM_JAR_FILE "${${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE}")
+else ()
+  # Standard JAR creation without Maven classifiers
+  add_jar (${HDF5_JAVA_HDF5_LIB_TARGET} OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}" MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
+  install_jar (${HDF5_JAVA_HDF5_LIB_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT libraries)
+endif ()
 #if (NOT WIN32)
 #  install_jni_symlink (${HDF5_JAVA_HDF5_LIB_TARGET} ${HDF5_INSTALL_JAR_DIR} libraries)
 #endif ()
@@ -137,6 +202,34 @@ SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS ${${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE})
 
 add_dependencies (${HDF5_JAVA_HDF5_LIB_TARGET} ${HDF5_JAVA_JNI_LIB_TARGET})
 set_target_properties (${HDF5_JAVA_HDF5_LIB_TARGET} PROPERTIES FOLDER libraries/java)
+
+#-----------------------------------------------------------------------------
+# Maven POM Generation
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_MAVEN_DEPLOY)
+  # Configure timestamp for build metadata
+  string (TIMESTAMP CMAKE_CONFIGURE_DATE "%Y-%m-%d %H:%M:%S UTC" UTC)
+
+  # Generate POM file from template
+  configure_file (
+    ${CMAKE_CURRENT_SOURCE_DIR}/pom.xml.in
+    ${CMAKE_CURRENT_BINARY_DIR}/pom.xml
+    @ONLY
+  )
+
+  # Install POM file for deployment
+  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/pom.xml
+    DESTINATION ${HDF5_INSTALL_JAR_DIR}
+    COMPONENT maven
+  )
+
+  # Add Maven deployment information to global variables
+  SET_GLOBAL_VARIABLE (HDF5_MAVEN_POM_FILE "${CMAKE_CURRENT_BINARY_DIR}/pom.xml")
+  SET_GLOBAL_VARIABLE (HDF5_MAVEN_PLATFORM_CLASSIFIER "${HDF5_MAVEN_PLATFORM}-${HDF5_MAVEN_ARCHITECTURE}")
+
+  message (STATUS "Maven POM configured: ${HDF5_MAVEN_PLATFORM}-${HDF5_MAVEN_ARCHITECTURE}")
+endif ()
+
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_JAVA_SRC_FORMAT ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
 endif ()

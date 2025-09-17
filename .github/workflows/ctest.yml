@@ -26,6 +26,11 @@ on:
         description: "3.26.0 or later, latest"
         required: true
         type: string
+      maven_enabled:
+        description: 'Enable Maven artifact generation and upload'
+        type: boolean
+        required: false
+        default: false
     secrets:
         APPLE_CERTS_BASE64:
             required: true
@@ -280,7 +285,18 @@ jobs:
       - name: Run CTest (Linux)
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-GNUC --fresh
+          if [ "${{ inputs.maven_enabled }}" == "true" ]; then
+            if [ "${{ inputs.use_environ }}" == "release" ]; then
+              echo "Building with Maven release preset"
+              cmake --workflow --preset=${{ inputs.preset_name }}-GNUC-Maven --fresh
+            else
+              echo "Building with Maven snapshot preset"
+              cmake --workflow --preset=${{ inputs.preset_name }}-GNUC-Maven-Snapshot --fresh
+            fi
+          else
+            echo "Building with standard preset"
+            cmake --workflow --preset=${{ inputs.preset_name }}-GNUC --fresh
+          fi
         shell: bash
 
       - name: Publish binary (Linux)
@@ -343,6 +359,41 @@ jobs:
               name: docs-doxygen
               path: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/hdf5lib_docs/html
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Upload Maven artifacts when Maven deployment is enabled
+      - name: Collect Maven artifacts (Linux)
+        if: ${{ inputs.maven_enabled == true }}
+        run: |
+          echo "Collecting Maven artifacts for deployment..."
+          mkdir -p ${{ runner.workspace }}/maven-artifacts
+
+          # Determine the build directory based on Maven preset used
+          if [ "${{ inputs.use_environ }}" == "release" ]; then
+            BUILD_DIR="${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-Maven"
+          else
+            BUILD_DIR="${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-Maven-Snapshot"
+          fi
+
+          echo "Looking for artifacts in: ${BUILD_DIR}"
+
+          # Copy JAR files
+          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # Copy POM files
+          find "${BUILD_DIR}" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # List collected artifacts
+          echo "Collected Maven artifacts:"
+          ls -la ${{ runner.workspace }}/maven-artifacts/
+        shell: bash
+
+      - name: Upload Maven artifacts (Linux)
+        if: ${{ inputs.maven_enabled == true }}
+        uses: actions/upload-artifact@v4
+        with:
+              name: Linux-${{ inputs.preset_name }}-artifacts
+              path: ${{ runner.workspace }}/maven-artifacts
+              if-no-files-found: warn
 
   build_and_test_mac_latest:
   # MacOS w/ Clang

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/**)",
+      "Bash(chmod:*)",
+      "Bash(cmake:*)",
+      "Bash(/home/byrn/HDF_Projects/hdf5/develop/.github/scripts/validate-maven-artifacts.sh:*)",
+      "Bash(python3:*)",
+      "Read(//home/byrn/HDF_Projects/hdf5/build/ci-StdShar-GNUC-Maven-Snapshot/java/src/hdf/hdf5lib/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

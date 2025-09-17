@@ -1,0 +1,329 @@
+name: Maven Repository Deployment
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+      preset_name:
+        description: "The preset configuration name used for build"
+        required: true
+        type: string
+      repository_url:
+        description: 'Maven repository URL (GitHub Packages or Maven Central)'
+        required: false
+        type: string
+        default: 'https://maven.pkg.github.com/HDFGroup/hdf5'
+      repository_id:
+        description: 'Maven repository ID for server configuration'
+        required: false
+        type: string
+        default: 'github'
+      deploy_snapshots:
+        description: 'Deploy snapshot versions (-SNAPSHOT suffix)'
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Perform validation without actual deployment'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      MAVEN_USERNAME:
+        description: 'Maven repository username'
+        required: true
+      MAVEN_PASSWORD:
+        description: 'Maven repository password/token'
+        required: true
+      GPG_PRIVATE_KEY:
+        description: 'GPG private key for signing (Maven Central)'
+        required: false
+      GPG_PASSPHRASE:
+        description: 'GPG passphrase for signing'
+        required: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  validate-artifacts:
+    name: Validate Build Artifacts
+    runs-on: ubuntu-latest
+    outputs:
+      hdf5-version: ${{ steps.extract-version.outputs.hdf5-version }}
+      jar-files: ${{ steps.find-jars.outputs.jar-files }}
+      pom-file: ${{ steps.find-pom.outputs.pom-file }}
+      platform-classifier: ${{ steps.platform-info.outputs.classifier }}
+    steps:
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux-${{ inputs.preset_name }}-artifacts
+          path: ./artifacts
+
+      - name: Find JAR files
+        id: find-jars
+        run: |
+          JAR_FILES=$(find ./artifacts -name "*.jar" -not -name "*test*" | tr '\n' ',' | sed 's/,$//')
+          echo "jar-files=${JAR_FILES}" >> $GITHUB_OUTPUT
+          echo "Found JAR files: ${JAR_FILES}"
+
+          if [ -z "${JAR_FILES}" ]; then
+            echo "ERROR: No JAR files found in artifacts"
+            exit 1
+          fi
+
+      - name: Find POM file
+        id: find-pom
+        run: |
+          POM_FILE=$(find ./artifacts -name "pom.xml" | head -1)
+          echo "pom-file=${POM_FILE}" >> $GITHUB_OUTPUT
+          echo "Found POM file: ${POM_FILE}"
+
+          if [ -z "${POM_FILE}" ]; then
+            echo "ERROR: No POM file found in artifacts"
+            exit 1
+          fi
+
+      - name: Extract version information
+        id: extract-version
+        run: |
+          # Extract version from POM file
+          VERSION=$(grep -o '<version>[^<]*</version>' "${{ steps.find-pom.outputs.pom-file }}" | head -1 | sed 's/<[^>]*>//g')
+          echo "hdf5-version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Extracted HDF5 version: ${VERSION}"
+
+      - name: Determine platform classifier
+        id: platform-info
+        run: |
+          # Extract platform classifier from JAR filename
+          JAR_FILE=$(echo "${{ steps.find-jars.outputs.jar-files }}" | cut -d',' -f1)
+          CLASSIFIER=""
+
+          if [[ "${JAR_FILE}" == *"linux"* ]]; then
+            CLASSIFIER="linux-x86_64"
+          elif [[ "${JAR_FILE}" == *"windows"* ]]; then
+            CLASSIFIER="windows-x86_64"
+          elif [[ "${JAR_FILE}" == *"macos"* ]]; then
+            if [[ "${JAR_FILE}" == *"aarch64"* ]]; then
+              CLASSIFIER="macos-aarch64"
+            else
+              CLASSIFIER="macos-x86_64"
+            fi
+          fi
+
+          echo "classifier=${CLASSIFIER}" >> $GITHUB_OUTPUT
+          echo "Platform classifier: ${CLASSIFIER}"
+
+      - name: Validate artifact integrity
+        run: |
+          echo "=== Artifact Validation ==="
+          for jar_file in $(echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' ' '); do
+            echo "Validating: ${jar_file}"
+
+            # Check JAR integrity
+            if ! jar tf "${jar_file}" > /dev/null 2>&1; then
+              echo "ERROR: Invalid JAR file: ${jar_file}"
+              exit 1
+            fi
+
+            # Check file size (must be > 1KB)
+            size=$(stat -c%s "${jar_file}")
+            if [ ${size} -lt 1024 ]; then
+              echo "ERROR: JAR file too small: ${jar_file} (${size} bytes)"
+              exit 1
+            fi
+
+            echo "✓ JAR validation passed: ${jar_file} (${size} bytes)"
+          done
+
+          # Validate POM structure
+          if ! grep -q "<groupId>org.hdfgroup</groupId>" "${{ steps.find-pom.outputs.pom-file }}"; then
+            echo "ERROR: Invalid POM groupId"
+            exit 1
+          fi
+
+          if ! grep -q "<artifactId>hdf5-java</artifactId>" "${{ steps.find-pom.outputs.pom-file }}"; then
+            echo "ERROR: Invalid POM artifactId"
+            exit 1
+          fi
+
+          echo "✓ POM validation passed"
+
+  deploy-maven:
+    name: Deploy to Maven Repository
+    runs-on: ubuntu-latest
+    needs: validate-artifacts
+    if: ${{ !inputs.dry_run }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux-${{ inputs.preset_name }}-artifacts
+          path: ./artifacts
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Create Maven settings.xml
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                    https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>${{ inputs.repository_id }}</id>
+                <username>${{ secrets.MAVEN_USERNAME }}</username>
+                <password>${{ secrets.MAVEN_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Import GPG key (if provided)
+        if: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          echo "GPG key imported for artifact signing"
+
+      - name: Deploy JAR artifacts
+        env:
+          HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
+          PLATFORM_CLASSIFIER: ${{ needs.validate-artifacts.outputs.platform-classifier }}
+        run: |
+          echo "=== Maven Deployment ==="
+          echo "Version: ${HDF5_VERSION}"
+          echo "Repository: ${{ inputs.repository_url }}"
+          echo "Repository ID: ${{ inputs.repository_id }}"
+          echo "Platform Classifier: ${PLATFORM_CLASSIFIER}"
+
+          # Set GPG options if available
+          GPG_OPTS=""
+          if [ -n "${{ secrets.GPG_PRIVATE_KEY }}" ]; then
+            GPG_OPTS="-Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}"
+            echo "GPG signing enabled"
+          fi
+
+          # Deploy each JAR file
+          success_count=0
+          total_count=0
+
+          for jar_file in $(echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' ' '); do
+            total_count=$((total_count + 1))
+            jar_basename=$(basename "${jar_file}")
+
+            echo "Deploying: ${jar_basename}"
+
+            # Determine classifier for this specific JAR
+            classifier_opts=""
+            if [ -n "${PLATFORM_CLASSIFIER}" ] && [[ "${jar_basename}" != *"sources"* ]] && [[ "${jar_basename}" != *"javadoc"* ]]; then
+              classifier_opts="-Dclassifier=${PLATFORM_CLASSIFIER}"
+            fi
+
+            # Deploy with Maven
+            if mvn deploy:deploy-file \
+              -DgroupId=org.hdfgroup \
+              -DartifactId=hdf5-java \
+              -Dversion="${HDF5_VERSION}" \
+              -Dfile="${jar_file}" \
+              -DpomFile="${{ needs.validate-artifacts.outputs.pom-file }}" \
+              -DrepositoryId="${{ inputs.repository_id }}" \
+              -Durl="${{ inputs.repository_url }}" \
+              ${classifier_opts} \
+              ${GPG_OPTS} \
+              -B -q; then
+
+              echo "✓ Successfully deployed: ${jar_basename}"
+              success_count=$((success_count + 1))
+            else
+              echo "✗ Failed to deploy: ${jar_basename}"
+            fi
+          done
+
+          echo "=== Deployment Summary ==="
+          echo "Successful deployments: ${success_count}/${total_count}"
+
+          if [ ${success_count} -eq ${total_count} ]; then
+            echo "🎉 All artifacts deployed successfully!"
+          else
+            echo "❌ Some deployments failed"
+            exit 1
+          fi
+
+      - name: Verify deployment
+        env:
+          HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
+        run: |
+          echo "=== Deployment Verification ==="
+
+          # Wait for repository to process
+          sleep 10
+
+          # For GitHub Packages, we can verify using the API
+          if [[ "${{ inputs.repository_url }}" == *"maven.pkg.github.com"* ]]; then
+            echo "Verifying GitHub Packages deployment..."
+
+            # Extract owner/repo from URL
+            REPO_PATH=$(echo "${{ inputs.repository_url }}" | sed 's|.*maven.pkg.github.com/||')
+
+            curl -s -H "Authorization: token ${{ secrets.MAVEN_PASSWORD }}" \
+              "https://api.github.com/users/HDFGroup/packages?package_type=maven" | \
+              grep -q "hdf5-java" && echo "✓ Package verified in GitHub Packages" || echo "⚠ Package verification pending"
+          fi
+
+          echo "Deployment verification completed"
+
+  create-release-notes:
+    name: Create Maven Release Notes
+    runs-on: ubuntu-latest
+    needs: [validate-artifacts, deploy-maven]
+    if: ${{ always() && needs.validate-artifacts.result == 'success' }}
+    steps:
+      - name: Generate deployment summary
+        run: |
+          cat > maven-deployment-summary.md << 'EOF'
+          # Maven Deployment Summary
+
+          **Version**: ${{ needs.validate-artifacts.outputs.hdf5-version }}
+          **Repository**: ${{ inputs.repository_url }}
+          **Platform**: ${{ needs.validate-artifacts.outputs.platform-classifier }}
+          **Deployment Status**: ${{ needs.deploy-maven.result || 'skipped (dry-run)' }}
+
+          ## Maven Dependency
+
+          ```xml
+          <dependency>
+              <groupId>org.hdfgroup</groupId>
+              <artifactId>hdf5-java</artifactId>
+              <version>${{ needs.validate-artifacts.outputs.hdf5-version }}</version>
+              <classifier>${{ needs.validate-artifacts.outputs.platform-classifier }}</classifier>
+          </dependency>
+          ```
+
+          ## Gradle Dependency
+
+          ```kotlin
+          implementation("org.hdfgroup:hdf5-java:${{ needs.validate-artifacts.outputs.hdf5-version }}:${{ needs.validate-artifacts.outputs.platform-classifier }}")
+          ```
+          EOF
+
+          echo "Maven deployment summary created"
+
+      - name: Upload deployment summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-deployment-summary
+          path: maven-deployment-summary.md
+          retention-days: 30

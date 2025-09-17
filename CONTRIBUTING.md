@@ -62,6 +62,7 @@ Depending on which features you want to build or enable:
 * A _C++11_-compatible compiler for the C++ wrappers.
 * A _Fortran 2003_-compatible compiler for the Fortran wrappers.
 * A _Java 8_-compatible compiler for the Java wrappers.
+* **Maven** for Java artifact deployment and validation (when `HDF5_ENABLE_MAVEN_DEPLOY=ON`).
 * `flex`/`lex` and `bison`/`yacc` if you want to modify the high-level parsers.
 * Development versions of **zlib** and **szip** for compression support.
 * An MPI-3 compatible MPI library for parallel HDF5 development.
@@ -106,9 +107,22 @@ CMake is the required build system for all platforms:
 
 * **Memory Checking:** Use `HDF5_ENABLE_USING_MEMCHECKER:BOOL=ON` when using tools like Valgrind. This disables
                        internal memory pools that can hide memory issues.
-* **Developer Warnings:** Enable extra warnings with `HDF5_ENABLE_DEV_WARNINGS:BOOL=ON` (generates significant 
+* **Developer Warnings:** Enable extra warnings with `HDF5_ENABLE_DEV_WARNINGS:BOOL=ON` (generates significant
                           output but can be useful).
 * **Warnings as Errors:** The CI system builds with `-Werror`, so fix all compiler warnings before submitting pull requests.
+
+### Maven Integration Development
+
+For developers working on Java bindings and Maven integration:
+
+* **Enable Maven Support:** Use `HDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON` to enable Maven artifact generation.
+* **Snapshot Builds:** Use `HDF5_MAVEN_SNAPSHOT:BOOL=ON` for development builds with `-SNAPSHOT` versions.
+* **Maven Presets:** Use Maven-enabled CMake presets for consistent builds:
+  ```bash
+  cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh
+  ```
+* **Artifact Validation:** Test Maven artifacts using `.github/scripts/validate-maven-artifacts.sh` script.
+* **Repository Testing:** Use the `maven-staging.yml` workflow for pull request validation.
 
 ---
 

@@ -124,6 +124,22 @@
       }
     },
     {
+      "name": "ci-Maven",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_ENABLE_MAVEN_DEPLOY": "ON",
+        "HDF5_MAVEN_SNAPSHOT": "OFF"
+      }
+    },
+    {
+      "name": "ci-Maven-Snapshot",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_ENABLE_MAVEN_DEPLOY": "ON",
+        "HDF5_MAVEN_SNAPSHOT": "ON"
+      }
+    },
+    {
       "name": "ci-StdShar",
       "hidden": true,
       "inherits": ["ci-StdCompression", "ci-StdExamples", "ci-StdPlugins"],
@@ -216,6 +232,30 @@
         "ci-Java",
         "ci-StdShar"
       ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "description": "GNUC Standard Config for x64 with Maven deployment (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar",
+        "ci-Maven"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "description": "GNUC Standard Config for x64 with Maven snapshot deployment (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar",
+        "ci-Maven-Snapshot"
+      ]
     }
   ],
   "buildPresets": [
@@ -277,6 +317,24 @@
       "verbose": true,
       "inherits": [
         "ci-x64-Release-Intel"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "description": "GNUC Standard Build for x64 with Maven deployment (Release)",
+      "configurePreset": "ci-StdShar-GNUC-Maven",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "description": "GNUC Standard Build for x64 with Maven snapshot deployment (Release)",
+      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
       ]
     }
   ],
@@ -346,6 +404,20 @@
       "inherits": [
         "ci-x64-Release-Intel"
       ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "configurePreset": "ci-StdShar-GNUC-Maven",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
     }
   ],
   "packagePresets": [
@@ -383,6 +455,16 @@
       "name": "ci-StdShar-Intel",
       "configurePreset": "ci-StdShar-Intel",
       "inherits": "ci-x64-Release-Intel"
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "configurePreset": "ci-StdShar-GNUC-Maven",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
+      "inherits": "ci-x64-Release-GNUC"
     }
   ],
   "workflowPresets": [
@@ -456,6 +538,24 @@
         {"type": "build", "name": "ci-StdShar-Intel"},
         {"type": "test", "name": "ci-StdShar-win-Intel"},
         {"type": "package", "name": "ci-StdShar-Intel"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-GNUC-Maven"},
+        {"type": "build", "name": "ci-StdShar-GNUC-Maven"},
+        {"type": "test", "name": "ci-StdShar-GNUC-Maven"},
+        {"type": "package", "name": "ci-StdShar-GNUC-Maven"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
+        {"type": "build", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
+        {"type": "test", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
+        {"type": "package", "name": "ci-StdShar-GNUC-Maven-Snapshot"}
       ]
     }
   ]

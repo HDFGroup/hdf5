@@ -35,36 +35,43 @@ The current release workflow follows a sequential pattern:
    - GitHub Packages (simpler, tied to GitHub repository)
    - Private/corporate repository (Nexus, Artifactory, etc.)
    - Multiple repositories (different environments)
+Decision: Target Github Packages and add a plan for future change to Maven Central.
 
 2. **Maven coordinates strategy:**
    - GroupId: `org.hdfgroup` or `org.hdfgroup.hdf5`?
    - ArtifactId: `hdf5-java`, `hdf5`, or separate artifacts?
    - Version mapping: Direct HDF5 version (`2.0.0-2`) or Java-specific versioning?
+Decision: GroupId: `org.hdfgroup` ArtifactId: `hdf5-java` Version mapping: Direct HDF5 version (`2.0.0-2`)
 
 ### Integration Approach
 3. **Workflow integration point:**
    - **Option A**: Add to existing `release.yml` as final step (after all validation)
    - **Option B**: Create separate `maven-deploy.yml` callable workflow
    - **Option C**: Integrate into `ctest.yml` during artifact creation
+Decision: Option B: Create separate `maven-deploy.yml` callable workflow
 
 4. **Artifact scope:**
    - Just Java JARs (hdf5-java bindings)?
    - Include native libraries (JNI .so/.dll/.dylib files)?
    - Source JARs and Javadoc JARs for Maven Central compliance?
    - Test artifacts (`jartest5`)?
+Decision: Jars, native libs, Maven Central compliance. No test artifacts.
 
 ### Build Requirements
 5. **Native library handling:**
    - Package platform-specific natives in separate classifier artifacts?
    - Use Maven's platform detection or custom solution?
    - Multi-platform deployment strategy (Windows/Linux/macOS)?
+Decision: Need more investigation of pros and cons for a decision.
 
 6. **POM generation strategy:**
    - Generate via CMake configure-time?
    - Template-based with version substitution?
    - Include HDF5 native library dependencies in POM?
+Decision: CMake POM Generation
 
 ## Recommended Integration Strategy
+Decision: Agree with recommended strategy after aligning with above decisions.
 
 ### Phase 1: Foundation (MVP)
 **Goal**: Basic Maven deployment capability for Java artifacts

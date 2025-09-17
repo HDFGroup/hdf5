@@ -179,12 +179,17 @@ For more information on the HDF5 versioning and backward and forward compatibili
 3. Run `bin/release` (similar to 8.2) and commit all the changed files.
 4. Select the actions tab and the release build workflow, then click the 'Run workflow' drop-down.
     - Choose the release branch
-    - Enter the ‘Release version tag’ name as 'X.Y.Z'
+    - Enter the 'Release version tag' name as 'X.Y.Z'
+    - **Maven Deployment (Optional):** Set 'deploy_maven' to true if Maven deployment is desired
     - Press "Run Workflow"
-5. Review the release files in Github
-6. Edit the Github Release and change status to Release
+5. **Maven Artifact Deployment (If Enabled):**
+    - If Maven deployment was enabled, the `maven-deploy.yml` workflow will be triggered automatically
+    - Monitor the Maven deployment workflow for successful completion
+    - Verify artifacts are properly uploaded to GitHub Packages or Maven Central staging
+6. Review the release files in Github
+7. Edit the Github Release and change status to Release
     - Change status from Pre-release to Release
-7. Select publish-release build from workflow, then click the 'Run workflow' drop-down.
+8. Select publish-release build from workflow, then click the 'Run workflow' drop-down.
     - Choose the release branch
     - Enter the ‘HDF5 Release version tag’ name as 'X.Y.Z'
     - Enter the 'HDF5 Release file name base' as 'hdf5-X.Y.Z'
