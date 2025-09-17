@@ -256,9 +256,9 @@ test_rtree_search(void)
     H5RT_leaf_t *leaves_temp = NULL;
 
     H5RT_result_t *results_head = NULL;
-    hsize_t      min[H5S_MAX_RANK];
-    hsize_t      max[H5S_MAX_RANK];
-    hsize_t      size = 0;
+    hsize_t        min[H5S_MAX_RANK];
+    hsize_t        max[H5S_MAX_RANK];
+    hsize_t        size = 0;
 
     TESTING("R-tree spatial queries");
     srand(0);
@@ -343,9 +343,9 @@ test_rtree_copy(void)
     H5RT_leaf_t *leaves     = NULL;
 
     H5RT_result_t *results_head = NULL;
-    hsize_t      min[H5S_MAX_RANK];
-    hsize_t      max[H5S_MAX_RANK];
-    hsize_t      size = 0;
+    hsize_t        min[H5S_MAX_RANK];
+    hsize_t        max[H5S_MAX_RANK];
+    hsize_t        size = 0;
 
     TESTING("R-tree copy");
     srand(0);

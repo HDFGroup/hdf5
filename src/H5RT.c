@@ -341,10 +341,10 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
     hsize_t *curr_min = NULL;
     hsize_t *curr_max = NULL;
 
-    H5RT_leaf_t   *curr_leaf   = NULL;
-    H5RT_node_t   *curr_node   = NULL;
-    H5RT_result_t *new_result  = NULL;
-    herr_t         ret_value   = SUCCEED;
+    H5RT_leaf_t   *curr_leaf  = NULL;
+    H5RT_node_t   *curr_node  = NULL;
+    H5RT_result_t *new_result = NULL;
+    herr_t         ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -459,8 +459,8 @@ done:
 herr_t
 H5RT_free_results(H5RT_result_t *results)
 {
-    H5RT_result_t *current = NULL;
-    H5RT_result_t *next    = NULL;
+    H5RT_result_t *current   = NULL;
+    H5RT_result_t *next      = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)

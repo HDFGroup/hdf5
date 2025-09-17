@@ -31,8 +31,8 @@ typedef struct H5RT_leaf_t {
 
 /* Struct representing a search result */
 typedef struct H5RT_result_t {
-    H5RT_leaf_t           *leaf;
-    struct H5RT_result_t  *next;
+    H5RT_leaf_t          *leaf;
+    struct H5RT_result_t *next;
 } H5RT_result_t;
 
 H5_DLL H5RT_t *H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count);
