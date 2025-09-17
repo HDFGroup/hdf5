@@ -172,7 +172,7 @@
 
 /* Definition for "low" bound of library format versions */
 #define H5F_ACS_LIBVER_LOW_BOUND_SIZE sizeof(H5F_libver_t)
-#define H5F_ACS_LIBVER_LOW_BOUND_DEF  H5F_LIBVER_EARLIEST
+#define H5F_ACS_LIBVER_LOW_BOUND_DEF  H5F_LIBVER_V18
 #define H5F_ACS_LIBVER_LOW_BOUND_ENC  H5P__facc_libver_type_enc
 #define H5F_ACS_LIBVER_LOW_BOUND_DEC  H5P__facc_libver_type_dec
 

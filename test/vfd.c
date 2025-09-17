@@ -1026,6 +1026,10 @@ test_family(void)
         TEST_ERROR;
     h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
 
+    /* Set earliest file format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
         TEST_ERROR;
@@ -1478,6 +1482,10 @@ test_multi(void)
 
     /* Set file access property list for MULTI driver */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set earliest file format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 
     memset(memb_map, 0, sizeof(memb_map));
