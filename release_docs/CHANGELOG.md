@@ -41,7 +41,7 @@ HDF5 release, platforms tested, and known problems in this release.
 > [!IMPORTANT]
 > 
 > - Transitioned to [CMake-only](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
-> - Renamed library state variables, noteability `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
+> - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
 
 ## Enhanced Features:
 
