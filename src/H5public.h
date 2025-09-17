@@ -461,6 +461,22 @@ typedef void (*H5_atclose_func_t)(void *ctx);
  * Does the compiler support the __builtin_expect() syntax?
  * It's not a problem if not.
  */
+
+/* clang-format off */
+#if defined(__has_builtin)
+    /* clang extension to check for builtins. Do this first, because clang
+     * also defines __GNUC__ and didn't support __builtin_expect() until
+     * more recently.
+     */
+#   if __has_builtin(__builtin_expect)
+#       define H5_HAVE_BUILTIN_EXPECT 1
+#   endif
+#elif defined(__GNUC__)
+    /* __builtin_expect() has been supported since 2.95 or 2.96 (circa 2000) */
+#   define H5_HAVE_BUILTIN_EXPECT 1
+#endif
+/* clang-format on */
+
 #if H5_HAVE_BUILTIN_EXPECT
 #define H5_LIKELY(expression)   __builtin_expect(!!(expression), 1)
 #define H5_UNLIKELY(expression) __builtin_expect(!!(expression), 0)
