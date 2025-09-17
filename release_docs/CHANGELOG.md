@@ -13,6 +13,7 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdf5#help-and-support)
 
 ## 📖 Contents
+* [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200) 
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](#--bug-fixes)
@@ -20,13 +21,39 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
 * [Known Problems](#-known-problems)
   
+# 🔆 Executive Summary: HDF5 Version 2.0.0
+
+## Performance Enhancements:
+
+- 30% faster opening and 25% faster closing of virtual datasets.
+- Reduced memory overhead via shared name strings and optimized spatial search algorithms for virtual datasets.
+
+## Significant Advancements:
+
+- Full [UTF-8](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#utf8) filename support on Windows, resolving encoding issues from previous versions.
+- Introduction of native bfloat16 datatypes for efficient machine learning conversions.
+- First-class support for [complex numbers](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
+
+## Updated Foundation:
+
+- New [file format](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) version (4.0) and compliance with the C11 standard.
+
+> [!IMPORTANT]
+> 
+> - Transitioned to [CMake-only](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
+> - Renamed library state variables, noteability `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
+
+## Enhanced Features:
+
+- Improved [ROS3 VFD](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
+
 # ⚠️ Breaking Changes
 
-- **Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT**
+- **Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`**
 
-   The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
+   The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
 
-- Autotools support was removed from HDF5
+- Autotools support was removed from HDF5<a name="cmake">
 
    CMake is now the build system available in HDF5 code.  Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options. 
 
@@ -182,7 +209,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The default dataset chunk cache size was increased to 8 MiB (8,388,608 bytes).
 
-- The file format has been updated to 4.0
+- The file format has been updated to 4.0<a name="fleformat">
 
    The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
 
@@ -204,7 +231,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    `H5Dread_chunk()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
 
-- Replaced the ROS3 VFD's S3 backend based on libcurl with a new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3)
+- Replaced the ROS3 VFD's S3 backend based on libcurl with a new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3)<a name="ros3">
 
    The ROS3 VFD now requires the aws-c-s3 library in order to be built. This library offers several useful features for the VFD, including the following
      - Automatic retries of non-fatal failed requests (where the libcurl backend would simply return an error),
@@ -292,7 +319,7 @@ HDF5 release, platforms tested, and known problems in this release.
       H5F_LIBVER_LATEST   = 5,
       </snip>
 ```
-- Added support for complex number datatypes
+- Added support for complex number datatypes<a name="complex">
 
    Support for the C99 "float _Complex", "double _Complex" and "long double _Complex" (with MSVC, "_Fcomplex", "_Dcomplex" and "_Lcomplex") types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications).
   
@@ -458,9 +485,9 @@ HDF5 release, platforms tested, and known problems in this release.
 
    Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in H5HL__fl_deserialize to ensure no overflow can occur.
 
-   Fixes GitHub issue #5382
+   Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
 
-- Revised handling of Unicode filenames on Windows
+- Revised handling of Unicode filenames on Windows<a name="utf-8">
 
    In the HDF5 1.14.4 release, a change was made to address some issues with the library's handling of code pages and file paths on Windows.  This change introduced other issues with the handling of UTF-8 file names that caused breakage for software using the 1.14.4 and 1.14.5 releases of HDF5. That change was reverted for the 1.14.6 release and the behavior has been slightly modified for this release.
 
