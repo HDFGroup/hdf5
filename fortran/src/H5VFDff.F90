@@ -33,7 +33,7 @@
 ! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
 !      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
 !
-!  If you add a new H5VL function you must add the function name to the
+!  If you add a new H5VFD function you must add the function name to the
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
