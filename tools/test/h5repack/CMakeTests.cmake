@@ -396,7 +396,7 @@ macro (ADD_H5_TEST testname)
     set (ctest_filename "VERIFY_LAYOUT-${testname}")
     set (ARG_DUMP_SKIP_COMPARE TRUE)
     set (ARG_STDOUT_FILE "${ARG_TEST_FILE}-${testname}-v.out")
-    set (ARG_DUMP_REFERENCE "${testfilter}")
+    set (ARG_DUMP_REFERENCE "${ARG_LAYOUT_FILTER}")
     # If an error result code is provided, change the h5dump call in the following ways
     # - remove use of dset in args
     # - change expected result code to 0
