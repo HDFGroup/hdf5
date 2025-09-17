@@ -420,22 +420,82 @@ H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *conf
 /**
  * \ingroup H5VFD
  *
- * \brief Provides a list of subfile names that are associated with an MPI rank identifier.
+ * \brief Retrieve the subfile names for an HDF5 file using the subfiling VFD
  *
- * \file_id
+ * \file_id{file_id}
  *
- * \param[out] filenames List of subfile names that are associated with an MPI rank identifier.
- * \param[out] len The number of subfiles contained in the list.
+ * \param[out] filenames Pointer to an array of C strings containing the subfile names.
+ *                       Memory is allocated by the function and must be freed by the caller.
+ * \param[out] len       Pointer to the number of subfiles in the \p filenames array.
  *
  * \returns \herr_t
  *
- * \details H5FDsubfiling_get_file_mapping() retrieves the subfile names associated with a
- *          specified file identifier and MPI rank identifier. This information is useful,
- *          for instance, when providing it to `h5fuse` for combining files from local node
- *          storage.
+ * \details H5FDsubfiling_get_file_mapping() retrieves the names of all physical subfiles
+ *          that collectively make up a logical HDF5 file using the subfiling Virtual File
+ *          Driver (VFD). The subfiling VFD distributes file data across multiple subfiles
+ *          to improve parallel I/O performance, particularly systems where metadata operations
+ *          can become a bottleneck.
  *
- * \note  The caller must call H5free_memory() on each of the entries in \p filenames, as well
- *        as on \p filenames itself.
+ *          The function returns an array of subfile names corresponding to the physical files
+ *          stored on the file system. Each MPI rank may be responsible for different subfiles,
+ *          and this function provides visibility into which subfiles are associated with the
+ *          calling rank.
+ *
+ *          **Typical use cases include:**
+ *          - **File management**: Understanding the physical storage layout for backup and archival
+ *          - **Performance analysis**: Identifying subfile distribution patterns
+ *          - **File fusion**: Providing subfile lists to tools like h5fuse for recombining files
+ *          - **Debugging**: Troubleshooting subfiling configuration and I/O patterns
+ *          - **Storage optimization**: Analyzing subfile sizes and distribution
+ *
+ * \note  **Memory management**: The caller must call H5free_memory() on each string in the
+ *        \p filenames array, and then call H5free_memory() on the \p filenames array itself:
+ *        \code{.c}
+ *        for (size_t i = 0; i < len; i++) {
+ *            H5free_memory(filenames[i]);
+ *        }
+ *        H5free_memory(filenames);
+ *        \endcode
+ *
+ * \note  **VFD requirement**: This function only works with files that use the subfiling VFD.
+ *        Calling it on files using other VFDs will result in an error.
+ *
+ * \note  **MPI context**: The function returns subfiles associated with the calling MPI rank.
+ *        Different ranks may receive different subfile lists depending on the subfiling
+ *        configuration and I/O concentrator (IOC) assignment.
+ *
+ * \warning **Platform support**: Subfiling is not supported on Windows. This function will
+ *          not be available when HDF5 is built on Windows platforms.
+ *
+ * \par Example
+ * \code{.c}
+ * #include "hdf5.h"
+ *
+ * hid_t   file_id;
+ * char  **subfile_names = NULL;
+ * size_t  num_subfiles;
+ * herr_t  ret;
+ *
+ * // Open file with subfiling VFD (setup not shown)
+ * // ...
+ *
+ * // Get subfile mapping
+ * ret = H5FDsubfiling_get_file_mapping(file_id, &subfile_names, &num_subfiles);
+ * if (ret >= 0) {
+ *     printf("Found %zu subfiles:\n", num_subfiles);
+ *     for (size_t i = 0; i < num_subfiles; i++) {
+ *         printf("  %s\n", subfile_names[i]);
+ *         H5free_memory(subfile_names[i]);  // Free each string
+ *     }
+ *     H5free_memory(subfile_names);         // Free the array
+ * } else {
+ *     printf("Error getting file mapping\n");
+ * }
+ * \endcode
+ *
+ * \see H5Pset_fapl_subfiling()
+ * \see H5Pget_fapl_subfiling()
+ * \see H5free_memory()
  *
  * \since 2.0.0
  *
