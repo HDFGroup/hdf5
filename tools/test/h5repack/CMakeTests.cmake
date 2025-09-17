@@ -482,20 +482,43 @@ macro (ADD_H5_TEST testname)
         COMMAND ${CMAKE_COMMAND} -E remove "${ARG_CLEANUP_FILES}"
     )
 
+    # Build TEST_ARGS properly to avoid empty first argument
+    set(TEST_ARGS "")
+    if(ARG_ERROR_STACK_FLAG)
+      set(TEST_ARGS "${ARG_ERROR_STACK_FLAG}")
+    endif()
+    if(ARG_UNPARSED_ARGUMENTS)
+      if(TEST_ARGS)
+        set(TEST_ARGS "${TEST_ARGS};${ARG_UNPARSED_ARGUMENTS}")
+      else()
+        set(TEST_ARGS "${ARG_UNPARSED_ARGUMENTS}")
+      endif()
+    endif()
+
     if (HDF5_ENABLE_USING_MEMCHECKER OR ${ARG_DUMP_CHECK})
-      # Execute h5repack directly
+      # Execute h5repack directly - append absolute paths
+      if(TEST_ARGS)
+        set(TEST_ARGS "${TEST_ARGS};-i;${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE};-o;${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}")
+      else()
+        set(TEST_ARGS "-i;${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE};-o;${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}")
+      endif()
       add_test (
           NAME H5REPACK-${ctest_testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARG_ERROR_STACK_FLAG} ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${TEST_ARGS}
       )
     else ()
-      # Execute h5repack through runTest script
+      # Execute h5repack through runTest script - append relative paths
+      if(TEST_ARGS)
+        set(TEST_ARGS "${TEST_ARGS};-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}")
+      else()
+        set(TEST_ARGS "-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}")
+      endif()
       add_test (
           NAME H5REPACK-${ctest_testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-              -D "TEST_ARGS:STRING=${ARG_ERROR_STACK_FLAG};${ARG_UNPARSED_ARGUMENTS};-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}"
+              -D "TEST_ARGS:STRING=${TEST_ARGS}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
               -D "TEST_EXPECT=${ARG_RESULT_CODE}"
