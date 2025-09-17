@@ -44,7 +44,7 @@ The latest documentation for the HDF5 library can be found at:
 
    https://support.hdfgroup.org/documentation/hdf5/latest
 
-See the [RELEASE.txt][u1] file in the [release_docs/][u4] directory for information specific
+See the [CHANGELOG.md][u1] file in the [release_docs/][u4] directory for information specific
 to the features and updates included in this release of the library.
 
 Several more files are located within the [release_docs/][u4] directory with specific
@@ -127,7 +127,7 @@ Development code is available at our Github location:
 
    https://github.com/HDFGroup/hdf5.git
 
-[u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt
+[u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md
 [u2]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/img/release-schedule.png
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/doxygen/img/HDF5.png
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs

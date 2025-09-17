@@ -252,7 +252,7 @@ For a pull request to be accepted, it must satisfy:
   - Machine independence (data readable across all platforms).
   - Binary compatibility for maintenance releases (no changes to public APIs/structures).
 * **Documentation:** New features must be properly documented. This includes using Doxygen
-    and providing information in release documents such as `RELEASE.txt`.
+    and providing information in release documents such as `CHANGELOG.md`.
 
 ### Branching Strategy
 
@@ -361,7 +361,7 @@ Before submitting your pull request, verify:
 - [ ] API changes follow compatibility guidelines.
 
 ### Documentation
-- [ ] Change described in `release_docs/RELEASE.txt`.
+- [ ] Change described in `release_docs/CHANGELOG.md`.
 - [ ] New functions documented with Doxygen in public headers.
 - [ ] New features documented for HDF5 community.
 
