@@ -149,7 +149,7 @@ jobs:
         id: version-info
         run: |
           # Find the generated POM file
-          POM_FILE=$(find ${{ runner.workspace }}/hdf5/build/${{ steps.buildhdf5.outputs.preset }} -name "pom.xml" | head -1)
+          POM_FILE=$(find ${{ runner.workspace }}/build/${{ steps.buildhdf5.outputs.preset }} -name "pom.xml" | head -1)
 
           if [ -n "$POM_FILE" ]; then
             VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
@@ -166,11 +166,11 @@ jobs:
           mkdir -p ${{ runner.workspace }}/maven-artifacts
 
           # Find build directory
-          BUILD_DIR=$(find ${{ runner.workspace }}/hdf5/build/${{ steps.buildhdf5.outputs.preset }} -name "*Maven*" -type d | head -1)
+          BUILD_DIR=$(find ${{ runner.workspace }}/build/${{ steps.buildhdf5.outputs.preset }} -name "*Maven*" -type d | head -1)
 
           if [ -z "$BUILD_DIR" ]; then
             echo "ERROR: Could not find Maven build directory"
-            find ${{ runner.workspace }}/hdf5/build/${{ steps.buildhdf5.outputs.preset }} -type d -name "*" | head -10
+            find ${{ runner.workspace }}/build/${{ steps.buildhdf5.outputs.preset }} -type d -name "*" | head -10
             exit 1
           fi
 
