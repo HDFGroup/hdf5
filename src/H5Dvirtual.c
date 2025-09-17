@@ -3130,7 +3130,6 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
         curr_result = search_results;
         while (curr_result) {
             H5RT_leaf_t *curr_leaf = curr_result->leaf;
-
             assert(curr_leaf);
 
             size_t mapping_index = (size_t)curr_leaf->record;
@@ -3141,6 +3140,10 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
 
             curr_result = curr_result->next;
         }
+
+        /* Free search results */
+        if (H5RT_free_results(search_results) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
     }
 
     /* Iterate over the mappings that are not stored in the tree */
@@ -3894,8 +3897,17 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
     assert(leaves_out);
     assert(is_in_tree_out);
 
-    /* TODO - For now, assume that bulk allocation of too much memory is faster than 
-     * piecemeal allocation of the exactly correct amount */
+    /* Get rank from the first mapping's virtual selection */
+    if ((curr_space = mappings[0].source_dset.virtual_select) == NULL)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "first mapping has no virtual space");
+
+    if ((rank = H5S_GET_EXTENT_NDIMS(curr_space)) < 0 || rank > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get rank of dataspace");
+
+    if (rank == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "mapping has zero-dimensional space");
+
+    /* Allocate array of leaf structures */
     if ((leaves_temp = (H5RT_leaf_t *)calloc(num_mappings, sizeof(H5RT_leaf_t))) == NULL)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate leaves array");
 
@@ -3913,20 +3925,15 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
         
         is_in_tree[i] = true;
 
-        /* Leaf is already allocated, populate its fields */
+        /* Initialize leaf with dynamic coordinate allocation */
         curr_leaf = &leaves_temp[curr_leaf_count];
+        if (H5RT_leaf_init(curr_leaf, rank, (uintptr_t)i) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't initialize R-tree leaf");
         
-        /* Store the index into the mapping list */
-        curr_leaf->record = (uintptr_t) i;
+        /* Record is already set by H5RT_leaf_init */
 
         if ((curr_space = mappings[i].source_dset.virtual_select) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "mapping has no virtual space");
-        
-        if ((rank = H5S_GET_EXTENT_NDIMS(curr_space)) < 0 || rank > H5S_MAX_RANK)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get rank of dataspace");
-
-        if (rank == 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "mapping has zero-dimensional space");
 
         /* Get selection bounds */
         if (H5S_SELECT_BOUNDS(curr_space, curr_leaf->min, curr_leaf->max) < 0)
@@ -3947,8 +3954,13 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
     *is_in_tree_out = is_in_tree;
 done:
     if (ret_value < 0) {
-        if (leaves_temp)
+        if (leaves_temp) {
+            /* Clean up coordinate arrays for initialized leaves */
+            for (size_t j = 0; j < curr_leaf_count; j++) {
+                H5RT_leaf_cleanup(&leaves_temp[j]);
+            }
             free(leaves_temp);
+        }
         if (is_in_tree)
             H5MM_free(is_in_tree);
     }
@@ -3992,10 +4004,14 @@ H5D__virtual_build_tree(H5O_storage_virtual_t *virt, int rank) {
 
     if (num_leaves == 0) {
         /* Don't build a tree, release allocated memory */
-        free(leaves);
-        leaves = NULL;
-        free(is_in_tree);
-        is_in_tree = NULL;
+        if (leaves) {
+            free(leaves);
+            leaves = NULL;
+        }
+        if (is_in_tree) {
+            H5MM_free(is_in_tree);
+            is_in_tree = NULL;
+        }
 
         virt->tree = NULL;
         virt->is_in_tree = NULL;
@@ -4006,16 +4022,21 @@ H5D__virtual_build_tree(H5O_storage_virtual_t *virt, int rank) {
         /* Build the tree */
         if ((virt->tree = H5RT_create(rank, leaves, num_leaves)) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create mapping tree");
-        /* Tree takes ownership of leaves */
+        /* Tree takes ownership of leaves array and coordinate arrays */
         leaves = NULL;
     }
 
 done:
     if (ret_value < 0) {
-        if (leaves)
+        if (leaves) {
+            /* Clean up coordinate arrays and the leaf array */
+            for (size_t i = 0; i < num_leaves; i++) {
+                H5RT_leaf_cleanup(&leaves[i]);
+            }
             free(leaves);
+        }
         if (is_in_tree)
-            free(is_in_tree);
+            H5MM_free(is_in_tree);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
