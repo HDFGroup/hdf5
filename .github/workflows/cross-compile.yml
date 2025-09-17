@@ -100,6 +100,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tgz-ubuntu-2404_mingw64-${{ inputs.build_mode }}-binary
-          path: ${{ runner.workspace }}/build/HDF5-*-win64.tar.gz
+          path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ inputs.build_mode != 'Debug' }}
