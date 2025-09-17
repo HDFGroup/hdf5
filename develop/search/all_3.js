@@ -5,7 +5,7 @@ var searchData=
   ['3_20code_20and_20code_20scanf_203_20code_20format_20strings_2',['Functions that accept &lt;code&gt;printf(3)&lt;/code&gt; and &lt;code&gt;scanf(3)&lt;/code&gt; format strings',['../_c_o_d_e_c_o_n_v.html#subsec_codeconv_func_1',1,'']]],
   ['3_20code_20format_20strings_3',['Functions that accept &lt;code&gt;printf(3)&lt;/code&gt; and &lt;code&gt;scanf(3)&lt;/code&gt; format strings',['../_c_o_d_e_c_o_n_v.html#subsec_codeconv_func_1',1,'']]],
   ['3_20november_202009_4',['Release 1.8.4 versus Release 1.8.3, November 2009',['../rel_spec_18.html#subsec_rel_spec_18_change_4',1,'']]],
-  ['3_20prepare_20release_20notes_20release_20manager_5',['3. Prepare Release Notes (Release Manager)',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md185',1,'']]],
+  ['3_20prepare_20release_20notes_20release_20manager_5',['3. Prepare Release Notes (Release Manager)',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md186',1,'']]],
   ['3_20temporary_20ban_6',['3. Temporary Ban',['../md__c_o_d_e___o_f___c_o_n_d_u_c_t.html#autotoc_md11',1,'']]],
   ['3_20versus_201_2010_202_7',['Release 1.10.3 versus 1.10.2',['../rel_spec_110_change.html#subsec_rel_spec_110_change_3versus2',1,'']]],
   ['3_20versus_20release_201_2014_202_8',['Release 1.14.3 versus Release 1.14.2',['../rel_spec_114_change.html#subsec_rel_spec_114_change_3versus2',1,'']]],

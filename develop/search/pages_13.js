@@ -11,8 +11,6 @@ var searchData=
   ['of_20conduct_8',['Contributor Covenant Code of Conduct',['../md__c_o_d_e___o_f___c_o_n_d_u_c_t.html',1,'']]],
   ['of_20numbers_9',['Native Arrays of Numbers',['../_h_d_f_n_a_t_i_v_e.html',1,'']]],
   ['optimizations_10',['HDF5 High Level Optimizations',['../_h5_d_o__u_g.html',1,'']]],
-  ['options_11',['How To Convert Autotools Build Options to CMake Options',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
-  ['options_20to_20cmake_20options_12',['How To Convert Autotools Build Options to CMake Options',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
-  ['or_20writing_20to_20a_20subset_20of_20a_20dataset_13',['Reading From or Writing To a Subset of a Dataset',['../_l_b_dset_sub_r_w.html',1,'LearnBasics']]],
-  ['organization_14',['HDF5 File Organization',['../_l_b_file_org.html',1,'LearnBasics']]]
+  ['or_20writing_20to_20a_20subset_20of_20a_20dataset_11',['Reading From or Writing To a Subset of a Dataset',['../_l_b_dset_sub_r_w.html',1,'LearnBasics']]],
+  ['organization_12',['HDF5 File Organization',['../_l_b_file_org.html',1,'LearnBasics']]]
 ];
