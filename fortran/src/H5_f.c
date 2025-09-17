@@ -1142,7 +1142,7 @@ int_f
 h5free_string_array_memory_c(void **array_ptr, size_t_f *num_files)
 /******/
 {
-    int ret_value = 0;
+    int    ret_value = 0;
     char **array;
     size_t len;
     size_t i;
@@ -1152,7 +1152,7 @@ h5free_string_array_memory_c(void **array_ptr, size_t_f *num_files)
     }
 
     array = (char **)(*array_ptr);
-    len = (size_t)(*num_files);
+    len   = (size_t)(*num_files);
 
     if (array == NULL || len == 0) {
         return ret_value; /* Nothing to free */
