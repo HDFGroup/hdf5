@@ -290,6 +290,7 @@ typedef int htri_t;
  * Use of ssize_t should be discouraged in new code.
  */
 #ifdef _WIN32
+#include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
 /* This will have been defined to 0 in configure */
 #define H5_SIZEOF_SSIZE_T H5_SIZEOF_SIZE_T
