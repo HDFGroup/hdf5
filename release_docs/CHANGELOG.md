@@ -48,6 +48,16 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The `HDF5_ENABLE_THREADS` option has been removed, as it no longer functions as a proper build option. The library will always check for thread support and set the internal status variable, `HDF5_THREADS_ENABLED`. The `HDF5_ENABLE_THREADSAFE` option is still available to build with thread-safe API calls.
 
+- Enhanced Maven repository deployment support
+
+   Added comprehensive Maven integration with optimized workflows for Java artifact deployment:
+   - **New CMake options**: `HDF5_ENABLE_MAVEN_DEPLOY` and `HDF5_MAVEN_SNAPSHOT` for Maven repository deployment
+   - **Minimal build presets**: Added `ci-MinShar-*-Maven*` presets for efficient Java-only artifact generation
+   - **Multi-platform support**: Automated generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+   - **CI/CD integration**: Enhanced GitHub Actions workflows (`maven-staging.yml`, `maven-deploy.yml`) with cross-platform build matrix
+   - **Artifact validation**: Comprehensive validation framework for Maven artifacts before deployment
+   - **Deployment targets**: Support for GitHub Packages and Maven Central staging repositories
+
  - Reorganized the files in the config/cmake folder into the config folder structure
 
    The config folder CMake files have been reorganized to make it easier to maintain and add new features. This includes the following changes:
