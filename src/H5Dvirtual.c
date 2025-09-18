@@ -3070,6 +3070,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     herr_t          ret_value = SUCCEED; /* Return value */
     bool            tree_enabled = false;
     H5P_genplist_t *dapl_plist = NULL; /* Dataset access property list */
+    H5RT_result_t *search_results = NULL; /* Search results from R-tree */
 
     FUNC_ENTER_PACKAGE
 
@@ -3112,7 +3113,6 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     if (storage->tree) {
         /* Perform a spatial tree search to get a list of mappings
          * whose virtual selection intersects the IO operation */
-        H5RT_result_t *search_results = NULL; /* Search results from R-tree */
         H5RT_result_t *curr_result = NULL;   /* Current result in search results */
         hsize_t min[H5S_MAX_RANK];
         hsize_t max[H5S_MAX_RANK];
@@ -3144,6 +3144,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
         /* Free search results */
         if (H5RT_free_results(search_results) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
+        search_results = NULL;
     }
 
     /* Iterate over the mappings that are not stored in the tree */
@@ -3159,6 +3160,11 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     }
 
 done:
+    if (ret_value < 0)
+        if (search_results)
+            if (H5RT_free_results(search_results) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_pre_io() */
 
