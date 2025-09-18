@@ -153,7 +153,7 @@ jobs:
       - name: Set file base name
         id: set-file-base
         run: |
-          FILE_NAME_BASE=$(echo "hdf5-develop-$(date +%Y%m%d)")
+          FILE_NAME_BASE="hdf5-develop-$(date '+%Y%m%d')"
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
           echo "SOURCE_BASE=hdfsrc" >> $GITHUB_OUTPUT
 
