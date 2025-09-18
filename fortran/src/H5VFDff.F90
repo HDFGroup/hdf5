@@ -2,8 +2,6 @@
 !!
 !! @see H5FD, C-API
 !!
-!! @see @ref H5FD_UG, User Guide
-!!
 
 !> @ingroup FH5VFD
 !!
