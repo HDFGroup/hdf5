@@ -49,16 +49,6 @@ MODULE H5VFD
 
 #ifndef H5_DOXYGEN
   INTERFACE
-     ! Direct binding to the C API function
-     INTEGER(C_INT) FUNCTION h5fdsubfiling_get_file_mapping(file_id, filenames_ptr, len) &
-          BIND(C, NAME='H5FDsubfiling_get_file_mapping')
-       IMPORT :: C_INT, HID_T, C_PTR, C_SIZE_T
-       IMPLICIT NONE
-       INTEGER(HID_T), VALUE :: file_id
-       TYPE(C_PTR) :: filenames_ptr
-       INTEGER(C_SIZE_T) :: len
-     END FUNCTION h5fdsubfiling_get_file_mapping
-
      ! Helper function to free the C memory allocated by H5FDsubfiling_get_file_mapping
      INTEGER(C_INT) FUNCTION h5free_string_array_memory_c(filenames_ptr, num_files) &
           BIND(C, NAME='h5free_string_array_memory_c')
@@ -174,6 +164,16 @@ SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdfer
   CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: c_string
   INTEGER :: max_len = 0, str_len, estimated_max_len, search_limit
   INTEGER, PARAMETER :: SUBFILE_TEMPLATE_OVERHEAD = 64  ! ".subfile_" + inode + "_XX_of_XX" + safety margin
+  INTERFACE
+     INTEGER(C_INT) FUNCTION h5fdsubfiling_get_file_mapping(file_id, filenames_ptr, len) &
+          BIND(C, NAME='H5FDsubfiling_get_file_mapping')
+       IMPORT :: C_INT, HID_T, C_PTR, C_SIZE_T
+       IMPLICIT NONE
+       INTEGER(HID_T), VALUE :: file_id
+       TYPE(C_PTR) :: filenames_ptr
+       INTEGER(C_SIZE_T) :: len
+     END FUNCTION h5fdsubfiling_get_file_mapping
+  END INTERFACE
 
   hdferr = INT(h5fdsubfiling_get_file_mapping(file_id, filenames_ptr, c_num_files))
   num_files = INT(c_num_files, SIZE_T)
