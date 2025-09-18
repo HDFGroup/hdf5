@@ -119,7 +119,11 @@ For developers working on Java bindings and Maven integration:
 * **Snapshot Builds:** Use `HDF5_MAVEN_SNAPSHOT:BOOL=ON` for development builds with `-SNAPSHOT` versions.
 * **Maven Presets:** Use Maven-enabled CMake presets for consistent builds:
   ```bash
+  # For full builds (includes all components)
   cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh
+
+  # For Java artifact generation only (recommended for Maven development)
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh
   ```
 * **Artifact Validation:** Test Maven artifacts using `.github/scripts/validate-maven-artifacts.sh` script.
 * **Repository Testing:** Use the `maven-staging.yml` workflow for pull request validation.

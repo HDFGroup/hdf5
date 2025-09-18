@@ -827,8 +827,21 @@ HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
   cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_MAVEN_SNAPSHOT:BOOL=ON ../hdf5
 
   Or use the Maven-enabled CMake presets:
+
+  # Full build with Maven support (includes all components)
   cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Release version
   cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Snapshot version
+
+  # Minimal build for Java artifacts only (recommended for Maven deployment)
+  cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # Release version
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # Snapshot version
+
+  # Multi-platform minimal Maven presets
+  cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # Windows
+  cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS
+
+  Note: Minimal Maven presets skip examples, testing, tools, C++, and Fortran
+        builds to optimize for Java artifact generation only.
 
 ---------------- HDF5 Folder Build Options ---------------------------------
 Defaults relative to $<INSTALL_PREFIX>

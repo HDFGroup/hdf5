@@ -19,6 +19,11 @@ cmake --workflow --preset ci-StdShar-GNUC --fresh     # GCC
 cmake --workflow --preset ci-StdShar-Clang --fresh    # Clang
 cmake --workflow --preset ci-StdShar-MSVC --fresh     # MSVC
 
+# Maven-enabled builds (Java artifacts with deployment support)
+cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # Linux minimal Maven
+cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # Windows minimal Maven
+cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS minimal Maven
+
 # Install
 cmake --install .
 ```
@@ -33,6 +38,8 @@ cmake --install .
 - `HDF5_ENABLE_PARALLEL=ON` - Enable MPI parallel support
 - `HDF5_ENABLE_THREADSAFE=ON` - Enable thread safety
 - `BUILD_TESTING=ON` - Build test suite
+- `HDF5_ENABLE_MAVEN_DEPLOY=ON` - Enable Maven repository deployment
+- `HDF5_MAVEN_SNAPSHOT=ON` - Build Maven snapshot versions (-SNAPSHOT suffix)
 
 ## Testing
 

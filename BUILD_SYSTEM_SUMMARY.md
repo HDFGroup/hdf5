@@ -58,9 +58,10 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 
 ### Preset Architecture
 - **Layered inheritance**: Base presets + feature-specific + platform-specific
-- **Hidden presets**: Reusable components (`ci-base`, `ci-Debug`, `ci-Release`, `ci-Maven`, `ci-Maven-Snapshot`)
+- **Hidden presets**: Reusable components (`ci-base`, `ci-Debug`, `ci-Release`, `ci-Maven`, `ci-Maven-Snapshot`, `ci-Maven-Minimal`, `ci-Maven-Minimal-Snapshot`)
 - **Platform presets**: `ci-GNUC`, `ci-Clang`, `ci-MSVC`, `ci-macos`
 - **Maven presets**: Hidden base configurations for Maven deployment support
+- **Minimal Maven presets**: Streamlined configurations for Java artifact generation only
 - **Build type matrix**: Debug, Release (RelWithDebInfo + docs), Maven variants
 
 ### Key Preset Patterns
@@ -71,13 +72,20 @@ cmake --workflow --preset ci-StdShar-Clang --fresh     # Clang
 cmake --workflow --preset ci-StdShar-MSVC --fresh      # MSVC
 
 # Maven-enabled builds (Java artifacts with deployment support)
-cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Maven release
-cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Maven snapshot
+cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Maven release (full build)
+cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Maven snapshot (full build)
+cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # Maven release (minimal build)
+cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # Maven snapshot (minimal build)
+
+# Multi-platform Maven presets (minimal builds for Java artifacts only)
+cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # Windows Maven
+cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS Maven
 
 # Naming convention: ci-[Features]-[Compiler][-Maven[-Snapshot]]
-# Features: Std (standard), Min (minimal), StdShar (standard shared)
+# Features: Std (standard), Min (minimal), StdShar (standard shared), MinShar (minimal shared)
 # Maven: Adds Maven deployment support with platform-specific JARs
 # Snapshot: Adds -SNAPSHOT suffix for development versions
+# Minimal Maven presets: Skip examples, testing, tools, C++, Fortran - Java artifacts only
 ```
 
 ### Preset Configuration Strategy

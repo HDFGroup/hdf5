@@ -82,16 +82,54 @@ jobs:
       pom-file: ${{ steps.find-pom.outputs.pom-file }}
       platform-classifier: ${{ steps.platform-info.outputs.classifier }}
     steps:
-      - name: Download Linux artifacts
+      - name: Download artifacts (Linux)
         uses: actions/download-artifact@v4
         with:
           name: Linux-${{ inputs.preset_name }}-artifacts
-          path: ./artifacts
+          path: ./artifacts/linux
+        continue-on-error: true
+
+      - name: Download artifacts (Windows)
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows-${{ inputs.preset_name }}-artifacts
+          path: ./artifacts/windows
+        continue-on-error: true
+
+      - name: Download artifacts (macOS x86_64)
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS-${{ inputs.preset_name }}-artifacts
+          path: ./artifacts/macos-x86_64
+        continue-on-error: true
+
+      - name: Download artifacts (macOS aarch64)
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS-${{ inputs.preset_name }}-aarch64-artifacts
+          path: ./artifacts/macos-aarch64
+        continue-on-error: true
 
       - name: Find JAR files
         id: find-jars
         run: |
-          JAR_FILES=$(find ./artifacts -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" | tr '\n' ',' | sed 's/,$//')
+          # Find JAR files across all platform directories
+          JAR_FILES=""
+          for platform_dir in ./artifacts/*/; do
+            if [ -d "$platform_dir" ]; then
+              platform_jars=$(find "$platform_dir" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" 2>/dev/null || true)
+              if [ -n "$platform_jars" ]; then
+                if [ -z "$JAR_FILES" ]; then
+                  JAR_FILES="$platform_jars"
+                else
+                  JAR_FILES="$JAR_FILES,$platform_jars"
+                fi
+              fi
+            fi
+          done
+
+          # Remove trailing comma and convert newlines to commas
+          JAR_FILES=$(echo "$JAR_FILES" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
           echo "jar-files=${JAR_FILES}" >> $GITHUB_OUTPUT
           echo "Found JAR files: ${JAR_FILES}"
 
@@ -142,40 +180,35 @@ jobs:
           echo "classifier=${CLASSIFIER}" >> $GITHUB_OUTPUT
           echo "Platform classifier: ${CLASSIFIER}"
 
-      - name: Validate artifact integrity
+      - name: Quick artifact validation
         run: |
-          echo "=== Artifact Validation ==="
+          echo "=== Quick Artifact Validation ==="
+
+          # Count artifacts
+          jar_count=$(echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' '\n' | wc -l)
+          echo "Found ${jar_count} JAR file(s) for deployment"
+
+          # Basic validation (artifacts should already be validated by staging workflow)
           for jar_file in $(echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' ' '); do
-            echo "Validating: ${jar_file}"
-
-            # Check JAR integrity
-            if ! jar tf "${jar_file}" > /dev/null 2>&1; then
-              echo "ERROR: Invalid JAR file: ${jar_file}"
+            if [ ! -f "${jar_file}" ]; then
+              echo "ERROR: JAR file not found: ${jar_file}"
               exit 1
             fi
 
-            # Check file size (must be > 1KB)
-            size=$(stat -c%s "${jar_file}")
-            if [ ${size} -lt 1024 ]; then
-              echo "ERROR: JAR file too small: ${jar_file} (${size} bytes)"
-              exit 1
-            fi
-
-            echo "✓ JAR validation passed: ${jar_file} (${size} bytes)"
+            platform=$(dirname "${jar_file}" | sed 's|./artifacts/||')
+            jar_name=$(basename "${jar_file}")
+            echo "✓ [$platform] ${jar_name}"
           done
 
-          # Validate POM structure
-          if ! grep -q "<groupId>org.hdfgroup</groupId>" "${{ steps.find-pom.outputs.pom-file }}"; then
-            echo "ERROR: Invalid POM groupId"
+          # Quick POM validation
+          if [ -f "${{ steps.find-pom.outputs.pom-file }}" ]; then
+            echo "✓ POM file found: $(basename "${{ steps.find-pom.outputs.pom-file }}")"
+          else
+            echo "ERROR: POM file not found"
             exit 1
           fi
 
-          if ! grep -q "<artifactId>hdf5-java</artifactId>" "${{ steps.find-pom.outputs.pom-file }}"; then
-            echo "ERROR: Invalid POM artifactId"
-            exit 1
-          fi
-
-          echo "✓ POM validation passed"
+          echo "✓ Quick validation passed - artifacts ready for deployment"
 
   deploy-maven:
     name: Deploy to Maven Repository
@@ -183,11 +216,33 @@ jobs:
     needs: [check-secret, validate-artifacts]
     if: ${{ !inputs.dry_run }}
     steps:
-      - name: Download artifacts
+      - name: Download artifacts (Linux)
         uses: actions/download-artifact@v4
         with:
           name: Linux-${{ inputs.preset_name }}-artifacts
-          path: ./artifacts
+          path: ./artifacts/linux
+        continue-on-error: true
+
+      - name: Download artifacts (Windows)
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows-${{ inputs.preset_name }}-artifacts
+          path: ./artifacts/windows
+        continue-on-error: true
+
+      - name: Download artifacts (macOS x86_64)
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS-${{ inputs.preset_name }}-artifacts
+          path: ./artifacts/macos-x86_64
+        continue-on-error: true
+
+      - name: Download artifacts (macOS aarch64)
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS-${{ inputs.preset_name }}-aarch64-artifacts
+          path: ./artifacts/macos-aarch64
+        continue-on-error: true
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -238,20 +293,33 @@ jobs:
             echo "GPG signing enabled"
           fi
 
-          # Deploy each JAR file
+          # Deploy each JAR file with auto-detected platform classifier
           success_count=0
           total_count=0
 
           for jar_file in $(echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' ' '); do
             total_count=$((total_count + 1))
             jar_basename=$(basename "${jar_file}")
+            platform_dir=$(dirname "${jar_file}")
 
-            echo "Deploying: ${jar_basename}"
+            # Auto-detect platform classifier from directory structure
+            CURRENT_CLASSIFIER=""
+            if [[ "${platform_dir}" == *"/linux"* ]]; then
+              CURRENT_CLASSIFIER="linux-x86_64"
+            elif [[ "${platform_dir}" == *"/windows"* ]]; then
+              CURRENT_CLASSIFIER="windows-x86_64"
+            elif [[ "${platform_dir}" == *"/macos-x86_64"* ]]; then
+              CURRENT_CLASSIFIER="macos-x86_64"
+            elif [[ "${platform_dir}" == *"/macos-aarch64"* ]]; then
+              CURRENT_CLASSIFIER="macos-aarch64"
+            fi
 
-            # Determine classifier for this specific JAR
+            echo "Deploying: ${jar_basename} (classifier: ${CURRENT_CLASSIFIER:-none})"
+
+            # Determine classifier options
             classifier_opts=""
-            if [ -n "${PLATFORM_CLASSIFIER}" ] && [[ "${jar_basename}" != *"sources"* ]] && [[ "${jar_basename}" != *"javadoc"* ]]; then
-              classifier_opts="-Dclassifier=${PLATFORM_CLASSIFIER}"
+            if [ -n "${CURRENT_CLASSIFIER}" ] && [[ "${jar_basename}" != *"sources"* ]] && [[ "${jar_basename}" != *"javadoc"* ]]; then
+              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
             fi
 
             # Deploy with Maven

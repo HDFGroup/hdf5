@@ -22,6 +22,16 @@ on:
         type: boolean
         required: false
         default: true
+      platforms:
+        description: 'Build platforms for Maven artifacts'
+        type: choice
+        required: false
+        default: 'linux-only'
+        options:
+          - 'linux-only'
+          - 'linux-windows'
+          - 'linux-macos'
+          - 'all-platforms'
 
 permissions:
   contents: read
@@ -78,27 +88,63 @@ jobs:
 
   build-maven-artifacts:
     name: Build Maven Test Artifacts
-    runs-on: ubuntu-latest
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.should-test == 'true' }}
+    strategy:
+      matrix:
+        include:
+          - platform: ubuntu-latest
+            preset_suffix: GNUC
+            artifact_classifier: linux-x86_64
+            compiler: gcc
+            java_version: '21'
+          - platform: windows-latest
+            preset_suffix: MSVC
+            artifact_classifier: windows-x86_64
+            compiler: msvc
+            java_version: '21'
+            condition: ${{ contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
+          - platform: macos-latest
+            preset_suffix: Clang
+            artifact_classifier: macos-x86_64
+            compiler: clang
+            java_version: '21'
+            condition: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+          - platform: macos-latest
+            preset_suffix: Clang
+            artifact_classifier: macos-aarch64
+            compiler: clang
+            java_version: '21'
+            arch: arm64
+            condition: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+    runs-on: ${{ matrix.platform }}
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' && (matrix.condition == '' || matrix.condition) }}
     outputs:
       artifacts-created: ${{ steps.artifacts-check.outputs.created }}
       version-info: ${{ steps.version-info.outputs.version }}
     steps:
-      - name: Install Dependencies
+      - name: Install Dependencies (Linux)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen
 
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
-        with:
-          version: "1.13.2"
+      - name: Install Dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install ninja
+          choco install doxygen.install
 
-      - name: Set up JDK 21
+      - name: Install Dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install ninja
+          brew install doxygen
+
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: ${{ matrix.java_version }}
           distribution: 'temurin'
 
       - name: Checkout code
@@ -130,13 +176,13 @@ jobs:
         run: |
           cd ${{ runner.workspace }}/hdf5
 
-          # Determine preset based on snapshot setting
+          # Determine preset based on snapshot setting and platform (using minimal presets)
           if [ "${{ inputs.use_snapshot_version }}" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "Building with Maven snapshot preset"
-            PRESET_NAME="ci-StdShar-GNUC-Maven-Snapshot"
+            echo "Building with minimal Maven snapshot preset for ${{ matrix.preset_suffix }}"
+            PRESET_NAME="ci-MinShar-${{ matrix.preset_suffix }}-Maven-Snapshot"
           else
-            echo "Building with Maven release preset"
-            PRESET_NAME="ci-StdShar-GNUC-Maven"
+            echo "Building with minimal Maven release preset for ${{ matrix.preset_suffix }}"
+            PRESET_NAME="ci-MinShar-${{ matrix.preset_suffix }}-Maven"
           fi
           echo "preset=$PRESET_NAME" >> $GITHUB_OUTPUT
 
@@ -215,7 +261,7 @@ jobs:
       - name: Upload Maven artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: maven-staging-artifacts
+          name: maven-staging-artifacts-${{ matrix.artifact_classifier }}
           path: ${{ runner.workspace }}/maven-artifacts
           retention-days: 7
 
@@ -231,11 +277,35 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Download Maven artifacts
+      - name: Download Maven artifacts (Linux)
         uses: actions/download-artifact@v4
         with:
-          name: maven-staging-artifacts
-          path: ./artifacts
+          name: maven-staging-artifacts-linux-x86_64
+          path: ./artifacts/linux
+
+      - name: Download Maven artifacts (Windows)
+        if: ${{ contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-staging-artifacts-windows-x86_64
+          path: ./artifacts/windows
+        continue-on-error: true
+
+      - name: Download Maven artifacts (macOS x86_64)
+        if: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-staging-artifacts-macos-x86_64
+          path: ./artifacts/macos-x86_64
+        continue-on-error: true
+
+      - name: Download Maven artifacts (macOS aarch64)
+        if: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-staging-artifacts-macos-aarch64
+          path: ./artifacts/macos-aarch64
+        continue-on-error: true
 
       - name: Test Maven deployment (dry run)
         env:
@@ -245,9 +315,15 @@ jobs:
           echo "Version: $VERSION"
           echo "Repository: GitHub Packages (staging)"
 
-          # List artifacts to be deployed
+          # List artifacts to be deployed by platform
           echo "Artifacts ready for deployment:"
-          find ./artifacts -name "*.jar" -exec basename {} \;
+          for platform_dir in ./artifacts/*/; do
+            if [ -d "$platform_dir" ]; then
+              platform_name=$(basename "$platform_dir")
+              echo "Platform: $platform_name"
+              find "$platform_dir" -name "*.jar" -exec basename {} \; | sed 's/^/  - /'
+            fi
+          done
 
           # Create test Maven settings
           mkdir -p ~/.m2
@@ -264,19 +340,32 @@ jobs:
           </settings>
           EOF
 
-          # Simulate deployment validation
+          # Simulate deployment validation for each platform
+          total_jars=0
+          valid_jars=0
+
           for jar_file in $(find ./artifacts -name "*.jar"); do
             jar_name=$(basename "$jar_file")
-            echo "✓ Would deploy: $jar_name"
+            platform=$(dirname "$jar_file" | sed 's|./artifacts/||')
+            total_jars=$((total_jars + 1))
+
+            echo "[$platform] Testing: $jar_name"
 
             # Test JAR integrity
             if jar tf "$jar_file" > /dev/null 2>&1; then
               echo "  ✓ JAR integrity verified"
+              valid_jars=$((valid_jars + 1))
             else
               echo "  ❌ JAR integrity check failed"
-              exit 1
             fi
           done
+
+          echo "Validation summary: $valid_jars/$total_jars JARs passed integrity check"
+
+          if [ $valid_jars -ne $total_jars ]; then
+            echo "❌ Some artifacts failed validation"
+            exit 1
+          fi
 
           echo "🎉 Dry run deployment test passed!"
 
