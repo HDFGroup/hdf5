@@ -700,26 +700,6 @@ New Features
       library behavior, and the connector ID and information could not be read back
       from that plist later.
 
-    - Virtual datasets use a spatial tree to optimize searches
-
-      Virtual dataset operations with many (>1,000) mappings were much slower than
-      corresponding operations on normal datasets. This was due to the need
-      to iterate through every source dataset's dataspace and check for an intersection
-      with the user-selected region for a read/write in the virtual dataset.
-
-      Virtual datasets now use an r-tree (defined in H5RT.c) to perform a spatial search.
-      This allows the dataspaces that intersect the user-selection to be computed with,
-      in most cases, vastly fewer costly intersection checks, improving the speed of VDS
-      read/write operations.
-
-      Virtual datasets will use the r-tree by default, since the majority of use cases,
-      should see improvements from use of the tree. However, because some workflows may
-      find that the overhead of the tree outweighs the time saved on searches, there is
-      a new Dataset Access Property List (DAPL) property to control use of the spatial tree.
-
-      This property can be set or queried with the new API functions
-      H5Pset_dset_use_spatial_tree()/H5Pget_dset_use_spatial_tree().
-
     Parallel Library:
     -----------------
     -
