@@ -183,8 +183,8 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path "${{ runner.workspace }}/source"
           Set-Location "${{ runner.workspace }}/source"
-          # Create a simplified source package for testing (Windows uses 7z)
-          7z a -tgzip "${{ steps.set-file-base-windows.outputs.FILE_BASE }}.tar.gz" "${{ github.workspace }}/*" -x!.git
+          # Create a simplified source package for testing (Windows uses tar via Git Bash)
+          & tar -czf "${{ steps.set-file-base-windows.outputs.FILE_BASE }}.tar.gz" -C "${{ github.workspace }}" --exclude=".git" .
 
       - name: Extract source for build (Unix)
         if: runner.os != 'Windows'
@@ -207,13 +207,8 @@ jobs:
           Set-Location "${{ runner.workspace }}"
           if (Test-Path "hdf5") { Remove-Item -Recurse -Force "hdf5" }
           New-Item -ItemType Directory -Force -Path "hdf5"
-          7z x "${{ runner.workspace }}/source/${{ steps.set-file-base-windows.outputs.FILE_BASE }}.tar.gz" -so | 7z x -si -ttar -o"hdf5/"
-          # Move extracted contents if they're in a subdirectory
-          $extractedDir = Get-ChildItem "hdf5" -Directory | Select-Object -First 1
-          if ($extractedDir) {
-            Move-Item "$($extractedDir.FullName)/*" "hdf5/" -Force
-            Remove-Item $extractedDir.FullName -Recurse -Force
-          }
+          # Use tar to extract (available via Git Bash on Windows runners)
+          & tar -xzf "${{ runner.workspace }}/source/${{ steps.set-file-base-windows.outputs.FILE_BASE }}.tar.gz" -C "hdf5/"
 
       - name: Set preset name
         id: set-preset
