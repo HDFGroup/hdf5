@@ -382,7 +382,8 @@ check_deployment_readiness() {
 
     # Check for required files
     local jar_files pom_files
-    jar_files=($(find "${artifacts_dir}" -name "*.jar" -not -name "*test*" 2>/dev/null || true))
+    # Only count HDF5 JAR files, exclude dependencies like slf4j
+    jar_files=($(find "${artifacts_dir}" -name "*hdf5*.jar" -not -name "*test*" 2>/dev/null || true))
     pom_files=($(find "${artifacts_dir}" -name "pom.xml" 2>/dev/null || true))
 
     if [[ ${#jar_files[@]} -eq 0 ]]; then
@@ -454,9 +455,22 @@ main() {
     validate_environment
 
     # Find artifacts
-    local jar_files pom_files
-    jar_files=($(find "${artifacts_dir}" -name "*.jar" -not -name "*test*" 2>/dev/null || true))
+    local jar_files pom_files all_jars
+    # Only validate HDF5 JAR files, exclude dependencies like slf4j
+    jar_files=($(find "${artifacts_dir}" -name "*hdf5*.jar" -not -name "*test*" 2>/dev/null || true))
     pom_files=($(find "${artifacts_dir}" -name "pom.xml" 2>/dev/null || true))
+    all_jars=($(find "${artifacts_dir}" -name "*.jar" 2>/dev/null || true))
+
+    # Log what we found
+    log_info "Found ${#all_jars[@]} total JAR file(s), ${#jar_files[@]} HDF5 JAR file(s) to validate"
+    if [[ ${#all_jars[@]} -gt ${#jar_files[@]} ]]; then
+        log_info "Skipping non-HDF5 JAR files (dependencies like slf4j, etc.)"
+        for jar in "${all_jars[@]}"; do
+            if [[ ! "$(basename "$jar")" =~ hdf5 ]]; then
+                log_info "  Skipping: $(basename "$jar")"
+            fi
+        done
+    fi
 
     # Basic readiness check
     check_deployment_readiness "${artifacts_dir}"
