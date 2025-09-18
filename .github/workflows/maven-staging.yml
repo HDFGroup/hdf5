@@ -135,6 +135,10 @@ jobs:
           choco install ninja
           choco install doxygen.install
 
+      - name: Enable Developer Command Prompt
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
