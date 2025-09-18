@@ -318,9 +318,10 @@ done:
  * Signature: (JZ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1dset_1use_1spatial_1tree(JNIEnv *env, jclass clss, jlong dapl_id, jboolean use_tree)
+Java_hdf_hdf5lib_H5_H5Pset_1dset_1use_1spatial_1tree(JNIEnv *env, jclass clss, jlong dapl_id,
+                                                     jboolean use_tree)
 {
-    bool use_tree_val;
+    bool   use_tree_val;
     herr_t retVal = FAIL;
 
     UNUSED(clss);
@@ -342,8 +343,8 @@ done:
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1dset_1use_1spatial_1tree(JNIEnv *env, jclass clss, jlong dapl_id)
 {
-    bool use_tree = false;
-    jboolean bval = JNI_FALSE;
+    bool     use_tree = false;
+    jboolean bval     = JNI_FALSE;
 
     UNUSED(clss);
 

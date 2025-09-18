@@ -181,7 +181,7 @@ static const H5D_append_flush_t H5D_def_append_flush_g =
 static const char *H5D_def_efile_prefix_g =
     H5D_ACS_EFILE_PREFIX_DEF;                                     /* Default external file prefix string */
 static const char *H5D_def_vds_prefix_g = H5D_ACS_VDS_PREFIX_DEF; /* Default vds prefix string */
-static const bool H5D_def_tree_g = H5D_ACS_USE_TREE_DEF; /* Default use of spatial tree for VDS mappings */
+static const bool  H5D_def_tree_g = H5D_ACS_USE_TREE_DEF; /* Default use of spatial tree for VDS mappings */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dacc_reg_prop
@@ -1571,10 +1571,12 @@ done:
  *
  *-----------------------------------------------------------------------------
  */
-herr_t H5Pget_dset_use_spatial_tree(hid_t dcpl_id, bool *use_tree) {
-    bool setting = false;
-    H5P_genplist_t *plist = NULL;
-    herr_t ret_value = SUCCEED;
+herr_t
+H5Pget_dset_use_spatial_tree(hid_t dcpl_id, bool *use_tree)
+{
+    bool            setting   = false;
+    H5P_genplist_t *plist     = NULL;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
@@ -1609,10 +1611,12 @@ done:
  *
  *-----------------------------------------------------------------------------
  */
-herr_t H5Pset_dset_use_spatial_tree(hid_t dapl_id, bool use_tree) {
-    H5P_genplist_t *plist = NULL;
-    bool prev_set = false;
-    herr_t ret_value = SUCCEED;
+herr_t
+H5Pset_dset_use_spatial_tree(hid_t dapl_id, bool use_tree)
+{
+    H5P_genplist_t *plist     = NULL;
+    bool            prev_set  = false;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 

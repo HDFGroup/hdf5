@@ -6010,7 +6010,7 @@ H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
  *
  */
 H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize);
- /**
+/**
  * \ingroup DCPL
  *
  * \brief Retrieves the setting for whether or not to use a spatial tree

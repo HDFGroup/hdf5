@@ -94,7 +94,8 @@ JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pget_1virtual_1printf_1gap(JNIEnv 
  * Method:    H5Pset_dset_use_spatial_tree
  * Signature: (JZ)V
  */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1dset_1use_1spatial_1tree(JNIEnv *, jclass, jlong, jboolean);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1dset_1use_1spatial_1tree(JNIEnv *, jclass, jlong,
+                                                                            jboolean);
 
 /*
  * Class:     hdf_hdf5lib_H5
