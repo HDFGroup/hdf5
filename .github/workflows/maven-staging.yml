@@ -298,12 +298,35 @@ jobs:
           echo "Collecting Maven artifacts for testing..."
           mkdir -p ${{ runner.workspace }}/maven-artifacts
 
-          # Find build directory
-          BUILD_DIR=$(find ${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }} -name "*Maven*" -type d | head -1)
+          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          echo "Looking for Maven artifacts in build root: $BUILD_ROOT"
+
+          if [ ! -d "$BUILD_ROOT" ]; then
+            echo "ERROR: Build root directory does not exist: $BUILD_ROOT"
+            exit 1
+          fi
+
+          # Debug: Show what's in the build directory
+          echo "Build directory contents:"
+          find "$BUILD_ROOT" -type d | head -20
+
+          # Find build directory (try multiple patterns)
+          BUILD_DIR=$(find "$BUILD_ROOT" -name "*Maven*" -type d | head -1)
 
           if [ -z "$BUILD_DIR" ]; then
-            echo "ERROR: Could not find Maven build directory"
-            find ${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }} -type d -name "*" | head -10
+            # Try looking for java directory as fallback
+            BUILD_DIR=$(find "$BUILD_ROOT" -name "*java*" -type d | head -1)
+          fi
+
+          if [ -z "$BUILD_DIR" ]; then
+            # Try looking for any directory with JAR files
+            BUILD_DIR=$(find "$BUILD_ROOT" -name "*.jar" -type f | head -1 | xargs dirname 2>/dev/null || echo "")
+          fi
+
+          if [ -z "$BUILD_DIR" ]; then
+            echo "ERROR: Could not find Maven build directory with any of the patterns"
+            echo "Available directories:"
+            find "$BUILD_ROOT" -maxdepth 2 -type d
             exit 1
           fi
 
@@ -326,12 +349,39 @@ jobs:
           Write-Host "Collecting Maven artifacts for testing..."
           New-Item -ItemType Directory -Force -Path "${{ runner.workspace }}/maven-artifacts"
 
-          # Find build directory
-          $BUILD_DIR = Get-ChildItem -Path "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}" -Directory -Filter "*Maven*" | Select-Object -First 1
+          # Debug: Show what's in the build directory
+          $BUILD_ROOT = "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          Write-Host "Looking for Maven artifacts in build root: $BUILD_ROOT"
+
+          if (Test-Path $BUILD_ROOT) {
+            Write-Host "Build directory contents:"
+            Get-ChildItem -Path $BUILD_ROOT -Recurse -Directory | ForEach-Object { Write-Host "  DIR: $($_.FullName)" }
+
+            # Find Maven build directory (try multiple patterns)
+            $BUILD_DIR = Get-ChildItem -Path $BUILD_ROOT -Directory -Filter "*Maven*" | Select-Object -First 1
+
+            if (-not $BUILD_DIR) {
+              # Try looking for java directory as fallback
+              $BUILD_DIR = Get-ChildItem -Path $BUILD_ROOT -Directory -Filter "*java*" | Select-Object -First 1
+            }
+
+            if (-not $BUILD_DIR) {
+              # Try looking for any directory with JAR files
+              $DIRS_WITH_JARS = Get-ChildItem -Path $BUILD_ROOT -Recurse -Filter "*.jar" | ForEach-Object { $_.Directory } | Select-Object -Unique | Select-Object -First 1
+              if ($DIRS_WITH_JARS) {
+                $BUILD_DIR = $DIRS_WITH_JARS
+                Write-Host "Found JAR files in: $($BUILD_DIR.FullName)"
+              }
+            }
+          } else {
+            Write-Host "ERROR: Build root directory does not exist: $BUILD_ROOT"
+            exit 1
+          }
 
           if (-not $BUILD_DIR) {
-            Write-Host "ERROR: Could not find Maven build directory"
-            Get-ChildItem -Path "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}" -Directory | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }
+            Write-Host "ERROR: Could not find Maven build directory with any of the patterns"
+            Write-Host "Available directories:"
+            Get-ChildItem -Path $BUILD_ROOT -Directory | ForEach-Object { Write-Host "  $($_.Name)" }
             exit 1
           }
 
