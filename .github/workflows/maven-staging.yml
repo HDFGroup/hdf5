@@ -308,7 +308,7 @@ jobs:
 
           # Debug: Show what's in the build directory
           echo "Build directory contents:"
-          find "$BUILD_ROOT" -type d | head -20
+          find "$BUILD_ROOT" -maxdepth 3 -type d 2>/dev/null | head -20 || echo "Directory listing completed"
 
           # Find build directory (try multiple patterns)
           BUILD_DIR=$(find "$BUILD_ROOT" -name "*Maven*" -type d | head -1)
@@ -480,16 +480,25 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          # Change to the source directory where the script is located
-          cd ${{ github.workspace }}
-          if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
+          # Use GITHUB_WORKSPACE environment variable which is more reliable on Windows
+          echo "GitHub workspace: $GITHUB_WORKSPACE"
+          echo "Runner workspace: ${{ runner.workspace }}"
+
+          if [ -f "$GITHUB_WORKSPACE/.github/scripts/validate-maven-artifacts.sh" ]; then
             echo "Running Maven artifact validation..."
-            echo "Current directory: $(pwd)"
             echo "Maven artifacts directory contents:"
-            ls -la ${{ runner.workspace }}/maven-artifacts/ || echo "maven-artifacts directory not found"
-            .github/scripts/validate-maven-artifacts.sh ${{ runner.workspace }}/maven-artifacts
+            ls -la "${{ runner.workspace }}/maven-artifacts/" || echo "maven-artifacts directory not found"
+
+            # Use the script with full path and convert runner.workspace for Windows
+            ARTIFACTS_DIR="${{ runner.workspace }}/maven-artifacts"
+            # Convert any Windows backslashes to forward slashes for bash
+            ARTIFACTS_DIR=$(echo "$ARTIFACTS_DIR" | tr '\\' '/')
+            echo "Artifacts directory: $ARTIFACTS_DIR"
+
+            "$GITHUB_WORKSPACE/.github/scripts/validate-maven-artifacts.sh" "$ARTIFACTS_DIR"
           else
-            echo "Validation script not found - skipping validation"
+            echo "Validation script not found at $GITHUB_WORKSPACE/.github/scripts/validate-maven-artifacts.sh"
+            echo "Skipping validation"
           fi
 
       - name: Upload Maven artifacts
