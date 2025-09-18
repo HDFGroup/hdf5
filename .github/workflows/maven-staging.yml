@@ -314,13 +314,28 @@ jobs:
           BUILD_DIR=$(find "$BUILD_ROOT" -name "*Maven*" -type d | head -1)
 
           if [ -z "$BUILD_DIR" ]; then
-            # Try looking for java directory as fallback
-            BUILD_DIR=$(find "$BUILD_ROOT" -name "*java*" -type d | head -1)
+            # Try looking for java directory as fallback (more specific patterns)
+            BUILD_DIR=$(find "$BUILD_ROOT" -path "*/java/*" -type d | head -1)
+            if [ -z "$BUILD_DIR" ]; then
+              BUILD_DIR=$(find "$BUILD_ROOT" -name "java" -type d | head -1)
+            fi
           fi
 
           if [ -z "$BUILD_DIR" ]; then
             # Try looking for any directory with JAR files
-            BUILD_DIR=$(find "$BUILD_ROOT" -name "*.jar" -type f | head -1 | xargs dirname 2>/dev/null || echo "")
+            JAR_FILE=$(find "$BUILD_ROOT" -name "*.jar" -type f | head -1)
+            if [ -n "$JAR_FILE" ]; then
+              BUILD_DIR=$(dirname "$JAR_FILE")
+              echo "Found JAR file in: $BUILD_DIR"
+            fi
+          fi
+
+          if [ -z "$BUILD_DIR" ]; then
+            # Last resort: look for the build directory itself if it contains artifacts
+            if find "$BUILD_ROOT" -name "*.jar" -o -name "pom.xml" | grep -q .; then
+              BUILD_DIR="$BUILD_ROOT"
+              echo "Using build root as artifacts directory"
+            fi
           fi
 
           if [ -z "$BUILD_DIR" ]; then
@@ -361,16 +376,25 @@ jobs:
             $BUILD_DIR = Get-ChildItem -Path $BUILD_ROOT -Directory -Filter "*Maven*" | Select-Object -First 1
 
             if (-not $BUILD_DIR) {
-              # Try looking for java directory as fallback
-              $BUILD_DIR = Get-ChildItem -Path $BUILD_ROOT -Directory -Filter "*java*" | Select-Object -First 1
+              # Try looking for java directory as fallback (more specific patterns)
+              $BUILD_DIR = Get-ChildItem -Path $BUILD_ROOT -Recurse -Directory | Where-Object { $_.FullName -match "java" } | Select-Object -First 1
             }
 
             if (-not $BUILD_DIR) {
               # Try looking for any directory with JAR files
-              $DIRS_WITH_JARS = Get-ChildItem -Path $BUILD_ROOT -Recurse -Filter "*.jar" | ForEach-Object { $_.Directory } | Select-Object -Unique | Select-Object -First 1
-              if ($DIRS_WITH_JARS) {
-                $BUILD_DIR = $DIRS_WITH_JARS
+              $JAR_FILES = Get-ChildItem -Path $BUILD_ROOT -Recurse -Filter "*.jar"
+              if ($JAR_FILES) {
+                $BUILD_DIR = $JAR_FILES[0].Directory
                 Write-Host "Found JAR files in: $($BUILD_DIR.FullName)"
+              }
+            }
+
+            if (-not $BUILD_DIR) {
+              # Last resort: use build root if it contains artifacts
+              $HAS_ARTIFACTS = (Get-ChildItem -Path $BUILD_ROOT -Recurse -Filter "*.jar").Count -gt 0 -or (Get-ChildItem -Path $BUILD_ROOT -Recurse -Filter "pom.xml").Count -gt 0
+              if ($HAS_ARTIFACTS) {
+                $BUILD_DIR = Get-Item $BUILD_ROOT
+                Write-Host "Using build root as artifacts directory"
               }
             }
           } else {
@@ -456,14 +480,14 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
+          # Change to the source directory where the script is located
+          cd ${{ github.workspace }}
           if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
             echo "Running Maven artifact validation..."
-            # Use relative path to avoid Windows path issues
-            cd "${{ runner.workspace }}"
             echo "Current directory: $(pwd)"
             echo "Maven artifacts directory contents:"
-            ls -la maven-artifacts/ || echo "maven-artifacts directory not found"
-            .github/scripts/validate-maven-artifacts.sh maven-artifacts
+            ls -la ${{ runner.workspace }}/maven-artifacts/ || echo "maven-artifacts directory not found"
+            .github/scripts/validate-maven-artifacts.sh ${{ runner.workspace }}/maven-artifacts
           else
             echo "Validation script not found - skipping validation"
           fi
