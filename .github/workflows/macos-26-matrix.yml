@@ -16,14 +16,14 @@ jobs:
         # Test combinations of key options
         include:
           # Shared libraries with OpenMPI
-          - name: "macOS-26 Shared OpenMPI C++"
+          - name: "macOS-26 Shared OpenMPI Fortran Java"
             os: macos-26
             mpi: openmpi
             shared_libs: ON
             static_libs: OFF
-            cpp: ON
-            fortran: OFF
-            java: OFF
+            cpp: OFF
+            fortran: ON
+            java: ON
             hl: ON
             threadsafe: OFF
             parallel: ON
@@ -190,7 +190,7 @@ jobs:
 
         # Install Fortran compiler if needed
         if [[ "${{ matrix.fortran }}" == "ON" ]]; then
-          brew install gcc
+          brew install gfortran
         fi
 
     - name: Get Sources
