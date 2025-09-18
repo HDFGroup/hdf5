@@ -276,13 +276,13 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
     }
 
     /* Check if h5fuse script exists - similar to test_subfiling_h5fuse() */
-    int skip_validation = 0;
+    int   skip_validation = 0;
     FILE *h5fuse_script;
     h5fuse_script = fopen("./h5fuse", "r");
     if (h5fuse_script)
-      fclose(h5fuse_script);
+        fclose(h5fuse_script);
     else
-      skip_validation = 1;
+        skip_validation = 1;
 
     if (skip_validation) {
         return SUCCEED; /* Skip validation if h5fuse script not found */
