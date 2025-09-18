@@ -458,7 +458,12 @@ jobs:
         run: |
           if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
             echo "Running Maven artifact validation..."
-            .github/scripts/validate-maven-artifacts.sh ${{ runner.workspace }}/maven-artifacts
+            # Use relative path to avoid Windows path issues
+            cd "${{ runner.workspace }}"
+            echo "Current directory: $(pwd)"
+            echo "Maven artifacts directory contents:"
+            ls -la maven-artifacts/ || echo "maven-artifacts directory not found"
+            .github/scripts/validate-maven-artifacts.sh maven-artifacts
           else
             echo "Validation script not found - skipping validation"
           fi
