@@ -205,7 +205,27 @@ jobs:
         shell: pwsh
         run: |
           Set-Location "${{ runner.workspace }}"
-          if (Test-Path "hdf5") { Remove-Item -Recurse -Force "hdf5" }
+
+          # Robust cleanup with retry mechanism for Windows
+          if (Test-Path "hdf5") {
+            try {
+              Remove-Item -Recurse -Force "hdf5" -ErrorAction Stop
+            } catch {
+              Write-Host "First cleanup attempt failed, retrying..."
+              Start-Sleep -Seconds 2
+              try {
+                Remove-Item -Recurse -Force "hdf5" -ErrorAction Stop
+              } catch {
+                Write-Host "Second cleanup attempt failed, using robocopy to clear directory..."
+                # Use robocopy to clear the directory (Windows-specific robust method)
+                New-Item -ItemType Directory -Force -Path "temp_empty"
+                robocopy "temp_empty" "hdf5" /MIR /NFL /NDL /NJH /NJS
+                Remove-Item -Recurse -Force "temp_empty"
+                Remove-Item -Recurse -Force "hdf5"
+              }
+            }
+          }
+
           New-Item -ItemType Directory -Force -Path "hdf5"
           # Use tar to extract (available via Git Bash on Windows runners)
           & tar -xzf "${{ runner.workspace }}/source/${{ steps.set-file-base-windows.outputs.FILE_BASE }}.tar.gz" -C "hdf5/"
