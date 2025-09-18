@@ -41,7 +41,7 @@ PROGRAM subfiling_test
   INTEGER(HID_T) :: file_id
   INTEGER(KIND=MPI_INTEGER_KIND) :: comm, comm_ret
   INTEGER(KIND=MPI_INTEGER_KIND) :: info, info_ret
-  CHARACTER(LEN=3) :: info_val
+  CHARACTER(LEN=10) :: info_val
   CHARACTER(LEN=180) :: subfname
   INTEGER :: i, sum
   INTEGER(C_INT64_T) inode
@@ -103,18 +103,20 @@ PROGRAM subfiling_test
   ! Test H5Pset/get_mpi_params_f APIs
   ! ***********************************
   nerrors = 0
-  IF(mpi_size.GT.2)THEN
+  IF(mpi_size.GE.2)THEN
 
+     ! Create a sub-communicator with the first two processes
+     ! All processes participate in the split, but only first two get active comm
      IF (mpi_rank.LE.1)THEN
         CALL MPI_Comm_split(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
      ELSE
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 0_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, MPI_UNDEFINED, mpi_rank, comm, mpierror)
      ENDIF
 
-     CALL MPI_Info_create(info, mpierror)
-     CALL MPI_Info_set( info, "foo", "bar", mpierror)
-
+     ! Only ranks 0-1 have valid communicators after the split
      IF (mpi_rank.LE.1)THEN
+        CALL MPI_Info_create(info, mpierror)
+        CALL MPI_Info_set( info, "foo", "bar", mpierror)
 
         CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
         CALL check("h5pcreate_f", hdferror, nerrors)
@@ -133,7 +135,7 @@ PROGRAM subfiling_test
            nerrors = nerrors + 1
         ENDIF
 
-        CALL mpi_info_get(info_ret,"foo", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
+        CALL mpi_info_get(info_ret,"foo", 10_MPI_INTEGER_KIND, info_val, flag, mpierror)
         IF(LOGICAL(flag) .EQV. LOGICAL(.TRUE.))THEN
            IF(info_val.NE."bar")THEN
               IF(mpi_rank.EQ.0) &
@@ -146,10 +148,11 @@ PROGRAM subfiling_test
            nerrors = nerrors + 1
         ENDIF
         CALL h5pclose_f(fapl_id, hdferror)
-     ENDIF
 
-     CALL MPI_Comm_free(comm, mpierror)
-     CALL MPI_Info_free(info, mpierror)
+        ! Clean up resources only for ranks that created them
+        CALL MPI_Comm_free(comm, mpierror)
+        CALL MPI_Info_free(info, mpierror)
+     ENDIF
 
   ENDIF
 
