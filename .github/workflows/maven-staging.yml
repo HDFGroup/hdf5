@@ -118,7 +118,7 @@ jobs:
             arch: arm64
             condition: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
     runs-on: ${{ matrix.platform }}
-    if: ${{ needs.detect-changes.outputs.should-test == 'true' && (matrix.condition == '' || matrix.condition) }}
+    #if: ${{ needs.detect-changes.outputs.should-test == 'true' && (matrix.condition == '' || matrix.condition) }}
     outputs:
       artifacts-created: ${{ steps.artifacts-check.outputs.created }}
       version-info: ${{ steps.version-info.outputs.version }}
