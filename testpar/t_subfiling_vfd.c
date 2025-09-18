@@ -260,7 +260,6 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
 {
     char  *h5fuse_cmd = NULL;
     char   subfile_list[2048];
-    char   fused_filename[512];
     int    system_ret;
     hid_t  fused_file_id = H5I_INVALID_HID;
     herr_t ret_value     = SUCCEED;
@@ -309,9 +308,6 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
         }
     }
 
-    /* Generate name for fused output file */
-    snprintf(fused_filename, sizeof(fused_filename), "%s_fused.h5", main_filename);
-
     /* Construct h5fuse command with proper arguments */
     if (config_filename && access(config_filename, F_OK) == 0) {
         /* Use configuration file if available */
@@ -321,7 +317,6 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
         /* Use subfile list only */
         snprintf(h5fuse_cmd, 4096, "./h5fuse -q -l %s", subfile_list);
     }
-
     system_ret = system(h5fuse_cmd);
 
     if (system_ret != 0) {
@@ -330,67 +325,19 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
         goto done;
     }
 
-    /* Check if the default output file was created (h5fuse typically creates a file with a standard name) */
-    /* The actual filename depends on h5fuse implementation - it might use the main filename or a default name
-     */
-    const char *potential_outputs[] = {fused_filename, "fused_output.h5", main_filename, NULL};
-
-    const char *actual_output = NULL;
-    for (int i = 0; potential_outputs[i] != NULL; i++) {
-        if (access(potential_outputs[i], F_OK) == 0) {
-            actual_output = potential_outputs[i];
-            break;
-        }
-    }
-
-    if (!actual_output) {
-        printf("ERROR: No fused HDF5 file found after h5fuse execution\n");
-        ret_value = FAIL;
-        goto done;
-    }
-
     /* Check if the fused file is accessible as an HDF5 file */
     H5E_BEGIN_TRY
     {
-        htri_t is_accessible = H5Fis_accessible(actual_output, H5P_DEFAULT);
+        htri_t is_accessible = H5Fis_accessible(main_filename, H5P_DEFAULT);
         if (is_accessible <= 0) {
-            printf("ERROR: Fused file %s is not accessible as an HDF5 file\n", actual_output);
+            printf("ERROR: Fused file %s is not accessible as an HDF5 file\n", main_filename);
             ret_value = FAIL;
             goto done;
         }
     }
     H5E_END_TRY;
 
-    /* Validate the fused file by opening it with HDF5 */
-    H5E_BEGIN_TRY
-    {
-        fused_file_id = H5Fopen(actual_output, H5F_ACC_RDONLY, H5P_DEFAULT);
-    }
-    H5E_END_TRY;
-
-    if (fused_file_id < 0) {
-        printf("ERROR: Failed to open fused HDF5 file %s - file may be corrupted\n", actual_output);
-        ret_value = FAIL;
-        goto done;
-    }
-
-    /* Additional validation: try to read file properties */
-    hsize_t file_size;
-    if (H5Fget_filesize(fused_file_id, &file_size) < 0) {
-        printf("ERROR: Fused H5Fget_filesize failed \n");
-        ret_value = FAIL;
-        goto done;
-    }
-
-    /* Close the fused file */
-    if (H5Fclose(fused_file_id) < 0) {
-        printf("ERROR: Failed to close fused file properly\n");
-        ret_value = FAIL;
-        goto done;
-    }
-    fused_file_id = H5I_INVALID_HID;
-
-    /* Re-open file with sec2 driver and verify the data */
+    /* Open file with sec2 driver and verify the data */
     {
         hid_t   sec2_file_id = H5I_INVALID_HID;
         hid_t   dset_id      = H5I_INVALID_HID;
@@ -401,7 +348,7 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
 
         H5E_BEGIN_TRY
         {
-            sec2_file_id = H5Fopen(actual_output, H5F_ACC_RDONLY, H5P_DEFAULT);
+            sec2_file_id = H5Fopen(main_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
         }
         H5E_END_TRY;
 
@@ -444,13 +391,6 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
             ret_value = FAIL;
             goto done;
         }
-    }
-
-    /* Cleanup: remove the temporary fused file */
-    if (remove(actual_output) != 0) {
-        printf("ERROR: Failed to remove temporary fused file %s\n", actual_output);
-        ret_value = FAIL;
-        goto done;
     }
 
 done:
@@ -642,7 +582,7 @@ test_subfiling_get_file_mapping_ioc_selection(void)
             char   filename[256];
             int    expected_ioc_count = test_ioc_counts[j];
 
-            snprintf(filename, sizeof(filename), "%s_%zu_%d", SUBF_FILENAME_IOC, i, expected_ioc_count);
+            snprintf(filename, sizeof(filename), "test_subfiling_ioc_selection_%zu_%d.h5", i, expected_ioc_count);
 
             if (MAINPROCESS) {
                 char test_desc[256];
@@ -669,7 +609,9 @@ test_subfiling_get_file_mapping_ioc_selection(void)
             /* Validate that the number of subfiles matches expected IOC count */
             VRFY((len_total == (size_t)expected_ioc_count), "Number of subfiles matches expected IOC count");
 
-            /* All ranks participate in h5fuse validation result synchronization */
+            VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+            /* All ranks participate in h5fuse validation */
             int   validation_result = 1; /* Default to success */
             char *config_filename   = NULL;
             if (len > 0) {
@@ -688,9 +630,6 @@ test_subfiling_get_file_mapping_ioc_selection(void)
 
             cleanup_file_mapping_memory(filenames, len);
 
-            /* Cleanup */
-            VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
-
             H5E_BEGIN_TRY
             {
                 H5Fdelete(filename, fapl_id);
@@ -698,6 +637,7 @@ test_subfiling_get_file_mapping_ioc_selection(void)
             H5E_END_TRY
 
             VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
 
             CHECK_PASSED();
         }
@@ -900,6 +840,10 @@ test_subfiling_get_file_mapping_with_io(void)
         VRFY((strcmp(filenames_before[i], filenames_after[i]) == 0), "File mapping unchanged after I/O");
     }
 
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(dspace_id) >= 0), "Dataspace close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
     /* All ranks participate in h5fuse validation with actual data */
     int   validation_result = 1; /* Default to success */
     char *config_filename   = NULL;
@@ -923,9 +867,6 @@ test_subfiling_get_file_mapping_with_io(void)
 
     /* Cleanup */
     free(write_buf);
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(dspace_id) >= 0), "Dataspace close succeeded");
-    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     H5E_BEGIN_TRY
     {
