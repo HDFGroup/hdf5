@@ -159,6 +159,7 @@ jobs:
           echo "SOURCE_BASE=hdfsrc" >> $GITHUB_OUTPUT
 
       - name: Create source tarball
+        shell: bash
         run: |
           mkdir -p ${{ runner.workspace }}/source
           cd ${{ runner.workspace }}/source
@@ -166,14 +167,21 @@ jobs:
           tar -czf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz -C ${{ github.workspace }} --exclude='.git' .
 
       - name: Extract source for build
+        shell: bash
         run: |
           cd ${{ runner.workspace }}
+          rm -rf hdf5
           mkdir -p hdf5
           tar -xzf ${{ runner.workspace }}/source/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz -C hdf5/
-          mv hdf5/${{ github.workspace }}/* hdf5/ || true
+          # Move extracted contents if they're in a subdirectory
+          if [ -d "hdf5${{ github.workspace }}" ]; then
+            mv hdf5${{ github.workspace }}/* hdf5/ || true
+            rmdir hdf5${{ github.workspace }} || true
+          fi
 
       - name: Build HDF5 with Maven support
         id: buildhdf5
+        shell: bash
         run: |
           cd ${{ runner.workspace }}/hdf5
 
