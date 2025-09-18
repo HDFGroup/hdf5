@@ -120,8 +120,8 @@ jobs:
     runs-on: ${{ matrix.platform }}
     #if: ${{ needs.detect-changes.outputs.should-test == 'true' && (matrix.condition == '' || matrix.condition) }}
     outputs:
-      artifacts-created: ${{ steps.artifacts-check.outputs.created }}
-      version-info: ${{ steps.version-info.outputs.version }}
+      artifacts-created: ${{ steps.artifacts-check-unix.outputs.created || steps.artifacts-check-windows.outputs.created }}
+      version-info: ${{ steps.version-info-unix.outputs.version || steps.version-info-windows.outputs.version }}
     steps:
       - name: Install Dependencies (Linux)
         if: runner.os == 'Linux'
@@ -256,8 +256,9 @@ jobs:
           Set-Location "${{ runner.workspace }}/${{ steps.extract-windows.outputs.BUILD_DIR }}"
           cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
 
-      - name: Extract version information
-        id: version-info
+      - name: Extract version information (Unix)
+        if: runner.os != 'Windows'
+        id: version-info-unix
         shell: bash
         run: |
           # Find the generated POM file
@@ -272,7 +273,26 @@ jobs:
             echo "WARNING: Could not find POM file"
           fi
 
-      - name: Collect Maven artifacts
+      - name: Extract version information (Windows)
+        if: runner.os == 'Windows'
+        id: version-info-windows
+        shell: pwsh
+        run: |
+          # Find the generated POM file
+          $POM_FILE = Get-ChildItem -Path "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}" -Name "pom.xml" -Recurse | Select-Object -First 1
+
+          if ($POM_FILE) {
+            $FULL_POM_PATH = "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}/$POM_FILE"
+            $VERSION = (Select-String -Path $FULL_POM_PATH -Pattern '<version>([^<]*)</version>').Matches[0].Groups[1].Value
+            echo "version=$VERSION" >> $env:GITHUB_OUTPUT
+            Write-Host "Detected version: $VERSION"
+          } else {
+            echo "version=unknown" >> $env:GITHUB_OUTPUT
+            Write-Host "WARNING: Could not find POM file"
+          }
+
+      - name: Collect Maven artifacts (Unix)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           echo "Collecting Maven artifacts for testing..."
@@ -299,8 +319,44 @@ jobs:
           echo "Collected Maven artifacts:"
           ls -la ${{ runner.workspace }}/maven-artifacts/
 
-      - name: Validate artifacts
-        id: artifacts-check
+      - name: Collect Maven artifacts (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Collecting Maven artifacts for testing..."
+          New-Item -ItemType Directory -Force -Path "${{ runner.workspace }}/maven-artifacts"
+
+          # Find build directory
+          $BUILD_DIR = Get-ChildItem -Path "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}" -Directory -Filter "*Maven*" | Select-Object -First 1
+
+          if (-not $BUILD_DIR) {
+            Write-Host "ERROR: Could not find Maven build directory"
+            Get-ChildItem -Path "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}" -Directory | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }
+            exit 1
+          }
+
+          Write-Host "Looking for artifacts in: $($BUILD_DIR.FullName)"
+
+          # Copy JAR files (excluding test and H5Ex_ example JARs)
+          Get-ChildItem -Path $BUILD_DIR.FullName -Filter "*.jar" -Recurse | Where-Object {
+            $_.Name -notmatch "test" -and $_.Name -notmatch "H5Ex_"
+          } | ForEach-Object {
+            Copy-Item $_.FullName "${{ runner.workspace }}/maven-artifacts/"
+          }
+
+          # Copy POM files
+          Get-ChildItem -Path $BUILD_DIR.FullName -Filter "pom.xml" -Recurse | ForEach-Object {
+            Copy-Item $_.FullName "${{ runner.workspace }}/maven-artifacts/"
+          }
+
+          # List collected artifacts
+          Write-Host "Collected Maven artifacts:"
+          Get-ChildItem "${{ runner.workspace }}/maven-artifacts/" | ForEach-Object { Write-Host $_.Name }
+
+      - name: Validate artifacts (Unix)
+        if: runner.os != 'Windows'
+        id: artifacts-check-unix
+        shell: bash
         run: |
           ARTIFACT_COUNT=$(find ${{ runner.workspace }}/maven-artifacts -name "*.jar" | wc -l)
           POM_COUNT=$(find ${{ runner.workspace }}/maven-artifacts -name "pom.xml" | wc -l)
@@ -316,7 +372,39 @@ jobs:
             exit 1
           fi
 
-      - name: Run validation script
+      - name: Validate artifacts (Windows)
+        if: runner.os == 'Windows'
+        id: artifacts-check-windows
+        shell: pwsh
+        run: |
+          $ARTIFACT_COUNT = (Get-ChildItem -Path "${{ runner.workspace }}/maven-artifacts" -Filter "*.jar").Count
+          $POM_COUNT = (Get-ChildItem -Path "${{ runner.workspace }}/maven-artifacts" -Filter "pom.xml").Count
+
+          Write-Host "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files"
+
+          if ($ARTIFACT_COUNT -gt 0 -and $POM_COUNT -gt 0) {
+            echo "created=true" >> $env:GITHUB_OUTPUT
+            Write-Host "✅ Artifacts successfully created"
+          } else {
+            echo "created=false" >> $env:GITHUB_OUTPUT
+            Write-Host "❌ Artifact creation failed"
+            exit 1
+          }
+
+      - name: Run validation script (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
+            echo "Running Maven artifact validation..."
+            .github/scripts/validate-maven-artifacts.sh ${{ runner.workspace }}/maven-artifacts
+          else
+            echo "Validation script not found - skipping validation"
+          fi
+
+      - name: Run validation script (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
         run: |
           if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
             echo "Running Maven artifact validation..."
