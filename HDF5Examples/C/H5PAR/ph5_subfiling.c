@@ -27,7 +27,6 @@
  * is needed.
  */
 
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include "hdf5.h"
@@ -52,7 +51,7 @@ typedef int EXAMPLE_DSET_C_DATATYPE;
 static void
 cleanup(char *filename, hid_t fapl_id)
 {
-    bool do_cleanup = getenv(HDF5_NOCLEANUP) ? false : true;
+    hbool_t do_cleanup = getenv(HDF5_NOCLEANUP) ? 0 : 1;
 
     if (do_cleanup)
         H5Fdelete(filename, fapl_id);

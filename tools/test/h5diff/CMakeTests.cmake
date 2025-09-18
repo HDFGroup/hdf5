@@ -600,7 +600,7 @@ endmacro ()
 macro (ADD_PH5_TEST testname)
   cmake_parse_arguments(ARG
     ""
-    "RESULT_CODE;ERROR_REF"
+    "RESULT_CODE;ERROR_REF;VOL_NAME;VOL_ENV"
     ""
     ${ARGN}
   )

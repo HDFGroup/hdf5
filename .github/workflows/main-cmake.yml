@@ -1,13 +1,9 @@
-name: hdf5 dev CI
+name: hdf5 dev CMake CI
 
 # Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
-      cmake_version:
-        description: "3.26.0 or later, latest"
-        required: true
-        type: string
       thread_safety:
         description: "TS or empty"
         required: true
@@ -20,11 +16,6 @@ on:
         description: "release vs. debug build"
         required: true
         type: string
-      save_binary:
-        description: "binary-ext-name or missing"
-        required: false
-        default: "skip"
-        type: string
 
 permissions:
   contents: read
@@ -32,7 +23,7 @@ permissions:
 jobs:
 
   # A workflow that builds the library and runs all the tests
-  Build_and_test:
+  CMake_build_and_test:
     strategy:
       # The current matrix has one dimensions:
       #
@@ -53,7 +44,7 @@ jobs:
 
         include:
 
-          # Windows w/ MSVC
+          # Windows w/ MSVC + CMake
           #
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
@@ -74,7 +65,7 @@ jobs:
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             run_tests: true
 
-          # Linux (Ubuntu) w/ gcc
+          # Linux (Ubuntu) w/ gcc + CMake
           #
           - name: "Ubuntu gcc"
             ostype: ubuntu
@@ -94,7 +85,7 @@ jobs:
             generator: "-G Ninja"
             run_tests: true
 
-          # MacOS w/ Clang
+          # MacOS w/ Clang + CMake
           #
           - name: "MacOS Clang"
             ostype: macos
@@ -129,7 +120,7 @@ jobs:
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
 
-      - name: Install Dependencies (Linux)
+      - name: Install CMake Dependencies (Linux)
         run: |
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
@@ -147,18 +138,6 @@ jobs:
         with:
           version: "1.13.2"
 
-      - name: Install CMake
-        uses: lukka/get-cmake@latest
-        with:
-            cmakeVersion: ${{ inputs.cmake_version }}
-            ninjaVersion: latest
-
-      - name: Check CMake Version
-        shell: bash
-        run: |
-          which cmake
-          cmake --version
-
       - name: Set environment for MSVC (Windows)
         run: |
           # Set these environment variables so CMake picks the correct compiler
@@ -170,8 +149,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CONFIGURE
-      - name: Configure
+      # CMAKE CONFIGURE
+      - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -203,7 +182,7 @@ jobs:
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
 
-      - name: Configure (Thread-Safe)
+      - name: CMake Configure (Thread-Safe)
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -233,7 +212,7 @@ jobs:
         shell: bash
         if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
 
-      - name: Configure (Concurrency)
+      - name: CMake Configure (Concurrency)
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -261,22 +240,22 @@ jobs:
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}
 
       # BUILD
-      - name: Build
+      - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: Run Tests
+      - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests }}
 
-      - name: Run Package
+      - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
 #        if: ${{ (matrix.ostype != 'macos') && (inputs.build_mode != 'Debug') }}
 
-#      - name: Run Package (Mac_latest)
+#      - name: CMake Run Package (Mac_latest)
 #        run: cpack -C ${{ inputs.build_mode }} -G STGZ -V
 #        if: ${{ (matrix.ostype == 'macos') }}
 
@@ -284,14 +263,14 @@ jobs:
         run: |
               ls -l ${{ runner.workspace }}/build
 
-      # Save files created by CTest script
+      # Save files created by ctest script
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@v4
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
+        if:  ${{ (matrix.ostype == 'windows') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v4
@@ -299,7 +278,7 @@ jobs:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
+        if:  ${{ (matrix.ostype == 'ubuntu') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
 
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
@@ -307,7 +286,7 @@ jobs:
               name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.ostype == 'macos') && ( inputs.save_binary != 'skip') }}
+        if: ${{ (matrix.ostype == 'macos') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
 
 
   # A workflow that builds the library and runs all the tests
@@ -402,7 +381,7 @@ jobs:
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
 
-      - name: Install Dependencies (Linux)
+      - name: Install CMake Dependencies (Linux)
         run: |
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
@@ -420,18 +399,6 @@ jobs:
         with:
           version: "1.13.2"
 
-      - name: Install CMake
-        uses: lukka/get-cmake@latest
-        with:
-            cmakeVersion: ${{ inputs.cmake_version }}
-            ninjaVersion: latest
-
-      - name: Check CMake Version
-        shell: bash
-        run: |
-          which cmake
-          cmake --version
-
       - name: Set environment for MSVC (Windows)
         run: |
           # Set these environment variables so CMake picks the correct compiler
@@ -443,8 +410,8 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      # CONFIGURE
-      - name: Configure
+      # CMAKE CONFIGURE
+      - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -474,12 +441,12 @@ jobs:
         shell: bash
 
       # BUILD
-      - name: Build
+      - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: Run Tests
+      - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests }}

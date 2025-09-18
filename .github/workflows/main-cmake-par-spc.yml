@@ -1,4 +1,4 @@
-name: hdf5 dev parallel special CI
+name: hdf5 dev parallel special CMake CI
 
 on:
   workflow_call:
@@ -17,9 +17,9 @@ jobs:
   # so we catch most issues in daily testing. What we have here is just
   # a compile check to make sure nothing obvious is broken.
   # A workflow that builds the library
-  # Parallel Linux (Ubuntu) w/ gcc
+  # Parallel Linux (Ubuntu) w/ gcc + CMake
   #
-  Build_parallel_werror:
+  CMake_build_parallel_werror:
     name: "Parallel GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +36,7 @@ jobs:
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
 
-      - name: Configure
+      - name: CMake Configure
         shell: bash
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -62,17 +62,17 @@ jobs:
             $GITHUB_WORKSPACE
 
       # BUILD
-      - name: Build
+      - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: Run Tests
+      - name: CMake Run Tests
         run: ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ inputs.thread_safety != 'TS' }}
 
-      - name: Run Parallel Tests
+      - name: CMake Run Parallel Tests
         run: ctest . -R MPI_TEST -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}

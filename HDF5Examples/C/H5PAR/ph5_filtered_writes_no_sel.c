@@ -27,7 +27,6 @@
  * if one is needed.
  */
 
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include "hdf5.h"
@@ -103,7 +102,7 @@ fill_databuf(hsize_t start[], hsize_t count[], hsize_t stride[], C_DATATYPE *dat
 static void
 cleanup(char *filename)
 {
-    bool do_cleanup = getenv(HDF5_NOCLEANUP) ? false : true;
+    hbool_t do_cleanup = getenv(HDF5_NOCLEANUP) ? 0 : 1;
 
     if (do_cleanup)
         MPI_File_delete(filename, MPI_INFO_NULL);
@@ -126,7 +125,7 @@ write_dataset_some_no_sel(hid_t file_id, hid_t dxpl_id)
     hsize_t    start[EXAMPLE_DSET_DIMS];
     hsize_t    stride[EXAMPLE_DSET_DIMS];
     hsize_t    count[EXAMPLE_DSET_DIMS];
-    bool       no_selection;
+    hbool_t    no_selection;
     hid_t      dset_id        = H5I_INVALID_HID;
     hid_t      dcpl_id        = H5I_INVALID_HID;
     hid_t      file_dataspace = H5I_INVALID_HID;

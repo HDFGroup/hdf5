@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       build_mode:
-        description: "Build type"
+        description: "CMake Build type"
         required: true
         type: string
 

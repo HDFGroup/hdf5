@@ -447,57 +447,43 @@ Wflock(int fd, int operation)
  *
  * Purpose:      Gets a UTF-16 string from an UTF-8 (or ASCII) string.
  *
- *               On success, a pointer to the new UTF-16 string is returned
- *               in `wstring`. This must be freed by the caller using
- *               H5MM_xfree().
- *
- * Return:       Non-negative on success/Negative on failure
- *
- *               On failure, the result of GetLastError() is returned
- *               through the `win_error` parameter, if non-NULL.
+ * Return:       Success:    A pointer to a UTF-16 string
+ *                           This must be freed by the caller using H5MM_xfree()
+ *               Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5_get_utf16_str(const char *s, wchar_t **wstring, uint32_t *win_error)
+wchar_t *
+H5_get_utf16_str(const char *s)
 {
     int      nwchars = -1;   /* Length of the UTF-16 buffer */
     wchar_t *ret_s   = NULL; /* UTF-16 version of the string */
 
     /* Get the number of UTF-16 characters needed */
-    if (0 == (nwchars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, NULL, 0)))
+    if (0 == (nwchars = MultiByteToWideChar(CP_UTF8, 0, s, -1, NULL, 0)))
         goto error;
 
     /* Allocate a buffer for the UTF-16 string */
-    if (NULL == (ret_s = H5MM_calloc(sizeof(wchar_t) * (size_t)nwchars)))
+    if (NULL == (ret_s = (wchar_t *)H5MM_calloc(sizeof(wchar_t) * (size_t)nwchars)))
         goto error;
 
     /* Convert the input UTF-8 string to UTF-16 */
-    if (0 == MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, ret_s, nwchars))
+    if (0 == MultiByteToWideChar(CP_UTF8, 0, s, -1, ret_s, nwchars))
         goto error;
 
-    *wstring = ret_s;
-
-    return SUCCEED;
+    return ret_s;
 
 error:
-    /* Store error value first before doing anything else */
-    if (win_error)
-        *win_error = (uint32_t)GetLastError();
-
     if (ret_s)
         H5MM_xfree((void *)ret_s);
-
-    *wstring = NULL;
-
-    return FAIL;
+    return NULL;
 } /* end H5_get_utf16_str() */
 
 /*-------------------------------------------------------------------------
  * Function:     Wopen
  *
  * Purpose:      Equivalent of open(2) for use on Windows. Necessary to
- *               handle Unicode and code pages on that platform.
+ *               handle code pages and Unicode on that platform.
  *
  * Return:       Success:    A POSIX file descriptor
  *               Failure:    -1
@@ -506,13 +492,9 @@ error:
 int
 Wopen(const char *path, int oflag, ...)
 {
-    uint32_t win_error        = 0;     /* Windows error code for failures */
-    wchar_t *wpath            = NULL;  /* UTF-16 version of the path */
-    herr_t   h5_ret           = FAIL;  /* HDF5 return code */
-    char    *env              = NULL;  /* Environment variable string */
-    bool     prefer_code_page = false; /* Whether to prefer using the Windows code page */
-    int      fd               = -1;    /* POSIX file descriptor to be returned */
-    int      pmode            = 0;     /* mode (optionally set via variable args) */
+    int      fd    = -1;   /* POSIX file descriptor to be returned */
+    wchar_t *wpath = NULL; /* UTF-16 version of the path */
+    int      pmode = 0;    /* mode (optionally set via variable args) */
 
     /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
      * transformations when performing I/O. Note that this will
@@ -529,36 +511,30 @@ Wopen(const char *path, int oflag, ...)
         va_end(vl);
     }
 
-    /*
-     * Check HDF5_PREFER_WINDOWS_CODE_PAGE environment variable to
-     * determine how to handle the pathname.
+    /* First try opening the file with the normal POSIX open() call.
+     * This will handle ASCII without additional processing as well as
+     * systems where code pages are being used instead of true Unicode.
      */
-    env = getenv(HDF5_PREFER_WINDOWS_CODE_PAGE);
-    if (env && (*env != '\0')) {
-        if (0 == HDstrcasecmp(env, "true") || 0 == strcmp(env, "1"))
-            prefer_code_page = true;
+    if ((fd = open(path, oflag, pmode)) >= 0) {
+        /* If this succeeds, we're done */
+        goto done;
     }
 
-    /*
-     * Unless requested to prefer Windows code pages, try to convert
-     * the pathname from UTF-8 to UTF-16. If this fails, fallback to
-     * the normal POSIX open() call.
-     */
-    if (!prefer_code_page) {
-        h5_ret = H5_get_utf16_str(path, &wpath, &win_error);
-        if (h5_ret >= 0) {
-            /* Open the file using a UTF-16 path */
-            fd = _wopen(wpath, oflag, pmode);
-        }
-        else {
-            if (ERROR_NO_UNICODE_TRANSLATION != win_error)
-                goto done;
-
-            fd = open(path, oflag, pmode);
-        }
+    if (errno == ENOENT) {
+        /* Not found, reset errno and try with UTF-16 */
+        errno = 0;
     }
-    else
-        fd = open(path, oflag, pmode);
+    else {
+        /* Some other error (like permissions), so just exit */
+        goto done;
+    }
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if (NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Open the file using a UTF-16 path */
+    fd = _wopen(wpath, oflag, pmode);
 
 done:
     H5MM_xfree(wpath);
@@ -570,7 +546,7 @@ done:
  * Function:     Wremove
  *
  * Purpose:      Equivalent of remove(3) for use on Windows. Necessary to
- *               handle Unicode and code pages on that platform.
+ *               handle code pages and Unicode on that platform.
  *
  * Return:       Success:    0
  *               Failure:    -1
@@ -579,43 +555,33 @@ done:
 int
 Wremove(const char *path)
 {
-    uint32_t win_error        = 0;     /* Windows error code for failures */
-    wchar_t *wpath            = NULL;  /* UTF-16 version of the path */
-    herr_t   h5_ret           = FAIL;  /* HDF5 return code */
-    char    *env              = NULL;  /* Environment variable string */
-    bool     prefer_code_page = false; /* Whether to prefer using the Windows code page */
-    int      ret              = -1;
+    wchar_t *wpath = NULL; /* UTF-16 version of the path */
+    int      ret   = -1;
 
-    /*
-     * Check HDF5_PREFER_WINDOWS_CODE_PAGE environment variable to
-     * determine how to handle the pathname.
+    /* First try removing the file with the normal POSIX remove() call.
+     * This will handle ASCII without additional processing as well as
+     * systems where code pages are being used instead of true Unicode.
      */
-    env = getenv(HDF5_PREFER_WINDOWS_CODE_PAGE);
-    if (env && (*env != '\0')) {
-        if (0 == HDstrcasecmp(env, "true") || 0 == strcmp(env, "1"))
-            prefer_code_page = true;
+    if ((ret = remove(path)) >= 0) {
+        /* If this succeeds, we're done */
+        goto done;
     }
 
-    /*
-     * Unless requested to prefer Windows code pages, try to convert
-     * the pathname from UTF-8 to UTF-16. If this fails, fallback to
-     * the normal POSIX remove() call.
-     */
-    if (!prefer_code_page) {
-        h5_ret = H5_get_utf16_str(path, &wpath, &win_error);
-        if (h5_ret >= 0) {
-            /* Remove the file using a UTF-16 path */
-            ret = _wremove(wpath);
-        }
-        else {
-            if (ERROR_NO_UNICODE_TRANSLATION != win_error)
-                goto done;
-
-            ret = remove(path);
-        }
+    if (errno == ENOENT) {
+        /* Not found, reset errno and try with UTF-16 */
+        errno = 0;
     }
-    else
-        ret = remove(path);
+    else {
+        /* Some other error (like permissions), so just exit */
+        goto done;
+    }
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if (NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Remove the file using a UTF-16 path */
+    ret = _wremove(wpath);
 
 done:
     H5MM_xfree(wpath);

@@ -1,6 +1,6 @@
 name: hdf5 callable parallel report to cdash
 
-# Triggers hdf5 dev parallel CTest script the workflow on a call from another workflow
+# Triggers hdf5 dev parallel ctest script the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -22,16 +22,12 @@ on:
         description: "release vs. debug build"
         required: true
         type: string
-      cmake_version:
-        description: "3.26.0 or later, latest"
-        required: true
-        type: string
 
 permissions:
   contents: read
 
 jobs:
-  Build_parallel_windows:
+  CMake_build_parallel_windows:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -47,12 +43,6 @@ jobs:
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.13.2"
-
-      - name: Install CMake
-        uses: lukka/get-cmake@latest
-        with:
-            cmakeVersion: ${{ inputs.cmake_version }}
-            ninjaVersion: latest
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
@@ -146,28 +136,28 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run CTest script (${{ matrix.mpi }})
+      - name: Run ctest script (${{ matrix.mpi }})
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by CTest script
+      # Save log files created by ctest script
       - name: Save log (${{ matrix.mpi }})
         uses: actions/upload-artifact@v4
         with:
           name: windows-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
 
-  Build_parallel_linux:
+  CMake_build_parallel_linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         mpi: [ 'mpich', 'openmpi', 'intelmpi']
     name: "Parallel ${{ matrix.mpi }} Linux-${{ inputs.build_mode }}"
     steps:
-      - name: Install Dependencies (${{ matrix.mpi }})
+      - name: Install CMake Dependencies (${{ matrix.mpi }})
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build graphviz curl
@@ -179,12 +169,6 @@ jobs:
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.13.2"
-
-      - name: Install CMake
-        uses: lukka/get-cmake@latest
-        with:
-            cmakeVersion: ${{ inputs.cmake_version }}
-            ninjaVersion: latest
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
@@ -266,21 +250,21 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run CTest script (${{ matrix.mpi }})
+      - name: Run ctest script (${{ matrix.mpi }})
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by CTest script
+      # Save log files created by ctest script
       - name: Save log (${{ matrix.mpi }})
         uses: actions/upload-artifact@v4
         with:
           name: linux-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
 
-  Build_parallel_intelmpi_macos:
+  CMake_build_parallel_intelmpi_macos:
     runs-on: macos-latest
     strategy:
       matrix:
@@ -376,14 +360,14 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
-      - name: Run CTest script (${{ matrix.mpi }})
+      - name: Run ctest script (${{ matrix.mpi }})
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
-      # Save log files created by CTest script
+      # Save log files created by ctest script
       - name: Save log (${{ matrix.mpi }})
         uses: actions/upload-artifact@v4
         with:

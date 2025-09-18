@@ -1,4 +1,4 @@
-name: hdf5 TestExpress CI
+name: hdf5 TestExpress CMake CI
 
 on:
   workflow_call:
@@ -15,7 +15,7 @@ jobs:
           - build_mode: "Release"
           - build_mode: "Debug"
 
-    name: "${{ matrix.build_mode }} Express Test Workflows"
+    name: "CMake ${{ matrix.build_mode }} Express Test Workflows"
 
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
@@ -36,7 +36,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      - name: Configure
+      - name: CMake Configure
         shell: bash
         run: |
            mkdir "${{ runner.workspace }}/build"
@@ -56,11 +56,11 @@ jobs:
                 -DHDF_TEST_EXPRESS=0 \
                 $GITHUB_WORKSPACE
 
-      - name: Build
+      - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ matrix.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      - name: Run Tests
+      - name: CMake Run Tests
         env:
           HDF5TestExpress: 0
         run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -V -R H5TESTXPR

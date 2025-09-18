@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.26)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5Examples_FORTRAN_HL Fortran)
 
 # --------------------------------------------------------------------
@@ -121,7 +121,7 @@ endforeach ()
 #  endforeach ()
 #endif ()
 
-#if (HDF5_PROVIDES_TOOLS)
+#if (HDF5_BUILD_TOOLS)
 #  foreach (example_name ${f03_examples})
 #    add_custom_command (
 #        TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
@@ -188,7 +188,7 @@ if (H5EX_BUILD_TESTING)
         set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "${EXAMPLE_VARNAME}_f90_${testname}")
-      if (HDF5_PROVIDES_TOOLS)
+      if (HDF5_BUILD_TOOLS)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}
             COMMAND "${CMAKE_COMMAND}"

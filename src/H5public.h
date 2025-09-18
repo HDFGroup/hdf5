@@ -16,11 +16,23 @@
 #ifndef H5public_H
 #define H5public_H
 
-/* Configure options */
-#include "H5pubconf.h"
+/* Include files for public use... */
+/*
+ * Since H5pubconf.h is a generated header file, it is messy to try
+ * to put a #ifndef H5pubconf_H ... #endif guard in it.
+ * HDF5 has set an internal rule that it is being included here.
+ * Source files should NOT include H5pubconf.h directly but include
+ * it via H5public.h.  The #ifndef H5public_H guard above would
+ * prevent repeated include.
+ */
+#include "H5pubconf.h" /* From configure */
 
 /* API Version macro wrapper definitions */
 #include "H5version.h"
+
+#ifdef H5_HAVE_FEATURES_H
+#include <features.h> /* For setting POSIX, BSD, etc. compatibility */
+#endif
 
 /* C library header files for things that appear in HDF5 public headers */
 #ifdef __cplusplus
@@ -38,7 +50,9 @@
  * on Windows, though it doesn't necessarily contain all the POSIX types
  * we need for HDF5 (e.g. ssize_t).
  */
+#ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
@@ -73,15 +87,15 @@
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE "2"
+#define H5_VERS_SUBRELEASE ""
 /**
  * Short version string
  */
-#define H5_VERS_STR "2.0.0-2"
+#define H5_VERS_STR "2.0.0"
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 2.0.0-2"
+#define H5_VERS_INFO "HDF5 library version: 2.0.0"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
@@ -208,8 +222,8 @@
  * opening a file. Valid values for this environment variable are
  * as follows:
  *
- *  "TRUE" or "1"  - Request that file locks should be used <br />
- *  "FALSE" or "0" - Request that file locks should NOT be used <br />
+ *  "TRUE" or "1"  - Request that file locks should be used
+ *  "FALSE" or "0" - Request that file locks should NOT be used
  *  "BEST_EFFORT"  - Request that file locks should be used and
  *                     that any locking errors caused by file
  *                     locking being disabled on the system
@@ -224,18 +238,6 @@
  * \since 1.14.0
  */
 #define HDF5_NOCLEANUP "HDF5_NOCLEANUP"
-/**
- * Macro for environment variable used to instruct HDF5 to prefer
- * Windows code pages over UTF-8 for functions that accept 'char *'
- * parameters. Valid values for this environment variable are as
- * follows (case-insensitive):
- *
- * "TRUE" or "1"  - Request that Windows code pages be preferred <br />
- * "FALSE" or "0" - Request that UTF-8 be preferred <br />
- *
- * \since 2.0.0
- */
-#define HDF5_PREFER_WINDOWS_CODE_PAGE "HDF5_PREFER_WINDOWS_CODE_PAGE"
 
 /**
  * Status return values.  Failed integer functions in HDF5 result almost
@@ -258,12 +260,12 @@ typedef int herr_t;
  * \deprecated Now that we require C99, hbool_t is typedef'd to C99's bool
  *             and hbool_t is considered deprecated. Due to its long-standing,
  *             widespread use, we have no plans to remove the hbool_t typedef
- *             from the public API, though it is otherwise unused in the library.
+ *             from the public API, though we will probably switch to using
+ *             bool in the public API starting in the next major release of HDF5.
  * \attention Boolean functions cannot fail.
  */
 #include <stdbool.h>
 typedef bool hbool_t;
-
 /**
  * Three-valued Boolean type. Functions that return #htri_t however return zero
  * (false), positive (true), or negative (failure).
@@ -756,7 +758,7 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
  *
  * \since 1.14.0
  */
-H5_DLL herr_t H5is_library_terminating(bool *is_terminating);
+H5_DLL herr_t H5is_library_terminating(hbool_t *is_terminating);
 /**
  * \ingroup H5
  * \brief Determines whether the HDF5 library was built with the thread-safety
@@ -775,7 +777,7 @@ H5_DLL herr_t H5is_library_terminating(bool *is_terminating);
  * \since 1.10.0
  *
  */
-H5_DLL herr_t H5is_library_threadsafe(bool *is_ts);
+H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
 /**
  * \ingroup H5
  * \brief Frees memory allocated by the HDF5 library
@@ -868,7 +870,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  * \since 1.8.15
  *
  */
-H5_DLL void *H5allocate_memory(size_t size, bool clear);
+H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
 /**
  * \ingroup H5
  * \brief Resizes and, if required, re-allocates memory that will later be

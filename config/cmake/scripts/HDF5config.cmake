@@ -15,7 +15,7 @@
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.26)
+cmake_minimum_required (VERSION 3.18)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
@@ -39,7 +39,7 @@ cmake_minimum_required (VERSION 3.26)
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "2.0.0")
-set (CTEST_SOURCE_VERSEXT "-2")
+set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
 # handle input parameters to script.
