@@ -454,6 +454,12 @@ HDF5 release, platforms tested, and known problems in this release.
 # 🪲  Bug Fixes
 
 ## Library
+- Fixed CVE-2025-6269
+
+   There were several security vulnerabilities found in the function H5C__reconstruct_cache_entry(), including buffer overflows and memory leaks.  The function has been hardened with bounds checks, input validation, and safe cleanup.
+
+   Fixes GitHub issues #5579 and #5581
+
 - Check for overflow in decoded heap block addresses
 
    Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in H5HL__fl_deserialize to ensure no overflow can occur.
