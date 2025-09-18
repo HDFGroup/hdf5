@@ -582,7 +582,8 @@ test_subfiling_get_file_mapping_ioc_selection(void)
             char   filename[256];
             int    expected_ioc_count = test_ioc_counts[j];
 
-            snprintf(filename, sizeof(filename), "test_subfiling_ioc_selection_%zu_%d.h5", i, expected_ioc_count);
+            snprintf(filename, sizeof(filename), "test_subfiling_ioc_selection_%zu_%d.h5", i,
+                     expected_ioc_count);
 
             if (MAINPROCESS) {
                 char test_desc[256];
@@ -637,7 +638,6 @@ test_subfiling_get_file_mapping_ioc_selection(void)
             H5E_END_TRY
 
             VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
-
 
             CHECK_PASSED();
         }
