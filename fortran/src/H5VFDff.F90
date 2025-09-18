@@ -62,6 +62,7 @@ MODULE H5VFD
 
 CONTAINS
 
+#ifdef H5_HAVE_SUBFILING_VFD
 !>
 !! \ingroup FH5VFD
 !!
@@ -279,5 +280,7 @@ SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdfer
   ! Note: We ignore the return value of the free function since the main operation succeeded
 
 END SUBROUTINE h5fdsubfiling_get_file_mapping_f
+
+#endif
 
 END MODULE H5VFD
