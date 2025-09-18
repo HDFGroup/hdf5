@@ -277,17 +277,13 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
 
     /* Check if h5fuse script exists - similar to test_subfiling_h5fuse() */
     int skip_validation = 0;
-    if (MAINPROCESS) {
-        FILE *h5fuse_script;
-        h5fuse_script = fopen("./h5fuse", "r");
-        if (h5fuse_script)
-            fclose(h5fuse_script);
-        else
-            skip_validation = 1;
-    }
+    FILE *h5fuse_script;
+    h5fuse_script = fopen("./h5fuse", "r");
+    if (h5fuse_script)
+      fclose(h5fuse_script);
+    else
+      skip_validation = 1;
 
-    /* Broadcast skip decision to all ranks */
-    MPI_Bcast(&skip_validation, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if (skip_validation) {
         return SUCCEED; /* Skip validation if h5fuse script not found */
     }
@@ -311,11 +307,11 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
     /* Construct h5fuse command with proper arguments */
     if (config_filename && access(config_filename, F_OK) == 0) {
         /* Use configuration file if available */
-        snprintf(h5fuse_cmd, 4096, "./h5fuse -q -f %s -l %s", config_filename, subfile_list);
+        snprintf(h5fuse_cmd, 4096, "./h5fuse -r -q -f %s -l %s", config_filename, subfile_list);
     }
     else {
         /* Use subfile list only */
-        snprintf(h5fuse_cmd, 4096, "./h5fuse -q -l %s", subfile_list);
+        snprintf(h5fuse_cmd, 4096, "./h5fuse -r -q -l %s", subfile_list);
     }
     system_ret = system(h5fuse_cmd);
 
@@ -638,7 +634,6 @@ test_subfiling_get_file_mapping_ioc_selection(void)
             H5E_END_TRY
 
             VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
-
             CHECK_PASSED();
         }
     }
@@ -2301,6 +2296,10 @@ test_selection_strategies(void)
                         snprintf(sel_criteria, 128, "%d", stride);
 
                         expected_num_subfiles = ((num_active_ranks - 1) / stride) + 1;
+                        /* Limit expected subfiles to available IOCs */
+                        if (expected_num_subfiles > num_iocs_g) {
+                            expected_num_subfiles = num_iocs_g;
+                        }
 
                         break;
                     }
@@ -2323,6 +2322,10 @@ test_selection_strategies(void)
                         snprintf(sel_criteria, 128, "%d", n_iocs);
 
                         expected_num_subfiles = n_iocs;
+                        /* Limit expected subfiles to available IOCs */
+                        if (expected_num_subfiles > num_iocs_g) {
+                            expected_num_subfiles = num_iocs_g;
+                        }
 
                         break;
                     }
