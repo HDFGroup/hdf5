@@ -112,7 +112,6 @@ static void test_subfiling_vector_io_extension(void);
 static void test_subfiling_h5fuse(void);
 
 static test_func tests[] = {
-    test_subfiling_file_mapping_api,
     test_ioc_only_fail,
     test_config_file,
     test_stripe_sizes,
@@ -124,6 +123,7 @@ static test_func tests[] = {
     test_subfiling_write_many_read_few,
     test_subfiling_vector_io_extension,
     test_subfiling_h5fuse,
+    test_subfiling_file_mapping_api,
 };
 
 /* ---------------------------------------------------------------------------
@@ -878,6 +878,8 @@ test_subfiling_get_file_mapping_with_io(void)
 static void
 test_subfiling_file_mapping_api(void)
 {
+    int saved_num_iocs_g = num_iocs_g; /* Save original value */
+
     if (MAINPROCESS) {
         printf("\n");
         printf("=======================================================\n");
@@ -896,6 +898,8 @@ test_subfiling_file_mapping_api(void)
         printf("=======================================================\n\n");
     }
     MPI_Barrier(comm_g);
+    /* Restore original num_iocs_g value to prevent affecting subsequent tests */
+    num_iocs_g = saved_num_iocs_g;
 }
 
 /*
@@ -2296,10 +2300,6 @@ test_selection_strategies(void)
                         snprintf(sel_criteria, 128, "%d", stride);
 
                         expected_num_subfiles = ((num_active_ranks - 1) / stride) + 1;
-                        /* Limit expected subfiles to available IOCs */
-                        if (expected_num_subfiles > num_iocs_g) {
-                            expected_num_subfiles = num_iocs_g;
-                        }
 
                         break;
                     }
@@ -2322,10 +2322,6 @@ test_selection_strategies(void)
                         snprintf(sel_criteria, 128, "%d", n_iocs);
 
                         expected_num_subfiles = n_iocs;
-                        /* Limit expected subfiles to available IOCs */
-                        if (expected_num_subfiles > num_iocs_g) {
-                            expected_num_subfiles = num_iocs_g;
-                        }
 
                         break;
                     }
@@ -2365,6 +2361,14 @@ test_selection_strategies(void)
                     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
                     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
+                    /* Close the file to ensure subfiles are created and flushed to disk */
+                    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+                    /* Synchronize processes using the same communicator used for file operations */
+                    if (file_comm != MPI_COMM_SELF) {
+                        MPI_Barrier(file_comm);
+                    }
+
                     /*
                      * Get the file inode value so we can construct the subfile names
                      */
@@ -2392,8 +2396,6 @@ test_selection_strategies(void)
                     /* Ensure file doesn't exist */
                     subfile_ptr = fopen(tmp_filename, "r");
                     VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
-
-                    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
                     mpi_code_g = MPI_Barrier(file_comm);
                     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
