@@ -220,16 +220,6 @@ jobs:
           CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PLUGIN_SUPPORT=ON -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF"
         fi
 
-        # MPI configuration
-        if [[ "${{ matrix.parallel }}" == "ON" ]]; then
-          CMAKE_OPTS="$CMAKE_OPTS -DMPIEXEC_MAX_NUMPROCS=2"
-          if [[ "${{ matrix.mpi }}" == "openmpi" ]]; then
-            CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
-          elif [[ "${{ matrix.mpi }}" == "mpich" ]]; then
-            CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
-          fi
-        fi
-
         # Set Java environment if needed
         if [[ "${{ matrix.java }}" == "ON" ]]; then
           export JAVA_HOME=$(/usr/libexec/java_home)
@@ -239,6 +229,17 @@ jobs:
         # Set Fortran compiler if needed
         if [[ "${{ matrix.fortran }}" == "ON" ]]; then
           CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=gfortran-15"
+        fi
+
+        # MPI configuration
+        if [[ "${{ matrix.parallel }}" == "ON" ]]; then
+          CMAKE_OPTS="$CMAKE_OPTS -DMPIEXEC_MAX_NUMPROCS=2"
+          if [[ "${{ matrix.mpi }}" == "openmpi" ]]; then
+            CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
+          elif [[ "${{ matrix.mpi }}" == "mpich" ]]; then
+            CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
+            CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=mpifort"
+          fi
         fi
 
         echo "CMake configuration options: $CMAKE_OPTS"
