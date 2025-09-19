@@ -12,7 +12,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5Odelted.c
+ * Created:             H5Odeleted.c
  *
  * Purpose:             The deleted message. This should never exist in
  *                      the file.
