@@ -454,6 +454,12 @@ HDF5 release, platforms tested, and known problems in this release.
 # 🪲  Bug Fixes
 
 ## Library
+- Fix bugs in object header operations
+
+   In some rare circumstances, such as deleting hard links that point to their own parent group in a file using the new file format, memory corruption could occur due to recusive operations changing data structures being operated on by multiple levels of recursion. Made changes to delay changing the data structure in a dangerous way until recursion is complete.
+
+   Fixes GitHub issue #5854
+
 - Check for overflow in decoded heap block addresses
 
    Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in H5HL__fl_deserialize to ensure no overflow can occur.
