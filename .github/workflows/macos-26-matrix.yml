@@ -52,14 +52,14 @@ jobs:
             szip: ON
 
           # Static libraries with OpenMPI
-          - name: "macOS-26 Static OpenMPI Java"
+          - name: "macOS-26 Static OpenMPI"
             os: macos-26
             mpi: openmpi
             shared_libs: OFF
             static_libs: ON
             cpp: OFF
             fortran: OFF
-            java: ON
+            java: OFF
             hl: ON
             threadsafe: OFF
             parallel: ON
@@ -213,10 +213,11 @@ jobs:
         CMAKE_OPTS="$CMAKE_OPTS -DHDF5_BUILD_EXAMPLES=${{ matrix.examples }}"
         CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_ZLIB_SUPPORT=${{ matrix.zlib }}"
         CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_SZIP_SUPPORT=${{ matrix.szip }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ALLOW_UNSUPPORTED=ON"
 
         # Plugin support if specified
         if [[ "${{ matrix.plugins }}" == "ON" ]]; then
-          CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PLUGIN_SUPPORT=ON"
+          CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PLUGIN_SUPPORT=ON -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF"
         fi
 
         # MPI configuration
@@ -253,10 +254,10 @@ jobs:
         # Run tests with appropriate settings for each configuration
         if [[ "${{ matrix.parallel }}" == "ON" ]]; then
           # For parallel builds, limit concurrent tests
-          ctest --build . -C Release -V --parallel 1
+          ctest . -C Release -V --parallel 1
         else
           # For serial builds, can run more tests concurrently
-          ctest --build . -C Release -V --parallel 2
+          ctest . -C Release -V --parallel 2
         fi
       working-directory: ${{ runner.workspace }}/build
       env:
