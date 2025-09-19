@@ -239,6 +239,8 @@ jobs:
           elif [[ "${{ matrix.mpi }}" == "mpich" ]]; then
             CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
             CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=mpifort"
+            sudo ln -s /opt/homebrew/bin/gfortran-15 /opt/homebrew/bin/gfortran
+            mpifort --version
           fi
         fi
 
