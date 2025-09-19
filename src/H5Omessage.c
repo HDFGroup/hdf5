@@ -1136,10 +1136,10 @@ herr_t
 H5O__msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type, const H5O_mesg_operator_t *op,
                       void *op_data)
 {
-    H5O_mesg_t *idx_msg;                    /* Pointer to current message */
-    unsigned    idx;                        /* Absolute index of current message in all messages */
-    unsigned    sequence;                   /* Relative index of current message for messages of type */
-    herr_t      ret_value   = H5_ITER_CONT; /* Return value */
+    H5O_mesg_t *idx_msg;                  /* Pointer to current message */
+    unsigned    idx;                      /* Absolute index of current message in all messages */
+    unsigned    sequence;                 /* Relative index of current message for messages of type */
+    herr_t      ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1182,7 +1182,8 @@ done:
     /* Reduce recursion level */
     oh->recursion_level--;
 
-    /* If we are at the root of recursion (we are not inside any other msg_iterate), check if any message was modified (handle deferred operations) */
+    /* If we are at the root of recursion (we are not inside any other msg_iterate), check if any message was
+     * modified (handle deferred operations) */
     if (oh->recursion_level == 0 && oh->mesgs_modified) {
         /* Try to condense object header info */
         /* (Since this routine is used to remove messages from an
@@ -1749,7 +1750,7 @@ H5O__msg_alloc(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type, unsigned *mesg_
 done:
     /* If we are not in a recursive call, remove any deleted messages from the object header */
     if (oh->recursion_level == 0) {
-        for (unsigned u = 0; oh->num_deleted_mesgs > 0 && u < oh->nmesgs; )
+        for (unsigned u = 0; oh->num_deleted_mesgs > 0 && u < oh->nmesgs;)
             if (oh->mesg[u].type->id == H5O_DELETED_ID) {
                 /* Check if mesg_idx is in the section to be moved, and adjust it if so */
                 assert(u != *mesg_idx);

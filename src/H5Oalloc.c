@@ -938,7 +938,8 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null, const H5O_
             for (u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++)
                 if (curr_msg->chunkno == chunkno - 1) {
                     if (curr_msg->type->id == H5O_NULL_ID) {
-                        /* Delete the null message. Defer actual deletion so we don't interfere with a higher level of recursion by moving the messages. */
+                        /* Delete the null message. Defer actual deletion so we don't interfere with a higher
+                         * level of recursion by moving the messages. */
                         curr_msg->type = H5O_MSG_DELETED;
                         oh->num_deleted_mesgs++;
                     }
@@ -1036,7 +1037,8 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null, const H5O_
                 /* Release any information/memory for message */
                 H5O__msg_free_mesg(old_null_msg);
 
-                /* Delete null message from list of messages. Defer actual deletion so we don't interfere with a higher level of recursion by moving the messages. */
+                /* Delete null message from list of messages. Defer actual deletion so we don't interfere with
+                 * a higher level of recursion by moving the messages. */
                 old_null_msg->type = H5O_MSG_DELETED;
                 oh->num_deleted_mesgs++;
             } /* end if */
@@ -2261,7 +2263,7 @@ H5O__condense_header(H5F_t *f, H5O_t *oh)
     assert(oh != NULL);
 
     /* First remove all deleted messages from the object header */
-    for (unsigned u = 0; oh->num_deleted_mesgs > 0 && u < oh->nmesgs; )
+    for (unsigned u = 0; oh->num_deleted_mesgs > 0 && u < oh->nmesgs;)
         if (oh->mesg[u].type->id == H5O_DELETED_ID) {
             memmove(&oh->mesg[u], &oh->mesg[u + 1], ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
             oh->nmesgs--;

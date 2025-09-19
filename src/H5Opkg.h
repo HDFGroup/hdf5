@@ -303,13 +303,13 @@ struct H5O_t {
     unsigned min_dense;   /* Minimum # of "dense" attributes   */
 
     /* Message management (stored, encoded in chunks) */
-    size_t      nmesgs;         /*number of messages		     */
-    size_t      alloc_nmesgs;   /*number of message slots	     */
-    H5O_mesg_t *mesg;           /*array of messages		     */
-    size_t      link_msgs_seen; /* # of link messages seen when loading header */
-    size_t      attr_msgs_seen; /* # of attribute messages seen when loading header */
-    unsigned    mesgs_modified; /* Whether any messages were modified during this operation */
-    unsigned    recursion_level; /* Level of recursion within message iteration */
+    size_t      nmesgs;            /*number of messages		     */
+    size_t      alloc_nmesgs;      /*number of message slots	     */
+    H5O_mesg_t *mesg;              /*array of messages		     */
+    size_t      link_msgs_seen;    /* # of link messages seen when loading header */
+    size_t      attr_msgs_seen;    /* # of attribute messages seen when loading header */
+    unsigned    mesgs_modified;    /* Whether any messages were modified during this operation */
+    unsigned    recursion_level;   /* Level of recursion within message iteration */
     unsigned    num_deleted_mesgs; /* Number of deleted messages */
 
     /* Chunk management (not stored) */

@@ -17549,8 +17549,8 @@ static int
 delete_self_referential_link(hid_t fapl, bool new_format)
 {
     char   filename[NAME_BUF_SIZE]; /* Buffer for file name */
-    hid_t  fid = H5I_INVALID_HID;   /* File ID */
-    hid_t  gid = H5I_INVALID_HID;   /* Group ID */
+    hid_t  fid  = H5I_INVALID_HID;  /* File ID */
+    hid_t  gid  = H5I_INVALID_HID;  /* Group ID */
     hid_t  gcpl = H5I_INVALID_HID;  /* GCPL ID */
     htri_t status;                  /* Generic return value */
 

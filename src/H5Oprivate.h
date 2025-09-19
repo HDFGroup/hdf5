@@ -230,7 +230,7 @@ typedef struct H5O_copy_t {
 #define H5O_MDCI_MSG_ID    0x0018 /* Metadata Cache Image Message */
 #define H5O_UNKNOWN_ID     0x0019 /* Placeholder message ID for unknown message.  */
 /* (this should never exist in a file) */
-#define H5O_DELETED_ID     0x001a /* Placeholder in mesg array in memory for a deleted message */
+#define H5O_DELETED_ID 0x001a /* Placeholder in mesg array in memory for a deleted message */
 /* (this should never exist in a file) */
 /*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g

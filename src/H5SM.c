@@ -2228,8 +2228,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__read_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
-                   void *_udata /*in,out*/)
+H5SM__read_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence, void *_udata /*in,out*/)
 {
     H5SM_read_udata_t *udata     = (H5SM_read_udata_t *)_udata;
     herr_t             ret_value = H5_ITER_CONT;

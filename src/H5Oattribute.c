@@ -111,11 +111,9 @@ typedef struct {
 static herr_t H5O__attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence,
                                     void *_udata);
 static htri_t H5O__attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char *name_to_open);
-static herr_t H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence,
-                                void *_udata);
+static herr_t H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence, void *_udata);
 static herr_t H5O__attr_open_by_idx_cb(const H5A_t *attr, void *_ret_attr);
-static herr_t H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence,
-                                 void *_udata);
+static herr_t H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence, void *_udata);
 static herr_t H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg,
                                       unsigned H5_ATTR_UNUSED sequence, void *_udata);
 static herr_t H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence,
@@ -392,8 +390,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
-                  void *_udata /*in,out*/)
+H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence, void *_udata /*in,out*/)
 {
     H5O_iter_opn_t *udata     = (H5O_iter_opn_t *)_udata; /* Operator user data */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
