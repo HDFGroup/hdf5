@@ -22,7 +22,7 @@ jobs:
             shared_libs: ON
             static_libs: OFF
             cpp: OFF
-            fortran: ON
+            fortran: OFF
             java: ON
             hl: ON
             threadsafe: OFF
@@ -188,10 +188,6 @@ jobs:
           brew install openjdk
         fi
 
-        # Install Fortran compiler if needed
-        if [[ "${{ matrix.fortran }}" == "ON" ]]; then
-          brew install gfortran
-        fi
 
     - name: Get Sources
       uses: actions/checkout@v5
@@ -241,7 +237,7 @@ jobs:
 
         # Set Fortran compiler if needed
         if [[ "${{ matrix.fortran }}" == "ON" ]]; then
-          CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=gfortran"
+          CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=gfortran-15"
         fi
 
         echo "CMake configuration options: $CMAKE_OPTS"
