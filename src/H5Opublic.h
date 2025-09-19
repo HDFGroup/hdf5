@@ -1563,7 +1563,7 @@ H5_DLL herr_t H5Oenable_mdc_flushes(hid_t object_id);
  * \since 1.10.0
  *
  */
-H5_DLL herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
+H5_DLL herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled);
 
 /**
  *-------------------------------------------------------------------------

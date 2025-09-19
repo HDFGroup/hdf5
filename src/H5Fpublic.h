@@ -1639,7 +1639,7 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
  *
  * \since 1.10.0
  */
-H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled, hbool_t *is_currently_logging);
+H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, bool *is_enabled, bool *is_currently_logging);
 /**
  * \ingroup H5F
  *
@@ -1738,7 +1738,7 @@ H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t 
  * \since 1.10.5
  *
  */
-H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
+H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, bool *minimize);
 /**
  * \ingroup H5F
  *
@@ -1769,7 +1769,7 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  * \since 1.10.5
  *
  */
-H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
+H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, bool minimize);
 
 #ifdef H5_HAVE_PARALLEL
 /**
@@ -1836,7 +1836,7 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * \since 1.8.9
  *
  */
-H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
+H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, bool flag);
 /**
  * \ingroup PH5F
  *
@@ -1859,7 +1859,7 @@ H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
  * \since 1.8.9
  *
  */
-H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
+H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, bool *flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /// \cond DEV
@@ -1970,7 +1970,7 @@ H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *file_info);
  * \deprecated 1.10.2 Deprecated in favor of the function H5Fset_libver_bounds()
  *
  */
-H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
+H5_DLL herr_t H5Fset_latest_format(hid_t file_id, bool latest_format);
 /**
  * \ingroup H5F
  *

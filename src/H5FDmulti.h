@@ -161,7 +161,7 @@ H5_DLLVAR hid_t H5FD_MULTI_id_g;
  * \since 1.4.0
  */
 H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl,
-                                const char *const *memb_name, const haddr_t *memb_addr, hbool_t relax);
+                                const char *const *memb_name, const haddr_t *memb_addr, bool relax);
 
 /**
  * \ingroup FAPL
@@ -184,7 +184,7 @@ H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const
  *
  */
 H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid_t *memb_fapl /*out*/,
-                                char **memb_name /*out*/, haddr_t *memb_addr /*out*/, hbool_t *relax /*out*/);
+                                char **memb_name /*out*/, haddr_t *memb_addr /*out*/, bool *relax /*out*/);
 
 /**
  * \ingroup FAPL

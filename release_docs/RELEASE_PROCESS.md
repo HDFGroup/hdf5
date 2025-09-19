@@ -35,16 +35,16 @@ For more information on the HDF5 versioning and backward and forward compatibili
 ### 3. Prepare Release Notes (Release Manager)
 1. Confirm that all non-trivial changes made to the source are reflected in the release notes. Verify the following: 
     - [HDF5 Milestones Projects](https://github.com/HDFGroup/hdf5/milestones)
-    - Each entry in [RELEASE.txt][u1] traces to one or more resolved GH issues marked with FixVersion="X.Y.Z". 
-    - Each resolved GH milestone issue traces to an entry in [RELEASE.txt][u1].
+    - Each entry in [CHANGELOG.md][u1] traces to one or more resolved GH issues marked with FixVersion="X.Y.Z". 
+    - Each resolved GH milestone issue traces to an entry in [CHANGELOG.md][u1].
     - Each resolved GH milestone issue traces to one or more revisions to the HDF5 source.
     - Each resolved GH milestone issue traces to one or more pull requests.
-2. For each previously authored KNOWN ISSUE in the [RELEASE.txt][u1], if the issue has been resolved or can no longer be confirmed, remove the issue from the [RELEASE.txt][u1].
+2. For each previously authored KNOWN ISSUE in the [CHANGELOG.md][u1], if the issue has been resolved or can no longer be confirmed, remove the issue from the [CHANGELOG.md][u1].
     - Document any new known issues at the top of the list.
-3. Update the TESTED CONFIGURATION FEATURES SUMMARY in [RELEASE.txt][u1] to correspond to features and options that have been tested during the maintenance period by the automated daily regression tests. 
+3. Update the TESTED CONFIGURATION FEATURES SUMMARY in [CHANGELOG.md][u1] to correspond to features and options that have been tested during the maintenance period by the automated daily regression tests. 
     - **See: Testing/Testing Systems(this is a page in confluence)**
-4. Update current compiler information for each platform in the PLATFORMS TESTED section of [RELEASE.txt][u1].
-5. Review the [RELEASE.txt][u1] for formatting and language to verify that it corresponds to guidelines found in **[Writing Notes in a RELEASE.txt(this is missing)]()** File.
+4. Update current compiler information for each platform in the PLATFORMS TESTED section of [CHANGELOG.md][u1].
+5. Review the [CHANGELOG.md][u1] for formatting and language to verify that it corresponds to guidelines found in **[Writing Notes in a CHANGELOG.md(this is missing)]()** File.
 6. Review and update, if needed, the [README][u2] and [LICENSE][u3] files.
 7. Review and update all INSTALL_* files in [release_docs][u4], if needed.
     - [INSTALL][u5] should be general info and not require extensive changes
@@ -165,11 +165,11 @@ For more information on the HDF5 versioning and backward and forward compatibili
 
 
 ### 8. Finalize Release Notes (Release Manager)
-1. Perform a final review of release notes and ensure that any new changes made to the source, any new known issues discovered, and any additional tests run since the code freeze have been reflected in RELEASE.txt and other appropriate in-source documentation files (INSTALL_*, etc.). (Refer to the sub-steps of step 3 for what to check).
-2. Update the [RELEASE.txt][u1] in the **support** branch (i.e. hdf5_X_Y) to remove entries in “Bugs fixed” and “New Features” sections and increment the version number for the following release (“Bug fixes since X.Y.Z” - occurs twice).
+1. Perform a final review of release notes and ensure that any new changes made to the source, any new known issues discovered, and any additional tests run since the code freeze have been reflected in CHANGELOG.md and other appropriate in-source documentation files (INSTALL_*, etc.). (Refer to the sub-steps of step 3 for what to check).
+2. Update the [CHANGELOG.md][u1] in the **support** branch (i.e. hdf5_X_Y) to remove entries in “Bugs fixed” and “New Features” sections and increment the version number for the following release (“Bug fixes since X.Y.Z” - occurs twice).
     - `$ git checkout hdf5_X_Y` 
-    - `$ vi RELEASE.txt # update RELEASE.txt to clear it out` 
-    - `$ git commit -m "Reset RELEASE.txt in preparation for the next release."` 
+    - `$ vi CHANGELOG.md # update CHANGELOG.md to clear it out` 
+    - `$ git commit -m "Reset CHANGELOG.md in preparation for the next release."` 
     - `$ git push` 
 3. Update Release Notes in **release** branch (Release Manager)
 
@@ -192,13 +192,13 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Press "Run Workflow"
 8. Release hdf5_plugins following the same steps.
 
-### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
+### 10. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
 
 ### 11. Conduct Release Retrospective (Release Manager)
 1. Schedule time and solicit comments from retrospective
 2. Identify issues and document them
 
-[u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt
+[u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md
 [u2]: https://github.com/HDFGroup/hdf5/blob/develop/README.md
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/LICENSE
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs

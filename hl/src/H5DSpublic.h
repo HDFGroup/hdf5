@@ -825,7 +825,7 @@ extern "C" {
  *           via configure option.
  *
  */
-H5HL_DLL herr_t H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref);
+H5HL_DLL herr_t H5DSwith_new_ref(hid_t obj_id, bool *with_new_ref);
 
 /**
  * --------------------------------------------------------------------------

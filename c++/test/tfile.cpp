@@ -842,7 +842,7 @@ test_file_info()
     SUBTEST("File general information");
 
     hsize_t out_threshold = 0;     // Free space section threshold to get
-    hbool_t out_persist   = false; // Persist free-space read
+    bool    out_persist   = false; // Persist free-space read
     // File space handling strategy
     H5F_fspace_strategy_t out_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
 
@@ -884,7 +884,7 @@ test_file_info()
         fcpl.setIstorek(F2_ISTORE);
 
         hsize_t               threshold = 5;    // Free space section threshold to set
-        hbool_t               persist   = true; // Persist free-space to set
+        bool                  persist   = true; // Persist free-space to set
         H5F_fspace_strategy_t strategy  = H5F_FSPACE_STRATEGY_PAGE;
 
         fcpl.setFileSpaceStrategy(strategy, persist, threshold);

@@ -27,7 +27,7 @@
  
  * The Core VFD is configured via the following API call:
  * \code
- *    herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
+ *    herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
  * \endcode
  *
  * The backing_store parameter sets whether or not changes are propagated to physical storage on
@@ -73,8 +73,8 @@
  * #H5Pget_core_write_tracking/#H5Pset_core_write_tracking HDF5
  * API calls. The signatures of these function calls are the following:
  * \code
- *     herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size)
- *     herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size)
+ *     herr_t H5Pset_core_write_tracking(hid_t fapl_id, bool is_enabled, size_t page_size)
+ *     herr_t H5Pget_core_write_tracking(hid_t fapl_id, bool *is_enabled, size_t *page_size)
  * \endcode
  * Setting the page size to a value greater than 1 turns write tracking on at that page size. Setting a page
  * size of 1 byte disables paging.
@@ -124,4 +124,4 @@
  * <hr>
  * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
  *
- */ 
+ */

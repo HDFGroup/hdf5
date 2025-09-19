@@ -217,6 +217,19 @@ New Features
 
     Library:
     --------
+    - Removed hbool_t from public API calls
+
+      The hbool_t type was introduced before the library supported C99's
+      Boolean type. Originally typedef'd to an integer, it has been typedef'd
+      to C99's bool for many years.
+
+      It had been previously purged from the bulk of the library code and
+      only remained in public API signatures. In HDF5 2.0, it has also been
+      removed from public API signatures.
+
+      The hbool_t typedef remains in H5public.h so existing code does not
+      need to be updated.
+
     - H5public.h no longer includes features.h
 
       features.h is supposed to be included by glibc headers and not used in
