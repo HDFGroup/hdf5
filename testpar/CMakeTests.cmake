@@ -119,13 +119,13 @@ set (test_par_CLEANFILES
 # Remove any output file left over from previous test run
 add_test (
     NAME MPI_TEST-clear-objects
-    COMMAND sh -c "${CMAKE_COMMAND} -E remove ${test_par_CLEANFILES} 2>/dev/null || true; rm -f *.h5.subfile_* 2>/dev/null || true"
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_par_CLEANFILES}
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
 set_tests_properties (MPI_TEST-clear-objects PROPERTIES FIXTURES_SETUP par_clear_objects)
 add_test (
     NAME MPI_TEST-clean-objects
-    COMMAND sh -c "${CMAKE_COMMAND} -E remove ${test_par_CLEANFILES} 2>/dev/null || true; rm -f *.h5.subfile_* 2>/dev/null || true"
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_par_CLEANFILES}
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
 set_tests_properties (MPI_TEST-clean-objects PROPERTIES FIXTURES_CLEANUP par_clear_objects)

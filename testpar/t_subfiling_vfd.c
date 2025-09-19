@@ -4072,6 +4072,11 @@ exit:
         HDunsetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
 
     if (MAINPROCESS) {
+        /* Remove any .config files in the directory before removing the directory */
+        char cleanup_cmd[512];
+        snprintf(cleanup_cmd, sizeof(cleanup_cmd), "rm -f %s/*.config 2>/dev/null", SUBFILING_CONFIG_FILE_DIR);
+        system(cleanup_cmd);
+
         if (HDrmdir(SUBFILING_CONFIG_FILE_DIR) < 0 && (errno != ENOENT)) {
             printf("couldn't remove temporary testing directory\n");
             nerrors++;
