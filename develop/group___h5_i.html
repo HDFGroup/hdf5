@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-19</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-20</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -269,7 +269,7 @@ Functions</h2></td></tr>
 <tr class="memitem:ga6ce32e88051e4cdf7d02439d86e5e042" id="r_ga6ce32e88051e4cdf7d02439d86e5e042"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga6ce32e88051e4cdf7d02439d86e5e042">H5Iget_file_id</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> id)</td></tr>
 <tr class="memdesc:ga6ce32e88051e4cdf7d02439d86e5e042"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves an identifier for the file containing the specified object.  <br /></td></tr>
 <tr class="separator:ga6ce32e88051e4cdf7d02439d86e5e042"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9c84a8dc29566b82b6d1ff7a6e6828f1" id="r_ga9c84a8dc29566b82b6d1ff7a6e6828f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9c84a8dc29566b82b6d1ff7a6e6828f1">H5Iget_name</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> id, char *name, size_t size)</td></tr>
+<tr class="memitem:ga9c84a8dc29566b82b6d1ff7a6e6828f1" id="r_ga9c84a8dc29566b82b6d1ff7a6e6828f1"><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9c84a8dc29566b82b6d1ff7a6e6828f1">H5Iget_name</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> id, char *name, size_t size)</td></tr>
 <tr class="memdesc:ga9c84a8dc29566b82b6d1ff7a6e6828f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a name of an object based on the object identifier.  <br /></td></tr>
 <tr class="separator:ga9c84a8dc29566b82b6d1ff7a6e6828f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac9638ade14cc75b7b125b3723f319c81" id="r_gac9638ade14cc75b7b125b3723f319c81"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac9638ade14cc75b7b125b3723f319c81">H5Iget_ref</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> id)</td></tr>
@@ -357,7 +357,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a> H5Iget_name </td>
+          <td class="memname">ssize_t H5Iget_name </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>id</em></span>, </td>
         </tr>
@@ -383,7 +383,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a></dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>ssize_t</dd></dl>
 <p><a class="el" href="#ga9c84a8dc29566b82b6d1ff7a6e6828f1" title="Retrieves a name of an object based on the object identifier.">H5Iget_name()</a> retrieves a name for the object identified by <code class="param">id</code>.</p>
 <p>Up to size characters of the name are returned in <code class="param">name</code>; additional characters, if any, are not returned to the user application.</p>
 <p>Up to <code class="param">size</code> characters of the object name are returned in <code class="param">name</code>; additional characters, if any, are not returned to the user application.<br  />

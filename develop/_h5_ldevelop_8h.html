@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-19</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-20</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -183,7 +183,7 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a923e0abe07eacf3101ba6e717665edf1" id="r_a923e0abe07eacf3101ba6e717665edf1"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a923e0abe07eacf3101ba6e717665edf1">H5L_move_func_t</a>) (const char *new_name, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_loc, const void *lnkdata, size_t lnkdata_size)</td></tr>
 <tr class="memdesc:a923e0abe07eacf3101ba6e717665edf1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback for link move.  <br /></td></tr>
 <tr class="separator:a923e0abe07eacf3101ba6e717665edf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ed3f3e89fe170d547cefd7d68549632" id="r_a4ed3f3e89fe170d547cefd7d68549632"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ed3f3e89fe170d547cefd7d68549632">H5L_query_func_t</a>) (const char *link_name, const void *lnkdata, size_t lnkdata_size, void *buf, size_t buf_size)</td></tr>
+<tr class="memitem:a4ed3f3e89fe170d547cefd7d68549632" id="r_a4ed3f3e89fe170d547cefd7d68549632"><td class="memItemLeft" align="right" valign="top">typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ed3f3e89fe170d547cefd7d68549632">H5L_query_func_t</a>) (const char *link_name, const void *lnkdata, size_t lnkdata_size, void *buf, size_t buf_size)</td></tr>
 <tr class="memdesc:a4ed3f3e89fe170d547cefd7d68549632"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback for querying the link.  <br /></td></tr>
 <tr class="separator:a4ed3f3e89fe170d547cefd7d68549632"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a863c336d2a38fc3006a204296925aad6" id="r_a863c336d2a38fc3006a204296925aad6"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a863c336d2a38fc3006a204296925aad6">H5L_traverse_0_func_t</a>) (const char *link_name, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> cur_group, const void *lnkdata, size_t lnkdata_size, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> lapl_id)</td></tr>
@@ -340,7 +340,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef <a class="el" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a>(* H5L_query_func_t) (const char *link_name, const void *lnkdata, size_t lnkdata_size, void *buf, size_t buf_size)</td>
+          <td class="memname">typedef ssize_t(* H5L_query_func_t) (const char *link_name, const void *lnkdata, size_t lnkdata_size, void *buf, size_t buf_size)</td>
         </tr>
       </table>
 </div><div class="memdoc">

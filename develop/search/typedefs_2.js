@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ssize_5ft_0',['ssize_t',['../_h5public_8h.html#af629ed855824cf5955b54529adf78ad6',1,'H5public.h']]]
+  ['visit_5foperator_5ft_0',['visit_operator_t',['../namespace_h5.html#a947845193996f95f6017b1ae6d3044c7',1,'H5']]]
 ];

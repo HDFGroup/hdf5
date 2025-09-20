@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-19</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-20</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -356,8 +356,7 @@ udata_free returns 0 (SUCCEED) on success and -1 (FAIL) on failure. </li>
 <p>Finally, it is logically possible that a file driver would set the <a class="el" href="_h5_f_dpublic_8h.html#ab737a473dca3020847b2f713ad17f3c7">H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS</a> flag, but not the <a class="el" href="_h5_f_dpublic_8h.html#af55fc4553f24c5dac13ec3f2499b04f0">H5FD_FEAT_ALLOW_FILE_IMAGE</a> flag. While it is hard to think of a situation in which this would be desirable, setting the flags this way will not cause any problems: the two capabilities are logically distinct.</p>
 <p><a class="anchor" id="FI216"></a></p><h4><a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image</a></h4>
 <p>The purpose of the <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image</a> routine is to provide a simple way to retrieve a copy of the image of an existing, open file. This routine can be used with files opened using the SEC2 (aka POSIX), STDIO, and Core (aka Memory) VFDs.</p>
-<p>The signature of <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image</a> is defined as follows: </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a> <a class="code hl_function" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad">H5Fget_file_image</a>(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, <span class="keywordtype">void</span> *buf_ptr, <span class="keywordtype">size_t</span> buf_len)</div>
-<div class="ttc" id="a_h5public_8h_html_af629ed855824cf5955b54529adf78ad6"><div class="ttname"><a href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a></div><div class="ttdeci">int ssize_t</div><div class="ttdef"><b>Definition</b> H5public.h:296</div></div>
+<p>The signature of <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image</a> is defined as follows: </p><div class="fragment"><div class="line">ssize_t <a class="code hl_function" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad">H5Fget_file_image</a>(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, <span class="keywordtype">void</span> *buf_ptr, <span class="keywordtype">size_t</span> buf_len)</div>
 <div class="ttc" id="agroup___h5_f_html_gadc53f4e76b1199cb5d2a8cb7fbb114ad"><div class="ttname"><a href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad">H5Fget_file_image</a></div><div class="ttdeci">ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)</div><div class="ttdoc">Retrieves a copy of the image of an existing, open file.</div></div>
 </div><!-- fragment --><p>The parameters of <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image</a> are defined as follows: </p><ul>
 <li>file_id contains the ID of the target file. </li>
