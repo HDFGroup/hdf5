@@ -187,7 +187,7 @@ jobs:
     - name: Get Sources
       uses: actions/checkout@v5
 
-    - name: Configure CMake
+    - name: Configure
       run: |
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
@@ -242,7 +242,7 @@ jobs:
           fi
         fi
 
-        echo "CMake configuration options: $CMAKE_OPTS"
+        echo "Configuration options: $CMAKE_OPTS"
         cmake $CMAKE_OPTS "$GITHUB_WORKSPACE"
       shell: bash
 
