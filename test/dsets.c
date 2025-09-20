@@ -16184,8 +16184,6 @@ test_vds_shared_strings(hid_t fapl)
     H5D_t                 *dset_int                    = NULL;            /* Internal dataset structure */
     char                   file_name[64];
     char                   dset_name[64];
-    int                    shared_file_count = 0;
-    int                    shared_dset_count = 0;
 
     TESTING("VDS sharing of file/dataset names");
 
