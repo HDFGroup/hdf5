@@ -168,7 +168,7 @@ jobs:
     - name: Install Dependencies
       run: |
         # Install base dependencies
-        brew install ninja cmake autoconf automake libtool
+        brew install autoconf automake libtool
 
         # Install compression libraries
         brew install zlib
@@ -181,11 +181,6 @@ jobs:
           brew install openmpi
         elif [[ "${{ matrix.mpi }}" == "mpich" ]]; then
           brew install mpich
-        fi
-
-        # Install Java if needed
-        if [[ "${{ matrix.java }}" == "ON" ]]; then
-          brew install openjdk
         fi
 
 
@@ -217,7 +212,9 @@ jobs:
 
         # Plugin support if specified
         if [[ "${{ matrix.plugins }}" == "ON" ]]; then
-          CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PLUGIN_SUPPORT=ON -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF"
+          CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PLUGIN_SUPPORT=ON"
+          CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ALLOW_EXTERNAL_SUPPORT=TGZ"
+          CMAKE_OPTS="$CMAKE_OPTS -DPLUGIN_USE_LOCALCONTENT=OFF"
         fi
 
         # Set Java environment if needed
