@@ -9,7 +9,7 @@
 # help@hdfgroup.org.
 #
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TEST_PAR_API C)
 
 #------------------------------------------------------------------------------

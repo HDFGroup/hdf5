@@ -5,7 +5,7 @@
 # It organizes source and header files for each module, sets up build targets,
 # manages installation, pkg-config, and documentation generation.
 # -----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_SRC C)
 
 #-----------------------------------------------------------------------------

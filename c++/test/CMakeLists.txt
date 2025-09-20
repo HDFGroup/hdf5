@@ -4,7 +4,7 @@
 # It handles C++ test source grouping, test executable creation, compiler options, linking, and integration with the HDF5 C++ and core libraries.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_CPP_TEST CXX)
 
 # --------------------------------------------------------------------

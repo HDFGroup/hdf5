@@ -1,4 +1,4 @@
-# Put all top-level options build options into one place
+# Put all top-level build options into one place
 # This file will be included at the beginning of the root CMakeLists.txt
 option (HDF5_USE_FOLDERS "Enable folder grouping of projects in IDEs." ON)
 mark_as_advanced (HDF5_USE_FOLDERS)

@@ -4,7 +4,7 @@
 # test plugins, and all test executables. It handles source/header definitions, compiler options, linking,
 # export, and test configuration for the HDF5 test suite, including plugin, VFD, VOL, SWMR, and use case tests.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TEST C)
 
 #-----------------------------------------------------------------------------

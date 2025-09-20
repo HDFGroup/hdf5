@@ -16901,23 +16901,16 @@ test_vds_shared_strings(hid_t fapl)
      * - Every 5th mapping uses "/shared_dataset"
      * - Others use unique file/dataset names
      */
-
     for (int i = 0; i < NUM_MAPPINGS_MANY; i++) {
-        if (i % 10 == 0) {
+        if (i % 10 == 0)
             strcpy(file_name, "shared_file.h5");
-            shared_file_count++;
-        }
-        else {
+        else
             snprintf(file_name, sizeof(file_name), "file_%d.h5", i);
-        }
 
-        if (i % 5 == 0) {
+        if (i % 5 == 0)
             strcpy(dset_name, "/shared_dataset");
-            shared_dset_count++;
-        }
-        else {
+        else
             snprintf(dset_name, sizeof(dset_name), "/dataset_%d", i);
-        }
 
         if (H5Pset_virtual(dcpl_id, virt_space_id, file_name, dset_name, src_space_id) < 0)
             TEST_ERROR;

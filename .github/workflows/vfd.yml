@@ -16,7 +16,7 @@ jobs:
         build_mode: ["Release", "Debug"]
 
     # Sets the job's name from the properties
-    name: "CMake ${{ matrix.build_mode }} Workflows"
+    name: "${{ matrix.build_mode }} Workflows"
 
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"

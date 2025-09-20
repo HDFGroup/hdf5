@@ -842,7 +842,7 @@ test_file_info()
     SUBTEST("File general information");
 
     hsize_t out_threshold = 0;     // Free space section threshold to get
-    hbool_t out_persist   = false; // Persist free-space read
+    bool    out_persist   = false; // Persist free-space read
     // File space handling strategy
     H5F_fspace_strategy_t out_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
 

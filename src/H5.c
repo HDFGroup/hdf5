@@ -154,6 +154,9 @@ H5_init_library(void)
      */
     H5_INIT_GLOBAL = true;
 
+    /* Make sure we picked a good type for ssize_t if it wasn't present */
+    HDcompile_assert(sizeof(size_t) == sizeof(ssize_t));
+
 #ifdef H5_HAVE_PARALLEL
     {
         int mpi_initialized;

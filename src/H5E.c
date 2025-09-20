@@ -864,7 +864,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack)
+H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, bool close_source_stack)
 {
     H5E_stack_t *dst_stack, *src_stack; /* Error stacks */
     herr_t       ret_value = SUCCEED;   /* Return value */
@@ -903,7 +903,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eis_paused(hid_t stack_id, hbool_t *is_paused)
+H5Eis_paused(hid_t stack_id, bool *is_paused)
 {
     H5E_stack_t *stack;               /* Error stack */
     herr_t       ret_value = SUCCEED; /* Return value */

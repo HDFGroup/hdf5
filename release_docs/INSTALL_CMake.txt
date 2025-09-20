@@ -44,9 +44,7 @@ Obtaining HDF5 source code
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
-      The HDF5 2."X"."Y" product requires a minimum CMake version 3.18,
-      where "X"."Y" is the current HDF5 release version. If you are using
-      VS2022, the minimum version is 3.21. CMakePresets requires CMake 3.25.
+      The HDF5 2."X"."Y" product requires a minimum CMake version 3.26.
 
 Note:
    To change the install prefix from the platform defaults initialize
@@ -1117,7 +1115,7 @@ Quick Start Presets
 Solution
 -------------------------------
     CMake introduced presets in version 3.19. HDF Group provides a file in the source,
-    CMakePresets.json, requiring CMake 3.25 or higher, that will build HDF5 with the
+    CMakePresets.json, that will build HDF5 with the
     options for building a typical shared library with the common languages for a
     platform. The features include building the tools, examples, plugins, and the
     shared and static libraries.

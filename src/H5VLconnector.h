@@ -197,7 +197,7 @@ typedef struct H5VL_attr_specific_args_t {
         /* H5VL_ATTR_EXISTS */
         struct {
             const char *name;   /* Name of attribute to check */
-            hbool_t    *exists; /* Whether attribute exists (OUT) */
+            bool       *exists; /* Whether attribute exists (OUT) */
         } exists;
 
         /* H5VL_ATTR_ITER */
@@ -474,7 +474,7 @@ typedef struct H5VL_file_specific_args_t {
         struct {
             const char *filename;   /* Name of file to check */
             hid_t       fapl_id;    /* File access property list to use */
-            hbool_t    *accessible; /* Whether file is accessible with FAPL settings (OUT) */
+            bool       *accessible; /* Whether file is accessible with FAPL settings (OUT) */
         } is_accessible;
 
         /* H5VL_FILE_DELETE */
@@ -485,8 +485,8 @@ typedef struct H5VL_file_specific_args_t {
 
         /* H5VL_FILE_IS_EQUAL */
         struct {
-            void    *obj2;      /* Second file object to compare against */
-            hbool_t *same_file; /* Whether files are the same (OUT) */
+            void *obj2;      /* Second file object to compare against */
+            bool *same_file; /* Whether files are the same (OUT) */
         } is_equal;
     } args;
 } H5VL_file_specific_args_t;
@@ -641,7 +641,7 @@ typedef enum H5VL_link_specific_t {
 
 /* Parameters for link 'iterate' operation */
 typedef struct H5VL_link_iterate_args_t {
-    hbool_t         recursive; /* Whether iteration is recursive */
+    bool            recursive; /* Whether iteration is recursive */
     H5_index_t      idx_type;  /* Type of index to iterate over */
     H5_iter_order_t order;     /* Order of index iteration */
     hsize_t        *idx_p;     /* Start/stop iteration index (OUT) */
@@ -660,7 +660,7 @@ typedef struct H5VL_link_specific_args_t {
 
         /* H5VL_LINK_EXISTS */
         struct {
-            hbool_t *exists; /* Whether link exists (OUT) */
+            bool *exists; /* Whether link exists (OUT) */
         } exists;
 
         /* H5VL_LINK_ITER */
@@ -743,7 +743,7 @@ typedef struct H5VL_object_specific_args_t {
 
         /* H5VL_OBJECT_EXISTS */
         struct {
-            hbool_t *exists; /* Whether object exists (OUT) */
+            bool *exists; /* Whether object exists (OUT) */
         } exists;
 
         /* H5VL_OBJECT_LOOKUP */
@@ -829,7 +829,7 @@ typedef struct H5VL_blob_specific_args_t {
 
         /* H5VL_BLOB_ISNULL */
         struct {
-            hbool_t *isnull; /* Whether blob ID is "null" (OUT) */
+            bool *isnull; /* Whether blob ID is "null" (OUT) */
         } is_null;
 
         /* H5VL_BLOB_SETNULL */
