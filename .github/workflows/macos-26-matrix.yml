@@ -236,6 +236,7 @@ jobs:
           CMAKE_OPTS="$CMAKE_OPTS -DMPIEXEC_MAX_NUMPROCS=2"
           if [[ "${{ matrix.mpi }}" == "openmpi" ]]; then
             CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
+            CMAKE_OPTS="$CMAKE_OPTS -DMPIEXEC_PREFLAGS=--oversubscribe"
           elif [[ "${{ matrix.mpi }}" == "mpich" ]]; then
             CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
             CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=mpifort"
