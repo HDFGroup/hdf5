@@ -89,117 +89,51 @@ jobs:
   build-maven-artifacts:
     name: Build Maven Test Artifacts
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.should-test == 'true' && matrix.enabled }}
-    strategy:
-      matrix:
-        include:
-          - platform: ubuntu-latest
-            preset_suffix: GNUC
-            artifact_classifier: linux-x86_64
-            compiler: gcc
-            java_version: '21'
-            enabled: true
-          - platform: windows-latest
-            preset_suffix: MSVC
-            artifact_classifier: windows-x86_64
-            compiler: msvc
-            java_version: '21'
-            enabled: ${{ contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
-          - platform: macos-latest
-            preset_suffix: Clang
-            artifact_classifier: macos-x86_64
-            compiler: clang
-            java_version: '21'
-            enabled: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
-          - platform: macos-latest
-            preset_suffix: Clang
-            artifact_classifier: macos-aarch64
-            compiler: clang
-            java_version: '21'
-            arch: arm64
-            enabled: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
-    runs-on: ${{ matrix.platform }}
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' }}
+    runs-on: ubuntu-latest
     outputs:
-      artifacts-created: ${{ steps.artifacts-check-unix.outputs.created || steps.artifacts-check-windows.outputs.created }}
+      artifacts-created: ${{ steps.artifacts-check.outputs.created }}
       version-info: ${{ steps.version-info.outputs.version }}
     steps:
-      - name: Install Dependencies (Linux)
-        if: runner.os == 'Linux'
+      - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build doxygen
 
-      - name: Install Dependencies (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          choco install ninja
-          choco install doxygen.install
-
-      - name: Enable Developer Command Prompt
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1.13.0
-
-      - name: Install Dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install ninja
-          brew install doxygen
-
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java_version }}
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set file base name (Unix)
-        if: runner.os != 'Windows'
-        id: set-file-base-unix
+      - name: Set file base name
+        id: set-file-base
         shell: bash
         run: |
           FILE_NAME_BASE="hdf5-develop-$(date '+%Y%m%d')"
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
           echo "SOURCE_BASE=hdfsrc" >> $GITHUB_OUTPUT
 
-      - name: Set file base name (Windows)
-        if: runner.os == 'Windows'
-        id: set-file-base-windows
-        shell: pwsh
-        run: |
-          $FILE_NAME_BASE = "hdf5-develop-$(Get-Date -Format 'yyyyMMdd')"
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $env:GITHUB_OUTPUT
-          echo "SOURCE_BASE=hdfsrc" >> $env:GITHUB_OUTPUT
-
-      - name: Create source tarball (Unix)
-        if: runner.os != 'Windows'
+      - name: Create source tarball
         shell: bash
         run: |
           mkdir -p ${{ runner.workspace }}/source
           cd ${{ runner.workspace }}/source
           # Create a simplified source package for testing
-          tar -czf ${{ steps.set-file-base-unix.outputs.FILE_BASE }}.tar.gz -C ${{ github.workspace }} --exclude='.git' .
+          tar -czf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz -C ${{ github.workspace }} --exclude='.git' .
 
-      - name: Create source tarball (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path "${{ runner.workspace }}/source"
-          Set-Location "${{ runner.workspace }}/source"
-          # Create a simplified source package for testing (Windows uses tar via Git Bash)
-          & tar -czf "${{ steps.set-file-base-windows.outputs.FILE_BASE }}.tar.gz" -C "${{ github.workspace }}" --exclude=".git" .
-
-      - name: Extract source for build (Unix)
-        if: runner.os != 'Windows'
-        id: extract-unix
+      - name: Extract source for build
+        id: extract
         shell: bash
         run: |
           cd ${{ runner.workspace }}
           BUILD_DIR="hdf5"
           rm -rf "$BUILD_DIR"
           mkdir -p "$BUILD_DIR"
-          tar -xzf ${{ runner.workspace }}/source/${{ steps.set-file-base-unix.outputs.FILE_BASE }}.tar.gz -C "$BUILD_DIR/"
+          tar -xzf ${{ runner.workspace }}/source/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz -C "$BUILD_DIR/"
           # Move extracted contents if they're in a subdirectory
           if [ -d "$BUILD_DIR${{ github.workspace }}" ]; then
             mv "$BUILD_DIR${{ github.workspace }}"/* "$BUILD_DIR/" || true
@@ -207,53 +141,26 @@ jobs:
           fi
           echo "BUILD_DIR=$BUILD_DIR" >> $GITHUB_OUTPUT
 
-      - name: Extract source for build (Windows)
-        if: runner.os == 'Windows'
-        id: extract-windows
-        shell: pwsh
-        run: |
-          Set-Location "${{ runner.workspace }}"
-
-          # Use unique directory name to avoid file locking issues
-          $BUILD_DIR = "hdf5-build-$(Get-Date -Format 'HHmmss')"
-          Write-Host "Using build directory: $BUILD_DIR"
-
-          New-Item -ItemType Directory -Force -Path "$BUILD_DIR"
-          # Use tar to extract (available via Git Bash on Windows runners)
-          & tar -xzf "${{ runner.workspace }}/source/${{ steps.set-file-base-windows.outputs.FILE_BASE }}.tar.gz" -C "$BUILD_DIR/"
-
-          # Set output for later steps to use
-          echo "BUILD_DIR=$BUILD_DIR" >> $env:GITHUB_OUTPUT
-
       - name: Set preset name
         id: set-preset
         shell: bash
         run: |
-          # Determine preset based on snapshot setting and platform (using minimal presets)
+          # Determine preset based on snapshot setting (using minimal presets for Linux/GCC)
           if [ "${{ inputs.use_snapshot_version }}" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "Building with minimal Maven snapshot preset for ${{ matrix.preset_suffix }}"
-            PRESET_NAME="ci-MinShar-${{ matrix.preset_suffix }}-Maven-Snapshot"
+            echo "Building with minimal Maven snapshot preset for GNUC"
+            PRESET_NAME="ci-MinShar-GNUC-Maven-Snapshot"
           else
-            echo "Building with minimal Maven release preset for ${{ matrix.preset_suffix }}"
-            PRESET_NAME="ci-MinShar-${{ matrix.preset_suffix }}-Maven"
+            echo "Building with minimal Maven release preset for GNUC"
+            PRESET_NAME="ci-MinShar-GNUC-Maven"
           fi
           echo "preset=$PRESET_NAME" >> $GITHUB_OUTPUT
           echo "Using preset: $PRESET_NAME"
 
-      - name: Build HDF5 with Maven support (Unix)
-        if: runner.os != 'Windows'
-        id: buildhdf5-unix
+      - name: Build HDF5 with Maven support
+        id: buildhdf5
         shell: bash
         run: |
-          cd ${{ runner.workspace }}/${{ steps.extract-unix.outputs.BUILD_DIR }}
-          cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
-
-      - name: Build HDF5 with Maven support (Windows)
-        if: runner.os == 'Windows'
-        id: buildhdf5-windows
-        shell: pwsh
-        run: |
-          Set-Location "${{ runner.workspace }}/${{ steps.extract-windows.outputs.BUILD_DIR }}"
+          cd ${{ runner.workspace }}/${{ steps.extract.outputs.BUILD_DIR }}
           cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
 
       - name: Extract version information
@@ -303,8 +210,7 @@ jobs:
             exit 1
           fi
 
-      - name: Collect Maven artifacts (Unix)
-        if: runner.os != 'Windows'
+      - name: Collect Maven artifacts
         shell: bash
         run: |
           echo "Collecting Maven artifacts for testing..."
@@ -369,79 +275,8 @@ jobs:
           echo "Collected Maven artifacts:"
           ls -la ${{ runner.workspace }}/maven-artifacts/
 
-      - name: Collect Maven artifacts (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          Write-Host "Collecting Maven artifacts for testing..."
-          New-Item -ItemType Directory -Force -Path "${{ runner.workspace }}/maven-artifacts"
-
-          # Debug: Show what's in the build directory
-          $BUILD_ROOT = "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
-          Write-Host "Looking for Maven artifacts in build root: $BUILD_ROOT"
-
-          if (Test-Path $BUILD_ROOT) {
-            Write-Host "Build directory contents:"
-            Get-ChildItem -Path $BUILD_ROOT -Recurse -Directory | ForEach-Object { Write-Host "  DIR: $($_.FullName)" }
-
-            # Find Maven build directory (try multiple patterns)
-            $BUILD_DIR = Get-ChildItem -Path $BUILD_ROOT -Directory -Filter "*Maven*" | Select-Object -First 1
-
-            if (-not $BUILD_DIR) {
-              # Try looking for java directory as fallback (more specific patterns)
-              $BUILD_DIR = Get-ChildItem -Path $BUILD_ROOT -Recurse -Directory | Where-Object { $_.FullName -match "java" } | Select-Object -First 1
-            }
-
-            if (-not $BUILD_DIR) {
-              # Try looking for any directory with JAR files
-              $JAR_FILES = Get-ChildItem -Path $BUILD_ROOT -Recurse -Filter "*.jar"
-              if ($JAR_FILES) {
-                $BUILD_DIR = $JAR_FILES[0].Directory
-                Write-Host "Found JAR files in: $($BUILD_DIR.FullName)"
-              }
-            }
-
-            if (-not $BUILD_DIR) {
-              # Last resort: use build root if it contains artifacts
-              $HAS_ARTIFACTS = (Get-ChildItem -Path $BUILD_ROOT -Recurse -Filter "*.jar").Count -gt 0 -or (Get-ChildItem -Path $BUILD_ROOT -Recurse -Filter "pom.xml").Count -gt 0
-              if ($HAS_ARTIFACTS) {
-                $BUILD_DIR = Get-Item $BUILD_ROOT
-                Write-Host "Using build root as artifacts directory"
-              }
-            }
-          } else {
-            Write-Host "ERROR: Build root directory does not exist: $BUILD_ROOT"
-            exit 1
-          }
-
-          if (-not $BUILD_DIR) {
-            Write-Host "ERROR: Could not find Maven build directory with any of the patterns"
-            Write-Host "Available directories:"
-            Get-ChildItem -Path $BUILD_ROOT -Directory | ForEach-Object { Write-Host "  $($_.Name)" }
-            exit 1
-          }
-
-          Write-Host "Looking for artifacts in: $($BUILD_DIR.FullName)"
-
-          # Copy JAR files (excluding test and H5Ex_ example JARs)
-          Get-ChildItem -Path $BUILD_DIR.FullName -Filter "*.jar" -Recurse | Where-Object {
-            $_.Name -notmatch "test" -and $_.Name -notmatch "H5Ex_"
-          } | ForEach-Object {
-            Copy-Item $_.FullName "${{ runner.workspace }}/maven-artifacts/"
-          }
-
-          # Copy POM files
-          Get-ChildItem -Path $BUILD_DIR.FullName -Filter "pom.xml" -Recurse | ForEach-Object {
-            Copy-Item $_.FullName "${{ runner.workspace }}/maven-artifacts/"
-          }
-
-          # List collected artifacts
-          Write-Host "Collected Maven artifacts:"
-          Get-ChildItem "${{ runner.workspace }}/maven-artifacts/" | ForEach-Object { Write-Host $_.Name }
-
-      - name: Validate artifacts (Unix)
-        if: runner.os != 'Windows'
-        id: artifacts-check-unix
+      - name: Validate artifacts
+        id: artifacts-check
         shell: bash
         run: |
           ARTIFACT_COUNT=$(find ${{ runner.workspace }}/maven-artifacts -name "*.jar" | wc -l)
@@ -458,27 +293,7 @@ jobs:
             exit 1
           fi
 
-      - name: Validate artifacts (Windows)
-        if: runner.os == 'Windows'
-        id: artifacts-check-windows
-        shell: pwsh
-        run: |
-          $ARTIFACT_COUNT = (Get-ChildItem -Path "${{ runner.workspace }}/maven-artifacts" -Filter "*.jar").Count
-          $POM_COUNT = (Get-ChildItem -Path "${{ runner.workspace }}/maven-artifacts" -Filter "pom.xml").Count
-
-          Write-Host "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files"
-
-          if ($ARTIFACT_COUNT -gt 0 -and $POM_COUNT -gt 0) {
-            echo "created=true" >> $env:GITHUB_OUTPUT
-            Write-Host "✅ Artifacts successfully created"
-          } else {
-            echo "created=false" >> $env:GITHUB_OUTPUT
-            Write-Host "❌ Artifact creation failed"
-            exit 1
-          }
-
-      - name: Run validation script (Unix)
-        if: runner.os != 'Windows'
+      - name: Run validation script
         shell: bash
         run: |
           if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
@@ -488,35 +303,10 @@ jobs:
             echo "Validation script not found - skipping validation"
           fi
 
-      - name: Run validation script (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          # Use GITHUB_WORKSPACE environment variable which is more reliable on Windows
-          echo "GitHub workspace: $GITHUB_WORKSPACE"
-          echo "Runner workspace: ${{ runner.workspace }}"
-
-          if [ -f "$GITHUB_WORKSPACE/.github/scripts/validate-maven-artifacts.sh" ]; then
-            echo "Running Maven artifact validation..."
-            echo "Maven artifacts directory contents:"
-            ls -la "${{ runner.workspace }}/maven-artifacts/" || echo "maven-artifacts directory not found"
-
-            # Use the script with full path and convert runner.workspace for Windows
-            ARTIFACTS_DIR="${{ runner.workspace }}/maven-artifacts"
-            # Convert any Windows backslashes to forward slashes for bash
-            ARTIFACTS_DIR=$(echo "$ARTIFACTS_DIR" | tr '\\' '/')
-            echo "Artifacts directory: $ARTIFACTS_DIR"
-
-            "$GITHUB_WORKSPACE/.github/scripts/validate-maven-artifacts.sh" "$ARTIFACTS_DIR"
-          else
-            echo "Validation script not found at $GITHUB_WORKSPACE/.github/scripts/validate-maven-artifacts.sh"
-            echo "Skipping validation"
-          fi
-
       - name: Upload Maven artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: maven-staging-artifacts-${{ matrix.artifact_classifier }}
+          name: maven-staging-artifacts-linux-x86_64
           path: ${{ runner.workspace }}/maven-artifacts
           retention-days: 7
 
