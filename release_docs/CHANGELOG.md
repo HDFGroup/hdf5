@@ -584,7 +584,8 @@ HDF5 release, platforms tested, and known problems in this release.
    ```
    HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
    <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
-    ``` 
+   ``` 
+
    where `<LIB_PKG_NAME>` is one of `ZLIB`, `ZLIBNG`, `SZIP`, `PLUGIN`.
 
    Note that `HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO` disables building all plugins and external libraries in-line with the HDF5 library.
