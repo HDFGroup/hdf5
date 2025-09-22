@@ -85,28 +85,28 @@ jobs:
       - name: Download artifacts (Linux)
         uses: actions/download-artifact@v4
         with:
-          name: Linux-${{ inputs.preset_name }}-artifacts
+          name: maven-staging-artifacts-linux-x86_64
           path: ./artifacts/linux
         continue-on-error: true
 
       - name: Download artifacts (Windows)
         uses: actions/download-artifact@v4
         with:
-          name: Windows-${{ inputs.preset_name }}-artifacts
+          name: maven-staging-artifacts-windows-x86_64
           path: ./artifacts/windows
         continue-on-error: true
 
       - name: Download artifacts (macOS x86_64)
         uses: actions/download-artifact@v4
         with:
-          name: macOS-${{ inputs.preset_name }}-artifacts
+          name: maven-staging-artifacts-macos-x86_64
           path: ./artifacts/macos-x86_64
         continue-on-error: true
 
       - name: Download artifacts (macOS aarch64)
         uses: actions/download-artifact@v4
         with:
-          name: macOS-${{ inputs.preset_name }}-aarch64-artifacts
+          name: maven-staging-artifacts-macos-aarch64
           path: ./artifacts/macos-aarch64
         continue-on-error: true
 
@@ -238,28 +238,28 @@ jobs:
       - name: Download artifacts (Linux)
         uses: actions/download-artifact@v4
         with:
-          name: Linux-${{ inputs.preset_name }}-artifacts
+          name: maven-staging-artifacts-linux-x86_64
           path: ./artifacts/linux
         continue-on-error: true
 
       - name: Download artifacts (Windows)
         uses: actions/download-artifact@v4
         with:
-          name: Windows-${{ inputs.preset_name }}-artifacts
+          name: maven-staging-artifacts-windows-x86_64
           path: ./artifacts/windows
         continue-on-error: true
 
       - name: Download artifacts (macOS x86_64)
         uses: actions/download-artifact@v4
         with:
-          name: macOS-${{ inputs.preset_name }}-artifacts
+          name: maven-staging-artifacts-macos-x86_64
           path: ./artifacts/macos-x86_64
         continue-on-error: true
 
       - name: Download artifacts (macOS aarch64)
         uses: actions/download-artifact@v4
         with:
-          name: macOS-${{ inputs.preset_name }}-aarch64-artifacts
+          name: maven-staging-artifacts-macos-aarch64
           path: ./artifacts/macos-aarch64
         continue-on-error: true
 
