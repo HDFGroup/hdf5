@@ -20,9 +20,12 @@ cmake --workflow --preset ci-StdShar-Clang --fresh    # Clang
 cmake --workflow --preset ci-StdShar-MSVC --fresh     # MSVC
 
 # Maven-enabled builds (Java artifacts with deployment support)
-cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # Linux minimal Maven
-cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # Windows minimal Maven
-cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS minimal Maven
+cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh     # Linux with snapshots
+cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh     # Windows with snapshots
+cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh    # macOS with snapshots
+cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh              # Linux release
+cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh              # Windows release
+cmake --workflow --preset ci-MinShar-Clang-Maven --fresh             # macOS release
 
 # Install
 cmake --install .
@@ -139,6 +142,15 @@ ctest -E "MPI|SWMR"         # Exclude parallel/SWMR tests
 3. **Debug builds:**
    ```bash
    cmake -DCMAKE_BUILD_TYPE=Debug ..
+   ```
+
+4. **Maven artifact testing:**
+   ```bash
+   # Test Maven staging workflow (all platforms)
+   gh workflow run maven-staging.yml -f platforms=all-platforms -f use_snapshot_version=true
+
+   # Test Maven deployment (dry run)
+   gh workflow run release.yml -f deploy_maven=true -f use_tag=snapshot
    ```
 
 ## Documentation

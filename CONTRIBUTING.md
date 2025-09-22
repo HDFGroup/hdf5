@@ -320,6 +320,28 @@ Used only by the large `testhdf5` program. Uses global variables and should be a
 4. Update `CMakeLists.txt` in the `test/` directory.
 5. Ensure tests run and pass under CMake.
 
+### Maven Deployment Testing
+
+For contributions involving Maven deployment or Java bindings:
+
+1. **Test Maven Artifacts:** Use the validation script to verify artifact generation:
+   ```bash
+   # Build with Maven support
+   cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh
+
+   # Validate generated artifacts
+   .github/scripts/validate-maven-artifacts.sh build/ci-MinShar-GNUC-Maven-Snapshot
+   ```
+
+2. **PR Validation:** The `maven-staging.yml` workflow automatically tests Maven artifacts for pull requests when Java-related files are modified.
+
+3. **Multi-Platform Testing:** Verify artifacts generate correctly on all platforms by testing with different Maven presets:
+   - Linux: `ci-MinShar-GNUC-Maven-Snapshot`
+   - Windows: `ci-MinShar-MSVC-Maven-Snapshot`
+   - macOS: `ci-MinShar-Clang-Maven-Snapshot`
+
+4. **Dry Run Testing:** Before deploying to repositories, test deployment permissions using the dry run mode in release workflows.
+
 ---
 
 ## Documentation

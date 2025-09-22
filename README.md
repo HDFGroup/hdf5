@@ -123,6 +123,14 @@ Source packages for current and previous releases are located at:
    Archived releases:
    https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
 
+Maven artifacts for Java bindings are available at:
+
+   GitHub Packages:
+   https://maven.pkg.github.com/HDFGroup/hdf5
+
+   Maven Central (starting with HDF5 2.0):
+   https://central.sonatype.com/artifact/org.hdfgroup/jhdf5
+
 Development code is available at our Github location:
 
    https://github.com/HDFGroup/hdf5.git

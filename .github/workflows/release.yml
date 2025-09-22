@@ -125,7 +125,7 @@ jobs:
       repository_url: ${{ inputs.maven_repository == 'github-packages' && 'https://maven.pkg.github.com/HDFGroup/hdf5' || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
       repository_id: ${{ inputs.maven_repository == 'github-packages' && 'github' || 'ossrh' }}
       deploy_snapshots: ${{ needs.log-the-inputs.outputs.rel_tag == 'snapshot' }}
-      dry_run: false
+      dry_run: true  # Start with dry run to test permissions
     secrets:
       MAVEN_USERNAME: ${{ inputs.maven_repository == 'github-packages' && github.actor || secrets.MAVEN_CENTRAL_USERNAME }}
       MAVEN_PASSWORD: ${{ inputs.maven_repository == 'github-packages' && secrets.GITHUB_TOKEN || secrets.MAVEN_CENTRAL_PASSWORD }}

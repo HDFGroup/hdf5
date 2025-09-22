@@ -113,17 +113,29 @@ jobs:
       - name: Find JAR files
         id: find-jars
         run: |
-          # Find JAR files across all platform directories
+          # Find only main HDF5 JAR files across all platform directories
           JAR_FILES=""
+          echo "=== Scanning for main HDF5 JAR files ==="
+
           for platform_dir in ./artifacts/*/; do
             if [ -d "$platform_dir" ]; then
-              platform_jars=$(find "$platform_dir" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" 2>/dev/null || true)
+              platform_name=$(basename "$platform_dir")
+              echo "Scanning platform: $platform_name"
+
+              # Find only the main HDF5 JAR files (jarhdf5-*.jar), exclude dependencies and examples
+              platform_jars=$(find "$platform_dir" -name "jarhdf5-*.jar" 2>/dev/null || true)
+
               if [ -n "$platform_jars" ]; then
+                echo "Found HDF5 JARs in $platform_name:"
+                echo "$platform_jars" | while read jar; do echo "  - $(basename "$jar")"; done
+
                 if [ -z "$JAR_FILES" ]; then
                   JAR_FILES="$platform_jars"
                 else
                   JAR_FILES="$JAR_FILES,$platform_jars"
                 fi
+              else
+                echo "No HDF5 JARs found in $platform_name"
               fi
             fi
           done
@@ -131,10 +143,17 @@ jobs:
           # Remove trailing comma and convert newlines to commas
           JAR_FILES=$(echo "$JAR_FILES" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
           echo "jar-files=${JAR_FILES}" >> $GITHUB_OUTPUT
-          echo "Found JAR files: ${JAR_FILES}"
+          echo "=== Final JAR list for deployment ==="
+          echo "$JAR_FILES" | tr ',' '\n' | while read jar; do
+            if [ -n "$jar" ]; then
+              echo "  - $jar"
+            fi
+          done
 
           if [ -z "${JAR_FILES}" ]; then
-            echo "ERROR: No JAR files found in artifacts"
+            echo "ERROR: No main HDF5 JAR files found in artifacts"
+            echo "Available files:"
+            find ./artifacts -name "*.jar" -o -name "*.xml" 2>/dev/null | head -20
             exit 1
           fi
 
@@ -280,27 +299,54 @@ jobs:
           HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
           PLATFORM_CLASSIFIER: ${{ needs.validate-artifacts.outputs.platform-classifier }}
         run: |
-          echo "=== Maven Deployment ==="
+          echo "=== Maven Deployment Debug Info ==="
           echo "Version: ${HDF5_VERSION}"
           echo "Repository: ${{ inputs.repository_url }}"
           echo "Repository ID: ${{ inputs.repository_id }}"
           echo "Platform Classifier: ${PLATFORM_CLASSIFIER}"
+          echo "Dry Run: ${{ inputs.dry_run }}"
+          echo "Deploy Snapshots: ${{ inputs.deploy_snapshots }}"
+          echo "Username: ${{ secrets.MAVEN_USERNAME }}"
+          echo "Password length: ${#MAVEN_PASSWORD} chars"
+          echo "GPG Private Key available: ${{ secrets.GPG_PRIVATE_KEY != '' }}"
+
+          # Check Maven configuration
+          echo "=== Maven Configuration ==="
+          mvn --version
+          cat ~/.m2/settings.xml
 
           # Set GPG options if available
           GPG_OPTS=""
           if [ -n "${{ secrets.GPG_PRIVATE_KEY }}" ]; then
             GPG_OPTS="-Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}"
             echo "GPG signing enabled"
+          else
+            echo "GPG signing disabled (no private key)"
           fi
 
           # Deploy each JAR file with auto-detected platform classifier
           success_count=0
           total_count=0
 
+          echo "=== Starting JAR Deployment ==="
           for jar_file in $(echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' ' '); do
             total_count=$((total_count + 1))
             jar_basename=$(basename "${jar_file}")
             platform_dir=$(dirname "${jar_file}")
+
+            echo "--- Processing JAR $total_count: $jar_basename ---"
+            echo "Full path: $jar_file"
+            echo "Platform dir: $platform_dir"
+
+            # Verify file exists
+            if [ ! -f "$jar_file" ]; then
+              echo "❌ ERROR: JAR file does not exist: $jar_file"
+              continue
+            fi
+
+            # Show file details
+            echo "File size: $(du -h "$jar_file" | cut -f1)"
+            echo "File permissions: $(ls -l "$jar_file")"
 
             # Auto-detect platform classifier from directory structure
             CURRENT_CLASSIFIER=""
@@ -314,31 +360,56 @@ jobs:
               CURRENT_CLASSIFIER="macos-aarch64"
             fi
 
-            echo "Deploying: ${jar_basename} (classifier: ${CURRENT_CLASSIFIER:-none})"
+            echo "Detected classifier: ${CURRENT_CLASSIFIER:-none}"
 
             # Determine classifier options
             classifier_opts=""
             if [ -n "${CURRENT_CLASSIFIER}" ] && [[ "${jar_basename}" != *"sources"* ]] && [[ "${jar_basename}" != *"javadoc"* ]]; then
               classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
+              echo "Using classifier: ${CURRENT_CLASSIFIER}"
+            else
+              echo "No classifier applied"
             fi
 
-            # Deploy with Maven
-            if mvn deploy:deploy-file \
-              -DgroupId=org.hdfgroup \
-              -DartifactId=hdf5-java \
-              -Dversion="${HDF5_VERSION}" \
-              -Dfile="${jar_file}" \
-              -DpomFile="${{ needs.validate-artifacts.outputs.pom-file }}" \
-              -DrepositoryId="${{ inputs.repository_id }}" \
-              -Durl="${{ inputs.repository_url }}" \
-              ${classifier_opts} \
-              ${GPG_OPTS} \
-              -B -q; then
-
-              echo "✓ Successfully deployed: ${jar_basename}"
+            # Check if this is a dry run
+            if [ "${{ inputs.dry_run }}" == "true" ]; then
+              echo "🧪 DRY RUN: Would deploy ${jar_basename} with classifier ${CURRENT_CLASSIFIER:-none}"
+              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=hdf5-java -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${classifier_opts}"
               success_count=$((success_count + 1))
             else
-              echo "✗ Failed to deploy: ${jar_basename}"
+              echo "🚀 Deploying ${jar_basename}..."
+
+              # Deploy with Maven (with verbose output for debugging)
+              deploy_cmd="mvn deploy:deploy-file \
+                -DgroupId=org.hdfgroup \
+                -DartifactId=hdf5-java \
+                -Dversion=\"${HDF5_VERSION}\" \
+                -Dfile=\"${jar_file}\" \
+                -DpomFile=\"${{ needs.validate-artifacts.outputs.pom-file }}\" \
+                -DrepositoryId=\"${{ inputs.repository_id }}\" \
+                -Durl=\"${{ inputs.repository_url }}\" \
+                ${classifier_opts} \
+                ${GPG_OPTS} \
+                -B -X"
+
+              echo "Command: $deploy_cmd"
+
+              if eval $deploy_cmd; then
+                echo "✓ Successfully deployed: ${jar_basename}"
+                success_count=$((success_count + 1))
+              else
+                deploy_exit_code=$?
+                echo "✗ Failed to deploy: ${jar_basename} (exit code: $deploy_exit_code)"
+
+                # Try to get more specific error information
+                echo "=== Debugging deployment failure ==="
+                echo "Testing repository connectivity..."
+                curl -I "${{ inputs.repository_url }}" || echo "Repository not accessible via curl"
+
+                echo "Testing authentication..."
+                curl -u "${{ secrets.MAVEN_USERNAME }}:${{ secrets.MAVEN_PASSWORD }}" \
+                     -I "${{ inputs.repository_url }}" || echo "Authentication test failed"
+              fi
             fi
           done
 

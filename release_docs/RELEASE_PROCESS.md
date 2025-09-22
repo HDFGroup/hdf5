@@ -181,10 +181,18 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Choose the release branch
     - Enter the 'Release version tag' name as 'X.Y.Z'
     - **Maven Deployment (Optional):** Set 'deploy_maven' to true if Maven deployment is desired
+    - **Maven Repository:** Choose between 'github-packages' or 'maven-central-staging' for deployment target
     - Press "Run Workflow"
 5. **Maven Artifact Deployment (If Enabled):**
-    - If Maven deployment was enabled, the `maven-deploy.yml` workflow will be triggered automatically
-    - Monitor the Maven deployment workflow for successful completion
+    - **Prerequisites:** Ensure Maven deployment permissions are configured (see `MAVEN_DEPLOYMENT_PERMISSIONS.md`)
+    - **Testing Phase:** The workflow starts with `dry_run: true` to test permissions without actual deployment
+    - **Multi-Platform Artifacts:** The staging workflow generates artifacts for Linux, Windows, macOS x86_64, and macOS aarch64
+    - **Deployment Process:**
+      - `maven-staging.yml` workflow generates artifacts for all platforms
+      - `maven-deploy.yml` workflow deploys filtered main HDF5 JARs (jarhdf5-*.jar) only
+      - Monitor both workflows for successful completion
+    - **Troubleshooting:** Check debug output in workflow logs for permission or authentication issues
+    - **Go-Live:** After successful dry run testing, set `dry_run: false` in `.github/workflows/release.yml`
     - Verify artifacts are properly uploaded to GitHub Packages or Maven Central staging
 6. Review the release files in Github
 7. Edit the Github Release and change status to Release

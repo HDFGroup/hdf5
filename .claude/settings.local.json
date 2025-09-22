@@ -8,7 +8,9 @@
       "Bash(python3:*)",
       "Read(//home/byrn/HDF_Projects/hdf5/build/ci-StdShar-GNUC-Maven-Snapshot/java/src/hdf/hdf5lib/**)",
       "Bash(grep:*)",
-      "Read(//home/byrn/Downloads/logs_46007782861/**)"
+      "Read(//home/byrn/Downloads/logs_46007782861/**)",
+      "Read(//home/byrn/Downloads/**)",
+      "Bash(unzip:*)"
     ],
     "deny": [],
     "ask": []
