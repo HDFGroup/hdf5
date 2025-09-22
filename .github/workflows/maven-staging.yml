@@ -89,7 +89,7 @@ jobs:
   build-maven-artifacts:
     name: Build Maven Test Artifacts
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.should-test == 'true' }}
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' && matrix.enabled }}
     strategy:
       matrix:
         include:
@@ -119,7 +119,6 @@ jobs:
             arch: arm64
             enabled: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
     runs-on: ${{ matrix.platform }}
-    if: ${{ needs.detect-changes.outputs.should-test == 'true' && matrix.enabled }}
     outputs:
       artifacts-created: ${{ steps.artifacts-check-unix.outputs.created || steps.artifacts-check-windows.outputs.created }}
       version-info: ${{ steps.version-info.outputs.version }}
