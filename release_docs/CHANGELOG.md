@@ -454,6 +454,12 @@ HDF5 release, platforms tested, and known problems in this release.
 # 🪲  Bug Fixes
 
 ## Library
+- Fixed security issue CVE-2025-6750
+
+   A heap buffer overflow occurred because an mtime message was not properly decoded, resulting in a buffer of size 0 being passed into the encoder.  This has been fixed by decoding old and new mtime messages which will allow invalid message size to be detected.
+
+   Fixes GitHub issue #5549
+
 - Fixed security issue CVE-2025-6857
 
    An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.

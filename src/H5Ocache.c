@@ -1461,9 +1461,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 /* Save the decoded old format mtime */
                 if (!mtime)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode old format mtime");
-                /* Save 'native' form of mtime message */
-                mesg->native = mtime;
 
+                /* Save 'native' form of mtime message and its value */
+                mesg->native = mtime;
                 oh->ctime = *mtime;
             }
             /* Check if message is an old mtime message */
@@ -1477,9 +1477,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 /* Save the decoded new format mtime */
                 if (!mtime)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode new format mtime");
-                /* Save 'native' form of mtime message */
-                mesg->native = mtime;
 
+                /* Save 'native' form of mtime message and its value */
+                mesg->native = mtime;
                 oh->ctime = *mtime;
             }
             /* Check if message is a link message */
