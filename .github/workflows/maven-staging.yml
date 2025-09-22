@@ -313,7 +313,7 @@ jobs:
   build-maven-artifacts-windows:
     name: Build Maven Test Artifacts (Windows)
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.should-test == 'true' && (contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms') }}
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' && (inputs.platforms == '' || contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms') }}
     runs-on: windows-latest
     outputs:
       artifacts-created: ${{ steps.artifacts-check.outputs.created }}
@@ -556,7 +556,7 @@ jobs:
   build-maven-artifacts-macos-x86_64:
     name: Build Maven Test Artifacts (macOS x86_64)
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.should-test == 'true' && (contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms') }}
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' && (inputs.platforms == '' || contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms') }}
     runs-on: macos-13  # Intel-based macOS runner
     outputs:
       artifacts-created: ${{ steps.artifacts-check.outputs.created }}
@@ -780,7 +780,7 @@ jobs:
   build-maven-artifacts-macos-aarch64:
     name: Build Maven Test Artifacts (macOS aarch64)
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.should-test == 'true' && (contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms') }}
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' && (inputs.platforms == '' || contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms') }}
     runs-on: macos-latest  # ARM-based macOS runner
     outputs:
       artifacts-created: ${{ steps.artifacts-check.outputs.created }}
@@ -1020,7 +1020,7 @@ jobs:
           path: ./artifacts/linux
 
       - name: Download Maven artifacts (Windows)
-        if: ${{ contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
+        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
         uses: actions/download-artifact@v4
         with:
           name: maven-staging-artifacts-windows-x86_64
@@ -1028,7 +1028,7 @@ jobs:
         continue-on-error: true
 
       - name: Download Maven artifacts (macOS x86_64)
-        if: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
         uses: actions/download-artifact@v4
         with:
           name: maven-staging-artifacts-macos-x86_64
@@ -1036,7 +1036,7 @@ jobs:
         continue-on-error: true
 
       - name: Download Maven artifacts (macOS aarch64)
-        if: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
         uses: actions/download-artifact@v4
         with:
           name: maven-staging-artifacts-macos-aarch64
