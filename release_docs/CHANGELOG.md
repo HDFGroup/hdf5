@@ -42,7 +42,8 @@ HDF5 release, platforms tested, and known problems in this release.
 > 
 > - Transitioned to [CMake-only](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
 > - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
-> - The default setting for `H5Fset_libver_bounds` has been updated to set the low bound to the 2.0 library version. This change ensures that, by default, users can utilize the library's optimal performance and latest features. Users who require their files to be compatible with older HDF5 library versions must manually lower this bound.
+> - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's
+>   optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
 
 ## Enhanced Features:
 
