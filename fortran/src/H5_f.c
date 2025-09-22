@@ -245,6 +245,14 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
         return ret_value;
     if ((floatingtypes[3] = (hid_t_f)H5Tcopy(H5T_IEEE_F64LE)) < 0)
         return ret_value;
+    if ((floatingtypes[4] = (hid_t_f)H5Tcopy(H5T_IEEE_F16BE)) < 0)
+        return ret_value;
+    if ((floatingtypes[5] = (hid_t_f)H5Tcopy(H5T_IEEE_F16LE)) < 0)
+        return ret_value;
+    if ((floatingtypes[6] = (hid_t_f)H5Tcopy(H5T_FLOAT_BFLOAT16BE)) < 0)
+        return ret_value;
+    if ((floatingtypes[7] = (hid_t_f)H5Tcopy(H5T_FLOAT_BFLOAT16LE)) < 0)
+        return ret_value;
 
     if ((integertypes[0] = (hid_t_f)H5Tcopy(H5T_STD_I8BE)) < 0)
         return ret_value;

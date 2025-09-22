@@ -263,6 +263,9 @@ gen_h5dump_files(void)
     gent_complex_be();
 #endif
 
+    gent_bfloat16();
+    gent_bfloat16_be();
+
     gent_trefer_attr();
     gent_tattr4_be();
     gent_tno_subset();
@@ -555,6 +558,7 @@ main(int argc, char *argv[])
                     break;
                 case 'l':
                     run_h5ls = true;
+                    break;
                 default:
                     continue;
             }

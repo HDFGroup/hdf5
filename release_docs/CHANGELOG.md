@@ -174,6 +174,18 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ## Library 
 
+### Added predefined datatypes for bfloat16 data
+
+   Predefined datatypes have been added for little- and big-endian bfloat16 (https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
+
+   The following new macros have been added:
+
+    - H5T_FLOAT_BFLOAT16LE / H5T_FLOAT_BFLOAT16BE
+
+      These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
+
+      Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
 ### Removed hbool_t from public API calls
 
    The hbool_t type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
