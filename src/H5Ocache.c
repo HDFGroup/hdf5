@@ -1466,7 +1466,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 mesg->native = mtime;
                 oh->ctime    = *mtime;
             }
-            /* Check if message is an old mtime message */
+            /* Check if message is an new mtime message */
             else if (H5O_MTIME_NEW_ID == id) {
                 time_t *mtime = NULL;
 
