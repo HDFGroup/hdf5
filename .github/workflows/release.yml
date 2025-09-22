@@ -99,8 +99,21 @@ jobs:
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 
+  call-workflow-maven-staging:
+    needs: [log-the-inputs, call-workflow-tarball]
+    if: ${{ inputs.deploy_maven == true }}
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+    uses: ./.github/workflows/maven-staging.yml
+    with:
+      test_maven_deployment: true
+      use_snapshot_version: ${{ needs.log-the-inputs.outputs.rel_tag == 'snapshot' }}
+      platforms: 'all-platforms'
+
   call-workflow-maven:
-    needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
+    needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-maven-staging]
     if: ${{ inputs.deploy_maven == true }}
     permissions:
       contents: read
