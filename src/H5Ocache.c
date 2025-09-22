@@ -1464,7 +1464,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
 
                 /* Save 'native' form of mtime message and its value */
                 mesg->native = mtime;
-                oh->ctime = *mtime;
+                oh->ctime    = *mtime;
             }
             /* Check if message is an old mtime message */
             else if (H5O_MTIME_NEW_ID == id) {
@@ -1480,7 +1480,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
 
                 /* Save 'native' form of mtime message and its value */
                 mesg->native = mtime;
-                oh->ctime = *mtime;
+                oh->ctime    = *mtime;
             }
             /* Check if message is a link message */
             else if (H5O_LINK_ID == id) {
