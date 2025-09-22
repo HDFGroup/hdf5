@@ -40,6 +40,8 @@
 #define RTREE_TEST_CREATE_RANK       8
 #define RTREE_TEST_CREATE_NUM_COUNTS 4
 
+#define RTREE_SRC_FILENAME "vds_src_file.h5"
+
 #define RTREE_DAPL_FILENAME         "vds_rtree_test.h5"
 #define RTREE_DAPL_SRC_FILENAME     "vds_src_rtree_test.h5"
 #define RTREE_DAPL_VDS_NAME         "vdset"
@@ -48,7 +50,11 @@
 #define RTREE_DAPL_DATASET_DIM1 10
 #define RTREE_DAPL_DATASET_DIM2 10
 
-static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {1, 100, 500, 10000};
+#define RTREE_THRESHOLD_FILENAME "vds_rtree_threshold_test.h5"
+#define RTREE_MAX_TEST_MAPPINGS  (H5D_VIRTUAL_TREE_THRESHOLD + 10)
+
+static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {H5D_VIRTUAL_TREE_THRESHOLD, 100, 1000,
+                                                                 10000};
 
 /* Helper function to generate leaf data */
 static H5RT_leaf_t *generate_leaves(int rank, size_t leaf_count);
@@ -65,7 +71,7 @@ static herr_t verify_rtree_search(H5RT_result_set_t *result_set, H5RT_leaf_t *le
                                   hsize_t min[], hsize_t max[], int rank);
 
 /* Helper to create and initialize virtual dset in a file */
-static hid_t create_virtual_dataset(hid_t file_id, hid_t dapl_id);
+static hid_t create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings);
 
 static herr_t
 verify_rtree_search(H5RT_result_set_t *result_set, H5RT_leaf_t *leaves, size_t leaf_count, hsize_t min[],
@@ -433,7 +439,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    create_virtual_dataset
  *
- * Purpose:     Helper function to create a virtual dataset with mappings
+ * Purpose:     Helper function to create a 1D virtual dataset with mappings
  *
  * Return:      Success: dataset ID
  *              Failure: H5I_INVALID_HID
@@ -441,59 +447,84 @@ error:
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_virtual_dataset(hid_t file_id, hid_t dapl_id)
+create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings)
 {
     hid_t   vspace_id   = H5I_INVALID_HID;
     hid_t   srcspace_id = H5I_INVALID_HID;
+    hid_t   vsel_id     = H5I_INVALID_HID;
     hid_t   srcfile_id  = H5I_INVALID_HID;
     hid_t   srcdset_id  = H5I_INVALID_HID;
     hid_t   vdset_id    = H5I_INVALID_HID;
     hid_t   dcpl_id     = H5I_INVALID_HID;
-    hsize_t dims[2]     = {RTREE_DAPL_DATASET_DIM1, RTREE_DAPL_DATASET_DIM2};
-    int     wbuf[RTREE_DAPL_DATASET_DIM1][RTREE_DAPL_DATASET_DIM2];
-    int     i, j;
+    hsize_t vdims[1]    = {(hsize_t)num_mappings};
+    hsize_t srcdims[1]  = {1};
+    hsize_t start[1], count[1];
+    char    srcdset_name[256];
+    int     wdata;
+    int     i;
 
-    if ((vspace_id = H5Screate_simple(2, dims, NULL)) < 0)
+    /* Create 1D virtual dataset space */
+    if ((vspace_id = H5Screate_simple(1, vdims, NULL)) < 0)
         goto error;
 
-    if ((srcspace_id = H5Screate_simple(2, dims, NULL)) < 0)
+    /* Create 1D source dataset space (single element) */
+    if ((srcspace_id = H5Screate_simple(1, srcdims, NULL)) < 0)
         goto error;
 
-    /* Create source file */
-    if ((srcfile_id = H5Fcreate(RTREE_DAPL_SRC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
-
-    /* Create source dataset */
-    if ((srcdset_id = H5Dcreate2(srcfile_id, RTREE_DAPL_SRC_DATASET_NAME, H5T_NATIVE_INT, srcspace_id,
-                                 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
-
+    /* Create dataset creation property list */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
 
-    if (H5Pset_virtual(dcpl_id, vspace_id, "vds_src_rtree_test.h5", RTREE_DAPL_SRC_DATASET_NAME,
-                       srcspace_id) < 0)
+    /* Create source file */
+    if ((srcfile_id = H5Fcreate(RTREE_SRC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
+
+    /* Create multiple source dsets and add virtual mappings */
+    for (i = 0; i < num_mappings; i++) {
+        sprintf(srcdset_name, "src_dset_%d", i);
+
+        /* Create source dataset */
+        if ((srcdset_id = H5Dcreate2(srcfile_id, srcdset_name, H5T_NATIVE_INT, srcspace_id, H5P_DEFAULT,
+                                     H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+
+        /* Write data to source dataset (value equals index) */
+        wdata = i;
+        if (H5Dwrite(srcdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+            goto error;
+
+        /* Create hyperslab selection for virtual dataset (one element at position i) */
+        if ((vsel_id = H5Scopy(vspace_id)) < 0)
+            goto error;
+
+        start[0] = (hsize_t)i;
+        count[0] = 1;
+        if (H5Sselect_hyperslab(vsel_id, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+            goto error;
+
+        /* Add virtual mapping */
+        if (H5Pset_virtual(dcpl_id, vsel_id, RTREE_SRC_FILENAME, srcdset_name, srcspace_id) < 0)
+            goto error;
+
+        /* Close source dataset and selection */
+        if (H5Dclose(srcdset_id) < 0)
+            goto error;
+        if (H5Sclose(vsel_id) < 0)
+            goto error;
+
+        srcdset_id = H5I_INVALID_HID;
+        vsel_id    = H5I_INVALID_HID;
+    }
 
     /* Create virtual dataset */
     if ((vdset_id = H5Dcreate2(file_id, RTREE_DAPL_VDS_NAME, H5T_NATIVE_INT, vspace_id, H5P_DEFAULT, dcpl_id,
                                dapl_id)) < 0)
         goto error;
 
-    /* Initialize and write data to source dataset */
-    for (i = 0; i < RTREE_DAPL_DATASET_DIM1; i++)
-        for (j = 0; j < RTREE_DAPL_DATASET_DIM2; j++)
-            wbuf[i][j] = i * RTREE_DAPL_DATASET_DIM2 + j;
-
-    if (H5Dwrite(srcdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-        goto error;
-
     /* Cleanup */
     if (H5Sclose(vspace_id) < 0)
         goto error;
     if (H5Sclose(srcspace_id) < 0)
-        goto error;
-    if (H5Dclose(srcdset_id) < 0)
         goto error;
     if (H5Fclose(srcfile_id) < 0)
         goto error;
@@ -507,6 +538,7 @@ error:
     {
         H5Sclose(vspace_id);
         H5Sclose(srcspace_id);
+        H5Sclose(vsel_id);
         H5Dclose(srcdset_id);
         H5Fclose(srcfile_id);
         H5Dclose(vdset_id);
@@ -520,7 +552,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_rtree_dapl
  *
- * Purpose:     Test R-tree options on the DCPL
+ * Purpose:     Test R-tree options on the DAPL
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
@@ -534,7 +566,7 @@ test_rtree_dapl(bool use_tree)
     hid_t dapl_id  = H5I_INVALID_HID;
     hid_t vdset_id = H5I_INVALID_HID;
 
-    int         rbuf[RTREE_DAPL_DATASET_DIM1][RTREE_DAPL_DATASET_DIM2];
+    int         rbuf[H5D_VIRTUAL_TREE_THRESHOLD + 10];
     const char *test_str = NULL;
 
     /* Internal values for introspection */
@@ -565,22 +597,19 @@ test_rtree_dapl(bool use_tree)
     if (H5Pset_dset_use_spatial_tree(dapl_id, use_tree) < 0)
         FAIL_STACK_ERROR;
 
-    /* Create virtual dataset with some mappings */
-    if ((vdset_id = create_virtual_dataset(file_id, dapl_id)) < 0)
+    /* Create virtual dataset with enough mappings to use tree */
+    if ((vdset_id = create_virtual_dataset(file_id, dapl_id, RTREE_MAX_TEST_MAPPINGS)) < 0)
         FAIL_STACK_ERROR;
 
     /* Read the entire virtual dataset to force tree initialization */
     if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    /* Verify read data matches expected pattern from create_virtual_dataset */
-    for (int i = 0; i < RTREE_DAPL_DATASET_DIM1; i++) {
-        for (int j = 0; j < RTREE_DAPL_DATASET_DIM2; j++) {
-            int expected = i * RTREE_DAPL_DATASET_DIM2 + j;
-            if (rbuf[i][j] != expected) {
-                printf("Data mismatch at [%d][%d]: expected %d, got %d\n", i, j, expected, rbuf[i][j]);
-                FAIL_STACK_ERROR;
-            }
+    /* Verify read data matches expected pattern */
+    for (int i = 0; i < (H5D_VIRTUAL_TREE_THRESHOLD + 10); i++) {
+        if (rbuf[i] != i) {
+            printf("Data mismatch at [%d]: expected %d, got %d\n", i, i, rbuf[i]);
+            FAIL_STACK_ERROR;
         }
     }
 
@@ -631,15 +660,11 @@ test_rtree_dapl(bool use_tree)
     if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    /* Verify read data matches expected pattern from create_virtual_dataset */
-    for (int i = 0; i < RTREE_DAPL_DATASET_DIM1; i++) {
-        for (int j = 0; j < RTREE_DAPL_DATASET_DIM2; j++) {
-            int expected = i * RTREE_DAPL_DATASET_DIM2 + j;
-            if (rbuf[i][j] != expected) {
-                printf("Data mismatch after re-open at [%d][%d]: expected %d, got %d\n", i, j, expected,
-                       rbuf[i][j]);
-                FAIL_STACK_ERROR;
-            }
+    /* Verify read data matches expected pattern */
+    for (int i = 0; i < (H5D_VIRTUAL_TREE_THRESHOLD + 10); i++) {
+        if (rbuf[i] != i) {
+            printf("Data mismatch after re-open at [%d]: expected %d, got %d\n", i, i, rbuf[i]);
+            FAIL_STACK_ERROR;
         }
     }
 
@@ -698,6 +723,130 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_rtree_threshold
+ *
+ * Purpose:     Test that threshold controls r-tree usage properly
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_rtree_threshold(bool use_tree)
+{
+    hid_t file_id  = H5I_INVALID_HID;
+    hid_t dapl_id  = H5I_INVALID_HID;
+    hid_t vdset_id = H5I_INVALID_HID;
+    int   rbuf[RTREE_MAX_TEST_MAPPINGS];
+
+    /* Internal values for introspection */
+    H5D_t                 *dset    = NULL;
+    H5O_storage_virtual_t *storage = NULL;
+
+    const char *test_str =
+        use_tree ? "threshold behavior with tree enabled" : "threshold behavior with tree disabled";
+
+    TESTING(test_str);
+
+    /* Test cases: below threshold, at threshold, above threshold */
+    int test_cases[3] = {H5D_VIRTUAL_TREE_THRESHOLD - 1, H5D_VIRTUAL_TREE_THRESHOLD, RTREE_MAX_TEST_MAPPINGS};
+
+    for (int test_idx = 0; test_idx < 3; test_idx++) {
+        int  num_mappings = test_cases[test_idx];
+        bool expect_tree;
+
+        /* Determine expected tree behavior based on threshold and use_tree setting */
+        /* Tree is created only when: tree_enabled AND num_mappings >= threshold */
+        expect_tree = (use_tree && (num_mappings >= H5D_VIRTUAL_TREE_THRESHOLD));
+
+        if ((file_id = H5Fcreate(RTREE_THRESHOLD_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR;
+
+        if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+            FAIL_STACK_ERROR;
+
+        /* Set the spatial tree property */
+        if (H5Pset_dset_use_spatial_tree(dapl_id, use_tree) < 0)
+            FAIL_STACK_ERROR;
+
+        /* Create virtual dataset with specified number of mappings */
+        if ((vdset_id = create_virtual_dataset(file_id, dapl_id, num_mappings)) < 0)
+            FAIL_STACK_ERROR;
+
+        /* Read the virtual dataset to force initialization */
+        if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+            FAIL_STACK_ERROR;
+
+        /* Verify data pattern (each element should equal its index) */
+        for (int i = 0; i < num_mappings; i++) {
+            if (rbuf[i] != i) {
+                printf("%d mappings: Data mismatch at [%d]: expected %d, got %d\n", num_mappings, i, i,
+                       rbuf[i]);
+                FAIL_STACK_ERROR;
+            }
+        }
+
+        /* Get the dataset object for introspection */
+        if (NULL == (dset = (H5D_t *)H5VL_object(vdset_id)))
+            FAIL_STACK_ERROR;
+
+        if (dset->shared->layout.type != H5D_VIRTUAL)
+            FAIL_STACK_ERROR;
+
+        /* Get the virtual storage structure */
+        storage = &(dset->shared->layout.storage.u.virt);
+
+        /* Verify tree existence matches expectation */
+        if (expect_tree) {
+            if (storage->tree == NULL) {
+                printf("%d mappings: Expected spatial tree to exist but it was NULL\n", num_mappings);
+                FAIL_STACK_ERROR;
+            }
+            if (storage->is_in_tree == NULL) {
+                printf("%d mappings: Expected is_in_tree array to exist but it was NULL\n", num_mappings);
+                FAIL_STACK_ERROR;
+            }
+        }
+        else {
+            if (storage->tree != NULL) {
+                printf("%d mappings: Expected spatial tree to be NULL but it exists\n", num_mappings);
+                FAIL_STACK_ERROR;
+            }
+            if (storage->is_in_tree != NULL) {
+                printf("%d mappings: Expected is_in_tree array to be NULL but it exists\n", num_mappings);
+                FAIL_STACK_ERROR;
+            }
+        }
+
+        /* Cleanup */
+        if (H5Dclose(vdset_id) < 0)
+            FAIL_STACK_ERROR;
+        if (H5Pclose(dapl_id) < 0)
+            FAIL_STACK_ERROR;
+        if (H5Fclose(file_id) < 0)
+            FAIL_STACK_ERROR;
+
+        vdset_id = H5I_INVALID_HID;
+        dapl_id  = H5I_INVALID_HID;
+        file_id  = H5I_INVALID_HID;
+    }
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(vdset_id);
+        H5Pclose(dapl_id);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+}
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the R-tree functionality
@@ -721,9 +870,13 @@ main(void)
     nerrors += test_rtree_search() < 0 ? 1 : 0;
     nerrors += test_rtree_copy() < 0 ? 1 : 0;
 
-    /* Test spatial tree with DCPL property enabled */
+    /* Test spatial tree with DAPL property enabled */
     nerrors += test_rtree_dapl(true) < 0 ? 1 : 0;
     nerrors += test_rtree_dapl(false) < 0 ? 1 : 0;
+
+    /* Test the mapping count threshold */
+    nerrors += test_rtree_threshold(true) < 0 ? 1 : 0;
+    nerrors += test_rtree_threshold(false) < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;

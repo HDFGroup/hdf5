@@ -468,10 +468,10 @@ Simple example programs showing how to use complex number datatypes have been ad
    to iterate through every source dataset's dataspace and check for an intersection
    with the user-selected region for a read/write in the virtual dataset.
 
-   Virtual datasets now use an r-tree (defined in H5RT.c) to perform a spatial search.
-   This allows the dataspaces that intersect the user-selection to be computed with,
-   in most cases, vastly fewer costly intersection checks, improving the speed of VDS
-   read/write operations.
+   Virtual datasets with many mappings now use an r-tree (defined in H5RT.c) to
+   perform a spatial search. This allows the dataspaces that intersect the
+   user-selection to be computed with, in most cases, much fewer intersection checks,
+   improving the speed of VDS read/write operations.
 
    Virtual datasets will use the r-tree by default, since the majority of use cases,
    should see improvements from use of the tree. However, because some workflows may

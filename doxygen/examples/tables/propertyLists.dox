@@ -618,7 +618,7 @@ encoding for object names.</td>
 </tr>
 <tr>
 <td>#H5Pset_dset_use_spatial_tree/#H5Pget_dset_use_spatial_tree</td>
-<td>Sets/gets the flag to use spatial trees when searching VDS mappings</td>
+<td>Sets/gets the flag to use spatial trees when searching many VDS mappings</td>
 </tr>
 </table>
 //! [dapl_table]

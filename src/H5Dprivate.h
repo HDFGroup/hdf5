@@ -125,6 +125,9 @@
 /* Default virtual dataset list size */
 #define H5D_VIRTUAL_DEF_LIST_SIZE 8
 
+/* Threshold for use of a tree for VDS mappings */
+#define H5D_VIRTUAL_TREE_THRESHOLD 50
+
 #ifdef H5D_MODULE
 #define H5D_OBJ_ID(D) (((H5D_obj_create_t *)(D))->dcpl_id)
 #else /* H5D_MODULE */

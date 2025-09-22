@@ -4404,7 +4404,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \ingroup FH5P
 !!
 !! \brief Sets the value of the "use spatial tree" flag which enables spatial tree
-!!        construction and usage for VDS mapping searches.
+!!        construction and usage for large VDS mapping searches.
 !!
 !! \param dapl_id  Target dataset access property list identifier.
 !! \param use_tree Value of the setting.
