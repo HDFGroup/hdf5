@@ -454,6 +454,12 @@ HDF5 release, platforms tested, and known problems in this release.
 # 🪲  Bug Fixes
 
 ## Library
+- Fixed security issue CVE-2025-6857
+
+   An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.
+
+   Fixes GitHub issue #5575
+
 - Check for overflow in decoded heap block addresses
 
    Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in H5HL__fl_deserialize to ensure no overflow can occur.
