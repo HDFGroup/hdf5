@@ -478,7 +478,7 @@ if (${${HDF_PREFIX}_HAVE_COMPLEX_NUMBERS})
   # for example, rather than "complex number of native float".
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tcomplex_be RESULT_CODE 0 -w80 -v tcomplex_be.h5)
-    ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5 ILL_FAIL)
+    ADD_H5_TEST (tcomplex_be_nosupport RESULT_CODE 0 -w80 -v tcomplex_be.h5 WILL_FAIL)
   else ()
     ADD_H5_TEST (tcomplex RESULT_CODE 0 -w80 -v tcomplex.h5)
     ADD_H5_TEST (tcomplex_nosupport RESULT_CODE 0 -w80 -v tcomplex.h5 WILL_FAIL)
