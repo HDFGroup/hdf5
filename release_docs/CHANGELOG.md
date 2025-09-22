@@ -16,11 +16,11 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200) 
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
-* [Bug Fixes](#--bug-fixes)
+* [Bug Fixes](#-bug-fixes)
 * [Support for new platforms and languages](#-support-for-new-platforms-and-languages)
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
 * [Known Problems](#-known-problems)
-  
+
 # 🔆 Executive Summary: HDF5 Version 2.0.0
 
 ## Performance Enhancements:
@@ -42,8 +42,7 @@ HDF5 release, platforms tested, and known problems in this release.
 > 
 > - Transitioned to [CMake-only](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
 > - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
-> - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's
->   optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
+> - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
 
 ## Enhanced Features:
 
@@ -57,7 +56,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Autotools support was removed from HDF5<a name="cmake">
 
-   CMake is now the build system available in HDF5 code.  Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options. 
+   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options. 
 
 # 🚀 New Features & Improvements
 
@@ -318,7 +317,7 @@ HDF5 release, platforms tested, and known problems in this release.
 ```
       <snip>
       H5F_LIBVER_V200 = 5,
-      H5F_LIBVER_LATEST   = 5,
+      H5F_LIBVER_LATEST = 5,
       </snip>
 ```
 - Added support for complex number datatypes<a name="complex">
@@ -337,7 +336,7 @@ HDF5 release, platforms tested, and known problems in this release.
      | `H5T_NATIVE_FLOAT_COMPLEX` | This macro maps to the ID of an HDF5 datatype representing the native C float complex datatype (either "float _Complex" or "_Fcomplex") for the platform. If support for a native float complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
      | `H5T_NATIVE_DOUBLE_COMPLEX` | This macro maps to the ID of an HDF5 datatype representing the native C double complex datatype (either "double _Complex" or "_Dcomplex") for the platform. If support for a native double complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
      | `H5T_NATIVE_LDOUBLE_COMPLEX` | This macro maps to the ID of an HDF5 datatype representing the native C long double complex datatype (either "long double _Complex" or "_Lcomplex") for the platform. If support for a native long double complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
-     | `H5T_COMPLEX_IEEE_F16LE` / `H5T_COMPLEX_IEEE_F16BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 16-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not.  |
+     | `H5T_COMPLEX_IEEE_F16LE` / `H5T_COMPLEX_IEEE_F16BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 16-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
      | `H5T_COMPLEX_IEEE_F32LE` / `H5T_COMPLEX_IEEE_F32BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 32-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
      | `H5T_COMPLEX_IEEE_F64LE` / `H5T_COMPLEX_IEEE_F64BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 64-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
 
@@ -369,7 +368,7 @@ HDF5 release, platforms tested, and known problems in this release.
    | H5T_NATIVE_SCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX |
    | H5T_NATIVE_SHORT   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_LDOUBLE_COMPLEX |
    | H5T_NATIVE_INT <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UINT<-> H5T_NATIVE_LDOUBLE_COMPLEX |
-   | H5T_NATIVE_LONG<-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX |
+   | H5T_NATIVE_LONG <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX |
    | H5T_NATIVE_LLONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_LDOUBLE_COMPLEX |
    | H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_LDOUBLE_COMPLEX |
    | H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_LDOUBLE_COMPLEX |
@@ -480,7 +479,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    This is where most people will expect to find license information. The COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5. The licenses are unchanged.
  
-# 🪲  Bug Fixes
+# 🪲 Bug Fixes
 
 ## Library
 - Check for overflow in decoded heap block addresses
@@ -534,7 +533,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
     `H5Ovisit2` visited only the root group and not all the nested groups.
 
-    This behavior occurred when the fields are not `H5O_INFO_BASIC` or `H5O_INFO_ALL` because an internal function did not obtain the basic information needed by its caller.  This problem is now fixed.
+    This behavior occurred when the fields are not `H5O_INFO_BASIC` or `H5O_INFO_ALL` because an internal function did not obtain the basic information needed by its caller. This problem is now fixed.
 
    Fixed GitHub issue [#4941](https://github.com/HDFGroup/hdf5/issues/4941)
 
@@ -550,8 +549,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Renamed the Callbacks.java file to H5Callbacks.java
 
-  The Callbacks.java file was renamed to H5Callbacks.java to match the file pattern used by doxygen. This change only affects the Java filenames and
- does not change the classname or the package name.
+  The Callbacks.java file was renamed to H5Callbacks.java to match the file pattern used by doxygen. This change only affects the Java filenames and does not change the classname or the package name.
 
 ## Configuration
 
@@ -632,7 +630,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Fixed an allocation in the t_bigio parallel test on 32-bit systems
 
-   A test in t_bigio.c attempts to allocate more than 4 GiB of memory, which will overflow (and wrap) the size_t type on 32-bit systems, creating a very small allocation instead of a very large allocation. The test then segfaults when it accesses memory outside of  the small buffer.
+   A test in t_bigio.c attempts to allocate more than 4 GiB of memory, which will overflow (and wrap) the size_t type on 32-bit systems, creating a very small allocation instead of a very large allocation. The test then segfaults when it accesses memory outside of the small buffer.
 
    The test has been fixed by limiting the buffer to 2 GiB on 32-bit systems.
 
