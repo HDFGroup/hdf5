@@ -2311,6 +2311,12 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, bo
             else if (H5Tequal(dtype, H5T_FLOAT_BFLOAT16LE)) {
                 snprintf(dt_str, *slen, "H5T_FLOAT_BFLOAT16LE");
             }
+            else if (H5Tequal(dtype, H5T_FLOAT_F8E4M3)) {
+                snprintf(dt_str, *slen, "H5T_FLOAT_F8E4M3");
+            }
+            else if (H5Tequal(dtype, H5T_FLOAT_F8E5M2)) {
+                snprintf(dt_str, *slen, "H5T_FLOAT_F8E5M2");
+            }
 #ifdef H5_HAVE__FLOAT16
             else if (H5Tequal(dtype, H5T_NATIVE_FLOAT16)) {
                 snprintf(dt_str, *slen, "H5T_NATIVE_FLOAT16");

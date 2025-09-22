@@ -267,6 +267,8 @@ gen_h5dump_files(void)
     gent_bfloat16();
     gent_bfloat16_be();
 
+    gent_float8();
+
     gent_trefer_attr();
     gent_tattr4_be();
     gent_tno_subset();
