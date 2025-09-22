@@ -26,7 +26,7 @@ on:
         description: 'Build platforms for Maven artifacts'
         type: choice
         required: false
-        default: 'linux-only'
+        default: 'all-platforms'
         options:
           - 'linux-only'
           - 'linux-windows'
