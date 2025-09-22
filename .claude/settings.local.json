@@ -7,7 +7,8 @@
       "Bash(/home/byrn/HDF_Projects/hdf5/develop/.github/scripts/validate-maven-artifacts.sh:*)",
       "Bash(python3:*)",
       "Read(//home/byrn/HDF_Projects/hdf5/build/ci-StdShar-GNUC-Maven-Snapshot/java/src/hdf/hdf5lib/**)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Read(//home/byrn/Downloads/logs_46007782861/**)"
     ],
     "deny": [],
     "ask": []

@@ -98,30 +98,31 @@ jobs:
             artifact_classifier: linux-x86_64
             compiler: gcc
             java_version: '21'
+            enabled: true
           - platform: windows-latest
             preset_suffix: MSVC
             artifact_classifier: windows-x86_64
             compiler: msvc
             java_version: '21'
-            condition: ${{ contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
+            enabled: ${{ contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
           - platform: macos-latest
             preset_suffix: Clang
             artifact_classifier: macos-x86_64
             compiler: clang
             java_version: '21'
-            condition: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+            enabled: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
           - platform: macos-latest
             preset_suffix: Clang
             artifact_classifier: macos-aarch64
             compiler: clang
             java_version: '21'
             arch: arm64
-            condition: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+            enabled: ${{ contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
     runs-on: ${{ matrix.platform }}
-    #if: ${{ needs.detect-changes.outputs.should-test == 'true' && (matrix.condition == '' || matrix.condition) }}
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' && matrix.enabled }}
     outputs:
       artifacts-created: ${{ steps.artifacts-check-unix.outputs.created || steps.artifacts-check-windows.outputs.created }}
-      version-info: ${{ steps.version-info-unix.outputs.version || steps.version-info-windows.outputs.version }}
+      version-info: ${{ steps.version-info.outputs.version }}
     steps:
       - name: Install Dependencies (Linux)
         if: runner.os == 'Linux'
@@ -256,40 +257,52 @@ jobs:
           Set-Location "${{ runner.workspace }}/${{ steps.extract-windows.outputs.BUILD_DIR }}"
           cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
 
-      - name: Extract version information (Unix)
-        if: runner.os != 'Windows'
-        id: version-info-unix
+      - name: Extract version information
+        id: version-info
         shell: bash
         run: |
-          # Find the generated POM file
-          POM_FILE=$(find ${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }} -name "pom.xml" | head -1)
+          # Find the generated POM file across all possible locations
+          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          echo "Looking for POM file in: $BUILD_ROOT"
 
-          if [ -n "$POM_FILE" ]; then
-            VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "Detected version: $VERSION"
-          else
-            echo "version=unknown" >> $GITHUB_OUTPUT
-            echo "WARNING: Could not find POM file"
+          # Try multiple search patterns for cross-platform compatibility
+          POM_FILE=""
+
+          # Search patterns in order of preference
+          if [ -z "$POM_FILE" ]; then
+            POM_FILE=$(find "$BUILD_ROOT" -name "pom.xml" -path "*/java/*" | head -1)
           fi
 
-      - name: Extract version information (Windows)
-        if: runner.os == 'Windows'
-        id: version-info-windows
-        shell: pwsh
-        run: |
-          # Find the generated POM file
-          $POM_FILE = Get-ChildItem -Path "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}" -Name "pom.xml" -Recurse | Select-Object -First 1
+          if [ -z "$POM_FILE" ]; then
+            POM_FILE=$(find "$BUILD_ROOT" -name "pom.xml" | head -1)
+          fi
 
-          if ($POM_FILE) {
-            $FULL_POM_PATH = "${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}/$POM_FILE"
-            $VERSION = (Select-String -Path $FULL_POM_PATH -Pattern '<version>([^<]*)</version>').Matches[0].Groups[1].Value
-            echo "version=$VERSION" >> $env:GITHUB_OUTPUT
-            Write-Host "Detected version: $VERSION"
-          } else {
-            echo "version=unknown" >> $env:GITHUB_OUTPUT
-            Write-Host "WARNING: Could not find POM file"
-          }
+          # Try Maven artifacts directory if build structure differs
+          if [ -z "$POM_FILE" ] && [ -d "${{ runner.workspace }}/maven-artifacts" ]; then
+            POM_FILE=$(find "${{ runner.workspace }}/maven-artifacts" -name "pom.xml" | head -1)
+          fi
+
+          if [ -n "$POM_FILE" ] && [ -f "$POM_FILE" ]; then
+            # Extract version using robust pattern that works across platforms
+            VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g' | tr -d '\r\n')
+
+            # Validate version format
+            if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+              echo "✓ Detected version: $VERSION"
+              echo "✓ POM file: $POM_FILE"
+            else
+              echo "version=unknown" >> $GITHUB_OUTPUT
+              echo "❌ Invalid version format detected: $VERSION"
+              exit 1
+            fi
+          else
+            echo "version=unknown" >> $GITHUB_OUTPUT
+            echo "❌ Could not find POM file"
+            echo "Available files in build root:"
+            find "$BUILD_ROOT" -name "*.xml" -o -name "pom*" 2>/dev/null | head -10 || echo "No XML files found"
+            exit 1
+          fi
 
       - name: Collect Maven artifacts (Unix)
         if: runner.os != 'Windows'
@@ -616,43 +629,16 @@ jobs:
     name: Comment on Pull Request
     runs-on: ubuntu-latest
     needs: [detect-changes, build-maven-artifacts, test-maven-deployment]
-    if: ${{ always() && github.event_name == 'pull_request' && needs.detect-changes.outputs.should-test == 'true' }}
+    if: ${{ github.event_name == 'pull_request' && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.result == 'success' && needs.test-maven-deployment.result == 'success' }}
     steps:
       - name: Generate comment body
         id: comment
         run: |
-          if [ "${{ needs.build-maven-artifacts.result }}" == "success" ] && [ "${{ needs.test-maven-deployment.result }}" == "success" ]; then
-            COMMENT="## ✅ Maven Staging Test Results
+          COMMENT="## ✅ Maven Staging Tests Passed
 
-          **Status**: All tests passed!
+          Maven artifacts successfully generated and validated for version \`${{ needs.build-maven-artifacts.outputs.version-info }}\`.
 
-          **Generated Artifacts**:
-          - Version: \`${{ needs.build-maven-artifacts.outputs.version-info }}\`
-          - Artifacts created: ${{ needs.build-maven-artifacts.outputs.artifacts-created }}
-
-          **Tests Performed**:
-          - ✅ Maven artifact generation
-          - ✅ JAR integrity validation
-          - ✅ POM structure validation
-          - ✅ Deployment simulation (dry run)
-
-          **Ready for**:
-          - Maven deployment to GitHub Packages
-          - Integration with release workflow
-
-          Generated by Maven Staging workflow."
-          else
-            COMMENT="## ❌ Maven Staging Test Results
-
-          **Status**: Tests failed
-
-          **Build Status**: ${{ needs.build-maven-artifacts.result }}
-          **Deployment Test**: ${{ needs.test-maven-deployment.result }}
-
-          Please check the workflow logs for details.
-
-          Generated by Maven Staging workflow."
-          fi
+          Ready for Maven deployment to GitHub Packages."
 
           echo "comment<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMENT" >> $GITHUB_OUTPUT
@@ -666,8 +652,10 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${{ steps.comment.outputs.comment }}`
+              body: process.env.COMMENT_BODY
             })
+        env:
+          COMMENT_BODY: ${{ steps.comment.outputs.comment }}
 
   cleanup:
     name: Cleanup Staging Artifacts
