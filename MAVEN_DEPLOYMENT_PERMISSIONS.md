@@ -113,8 +113,21 @@ The workflows are currently configured with `dry_run: true` to test permissions 
 3. **Fix Permission Issues**: Based on debug output and error messages
 4. **Enable Live Deployment**: Set `dry_run: false` after successful testing
 
+## Recent Updates (September 22, 2025)
+
+### Artifact Naming Fix
+- **Issue**: Deploy workflow was only finding Linux artifacts due to naming mismatch
+- **Fix**: Updated artifact download names in `maven-deploy.yml` to match staging workflow output
+- **Impact**: All platform artifacts (Linux, Windows, macOS x86_64, macOS aarch64) now properly downloaded
+
+### Workflow Integration
+- **Added**: Multi-platform artifact generation in release workflow
+- **Enhanced**: Debug output and error handling for troubleshooting permission issues
+- **Implemented**: Dry run mode for safe permission testing
+
 ## Files Modified
 
-- `.github/workflows/maven-deploy.yml`: Added debug output and error handling
+- `.github/workflows/maven-deploy.yml`: Fixed artifact naming, added debug output and error handling
 - `.github/workflows/release.yml`: Enabled dry run mode for testing
-- `maven-staging.yml`: Made reusable for release workflow integration
+- `.github/workflows/maven-staging.yml`: Made reusable for release workflow integration
+- `MAVEN_DEPLOYMENT_FIXES_SUMMARY_2025-09-22.md`: Complete technical summary of all fixes
