@@ -155,7 +155,7 @@ gen_h5dump_files(void)
     gent_group();
     gent_attribute();
     gent_softlink();
-    nerrors += (gent_softlink2() < 0 ? 1 : 0);
+    nerrors += (gent_softlink2(false) < 0 ? 1 : 0);
     gent_dataset();
     gent_hardlink();
     gent_extlink();
@@ -171,7 +171,7 @@ gen_h5dump_files(void)
     gent_str2();
     gent_enum();
     gent_objref();
-    gent_datareg();
+    gent_datareg(false);
     gent_attrreg();
     gent_nestcomp();
     gent_opaque();
@@ -342,7 +342,25 @@ gen_h5repack_files(void)
         nerrors += (generate_f32le(external) < 0 ? 1 : 0);
     } /* end for external data storage or not */
 
+    Test_Extlink_Copy();
+
+    gent_group_creation_order();
+
+    gent_extlink();
+    gent_extlinks();
+    gent_softlink2(true);
+    gent_attrreg();
+    gent_datareg(true);
+    gent_family();
+
+    nerrors += (gent_onion_1d_dset() < 0 ? 1 : 0);
+    nerrors += (gent_onion_create_delete_objects() < 0 ? 1 : 0);
+    nerrors += (gent_onion_dset_extension() < 0 ? 1 : 0);
+
     nerrors += (make_h5repack_testfiles() < 0 ? 1 : 0);
+    nerrors += (gen_filespaces() < 0 ? 1 : 0);
+
+    nerrors += (test_attributes(H5DIFF_FILE5, 0) < 0 ? 1 : 0);
     return nerrors;
 }
 
@@ -405,12 +423,12 @@ gen_h5ls_files(void)
     gent_group();
     gent_dataset();
     gent_softlink();
-    gent_softlink2();
+    gent_softlink2(false);
     gent_str();
 
     gent_vldatatypes();
     gent_compound_dt();
-    gent_datareg();
+    gent_datareg(false);
     gent_empty();
     gent_hardlink();
     gent_loop();
