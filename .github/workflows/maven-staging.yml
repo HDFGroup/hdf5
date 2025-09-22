@@ -10,6 +10,23 @@ on:
       - 'CMakePresets.json'
       - '**/CMakeLists.txt'
       - 'java/src/hdf/hdf5lib/pom.xml.in'
+  workflow_call:
+    inputs:
+      test_maven_deployment:
+        description: 'Test Maven deployment to staging'
+        type: boolean
+        required: false
+        default: true
+      use_snapshot_version:
+        description: 'Use snapshot version (-SNAPSHOT suffix)'
+        type: boolean
+        required: false
+        default: true
+      platforms:
+        description: 'Build platforms for Maven artifacts'
+        type: string
+        required: false
+        default: 'all-platforms'
   workflow_dispatch:
     inputs:
       test_maven_deployment:
