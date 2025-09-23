@@ -138,35 +138,24 @@ static int
 H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
 #endif
 {
-    const H5RT_leaf_t *l1        = NULL;
-    const H5RT_leaf_t *l2        = NULL;
-    int                sort_dim  = 0;
-    int                ret_value = 0;
+    const H5RT_leaf_t *l1       = (const H5RT_leaf_t *)leaf1;
+    const H5RT_leaf_t *l2       = (const H5RT_leaf_t *)leaf2;
+    int                sort_dim = 0;
 
     assert(leaf1);
     assert(leaf2);
     assert(dim);
 
-    l1       = (const H5RT_leaf_t *)leaf1;
-    l2       = (const H5RT_leaf_t *)leaf2;
     sort_dim = *(int *)dim;
-
-    FUNC_ENTER_PACKAGE_NOERR
 
     assert(sort_dim <= l1->rank - 1);
 
     /* Compare based on the midpoint of the specified dimension */
-    if (l1->mid[sort_dim] < l2->mid[sort_dim]) {
-        ret_value = -1;
-    }
-    else if (l1->mid[sort_dim] > l2->mid[sort_dim]) {
-        ret_value = 1;
-    }
-    else {
-        ret_value = 0;
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    if (l1->mid[sort_dim] < l2->mid[sort_dim])
+        return -1;
+    if (l1->mid[sort_dim] > l2->mid[sort_dim])
+        return 1;
+    return 0;
 }
 
 static herr_t
