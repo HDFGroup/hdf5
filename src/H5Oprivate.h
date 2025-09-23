@@ -605,8 +605,11 @@ typedef struct H5O_storage_virtual_t {
         *source_dset_hash_table; /* Hash table of virtual entries sorted by source dataset name. Only the
                                     first occurrence of each source dataset name is stored. */
     H5RT_t *tree;
-    bool   *is_in_tree; /* List of the indices in 'list' that are stored in tree for quick access
-                         * Some mappings cannot be stored in the tree and must be searched manually */
+    size_t  not_in_tree_nused;  /* Number of entries in not_in_tree_list */
+    size_t  not_in_tree_nalloc; /* Allocated size of not_in_tree_list */
+    H5O_storage_virtual_ent_t *
+        *not_in_tree_list; /* Array of POINTERS to mappings NOT in tree for quick access
+                            * Some mappings cannot be stored in the tree and must be searched manually */
 } H5O_storage_virtual_t;
 
 typedef struct H5O_storage_t {

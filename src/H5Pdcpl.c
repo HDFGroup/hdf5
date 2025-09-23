@@ -89,7 +89,7 @@
     {                                                                                                        \
         {HADDR_UNDEF, 0}, 0, NULL, 0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                       \
                                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                      \
-            H5D_VDS_ERROR, HSIZE_UNDEF, -1, -1, false, NULL, NULL, NULL, NULL                                \
+            H5D_VDS_ERROR, HSIZE_UNDEF, -1, -1, false, NULL, NULL, NULL, 0, 0, NULL,                         \
     }
 #define H5D_DEF_STORAGE_COMPACT                                                                              \
     {                                                                                                        \
@@ -2119,7 +2119,6 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
     /* Expand list if necessary */
     if (virtual_layout.storage.u.virt.list_nused == virtual_layout.storage.u.virt.list_nalloc) {
         H5O_storage_virtual_ent_t *x; /* Pointer to the new list */
-        bool                      *y; /* Pointer to the new is_in_tree list */
         size_t    new_alloc = MAX(H5D_VIRTUAL_DEF_LIST_SIZE, virtual_layout.storage.u.virt.list_nalloc * 2);
         ptrdiff_t buf_diff;
 
@@ -2130,13 +2129,6 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
         buf_diff                                  = (char *)x - (char *)virtual_layout.storage.u.virt.list;
         virtual_layout.storage.u.virt.list        = x;
         virtual_layout.storage.u.virt.list_nalloc = new_alloc;
-
-        /* Expand size of is_in_tree list */
-        if (NULL ==
-            (y = (bool *)H5MM_realloc(virtual_layout.storage.u.virt.is_in_tree, new_alloc * sizeof(bool))))
-            HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL,
-                        "can't reallocate virtual dataset mapping is_in_tree list");
-        virtual_layout.storage.u.virt.is_in_tree = y;
 
         /* Adjust pointers in the hash tables in case realloc moved the buffers, and hence all the elements
          * and hash handles in the hash tables */

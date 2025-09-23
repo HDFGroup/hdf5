@@ -629,8 +629,8 @@ test_rtree_dapl(bool use_tree)
             puts("Expected spatial tree to exist but it was NULL");
             FAIL_STACK_ERROR;
         }
-        if (storage->is_in_tree == NULL) {
-            puts("Expected is_in_tree array to exist but it was NULL");
+        if (storage->not_in_tree_nused > 0 && storage->not_in_tree_list == NULL) {
+            puts("Expected not_in_tree_list array to exist but it was NULL");
             FAIL_STACK_ERROR;
         }
     }
@@ -639,8 +639,8 @@ test_rtree_dapl(bool use_tree)
             puts("Expected spatial tree to be NULL but it exists");
             FAIL_STACK_ERROR;
         }
-        if (storage->is_in_tree != NULL) {
-            puts("Expected is_in_tree array to be NULL but it exists");
+        if (storage->not_in_tree_list != NULL || storage->not_in_tree_nused > 0) {
+            puts("Expected not_in_tree_list to be empty but it exists");
             FAIL_STACK_ERROR;
         }
     }
@@ -683,18 +683,21 @@ test_rtree_dapl(bool use_tree)
             puts("Expected spatial tree to exist but it was NULL");
             FAIL_STACK_ERROR;
         }
-        if (storage->is_in_tree == NULL) {
-            puts("Expected is_in_tree array to exist but it was NULL");
+        /* not_in_tree_list can be NULL if all mappings fit in tree - this is OK */
+        /* Just verify consistency: if nused > 0, then list should exist */
+        if (storage->not_in_tree_nused > 0 && storage->not_in_tree_list == NULL) {
+            puts("Expected not_in_tree_list array to exist but it was NULL");
             FAIL_STACK_ERROR;
         }
+        /* When tree is enabled, we just verify tree exists - not_in_tree_list may or may not exist */
     }
     else {
         if (storage->tree != NULL) {
             puts("Expected spatial tree to be NULL but it exists");
             FAIL_STACK_ERROR;
         }
-        if (storage->is_in_tree != NULL) {
-            puts("Expected is_in_tree array to be NULL but it exists");
+        if (storage->not_in_tree_list != NULL || storage->not_in_tree_nused > 0) {
+            puts("Expected not_in_tree_list to be empty but it exists");
             FAIL_STACK_ERROR;
         }
     }
@@ -803,8 +806,11 @@ test_rtree_threshold(bool use_tree)
                 printf("%d mappings: Expected spatial tree to exist but it was NULL\n", num_mappings);
                 FAIL_STACK_ERROR;
             }
-            if (storage->is_in_tree == NULL) {
-                printf("%d mappings: Expected is_in_tree array to exist but it was NULL\n", num_mappings);
+            /* not_in_tree_list can be NULL if all mappings fit in tree - this is OK */
+            /* Just verify consistency: if nused > 0, then list should exist */
+            if (storage->not_in_tree_nused > 0 && storage->not_in_tree_list == NULL) {
+                printf("%d mappings: Expected not_in_tree_list array to exist but it was NULL\n",
+                       num_mappings);
                 FAIL_STACK_ERROR;
             }
         }
@@ -813,8 +819,9 @@ test_rtree_threshold(bool use_tree)
                 printf("%d mappings: Expected spatial tree to be NULL but it exists\n", num_mappings);
                 FAIL_STACK_ERROR;
             }
-            if (storage->is_in_tree != NULL) {
-                printf("%d mappings: Expected is_in_tree array to be NULL but it exists\n", num_mappings);
+            if (storage->not_in_tree_list != NULL) {
+                printf("%d mappings: Expected not_in_tree_list array to be NULL but it exists\n",
+                       num_mappings);
                 FAIL_STACK_ERROR;
             }
         }

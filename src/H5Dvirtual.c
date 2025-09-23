@@ -157,7 +157,9 @@ static herr_t H5D__virtual_write_one(H5D_dset_io_info_t            *dset_info,
 /* R-tree helper functions */
 static herr_t H5D__virtual_build_tree(H5O_storage_virtual_t *virt, int rank);
 static herr_t H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings,
-                                      H5RT_leaf_t **leaves_out, bool **is_in_tree_out, size_t *leaf_count);
+                                      H5RT_leaf_t **leaves_out, H5O_storage_virtual_ent_t ***not_in_tree_out,
+                                      size_t *leaf_count, size_t *not_in_tree_count);
+static herr_t H5D__should_build_tree(H5O_storage_virtual_t *storage, hid_t dapl_id, bool *should_build_tree);
 /*********************/
 /* Package Variables */
 /*********************/
@@ -964,15 +966,15 @@ done:
 herr_t
 H5D__virtual_copy_layout(H5O_layout_t *layout)
 {
-    H5O_storage_virtual_ent_t *orig_list = NULL;
-    H5O_storage_virtual_t     *virt      = &layout->storage.u.virt;
-    hid_t                      orig_source_fapl;
-    hid_t                      orig_source_dapl;
-    H5P_genplist_t            *plist;
-    size_t                     i;
-    herr_t                     ret_value   = SUCCEED;
-    bool                      *new_in_tree = NULL;
-    H5RT_t                    *new_tree    = NULL;
+    H5O_storage_virtual_ent_t  *orig_list             = NULL;
+    H5O_storage_virtual_ent_t **orig_not_in_tree_list = NULL;
+    H5O_storage_virtual_t      *virt                  = &layout->storage.u.virt;
+    hid_t                       orig_source_fapl;
+    hid_t                       orig_source_dapl;
+    H5P_genplist_t             *plist;
+    size_t                      i;
+    herr_t                      ret_value = SUCCEED;
+    H5RT_t                     *new_tree  = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -987,12 +989,14 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
 
     /* Save original entry list and top-level property lists and reset in layout
      * so the originals aren't closed on error */
-    orig_source_fapl  = virt->source_fapl;
-    virt->source_fapl = -1;
-    orig_source_dapl  = virt->source_dapl;
-    virt->source_dapl = -1;
-    orig_list         = virt->list;
-    virt->list        = NULL;
+    orig_source_fapl       = virt->source_fapl;
+    virt->source_fapl      = -1;
+    orig_source_dapl       = virt->source_dapl;
+    virt->source_dapl      = -1;
+    orig_list              = virt->list;
+    virt->list             = NULL;
+    orig_not_in_tree_list  = virt->not_in_tree_list;
+    virt->not_in_tree_list = NULL;
 
     /* Copy entry list */
     if (virt->list_nused > 0) {
@@ -1111,16 +1115,29 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy spatial tree");
         virt->tree = new_tree;
 
-        if ((new_in_tree = H5MM_calloc(virt->list_nalloc * sizeof(bool))) == NULL)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate in-tree array");
+        /* Copy not_in_tree_list (pointer array) */
+        if (virt->not_in_tree_nused > 0) {
+            assert(orig_not_in_tree_list);
 
-        /* Copy is_in_tree array */
-        memcpy(new_in_tree, virt->is_in_tree, virt->list_nused * sizeof(bool));
-        virt->is_in_tree = new_in_tree;
+            /* Allocate new pointer array */
+            if ((virt->not_in_tree_list = (H5O_storage_virtual_ent_t **)H5MM_calloc(
+                     virt->not_in_tree_nalloc * sizeof(H5O_storage_virtual_ent_t *))) == NULL)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                            "unable to allocate not_in_tree_list pointer array");
+
+            /* Point to corresponding entries in the new list */
+            for (i = 0; i < virt->not_in_tree_nused; i++) {
+                ptrdiff_t offset = orig_not_in_tree_list[i] - orig_list;  /* Calculate original offset */
+                assert(offset >= 0 && (size_t)offset < virt->list_nused); /* Validate offset */
+                virt->not_in_tree_list[i] = &virt->list[offset];          /* Point to new list entry */
+            }
+        }
     }
     else {
-        virt->tree       = NULL;
-        virt->is_in_tree = NULL;
+        virt->tree               = NULL;
+        virt->not_in_tree_list   = NULL;
+        virt->not_in_tree_nused  = 0;
+        virt->not_in_tree_nalloc = 0;
     }
 
     /* Copy property lists */
@@ -1223,9 +1240,12 @@ H5D__virtual_free_layout_mappings(H5O_storage_virtual_t *virt)
         virt->tree = NULL;
     }
 
-    /* Destroy the list tracking which indices are in spatial tree */
-    if (virt->is_in_tree) {
-        virt->is_in_tree = H5MM_xfree(virt->is_in_tree);
+    /* Destroy the pointer array tracking which mappings are not in spatial tree */
+    if (virt->not_in_tree_list) {
+        /* Only free the pointer array itself - the entries are owned by the main list */
+        virt->not_in_tree_list   = H5MM_xfree(virt->not_in_tree_list);
+        virt->not_in_tree_nused  = 0;
+        virt->not_in_tree_nalloc = 0;
     }
 
     /* Note the lack of a done: label.  This is because there are no HGOTO_ERROR
@@ -3103,11 +3123,10 @@ static herr_t
 H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
                     H5S_t *mem_space, hsize_t *tot_nelmts)
 {
-    const H5D_t       *dset           = dset_info->dset; /* Local pointer to dataset info */
-    herr_t             ret_value      = SUCCEED;         /* Return value */
-    bool               tree_enabled   = false;
-    H5P_genplist_t    *dapl_plist     = NULL; /* Dataset access property list */
-    H5RT_result_set_t *search_results = NULL; /* Search results from R-tree */
+    const H5D_t       *dset              = dset_info->dset; /* Local pointer to dataset info */
+    herr_t             ret_value         = SUCCEED;         /* Return value */
+    bool               should_build_tree = true;
+    H5RT_result_set_t *search_results    = NULL; /* Search results from R-tree */
 
     FUNC_ENTER_PACKAGE
 
@@ -3125,29 +3144,21 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     /* Initialize tot_nelmts */
     *tot_nelmts = 0;
 
-    /* If r-tree use is enabled and no tree currently exists, build the tree */
-    if (!storage->tree && storage->list_nused >= H5D_VIRTUAL_TREE_THRESHOLD) {
+    if (H5D__should_build_tree(storage, dset->shared->dapl_id, &should_build_tree) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't determine if should build VDS tree");
+
+    if (should_build_tree) {
         int rank = 0;
-        assert(!storage->is_in_tree);
 
-        /* Check that building the tree is enabled */
-        if (NULL == (dapl_plist = (H5P_genplist_t *)H5I_object(dset->shared->dapl_id)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
+        /* Get the rank of the dataset */
+        if ((rank = H5S_GET_EXTENT_NDIMS(dset_info->dset->shared->space)) < 0 || rank >= H5S_MAX_RANK)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset rank");
 
-        if (H5P_get(dapl_plist, H5D_ACS_USE_TREE_NAME, &tree_enabled) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get virtual use tree flag");
+        if (rank == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "virtual dataset has no rank");
 
-        if (tree_enabled) {
-            /* Get the rank of the dataset */
-            if ((rank = H5S_GET_EXTENT_NDIMS(dset_info->dset->shared->space)) < 0 || rank >= H5S_MAX_RANK)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset rank");
-
-            if (rank == 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "virtual dataset has no rank");
-
-            if (H5D__virtual_build_tree(storage, rank) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
-        }
+        if (H5D__virtual_build_tree(storage, rank) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
     }
 
     /* Iterate over the mappings */
@@ -3180,19 +3191,21 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
         if (H5RT_free_results(search_results) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
         search_results = NULL;
+
+        /* Iterate over the mappings that are not stored in the tree */
+        for (size_t i = 0; i < storage->not_in_tree_nused; i++) {
+            if (H5D__virtual_pre_io_process_mapping(dset_info, file_space, mem_space, tot_nelmts,
+                                                    storage->not_in_tree_list[i]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
+        }
     }
-
-    /* Iterate over the mappings that are not stored in the tree */
-    /* Index of each boolean in the 'is in tree' list = index of the mapping it describes in the mapping list
-     */
-    for (size_t i = 0; i < storage->list_nused; i++) {
-        /* Skip any mappings that would have been searched by the tree */
-        if (storage->is_in_tree && storage->is_in_tree[i])
-            continue;
-
-        if (H5D__virtual_pre_io_process_mapping(dset_info, file_space, mem_space, tot_nelmts,
-                                                &storage->list[i]) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
+    else {
+        /* No tree - iterate over all mappings directly */
+        for (size_t i = 0; i < storage->list_nused; i++) {
+            if (H5D__virtual_pre_io_process_mapping(dset_info, file_space, mem_space, tot_nelmts,
+                                                    &storage->list[i]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
+        }
     }
 
 done:
@@ -3845,10 +3858,10 @@ done:
  *              num_mappings: Number of mappings in the array
  *              leaves_out: Pointer to array of leaves, one per mapping that should be inserted
  *                          Allocated on success and must be freed by caller.
- *              is_in_tree_out: Pointer to boolean array, one per mapping, indicating
- *                              whether the mapping is in the list of leaves.
- *                              Allocated on success and must be freed by caller.
+ *              not_in_tree_out: Pointer to array of pointers to mappings NOT in tree.
+ *                               Allocated on success and must be freed by caller.
  *              leaf_count: Pointer to number of leaves allocated in leaves_out.
+ *              not_in_tree_count: Pointer to number of entries in not_in_tree_out.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3856,19 +3869,21 @@ done:
  */
 static herr_t
 H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings, H5RT_leaf_t **leaves_out,
-                        bool **is_in_tree_out, size_t *leaf_count)
+                        H5O_storage_virtual_ent_t ***not_in_tree_out, size_t *leaf_count,
+                        size_t *not_in_tree_count)
 {
     herr_t ret_value = SUCCEED;
 
-    H5RT_leaf_t *leaves_temp = NULL;
-    bool        *is_in_tree  = NULL;
+    H5RT_leaf_t                *leaves_temp = NULL;
+    H5O_storage_virtual_ent_t **not_in_tree = NULL;
 
     bool should_insert_space = false;
 
-    H5O_storage_virtual_ent_t *curr_mapping    = NULL;
-    H5RT_leaf_t               *curr_leaf       = NULL;
-    size_t                     curr_leaf_count = 0;
-    H5S_t                     *curr_space      = NULL;
+    H5O_storage_virtual_ent_t *curr_mapping        = NULL;
+    H5RT_leaf_t               *curr_leaf           = NULL;
+    size_t                     curr_leaf_count     = 0;
+    size_t                     curr_not_tree_count = 0;
+    H5S_t                     *curr_space          = NULL;
 
     int rank = 0;
 
@@ -3878,7 +3893,8 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
     assert(num_mappings > 0);
     assert(leaf_count);
     assert(leaves_out);
-    assert(is_in_tree_out);
+    assert(not_in_tree_out);
+    assert(not_in_tree_count);
 
     /* Get rank from the first mapping's virtual selection */
     if ((curr_space = mappings[0].source_dset.virtual_select) == NULL)
@@ -3890,22 +3906,25 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
     if (rank == 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "mapping has zero-dimensional space");
 
-    /* Allocate array of leaf structures */
+    /* Allocate array of leaf structures and not-in-tree mappings */
     if ((leaves_temp = (H5RT_leaf_t *)calloc(num_mappings, sizeof(H5RT_leaf_t))) == NULL)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate leaves array");
 
-    if ((is_in_tree = (bool *)H5MM_calloc(num_mappings * sizeof(bool))) == NULL)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate is_in_tree array");
+    if ((not_in_tree = (H5O_storage_virtual_ent_t **)H5MM_calloc(
+             num_mappings * sizeof(H5O_storage_virtual_ent_t *))) == NULL)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate not_in_tree array");
 
     for (size_t i = 0; i < num_mappings; i++) {
         curr_mapping = &mappings[i];
 
         H5D_RTREE_SHOULD_INSERT(curr_mapping, should_insert_space);
 
-        if (!should_insert_space)
+        if (!should_insert_space) {
+            /* Store pointer to mapping in not_in_tree array */
+            not_in_tree[curr_not_tree_count] = curr_mapping;
+            curr_not_tree_count++;
             continue;
-
-        is_in_tree[i] = true;
+        }
 
         /* Initialize leaf with dynamic coordinate allocation */
         curr_leaf = &leaves_temp[curr_leaf_count];
@@ -3930,9 +3949,10 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
         curr_leaf_count++;
     }
 
-    *leaves_out     = leaves_temp;
-    *leaf_count     = curr_leaf_count;
-    *is_in_tree_out = is_in_tree;
+    *leaves_out        = leaves_temp;
+    *leaf_count        = curr_leaf_count;
+    *not_in_tree_out   = not_in_tree;
+    *not_in_tree_count = curr_not_tree_count;
 done:
     if (ret_value < 0) {
         if (leaves_temp) {
@@ -3942,25 +3962,24 @@ done:
             }
             free(leaves_temp);
         }
-        if (is_in_tree)
-            H5MM_free(is_in_tree);
+        if (not_in_tree)
+            H5MM_free(not_in_tree);
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-// attempt to build a tree and a boolean list and store them on the storage object
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_build_tree
  *
  * Purpose:     Build a spatial tree of mapping indices, and a list of
- *              which mapping indices are in the tree, and store them on
+ *              mappings not in the tree, and store them on
  *              the provided virtual layout
  *
  * Parameters:  virt: The virtual layout with the mapping to build the
  *              tree from. The tree will be stored at virt->tree,
- *              and the list of stored indices will be stored at
- *              virt->is_in_tree.
+ *              and the list of non-tree mappings will be stored at
+ *              virt->not_in_tree_list.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3972,40 +3991,55 @@ H5D__virtual_build_tree(H5O_storage_virtual_t *virt, int rank)
     H5O_storage_virtual_ent_t *mappings     = virt->list;
     size_t                     num_mappings = virt->list_nused;
 
-    H5RT_leaf_t *leaves     = NULL;
-    size_t       num_leaves = 0;
-    bool        *is_in_tree = NULL;
-    herr_t       ret_value  = SUCCEED;
+    H5RT_leaf_t                *leaves               = NULL;
+    size_t                      num_leaves           = 0;
+    H5O_storage_virtual_ent_t **not_in_tree_mappings = NULL;
+    size_t                      not_in_tree_count    = 0;
+    herr_t                      ret_value            = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     assert(virt);
 
-    if (H5D__mappings_to_leaves(mappings, num_mappings, &leaves, &is_in_tree, &num_leaves) < 0)
+    if (H5D__mappings_to_leaves(mappings, num_mappings, &leaves, &not_in_tree_mappings, &num_leaves,
+                                &not_in_tree_count) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get leaves from mappings");
 
     if (num_leaves == 0) {
-        /* Don't build a tree, release allocated memory */
+        /* No tree to build */
+        virt->tree = NULL;
         if (leaves) {
             free(leaves);
             leaves = NULL;
         }
-        if (is_in_tree) {
-            H5MM_free(is_in_tree);
-            is_in_tree = NULL;
-        }
-
-        virt->tree       = NULL;
-        virt->is_in_tree = NULL;
     }
     else {
-        virt->is_in_tree = is_in_tree;
-
         /* Build the tree */
         if ((virt->tree = H5RT_create(rank, leaves, num_leaves)) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create mapping tree");
         /* Tree takes ownership of leaves array and coordinate arrays */
         leaves = NULL;
+    }
+
+    /* Store not-in-tree mappings (regardless of whether tree was built) */
+    if (not_in_tree_count > 0) {
+        virt->not_in_tree_list   = not_in_tree_mappings;
+        virt->not_in_tree_nused  = not_in_tree_count;
+        virt->not_in_tree_nalloc = not_in_tree_count; /* Currently allocated exactly what we need */
+        not_in_tree_mappings     = NULL;              /* Transfer ownership to virt */
+    }
+    else {
+        /* Clean up any existing allocation */
+        if (virt->not_in_tree_list) {
+            H5MM_free(virt->not_in_tree_list);
+        }
+        virt->not_in_tree_list   = NULL;
+        virt->not_in_tree_nused  = 0;
+        virt->not_in_tree_nalloc = 0;
+        if (not_in_tree_mappings) {
+            H5MM_free(not_in_tree_mappings);
+            not_in_tree_mappings = NULL;
+        }
     }
 
 done:
@@ -4017,9 +4051,69 @@ done:
             }
             free(leaves);
         }
-        if (is_in_tree)
-            H5MM_free(is_in_tree);
+        if (not_in_tree_mappings)
+            H5MM_free(not_in_tree_mappings);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__should_build_tree
+ *
+ * Purpose:     Determine whether to build a spatial tree of mapping indice
+ *              for the provided dataset layout
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__should_build_tree(H5O_storage_virtual_t *storage, hid_t dapl_id, bool *should_build_tree)
+{
+    herr_t          ret_value    = SUCCEED;
+    H5P_genplist_t *dapl_plist   = NULL;
+    bool            tree_enabled = false;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(storage);
+    assert(should_build_tree);
+    assert(dapl_id != H5I_INVALID_HID);
+
+    /* Don't build if already exists */
+    if (storage->tree) {
+        *should_build_tree = false;
+        HGOTO_DONE(SUCCEED);
+    }
+
+    /* Don't build if too few mappings */
+    if (storage->list_nused < H5D_VIRTUAL_TREE_THRESHOLD) {
+        *should_build_tree = false;
+        HGOTO_DONE(SUCCEED);
+    }
+
+    /* Don't build if DAPL property has disabled the tree */
+    if (*should_build_tree) {
+        if (NULL == (dapl_plist = (H5P_genplist_t *)H5I_object(dapl_id)))
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
+
+        if (H5P_get(dapl_plist, H5D_ACS_USE_TREE_NAME, &tree_enabled) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get virtual use tree flag");
+
+        if (!tree_enabled) {
+            *should_build_tree = false;
+            HGOTO_DONE(SUCCEED);
+        }
+    }
+
+    /* Don't build tree if we previously assembled ONLY a not_in_tree_list
+     * - this indicates that all mappings are not in the tree */
+    if (*should_build_tree && storage->not_in_tree_list && !storage->tree) {
+        *should_build_tree = false;
+        HGOTO_DONE(SUCCEED);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
