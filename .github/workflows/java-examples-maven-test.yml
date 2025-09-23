@@ -93,9 +93,16 @@ jobs:
               example_name=$(basename "$java_file" .java)
               echo "--- Testing $example_name ---"
 
-              # Build classpath
-              HDF5_JAR=$(find ../../../maven-artifacts -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
-              DEP_JARS=$(find ../../../maven-artifacts -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
+              # Build classpath (use platform-specific artifacts)
+              MAVEN_ARTIFACTS_DIR="../../../maven-artifacts"
+              HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
+              DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*" | head -3)
+
+              if [ -z "$HDF5_JAR" ]; then
+                echo "❌ No HDF5 JAR found"
+                find "$MAVEN_ARTIFACTS_DIR" -name "*.jar" | head -10
+                continue
+              fi
 
               CLASSPATH="$HDF5_JAR"
               for dep_jar in $DEP_JARS; do
@@ -334,9 +341,16 @@ jobs:
               example_name=$(basename "$java_file" .java)
               echo "--- Testing $example_name ---"
 
-              # Build classpath
-              HDF5_JAR=$(find ../../../maven-artifacts -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
-              DEP_JARS=$(find ../../../maven-artifacts -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
+              # Build classpath (use platform-specific artifacts)
+              MAVEN_ARTIFACTS_DIR="../../../maven-artifacts"
+              HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
+              DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*" | head -3)
+
+              if [ -z "$HDF5_JAR" ]; then
+                echo "❌ No HDF5 JAR found"
+                find "$MAVEN_ARTIFACTS_DIR" -name "*.jar" | head -10
+                continue
+              fi
 
               CLASSPATH="$HDF5_JAR"
               for dep_jar in $DEP_JARS; do

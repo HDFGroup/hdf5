@@ -1194,19 +1194,23 @@ jobs:
           # Test one representative example from each category
           cd HDF5Examples/JAVA
 
-          # Find HDF5 JAR files (not dependencies like slf4j)
-          HDF5_JAR=$(find ../../maven-artifacts -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
+          # Get absolute path to maven artifacts
+          MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/linux)"
+          echo "Maven artifacts directory: $MAVEN_ARTIFACTS_DIR"
+
+          # Find HDF5 JAR files (not dependencies like slf4j) - use only Linux artifacts for testing
+          HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
           if [ -z "$HDF5_JAR" ]; then
             echo "❌ No HDF5 JAR files found for testing"
             echo "Available JAR files:"
-            find ../../maven-artifacts -name "*.jar"
+            find "$MAVEN_ARTIFACTS_DIR" -name "*.jar"
             exit 1
           fi
 
           echo "Using HDF5 JAR file: $HDF5_JAR"
 
-          # Also find any dependency JARs
-          DEP_JARS=$(find ../../maven-artifacts -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
+          # Also find any dependency JARs (from Linux artifacts only to avoid duplicates)
+          DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
           if [ -n "$DEP_JARS" ]; then
             echo "Found dependency JARs:"
             echo "$DEP_JARS"
@@ -1228,11 +1232,11 @@ jobs:
                 example_name=$(basename "$EXAMPLE_FILE" .java)
                 echo "--- Testing $category/$example_name ---"
 
-                # Build classpath with HDF5 JAR and dependencies (absolute paths)
-                CLASSPATH="$(realpath "$HDF5_JAR")"
+                # Build classpath with HDF5 JAR and dependencies (already absolute paths)
+                CLASSPATH="$HDF5_JAR"
                 if [ -n "$DEP_JARS" ]; then
                   for dep_jar in $DEP_JARS; do
-                    CLASSPATH="$CLASSPATH:$(realpath "$dep_jar")"
+                    CLASSPATH="$CLASSPATH:$dep_jar"
                   done
                 fi
 
