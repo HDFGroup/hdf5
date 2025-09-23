@@ -52,6 +52,15 @@ struct H5RT_t {
     size_t       nleaves;
 };
 
-H5_DLL bool H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[]);
+/* Inline function to check if two hyper-rectangles intersect */
+static inline bool
+H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[])
+{
+    for (int i = 0; i < rank; i++)
+        if (min1[i] > max2[i] || min2[i] > max1[i])
+            return false; /* No overlap in i-th dimension */
+
+    return true;
+}
 
 #endif /* H5RTpkg_H */

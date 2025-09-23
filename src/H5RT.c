@@ -125,18 +125,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RT_leaf_cleanup() */
 
-bool
-H5RT__leaves_intersect(int rank, hsize_t min1[], hsize_t max1[], hsize_t min2[], hsize_t max2[])
-{
-    FUNC_ENTER_PACKAGE_NOERR
-
-    for (int i = 0; i < rank; i++)
-        if (min1[i] > max2[i] || min2[i] > max1[i])
-            return false; /* No overlap in i-th dimension */
-
-    FUNC_LEAVE_NOAPI(true)
-} /* end intersect() */
-
 /* Returns
  * -1 if leaf1 < leaf2
  * 0 if leaf1 == leaf2
