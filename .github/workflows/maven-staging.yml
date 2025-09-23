@@ -1359,11 +1359,28 @@ jobs:
                 if ($LASTEXITCODE -eq 0) {
                   Write-Host "✓ Compilation successful for $category/$example_name"
 
-                  # Test execution
+                  # Test execution (with PowerShell timeout)
                   $output_file = "../../../$example_name.out"
-                  $execResult = & timeout 10 java -cp ".;$CLASSPATH" $example_name > $output_file 2>&1
 
-                  if ($LASTEXITCODE -eq 0) {
+                  # Use PowerShell's Start-Process with timeout for Windows
+                  try {
+                    $process = Start-Process -FilePath "java" -ArgumentList "-cp", ".;$CLASSPATH", $example_name -RedirectStandardOutput $output_file -RedirectStandardError $output_file -NoNewWindow -PassThru
+
+                    # Wait for the process with timeout
+                    if ($process.WaitForExit(10000)) {  # 10 seconds in milliseconds
+                      $execResult = $process.ExitCode
+                    } else {
+                      # Process timed out
+                      try { $process.Kill() } catch { }
+                      $execResult = 1
+                      "Process timed out after 10 seconds" | Out-File $output_file -Encoding UTF8
+                    }
+                  } catch {
+                    $execResult = 1
+                    "Execution error: $($_.Exception.Message)" | Out-File $output_file -Encoding UTF8
+                  }
+
+                  if ($execResult -eq 0) {
                     # Basic output validation
                     $content = Get-Content $output_file -Raw
                     if (($content -match "(?i)(dataset|datatype|group|success|created|written|read)") -and
