@@ -195,7 +195,7 @@ jobs:
 
       - name: Create description for release/snapshot from "Executive Summary" section of CHANGELOG.md
         run: |
-          sed -n '/^# .* Executive Summary: HDF5 Version .*/,/^# .* Breaking Changes/p' CHANGELOG.md | sed '$d' > description.txt
+          sed -n '/^# .* Executive Summary: HDF5 Version .*/,/^# .* Breaking Changes/p'  ./hdfsrc/release_docs/CHANGELOG.md | sed '$d' > description.txt
 
       - name: List files in the repository
         run: |
