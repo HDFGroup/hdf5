@@ -128,15 +128,30 @@ The examples are automatically tested in CI:
 3. **Cross-Platform Testing**: Tested on Linux, Windows, and macOS
 4. **Maven Integration Testing**: Tests against staging Maven artifacts
 
+### Maven-Only Testing Behavior
+
+**Expected Native Library Errors**: During Maven-only testing (without HDF5 installation), examples will compile successfully but fail at runtime with:
+```
+UnsatisfiedLinkError: no hdf5_java in java.library.path
+```
+
+This is **expected behavior** and indicates:
+- ✅ **JAR structure is correct**
+- ✅ **Dependencies resolve properly**
+- ✅ **Compilation succeeds**
+- ⚠️ **Native HDF5 libraries not available** (expected in Maven-only environment)
+
 ### Pattern-Based Output Validation
 
 Examples are validated using pattern matching for:
 - **Success patterns**: `dataset|datatype|group|success|created|written|read`
-- **Failure patterns**: `error|exception|failed|cannot`
+- **Expected failures**: `UnsatisfiedLinkError.*hdf5_java.*java.library.path` (Maven-only testing)
+- **Unexpected failures**: Other errors indicating JAR or compilation issues
 
 ### Non-Blocking Failures
 
 - Individual example failures don't block CI
+- Native library errors are treated as **expected** in Maven-only testing
 - Multi-platform failures for the same example trigger alerts
 - Results are uploaded as artifacts for debugging
 
