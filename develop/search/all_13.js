@@ -263,7 +263,7 @@ var searchData=
   ['group_20object_260',['Group Object',['../_h5_g__u_g.html#subsec_group_descr',1,'Description of the Group Object'],['../_h5_g__u_g.html#subsubsec_group_descr_object',1,'The Group Object']]],
   ['group_20resources_261',['The HDF Group Resources',['../_getting_started.html#subsec_learn_intro',1,'']]],
   ['group_20symbol_20table_20nodes_262',['Group Symbol Table Nodes',['../_f_m_t2.html#subsec_fmt2_infra_symboltable',1,'III.B. Disk Format: Level 1B - Group Symbol Table Nodes'],['../_f_m_t3.html#subsec_fmt3_infra_symboltable',1,'III.B. Disk Format: Level 1B - Group Symbol Table Nodes'],['../_f_m_t4.html#subsec_fmt4_infra_symboltable',1,'III.B. Disk Format: Level 1B - Group Symbol Table Nodes']]],
-  ['group_20tutorials_20and_20examples_263',['The HDF Group Tutorials and Examples',['../_getting_started.html#subsec_learn_tutor',1,'']]],
+  ['group_20tutorials_20amp_20examples_263',['The HDF Group Tutorials &amp;amp; Examples',['../_getting_started.html#subsec_learn_tutor',1,'']]],
   ['group_3a_20close_264',['group: close',['../_v_o_l__connector.html#subsubsecVOLRefGrpclose',1,'']]],
   ['group_3a_20create_265',['group: create',['../_v_o_l__connector.html#subsubsecVOLRefGrpcreate',1,'']]],
   ['group_3a_20get_266',['group: get',['../_v_o_l__connector.html#subsubsecVOLRefGrpget',1,'']]],
