@@ -31,15 +31,11 @@ typedef struct H5RT_leaf_t {
     hsize_t *_coords; /* Private: single allocation for all coordinate arrays */
 } H5RT_leaf_t;
 
-/* Struct representing a single search result (no linked list) */
-typedef struct H5RT_result_t {
-    H5RT_leaf_t *leaf;
-} H5RT_result_t;
-
-/* Struct representing a set of search results */
+/* Dynamic result buffer for efficient search result allocation */
 typedef struct H5RT_result_set_t {
-    H5RT_result_t *results; /* Array of results */
-    size_t         count;   /* Number of results */
+    H5RT_leaf_t **results;  /* Array of pointers to result leaves */
+    size_t        capacity; /* Current buffer size (power of 2) */
+    size_t        count;    /* Number of results used */
 } H5RT_result_set_t;
 
 /* Leaf helper functions */

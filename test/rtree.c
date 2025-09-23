@@ -80,7 +80,7 @@ verify_rtree_search(H5RT_result_set_t *result_set, H5RT_leaf_t *leaves, size_t l
 
             /* Check if this manual result is in the r-tree results */
             for (size_t j = 0; j < result_set->count; j++) {
-                if (result_set->results[j].leaf == manual_leaf) {
+                if (result_set->results[j] == manual_leaf) {
                     found = true;
                     break;
                 }
