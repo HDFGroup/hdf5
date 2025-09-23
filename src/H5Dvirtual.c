@@ -3819,10 +3819,8 @@ H5D__rtree_should_insert(void *mapping_entry, bool *should_insert)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    if (!mapping_entry || !should_insert) {
-        ret_value = FAIL;
-        goto done;
-    }
+    assert(mapping_entry);
+    assert(should_insert);
 
     entry = (H5O_storage_virtual_ent_t *)mapping_entry;
 
@@ -3936,9 +3934,8 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't initialize R-tree leaf");
 
         /* Record is already set by H5RT_leaf_init */
-
-        if ((curr_space = mappings[i].source_dset.virtual_select) == NULL)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "mapping has no virtual space");
+        assert(mappings[i].source_dset.virtual_select);
+        curr_space = mappings[i].source_dset.virtual_select;
 
         /* Get selection bounds */
         if (H5S_SELECT_BOUNDS(curr_space, curr_leaf->min, curr_leaf->max) < 0)
