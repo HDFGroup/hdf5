@@ -3103,11 +3103,11 @@ static herr_t
 H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
                     H5S_t *mem_space, hsize_t *tot_nelmts)
 {
-    const H5D_t    *dset           = dset_info->dset; /* Local pointer to dataset info */
-    herr_t          ret_value      = SUCCEED;         /* Return value */
-    bool            tree_enabled   = false;
-    H5P_genplist_t *dapl_plist     = NULL; /* Dataset access property list */
-    H5RT_result_t  *search_results = NULL; /* Search results from R-tree */
+    const H5D_t       *dset           = dset_info->dset; /* Local pointer to dataset info */
+    herr_t             ret_value      = SUCCEED;         /* Return value */
+    bool               tree_enabled   = false;
+    H5P_genplist_t    *dapl_plist     = NULL; /* Dataset access property list */
+    H5RT_result_set_t *search_results = NULL; /* Search results from R-tree */
 
     FUNC_ENTER_PACKAGE
 
@@ -3154,9 +3154,8 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     if (storage->tree) {
         /* Perform a spatial tree search to get a list of mappings
          * whose virtual selection intersects the IO operation */
-        H5RT_result_t *curr_result = NULL; /* Current result in search results */
-        hsize_t        min[H5S_MAX_RANK];
-        hsize_t        max[H5S_MAX_RANK];
+        hsize_t min[H5S_MAX_RANK];
+        hsize_t max[H5S_MAX_RANK];
 
         memset(min, 0, sizeof(min));
         memset(max, 0, sizeof(max));
@@ -3168,16 +3167,13 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "R-tree search failed");
 
         /* First, iterate over the mappings with an intersection found via the tree */
-        curr_result = search_results;
-        while (curr_result) {
-            H5RT_leaf_t *curr_leaf = curr_result->leaf;
+        for (size_t i = 0; i < search_results->count; i++) {
+            H5RT_leaf_t *curr_leaf = search_results->results[i].leaf;
             assert(curr_leaf);
 
             if (H5D__virtual_pre_io_process_mapping(dset_info, file_space, mem_space, tot_nelmts,
                                                     (H5O_storage_virtual_ent_t *)curr_leaf->record) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
-
-            curr_result = curr_result->next;
         }
 
         /* Free search results */
