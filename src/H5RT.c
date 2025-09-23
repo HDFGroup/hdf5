@@ -306,13 +306,6 @@ H5RT__result_buffer_grow(H5RT_result_buffer_t *buffer)
     buffer->buffer   = new_buffer;
     buffer->capacity = new_capacity;
 
-    /* Fix up next pointers after realloc - they all point within the same buffer */
-    for (size_t i = 0; i < buffer->count - 1; i++)
-        buffer->buffer[i].next = &buffer->buffer[i + 1];
-
-    if (buffer->count > 0)
-        buffer->buffer[buffer->count - 1].next = NULL;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -344,12 +337,7 @@ H5RT__result_buffer_add(H5RT_result_buffer_t *buffer, H5RT_leaf_t *leaf)
 
     /* Add the new result */
     H5RT_result_t *new_result = &buffer->buffer[buffer->count];
-    new_result->leaf = leaf;
-    new_result->next = NULL;
-
-    /* Link to previous result if this isn't the first */
-    if (buffer->count > 0)
-        buffer->buffer[buffer->count - 1].next = new_result;
+    new_result->leaf          = leaf;
 
     buffer->count++;
 
@@ -630,7 +618,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_t **results_out)
+H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_set_t **results_out)
 {
     H5RT_result_buffer_t buffer;
     herr_t               ret_value = SUCCEED;
@@ -654,21 +642,33 @@ H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_t **results
     if (H5RT__search_recurse(&rtree->root, rtree->rank, min, max, &buffer) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "search failed");
 
-    /* Return the buffer pointer (or NULL if no results) */
+    /* Always allocate result set structure for consistent API */
+    H5RT_result_set_t *result_set = (H5RT_result_set_t *)malloc(sizeof(H5RT_result_set_t));
+    if (!result_set)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate result set");
+
     if (buffer.count > 0) {
-        *results_out = buffer.buffer;
+        /* Results found - transfer ownership of buffer to result set */
+        result_set->results = buffer.buffer;
+        result_set->count   = buffer.count;
         /* Don't cleanup buffer on success - caller owns it now */
     }
     else {
-        /* No results found, clean up buffer and return NULL */
+        /* No results found - return empty result set */
         H5RT__result_buffer_cleanup(&buffer);
-        *results_out = NULL;
+        result_set->results = NULL;
+        result_set->count   = 0;
     }
+
+    *results_out = result_set;
 
 done:
     if (ret_value < 0) {
         /* Clean up buffer on failure */
         H5RT__result_buffer_cleanup(&buffer);
+        if (result_set) {
+            free(result_set);
+        }
         *results_out = NULL;
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -679,28 +679,28 @@ done:
  *
  * Purpose:     Free search results returned by H5RT_search.
  *
- *              Since results are now allocated as a contiguous buffer,
- *              this function simply frees the entire buffer in one operation.
+ *              Frees both the result set structure and the underlying
+ *              results array buffer.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5RT_free_results(H5RT_result_t *results)
+H5RT_free_results(H5RT_result_set_t *result_set)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOERR(FAIL);
+    if (result_set) {
+        /* Free the results array buffer */
+        if (result_set->results)
+            free(result_set->results);
 
-    if (results) {
-        /* All results are allocated as a single contiguous buffer,
-         * so we can free the entire thing at once.
-         * The buffer was allocated with malloc() in H5RT__result_buffer_init */
-        free(results);
+        /* Free the result set structure itself */
+        free(result_set);
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5RT_free_results() */
 
 /*-------------------------------------------------------------------------
