@@ -53,7 +53,7 @@ static int H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5RT_leaf_init(H5RT_leaf_t *leaf, int rank, uintptr_t record)
+H5RT_leaf_init(H5RT_leaf_t *leaf, int rank, void *record)
 {
     herr_t ret_value = SUCCEED;
 

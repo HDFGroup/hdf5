@@ -23,12 +23,12 @@ typedef struct H5RT_t H5RT_t;
 
 /* Struct representing a leaf in the r-tree */
 typedef struct H5RT_leaf_t {
-    uintptr_t record;
-    int       rank;
-    hsize_t  *min;     /* Points to _coords[0] */
-    hsize_t  *max;     /* Points to _coords[rank] */
-    hsize_t  *mid;     /* Points to _coords[2*rank] */
-    hsize_t  *_coords; /* Private: single allocation for all coordinate arrays */
+    void    *record;
+    int      rank;
+    hsize_t *min;     /* Points to _coords[0] */
+    hsize_t *max;     /* Points to _coords[rank] */
+    hsize_t *mid;     /* Points to _coords[2*rank] */
+    hsize_t *_coords; /* Private: single allocation for all coordinate arrays */
 } H5RT_leaf_t;
 
 /* Struct representing a search result */
@@ -38,7 +38,7 @@ typedef struct H5RT_result_t {
 } H5RT_result_t;
 
 /* Leaf helper functions */
-H5_DLL herr_t H5RT_leaf_init(H5RT_leaf_t *leaf, int rank, uintptr_t record);
+H5_DLL herr_t H5RT_leaf_init(H5RT_leaf_t *leaf, int rank, void *record);
 H5_DLL herr_t H5RT_leaf_cleanup(H5RT_leaf_t *leaf);
 
 /* Main R-tree functions */

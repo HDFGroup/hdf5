@@ -130,7 +130,7 @@ generate_leaves(int rank, size_t leaf_count)
 
     for (size_t i = 0; i < leaf_count; i++) {
         /* Initialize leaf with dynamic coordinate allocation */
-        if (H5RT_leaf_init(&ret_value[i], rank, (uintptr_t)i) < 0) {
+        if (H5RT_leaf_init(&ret_value[i], rank, (void *)1) < 0) {
             /* Clean up already initialized leaves */
             for (size_t j = 0; j < i; j++) {
                 H5RT_leaf_cleanup(&ret_value[j]);
