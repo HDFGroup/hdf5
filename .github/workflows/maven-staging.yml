@@ -1194,14 +1194,23 @@ jobs:
           # Test one representative example from each category
           cd HDF5Examples/JAVA
 
-          # Find available JAR files
-          JAR_FILES=$(find ../../maven-artifacts -name "*.jar" | head -1)
-          if [ -z "$JAR_FILES" ]; then
-            echo "❌ No Maven JAR files found for testing"
+          # Find HDF5 JAR files (not dependencies like slf4j)
+          HDF5_JAR=$(find ../../maven-artifacts -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
+          if [ -z "$HDF5_JAR" ]; then
+            echo "❌ No HDF5 JAR files found for testing"
+            echo "Available JAR files:"
+            find ../../maven-artifacts -name "*.jar"
             exit 1
           fi
 
-          echo "Using JAR file: $JAR_FILES"
+          echo "Using HDF5 JAR file: $HDF5_JAR"
+
+          # Also find any dependency JARs
+          DEP_JARS=$(find ../../maven-artifacts -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
+          if [ -n "$DEP_JARS" ]; then
+            echo "Found dependency JARs:"
+            echo "$DEP_JARS"
+          fi
 
           FAILED_EXAMPLES=""
           TOTAL_EXAMPLES=0
@@ -1219,12 +1228,22 @@ jobs:
                 example_name=$(basename "$EXAMPLE_FILE" .java)
                 echo "--- Testing $category/$example_name ---"
 
+                # Build classpath with HDF5 JAR and dependencies (absolute paths)
+                CLASSPATH="$(realpath "$HDF5_JAR")"
+                if [ -n "$DEP_JARS" ]; then
+                  for dep_jar in $DEP_JARS; do
+                    CLASSPATH="$CLASSPATH:$(realpath "$dep_jar")"
+                  done
+                fi
+
+                echo "Using classpath: $CLASSPATH"
+
                 # Test compilation
-                if javac -cp "../../../maven-artifacts/*/*.jar" "$EXAMPLE_FILE" 2>/dev/null; then
+                if javac -cp "$CLASSPATH" "$EXAMPLE_FILE" 2>&1; then
                   echo "✓ Compilation successful for $category/$example_name"
 
                   # Test execution (with timeout)
-                  if timeout 10s java -cp ".:../../../maven-artifacts/*/*.jar" "$example_name" >/tmp/${example_name}.out 2>&1; then
+                  if timeout 10s java -cp ".:$CLASSPATH" "$example_name" >/tmp/${example_name}.out 2>&1; then
                     # Basic output validation
                     if grep -q -i -E "(dataset|datatype|group|success|created|written|read)" /tmp/${example_name}.out && \
                        ! grep -q -i -E "(error|exception|failed|cannot)" /tmp/${example_name}.out; then

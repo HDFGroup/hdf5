@@ -140,9 +140,18 @@ jobs:
             thread_safety: ""
             build_mode: "Release"
 
+    call-maven-staging:
+        name: "Maven Staging Tests"
+        needs: call-release-cmake
+        uses: ./.github/workflows/maven-staging.yml
+        with:
+            test_maven_deployment: true
+            use_snapshot_version: true
+            platforms: "all-platforms"
+
     call-release-bintest:
         name: "Test Release Binaries"
-        needs: call-release-cmake
+        needs: [call-release-cmake, call-maven-staging]
         uses: ./.github/workflows/bintest.yml
         with:
             build_mode: "Release"

@@ -259,13 +259,4 @@ jobs:
           sh ./test-pc.sh ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/build .
         shell: bash
 
-  # Java Examples Maven Testing
-  test-java-examples-maven:
-    name: "Java Examples Maven Testing"
-    needs: [test_binary_linux, test_binary_win, test_binary_mac_latest]
-    if: always()  # Run even if binary tests have issues
-    uses: ./.github/workflows/java-examples-maven-test.yml
-    with:
-      build_mode: ${{ inputs.build_mode }}
-      maven_artifacts_version: "2.0.0-3-SNAPSHOT"  # This should be dynamically determined
 

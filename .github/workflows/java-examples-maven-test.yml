@@ -51,23 +51,26 @@ jobs:
             ${{ runner.os }}-maven-examples-
             ${{ runner.os }}-maven-
 
-      - name: Create local Maven repository
+      - name: Identify HDF5 JAR files
         run: |
-          mkdir -p ~/.m2/repository-local
-          # Install staging artifacts to local repository
-          for jar_file in ./maven-artifacts/*.jar; do
-            if [ -f "$jar_file" ]; then
-              echo "Installing $(basename "$jar_file") to local repository"
-              mvn install:install-file \
-                -DgroupId=org.hdfgroup \
-                -DartifactId=hdf5-java \
-                -Dversion="${{ inputs.maven_artifacts_version }}" \
-                -Dclassifier=linux-x86_64 \
-                -Dpackaging=jar \
-                -Dfile="$jar_file" \
-                -DlocalRepositoryPath="$HOME/.m2/repository-local"
-            fi
-          done
+          echo "=== Identifying HDF5 JAR files ==="
+
+          # Find HDF5 JAR files (not dependencies)
+          HDF5_JARS=$(find ./maven-artifacts -name "*hdf5*.jar" -o -name "jarhdf5*.jar")
+          DEP_JARS=$(find ./maven-artifacts -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
+
+          echo "HDF5 JARs found:"
+          echo "$HDF5_JARS"
+          echo ""
+          echo "Dependency JARs found:"
+          echo "$DEP_JARS"
+
+          if [ -z "$HDF5_JARS" ]; then
+            echo "❌ No HDF5 JAR files found!"
+            echo "All available JARs:"
+            find ./maven-artifacts -name "*.jar"
+            exit 1
+          fi
 
       - name: Test Examples Category ${{ matrix.category }}
         id: test-examples
@@ -90,12 +93,21 @@ jobs:
               example_name=$(basename "$java_file" .java)
               echo "--- Testing $example_name ---"
 
+              # Build classpath
+              HDF5_JAR=$(find ../../../maven-artifacts -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
+              DEP_JARS=$(find ../../../maven-artifacts -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
+
+              CLASSPATH="$HDF5_JAR"
+              for dep_jar in $DEP_JARS; do
+                CLASSPATH="$CLASSPATH:$dep_jar"
+              done
+
               # Compile the example
-              if javac -cp "../../../maven-artifacts/*.jar" "$java_file"; then
+              if javac -cp "$CLASSPATH" "$java_file"; then
                 echo "✓ Compilation successful for $example_name"
 
                 # Run the example and capture output
-                if timeout 30s java -cp ".:../../../maven-artifacts/*" "$example_name" > "../../../test-results/${{ matrix.category }}/${example_name}.output" 2>&1; then
+                if timeout 30s java -cp ".:$CLASSPATH" "$example_name" > "../../../test-results/${{ matrix.category }}/${example_name}.output" 2>&1; then
                   # Validate output using pattern matching
                   output_file="../../../test-results/${{ matrix.category }}/${example_name}.output"
 
@@ -322,12 +334,21 @@ jobs:
               example_name=$(basename "$java_file" .java)
               echo "--- Testing $example_name ---"
 
+              # Build classpath
+              HDF5_JAR=$(find ../../../maven-artifacts -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
+              DEP_JARS=$(find ../../../maven-artifacts -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
+
+              CLASSPATH="$HDF5_JAR"
+              for dep_jar in $DEP_JARS; do
+                CLASSPATH="$CLASSPATH:$dep_jar"
+              done
+
               # Compile the example
-              if javac -cp "../../../maven-artifacts/*.jar" "$java_file"; then
+              if javac -cp "$CLASSPATH" "$java_file"; then
                 echo "✓ Compilation successful for $example_name"
 
                 # Run the example and capture output
-                if timeout 30s java -cp ".:../../../maven-artifacts/*" "$example_name" > "../../../test-results/${{ matrix.category }}/${example_name}.output" 2>&1; then
+                if timeout 30s java -cp ".:$CLASSPATH" "$example_name" > "../../../test-results/${{ matrix.category }}/${example_name}.output" 2>&1; then
                   # Validate output using pattern matching
                   output_file="../../../test-results/${{ matrix.category }}/${example_name}.output"
 
