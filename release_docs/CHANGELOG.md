@@ -30,7 +30,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ## Significant Advancements:
 
-- Full [UTF-8](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#utf8) filename support on Windows, resolving encoding issues from previous versions.
+- Full [UTF-8](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
 - Introduction of bfloat16 predefined datatypes for efficient machine learning conversions.
 - First-class support for [complex numbers](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
 
