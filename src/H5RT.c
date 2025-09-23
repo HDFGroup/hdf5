@@ -125,10 +125,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RT_leaf_cleanup() */
 
-/* Returns
- * -1 if leaf1 < leaf2
- * 0 if leaf1 == leaf2
- * 1 if leaf1 > leaf2
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__leaf_compare
+ *
+ * Purpose:     Compare two R-tree leaves for sorting based on their midpoint
+ *              coordinates in the specified dimension.
+ *
+ * Return:      -1 if leaf1 < leaf2
+ *               0 if leaf1 == leaf2
+ *               1 if leaf1 > leaf2
+ *
+ *-------------------------------------------------------------------------
  */
 #if defined(H5_HAVE_DARWIN) || defined(H5_HAVE_WIN32_API)
 static int
@@ -158,6 +165,16 @@ H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__compute_slabs
+ *
+ * Purpose:     Compute the number of slabs and slab size to use when partitioning
+ *              leaves into slabs for bulk-loading the r-tree.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_out, size_t *slab_size_out)
 {
@@ -209,18 +226,24 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-/* Load the provided leaves into the r-tree in an efficient manner.
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__bulk_load
  *
- * Parameters:
- *   node = the node to fill
- *   rank = the rank of the hyper-rectangles
- *   leaves = a pointer to the first leaf in this block
- *   count = the number of leaves in this block
- *   root = whether this is the root node
- *   prev_sort_dim = the dimension that was last sorted on (or -1 if none)
- * This is an implementation of the sort-tile-recursive (STR) algorithm.
- * See "STR: A Simple and Efficient Algorithm for R-Tree Packing"
- * https://archive.org/details/nasa_techdoc_19970016975/page/n9 */
+ * Purpose:     Load the provided leaves into the r-tree in an efficient manner.
+ *              This is an implementation of the sort-tile-recursive (STR) algorithm.
+ *              See "STR: A Simple and Efficient Algorithm for R-Tree Packing"
+ *              https://archive.org/details/nasa_techdoc_19970016975/page/n9
+ *
+ * Parameters:  node          - The node to fill
+ *              rank          - The rank of the hyper-rectangles
+ *              leaves        - A pointer to the first leaf in this block
+ *              count         - The number of leaves in this block
+ *              prev_sort_dim - The dimension that was last sorted on (or -1 if none)
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, int prev_sort_dim)
 {
@@ -229,8 +252,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
     size_t       child_leaf_count = 0;
     H5RT_leaf_t *child_leaf_start = NULL;
 
-    bool this_rank_sorted = false;
-    int  sort_dim         = -1;
+    int sort_dim = -1;
 
     size_t num_slabs = 0;
     size_t slab_size = 0;
@@ -247,8 +269,6 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "must have at least one leaf");
     if (prev_sort_dim < -1)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid previous sort dimension");
-
-    this_rank_sorted = (prev_sort_dim == (rank - 1));
 
     /* Compute the max/min bounds of the provided node */
     /* Initial values */
@@ -276,8 +296,9 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         /* Recursive case - there will be child nodes */
         node->children_are_leaves = false;
 
-        /* Sort hyper-rectangles in this region by the first unsorted coordinate of their midpoints */
-        if (!this_rank_sorted) {
+        /* If we haven't sorted along every dimension yet, sort the hyper-rectangles in this region
+         * by the first unsorted coordinate of their midpoints */
+        if (prev_sort_dim != rank - 1) {
             assert(prev_sort_dim < rank - 1);
             sort_dim = prev_sort_dim + 1;
 #if defined(H5_HAVE_WIN32_API)
@@ -365,7 +386,6 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
     if (count == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "r-tree must have at least one leaf");
 
-    /* TBD: May replace with malloc for optimization */
     if (NULL == (rtree = H5FL_CALLOC(H5RT_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree");
 
@@ -388,14 +408,22 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RT_create() */
 
-/*
- *  Parameters:
- *     node (in): Node from which to begin the search.
- *     rank (in): rank of the hyper-rectangles
- *     min (in): Minimum bounds of spatial search, should have 'rank' dims.
- *     max (in): Maximum bounds of spatial search, should have 'rank' dims.
- *     head (out): Head of the linked list of result structures.
- *     tail (out): Tail of the linked list of result structures.
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__search_recurse
+ *
+ * Purpose:     Recursively search the r-tree for leaves whose bounding boxes
+ *              intersect with the provided search region.
+ *
+ * Parameters:  node (in)  - Node from which to begin the search
+ *              rank (in)  - Rank of the hyper-rectangles
+ *              min (in)   - Minimum bounds of spatial search, should have 'rank' dims
+ *              max (in)   - Maximum bounds of spatial search, should have 'rank' dims
+ *              head (out) - Head of the linked list of result structures
+ *              tail (out) - Tail of the linked list of result structures
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
  */
 static herr_t
 H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_result_t **head,
