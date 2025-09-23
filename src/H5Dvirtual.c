@@ -3173,10 +3173,8 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
             H5RT_leaf_t *curr_leaf = curr_result->leaf;
             assert(curr_leaf);
 
-            size_t mapping_index = (size_t)curr_leaf->record;
-
             if (H5D__virtual_pre_io_process_mapping(dset_info, file_space, mem_space, tot_nelmts,
-                                                    &storage->list[mapping_index]) < 0)
+                                                    (H5O_storage_virtual_ent_t *)curr_leaf->record) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
 
             curr_result = curr_result->next;
@@ -3915,7 +3913,7 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
 
         /* Initialize leaf with dynamic coordinate allocation */
         curr_leaf = &leaves_temp[curr_leaf_count];
-        if (H5RT_leaf_init(curr_leaf, rank, (uintptr_t)i) < 0)
+        if (H5RT_leaf_init(curr_leaf, rank, (void *)curr_mapping) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't initialize R-tree leaf");
 
         /* Record is already set by H5RT_leaf_init */
