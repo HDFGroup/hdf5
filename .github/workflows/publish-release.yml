@@ -32,6 +32,7 @@ jobs:
     steps:
       - name: Validate Inputs
         run: |
+          set -euo pipefail
           echo "Validating inputs..."
           if [[ ! "${{ inputs.use_tag }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-.*)?$ ]]; then
             echo "❌ Invalid tag format. Expected: vX.Y.Z or vX.Y.Z-suffix"
@@ -39,6 +40,10 @@ jobs:
           fi
           if [[ "${{ inputs.target_dir }}" == *".."* ]] || [[ "${{ inputs.target_dir }}" == /* ]]; then
             echo "❌ Invalid target_dir. Cannot contain '..' or start with '/'"
+            exit 1
+          fi
+          if [[ "${{ inputs.file_name }}" == *".."* ]] || [[ "${{ inputs.file_name }}" == *"/"* ]] || [[ "${{ inputs.file_name }}" =~ [^a-zA-Z0-9._-] ]]; then
+            echo "❌ Invalid file_name. Can only contain alphanumeric, dots, underscores, and hyphens"
             exit 1
           fi
           echo "✅ Input validation passed"
@@ -64,6 +69,7 @@ jobs:
 
       - name: Verify downloaded files
         run: |
+          set -euo pipefail
           echo "📁 Downloaded files:"
           ls -la HDF5/
           
@@ -88,6 +94,7 @@ jobs:
       - name: Sync release files to S3 bucket
         if: ${{ !inputs.dry_run }}
         run: |
+          set -euo pipefail
           echo "🚀 Syncing release files to S3..."
           aws s3 sync ./HDF5 s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads \
             --delete \
@@ -102,6 +109,7 @@ jobs:
 
       - name: Process documentation
         run: |
+          set -euo pipefail
           DOC_FILE="HDF5/${{ inputs.file_name }}.doxygen.zip"
           if [ -f "$DOC_FILE" ]; then
             echo "📚 Processing documentation..."
@@ -119,6 +127,7 @@ jobs:
       - name: Sync documentation to S3 bucket
         if: ${{ !inputs.dry_run }}
         run: |
+          set -euo pipefail
           if [ -d "${{ inputs.file_name }}.doxygen" ]; then
             echo "📚 Syncing documentation to S3..."
             aws s3 sync ./${{ inputs.file_name }}.doxygen \
@@ -133,6 +142,7 @@ jobs:
 
       - name: Process compatibility reports
         run: |
+          set -euo pipefail
           COMPAT_FILE="HDF5/${{ inputs.file_name }}.html.abi.reports.tar.gz"
           if [ -f "$COMPAT_FILE" ]; then
             echo "📊 Processing compatibility reports..."
@@ -150,6 +160,7 @@ jobs:
       - name: Sync compatibility reports to S3 bucket
         if: ${{ !inputs.dry_run }}
         run: |
+          set -euo pipefail
           if [ -d "hdf5" ]; then
             echo "📊 Syncing compatibility reports to S3..."
             aws s3 sync ./hdf5 \
@@ -164,6 +175,7 @@ jobs:
 
       - name: Summary
         run: |
+          set -euo pipefail
           echo "🎉 HDF5 Release Publication Summary"
           echo "=================================="
           echo "🏷️  Tag: ${{ inputs.use_tag }}"
