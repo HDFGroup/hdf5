@@ -165,6 +165,8 @@ H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
 
     FUNC_ENTER_PACKAGE_NOERR
 
+    assert(sort_dim <= l1->rank - 1);
+
     /* Compare based on the midpoint of the specified dimension */
     if (l1->mid[sort_dim] < l2->mid[sort_dim]) {
         ret_value = -1;
