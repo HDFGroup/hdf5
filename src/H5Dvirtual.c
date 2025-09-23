@@ -3179,7 +3179,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
 
         /* First, iterate over the mappings with an intersection found via the tree */
         for (size_t i = 0; i < search_results->count; i++) {
-            H5RT_leaf_t *curr_leaf = search_results->results[i].leaf;
+            H5RT_leaf_t *curr_leaf = search_results->results[i];
             assert(curr_leaf);
 
             if (H5D__virtual_pre_io_process_mapping(dset_info, file_space, mem_space, tot_nelmts,
