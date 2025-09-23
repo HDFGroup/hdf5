@@ -1321,6 +1321,13 @@ jobs:
           Write-Host "Using HDF5 JAR file: $($HDF5_JAR.FullName)"
 
           # Find dependency JARs - only include slf4j-api and slf4j-simple
+          Write-Host "Searching for dependency JARs in: $MAVEN_ARTIFACTS_DIR"
+
+          # Debug: Show all JAR files in directory
+          $ALL_JARS = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*.jar" -Recurse
+          Write-Host "All JAR files found:"
+          $ALL_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
+
           $DEP_JARS = @()
           $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-api*.jar" -Recurse
           $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-simple*.jar" -Recurse
@@ -1328,6 +1335,8 @@ jobs:
           if ($DEP_JARS.Count -gt 0) {
             Write-Host "Found dependency JARs:"
             $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
+          } else {
+            Write-Host "No SLF4J dependency JARs found - this may cause ClassNotFoundException"
           }
 
           $FAILED_EXAMPLES = @()
