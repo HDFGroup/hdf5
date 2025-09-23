@@ -6,10 +6,13 @@ on:
     branches: [ develop, main ]
     paths:
       - 'java/src/hdf/hdf5lib/**'
+      - 'HDF5Examples/JAVA/**'
       - '.github/workflows/maven-*.yml'
+      - '.github/workflows/java-examples-*.yml'
       - 'CMakePresets.json'
       - '**/CMakeLists.txt'
       - 'java/src/hdf/hdf5lib/pom.xml.in'
+      - 'HDF5Examples/JAVA/pom-examples.xml.in'
   workflow_call:
     inputs:
       test_maven_deployment:
@@ -81,7 +84,7 @@ jobs:
           # For pull requests, check changed files
           git fetch origin ${{ github.base_ref }}
 
-          MAVEN_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E "(java/src/hdf/hdf5lib/|maven|pom\.xml|CMakePresets\.json)" || true)
+          MAVEN_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E "(java/src/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
 
           if [ -n "$MAVEN_FILES" ]; then
             echo "maven=true" >> $GITHUB_OUTPUT
@@ -1121,6 +1124,158 @@ jobs:
           fi
 
           echo "🎉 Dry run deployment test passed!"
+
+  test-java-examples-maven:
+    name: "Test Java Examples with Maven Artifacts"
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-maven-artifacts, build-maven-artifacts-windows, build-maven-artifacts-macos-x86_64, build-maven-artifacts-macos-aarch64]
+    if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.outputs.artifacts-created == 'true' }}
+    continue-on-error: true  # Non-blocking failures
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download Maven artifacts (All Platforms)
+        run: |
+          mkdir -p ./maven-artifacts
+          echo "Downloading Maven artifacts for Java examples testing..."
+
+      - name: Download Maven artifacts (Linux)
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-staging-artifacts-linux-x86_64
+          path: ./maven-artifacts/linux
+        continue-on-error: true
+
+      - name: Download Maven artifacts (Windows)
+        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-staging-artifacts-windows-x86_64
+          path: ./maven-artifacts/windows
+        continue-on-error: true
+
+      - name: Download Maven artifacts (macOS x86_64)
+        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-staging-artifacts-macos-x86_64
+          path: ./maven-artifacts/macos-x86_64
+        continue-on-error: true
+
+      - name: Download Maven artifacts (macOS aarch64)
+        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-staging-artifacts-macos-aarch64
+          path: ./maven-artifacts/macos-aarch64
+        continue-on-error: true
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-examples-
+            ${{ runner.os }}-maven-
+
+      - name: Test Java Examples (Quick Test)
+        id: test-examples
+        run: |
+          echo "=== Java Examples Maven Integration Test ==="
+
+          # Test one representative example from each category
+          cd HDF5Examples/JAVA
+
+          # Find available JAR files
+          JAR_FILES=$(find ../../maven-artifacts -name "*.jar" | head -1)
+          if [ -z "$JAR_FILES" ]; then
+            echo "❌ No Maven JAR files found for testing"
+            exit 1
+          fi
+
+          echo "Using JAR file: $JAR_FILES"
+
+          FAILED_EXAMPLES=""
+          TOTAL_EXAMPLES=0
+          PASSED_EXAMPLES=0
+
+          # Test representative examples from each category
+          for category in H5D H5T H5G TUTR; do
+            if [ -d "$category" ]; then
+              cd "$category"
+
+              # Find first .java file in category
+              EXAMPLE_FILE=$(ls *.java | head -1)
+              if [ -f "$EXAMPLE_FILE" ]; then
+                TOTAL_EXAMPLES=$((TOTAL_EXAMPLES + 1))
+                example_name=$(basename "$EXAMPLE_FILE" .java)
+                echo "--- Testing $category/$example_name ---"
+
+                # Test compilation
+                if javac -cp "../../../maven-artifacts/*/*.jar" "$EXAMPLE_FILE" 2>/dev/null; then
+                  echo "✓ Compilation successful for $category/$example_name"
+
+                  # Test execution (with timeout)
+                  if timeout 10s java -cp ".:../../../maven-artifacts/*/*.jar" "$example_name" >/tmp/${example_name}.out 2>&1; then
+                    # Basic output validation
+                    if grep -q -i -E "(dataset|datatype|group|success|created|written|read)" /tmp/${example_name}.out && \
+                       ! grep -q -i -E "(error|exception|failed|cannot)" /tmp/${example_name}.out; then
+                      echo "✓ Execution and validation successful for $category/$example_name"
+                      PASSED_EXAMPLES=$((PASSED_EXAMPLES + 1))
+                    else
+                      echo "✗ Output validation failed for $category/$example_name"
+                      echo "Output:"
+                      cat /tmp/${example_name}.out
+                      FAILED_EXAMPLES="$FAILED_EXAMPLES $category/$example_name"
+                    fi
+                  else
+                    echo "✗ Execution failed for $category/$example_name"
+                    FAILED_EXAMPLES="$FAILED_EXAMPLES $category/$example_name"
+                  fi
+                else
+                  echo "✗ Compilation failed for $category/$example_name"
+                  FAILED_EXAMPLES="$FAILED_EXAMPLES $category/$example_name"
+                fi
+              fi
+              cd ..
+            fi
+          done
+
+          echo "=== Java Examples Test Summary ==="
+          echo "Total representative examples tested: $TOTAL_EXAMPLES"
+          echo "Passed: $PASSED_EXAMPLES"
+          echo "Failed: $((TOTAL_EXAMPLES - PASSED_EXAMPLES))"
+
+          if [ -n "$FAILED_EXAMPLES" ]; then
+            echo "Failed examples:$FAILED_EXAMPLES"
+            echo "❌ Some Java examples failed - but continuing (non-blocking)"
+            echo "test-status=FAILED" >> $GITHUB_OUTPUT
+          else
+            echo "✅ All representative Java examples passed!"
+            echo "test-status=PASSED" >> $GITHUB_OUTPUT
+          fi
+
+          echo "total-examples=$TOTAL_EXAMPLES" >> $GITHUB_OUTPUT
+          echo "passed-examples=$PASSED_EXAMPLES" >> $GITHUB_OUTPUT
+
+      - name: Upload failure artifacts (Java Examples)
+        if: steps.test-examples.outputs.test-status == 'FAILED'
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-examples-staging-failure-${{ github.run_id }}
+          path: |
+            /tmp/*.out
+            HDF5Examples/JAVA/*/*.class
+            HDF5Examples/JAVA/*/*.h5
+          retention-days: 7
 
   comment-pr:
     name: Comment on Pull Request

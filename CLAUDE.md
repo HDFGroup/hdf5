@@ -44,6 +44,40 @@ cmake --install .
 - `HDF5_ENABLE_MAVEN_DEPLOY=ON` - Enable Maven repository deployment
 - `HDF5_MAVEN_SNAPSHOT=ON` - Build Maven snapshot versions (-SNAPSHOT suffix)
 
+## Java Examples Maven Integration
+
+### Java Examples as Maven Artifact
+
+HDF5 Java examples (62 examples) are available as a Maven artifact:
+
+```xml
+<dependency>
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java-examples</artifactId>
+    <version>2.0.0-3</version>
+</dependency>
+```
+
+### Example Categories
+- **H5D/** - Dataset operations (25 examples)
+- **H5T/** - Datatype operations (16 examples)
+- **H5G/** - Group operations (8 examples)
+- **TUTR/** - Tutorial examples (13 examples)
+
+### Building Java Examples with Maven
+```bash
+cd HDF5Examples/JAVA
+mvn compile -f pom-examples.xml
+mvn test -Prun-examples -f pom-examples.xml
+```
+
+### Java Examples Testing in CI
+- **Staging Integration**: Examples tested in `maven-staging.yml`
+- **Representative Testing**: 4 examples (1 per category) for quick validation
+- **Full Testing**: Available via `java-examples-maven-test.yml`
+- **Cross-Platform**: Linux, Windows, macOS support
+- **Output Validation**: Pattern-based success/failure detection
+
 ## Testing
 
 ### Running Tests
@@ -151,6 +185,36 @@ ctest -E "MPI|SWMR"         # Exclude parallel/SWMR tests
 
    # Test Maven deployment (dry run)
    gh workflow run release.yml -f deploy_maven=true -f use_tag=snapshot
+   ```
+
+5. **Java Examples testing:**
+   ```bash
+   # Test Java examples with Maven artifacts
+   gh workflow run java-examples-maven-test.yml -f build_mode=release -f maven_artifacts_version=2.0.0-3-SNAPSHOT
+
+   # Quick Java examples test (part of Maven staging)
+   gh workflow run maven-staging.yml -f test_maven_deployment=true
+   ```
+
+### Claude Code Assistant Shortcuts
+
+For efficient interaction with Claude Code when working on this repository:
+
+6. **Request clarification and improvements:**
+   ```
+   Ask questions for clarification and suggest improvements as needed.
+   ```
+
+7. **Common analysis patterns:**
+   ```bash
+   # Analyze current implementation and suggest next steps
+   Analyze @*.md and @.github/workflows/*.yml files and suggest improvements
+
+   # Review specific component integration
+   Review the @component integration with @related-files and suggest optimizations
+
+   # End-to-end workflow analysis
+   Trace the complete workflow from @starting-point to @end-point and identify issues
    ```
 
 ## Documentation

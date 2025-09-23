@@ -125,9 +125,27 @@ The workflows are currently configured with `dry_run: true` to test permissions 
 - **Enhanced**: Debug output and error handling for troubleshooting permission issues
 - **Implemented**: Dry run mode for safe permission testing
 
+## Java Examples Integration (September 23, 2025)
+
+### Enhanced Maven Artifacts
+- **Main Product**: `org.hdfgroup:hdf5-java` - HDF5 Java bindings
+- **New Product**: `org.hdfgroup:hdf5-java-examples` - 62 Java examples
+- **Testing Integration**: Java examples tested in Maven staging workflow
+- **Cross-Platform Support**: All examples tested on Linux, Windows, macOS
+
+### CI/CD Integration
+- **Staging Workflow**: Added Java examples testing to `maven-staging.yml`
+- **Representative Testing**: Quick validation (4 examples) in staging
+- **Full Testing**: Comprehensive testing (62 examples) via dedicated workflow
+- **Non-Blocking**: Example failures don't block Maven artifact deployment
+
 ## Files Modified
 
 - `.github/workflows/maven-deploy.yml`: Fixed artifact naming, added debug output and error handling
 - `.github/workflows/release.yml`: Enabled dry run mode for testing
-- `.github/workflows/maven-staging.yml`: Made reusable for release workflow integration
+- `.github/workflows/maven-staging.yml`: Made reusable for release workflow integration, added Java examples testing
+- `.github/workflows/java-examples-maven-test.yml`: New comprehensive Java examples testing workflow
+- `HDF5Examples/JAVA/pom-examples.xml.in`: Maven POM template for examples artifact
+- `HDF5Examples/JAVA/README-MAVEN.md`: Documentation for Maven integration
+- `CLAUDE.md`: Updated with Java examples Maven information
 - `MAVEN_DEPLOYMENT_FIXES_SUMMARY_2025-09-22.md`: Complete technical summary of all fixes

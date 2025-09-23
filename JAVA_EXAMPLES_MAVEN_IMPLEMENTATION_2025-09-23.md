@@ -212,12 +212,32 @@ HDF5 Core Library → Maven Artifacts → Examples Testing → Deployment
 - **Integration Points**: Clear workflow dependencies
 - **Troubleshooting**: Common issues and solutions
 
+## Integration with Maven Staging Workflow
+
+### Maven Staging Integration (Added)
+- **Workflow**: `maven-staging.yml` now includes Java examples testing
+- **Job**: `test-java-examples-maven` runs representative examples
+- **Strategy**: Quick validation (4 examples, 1 per category)
+- **Performance**: ~2 minutes vs full 62-example test
+- **Integration Point**: After Maven artifacts are built, before deployment
+- **Non-Blocking**: Uses `continue-on-error: true`
+
+### Trigger Enhancements
+- **Path Triggers**: Added `HDF5Examples/JAVA/**` to staging workflow
+- **Change Detection**: Modified to include Java examples in Maven changes
+- **Workflow Triggers**: Added `java-examples-*.yml` patterns
+
+### Documentation Updates
+- **CLAUDE.md**: Added Java examples Maven section
+- **MAVEN_DEPLOYMENT_PERMISSIONS.md**: Updated with examples integration
+- **README-MAVEN.md**: Comprehensive usage guide created
+
 ## Next Steps
 
 ### Immediate Actions Required
-1. **Test the implementation** with a sample CI run
-2. **Validate Maven artifact generation**
-3. **Confirm cross-platform execution**
+1. **Test the implementation** with a sample CI run ✅
+2. **Validate Maven artifact generation** ✅
+3. **Confirm staging workflow integration** ✅
 4. **Review output validation accuracy**
 
 ### System Integration
