@@ -3082,24 +3082,28 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     *tot_nelmts = 0;
 
     /* If r-tree use is enabled and no tree currently exists, build the tree */
-    if (NULL == (dapl_plist = (H5P_genplist_t *)H5I_object(dset->shared->dapl_id)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
-
-    if (H5P_get(dapl_plist, H5D_ACS_USE_TREE_NAME, &tree_enabled) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get virtual use tree flag");
-
-    if (tree_enabled && !storage->tree && storage->list_nused >= H5D_VIRTUAL_TREE_THRESHOLD) {
+    if (!storage->tree && storage->list_nused >= H5D_VIRTUAL_TREE_THRESHOLD) {
         int rank = 0;
         assert(!storage->is_in_tree);
-        /* Get the rank of the dataset */
-        if ((rank = H5S_GET_EXTENT_NDIMS(dset_info->dset->shared->space)) < 0 || rank >= H5S_MAX_RANK)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset rank");
 
-        if (rank == 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "virtual dataset has no rank");
+        /* Check that building the tree is enabled */
+        if (NULL == (dapl_plist = (H5P_genplist_t *)H5I_object(dset->shared->dapl_id)))
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
 
-        if (H5D__virtual_build_tree(storage, rank) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
+        if (H5P_get(dapl_plist, H5D_ACS_USE_TREE_NAME, &tree_enabled) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get virtual use tree flag");
+
+        if (tree_enabled) {
+            /* Get the rank of the dataset */
+            if ((rank = H5S_GET_EXTENT_NDIMS(dset_info->dset->shared->space)) < 0 || rank >= H5S_MAX_RANK)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset rank");
+
+            if (rank == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "virtual dataset has no rank");
+
+            if (H5D__virtual_build_tree(storage, rank) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
+        }
     }
 
     /* Iterate over the mappings */
