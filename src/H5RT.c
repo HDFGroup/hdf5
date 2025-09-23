@@ -71,7 +71,7 @@ H5RT_leaf_init(H5RT_leaf_t *leaf, int rank, void *record)
     memset(leaf, 0, sizeof(H5RT_leaf_t));
 
     /* Allocate coordinate arrays as single block: 3 * rank * sizeof(hsize_t) */
-    if (NULL == (leaf->_coords = (hsize_t *)calloc(3 * (size_t)rank, sizeof(hsize_t))))
+    if (NULL == (leaf->_coords = (hsize_t *)malloc(3 * (size_t)rank * sizeof(hsize_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate leaf coordinates");
 
     /* Set up pointers to sections of the coordinate block */
@@ -730,8 +730,8 @@ H5RT_copy(const H5RT_t *rtree)
         const H5RT_leaf_t *src_leaf = &rtree->leaves[i];
 
         /* Allocate coordinate arrays for this leaf */
-        hsize_t *coords = (hsize_t *)calloc(3 * (size_t)src_leaf->rank, sizeof(hsize_t));
-        if (!coords) {
+        new_leaves[i]._coords = (hsize_t *)malloc(3 * (size_t)src_leaf->rank * sizeof(hsize_t));
+        if (!new_leaves[i]._coords) {
             /* Clean up already copied leaves */
             for (size_t j = 0; j < i; j++) {
                 if (new_leaves[j]._coords)
@@ -741,15 +741,14 @@ H5RT_copy(const H5RT_t *rtree)
         }
 
         /* Set up the leaf structure */
-        new_leaves[i].record  = src_leaf->record;
-        new_leaves[i].rank    = src_leaf->rank;
-        new_leaves[i]._coords = coords;
-        new_leaves[i].min     = coords;
-        new_leaves[i].max     = coords + src_leaf->rank;
-        new_leaves[i].mid     = coords + (2 * src_leaf->rank);
+        new_leaves[i].record = src_leaf->record;
+        new_leaves[i].rank   = src_leaf->rank;
+        new_leaves[i].min    = new_leaves[i]._coords;
+        new_leaves[i].max    = new_leaves[i]._coords + src_leaf->rank;
+        new_leaves[i].mid    = new_leaves[i]._coords + (2 * src_leaf->rank);
 
         /* Copy coordinate data */
-        memcpy(coords, src_leaf->_coords, 3 * (size_t)src_leaf->rank * sizeof(hsize_t));
+        memcpy(new_leaves[i]._coords, src_leaf->_coords, 3 * (size_t)src_leaf->rank * sizeof(hsize_t));
     }
 
     /* Allocate new tree structure */
