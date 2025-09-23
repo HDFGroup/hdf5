@@ -1364,16 +1364,42 @@ jobs:
 
                   # Use PowerShell's Start-Process with timeout for Windows
                   try {
-                    $process = Start-Process -FilePath "java" -ArgumentList "-cp", ".;$CLASSPATH", $example_name -RedirectStandardOutput $output_file -RedirectStandardError $output_file -NoNewWindow -PassThru
+                    # Create temporary files for stdout and stderr
+                    $stdout_file = "$output_file.stdout"
+                    $stderr_file = "$output_file.stderr"
+
+                    $process = Start-Process -FilePath "java" -ArgumentList "-cp", ".;$CLASSPATH", $example_name -RedirectStandardOutput $stdout_file -RedirectStandardError $stderr_file -NoNewWindow -PassThru
 
                     # Wait for the process with timeout
                     if ($process.WaitForExit(10000)) {  # 10 seconds in milliseconds
                       $execResult = $process.ExitCode
+
+                      # Combine stdout and stderr into single output file
+                      $stdout_content = if (Test-Path $stdout_file) {
+                        try { Get-Content $stdout_file -Raw -ErrorAction SilentlyContinue } catch { "" }
+                      } else { "" }
+                      $stderr_content = if (Test-Path $stderr_file) {
+                        try { Get-Content $stderr_file -Raw -ErrorAction SilentlyContinue } catch { "" }
+                      } else { "" }
+
+                      $combined_content = "$stdout_content$stderr_content"
+                      if ([string]::IsNullOrWhiteSpace($combined_content)) {
+                        $combined_content = "No output generated"
+                      }
+                      $combined_content | Out-File $output_file -Encoding UTF8
+
+                      # Clean up temporary files
+                      if (Test-Path $stdout_file) { Remove-Item $stdout_file -Force }
+                      if (Test-Path $stderr_file) { Remove-Item $stderr_file -Force }
                     } else {
                       # Process timed out
                       try { $process.Kill() } catch { }
                       $execResult = 1
                       "Process timed out after 10 seconds" | Out-File $output_file -Encoding UTF8
+
+                      # Clean up temporary files
+                      if (Test-Path $stdout_file) { Remove-Item $stdout_file -Force }
+                      if (Test-Path $stderr_file) { Remove-Item $stderr_file -Force }
                     }
                   } catch {
                     $execResult = 1
