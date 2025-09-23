@@ -32,6 +32,8 @@ static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, 
                               int prev_sort_dim);
 static herr_t H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[],
                                    H5RT_result_t **head, H5RT_result_t **tail);
+static herr_t H5RT__node_copy(H5RT_node_t *dest_node, const H5RT_node_t *src_node,
+                              const H5RT_leaf_t *old_leaves_base, H5RT_leaf_t *new_leaves_base);
 static void   H5RT__free_recurse(H5RT_node_t *node);
 
 #if defined(H5_HAVE_DARWIN) || defined(H5_HAVE_WIN32_API)
@@ -335,7 +337,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
             assert(child_leaf_start + leaves_left <= leaves + count);
 
             /* Allocate this child node */
-            if (NULL == (node->children.nodes[i] = H5FL_CALLOC(H5RT_node_t)))
+            if (NULL == (node->children.nodes[i] = H5FL_MALLOC(H5RT_node_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate memory for R-tree node");
 
             child_leaf_count = (leaves_left < slab_size) ? leaves_left : slab_size;
@@ -386,7 +388,7 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
     if (count == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "r-tree must have at least one leaf");
 
-    if (NULL == (rtree = H5FL_CALLOC(H5RT_t)))
+    if (NULL == (rtree = H5FL_MALLOC(H5RT_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree");
 
     rtree->rank    = rank;
@@ -452,7 +454,7 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
 
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
                 /* We found an intersecting leaf, create a result structure for it */
-                if (NULL == (new_result = H5FL_CALLOC(H5RT_result_t)))
+                if (NULL == (new_result = H5FL_MALLOC(H5RT_result_t)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate result structure");
 
                 new_result->leaf = curr_leaf;
@@ -569,6 +571,74 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RT_free_results() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__node_copy
+ *
+ * Purpose:     Deep copy a node from source tree to destination tree,
+ *              recursively copying all child nodes and remapping leaf
+ *              pointers to the new leaves array.
+ *
+ * Parameters:  dest_node       - Pre-allocated destination node to copy into
+ *              src_node        - Source node to copy from
+ *              old_leaves_base - Base pointer of original tree's leaves array
+ *              new_leaves_base - Base pointer of new tree's leaves array
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5RT__node_copy(H5RT_node_t *dest_node, const H5RT_node_t *src_node, const H5RT_leaf_t *old_leaves_base,
+                H5RT_leaf_t *new_leaves_base)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(dest_node);
+    assert(src_node);
+    assert(old_leaves_base);
+    assert(new_leaves_base);
+
+    /* Copy basic node fields */
+    memcpy(dest_node->min, src_node->min, H5S_MAX_RANK * sizeof(hsize_t));
+    memcpy(dest_node->max, src_node->max, H5S_MAX_RANK * sizeof(hsize_t));
+    dest_node->nchildren           = src_node->nchildren;
+    dest_node->children_are_leaves = src_node->children_are_leaves;
+
+    if (src_node->children_are_leaves) {
+        /* Leaf node: remap the leaves pointer to the corresponding position in new array */
+        ptrdiff_t offset           = src_node->children.leaves - old_leaves_base;
+        dest_node->children.leaves = new_leaves_base + offset;
+    }
+    else {
+        /* Internal node: recursively copy each child node */
+        for (int i = 0; i < src_node->nchildren; i++) {
+            /* Allocate new child node */
+            if (NULL == (dest_node->children.nodes[i] = H5FL_MALLOC(H5RT_node_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate child node");
+
+            /* Recursively copy the child */
+            if (H5RT__node_copy(dest_node->children.nodes[i], src_node->children.nodes[i], old_leaves_base,
+                                new_leaves_base) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, FAIL, "failed to copy child node");
+        }
+    }
+
+done:
+    if (ret_value < 0 && dest_node && !dest_node->children_are_leaves) {
+        /* Clean up any partially allocated child nodes */
+        for (int i = 0; i < dest_node->nchildren; i++) {
+            if (dest_node->children.nodes[i]) {
+                H5FL_FREE(H5RT_node_t, dest_node->children.nodes[i]);
+                dest_node->children.nodes[i] = NULL;
+            }
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5RT__node_copy() */
+
 static void
 H5RT__free_recurse(H5RT_node_t *node)
 {
@@ -682,8 +752,18 @@ H5RT_copy(const H5RT_t *rtree)
         memcpy(coords, src_leaf->_coords, 3 * (size_t)src_leaf->rank * sizeof(hsize_t));
     }
 
-    if ((new_tree = H5RT_create(rtree->rank, new_leaves, rtree->nleaves)) == NULL)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, NULL, "failed to create new r-tree");
+    /* Allocate new tree structure */
+    if (NULL == (new_tree = H5FL_MALLOC(H5RT_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "failed to allocate memory for R-tree copy");
+
+    /* Copy basic tree fields */
+    new_tree->rank    = rtree->rank;
+    new_tree->nleaves = rtree->nleaves;
+    new_tree->leaves  = new_leaves;
+
+    /* Deep copy the root node structure */
+    if (H5RT__node_copy(&new_tree->root, &rtree->root, rtree->leaves, new_leaves) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "failed to copy r-tree structure");
 
     ret_value = new_tree;
 
