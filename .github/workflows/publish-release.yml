@@ -19,7 +19,7 @@ on:
       dry_run:
         description: Dry run mode (skip S3 upload)
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
