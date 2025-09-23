@@ -26,15 +26,27 @@
 
 H5FL_DEFINE_STATIC(H5RT_t);
 H5FL_DEFINE_STATIC(H5RT_node_t);
-H5FL_DEFINE_STATIC(H5RT_result_t);
+
+/* Dynamic result buffer for efficient search result allocation */
+typedef struct {
+    H5RT_result_t *buffer;   /* Contiguous array of results */
+    size_t         capacity; /* Current buffer size (power of 2) */
+    size_t         count;    /* Number of results used */
+} H5RT_result_buffer_t;
 
 static herr_t H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count,
                               int prev_sort_dim);
 static herr_t H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[],
-                                   H5RT_result_t **head, H5RT_result_t **tail);
+                                   H5RT_result_buffer_t *buffer);
 static herr_t H5RT__node_copy(H5RT_node_t *dest_node, const H5RT_node_t *src_node,
                               const H5RT_leaf_t *old_leaves_base, H5RT_leaf_t *new_leaves_base);
 static void   H5RT__free_recurse(H5RT_node_t *node);
+
+/* Result buffer helper functions */
+static herr_t H5RT__result_buffer_init(H5RT_result_buffer_t *buffer);
+static herr_t H5RT__result_buffer_add(H5RT_result_buffer_t *buffer, H5RT_leaf_t *leaf);
+static herr_t H5RT__result_buffer_grow(H5RT_result_buffer_t *buffer);
+static void   H5RT__result_buffer_cleanup(H5RT_result_buffer_t *buffer);
 
 #if defined(H5_HAVE_DARWIN) || defined(H5_HAVE_WIN32_API)
 static int H5RT__leaf_compare(void *dim, const void *leaf1, const void *leaf2);
@@ -229,6 +241,147 @@ done:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    H5RT__result_buffer_init
+ *
+ * Purpose:     Initialize a result buffer with initial capacity
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5RT__result_buffer_init(H5RT_result_buffer_t *buffer)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(buffer);
+
+    buffer->capacity = 32; /* Initial power-of-2 size */
+    buffer->count    = 0;
+
+    /* Allocate initial buffer */
+    buffer->buffer = (H5RT_result_t *)malloc(buffer->capacity * sizeof(H5RT_result_t));
+    if (!buffer->buffer)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate result buffer");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__result_buffer_grow
+ *
+ * Purpose:     Double the capacity of the result buffer and fix next pointers
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5RT__result_buffer_grow(H5RT_result_buffer_t *buffer)
+{
+    herr_t         ret_value    = SUCCEED;
+    size_t         new_capacity = 0;
+    H5RT_result_t *new_buffer   = NULL;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(buffer);
+    assert(buffer->buffer);
+    assert(buffer->count == buffer->capacity);
+
+    new_capacity = buffer->capacity * 2;
+
+    /* Overflow check */
+    if (new_capacity < buffer->capacity || new_capacity > SIZE_MAX / sizeof(H5RT_result_t))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "result buffer capacity overflow");
+
+    /* Reallocate the buffer */
+    new_buffer = (H5RT_result_t *)realloc(buffer->buffer, new_capacity * sizeof(H5RT_result_t));
+    if (!new_buffer)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to grow result buffer");
+
+    buffer->buffer   = new_buffer;
+    buffer->capacity = new_capacity;
+
+    /* Fix up next pointers after realloc - they all point within the same buffer */
+    for (size_t i = 0; i < buffer->count - 1; i++)
+        buffer->buffer[i].next = &buffer->buffer[i + 1];
+
+    if (buffer->count > 0)
+        buffer->buffer[buffer->count - 1].next = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__result_buffer_add
+ *
+ * Purpose:     Add a leaf to the result buffer, growing if necessary
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5RT__result_buffer_add(H5RT_result_buffer_t *buffer, H5RT_leaf_t *leaf)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(buffer);
+    assert(leaf);
+
+    /* Grow buffer if full */
+    if (buffer->count >= buffer->capacity) {
+        if (H5RT__result_buffer_grow(buffer) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTALLOC, FAIL, "failed to grow result buffer");
+    }
+
+    /* Add the new result */
+    H5RT_result_t *new_result = &buffer->buffer[buffer->count];
+    new_result->leaf = leaf;
+    new_result->next = NULL;
+
+    /* Link to previous result if this isn't the first */
+    if (buffer->count > 0)
+        buffer->buffer[buffer->count - 1].next = new_result;
+
+    buffer->count++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__result_buffer_cleanup
+ *
+ * Purpose:     Clean up a result buffer (does not affect linked list semantics)
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5RT__result_buffer_cleanup(H5RT_result_buffer_t *buffer)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (buffer && buffer->buffer) {
+        free(buffer->buffer);
+        buffer->buffer   = NULL;
+        buffer->capacity = 0;
+        buffer->count    = 0;
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5RT__bulk_load
  *
  * Purpose:     Load the provided leaves into the r-tree in an efficient manner.
@@ -406,34 +559,30 @@ done:
  * Purpose:     Recursively search the r-tree for leaves whose bounding boxes
  *              intersect with the provided search region.
  *
- * Parameters:  node (in)  - Node from which to begin the search
- *              rank (in)  - Rank of the hyper-rectangles
- *              min (in)   - Minimum bounds of spatial search, should have 'rank' dims
- *              max (in)   - Maximum bounds of spatial search, should have 'rank' dims
- *              head (out) - Head of the linked list of result structures
- *              tail (out) - Tail of the linked list of result structures
+ * Parameters:  node (in)   - Node from which to begin the search
+ *              rank (in)   - Rank of the hyper-rectangles
+ *              min (in)    - Minimum bounds of spatial search, should have 'rank' dims
+ *              max (in)    - Maximum bounds of spatial search, should have 'rank' dims
+ *              buffer (io) - Dynamic result buffer to add matches to
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_result_t **head,
-                     H5RT_result_t **tail)
+H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_result_buffer_t *buffer)
 {
     hsize_t *curr_min = NULL;
     hsize_t *curr_max = NULL;
 
-    H5RT_leaf_t   *curr_leaf  = NULL;
-    H5RT_node_t   *curr_node  = NULL;
-    H5RT_result_t *new_result = NULL;
-    herr_t         ret_value  = SUCCEED;
+    H5RT_leaf_t *curr_leaf = NULL;
+    H5RT_node_t *curr_node = NULL;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     assert(node);
-    assert(head);
-    assert(tail);
+    assert(buffer);
 
     /* Check all children for intersection */
     for (int i = 0; i < node->nchildren; i++)
@@ -443,25 +592,9 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
             curr_max  = curr_leaf->max;
 
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
-                /* We found an intersecting leaf, create a result structure for it */
-                if (NULL == (new_result = H5FL_MALLOC(H5RT_result_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate result structure");
-
-                new_result->leaf = curr_leaf;
-                new_result->next = NULL;
-
-                /* Add to the linked list of results */
-                if (*tail) {
-                    assert(*head);
-                    (*tail)->next = new_result;
-                }
-                else {
-                    /* This is the first result to be returned - mark it as head */
-                    assert(*head == NULL);
-                    *head = new_result;
-                }
-                /* Newly added result is the new tail of result list */
-                *tail = new_result;
+                /* We found an intersecting leaf, add it to the buffer */
+                if (H5RT__result_buffer_add(buffer, curr_leaf) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTALLOC, FAIL, "failed to add result to buffer");
             }
         }
         else {
@@ -473,7 +606,7 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
             /* Only recurse into child node if its bounding box overlaps with the search region */
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
                 /* We found an intersecting internal node, recurse into it */
-                if (H5RT__search_recurse(curr_node, rank, min, max, head, tail) < 0)
+                if (H5RT__search_recurse(curr_node, rank, min, max, buffer) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "recursive search failed");
             }
         }
@@ -499,9 +632,8 @@ done:
 herr_t
 H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_t **results_out)
 {
-    H5RT_result_t *head      = NULL;
-    H5RT_result_t *tail      = NULL;
-    herr_t         ret_value = SUCCEED;
+    H5RT_result_buffer_t buffer;
+    herr_t               ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -514,17 +646,29 @@ H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_t **results
     if (!results_out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid results output pointer");
 
+    /* Initialize result buffer */
+    if (H5RT__result_buffer_init(&buffer) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "failed to initialize result buffer");
+
     /* Perform the actual search */
-    if (H5RT__search_recurse(&rtree->root, rtree->rank, min, max, &head, &tail) < 0)
+    if (H5RT__search_recurse(&rtree->root, rtree->rank, min, max, &buffer) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "search failed");
 
-    /* Return the linked list */
-    *results_out = head;
+    /* Return the buffer pointer (or NULL if no results) */
+    if (buffer.count > 0) {
+        *results_out = buffer.buffer;
+        /* Don't cleanup buffer on success - caller owns it now */
+    }
+    else {
+        /* No results found, clean up buffer and return NULL */
+        H5RT__result_buffer_cleanup(&buffer);
+        *results_out = NULL;
+    }
 
 done:
-    if (ret_value < 0 && head) {
-        /* Clean up partial results on failure */
-        H5RT_free_results(head);
+    if (ret_value < 0) {
+        /* Clean up buffer on failure */
+        H5RT__result_buffer_cleanup(&buffer);
         *results_out = NULL;
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -533,7 +677,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5RT_free_results
  *
- * Purpose:     Free a linked list of search results returned by H5RT_search.
+ * Purpose:     Free search results returned by H5RT_search.
+ *
+ *              Since results are now allocated as a contiguous buffer,
+ *              this function simply frees the entire buffer in one operation.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -542,22 +689,17 @@ done:
 herr_t
 H5RT_free_results(H5RT_result_t *results)
 {
-    H5RT_result_t *current   = NULL;
-    H5RT_result_t *next      = NULL;
-    herr_t         ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR(FAIL);
 
-    /* Free all result structures in the linked list */
-    current = results;
-    while (current) {
-        next = current->next;
-        if (H5FL_FREE(H5RT_result_t, current) != NULL)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to free result structure");
-        current = next;
+    if (results) {
+        /* All results are allocated as a single contiguous buffer,
+         * so we can free the entire thing at once.
+         * The buffer was allocated with malloc() in H5RT__result_buffer_init */
+        free(results);
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RT_free_results() */
 
