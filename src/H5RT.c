@@ -261,16 +261,11 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
 
     FUNC_ENTER_PACKAGE
 
-    if (!node)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid node");
-    if (rank < 1 || rank > H5S_MAX_RANK)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
-    if (!leaves)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid leaves");
-    if (count == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "must have at least one leaf");
-    if (prev_sort_dim < -1)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid previous sort dimension");
+    assert(node);
+    assert(leaves);
+    assert(count > 0);
+    assert(prev_sort_dim >= -1);
+    assert(rank >= 1 && rank <= H5S_MAX_RANK);
 
     /* Compute the max/min bounds of the provided node */
     /* Initial values */
@@ -319,7 +314,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
 
         /* After leaves are sorted in the current dimension, partition the hyper-rectangles into slabs */
 
-        /* Compute # slabs and slab size */
+        /* Compute number of slabs and slab size for partitioning */
         H5RT__compute_slabs(H5RT_MAX_NODE_SIZE, count, &num_slabs, &slab_size);
 
         node->nchildren = (int)num_slabs;
@@ -333,17 +328,12 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         for (int i = 0; i < node->nchildren; i++) {
             /* The final slab should exactly contain the last leaf */
             assert(leaves_left > 0);
-            assert(child_leaf_start);
-            assert(child_leaf_start + leaves_left <= leaves + count);
 
             /* Allocate this child node */
             if (NULL == (node->children.nodes[i] = H5FL_MALLOC(H5RT_node_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate memory for R-tree node");
 
             child_leaf_count = (leaves_left < slab_size) ? leaves_left : slab_size;
-            assert(child_leaf_count <= leaves_left);
-            assert(child_leaf_count > 0);
-            assert(child_leaf_count < count);
 
             /* Recursively fill this child node with leaves from 'child_leaf_start' to 'child_leaf_start' +
              * 'child_leaf_count' */
