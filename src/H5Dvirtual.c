@@ -71,6 +71,51 @@
 /* Default size for sub_dset array */
 #define H5D_VIRTUAL_DEF_SUB_DSET_SIZE 128
 
+/*
+ * Determines whether a virtual dataset mapping entry should be inserted
+ * into the R-tree spatial index.
+ *
+ * Parameters:
+ *   entry        - H5O_storage_virtual_ent_t* mapping entry to check
+ *   should_insert - bool output parameter set to true/false
+ *
+ */
+#define H5D_RTREE_SHOULD_INSERT(entry, should_insert)                                                        \
+    do {                                                                                                     \
+        H5S_t  *_vspace      = NULL;                                                                         \
+        H5S_t  *_src_space   = NULL;                                                                         \
+        hsize_t _virt_nelems = 0;                                                                            \
+        hsize_t _src_nelems  = 0;                                                                            \
+                                                                                                             \
+        assert(entry);                                                                                       \
+                                                                                                             \
+        /* Get virtual space and element count */                                                            \
+        if ((_vspace = (entry)->source_dset.virtual_select) != NULL)                                         \
+            _virt_nelems = (hsize_t)H5S_GET_SELECT_NPOINTS(_vspace);                                         \
+                                                                                                             \
+        /* Get source space and element count */                                                             \
+        if ((_src_space = (entry)->source_dset.clipped_source_select) != NULL)                               \
+            _src_nelems = (hsize_t)H5S_GET_SELECT_NPOINTS(_src_space);                                       \
+                                                                                                             \
+        /* Do not insert mappings with an unlimited dimension */                                             \
+        if (_virt_nelems == H5S_UNLIMITED || _src_nelems == H5S_UNLIMITED) {                                 \
+            should_insert = false;                                                                           \
+        }                                                                                                    \
+        /* Do not insert printf-style mappings */                                                            \
+        else if ((entry)->psfn_nsubs > 0 || (entry)->psdn_nsubs > 0) {                                       \
+            should_insert = false;                                                                           \
+        }                                                                                                    \
+        /* Do not insert zero-dim mappings */                                                                \
+        else if ((_vspace && H5S_GET_EXTENT_NDIMS(_vspace) < 1) ||                                           \
+                 (_src_space && H5S_GET_EXTENT_NDIMS(_src_space) < 1)) {                                     \
+            should_insert = false;                                                                           \
+        }                                                                                                    \
+        /* Otherwise, we can insert it */                                                                    \
+        else {                                                                                               \
+            should_insert = true;                                                                            \
+        }                                                                                                    \
+    } while (0)
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -111,7 +156,6 @@ static herr_t H5D__virtual_write_one(H5D_dset_io_info_t            *dset_info,
 
 /* R-tree helper functions */
 static herr_t H5D__virtual_build_tree(H5O_storage_virtual_t *virt, int rank);
-static herr_t H5D__rtree_should_insert(void *mapping_entry, bool *should_insert);
 static herr_t H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings,
                                       H5RT_leaf_t **leaves_out, bool **is_in_tree_out, size_t *leaf_count);
 /*********************/
@@ -3798,64 +3842,6 @@ done:
 } /* end H5D__virtual_release_source_dset_files() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__rtree_should_insert
- *
- * Purpose:     Determine whether the given mapping is valid for
- *              insertion into a spatial tree
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__rtree_should_insert(void *mapping_entry, bool *should_insert)
-{
-    herr_t                     ret_value   = SUCCEED;
-    H5S_t                     *vspace      = NULL;
-    H5S_t                     *src_space   = NULL;
-    hsize_t                    virt_nelems = 0;
-    hsize_t                    src_nelems  = 0;
-    H5O_storage_virtual_ent_t *entry       = NULL;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    assert(mapping_entry);
-    assert(should_insert);
-
-    entry = (H5O_storage_virtual_ent_t *)mapping_entry;
-
-    /* Do not insert mappings with an unlimited dimension */
-    if ((vspace = entry->source_dset.virtual_select) != NULL)
-        virt_nelems = (hsize_t)H5S_GET_SELECT_NPOINTS(vspace);
-
-    if ((src_space = entry->source_dset.clipped_source_select) != NULL)
-        src_nelems = (hsize_t)H5S_GET_SELECT_NPOINTS(src_space);
-
-    if (virt_nelems == H5S_UNLIMITED || src_nelems == H5S_UNLIMITED) {
-        *should_insert = false;
-        goto done;
-    }
-
-    /* Do not insert printf-style mappings */
-    if (entry->psfn_nsubs > 0 || entry->psdn_nsubs > 0) {
-        *should_insert = false;
-        goto done;
-    }
-
-    /* Do not insert zero-dim mappings */
-    if ((H5S_GET_EXTENT_NDIMS(vspace)) < 1 || (H5S_GET_EXTENT_NDIMS(src_space)) < 1) {
-        *should_insert = false;
-        goto done;
-    }
-
-    /* Otherwise, we can insert it */
-    *should_insert = true;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-/*-------------------------------------------------------------------------
  * Function:    H5D__mappings_to_leaves
  *
  * Purpose:     Allocate leaf array and boolean array for construction of a
@@ -3920,8 +3906,7 @@ H5D__mappings_to_leaves(H5O_storage_virtual_ent_t *mappings, size_t num_mappings
     for (size_t i = 0; i < num_mappings; i++) {
         curr_mapping = &mappings[i];
 
-        if (H5D__rtree_should_insert((void *)curr_mapping, &should_insert_space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "error checking if mapping should be inserted");
+        H5D_RTREE_SHOULD_INSERT(curr_mapping, should_insert_space);
 
         if (!should_insert_space)
             continue;
