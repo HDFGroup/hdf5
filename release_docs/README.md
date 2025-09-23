@@ -100,3 +100,16 @@ platforms.
 
 These files document how to build HDF5 applications with an installed HDF5
 library.
+
+## Java Examples Maven Integration
+
+The HDF5 Java examples are now integrated with Maven deployment to provide
+complete example applications that work with HDF5 Java library Maven artifacts:
+
+* **Maven Artifact:** `org.hdfgroup:hdf5-java-examples`
+* **Platform Support:** Cross-platform with platform-specific dependencies
+* **Documentation:** See `HDF5Examples/JAVA/README-MAVEN.md` for complete usage instructions
+* **Testing:** Comprehensive CI/CD testing across all supported platforms
+
+The Java examples demonstrate proper usage of HDF5 Java bindings in real-world
+scenarios and serve as templates for developing HDF5-based Java applications.

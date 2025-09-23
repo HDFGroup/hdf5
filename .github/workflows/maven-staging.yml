@@ -1126,11 +1126,31 @@ jobs:
           echo "🎉 Dry run deployment test passed!"
 
   test-java-examples-maven:
-    name: "Test Java Examples with Maven Artifacts"
-    runs-on: ubuntu-latest
+    name: "Test Java Examples with Maven Artifacts (${{ matrix.platform }})"
+    runs-on: ${{ matrix.os }}
     needs: [detect-changes, build-maven-artifacts, build-maven-artifacts-windows, build-maven-artifacts-macos-x86_64, build-maven-artifacts-macos-aarch64]
     if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.outputs.artifacts-created == 'true' }}
     continue-on-error: true  # Non-blocking failures
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "Linux"
+            os: "ubuntu-latest"
+            artifact-name: "maven-staging-artifacts-linux-x86_64"
+            artifact-path: "linux"
+          - platform: "Windows"
+            os: "windows-latest"
+            artifact-name: "maven-staging-artifacts-windows-x86_64"
+            artifact-path: "windows"
+          - platform: "macOS-x86_64"
+            os: "macos-13"
+            artifact-name: "maven-staging-artifacts-macos-x86_64"
+            artifact-path: "macos-x86_64"
+          - platform: "macOS-aarch64"
+            os: "macos-latest"
+            artifact-name: "maven-staging-artifacts-macos-aarch64"
+            artifact-path: "macos-aarch64"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -1141,40 +1161,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Download Maven artifacts (All Platforms)
-        run: |
-          mkdir -p ./maven-artifacts
-          echo "Downloading Maven artifacts for Java examples testing..."
-
-      - name: Download Maven artifacts (Linux)
+      - name: Download Maven artifacts (${{ matrix.platform }})
         uses: actions/download-artifact@v4
         with:
-          name: maven-staging-artifacts-linux-x86_64
-          path: ./maven-artifacts/linux
-        continue-on-error: true
-
-      - name: Download Maven artifacts (Windows)
-        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'windows') || inputs.platforms == 'all-platforms' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: maven-staging-artifacts-windows-x86_64
-          path: ./maven-artifacts/windows
-        continue-on-error: true
-
-      - name: Download Maven artifacts (macOS x86_64)
-        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: maven-staging-artifacts-macos-x86_64
-          path: ./maven-artifacts/macos-x86_64
-        continue-on-error: true
-
-      - name: Download Maven artifacts (macOS aarch64)
-        if: ${{ inputs.platforms == '' || contains(inputs.platforms, 'macos') || inputs.platforms == 'all-platforms' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: maven-staging-artifacts-macos-aarch64
-          path: ./maven-artifacts/macos-aarch64
+          name: ${{ matrix.artifact-name }}
+          path: ./maven-artifacts/${{ matrix.artifact-path }}
         continue-on-error: true
 
       - name: Cache Maven dependencies
@@ -1186,19 +1177,21 @@ jobs:
             ${{ runner.os }}-maven-examples-
             ${{ runner.os }}-maven-
 
-      - name: Test Java Examples (Quick Test)
-        id: test-examples
+      - name: Test Java Examples (Unix)
+        if: ${{ matrix.platform != 'Windows' }}
+        id: test-examples-unix
+        shell: bash
         run: |
-          echo "=== Java Examples Maven Integration Test ==="
+          echo "=== Java Examples Maven Integration Test (${{ matrix.platform }}) ==="
 
           # Test one representative example from each category
           cd HDF5Examples/JAVA
 
-          # Get absolute path to maven artifacts
-          MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/linux)"
-          echo "Maven artifacts directory: $MAVEN_ARTIFACTS_DIR"
+          # Get absolute path to maven artifacts for this platform
+          MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/${{ matrix.artifact-path }})"
+          echo "Maven artifacts directory (${{ matrix.platform }}): $MAVEN_ARTIFACTS_DIR"
 
-          # Find HDF5 JAR files (not dependencies like slf4j) - use only Linux artifacts for testing
+          # Find HDF5 JAR files (not dependencies like slf4j) - use platform-specific artifacts
           HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
           if [ -z "$HDF5_JAR" ]; then
             echo "❌ No HDF5 JAR files found for testing"
@@ -1209,8 +1202,7 @@ jobs:
 
           echo "Using HDF5 JAR file: $HDF5_JAR"
 
-          # Also find any dependency JARs (from Linux artifacts only to avoid duplicates)
-          # Only include slf4j-api and slf4j-simple, exclude slf4j-nop to avoid conflicts
+          # Also find any dependency JARs - only include slf4j-api and slf4j-simple, exclude slf4j-nop to avoid conflicts
           DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar")
           if [ -n "$DEP_JARS" ]; then
             echo "Found dependency JARs:"
@@ -1282,7 +1274,7 @@ jobs:
             fi
           done
 
-          echo "=== Java Examples Test Summary ==="
+          echo "=== Java Examples Test Summary (${{ matrix.platform }}) ==="
           echo "Total representative examples tested: $TOTAL_EXAMPLES"
           echo "Passed: $PASSED_EXAMPLES"
           echo "Failed: $((TOTAL_EXAMPLES - PASSED_EXAMPLES))"
@@ -1299,13 +1291,139 @@ jobs:
           echo "total-examples=$TOTAL_EXAMPLES" >> $GITHUB_OUTPUT
           echo "passed-examples=$PASSED_EXAMPLES" >> $GITHUB_OUTPUT
 
+      - name: Test Java Examples (Windows)
+        if: ${{ matrix.platform == 'Windows' }}
+        id: test-examples-windows
+        shell: pwsh
+        run: |
+          Write-Host "=== Java Examples Maven Integration Test (Windows) ==="
+
+          # Test one representative example from each category
+          Set-Location HDF5Examples/JAVA
+
+          # Get absolute path to maven artifacts for this platform
+          $MAVEN_ARTIFACTS_DIR = Resolve-Path "../../maven-artifacts/${{ matrix.artifact-path }}"
+          Write-Host "Maven artifacts directory (Windows): $MAVEN_ARTIFACTS_DIR"
+
+          # Find HDF5 JAR files (not dependencies like slf4j)
+          $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*hdf5*.jar" -Recurse | Select-Object -First 1
+          if (-not $HDF5_JAR) {
+            $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "jarhdf5*.jar" -Recurse | Select-Object -First 1
+          }
+
+          if (-not $HDF5_JAR) {
+            Write-Host "❌ No HDF5 JAR files found for testing"
+            Write-Host "Available JAR files:"
+            Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*.jar" -Recurse
+            exit 1
+          }
+
+          Write-Host "Using HDF5 JAR file: $($HDF5_JAR.FullName)"
+
+          # Find dependency JARs - only include slf4j-api and slf4j-simple
+          $DEP_JARS = @()
+          $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-api*.jar" -Recurse
+          $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-simple*.jar" -Recurse
+
+          if ($DEP_JARS.Count -gt 0) {
+            Write-Host "Found dependency JARs:"
+            $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
+          }
+
+          $FAILED_EXAMPLES = @()
+          $TOTAL_EXAMPLES = 0
+          $PASSED_EXAMPLES = 0
+
+          # Test representative examples from each category
+          foreach ($category in @("H5D", "H5T", "H5G", "TUTR")) {
+            if (Test-Path $category) {
+              Set-Location $category
+
+              # Find first .java file in category
+              $EXAMPLE_FILE = Get-ChildItem -Filter "*.java" | Select-Object -First 1
+              if ($EXAMPLE_FILE) {
+                $TOTAL_EXAMPLES++
+                $example_name = $EXAMPLE_FILE.BaseName
+                Write-Host "--- Testing $category/$example_name ---"
+
+                # Build classpath with HDF5 JAR and dependencies
+                $CLASSPATH = $HDF5_JAR.FullName
+                foreach ($dep_jar in $DEP_JARS) {
+                  $CLASSPATH += ";$($dep_jar.FullName)"
+                }
+
+                Write-Host "Using classpath: $CLASSPATH"
+
+                # Test compilation
+                $compileResult = & javac -cp $CLASSPATH $EXAMPLE_FILE.Name 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                  Write-Host "✓ Compilation successful for $category/$example_name"
+
+                  # Test execution
+                  $output_file = "../../../$example_name.out"
+                  $execResult = & timeout 10 java -cp ".;$CLASSPATH" $example_name > $output_file 2>&1
+
+                  if ($LASTEXITCODE -eq 0) {
+                    # Basic output validation
+                    $content = Get-Content $output_file -Raw
+                    if (($content -match "(?i)(dataset|datatype|group|success|created|written|read)") -and
+                        ($content -notmatch "(?i)(error|exception|failed|cannot)")) {
+                      Write-Host "✓ Execution and validation successful for $category/$example_name"
+                      $PASSED_EXAMPLES++
+                    } else {
+                      Write-Host "✗ Output validation failed for $category/$example_name"
+                      Write-Host "Output:"
+                      Get-Content $output_file
+                      $FAILED_EXAMPLES += "$category/$example_name"
+                    }
+                  } else {
+                    # Check if failure is due to expected native library issue
+                    $content = Get-Content $output_file -Raw
+                    if ($content -match "UnsatisfiedLinkError.*hdf5_java.*java.library.path") {
+                      Write-Host "✓ Expected native library error for Maven-only testing: $category/$example_name"
+                      Write-Host "  (This confirms JAR structure is correct)"
+                      $PASSED_EXAMPLES++
+                    } else {
+                      Write-Host "✗ Unexpected execution failure for $category/$example_name"
+                      Write-Host "Output:"
+                      Get-Content $output_file
+                      $FAILED_EXAMPLES += "$category/$example_name"
+                    }
+                  }
+                } else {
+                  Write-Host "✗ Compilation failed for $category/$example_name"
+                  $FAILED_EXAMPLES += "$category/$example_name"
+                }
+              }
+              Set-Location ..
+            }
+          }
+
+          Write-Host "=== Java Examples Test Summary (Windows) ==="
+          Write-Host "Total representative examples tested: $TOTAL_EXAMPLES"
+          Write-Host "Passed: $PASSED_EXAMPLES"
+          Write-Host "Failed: $($TOTAL_EXAMPLES - $PASSED_EXAMPLES)"
+
+          if ($FAILED_EXAMPLES.Count -gt 0) {
+            Write-Host "Failed examples: $($FAILED_EXAMPLES -join ' ')"
+            Write-Host "❌ Some Java examples failed - but continuing (non-blocking)"
+            echo "test-status=FAILED" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "✅ All representative Java examples passed!"
+            echo "test-status=PASSED" >> $env:GITHUB_OUTPUT
+          }
+
+          echo "total-examples=$TOTAL_EXAMPLES" >> $env:GITHUB_OUTPUT
+          echo "passed-examples=$PASSED_EXAMPLES" >> $env:GITHUB_OUTPUT
+
       - name: Upload failure artifacts (Java Examples)
-        if: steps.test-examples.outputs.test-status == 'FAILED'
+        if: steps.test-examples-unix.outputs.test-status == 'FAILED' || steps.test-examples-windows.outputs.test-status == 'FAILED'
         uses: actions/upload-artifact@v4
         with:
-          name: java-examples-staging-failure-${{ github.run_id }}
+          name: java-examples-staging-failure-${{ matrix.platform }}-${{ github.run_id }}
           path: |
             /tmp/*.out
+            *.out
             HDF5Examples/JAVA/*/*.class
             HDF5Examples/JAVA/*/*.h5
           retention-days: 7

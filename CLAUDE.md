@@ -73,10 +73,11 @@ mvn test -Prun-examples -f pom-examples.xml
 
 ### Java Examples Testing in CI
 - **Staging Integration**: Examples tested in `maven-staging.yml`
-- **Representative Testing**: 4 examples (1 per category) for quick validation
-- **Full Testing**: Available via `java-examples-maven-test.yml`
-- **Cross-Platform**: Linux, Windows, macOS support
-- **Output Validation**: Pattern-based success/failure detection
+- **Multi-Platform Testing**: All platforms tested in parallel (Linux, Windows, macOS x86_64, macOS aarch64)
+- **Representative Testing**: 4 examples (1 per category) per platform for quick validation
+- **Full Testing**: Available via `java-examples-maven-test.yml` (62 examples)
+- **Platform-Specific Artifacts**: Each platform tests against its own Maven artifacts
+- **Output Validation**: Pattern-based success/failure detection with native library error handling
 
 ## Testing
 

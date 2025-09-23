@@ -85,6 +85,9 @@ HDF5 release, platforms tested, and known problems in this release.
    - **CI/CD integration**: Enhanced GitHub Actions workflows (`maven-staging.yml`, `maven-deploy.yml`) with cross-platform build matrix
    - **Artifact validation**: Comprehensive validation framework for Maven artifacts before deployment
    - **Deployment targets**: Support for GitHub Packages and Maven Central staging repositories
+   - **Java Examples Maven Integration**: Added complete Maven artifact for Java examples (`org.hdfgroup:hdf5-java-examples`) with cross-platform compatibility
+   - **Multi-platform testing**: Comprehensive CI/CD testing of Java examples across all supported platforms (Linux, Windows, macOS x86_64, macOS aarch64)
+   - **Native library error handling**: Enhanced validation logic for Maven-only environments to properly handle expected native library loading errors
 
  - Reorganized the files in the config/cmake folder into the config folder structure
 

@@ -138,7 +138,7 @@ Here's where to find things in the source tree:
 * **`test/`**: C library test code
 * **`testpar/`**: Parallel C library test code
 * **`tools/`**: Command-line tools (h5dump, h5repack, etc.)
-* **`HDF5Examples/`**: Library examples
+* **`HDF5Examples/`**: Library examples including Java examples with Maven integration
 * **`hl/`**: High-level library source, tests, and examples
 * **`c++/`**: C++ language wrapper
 * **`fortran/`**: Fortran language wrapper
@@ -341,6 +341,18 @@ For contributions involving Maven deployment or Java bindings:
    - macOS: `ci-MinShar-Clang-Maven-Snapshot`
 
 4. **Dry Run Testing:** Before deploying to repositories, test deployment permissions using the dry run mode in release workflows.
+
+5. **Java Examples Testing:** The Java examples Maven integration includes comprehensive testing:
+   ```bash
+   # Test Java examples with Maven artifacts (all platforms)
+   gh workflow run maven-staging.yml -f platforms=all-platforms
+
+   # Run dedicated Java examples testing
+   gh workflow run java-examples-maven-test.yml -f category=all
+   ```
+   - **Cross-Platform Validation:** Ensures examples work with platform-specific Maven artifacts
+   - **Native Library Error Handling:** Validates JAR structure through expected native library errors
+   - **Multi-Platform Coverage:** Tests on Linux, Windows, macOS x86_64, and macOS aarch64
 
 ---
 
