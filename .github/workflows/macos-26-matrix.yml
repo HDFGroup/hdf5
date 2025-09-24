@@ -1,12 +1,14 @@
 name: macOS-26 Matrix Testing
 
 on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
+   workflow_dispatch:
+   schedule:
+     - cron: "0 9 * * *"
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   build-test:
