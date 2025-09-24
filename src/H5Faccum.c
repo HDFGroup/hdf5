@@ -879,6 +879,8 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
 
                 /* Calculate the size of the overlap with the accumulator, etc. */
                 H5_CHECKED_ASSIGN(overlap_size, size_t, (addr + size) - accum->loc, haddr_t);
+                if (overlap_size > accum->size)
+                    HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "new accumulator size negative");
                 new_accum_size = accum->size - overlap_size;
 
                 /* Move the accumulator buffer information to eliminate the freed block */
