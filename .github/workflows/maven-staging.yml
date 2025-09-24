@@ -1326,30 +1326,28 @@ jobs:
             SLF4J_VERSION="2.0.16"
             TEMP_POM="$MAVEN_ARTIFACTS_DIR/temp-pom.xml"
 
-            # Create a minimal POM to download dependencies
-            cat > "$TEMP_POM" << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>temp</groupId>
-    <artifactId>temp</artifactId>
-    <version>1.0</version>
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.16</version>
-        </dependency>
-    </dependencies>
-</project>
-EOF
+            # Create a minimal POM to download dependencies using echo
+            echo '<?xml version="1.0" encoding="UTF-8"?>' > "$TEMP_POM"
+            echo '<project xmlns="http://maven.apache.org/POM/4.0.0"' >> "$TEMP_POM"
+            echo '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' >> "$TEMP_POM"
+            echo '         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">' >> "$TEMP_POM"
+            echo '    <modelVersion>4.0.0</modelVersion>' >> "$TEMP_POM"
+            echo '    <groupId>temp</groupId>' >> "$TEMP_POM"
+            echo '    <artifactId>temp</artifactId>' >> "$TEMP_POM"
+            echo '    <version>1.0</version>' >> "$TEMP_POM"
+            echo '    <dependencies>' >> "$TEMP_POM"
+            echo '        <dependency>' >> "$TEMP_POM"
+            echo '            <groupId>org.slf4j</groupId>' >> "$TEMP_POM"
+            echo '            <artifactId>slf4j-api</artifactId>' >> "$TEMP_POM"
+            echo '            <version>2.0.16</version>' >> "$TEMP_POM"
+            echo '        </dependency>' >> "$TEMP_POM"
+            echo '        <dependency>' >> "$TEMP_POM"
+            echo '            <groupId>org.slf4j</groupId>' >> "$TEMP_POM"
+            echo '            <artifactId>slf4j-simple</artifactId>' >> "$TEMP_POM"
+            echo '            <version>2.0.16</version>' >> "$TEMP_POM"
+            echo '        </dependency>' >> "$TEMP_POM"
+            echo '    </dependencies>' >> "$TEMP_POM"
+            echo '</project>' >> "$TEMP_POM"
 
             # Download dependencies
             if (cd "$MAVEN_ARTIFACTS_DIR" && mvn -f temp-pom.xml dependency:copy-dependencies -DoutputDirectory=. -DincludeScope=runtime -q); then
@@ -1509,30 +1507,28 @@ EOF
             $SLF4J_VERSION = "2.0.16"
             $TEMP_POM = "$MAVEN_ARTIFACTS_DIR\temp-pom.xml"
 
-            # Create a minimal POM to download dependencies
-            @"
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>temp</groupId>
-    <artifactId>temp</artifactId>
-    <version>1.0</version>
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>$SLF4J_VERSION</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>$SLF4J_VERSION</version>
-        </dependency>
-    </dependencies>
-</project>
-"@ | Out-File $TEMP_POM -Encoding UTF8
+            # Create a minimal POM to download dependencies using PowerShell strings
+            '<?xml version="1.0" encoding="UTF-8"?>' | Out-File $TEMP_POM -Encoding UTF8
+            '<project xmlns="http://maven.apache.org/POM/4.0.0"' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <modelVersion>4.0.0</modelVersion>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <groupId>temp</groupId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <artifactId>temp</artifactId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <version>1.0</version>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <dependencies>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '        <dependency>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <groupId>org.slf4j</groupId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <artifactId>slf4j-api</artifactId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <version>2.0.16</version>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '        </dependency>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '        <dependency>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <groupId>org.slf4j</groupId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <artifactId>slf4j-simple</artifactId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <version>2.0.16</version>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '        </dependency>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    </dependencies>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '</project>' | Out-File $TEMP_POM -Append -Encoding UTF8
 
             # Download dependencies
             try {
