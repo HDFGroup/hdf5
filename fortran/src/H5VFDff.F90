@@ -81,6 +81,7 @@ CONTAINS
 !! \param file_id      [in] HDF5 file identifier for a file using the subfiling VFD
 !! \param filenames    [out] Allocatable array of subfile names. Memory is automatically
 !!                     allocated by the function and must be deallocated by the caller.
+!!                     See **Compiler Compatibility** note below.
 !! \param num_files    [out] Number of subfiles in the filenames array
 !! \param hdferr       [out] Error code:
 !!                     \li 0 on success
