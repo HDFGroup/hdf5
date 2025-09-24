@@ -40,20 +40,21 @@ jobs:
           echo "Target Repository: ${{ inputs.target_repository }}"
           echo "GitHub Actor: ${{ github.actor }}"
           echo "Repository: ${{ github.repository }}"
-          echo "Expected packages URL: https://github.com/HDFGroup/hdf5/packages"
+          echo "Expected packages URL: https://github.com/${{ github.repository }}/packages"
           echo ""
 
       - name: Check repository permissions
         run: |
           echo "=== Repository Permission Check ==="
 
-          # Check if this is running on HDFGroup repo
-          if [[ "${{ github.repository }}" != "HDFGroup/hdf5" ]]; then
-            echo "⚠️  WARNING: Running on fork (${{ github.repository }})"
-            echo "   Packages will not be published to HDFGroup/hdf5"
-            echo "   Only permission testing will work"
+          # Check repository context
+          if [[ "${{ github.repository }}" == "HDFGroup/hdf5" ]]; then
+            echo "✓ Running on canonical repository (${{ github.repository }})"
+            echo "   Packages will be published to HDFGroup/hdf5"
           else
-            echo "✓ Running on HDFGroup/hdf5 repository"
+            echo "✓ Running on fork/test repository (${{ github.repository }})"
+            echo "   Packages will be published to ${{ github.repository }} for validation"
+            echo "   This allows full testing before merging to canonical repository"
           fi
 
           # Check if we have packages permission
@@ -78,7 +79,7 @@ jobs:
           echo "Testing GitHub Packages API access..."
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
-               "https://api.github.com/users/HDFGroup/packages?package_type=maven" \
+               "https://api.github.com/repos/${{ github.repository }}/packages?package_type=maven" \
                | jq 'length // "API_ERROR"' || echo "No packages found yet"
 
       - name: Generate test Maven artifacts
@@ -130,7 +131,7 @@ jobs:
     with:
       file_base: "hdf5-test"
       preset_name: "test"
-      repository_url: ${{ inputs.target_repository == 'github-packages' && 'https://maven.pkg.github.com/HDFGroup/hdf5' || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
+      repository_url: ${{ inputs.target_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
       repository_id: ${{ inputs.target_repository == 'github-packages' && 'github' || 'ossrh' }}
       deploy_snapshots: false
       dry_run: ${{ inputs.test_mode == 'dry-run' }}
@@ -160,7 +161,7 @@ jobs:
 
             packages=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                             -H "Accept: application/vnd.github.v3+json" \
-                            "https://api.github.com/users/HDFGroup/packages?package_type=maven")
+                            "https://api.github.com/repos/${{ github.repository }}/packages?package_type=maven")
 
             echo "Available packages:"
             echo "$packages" | jq '.[] | {name: .name, html_url: .html_url}' || echo "No packages or jq not available"
@@ -194,13 +195,13 @@ jobs:
             echo ""
             echo "Next steps:"
             echo "1. If no errors above, run with 'live-deployment' mode"
-            echo "2. Check https://github.com/HDFGroup/hdf5/packages for deployed artifacts"
+            echo "2. Check https://github.com/${{ github.repository }}/packages for deployed artifacts"
             echo "3. Test consuming the artifacts in a sample Maven project"
           else
             echo "🚀 LIVE DEPLOYMENT COMPLETED"
             echo ""
             echo "Check deployment results at:"
-            echo "- GitHub Packages: https://github.com/HDFGroup/hdf5/packages"
+            echo "- GitHub Packages: https://github.com/${{ github.repository }}/packages"
             echo "- Workflow logs above for any deployment errors"
             echo ""
             echo "Next steps:"

@@ -122,7 +122,7 @@ jobs:
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       preset_name: ci-StdShar
-      repository_url: ${{ inputs.maven_repository == 'github-packages' && 'https://maven.pkg.github.com/HDFGroup/hdf5' || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
+      repository_url: ${{ inputs.maven_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
       repository_id: ${{ inputs.maven_repository == 'github-packages' && 'github' || 'ossrh' }}
       deploy_snapshots: ${{ needs.log-the-inputs.outputs.rel_tag == 'snapshot' }}
       dry_run: false  # Enable live deployment to HDFGroup packages

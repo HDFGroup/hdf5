@@ -193,8 +193,8 @@ ctest -E "MPI|SWMR"         # Exclude parallel/SWMR tests
    # Full release with Maven deployment
    gh workflow run release.yml -f deploy_maven=true -f maven_repository=github-packages -f use_tag=snapshot
 
-   # Test consuming deployed artifacts
-   ./.github/scripts/test-maven-consumer.sh 2.0.0-3 https://maven.pkg.github.com/HDFGroup/hdf5
+   # Test consuming deployed artifacts (fork for testing)
+   ./.github/scripts/test-maven-consumer.sh 2.0.0-3 https://maven.pkg.github.com/byrnHDF/hdf5
    ```
 
 5. **Java Examples testing:**

@@ -6,7 +6,7 @@
 set -e
 
 VERSION="${1:-2.0.0-3}"
-REPOSITORY_URL="${2:-https://maven.pkg.github.com/HDFGroup/hdf5}"
+REPOSITORY_URL="${2:-https://maven.pkg.github.com/byrnHDF/hdf5}"
 
 echo "=== Testing HDF5 Maven Artifacts ==="
 echo "Version: ${VERSION}"
