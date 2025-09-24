@@ -494,7 +494,7 @@ Simple example programs showing how to use complex number datatypes have been ad
 # 🪲 Bug Fixes
 
 ### Fixed security issue CVE-2025-2915
-   In H5F__accum_free, a heap-based buffer overflow issue was ocurring due to calculating a new_accum_size that did not make sense due to an integer overflow. A new check has been added to make sure that accum->size - overlap_size can't result in a negative number, which prevents strange behavior later. 
+   In H5F__accum_free, a heap-based buffer overflow issue was occurring due to calculating a new_accum_size that did not make sense due to an integer overflow. A new check has been added to make sure that accum->size - overlap_size can't result in a negative number, which prevents strange behavior later. 
 
    Fixes GitHub issue #5380
 
