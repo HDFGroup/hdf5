@@ -482,43 +482,35 @@ macro (ADD_H5_TEST testname)
         COMMAND ${CMAKE_COMMAND} -E remove "${ARG_CLEANUP_FILES}"
     )
 
-    # Build TEST_ARGS properly to avoid empty first argument
-    set(TEST_ARGS "")
+    # Build REPACK_TOOL_ARGS properly to avoid empty first argument
+    set(REPACK_TOOL_ARGS "")
+
     if(ARG_ERROR_STACK_FLAG)
-      set(TEST_ARGS "${ARG_ERROR_STACK_FLAG}")
+      list(APPEND REPACK_TOOL_ARGS "${ARG_ERROR_STACK_FLAG}")
     endif()
+
     if(ARG_UNPARSED_ARGUMENTS)
-      if(TEST_ARGS)
-        set(TEST_ARGS "${TEST_ARGS};${ARG_UNPARSED_ARGUMENTS}")
-      else()
-        set(TEST_ARGS "${ARG_UNPARSED_ARGUMENTS}")
-      endif()
+      list(APPEND REPACK_TOOL_ARGS "${ARG_UNPARSED_ARGUMENTS}")
     endif()
 
     if (HDF5_ENABLE_USING_MEMCHECKER OR ${ARG_DUMP_CHECK})
       # Execute h5repack directly - append absolute paths
-      if(TEST_ARGS)
-        set(TEST_ARGS "${TEST_ARGS};-i;${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE};-o;${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}")
-      else()
-        set(TEST_ARGS "-i;${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE};-o;${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}")
-      endif()
+      list(APPEND REPACK_TOOL_ARGS "-i;${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE};-o;${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}")
+
       add_test (
           NAME H5REPACK-${ctest_testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${TEST_ARGS}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${REPACK_TOOL_ARGS}
       )
     else ()
       # Execute h5repack through runTest script - append relative paths
-      if(TEST_ARGS)
-        set(TEST_ARGS "${TEST_ARGS};-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}")
-      else()
-        set(TEST_ARGS "-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}")
-      endif()
+      list(APPEND REPACK_TOOL_ARGS "-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}")
+
       add_test (
           NAME H5REPACK-${ctest_testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-              -D "TEST_ARGS:STRING=${TEST_ARGS}"
+              -D "TEST_ARGS:STRING=${REPACK_TOOL_ARGS}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
               -D "TEST_EXPECT=${ARG_RESULT_CODE}"
