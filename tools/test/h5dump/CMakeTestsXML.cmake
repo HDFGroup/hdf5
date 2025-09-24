@@ -303,10 +303,8 @@ ADD_XML_H5_TEST (torderattr3.h5 0 -H --sort_by=creation_order --sort_order=ascen
 ADD_XML_H5_TEST (torderattr4.h5 0 -H --sort_by=creation_order --sort_order=descending torderattr.h5)
 
 # Add tests for _Float16 type
-if (${${HDF_PREFIX}_HAVE__FLOAT16})
-  ADD_XML_H5_TEST (tfloat16.h5 0 tfloat16.h5)
-  ADD_XML_H5_TEST (tfloat16_be.h5 0 tfloat16_be.h5)
-endif ()
+ADD_XML_H5_TEST (tfloat16.h5 0 tfloat16.h5)
+ADD_XML_H5_TEST (tfloat16_be.h5 0 tfloat16_be.h5)
 
 # Add tests for bfloat16 type
 ADD_XML_H5_TEST (tbfloat16.h5 0 tbfloat16.h5)
