@@ -1312,6 +1312,55 @@ jobs:
           if [ -n "$DEP_JARS" ]; then
             echo "Found dependency JARs:"
             echo "$DEP_JARS"
+          else
+            echo "No SLF4J dependency JARs found in artifacts, downloading them directly..."
+
+            # Download SLF4J dependencies directly using Maven
+            SLF4J_VERSION="2.0.16"
+            TEMP_POM="$MAVEN_ARTIFACTS_DIR/temp-pom.xml"
+
+            # Create a minimal POM to download dependencies
+            cat > "$TEMP_POM" << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>temp</groupId>
+    <artifactId>temp</artifactId>
+    <version>1.0</version>
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.16</version>
+        </dependency>
+    </dependencies>
+</project>
+EOF
+
+            # Download dependencies
+            if (cd "$MAVEN_ARTIFACTS_DIR" && mvn -f temp-pom.xml dependency:copy-dependencies -DoutputDirectory=. -DincludeScope=runtime -q); then
+              # Clean up temporary POM
+              rm -f "$TEMP_POM"
+
+              # Re-scan for dependency JARs
+              DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar")
+              if [ -n "$DEP_JARS" ]; then
+                echo "Successfully downloaded SLF4J dependencies:"
+                echo "$DEP_JARS"
+              else
+                echo "Failed to download SLF4J dependencies"
+              fi
+            else
+              echo "Error downloading dependencies with Maven"
+              rm -f "$TEMP_POM"
+            fi
           fi
 
           FAILED_EXAMPLES=""
@@ -1434,7 +1483,59 @@ jobs:
             Write-Host "Found dependency JARs:"
             $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
           } else {
-            Write-Host "Warning: No SLF4J dependency JARs found - Java examples may fail with ClassNotFoundException"
+            Write-Host "No SLF4J dependency JARs found in artifacts, downloading them directly..."
+
+            # Download SLF4J dependencies directly using Maven
+            $SLF4J_VERSION = "2.0.16"
+            $TEMP_POM = "$MAVEN_ARTIFACTS_DIR\temp-pom.xml"
+
+            # Create a minimal POM to download dependencies
+            @"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>temp</groupId>
+    <artifactId>temp</artifactId>
+    <version>1.0</version>
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>$SLF4J_VERSION</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>$SLF4J_VERSION</version>
+        </dependency>
+    </dependencies>
+</project>
+"@ | Out-File $TEMP_POM -Encoding UTF8
+
+            # Download dependencies
+            try {
+              Push-Location $MAVEN_ARTIFACTS_DIR
+              & mvn -f $TEMP_POM dependency:copy-dependencies -DoutputDirectory=. -DincludeScope=runtime -q
+              Pop-Location
+
+              # Clean up temporary POM
+              Remove-Item $TEMP_POM -Force -ErrorAction SilentlyContinue
+
+              # Re-scan for dependency JARs
+              $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-api*.jar" -Recurse
+              $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-simple*.jar" -Recurse
+
+              if ($DEP_JARS.Count -gt 0) {
+                Write-Host "Successfully downloaded SLF4J dependencies:"
+                $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
+              } else {
+                Write-Host "Failed to download SLF4J dependencies"
+              }
+            } catch {
+              Write-Host "Error downloading dependencies: $($_.Exception.Message)"
+            }
           }
 
           $FAILED_EXAMPLES = @()
