@@ -747,9 +747,6 @@ macro (ADD_H5_TEST testname)
       if (${ARG_RESULT_CODE})
         set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES WILL_FAIL "true")
       endif ()
-      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES
-          WORKING_DIRECTORY "${workdir}"
-      )
     else ()
       add_test (
           NAME ${vol_prefix}H5DUMP-${ctest_testname}
@@ -775,10 +772,6 @@ macro (ADD_H5_TEST testname)
         WORKING_DIRECTORY "${workdir}"
     )
 
-    if ("${vol_prefix}H5DUMP-${ctest_testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
-    endif ()
-    
     # Set VOL-specific properties
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES
