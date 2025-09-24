@@ -1271,10 +1271,8 @@ ADD_H5_TEST (tldouble RESULT_CODE 0 --enable-error-stack TARGET_FILE tldouble.h5
 ADD_H5_TEST (tldouble_scalar RESULT_CODE 0 -p --enable-error-stack TARGET_FILE tldouble_scalar.h5)
 
 # Add tests for _Float16 type
-if (${${HDF_PREFIX}_HAVE__FLOAT16})
-  ADD_H5_TEST (tfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16.h5)
-  ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16_be.h5)
-endif()
+ADD_H5_TEST (tfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16.h5)
+ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16_be.h5)
 
 # Add tests for bfloat16 type
 ADD_H5_TEST (tbfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tbfloat16.h5)
