@@ -285,8 +285,43 @@ jobs:
 
           echo "Looking for artifacts in: $BUILD_DIR"
 
+          # Debug: Show all JAR files in build directory
+          echo "All JAR files in build directory:"
+          find "$BUILD_DIR" -name "*.jar" -type f | head -20
+
+          # Debug: Show specifically what we're looking for
+          echo "SLF4J JAR files in build directory:"
+          find "$BUILD_DIR" -name "*slf4j*.jar" -type f
+
           # Copy JAR files (excluding test and H5Ex_ example JARs)
           find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # Also look for Maven dependencies in common locations
+          echo "Looking for Maven dependencies in additional locations..."
+
+          # Check if there's a Maven repository in the build area
+          if [ -d "$BUILD_ROOT" ]; then
+            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          fi
+
+          # Check common Maven local repository locations
+          MAVEN_REPO_PATHS=(
+            "$HOME/.m2/repository"
+            "$BUILD_ROOT/.m2/repository"
+            "${{ runner.workspace }}/.m2/repository"
+          )
+
+          for repo_path in "${MAVEN_REPO_PATHS[@]}"; do
+            if [ -d "$repo_path" ]; then
+              echo "Checking Maven repository: $repo_path"
+              find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" | head -2 | while read jar_file; do
+                if [ -f "$jar_file" ]; then
+                  echo "Found dependency: $jar_file"
+                  cp "$jar_file" ${{ runner.workspace }}/maven-artifacts/
+                fi
+              done
+            fi
+          done
 
           # Copy POM files
           find "$BUILD_DIR" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
@@ -752,8 +787,43 @@ jobs:
 
           echo "Looking for artifacts in: $BUILD_DIR"
 
+          # Debug: Show all JAR files in build directory
+          echo "All JAR files in build directory:"
+          find "$BUILD_DIR" -name "*.jar" -type f | head -20
+
+          # Debug: Show specifically what we're looking for
+          echo "SLF4J JAR files in build directory:"
+          find "$BUILD_DIR" -name "*slf4j*.jar" -type f
+
           # Copy JAR files (excluding test and H5Ex_ example JARs)
           find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # Also look for Maven dependencies in common locations
+          echo "Looking for Maven dependencies in additional locations..."
+
+          # Check if there's a Maven repository in the build area
+          if [ -d "$BUILD_ROOT" ]; then
+            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          fi
+
+          # Check common Maven local repository locations
+          MAVEN_REPO_PATHS=(
+            "$HOME/.m2/repository"
+            "$BUILD_ROOT/.m2/repository"
+            "${{ runner.workspace }}/.m2/repository"
+          )
+
+          for repo_path in "${MAVEN_REPO_PATHS[@]}"; do
+            if [ -d "$repo_path" ]; then
+              echo "Checking Maven repository: $repo_path"
+              find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" | head -2 | while read jar_file; do
+                if [ -f "$jar_file" ]; then
+                  echo "Found dependency: $jar_file"
+                  cp "$jar_file" ${{ runner.workspace }}/maven-artifacts/
+                fi
+              done
+            fi
+          done
 
           # Copy POM files
           find "$BUILD_DIR" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
@@ -976,8 +1046,43 @@ jobs:
 
           echo "Looking for artifacts in: $BUILD_DIR"
 
+          # Debug: Show all JAR files in build directory
+          echo "All JAR files in build directory:"
+          find "$BUILD_DIR" -name "*.jar" -type f | head -20
+
+          # Debug: Show specifically what we're looking for
+          echo "SLF4J JAR files in build directory:"
+          find "$BUILD_DIR" -name "*slf4j*.jar" -type f
+
           # Copy JAR files (excluding test and H5Ex_ example JARs)
           find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # Also look for Maven dependencies in common locations
+          echo "Looking for Maven dependencies in additional locations..."
+
+          # Check if there's a Maven repository in the build area
+          if [ -d "$BUILD_ROOT" ]; then
+            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          fi
+
+          # Check common Maven local repository locations
+          MAVEN_REPO_PATHS=(
+            "$HOME/.m2/repository"
+            "$BUILD_ROOT/.m2/repository"
+            "${{ runner.workspace }}/.m2/repository"
+          )
+
+          for repo_path in "${MAVEN_REPO_PATHS[@]}"; do
+            if [ -d "$repo_path" ]; then
+              echo "Checking Maven repository: $repo_path"
+              find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" | head -2 | while read jar_file; do
+                if [ -f "$jar_file" ]; then
+                  echo "Found dependency: $jar_file"
+                  cp "$jar_file" ${{ runner.workspace }}/maven-artifacts/
+                fi
+              done
+            fi
+          done
 
           # Copy POM files
           find "$BUILD_DIR" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
@@ -1321,13 +1426,6 @@ jobs:
           Write-Host "Using HDF5 JAR file: $($HDF5_JAR.FullName)"
 
           # Find dependency JARs - only include slf4j-api and slf4j-simple
-          Write-Host "Searching for dependency JARs in: $MAVEN_ARTIFACTS_DIR"
-
-          # Debug: Show all JAR files in directory
-          $ALL_JARS = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*.jar" -Recurse
-          Write-Host "All JAR files found:"
-          $ALL_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
-
           $DEP_JARS = @()
           $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-api*.jar" -Recurse
           $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-simple*.jar" -Recurse
@@ -1336,7 +1434,7 @@ jobs:
             Write-Host "Found dependency JARs:"
             $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
           } else {
-            Write-Host "No SLF4J dependency JARs found - this may cause ClassNotFoundException"
+            Write-Host "Warning: No SLF4J dependency JARs found - Java examples may fail with ClassNotFoundException"
           }
 
           $FAILED_EXAMPLES = @()
