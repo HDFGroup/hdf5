@@ -652,7 +652,8 @@ HDF5 release, platforms tested, and known problems in this release.
 
 # ☑️ Platforms Tested 
 
-Data to come from cdash.
+A table of platforms tested can be seen on the [wiki](https://github.com/HDFGroup/hdf5/wiki/Platforms-Tested).
+Current test results are available [here](https://my.cdash.org/index.php?project=HDF5).
 
 # ⛔ Known Problems
 
