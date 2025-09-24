@@ -10,7 +10,9 @@
       "Bash(grep:*)",
       "Read(//home/byrn/Downloads/logs_46007782861/**)",
       "Read(//home/byrn/Downloads/**)",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Bash(gh workflow view:*)",
+      "Bash(mvn dependency:resolve:*)"
     ],
     "deny": [],
     "ask": []
