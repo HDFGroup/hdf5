@@ -450,10 +450,6 @@ macro (ADD_H5_TEST testname)
     set (ARG_FILTER_OUT "SIZE XXXX (2.XXX:1 COMPRESSION)")
     # Don't skip runTest comparison if we're using filters
     set(ARG_COMPARE_LOCAL false)
-  else ()
-    set(ARG_GZIP_FILTER_IN "")
-    set(ARG_GZIP_FILTER_OUT "")
-    set(ARG_REF_FILE "")
   endif ()
 
   if (${ARG_DUMP_CHECK})
