@@ -150,15 +150,12 @@ CONTAINS
 !!
 SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdferr)
   IMPLICIT NONE
-  ! Use a larger buffer to accommodate full paths plus subfile suffix
-  ! PATH_MAX (4096) + subfile template overhead (~64) + safety margin (448) = 4608
-  ! Round up to 8192 for robust handling of long paths and future-proofing
-  INTEGER, PARAMETER :: MAX_FILENAME_LEN = 8192
   INTEGER(HID_T), INTENT(IN) :: file_id
 #ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
   CHARACTER(LEN=:), ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: filenames
 #else
-  CHARACTER(LEN=MAX_FILENAME_LEN), ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: filenames
+  INTEGER, PARAMETER :: DEFAULT_MAX_LEN = 8192
+  CHARACTER(LEN=DEFAULT_MAX_LEN), ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: filenames
 #endif
   INTEGER(SIZE_T), INTENT(OUT) :: num_files
   INTEGER, INTENT(OUT) :: hdferr
@@ -166,11 +163,13 @@ SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdfer
   TYPE(C_PTR) :: filenames_ptr
   INTEGER(C_SIZE_T) :: c_num_files
   INTEGER(C_INT) :: ret_val
-  INTEGER(SIZE_T) :: i
+  INTEGER(SIZE_T) :: i, str_len
   TYPE(C_PTR), POINTER, DIMENSION(:) :: c_filename_ptrs
-  CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: c_string
-  INTEGER :: max_len = 0, str_len, estimated_max_len, search_limit
-  INTEGER, PARAMETER :: SUBFILE_TEMPLATE_OVERHEAD = 64  ! ".subfile_" + inode + "_XX_of_XX" + safety margin
+  INTEGER :: max_len
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  CHARACTER(LEN=:), ALLOCATABLE :: temp_filenames(:)
+  INTEGER(SIZE_T) :: k
+#endif
   INTERFACE
      INTEGER(C_INT) FUNCTION h5fdsubfiling_get_file_mapping(file_id, filenames_ptr, len) &
           BIND(C, NAME='H5FDsubfiling_get_file_mapping')
@@ -199,83 +198,75 @@ SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdfer
   ! Convert the C char** array to Fortran character array
   CALL C_F_POINTER(filenames_ptr, c_filename_ptrs, [num_files])
 
-  ! Estimate maximum subfile name length based on subfiling template:
-  ! Template: "%s.subfile_%" PRIu64 "_%0*d_of_%d"
-  ! Components: base_filename + ".subfile_" + inode(20 digits) + "_" + subfile_index + "_of_" + total_subfiles
-  ! Conservative estimate: assume original filename could be up to PATH_MAX/2, then add overhead
-  estimated_max_len = MIN(MAX_FILENAME_LEN, 2048 + SUBFILE_TEMPLATE_OVERHEAD + INT(LOG10(REAL(MAX(1, INT(num_files))))) * 2)
-
-  ! First pass: determine actual maximum string length (but limit search to reasonable bounds)
-  DO i = 1, num_files
-    IF (C_ASSOCIATED(c_filename_ptrs(i))) THEN
-      ! Find length by searching for null terminator with optimized bound
-      ! Use estimated length for first check, fall back to full buffer if needed
-      search_limit = MIN(MAX_FILENAME_LEN, estimated_max_len + 256)
-      CALL C_F_POINTER(c_filename_ptrs(i), c_string, [MAX_FILENAME_LEN])
-      str_len = 0
-      DO WHILE (str_len < search_limit .AND. c_string(str_len + 1) .NE. C_NULL_CHAR)
-        str_len = str_len + 1
-      END DO
-
-      ! If we hit the search limit but not the absolute limit, extend search
-      IF (str_len == search_limit .AND. search_limit < MAX_FILENAME_LEN .AND. c_string(str_len + 1) .NE. C_NULL_CHAR) THEN
-        DO WHILE (str_len < MAX_FILENAME_LEN .AND. c_string(str_len + 1) .NE. C_NULL_CHAR)
-          str_len = str_len + 1
-        END DO
-      END IF
-
-      ! Check if we hit the absolute maximum without finding null terminator
-      IF (str_len == MAX_FILENAME_LEN .AND. c_string(MAX_FILENAME_LEN) .NE. C_NULL_CHAR) THEN
-        hdferr = -1
+  ! Allocate with a reasonable default - will expand if needed
 #ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
-        ALLOCATE(CHARACTER(LEN=0) :: filenames(0))
-#else
-        ALLOCATE(filenames(0))
-#endif
-        num_files = 0_SIZE_T
-        RETURN
-      END IF
-
-      max_len = MAX(max_len, str_len)
-    END IF
-  END DO
-
-  ! Allocate the output array with optimized length
-  ! Use the actual max_len if determined, otherwise fall back to estimated length
-#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
-  IF (max_len > 0) THEN
-    ALLOCATE(CHARACTER(LEN=max_len) :: filenames(num_files))
-  ELSE
-    ! Fallback to estimated length if no strings were found
-    ALLOCATE(CHARACTER(LEN=estimated_max_len) :: filenames(num_files))
-  END IF
+  ALLOCATE(CHARACTER(LEN=1024) :: filenames(num_files))
 #else
   ALLOCATE(filenames(num_files))
 #endif
 
-  ! Second pass: copy the strings
+  max_len = 0
+
+  ! Single pass: determine lengths and copy strings
   DO i = 1, num_files
     IF (C_ASSOCIATED(c_filename_ptrs(i))) THEN
-      CALL C_F_POINTER(c_filename_ptrs(i), c_string, [MAX_FILENAME_LEN])
-      str_len = 0
-      DO WHILE (str_len < MAX_FILENAME_LEN .AND. c_string(str_len + 1) .NE. C_NULL_CHAR)
-        str_len = str_len + 1
-      END DO
+      BLOCK
+        CHARACTER(KIND=C_CHAR), POINTER :: c_string(:)
+        INTEGER :: current_size, j
+        INTEGER, PARAMETER :: INITIAL_SIZE = 1024
 
-      ! Double-check for buffer overflow (should not happen if first pass was correct)
-      IF (str_len == MAX_FILENAME_LEN .AND. c_string(MAX_FILENAME_LEN) .NE. C_NULL_CHAR) THEN
-        hdferr = -1
-        DEALLOCATE(filenames)
+        current_size = INITIAL_SIZE
+        DO
+          CALL C_F_POINTER(c_filename_ptrs(i), c_string, [current_size])
+
+          ! Find string length by searching for null terminator
+          str_len = 0
+          DO WHILE (str_len < current_size .AND. c_string(str_len + 1) /= C_NULL_CHAR)
+            str_len = str_len + 1
+          END DO
+
+          ! If we found the null terminator, we're done
+          IF (str_len < current_size) EXIT
+
+          ! Otherwise, double the size and try again
+          current_size = current_size * 2
+          IF (current_size > 65536) THEN
+            ! Sanity check - if path is longer than 64K, something is wrong
+            hdferr = -1
+            RETURN
+          END IF
+        END DO
+
+        max_len = MAX(max_len, INT(str_len))
+
 #ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
-        ALLOCATE(CHARACTER(LEN=0) :: filenames(0))
+        ! Reallocate if this string is longer than current allocation
+        IF (INT(str_len) > LEN(filenames(1))) THEN
+          ALLOCATE(CHARACTER(LEN=INT(str_len)) :: temp_filenames(num_files))
+          DO k = 1, i-1
+            temp_filenames(k) = filenames(k)
+          END DO
+          DEALLOCATE(filenames)
+          ALLOCATE(CHARACTER(LEN=INT(str_len)) :: filenames(num_files))
+          DO k = 1, i-1
+            filenames(k) = temp_filenames(k)
+          END DO
+          DEALLOCATE(temp_filenames)
+        END IF
 #else
-        ALLOCATE(filenames(0))
+        ! Check if string exceeds our fixed buffer
+        IF (INT(str_len) > DEFAULT_MAX_LEN) THEN
+          hdferr = -1
+          RETURN
+        END IF
 #endif
-        num_files = 0_SIZE_T
-        RETURN
-      END IF
 
-      filenames(i) = TRANSFER(c_string(1:str_len), filenames(i)(1:str_len))
+        ! Copy the string
+        filenames(i) = ""
+        DO j = 1, INT(str_len)
+          filenames(i)(j:j) = c_string(j)
+        END DO
+      END BLOCK
     ELSE
       filenames(i) = ""
     END IF
