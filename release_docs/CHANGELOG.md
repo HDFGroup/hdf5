@@ -4,7 +4,7 @@
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
 HDF5 release, platforms tested, and known problems in this release.
 
-*For releases prior to version 2.0.0, please see the [release_archive.txt](release_archive.txt) file and for more details check the HISTORY*.txt files in the HDF5 source.*
+For releases prior to version 2.0.0, please see the release.txt file and for more details check the HISTORY*.txt files in the HDF5 source.
 
 # 🔗 Quick Links
 * [HDF5 documentation](https://support.hdfgroup.org/documentation/hdf5/latest/)
@@ -16,10 +16,10 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
-* [Bug Fixes](#-bug-fixes)
-* [Support for new platforms and languages](#-support-for-new-platforms-and-languages)
-* [Platforms Tested](#%EF%B8%8F-platforms-tested)
-* [Known Problems](#-known-problems)
+* [Bug Fixes](CHANGELOG.md#-bug-fixes)
+* [Support for new platforms and languages](CHANGELOG.md#-support-for-new-platforms-and-languages)
+* [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
+* [Known Problems](CHANGELOG.md#-known-problems)
 
 # 🔆 Executive Summary: HDF5 Version 2.0.0
 
@@ -52,7 +52,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ### Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
 
-   The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
+   The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.
 
 ### Autotools support was removed from HDF5<a name="cmake">
 
@@ -98,8 +98,6 @@ HDF5 release, platforms tested, and known problems in this release.
 ### Added `CMAKE_INSTALL_PREFIX` to the default plugin path
 
    To help users find their plugins, the default plugin path has been changed to include the `CMAKE_INSTALL_PREFIX`. Adding the install prefix allows users to skip setting the `HDF5_PLUGIN_PATH` environment variable when using plugins with the default lib/plugin location.
-
-### Removed support for the autotools build system.
 
 ### Converted documentation in the source folder, doc, to doxygen files.
 
