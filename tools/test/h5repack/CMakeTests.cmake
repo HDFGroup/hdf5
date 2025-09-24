@@ -324,7 +324,6 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   # Default values for local variables
-  set (ARG_CLEANUP_FILES "")
   set (ARG_CLEANUP_DEPENDS "")
 
   set (ctest_testname ${testname})
@@ -355,8 +354,6 @@ macro (ADD_H5_TEST testname)
   else ()
     set (ARG_MAIN_OUT_FILE "out-${testname}.${ARG_TEST_FILE}")
   endif ()
-
-  list (APPEND ARG_CLEANUP_FILES "${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}")
 
   # Process optional arguments
   if (ARG_ERROR_STACK)
@@ -475,7 +472,7 @@ macro (ADD_H5_TEST testname)
     # Test is to be run
     add_test (
         NAME H5REPACK-${ctest_testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove "${ARG_CLEANUP_FILES}"
+        COMMAND ${CMAKE_COMMAND} -E remove "${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
     )
 
     # Build REPACK_TOOL_ARGS properly to avoid empty first argument
@@ -620,7 +617,7 @@ macro (ADD_H5_TEST testname)
     # Post-test cleanup
     add_test (
       NAME H5REPACK-${ctest_testname}-clean-objects
-      COMMAND ${CMAKE_COMMAND} -E remove ${ARG_CLEANUP_FILES}
+      COMMAND ${CMAKE_COMMAND} -E remove "${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
     )
     # Only set dependencies if necessary
     if (NOT "${ARG_CLEANUP_DEPENDS}" STREQUAL "")
