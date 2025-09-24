@@ -207,7 +207,7 @@ SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdfer
 
   max_len = 0
 
-  ! Single pass: determine lengths and copy strings
+  ! determine lengths and copy strings
   DO i = 1, num_files
     IF (C_ASSOCIATED(c_filename_ptrs(i))) THEN
       BLOCK
