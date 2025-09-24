@@ -854,6 +854,8 @@ HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
   - Maven staging workflow validates examples against artifacts
   - Cross-platform testing ensures compatibility on all supported platforms
   - Native library error handling validates JAR structure in Maven-only environments
+  - Fork-based testing allows validation on repository forks before canonical deployment
+  - Dynamic repository workflows adapt to any GitHub repository automatically
 
 ---------------- HDF5 Folder Build Options ---------------------------------
 Defaults relative to $<INSTALL_PREFIX>
