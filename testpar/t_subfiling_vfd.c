@@ -264,7 +264,7 @@ test_create_and_close(void)
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
     char **filenames = NULL;
-    size_t len = 0;
+    size_t len       = 0;
     H5FDsubfiling_get_file_mapping(file_id, &filenames, &len);
 
     if (len > 0) {
@@ -2368,8 +2368,9 @@ test_selection_strategies(void)
 
                     /* Ensure all the subfiles are present */
                     for (int i = 0; i < expected_num_subfiles; i++) {
-                        int needed_len = snprintf(NULL, 0, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                                                  (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
+                        int needed_len =
+                            snprintf(NULL, 0, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                                     (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
                         if (needed_len >= PATH_MAX) {
                             VRFY(0, "subfile name too long for buffer");
                         }
@@ -2384,8 +2385,8 @@ test_selection_strategies(void)
 
                     /* Ensure no extra subfiles are present */
                     int needed_len = snprintf(NULL, 0, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                                              (uint64_t)file_info.st_ino, num_digits, expected_num_subfiles + 1,
-                                              expected_num_subfiles);
+                                              (uint64_t)file_info.st_ino, num_digits,
+                                              expected_num_subfiles + 1, expected_num_subfiles);
                     if (needed_len >= PATH_MAX) {
                         VRFY(0, "subfile name too long for buffer");
                     }
