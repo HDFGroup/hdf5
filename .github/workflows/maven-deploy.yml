@@ -122,8 +122,9 @@ jobs:
               platform_name=$(basename "$platform_dir")
               echo "Scanning platform: $platform_name"
 
-              # Find only the main HDF5 JAR files (jarhdf5-*.jar), exclude dependencies and examples
-              platform_jars=$(find "$platform_dir" -name "jarhdf5-*.jar" 2>/dev/null || true)
+              # Find main HDF5 JAR files (jarhdf5-*.jar) and examples JAR files (hdf5-java-examples-*.jar)
+              # Find both main HDF5 JARs and examples JARs
+              platform_jars=$(find "$platform_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" \) 2>/dev/null || true)
 
               if [ -n "$platform_jars" ]; then
                 echo "Found HDF5 JARs in $platform_name:"
@@ -348,33 +349,43 @@ jobs:
             echo "File size: $(du -h "$jar_file" | cut -f1)"
             echo "File permissions: $(ls -l "$jar_file")"
 
-            # Auto-detect platform classifier from directory structure
-            CURRENT_CLASSIFIER=""
-            if [[ "${platform_dir}" == *"/linux"* ]]; then
-              CURRENT_CLASSIFIER="linux-x86_64"
-            elif [[ "${platform_dir}" == *"/windows"* ]]; then
-              CURRENT_CLASSIFIER="windows-x86_64"
-            elif [[ "${platform_dir}" == *"/macos-x86_64"* ]]; then
-              CURRENT_CLASSIFIER="macos-x86_64"
-            elif [[ "${platform_dir}" == *"/macos-aarch64"* ]]; then
-              CURRENT_CLASSIFIER="macos-aarch64"
-            fi
-
-            echo "Detected classifier: ${CURRENT_CLASSIFIER:-none}"
-
-            # Determine classifier options
-            classifier_opts=""
-            if [ -n "${CURRENT_CLASSIFIER}" ] && [[ "${jar_basename}" != *"sources"* ]] && [[ "${jar_basename}" != *"javadoc"* ]]; then
-              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
-              echo "Using classifier: ${CURRENT_CLASSIFIER}"
+            # Determine artifact type and settings
+            if [[ "${jar_basename}" == *"hdf5-java-examples"* ]]; then
+              # Java Examples artifact
+              ARTIFACT_ID="hdf5-java-examples"
+              CURRENT_CLASSIFIER=""  # Examples JAR has no platform classifier
+              classifier_opts=""
+              echo "Artifact type: Java Examples (no classifier)"
             else
-              echo "No classifier applied"
+              # Main HDF5 Java library
+              ARTIFACT_ID="hdf5-java"
+
+              # Auto-detect platform classifier from directory structure
+              CURRENT_CLASSIFIER=""
+              if [[ "${platform_dir}" == *"/linux"* ]]; then
+                CURRENT_CLASSIFIER="linux-x86_64"
+              elif [[ "${platform_dir}" == *"/windows"* ]]; then
+                CURRENT_CLASSIFIER="windows-x86_64"
+              elif [[ "${platform_dir}" == *"/macos-x86_64"* ]]; then
+                CURRENT_CLASSIFIER="macos-x86_64"
+              elif [[ "${platform_dir}" == *"/macos-aarch64"* ]]; then
+                CURRENT_CLASSIFIER="macos-aarch64"
+              fi
+
+              # Determine classifier options for main library
+              classifier_opts=""
+              if [ -n "${CURRENT_CLASSIFIER}" ] && [[ "${jar_basename}" != *"sources"* ]] && [[ "${jar_basename}" != *"javadoc"* ]]; then
+                classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
+                echo "Artifact type: HDF5 Java Library, classifier: ${CURRENT_CLASSIFIER}"
+              else
+                echo "Artifact type: HDF5 Java Library (no classifier)"
+              fi
             fi
 
             # Check if this is a dry run
             if [ "${{ inputs.dry_run }}" == "true" ]; then
-              echo "🧪 DRY RUN: Would deploy ${jar_basename} with classifier ${CURRENT_CLASSIFIER:-none}"
-              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=hdf5-java -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${classifier_opts}"
+              echo "🧪 DRY RUN: Would deploy ${jar_basename} as ${ARTIFACT_ID} with classifier ${CURRENT_CLASSIFIER:-none}"
+              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${classifier_opts}"
               success_count=$((success_count + 1))
             else
               echo "🚀 Deploying ${jar_basename}..."
@@ -382,7 +393,7 @@ jobs:
               # Deploy with Maven (with verbose output for debugging)
               deploy_cmd="mvn deploy:deploy-file \
                 -DgroupId=org.hdfgroup \
-                -DartifactId=hdf5-java \
+                -DartifactId=\"${ARTIFACT_ID}\" \
                 -Dversion=\"${HDF5_VERSION}\" \
                 -Dfile=\"${jar_file}\" \
                 -DpomFile=\"${{ needs.validate-artifacts.outputs.pom-file }}\" \
@@ -459,25 +470,42 @@ jobs:
 
           **Version**: ${{ needs.validate-artifacts.outputs.hdf5-version }}
           **Repository**: ${{ inputs.repository_url }}
-          **Platform**: ${{ needs.validate-artifacts.outputs.platform-classifier }}
           **Deployment Status**: ${{ needs.deploy-maven.result || 'skipped (dry-run)' }}
 
-          ## Maven Dependency
+          ## HDF5 Java Library
 
           ```xml
           <dependency>
               <groupId>org.hdfgroup</groupId>
               <artifactId>hdf5-java</artifactId>
               <version>${{ needs.validate-artifacts.outputs.hdf5-version }}</version>
-              <classifier>${{ needs.validate-artifacts.outputs.platform-classifier }}</classifier>
+              <classifier>linux-x86_64</classifier> <!-- or windows-x86_64, macos-x86_64, macos-aarch64 -->
           </dependency>
           ```
 
-          ## Gradle Dependency
+          ## HDF5 Java Examples
+
+          ```xml
+          <dependency>
+              <groupId>org.hdfgroup</groupId>
+              <artifactId>hdf5-java-examples</artifactId>
+              <version>${{ needs.validate-artifacts.outputs.hdf5-version }}</version>
+          </dependency>
+          ```
+
+          ## Gradle Dependencies
 
           ```kotlin
-          implementation("org.hdfgroup:hdf5-java:${{ needs.validate-artifacts.outputs.hdf5-version }}:${{ needs.validate-artifacts.outputs.platform-classifier }}")
+          // HDF5 Java Library
+          implementation("org.hdfgroup:hdf5-java:${{ needs.validate-artifacts.outputs.hdf5-version }}:linux-x86_64")
+
+          // HDF5 Java Examples (62 examples)
+          implementation("org.hdfgroup:hdf5-java-examples:${{ needs.validate-artifacts.outputs.hdf5-version }}")
           ```
+
+          ## Available Packages
+          - **hdf5-java**: Platform-specific HDF5 Java bindings (4 platform variants)
+          - **hdf5-java-examples**: 62 Java examples (platform-independent)
           EOF
 
           echo "Maven deployment summary created"
