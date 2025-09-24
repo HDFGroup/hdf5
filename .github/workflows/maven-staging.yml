@@ -1508,6 +1508,7 @@ jobs:
             $TEMP_POM = "$MAVEN_ARTIFACTS_DIR\temp-pom.xml"
 
             # Create a minimal POM to download dependencies using PowerShell strings
+            Write-Host "Creating temporary POM at: $TEMP_POM"
             '<?xml version="1.0" encoding="UTF-8"?>' | Out-File $TEMP_POM -Encoding UTF8
             '<project xmlns="http://maven.apache.org/POM/4.0.0"' | Out-File $TEMP_POM -Append -Encoding UTF8
             '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' | Out-File $TEMP_POM -Append -Encoding UTF8
@@ -1532,22 +1533,28 @@ jobs:
 
             # Download dependencies
             try {
-              Push-Location $MAVEN_ARTIFACTS_DIR
-              & mvn -f $TEMP_POM dependency:copy-dependencies -DoutputDirectory=. -DincludeScope=runtime -q
-              Pop-Location
+              Write-Host "Running Maven command: mvn -f $TEMP_POM dependency:copy-dependencies -DoutputDirectory=$MAVEN_ARTIFACTS_DIR -DincludeScope=runtime -q"
+              $mvn_result = & mvn -f $TEMP_POM dependency:copy-dependencies "-DoutputDirectory=$MAVEN_ARTIFACTS_DIR" -DincludeScope=runtime -q
+              $mvn_exit_code = $LASTEXITCODE
 
               # Clean up temporary POM
               Remove-Item $TEMP_POM -Force -ErrorAction SilentlyContinue
 
-              # Re-scan for dependency JARs
-              $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-api*.jar" -Recurse
-              $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-simple*.jar" -Recurse
+              if ($mvn_exit_code -eq 0) {
+                # Re-scan for dependency JARs
+                $DEP_JARS = @()
+                $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-api*.jar" -Recurse
+                $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-simple*.jar" -Recurse
 
-              if ($DEP_JARS.Count -gt 0) {
-                Write-Host "Successfully downloaded SLF4J dependencies:"
-                $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
+                if ($DEP_JARS.Count -gt 0) {
+                  Write-Host "Successfully downloaded SLF4J dependencies:"
+                  $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
+                } else {
+                  Write-Host "Maven succeeded but no SLF4J JARs found"
+                }
               } else {
-                Write-Host "Failed to download SLF4J dependencies"
+                Write-Host "Maven command failed with exit code: $mvn_exit_code"
+                Write-Host "Maven output: $mvn_result"
               }
             } catch {
               Write-Host "Error downloading dependencies: $($_.Exception.Message)"
