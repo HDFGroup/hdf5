@@ -2,18 +2,18 @@
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
-HDF5 release, platforms tested, and known problems in this release. 
+HDF5 release, platforms tested, and known problems in this release.
 
 *For releases prior to version 2.0.0, please see the [release_archive.txt](release_archive.txt) file and for more details check the HISTORY*.txt files in the HDF5 source.*
 
-# 🔗 Quick Links 
+# 🔗 Quick Links
 * [HDF5 documentation](https://support.hdfgroup.org/documentation/hdf5/latest/)
-* [Official HDF5 releases](https://support.hdfgroup.org/downloads/index.html) 
+* [Official HDF5 releases](https://support.hdfgroup.org/downloads/index.html)
 * [Changes from Release to Release and New Features in the HDF5-2.x.y](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdf5#help-and-support)
 
 ## 📖 Contents
-* [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200) 
+* [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](#-bug-fixes)
@@ -39,7 +39,7 @@ HDF5 release, platforms tested, and known problems in this release.
 - New [file format](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) version (4.0) and compliance with the C11 standard.
 
 > [!IMPORTANT]
-> 
+>
 > - Transitioned to [CMake-only](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
 > - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
 > - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
@@ -56,7 +56,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ### Autotools support was removed from HDF5<a name="cmake">
 
-   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options. 
+   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
 
 # 🚀 New Features & Improvements
 
@@ -91,7 +91,7 @@ HDF5 release, platforms tested, and known problems in this release.
    | --- | --- |
    | `HDF5_H5CC_C_COMPILER` | for the C compiler |
    | `HDF5_H5CC_CXX_COMPILER` | for the C++ compiler |
-   | `HDF5_H5CC_Fortran_COMPILER` | for the Fortran compiler | 
+   | `HDF5_H5CC_Fortran_COMPILER` | for the Fortran compiler |
 
    These default to the currently used compiler, preserving the current behavior. However, they can be overridden by users who need to use a different compiler at runtime, for example, when they build via cache.
 
@@ -132,19 +132,19 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ### Added support for native zlib-ng compression
 
-   Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added #ifdef around the compression function calls. Added including the correct header file with the same #ifdef.
+Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added `#ifdef` around the compression function calls. Added including the correct header file with the same `#ifdef`.
 
 ### Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
-    
-   | | | |
-   | --- | --- | --- | 
-   | `DEFAULT_API_VERSION` | to | `HDF5_DEFAULT_API_VERSION` | 
-   | `DISABLE_PDB_FILES` | to | `HDF5_DISABLE_PDB_FILES` | 
-   | `ONLY_SHARED_LIBS` | to | `HDF5_ONLY_SHARED_LIBS` |
-   | `ALLOW_UNSUPPORTED` | to | `HDF5_ALLOW_UNSUPPORTED` |
-   | `TEST_SHELL_SCRIPTS` | to | `HDF5_TEST_SHELL_SCRIPTS` |
 
-  All other HDF5 library CMake options are prefixed with `HDF5_`
+| Old | New |
+| --- | --- |
+| `DEFAULT_API_VERSION` | `HDF5_DEFAULT_API_VERSION` |
+| `DISABLE_PDB_FILES` | `HDF5_DISABLE_PDB_FILES` |
+| `ONLY_SHARED_LIBS` |  `HDF5_ONLY_SHARED_LIBS` |
+| `ALLOW_UNSUPPORTED` | `HDF5_ALLOW_UNSUPPORTED` |
+| `TEST_SHELL_SCRIPTS` | `HDF5_TEST_SHELL_SCRIPTS` |
+
+All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ### bin/cmakehdf5 has been removed
 
@@ -172,130 +172,136 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The standard for building the library is now C11. We have updated the build files to set the C standard to C11, though some platforms use gnu11 to get some GNU things to work.
 
-## Library 
+## Library
 
-### Removed hbool_t from public API calls
+### Removed `hbool_t` from public API calls
 
-   The hbool_t type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
+The `hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
 
-   It had been previously purged from the bulk of the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
+It had been previously purged from the bulk of the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
 
-   The hbool_t typedef remains in H5public.h so existing code does not need to be updated.
+The `hbool_t` typedef remains in H5public.h so existing code does not need to be updated.
 
-### H5public.h no longer includes features.h
+### `H5public.h` no longer includes `features.h`
 
-   features.h is supposed to be included by glibc headers and not used in application code. It is unnecessary given our use of feature test macros like _POSIX_C_SOURCE and has been removed.
+`features.h` is supposed to be included by glibc headers and not used in application code. It is unnecessary given our use of feature test macros like `_POSIX_C_SOURCE` and has been removed.
 
 ### Improved performance of opening a virtual dataset with many mappings
 
-   When opening a virtual dataset, the library would previously decode the mappings in the object header package, then copy them to the dataset struct, then copy them to the internal DCPL. Copying the VDS mappings could be very expensive if there were many mappings. Changed this to delay decoding the mappings until the dataset code, and delay copying the layout to the DCPL until it is needed. This results in only the decoding and no copies in most use cases, as opposed to the decoding and two copies with the previous code.
+   When opening a virtual dataset, the library would previously decode the mappings in the object header package, then copy them to the dataset struct, then copy them to the internal dataset creation property list. Copying the VDS mappings could be very expensive if there were many mappings. Changed this to delay decoding the mappings until the dataset code, and delay copying the layout to the DCPL until it is needed. This results in only the decoding and no copies in most use cases, as opposed to the decoding and two copies with the previous code.
 
 ### Aligned the CMake compiler wrappers with the old Autotools versions
 
-   The versions of `h5cc`, `h5fc`, `h5c++`, etc. generated by CMake were missing several options and features from the Autotools counterparts. Some of these options and features have now been implemented in the CMake versions, while some of them have not:
-   - The missing `--help/-h`, `-c`, `-echo`, and `-shlib/-noshlib` options have been implemented.
-   - The `-prefix` option was not implemented, as it didn't appear to function in the Autotools wrappers and is generally covered by pkg-config in the CMake wrappers.
-   - A new `-nohl` option has been added to avoid building and linking against the high-level HDF5 libraries if desired.
-   - Similar to the Autotools wrappers, the CMake wrappers now add the HDF5 installation library directory to the rpath of the resulting executable/library by default when linking against shared HDF5 libraries. This behavior can be avoided by specifying the new `-norpath` option.
-   - Parsing of the `HDF5_USE_SHLIB` environment variable has been added to determine whether to link against shared or static HDF5 libraries. Precedence is still given to the -shlib/-noshlib options.
-   - Parsing of the `HDF5_PKG_CONFIG_ARGS` environment variable has been added to separate pkg-config-specific options from compiler-specific options and prevent conflicts between them.
+The versions of `h5cc`, `h5fc`, `h5c++`, etc. generated by CMake were missing several options and features from the Autotools counterparts. Some of these options and features have now been implemented in the CMake versions, while some of them have not:
+- The missing `--help`/`-h`, `-c`, `-echo`, and `-shlib`/`-noshlib` options have been implemented.
+- The `-prefix` option was not implemented, as it didn't appear to function in the Autotools wrappers and is generally covered by pkg-config in the CMake wrappers.
+- A new `-nohl` option has been added to avoid building and linking against the high-level HDF5 libraries if desired.
+- Similar to the Autotools wrappers, the CMake wrappers now add the HDF5 installation library directory to the rpath of the resulting executable/library by default when linking against shared HDF5 libraries. This behavior can be avoided by specifying the new `-norpath` option.
+- Parsing of the `HDF5_USE_SHLIB` environment variable has been added to determine whether to link against shared or static HDF5 libraries. Precedence is still given to the `-shlib`/`-noshlib` options.
+- Parsing of the `HDF5_PKG_CONFIG_ARGS` environment variable has been added to separate pkg-config-specific options from compiler-specific options and prevent conflicts between them.
 
-   Several issues were also fixed in the pkg-config files that are generated by CMake.
+Several issues were also fixed in the pkg-config files that are generated by CMake.
 
 ### Changed the default page buffer size for the ROS3 driver
 
-   Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer size in the FAPL to 64MiB if it was not previously set. This will only have an effect if the file uses paged allocation. Also added the `H5F_PAGE_BUFFER_SIZE_DEFAULT` to allow the user to unset the page buffer size in an FAPL so it can be similarly overridden.
+Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer size in the FAPL to 64 MiB if it was not previously set. This will only have an effect if the file uses paged allocation. Also added the `H5F_PAGE_BUFFER_SIZE_DEFAULT` to allow the user to unset the page buffer size in an FAPL so it can be similarly overridden.
 
 ### Default dataset chunk cache size increased
 
    The default dataset chunk cache size was increased to 8 MiB (8,388,608 bytes).
 
-### The file format has been updated to 4.0<a name="fileformat">
+### The file format has been updated to 4.0<a name="fileformat"></a>
 
-   The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
+The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
 
 ### The `H5Dread_chunk()` signature has changed
 
-   A new parameter, `nalloc`, has been added to `H5Dread_chunk()`. This parameter contains a pointer to a variable that holds the size of the buffer buf. If *nalloc is not large enough to hold the entire chunk being read, no data is read. On exit, the value of this variable is set to the buffer size needed to read the chunk.
+A new parameter, `nalloc`, has been added to `H5Dread_chunk()`. This parameter contains a pointer to a variable that holds the size of the buffer buf. If *nalloc is not large enough to hold the entire chunk being read, no data is read. On exit, the value of this variable is set to the buffer size needed to read the chunk.
 
-   The old signature has been renamed to `H5Dread_chunk1()` and is considered deprecated:
+The old signature has been renamed to `H5Dread_chunk1()` and is considered deprecated:
+```c
+   herr_t H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id,
+                         const hsize_t *offset, uint32_t *filters,
+                         void *buf);
+```
 
-      herr_t H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id,
-                            const hsize_t *offset, uint32_t *filters,
-                            void *buf);
+The new signature is `H5Dread_chunk2()`. All code should be updated to use this version:
+```c
+   herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id,
+                         const hsize_t *offset, uint32_t *filters,
+                         void *buf, size_t *nalloc);
+```
 
-   The new signature is `H5Dread_chunk2()`. All code should be updated to use this version:
+`H5Dread_chunk()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
 
-      herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id,
-                            const hsize_t *offset, uint32_t *filters,
-                            void *buf, size_t *nalloc);
+### Replaced the ROS3 VFD's S3 backend based on libcurl with a new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3)<a name="ros3"></a>
 
-   `H5Dread_chunk()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
+The ROS3 VFD now requires the `aws-c-s3` library in order to be built. This library offers several useful features for the VFD, including the following:
+   - Automatic retries of non-fatal failed requests (where the libcurl backend would simply return an error),
+   - Built-in sourcing of credentials and other configuration information from standard AWS configuration files and environment variables,
+   - Automatic splitting and parallelization of large S3 requests,
+   - Built-in handling of the formation of HTTP request authentication headers (where the libcurl backend had to manage this manually), and more.
 
-### Replaced the ROS3 VFD's S3 backend based on libcurl with a new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3)<a name="ros3">
+Additional benefits with the rewrite of this backend include:
+   - Support for `s3://` object URIs,
+   - The ability to enable debugging information printouts at runtime by setting a new environment variable `HDF5_ROS3_VFD_DEBUG` (refer to `H5FDros3.h`),
+   - The ability to capture logging information from the `aws-c-s3` library by setting a new environment variable `HDF5_ROS3_VFD_LOG_LEVEL` (refer to `H5FDros3.h`).
 
-   The ROS3 VFD now requires the aws-c-s3 library in order to be built. This library offers several useful features for the VFD, including the following
-     - Automatic retries of non-fatal failed requests (where the libcurl backend would simply return an error),
-     - Built-in sourcing of credentials and other configuration information from standard AWS configuration files and environment variables,
-     - Automatic splitting and parallelization of large S3 requests,
-     - Built-in handling of the formation of HTTP request authentication headers (where the libcurl backend had to manage this manually), and more.
+With these changes, the behavior of the `authenticate` field of the ROS3 VFD's FAPL structure has changed slightly. If `authenticate` is true, the ROS3 VFD will _only_ use credentials specified in the FAPL structure and will not attempt to load credentials from other places. In this case, the `secret_id` and `secret_key` fields must still both be non-empty strings, or an error will be returned when opening a file. If a session token is to be used, it must be specified with `H5Pset_fapl_ros3_token()`.
 
-   Additional benefits with the rewrite of this backend include:
-     - Support for s3:// object URIs
-     - The ability to enable debugging information printouts at runtime by setting a new environment variable `HDF5_ROS3_VFD_DEBUG` (refer to H5FDros3.h)
-     - The ability to capture logging information from the aws-c-s3 library by setting a new environment variable `HDF5_ROS3_VFD_LOG_LEVEL` (refer to H5FDros3.h)
+If `authenticate` is false, the ROS3 VFD will instead attempt to load credentials from several different places, in this order:
+   - From the environment, by checking AWS environment variables such as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` and `AWS_ACCOUNT_ID`,
+   - From the AWS profile files, by reading from `~/.aws/config` and `~/.aws/credentials`, by default. The specific files read from can be overridden with the `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE` environment variables,
+   - From STS, by using `AssumeRoleWithWebIdentity`,
+   - From EC2 instance metadata.
 
-   With these changes, the behavior of the 'authenticate' field of the ROS3 VFD's FAPL structure has changed slightly. If 'authenticate' is true, the ROS3 VFD will ONLY use credentials specified in the FAPL structure and will not attempt to load credentials from other places. In this case, the 'secret_id' and 'secret_key' fields must still both be non-empty strings, or an error will be returned when opening a file. If a session token is to be used, it must be specified with `H5Pset_fapl_ros3_token()`.
+If the ROS3 VFD cannot source credentials from any of these locations, it will fall back to using anonymous credentials.
 
-   If 'authenticate' is false, the ROS3 VFD will instead attempt to load credentials from several different places, in this order:
-     - From the environment, by checking AWS environment variables such as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` and `AWS_ACCOUNT_ID`
-     - From the AWS profile files, by reading from ~/.aws/config and ~/.aws/credentials, by default. The specific files read from can be overridden with the `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE` environment variables.
-     - From STS, by using AssumeRoleWithWebIdentity
-     - From EC2 instance metadata
+This functionality effectively deprecates the `--s3-cred` option for the `h5dump`, `h5ls`, and `h5stat` tools. However, this option has been kept for compatibility reasons and can still be used to force the specified credentials to take precedence over any credentials that the VFD would otherwise try to source.
 
-   If the ROS3 VFD cannot source credentials from any of these locations, it will fall back to using anonymous credentials.
+Note that with these changes, the AWS region to be used must always be specified. However, the region can now be specified in several ways other than just in the FAPL structure. The VFD will search for a specified AWS region in the following order:
+   - The FAPL, if `aws_region` is not an empty string
+   - The `AWS_REGION` environment variable
+   - The `AWS_DEFAULT_REGION` environment variable
+   - The AWS configuration file (`~/.aws/config` by default)
+   - The `default` profile from this file is used, unless a different profile is specified with the AWS_PROFILE environment variable
 
-   This functionality effectively deprecates the --s3-cred option for the `h5dump`, `h5ls`, and `h5stat` tools. However, this option has been kept for compatibility reasons and can still be used to force the specified credentials to take precedence over any credentials that the VFD would otherwise try to source.
+If the ROS3 VFD cannot determine an AWS region from one of these locations, an error will be returned when opening a file.
 
-   Note that with these changes, the AWS region to be used must always be specified. However, the region can now be specified in several ways other than just in the FAPL structure. The VFD will search for a specified AWS region in the following order:
-     - The FAPL, if `aws_region` is not an empty string
-     - The AWS_REGION environment variable
-     - The AWS_DEFAULT_REGION environment variable
-     - The AWS configuration file (~/.aws/config by default)
-     - The 'default' profile from this file is used, unless a different profile is specified with the AWS_PROFILE environment variable
+New API functions `H5Pset_fapl_ros3_endpoint()` and `H5Pget_fapl_ros3_endpoint()` have been added for use with the ROS3 VFD. These functions set/get an alternate endpoint URL to use when opening files with the ROS3 VFD. This is useful in cases where the application needs to access files that are in a location other than the standard `s3.<region-code>.amazonaws.com`, which is what the ROS3 VFD uses when an alternate endpoint URL isn't specified. The ROS3 VFD also checks the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL` environment variables for an alternate endpoint URL if one isn't specified with `H5Pset_fapl_ros3_endpoint()`.
 
-   If the ROS3 VFD cannot determine an AWS region from one of these locations, an error will be returned when opening a file.
-
-   New API functions `H5Pset_fapl_ros3_endpoint()` and `H5Pget_fapl_ros3_endpoint()` have been added for use with the ROS3 VFD. These functions set/get an alternate endpoint URL to use when opening files with the ROS3 VFD. This is useful in cases where the application needs to access files that are in a location other than the standard s3.<region-code>.amazonaws.com, which is what the ROS3 VFD uses when an alternate endpoint URL isn't specified. The ROS3 VFD also checks the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate endpoint URL if one isn't specified with `H5Pset_fapl_ros3_endpoint()`.
-
-   Instructions for building the ROS3 VFD with the aws-c-s3 library have been added to release_docs/INSTALL_S3.txt. The ROS3 VFD and information about the usage of the driver are described in the HDF5 user's guide.
+Instructions for building the ROS3 VFD with the `aws-c-s3` library are in the [INSTALL_S3.txt](./INSTALL_S3.txt) file. The ROS3 VFD and information about the usage of the driver are described in the HDF5 user's guide.
 
 ### Renamed some API decorations
 
-   Some API decorations (used to hide __declspec on Windows, among other things) have been renamed:
+Some API decorations (used to hide `__declspec` on Windows, among other things) have been renamed:
 
-   | | | |
-   | --- | --- | --- | 
-   | H5_DLLCPP(VAR) | to | H5CPP_DLL(VAR) | 
-   | H5_HLDLL(VAR) | to | H5HL_DLL(VAR) |
-   | H5_HLCPPDLL(VAR) | to | H5CPP_HL_DLL(VAR) |
-   | H5_FCDLL(VAR) | to | H5FC_DLL(VAR) |
-   | H5_FCTESTDLL(VAR) | to | H5FC_TEST_DLL(VAR) |
-   | HDF5_HL_F90CSTUBDLL(VAR) | to | H5FC_HL_DLL(VAR) | 
+| Old | New |
+| --- | --- |
+| `H5_DLLCPP(VAR)` | `H5CPP_DLL(VAR)` |
+| `H5_HLDLL(VAR)` | `H5HL_DLL(VAR)` |
+| `H5_HLCPPDLL(VAR)` | `H5CPP_HL_DLL(VAR)` |
+| `H5_FCDLL(VAR)` | `H5FC_DLL(VAR)` |
+| `H5_FCTESTDLL(VAR)` | `H5FC_TEST_DLL(VAR)` |
+| `HDF5_HL_F90CSTUBDLL(VAR)` | `H5FC_HL_DLL(VAR)` |
 
 ### The `H5Iregister_type()` signature has changed
 
-   The hash_size parameter has not been used since early versions of HDF5 1.8, so it has been removed, and the API call has been versioned.
+The hash_size parameter has not been used since early versions of HDF5 1.8, so it has been removed, and the API call has been versioned.
 
-   The old signature has been renamed to `H5Iregister_type1()` and is considered deprecated:
+The old signature has been renamed to `H5Iregister_type1()` and is considered deprecated:
 
-      H5I_type_t H5Iregister_type1(size_t hash_size, unsigned reserved, H5I_free_t free_func);
+```c
+H5I_type_t H5Iregister_type1(size_t hash_size, unsigned reserved, H5I_free_t free_func);
+```
 
-   The new signature is `H5Iregister_type2()`. New code should use this version:
+The new signature is `H5Iregister_type2()`. New code should use this version:
 
-      H5I_type_t H5Iregister_type2(unsigned reserved, H5I_free_t free_func);
+```c
+H5I_type_t H5Iregister_type2(unsigned reserved, H5I_free_t free_func);
+```
 
-   `H5Iregister_type()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
+`H5Iregister_type()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
 
 ### The `H5Tdecode()` signature has changed
 
@@ -311,97 +317,103 @@ HDF5 release, platforms tested, and known problems in this release.
 
    `H5Tdecode()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
 
-### `H5F_LIBVER_LATEST` is now an enum value 
+### `H5F_LIBVER_LATEST` is now an enum value
 
-   This was previously #defined to the latest `H5F_libver_t API` version, but is now an enum value with an integer value equal to the latest `H5F_libver_t` API version's value. e.g.:
+This was previously #defined to the latest `H5F_libver_t API` version, but is now an enum value with an integer value equal to the latest `H5F_libver_t` API version's value. e.g.:
+
 ```
       <snip>
       H5F_LIBVER_V200 = 5,
       H5F_LIBVER_LATEST = 5,
       </snip>
 ```
-### Added support for complex number datatypes<a name="complex">
+### Added support for complex number datatypes<a name="complex"></a>
 
-   Support for the C99 "float _Complex", "double _Complex" and "long double _Complex" (with MSVC, "_Fcomplex", "_Dcomplex" and "_Lcomplex") types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications).
-  
-   The following new macros have been added:
+Support for the C99 `float _Complex`, `double _Complex` and `long double _Complex` (with MSVC, `_Fcomplex`, `_Dcomplex` and `_Lcomplex`) types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications).
 
-     | | |
-     | --- | --- | 
-     | `H5_HAVE_COMPLEX_NUMBERS` | This macro is defined in H5pubconf.h and will have the value 1 if native support for complex numbers is available. It will not be defined otherwise. |
-     | `H5_HAVE_C99_COMPLEX_NUMBERS` | This macro is defined in H5pubconf.h and will have the value 1 if native support for C99 complex numbers is available. It will not be defined otherwise. If this macro is not defined but `H5_HAVE_COMPLEX_NUMBERS` is defined, the complex number types supported are the MSVC types. |
-     | `H5_SIZEOF_FLOAT_COMPLEX` | This macro is defined in H5pubconf.h and will have a value corresponding to the size of the native float complex datatype, as computed by sizeof(). If C99 complex number support is available, this will be the size of the "float _Complex" type. Otherwise, it will be the size of the "_Fcomplex" type. It will have the value 0 if support for a native float complex datatype is not available. |
-     | `H5_SIZEOF_DOUBLE_COMPLEX` | This macro is defined in H5pubconf.h and will have a value corresponding to the size of the native double complex datatype, as computed by sizeof(). If C99 complex number support is available, this will be the size of the "double _Complex" type. Otherwise, it will be the size of the "_Dcomplex" type. It will have the value 0 if support for a native double complex datatype is not available. |
-     | `H5_SIZEOF_LONG_DOUBLE_COMPLEX` | This macro is defined in H5pubconf.h and will have a value corresponding to the size of the native long double complex datatype, as computed by sizeof(). If C99 complex number support is available, this will be the size of the "long double _Complex" type. Otherwise, it will be the size of the "_Lcomplex" type. It will have the value 0 if support for a native long double complex datatype is not available. |
-     | `H5T_NATIVE_FLOAT_COMPLEX` | This macro maps to the ID of an HDF5 datatype representing the native C float complex datatype (either "float _Complex" or "_Fcomplex") for the platform. If support for a native float complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
-     | `H5T_NATIVE_DOUBLE_COMPLEX` | This macro maps to the ID of an HDF5 datatype representing the native C double complex datatype (either "double _Complex" or "_Dcomplex") for the platform. If support for a native double complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
-     | `H5T_NATIVE_LDOUBLE_COMPLEX` | This macro maps to the ID of an HDF5 datatype representing the native C long double complex datatype (either "long double _Complex" or "_Lcomplex") for the platform. If support for a native long double complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
-     | `H5T_COMPLEX_IEEE_F16LE` / `H5T_COMPLEX_IEEE_F16BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 16-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
-     | `H5T_COMPLEX_IEEE_F32LE` / `H5T_COMPLEX_IEEE_F32BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 32-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
-     | `H5T_COMPLEX_IEEE_F64LE` / `H5T_COMPLEX_IEEE_F64BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 64-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
+The following new macros have been added:
 
-   The following new API function has been added:
-     | | |
-     | --- | --- | 
-     | `hid_t H5Tcomplex_create(hid_t base_type_id);` | Creates a new complex number datatype from the base datatype specified by the given HDF5 ID `base_type_id`. The base datatype must be a floating-point datatype. |
+| Macro | Description |
+| --- | --- |
+| `H5_HAVE_COMPLEX_NUMBERS` | This macro is defined in `H5pubconf.h` and will have the value 1 if native support for complex numbers is available. It will not be defined otherwise. |
+| `H5_HAVE_C99_COMPLEX_NUMBERS` | This macro is defined in `H5pubconf.h` and will have the value 1 if native support for C99 complex numbers is available. It will not be defined otherwise. If this macro is not defined but `H5_HAVE_COMPLEX_NUMBERS` is defined, the complex number types supported are the MSVC types. |
+| `H5_SIZEOF_FLOAT_COMPLEX` | This macro is defined in `H5pubconf.h` and will have a value corresponding to the size of the native float complex datatype, as computed by sizeof(). If C99 complex number support is available, this will be the size of the "float _Complex" type. Otherwise, it will be the size of the `_Fcomplex` type. It will have the value 0 if support for a native float complex datatype is not available. |
+| `H5_SIZEOF_DOUBLE_COMPLEX` | This macro is defined in `H5pubconf.h` and will have a value corresponding to the size of the native double complex datatype, as computed by sizeof(). If C99 complex number support is available, this will be the size of the `double _Complex` type. Otherwise, it will be the size of the `_Dcomplex` type. It will have the value 0 if support for a native double complex datatype is not available. |
+| `H5_SIZEOF_LONG_DOUBLE_COMPLEX` | This macro is defined in `H5pubconf.h` and will have a value corresponding to the size of the native long double complex datatype, as computed by sizeof(). If C99 complex number support is available, this will be the size of the `long double _Complex` type. Otherwise, it will be the size of the `_Lcomplex` type. It will have the value 0 if support for a native long double complex datatype is not available. |
+| ``H5T_NATIVE_FLOAT_COMPLEX`` | This macro maps to the ID of an HDF5 datatype representing the native C float complex datatype (either "float _Complex" or `_Fcomplex`) for the platform. If support for a native float complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
+| ``H5T_NATIVE_DOUBLE_COMPLEX`` | This macro maps to the ID of an HDF5 datatype representing the native C double complex datatype (either `double _Complex` or `_Dcomplex`) for the platform. If support for a native double complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
+| ``H5T_NATIVE_LDOUBLE_COMPLEX`` | This macro maps to the ID of an HDF5 datatype representing the native C long double complex datatype (either `long double _Complex` or `_Lcomplex`) for the platform. If support for a native long double complex datatype is not available (`H5_HAVE_COMPLEX_NUMBERS` is not defined), the macro will map to `H5I_INVALID_HID` and should not be used. |
+| `H5T_COMPLEX_IEEE_F16LE` / `H5T_COMPLEX_IEEE_F16BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 16-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
+| `H5T_COMPLEX_IEEE_F32LE` / `H5T_COMPLEX_IEEE_F32BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 32-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
+| `H5T_COMPLEX_IEEE_F64LE` / `H5T_COMPLEX_IEEE_F64BE` | These macros map to IDs of HDF5 datatypes representing a complex number of two parts, each of which is an IEEE 754 64-bit floating-point datatype in little- or big-endian order. These datatypes are available regardless of whether complex number support is available or not. |
 
-   The following new hard datatype conversion paths have been added, but will only be used when complex number support is available:
+The following new API function has been added:
 
-   | | |
-   | -- | -- |
-   | H5T_NATIVE_SCHAR   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_FLOAT_COMPLEX |
-   | H5T_NATIVE_SHORT   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_FLOAT_COMPLEX |
-   | H5T_NATIVE_INT <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_UINT<-> H5T_NATIVE_FLOAT_COMPLEX |
-   | H5T_NATIVE_LONG<-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_FLOAT_COMPLEX |
-   | H5T_NATIVE_LLONG   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_FLOAT_COMPLEX |
-   | H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_FLOAT_COMPLEX |
-   | H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT_COMPLEX |
-   | | |
-   | H5T_NATIVE_SCHAR   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_DOUBLE_COMPLEX |
-   | H5T_NATIVE_SHORT   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_DOUBLE_COMPLEX |
-   | H5T_NATIVE_INT <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_UINT<-> H5T_NATIVE_DOUBLE_COMPLEX |
-   | H5T_NATIVE_LONG<-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_DOUBLE_COMPLEX |
-   | H5T_NATIVE_LLONG   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_DOUBLE_COMPLEX |
-   | H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_DOUBLE_COMPLEX |
-   | H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_DOUBLE_COMPLEX |
-   | | |
-   | H5T_NATIVE_SCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX |
-   | H5T_NATIVE_SHORT   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_LDOUBLE_COMPLEX |
-   | H5T_NATIVE_INT <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UINT<-> H5T_NATIVE_LDOUBLE_COMPLEX |
-   | H5T_NATIVE_LONG <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX |
-   | H5T_NATIVE_LLONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_LDOUBLE_COMPLEX |
-   | H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_LDOUBLE_COMPLEX |
-   | H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_LDOUBLE_COMPLEX |
-   | | |
-   | H5T_NATIVE_FLOAT_COMPLEX  <-> H5T_NATIVE_DOUBLE_COMPLEX |  |
-   | H5T_NATIVE_FLOAT_COMPLEX  <-> H5T_NATIVE_LDOUBLE_COMPLEX | |
-   | H5T_NATIVE_DOUBLE_COMPLEX <-> H5T_NATIVE_LDOUBLE_COMPLEX | |
+| Function | Description |
+| --- | --- |
+| `hid_t H5Tcomplex_create(hid_t base_type_id)` | Creates a new complex number datatype from the base datatype specified by the given HDF5 ID `base_type_id`. The base datatype must be a floating-point datatype. |
 
-   Alternative software implementation conversion paths have been added for all of the above for use when native complex number support is not available. All of these conversion paths follow the behavior outlined in the C standard for conversions of complex number values.
+The following new hard datatype conversion paths have been added, but will only be used when complex number support is available:
 
-   Additionally, a special datatype conversion path has been added between complex number datatypes and array or compound datatypes, where the in-memory layout of data is the same between the datatypes and data can be directly converted. This conversion path is subject to the following rules:
-     - An array datatype must consist of exactly two elements, where each element is of the same floating-point datatype as the complex number datatype's base floating-point datatype.
-     - A compound datatype must consist of exactly two fields, where each field is of the same floating-point datatype as the complex number datatype's base floating-point datatype. The compound datatype must not have any leading or trailing structure padding or any padding between its two fields. The fields must also have compatible names, must have compatible offsets within the datatype and must be in the order of "real" part -> "imaginary" part, such that the compound datatype matches the following representation:
-        ```
-        H5T_COMPOUND {
-        <float_type> "r(e)(a)(l)";  OFFSET 0
-        <float_type> "i(m)(a)(g)(i)(n)(a)(r)(y)"; OFFSET SIZEOF("r(e)(a)(l)")
-         }
-        ```
-        where "r(e)(a)(l)" means the field may be named any substring of "real", such as "r", or "re" and "i(m)(a)(g)(i)(n)(a)(r)(y)" means the field may be named any substring of "imaginary", such as "im" or "imag".
+| | |
+| -- | -- |
+| `H5T_NATIVE_SCHAR`   <-> `H5T_NATIVE_FLOAT_COMPLEX` | `H5T_NATIVE_UCHAR`   <-> `H5T_NATIVE_FLOAT_COMPLEX` |
+| `H5T_NATIVE_SHORT`   <-> `H5T_NATIVE_FLOAT_COMPLEX` | `H5T_NATIVE_USHORT`  <-> `H5T_NATIVE_FLOAT_COMPLEX` |
+| `H5T_NATIVE_INT` <-> `H5T_NATIVE_FLOAT_COMPLEX` | `H5T_NATIVE_UINT`<-> `H5T_NATIVE_FLOAT_COMPLEX` |
+| `H5T_NATIVE_LONG`<-> `H5T_NATIVE_FLOAT_COMPLEX` | `H5T_NATIVE_ULONG`   <-> `H5T_NATIVE_FLOAT_COMPLEX` |
+| `H5T_NATIVE_LLONG`   <-> `H5T_NATIVE_FLOAT_COMPLEX` | `H5T_NATIVE_ULLONG`  <-> `H5T_NATIVE_FLOAT_COMPLEX` |
+| `H5T_NATIVE_FLOAT16` <-> `H5T_NATIVE_FLOAT_COMPLEX` | `H5T_NATIVE_FLOAT`   <-> `H5T_NATIVE_FLOAT_COMPLEX` |
+| `H5T_NATIVE_DOUBLE`  <-> `H5T_NATIVE_FLOAT_COMPLEX` | `H5T_NATIVE_LDOUBLE` <-> `H5T_NATIVE_FLOAT_COMPLEX` |
+| | |
+| `H5T_NATIVE_SCHAR`   <-> `H5T_NATIVE_DOUBLE_COMPLEX` | `H5T_NATIVE_UCHAR`   <-> `H5T_NATIVE_DOUBLE_COMPLEX` |
+| `H5T_NATIVE_SHORT`   <-> `H5T_NATIVE_DOUBLE_COMPLEX` | `H5T_NATIVE_USHORT`  <-> `H5T_NATIVE_DOUBLE_COMPLEX` |
+| `H5T_NATIVE_INT` <-> `H5T_NATIVE_DOUBLE_COMPLEX` | `H5T_NATIVE_UINT`<-> `H5T_NATIVE_DOUBLE_COMPLEX` |
+| `H5T_NATIVE_LONG`<-> `H5T_NATIVE_DOUBLE_COMPLEX` | `H5T_NATIVE_ULONG`   <-> `H5T_NATIVE_DOUBLE_COMPLEX` |
+| `H5T_NATIVE_LLONG`   <-> `H5T_NATIVE_DOUBLE_COMPLEX` | `H5T_NATIVE_ULLONG`  <-> `H5T_NATIVE_DOUBLE_COMPLEX` |
+| `H5T_NATIVE_FLOAT16` <-> `H5T_NATIVE_DOUBLE_COMPLEX` | `H5T_NATIVE_FLOAT`   <-> `H5T_NATIVE_DOUBLE_COMPLEX` |
+| `H5T_NATIVE_DOUBLE`  <-> `H5T_NATIVE_DOUBLE_COMPLEX` | `H5T_NATIVE_LDOUBLE` <-> `H5T_NATIVE_DOUBLE_COMPLEX` |
+| | |
+| `H5T_NATIVE_SCHAR`   <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | `H5T_NATIVE_UCHAR`   <-> `H5T_NATIVE_LDOUBLE_COMPLEX` |
+| `H5T_NATIVE_SHORT`   <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | `H5T_NATIVE_USHORT`  <-> `H5T_NATIVE_LDOUBLE_COMPLEX` |
+| `H5T_NATIVE_INT` <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | `H5T_NATIVE_UINT`<-> `H5T_NATIVE_LDOUBLE_COMPLEX` |
+| `H5T_NATIVE_LONG` <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | `H5T_NATIVE_ULONG`   <-> `H5T_NATIVE_LDOUBLE_COMPLEX` |
+| `H5T_NATIVE_LLONG`   <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | `H5T_NATIVE_ULLONG`  <-> `H5T_NATIVE_LDOUBLE_COMPLEX` |
+| `H5T_NATIVE_FLOAT16` <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | `H5T_NATIVE_FLOAT`   <-> `H5T_NATIVE_LDOUBLE_COMPLEX` |
+| `H5T_NATIVE_DOUBLE`  <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | `H5T_NATIVE_LDOUBLE` <-> `H5T_NATIVE_LDOUBLE_COMPLEX` |
+| | |
+| `H5T_NATIVE_FLOAT_COMPLEX`  <-> `H5T_NATIVE_DOUBLE_COMPLEX` |  |
+| `H5T_NATIVE_FLOAT_COMPLEX`  <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | |
+| `H5T_NATIVE_DOUBLE_COMPLEX` <-> `H5T_NATIVE_LDOUBLE_COMPLEX` | |
 
-   Support for complex numbers has been added to the `h5dump`, `h5ls`, and `h5diff`/`ph5diff` tools. The `h5dump` command-line option '-m' can be used to change the floating-point printing format for the float complex and double complex datatypes, as well as the long double complex datatype if it has the same size as a double complex datatype.
+Alternative software implementation conversion paths have been added for all of the above for use when native complex number support is not available. All of these conversion paths follow the behavior outlined in the C standard for conversions of complex number values.
 
-   Support for the predefined complex number datatypes and the `H5Tcomplex_create` function has been added to the Java wrappers. However, Java does not have official types for complex numbers, so an application must be sure that data is in an appropriate format in-memory when using these datatypes.
+Additionally, a special datatype conversion path has been added between complex number datatypes and array or compound datatypes, where the in-memory layout of data is the same between the datatypes and data can be directly converted. This conversion path is subject to the following rules:
 
-   Support for the Fortran wrappers has not yet been added.
+- An array datatype must consist of exactly two elements, where each element is of the same floating-point datatype as the complex number datatype's base floating-point datatype.
+- A compound datatype must consist of exactly two fields, where each field is of the same floating-point datatype as the complex number datatype's base floating-point datatype. The compound datatype must not have any leading or trailing structure padding or any padding between its two fields. The fields must also have compatible names, must have compatible offsets within the datatype and must be in the order of "real" part -> "imaginary" part, such that the compound datatype matches the following representation:
 
-   Support for the predefined complex number datatypes and the `H5Tcomplex_create` function has been added to the high-level library, allowing them to work with the `H5LTtext_to_dtype` and `H5LTdtype_to_text` functions.
+```
+H5T_COMPOUND {
+<float_type> "r(e)(a)(l)";  OFFSET 0
+<float_type> "i(m)(a)(g)(i)(n)(a)(r)(y)"; OFFSET SIZEOF("r(e)(a)(l)")
+}
+```
 
-   Simple example programs showing how to use complex number datatypes have been added in the following files:
-    - HDF5Examples/C/H5T/200/h5ex_t_complex.c   (Uses C99 complex number types)
-    - HDF5Examples/C/H5T/200/h5ex_t_complex_msvc.c   (Uses MSVC complex number types)
-    - HDF5Examples/C/H5T/200/h5ex_t_complex_custom.c (Uses H5Tcomplex_create to create a custom complex number type)
+where `r(e)(a)(l)` means the field may be named any substring of "real", such as "r", or "re", and `i(m)(a)(g)(i)(n)(a)(r)(y)` means the field may be named any substring of "imaginary", such as "im" or "imag".
+
+Support for complex numbers has been added to the `h5dump`, `h5ls`, and `h5diff`/`ph5diff` tools. The `h5dump` command-line option '-m' can be used to change the floating-point printing format for the float complex and double complex datatypes, as well as the long double complex datatype if it has the same size as a double complex datatype.
+
+Support for the predefined complex number datatypes and the `H5Tcomplex_create` function has been added to the Java wrappers. However, Java does not have official types for complex numbers, so an application must be sure that data is in an appropriate format in-memory when using these datatypes.
+
+Support for the Fortran wrappers has not yet been added.
+
+Support for the predefined complex number datatypes and the `H5Tcomplex_create` function has been added to the high-level library, allowing them to work with the `H5LTtext_to_dtype` and `H5LTdtype_to_text` functions.
+
+Simple example programs showing how to use complex number datatypes have been added in the following files:
+
+- `HDF5Examples/C/H5T/200/h5ex_t_complex.c`   (Uses C99 complex number types)
+- `HDF5Examples/C/H5T/200/h5ex_t_complex_msvc.c`   (Uses MSVC complex number types)
+- `HDF5Examples/C/H5T/200/h5ex_t_complex_custom.c` (Uses `H5Tcomplex_create()` to create a custom complex number type)
 
 ### FOR VOL DEVELOPERS: Renamed `H5VLstart_lib_state` and `H5VLfinish_lib_state`
 
@@ -467,7 +479,7 @@ HDF5 release, platforms tested, and known problems in this release.
    This also removed the following configure options:
       CMake: `HDF5_BUILD_HL_GIF_TOOLS`
 
-## High-Level APIs 
+## High-Level APIs
 
 ## C Packet Table API
 
@@ -478,7 +490,7 @@ HDF5 release, platforms tested, and known problems in this release.
 ### The COPYING file has been renamed to LICENSE
 
    This is where most people will expect to find license information. The COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5. The licenses are unchanged.
- 
+
 # 🪲 Bug Fixes
 
 ## Library
@@ -584,7 +596,7 @@ HDF5 release, platforms tested, and known problems in this release.
    ```
    HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
    <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
-   ``` 
+   ```
 
    where `<LIB_PKG_NAME>` is one of `ZLIB`, `ZLIBNG`, `SZIP`, `PLUGIN`.
 
@@ -650,7 +662,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 # ✨ Support for new platforms and languages
 
-# ☑️ Platforms Tested 
+# ☑️ Platforms Tested
 
 Data to come from cdash.
 
@@ -675,7 +687,7 @@ fails to initialize due to not being able to detect the byte order of the _Float
       MPI_TEST_t_filters_parallel<br>
 
       Sporadic failures (even with lower -O levels):<br>
-   
+
       Java JUnit-TestH5Pfapl<br>
       Java JUnit-TestH5D<br>
 
