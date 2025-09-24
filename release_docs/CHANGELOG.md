@@ -483,6 +483,12 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ## Library
 
+### Fixed a problem with the scale-offset filter
+
+A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
+
+Fixes GitHub issue #5861
+
 ### Fixed security issue CVE-2025-6857
 
    An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.
