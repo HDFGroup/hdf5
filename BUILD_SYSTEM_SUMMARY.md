@@ -86,6 +86,7 @@ cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS Maven
 # Maven: Adds Maven deployment support with platform-specific JARs
 # Snapshot: Adds -SNAPSHOT suffix for development versions
 # Minimal Maven presets: Skip examples, testing, tools, C++, Fortran - Java artifacts only
+# Java Examples Maven Integration: Comprehensive testing of Java examples with Maven artifacts across all platforms
 ```
 
 ### Preset Configuration Strategy

@@ -187,6 +187,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - **Prerequisites:** Ensure Maven deployment permissions are configured (see `MAVEN_DEPLOYMENT_PERMISSIONS.md`)
     - **Testing Phase:** The workflow starts with `dry_run: true` to test permissions without actual deployment
     - **Multi-Platform Artifacts:** The staging workflow generates artifacts for Linux, Windows, macOS x86_64, and macOS aarch64
+    - **Java Examples Testing:** Comprehensive validation of Java examples (org.hdfgroup:hdf5-java-examples) across all platforms with Maven artifacts
     - **Deployment Process:**
       - `maven-staging.yml` workflow generates artifacts for all platforms
       - `maven-deploy.yml` workflow deploys filtered main HDF5 JARs (jarhdf5-*.jar) only
