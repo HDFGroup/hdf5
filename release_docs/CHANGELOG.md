@@ -172,7 +172,11 @@ HDF5 release, platforms tested, and known problems in this release.
 
    The standard for building the library is now C11. We have updated the build files to set the C standard to C11, though some platforms use gnu11 to get some GNU things to work.
 
-## Library 
+## Library
+
+### The maximum POSIX I/O size has been set to 0x7ffff000 bytes for all platforms
+
+This was previously set to SSIZE_MAX on Linux, which is correct as far as POSIX is concerned, but Linux defines the max as MAX_RW_COUNT, which is set to INT_MAX & PAGE_CACHE_MASK (0x7ffff000) in fs.h. Since this is very close to the INT_MAX value that was previously set for MacOS and Windows, HDF5 will now use the Linux value on all platforms. Larger I/O sizes will be split into multiple smaller read/write calls in the VFDs.
 
 ### Removed hbool_t from public API calls
 

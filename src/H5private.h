@@ -401,22 +401,18 @@
 #endif /* H5_HAVE_PARALLEL */
 
 /*
- * Types and max sizes for POSIX I/O.
- * OS X (Darwin) is odd since the max I/O size does not match the types.
+ * Types and max I/O size for POSIX read/write calls
  */
 #if defined(H5_HAVE_WIN32_API)
-#define h5_posix_io_t         unsigned int
-#define h5_posix_io_ret_t     int
-#define H5_POSIX_MAX_IO_BYTES INT_MAX
-#elif defined(H5_HAVE_DARWIN)
-#define h5_posix_io_t         size_t
-#define h5_posix_io_ret_t     ssize_t
-#define H5_POSIX_MAX_IO_BYTES INT_MAX
+#define h5_posix_io_t     unsigned int
+#define h5_posix_io_ret_t int
 #else
-#define h5_posix_io_t         size_t
-#define h5_posix_io_ret_t     ssize_t
-#define H5_POSIX_MAX_IO_BYTES SSIZE_MAX
+#define h5_posix_io_t     size_t
+#define h5_posix_io_ret_t ssize_t
 #endif
+
+/* Use the Linux limit (MAX_RW_COUNT, which is INT_MAX & PAGE_CACHE_MASK) for everyone */
+#define H5_POSIX_MAX_IO_BYTES 0x7ffff000
 
 /* POSIX I/O mode used as the third parameter to open/_open
  * when creating a new file (O_CREAT is set).
