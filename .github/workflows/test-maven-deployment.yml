@@ -26,8 +26,8 @@ permissions:
   packages: write
 
 jobs:
-  test-maven-deployment:
-    name: Test Maven Deployment to HDFGroup Packages
+  generate-test-artifacts:
+    name: Generate Test Artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -123,23 +123,30 @@ jobs:
           name: maven-staging-artifacts-linux-x86_64
           path: test-artifacts/maven-staging-artifacts-linux-x86_64/
 
-      - name: Call Maven deployment workflow
-        uses: ./.github/workflows/maven-deploy.yml
-        with:
-          file_base: "hdf5-test"
-          preset_name: "test"
-          repository_url: ${{ inputs.target_repository == 'github-packages' && 'https://maven.pkg.github.com/HDFGroup/hdf5' || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
-          repository_id: ${{ inputs.target_repository == 'github-packages' && 'github' || 'ossrh' }}
-          deploy_snapshots: false
-          dry_run: ${{ inputs.test_mode == 'dry-run' }}
-        secrets:
-          MAVEN_USERNAME: ${{ inputs.target_repository == 'github-packages' && github.actor || secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_PASSWORD: ${{ inputs.target_repository == 'github-packages' && secrets.GITHUB_TOKEN || secrets.MAVEN_CENTRAL_PASSWORD }}
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+  test-maven-deployment:
+    name: Test Maven Deployment to HDFGroup Packages
+    needs: generate-test-artifacts
+    uses: ./.github/workflows/maven-deploy.yml
+    with:
+      file_base: "hdf5-test"
+      preset_name: "test"
+      repository_url: ${{ inputs.target_repository == 'github-packages' && 'https://maven.pkg.github.com/HDFGroup/hdf5' || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
+      repository_id: ${{ inputs.target_repository == 'github-packages' && 'github' || 'ossrh' }}
+      deploy_snapshots: false
+      dry_run: ${{ inputs.test_mode == 'dry-run' }}
+    secrets:
+      MAVEN_USERNAME: ${{ inputs.target_repository == 'github-packages' && github.actor || secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_PASSWORD: ${{ inputs.target_repository == 'github-packages' && secrets.GITHUB_TOKEN || secrets.MAVEN_CENTRAL_PASSWORD }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
+  validate-results:
+    name: Validate Deployment Results
+    needs: test-maven-deployment
+    if: ${{ always() && inputs.test_mode == 'live-deployment' }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Validate deployment results
-        if: inputs.test_mode == 'live-deployment'
         run: |
           echo "=== Validating Deployment Results ==="
 
@@ -156,7 +163,7 @@ jobs:
                             "https://api.github.com/users/HDFGroup/packages?package_type=maven")
 
             echo "Available packages:"
-            echo "$packages" | jq '.[] | {name: .name, html_url: .html_url}'
+            echo "$packages" | jq '.[] | {name: .name, html_url: .html_url}' || echo "No packages or jq not available"
 
             # Check for our test package
             if echo "$packages" | jq -r '.[].name' | grep -q "hdf5-java"; then
@@ -166,9 +173,17 @@ jobs:
             fi
           fi
 
+  display-results:
+    name: Display Test Results
+    needs: [generate-test-artifacts, test-maven-deployment]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
       - name: Display next steps
         run: |
           echo "=== Test Results and Next Steps ==="
+          echo "Generation Status: ${{ needs.generate-test-artifacts.result }}"
+          echo "Deployment Status: ${{ needs.test-maven-deployment.result }}"
 
           if [[ "${{ inputs.test_mode }}" == "dry-run" ]]; then
             echo "🧪 DRY RUN COMPLETED"
