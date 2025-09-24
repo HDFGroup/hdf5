@@ -300,7 +300,7 @@ if ($README) {
   open FILE, $README or die "$README: $!\n";
   my @contents = <FILE>;
   close FILE;
-  $contents[0] = sprintf("# HDF5 version %d.%d.%d%s %s",
+  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
 			 @newver[0,1,2],
 			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
@@ -314,7 +314,7 @@ if ($CHANGELOG) {
   open FILE, $CHANGELOG or die "$CHANGELOG: $!\n";
   my @contents = <FILE>;
   close FILE;
-  $contents[0] = sprintf("# HDF5 version %d.%d.%d%s %s",
+  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
 			 @newver[0,1,2],
 			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
