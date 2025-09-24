@@ -350,7 +350,7 @@ macro (ADD_H5_TEST testname)
       message(FATAL_ERROR "ADD_H5_TEST: STAT_ARG is a required argument when STAT_CHECK is provided")
     endif()
 
-    set (ctest_filename "STAT-${testname}")
+    set (ctest_testname "STAT-${testname}")
     set (ARG_MAIN_OUT_FILE "out-${ARG_STAT_ARG}.${ARG_TEST_FILE}")
   else ()
     set (ARG_MAIN_OUT_FILE "out-${testname}.${ARG_TEST_FILE}")
@@ -393,7 +393,7 @@ macro (ADD_H5_TEST testname)
       set (ARG_TEST_TYPE "SKIP")
     endif ()
 
-    set (ctest_filename "VERIFY_LAYOUT-${testname}")
+    set (ctest_testname "VERIFY_LAYOUT-${testname}")
     set (ARG_DUMP_SKIP_COMPARE TRUE)
     set (ARG_STDOUT_FILE "${ARG_TEST_FILE}-${testname}-v.out")
     set (ARG_DUMP_REFERENCE "${ARG_LAYOUT_FILTER}")
@@ -458,12 +458,12 @@ macro (ADD_H5_TEST testname)
 
   if (${ARG_DUMP_CHECK})
     set(ARG_COMPARE_LOCAL false)
-    set(ctest_filename "DMP-${ctest_testname}")
+    set(ctest_testname "DMP-${ctest_testname}")
   endif ()
 
   if (${ARG_STAT_CHECK})
     set(ARG_COMPARE_LOCAL false)
-    set(ctest_filename "STAT-${ctest_testname}")
+    set(ctest_testname "STAT-${ctest_testname}")
   endif()
 
   # === Create test ===
