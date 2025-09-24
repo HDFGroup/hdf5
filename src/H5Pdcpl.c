@@ -3569,7 +3569,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize /*out*/)
+H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize /*out*/)
 {
     bool            setting   = false;
     H5P_genplist_t *plist     = NULL;
@@ -3609,7 +3609,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize)
+H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize)
 {
     H5P_genplist_t *plist     = NULL;
     bool            prev_set  = false;

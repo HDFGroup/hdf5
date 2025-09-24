@@ -164,7 +164,7 @@ DSetMemXferPropList::getBuffer(void **tconv, void **bkg) const
 void
 DSetMemXferPropList::setPreserve(bool status) const
 {
-    herr_t ret_value = H5Pset_preserve(id, static_cast<hbool_t>(status));
+    herr_t ret_value = H5Pset_preserve(id, static_cast<bool>(status));
     if (ret_value < 0) {
         throw PropListIException("DSetMemXferPropList::setPreserve", "H5Pset_preserve failed");
     }

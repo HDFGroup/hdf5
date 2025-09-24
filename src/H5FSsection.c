@@ -1057,8 +1057,9 @@ done:
 static herr_t
 H5FS__sect_link(H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flags)
 {
-    const H5FS_section_class_t *cls;                 /* Class of section */
-    herr_t                      ret_value = SUCCEED; /* Return value */
+    const H5FS_section_class_t *cls;                   /* Class of section */
+    bool                        linked_sect = false;   /* Was the section linked in? */
+    herr_t                      ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1073,6 +1074,7 @@ H5FS__sect_link(H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flags)
     /* Add section to size tracked data structures */
     if (H5FS__sect_link_size(fspace->sinfo, cls, sect) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't add section to size tracking data structures");
+    linked_sect = true;
 
     /* Update rest of free space manager data structures for section addition */
     if (H5FS__sect_link_rest(fspace, cls, sect, flags) < 0)
@@ -1080,6 +1082,12 @@ H5FS__sect_link(H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flags)
                     "can't add section to non-size tracking data structures");
 
 done:
+    if (ret_value < 0) {
+        if (linked_sect && H5FS__sect_unlink_size(fspace->sinfo, cls, sect) < 0)
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL,
+                        "can't remove section from size tracking data structures");
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS__sect_link() */
 

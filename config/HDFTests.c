@@ -27,21 +27,6 @@ main ()
 
 #endif /* HAVE___FLOAT128 */
 
-#ifdef HAVE_BUILTIN_EXPECT
-
-int
-main ()
-{
-    void *ptr = (void*) 0;
-
-    if (__builtin_expect (ptr != (void*) 0, 1))
-        return 0;
-
-    return 0;
-}
-
-#endif /* HAVE_BUILTIN_EXPECT */
-
 #ifdef HAVE_ATTRIBUTE
 
 int
@@ -84,11 +69,9 @@ int main(void)
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #ifdef HAVE_UNISTD_H
 #   include <unistd.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#   include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #   include <sys/socket.h>

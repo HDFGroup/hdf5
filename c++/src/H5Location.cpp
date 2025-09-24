@@ -1683,7 +1683,7 @@ H5Location::getObjinfo(const H5std_string &grp_name, H5_index_t idx_type, H5_ite
 // 2000
 //--------------------------------------------------------------------------
 void
-H5Location::getObjinfo(const char *name, hbool_t follow_link, H5G_stat_t &statbuf) const
+H5Location::getObjinfo(const char *name, bool follow_link, H5G_stat_t &statbuf) const
 {
     herr_t ret_value = H5Gget_objinfo(getId(), name, follow_link, &statbuf);
     if (ret_value < 0)
@@ -1697,7 +1697,7 @@ H5Location::getObjinfo(const char *name, hbool_t follow_link, H5G_stat_t &statbu
 ///             \c H5std_string for \a name.
 //--------------------------------------------------------------------------
 void
-H5Location::getObjinfo(const H5std_string &name, hbool_t follow_link, H5G_stat_t &statbuf) const
+H5Location::getObjinfo(const H5std_string &name, bool follow_link, H5G_stat_t &statbuf) const
 {
     getObjinfo(name.c_str(), follow_link, statbuf);
 }

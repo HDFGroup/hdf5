@@ -626,7 +626,7 @@ public class H5 implements java.io.Serializable {
 
     // /////// unimplemented ////////
     //  herr_t H5free_memory(void *mem);
-    //  void *H5allocate_memory(size_t size, hbool_t clear);
+    //  void *H5allocate_memory(size_t size, bool clear);
     //  void *H5resize_memory(void *mem, size_t size);
 
     // ////////////////////////////////////////////////////////////
@@ -4669,11 +4669,11 @@ public class H5 implements java.io.Serializable {
 
     // /////// unimplemented ////////
     // H5_DLL hid_t H5EScreate(void);
-    // H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, hbool_t *err_occurred);
-    // H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred);
+    // H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, bool *err_occurred);
+    // H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, bool *err_occurred);
     // H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
     // H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
-    // H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
+    // H5_DLL herr_t H5ESget_err_status(hid_t es_id, bool *err_occurred);
     // H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
     // H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
     //                                size_t *err_cleared);
@@ -5344,8 +5344,8 @@ public class H5 implements java.io.Serializable {
     //     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
     //  herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
     // #ifdef H5_HAVE_PARALLEL
-    //    herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
-    //    herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
+    //    herr_t H5Fset_mpi_atomicity(hid_t file_id, bool flag);
+    //    herr_t H5Fget_mpi_atomicity(hid_t file_id, bool *flag);
     // #endif /* H5_HAVE_PARALLEL */
 
     // /*
@@ -5419,8 +5419,8 @@ public class H5 implements java.io.Serializable {
     //  herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void**file_handle);
     //  herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void
     //  *buf/*out*/); herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t
-    //  size, const void *buf); herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing); herr_t
-    //  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing); herr_t H5FDlock(H5FD_t *file, hbool_t rw);
+    //  size, const void *buf); herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, bool closing); herr_t
+    //  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, bool closing); herr_t H5FDlock(H5FD_t *file, bool rw);
     //  herr_t H5FDunlock(H5FD_t *file);
     //  herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags/*out*/);
 
@@ -11778,13 +11778,13 @@ public class H5 implements java.io.Serializable {
     // herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
     // herr_t H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
     // herr_t H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
-    // herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
-    // herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size);
+    // herr_t H5Pset_core_write_tracking(hid_t fapl_id, bool is_enabled, size_t page_size);
+    // herr_t H5Pget_core_write_tracking(hid_t fapl_id, bool *is_enabled, size_t *page_size);
     // #ifdef H5_HAVE_PARALLEL
-    // herr_t H5Pset_all_coll_metadata_ops(hid_t accpl_id, hbool_t is_collective);
-    //  herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
-    // herr_t H5Pset_coll_metadata_write(hid_t fapl_id, hbool_t is_collective);
-    // herr_t H5Pget_coll_metadata_write(hid_t fapl_id, hbool_t *is_collective);
+    // herr_t H5Pset_all_coll_metadata_ops(hid_t accpl_id, bool is_collective);
+    //  herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, bool *is_collective);
+    // herr_t H5Pset_coll_metadata_write(hid_t fapl_id, bool is_collective);
+    // herr_t H5Pget_coll_metadata_write(hid_t fapl_id, bool *is_collective);
     // #endif /* H5_HAVE_PARALLEL */
     //  herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr);
     //  herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr /*out*/);
@@ -11803,7 +11803,7 @@ public class H5 implements java.io.Serializable {
 
     // Dataset xfer property list (DXPL) routines //
     // herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
-    // herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
+    // herr_t H5Pset_preserve(hid_t plist_id, bool status);
     // int H5Pget_preserve(hid_t plist_id);
     // herr_t H5Pset_filter_callback(hid_t plist, H5Z_filter_func_t func, void *op_data)
     // herr_t H5Pget_vlen_mem_manager(hid_t plist, H5MM_allocate_t *alloc, void **alloc_info, H5MM_free_t

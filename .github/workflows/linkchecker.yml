@@ -42,13 +42,13 @@ jobs:
 
       - name: Run Comprehensive Link Check
         id: lychee
-        uses: lycheeverse/lychee-action@v1.9.3
+        uses: lycheeverse/lychee-action@v2.0.2
         with:
           args: >
             --verbose
             --base ${{ steps.build_docs.outputs.html_path }}
             --max-retries 4
-            --max-concurrency 8
+            --max-concurrency 4
             --retry-wait-time 10
             --timeout 30
             --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"

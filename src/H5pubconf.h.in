@@ -304,14 +304,8 @@
 /* Define to 1 if you have the <sys/time.h> header file. */
 #cmakedefine H5_HAVE_SYS_TIME_H @H5_HAVE_SYS_TIME_H@
 
-/* Define to 1 if you have the <sys/types.h> header file. */
-#cmakedefine H5_HAVE_SYS_TYPES_H @H5_HAVE_SYS_TYPES_H@
-
 /* Define to 1 if you have the <szlib.h> header file. */
 #cmakedefine H5_HAVE_SZLIB_H @H5_HAVE_SZLIB_H@
-
-/* Define to 1 if the compiler supports the __builtin_expect() extension */
-#cmakedefine H5_HAVE_BUILTIN_EXPECT @H5_HAVE_BUILTIN_EXPECT@
 
 /* Define if we have thread support */
 # cmakedefine H5_HAVE_THREADS @H5_HAVE_THREADS@
