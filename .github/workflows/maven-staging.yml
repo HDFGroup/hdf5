@@ -1266,6 +1266,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Install timeout command on macOS
+        if: ${{ startsWith(matrix.platform, 'macOS') }}
+        run: |
+          # Install GNU coreutils which includes gtimeout
+          brew install coreutils
+          echo "Installed gtimeout: $(which gtimeout)"
+
       - name: Download Maven artifacts (${{ matrix.platform }})
         uses: actions/download-artifact@v4
         with:
@@ -1393,8 +1400,21 @@ EOF
                 if javac -cp "$CLASSPATH" "$EXAMPLE_FILE" 2>&1; then
                   echo "✓ Compilation successful for $category/$example_name"
 
-                  # Test execution (with timeout)
-                  if timeout 10s java -cp ".:$CLASSPATH" "$example_name" >/tmp/${example_name}.out 2>&1; then
+                  # Test execution (with cross-platform timeout)
+                  if command -v gtimeout >/dev/null 2>&1; then
+                    # macOS with GNU coreutils timeout
+                    EXEC_RESULT=$(gtimeout 10s java -cp ".:$CLASSPATH" "$example_name" >/tmp/${example_name}.out 2>&1; echo $?)
+                  elif command -v timeout >/dev/null 2>&1; then
+                    # Linux/Windows with timeout command
+                    EXEC_RESULT=$(timeout 10s java -cp ".:$CLASSPATH" "$example_name" >/tmp/${example_name}.out 2>&1; echo $?)
+                  else
+                    # Fallback - run without timeout (Java examples should complete quickly)
+                    echo "Note: Running without timeout"
+                    java -cp ".:$CLASSPATH" "$example_name" >/tmp/${example_name}.out 2>&1
+                    EXEC_RESULT=$?
+                  fi
+
+                  if [ "$EXEC_RESULT" -eq 0 ]; then
                     # Basic output validation
                     if grep -q -i -E "(dataset|datatype|group|success|created|written|read)" /tmp/${example_name}.out && \
                        ! grep -q -i -E "(error|exception|failed|cannot)" /tmp/${example_name}.out; then
