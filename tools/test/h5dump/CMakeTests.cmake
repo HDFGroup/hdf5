@@ -1218,9 +1218,7 @@ ADD_H5_TEST (texceedsubblock RESULT_CODE 1 H5ERRREF "exceed dataset dims" --enab
 
 # tests for filters
 # SZIP
-if (H5_HAVE_FILTER_SZIP)
-  ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip TARGET_FILE tfilters.h5)
-endif()
+ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip TARGET_FILE tfilters.h5)
 
 # deflate
 ADD_H5_TEST (tdeflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate TARGET_FILE tfilters.h5)
@@ -1238,9 +1236,7 @@ ADD_H5_TEST (tnbit RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d n
 ADD_H5_TEST (tscaleoffset RESULT_CODE 0 APPLY_FILTERS 4 --enable-error-stack -H -p -d scaleoffset  TARGET_FILE tfilters.h5)
 
 # all
-if (H5_HAVE_FILTER_SZIP)
-  ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  TARGET_FILE tfilters.h5 APPLY_FILTERS 1)
-endif ()
+ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  TARGET_FILE tfilters.h5 APPLY_FILTERS 1)
 
 # user defined
 ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  TARGET_FILE tfilters.h5)
