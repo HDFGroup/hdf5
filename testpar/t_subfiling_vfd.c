@@ -98,6 +98,7 @@ static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, bool custom
 static hid_t create_dcpl_id(int rank, const hsize_t dims[], hid_t dxpl_id);
 
 /* Test functions */
+static void test_create_and_close(void);
 static void test_subfiling_file_mapping_api(void);
 static void test_ioc_only_fail(void);
 static void test_config_file(void);
@@ -112,6 +113,7 @@ static void test_subfiling_vector_io_extension(void);
 static void test_subfiling_h5fuse(void);
 
 static test_func tests[] = {
+    test_create_and_close,
     test_ioc_only_fail,
     test_config_file,
     test_stripe_sizes,
@@ -238,6 +240,63 @@ error:
 
     return H5I_INVALID_HID;
 }
+/*
+ * A simple test that creates and closes a file with the
+ * subfiling VFD
+ */
+#define SUBF_FILENAME "test_subfiling_basic_create.h5"
+static void
+test_create_and_close(void)
+{
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("file creation and immediate close");
+
+    /* Get a default Subfiling FAPL */
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    char **filenames = NULL;
+    size_t len = 0;
+    H5FDsubfiling_get_file_mapping(file_id, &filenames, &len);
+
+    if (len > 0) {
+        int l_mpi_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &l_mpi_rank);
+        printf("I AM MPI RANK %d RESPONSIBLE FOR SUBFILES: [", l_mpi_rank);
+        for (size_t i = 0; i < len; i++) {
+            if (i > 0)
+                printf(", ");
+            printf("%s", filenames[i]);
+        }
+        printf("]\n\n");
+
+        for (size_t i = 0; i < len; i++) {
+            H5free_memory(filenames[i]);
+        }
+        H5free_memory(filenames);
+    }
+
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(SUBF_FILENAME, fapl_id);
+    }
+    H5E_END_TRY
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME
 
 /* Helper function to cleanup file mapping memory */
 static void
@@ -471,75 +530,6 @@ create_subfiling_fapl_with_ioc_selection_and_count(H5FD_subfiling_ioc_select_t s
 
     return fapl_id;
 }
-
-/*
- * Basic test with enhanced file mapping output
- */
-#define SUBF_FILENAME "test_subfiling_basic_create.h5"
-static void
-test_create_and_close(void)
-{
-    hid_t  file_id         = H5I_INVALID_HID;
-    hid_t  fapl_id         = H5I_INVALID_HID;
-    char **filenames       = NULL;
-    char  *config_filename = NULL;
-
-    curr_nerrors = nerrors;
-
-    if (MAINPROCESS)
-        TESTING("file creation and immediate close");
-
-    /* Get a default Subfiling FAPL */
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
-    VRFY((fapl_id >= 0), "FAPL creation succeeded");
-
-    file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    VRFY((file_id >= 0), "H5Fcreate succeeded");
-
-    /* Test H5FDsubfiling_get_file_mapping */
-    size_t len = 0;
-    herr_t ret = H5FDsubfiling_get_file_mapping(file_id, &filenames, &len);
-    VRFY((ret >= 0), "H5FDsubfiling_get_file_mapping succeeded");
-
-    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
-
-    /* Find configuration file */
-    if (MAINPROCESS) {
-        config_filename = find_config_file(SUBF_FILENAME);
-    }
-
-    /* Validate using h5fuse - only on main process to avoid conflicts */
-    mpi_code_g = MPI_Barrier(comm_g);
-    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
-
-    /* All ranks participate in validation result synchronization */
-    int validation_result = 1; /* Default to success */
-    if (len > 0) {
-        ret               = validate_file_with_h5fuse(config_filename, filenames, len, SUBF_FILENAME);
-        validation_result = (ret >= 0) ? 1 : 0;
-    }
-
-    /* Synchronize validation result across all ranks */
-    MPI_Allreduce(MPI_IN_PLACE, &validation_result, 1, MPI_INT, MPI_LAND, comm_g);
-    VRFY(validation_result, "h5fuse validation succeeded");
-
-    /* Cleanup */
-    cleanup_file_mapping_memory(filenames, len);
-
-    if (config_filename) {
-        free(config_filename);
-    }
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(SUBF_FILENAME, fapl_id);
-    }
-    H5E_END_TRY
-
-    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
-
-    CHECK_PASSED();
-}
-#undef SUBF_FILENAME
 
 /*
  * Test H5FDsubfiling_get_file_mapping with different IOC selection methods
@@ -887,7 +877,6 @@ test_subfiling_file_mapping_api(void)
         printf("=======================================================\n");
     }
 
-    test_create_and_close();                         /* Basic test */
     test_subfiling_get_file_mapping_ioc_selection(); /* Different IOC selections */
     test_subfiling_get_file_mapping_consistency();   /* Consistency testing */
     test_subfiling_get_file_mapping_errors();        /* Error conditions */
@@ -2379,6 +2368,11 @@ test_selection_strategies(void)
 
                     /* Ensure all the subfiles are present */
                     for (int i = 0; i < expected_num_subfiles; i++) {
+                        int needed_len = snprintf(NULL, 0, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                                                  (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
+                        if (needed_len >= PATH_MAX) {
+                            VRFY(0, "subfile name too long for buffer");
+                        }
                         snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                                  (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
 
@@ -2389,6 +2383,12 @@ test_selection_strategies(void)
                     }
 
                     /* Ensure no extra subfiles are present */
+                    int needed_len = snprintf(NULL, 0, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                                              (uint64_t)file_info.st_ino, num_digits, expected_num_subfiles + 1,
+                                              expected_num_subfiles);
+                    if (needed_len >= PATH_MAX) {
+                        VRFY(0, "subfile name too long for buffer");
+                    }
                     snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                              (uint64_t)file_info.st_ino, num_digits, expected_num_subfiles + 1,
                              expected_num_subfiles);

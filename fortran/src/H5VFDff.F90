@@ -94,19 +94,26 @@ CONTAINS
 !!       DEALLOCATE(filenames)
 !!       \endcode
 !!
-!! \note **Compiler Compatibility**:
-!!       - With H5_FORTRAN_HAVE_CHAR_ALLOC: Variable-length character strings (Fortran 2003+)
-!!       - Without H5_FORTRAN_HAVE_CHAR_ALLOC: Fixed-length 8192 character strings (older compilers)
+!! \note
+!! \parblock
+!! **Compiler Compatibility**:
+!! - With H5_FORTRAN_HAVE_CHAR_ALLOC: Variable-length character strings (Fortran 2003+)
+!! - Without H5_FORTRAN_HAVE_CHAR_ALLOC: Fixed-length 8192 character strings (older compilers),
+!!   filenames longer than 8192 characters will cause the function to fail with hdferr = -1.
+!! \endparblock
 !!
-!! \note **Platform Support**: This function is only available when HDF5 is built with
-!!       subfiling support enabled.
+!! \note
+!! \parblock
+!!  This function will not be accessible if support for the subfiling VFD is unavailable or disabled.
+!! \endparblock
 !!
-!! \warning Filenames longer than 8192 characters will cause the function to fail with hdferr = -1
-!!
-!! \note **Optimized Allocation**: The function uses knowledge of the subfiling filename template
-!!       to estimate optimal string lengths, typically reducing memory usage compared to the
-!!       maximum 8192 character limit. Subfile names follow the pattern:
-!!       `basename.subfile_<inode>_<index>_of_<total>`
+!! \note
+!! \parblock
+!! **Optimized Allocation**: The function uses knowledge of the subfiling filename template
+!! to estimate optimal string lengths, typically reducing memory usage compared to the
+!! maximum 8192 character limit. Subfile names follow the pattern:
+!! `basename.subfile_<inode>_<index>_of_<total>`
+!! \endparblock
 !!
 !! \par Example Usage:
 !! \code{.f90}

@@ -448,24 +448,36 @@ H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *conf
  *          - **Debugging**: Troubleshooting subfiling configuration and I/O patterns
  *          - **Storage optimization**: Analyzing subfile sizes and distribution
  *
- * \note  **Memory management**: The caller must call H5free_memory() on each string in the
- *        \p filenames array, and then call H5free_memory() on the \p filenames array itself:
- *        \code{.c}
- *        for (size_t i = 0; i < len; i++) {
- *            H5free_memory(filenames[i]);
- *        }
- *        H5free_memory(filenames);
- *        \endcode
+ * \note
+ * \parblock
+ * **Memory management**: The caller must call H5free_memory() on each string in the
+ * \p filenames array, and then call H5free_memory() on the \p filenames array itself:
+ * \code{.c}
+ * for (size_t i = 0; i < len; i++) {
+ *     H5free_memory(filenames[i]);
+ * }
+ * H5free_memory(filenames);
+ * \endcode
+ * \endparblock
  *
- * \note  **VFD requirement**: This function only works with files that use the subfiling VFD.
- *        Calling it on files using other VFDs will result in an error.
+ * \note
+ * \parblock
+ * **VFD requirement**: This function only works with files that use the subfiling VFD.
+ *   Calling it on files using other VFDs will result in an error. This function will not
+ *   be accessible if support for the subfiling VFD is unavailable or disabled.
+ * \endparblock
  *
- * \note  **MPI context**: The function returns subfiles associated with the calling MPI rank.
- *        Different ranks may receive different subfile lists depending on the subfiling
- *        configuration and I/O concentrator (IOC) assignment.
+ * \note
+ * \parblock
+ * **MPI context**: The function returns subfiles associated with the calling MPI rank.
+ * Different ranks may receive different subfile lists depending on the subfiling
+ * configuration and I/O concentrator (IOC) assignment.
+ * \endparblock
  *
- * \warning **Platform support**: Subfiling is not supported on Windows. This function will
- *          not be available when HDF5 is built on Windows platforms.
+ * \note
+ * \parblock
+ * \warning
+ * \endparblock
  *
  * \par Example
  * \code{.c}

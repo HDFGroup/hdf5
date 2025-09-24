@@ -593,6 +593,9 @@ H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len)
     if (NULL == (file_ptr = H5VL_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID");
 
+    if (H5FD_SUBFILING != H5F_get_driver_id(file_ptr))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file is not using Subfiling VFD");
+
     if (H5F_shared_get_file_driver(H5F_SHARED(file_ptr), &driver) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get driver structure from file ID");
 
