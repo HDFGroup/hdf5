@@ -1,4 +1,4 @@
-# HDF5 2.0.0 - 2025-09-30
+# HDF5 version 2.0.0-2 currently under development
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -21,7 +21,7 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
 * [Known Problems](#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.0.0
+# 🔆 Executive Summary: HDF5 Version 2.0.0-2
 
 ## Performance Enhancements:
 
