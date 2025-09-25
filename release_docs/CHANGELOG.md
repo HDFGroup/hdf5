@@ -89,7 +89,7 @@ HDF5 release, platforms tested, and known problems in this release.
    - **Multi-platform testing**: Comprehensive CI/CD testing of Java examples across all supported platforms (Linux, Windows, macOS x86_64, macOS aarch64)
    - **Native library error handling**: Enhanced validation logic for Maven-only environments to properly handle expected native library loading errors
    - **Dynamic repository support**: Enhanced workflows to use `github.repository` variable for seamless testing on forks before canonical deployment
-   - **Fork-based testing**: Complete testing framework allowing validation on repository forks (e.g., byrnHDF/hdf5) before merging to HDFGroup/hdf5
+   - **Fork-based testing**: Complete testing framework allowing validation on repository forks (e.g., fork-name/hdf5) before merging to HDFGroup/hdf5
    - **Multi-artifact deployment**: Enhanced deployment workflow to handle both `hdf5-java` (platform-specific) and `hdf5-java-examples` (platform-independent) artifacts
    - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
    - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
