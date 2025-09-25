@@ -1145,7 +1145,6 @@ h5free_string_array_memory_c(void **array_ptr, size_t_f *num_files)
     int    ret_value = 0;
     char **array;
     size_t len;
-    size_t i;
 
     if (array_ptr == NULL || num_files == NULL) {
         return ret_value; /* Nothing to free */
@@ -1159,7 +1158,7 @@ h5free_string_array_memory_c(void **array_ptr, size_t_f *num_files)
     }
 
     /* Free each individual string */
-    for (i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         if (array[i] != NULL) {
             H5free_memory(array[i]);
             array[i] = NULL;

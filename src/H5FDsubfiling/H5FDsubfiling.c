@@ -617,7 +617,7 @@ H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len)
 
         /* Get the basename of the full HDF5 filename */
         if (H5_basename(sf_context->h5_filename, &base) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get HDF5 file basename");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't get HDF5 file basename");
 
         /*
          * Get the directory prefix where subfiles will be placed.
@@ -627,24 +627,24 @@ H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len)
          */
         if (sf_context->subfile_prefix) {
             if (NULL == (subfile_dir = H5MM_strdup(sf_context->subfile_prefix)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix");
         }
         else {
             if (H5_dirname(sf_context->h5_filename, &subfile_dir) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't get HDF5 file dirname");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't get HDF5 file dirname");
         }
 
         num_subfiles = sf_context->sf_num_subfiles;
         num_digits   = (int)(log10(num_subfiles) + 1);
 
-        if (NULL == (filenames_arr = calloc(1, (size_t)sf_context->sf_num_fids * sizeof(char *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate filenames array");
+        if (NULL == (filenames_arr = calloc((size_t)sf_context->sf_num_fids, sizeof(char *))))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate filenames array");
 
         for (int i = 0; i < sf_context->sf_num_fids; i++) {
             int subfile_idx;
 
             if (NULL == (filepath = malloc(PATH_MAX)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
                             "couldn't allocate space for subfile filename");
 
             subfile_idx = (i * sf_context->topology->n_io_concentrators) + sf_context->topology->ioc_idx + 1;
