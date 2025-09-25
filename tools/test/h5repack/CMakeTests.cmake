@@ -279,586 +279,360 @@ macro (ADD_HELP_TEST testname resultcode)
   endif ()
 endmacro ()
 
-macro (ADD_H5_TEST_OLD testname testtype testfile)
-  if (NOT HDF5_USING_ANALYSIS_TOOL)
-    if ("${testtype}" STREQUAL "SKIP")
-      add_test (
-          NAME H5REPACK_OLD-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
-      )
-      set_property(TEST H5REPACK_OLD-${testname} PROPERTY DISABLED true)
-    else ()
-      add_test (
-          NAME H5REPACK_OLD-${testname}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-      )
-      add_test (
-          NAME H5REPACK_OLD-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_OLD-${testname} PROPERTIES
-          DEPENDS H5REPACK_OLD-${testname}-clear-objects
-      )
-      if ("H5REPACK_OLD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_OLD-${testname} PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_OLD-${testname}_DFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES
-          DEPENDS H5REPACK_OLD-${testname}
-      )
-      if ("H5REPACK_OLD-${testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_OLD-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_OLD-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_OLD-${testname}_DFF
-      )
-    endif ()
-  endif ()
-endmacro ()
+#
+# Adds a test that performs h5repack and checks the new file according to passed parameters
+# 
+# REQUIRED KEYWORDS ARGUMENTS:
+#   TEST_TYPE <testtype> - "TEST", "SKIP", or "LEGACY"
+#   TEST_FILE <filename> - the target file to use h5repack on
+# 
+# OPTIONAL KEYWORD ARGUMENTS:
+#   RESULT_CODE <code> - expected return code from h5repack (default 0)
+#   DIFF_RESULT_CODE <code> - expected return code from h5diff (default 0)
+#   ERR_REF <string> - value for TEST_ERRREF (default empty)
+#   STAT_ARG <arg> - argument to pass to h5stat (required if STAT_CHECK is provided)
+#   STAT_RESULT_CODE <code> - expected return code from h5stat (default 0)
+#   LAYOUT_DSET <dset> - dataset to use for layout verification tests
+#   LAYOUT_FILTER <filter> - filter to use for layout verification tests
+#
+# OPTIONAL FLAGS
+#   ERROR_STACK - pass the '--enable-error-stack' flag to h5repack and h5diff
+#   GZIP_FILTER - Apply filters to genericize gzip-related output for comparison
+#   SIZE_FILTER - Apply filters to genericize size-related output for comparison
+#   DUMP_CHECK - Whether to use h5dump to verify output
+#   DUMP_NO_OPT - Whether to provide additional cmd line arguments to h5dump
+#                 No effect if DUMP_CHECK is not provided
+#   FULL_DIFF - Whether to perform h5diff verification through runTest
+#   STAT_CHECK - Whether to use h5stat to verify output
+#
+macro (ADD_H5_TEST testname)
+  # === Argument handling ===
+  cmake_parse_arguments(ARG
+    "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK;DUMP_NO_OPT;FULL_DIFF;STAT_CHECK" # flags
+    "TEST_TYPE;TEST_FILE;RESULT_CODE;DIFF_RESULT_CODE;ERR_REF;STAT_ARG;STAT_RESULT_CODE;LAYOUT_DSET;LAYOUT_FILTER" # single arg
+    "" # multi arg
+    ${ARGN}
+  )
 
-macro (ADD_H5_TEST testname testtype testfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
-      )
-      set_property(TEST H5REPACK-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-    )
-    add_test (
-        NAME H5REPACK-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-    )
-    set_tests_properties (H5REPACK-${testname} PROPERTIES
-        DEPENDS H5REPACK-${testname}-clear-objects
-    )
-    if ("H5REPACK-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK-${testname} PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5REPACK-${testname}_DFF
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-    )
-    set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES
-        DEPENDS H5REPACK-${testname}
-    )
-    if ("H5REPACK-${testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5REPACK-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-    )
-    set_tests_properties (H5REPACK-${testname}-clean-objects PROPERTIES
-        DEPENDS H5REPACK-${testname}_DFF
-    )
+  # Check for required arguments
+  if (NOT ARG_TEST_TYPE)
+    message(FATAL_ERROR "ADD_H5_TEST: TEST_TYPE is a required argument")
   endif ()
-endmacro ()
 
-macro (ADD_H5_FILTER_TEST testname testfilter replacefilter testtype resultcode resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_CMP-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_CMP-${testname} PROPERTY DISABLED true)
-    endif ()
+  if (NOT ARG_TEST_FILE)
+    message(FATAL_ERROR "ADD_H5_TEST: TEST_FILE is a required argument")
+  endif ()
+
+  # Default values for local variables
+  set (ARG_CLEANUP_DEPENDS "")
+
+  set (ctest_testname ${testname})
+
+  set (ARG_FILTER_IN "")
+  set (ARG_FILTER_OUT "")
+  set (ARG_REF_FILE "")
+
+  set (ARG_DUMP_SKIP_COMPARE FALSE)
+  set (ARG_DUMP_OPTIONS "-q;creation_order;-pH;")
+  set (ARG_NOT_LAYOUT_FILTER "")
+  set (ARG_DUMP_GREP_FILTER "")
+  set (ARG_DUMP_REFERENCE "${testname}.${ARG_TEST_FILE}.ddl")
+
+  set (ARG_STDOUT_FILE "${ARG_TEST_FILE}-${testname}.out")
+  set (ARG_ERROR_STACK_FLAG "")
+
+  # Whether to perform comparison in runTest or locally with h5diff
+  set(ARG_COMPARE_LOCAL true)
+
+  if (${ARG_STAT_CHECK})
+    if (NOT DEFINED ARG_STAT_ARG)
+      message(FATAL_ERROR "ADD_H5_TEST: STAT_ARG is a required argument when STAT_CHECK is provided")
+    endif()
+
+    set (ctest_testname "STAT-${testname}")
+    set (ARG_MAIN_OUT_FILE "out-${ARG_STAT_ARG}.${ARG_TEST_FILE}")
   else ()
-    add_test (
-        NAME H5REPACK_CMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    # If using memchecker add tests without using scripts
+    set (ARG_MAIN_OUT_FILE "out-${testname}.${ARG_TEST_FILE}")
+  endif ()
+
+  # Process optional arguments
+  if (ARG_ERROR_STACK)
+    set(ARG_ERROR_STACK_FLAG "--enable-error-stack")
+  endif ()
+
+  if (NOT DEFINED ARG_RESULT_CODE)
+    set(ARG_RESULT_CODE 0)
+  endif ()
+
+  if (NOT DEFINED ARG_DIFF_RESULT_CODE)
+    set(ARG_DIFF_RESULT_CODE 0)
+  endif ()
+
+  if (NOT DEFINED ARG_STAT_RESULT_CODE)
+    set(ARG_STAT_RESULT_CODE 0)
+  endif ()
+
+  if (ARG_DUMP_NO_OPT)
+    set (ARG_DUMP_OPTIONS "")
+  endif()
+
+  if (DEFINED ARG_LAYOUT_DSET OR DEFINED ARG_LAYOUT_FILTER)
+    if (NOT DEFINED ARG_LAYOUT_DSET OR NOT DEFINED ARG_LAYOUT_FILTER)
+      message(FATAL_ERROR "ADD_H5_TEST: Both LAYOUT_DSET and LAYOUT_FILTER must be provided for layout verification tests")
+    endif ()
+    
+    if (${ARG_DUMP_CHECK})
+      message(FATAL_ERROR "ADD_H5_TEST: DUMP_CHECK cannot be used with layout verification tests")
+    endif ()
+
+    # Skip verify layout tests if memchecker enabled
     if (HDF5_ENABLE_USING_MEMCHECKER)
+      set (ARG_TEST_TYPE "SKIP")
+    endif ()
+
+    set (ctest_testname "VERIFY_LAYOUT-${testname}")
+    set (ARG_DUMP_SKIP_COMPARE TRUE)
+    set (ARG_STDOUT_FILE "${ARG_TEST_FILE}-${testname}-v.out")
+    set (ARG_DUMP_REFERENCE "${ARG_LAYOUT_FILTER}")
+    # If an error result code is provided, change the h5dump call in the following ways
+    # - remove use of dset in args
+    # - change expected result code to 0
+    # - change the layout filter provided to TEST_GREP_FILTER
+    if (${ARG_RESULT_CODE})
+      set(ARG_DUMP_OPTIONS "-pH;")
+
+      if (${ARG_LAYOUT_FILTER} STREQUAL "CHUNKED")
+        set (ARG_NOT_LAYOUT_FILTER "(CONTIGUOUS|COMPACT)")
+      elseif (${ARG_LAYOUT_FILTER} STREQUAL "CONTIGUOUS")
+        set (ARG_NOT_LAYOUT_FILTER "(CHUNK|COMPACT)")
+      elseif (${ARG_LAYOUT_FILTER} STREQUAL "COMPACT")
+        set (ARG_NOT_LAYOUT_FILTER "(CONTIGUOUS|CHUNK)")
+      else ()
+        message(FATAL_ERROR "ADD_H5_TEST: Invalid LAYOUT_FILTER value ${ARG_LAYOUT_FILTER}. Must be CONTIGUOUS, CHUNKED, or COMPACT")
+      endif ()
+
+      set(ARG_DUMP_GREP_FILTER ${ARG_NOT_LAYOUT_FILTER})
+      set(ARG_RESULT_CODE 0)
+    else ()
+      set (ARG_DUMP_OPTIONS "-d;${ARG_LAYOUT_DSET};-pH;")
+      set (ARG_DUMP_GREP_FILTER ${ARG_LAYOUT_FILTER})
+    endif ()
+  endif()
+
+  # Check for incompatible options
+  if (${ARG_GZIP_FILTER} AND DEFINED ARG_ERR_REF)
+    message(FATAL_ERROR "ADD_H5_TEST: GZIP_FILTER and ERR_REF options are incompatible")
+  endif ()
+  if (${ARG_FULL_DIFF} AND ${ARG_DUMP_CHECK})
+    message(FATAL_ERROR "ADD_H5_TEST: FULL_DIFF and DUMP_CHECK options are incompatible")
+  endif ()
+  if (${ARG_STAT_CHECK} AND ${ARG_DUMP_CHECK})
+    message(FATAL_ERROR "ADD_H5_TEST: STAT_CHECK and DUMP_CHECK options are incompatible")
+  endif ()
+
+  # not fundamentally incompatible, but at present this probably indicates a mistake in test setup
+  if (${ARG_GZIP_FILTER} AND ${ARG_SIZE_FILTER})
+    message(FATAL_ERROR "ADD_H5_TEST: GZIP_FILTER and SIZE_FILTER options are incompatible")
+  endif ()
+
+  if (ARG_GZIP_FILTER)
+    list(APPEND ARG_FILTER_IN "GZIP   \\(0\\.[0-9][0-9][0-9]:1\\);O?...ing file[^\n]+\n")
+    list(APPEND ARG_FILTER_OUT "GZIP   (0.XXX:1);")
+    set(ARG_REF_FILE "${ARG_TEST_FILE}-${testname}.tst")
+    set(ctest_testname "CMP-${ctest_testname}")
+    # Don't skip runTest comparison if we're using filters
+    set(ARG_COMPARE_LOCAL false)
+  elseif (ARG_SIZE_FILTER)
+    list(APPEND ARG_FILTER_IN "SIZE [0-9][0-9][0-9][0-9] \\(2\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)")
+    list(APPEND ARG_FILTER_OUT "SIZE XXXX (2.XXX:1 COMPRESSION)")
+    # Don't skip runTest comparison if we're using filters
+    set(ARG_COMPARE_LOCAL false)
+  endif ()
+
+  # Size/Offset within file will differ across VOL connectors
+  # These are inserted to the list now to be applied after compression-related output masks
+  list (APPEND ARG_FILTER_IN "OFFSET [0-9]+")
+  list (APPEND ARG_FILTER_OUT "OFFSET XXXX")
+
+  list (APPEND ARG_FILTER_IN "SIZE [0-9]+")
+  list (APPEND ARG_FILTER_OUT "SIZE XXXX")
+
+  if (${ARG_DUMP_CHECK})
+    set(ARG_COMPARE_LOCAL false)
+    set(ctest_testname "DMP-${ctest_testname}")
+  endif ()
+
+  if (${ARG_STAT_CHECK})
+    set(ARG_COMPARE_LOCAL false)
+    set(ctest_testname "STAT-${ctest_testname}")
+  endif()
+
+  # === Create test ===
+  if ("${ARG_TEST_TYPE}" STREQUAL "SKIP")
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
-          NAME H5REPACK_CMP-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+          NAME H5REPACK-${ctest_testname}
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
       )
-      set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES
-          DEPENDS H5REPACK_CMP-${testname}-clear-objects
+      set_property(TEST H5REPACK-${ctest_testname} PROPERTY DISABLED true)
+    endif ()
+  else ()
+    # Test is to be run
+    add_test (
+        NAME H5REPACK-${ctest_testname}-clear-objects
+        COMMAND ${CMAKE_COMMAND} -E remove "${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
+    )
+
+    # Build REPACK_TOOL_ARGS properly to avoid empty first argument
+    set(REPACK_TOOL_ARGS "")
+
+    if(ARG_ERROR_STACK_FLAG)
+      list(APPEND REPACK_TOOL_ARGS "${ARG_ERROR_STACK_FLAG}")
+    endif()
+
+    if(ARG_UNPARSED_ARGUMENTS)
+      list(APPEND REPACK_TOOL_ARGS "${ARG_UNPARSED_ARGUMENTS}")
+    endif()
+
+    if (HDF5_ENABLE_USING_MEMCHECKER OR ${ARG_DUMP_CHECK})
+      # Execute h5repack directly - append absolute paths
+      list(APPEND REPACK_TOOL_ARGS "-i;${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE};-o;${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}")
+
+      add_test (
+          NAME H5REPACK-${ctest_testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${REPACK_TOOL_ARGS}
       )
     else ()
+      # Execute h5repack through runTest script - append relative paths
+      list(APPEND REPACK_TOOL_ARGS "-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}")
+
       add_test (
-          NAME H5REPACK_CMP-${testname}
+          NAME H5REPACK-${ctest_testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-              -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
+              -D "TEST_ARGS:STRING=${REPACK_TOOL_ARGS}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_FILTER:STRING=GZIP   \\(0\\.[0-9][0-9][0-9]:1\\);O?...ing file[^\n]+\n"
-              -D "TEST_FILTER_REPLACE:STRING=GZIP   (0.XXX:1);"
-              -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
+              -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
+              -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+              -D "TEST_SKIP_COMPARE=${ARG_COMPARE_LOCAL}"
+              -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
+              -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
+              -D "TEST_REFERENCE=${ARG_REF_FILE}"
+              -D "TEST_ERRREF=${ARG_ERR_REF}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES
-          DEPENDS H5REPACK_CMP-${testname}-clear-objects
+    endif()
+
+    set_tests_properties (H5REPACK-${ctest_testname} PROPERTIES
+        DEPENDS H5REPACK-${ctest_testname}-clear-objects
+    )
+    if ("H5REPACK-${ctest_testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5REPACK-${ctest_testname} PROPERTIES DISABLED true)
+    endif ()
+
+    # If we're doing local comparison, add h5diff test
+    if ((${ARG_COMPARE_LOCAL} AND NOT ${ARG_FULL_DIFF}) OR DEFINED ARG_LAYOUT_DSET)
+      # h5diff directly
+      add_test (
+          NAME H5REPACK-${ctest_testname}_DFF
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARG_ERROR_STACK_FLAG} ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} ${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}
       )
-      if ("H5REPACK_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DISABLED true)
+      set_tests_properties (H5REPACK-${ctest_testname}_DFF PROPERTIES
+          DEPENDS H5REPACK-${ctest_testname}
+      )
+      if ("H5REPACK-${ctest_testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK-${ctest_testname}_DFF PROPERTIES DISABLED true)
       endif ()
-    endif ()
-    add_test (
-        NAME H5REPACK_CMP-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_CMP-${testname}-clean-objects PROPERTIES
-        DEPENDS H5REPACK_CMP-${testname}
-    )
-  endif ()
-endmacro ()
 
-macro (ADD_H5_MASK_TEST testname testtype resultcode result_errcheck resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
+      set (ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}_DFF")
+    elseif (${ARG_COMPARE_LOCAL} AND ${ARG_FULL_DIFF})
+      # h5diff via runTest
       add_test (
-          NAME H5REPACK_MASK-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
+        NAME H5REPACK_DIFF-${ctest_testname}_DFF
+        COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+          -D "TEST_ARGS:STRING=-v;${ARG_ERROR_STACK_FLAG};${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE};${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+          -D "TEST_OUTPUT=${ARG_MAIN_OUT_FILE}.out"
+          -D "TEST_EXPECT=${ARG_DIFF_RESULT_CODE}"
+          -D "TEST_REFERENCE=${testname}.${ARG_TEST_FILE}.tst"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
-      set_property(TEST H5REPACK_MASK-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_MASK-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_MASK-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+      set_tests_properties (H5REPACK_DIFF-${ctest_testname}_DFF PROPERTIES
+          DEPENDS H5REPACK-${ctest_testname}
       )
-    else ()
-      add_test (
-          NAME H5REPACK_MASK-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-              -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_SKIP_COMPARE=true"
-              -D "TEST_REFERENCE=${resultfile}.mty"
-              -D "TEST_ERRREF=${result_errcheck}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-    endif ()
-    set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES
-        DEPENDS H5REPACK_MASK-${testname}-clear-objects
-    )
-    if ("H5REPACK_MASK-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5REPACK_MASK-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_MASK-${testname}-clean-objects PROPERTIES
-        DEPENDS H5REPACK_MASK-${testname}
-    )
-  endif ()
-endmacro ()
-
-macro (ADD_H5_DMP_TEST testname testtype resultcode resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_DMP-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_DMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    add_test (
-        NAME H5REPACK_DMP-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
-        DEPENDS H5REPACK_DMP-${testname}-clear-objects
-    )
-    if ("H5REPACK_DMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DISABLED true)
-    endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_DMP-h5dump-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
-          DEPENDS H5REPACK_DMP-${testname}
-      )
-      if ("H5REPACK_DMP-h5dump-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DISABLED true)
+      if ("H5REPACK_DIFF-${ctest_testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK_DIFF-${ctest_testname}_DFF PROPERTIES DISABLED true)
       endif ()
-      add_test (
-          NAME H5REPACK_DMP-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_DMP-h5dump-${testname}
-      )
-    else ()
-      add_test (
-          NAME H5REPACK_DMP-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_DMP-${testname}
-      )
-    endif ()
-  endif ()
-endmacro ()
 
-macro (ADD_H5_DMP_MASK testname testtype resultcode resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_DMP-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_DMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    add_test (
-        NAME H5REPACK_DMP-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
-        DEPENDS H5REPACK_DMP-${testname}-clear-objects
-    )
-    if ("H5REPACK_DMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DISABLED true)
-    endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_DMP-h5dump-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
-              -D "TEST_FILTER:STRING=SIZE [0-9][0-9][0-9][0-9] \\(2\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)"
-              -D "TEST_FILTER_REPLACE:STRING=SIZE XXXX (2.XXX:1 COMPRESSION)"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
-          DEPENDS H5REPACK_DMP-${testname}
-      )
-      if ("H5REPACK_DMP-h5dump-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_DMP-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_DMP-h5dump-${testname}
-      )
-    else ()
-      add_test (
-          NAME H5REPACK_DMP-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_DMP-${testname}
-      )
-    endif ()
-  endif ()
-endmacro ()
+      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK_DIFF-${ctest_testname}_DFF")
+    endif()
 
-macro (ADD_H5_DMP_NO_OPT_TEST testname testtype resultcode resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
+    if (${ARG_DUMP_CHECK} OR DEFINED ARG_LAYOUT_DSET)
+      # Perform check via h5dump
       add_test (
-          NAME H5REPACK_DMP-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_DMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_DMP-${testname}-clear-objects PROPERTIES
-        FIXTURES_REQUIRED clear_h5repack
-    )
-    add_test (
-        NAME H5REPACK_DMP-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
-        DEPENDS H5REPACK_DMP-${testname}-clear-objects
-    )
-    if ("H5REPACK_DMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DISABLED true)
-    endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_DMP-h5dump-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
-          DEPENDS "H5REPACK_DMP-${testname}"
-      )
-      if ("H5REPACK_DMP-h5dump-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DISABLED true)
-      endif ()
-    endif ()
-  endif ()
-endmacro ()
-
-macro (ADD_H5_DIFF_TEST testname testtype resultcode testfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_DIFF-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
-      )
-      set_property(TEST H5REPACK_DIFF-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_DIFF-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-    )
-    add_test (
-        NAME H5REPACK_DIFF-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-    )
-    set_tests_properties (H5REPACK_DIFF-${testname} PROPERTIES
-        DEPENDS H5REPACK_DIFF-${testname}-clear-objects
-    )
-    if ("H5REPACK_DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DIFF-${testname} PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5REPACK_DIFF-${testname}_DFF
+        NAME H5REPACK-${ctest_testname}-h5dump
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=-v;--enable-error-stack;${testfile};out-${testname}.${testfile}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+            -D "TEST_ARGS:STRING=${ARG_DUMP_OPTIONS};${ARG_MAIN_OUT_FILE}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=out-${testname}.${testfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${testname}.${testfile}.tst"
+            -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
+            -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_SKIP_COMPARE=${ARG_DUMP_SKIP_COMPARE}"
+            -D "TEST_GREP_FILTER=${ARG_DUMP_GREP_FILTER}"
+            -D "TEST_GREP_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
+            -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
+            -D "TEST_REFERENCE=${ARG_DUMP_REFERENCE}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (H5REPACK_DIFF-${testname}_DFF PROPERTIES
-        DEPENDS H5REPACK_DIFF-${testname}
-    )
-    if ("H5REPACK_DIFF-${testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DIFF-${testname}_DFF PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5REPACK_DIFF-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-    )
-    set_tests_properties (H5REPACK_DIFF-${testname}-clean-objects PROPERTIES
-        DEPENDS H5REPACK_DIFF-${testname}_DFF
-    )
-  endif ()
-endmacro ()
-
-macro (ADD_H5_STAT_TEST testname testtype resultcode statarg resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_STAT-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}"
       )
-      set_property(TEST H5REPACK_STAT-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_STAT-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${statarg}.${resultfile}
-    )
-    add_test (
-        NAME H5REPACK_STAT-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES
-        DEPENDS H5REPACK_STAT-${testname}-clear-objects
-    )
-    if ("H5REPACK_STAT-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES DISABLED true)
-    endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_STAT-h5stat-${testname}
+      set_tests_properties (H5REPACK-${ctest_testname}-h5dump PROPERTIES
+          DEPENDS H5REPACK-${ctest_testname}
+      )
+      if ("H5REPACK-${ctest_testname}-h5dump" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK-${ctest_testname}-h5dump PROPERTIES DISABLED true)
+      endif ()
+
+      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5dump")
+    endif()
+
+    if (${ARG_STAT_CHECK} AND NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+          NAME H5REPACK-${ctest_testname}-h5stat
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
-              -D "TEST_ARGS:STRING=-S;-s;out-${statarg}.${resultfile}"
+              -D "TEST_ARGS:STRING=-S;-s;out-${ARG_STAT_ARG}.${ARG_TEST_FILE}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${statarg}.${resultfile}.ddl"
+              -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
+              -D "TEST_EXPECT=${ARG_STAT_RESULT_CODE}"
+              -D "TEST_REFERENCE=${ARG_STAT_ARG}.${ARG_TEST_FILE}.ddl"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5REPACK_STAT-h5stat-${testname} PROPERTIES
-          DEPENDS H5REPACK_STAT-${testname}
+      set_tests_properties (H5REPACK-${ctest_testname}-h5stat PROPERTIES
+          DEPENDS H5REPACK-${ctest_testname}
       )
-      if ("H5REPACK_STAT-h5stat-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_STAT-h5stat-${testname} PROPERTIES DISABLED true)
+      if ("H5REPACK-${ctest_testname}-h5stat" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties ("H5REPACK-${ctest_testname}-h5stat" PROPERTIES DISABLED true)
       endif ()
-      add_test (
-          NAME H5REPACK_STAT-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${statarg}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_STAT-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_STAT-h5stat-${testname}
-      )
-    else ()
-      add_test (
-          NAME H5REPACK_STAT-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${statarg}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_STAT-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_STAT-${testname}
-      )
-    endif ()
-  endif ()
-endmacro ()
 
-macro (ADD_H5_VERIFY_TEST testname testtype resultcode testfile testdset testfilter)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP -d ${testdset} -pH ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
+      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5stat")
+    endif()
+
+    # Post-test cleanup
+    add_test (
+      NAME H5REPACK-${ctest_testname}-clean-objects
+      COMMAND ${CMAKE_COMMAND} -E remove "${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
+    )
+    # Only set dependencies if necessary
+    if (NOT "${ARG_CLEANUP_DEPENDS}" STREQUAL "")
+      set_tests_properties (H5REPACK-${ctest_testname}-clean-objects PROPERTIES
+          DEPENDS "${ARG_CLEANUP_DEPENDS}"
       )
-      set_property(TEST H5REPACK_VERIFY_LAYOUT-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-      )
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES
-          DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects
-      )
-      if ("H5REPACK_VERIFY_LAYOUT-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}_DFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES
-          DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}
-      )
-      if ("H5REPACK_VERIFY_LAYOUT-${testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES DISABLED true)
-      endif ()
-      if (NOT ${resultcode})
-        add_test (
-            NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-d;${testdset};-pH;out-${testname}.${testfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_SKIP_COMPARE=TRUE"
-                -D "TEST_GREP_FILTER:STRING=${testfilter}"
-                -D "TEST_REFERENCE=${testfilter}"
-                -D "TEST_GREP_COMPARE=TRUE"
-                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-        )
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES
-            DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF
-        )
-      else ()
-        if ("${testfilter}" STREQUAL "CHUNKED")
-          set (nottestfilter "(CONTIGUOUS|COMPACT)")
-        endif ()
-        if ("${testfilter}" STREQUAL "CONTIGUOUS")
-          set (nottestfilter "(CHUNK|COMPACT)")
-        endif ()
-        if ("${testfilter}" STREQUAL "COMPACT")
-          set (nottestfilter "(CONTIGUOUS|CHUNK)")
-        endif ()
-        add_test (
-            NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-pH;out-${testname}.${testfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
-                -D "TEST_EXPECT=0"
-                -D "TEST_SKIP_COMPARE=TRUE"
-                -D "TEST_GREP_EXPECT=${resultcode}"
-                -D "TEST_GREP_FILTER:STRING=${nottestfilter}"
-                -D "TEST_REFERENCE=${testfilter}"
-                -D "TEST_GREP_COMPARE=TRUE"
-                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-        )
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES
-            DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF
-        )
-      endif ()
-      if ("H5REPACK_VERIFY_LAYOUT-${testname}_DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_VERIFY_LAYOUT-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DMP
-      )
-    endif ()
+    endif()
   endif ()
 endmacro ()
 
@@ -1336,7 +1110,7 @@ endmacro ()
 # --------------------------------------------------------------------
 # test file names
 # --------------------------------------------------------------------
-set (INFO_FILE testfiles/h5repack.info)
+set (INFO_FILE h5repack.info)
 
 set (FILE0 h5repack_fill.h5)
 set (FILE1 h5repack_objs.h5)
@@ -1414,18 +1188,18 @@ if (H5_HAVE_FILTER_SZIP)
 endif ()
 
 # copy files (these files have no filters)
-ADD_H5_TEST (fill "TEST" ${FILE0})
-ADD_H5_TEST (objs "TEST" ${FILE1})
-ADD_H5_TEST (attr "TEST" ${FILE2})
-ADD_H5_TEST (hlink "TEST" ${FILE3})
-ADD_H5_TEST (layout "TEST" ${FILE4})
-ADD_H5_TEST (early "TEST" ${FILE5})
+ADD_H5_TEST (fill TEST_TYPE "TEST" TEST_FILE ${FILE0} ERROR_STACK)
+ADD_H5_TEST (objs TEST_TYPE "TEST" TEST_FILE ${FILE1} ERROR_STACK)
+ADD_H5_TEST (attr TEST_TYPE "TEST" TEST_FILE ${FILE2} ERROR_STACK)
+ADD_H5_TEST (hlink TEST_TYPE "TEST" TEST_FILE ${FILE3} ERROR_STACK)
+ADD_H5_TEST (layout TEST_TYPE "TEST" TEST_FILE ${FILE4} ERROR_STACK)
+ADD_H5_TEST (early TEST_TYPE "TEST" TEST_FILE ${FILE5} ERROR_STACK)
 
 # nested 8bit enum in both deflated and non-deflated datafiles
 if (NOT USE_FILTER_DEFLATE)
-  ADD_H5_TEST (nested_8bit_enum "TEST" h5repack_nested_8bit_enum.h5)
+  ADD_H5_TEST (nested_8bit_enum TEST_TYPE "TEST" TEST_FILE h5repack_nested_8bit_enum.h5)
 else ()
-  ADD_H5_TEST (nested_8bit_enum "TEST" h5repack_nested_8bit_enum_deflated.h5)
+  ADD_H5_TEST (nested_8bit_enum TEST_TYPE "TEST" TEST_FILE h5repack_nested_8bit_enum_deflated.h5)
 endif ()
 
 # use $FILE4 to write some filters  (this file has  no filters)
@@ -1436,7 +1210,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (gzip_individual ${TESTTYPE} ${arg})
+ADD_H5_TEST (gzip_individual TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # gzip for all
 set (arg ${FILE4} -f GZIP=1)
@@ -1444,7 +1218,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (gzip_all ${TESTTYPE} ${arg})
+ADD_H5_TEST (gzip_all TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # szip with individual object
 set (arg ${FILE4} -f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10)
@@ -1454,7 +1228,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_individual ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_individual TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # szip for all
 set (arg ${FILE4} -f SZIP=8,NN)
@@ -1464,23 +1238,23 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_all ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_all TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # shuffle with individual object
 set (arg ${FILE4} -f dset2:SHUF  -l dset2:CHUNK=20x10)
-ADD_H5_TEST (shuffle_individual "TEST" ${arg})
+ADD_H5_TEST (shuffle_individual TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # shuffle for all
 set (arg ${FILE4} -f SHUF)
-ADD_H5_TEST (shuffle_all "TEST" ${arg})
+ADD_H5_TEST (shuffle_all TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # fletcher32  with individual object
 set (arg ${FILE4} -f dset2:FLET  -l dset2:CHUNK=20x10)
-ADD_H5_TEST (fletcher_individual "TEST" ${arg})
+ADD_H5_TEST (fletcher_individual TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # fletcher32 for all
 set (arg ${FILE4} -f FLET)
-ADD_H5_TEST (fletcher_all "TEST" ${arg})
+ADD_H5_TEST (fletcher_all TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # all filters
 set (arg ${FILE4} -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10)
@@ -1490,7 +1264,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (all_filters ${TESTTYPE} ${arg})
+ADD_H5_TEST (all_filters TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # verbose gzip with individual object
 set (arg ${FILE11} -v -f /dset_deflate:GZIP=9)
@@ -1498,7 +1272,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_FILTER_TEST (gzip_verbose_filters "GZIP   \(0\.[0-9][0-9][0-9]:1\)" "GZIP   (0.XXX:1)" ${TESTTYPE} 0 ${arg})
+ADD_H5_TEST (gzip_verbose_filters TEST_TYPE ${TESTTYPE} RESULT_CODE 0 TEST_FILE ${arg} GZIP_FILTER)
 
 ###########################################################
 # the following tests assume the input files have filters
@@ -1512,7 +1286,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_copy ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_copy TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # szip remove
 set (arg ${FILE7} --filter=dset_szip:NONE)
@@ -1522,7 +1296,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_remove ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_remove TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # deflate copy
 set (arg ${FILE8})
@@ -1530,7 +1304,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (deflate_copy ${TESTTYPE} ${arg})
+ADD_H5_TEST (deflate_copy TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # deflate remove
 set (arg ${FILE8} -f dset_deflate:NONE)
@@ -1538,47 +1312,47 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (deflate_remove ${TESTTYPE} ${arg})
+ADD_H5_TEST (deflate_remove TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # shuffle copy
 set (arg ${FILE9})
-ADD_H5_TEST (shuffle_copy "TEST" ${arg})
+ADD_H5_TEST (shuffle_copy TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # shuffle remove
 set (arg ${FILE9} -f dset_shuffle:NONE)
-ADD_H5_TEST (shuffle_remove "TEST" ${arg})
+ADD_H5_TEST (shuffle_remove TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # fletcher32 copy
 set (arg ${FILE10})
-ADD_H5_TEST (fletcher_copy "TEST" ${arg})
+ADD_H5_TEST (fletcher_copy TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # fletcher32 remove
 set (arg ${FILE10} -f dset_fletcher32:NONE)
-ADD_H5_TEST (fletcher_remove "TEST" ${arg})
+ADD_H5_TEST (fletcher_remove TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # nbit copy
 set (arg ${FILE12})
-ADD_H5_TEST (nbit_copy "TEST" ${arg})
+ADD_H5_TEST (nbit_copy TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # nbit remove
 set (arg ${FILE12} -f dset_nbit:NONE)
-ADD_H5_TEST (nbit_remove "TEST" ${arg})
+ADD_H5_TEST (nbit_remove TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # nbit add
 set (arg ${FILE12} -f dset_int31:NBIT)
-ADD_H5_TEST (nbit_add "TEST" ${arg})
+ADD_H5_TEST (nbit_add TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # scaleoffset copy
 set (arg ${FILE13})
-ADD_H5_TEST (scale_copy "TEST" ${arg})
+ADD_H5_TEST (scale_copy TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # scaleoffset add
 set (arg ${FILE13} -f dset_none:SOFF=31,IN)
-ADD_H5_TEST (scale_add "TEST" ${arg})
+ADD_H5_TEST (scale_add TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # scaleoffset remove
 set (arg ${FILE13} -f dset_scaleoffset:NONE)
-ADD_H5_TEST (scale_remove "TEST" ${arg})
+ADD_H5_TEST (scale_remove TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # remove all  filters
 set (arg ${FILE11} -f NONE)
@@ -1588,7 +1362,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (remove_all ${TESTTYPE} ${arg})
+ADD_H5_TEST (remove_all TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 #filter conversions
 set (arg ${FILE8} -f dset_deflate:SZIP=8,NN)
@@ -1598,7 +1372,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (deflate_convert ${TESTTYPE} ${arg})
+ADD_H5_TEST (deflate_convert TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 set (arg ${FILE7} -f dset_szip:GZIP=1)
 set (TESTTYPE "TEST")
@@ -1607,7 +1381,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_convert TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 #limit
 set (arg ${FILE4} -f GZIP=2 -m 1024)
@@ -1615,7 +1389,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_DMP_MASK (deflate_limit ${TESTTYPE} 0 ${arg})
+ADD_H5_TEST (deflate_limit TEST_TYPE ${TESTTYPE} RESULT_CODE 0 TEST_FILE ${arg} DUMP_CHECK SIZE_FILTER)
 
 #file
 set (arg ${FILE4} -e ${INFO_FILE})
@@ -1623,12 +1397,12 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (deflate_file ${TESTTYPE} ${arg})
+ADD_H5_TEST (deflate_file TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 #crtorder
 set (arg tordergr.h5 -L)
 set (TESTTYPE "TEST")
-ADD_H5_DMP_TEST (crtorder ${TESTTYPE} 0 ${arg})
+ADD_H5_TEST(crtorder TEST_TYPE ${TESTTYPE} RESULT_CODE 0 TEST_FILE ${arg} DUMP_CHECK)
 
 ###################################################################################################
 # Testing paged aggregation related options:
@@ -1649,56 +1423,55 @@ ADD_H5_DMP_TEST (crtorder ${TESTTYPE} 0 ${arg})
 #
 set (arg h5repack_fsm_aggr_nopersist.h5 -S PAGE -P 1)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (SP_PAGE ${TESTTYPE} 0 SP ${arg})
+ADD_H5_TEST (SP_PAGE TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG SP TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_fsm_aggr_persist.h5 -S AGGR)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (S_AGGR ${TESTTYPE} 0 S ${arg})
+ADD_H5_TEST (S_AGGR TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG S TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_none.h5 -S PAGE -T 10 -G 2048)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (STG_PAGE ${TESTTYPE} 0 STG ${arg})
+ADD_H5_TEST (STG_PAGE TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG STG TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_paged_nopersist.h5 -G 512 -S AGGR)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (GS_AGGR ${TESTTYPE} 0 GS ${arg})
+ADD_H5_TEST (GS_AGGR TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG GS TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_paged_persist.h5 -S NONE -P 1)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (SP_NONE ${TESTTYPE} 0 SP ${arg})
+ADD_H5_TEST (SP_NONE TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG SP TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_aggr.h5 -S FSM_AGGR -P 1 -T 5)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (SPT_FSM_AGGR ${TESTTYPE} 0 SPT ${arg})
-
+ADD_H5_TEST (SPT_FSM_AGGR TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG SPT TEST_FILE ${arg} STAT_CHECK)
 
 #########################################################
 # layout options (these files have no filters)
 #########################################################
-ADD_H5_VERIFY_TEST (dset2_chunk_20x10 "TEST" 0 ${FILE4} dset2 CHUNKED --layout=dset2:CHUNK=20x10)
-ADD_H5_VERIFY_TEST (chunk_20x10 "TEST" 1 ${FILE4} null CHUNKED -l CHUNK=20x10)
-ADD_H5_VERIFY_TEST (dset2_conti "TEST" 0 ${FILE4} dset2 CONTIGUOUS -l dset2:CONTI)
-ADD_H5_VERIFY_TEST (conti "TEST" 1 ${FILE4} null CONTIGUOUS -l CONTI)
-ADD_H5_VERIFY_TEST (dset2_compa "TEST" 0 ${FILE4} dset2 COMPACT -l dset2:COMPA)
-ADD_H5_VERIFY_TEST (compa "TEST" 1 ${FILE4} null COMPACT -l COMPA)
-ADD_H5_MASK_TEST (dset2_chunk_20x10-errstk "TEST" 0 "dimensionality of chunks doesn't match the dataspace" ${FILE4} --layout=dset2:CHUNK=20x10x5 --enable-error-stack)
+ADD_H5_TEST (dset2_chunk_20x10 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset2 LAYOUT_FILTER CHUNKED --layout=dset2:CHUNK=20x10)
+ADD_H5_TEST (chunk_20x10 TEST_TYPE "TEST" RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER CHUNKED -l CHUNK=20x10)
+ADD_H5_TEST (dset2_conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset2 LAYOUT_FILTER CONTIGUOUS -l dset2:CONTI)
+ADD_H5_TEST (conti TEST_TYPE "TEST" RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER CONTIGUOUS -l CONTI)
+ADD_H5_TEST (dset2_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset2 LAYOUT_FILTER COMPACT -l dset2:COMPA)
+ADD_H5_TEST (compa TEST_TYPE "TEST" RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER COMPACT -l COMPA)
+ADD_H5_TEST (dset2_chunk_20x10-errstk TEST_TYPE "TEST" RESULT_CODE 0 ERR_REF "dimensionality of chunks doesn't match the dataspace" TEST_FILE ${FILE4} --layout=dset2:CHUNK=20x10x5 ERROR_STACK)
 
 ################################################################
 # layout conversions (file has no filters)
 ###############################################################
-ADD_H5_VERIFY_TEST (dset_compa_conti "TEST" 0 ${FILE4} dset_compact CONTIGUOUS -l dset_compact:CONTI)
-ADD_H5_VERIFY_TEST (dset_compa_chunk "TEST" 0 ${FILE4} dset_compact CHUNKED -l dset_compact:CHUNK=2x5)
-ADD_H5_VERIFY_TEST (dset_compa_compa "TEST" 0 ${FILE4} dset_compact COMPACT -l dset_compact:COMPA)
-ADD_H5_VERIFY_TEST (dset_conti_compa "TEST" 0 ${FILE4} dset_contiguous COMPACT -l dset_contiguous:COMPA)
-ADD_H5_VERIFY_TEST (dset_conti_chunk "TEST" 0 ${FILE4} dset_contiguous CHUNKED -l dset_contiguous:CHUNK=3x6)
-ADD_H5_VERIFY_TEST (dset_conti_conti "TEST" 0 ${FILE4} dset_contiguous CONTIGUOUS -l dset_contiguous:CONTI)
-ADD_H5_VERIFY_TEST (chunk_compa "TEST" 0 ${FILE4} dset_chunk COMPACT -l dset_chunk:COMPA)
-ADD_H5_VERIFY_TEST (chunk_conti "TEST" 0 ${FILE4} dset_chunk CONTIGUOUS -l dset_chunk:CONTI)
-ADD_H5_VERIFY_TEST (chunk_18x13 "TEST" 0 ${FILE4} dset_chunk CHUNKED -l dset_chunk:CHUNK=18x13)
+ADD_H5_TEST (dset_compa_conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_compact LAYOUT_FILTER CONTIGUOUS -l dset_compact:CONTI)
+ADD_H5_TEST (dset_compa_chunk TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_compact LAYOUT_FILTER CHUNKED -l dset_compact:CHUNK=2x5)
+ADD_H5_TEST (dset_compa_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_compact LAYOUT_FILTER COMPACT -l dset_compact:COMPA)
+ADD_H5_TEST (dset_conti_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_contiguous LAYOUT_FILTER COMPACT -l dset_contiguous:COMPA)
+ADD_H5_TEST (dset_conti_chunk TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_contiguous LAYOUT_FILTER CHUNKED -l dset_contiguous:CHUNK=3x6)
+ADD_H5_TEST (dset_conti_conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_contiguous LAYOUT_FILTER CONTIGUOUS -l dset_contiguous:CONTI)
+ADD_H5_TEST (chunk_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_chunk LAYOUT_FILTER COMPACT -l dset_chunk:COMPA)
+ADD_H5_TEST (chunk_conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_chunk LAYOUT_FILTER CONTIGUOUS -l dset_chunk:CONTI)
+ADD_H5_TEST (chunk_18x13 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE4} LAYOUT_DSET dset_chunk LAYOUT_FILTER CHUNKED -l dset_chunk:CHUNK=18x13)
 
 # test convert small size dataset ( < 1k) to compact layout without -m
-ADD_H5_VERIFY_TEST (contig_small_compa "TEST" 0 ${FILE18} contig_small COMPACT -l contig_small:COMPA)
-ADD_H5_VERIFY_TEST (contig_small_fixed_compa "TEST" 0 ${FILE18} chunked_small_fixed COMPACT -l chunked_small_fixed:COMPA)
+ADD_H5_TEST (contig_small_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE18} LAYOUT_DSET contig_small LAYOUT_FILTER COMPACT -l contig_small:COMPA)
+ADD_H5_TEST (contig_small_fixed_compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE18} LAYOUT_DSET chunked_small_fixed LAYOUT_FILTER COMPACT -l chunked_small_fixed:COMPA)
 
 #---------------------------------------------------------------------------
 # Test file contains chunked datasets (need multiple dsets) with
@@ -1706,14 +1479,14 @@ ADD_H5_VERIFY_TEST (contig_small_fixed_compa "TEST" 0 ${FILE18} chunked_small_fi
 # Use first dset to test.
 #---------------------------------------------------------------------------
 # chunk to chunk - specify chunk dim bigger than any current dim
-ADD_H5_VERIFY_TEST (chunk2chunk "TEST" 0 ${FILE19} chunk_unlimit1 CHUNK -l chunk_unlimit1:CHUNK=100x300)
+ADD_H5_TEST (chunk2chunk TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit1 LAYOUT_FILTER CHUNK -l chunk_unlimit1:CHUNK=100x300)
 
 # chunk to contiguous
-ADD_H5_VERIFY_TEST (chunk2conti "TEST" 0 ${FILE19} chunk_unlimit1 CONTI -l chunk_unlimit1:CONTI)
+ADD_H5_TEST (chunk2conti TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit1 LAYOUT_FILTER CONTI -l chunk_unlimit1:CONTI)
 
 # chunk to compact - convert big dataset (should be > 64k) for this purpose,
 # should remain as original layout (chunk)
-ADD_H5_VERIFY_TEST (chunk2compa "TEST" 0 ${FILE19} chunk_unlimit1 CHUNK -l chunk_unlimit1:COMPA)
+ADD_H5_TEST (chunk2compa TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit1 LAYOUT_FILTER CHUNK -l chunk_unlimit1:COMPA)
 
 #--------------------------------------------------------------------------
 # Test -f for some specific cases. Chunked dataset with unlimited max dims.
@@ -1723,16 +1496,16 @@ ADD_H5_VERIFY_TEST (chunk2compa "TEST" 0 ${FILE19} chunk_unlimit1 CHUNK -l chunk
 # - should not change max dims from unlimit
 
 # chunk dim is bigger than dataset dim. ( dset size < 64k )
-ADD_H5_VERIFY_TEST (error1 "TEST" 0 ${FILE19} chunk_unlimit1 H5S_UNLIMITED -f chunk_unlimit1:NONE)
+ADD_H5_TEST (error1 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit1 LAYOUT_FILTER H5S_UNLIMITED -f chunk_unlimit1:NONE)
 
 # chunk dim is bigger than dataset dim. ( dset size > 64k )
-ADD_H5_VERIFY_TEST (error2 "TEST" 0 ${FILE19} chunk_unlimit2 H5S_UNLIMITED -f chunk_unlimit2:NONE)
+ADD_H5_TEST (error2 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit2 LAYOUT_FILTER H5S_UNLIMITED -f chunk_unlimit2:NONE)
 
 # chunk dims are smaller than dataset dims. ( dset size < 64k )
-ADD_H5_VERIFY_TEST (error3 "TEST" 0 ${FILE19} chunk_unlimit3 H5S_UNLIMITED -f chunk_unlimit3:NONE)
+ADD_H5_TEST (error3 TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit3 LAYOUT_FILTER H5S_UNLIMITED -f chunk_unlimit3:NONE)
 
 # file input - should not fail
-ADD_H5_TEST (error4 "TEST" ${FILE19} -f NONE)
+ADD_H5_TEST (error4 TEST_TYPE "TEST" TEST_FILE ${FILE19} -f NONE ERROR_STACK)
 
 #--------------------------------------------------------------------------
 # Test base: Convert CHUNK to CONTI for a chunked dataset with small dataset
@@ -1740,17 +1513,17 @@ ADD_H5_TEST (error4 "TEST" ${FILE19} -f NONE)
 # (HDFFV-8214)
 #--------------------------------------------------------------------------
 # chunk dim is bigger than dataset dim. should succeed.
-ADD_H5_VERIFY_TEST (ckdim_biger "TEST" 0 ${FILE19} chunk_unlimit2 CONTI -l chunk_unlimit2:CONTI)
+ADD_H5_TEST (ckdim_biger TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit2 LAYOUT_FILTER CONTI -l chunk_unlimit2:CONTI)
 # chunk dim is smaller than dataset dim. should succeed.
-ADD_H5_VERIFY_TEST (ckdim_smaller "TEST" 0 ${FILE19} chunk_unlimit3 CONTI -l chunk_unlimit3:CONTI)
+ADD_H5_TEST (ckdim_smaller TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE ${FILE19} LAYOUT_DSET chunk_unlimit3 LAYOUT_FILTER CONTI -l chunk_unlimit3:CONTI)
 
 
 
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
 # report a difference.
-ADD_H5_TEST (native_fill "TEST" ${FILE0} -n)
-ADD_H5_TEST (native_attr "TEST" ${FILE2} -n)
+ADD_H5_TEST (native_fill TEST_TYPE "TEST" TEST_FILE ${FILE0} -n ERROR_STACK)
+ADD_H5_TEST (native_attr TEST_TYPE "TEST" TEST_FILE ${FILE2} -n ERROR_STACK)
 
 # latest file format with long switches. use FILE4=h5repack_layout.h5 (no filters)
 set (arg --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype])
@@ -1758,7 +1531,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_VERIFY_TEST (layout_long_switches ${TESTTYPE} 1 ${FILE4} null CHUNKED ${arg})
+ADD_H5_TEST (layout_long_switches TEST_TYPE ${TESTTYPE} RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER CHUNKED ${arg})
 
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
 set (arg -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype])
@@ -1766,7 +1539,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_VERIFY_TEST (layout_short_switches ${TESTTYPE} 1 ${FILE4} null CHUNKED ${arg})
+ADD_H5_TEST (layout_short_switches TEST_TYPE ${TESTTYPE} RESULT_CODE 1 TEST_FILE ${FILE4} LAYOUT_DSET null LAYOUT_FILTER CHUNKED ${arg})
 
 # several global filters
 set (arg ${FILE4} --filter GZIP=1 --filter SHUF)
@@ -1774,7 +1547,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (global_filters ${TESTTYPE} ${arg})
+ADD_H5_TEST (global_filters TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 
 # syntax of -i infile -o outfile
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
@@ -1783,48 +1556,48 @@ set (TESTTYPE "LEGACY")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST_OLD (old_style_layout_short_switches ${TESTTYPE} ${arg})
+ADD_H5_TEST (old_style_layout_short_switches TEST_TYPE ${TESTTYPE} TEST_FILE ${arg})
 
 # add a userblock to file
 set (arg ${FILE1} -u ${PROJECT_BINARY_DIR}/testfiles/ublock.bin -b 2048)
-ADD_H5_TEST (add_userblock "TEST" ${arg})
+ADD_H5_TEST (add_userblock TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # add a userblock reserve to file
 ADD_H5_VERIFY_USERBLOCK (reserve_userblock 2048 ${FILE1} -b 2048)
 
 # add alignment
 set (arg ${FILE1} -t 1 -a 1)
-ADD_H5_TEST (add_alignment "TEST" ${arg})
+ADD_H5_TEST (add_alignment TEST_TYPE "TEST" TEST_FILE ${arg} ERROR_STACK)
 
 # Check repacking file with old version of layout message (should get upgraded
 # to new version and be readable, etc.)
-ADD_H5_TEST (upgrade_layout "TEST" ${FILE14})
+ADD_H5_TEST (upgrade_layout TEST_TYPE "TEST" TEST_FILE ${FILE14} ERROR_STACK)
 
 # test for datum size > H5TOOLS_MALLOCSIZE
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (gt_mallocsize ${TESTTYPE} ${FILE1} -f GZIP=1)
+ADD_H5_TEST (gt_mallocsize TEST_TYPE ${TESTTYPE} TEST_FILE ${FILE1} -f GZIP=1 ERROR_STACK)
 
 # Check repacking file with committed datatypes in odd configurations
-ADD_H5_TEST (committed_dt "TEST" ${FILE15})
+ADD_H5_TEST (committed_dt TEST_TYPE "TEST" TEST_FILE ${FILE15} ERROR_STACK)
 
 # tests family driver (file is located in common testfiles folder, uses TOOLTEST1
-ADD_H5_TEST (family "TEST" ${FILE16})
+ADD_H5_TEST (family TEST_TYPE "TEST" TEST_FILE ${FILE16} ERROR_STACK)
 
 # test various references (bug 1814 and 1726)
-ADD_H5_TEST (bug1814 "TEST" ${FILE_REF})
+ADD_H5_TEST (bug1814 TEST_TYPE "TEST" TEST_FILE ${FILE_REF} ERROR_STACK)
 
 # test attribute with various references (bug1797 / HDFFV-5932)
 # the references in attribute of compound or vlen datatype
-ADD_H5_TEST (HDFFV-5932 "TEST" ${FILE_ATTR_REF})
+ADD_H5_TEST (HDFFV-5932 TEST_TYPE "TEST" TEST_FILE ${FILE_ATTR_REF} ERROR_STACK)
 
 # Add test for memory leak in attribute. This test is verified by CTEST.
 # 1. leak from vlen string
 # 2. leak from compound type without reference member
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools
-ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
+ADD_H5_TEST (HDFFV-7840 TEST_TYPE "TEST" TEST_FILE h5diff_attr1.h5 ERROR_STACK)
 
 # test CVE-2018-17432 fix
 set (arg --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
@@ -1883,8 +1656,8 @@ ADD_H5_VERIFY_VDS (vds_conti ${TESTTYPE} 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_
 ################################################################
 # reference new api conversions
 ###############################################################
-ADD_H5_DMP_TEST (attrregion "TEST" 0 tattrreg.h5)
-ADD_H5_DMP_TEST (dataregion "TEST" 0 tdatareg.h5)
+ADD_H5_TEST(attrregion TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tattrreg.h5 DUMP_CHECK)
+ADD_H5_TEST(dataregion TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tdatareg.h5 DUMP_CHECK)
 
 ##############################################################################
 ###    V E R S I O N  B O U N D S  T E S T S
@@ -1911,43 +1684,44 @@ ADD_H5_EXTERNAL_TEST (ext_uint8be "TEST" uint8be -l CONTI)
 ###    E X T E R N A L  L I N K  T E S T S
 ##############################################################################
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DMP_TEST (h5copy_extlinks_src-base "TEST" 0 h5copy_extlinks_src.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (tsoftlinks-base "TEST" 0 tsoftlinks.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (textlink-base "TEST" 0 textlink.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (textlinkfar-base "TEST" 0 textlinkfar.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (textlinksrc-base "TEST" 0 textlinksrc.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (textlinktar-base "TEST" 0 textlinktar.h5 --enable-error-stack)
+ADD_H5_TEST(h5copy_extlinks_src-base TEST_TYPE "SKIP" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(tsoftlinks-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlink-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlink.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinkfar-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinkfar.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinksrc-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinksrc.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinktar-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinktar.h5 ERROR_STACK DUMP_CHECK)
 
-ADD_H5_DIFF_TEST (h5copy_extlinks_src-merge "TEST" 0 h5copy_extlinks_src.h5 --merge)
-ADD_H5_DIFF_TEST (tsoftlinks-merge "TEST" 1 tsoftlinks.h5 --merge)
-ADD_H5_DIFF_TEST (textlink-merge "TEST" 0 textlink.h5 --merge)
-### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (textlinkfar-merge "TEST" 1 textlinkfar.h5 --merge)
-### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (textlinksrc-merge "TEST" 1 textlinksrc.h5 --merge)
-### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (textlinktar-merge "TEST" 1 textlinktar.h5 --merge)
+ADD_H5_TEST (h5copy_extlinks_src-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 --merge FULL_DIFF ERROR_STACK)
+ADD_H5_TEST (tsoftlinks-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 1 TEST_FILE tsoftlinks.h5 --merge FULL_DIFF ERROR_STACK)
+ADD_H5_TEST (textlink-merge TEST_TYPE "TEST" DIFF_RESULT_CODE 0 TEST_FILE textlink.h5 --merge FULL_DIFF ERROR_STACK)
 
-ADD_H5_DMP_TEST (h5copy_extlinks_src-prune "TEST" 0 h5copy_extlinks_src.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (tsoftlinks-prune "TEST" 0 tsoftlinks.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlink-prune "TEST" 0 textlink.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlinkfar-prune "TEST" 0 textlinkfar.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlinksrc-prune "TEST" 0 textlinksrc.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlinktar-prune "TEST" 0 textlinktar.h5 --prune --enable-error-stack)
+### HDFFV-11128 needs fixed to enable the following test
+ADD_H5_TEST (textlinkfar-merge TEST_TYPE "SKIP" DIFF_RESULT_CODE 1 TEST_FILE textlinkfar.h5 --merge FULL_DIFF ERROR_STACK)
+### HDFFV-11128 needs fixed to enable the following test
+ADD_H5_TEST (textlinksrc-merge TEST_TYPE "SKIP" DIFF_RESULT_CODE 1 TEST_FILE textlinksrc.h5 --merge FULL_DIFF ERROR_STACK)
+### HDFFV-11128 needs fixed to enable the following test
+ADD_H5_TEST (textlinktar-merge TEST_TYPE "SKIP" DIFF_RESULT_CODE 1 TEST_FILE textlinktar.h5 --merge FULL_DIFF ERROR_STACK)
 
-ADD_H5_DMP_TEST (h5copy_extlinks_src-mergeprune "TEST" 0 h5copy_extlinks_src.h5 --merge --prune --enable-error-stack)
-ADD_H5_DMP_TEST (tsoftlinks-mergeprune "TEST" 0 tsoftlinks.h5 --merge --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlink-mergeprune "TEST" 0 textlink.h5 --merge --prune --enable-error-stack)
-### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DMP_TEST (textlinkfar-mergeprune "TEST" 0 textlinkfar.h5 --merge --prune --enable-error-stack)
-### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DMP_TEST (textlinksrc-mergeprune "TEST" 0 textlinksrc.h5 --merge --prune --enable-error-stack)
-### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DMP_TEST (textlinktar-mergeprune "TEST" 0 textlinktar.h5 --merge --prune --enable-error-stack)
+ADD_H5_TEST(h5copy_extlinks_src-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(tsoftlinks-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlink-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlink.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinkfar-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinkfar.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinksrc-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinksrc.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinktar-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinktar.h5 --prune ERROR_STACK DUMP_CHECK)
 
-ADD_H5_DMP_NO_OPT_TEST (tst_onion_dset_1d "TEST" 0 tst_onion_dset_1d.h5 --src-vfd-name onion --src-vfd-info 1)
-ADD_H5_DMP_NO_OPT_TEST (tst_onion_dset_ext "TEST" 0 tst_onion_dset_ext.h5 --src-vfd-name onion --src-vfd-info 1)
-ADD_H5_DMP_NO_OPT_TEST (tst_onion_objs "TEST" 0 tst_onion_objs.h5 --src-vfd-name onion --src-vfd-info 1)
+ADD_H5_TEST(h5copy_extlinks_src-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(tsoftlinks-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlink-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlink.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+### HDFFV-11128 needs fixed to enable the following test
+ADD_H5_TEST(textlinkfar-mergeprune TEST_TYPE "SKIP" RESULT_CODE 0 TEST_FILE textlinkfar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+### HDFFV-11128 needs fixed to enable the following test
+ADD_H5_TEST(textlinksrc-mergeprune TEST_TYPE "SKIP" RESULT_CODE 0 TEST_FILE textlinksrc.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+### HDFFV-11128 needs fixed to enable the following test
+ADD_H5_TEST(textlinktar-mergeprune TEST_TYPE "SKIP" RESULT_CODE 0 TEST_FILE textlinktar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+
+ADD_H5_TEST (tst_onion_dset_1d TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tst_onion_dset_1d.h5 --src-vfd-name onion --src-vfd-info 1 DUMP_CHECK DUMP_NO_OPT)
+ADD_H5_TEST (tst_onion_dset_ext TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tst_onion_dset_ext.h5 --src-vfd-name onion --src-vfd-info 1 DUMP_CHECK DUMP_NO_OPT)
+ADD_H5_TEST (tst_onion_objs TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tst_onion_objs.h5 --src-vfd-name onion --src-vfd-info 1 DUMP_CHECK DUMP_NO_OPT)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
