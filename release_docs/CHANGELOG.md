@@ -495,6 +495,12 @@ Simple example programs showing how to use complex number datatypes have been ad
 
 ## Library
 
+### Fixed security issue CVE-2025-2926
+
+   An image size was corrupted and decoded as 0 resulting in a NULL image buffer, which caused a NULL pointer dereference when the image was being copied to the buffer.  This has been fixed with additional image size check.
+
+   Fixes GitHub issue #5384
+
 ### Fixed security issue CVE-2025-6857
 
    An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.
