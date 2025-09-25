@@ -64,6 +64,8 @@ Examples:
     /tmp/hdf5-1.8.13.zip
     /tmp/hdf5-1.8.13.zip.sha256
 
+    Note:  as of HDF5 2.0.0, RELEASE.txt is replaced by CHANGELOG.md
+
 The integrity of a downloaded file can be verified on Linux platforms by running 
 "sha256sum --check <filename>.sha256, which will display 'OK' if the calculated
 checksum of <filename> matches the checksum in <filename>.sha256.
@@ -259,9 +261,9 @@ fi
 # we want (gnu's --transform isn't portable)
 ln -s `pwd` $tmpdir/$HDF5_IN_VERS || exit 1
 
-# Update README.md and release_docs/RELEASE.txt with release information in
+# Update README.md and release_docs/CHANGELOG.md with release information in
 # line 1.
-for f in README.md release_docs/RELEASE.txt; do
+for f in README.md release_docs/CHANGELOG.md; do
     echo "HDF5 version $VERS released on $release_date" >$f.x
     sed -e 1d $f >>$f.x
     mv $f.x $f
@@ -304,8 +306,8 @@ for comp in $methods; do
     esac
 done
 
-# Copy the RELEASE.txt to the release area.
-cp release_docs/RELEASE.txt $DEST/$HDF5_VERS-RELEASE.txt
+# Copy CHANGELOG.mc to the release area
+cp release_docs/CHANGELOG.md $DEST/$HDF5_VERS-CHANGELOG.md
 
 # Restore OLD version information, then no need for trap.
 if [ X$pmode = Xyes ] || [ X$revmode = Xyes ]; then
