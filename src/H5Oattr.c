@@ -191,9 +191,9 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     if (H5_IS_BUFFER_OVERFLOW(p, name_len, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
-    /* Verify that name is null-terminated within its expected length to prevent overrun during strndup */
-    if (memchr((const char *)p, '\0', name_len) == NULL)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "attribute name not properly null-terminated within buffer");
+    /* Verify that retrieved name length (including null byte) is valid */
+    if (name_len <= 1)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "decoded name length is invalid");
 
     if (NULL == (attr->shared->name = H5MM_strndup((const char *)p, name_len - 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
