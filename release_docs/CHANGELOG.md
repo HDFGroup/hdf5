@@ -25,7 +25,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
-- 30% faster opening and 25% faster closing of virtual datasets.
+- [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and 25% faster closing of virtual datasets.
 - Reduced memory overhead via shared name strings and optimized spatial search algorithms for virtual datasets.
 
 ## Significant Advancements:
@@ -438,6 +438,12 @@ Simple example programs showing how to use complex number datatypes have been ad
 ### `H5Pset_vol()` now fails when used on a non-file-access property list
 
    Similar to the above. Setting the connector on a non-FAPL had no effect on library behavior, and the connector ID and information could not be read back from that plist later.
+
+### Optimized Virtual Dataset opens by delaying layout copy<a name="layoutcopydelay"></a>
+
+   On dataset open, the dataset performed an internal copy of the layout in order to populate its internal DCPL. For virtual datasets, this added a significant amount of overhead to the open operation.
+
+   This layout copy is now delayed until either a user requests the DCPL, or until the start of an operation that needs to read the layout from the DCPL.
 
 ## Parallel Library
 
