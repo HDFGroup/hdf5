@@ -121,7 +121,7 @@ if (HDF5_PROVIDES_TOOLS)
   )
   foreach (example_name ${common_examples})
     if (NOT ${example_name} STREQUAL "h5ex_lite1" AND NOT ${example_name} STREQUAL "h5ex_lite2")
-      if (H5_WORDS_BIGENDIAN)
+      if (H5EX_WORDS_BIGENDIAN)
         add_custom_command (
             TARGET     ${EXAMPLE_VARNAME}_${example_name}
             POST_BUILD
