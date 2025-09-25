@@ -1,3 +1,8 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Java JNI library
+# This file sets up the build, formatting, and installation rules for the HDF5 Java JNI shared library.
+# It handles JNI C/C++ source and header definitions, compiler options, linking, export, and integration with the HDF5 shared library for Java bindings.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_JAVA_SRCJNI_JNI C)
 

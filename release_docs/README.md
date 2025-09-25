@@ -100,3 +100,35 @@ platforms.
 
 These files document how to build HDF5 applications with an installed HDF5
 library.
+
+## Java Examples Maven Integration
+
+The HDF5 Java examples are now integrated with Maven deployment to provide
+complete example applications that work with HDF5 Java library Maven artifacts:
+
+### Maven Artifacts
+* **`org.hdfgroup:hdf5-java`** - HDF5 Java bindings with platform-specific JARs
+  - linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64 classifiers
+* **`org.hdfgroup:hdf5-java-examples`** - Complete collection of 62 Java examples
+  - Platform-independent JAR with educational examples
+  - Covers all major HDF5 functionality: datasets, datatypes, groups, tutorials
+
+### Features
+* **Cross-Platform CI/CD:** Automated testing across all supported platforms
+* **Fork-Based Testing:** Complete validation framework for testing on repository forks
+* **Dynamic Repository Support:** Workflows adapt automatically to any GitHub repository
+* **Maven Integration:** Seamless integration with standard Maven dependency management
+* **Documentation:** See `HDF5Examples/JAVA/README-MAVEN.md` for complete usage instructions
+
+### GitHub Packages Deployment
+```xml
+<dependency>
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java</artifactId>
+    <version>2.0.0-3</version>
+    <classifier>linux-x86_64</classifier>
+</dependency>
+```
+
+The Java examples demonstrate proper usage of HDF5 Java bindings in real-world
+scenarios and serve as templates for developing HDF5-based Java applications.

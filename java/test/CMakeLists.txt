@@ -4,7 +4,6 @@
 # It handles Java test source grouping, JAR creation, test data management, test execution (including VOL tests),
 # and integration with the HDF5 Java JNI and core libraries.
 #-----------------------------------------------------------------------------
-
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_JAVA_TEST Java)
 

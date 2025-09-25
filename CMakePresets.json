@@ -124,6 +124,44 @@
       }
     },
     {
+      "name": "ci-Maven",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_ENABLE_MAVEN_DEPLOY": "ON",
+        "HDF5_MAVEN_SNAPSHOT": "OFF"
+      }
+    },
+    {
+      "name": "ci-Maven-Snapshot",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_ENABLE_MAVEN_DEPLOY": "ON",
+        "HDF5_MAVEN_SNAPSHOT": "ON"
+      }
+    },
+    {
+      "name": "ci-Maven-Minimal",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_EXAMPLES": "OFF",
+        "BUILD_TESTING": "OFF",
+        "HDF5_BUILD_TOOLS": "OFF",
+        "HDF5_BUILD_FORTRAN": "OFF",
+        "HDF5_BUILD_CPP_LIB": "OFF",
+        "HDF5_BUILD_JAVA": "ON",
+        "HDF5_ENABLE_MAVEN_DEPLOY": "ON",
+        "HDF5_MAVEN_SNAPSHOT": "OFF"
+      }
+    },
+    {
+      "name": "ci-Maven-Minimal-Snapshot",
+      "hidden": true,
+      "inherits": ["ci-Maven-Minimal"],
+      "cacheVariables": {
+        "HDF5_MAVEN_SNAPSHOT": "ON"
+      }
+    },
+    {
       "name": "ci-StdShar",
       "hidden": true,
       "inherits": ["ci-StdCompression", "ci-StdExamples", "ci-StdPlugins"],
@@ -216,6 +254,84 @@
         "ci-Java",
         "ci-StdShar"
       ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "description": "GNUC Standard Config for x64 with Maven deployment (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar",
+        "ci-Maven"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "description": "GNUC Standard Config for x64 with Maven snapshot deployment (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar",
+        "ci-Maven-Snapshot"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven",
+      "description": "GNUC Minimal Config for x64 with Maven deployment (Java artifacts only)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-Snapshot",
+      "description": "GNUC Minimal Config for x64 with Maven snapshot deployment (Java artifacts only)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven",
+      "description": "MSVC Minimal Config for x64 with Maven deployment (Java artifacts only)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-Snapshot",
+      "description": "MSVC Minimal Config for x64 with Maven snapshot deployment (Java artifacts only)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven",
+      "description": "Clang Minimal Config for x64 with Maven deployment (Java artifacts only)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-Snapshot",
+      "description": "Clang Minimal Config for x64 with Maven snapshot deployment (Java artifacts only)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java",
+        "ci-Maven-Minimal-Snapshot"
+      ]
     }
   ],
   "buildPresets": [
@@ -277,6 +393,78 @@
       "verbose": true,
       "inherits": [
         "ci-x64-Release-Intel"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "description": "GNUC Standard Build for x64 with Maven deployment (Release)",
+      "configurePreset": "ci-StdShar-GNUC-Maven",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "description": "GNUC Standard Build for x64 with Maven snapshot deployment (Release)",
+      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven",
+      "description": "GNUC Minimal Build for x64 with Maven deployment (Java artifacts only)",
+      "configurePreset": "ci-MinShar-GNUC-Maven",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-Snapshot",
+      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (Java artifacts only)",
+      "configurePreset": "ci-MinShar-GNUC-Maven-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven",
+      "description": "MSVC Minimal Build for x64 with Maven deployment (Java artifacts only)",
+      "configurePreset": "ci-MinShar-MSVC-Maven",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-Snapshot",
+      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (Java artifacts only)",
+      "configurePreset": "ci-MinShar-MSVC-Maven-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven",
+      "description": "Clang Minimal Build for x64 with Maven deployment (Java artifacts only)",
+      "configurePreset": "ci-MinShar-Clang-Maven",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-Snapshot",
+      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (Java artifacts only)",
+      "configurePreset": "ci-MinShar-Clang-Maven-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
       ]
     }
   ],
@@ -346,6 +534,62 @@
       "inherits": [
         "ci-x64-Release-Intel"
       ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "configurePreset": "ci-StdShar-GNUC-Maven",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven",
+      "configurePreset": "ci-MinShar-GNUC-Maven",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-Snapshot",
+      "configurePreset": "ci-MinShar-GNUC-Maven-Snapshot",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven",
+      "configurePreset": "ci-MinShar-MSVC-Maven",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-Snapshot",
+      "configurePreset": "ci-MinShar-MSVC-Maven-Snapshot",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven",
+      "configurePreset": "ci-MinShar-Clang-Maven",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-Snapshot",
+      "configurePreset": "ci-MinShar-Clang-Maven-Snapshot",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
     }
   ],
   "packagePresets": [
@@ -383,6 +627,46 @@
       "name": "ci-StdShar-Intel",
       "configurePreset": "ci-StdShar-Intel",
       "inherits": "ci-x64-Release-Intel"
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "configurePreset": "ci-StdShar-GNUC-Maven",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven",
+      "configurePreset": "ci-MinShar-GNUC-Maven",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-Snapshot",
+      "configurePreset": "ci-MinShar-GNUC-Maven-Snapshot",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven",
+      "configurePreset": "ci-MinShar-MSVC-Maven",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-Snapshot",
+      "configurePreset": "ci-MinShar-MSVC-Maven-Snapshot",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven",
+      "configurePreset": "ci-MinShar-Clang-Maven",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-Snapshot",
+      "configurePreset": "ci-MinShar-Clang-Maven-Snapshot",
+      "inherits": "ci-x64-Release-Clang"
     }
   ],
   "workflowPresets": [
@@ -456,6 +740,72 @@
         {"type": "build", "name": "ci-StdShar-Intel"},
         {"type": "test", "name": "ci-StdShar-win-Intel"},
         {"type": "package", "name": "ci-StdShar-Intel"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-GNUC-Maven"},
+        {"type": "build", "name": "ci-StdShar-GNUC-Maven"},
+        {"type": "test", "name": "ci-StdShar-GNUC-Maven"},
+        {"type": "package", "name": "ci-StdShar-GNUC-Maven"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Maven-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
+        {"type": "build", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
+        {"type": "test", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
+        {"type": "package", "name": "ci-StdShar-GNUC-Maven-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-GNUC-Maven"},
+        {"type": "build", "name": "ci-MinShar-GNUC-Maven"},
+        {"type": "package", "name": "ci-MinShar-GNUC-Maven"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-GNUC-Maven-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-GNUC-Maven-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-MSVC-Maven"},
+        {"type": "build", "name": "ci-MinShar-MSVC-Maven"},
+        {"type": "package", "name": "ci-MinShar-MSVC-Maven"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-MSVC-Maven-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-MSVC-Maven-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-Clang-Maven"},
+        {"type": "build", "name": "ci-MinShar-Clang-Maven"},
+        {"type": "package", "name": "ci-MinShar-Clang-Maven"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-Clang-Maven-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-Clang-Maven-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-Clang-Maven-Snapshot"}
       ]
     }
   ]

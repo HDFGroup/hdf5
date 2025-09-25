@@ -816,6 +816,47 @@ HDF5_BUILD_TOOLS          "Build HDF5 Tools"                    ON
 HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools"           OFF
 HDF5_BUILD_STATIC_TOOLS   "Build Static Tools Not Shared Tools" OFF
 
+----------------- HDF5 Maven Integration Options ----------------------------
+HDF5_ENABLE_MAVEN_DEPLOY  "Enable Maven repository deployment"  OFF
+HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
+
+  To build HDF5 with Maven deployment support:
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON ../hdf5
+
+  To build Maven snapshot versions for development:
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_MAVEN_SNAPSHOT:BOOL=ON ../hdf5
+
+  Or use the Maven-enabled CMake presets:
+
+  # Full build with Maven support (includes all components)
+  cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Release version
+  cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Snapshot version
+
+  # Minimal build for Java artifacts only (recommended for Maven deployment)
+  cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # Release version
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # Snapshot version
+
+  # Multi-platform minimal Maven presets
+  cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # Windows
+  cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS
+
+  Note: Minimal Maven presets skip examples, testing, tools, C++, and Fortran
+        builds to optimize for Java artifact generation only.
+
+  Java Examples Maven Integration:
+  The HDF5 Java examples are available as a separate Maven artifact:
+  - org.hdfgroup:hdf5-java-examples
+  - Platform-specific dependencies ensure compatibility with HDF5 Java library
+  - Complete examples with documentation for all HDF5 Java functionality
+  - See HDF5Examples/JAVA/README-MAVEN.md for usage instructions
+
+  Testing Java Examples with Maven Artifacts:
+  - Maven staging workflow validates examples against artifacts
+  - Cross-platform testing ensures compatibility on all supported platforms
+  - Native library error handling validates JAR structure in Maven-only environments
+  - Fork-based testing allows validation on repository forks before canonical deployment
+  - Dynamic repository workflows adapt to any GitHub repository automatically
+
 ---------------- HDF5 Folder Build Options ---------------------------------
 Defaults relative to $<INSTALL_PREFIX>
 HDF5_INSTALL_BIN_DIR      "bin"

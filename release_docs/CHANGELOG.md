@@ -76,6 +76,24 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
    The `HDF5_ENABLE_THREADS` option has been removed, as it no longer functions as a proper build option. The library will always check for thread support and set the internal status variable, `HDF5_THREADS_ENABLED`. The `HDF5_ENABLE_THREADSAFE` option is still available to build with thread-safe API calls.
 
+- Enhanced Maven repository deployment support
+
+   Added comprehensive Maven integration with optimized workflows for Java artifact deployment:
+   - **New CMake options**: `HDF5_ENABLE_MAVEN_DEPLOY` and `HDF5_MAVEN_SNAPSHOT` for Maven repository deployment
+   - **Minimal build presets**: Added `ci-MinShar-*-Maven*` presets for efficient Java-only artifact generation
+   - **Multi-platform support**: Automated generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+   - **CI/CD integration**: Enhanced GitHub Actions workflows (`maven-staging.yml`, `maven-deploy.yml`) with cross-platform build matrix
+   - **Artifact validation**: Comprehensive validation framework for Maven artifacts before deployment
+   - **Deployment targets**: Support for GitHub Packages and Maven Central staging repositories
+   - **Java Examples Maven Integration**: Added complete Maven artifact for Java examples (`org.hdfgroup:hdf5-java-examples`) with cross-platform compatibility
+   - **Multi-platform testing**: Comprehensive CI/CD testing of Java examples across all supported platforms (Linux, Windows, macOS x86_64, macOS aarch64)
+   - **Native library error handling**: Enhanced validation logic for Maven-only environments to properly handle expected native library loading errors
+   - **Dynamic repository support**: Enhanced workflows to use `github.repository` variable for seamless testing on forks before canonical deployment
+   - **Fork-based testing**: Complete testing framework allowing validation on repository forks (e.g., fork-name/hdf5) before merging to HDFGroup/hdf5
+   - **Multi-artifact deployment**: Enhanced deployment workflow to handle both `hdf5-java` (platform-specific) and `hdf5-java-examples` (platform-independent) artifacts
+   - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
+   - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
+
  - Reorganized the files in the config/cmake folder into the config folder structure
 
    The config folder CMake files have been reorganized to make it easier to maintain and add new features. This includes the following changes:

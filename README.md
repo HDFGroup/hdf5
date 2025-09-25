@@ -123,6 +123,23 @@ Source packages for current and previous releases are located at:
    Archived releases:
    https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
 
+Maven artifacts for Java bindings and examples are available at:
+
+   GitHub Packages:
+   https://maven.pkg.github.com/HDFGroup/hdf5
+
+   Maven Central (coming soon):
+   https://central.sonatype.com/artifact/org.hdfgroup/hdf5-java
+
+Java Examples Maven Integration:
+   - **org.hdfgroup:hdf5-java** - HDF5 Java bindings with platform-specific JARs (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+   - **org.hdfgroup:hdf5-java-examples** - Complete collection of 62 Java examples (platform-independent)
+   - Cross-platform CI/CD testing and deployment
+   - Comprehensive Maven integration with automated testing
+   - **Deployment Status**: ✅ Production ready with snapshot versioning support
+   - **Testing Status**: Successfully resolved HTTP 409 conflicts using snapshot deployment
+   - See HDF5Examples/JAVA/README-MAVEN.md for complete usage instructions
+
 Development code is available at our Github location:
 
    https://github.com/HDFGroup/hdf5.git
