@@ -969,6 +969,7 @@ test_config_file(void)
         char     *subfile_name;
         char     *tmp_buf;
         char     *substr;
+        char      scan_format[64];
         int       num_digits;
 
         memset(&file_info, 0, sizeof(h5_stat_t));
@@ -1034,14 +1035,16 @@ test_config_file(void)
         substr = strstr(config_buf, "hdf5_file");
         VRFY(substr, "strstr succeeded");
 
-        VRFY((sscanf(substr, "hdf5_file=%4095s", tmp_buf) == 1), "sscanf succeeded");
+        snprintf(scan_format, sizeof(scan_format), "hdf5_file=%%%zus", (size_t)(PATH_MAX - 1));
+        VRFY((sscanf(substr, scan_format, tmp_buf) == 1), "sscanf succeeded");
 
         VRFY((strcmp(tmp_buf, resolved_path) == 0), "strcmp succeeded");
 
         substr = strstr(config_buf, "subfile_dir");
         VRFY(substr, "strstr succeeded");
 
-        VRFY((sscanf(substr, "subfile_dir=%4095s", tmp_buf) == 1), "sscanf succeeded");
+        snprintf(scan_format, sizeof(scan_format), "subfile_dir=%%%zus", (size_t)(PATH_MAX - 1));
+        VRFY((sscanf(substr, scan_format, tmp_buf) == 1), "sscanf succeeded");
 
         VRFY((strcmp(tmp_buf, subfile_dir) == 0), "strcmp succeeded");
 
