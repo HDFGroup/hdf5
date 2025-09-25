@@ -969,7 +969,7 @@ test_config_file(void)
         char     *subfile_name;
         char     *tmp_buf;
         char     *substr;
-        char      scan_format[64];
+        char      scan_format[256];
         int       num_digits;
 
         memset(&file_info, 0, sizeof(h5_stat_t));
