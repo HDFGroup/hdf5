@@ -22,6 +22,7 @@ int generate_uint8be(bool external);
 int generate_f32le(bool external);
 int make_h5repack_testfiles(void);
 int verify_userblock(const char *filename);
+int gen_filespaces(void);
 
 /* fill value test */
 #define H5REPACK_FNAME0    "h5repack_fill.h5"
