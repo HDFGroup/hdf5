@@ -354,9 +354,8 @@ H5O__msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type, unsigned m
          */
         assert(!(mesg_flags & H5O_MSG_FLAG_DONTSHARE));
 
-        /* Check to see if the type is not sharable */
-        if (!(type->share_flags & H5O_SHARE_IS_SHARABLE))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "message is not sharable");
+        /* Sanity check to see if the type is not sharable */
+        assert(type->share_flags & H5O_SHARE_IS_SHARABLE);
 
         /* Remove the old message from the SOHM index */
         /* (It would be more efficient to try to share the message first, then
