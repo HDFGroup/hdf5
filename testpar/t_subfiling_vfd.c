@@ -263,27 +263,6 @@ test_create_and_close(void)
     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-    char **filenames = NULL;
-    size_t len       = 0;
-    H5FDsubfiling_get_file_mapping(file_id, &filenames, &len);
-
-    if (len > 0) {
-        int l_mpi_rank;
-        MPI_Comm_rank(MPI_COMM_WORLD, &l_mpi_rank);
-        printf("I AM MPI RANK %d RESPONSIBLE FOR SUBFILES: [", l_mpi_rank);
-        for (size_t i = 0; i < len; i++) {
-            if (i > 0)
-                printf(", ");
-            printf("%s", filenames[i]);
-        }
-        printf("]\n\n");
-
-        for (size_t i = 0; i < len; i++) {
-            H5free_memory(filenames[i]);
-        }
-        H5free_memory(filenames);
-    }
-
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     H5E_BEGIN_TRY
@@ -527,6 +506,8 @@ create_subfiling_fapl_with_ioc_selection_and_count(H5FD_subfiling_ioc_select_t s
     /* Apply modified configuration */
     ret = H5Pset_fapl_subfiling(fapl_id, &subf_config);
     VRFY((ret >= 0), "H5Pset_fapl_subfiling succeeded");
+
+    VRFY((H5Pclose(subf_config.ioc_fapl_id) >= 0), "FAPL close succeeded");
 
     return fapl_id;
 }
@@ -2350,14 +2331,6 @@ test_selection_strategies(void)
                     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
                     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-                    /* Close the file to ensure subfiles are created and flushed to disk */
-                    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
-
-                    /* Synchronize processes using the same communicator used for file operations */
-                    if (file_comm != MPI_COMM_SELF) {
-                        MPI_Barrier(file_comm);
-                    }
-
                     /*
                      * Get the file inode value so we can construct the subfile names
                      */
@@ -2368,12 +2341,6 @@ test_selection_strategies(void)
 
                     /* Ensure all the subfiles are present */
                     for (int i = 0; i < expected_num_subfiles; i++) {
-                        int needed_len =
-                            snprintf(NULL, 0, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                                     (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
-                        if (needed_len >= PATH_MAX) {
-                            VRFY(0, "subfile name too long for buffer");
-                        }
                         snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                                  (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
 
@@ -2384,12 +2351,6 @@ test_selection_strategies(void)
                     }
 
                     /* Ensure no extra subfiles are present */
-                    int needed_len = snprintf(NULL, 0, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                                              (uint64_t)file_info.st_ino, num_digits,
-                                              expected_num_subfiles + 1, expected_num_subfiles);
-                    if (needed_len >= PATH_MAX) {
-                        VRFY(0, "subfile name too long for buffer");
-                    }
                     snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                              (uint64_t)file_info.st_ino, num_digits, expected_num_subfiles + 1,
                              expected_num_subfiles);
@@ -2397,6 +2358,8 @@ test_selection_strategies(void)
                     /* Ensure file doesn't exist */
                     subfile_ptr = fopen(tmp_filename, "r");
                     VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
+
+                    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
                     mpi_code_g = MPI_Barrier(file_comm);
                     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
