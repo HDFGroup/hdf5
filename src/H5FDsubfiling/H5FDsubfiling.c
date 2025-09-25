@@ -644,8 +644,7 @@ H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len)
             int subfile_idx;
 
             if (NULL == (filepath = malloc(PATH_MAX)))
-                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate space for subfile filename");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate space for subfile filename");
 
             subfile_idx = (i * sf_context->topology->n_io_concentrators) + sf_context->topology->ioc_idx + 1;
 
