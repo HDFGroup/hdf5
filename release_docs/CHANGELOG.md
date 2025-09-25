@@ -4,7 +4,7 @@
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
 HDF5 release, platforms tested, and known problems in this release.
 
-*For releases prior to version 2.0.0, please see the [release_archive.txt](release_archive.txt) file and for more details check the HISTORY*.txt files in the HDF5 source.*
+For releases prior to version 2.0.0, please see the release.txt file and for more details check the HISTORY*.txt files in the HDF5 source.
 
 # 🔗 Quick Links
 * [HDF5 documentation](https://support.hdfgroup.org/documentation/hdf5/latest/)
@@ -16,10 +16,10 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
-* [Bug Fixes](#-bug-fixes)
-* [Support for new platforms and languages](#-support-for-new-platforms-and-languages)
-* [Platforms Tested](#%EF%B8%8F-platforms-tested)
-* [Known Problems](#-known-problems)
+* [Bug Fixes](CHANGELOG.md#-bug-fixes)
+* [Support for new platforms and languages](CHANGELOG.md#-support-for-new-platforms-and-languages)
+* [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
+* [Known Problems](CHANGELOG.md#-known-problems)
 
 # 🔆 Executive Summary: HDF5 Version 2.0.0
 
@@ -52,7 +52,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ### Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
 
-   The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
+   The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.
 
 ### Autotools support was removed from HDF5<a name="cmake">
 
@@ -116,8 +116,6 @@ HDF5 release, platforms tested, and known problems in this release.
 ### Added `CMAKE_INSTALL_PREFIX` to the default plugin path
 
    To help users find their plugins, the default plugin path has been changed to include the `CMAKE_INSTALL_PREFIX`. Adding the install prefix allows users to skip setting the `HDF5_PLUGIN_PATH` environment variable when using plugins with the default lib/plugin location.
-
-### Removed support for the autotools build system.
 
 ### Converted documentation in the source folder, doc, to doxygen files.
 
@@ -513,6 +511,12 @@ Simple example programs showing how to use complex number datatypes have been ad
 
 ## Library
 
+### Fixed a problem with the scale-offset filter
+
+A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
+
+Fixes GitHub issue #5861
+
 ### Fixed security issue CVE-2025-6857
 
    An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.
@@ -686,8 +690,7 @@ Data to come from cdash.
 
 # ⛔ Known Problems
 
-###  When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library
-fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
+- When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
 
      #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
      major: Datatype
@@ -697,42 +700,42 @@ fails to initialize due to not being able to detect the byte order of the _Float
 
      `CMake: HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16=OFF`
 
- ###  When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur in the following tests:
+- When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur in the following tests:
 
       H5PLUGIN-filter_plugin <br>
       H5TEST-flush2<br>
       H5TEST-testhdf5-base<br>
       MPI_TEST_t_filters_parallel<br>
 
-      Sporadic failures (even with lower -O levels):<br>
+  Sporadic failures (even with lower -O levels):<br>
 
       Java JUnit-TestH5Pfapl<br>
       Java JUnit-TestH5D<br>
 
-      Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of 'use of undefined value' when the optimization level is -O2 or higher.
+  Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of 'use of undefined value' when the optimization level is -O2 or higher.
 
       This is confirmed to be a [bug in the nvc compiler](https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045) that has been fixed as of 23.11. If you are using an affected version of the NVidia compiler, the work-around is to set the optimization level to -O1.
 
-### CMake files do not behave correctly with paths containing spaces
+- CMake files do not behave correctly with paths containing spaces
 
    Do not use spaces in paths because the required escaping for handling spaces results in very complex and fragile build files.
 
-### At present, metadata cache images may not be generated by parallel applications. Parallel applications can read files with metadata cache images, but since this is a collective operation, a deadlock is possible if one or more processes do not participate.
+- At present, metadata cache images may not be generated by parallel applications. Parallel applications can read files with metadata cache images, but since this is a collective operation, a deadlock is possible if one or more processes do not participate.
 
-### The subsetting option in `ph5diff` currently will fail and should be avoided
+- The subsetting option in `ph5diff` currently will fail and should be avoided
 
    The subsetting option works correctly in serial `h5diff`.
 
-### Flang Fortran compilation will fail (last check version 17) due to not yet implemented: (1) derived type argument passed by value (H5VLff.F90), and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
+- Flang Fortran compilation will fail (last check version 17) due to not yet implemented: (1) derived type argument passed by value (H5VLff.F90), and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
 
-### Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers greater than version 16.0 due to a compiler bug. The latest version verified as failing was version 17.0.
+- Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers greater than version 16.0 due to a compiler bug. The latest version verified as failing was version 17.0.
 
-### Several tests currently fail on certain platforms:
+- Several tests currently fail on certain platforms:
    MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
 
    MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
    cray-mpich on theta and with XL compilers on ppc64le platforms.
 
-### File space may not be released when overwriting or deleting certain nested variable length or reference types.
+- File space may not be released when overwriting or deleting certain nested variable length or reference types.
 
-### Known problems in previous releases can be found in the HISTORY*.txt files in the HDF5 source. Please report any new problems found to help@hdfgroup.org.
+Known problems in previous releases can be found in the HISTORY*.txt files in the HDF5 source. Please report any new problems found to <a href="mailto:help@hdfgroup.org">help@hdfgroup.org</a>.
