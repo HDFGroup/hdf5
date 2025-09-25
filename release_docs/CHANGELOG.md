@@ -25,8 +25,8 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
-- [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and 25% faster closing of virtual datasets.
-- Reduced memory overhead via shared name strings and optimized spatial search algorithms for virtual datasets.
+- [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and [25% faster closing](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) of virtual datasets.
+- [Reduced memory overhead](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
 
 ## Significant Advancements:
 
@@ -211,6 +211,8 @@ Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer 
 ### The file format has been updated to 4.0<a name="fileformat"></a>
 
 The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
+
+Use of the shared strings option for Virtual Datasets reduces memory overhead and optimizes dataset close operations.
 
 ### The `H5Dread_chunk()` signature has changed
 
