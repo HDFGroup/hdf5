@@ -917,7 +917,6 @@ Bug Fixes since HDF5-2.0.0 release
       not sharable
 
       The message flags field could be modified such that a message that is 
-<<<<<<< HEAD:release_docs/release_archive.txt
       not sharable according to the share_flags field in H5O_msg_class_t
       can be treated as sharable. A check has been added to make sure 
       messages that are not sharable can't be modified so that they
@@ -937,8 +936,6 @@ Bug Fixes since HDF5-2.0.0 release
       not sharable
 
       The message flags field can be modified such that a message that is 
-=======
->>>>>>> a7ea70fdb5 (Add change to release note):release_docs/RELEASE.txt
       not sharable according to the share_flags field in H5O_msg_class_t
       can be treated as sharable. A check has been added to make sure 
       messages that are not sharable can't be modified so that they
