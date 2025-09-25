@@ -25,8 +25,14 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
+<<<<<<< HEAD
 - [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and [25% faster closing](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) of virtual datasets.
 - [Reduced memory overhead](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
+=======
+- Up to [2500% faster](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#rtree) Virtual Dataset read/write operations
+- 30% faster opening and 25% faster closing of virtual datasets.
+- Reduced memory overhead via shared name strings and optimized spatial search algorithms for virtual datasets.
+>>>>>>> 7ae02e1c82 (Add bullet point to CHANGELOG executive summary)
 
 ## Significant Advancements:
 
@@ -461,7 +467,7 @@ Simple example programs showing how to use complex number datatypes have been ad
 
    This layout copy is now delayed until either a user requests the DCPL, or until the start of an operation that needs to read the layout from the DCPL.
 
-### Virtual datasets now use a spatial tree to optimize searches
+### Virtual datasets now use a spatial tree to optimize searches<a name="rtree"></a>
 
    Virtual dataset operations with many (>1,000) mappings were much slower than
    corresponding operations on normal datasets. This was due to the need
