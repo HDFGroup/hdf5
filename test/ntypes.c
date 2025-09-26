@@ -3171,6 +3171,48 @@ error:
 }
 #endif
 
+static herr_t
+test_bfloat16(void)
+{
+    hid_t native_type = H5I_INVALID_HID;
+
+    TESTING("bfloat16 datatype");
+
+    /*
+     * Just ensure that the bfloat16 type is currently promoted
+     * to float. Until native support is added for a bfloat16
+     * type, conversion from bfloat16 to float should be easy.
+     */
+    if ((native_type = H5Tget_native_type(H5T_FLOAT_BFLOAT16LE, H5T_DIR_ASCEND)) < 0)
+        TEST_ERROR;
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT))
+        TEST_ERROR;
+
+    if (H5Tclose(native_type) < 0)
+        TEST_ERROR;
+
+    if ((native_type = H5Tget_native_type(H5T_FLOAT_BFLOAT16LE, H5T_DIR_DESCEND)) < 0)
+        TEST_ERROR;
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT))
+        TEST_ERROR;
+
+    if (H5Tclose(native_type) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(native_type);
+    }
+    H5E_END_TRY
+
+    return -1;
+}
+
 #ifdef H5_HAVE_COMPLEX_NUMBERS
 static herr_t
 test_complex(hid_t file)
@@ -3348,6 +3390,8 @@ main(void)
 #ifdef H5_HAVE__FLOAT16
     nerrors += test__Float16(file) < 0 ? 1 : 0;
 #endif
+
+    nerrors += test_bfloat16() < 0 ? 1 : 0;
 
 #ifdef H5_HAVE_COMPLEX_NUMBERS
     nerrors += test_complex(file) < 0 ? 1 : 0;

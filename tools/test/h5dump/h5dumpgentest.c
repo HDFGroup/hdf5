@@ -118,17 +118,18 @@
 #define FILE95 "tcomplex.h5"
 #define FILE96 "tcomplex_be.h5"
 #endif
-#define FILE97   "trefer_attr.h5"
-#define FILE98   "tattr4_be.h5"
-#define FILE99   "tno-subset.h5"
-#define F99_DSET "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
-#define FILE100  "trefer_compat.h5"
-#define FILE101  "trefer_grp.h5"
-#define FILE102  "trefer_obj_del.h5"
-#define FILE103  "trefer_obj.h5"
-#define FILE104  "trefer_param.h5"
-#define FILE105  "trefer_reg.h5"
-#define FILE106  "trefer_reg_1d.h5"
+#define FILE97  "tbfloat16.h5"
+#define FILE98  "tbfloat16_be.h5"
+#define FILE99  "trefer_attr.h5"
+#define FILE100 "tattr4_be.h5"
+#define FILE101 "tno-subset.h5"
+#define FILE102 "trefer_compat.h5"
+#define FILE103 "trefer_grp.h5"
+#define FILE104 "trefer_obj_del.h5"
+#define FILE105 "trefer_obj.h5"
+#define FILE106 "trefer_param.h5"
+#define FILE107 "trefer_reg.h5"
+#define FILE108 "trefer_reg_1d.h5"
 
 #define ONION_TEST_FIXNAME_SIZE 1024
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
@@ -434,6 +435,19 @@ typedef struct s1_t {
 #define F96_DSET_ARR_FC  "ArrayDatasetFloatComplex"
 #define F96_ATTR_FC      "AttributeFloatComplex"
 #endif
+
+/* "FILE97" macros */
+#define F97_XDIM    8
+#define F97_YDIM    16
+#define F97_DATASET "DS16BITS"
+
+/* "FILE98" macros */
+#define F98_XDIM    8
+#define F98_YDIM    16
+#define F98_DATASET "DS16BITS"
+
+/* "FILE101" macros */
+#define F101_DSET "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
 
 void
 gent_group(void)
@@ -12250,16 +12264,20 @@ gent_float16(void)
 
     H5Awrite(attr, H5T_IEEE_F16LE, aset16);
 
-    H5Aclose(attr);
-    H5Sclose(aspace);
-    H5Sclose(space);
-    H5Dclose(dataset);
-
 error:
     free(aset16);
     free(dset16);
 
-    H5Fclose(fid);
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(tid);
+        H5Aclose(attr);
+        H5Sclose(aspace);
+        H5Sclose(space);
+        H5Dclose(dataset);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
 }
 
 void
@@ -12320,16 +12338,20 @@ gent_float16_be(void)
 
     H5Awrite(attr, H5T_IEEE_F16LE, aset16);
 
-    H5Aclose(attr);
-    H5Sclose(aspace);
-    H5Sclose(space);
-    H5Dclose(dataset);
-
 error:
     free(aset16);
     free(dset16);
 
-    H5Fclose(fid);
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(tid);
+        H5Aclose(attr);
+        H5Sclose(aspace);
+        H5Sclose(space);
+        H5Dclose(dataset);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
 }
 #endif
 
@@ -12858,6 +12880,158 @@ gent_complex_be(void)
 #endif
 
 void
+gent_bfloat16(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   attr    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   aspace  = H5I_INVALID_HID;
+    hsize_t dims[2], adims[1];
+
+    /*
+     * bfloat16 keeps approximately the same range as the IEEE 32-bit
+     * floating point format while sacrificing precision. Since the
+     * data for these testing files isn't particular interesting or
+     * precise, just use float for the memory type (though it's
+     * possible it may not be the IEEE format). While GCC and Clang
+     * have support for a __bf16 type at this point, there's no native
+     * support for the type in HDF5 yet.
+     */
+    struct {
+        float arr[F97_XDIM][F97_YDIM];
+    } *dset16;
+
+    float *aset16 = NULL;
+    float  val;
+
+    dset16 = malloc(sizeof(*dset16));
+
+    aset16 = calloc(F97_XDIM * F97_YDIM, sizeof(float));
+
+    fid = H5Fcreate(FILE97, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Dataset of 16-bit little-endian bfloat16 */
+    dims[0] = F97_XDIM;
+    dims[1] = F97_YDIM;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset =
+        H5Dcreate2(fid, F97_DATASET, H5T_FLOAT_BFLOAT16LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val = (float)F97_YDIM;
+    for (size_t i = 0; i < dims[0]; i++) {
+        dset16->arr[i][0]   = val;
+        aset16[i * dims[1]] = dset16->arr[i][0];
+
+        for (size_t j = 1; j < dims[1]; j++) {
+            dset16->arr[i][j]       = (float)(j * dims[0] + i) / (float)F97_YDIM;
+            aset16[i * dims[1] + j] = dset16->arr[i][j];
+        }
+
+        val -= (float)1;
+    }
+
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset16);
+
+    /* Attribute of 16-bit little-endian bfloat16 */
+    adims[0] = F97_XDIM * F97_YDIM;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F97_DATASET, H5T_FLOAT_BFLOAT16LE, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_NATIVE_FLOAT, aset16);
+
+error:
+    free(aset16);
+    free(dset16);
+
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(attr);
+        H5Sclose(aspace);
+        H5Sclose(space);
+        H5Dclose(dataset);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
+}
+
+void
+gent_bfloat16_be(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   attr    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   aspace  = H5I_INVALID_HID;
+    hsize_t dims[2], adims[1];
+
+    /*
+     * bfloat16 keeps approximately the same range as the IEEE 32-bit
+     * floating point format while sacrificing precision. Since the
+     * data for these testing files isn't particular interesting or
+     * precise, just use float for the memory type (though it's
+     * possible it may not be the IEEE format). While GCC and Clang
+     * have support for a __bf16 type at this point, there's no native
+     * support for the type in HDF5 yet.
+     */
+    struct {
+        float arr[F98_XDIM][F98_YDIM];
+    } *dset16;
+
+    float *aset16 = NULL;
+    float  val;
+
+    dset16 = malloc(sizeof(*dset16));
+
+    aset16 = calloc(F98_XDIM * F98_YDIM, sizeof(float));
+
+    fid = H5Fcreate(FILE98, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Dataset of 16-bit big-endian bfloat16 */
+    dims[0] = F98_XDIM;
+    dims[1] = F98_YDIM;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset =
+        H5Dcreate2(fid, F98_DATASET, H5T_FLOAT_BFLOAT16BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val = (float)F98_YDIM;
+    for (size_t i = 0; i < dims[0]; i++) {
+        dset16->arr[i][0]   = val;
+        aset16[i * dims[1]] = dset16->arr[i][0];
+
+        for (size_t j = 1; j < dims[1]; j++) {
+            dset16->arr[i][j]       = (float)(j * dims[0] + i) / (float)F98_YDIM;
+            aset16[i * dims[1] + j] = dset16->arr[i][j];
+        }
+
+        val -= (float)1;
+    }
+
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset16);
+
+    /* Attribute of 16-bit big-endian bfloat16 */
+    adims[0] = F98_XDIM * F98_YDIM;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F98_DATASET, H5T_FLOAT_BFLOAT16BE, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_NATIVE_FLOAT, aset16);
+
+error:
+    free(aset16);
+    free(dset16);
+
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(attr);
+        H5Sclose(aspace);
+        H5Sclose(space);
+        H5Dclose(dataset);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
+}
+
+void
 gent_trefer_attr(void)
 {
     hid_t     file_id      = H5I_INVALID_HID;
@@ -12879,7 +13053,7 @@ gent_trefer_attr(void)
     unsigned int  attr2_data[4] = {1, 4, 7, 10};
     unsigned int  attr3_data[4] = {2, 5, 8, 11};
 
-    file_id = H5Fcreate(FILE97, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE99, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     group_id = H5Gcreate2(file_id, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -12953,7 +13127,7 @@ gent_tattr4_be(void)
     float   data_value        = 0.0f;
     char    attr_name[10]     = {0};
 
-    file_id = H5Fcreate(FILE98, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE100, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     dataspace_id = H5Screate_simple(1, dims, NULL);
 
@@ -12995,10 +13169,10 @@ gent_tno_subset(void)
     hsize_t dims[2]      = {1, 1};
     int     data[1][1]   = {{0}};
 
-    file_id      = H5Fcreate(FILE99, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id      = H5Fcreate(FILE101, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     dataspace_id = H5Screate_simple(2, dims, NULL);
     dataset_id =
-        H5Dcreate2(file_id, F99_DSET, H5T_STD_I32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5Dcreate2(file_id, F101_DSET, H5T_STD_I32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset_id, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
     H5Dclose(dataset_id);
@@ -13033,7 +13207,7 @@ gent_trefer_compat(void)
     memset(data1, 0, sizeof(data1));
     memset(data2, 0, sizeof(data2));
 
-    file_id = H5Fcreate(FILE100, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE102, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     group_id = H5Gcreate2(file_id, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -13105,7 +13279,7 @@ gent_trefer_grp(void)
     hid_t     space_id  = H5I_INVALID_HID;
     H5R_ref_t ref;
 
-    file_id = H5Fcreate(FILE101, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE103, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     group_id  = H5Gcreate2(file_id, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     group3_id = H5Gcreate2(group_id, "group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -13133,7 +13307,7 @@ gent_trefer_obj_del(void)
     hid_t     space_id = H5I_INVALID_HID;
     H5R_ref_t ref;
 
-    file_id = H5Fcreate(FILE102, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE104, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     space_id = H5Screate(H5S_SCALAR);
 
@@ -13179,7 +13353,7 @@ gent_trefer_obj(void)
     H5R_ref_t       ref_data5[1];
     hdset_reg_ref_t ref_data6[1];
 
-    file_id = H5Fcreate(FILE103, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE105, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     group_id = H5Gcreate2(file_id, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -13249,7 +13423,7 @@ gent_trefer_param(void)
     uint8_t   data2[4] = {0, 0, 0, 0};
     H5R_ref_t ref_data[4];
 
-    file_id = H5Fcreate(FILE104, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE106, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     group_id = H5Gcreate2(file_id, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -13313,7 +13487,7 @@ gent_trefer_reg(void)
         for (j = 0; j < 10; j++, n += 3)
             data2[i][j] = (uint8_t)(n % 256);
 
-    file_id = H5Fcreate(FILE105, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE107, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     space2_id = H5Screate_simple(2, dims2, NULL);
     dset2_id =
@@ -13373,7 +13547,7 @@ gent_trefer_reg_1d(void)
     hsize_t       block[1]  = {2};
     hsize_t       coord[10] = {16, 22, 38, 41, 52, 63, 70, 89, 97, 3};
 
-    file_id = H5Fcreate(FILE106, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE108, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     for (int i = 0; i < 100; i++) {
         data[i] = (unsigned char)(i * 3 % 256);
