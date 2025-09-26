@@ -905,8 +905,10 @@ main(void)
 
     /* Test the mapping count threshold */
     nerrors += test_rtree_threshold(true) < 0 ? 1 : 0;
+    // TODO - Fix failure
     nerrors += test_rtree_threshold(false) < 0 ? 1 : 0;
 
+    // TODO - Write test with tree on/off
     if (nerrors)
         goto error;
 
