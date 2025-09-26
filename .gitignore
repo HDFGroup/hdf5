@@ -15,6 +15,6 @@
 src/H5config.h.in
 
 /.classpath
-/.claude/settings.local.json
+.claude/
 /CMakeUserPresets.json
 HDF5Examples/CMakeUserPresets.json
