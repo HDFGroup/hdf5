@@ -132,6 +132,10 @@ print_type(hid_t type)
                 parallel_print("H5T_IEEE_F64BE");
             else if (H5Tequal(type, H5T_IEEE_F64LE))
                 parallel_print("H5T_IEEE_F64LE");
+            else if (H5Tequal(type, H5T_FLOAT_BFLOAT16BE))
+                parallel_print("H5T_FLOAT_BFLOAT16BE");
+            else if (H5Tequal(type, H5T_FLOAT_BFLOAT16LE))
+                parallel_print("H5T_FLOAT_BFLOAT16LE");
 #ifdef H5_HAVE__FLOAT16
             else if (H5Tequal(type, H5T_NATIVE_FLOAT16))
                 parallel_print("H5T_NATIVE_FLOAT16");

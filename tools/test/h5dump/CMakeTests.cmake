@@ -58,6 +58,8 @@ set (HDF5_REFERENCE_FILES
     tattrintsize.ddl
     tattrreg.ddl
     tattrregR.ddl
+    tbfloat16.ddl
+    tbfloat16_be.ddl
     tbin1.ddl
     tbin1.ddl
     tbin2.ddl
@@ -264,6 +266,8 @@ set (HDF5_REFERENCE_TEST_FILES
     tattr4_be.h5
     tattrintsize.h5
     tattrreg.h5
+    tbfloat16.h5
+    tbfloat16_be.h5
     tbigdims.h5
     tbinary.h5
     tbitnopaque.h5
@@ -1156,6 +1160,10 @@ ADD_H5_TEST (tldouble_scalar RESULT_CODE 0 -p --enable-error-stack TARGET_FILE t
 # Add tests for _Float16 type
 ADD_H5_TEST (tfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16.h5)
 ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16_be.h5)
+
+# Add tests for bfloat16 type
+ADD_H5_TEST (tbfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tbfloat16.h5)
+ADD_H5_TEST (tbfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tbfloat16_be.h5)
 
 # Add tests for complex numbers. For portability, use a fixed floating-point
 # precision and skip dumping of the "long double _Complex" dataset. The "long

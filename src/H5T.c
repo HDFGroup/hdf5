@@ -143,6 +143,30 @@
         H5T_INIT_TYPE_FLOAT16_COMMON(H5T_ORDER_BE)                                                           \
     }
 
+/* Define the code templates for standard 16-bit bfloat16 floats for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_BFLOAT16_COMMON(ENDIANNESS)                                                            \
+    {                                                                                                        \
+        H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)                                                                 \
+        dt->shared->u.atomic.u.f.sign  = 15;                                                                 \
+        dt->shared->u.atomic.u.f.epos  = 7;                                                                  \
+        dt->shared->u.atomic.u.f.esize = 8;                                                                  \
+        dt->shared->u.atomic.u.f.ebias = 0x7f;                                                               \
+        dt->shared->u.atomic.u.f.mpos  = 0;                                                                  \
+        dt->shared->u.atomic.u.f.msize = 7;                                                                  \
+        dt->shared->u.atomic.u.f.norm  = H5T_NORM_IMPLIED;                                                   \
+        dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;                                                       \
+    }
+
+#define H5T_INIT_TYPE_BFLOAT16LE_CORE                                                                        \
+    {                                                                                                        \
+        H5T_INIT_TYPE_BFLOAT16_COMMON(H5T_ORDER_LE)                                                          \
+    }
+
+#define H5T_INIT_TYPE_BFLOAT16BE_CORE                                                                        \
+    {                                                                                                        \
+        H5T_INIT_TYPE_BFLOAT16_COMMON(H5T_ORDER_BE)                                                          \
+    }
+
 /* Define the code templates for standard floats for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_FLOAT_COMMON(ENDIANNESS)                                                               \
     {                                                                                                        \
@@ -432,6 +456,9 @@ hid_t H5T_IEEE_F32BE_g = H5I_INVALID_HID;
 hid_t H5T_IEEE_F32LE_g = H5I_INVALID_HID;
 hid_t H5T_IEEE_F64BE_g = H5I_INVALID_HID;
 hid_t H5T_IEEE_F64LE_g = H5I_INVALID_HID;
+
+hid_t H5T_FLOAT_BFLOAT16BE_g = H5I_INVALID_HID;
+hid_t H5T_FLOAT_BFLOAT16LE_g = H5I_INVALID_HID;
 
 hid_t H5T_COMPLEX_IEEE_F16BE_g = H5I_INVALID_HID;
 hid_t H5T_COMPLEX_IEEE_F16LE_g = H5I_INVALID_HID;
@@ -1086,6 +1113,17 @@ H5T__init_package(void)
 
     /* IEEE 8-byte big-endian float */
     H5T_INIT_TYPE(DOUBLEBE, H5T_IEEE_F64BE_g, COPY, native_double, SET, 8)
+
+    /*------------------------------------------------------------
+     * Alternative floating-point types
+     *------------------------------------------------------------
+     */
+
+    /* 2-byte little-endian bfloat16 float type */
+    H5T_INIT_TYPE(BFLOAT16LE, H5T_FLOAT_BFLOAT16LE_g, COPY, native_double, SET, 2)
+
+    /* 2-byte big-endian bfloat16 float type */
+    H5T_INIT_TYPE(BFLOAT16BE, H5T_FLOAT_BFLOAT16BE_g, COPY, native_double, SET, 2)
 
     /*------------------------------------------------------------
      * VAX Types
@@ -2181,6 +2219,9 @@ H5T_top_term_package(void)
             H5T_IEEE_F32LE_g = H5I_INVALID_HID;
             H5T_IEEE_F64BE_g = H5I_INVALID_HID;
             H5T_IEEE_F64LE_g = H5I_INVALID_HID;
+
+            H5T_FLOAT_BFLOAT16BE_g = H5I_INVALID_HID;
+            H5T_FLOAT_BFLOAT16LE_g = H5I_INVALID_HID;
 
             H5T_COMPLEX_IEEE_F16BE_g = H5I_INVALID_HID;
             H5T_COMPLEX_IEEE_F16LE_g = H5I_INVALID_HID;
