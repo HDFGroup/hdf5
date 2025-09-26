@@ -51,7 +51,7 @@
 #define RTREE_DAPL_DATASET_DIM2 10
 
 #define RTREE_THRESHOLD_FILENAME "vds_rtree_threshold_test.h5"
-#define RTREE_MAX_TEST_MAPPINGS  (H5D_VIRTUAL_TREE_THRESHOLD + 10)
+#define RTREE_MAX_TEST_MAPPINGS  (H5D_VIRTUAL_TREE_THRESHOLD + 100)
 
 static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {H5D_VIRTUAL_TREE_THRESHOLD, 100, 1000,
                                                                  10000};
@@ -566,7 +566,7 @@ test_rtree_dapl(bool use_tree)
     hid_t dapl_id  = H5I_INVALID_HID;
     hid_t vdset_id = H5I_INVALID_HID;
 
-    int         rbuf[H5D_VIRTUAL_TREE_THRESHOLD + 10];
+    int         rbuf[RTREE_MAX_TEST_MAPPINGS];
     const char *test_str = NULL;
 
     /* Internal values for introspection */
@@ -606,7 +606,7 @@ test_rtree_dapl(bool use_tree)
         FAIL_STACK_ERROR;
 
     /* Verify read data matches expected pattern */
-    for (int i = 0; i < (H5D_VIRTUAL_TREE_THRESHOLD + 10); i++) {
+    for (int i = 0; i < (RTREE_MAX_TEST_MAPPINGS); i++) {
         if (rbuf[i] != i) {
             printf("Data mismatch at [%d]: expected %d, got %d\n", i, i, rbuf[i]);
             FAIL_STACK_ERROR;
@@ -648,9 +648,31 @@ test_rtree_dapl(bool use_tree)
     /* Close the dataset and re-open it with the opposite value set in DAPL */
     if (H5Dclose(vdset_id) < 0)
         FAIL_STACK_ERROR;
+
     vdset_id = H5I_INVALID_HID;
 
+    if (H5Fclose(file_id) < 0)
+        FAIL_STACK_ERROR;
+
+    file_id = H5I_INVALID_HID;
+
+    if (H5Pclose(dapl_id) < 0)
+        FAIL_STACK_ERROR;
+
+    dapl_id = H5I_INVALID_HID;
+
+    memset(rbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
+
+    H5close();
+    H5open();
+
+    if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+
     if (H5Pset_dset_use_spatial_tree(dapl_id, use_tree_inverse) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((file_id = H5Fopen(RTREE_DAPL_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
     if ((vdset_id = H5Dopen2(file_id, RTREE_DAPL_VDS_NAME, dapl_id)) < 0)
@@ -661,7 +683,7 @@ test_rtree_dapl(bool use_tree)
         FAIL_STACK_ERROR;
 
     /* Verify read data matches expected pattern */
-    for (int i = 0; i < (H5D_VIRTUAL_TREE_THRESHOLD + 10); i++) {
+    for (int i = 0; i < (RTREE_MAX_TEST_MAPPINGS); i++) {
         if (rbuf[i] != i) {
             printf("Data mismatch after re-open at [%d]: expected %d, got %d\n", i, i, rbuf[i]);
             FAIL_STACK_ERROR;
@@ -677,27 +699,27 @@ test_rtree_dapl(bool use_tree)
 
     storage = &(dset->shared->layout.storage.u.virt);
 
-    /* Verify tree existence matches expectation */
+    /* Verify tree existence matches expectation after re-open */
     if (use_tree_inverse) {
         if (storage->tree == NULL) {
-            puts("Expected spatial tree to exist but it was NULL");
+            puts("Expected spatial tree to exist but it was NULL after re-open");
             FAIL_STACK_ERROR;
         }
         /* not_in_tree_list can be NULL if all mappings fit in tree - this is OK */
         /* Just verify consistency: if nused > 0, then list should exist */
         if (storage->not_in_tree_nused > 0 && storage->not_in_tree_list == NULL) {
-            puts("Expected not_in_tree_list array to exist but it was NULL");
+            puts("Expected not_in_tree_list array to exist but it was NULL after re-open");
             FAIL_STACK_ERROR;
         }
         /* When tree is enabled, we just verify tree exists - not_in_tree_list may or may not exist */
     }
     else {
         if (storage->tree != NULL) {
-            puts("Expected spatial tree to be NULL but it exists");
+            puts("Expected spatial tree to be NULL but it exists after re-open");
             FAIL_STACK_ERROR;
         }
         if (storage->not_in_tree_list != NULL || storage->not_in_tree_nused > 0) {
-            puts("Expected not_in_tree_list to be empty but it exists");
+            puts("Expected not_in_tree_list to be empty but it exists after re-open");
             FAIL_STACK_ERROR;
         }
     }

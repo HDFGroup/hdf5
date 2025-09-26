@@ -147,7 +147,8 @@ static herr_t H5D__virtual_build_source_name(char                               
                                              char **built_name);
 static herr_t H5D__virtual_init_all(const H5D_t *dset);
 static herr_t H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage,
-                                  H5S_t *file_space, H5S_t *mem_space, hsize_t *tot_nelmts);
+                                  H5S_t *file_space, H5S_t *mem_space, hsize_t *tot_nelmts,
+                                  H5RT_result_set_t *mappings);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
 static herr_t H5D__virtual_read_one(H5D_dset_io_info_t            *dset_info,
                                     H5O_storage_virtual_srcdset_t *source_dset);
@@ -3121,12 +3122,9 @@ done:
  */
 static herr_t
 H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
-                    H5S_t *mem_space, hsize_t *tot_nelmts)
+                    H5S_t *mem_space, hsize_t *tot_nelmts, H5RT_result_set_t *mappings)
 {
-    const H5D_t       *dset              = dset_info->dset; /* Local pointer to dataset info */
     herr_t             ret_value         = SUCCEED;         /* Return value */
-    bool               should_build_tree = true;
-    H5RT_result_set_t *search_results    = NULL; /* Search results from R-tree */
 
     FUNC_ENTER_PACKAGE
 
@@ -3136,61 +3134,20 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     assert(file_space);
     assert(tot_nelmts);
 
-    /* Initialize layout if necessary */
-    if (!storage->init)
-        if (H5D__virtual_init_all(dset) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize virtual layout");
-
     /* Initialize tot_nelmts */
     *tot_nelmts = 0;
 
-    if (H5D__should_build_tree(storage, dset->shared->dapl_id, &should_build_tree) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't determine if should build VDS tree");
-
-    if (should_build_tree) {
-        int rank = 0;
-
-        /* Get the rank of the dataset */
-        if ((rank = H5S_GET_EXTENT_NDIMS(dset_info->dset->shared->space)) < 0 || rank >= H5S_MAX_RANK)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset rank");
-
-        if (rank == 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "virtual dataset has no rank");
-
-        if (H5D__virtual_build_tree(storage, rank) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
-    }
-
     /* Iterate over the mappings */
-    if (storage->tree) {
-        /* Perform a spatial tree search to get a list of mappings
-         * whose virtual selection intersects the IO operation */
-        hsize_t min[H5S_MAX_RANK];
-        hsize_t max[H5S_MAX_RANK];
-
-        memset(min, 0, sizeof(min));
-        memset(max, 0, sizeof(max));
-
-        if (H5S_SELECT_BOUNDS(file_space, min, max) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get selection bounds");
-
-        if (H5RT_search(storage->tree, min, max, &search_results) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "R-tree search failed");
-
+    if (mappings) {
         /* First, iterate over the mappings with an intersection found via the tree */
-        for (size_t i = 0; i < search_results->count; i++) {
-            H5RT_leaf_t *curr_leaf = search_results->results[i];
+        for (size_t i = 0; i < mappings->count; i++) {
+            H5RT_leaf_t *curr_leaf = mappings->results[i];
             assert(curr_leaf);
 
             if (H5D__virtual_pre_io_process_mapping(dset_info, file_space, mem_space, tot_nelmts,
                                                     (H5O_storage_virtual_ent_t *)curr_leaf->record) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
         }
-
-        /* Free search results */
-        if (H5RT_free_results(search_results) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
-        search_results = NULL;
 
         /* Iterate over the mappings that are not stored in the tree */
         for (size_t i = 0; i < storage->not_in_tree_nused; i++) {
@@ -3209,11 +3166,6 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     }
 
 done:
-    if (ret_value < 0)
-        if (search_results)
-            if (H5RT_free_results(search_results) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_pre_io() */
 
@@ -3237,7 +3189,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
     /* Sanity check */
     assert(storage);
 
-    /* Iterate over mappings */
+    /* Iterate over all mappings */
     for (i = 0; i < storage->list_nused; i++)
         /* Check for "printf" source dataset resolution */
         if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
@@ -3346,6 +3298,10 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
     size_t                 nelmts;              /* Number of elements to process */
     size_t                 i, j;                /* Local index variables */
     herr_t                 ret_value = SUCCEED; /* Return value */
+    bool                   should_build_tree = false; /* Whether to build a spatial tree */
+    H5RT_result_set_t     *mappings    = NULL; /* Search results from R-tree */
+    hsize_t min[H5S_MAX_RANK];
+    hsize_t max[H5S_MAX_RANK];
 
     FUNC_ENTER_PACKAGE
 
@@ -3362,14 +3318,48 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
     /* Initialize nelmts */
     nelmts = H5S_GET_SELECT_NPOINTS(dset_info->file_space);
 
+    memset(min, 0, sizeof(min));
+    memset(max, 0, sizeof(max));
 #ifdef H5_HAVE_PARALLEL
     /* Parallel reads are not supported (yet) */
     if (H5F_HAS_FEATURE(dset_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel reads not supported on virtual datasets");
 #endif /* H5_HAVE_PARALLEL */
 
+    /* Initialize layout if necessary */
+    if (!storage->init)
+        if (H5D__virtual_init_all(dset_info->dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize virtual layout");
+
+    if (H5D__should_build_tree(storage, dset_info->dset->shared->dapl_id, &should_build_tree) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't determine if should build VDS tree");
+
+    if (should_build_tree) {
+        int rank = 0;
+
+        /* Get the rank of the dataset */
+        if ((rank = H5S_GET_EXTENT_NDIMS(dset_info->dset->shared->space)) < 0 || rank >= H5S_MAX_RANK)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset rank");
+
+        if (rank == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "virtual dataset has no rank");
+
+        if (H5D__virtual_build_tree(storage, rank) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
+    }
+
+    if (storage->tree) {
+        /* Perform a spatial tree search to get a list of mappings
+        * whose virtual selection intersects the IO operation */
+        if (H5S_SELECT_BOUNDS(dset_info->file_space, min, max) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get selection bounds");
+
+        if (H5RT_search(storage->tree, min, max, &mappings) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "R-tree search failed");
+    }
+
     /* Prepare for I/O operation */
-    if (H5D__virtual_pre_io(dset_info, storage, dset_info->file_space, dset_info->mem_space, &tot_nelmts) < 0)
+    if (H5D__virtual_pre_io(dset_info, storage, dset_info->file_space, dset_info->mem_space, &tot_nelmts, mappings) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation");
 
     /* Iterate over mappings */
@@ -3446,6 +3436,10 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
     }         /* end if */
 
 done:
+    if (mappings)
+        if (H5RT_free_results(mappings) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
+
     /* Cleanup I/O operation */
     if (H5D__virtual_post_io(storage) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation");
@@ -3542,6 +3536,10 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
     size_t                 nelmts;              /* Number of elements to process */
     size_t                 i, j;                /* Local index variables */
     herr_t                 ret_value = SUCCEED; /* Return value */
+    bool                   should_build_tree = false; /* Whether to build a spatial tree */
+    H5RT_result_set_t     *mappings    = NULL; /* Search results from R-tree */
+    hsize_t min[H5S_MAX_RANK];
+    hsize_t max[H5S_MAX_RANK];
 
     FUNC_ENTER_PACKAGE
 
@@ -3558,14 +3556,48 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
     /* Initialize nelmts */
     nelmts = H5S_GET_SELECT_NPOINTS(dset_info->file_space);
 
+    memset(min, 0, sizeof(min));
+    memset(max, 0, sizeof(max));
 #ifdef H5_HAVE_PARALLEL
     /* Parallel writes are not supported (yet) */
     if (H5F_HAS_FEATURE(dset_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel writes not supported on virtual datasets");
 #endif /* H5_HAVE_PARALLEL */
 
+    /* Initialize layout if necessary */
+    if (!storage->init)
+        if (H5D__virtual_init_all(dset_info->dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize virtual layout");
+
+    if (H5D__should_build_tree(storage, dset_info->dset->shared->dapl_id, &should_build_tree) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't determine if should build VDS tree");
+
+    if (should_build_tree) {
+        int rank = 0;
+
+        /* Get the rank of the dataset */
+        if ((rank = H5S_GET_EXTENT_NDIMS(dset_info->dset->shared->space)) < 0 || rank >= H5S_MAX_RANK)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset rank");
+
+        if (rank == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "virtual dataset has no rank");
+
+        if (H5D__virtual_build_tree(storage, rank) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
+    }
+
+    if (storage->tree) {
+        /* Perform a spatial tree search to get a list of mappings
+        * whose virtual selection intersects the IO operation */
+        if (H5S_SELECT_BOUNDS(dset_info->file_space, min, max) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get selection bounds");
+
+        if (H5RT_search(storage->tree, min, max, &mappings) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "R-tree search failed");
+    }
+
     /* Prepare for I/O operation */
-    if (H5D__virtual_pre_io(dset_info, storage, dset_info->file_space, dset_info->mem_space, &tot_nelmts) < 0)
+    if (H5D__virtual_pre_io(dset_info, storage, dset_info->file_space, dset_info->mem_space, &tot_nelmts, mappings) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation");
 
     /* Fail if there are unmapped parts of the selection as they would not be
@@ -3593,6 +3625,9 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
     } /* end for */
 
 done:
+    if (mappings)
+        H5RT_free_results(mappings);
+
     /* Cleanup I/O operation */
     if (H5D__virtual_post_io(storage) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation");
@@ -4073,7 +4108,7 @@ H5D__should_build_tree(H5O_storage_virtual_t *storage, hid_t dapl_id, bool *shou
 {
     herr_t          ret_value    = SUCCEED;
     H5P_genplist_t *dapl_plist   = NULL;
-    bool            tree_enabled = false;
+    bool            tree_enabled_dapl = false;
 
     FUNC_ENTER_PACKAGE
 
@@ -4094,26 +4129,18 @@ H5D__should_build_tree(H5O_storage_virtual_t *storage, hid_t dapl_id, bool *shou
     }
 
     /* Don't build if DAPL property has disabled the tree */
-    if (*should_build_tree) {
-        if (NULL == (dapl_plist = (H5P_genplist_t *)H5I_object(dapl_id)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
+    if (NULL == (dapl_plist = (H5P_genplist_t *)H5I_object(dapl_id)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
 
-        if (H5P_get(dapl_plist, H5D_ACS_USE_TREE_NAME, &tree_enabled) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get virtual use tree flag");
+    if (H5P_get(dapl_plist, H5D_ACS_USE_TREE_NAME, &tree_enabled_dapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get virtual use tree flag");
 
-        if (!tree_enabled) {
-            *should_build_tree = false;
-            HGOTO_DONE(SUCCEED);
-        }
-    }
-
-    /* Don't build tree if we previously assembled ONLY a not_in_tree_list
-     * - this indicates that all mappings are not in the tree */
-    if (*should_build_tree && storage->not_in_tree_list && !storage->tree) {
+    if (!tree_enabled_dapl) {
         *should_build_tree = false;
         HGOTO_DONE(SUCCEED);
     }
 
+    *should_build_tree = true;
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
