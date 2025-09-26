@@ -686,11 +686,12 @@ gent_softlink(void)
 #define NX 4
 #define NY 2
 int
-gent_softlink2(void)
+gent_softlink2(bool big_endian_committed)
 {
     hid_t   fileid1 = H5I_INVALID_HID;
     hid_t   gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;
-    hid_t   datatype = H5I_INVALID_HID;
+    hid_t   target_type = H5I_INVALID_HID;
+    hid_t   datatype    = H5I_INVALID_HID;
     hid_t   dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID;
     hid_t   dataspace = H5I_INVALID_HID;
     hsize_t dimsf[2]; /* dataset dimensions */
@@ -729,8 +730,22 @@ gent_softlink2(void)
     /*-----------------------------------------------------------------------
      * Named datatype
      *------------------------------------------------------------------------*/
-    datatype = H5Tcopy(H5T_NATIVE_INT);
-    status   = H5Tcommit2(fileid1, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((target_type = H5Tcopy(H5T_NATIVE_INT)) < 0) {
+        fprintf(stderr, "Error: %s> H5Tcopy failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    if (big_endian_committed) {
+        if (H5Tset_order(target_type, H5T_ORDER_BE) < 0) {
+            status = FAIL;
+            goto out;
+        }
+    }
+
+    datatype = H5Tcopy(target_type);
+
+    status = H5Tcommit2(fileid1, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
         fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", FILE4_1);
         status = FAIL;
@@ -748,13 +763,10 @@ gent_softlink2(void)
     dimsf[1]  = NY;
     dataspace = H5Screate_simple(2, dimsf, NULL);
 
-    /*
-     * We will store little endian INT numbers.
-     */
-
     /*---------------
      * dset1
      */
+
     /* Create a new dataset as sample object */
     dset1 = H5Dcreate2(fileid1, "/dset1", H5T_STD_I32BE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset1 < 0) {
@@ -774,14 +786,14 @@ gent_softlink2(void)
      * dset2
      */
     /* Create a new dataset as sample object */
-    dset2 = H5Dcreate2(fileid1, "/dset2", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset2 = H5Dcreate2(fileid1, "/dset2", target_type, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset2 < 0) {
         fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
 
-    status = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+    status = H5Dwrite(dset2, target_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
     if (status < 0) {
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
         status = FAIL;
@@ -2238,7 +2250,7 @@ gent_objref(void)
 }
 
 void
-gent_datareg(void)
+gent_datareg(bool undefined_fill_value)
 {
     /*some code is taken from enum.c in the test dir */
 
@@ -2247,6 +2259,7 @@ gent_datareg(void)
         dset2;   /* Dereferenced dataset ID */
     hid_t sid1,  /* Dataspace ID #1  */
         sid2;    /* Dataspace ID #2  */
+    hid_t            dcpl_id = H5I_INVALID_HID;
     hsize_t          dims1[] = {SPACE1_DIM1}, dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t          start[SPACE2_RANK];                  /* Starting location of hyperslab */
     hsize_t          stride[SPACE2_RANK];                 /* Stride of hyperslab */
@@ -2272,8 +2285,16 @@ gent_datareg(void)
     /* Create dataspace for datasets */
     sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
 
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+
+    if (undefined_fill_value) {
+        /* Set the fill value to be undefined */
+        H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_IFSET);
+        H5Pset_fill_value(dcpl_id, H5I_INVALID_HID, NULL);
+    }
+
     /* Create a dataset */
-    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_U8BE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_U8BE, sid2, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
 
     for (tu8 = dwbuf, i = 0; i < SPACE2_DIM1 * SPACE2_DIM2; i++)
         *tu8++ = (uint8_t)(i * 3);
@@ -2288,7 +2309,7 @@ gent_datareg(void)
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
 
     /* Create a dataset */
-    dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
 
     /* Create references */
 
@@ -2350,6 +2371,8 @@ gent_datareg(void)
 
     /* Close file */
     H5Fclose(fid1);
+
+    H5Pclose(dcpl_id);
 
     /* Free memory buffers */
     free(wbuf);
