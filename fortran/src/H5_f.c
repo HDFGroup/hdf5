@@ -1125,3 +1125,49 @@ h5dont_atexit_c(void)
     ret_value = 0;
     return ret_value;
 }
+
+/****if* H5_f/h5free_string_array_memory_c
+ * NAME
+ *  h5free_string_array_memory_c
+ * PURPOSE
+ *  Frees internal memory allocated for a char** string array
+ * INPUTS
+ *  array_ptr - pointer to char** array
+ *  num_files - number of strings in the array
+ * RETURNS
+ *  0 on success, -1 on failure
+ * SOURCE
+ */
+int_f
+h5free_string_array_memory_c(void **array_ptr, size_t_f *num_files)
+/******/
+{
+    int    ret_value = 0;
+    char **array;
+    size_t len;
+
+    if (array_ptr == NULL || num_files == NULL) {
+        return ret_value; /* Nothing to free */
+    }
+
+    array = (char **)(*array_ptr);
+    len   = (size_t)(*num_files);
+
+    if (array == NULL || len == 0) {
+        return ret_value; /* Nothing to free */
+    }
+
+    /* Free each individual string */
+    for (size_t i = 0; i < len; i++) {
+        if (array[i] != NULL) {
+            H5free_memory(array[i]);
+            array[i] = NULL;
+        }
+    }
+
+    /* Free the array of pointers */
+    H5free_memory(array);
+    *array_ptr = NULL;
+
+    return ret_value;
+}

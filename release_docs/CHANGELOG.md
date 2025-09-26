@@ -441,7 +441,16 @@ Simple example programs showing how to use complex number datatypes have been ad
 
 ## Parallel Library
 
+### Added H5FDsubfiling_get_file_mapping() API function for subfiling VFD
+
+Added H5FDsubfiling_get_file_mapping() API function to retrieve the names of all physical subfiles that collectively make up a logical HDF5 file when using the subfiling Virtual File Driver.
+
 ## Fortran Library
+
+### Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for subfiling VFD
+
+Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file mapping functionality, ensuring complete language binding support.
+
 
 ## C++ Library
 
