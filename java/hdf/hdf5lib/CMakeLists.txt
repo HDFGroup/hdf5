@@ -176,7 +176,7 @@ if (HDF5_ENABLE_MAVEN_DEPLOY)
   install_jar (${HDF5_JAVA_UNIVERSAL_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT libraries)
 
   # Add universal JAR dependency
-  add_dependencies (${HDF5_JAVA_UNIVERSAL_TARGET} ${HDF5_JAVA_JNI_LIB_TARGET})
+  add_dependencies (${HDF5_JAVA_UNIVERSAL_TARGET} ${HDF5_JAVA_JSRC_LIB_TARGET})
   set_target_properties (${HDF5_JAVA_UNIVERSAL_TARGET} PROPERTIES FOLDER libraries/java)
 
   # Update global variables for both JARs
