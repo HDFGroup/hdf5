@@ -26,10 +26,11 @@ function usage {
          configuration file either as a command-line argument or the script will
          search for the *.config file in the current directory."
    echo ""
-   echo "usage: h5fuse [-f filename] [-h] [-p] [-q] [-r] [-v] "
+   echo "usage: h5fuse [-f filename] [-h] [-p] [-q] [-r] [-v] [-l subfile1,subfile2,...]"
    echo "-f filename  Subfile configuration file."
    echo "-h           Print this help."
    echo "-q           Quiet all output. [no]"
+   echo "-l           Comma separated list of subfiles to process"
    echo "-p           h5fuse is being run in parallel, with more than one rank. [no]"
    echo "-r           Remove subfiles after being processed. [no]"
    echo "-v           Verbose output. [no]"
@@ -131,8 +132,7 @@ for i in "${subfiles[@]}"; do
                   if [ "$verbose" == "true" ]; then
                       echo -e "$GRN $EXEC $NC"
                   fi
-                  err=$( $EXEC 2>&1 1>/dev/null )
-                  if [ $? -ne 0 ]; then
+                  if ! err=$( $EXEC 2>&1 1>/dev/null ); then
                      echo -e "$CYN ERR: dd Utility Failed $NC"
                      echo -e "$CYN MSG: $err $NC"
                      exit $FAILED
@@ -172,7 +172,8 @@ verbose="false"
 quiet="false"
 rm_subf="false"
 parallel="false"
-while getopts "hpqrvf:" option; do
+subf_list=()
+while getopts "hpqrvf:l:" option; do
    case $option in
       f) # subfiling configuration file
          file_config=$OPTARG;;
@@ -187,6 +188,9 @@ while getopts "hpqrvf:" option; do
          rm_subf="true";;
       v) # verbose output
          verbose="true";;
+      l) # process a list of subfiles
+         # Split the comma-separated list into an array
+         IFS=',' read -r -a subf_list <<< "${OPTARG}";;
      \?) # Invalid option
          echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
          usage
@@ -259,17 +263,44 @@ fi
 nsubfiles=${#subfiles[@]}
 
 # Get the number of local subfiles
+
 subfiles_loc=()
 subfiles_size=()
-for i in "${subfiles[@]}"; do
-    subfile="${subfile_dir}/${i}"
-    if [ -f "${subfile}" ]; then
-        subfiles_loc+=("$subfile")
-        subfiles_size+=($(wc -c "${subfile}" | awk '{print $1}'))
-    else
-        subfiles_size+=(0)
-    fi
-done
+
+if [[ "${#subf_list[@]}" == "0" ]]; then
+
+  for i in "${subfiles[@]}"; do
+      subfile="${subfile_dir}/${i}"
+      if [ -f "${subfile}" ]; then
+          subfiles_loc+=("$subfile")
+          subfiles_size+=("$(wc -c "${subfile}" | awk '{print $1}')")
+      else
+          subfiles_size+=(0)
+      fi
+  done
+
+else
+
+  for i in "${subfiles[@]}"; do
+      subfile="${subfile_dir}/${i}"
+      match=0
+      for ((j=0; j<${#subf_list[@]}; ++j)); do
+          if [[ "${subf_list[j]}" == "$subfile" ]]; then
+             unset "subf_list[$j]"  # Use unset within loop for proper removal
+             match=1
+             break
+          fi
+      done
+
+      if [[ "$match" == "1" ]]; then
+          subfiles_loc+=("$subfile")
+          subfiles_size+=("$(wc -c "${subfile}" | awk '{print $1}')")
+      else
+          subfiles_size+=(0)
+      fi
+  done
+
+fi
 
 if [ "$quiet" == "false" ]; then
     TIMEFORMAT="COMPLETION TIME = %R s"

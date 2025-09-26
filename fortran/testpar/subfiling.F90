@@ -380,6 +380,17 @@ PROGRAM subfiling_test
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
        'Testing H5Fcreate with subfiling with custom settings', total_error)
 
+  ! *********************************************************
+  ! Testing H5FDsubfiling_get_file_mapping_f Fortran wrapper
+  ! *********************************************************
+
+  nerrors = 0
+  CALL test_subfiling_get_file_mapping_f(filename, nerrors, mpi_rank)
+  CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
+
+  IF(mpi_rank==0) CALL write_test_status(nerrors, &
+       'Testing H5FDsubfiling_get_file_mapping_f wrapper', total_error)
+
   !
   ! close HDF5 interface
   !
@@ -410,6 +421,82 @@ PROGRAM subfiling_test
   ENDIF
 
   IF(mpi_rank==0) CALL write_test_footer()
+
+CONTAINS
+
+! **********************************************************************
+! Function:  test_subfiling_get_file_mapping_f
+!
+! Purpose:   Test the Fortran wrapper for H5FDsubfiling_get_file_mapping
+!            This is a focused test for the Fortran wrapper functionality
+!
+! Return:    none (errors incremented in nerrors)
+! **********************************************************************
+SUBROUTINE test_subfiling_get_file_mapping_f(filename, nerrors, mpi_rank)
+  IMPLICIT NONE
+
+  CHARACTER(LEN=*), INTENT(IN) :: filename
+  INTEGER, INTENT(INOUT) :: nerrors
+  INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN) :: mpi_rank
+
+  INTEGER(HID_T) :: file_id, fapl_id
+  INTEGER :: hdferror
+  INTEGER(SIZE_T) :: num_files
+
+  ! Variable declarations matching the exact interface signature
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  CHARACTER(LEN=:), ALLOCATABLE, DIMENSION(:) :: filenames
+#else
+  CHARACTER(LEN=4096), ALLOCATABLE, DIMENSION(:) :: filenames
+#endif
+
+  ! All ranks will test the API to ensure parallel consistency
+
+  ! Set up file access property list with subfiling
+  CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
+  CALL check("h5pcreate_f", hdferror, nerrors)
+
+  CALL H5Pset_mpi_params_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
+  CALL check("H5Pset_mpi_params_f", hdferror, nerrors)
+
+  CALL h5pset_fapl_subfiling_f(fapl_id, hdferror)
+  CALL check("h5pset_fapl_subfiling_f", hdferror, nerrors)
+
+  ! Open existing subfiling file (created earlier in the test)
+  CALL h5fopen_f(filename, H5F_ACC_RDONLY_F, file_id, hdferror, access_prp = fapl_id)
+  CALL check("h5fopen_f", hdferror, nerrors)
+
+  ! Test the Fortran wrapper for getting file mapping
+  CALL h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdferror)
+  CALL check("h5fdsubfiling_get_file_mapping_f", hdferror, nerrors)
+  ! Basic validation of the Fortran wrapper functionality
+  IF (hdferror .EQ. 0) THEN
+    IF (num_files .GT. 0) THEN
+      ! Just verify we got some results and they have the expected pattern
+      IF (INDEX(filenames(1), ".subfile_") .LE. 0) THEN
+        IF (mpi_rank .EQ. 0) WRITE(*,*) "ERROR: Subfile names don't contain expected pattern"
+        nerrors = nerrors + 1
+      END IF
+    ELSE
+      IF (mpi_rank .EQ. 0) WRITE(*,*) "ERROR: No subfiles returned from Fortran wrapper"
+      nerrors = nerrors + 1
+    END IF
+
+    ! Clean up memory allocated by the Fortran wrapper
+    IF (ALLOCATED(filenames)) DEALLOCATE(filenames)
+  ELSE
+    IF (mpi_rank .EQ. 0) WRITE(*,*) "ERROR: h5fdsubfiling_get_file_mapping_f failed with hdferr =", hdferror
+    nerrors = nerrors + 1
+  END IF
+
+  ! Clean up
+  CALL h5fclose_f(file_id, hdferror)
+  CALL check("h5fclose_f", hdferror, nerrors)
+
+  CALL h5pclose_f(fapl_id, hdferror)
+  CALL check("h5pclose_f", hdferror, nerrors)
+
+END SUBROUTINE test_subfiling_get_file_mapping_f
 
   !
   ! end main program
