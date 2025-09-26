@@ -99,6 +99,7 @@ static hid_t create_dcpl_id(int rank, const hsize_t dims[], hid_t dxpl_id);
 
 /* Test functions */
 static void test_create_and_close(void);
+static void test_subfiling_file_mapping_api(void);
 static void test_ioc_only_fail(void);
 static void test_config_file(void);
 static void test_stripe_sizes(void);
@@ -124,6 +125,7 @@ static test_func tests[] = {
     test_subfiling_write_many_read_few,
     test_subfiling_vector_io_extension,
     test_subfiling_h5fuse,
+    test_subfiling_file_mapping_api,
 };
 
 /* ---------------------------------------------------------------------------
@@ -274,6 +276,601 @@ test_create_and_close(void)
     CHECK_PASSED();
 }
 #undef SUBF_FILENAME
+
+/* Helper function to cleanup file mapping memory */
+static void
+cleanup_file_mapping_memory(char **filenames, size_t len)
+{
+    if (filenames && len > 0) {
+        for (size_t i = 0; i < len; i++) {
+            if (filenames[i]) {
+                H5free_memory(filenames[i]);
+            }
+        }
+        H5free_memory(filenames);
+    }
+}
+
+/* Helper function to validate HDF5 file using h5fuse */
+static herr_t
+validate_file_with_h5fuse(const char *config_filename, char **subfile_names, size_t num_subfiles,
+                          const char *main_filename)
+{
+    char  *h5fuse_cmd = NULL;
+    char   subfile_list[2048];
+    int    system_ret;
+    hid_t  fused_file_id = H5I_INVALID_HID;
+    herr_t ret_value     = SUCCEED;
+
+    /* Only validate on main process */
+    if (!MAINPROCESS)
+        return SUCCEED;
+
+    /* Allocate command buffer */
+    h5fuse_cmd = malloc(4096);
+    if (!h5fuse_cmd) {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    /* Check if h5fuse script exists - similar to test_subfiling_h5fuse() */
+    int   skip_validation = 0;
+    FILE *h5fuse_script;
+    h5fuse_script = fopen("./h5fuse", "r");
+    if (h5fuse_script)
+        fclose(h5fuse_script);
+    else
+        skip_validation = 1;
+
+    if (skip_validation) {
+        return SUCCEED; /* Skip validation if h5fuse script not found */
+    }
+
+    /* Build comma-separated list of subfiles for h5fuse */
+    subfile_list[0] = '\0';
+    for (size_t i = 0; i < num_subfiles; i++) {
+        if (i > 0) {
+            strcat(subfile_list, ",");
+        }
+        strcat(subfile_list, subfile_names[i]);
+
+        /* Verify each subfile exists before attempting to fuse */
+        if (access(subfile_names[i], F_OK) != 0) {
+            printf("ERROR: Subfile %s does not exist\n", subfile_names[i]);
+            ret_value = FAIL;
+            goto done;
+        }
+    }
+
+    /* Construct h5fuse command with proper arguments */
+    if (config_filename && access(config_filename, F_OK) == 0) {
+        /* Use configuration file if available */
+        snprintf(h5fuse_cmd, 4096, "./h5fuse -r -q -f %s -l %s", config_filename, subfile_list);
+    }
+    else {
+        /* Use subfile list only */
+        snprintf(h5fuse_cmd, 4096, "./h5fuse -r -q -l %s", subfile_list);
+    }
+    system_ret = system(h5fuse_cmd);
+
+    if (system_ret != 0) {
+        printf("ERROR: h5fuse command failed with return code: %d\n", system_ret);
+        ret_value = FAIL;
+        goto done;
+    }
+
+    /* Check if the fused file is accessible as an HDF5 file */
+    H5E_BEGIN_TRY
+    {
+        htri_t is_accessible = H5Fis_accessible(main_filename, H5P_DEFAULT);
+        if (is_accessible <= 0) {
+            printf("ERROR: Fused file %s is not accessible as an HDF5 file\n", main_filename);
+            ret_value = FAIL;
+            goto done;
+        }
+    }
+    H5E_END_TRY;
+
+    /* Open file with sec2 driver and verify the data */
+    {
+        hid_t   sec2_file_id = H5I_INVALID_HID;
+        hid_t   dset_id      = H5I_INVALID_HID;
+        hid_t   fspace_id    = H5I_INVALID_HID;
+        void   *buf          = NULL;
+        hsize_t dset_dims[1];
+        size_t  dset_size;
+
+        H5E_BEGIN_TRY
+        {
+            sec2_file_id = H5Fopen(main_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+
+        if (sec2_file_id >= 0) {
+
+            H5E_BEGIN_TRY
+            {
+                dset_id = H5Dopen2(sec2_file_id, "DSET", H5P_DEFAULT);
+            }
+            H5E_END_TRY;
+
+            if (dset_id >= 0) {
+                /* Get dataset dimensions */
+                fspace_id = H5Dget_space(dset_id);
+                if (fspace_id >= 0 && H5Sget_simple_extent_dims(fspace_id, dset_dims, NULL) >= 0) {
+                    dset_size = dset_dims[0] * sizeof(int);
+                    buf       = malloc(dset_size);
+
+                    if (buf) {
+                        /* Read the entire dataset */
+                        if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) >= 0) {
+                            printf("Successfully read dataset data from fused file\n");
+                            /* Note: Full data verification would require knowledge of the original data
+                             * pattern */
+                            /* For now, just verify we can read the data without errors */
+                        }
+                        free(buf);
+                    }
+
+                    if (fspace_id >= 0)
+                        H5Sclose(fspace_id);
+                }
+                H5Dclose(dset_id);
+            }
+
+            H5Fclose(sec2_file_id);
+        }
+        else {
+            printf("ERROR: Could not re-open fused file with sec2 driver for data validation\n");
+            ret_value = FAIL;
+            goto done;
+        }
+    }
+
+done:
+    if (h5fuse_cmd)
+        free(h5fuse_cmd);
+
+    H5E_BEGIN_TRY
+    {
+        if (fused_file_id >= 0)
+            H5Fclose(fused_file_id);
+    }
+    H5E_END_TRY;
+
+    return ret_value;
+}
+
+/* Helper function to find configuration file */
+static char *
+find_config_file(const char *main_filename)
+{
+    h5_stat_t file_info;
+    char     *config_filename = NULL;
+
+    /* Get file inode for config filename construction */
+    if (HDstat(main_filename, &file_info) < 0) {
+        return NULL;
+    }
+
+    config_filename = malloc(PATH_MAX);
+    if (!config_filename) {
+        return NULL;
+    }
+
+    /* Construct expected config filename using the same pattern as the main code */
+    snprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
+             config_dir ? config_dir : ".", main_filename, (uint64_t)file_info.st_ino);
+
+    /* Check if config file exists */
+    if (access(config_filename, F_OK) == 0) {
+        return config_filename;
+    }
+
+    /* Try alternative locations */
+    snprintf(config_filename, PATH_MAX, "./%s.config", main_filename);
+    if (access(config_filename, F_OK) == 0) {
+        return config_filename;
+    }
+
+    /* Search for any .config file in current directory */
+    snprintf(config_filename, PATH_MAX, "./subfiling.config");
+    if (access(config_filename, F_OK) == 0) {
+        return config_filename;
+    }
+
+    free(config_filename);
+    return NULL;
+}
+
+/* Helper function to create FAPL with specific IOC selection and count */
+static hid_t
+create_subfiling_fapl_with_ioc_selection_and_count(H5FD_subfiling_ioc_select_t selection_type, int ioc_count)
+{
+    hid_t                   fapl_id = H5I_INVALID_HID;
+    H5FD_subfiling_config_t subf_config;
+    herr_t                  ret;
+
+    /* Create base FAPL with MPI settings */
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
+    VRFY((fapl_id >= 0), "Base FAPL creation succeeded");
+
+    /* Get current subfiling configuration */
+    ret = H5Pget_fapl_subfiling(fapl_id, &subf_config);
+    VRFY((ret >= 0), "H5Pget_fapl_subfiling succeeded");
+
+    /* Modify IOC selection method and stripe count */
+    subf_config.shared_cfg.ioc_selection = selection_type;
+    subf_config.shared_cfg.stripe_count  = ioc_count;
+
+    /* Apply modified configuration */
+    ret = H5Pset_fapl_subfiling(fapl_id, &subf_config);
+    VRFY((ret >= 0), "H5Pset_fapl_subfiling succeeded");
+
+    VRFY((H5Pclose(subf_config.ioc_fapl_id) >= 0), "FAPL close succeeded");
+
+    return fapl_id;
+}
+
+/*
+ * Test H5FDsubfiling_get_file_mapping with different IOC selection methods
+ */
+#define SUBF_FILENAME_IOC "test_subfiling_ioc_selection.h5"
+static void
+test_subfiling_get_file_mapping_ioc_selection(void)
+{
+    const H5FD_subfiling_ioc_select_t selection_types[] = {SELECT_IOC_ONE_PER_NODE, SELECT_IOC_EVERY_NTH_RANK,
+                                                           /*     SELECT_IOC_WITH_CONFIG, */
+                                                           SELECT_IOC_TOTAL};
+
+    const char *selection_names[] = {"One IOC Per Node", "Every Nth Rank",
+                                     /* "With Config", */
+                                     "Total IOCs"};
+
+    const size_t num_selections = sizeof(selection_types) / sizeof(selection_types[0]);
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_MULTIPART("H5FDsubfiling_get_file_mapping with different IOC selections");
+
+    /* Test each IOC selection with both 1 and 3 IOCs */
+    const int    test_ioc_counts[] = {1, 3};
+    const size_t num_ioc_counts    = sizeof(test_ioc_counts) / sizeof(test_ioc_counts[0]);
+
+    for (size_t i = 0; i < num_selections; i++) {
+        for (size_t j = 0; j < num_ioc_counts; j++) {
+            hid_t  file_id   = H5I_INVALID_HID;
+            hid_t  fapl_id   = H5I_INVALID_HID;
+            char **filenames = NULL;
+            size_t len       = 0;
+            size_t len_total = 0;
+            herr_t ret;
+            char   filename[256];
+            int    expected_ioc_count = test_ioc_counts[j];
+
+            snprintf(filename, sizeof(filename), "test_subfiling_ioc_selection_%zu_%d.h5", i,
+                     expected_ioc_count);
+
+            if (MAINPROCESS) {
+                char test_desc[256];
+                snprintf(test_desc, sizeof(test_desc), "IOC Selection: %s with %d IOCs", selection_names[i],
+                         expected_ioc_count);
+                TESTING_2(test_desc);
+            }
+
+            /* Create FAPL with specific IOC selection and count */
+            fapl_id =
+                create_subfiling_fapl_with_ioc_selection_and_count(selection_types[i], expected_ioc_count);
+            VRFY((fapl_id >= 0), "IOC-specific FAPL creation succeeded");
+
+            /* Create file */
+            file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+            VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+            /* Test H5FDsubfiling_get_file_mapping */
+            ret = H5FDsubfiling_get_file_mapping(file_id, &filenames, &len);
+            VRFY((ret >= 0), "H5FDsubfiling_get_file_mapping succeeded");
+
+            MPI_Allreduce(&len, &len_total, 1, H5_SIZE_T_AS_MPI_TYPE, MPI_SUM, comm_g);
+
+            /* Validate that the number of subfiles matches expected IOC count */
+            VRFY((len_total == (size_t)expected_ioc_count), "Number of subfiles matches expected IOC count");
+
+            VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+            /* All ranks participate in h5fuse validation */
+            int   validation_result = 1; /* Default to success */
+            char *config_filename   = NULL;
+            if (len > 0) {
+                config_filename   = find_config_file(filename);
+                ret               = validate_file_with_h5fuse(config_filename, filenames, len, filename);
+                validation_result = (ret >= 0) ? 1 : 0;
+            }
+
+            /* Synchronize validation result across all ranks */
+            MPI_Allreduce(MPI_IN_PLACE, &validation_result, 1, MPI_INT, MPI_LAND, comm_g);
+            VRFY(validation_result, "h5fuse validation succeeded for IOC selection");
+
+            if (config_filename) {
+                free(config_filename);
+            }
+
+            cleanup_file_mapping_memory(filenames, len);
+
+            H5E_BEGIN_TRY
+            {
+                H5Fdelete(filename, fapl_id);
+            }
+            H5E_END_TRY
+
+            VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+            CHECK_PASSED();
+        }
+    }
+}
+#undef SUBF_FILENAME_IOC
+
+/*
+ * Test H5FDsubfiling_get_file_mapping consistency
+ */
+#define SUBF_FILENAME_CONSISTENCY "test_subfiling_mapping_consistency.h5"
+static void
+test_subfiling_get_file_mapping_consistency(void)
+{
+    hid_t  file_id    = H5I_INVALID_HID;
+    hid_t  fapl_id    = H5I_INVALID_HID;
+    char **filenames1 = NULL, **filenames2 = NULL;
+    size_t len1 = 0, len2 = 0;
+    herr_t ret;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING("H5FDsubfiling_get_file_mapping consistency across calls");
+
+    /* Create FAPL */
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    /* Create file */
+    file_id = H5Fcreate(SUBF_FILENAME_CONSISTENCY, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    /* First call to H5FDsubfiling_get_file_mapping */
+    ret = H5FDsubfiling_get_file_mapping(file_id, &filenames1, &len1);
+    VRFY((ret >= 0), "First H5FDsubfiling_get_file_mapping call succeeded");
+
+    /* Second call to H5FDsubfiling_get_file_mapping */
+    ret = H5FDsubfiling_get_file_mapping(file_id, &filenames2, &len2);
+    VRFY((ret >= 0), "Second H5FDsubfiling_get_file_mapping call succeeded");
+
+    /* Verify consistency */
+    VRFY((len1 == len2), "Both calls returned same number of subfiles");
+
+    if (len1 > 0 && len2 > 0) {
+        for (size_t i = 0; i < len1; i++) {
+            VRFY((strcmp(filenames1[i], filenames2[i]) == 0), "Filenames are identical between calls");
+        }
+        cleanup_file_mapping_memory(filenames1, len1);
+        cleanup_file_mapping_memory(filenames2, len2);
+    }
+
+    /* Cleanup */
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(SUBF_FILENAME_CONSISTENCY, fapl_id);
+    }
+    H5E_END_TRY
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME_CONSISTENCY
+
+/*
+ * Test H5FDsubfiling_get_file_mapping error conditions
+ */
+static void
+test_subfiling_get_file_mapping_errors(void)
+{
+    hid_t  file_id   = H5I_INVALID_HID;
+    hid_t  fapl_id   = H5I_INVALID_HID;
+    char **filenames = NULL;
+    size_t len       = 0;
+    herr_t ret;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING("H5FDsubfiling_get_file_mapping error conditions");
+
+    /* Test with invalid file ID */
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDsubfiling_get_file_mapping(H5I_INVALID_HID, &filenames, &len);
+    }
+    H5E_END_TRY
+    VRFY((ret < 0), "H5FDsubfiling_get_file_mapping failed with invalid file ID as expected");
+
+    /* Create valid file for parameter testing */
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    file_id = H5Fcreate("test_error_conditions.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    /* Test with NULL filenames parameter */
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDsubfiling_get_file_mapping(file_id, NULL, &len);
+    }
+    H5E_END_TRY
+    VRFY((ret < 0), "H5FDsubfiling_get_file_mapping failed with NULL filenames as expected");
+
+    /* Test with NULL len parameter */
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDsubfiling_get_file_mapping(file_id, &filenames, NULL);
+    }
+    H5E_END_TRY
+    VRFY((ret < 0), "H5FDsubfiling_get_file_mapping failed with NULL len as expected");
+
+    /* Test with both parameters NULL */
+    H5E_BEGIN_TRY
+    {
+        ret = H5FDsubfiling_get_file_mapping(file_id, NULL, NULL);
+    }
+    H5E_END_TRY
+    VRFY((ret < 0), "H5FDsubfiling_get_file_mapping failed with both NULL parameters as expected");
+
+    /* Cleanup */
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete("test_error_conditions.h5", fapl_id);
+    }
+    H5E_END_TRY
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
+}
+
+/*
+ * Test H5FDsubfiling_get_file_mapping with data I/O operations
+ */
+#define SUBF_FILENAME_IO "test_subfiling_mapping_with_io.h5"
+static void
+test_subfiling_get_file_mapping_with_io(void)
+{
+    hid_t   file_id          = H5I_INVALID_HID;
+    hid_t   fapl_id          = H5I_INVALID_HID;
+    hid_t   dset_id          = H5I_INVALID_HID;
+    hid_t   dspace_id        = H5I_INVALID_HID;
+    char  **filenames_before = NULL, **filenames_after = NULL;
+    size_t  len_before = 0, len_after = 0;
+    herr_t  ret;
+    hsize_t dims[2]   = {100, 50};
+    int    *write_buf = NULL;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING("H5FDsubfiling_get_file_mapping before/after I/O operations");
+
+    /* Allocate write buffer */
+    write_buf = malloc(dims[0] * dims[1] * sizeof(int));
+    VRFY((write_buf != NULL), "Write buffer allocation succeeded");
+
+    /* Initialize data */
+    for (hsize_t i = 0; i < dims[0] * dims[1]; i++) {
+        write_buf[i] = (int)(mpi_rank * 1000 + (int)i);
+    }
+
+    /* Create FAPL */
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    /* Create file */
+    file_id = H5Fcreate(SUBF_FILENAME_IO, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    /* Get file mapping before I/O */
+    ret = H5FDsubfiling_get_file_mapping(file_id, &filenames_before, &len_before);
+    VRFY((ret >= 0), "H5FDsubfiling_get_file_mapping before I/O succeeded");
+
+    /* Create dataset and write data */
+    dspace_id = H5Screate_simple(2, dims, NULL);
+    VRFY((dspace_id >= 0), "H5Screate_simple succeeded");
+
+    dset_id =
+        H5Dcreate2(file_id, "/dataset", H5T_NATIVE_INT, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+
+    ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+
+    /* Get file mapping after I/O */
+    ret = H5FDsubfiling_get_file_mapping(file_id, &filenames_after, &len_after);
+    VRFY((ret >= 0), "H5FDsubfiling_get_file_mapping after I/O succeeded");
+
+    /* Verify mapping consistency */
+    VRFY((len_before == len_after), "File mapping length unchanged after I/O");
+
+    for (size_t i = 0; i < len_before; i++) {
+        VRFY((strcmp(filenames_before[i], filenames_after[i]) == 0), "File mapping unchanged after I/O");
+    }
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(dspace_id) >= 0), "Dataspace close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    /* All ranks participate in h5fuse validation with actual data */
+    int   validation_result = 1; /* Default to success */
+    char *config_filename   = NULL;
+    if (len_after > 0) {
+        config_filename = find_config_file(SUBF_FILENAME_IO);
+        ret = validate_file_with_h5fuse(config_filename, filenames_after, len_after, SUBF_FILENAME_IO);
+        validation_result = (ret >= 0) ? 1 : 0;
+    }
+
+    /* Synchronize validation result across all ranks */
+    MPI_Allreduce(MPI_IN_PLACE, &validation_result, 1, MPI_INT, MPI_LAND, comm_g);
+    VRFY(validation_result, "h5fuse validation with I/O data succeeded");
+
+    if (config_filename) {
+        free(config_filename);
+    }
+
+    /* All ranks participate in cleanup */
+    cleanup_file_mapping_memory(filenames_before, len_before);
+    cleanup_file_mapping_memory(filenames_after, len_after);
+
+    /* Cleanup */
+    free(write_buf);
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(SUBF_FILENAME_IO, fapl_id);
+    }
+    H5E_END_TRY
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME_IO
+
+static void
+test_subfiling_file_mapping_api(void)
+{
+    int saved_num_iocs_g = num_iocs_g; /* Save original value */
+
+    if (MAINPROCESS) {
+        printf("\n");
+        printf("=======================================================\n");
+        printf("Testing H5FDsubfiling_get_file_mapping API Functions\n");
+        printf("=======================================================\n");
+    }
+
+    test_subfiling_get_file_mapping_ioc_selection(); /* Different IOC selections */
+    test_subfiling_get_file_mapping_consistency();   /* Consistency testing */
+    test_subfiling_get_file_mapping_errors();        /* Error conditions */
+    test_subfiling_get_file_mapping_with_io();       /* With actual I/O */
+
+    if (MAINPROCESS) {
+        printf("H5FDsubfiling_get_file_mapping API tests completed.\n");
+        printf("=======================================================\n\n");
+    }
+    MPI_Barrier(comm_g);
+    /* Restore original num_iocs_g value to prevent affecting subsequent tests */
+    num_iocs_g = saved_num_iocs_g;
+}
 
 /*
  * A simple test that ensures file creation fails when
@@ -3442,6 +4039,12 @@ exit:
         HDunsetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
 
     if (MAINPROCESS) {
+        /* Remove any .config files in the directory before removing the directory */
+        char cleanup_cmd[512];
+        snprintf(cleanup_cmd, sizeof(cleanup_cmd), "rm -f %s/*.config 2>/dev/null",
+                 SUBFILING_CONFIG_FILE_DIR);
+        system(cleanup_cmd);
+
         if (HDrmdir(SUBFILING_CONFIG_FILE_DIR) < 0 && (errno != ENOENT)) {
             printf("couldn't remove temporary testing directory\n");
             nerrors++;

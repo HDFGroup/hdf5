@@ -208,9 +208,11 @@ jobs:
         run: |
           echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
 
-      - name: Create description for release/snapshot from "Executive Summary" section of CHANGELOG.md
-        run: |
-          sed -n '/^# .* Executive Summary: HDF5 Version .*/,/^# .* Breaking Changes/p' CHANGELOG.md | sed '$d' > description.txt
+      - name: Get description.txt for release/snapshot
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+                name: description.txt
+                path: ${{ github.workspace }}
 
       - name: PreRelease tag
         id: create_prerelease

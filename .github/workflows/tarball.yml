@@ -193,9 +193,18 @@ jobs:
               path: hdf5.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      - name: Save NEWSLETTER
+      - name: Create description for release/snapshot from "Executive Summary" section of CHANGELOG.md
+        run: |
+          sed -n '/^# .* Executive Summary: HDF5 Version .*/,/^# .* Breaking Changes/p'  ./hdfsrc/release_docs/CHANGELOG.md | sed '$d' > description.txt
+
+      - name: List files in the repository
+        run: |
+              ls -l ${{ github.workspace }}
+              ls $GITHUB_WORKSPACE
+
+      - name: Upload description.txt
         uses: actions/upload-artifact@v4
         with:
-              name: NEWSLETTER
-              path: ./hdfsrc/release_docs/NEWSLETTER.txt
+              name: description.txt
+              path: ./description.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
