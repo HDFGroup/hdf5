@@ -29,7 +29,7 @@ cd "$top_srcdir"
 # Loop through all subdirectories
 for dir in */; do
   if [ -d "$dir" ] && [ ! -L "$dir" ]; then
-    #check if test-pc.sh exists
+    # Check if test-pc.sh exists
     if [ -f "$dir/test-pc.sh" ];
     then
         echo "Entering directory: $dir"
