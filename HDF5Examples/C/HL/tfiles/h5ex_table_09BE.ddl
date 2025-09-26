@@ -109,7 +109,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_1_FILL" {
-         DATATYPE  H5T_STD_I32LE
+         DATATYPE  H5T_STD_I32BE
          DATASPACE  SCALAR
          DATA {
          (0): -1
@@ -128,7 +128,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_2_FILL" {
-         DATATYPE  H5T_STD_I32LE
+         DATATYPE  H5T_STD_I32BE
          DATASPACE  SCALAR
          DATA {
          (0): -2
@@ -147,7 +147,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_3_FILL" {
-         DATATYPE  H5T_IEEE_F32LE
+         DATATYPE  H5T_IEEE_F32BE
          DATASPACE  SCALAR
          DATA {
          (0): -99
@@ -166,7 +166,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_4_FILL" {
-         DATATYPE  H5T_IEEE_F64LE
+         DATATYPE  H5T_IEEE_F64BE
          DATASPACE  SCALAR
          DATA {
          (0): -98
@@ -217,10 +217,10 @@ GROUP "/" {
             CSET H5T_CSET_ASCII;
             CTYPE H5T_C_S1;
          } "Name";
-         H5T_STD_I32LE "Latitude";
-         H5T_STD_I32LE "Longitude";
-         H5T_IEEE_F32LE "Pressure";
-         H5T_IEEE_F64LE "Temperature";
+         H5T_STD_I32BE "Latitude";
+         H5T_STD_I32BE "Longitude";
+         H5T_IEEE_F32BE "Pressure";
+         H5T_IEEE_F64BE "Temperature";
       }
       DATASPACE  SIMPLE { ( 10 ) / ( H5S_UNLIMITED ) }
       DATA {
@@ -332,7 +332,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_1_FILL" {
-         DATATYPE  H5T_STD_I32LE
+         DATATYPE  H5T_STD_I32BE
          DATASPACE  SCALAR
          DATA {
          (0): -1
@@ -351,7 +351,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_2_FILL" {
-         DATATYPE  H5T_STD_I32LE
+         DATATYPE  H5T_STD_I32BE
          DATASPACE  SCALAR
          DATA {
          (0): -2
@@ -370,7 +370,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_3_FILL" {
-         DATATYPE  H5T_IEEE_F32LE
+         DATATYPE  H5T_IEEE_F32BE
          DATASPACE  SCALAR
          DATA {
          (0): -99
@@ -389,7 +389,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_4_FILL" {
-         DATATYPE  H5T_IEEE_F64LE
+         DATATYPE  H5T_IEEE_F64BE
          DATASPACE  SCALAR
          DATA {
          (0): -98

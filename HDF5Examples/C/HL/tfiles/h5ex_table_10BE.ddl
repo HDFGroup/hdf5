@@ -177,10 +177,10 @@ GROUP "/" {
             CSET H5T_CSET_ASCII;
             CTYPE H5T_C_S1;
          } "Name";
-         H5T_STD_I32LE "Latitude";
-         H5T_STD_I32LE "Longitude";
-         H5T_IEEE_F32LE "Pressure";
-         H5T_IEEE_F64LE "Temperature";
+         H5T_STD_I32BE "Latitude";
+         H5T_STD_I32BE "Longitude";
+         H5T_IEEE_F32BE "Pressure";
+         H5T_IEEE_F64BE "Temperature";
       }
       DATASPACE  SIMPLE { ( 8 ) / ( H5S_UNLIMITED ) }
       DATA {
@@ -346,10 +346,10 @@ GROUP "/" {
             CSET H5T_CSET_ASCII;
             CTYPE H5T_C_S1;
          } "Name";
-         H5T_STD_I32LE "Latitude";
-         H5T_STD_I32LE "Longitude";
-         H5T_IEEE_F32LE "Pressure";
-         H5T_IEEE_F64LE "Temperature";
+         H5T_STD_I32BE "Latitude";
+         H5T_STD_I32BE "Longitude";
+         H5T_IEEE_F32BE "Pressure";
+         H5T_IEEE_F64BE "Temperature";
       }
       DATASPACE  SIMPLE { ( 16 ) / ( H5S_UNLIMITED ) }
       DATA {

@@ -118,7 +118,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_1_FILL" {
-         DATATYPE  H5T_STD_I32LE
+         DATATYPE  H5T_STD_I32BE
          DATASPACE  SCALAR
          DATA {
          (0): -1
@@ -137,7 +137,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_2_FILL" {
-         DATATYPE  H5T_STD_I32LE
+         DATATYPE  H5T_STD_I32BE
          DATASPACE  SCALAR
          DATA {
          (0): -2
@@ -156,7 +156,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_3_FILL" {
-         DATATYPE  H5T_IEEE_F32LE
+         DATATYPE  H5T_IEEE_F32BE
          DATASPACE  SCALAR
          DATA {
          (0): -99
@@ -175,7 +175,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_4_FILL" {
-         DATATYPE  H5T_IEEE_F64LE
+         DATATYPE  H5T_IEEE_F64BE
          DATASPACE  SCALAR
          DATA {
          (0): -98
@@ -194,7 +194,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "FIELD_5_FILL" {
-         DATATYPE  H5T_STD_I32LE
+         DATATYPE  H5T_STD_I32BE
          DATASPACE  SCALAR
          DATA {
          (0): -100

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/**)",
+      "Bash(chmod:*)",
+      "Bash(cmake:*)",
+      "Bash(/home/byrn/HDF_Projects/hdf5/develop/.github/scripts/validate-maven-artifacts.sh:*)",
+      "Bash(python3:*)",
+      "Read(//home/byrn/HDF_Projects/hdf5/build/ci-StdShar-GNUC-Maven-Snapshot/java/src/hdf/hdf5lib/**)",
+      "Bash(grep:*)",
+      "Read(//home/byrn/Downloads/logs_46007782861/**)",
+      "Read(//home/byrn/Downloads/**)",
+      "Bash(unzip:*)",
+      "Bash(gh workflow view:*)",
+      "Bash(mvn dependency:resolve:*)",
+      "Bash(yamllint:*)",
+      "Bash(gh workflow run:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh workflow list:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run watch:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh api:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
