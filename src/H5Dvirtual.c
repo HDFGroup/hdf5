@@ -150,10 +150,13 @@ static herr_t H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_vir
                                   H5S_t *file_space, H5S_t *mem_space, hsize_t *tot_nelmts,
                                   H5RT_result_set_t *mappings);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
-static herr_t H5D__virtual_read_one(H5D_dset_io_info_t            *dset_info,
+static herr_t H5D__virtual_read_one_src(H5D_dset_io_info_t            *dset_info,
                                     H5O_storage_virtual_srcdset_t *source_dset);
 static herr_t H5D__virtual_write_one(H5D_dset_io_info_t            *dset_info,
                                      H5O_storage_virtual_srcdset_t *source_dset);
+
+static herr_t
+H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping);
 
 /* R-tree helper functions */
 static herr_t H5D__virtual_build_tree(H5O_storage_virtual_t *virt, int rank);
@@ -3216,7 +3219,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
 } /* end H5D__virtual_post_io() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__virtual_read_one
+ * Function:    H5D__virtual_read_one_src
  *
  * Purpose:     Read from a single source dataset in a virtual dataset.
  *
@@ -3225,7 +3228,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset)
+H5D__virtual_read_one_src(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t             *projected_src_space = NULL; /* File space for selection in a single source dataset */
     H5D_dset_io_info_t source_dinfo;               /* Dataset info for source dataset read */
@@ -3278,7 +3281,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__virtual_read_one() */
+} /* end H5D__virtual_read_one_src() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_read
@@ -3363,23 +3366,30 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation");
 
     /* Iterate over mappings */
-    for (i = 0; i < storage->list_nused; i++) {
-        /* Sanity check that the virtual space has been patched by now */
-        assert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+    if (mappings) {
+        /* Iterate over intersections in tree */
+        for (i = 0; i < mappings->count; i++) {
+            H5RT_leaf_t *curr_leaf = mappings->results[i];
+            assert(curr_leaf);
 
-        /* Check for "printf" source dataset resolution */
-        if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
-            /* Iterate over sub-source dsets */
-            for (j = storage->list[i].sub_dset_io_start; j < storage->list[i].sub_dset_io_end; j++)
-                if (H5D__virtual_read_one(dset_info, &storage->list[i].sub_dset[j]) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
-        } /* end if */
-        else
-            /* Read from source dataset */
-            if (H5D__virtual_read_one(dset_info, &storage->list[i].source_dset) < 0)
+            if (H5D__virtual_read_one_mapping(dset_info, curr_leaf->record) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
-    } /* end for */
+        }
 
+        /* Iterate over not-in-tree mappings */
+        for (i = 0; i < storage->not_in_tree_nused; i++) {
+            if (H5D__virtual_read_one_mapping(dset_info, storage->not_in_tree_list[i]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
+        }
+    } else {
+        /* Iterate over all mappings */
+        for (i = 0; i < storage->list_nused; i++) {
+            if (H5D__virtual_read_one_mapping(dset_info, &storage->list[i]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
+        } /* end for */
+
+    }
+   
     /* Fill unmapped part of buffer with fill value */
     if (tot_nelmts < nelmts) {
         H5D_fill_value_t fill_status; /* Fill value status */
@@ -4143,4 +4153,39 @@ H5D__should_build_tree(H5O_storage_virtual_t *storage, hid_t dapl_id, bool *shou
     *should_build_tree = true;
 done:
     FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_read_one_mapping
+ *
+ * Purpose:     Read from a single mapping entry in a virtual dataset
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping) {
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+     /* Sanity check that the virtual space has been patched by now */
+    assert(mapping->virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+
+    /* Check for "printf" source dataset resolution */
+    if (mapping->psfn_nsubs || mapping->psdn_nsubs) {
+        /* Iterate over sub-source dsets */
+        for (size_t j = mapping->sub_dset_io_start;
+                j < mapping->sub_dset_io_end; j++)
+            if (H5D__virtual_read_one_src(dset_info, &mapping->sub_dset[j]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
+    } /* end if */
+    else
+        /* Read from source dataset */
+        if (H5D__virtual_read_one_src(dset_info, &mapping->source_dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
