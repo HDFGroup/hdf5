@@ -527,6 +527,9 @@ macro (ADD_H5_TEST testname)
     set_tests_properties (H5REPACK-${ctest_testname} PROPERTIES
         DEPENDS H5REPACK-${ctest_testname}-clear-objects
     )
+
+    list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}")
+
     if ("H5REPACK-${ctest_testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5REPACK-${ctest_testname} PROPERTIES DISABLED true)
     endif ()
@@ -545,7 +548,7 @@ macro (ADD_H5_TEST testname)
         set_tests_properties (H5REPACK-${ctest_testname}_DFF PROPERTIES DISABLED true)
       endif ()
 
-      set (ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}_DFF")
+      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}_DFF")
     elseif (${ARG_COMPARE_LOCAL} AND ${ARG_FULL_DIFF})
       # h5diff via runTest
       add_test (
