@@ -132,6 +132,22 @@
       }
     },
     {
+      "name": "ci-Java-FFM",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_JAVA": "ON",
+        "HDF5_ENABLE_JNI": "OFF"
+      }
+    },
+    {
+      "name": "ci-Java-JNI",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_JAVA": "ON",
+        "HDF5_ENABLE_JNI": "ON"
+      }
+    },
+    {
       "name": "ci-x64-Debug-MSVC",
       "description": "MSVC for x64 (Debug)",
       "hidden": true,

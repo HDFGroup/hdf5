@@ -76,21 +76,28 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
    The `HDF5_ENABLE_THREADS` option has been removed, as it no longer functions as a proper build option. The library will always check for thread support and set the internal status variable, `HDF5_THREADS_ENABLED`. The `HDF5_ENABLE_THREADSAFE` option is still available to build with thread-safe API calls.
 
-- Enhanced Maven repository deployment support
+- Enhanced Maven repository deployment support with Java FFM/JNI implementation differentiation
 
-   Added comprehensive Maven integration with optimized workflows for Java artifact deployment:
+   Added comprehensive Maven integration with dual Java implementation support:
+   - **Java Implementation Selection**: New `HDF5_ENABLE_JNI` CMake option to choose between implementations
+     - **FFM (Foreign Function & Memory)**: Default for Java 24+, uses modern native access (`org.hdfgroup:hdf5-java-ffm`)
+     - **JNI (Java Native Interface)**: Legacy implementation for all Java versions (`org.hdfgroup:hdf5-java-jni`)
+     - **Seamless Migration**: Both implementations use identical `hdf.hdf5lib.*` package structure
    - **New CMake options**: `HDF5_ENABLE_MAVEN_DEPLOY` and `HDF5_MAVEN_SNAPSHOT` for Maven repository deployment
+   - **Implementation-specific presets**: Added `ci-MinShar-*-Maven-FFM/JNI` presets for testing individual implementations
    - **Minimal build presets**: Added `ci-MinShar-*-Maven*` presets for efficient Java-only artifact generation
    - **Multi-platform support**: Automated generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
-   - **CI/CD integration**: Enhanced GitHub Actions workflows (`maven-staging.yml`, `maven-deploy.yml`) with cross-platform build matrix
-   - **Artifact validation**: Comprehensive validation framework for Maven artifacts before deployment
+   - **Artifact differentiation**: Proper JAR manifest metadata and POM generation for implementation identification
+   - **CI/CD integration**: Enhanced GitHub Actions workflows (`maven-staging.yml`, `maven-deploy.yml`) with implementation selection support
+   - **Comprehensive testing**: New `java-implementation-test.yml` workflow for testing both implementations across platforms
+   - **Artifact validation**: Comprehensive validation framework with implementation-specific checks
    - **Deployment targets**: Support for GitHub Packages and Maven Central staging repositories
    - **Java Examples Maven Integration**: Added complete Maven artifact for Java examples (`org.hdfgroup:hdf5-java-examples`) with cross-platform compatibility
    - **Multi-platform testing**: Comprehensive CI/CD testing of Java examples across all supported platforms (Linux, Windows, macOS x86_64, macOS aarch64)
    - **Native library error handling**: Enhanced validation logic for Maven-only environments to properly handle expected native library loading errors
    - **Dynamic repository support**: Enhanced workflows to use `github.repository` variable for seamless testing on forks before canonical deployment
    - **Fork-based testing**: Complete testing framework allowing validation on repository forks (e.g., fork-name/hdf5) before merging to HDFGroup/hdf5
-   - **Multi-artifact deployment**: Enhanced deployment workflow to handle both `hdf5-java` (platform-specific) and `hdf5-java-examples` (platform-independent) artifacts
+   - **Multi-artifact deployment**: Enhanced deployment workflow to handle FFM/JNI artifacts and `hdf5-java-examples` (platform-independent) artifacts
    - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
    - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
 

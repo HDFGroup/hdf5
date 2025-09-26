@@ -187,14 +187,23 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - **Prerequisites:** Ensure Maven deployment permissions are configured (see `MAVEN_DEPLOYMENT_PERMISSIONS.md`)
     - **Testing Phase:** The workflow starts with `dry_run: true` to test permissions without actual deployment
     - **Multi-Platform Artifacts:** The staging workflow generates artifacts for Linux, Windows, macOS x86_64, and macOS aarch64
+    - **Java Implementation Selection:**
+      - **FFM Implementation:** `org.hdfgroup:hdf5-java-ffm` (default for Java 24+)
+      - **JNI Implementation:** `org.hdfgroup:hdf5-java-jni` (legacy, all Java versions)
+      - Both implementations can be deployed simultaneously with different artifact IDs
+      - Use `java_implementation` workflow input to select 'auto', 'ffm', 'jni', or 'both'
     - **Java Examples Testing:** Comprehensive validation of Java examples (org.hdfgroup:hdf5-java-examples) across all platforms with Maven artifacts
     - **Deployment Process:**
-      - `maven-staging.yml` workflow generates artifacts for all platforms
-      - `maven-deploy.yml` workflow deploys filtered main HDF5 JARs (jarhdf5-*.jar) only
-      - Monitor both workflows for successful completion
+      - `maven-staging.yml` workflow generates artifacts for all platforms and selected implementations
+      - `maven-deploy.yml` workflow deploys implementation-specific JARs with proper artifact IDs
+      - Monitor both workflows for successful completion and artifact differentiation
+    - **Artifact Validation:** Verify proper implementation differentiation in generated JARs:
+      - FFM JARs contain `HDF5-Java-Implementation: FFM` in manifest
+      - JNI JARs contain `HDF5-Java-Implementation: JNI` in manifest
+      - Both use `hdf.hdf5lib.*` package structure for compatibility
     - **Troubleshooting:** Check debug output in workflow logs for permission or authentication issues
     - **Go-Live:** After successful dry run testing, set `dry_run: false` in `.github/workflows/release.yml`
-    - Verify artifacts are properly uploaded to GitHub Packages or Maven Central staging
+    - Verify artifacts are properly uploaded to GitHub Packages or Maven Central staging with correct implementation identifiers
 6. Review the release files in Github
 7. Edit the Github Release and change status to Release
     - Change status from Pre-release to Release

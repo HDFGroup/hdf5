@@ -332,6 +332,40 @@
         "ci-Java",
         "ci-Maven-Minimal-Snapshot"
       ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Java-FFM",
+      "description": "GNUC Standard Config for x64 with Java FFM",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-FFM"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Java-JNI",
+      "description": "GNUC Standard Config for x64 with Java JNI",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-JNI"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM",
+      "description": "GNUC Minimal Config for x64 with Maven deployment (FFM)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-FFM",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-JNI",
+      "description": "GNUC Minimal Config for x64 with Maven deployment (JNI)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-JNI",
+        "ci-Maven-Minimal"
+      ]
     }
   ],
   "buildPresets": [

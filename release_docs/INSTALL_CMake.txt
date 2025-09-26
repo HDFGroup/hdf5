@@ -811,6 +811,7 @@ HDF5_BUILD_CPP_LIB        "Build HDF5 C++ Library"              OFF
 HDF5_BUILD_EXAMPLES       "Build HDF5 Library Examples"         ON
 HDF5_BUILD_FORTRAN        "Build FORTRAN support"               OFF
 HDF5_BUILD_JAVA           "Build JAVA support"                  OFF
+HDF5_ENABLE_JNI           "Force JNI instead of FFM for Java bindings (Java 24+)" OFF
 HDF5_BUILD_HL_LIB         "Build HIGH Level HDF5 Library"       ON
 HDF5_BUILD_TOOLS          "Build HDF5 Tools"                    ON
 HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools"           OFF
@@ -826,15 +827,26 @@ HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
   To build Maven snapshot versions for development:
   cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_MAVEN_SNAPSHOT:BOOL=ON ../hdf5
 
+  Java Implementation Selection:
+  - FFM (Foreign Function & Memory): Default for Java 24+, uses modern native access
+  - JNI (Java Native Interface): Available for all Java versions, legacy support
+
+  To force JNI implementation (when Java 24+ is available):
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_JNI:BOOL=ON ../hdf5
+
   Or use the Maven-enabled CMake presets:
 
-  # Full build with Maven support (includes all components)
+  # Full build with Maven support (includes all components) - auto-selects implementation
   cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Release version
   cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Snapshot version
 
   # Minimal build for Java artifacts only (recommended for Maven deployment)
   cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # Release version
   cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # Snapshot version
+
+  # Implementation-specific presets for testing
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh      # FFM implementation
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh      # JNI implementation
 
   # Multi-platform minimal Maven presets
   cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # Windows
@@ -849,6 +861,11 @@ HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
   - Platform-specific dependencies ensure compatibility with HDF5 Java library
   - Complete examples with documentation for all HDF5 Java functionality
   - See HDF5Examples/JAVA/README-MAVEN.md for usage instructions
+
+  Maven Artifact IDs:
+  - FFM Implementation: org.hdfgroup:hdf5-java-ffm (Java 24+ default)
+  - JNI Implementation: org.hdfgroup:hdf5-java-jni (all Java versions)
+  - Both use the same hdf.hdf5lib.* package structure for seamless migration
 
   Testing Java Examples with Maven Artifacts:
   - Maven staging workflow validates examples against artifacts

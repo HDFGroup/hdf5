@@ -30,7 +30,34 @@ set (CMAKE_JAVA_INCLUDE_PATH "")
 # Traverse source subdirectory
 #-----------------------------------------------------------------------------
 message (VERBOSE "Java version is ${Java_VERSION_STRING}")
-if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0" AND NOT HDF5_ENABLE_JNI)
+
+# Determine which Java implementation to build based on version and user preferences
+set (HDF5_JAVA_USE_FFM FALSE)
+set (HDF5_JAVA_IMPLEMENTATION "JNI")
+
+if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
+  if (HDF5_ENABLE_JNI)
+    set (HDF5_JAVA_USE_FFM FALSE)
+    set (HDF5_JAVA_IMPLEMENTATION "JNI")
+    message (STATUS "Building HDF5 Java with JNI implementation (explicitly requested via HDF5_ENABLE_JNI)")
+  else ()
+    set (HDF5_JAVA_USE_FFM TRUE)
+    set (HDF5_JAVA_IMPLEMENTATION "FFM")
+    message (STATUS "Building HDF5 Java with FFM implementation (Java ${Java_VERSION_STRING})")
+  endif ()
+else ()
+  if (HDF5_ENABLE_JNI)
+    message (STATUS "Building HDF5 Java with JNI implementation (Java ${Java_VERSION_STRING})")
+  else ()
+    message (STATUS "Building HDF5 Java with JNI implementation (Java ${Java_VERSION_STRING} < 24.0.0, FFM not available)")
+  endif ()
+  if (Java_VERSION_STRING VERSION_LESS "11.0.0")
+    message (FATAL_ERROR "Java version ${Java_VERSION_STRING} is not supported. Minimum required: Java 11")
+  endif ()
+endif ()
+
+# Build appropriate subdirectories based on implementation
+if (HDF5_JAVA_USE_FFM)
   add_subdirectory (jsrc)
   add_subdirectory (hdf)
   if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)

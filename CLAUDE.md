@@ -20,12 +20,17 @@ cmake --workflow --preset ci-StdShar-Clang --fresh    # Clang
 cmake --workflow --preset ci-StdShar-MSVC --fresh     # MSVC
 
 # Maven-enabled builds (Java artifacts with deployment support)
-cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh     # Linux with snapshots
-cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh     # Windows with snapshots
-cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh    # macOS with snapshots
-cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh              # Linux release
-cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh              # Windows release
-cmake --workflow --preset ci-MinShar-Clang-Maven --fresh             # macOS release
+cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh     # Linux with snapshots (FFM)
+cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh     # Windows with snapshots (FFM)
+cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh    # macOS with snapshots (FFM)
+cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh              # Linux release (FFM)
+cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh              # Windows release (FFM)
+cmake --workflow --preset ci-MinShar-Clang-Maven --fresh             # macOS release (FFM)
+
+# Maven-enabled builds with JNI (explicit JNI selection)
+cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh -DHDF5_ENABLE_JNI=ON     # Linux JNI
+cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh -DHDF5_ENABLE_JNI=ON     # Windows JNI
+cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh -DHDF5_ENABLE_JNI=ON    # macOS JNI
 
 # Install
 cmake --install .
@@ -38,11 +43,24 @@ cmake --install .
 - `HDF5_BUILD_FORTRAN=ON` - Build Fortran bindings
 - `HDF5_BUILD_CPP_LIB=ON` - Build C++ bindings
 - `HDF5_BUILD_JAVA=ON` - Build Java bindings
+- `HDF5_ENABLE_JNI=ON` - Force JNI implementation (default: OFF, uses FFM for Java 24+)
 - `HDF5_ENABLE_PARALLEL=ON` - Enable MPI parallel support
 - `HDF5_ENABLE_THREADSAFE=ON` - Enable thread safety
 - `BUILD_TESTING=ON` - Build test suite
 - `HDF5_ENABLE_MAVEN_DEPLOY=ON` - Enable Maven repository deployment
 - `HDF5_MAVEN_SNAPSHOT=ON` - Build Maven snapshot versions (-SNAPSHOT suffix)
+
+### Java Implementation Selection
+
+- **FFM (Foreign Function & Memory)**: Default for Java 24+, provides modern native access
+- **JNI (Java Native Interface)**: Available for all Java versions when `HDF5_ENABLE_JNI=ON`, will be deprecated in future releases
+
+### Maven Artifacts
+
+- **FFM Implementation**: `org.hdfgroup:hdf5-java-ffm`
+- **JNI Implementation**: `org.hdfgroup:hdf5-java-jni`
+
+Both implementations use the same `hdf.hdf5lib.*` package structure for seamless migration.
 
 ## Java Examples Maven Integration
 
@@ -179,9 +197,24 @@ ctest -E "MPI|SWMR"         # Exclude parallel/SWMR tests
    cmake -DCMAKE_BUILD_TYPE=Debug ..
    ```
 
-4. **Maven artifact testing:**
+4. **Java FFM/JNI specific builds:**
    ```bash
-   # Test Maven staging workflow (all platforms)
+   # Java FFM (default for Java 24+)
+   cmake --workflow --preset ci-StdShar-GNUC-Java-FFM --fresh
+
+   # Java JNI (explicit selection)
+   cmake --workflow --preset ci-StdShar-GNUC-Java-JNI --fresh
+
+   # Maven deployment with FFM
+   cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh
+
+   # Maven deployment with JNI
+   cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh
+   ```
+
+5. **Maven artifact testing:**
+   ```bash
+   # Test Maven staging workflow (all platforms) - FFM by default
    gh workflow run maven-staging.yml -f platforms=all-platforms -f use_snapshot_version=true
 
    # Test Maven deployment to HDFGroup packages (dry run)
@@ -190,19 +223,21 @@ ctest -E "MPI|SWMR"         # Exclude parallel/SWMR tests
    # Test Maven deployment to HDFGroup packages (live deployment)
    gh workflow run test-maven-deployment.yml -f test_mode=live-deployment -f target_repository=github-packages
 
-   # Full release with Maven deployment
+   # Full release with Maven deployment (choose implementation)
    gh workflow run release.yml -f deploy_maven=true -f maven_repository=github-packages -f use_tag=snapshot
 
-   # Test consuming deployed artifacts (fork for testing)
-   ./.github/scripts/test-maven-consumer.sh 2.0.0-3 https://maven.pkg.github.com/<fork_name>/hdf5
+   # Test consuming deployed artifacts (specify FFM or JNI)
+   ./.github/scripts/test-maven-consumer.sh 2.0.0-3 https://maven.pkg.github.com/<fork_name>/hdf5 hdf5-java-ffm
+   ./.github/scripts/test-maven-consumer.sh 2.0.0-3 https://maven.pkg.github.com/<fork_name>/hdf5 hdf5-java-jni
    ```
 
-5. **Java Examples testing:**
+6. **Java Examples testing:**
    ```bash
-   # Test Java examples with Maven artifacts
-   gh workflow run java-examples-maven-test.yml -f build_mode=release -f maven_artifacts_version=2.0.0-3-SNAPSHOT
+   # Test Java examples with Maven artifacts (specify implementation)
+   gh workflow run java-examples-maven-test.yml -f build_mode=release -f maven_artifacts_version=2.0.0-3-SNAPSHOT -f java_implementation=ffm
+   gh workflow run java-examples-maven-test.yml -f build_mode=release -f maven_artifacts_version=2.0.0-3-SNAPSHOT -f java_implementation=jni
 
-   # Quick Java examples test (part of Maven staging)
+   # Quick Java examples test (part of Maven staging) - tests both implementations
    gh workflow run maven-staging.yml -f test_maven_deployment=true
    ```
 
