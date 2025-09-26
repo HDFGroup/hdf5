@@ -149,14 +149,15 @@ static herr_t H5D__virtual_init_all(const H5D_t *dset);
 static herr_t H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage,
                                   H5S_t *file_space, H5S_t *mem_space, hsize_t *tot_nelmts,
                                   H5RT_result_set_t *mappings);
-static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
+static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage, H5RT_result_set_t *mappings);
+static herr_t H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping);
+static herr_t H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping);
 static herr_t H5D__virtual_read_one_src(H5D_dset_io_info_t            *dset_info,
                                     H5O_storage_virtual_srcdset_t *source_dset);
 static herr_t H5D__virtual_write_one(H5D_dset_io_info_t            *dset_info,
                                      H5O_storage_virtual_srcdset_t *source_dset);
 
-static herr_t
-H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping);
+
 
 /* R-tree helper functions */
 static herr_t H5D__virtual_build_tree(H5O_storage_virtual_t *virt, int rank);
@@ -3182,9 +3183,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_post_io(H5O_storage_virtual_t *storage)
+H5D__virtual_post_io(H5O_storage_virtual_t *storage, H5RT_result_set_t *mappings)
 {
-    size_t i, j;                /* Local index variables */
+    size_t i;                /* Local index variables */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3192,29 +3193,30 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
     /* Sanity check */
     assert(storage);
 
-    /* Iterate over all mappings */
-    for (i = 0; i < storage->list_nused; i++)
-        /* Check for "printf" source dataset resolution */
-        if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
-            /* Iterate over sub-source dsets */
-            for (j = storage->list[i].sub_dset_io_start; j < storage->list[i].sub_dset_io_end; j++)
-                /* Close projected memory space */
-                if (storage->list[i].sub_dset[j].projected_mem_space) {
-                    if (H5S_close(storage->list[i].sub_dset[j].projected_mem_space) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
-                    storage->list[i].sub_dset[j].projected_mem_space = NULL;
-                } /* end if */
-        }         /* end if */
-        else
-            /* Close projected memory space */
-            if (storage->list[i].source_dset.projected_mem_space) {
-                if (H5S_close(storage->list[i].source_dset.projected_mem_space) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
-                storage->list[i].source_dset.projected_mem_space = NULL;
-            } /* end if */
+    if (mappings) {
+        /* Iterate over mappings in tree */
+        for (i = 0; i < mappings->count; i++) {
+            H5RT_leaf_t *curr_leaf = mappings->results[i];
+            assert(curr_leaf);
 
-    /* Note the lack of a done: label.  This is because there are no HGOTO_ERROR
-     * calls.  If one is added, a done: label must also be added */
+            if (H5D__virtual_close_mapping(curr_leaf->record) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
+        }
+
+        /* Iterate over the mappings that are not stored in the tree */
+        for (i = 0; i < storage->not_in_tree_nused; i++) {
+            if (H5D__virtual_close_mapping(storage->not_in_tree_list[i]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
+        }
+    } else {
+        /* Iterate over all mappings */
+        for (i = 0; i < storage->list_nused; i++)
+            if (H5D__virtual_close_mapping(&storage->list[i]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "failed to close mapping");
+    }
+    
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_post_io() */
 
@@ -3446,13 +3448,13 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
     }         /* end if */
 
 done:
+    /* Cleanup I/O operation */
+    if (H5D__virtual_post_io(storage, mappings) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation");
+
     if (mappings)
         if (H5RT_free_results(mappings) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
-
-    /* Cleanup I/O operation */
-    if (H5D__virtual_post_io(storage) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation");
 
     /* Close fill space */
     if (fill_space)
@@ -3635,12 +3637,12 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
     } /* end for */
 
 done:
+    /* Cleanup I/O operation */
+    if (H5D__virtual_post_io(storage, mappings) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation");
+
     if (mappings)
         H5RT_free_results(mappings);
-
-    /* Cleanup I/O operation */
-    if (H5D__virtual_post_io(storage) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_write() */
@@ -4188,4 +4190,42 @@ H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_close_mapping
+ *
+ * Purpose:     Frees memory structures allocated by H5D__virtual_pre_io
+ *              for a particular mapping
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping) {
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check for "printf" source dataset resolution */
+    if (mapping->psfn_nsubs || mapping->psdn_nsubs) {
+        /* Iterate over sub-source dsets */
+        for (size_t j = mapping->sub_dset_io_start; j < mapping->sub_dset_io_end; j++)
+            /* Close projected memory space */
+            if (mapping->sub_dset[j].projected_mem_space) {
+                if (H5S_close(mapping->sub_dset[j].projected_mem_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
+                mapping->sub_dset[j].projected_mem_space = NULL;
+            } /* end if */
+    }         /* end if */
+    else
+        /* Close projected memory space */
+        if (mapping->source_dset.projected_mem_space) {
+            if (H5S_close(mapping->source_dset.projected_mem_space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
+            mapping->source_dset.projected_mem_space = NULL;
+        } /* end if */
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
