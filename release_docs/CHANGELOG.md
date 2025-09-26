@@ -492,12 +492,17 @@ Simple example programs showing how to use complex number datatypes have been ad
 # 🪲 Bug Fixes
 
 ## Library
+### Fixed CVE-2025-6269
+
+   There were several security vulnerabilities found in the function H5C__reconstruct_cache_entry(), including buffer overflows and memory leaks.  The function has been hardened with bounds checks, input validation, and safe cleanup.
+
+   Fixes GitHub issues #5579 and #5581
 
 ### Fixed a problem with the scale-offset filter
 
-A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
+   A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
 
-Fixes GitHub issue #5861
+   Fixes GitHub issue #5861
 
 ### Fixed security issue CVE-2025-6857
 
