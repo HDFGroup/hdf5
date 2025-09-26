@@ -25,6 +25,16 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.2.1
 
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@v1.3.0
+        with:
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          tool-cache: false
+          swap-storage: true 
+
       - name: Install Dependencies
         shell: bash
         run: |
