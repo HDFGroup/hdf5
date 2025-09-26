@@ -2436,9 +2436,13 @@ validateConfigurationParameters(struct Input *in)
         "Cannot specify chunking or compression or extendible data sets with the external file option.\n";
     const char *err3 =
         "Cannot specify the compression or the extendible data sets without the chunking option.\n";
-    const char *err4a = "OUTPUT-ARCHITECTURE cannot be STD if OUTPUT-CLASS is floating point (FP).\n";
-    const char *err4b = "OUTPUT-ARCHITECTURE cannot be IEEE if OUTPUT-CLASS is integer (IN).\n";
-    const char *err5  = "For OUTPUT-CLASS FP, valid values for OUTPUT-SIZE are (32, 64) .\n";
+    const char *err4a      = "OUTPUT-ARCHITECTURE cannot be STD if OUTPUT-CLASS is floating point (FP).\n";
+    const char *err4b      = "OUTPUT-ARCHITECTURE cannot be IEEE if OUTPUT-CLASS is integer (IN).\n";
+    const char *err5       = "For OUTPUT-CLASS FP, valid values for OUTPUT-SIZE are (32, 64) .\n";
+    const char *err6       = "Cannot get OUTPUT-ARCHITECTUREs for validation.\n";
+    int         std_index  = -1;
+    int         ieee_index = -1;
+    int         flt_index  = -1;
 
     /* for class STR other parameters are ignored */
     if (in->inputClass == 5) /* STR */
@@ -2464,15 +2468,24 @@ validateConfigurationParameters(struct Input *in)
         }
     }
 
+    /* Obtain index values for type arch to be checked */
+    std_index  = OutputArchStrToInt("STD");
+    ieee_index = OutputArchStrToInt("IEEE");
+    flt_index  = OutputArchStrToInt("FLOAT");
+    if (std_index == -1 || ieee_index == -1 || flt_index == -1) {
+        (void)fprintf(stderr, "%s", err6);
+        return -1;
+    }
+
     /* Arch can't be STD if O/p class is FP */
-    if (in->outputArchitecture == 1)
+    if (in->outputArchitecture == std_index)
         if (in->outputClass == 1) {
             (void)fprintf(rawerrorstream, "%s", err4a);
             return (-1);
         }
 
-    /* Arch can't be IEEE if O/p class is IN */
-    if (in->outputArchitecture == 2)
+    /* Arch can't be IEEE or FLOAT if O/p class is IN */
+    if (in->outputArchitecture == ieee_index || in->outputArchitecture == flt_index)
         if (in->outputClass == 0) {
             (void)fprintf(rawerrorstream, "%s", err4b);
             return (-1);
@@ -3228,6 +3241,48 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
+    else if (!strcmp(buffer, "H5T_FLOAT_BFLOAT16BE")) {
+        in->inputSize                      = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("FLOAT")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
+    else if (!strcmp(buffer, "H5T_FLOAT_BFLOAT16LE")) {
+        in->inputSize                      = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("FLOAT")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
     else if (!strcmp(buffer, "H5T_VAX_F32")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
@@ -3690,8 +3745,9 @@ static int
 OutputArchStrToInt(const char *temp)
 {
     int  i;
-    char outputArchKeywordTable[8][15] = {"NATIVE", "STD", "IEEE", "INTEL", "CRAY", "MIPS", "ALPHA", "UNIX"};
-    for (i = 0; i < 8; i++)
+    char outputArchKeywordTable[9][15] = {"NATIVE", "STD",   "IEEE", "INTEL", "CRAY",
+                                          "MIPS",   "ALPHA", "UNIX", "FLOAT"};
+    for (i = 0; i < 9; i++)
         if (!strcmp(outputArchKeywordTable[i], temp))
             return i;
     return -1;
@@ -4082,6 +4138,31 @@ createOutputDataType(struct Input *in)
                     }
                     break;
 
+                case 8:
+                    switch (in->outputSize) {
+                        case 16:
+                            switch (in->outputByteOrder) {
+                                case -1:
+                                case 0:
+                                    new_type = H5Tcopy(H5T_FLOAT_BFLOAT16BE);
+                                    break;
+
+                                case 1:
+                                    new_type = H5Tcopy(H5T_FLOAT_BFLOAT16LE);
+                                    break;
+
+                                default:
+                                    (void)fprintf(stderr, "%s", err3);
+                                    return (-1);
+                            }
+                            break;
+
+                        default:
+                            (void)fprintf(stderr, "%s", err2);
+                            return (-1);
+                    }
+                    break;
+
                 default:
                     (void)fprintf(rawerrorstream, "%s", err4);
                     return (-1);
@@ -4456,6 +4537,31 @@ createInputDataType(struct Input *in)
 
                             default:
                                 (void)fprintf(rawerrorstream, "%s", err2);
+                                return (-1);
+                        }
+                        break;
+
+                    case 8:
+                        switch (in->inputSize) {
+                            case 16:
+                                switch (in->inputByteOrder) {
+                                    case -1:
+                                    case 0:
+                                        new_type = H5Tcopy(H5T_FLOAT_BFLOAT16BE);
+                                        break;
+
+                                    case 1:
+                                        new_type = H5Tcopy(H5T_FLOAT_BFLOAT16LE);
+                                        break;
+
+                                    default:
+                                        (void)fprintf(stderr, "%s", err3);
+                                        return (-1);
+                                }
+                                break;
+
+                            default:
+                                (void)fprintf(stderr, "%s", err2);
                                 return (-1);
                         }
                         break;
