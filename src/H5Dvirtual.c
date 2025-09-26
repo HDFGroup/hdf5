@@ -151,14 +151,14 @@ static herr_t H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_vir
                                   H5RT_result_set_t *mappings);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage, H5RT_result_set_t *mappings);
 static herr_t H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping);
-static herr_t H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping);
+static herr_t H5D__virtual_read_one_mapping(H5D_dset_io_info_t        *dset_info,
+                                            H5O_storage_virtual_ent_t *mapping);
 static herr_t H5D__virtual_read_one_src(H5D_dset_io_info_t            *dset_info,
-                                    H5O_storage_virtual_srcdset_t *source_dset);
-static herr_t H5D__virtual_write_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping);
+                                        H5O_storage_virtual_srcdset_t *source_dset);
+static herr_t H5D__virtual_write_one_mapping(H5D_dset_io_info_t        *dset_info,
+                                             H5O_storage_virtual_ent_t *mapping);
 static herr_t H5D__virtual_write_one_src(H5D_dset_io_info_t            *dset_info,
-                                     H5O_storage_virtual_srcdset_t *source_dset);
-
-
+                                         H5O_storage_virtual_srcdset_t *source_dset);
 
 /* R-tree helper functions */
 static herr_t H5D__virtual_build_tree(H5O_storage_virtual_t *virt, int rank);
@@ -3129,7 +3129,7 @@ static herr_t
 H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
                     H5S_t *mem_space, hsize_t *tot_nelmts, H5RT_result_set_t *mappings)
 {
-    herr_t             ret_value         = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3186,7 +3186,7 @@ done:
 static herr_t
 H5D__virtual_post_io(H5O_storage_virtual_t *storage, H5RT_result_set_t *mappings)
 {
-    size_t i;                /* Local index variables */
+    size_t i;                   /* Local index variables */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3209,13 +3209,13 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage, H5RT_result_set_t *mappings
             if (H5D__virtual_close_mapping(storage->not_in_tree_list[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't process mapping for pre I/O");
         }
-    } else {
+    }
+    else {
         /* Iterate over all mappings */
         for (i = 0; i < storage->list_nused; i++)
             if (H5D__virtual_close_mapping(&storage->list[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "failed to close mapping");
     }
-    
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3298,16 +3298,16 @@ done:
 static herr_t
 H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info_t *dset_info)
 {
-    H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
-    hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
-    H5S_t                 *fill_space = NULL;   /* Space to fill with fill value */
-    size_t                 nelmts;              /* Number of elements to process */
-    size_t                 i, j;                /* Local index variables */
-    herr_t                 ret_value = SUCCEED; /* Return value */
-    bool                   should_build_tree = false; /* Whether to build a spatial tree */
-    H5RT_result_set_t     *mappings    = NULL; /* Search results from R-tree */
-    hsize_t min[H5S_MAX_RANK];
-    hsize_t max[H5S_MAX_RANK];
+    H5O_storage_virtual_t *storage;                     /* Convenient pointer into layout struct */
+    hsize_t                tot_nelmts;                  /* Total number of elements mapped to mem_space */
+    H5S_t                 *fill_space = NULL;           /* Space to fill with fill value */
+    size_t                 nelmts;                      /* Number of elements to process */
+    size_t                 i, j;                        /* Local index variables */
+    herr_t                 ret_value         = SUCCEED; /* Return value */
+    bool                   should_build_tree = false;   /* Whether to build a spatial tree */
+    H5RT_result_set_t     *mappings          = NULL;    /* Search results from R-tree */
+    hsize_t                min[H5S_MAX_RANK];
+    hsize_t                max[H5S_MAX_RANK];
 
     FUNC_ENTER_PACKAGE
 
@@ -3356,7 +3356,7 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
 
     if (storage->tree) {
         /* Perform a spatial tree search to get a list of mappings
-        * whose virtual selection intersects the IO operation */
+         * whose virtual selection intersects the IO operation */
         if (H5S_SELECT_BOUNDS(dset_info->file_space, min, max) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get selection bounds");
 
@@ -3365,7 +3365,8 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
     }
 
     /* Prepare for I/O operation */
-    if (H5D__virtual_pre_io(dset_info, storage, dset_info->file_space, dset_info->mem_space, &tot_nelmts, mappings) < 0)
+    if (H5D__virtual_pre_io(dset_info, storage, dset_info->file_space, dset_info->mem_space, &tot_nelmts,
+                            mappings) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation");
 
     /* Iterate over mappings */
@@ -3384,15 +3385,15 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
             if (H5D__virtual_read_one_mapping(dset_info, storage->not_in_tree_list[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
         }
-    } else {
+    }
+    else {
         /* Iterate over all mappings */
         for (i = 0; i < storage->list_nused; i++) {
             if (H5D__virtual_read_one_mapping(dset_info, &storage->list[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
         } /* end for */
-
     }
-   
+
     /* Fill unmapped part of buffer with fill value */
     if (tot_nelmts < nelmts) {
         H5D_fill_value_t fill_status; /* Fill value status */
@@ -3544,15 +3545,15 @@ done:
 static herr_t
 H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info_t *dset_info)
 {
-    H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
-    hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
-    size_t                 nelmts;              /* Number of elements to process */
-    size_t                 i;                /* Local index variables */
-    herr_t                 ret_value = SUCCEED; /* Return value */
-    bool                   should_build_tree = false; /* Whether to build a spatial tree */
-    H5RT_result_set_t     *mappings    = NULL; /* Search results from R-tree */
-    hsize_t min[H5S_MAX_RANK];
-    hsize_t max[H5S_MAX_RANK];
+    H5O_storage_virtual_t *storage;                     /* Convenient pointer into layout struct */
+    hsize_t                tot_nelmts;                  /* Total number of elements mapped to mem_space */
+    size_t                 nelmts;                      /* Number of elements to process */
+    size_t                 i;                           /* Local index variables */
+    herr_t                 ret_value         = SUCCEED; /* Return value */
+    bool                   should_build_tree = false;   /* Whether to build a spatial tree */
+    H5RT_result_set_t     *mappings          = NULL;    /* Search results from R-tree */
+    hsize_t                min[H5S_MAX_RANK];
+    hsize_t                max[H5S_MAX_RANK];
 
     FUNC_ENTER_PACKAGE
 
@@ -3601,7 +3602,7 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
 
     if (storage->tree) {
         /* Perform a spatial tree search to get a list of mappings
-        * whose virtual selection intersects the IO operation */
+         * whose virtual selection intersects the IO operation */
         if (H5S_SELECT_BOUNDS(dset_info->file_space, min, max) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get selection bounds");
 
@@ -3610,7 +3611,8 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
     }
 
     /* Prepare for I/O operation */
-    if (H5D__virtual_pre_io(dset_info, storage, dset_info->file_space, dset_info->mem_space, &tot_nelmts, mappings) < 0)
+    if (H5D__virtual_pre_io(dset_info, storage, dset_info->file_space, dset_info->mem_space, &tot_nelmts,
+                            mappings) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation");
 
     /* Fail if there are unmapped parts of the selection as they would not be
@@ -3634,7 +3636,8 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
             if (H5D__virtual_write_one_mapping(dset_info, storage->not_in_tree_list[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
         }
-    } else {
+    }
+    else {
         /* Iterate over all mappings */
         for (i = 0; i < storage->list_nused; i++) {
             if (H5D__virtual_write_one_mapping(dset_info, &storage->list[i]) < 0)
@@ -4124,8 +4127,8 @@ done:
 static herr_t
 H5D__should_build_tree(H5O_storage_virtual_t *storage, hid_t dapl_id, bool *should_build_tree)
 {
-    herr_t          ret_value    = SUCCEED;
-    H5P_genplist_t *dapl_plist   = NULL;
+    herr_t          ret_value         = SUCCEED;
+    H5P_genplist_t *dapl_plist        = NULL;
     bool            tree_enabled_dapl = false;
 
     FUNC_ENTER_PACKAGE
@@ -4173,19 +4176,19 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping) {
+H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping)
+{
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-     /* Sanity check that the virtual space has been patched by now */
+    /* Sanity check that the virtual space has been patched by now */
     assert(mapping->virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
     /* Check for "printf" source dataset resolution */
     if (mapping->psfn_nsubs || mapping->psdn_nsubs) {
         /* Iterate over sub-source dsets */
-        for (size_t j = mapping->sub_dset_io_start;
-                j < mapping->sub_dset_io_end; j++)
+        for (size_t j = mapping->sub_dset_io_start; j < mapping->sub_dset_io_end; j++)
             if (H5D__virtual_read_one_src(dset_info, &mapping->sub_dset[j]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
     } /* end if */
@@ -4207,7 +4210,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5D__virtual_write_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping) {
+static herr_t
+H5D__virtual_write_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping)
+{
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -4221,7 +4226,8 @@ static herr_t H5D__virtual_write_one_mapping(H5D_dset_io_info_t *dset_info, H5O_
         for (size_t j = mapping->sub_dset_io_start; j < mapping->sub_dset_io_end; j++)
             if (H5D__virtual_write_one_src(dset_info, &mapping->sub_dset[j]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset");
-    } else
+    }
+    else
         /* Write to source dataset */
         if (H5D__virtual_write_one_src(dset_info, &mapping->source_dset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset");
@@ -4241,7 +4247,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping) {
+H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping)
+{
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
