@@ -154,7 +154,8 @@ static herr_t H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping);
 static herr_t H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping);
 static herr_t H5D__virtual_read_one_src(H5D_dset_io_info_t            *dset_info,
                                     H5O_storage_virtual_srcdset_t *source_dset);
-static herr_t H5D__virtual_write_one(H5D_dset_io_info_t            *dset_info,
+static herr_t H5D__virtual_write_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping);
+static herr_t H5D__virtual_write_one_src(H5D_dset_io_info_t            *dset_info,
                                      H5O_storage_virtual_srcdset_t *source_dset);
 
 
@@ -3465,7 +3466,7 @@ done:
 } /* end H5D__virtual_read() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__virtual_write_one
+ * Function:    H5D__virtual_write_one_src
  *
  * Purpose:     Write to a single source dataset in a virtual dataset.
  *
@@ -3474,7 +3475,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset)
+H5D__virtual_write_one_src(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t             *projected_src_space = NULL; /* File space for selection in a single source dataset */
     H5D_dset_io_info_t source_dinfo;               /* Dataset info for source dataset write */
@@ -3529,7 +3530,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__virtual_write_one() */
+} /* end H5D__virtual_write_one_src() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_write
@@ -3546,7 +3547,7 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
     size_t                 nelmts;              /* Number of elements to process */
-    size_t                 i, j;                /* Local index variables */
+    size_t                 i;                /* Local index variables */
     herr_t                 ret_value = SUCCEED; /* Return value */
     bool                   should_build_tree = false; /* Whether to build a spatial tree */
     H5RT_result_set_t     *mappings    = NULL; /* Search results from R-tree */
@@ -3618,23 +3619,28 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
                     "write requested to unmapped portion of virtual dataset");
 
-    /* Iterate over mappings */
-    for (i = 0; i < storage->list_nused; i++) {
-        /* Sanity check that virtual space has been patched by now */
-        assert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+    if (mappings) {
+        /* Iterate over intersections in tree */
+        for (i = 0; i < mappings->count; i++) {
+            H5RT_leaf_t *curr_leaf = mappings->results[i];
+            assert(curr_leaf);
 
-        /* Check for "printf" source dataset resolution */
-        if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
-            /* Iterate over sub-source dsets */
-            for (j = storage->list[i].sub_dset_io_start; j < storage->list[i].sub_dset_io_end; j++)
-                if (H5D__virtual_write_one(dset_info, &storage->list[i].sub_dset[j]) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset");
-        } /* end if */
-        else
-            /* Write to source dataset */
-            if (H5D__virtual_write_one(dset_info, &storage->list[i].source_dset) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset");
-    } /* end for */
+            if (H5D__virtual_write_one_mapping(dset_info, curr_leaf->record) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
+        }
+
+        /* Iterate over not-in-tree mappings */
+        for (i = 0; i < storage->not_in_tree_nused; i++) {
+            if (H5D__virtual_write_one_mapping(dset_info, storage->not_in_tree_list[i]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
+        }
+    } else {
+        /* Iterate over all mappings */
+        for (i = 0; i < storage->list_nused; i++) {
+            if (H5D__virtual_write_one_mapping(dset_info, &storage->list[i]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write to virtual mapping");
+        }
+    }
 
 done:
     /* Cleanup I/O operation */
@@ -4187,6 +4193,38 @@ H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual
         /* Read from source dataset */
         if (H5D__virtual_read_one_src(dset_info, &mapping->source_dset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_read_one_mapping
+ *
+ * Purpose:     Write to a single mapping entry in a virtual dataset
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5D__virtual_write_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_ent_t *mapping) {
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check that virtual space has been patched by now */
+    assert(mapping->virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+
+    /* Check for "printf" source dataset resolution */
+    if (mapping->psfn_nsubs || mapping->psdn_nsubs) {
+        /* Iterate over sub-source dsets */
+        for (size_t j = mapping->sub_dset_io_start; j < mapping->sub_dset_io_end; j++)
+            if (H5D__virtual_write_one_src(dset_info, &mapping->sub_dset[j]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset");
+    } else
+        /* Write to source dataset */
+        if (H5D__virtual_write_one_src(dset_info, &mapping->source_dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
