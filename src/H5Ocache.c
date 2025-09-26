@@ -1269,6 +1269,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
         if (mesg_size != H5O_ALIGN_OH(oh, mesg_size))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message not aligned");
 
+        if (H5_IS_BUFFER_OVERFLOW(chunk_image, mesg_size, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "message size exceeds buffer end");
+
         /* Message flags */
         if (H5_IS_BUFFER_OVERFLOW(chunk_image, 1, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
@@ -1300,12 +1303,6 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 UINT16DECODE(chunk_image, crt_idx);
             }
         }
-
-        /* Try to detect invalidly formatted object header message that
-         *  extends past end of chunk.
-         */
-        if (chunk_image + mesg_size > eom_ptr)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "corrupt object header");
 
         /* Increment count of null messages */
         if (H5O_NULL_ID == id)
@@ -1452,6 +1449,38 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 if (!refcount)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't decode refcount");
                 oh->nlink = *refcount;
+            }
+            /* Check if message is an old mtime message */
+            else if (H5O_MTIME_ID == id) {
+                time_t *mtime = NULL;
+
+                /* Decode mtime message */
+                mtime =
+                    (time_t *)(H5O_MSG_MTIME->decode)(udata->f, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
+
+                /* Save the decoded old format mtime */
+                if (!mtime)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode old format mtime");
+
+                /* Save 'native' form of mtime message and its value */
+                mesg->native = mtime;
+                oh->ctime    = *mtime;
+            }
+            /* Check if message is an new mtime message */
+            else if (H5O_MTIME_NEW_ID == id) {
+                time_t *mtime = NULL;
+
+                /* Decode mtime message */
+                mtime = (time_t *)(H5O_MSG_MTIME_NEW->decode)(udata->f, NULL, 0, &ioflags, mesg->raw_size,
+                                                              mesg->raw);
+
+                /* Save the decoded new format mtime */
+                if (!mtime)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode new format mtime");
+
+                /* Save 'native' form of mtime message and its value */
+                mesg->native = mtime;
+                oh->ctime    = *mtime;
             }
             /* Check if message is a link message */
             else if (H5O_LINK_ID == id) {

@@ -492,6 +492,13 @@ Simple example programs showing how to use complex number datatypes have been ad
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed security issue CVE-2025-6750
+
+   A heap buffer overflow occurred because an mtime message was not properly decoded, resulting in a buffer of size 0 being passed into the encoder.  This has been fixed by decoding old and new mtime messages which will allow invalid message size to be detected.
+
+   Fixes GitHub issue #5549
+
 ### Fixed CVE-2025-6269
 
    There were several security vulnerabilities found in the function H5C__reconstruct_cache_entry(), including buffer overflows and memory leaks.  The function has been hardened with bounds checks, input validation, and safe cleanup.
