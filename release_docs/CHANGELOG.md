@@ -1,4 +1,4 @@
-# HDF5 2.0.0 - 2025-09-30
+HDF5 version 2.0.0-2 currently under development
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -21,7 +21,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.0.0
+# 🔆 Executive Summary: HDF5 Version 2.0.0-2
 
 ## Performance Enhancements:
 
@@ -673,7 +673,8 @@ Simple example programs showing how to use complex number datatypes have been ad
 
 # ☑️ Platforms Tested
 
-Data to come from cdash.
+A table of platforms tested can be seen on the [wiki](https://github.com/HDFGroup/hdf5/wiki/Platforms-Tested).
+Current test results are available [here](https://my.cdash.org/index.php?project=HDF5).
 
 # ⛔ Known Problems
 

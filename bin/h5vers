@@ -63,7 +63,7 @@ use strict;
 # ./H5public.h or ./src/H5public.h.
 #
 # If the version number is changed (either `-s' or `-i' was used on
-# the command line) then the version line of the README.md and RELEASE.txt files
+# the command line) then the version line of the README.md and CHANGELOG.md files
 # one directory above the H5public.h file is also modified so it looks
 # something like: This is hdf5-2.0.1-1 currently under development.
 # Version changes are also reflected in the Windows-maintained H5pubconf.h
@@ -155,9 +155,9 @@ while ($_ = shift) {
 die "mutually exclusive options given\n" if $set && $inc;
 
 # Determine file to use as H5public.h, README.md,
-# release_docs/RELEASE.txt, windows/src/H5pubconf.h
+# release_docs/CHANGELOG.md, windows/src/H5pubconf.h
 # config/lt_vers.am and config/cmake/scripts/HDF5config.cmake. 
-# The README.md, release_docs/RELEASE.txt, # windows/src/H5pubconf.h,
+# The README.md, release_docs/CHANGELOG.md, # windows/src/H5pubconf.h,
 # config/lt_vers.am and config/cmake/scripts/HDF5config.cmake
 # files are always in the directory above H5public.h
 unless ($file) {
@@ -183,10 +183,10 @@ die "unable to read file: $HDF5EXCONFCMAKE\n" unless -r $file;
 my $README = $file;
 $README =~ s/[^\/]*$/..\/README.md/;
 die "unable to read file: $README\n" unless -r $file;
-# release_docs/RELEASE.txt
-my $RELEASE = $file;
-$RELEASE =~ s/[^\/]*$/..\/release_docs\/RELEASE.txt/;
-die "unable to read file: $RELEASE\n" unless -r $file;
+# release_docs/CHANGELOG.md
+my $CHANGELOG = $file;
+$CHANGELOG =~ s/[^\/]*$/..\/release_docs\/CHANGELOG.md/;
+die "unable to read file: $CHANGELOG\n" unless -r $file;
 my $H5_JAVA = $file;
 $H5_JAVA =~ s/[^\/]*$/..\/java\/src\/hdf\/hdf5lib\/H5.java/;
 die "unable to read file: $H5_JAVA\n" unless -r $file;
@@ -241,7 +241,7 @@ if ($set) {
 } else {
   # Nothing to do but print result
   $README = "";
-  $RELEASE = "";
+  $CHANGELOG = "";
   $LT_VERS = "";       
   $HDF5CONFIGCMAKE = "";
   $HDF5EXCONFCMAKE = "";
@@ -309,16 +309,26 @@ if ($README) {
   close FILE;
 }
 
-# Update the release_docs/RELEASE.txt file
-if ($RELEASE) {
-  open FILE, $RELEASE or die "$RELEASE: $!\n";
+# Update the release_docs/CHANGELOG.md file
+if ($CHANGELOG) {
+  open FILE, $CHANGELOG or die "$CHANGELOG: $!\n";
   my @contents = <FILE>;
   close FILE;
   $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
 			 @newver[0,1,2],
 			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
-  open FILE, ">$RELEASE" or die "$RELEASE: $!\n";
+
+  for (my $i = 0; $i < $#contents; ++$i) {
+    if ($contents[$i] =~ /^# 🔆 Executive Summary: HDF5 Version/) {
+      $contents[$i] = sprintf("# 🔆 Executive Summary: HDF5 Version %d.%d.%d%s\n",
+                              @newver[0,1,2],
+                              $newver[3] eq "" ? "" : "-".$newver[3]);
+      last;
+    }
+  }
+
+  open FILE, ">$CHANGELOG" or die "$CHANGELOG: $!\n";
   print FILE @contents;
   close FILE;
 }
