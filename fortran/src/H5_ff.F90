@@ -287,10 +287,14 @@ CONTAINS
     H5T_NATIVE_B64                = predef_types(18)
     H5T_NATIVE_FLOAT_128          = predef_types(19)
 
-    H5T_IEEE_F32BE = floating_types(1)
-    H5T_IEEE_F32LE = floating_types(2)
-    H5T_IEEE_F64BE = floating_types(3)
-    H5T_IEEE_F64LE = floating_types(4)
+    H5T_IEEE_F32BE       = floating_types(1)
+    H5T_IEEE_F32LE       = floating_types(2)
+    H5T_IEEE_F64BE       = floating_types(3)
+    H5T_IEEE_F64LE       = floating_types(4)
+    H5T_IEEE_F16BE       = floating_types(5)
+    H5T_IEEE_F16LE       = floating_types(6)
+    H5T_FLOAT_BFLOAT16BE = floating_types(7)
+    H5T_FLOAT_BFLOAT16LE = floating_types(8)
 
     H5T_STD_I8BE   = integer_types(1)
     H5T_STD_I8LE   = integer_types(2)

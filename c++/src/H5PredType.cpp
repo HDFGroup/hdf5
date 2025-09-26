@@ -152,6 +152,9 @@ PredType *PredType::IEEE_F32LE_;
 PredType *PredType::IEEE_F64BE_;
 PredType *PredType::IEEE_F64LE_;
 
+PredType *PredType::FLOAT_BFLOAT16BE_;
+PredType *PredType::FLOAT_BFLOAT16LE_;
+
 PredType *PredType::UNIX_D32BE_;
 PredType *PredType::UNIX_D32LE_;
 PredType *PredType::UNIX_D64BE_;
@@ -339,6 +342,9 @@ PredType::makePredTypes()
     IEEE_F64BE_ = new PredType(H5T_IEEE_F64BE);
     IEEE_F64LE_ = new PredType(H5T_IEEE_F64LE);
 
+    FLOAT_BFLOAT16BE_ = new PredType(H5T_FLOAT_BFLOAT16BE);
+    FLOAT_BFLOAT16LE_ = new PredType(H5T_FLOAT_BFLOAT16LE);
+
     UNIX_D32BE_ = new PredType(H5T_UNIX_D32BE);
     UNIX_D32LE_ = new PredType(H5T_UNIX_D32LE);
     UNIX_D64BE_ = new PredType(H5T_UNIX_D64BE);
@@ -491,6 +497,9 @@ PredType::deleteConstants()
     delete IEEE_F32LE_;
     delete IEEE_F64BE_;
     delete IEEE_F64LE_;
+
+    delete FLOAT_BFLOAT16BE_;
+    delete FLOAT_BFLOAT16LE_;
 
     delete UNIX_D32BE_;
     delete UNIX_D32LE_;
@@ -648,6 +657,9 @@ const PredType &PredType::IEEE_F32BE = *IEEE_F32BE_;
 const PredType &PredType::IEEE_F32LE = *IEEE_F32LE_;
 const PredType &PredType::IEEE_F64BE = *IEEE_F64BE_;
 const PredType &PredType::IEEE_F64LE = *IEEE_F64LE_;
+
+const PredType &PredType::FLOAT_BFLOAT16BE = *FLOAT_BFLOAT16BE_;
+const PredType &PredType::FLOAT_BFLOAT16LE = *FLOAT_BFLOAT16LE_;
 
 const PredType &PredType::UNIX_D32BE = *UNIX_D32BE_;
 const PredType &PredType::UNIX_D32LE = *UNIX_D32LE_;

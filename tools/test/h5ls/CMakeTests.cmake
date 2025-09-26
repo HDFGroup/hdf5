@@ -29,6 +29,8 @@ set (LIST_HDF5_TEST_FILES
     tarray1.h5
     tattr2.h5
     tattrreg.h5
+    tbfloat16.h5
+    tbfloat16_be.h5
     tcomplex.h5
     tcomplex_be.h5
     tcompound.h5
@@ -66,6 +68,8 @@ set (LIST_OTHER_TEST_FILES
     tattr2.ls
     tattrreg_le.ls
     tattrreg_be.ls
+    tbfloat16.ls
+    tbfloat16_be.ls
     tcomp-1.ls
     tcomplex.ls
     tcomplex_be.ls
@@ -470,6 +474,10 @@ else ()
   ADD_H5_TEST (tfloat16_nosupport RESULT_CODE 0 -w80 -v tfloat16.h5)
   ADD_H5_TEST (tfloat16_be_nosupport RESULT_CODE 0 -w80 -v tfloat16_be.h5)
 endif ()
+
+# tests for bfloat16 type
+ADD_H5_TEST (tbfloat16 RESULT_CODE 0 -w80 -v tbfloat16.h5)
+ADD_H5_TEST (tbfloat16_be RESULT_CODE 0 -w80 -v tbfloat16_be.h5)
 
 # tests for complex numbers
 if (${${HDF_PREFIX}_HAVE_COMPLEX_NUMBERS})

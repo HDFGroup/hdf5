@@ -35,6 +35,25 @@
 //! [predefined_ieee_datatypes_table]
  *
  *
+//! [predefined_alt_float_datatypes_table]
+<table>
+<caption>Predefined Alternative Floating Point Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_FLOAT_BFLOAT16BE</td>
+<td>16-bit big-endian bfloat16 floating point</td>
+</tr>
+<tr>
+<td>#H5T_FLOAT_BFLOAT16LE</td>
+<td>16-bit little-endian bfloat16 floating point</td>
+</tr>
+</table>
+//! [predefined_alt_float_datatypes_table]
+ *
+ *
 //! [predefined_complex_datatypes_table]
 <table>
 <caption>Predefined Complex Number Datatypes</caption>
