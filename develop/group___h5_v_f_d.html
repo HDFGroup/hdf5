@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-26</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-27</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -152,6 +152,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga54309eee8a5a936e3e56a2e20eba23f0" id="r_ga54309eee8a5a936e3e56a2e20eba23f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga54309eee8a5a936e3e56a2e20eba23f0">H5FDonion_get_revision_count</a> (const char *filename, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, uint64_t *revision_count)</td></tr>
 <tr class="memdesc:ga54309eee8a5a936e3e56a2e20eba23f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the number of revisions  <br /></td></tr>
 <tr class="separator:ga54309eee8a5a936e3e56a2e20eba23f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga01c9bf33d6c925f006684acfa9b9dff7" id="r_ga01c9bf33d6c925f006684acfa9b9dff7"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga01c9bf33d6c925f006684acfa9b9dff7">H5FDsubfiling_get_file_mapping</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, char ***filenames, size_t *len)</td></tr>
+<tr class="memdesc:ga01c9bf33d6c925f006684acfa9b9dff7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the subfile names for an HDF5 file using the subfiling VFD.  <br /></td></tr>
+<tr class="separator:ga01c9bf33d6c925f006684acfa9b9dff7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga42cb42d302b233ce880a215784db0799" name="ga42cb42d302b233ce880a215784db0799"></a>
@@ -225,6 +228,94 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#ga54309eee8a5a936e3e56a2e20eba23f0" title="get the number of revisions">H5FDonion_get_revision_count()</a> returns the number of revisions for an onion file. It takes the file name and file access property list that is set for the onion VFD driver.</p>
 <dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
+
+</div>
+</div>
+<a id="ga01c9bf33d6c925f006684acfa9b9dff7" name="ga01c9bf33d6c925f006684acfa9b9dff7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga01c9bf33d6c925f006684acfa9b9dff7">&#9670;&#160;</a></span>H5FDsubfiling_get_file_mapping()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FDsubfiling_get_file_mapping </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>file_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char ***</td>          <td class="paramname"><span class="paramname"><em>filenames</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieve the subfile names for an HDF5 file using the subfiling VFD. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">file_id</td><td>File identifier</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">filenames</td><td>Pointer to an array of C strings containing the subfile names. Memory is allocated by the function and must be freed by the caller. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">len</td><td>Pointer to the number of subfiles in the <code class="param">filenames</code> array.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga01c9bf33d6c925f006684acfa9b9dff7" title="Retrieve the subfile names for an HDF5 file using the subfiling VFD.">H5FDsubfiling_get_file_mapping()</a> retrieves the names of all physical subfiles that collectively make up a logical HDF5 file using the subfiling Virtual File Driver (VFD). The subfiling VFD distributes file data across multiple subfiles to improve parallel I/O performance, particularly systems where metadata operations can become a bottleneck.</p>
+<p>The function returns an array of subfile names corresponding to the physical files stored on the file system. Each MPI rank may be responsible for different subfiles, and this function provides visibility into which subfiles are associated with the calling rank.</p>
+<p><b>Typical use cases include:</b></p><ul>
+<li><b>File management</b>: Understanding the physical storage layout for backup and archival</li>
+<li><b>Performance analysis</b>: Identifying subfile distribution patterns</li>
+<li><b>File fusion</b>: Providing subfile lists to tools like h5fuse for recombining files</li>
+<li><b>Debugging</b>: Troubleshooting subfiling configuration and I/O patterns</li>
+<li><b>Storage optimization</b>: Analyzing subfile sizes and distribution</li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd><b>Memory management</b>: The caller must call <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a> on each string in the <code class="param">filenames</code> array, and then call <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a> on the <code class="param">filenames</code> array itself: <div class="fragment"><div class="line"><span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; len; i++) {</div>
+<div class="line">    <a class="code hl_function" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf">H5free_memory</a>(filenames[i]);</div>
+<div class="line">}</div>
+<div class="line"><a class="code hl_function" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf">H5free_memory</a>(filenames);</div>
+<div class="ttc" id="agroup___h5_html_ga71872bf6445cba956da86d4762b662cf"><div class="ttname"><a href="group___h5.html#ga71872bf6445cba956da86d4762b662cf">H5free_memory</a></div><div class="ttdeci">herr_t H5free_memory(void *mem)</div><div class="ttdoc">Frees memory allocated by the HDF5 library.</div></div>
+</div><!-- fragment --> </dd></dl>
+<dl class="section note"><dt>Note</dt><dd><b>VFD requirement</b>: This function only works with files that use the subfiling VFD. Calling it on files using other VFDs will result in an error. This function will not be accessible if support for the subfiling VFD is unavailable or disabled. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd><b>MPI context</b>: The function returns subfiles associated with the calling MPI rank. Different ranks may receive different subfile lists depending on the subfiling configuration and I/O concentrator (IOC) assignment. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd></dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd></dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;hdf5.h&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>   file_id;</div>
+<div class="line"><span class="keywordtype">char</span>  **subfile_names = NULL;</div>
+<div class="line"><span class="keywordtype">size_t</span>  num_subfiles;</div>
+<div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>  ret;</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Open file with subfiling VFD (setup not shown)</span></div>
+<div class="line"><span class="comment">// ...</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Get subfile mapping</span></div>
+<div class="line">ret = <a class="code hl_function" href="#ga01c9bf33d6c925f006684acfa9b9dff7">H5FDsubfiling_get_file_mapping</a>(file_id, &amp;subfile_names, &amp;num_subfiles);</div>
+<div class="line"><span class="keywordflow">if</span> (ret &gt;= 0) {</div>
+<div class="line">    printf(<span class="stringliteral">&quot;Found %zu subfiles:\n&quot;</span>, num_subfiles);</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; num_subfiles; i++) {</div>
+<div class="line">        printf(<span class="stringliteral">&quot;  %s\n&quot;</span>, subfile_names[i]);</div>
+<div class="line">        <a class="code hl_function" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf">H5free_memory</a>(subfile_names[i]);  <span class="comment">// Free each string</span></div>
+<div class="line">    }</div>
+<div class="line">    <a class="code hl_function" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf">H5free_memory</a>(subfile_names);         <span class="comment">// Free the array</span></div>
+<div class="line">} <span class="keywordflow">else</span> {</div>
+<div class="line">    printf(<span class="stringliteral">&quot;Error getting file mapping\n&quot;</span>);</div>
+<div class="line">}</div>
+<div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:252</div></div>
+<div class="ttc" id="agroup___h5_v_f_d_html_ga01c9bf33d6c925f006684acfa9b9dff7"><div class="ttname"><a href="#ga01c9bf33d6c925f006684acfa9b9dff7">H5FDsubfiling_get_file_mapping</a></div><div class="ttdeci">H5_DLL herr_t H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len)</div><div class="ttdoc">Retrieve the subfile names for an HDF5 file using the subfiling VFD.</div></div>
+</div><!-- fragment --></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___f_a_p_l.html#ga65dbddbba216fdd0bdf99b4feaa74db2" title="Modifies the specified File Access Property List to use the H5FD_SUBFILING driver.">H5Pset_fapl_subfiling()</a> </dd>
+<dd>
+<a class="el" href="group___f_a_p_l.html#ga2af70900a3ea50a83d65f8285730ef45" title="Queries a File Access Property List for H5FD_SUBFILING file driver properties.">H5Pget_fapl_subfiling()</a> </dd>
+<dd>
+<a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a></dd></dl>
+<dl class="section since"><dt>Since</dt><dd>2.0.0 </dd></dl>
 
 </div>
 </div>
