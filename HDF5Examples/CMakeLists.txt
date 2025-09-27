@@ -21,7 +21,12 @@ set (H5EX_JAVA_DIR           ${H5EXAMPLES_SOURCE_DIR}/JAVA)
 #-----------------------------------------------------------------------------
 if (NOT EXAMPLES_EXTERNALLY_CONFIGURED)
   set (H5EX_CONFIG_DIR      ${H5EXAMPLES_SOURCE_DIR}/config)
-  set (H5EX_RESOURCES_DIR      ${H5EXAMPLES_SOURCE_DIR}/config/cmake)
+  set (H5EX_RESOURCES_DIR   ${H5EXAMPLES_SOURCE_DIR}/config/cmake)
+
+  include (TestBigEndian)
+  if (NOT WINDOWS)
+    TEST_BIG_ENDIAN (H5EX_WORDS_BIGENDIAN)
+  endif ()
 
   include (${H5EX_CONFIG_DIR}/HDFMacros.cmake)
   include (${H5EX_RESOURCES_DIR}/HDFExampleMacros.cmake)
