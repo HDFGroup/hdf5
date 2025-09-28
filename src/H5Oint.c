@@ -1041,7 +1041,6 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, bool pin_all_chunks)
         curr_msg = 0;
         while (curr_msg < cont_msg_info.nmsgs) {
             H5O_chunk_proxy_t *chk_proxy;            /* Proxy for chunk, to bring it into memory */
-            unsigned           chunkno;              /* Chunk number for chunk proxy */
             size_t             chkcnt = oh->nchunks; /* Count of chunks (for sanity checking) */
 
             /* Bring the chunk into the cache */
@@ -1056,14 +1055,12 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, bool pin_all_chunks)
             /* Sanity check */
             assert(chk_proxy->oh == oh);
 
-            chunkno = chk_proxy->chunkno;
-
             /* Release the chunk from the cache */
             if (H5AC_unprotect(loc->file, H5AC_OHDR_CHK, cont_msg_info.msgs[curr_msg].addr, chk_proxy,
                                H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header chunk");
 
-            if (chunkno != chkcnt)
+            if (chk_proxy->chunkno != chkcnt)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "incorrect chunk number for object header chunk");
             if (oh->nchunks != (chkcnt + 1))
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
