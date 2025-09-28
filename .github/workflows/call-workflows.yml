@@ -114,6 +114,18 @@ jobs:
             thread_safety: ""
             build_mode: "Release"
 
+    call-ffm-latest-java:
+        name: "FFM Latest Java Testing"
+        uses: ./.github/workflows/main.yml
+        continue-on-error: true  # Non-blocking for bleeding-edge Java
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+            java_version: "latest"
+            force_java_implementation: "ffm"
+
     call-arm64-cmake:
         name: "arm64 Workflows"
         uses: ./.github/workflows/arm-main.yml

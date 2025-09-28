@@ -331,27 +331,17 @@ set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-
 set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
 
 # Java implementation detection for global access
+# Note: Java version detection happens in java/CMakeLists.txt after find_package(Java)
+# These will be set by the Java subdirectory based on actual Java version
 if (HDF5_BUILD_JAVA)
-  if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0" AND NOT HDF5_ENABLE_JNI)
-    set (HDF5_JAVA_IMPLEMENTATION "FFM" CACHE STRING "Java implementation being built" FORCE)
-    set (HDF5_JAVA_ARTIFACT_ID "hdf5-java-ffm" CACHE STRING "Maven artifact ID for Java bindings" FORCE)
-    set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
-  else()
-    set (HDF5_JAVA_IMPLEMENTATION "JNI" CACHE STRING "Java implementation being built" FORCE)
-    set (HDF5_JAVA_ARTIFACT_ID "hdf5-java-jni" CACHE STRING "Maven artifact ID for Java bindings" FORCE)
-    set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
-  endif()
+  # Initialize cache variables with default values
+  set (HDF5_JAVA_IMPLEMENTATION "JNI" CACHE STRING "Java implementation being built")
+  set (HDF5_JAVA_ARTIFACT_ID "hdf5-java-jni" CACHE STRING "Maven artifact ID for Java bindings")
   set_property(CACHE HDF5_JAVA_IMPLEMENTATION PROPERTY STRINGS FFM JNI)
   mark_as_advanced (HDF5_JAVA_IMPLEMENTATION HDF5_JAVA_ARTIFACT_ID)
 
-  message (STATUS "Java implementation: ${HDF5_JAVA_IMPLEMENTATION}")
-  message (STATUS "Java Maven artifact: org.hdfgroup:${HDF5_JAVA_ARTIFACT_ID}")
-else()
-  if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0" AND NOT HDF5_ENABLE_JNI)
-    set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
-  else ()
-    set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
-  endif ()
+  # Defer DOXYGEN_JAVA_DIR setting until after Java subdirectory processes
+  # Actual implementation detection happens in java/CMakeLists.txt
 endif ()
 
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})

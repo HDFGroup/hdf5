@@ -25,6 +25,16 @@ on:
         required: false
         default: "skip"
         type: string
+      java_version:
+        description: "Java version for testing (11, 17, 21, 24, latest, auto)"
+        required: false
+        default: "auto"
+        type: string
+      force_java_implementation:
+        description: "Force specific Java implementation (auto, ffm, jni)"
+        required: false
+        default: "auto"
+        type: string
 
 permissions:
   contents: read
@@ -159,6 +169,24 @@ jobs:
           which cmake
           cmake --version
 
+      - name: Set up Java (if specified)
+        if: inputs.java_version != 'auto'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: |
+            ${{
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+
+      - name: Verify Java Setup
+        if: inputs.java_version != 'auto'
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+
       - name: Set environment for MSVC (Windows)
         run: |
           # Set these environment variables so CMake picks the correct compiler
@@ -199,6 +227,7 @@ jobs:
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            ${{ inputs.force_java_implementation == 'jni' && '-DHDF5_ENABLE_JNI:BOOL=ON' || '' }} \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
@@ -229,6 +258,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            ${{ inputs.force_java_implementation == 'jni' && '-DHDF5_ENABLE_JNI:BOOL=ON' || '' }} \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
@@ -432,6 +462,24 @@ jobs:
           which cmake
           cmake --version
 
+      - name: Set up Java (if specified)
+        if: inputs.java_version != 'auto'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: |
+            ${{
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+
+      - name: Verify Java Setup
+        if: inputs.java_version != 'auto'
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+
       - name: Set environment for MSVC (Windows)
         run: |
           # Set these environment variables so CMake picks the correct compiler
@@ -470,6 +518,7 @@ jobs:
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            ${{ inputs.force_java_implementation == 'jni' && '-DHDF5_ENABLE_JNI:BOOL=ON' || '' }} \
             $GITHUB_WORKSPACE
         shell: bash
 

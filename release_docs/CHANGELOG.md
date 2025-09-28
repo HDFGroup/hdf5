@@ -98,6 +98,8 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
    - **Dynamic repository support**: Enhanced workflows to use `github.repository` variable for seamless testing on forks before canonical deployment
    - **Fork-based testing**: Complete testing framework allowing validation on repository forks (e.g., fork-name/hdf5) before merging to HDFGroup/hdf5
    - **Multi-artifact deployment**: Enhanced deployment workflow to handle FFM/JNI artifacts and `hdf5-java-examples` (platform-independent) artifacts
+   - **Latest Java Testing**: Enhanced main workflow with configurable Java version inputs (11, 17, 21, 24, latest, auto) for comprehensive FFM testing with bleeding-edge Java versions
+   - **Non-blocking FFM Testing**: Added automated latest Java FFM testing to CI pipeline with `continue-on-error` for bleeding-edge compatibility validation
    - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
    - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
 
@@ -494,6 +496,19 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 ## C++ Library
 
 ## Java Library
+
+### Implemented Variable-Length (VL) Data Support for Java FFM Bindings
+
+  Added complete implementation of Variable-Length data functionality to the Java FFM (Foreign Function & Memory) bindings:
+  - **New VL Functions**: Implemented `H5AreadVL`, `H5AwriteVL`, `H5DreadVL`, and `H5DwriteVL` functions
+  - **VLDataConverter Utility**: New utility class for converting between Java `ArrayList` arrays and native HDF5 `hvl_t` structures
+  - **Automatic Type Detection**: Uses Java reflection to handle Integer, Double, String, and nested ArrayList data types
+  - **Memory Management**: Implements Arena.ofConfined() scoping for automatic native memory cleanup
+  - **Nested VL Support**: Full support for variable-length arrays of variable-length data (VL-of-VL)
+  - **String Handling**: Proper null-terminated C string conversion with UTF-8 encoding
+  - **API Compatibility**: Zero changes required to existing test code - maintains ArrayList-based API
+
+  This implementation enables all existing VL tests in TestH5A.java and TestH5D.java to work seamlessly with the FFM bindings, providing feature parity with the JNI implementation while leveraging modern Java native access capabilities.
 
 ## Tools
 

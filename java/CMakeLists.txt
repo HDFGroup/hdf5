@@ -56,6 +56,21 @@ else ()
   endif ()
 endif ()
 
+# Update global cache variables based on detected implementation
+if (HDF5_JAVA_USE_FFM)
+  set (HDF5_JAVA_IMPLEMENTATION "FFM" CACHE STRING "Java implementation being built" FORCE)
+  set (HDF5_JAVA_ARTIFACT_ID "hdf5-java-ffm" CACHE STRING "Maven artifact ID for Java bindings" FORCE)
+  set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
+else ()
+  set (HDF5_JAVA_IMPLEMENTATION "JNI" CACHE STRING "Java implementation being built" FORCE)
+  set (HDF5_JAVA_ARTIFACT_ID "hdf5-java-jni" CACHE STRING "Maven artifact ID for Java bindings" FORCE)
+  set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
+endif ()
+
+# Display final configuration
+message (STATUS "Java implementation: ${HDF5_JAVA_IMPLEMENTATION}")
+message (STATUS "Java Maven artifact: org.hdfgroup:${HDF5_JAVA_ARTIFACT_ID}")
+
 # Build appropriate subdirectories based on implementation
 if (HDF5_JAVA_USE_FFM)
   add_subdirectory (jsrc)

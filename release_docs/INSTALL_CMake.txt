@@ -874,6 +874,13 @@ HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
   - Fork-based testing allows validation on repository forks before canonical deployment
   - Dynamic repository workflows adapt to any GitHub repository automatically
 
+  FFM Latest Java Testing:
+  - Automated testing with bleeding-edge Java versions via enhanced main.yml workflow
+  - Non-blocking integration in CI pipeline for forward compatibility testing
+  - Configurable Java version selection (11, 17, 21, 24, latest, auto)
+  - Manual testing available: gh workflow run call-workflows.yml -f java_version=latest
+  - Force implementation testing: gh workflow run call-workflows.yml -f force_java_implementation=ffm
+
 ---------------- HDF5 Folder Build Options ---------------------------------
 Defaults relative to $<INSTALL_PREFIX>
 HDF5_INSTALL_BIN_DIR      "bin"

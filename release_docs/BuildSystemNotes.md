@@ -171,6 +171,7 @@ ctest -R "H5_api_test"
 - `analysis.yml` - Static analysis integration
 - `java-implementation-test.yml` - Java FFM/JNI implementation testing
 - `java-examples-maven-test.yml` - Java examples with Maven artifacts
+- **FFM Latest Java Testing** - Automated testing with bleeding-edge Java versions via enhanced `main.yml` workflow
 
 **Platform-Specific:**
 - `arm-main.yml` - ARM architecture testing
@@ -190,6 +191,10 @@ ctest -R "H5_api_test"
 - **Compiler diversity**: GCC, Clang, MSVC, Intel, AOCC, NVHPC
 - **Feature combinations**: Systematic testing of feature interactions
 - **Performance variants**: Debug vs Release vs specialized builds
+- **Latest Java Testing**: Non-blocking FFM testing with bleeding-edge Java versions
+  - Configurable Java version selection (11, 17, 21, 24, latest, auto)
+  - Force Java implementation (auto, ffm, jni)
+  - Integrated into main CI pipeline via `call-workflows.yml`
 
 ## Packaging & Distribution
 

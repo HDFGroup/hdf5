@@ -107,6 +107,7 @@ set (HDF5_JAVA_HDF_HDF5_SOURCES
     HDF5Constants.java
     HDFNativeData.java
     H5.java
+    VLDataConverter.java
 )
 
 set (HDF5_JAVADOC_HDF_HDF5_SOURCES

@@ -34,6 +34,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -79,6 +80,7 @@ import hdf.hdf5lib.structs.H5O_token_t;
 import hdf.hdf5lib.structs.H5_ih_info_t;
 
 import org.hdfgroup.javahdf5.*;
+import org.hdfgroup.javahdf5.hvl_t;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -407,6 +409,36 @@ public class H5 implements java.io.Serializable {
      * @return Returns a collection of open IDs
      */
     public final static Collection<Long> getOpenIDs() { return OPEN_IDS; }
+
+    /**
+     * @ingroup JH5
+     *
+     * FFM equivalent of h5str_detect_vlen function from JNI implementation.
+     * Detects whether a datatype contains any variable length data or variable length strings.
+     * This follows the same logic as the native JNI h5str_detect_vlen function.
+     *
+     * @param type_id
+     *            IN: Datatype identifier to check for VL data
+     *
+     * @return true if datatype contains VL data; false otherwise
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     */
+    private static boolean detectVLData(long type_id) throws HDF5LibraryException
+    {
+        // Recursively detect any vlen data values in type (compound, array ...)
+        if (H5Tdetect_class(type_id, HDF5Constants.H5T_VLEN)) {
+            return true;
+        }
+
+        // Recursively detect any vlen string in type (compound, array ...)
+        if (H5Tis_variable_str(type_id)) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * @ingroup JH5
@@ -2073,7 +2105,67 @@ public class H5 implements java.io.Serializable {
     public static int H5AreadVL(long attr_id, long mem_type_id, Object[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5AreadVL not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+
+        int status = -1;
+        boolean vl_data_class = false;
+        // CRITICAL FIX: Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
+        Arena arena = Arena.global();
+
+        try {
+            // Detect VL data to determine if H5Treclaim is needed (JNI pattern)
+            vl_data_class = detectVLData(mem_type_id);
+            // Check the datatype class to determine reading strategy
+            int typeClass = H5Tget_class(mem_type_id);
+
+            if (typeClass == HDF5Constants.H5T_ARRAY) {
+                // For array datatypes, read directly into array buffer (not hvl_t)
+                ArrayList[] result = VLDataConverter.readArrayDatatype(attr_id, mem_type_id, buf.length, arena);
+                System.arraycopy(result, 0, buf, 0, buf.length);
+                status = 0; // Success
+            } 
+            else {
+                // For VL datatypes, use hvl_t structures
+                MemorySegment hvlArray = hvl_t.allocateArray(buf.length, arena);
+
+                // Call native H5Aread
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, hvlArray);
+
+                if (status >= 0) {
+                    // Convert hvl_t data back to ArrayList array IMMEDIATELY while memory is valid
+                    ArrayList[] result = VLDataConverter.convertFromHVL(hvlArray, buf.length, mem_type_id);
+
+                    // Get dataspace for H5Treclaim
+                    long space_id = HDF5Constants.H5I_INVALID_HID;
+
+                    // Reclaim VL memory allocated by HDF5 only if VL data is detected (JNI pattern)
+                    try {
+                        // Get dataspace for H5Treclaim
+                        space_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_space(attr_id);
+                        if ((status >= 0) && vl_data_class) {
+                            org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(), hvlArray);
+                        }
+                    }
+                    finally {
+                        if (space_id >= 0) {
+                            org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_id);
+                        }
+                    }
+
+                    System.arraycopy(result, 0, buf, 0, buf.length);
+                } 
+                else {
+                    h5libraryError();
+                }
+            }
+        }
+        catch (HDF5JavaException ex) {
+            throw new HDF5LibraryException("VL data conversion failed: " + ex.getMessage());
+        }
+
+        return status;
     }
 
     /**
@@ -2737,7 +2829,59 @@ public class H5 implements java.io.Serializable {
     public static int H5AwriteVL(long attr_id, long mem_type_id, Object[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5AwriteVL not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+
+        int status = -1;
+        boolean vl_data_class = false;
+        // CRITICAL FIX: Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
+        Arena arena = Arena.global();
+
+        try {
+            // Detect VL data to determine if H5Treclaim is needed (JNI pattern)
+            vl_data_class = detectVLData(mem_type_id);
+
+            ArrayList[] arrayData;
+            try {
+                arrayData = (ArrayList[]) buf;
+            } catch (ClassCastException e) {
+                // Check if this is a VL string case (String[] input)
+                if (buf instanceof String[]) {
+                    // For VL strings, delegate to the specialized method
+                    return H5Awrite_VLStrings(attr_id, mem_type_id, (String[]) buf);
+                } else {
+                    // Re-throw the original exception with clear message
+                    throw new HDF5LibraryException("Input data must be ArrayList array: " + buf.getClass() + " cannot be cast to ArrayList[]");
+                }
+            }
+
+            // Check the datatype class to determine conversion strategy
+            int typeClass = H5Tget_class(mem_type_id);
+
+            if (typeClass == HDF5Constants.H5T_ARRAY) {
+                // For array datatypes, convert to packed array elements (not hvl_t)
+                MemorySegment arrayBuffer = VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, arrayBuffer);
+            }
+            else {
+                // For VL datatypes, convert to hvl_t structures
+                MemorySegment hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, hvlArray);
+            }
+
+            if (status < 0) {
+                h5libraryError();
+            }
+        }
+        catch (HDF5JavaException ex) {
+            throw new HDF5LibraryException("VL data conversion failed: " + ex.getMessage());
+        }
+        catch (ClassCastException ex) {
+            throw new HDF5LibraryException("Input data must be ArrayList array: " + ex.getMessage());
+        }
+
+        return status;
     }
 
     /**
@@ -4116,7 +4260,71 @@ public class H5 implements java.io.Serializable {
                                 long xfer_plist_id, Object[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5DreadVL not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+
+        int status = -1;
+        boolean vl_data_class = false;
+        // CRITICAL FIX: Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
+        Arena arena = Arena.global();
+
+        try {
+            // Detect VL data to determine if H5Treclaim is needed (JNI pattern)
+            vl_data_class = detectVLData(mem_type_id);
+            // Check the datatype class to determine reading strategy
+            int typeClass = H5Tget_class(mem_type_id);
+
+            if (typeClass == HDF5Constants.H5T_ARRAY) {
+                // For array datatypes, read directly into array buffer (not hvl_t)
+                ArrayList[] result = VLDataConverter.readArrayDatatypeFromDataset(dataset_id, mem_type_id,
+                                                   mem_space_id, file_space_id, xfer_plist_id, buf.length, arena);
+                System.arraycopy(result, 0, buf, 0, buf.length);
+                status = 0; // Success
+            } 
+            else {
+                // For VL datatypes, use hvl_t structures
+                MemorySegment hvlArray = hvl_t.allocateArray(buf.length, arena);
+
+                // Call native H5Dread
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                               file_space_id, xfer_plist_id, hvlArray);
+
+                if (status >= 0) {
+                    // Convert hvl_t data back to ArrayList array IMMEDIATELY while memory is valid
+                    ArrayList[] result = VLDataConverter.convertFromHVL(hvlArray, buf.length, mem_type_id);
+
+                    // Get dataspace for H5Treclaim
+                    long space_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_space(dataset_id);
+
+                    // Reclaim VL memory allocated by HDF5 only if VL data is detected (JNI pattern)
+                    try {
+                        if ((status >= 0) && vl_data_class) {
+                            org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(), hvlArray);
+                        }
+                    }
+                    catch (Exception reclaimEx) {
+                        // Log but don't fail if reclaim has issues
+                        System.err.println("Warning: H5Treclaim failed in H5DreadVL: " + reclaimEx.getMessage());
+                    }
+                    finally {
+                        if (space_id >= 0) {
+                            org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_id);
+                        }
+                    }
+
+                    System.arraycopy(result, 0, buf, 0, buf.length);
+                } 
+                else {
+                    h5libraryError();
+                }
+            }
+        } 
+        catch (HDF5JavaException ex) {
+            throw new HDF5LibraryException("VL data conversion failed: " + ex.getMessage());
+        }
+
+        return status;
     }
 
     /**
@@ -4906,7 +5114,45 @@ public class H5 implements java.io.Serializable {
                                  long xfer_plist_id, Object[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5DwriteVL not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+
+        int status = -1;
+        // CRITICAL FIX: Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
+        Arena arena = Arena.global();
+
+        try {
+            ArrayList[] arrayData = (ArrayList[]) buf;
+
+            // Check the datatype class to determine conversion strategy
+            int typeClass = H5Tget_class(mem_type_id);
+
+            if (typeClass == HDF5Constants.H5T_ARRAY) {
+                // For array datatypes, convert to packed array elements (not hvl_t)
+                MemorySegment arrayBuffer = VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                                                                file_space_id, xfer_plist_id, arrayBuffer);
+            }
+            else {
+                // For VL datatypes, convert to hvl_t structures
+                MemorySegment hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                                                                file_space_id, xfer_plist_id, hvlArray);
+            }
+
+            if (status < 0) {
+                h5libraryError();
+            }
+        } 
+        catch (HDF5JavaException ex) {
+            throw new HDF5LibraryException("VL data conversion failed: " + ex.getMessage());
+        }
+        catch (ClassCastException ex) {
+            throw new HDF5LibraryException("Input data must be ArrayList array: " + ex.getMessage());
+        }
+
+        return status;
     }
 
     /**
