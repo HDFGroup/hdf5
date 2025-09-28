@@ -117,7 +117,6 @@ jobs:
     call-ffm-latest-java:
         name: "FFM Latest Java Testing"
         uses: ./.github/workflows/main.yml
-        continue-on-error: true  # Non-blocking for bleeding-edge Java
         with:
             cmake_version: "latest"
             concurrent: ""
