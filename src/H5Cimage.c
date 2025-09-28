@@ -1277,8 +1277,8 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
     size_t         actual_header_len;
     size_t         expected_header_len;
     const uint8_t *p;
-    const uint8_t *p_end     = p + buf_size - 1; /* End of the p buffer */
-    herr_t         ret_value = SUCCEED;          /* Return value */
+    const uint8_t *p_end     = *buf + buf_size - 1; /* End of the p buffer */
+    herr_t         ret_value = SUCCEED;             /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1301,14 +1301,14 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
 
     /* Check version */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     version = *p++;
     if (version != (uint8_t)H5C__MDCI_BLOCK_VERSION_0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad metadata cache image version");
 
     /* Decode flags */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     flags = *p++;
     if (flags & H5C__MDCI_HEADER_HAVE_RESIZE_STATUS)
         have_resize_status = true;
@@ -1317,7 +1317,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
 
     /* Read image data length */
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     H5F_DECODE_LENGTH(f, p, cache_ptr->image_data_len);
 
     /* For now -- will become <= eventually */
@@ -1326,7 +1326,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
 
     /* Read num entries */
     if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     UINT32DECODE(p, cache_ptr->num_entries_in_image);
     if (cache_ptr->num_entries_in_image == 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad metadata cache entry count");
