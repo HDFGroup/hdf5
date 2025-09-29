@@ -51,6 +51,8 @@ set (HDF5_XML_REFERENCE_TEST_FILES
     tarray6.h5
     tarray7.h5
     tattr.h5
+    tbfloat16.h5
+    tbfloat16_be.h5
     tcompound.h5
     tcompound_complex.h5
     tdatareg.h5
@@ -88,6 +90,8 @@ set (HDF5_XML_REFERENCE_FILES
     tarray6.h5.xml
     tarray7.h5.xml
     tattr.h5.xml
+    tbfloat16.h5.xml
+    tbfloat16_be.h5.xml
     tbitfields_be.h5.xml
     tbitfields_le.h5.xml
     tcompound_complex.h5.xml
@@ -301,6 +305,10 @@ ADD_XML_H5_TEST (torderattr4.h5 0 -H --sort_by=creation_order --sort_order=desce
 # Add tests for _Float16 type
 ADD_XML_H5_TEST (tfloat16.h5 0 tfloat16.h5)
 ADD_XML_H5_TEST (tfloat16_be.h5 0 tfloat16_be.h5)
+
+# Add tests for bfloat16 type
+ADD_XML_H5_TEST (tbfloat16.h5 0 tbfloat16.h5)
+ADD_XML_H5_TEST (tbfloat16_be.h5 0 tbfloat16_be.h5)
 
 # tests for floating point user defined printf format
 ADD_XML_H5_TEST (tfpformat.h5 0 -u -m %.7f tfpformat.h5)

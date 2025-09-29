@@ -2736,6 +2736,16 @@ Java_hdf_hdf5lib_HDF5Constants_H5T_1IEEE_1F64LE(JNIEnv *env, jclass cls)
 {
     return H5T_IEEE_F64LE;
 }
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5T_1FLOAT_1BFLOAT16BE(JNIEnv *env, jclass cls)
+{
+    return H5T_FLOAT_BFLOAT16BE;
+}
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5T_1FLOAT_1BFLOAT16LE(JNIEnv *env, jclass cls)
+{
+    return H5T_FLOAT_BFLOAT16LE;
+}
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5T_1INTEGER(JNIEnv *env, jclass cls)
 {

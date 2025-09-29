@@ -5,17 +5,21 @@ on:
   workflow_dispatch:
     inputs:
       use_tag:
-        description: 'HDF5 Release version tag'
+        description: HDF5 Release version tag (e.g., v1.14.0)
         type: string
         required: true
       file_name:
-        description: 'HDF5 Release file name base'
+        description: HDF5 Release file name base
         type: string
         required: true
       target_dir:
-        description: 'HDF5 target bucket directory'
+        description: HDF5 target bucket directory
         type: string
         required: true
+      dry_run:
+        description: Dry run mode (skip S3 upload)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -23,45 +27,167 @@ permissions:
 jobs:
   publish-tag:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
     steps:
-        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        - name: Get Sources
-          uses: actions/checkout@9a9194f87191a7e9055e3e9b95b8cfb13023bb08 # v4.1.7
-          with:
-            fetch-depth: 0
-            ref: '${{ github.head_ref || github.ref_name }}'
+      - name: Validate Inputs
+        run: |
+          set -euo pipefail
+          echo "Validating inputs..."
+          if [[ ! "${{ inputs.use_tag }}" =~ ^hdf5[_-][0-9]+[._][0-9]+[._][0-9]+([._][0-9]+)?(-.*)?$ ]]; then
+            echo "❌ Invalid tag format. Expected: hdf5_X.Y.Z, hdf5-X_Y_Z, or hdf5_X.Y.Z.W"
+            exit 1
+          fi
+          if [[ "${{ inputs.target_dir }}" == *".."* ]] || [[ "${{ inputs.target_dir }}" == /* ]]; then
+            echo "❌ Invalid target_dir. Cannot contain '..' or start with '/'"
+            exit 1
+          fi
+          if [[ "${{ inputs.file_name }}" == *".."* ]] || [[ "${{ inputs.file_name }}" == *"/"* ]] || [[ "${{ inputs.file_name }}" =~ [^a-zA-Z0-9._-] ]]; then
+            echo "❌ Invalid file_name. Can only contain alphanumeric, dots, underscores, and hyphens"
+            exit 1
+          fi
+          echo "✅ Input validation passed"
 
-        - name: Get hdf5 release
-          uses: dsaltares/fetch-gh-release-asset@master
-          with:
-            repo: 'HDFGroup/hdf5'
-            version: 'tags/${{ inputs.use_tag }}'
-            regex: true
-            target: 'HDF5/'
-            file: '${{ inputs.use_hdf }}-*.*'
+      # Checks-out your repository under $GITHUB_WORKSPACE
+      - name: Get Sources
+        uses: actions/checkout@v4.2.2  # Updated to latest stable
+        with:
+          fetch-depth: 0
+          ref: '${{ github.head_ref || github.ref_name }}'
 
-        - name: Setup AWS CLI
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                 aws-region: ${{ secrets.AWS_REGION }}
+      - name: Create download directory
+        run: mkdir -p HDF5
 
-        - name: Sync release to S3 bucket
-          run: |
-                aws s3 sync ./HDF5 s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads --delete
+      - name: Get HDF5 release assets
+        uses: robinraju/release-downloader@v1.11  # More reliable alternative
+        with:
+          repository: HDFGroup/hdf5
+          tag: ${{ inputs.use_tag }}
+          fileName: ${{ inputs.file_name }}-*
+          out-file-path: HDF5
+          extract: false
 
-        - name: Uncompress source (Linux)
-          run: unzip ${{ github.workspace }}/HDF5/${{ inputs.file_name }}.doxygen.zip
+      - name: Verify downloaded files
+        run: |
+          set -euo pipefail
+          echo "📁 Downloaded files:"
+          ls -la HDF5/
+          
+          # Check for expected files
+          EXPECTED_FILES=("${{ inputs.file_name }}.doxygen.zip" "${{ inputs.file_name }}.html.abi.reports.tar.gz")
+          for file in "${EXPECTED_FILES[@]}"; do
+            if [ ! -f "HDF5/$file" ]; then
+              echo "⚠️  Warning: Expected file not found: $file"
+            else
+              echo "✅ Found: $file"
+            fi
+          done
 
-        - name: Sync userguide to S3 bucket
-          run: |
-                aws s3 sync ./${{ inputs.file_name }}.doxygen s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen --delete
+      - name: Setup AWS CLI
+        if: ${{ !inputs.dry_run }}
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-        - name: Uncompress compatibility reports (Linux)
-          run: unzip ${{ github.workspace }}/HDF5/${{ inputs.file_name }}.html.abi.reports.tar.gz
+      - name: Sync release files to S3 bucket
+        if: ${{ !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          echo "🚀 Syncing release files to S3..."
+          aws s3 sync ./HDF5 s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads \
+            --delete \
+            --include="*.tar.gz" \
+            --include="*.zip" \
+            --include="*.msi" \
+            --include="*.dmg" \
+            --include="*.exe" \
+            --exclude="*" \
+            --exact-timestamps
+          echo "✅ Release files sync completed"
 
-        - name: Sync compatibility reports to S3 bucket
-          run: |
-                aws s3 sync ./hdf5 s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/compat_report --delete
+      - name: Process documentation
+        run: |
+          set -euo pipefail
+          DOC_FILE="HDF5/${{ inputs.file_name }}.doxygen.zip"
+          if [ -f "$DOC_FILE" ]; then
+            echo "📚 Processing documentation..."
+            unzip -q "$DOC_FILE"
+            if [ -d "${{ inputs.file_name }}.doxygen" ]; then
+              echo "✅ Documentation extracted successfully"
+            else
+              echo "❌ Documentation extraction failed"
+              exit 1
+            fi
+          else
+            echo "⚠️  Documentation file not found, skipping..."
+          fi
 
+      - name: Sync documentation to S3 bucket
+        if: ${{ !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          if [ -d "${{ inputs.file_name }}.doxygen" ]; then
+            echo "📚 Syncing documentation to S3..."
+            aws s3 sync ./${{ inputs.file_name }}.doxygen \
+              s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen \
+              --delete \
+              --content-type "text/html" \
+              --metadata-directive REPLACE
+            echo "✅ Documentation sync completed"
+          else
+            echo "⚠️  No documentation directory found, skipping..."
+          fi
+
+      - name: Process compatibility reports
+        run: |
+          set -euo pipefail
+          COMPAT_FILE="HDF5/${{ inputs.file_name }}.html.abi.reports.tar.gz"
+          if [ -f "$COMPAT_FILE" ]; then
+            echo "📊 Processing compatibility reports..."
+            tar -xzf "$COMPAT_FILE"
+            if [ -d "hdf5" ]; then
+              echo "✅ Compatibility reports extracted successfully"
+            else
+              echo "❌ Compatibility reports extraction failed"
+              exit 1
+            fi
+          else
+            echo "⚠️  Compatibility reports file not found, skipping..."
+          fi
+
+      - name: Sync compatibility reports to S3 bucket
+        if: ${{ !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          if [ -d "hdf5" ]; then
+            echo "📊 Syncing compatibility reports to S3..."
+            aws s3 sync ./hdf5 \
+              s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/compat_report \
+              --delete \
+              --content-type "text/html" \
+              --metadata-directive REPLACE
+            echo "✅ Compatibility reports sync completed"
+          else
+            echo "⚠️  No compatibility reports directory found, skipping..."
+          fi
+
+      - name: Summary
+        run: |
+          set -euo pipefail
+          echo "🎉 HDF5 Release Publication Summary"
+          echo "=================================="
+          echo "🏷️  Tag: ${{ inputs.use_tag }}"
+          echo "📁 File Base: ${{ inputs.file_name }}"
+          echo "🎯 Target Directory: ${{ inputs.target_dir }}"
+          echo "🌐 Dry Run: ${{ inputs.dry_run }}"
+          echo ""
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "ℹ️  This was a dry run - no files were uploaded to S3"
+          else
+            echo "✅ Release published successfully!"
+            echo "📍 Downloads: s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads"
+            echo "📖 Documentation: s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen"
+            echo "📊 Reports: s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/compat_report"
+          fi
