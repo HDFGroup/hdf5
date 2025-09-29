@@ -1283,8 +1283,8 @@ ADD_H5_TEST (tfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16.h5
 ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16_be.h5 ${F16_NATIVE_ONLY})
 
 # Add tests for bfloat16 type
-ADD_H5_TEST (tbfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tbfloat16.h5 ${F16_NATIVE_ONLY})
-ADD_H5_TEST (tbfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tbfloat16_be.h5 ${F16_NATIVE_ONLY})
+ADD_H5_TEST (tbfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tbfloat16.h5)
+ADD_H5_TEST (tbfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tbfloat16_be.h5)
 
 # Add tests for complex numbers. For portability, use a fixed floating-point
 # precision and skip dumping of the "long double _Complex" dataset. The "long
