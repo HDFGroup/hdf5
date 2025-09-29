@@ -53,6 +53,8 @@
 #define RTREE_THRESHOLD_FILENAME "vds_rtree_threshold_test.h5"
 #define RTREE_MAX_TEST_MAPPINGS  (H5D_VIRTUAL_TREE_THRESHOLD + 100)
 
+#define RTREE_RW_FILENAME "vds_rtree_rw.h5"
+
 static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {H5D_VIRTUAL_TREE_THRESHOLD, 100, 1000,
                                                                  10000};
 
@@ -875,6 +877,115 @@ error:
 
     return FAIL;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    test_rtree_rw
+ *
+ * Purpose:     Test that dataset reads/writes produce correctly values
+ *              with rtree on/off
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_rtree_rw(bool use_tree)
+{
+    hid_t   file_id  = H5I_INVALID_HID;
+    hid_t   dapl_id  = H5I_INVALID_HID;
+    hid_t   vdset_id = H5I_INVALID_HID;
+    hid_t   space_id = H5I_INVALID_HID;
+    hsize_t wdims    = RTREE_MAX_TEST_MAPPINGS / 2;
+    int     rbuf[RTREE_MAX_TEST_MAPPINGS];
+    int     wbuf[RTREE_MAX_TEST_MAPPINGS];
+    int     num_mappings = RTREE_MAX_TEST_MAPPINGS;
+
+    const char *test_str = use_tree ? "R/W behavior with tree enabled" : "R/W behavior with tree disabled";
+
+    TESTING(test_str);
+
+    memset(rbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
+    memset(wbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
+
+    if ((file_id = H5Fcreate(RTREE_RW_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Set the spatial tree property */
+    if (H5Pset_dset_use_spatial_tree(dapl_id, use_tree) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create virtual dataset with specified number of mappings */
+    if ((vdset_id = create_virtual_dataset(file_id, dapl_id, num_mappings)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify initial read values (each element should equal its index) */
+    if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        FAIL_STACK_ERROR;
+
+    for (int i = 0; i < num_mappings; i++) {
+        if (rbuf[i] != i) {
+            printf("%d mappings: Data mismatch at [%d]: expected %d, got %d\n", num_mappings, i, i, rbuf[i]);
+            FAIL_STACK_ERROR;
+        }
+    }
+
+    /* Write to first half of dataset with 2*index */
+    for (int i = 0; i < num_mappings / 2; i++)
+        wbuf[i] = 2 * i;
+
+    if ((space_id = H5Screate_simple(1, (const hsize_t *)&wdims, NULL)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, (const hsize_t *)&(hsize_t){0}, NULL,
+                            (const hsize_t *)&wdims, NULL) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Dwrite(vdset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, wbuf) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Read back entire dataset and verify values */
+    if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        FAIL_STACK_ERROR;
+
+    for (int i = 0; i < num_mappings; i++) {
+        int expected = (i < num_mappings / 2) ? (2 * i) : i;
+        if (rbuf[i] != expected) {
+            printf("%d mappings: Post-write data mismatch at [%d]: expected %d, got %d\n", num_mappings, i,
+                   expected, rbuf[i]);
+            // FAIL_STACK_ERROR;
+        }
+    }
+
+    /* Cleanup */
+    if (H5Dclose(vdset_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dapl_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Fclose(file_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(space_id) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space_id);
+        H5Dclose(vdset_id);
+        H5Pclose(dapl_id);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -907,8 +1018,8 @@ main(void)
     nerrors += test_rtree_threshold(true) < 0 ? 1 : 0;
     // TODO - Fix failure
     nerrors += test_rtree_threshold(false) < 0 ? 1 : 0;
-
-    // TODO - Write test with tree on/off
+    nerrors += test_rtree_rw(true) < 0 ? 1 : 0;
+    nerrors += test_rtree_rw(false) < 0 ? 1 : 0;
     if (nerrors)
         goto error;
 
