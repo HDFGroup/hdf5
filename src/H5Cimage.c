@@ -130,7 +130,7 @@ static void   H5C__prep_for_file_close__compute_fd_heights_real(H5C_cache_entry_
 static herr_t H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr);
 static herr_t H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr);
 static herr_t H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr);
-static H5C_cache_entry_t *H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size,
+static H5C_cache_entry_t *H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size,
                                                        const uint8_t **buf);
 static herr_t             H5C__write_cache_image_superblock_msg(H5F_t *f, bool create);
 static herr_t             H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr);
@@ -2376,7 +2376,6 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
 {
     H5C_cache_entry_t *pf_entry_ptr;        /* Pointer to prefetched entry */
     H5C_cache_entry_t *parent_ptr;          /* Pointer to parent of prefetched entry */
-    hsize_t            image_len;           /* Image length */
     const uint8_t     *p;                   /* Pointer into image buffer */
     unsigned           u, v;                /* Local index variable */
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -2393,10 +2392,9 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
 
     /* Decode metadata cache image header */
     p         = (uint8_t *)cache_ptr->image_buffer;
-    image_len = cache_ptr->image_len;
-    if (H5C__decode_cache_image_header(f, cache_ptr, &p, image_len + 1) < 0)
+    if (H5C__decode_cache_image_header(f, cache_ptr, &p, cache_ptr->image_len + 1) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDECODE, FAIL, "cache image header decode failed");
-    assert((size_t)(p - (uint8_t *)cache_ptr->image_buffer) < image_len);
+    assert((size_t)(p - (uint8_t *)cache_ptr->image_buffer) < cache_ptr->image_len);
 
     /* The image_data_len and # of entries should be defined now */
     assert(cache_ptr->image_data_len > 0);
@@ -2408,7 +2406,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
         /* Create the prefetched entry described by the ith
          * entry in cache_ptr->image_entrise.
          */
-        if (NULL == (pf_entry_ptr = H5C__reconstruct_cache_entry(f, cache_ptr, &image_len, &p)))
+        if (NULL == (pf_entry_ptr = H5C__reconstruct_cache_entry(f, cache_ptr, cache_ptr->image_len, &p)))
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "reconstruction of cache entry failed");
 
         /* Note that we make no checks on available cache space before
@@ -2564,7 +2562,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5C_cache_entry_t *
-H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size, const uint8_t **buf)
+H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size, const uint8_t **buf)
 {
     H5C_cache_entry_t *pf_entry_ptr = NULL; /* Reconstructed cache entry */
     uint8_t            flags        = 0;
@@ -2577,7 +2575,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size
 #endif
     bool               file_is_rw;
     const uint8_t     *p;
-    const uint8_t     *p_end     = *buf + *buf_size - 1; /* Pointer to last valid byte in buffer */
+    const uint8_t     *p_end     = *buf + buf_size - 1; /* Pointer to last valid byte in buffer */
     H5C_cache_entry_t *ret_value = NULL;                 /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2746,8 +2744,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size
     /* Sanity checks */
     assert(pf_entry_ptr->size > 0 && pf_entry_ptr->size < H5C_MAX_ENTRY_SIZE);
 
-    /* Update buffer pointer and buffer len */
-    *buf_size -= (hsize_t)(p - *buf);
+    /* Update buffer pointer */
     *buf = p;
 
     ret_value = pf_entry_ptr;
