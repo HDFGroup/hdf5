@@ -500,7 +500,6 @@ Simple example programs showing how to use complex number datatypes have been ad
 
    Fixes GitHub issue #5854
 
-- Check for overflow in decoded heap block addresses
 
 ### Fixed security issue CVE-2025-6857
 
