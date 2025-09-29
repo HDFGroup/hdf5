@@ -494,7 +494,7 @@ Simple example programs showing how to use complex number datatypes have been ad
 # 🪲 Bug Fixes
 
 ## Library
-- Fix bugs in object header operations
+### Fix bugs in object header operations
 
    In some rare circumstances, such as deleting hard links that point to their own parent group in a file using the new file format, memory corruption could occur due to recursive operations changing data structures being operated on by multiple levels of recursion. Made changes to delay changing the data structure in a dangerous way until recursion is complete.
 
