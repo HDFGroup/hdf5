@@ -629,54 +629,66 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_rtree_dapl(bool use_tree)
+test_rtree_dapl(bool use_tree, bool read_init)
 {
     hid_t file_id  = H5I_INVALID_HID;
     hid_t dapl_id  = H5I_INVALID_HID;
     hid_t vdset_id = H5I_INVALID_HID;
 
-    int         rbuf[RTREE_MAX_TEST_MAPPINGS];
-    bool        tree_correct = false;
-    const char *test_str     = NULL;
+    int  rbuf[RTREE_MAX_TEST_MAPPINGS];
+    int  wbuf[RTREE_MAX_TEST_MAPPINGS];
+    bool tree_correct = false;
+    char test_str[256];
 
     /* Inverse of use_tree for re-open part of test */
     bool use_tree_inverse = !use_tree;
 
-    if (use_tree) {
-        test_str = "spatial tree option enabled";
+    memset(test_str, 0, sizeof(test_str));
+
+    if (snprintf(test_str, sizeof(test_str), "spatial tree option %s", use_tree ? "enabled" : "disabled") < 0)
+        FAIL_STACK_ERROR;
+
+    if (read_init) {
+        strncat(test_str, " with read initialization", sizeof(test_str) - strlen(test_str) - 1);
     }
     else {
-        test_str = "spatial tree option disabled";
+        strncat(test_str, " with write initialization", sizeof(test_str) - strlen(test_str) - 1);
     }
 
     TESTING(test_str);
 
-    /* Create file */
+    memset(rbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
+    memset(wbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
+
+    /* One-time setup */
     if ((file_id = H5Fcreate(RTREE_DAPL_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Create DAPL */
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
-
-    /* Set the spatial tree property */
-    if (H5Pset_dset_use_spatial_tree(dapl_id, use_tree) < 0)
         FAIL_STACK_ERROR;
 
     /* Create virtual dataset with enough mappings to use tree */
     if ((vdset_id = create_virtual_dataset(file_id, dapl_id, RTREE_MAX_TEST_MAPPINGS)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Read the entire virtual dataset to force tree initialization */
-    if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+    if (H5Dclose(vdset_id) < 0)
         FAIL_STACK_ERROR;
 
-    /* Verify read data matches expected pattern */
-    for (int i = 0; i < (RTREE_MAX_TEST_MAPPINGS); i++) {
-        if (rbuf[i] != i) {
-            printf("Data mismatch at [%d]: expected %d, got %d\n", i, i, rbuf[i]);
+    /* Set the spatial tree property */
+    if (H5Pset_dset_use_spatial_tree(dapl_id, use_tree) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((vdset_id = H5Dopen2(file_id, RTREE_DAPL_VDS_NAME, dapl_id)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Read/write the entire virtual dataset to force tree initialization */
+    if (read_init) {
+        if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
             FAIL_STACK_ERROR;
-        }
+    }
+    else {
+        if (H5Dwrite(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+            FAIL_STACK_ERROR;
     }
 
     /* Verify tree existence matches expectation */
@@ -704,8 +716,6 @@ test_rtree_dapl(bool use_tree)
     tree_correct = false;
     memset(rbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
 
-    H5close();
-
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         FAIL_STACK_ERROR;
 
@@ -718,16 +728,14 @@ test_rtree_dapl(bool use_tree)
     if ((vdset_id = H5Dopen2(file_id, RTREE_DAPL_VDS_NAME, dapl_id)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Read the entire virtual dataset to force tree initialization */
-    if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
-
-    /* Verify read data matches expected pattern */
-    for (int i = 0; i < (RTREE_MAX_TEST_MAPPINGS); i++) {
-        if (rbuf[i] != i) {
-            printf("Data mismatch after re-open at [%d]: expected %d, got %d\n", i, i, rbuf[i]);
+    /* Read/write the entire virtual dataset to force tree initialization */
+    if (read_init) {
+        if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
             FAIL_STACK_ERROR;
-        }
+    }
+    else {
+        if (H5Dwrite(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+            FAIL_STACK_ERROR;
     }
 
     /* Verify tree existence matches expectation after re-open */
@@ -1022,8 +1030,10 @@ main(void)
     nerrors += test_rtree_copy() < 0 ? 1 : 0;
 
     /* Test spatial tree with DAPL property enabled */
-    nerrors += test_rtree_dapl(true) < 0 ? 1 : 0;
-    nerrors += test_rtree_dapl(false) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(true, true) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(true, false) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(false, true) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(false, false) < 0 ? 1 : 0;
 
     /* Test the mapping count threshold */
     nerrors += test_rtree_threshold(true) < 0 ? 1 : 0;
@@ -1031,6 +1041,7 @@ main(void)
     nerrors += test_rtree_threshold(false) < 0 ? 1 : 0;
     nerrors += test_rtree_rw(true) < 0 ? 1 : 0;
     nerrors += test_rtree_rw(false) < 0 ? 1 : 0;
+
     if (nerrors)
         goto error;
 
