@@ -2165,7 +2165,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
                 HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for MTIME message");
             if (exists > 0) {
                 /* Get "old style" modification time info */
-                if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_MTIME_ID, &oinfo->ctime))
+                if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_MTIME_ID, &oh->ctime))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read MTIME message");
             } /* end if */
             else {
@@ -2174,12 +2174,15 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for MTIME_NEW message");
                 if (exists > 0) {
                     /* Get "new style" modification time info */
-                    if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_MTIME_NEW_ID, &oinfo->ctime))
+                    if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_MTIME_NEW_ID, &oh->ctime))
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read MTIME_NEW message");
                 } /* end if */
                 else
-                    oinfo->ctime = 0;
+                    oh->ctime = 0;
             } /* end else */
+
+            /* Get ctime field */
+            oinfo->ctime = oh->ctime;
         }     /* end else */
     }         /* end if */
 
