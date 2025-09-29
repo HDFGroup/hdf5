@@ -530,7 +530,7 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_MDCI[1];
 /* Placeholder for unknown message. (0x0019) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
 
-/* Placeholder for deleted message. (0x0019) */
+/* Placeholder for deleted message. (0x001a) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_DELETED[1];
 
 /*
