@@ -552,6 +552,73 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_rtree_existence_helper
+ *
+ * Purpose:     Test helper to verify that r-tree existence on a dataset
+ *              matches what is expected
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_rtree_existence_helper(hid_t vdset_id, bool expect_tree, bool *correct_out)
+{
+    herr_t                 ret_value = SUCCEED;
+    H5D_t                 *dset      = NULL;
+    H5O_storage_virtual_t *storage   = NULL;
+
+    assert(correct_out);
+    *correct_out = false;
+
+    /* Get the dataset object - this is using internal API for testing */
+    if (NULL == (dset = (H5D_t *)H5VL_object(vdset_id))) {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (dset->shared->layout.type != H5D_VIRTUAL) {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    /* Get the virtual storage structure */
+    storage = &(dset->shared->layout.storage.u.virt);
+
+    /* Verify tree existence matches expectation */
+    if (expect_tree) {
+        if (storage->tree == NULL) {
+            puts("Expected spatial tree to exist but it was NULL");
+            *correct_out = false;
+            goto done;
+        }
+
+        if (storage->not_in_tree_nused > 0 && storage->not_in_tree_list == NULL) {
+            puts("Expected not_in_tree_list array to exist but it was NULL");
+            *correct_out = false;
+            goto done;
+        }
+    }
+    else {
+        if (storage->tree != NULL) {
+            puts("Expected spatial tree to be NULL but it exists");
+            *correct_out = false;
+            goto done;
+        }
+        if (storage->not_in_tree_list != NULL || storage->not_in_tree_nused > 0) {
+            puts("Expected not_in_tree_list to be empty but it exists");
+            *correct_out = false;
+            goto done;
+        }
+    }
+
+    *correct_out = true;
+done:
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    test_rtree_dapl
  *
  * Purpose:     Test R-tree options on the DAPL
@@ -569,11 +636,8 @@ test_rtree_dapl(bool use_tree)
     hid_t vdset_id = H5I_INVALID_HID;
 
     int         rbuf[RTREE_MAX_TEST_MAPPINGS];
-    const char *test_str = NULL;
-
-    /* Internal values for introspection */
-    H5D_t                 *dset    = NULL;
-    H5O_storage_virtual_t *storage = NULL;
+    bool        tree_correct = false;
+    const char *test_str     = NULL;
 
     /* Inverse of use_tree for re-open part of test */
     bool use_tree_inverse = !use_tree;
@@ -615,37 +679,12 @@ test_rtree_dapl(bool use_tree)
         }
     }
 
-    /* Get the dataset object - this is using internal API for testing */
-    if (NULL == (dset = (H5D_t *)H5VL_object(vdset_id)))
-        FAIL_STACK_ERROR;
-
-    if (dset->shared->layout.type != H5D_VIRTUAL)
-        FAIL_STACK_ERROR;
-
-    /* Get the virtual storage structure */
-    storage = &(dset->shared->layout.storage.u.virt);
-
     /* Verify tree existence matches expectation */
-    if (use_tree) {
-        if (storage->tree == NULL) {
-            puts("Expected spatial tree to exist but it was NULL");
-            FAIL_STACK_ERROR;
-        }
-        if (storage->not_in_tree_nused > 0 && storage->not_in_tree_list == NULL) {
-            puts("Expected not_in_tree_list array to exist but it was NULL");
-            FAIL_STACK_ERROR;
-        }
-    }
-    else {
-        if (storage->tree != NULL) {
-            puts("Expected spatial tree to be NULL but it exists");
-            FAIL_STACK_ERROR;
-        }
-        if (storage->not_in_tree_list != NULL || storage->not_in_tree_nused > 0) {
-            puts("Expected not_in_tree_list to be empty but it exists");
-            FAIL_STACK_ERROR;
-        }
-    }
+    if (test_rtree_existence_helper(vdset_id, use_tree, &tree_correct) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!tree_correct)
+        FAIL_STACK_ERROR;
 
     /* Close the dataset and re-open it with the opposite value set in DAPL */
     if (H5Dclose(vdset_id) < 0)
@@ -661,12 +700,11 @@ test_rtree_dapl(bool use_tree)
     if (H5Pclose(dapl_id) < 0)
         FAIL_STACK_ERROR;
 
-    dapl_id = H5I_INVALID_HID;
-
+    dapl_id      = H5I_INVALID_HID;
+    tree_correct = false;
     memset(rbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
 
     H5close();
-    H5open();
 
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         FAIL_STACK_ERROR;
@@ -692,39 +730,12 @@ test_rtree_dapl(bool use_tree)
         }
     }
 
-    /* Get the dataset object - this is using internal API for testing */
-    if (NULL == (dset = (H5D_t *)H5VL_object(vdset_id)))
-        FAIL_STACK_ERROR;
-
-    if (dset->shared->layout.type != H5D_VIRTUAL)
-        FAIL_STACK_ERROR;
-
-    storage = &(dset->shared->layout.storage.u.virt);
-
     /* Verify tree existence matches expectation after re-open */
-    if (use_tree_inverse) {
-        if (storage->tree == NULL) {
-            puts("Expected spatial tree to exist but it was NULL after re-open");
-            FAIL_STACK_ERROR;
-        }
-        /* not_in_tree_list can be NULL if all mappings fit in tree - this is OK */
-        /* Just verify consistency: if nused > 0, then list should exist */
-        if (storage->not_in_tree_nused > 0 && storage->not_in_tree_list == NULL) {
-            puts("Expected not_in_tree_list array to exist but it was NULL after re-open");
-            FAIL_STACK_ERROR;
-        }
-        /* When tree is enabled, we just verify tree exists - not_in_tree_list may or may not exist */
-    }
-    else {
-        if (storage->tree != NULL) {
-            puts("Expected spatial tree to be NULL but it exists after re-open");
-            FAIL_STACK_ERROR;
-        }
-        if (storage->not_in_tree_list != NULL || storage->not_in_tree_nused > 0) {
-            puts("Expected not_in_tree_list to be empty but it exists after re-open");
-            FAIL_STACK_ERROR;
-        }
-    }
+    if (test_rtree_existence_helper(vdset_id, use_tree_inverse, &tree_correct) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!tree_correct)
+        FAIL_STACK_ERROR;
 
     /* Cleanup */
     if (H5Dclose(vdset_id) < 0)
