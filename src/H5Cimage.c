@@ -2391,7 +2391,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     assert(cache_ptr->image_len > 0);
 
     /* Decode metadata cache image header */
-    p         = (uint8_t *)cache_ptr->image_buffer;
+    p = (uint8_t *)cache_ptr->image_buffer;
     if (H5C__decode_cache_image_header(f, cache_ptr, &p, cache_ptr->image_len + 1) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDECODE, FAIL, "cache image header decode failed");
     assert((size_t)(p - (uint8_t *)cache_ptr->image_buffer) < cache_ptr->image_len);
@@ -2576,7 +2576,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size,
     bool               file_is_rw;
     const uint8_t     *p;
     const uint8_t     *p_end     = *buf + buf_size - 1; /* Pointer to last valid byte in buffer */
-    H5C_cache_entry_t *ret_value = NULL;                 /* Return value */
+    H5C_cache_entry_t *ret_value = NULL;                /* Return value */
 
     FUNC_ENTER_PACKAGE
 

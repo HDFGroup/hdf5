@@ -2183,8 +2183,8 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 
             /* Get ctime field */
             oinfo->ctime = oh->ctime;
-        }     /* end else */
-    }         /* end if */
+        } /* end else */
+    }     /* end if */
 
     /* Retrieve # of attributes */
     if (fields & H5O_INFO_NUM_ATTRS)
