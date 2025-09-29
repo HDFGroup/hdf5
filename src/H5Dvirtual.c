@@ -106,8 +106,7 @@
             should_insert = false;                                                                           \
         }                                                                                                    \
         /* Do not insert zero-dim mappings */                                                                \
-        else if ((_vspace && H5S_GET_EXTENT_NDIMS(_vspace) < 1) ||                                           \
-                 (_src_space && H5S_GET_EXTENT_NDIMS(_src_space) < 1)) {                                     \
+        else if ((_vspace && H5S_GET_EXTENT_NDIMS(_vspace) < 1)) {                                     \
             should_insert = false;                                                                           \
         }                                                                                                    \
         /* Otherwise, we can insert it */                                                                    \
