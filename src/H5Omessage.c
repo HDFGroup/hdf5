@@ -1758,12 +1758,14 @@ done:
                     (*mesg_idx)--;
 
                 /* Slide down mesg array and adjust message counts */
-                memmove(&oh->mesg[u], &oh->mesg[u + 1], ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
+                if (u < (oh->nmesgs - 1))
+                    memmove(&oh->mesg[u], &oh->mesg[u + 1], ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
                 oh->nmesgs--;
                 oh->num_deleted_mesgs--;
             }
             else
                 u++;
+        assert(oh->num_deleted_mesgs == 0);
     }
     else
         /* Otherwise, mark that we should condense the header when we leave recursion */

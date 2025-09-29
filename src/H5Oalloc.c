@@ -2265,12 +2265,14 @@ H5O__condense_header(H5F_t *f, H5O_t *oh)
     /* First remove all deleted messages from the object header */
     for (unsigned u = 0; oh->num_deleted_mesgs > 0 && u < oh->nmesgs;)
         if (oh->mesg[u].type->id == H5O_DELETED_ID) {
-            memmove(&oh->mesg[u], &oh->mesg[u + 1], ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
+            if (u < (oh->nmesgs - 1))
+                memmove(&oh->mesg[u], &oh->mesg[u + 1], ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
             oh->nmesgs--;
             oh->num_deleted_mesgs--;
         }
         else
             u++;
+    assert(oh->num_deleted_mesgs == 0);
 
     /* Loop until no changed to the object header messages & chunks */
     do {
