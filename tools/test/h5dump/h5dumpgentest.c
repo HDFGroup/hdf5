@@ -133,7 +133,6 @@
 #define FILE_REFER_ATTR   "trefer_attr.h5"
 #define FILE_ATTR4_BE   "tattr4_be.h5"
 #define FILE_NO_SUBSET   "tno-subset.h5"
-#define F99_DSET "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
 #define FILE_TVMS  "tvms.h5"
 
 #define ONION_TEST_FIXNAME_SIZE 1024
