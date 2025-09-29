@@ -1115,27 +1115,6 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to build documentation
-#-----------------------------------------------------------------------------
-if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
-# check if Doxygen is installed
-  find_package (Doxygen)
-  if (DOXYGEN_FOUND)
-    option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
-    mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
-    if (HDF5_ENABLE_DOXY_WARNINGS)
-      set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS_PRINT")
-    else ()
-      set (HDF5_DOXY_WARNINGS "NO")
-    endif ()
-    message (VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
-    add_subdirectory (doxygen)
-  else ()
-    message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------
 if (BUILD_TESTING)
@@ -1284,6 +1263,27 @@ if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR
     include (${HDF_RESOURCES_DIR}/HDF5ExampleCache.cmake)
     set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})
     add_subdirectory (HDF5Examples)
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build documentation
+#-----------------------------------------------------------------------------
+if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
+# check if Doxygen is installed
+  find_package (Doxygen)
+  if (DOXYGEN_FOUND)
+    option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
+    mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
+    if (HDF5_ENABLE_DOXY_WARNINGS)
+      set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS_PRINT")
+    else ()
+      set (HDF5_DOXY_WARNINGS "NO")
+    endif ()
+    message (VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
+    add_subdirectory (doxygen)
+  else ()
+    message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()
 endif ()
 
