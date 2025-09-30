@@ -2857,7 +2857,18 @@ H5D__virtual_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t H5_ATTR_UNUSED *
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__virtual_io_init() */
 
-// TODO
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_pre_io_process_mapping
+ *
+ * Purpose:     Process a single virtual mapping to prepare for I/O.
+ *              This includes projecting the virtual mapping onto mem_space
+ *              and opening source datasets. The number of elements included
+ *              in this mapping selection is added to tot_nelmts.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__virtual_pre_io_process_mapping(H5D_dset_io_info_t *dset_info, H5S_t *file_space, H5S_t *mem_space,
                                     hsize_t *tot_nelmts, H5O_storage_virtual_ent_t *curr_mapping)
@@ -3083,7 +3094,7 @@ H5D__virtual_pre_io_process_mapping(H5D_dset_io_info_t *dset_info, H5S_t *file_s
     }     /* end else */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D__virtual_pre_io_process_mapping() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_pre_io
