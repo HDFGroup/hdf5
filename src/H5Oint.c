@@ -120,7 +120,8 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_REFCOUNT,    /*0x0016 Object's ref. count             */
     H5O_MSG_FSINFO,      /*0x0017 Free-space manager info         */
     H5O_MSG_MDCI,        /*0x0018 Metadata cache image            */
-    H5O_MSG_UNKNOWN      /*0x0019 Placeholder for unknown message */
+    H5O_MSG_UNKNOWN,     /*0x0019 Placeholder for unknown message */
+    H5O_MSG_DELETED      /*0x001a Placeholder for deleted message */
 };
 
 /* Format version bounds for object header */
@@ -2918,6 +2919,8 @@ H5O__free(H5O_t *oh, bool H5_ATTR_NDEBUG_UNUSED force)
     /* check args */
     assert(oh);
     assert(0 == oh->rc);
+    assert(0 == oh->mesgs_modified);
+    assert(0 == oh->recursion_level);
 
     /* Destroy chunks */
     if (oh->chunk) {
