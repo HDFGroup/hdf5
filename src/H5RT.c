@@ -748,6 +748,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RT__node_copy() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5RT__free_recurse
+ *
+ * Purpose:     Recursively free the provided node and its child nodes.
+ *              Does not free the leaves.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 H5RT__free_recurse(H5RT_node_t *node)
 {
