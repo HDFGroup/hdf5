@@ -29,7 +29,7 @@
 #define H5O_NCHUNKS 2 /*initial number of chunks	     */
 #define H5O_MIN_SIZE                                                                                         \
     22 /* Min. obj header data size (must be big enough for a message prefix and a continuation message) */
-#define H5O_MSG_TYPES         26    /* # of types of messages            */
+#define H5O_MSG_TYPES         27    /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535 /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -303,11 +303,14 @@ struct H5O_t {
     unsigned min_dense;   /* Minimum # of "dense" attributes   */
 
     /* Message management (stored, encoded in chunks) */
-    size_t      nmesgs;         /*number of messages		     */
-    size_t      alloc_nmesgs;   /*number of message slots	     */
-    H5O_mesg_t *mesg;           /*array of messages		     */
-    size_t      link_msgs_seen; /* # of link messages seen when loading header */
-    size_t      attr_msgs_seen; /* # of attribute messages seen when loading header */
+    size_t      nmesgs;            /*number of messages		     */
+    size_t      alloc_nmesgs;      /*number of message slots	     */
+    H5O_mesg_t *mesg;              /*array of messages		     */
+    size_t      link_msgs_seen;    /* # of link messages seen when loading header */
+    size_t      attr_msgs_seen;    /* # of attribute messages seen when loading header */
+    unsigned    mesgs_modified;    /* Whether any messages were modified during this operation */
+    unsigned    recursion_level;   /* Level of recursion within message iteration */
+    unsigned    num_deleted_mesgs; /* Number of deleted messages */
 
     /* Chunk management (not stored) */
     size_t       nchunks;       /*number of chunks		     */
@@ -526,6 +529,9 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_MDCI[1];
 
 /* Placeholder for unknown message. (0x0019) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
+
+/* Placeholder for deleted message. (0x001a) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_DELETED[1];
 
 /*
  * Object header "object" types

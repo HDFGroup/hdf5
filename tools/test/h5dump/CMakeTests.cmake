@@ -16,6 +16,15 @@
 ##############################################################################
 ##############################################################################
 
+include(${HDF_CONFIG_DIR}/HDF5Macros.cmake)
+
+# System-independent path separator
+if (WIN32)
+  set (CMAKE_SEP "\;")
+else ()
+  set (CMAKE_SEP ":")
+endif ()
+
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the test directory into the source directory
 # --------------------------------------------------------------------
@@ -426,6 +435,52 @@ else ()
 endif ()
 add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
+# --------------------------------------------------------------------
+# Copy test files for each external VOL connector
+# --------------------------------------------------------------------
+set(h5dump_vol_files_list "")
+foreach(external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
+  HDF5_GET_VOL_TGT_INFO(${external_vol_tgt} ext_vol_dir_name vol_env)
+  # Setup testfiles directory
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std")
+
+  # Generate test files
+  add_test(NAME ${external_vol_tgt}-h5dumpgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5gentest> --h5dump)
+  set_tests_properties(${external_vol_tgt}-h5dumpgentest PROPERTIES
+    ENVIRONMENT "${vol_env}"
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std"
+    FIXTURES_SETUP "h5dump_vol_files"
+  )
+
+  # These aren't HDF5 files, just copy them to the VOL's subdirectory
+  foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_exp_file}" "h5dump_vol_files")
+  endforeach ()
+
+  foreach (tst_other_file ${HDF5_REFERENCE_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_other_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_other_file}" "h5dump_vol_files")
+  endforeach ()
+
+  foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_h5N_file}-N" "h5dump_vol_files")
+  endforeach ()
+
+  # Don't copy s3 files for each VOL connector, since the s3 files are specific to the native-exlusive ROS3 VFD
+
+  # --------------------------------------------------------------------
+  # Special file handling
+  # --------------------------------------------------------------------
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbin1LE.ddl" "h5dump_vol_files")
+  
+  # Certain versions of Visual Studio produce rounding differences compared with the reference data of the tfloatsattr test
+  if (WIN32 AND (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION VERSION_LESS 10.0.18362.0))
+    configure_file(${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
+  else ()
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbinregR.exp" "h5dump_vol_files")
+  endif ()
+endforeach ()
+add_custom_target(h5dump_vol_files ALL COMMENT "Copying files needed by h5dump VOL tests" DEPENDS ${h5dump_vol_files_list})
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -477,6 +532,7 @@ endmacro ()
 #   GREP_COMPARE - whether to perform a grep comparison on the output file
 #   BINFILE - if provided, use h5dump to put binary output into <testname>.bin
 #   SKIP_TEST - if provided, do not add this test
+#   NATIVE_ONLY - if provided, only run test with native VOL connector
 #
 # OPTIONAL KEYWORD ARGUMENTS:
 #   APPLY_FILTERS <resultvalue> - If provided, test will apply filters to output before comparison.
@@ -493,7 +549,7 @@ endmacro ()
 #
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
-    "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE;BINFILE;SKIP_TEST" # Flags
+    "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE;BINFILE;SKIP_TEST;NATIVE_ONLY" # Flags
     "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE;H5ERRREF;ENVVAR;ENVVAL" # Single value args
     "ANY_PATHS" # Multi value args
     ${ARGN}
@@ -511,11 +567,33 @@ macro (ADD_H5_TEST testname)
   # Validate optional parameters
   if (DEFINED ARG_APPLY_FILTERS)
     if ("${ARG_APPLY_FILTERS}" STREQUAL "")
-      message(FATAL_ERROR "ADD_H5_TEST: APPLY_FILTERS requires a resultvalue")
+      # default
+      set (_FILTER_VAL "1")
+    else()
+      set (_FILTER_VAL "${ARG_APPLY_FILTERS}")
     endif ()
 
-    set (filters_in "SIZE [0-9]* \\(${ARG_APPLY_FILTERS}\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)")
-    set (filters_out "SIZE XXXX (${ARG_APPLY_FILTERS}.XXX:1 COMPRESSION)")
+    set (filters_in "")
+    set (filters_out "")
+
+    list (APPEND filters_in "SIZE [0-9]* \\(${_FILTER_VAL}\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)")
+    list (APPEND filters_out "SIZE XXXX (${_FILTER_VAL}.XXX:1 COMPRESSION)")
+
+    # Mask out the h5dump-assigned anonymous committed datatype numbers
+    # Datatype number may have a forward slash before #
+    list (APPEND filters_in "DATATYPE[ \t]*\"(/?#)[0-9]+\"")
+    list (APPEND filters_out "DATATYPE \"#XXXX\"")
+
+    # With -n, oputput that must be filtered appears different
+    list (APPEND filters_in "datatype [ \t]*(/?#)[0-9]+")
+    list (APPEND filters_out "datatype [ \t]*(/?#)XXXX")
+  
+    # Size/Offset within file will differ across VOL connectors
+    list (APPEND filters_in "OFFSET [0-9]+")
+    list (APPEND filters_out "OFFSET XXXX")
+
+    list (APPEND filters_in "SIZE [0-9]+")
+    list (APPEND filters_out "SIZE XXXX")
   else ()
     set (filters_in "")
     set (filters_out "")
@@ -609,101 +687,144 @@ macro (ADD_H5_TEST testname)
     set(should_skip_test TRUE)
   endif()
 
-  # Cleanup if test produces artifacts
-  if (${DO_CLEANUP})
-    add_test (
-        NAME H5DUMP-${ctest_testname}-clear-objects
+  if (${ARG_NATIVE_ONLY})
+    set(num_ext_vols 0)
+  else()
+    list(LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
+  endif()
+
+  # Add a test for the native connector and each external VOL connector
+  foreach (vol_idx RANGE 0 ${num_ext_vols})
+    set(vol_env "")
+
+    # First, populate VOL info to be passed to tests
+    if (${vol_idx} EQUAL 0)
+      set(vol "native")
+      set (vol_prefix "")
+      set (workdir "${PROJECT_BINARY_DIR}/testfiles/std")
+    else ()
+      # An external VOL connector
+      math(EXPR vol_idx_fixed "${vol_idx} - 1")
+      list(GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
+      HDF5_GET_VOL_TGT_INFO(${ext_vol_tgt} vol vol_env)
+
+      set (vol_prefix "HDF5_VOL_${vol}-")
+
+      set (workdir "${PROJECT_BINARY_DIR}/${vol}/testfiles/std")
+      # Isolate plugin path string
+      string(FIND "${vol_env}" "HDF5_PLUGIN_PATH=" vol_plugin_path_posn)
+
+      if (vol_plugin_path_posn GREATER -1)
+        # Grab path string after HDF5_PLUGIN_PATH=
+        string(LENGTH "HDF5_PLUGIN_PATH=" path_prefix_len)
+        math(EXPR vol_plugin_path_posn "${vol_plugin_path_posn} + ${path_prefix_len}")
+        string(SUBSTRING "${vol_env}" ${vol_plugin_path_posn} -1 vol_plugin_path)
+      else()
+        set(vol_plugin_path "")
+      endif()
+    endif () # env VOL arg setup
+
+    # Clean up if test produces artifacts
+    if (${DO_CLEANUP})
+      add_test (
+          NAME ${vol_prefix}H5DUMP-${ctest_testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove
+            "${testname}.txt"
+            "${ARG_OUTPUT_FILE}.txt"
+            "${ARG_DDL_FILE}.txt"
+            "${testname}.bin"
+
+      )
+
+      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}-clear-objects PROPERTIES
+          WORKING_DIRECTORY "${workdir}"
+      )
+    endif ()
+
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER AND NOT ARG_MASK_ERROR AND NOT ARG_GREP_COMPARE AND NOT DEFINED ARG_H5ERRREF)
+      add_test (NAME ${vol_prefix}H5DUMP-${ctest_testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_DDL_FILE_CMD} ${BINARY_OUTPUT_FLAG} ${ARG_OUTPUT_FILEARGS} ${ARG_TARGET_FILE})
+      if (${ARG_RESULT_CODE})
+        set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES WILL_FAIL "true")
+      endif ()
+    else ()
+      add_test (
+          NAME ${vol_prefix}H5DUMP-${ctest_testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARG_ANY_PATHS};${ARG_UNPARSED_ARGUMENTS};${ARG_DDL_FILE_CMD};${BINARY_OUTPUT_FLAG};${ARG_OUTPUT_FILEARGS};${ARG_TARGET_FILE}"
+              -D "TEST_FOLDER=${workdir}"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+              -D "TEST_REFERENCE=${ARG_RESULT_CHECK_FILE}"
+              -D "TEST_FILTER:STRING=${filters_in}"
+              -D "TEST_FILTER_REPLACE:STRING=${filters_out}"
+              -D "TEST_MASK_ERROR:BOOL=${ARG_MASK_ERROR}"
+              -D "TEST_GREP_COMPARE:BOOL=${ARG_GREP_COMPARE}"
+              -D "TEST_ERRREF=${ARG_H5ERRREF}"
+              -D "TEST_ENV_VAR:STRING=${ARG_ENVVAR}"
+              -D "TEST_ENV_VALUE:STRING=${ARG_ENVVAL}"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES
+        WORKING_DIRECTORY "${workdir}"
+    )
+
+    # Set VOL-specific properties
+    if (NOT "${vol}" STREQUAL "native")
+      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES
+        ENVIRONMENT "${vol_env}"
+        FIXTURES_REQUIRED "h5dump_vol_files"
+      )
+    endif ()
+
+    if ("${vol_prefix}H5DUMP-${ctest_testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
+    endif ()
+      
+    set(CLEANUP_DEPENDENCIES "${vol_prefix}H5DUMP-${ctest_testname}")
+
+    if (DEFINED ARG_TARGET_FILE AND DEFINED ARG_OUTPUT_FILE)
+      add_test (
+        NAME ${vol_prefix}H5DUMP-${ctest_testname}-output-cmp
+        COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${testname}.txt ${testname}.exp
+      )
+
+      set_tests_properties(${vol_prefix}H5DUMP-${ctest_testname}-output-cmp PROPERTIES
+        DEPENDS H5DUMP-${ctest_testname}
+        WORKING_DIRECTORY "${workdir}"
+      )
+
+      if ("${vol_prefix}H5DUMP-${ctest_testname}-output-cmp" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}-output-cmp PROPERTIES DISABLED true)
+      endif ()
+
+      list(APPEND CLEANUP_DEPENDENCIES "${vol_prefix}H5DUMP-${ctest_testname}-output-cmp")
+    endif ()
+
+    if (${DO_CLEANUP})
+      add_test (
+        NAME ${vol_prefix}H5DUMP-${ctest_testname}-clean-objects
         COMMAND ${CMAKE_COMMAND} -E remove
           "${testname}.txt"
           "${ARG_OUTPUT_FILE}.txt"
           "${ARG_DDL_FILE}.txt"
           "${testname}.bin"
+      )
 
-    )
-
-    set_tests_properties (H5DUMP-${ctest_testname}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-  endif ()
-
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER AND NOT ARG_MASK_ERROR AND NOT ARG_GREP_COMPARE AND NOT DEFINED ARG_H5ERRREF)
-    add_test (NAME H5DUMP-${ctest_testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_DDL_FILE_CMD} ${BINARY_OUTPUT_FLAG} ${ARG_OUTPUT_FILEARGS} ${ARG_TARGET_FILE})
-    if (${ARG_RESULT_CODE})
-      set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES WILL_FAIL "true")
-    endif ()
-    set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-  else ()
-    add_test (
-        NAME H5DUMP-${ctest_testname}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARG_ANY_PATHS};${ARG_UNPARSED_ARGUMENTS};${ARG_DDL_FILE_CMD};${BINARY_OUTPUT_FLAG};${ARG_OUTPUT_FILEARGS};${ARG_TARGET_FILE}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-            -D "TEST_OUTPUT=${testname}.out"
-            -D "TEST_EXPECT=${ARG_RESULT_CODE}"
-            -D "TEST_REFERENCE=${ARG_RESULT_CHECK_FILE}"
-            -D "TEST_FILTER:STRING=${filters_in}"
-            -D "TEST_FILTER_REPLACE:STRING=${filters_out}"
-            -D "TEST_MASK_ERROR:BOOL=${ARG_MASK_ERROR}"
-            -D "TEST_GREP_COMPARE:BOOL=${ARG_GREP_COMPARE}"
-            -D "TEST_ERRREF=${ARG_H5ERRREF}"
-            -D "TEST_ENV_VAR:STRING=${ARG_ENVVAR}"
-            -D "TEST_ENV_VALUE:STRING=${ARG_ENVVAL}"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-  )
-
-  if ("H5DUMP-${ctest_testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
-  endif ()
-
-  set(CLEANUP_DEPENDENCIES "H5DUMP-${ctest_testname}")
-
-  if (DEFINED ARG_TARGET_FILE AND DEFINED ARG_OUTPUT_FILE)
-    add_test (
-      NAME H5DUMP-${ctest_testname}-output-cmp
-      COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${testname}.txt ${testname}.exp
-    )
-
-    set_tests_properties(H5DUMP-${ctest_testname}-output-cmp PROPERTIES
-      DEPENDS H5DUMP-${ctest_testname}
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-
-    if ("H5DUMP-${ctest_testname}-output-cmp" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5DUMP-${ctest_testname}-output-cmp PROPERTIES DISABLED true)
+      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}-clean-objects PROPERTIES
+          DEPENDS "${CLEANUP_DEPENDENCIES}"
+          WORKING_DIRECTORY "${workdir}"
+      )
     endif ()
 
-    list(APPEND CLEANUP_DEPENDENCIES "H5DUMP-${ctest_testname}-output-cmp")
-  endif ()
-
-  if (${DO_CLEANUP})
-    add_test (
-      NAME H5DUMP-${ctest_testname}-clean-objects
-      COMMAND ${CMAKE_COMMAND} -E remove
-        "${testname}.txt"
-        "${ARG_OUTPUT_FILE}.txt"
-        "${ARG_DDL_FILE}.txt"
-        "${testname}.bin"
-    )
-
-    set_tests_properties (H5DUMP-${ctest_testname}-clean-objects PROPERTIES
-        DEPENDS "${CLEANUP_DEPENDENCIES}"
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-  endif ()
-
-  # Mark the test as disabled if needed
-  if (should_skip_test)
-    set_tests_properties(H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
-  endif()
+    # Mark the test as disabled if needed
+    if (should_skip_test)
+      set_tests_properties(${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
+    endif()
+  endforeach () # per-VOL loop
 endmacro ()
 
 macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
@@ -917,12 +1038,12 @@ ADD_H5_TEST (thlink-5 RESULT_CODE 0 --enable-error-stack -d /dset1 -g /g2 -d /g1
 ADD_H5_TEST (thlink-5-N RESULT_CODE 0 --enable-error-stack TARGET_FILE thlink.h5 ANY_PATHS /dset1 /g2 /g1/dset2)
 
 # tests for compound data types
-ADD_H5_TEST (tcomp-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound.h5)
+ADD_H5_TEST (tcomp-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound.h5 APPLY_FILTERS 0)
 # test for named data types
 ADD_H5_TEST (tcomp-2 RESULT_CODE 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 TARGET_FILE tcompound.h5)
 ADD_H5_TEST (tcomp-2-N RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound.h5 ANY_PATHS /type1 /type2 /group1/type3)
-# test for unnamed type
-ADD_H5_TEST (tcomp-3 RESULT_CODE 0 H5ERRREF "object '#6632' doesn't exist" "--enable-error-stack;-t;/#6632;-g;/group2" TARGET_FILE tcompound.h5)
+# test for unnamed type - restrict to native VOL since other VOLs will assign different numbers
+ADD_H5_TEST (tcomp-3 RESULT_CODE 0 H5ERRREF "object '#6632' doesn't exist" "--enable-error-stack;-t;/#6632;-g;/group2" TARGET_FILE tcompound.h5 NATIVE_ONLY)
 # test complicated compound datatype
 ADD_H5_TEST (tcomp-4 RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound_complex.h5)
 ADD_H5_TEST (tcompound_complex2 RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound_complex2.h5)
@@ -953,7 +1074,7 @@ ADD_H5_TEST (tstr-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tstr.h5)
 ADD_H5_TEST (tstr-2 RESULT_CODE 0 --enable-error-stack TARGET_FILE tstr2.h5)
 
 # test for file created by Lib SAF team
-ADD_H5_TEST (tsaf RESULT_CODE 0 --enable-error-stack TARGET_FILE tsaf.h5)
+ADD_H5_TEST (tsaf RESULT_CODE 0 --enable-error-stack TARGET_FILE tsaf.h5 NATIVE_ONLY)
 
 # test for file with variable length data
 ADD_H5_TEST (tvldtypes1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tvldtypes1.h5)
@@ -1037,9 +1158,9 @@ ADD_H5_TEST (file_space_cache RESULT_CODE 0 --enable-error-stack=2 --page-buffer
 ADD_H5_TEST (tperror RESULT_CODE 1 H5ERRREF "h5dump error: unable to get link info from \"bogus\"" --enable-error-stack -p -d bogus TARGET_FILE tfcontents1.h5)
 
 # test for file contents
-ADD_H5_TEST (tcontents RESULT_CODE 0 --enable-error-stack -n TARGET_FILE tfcontents1.h5)
-ADD_H5_TEST (tordercontents1 RESULT_CODE 0 --enable-error-stack -n --sort_by=name --sort_order=ascending TARGET_FILE tfcontents1.h5)
-ADD_H5_TEST (tordercontents2 RESULT_CODE 0 --enable-error-stack -n --sort_by=name --sort_order=descending TARGET_FILE tfcontents1.h5)
+ADD_H5_TEST (tcontents RESULT_CODE 0 --enable-error-stack -n TARGET_FILE tfcontents1.h5 APPLY_FILTERS 0)
+ADD_H5_TEST (tordercontents1 RESULT_CODE 0 --enable-error-stack -n --sort_by=name --sort_order=ascending TARGET_FILE tfcontents1.h5 APPLY_FILTERS 1)
+ADD_H5_TEST (tordercontents2 RESULT_CODE 0 --enable-error-stack -n --sort_by=name --sort_order=descending TARGET_FILE tfcontents1.h5 APPLY_FILTERS 1)
 ADD_H5_TEST (tattrcontents1 RESULT_CODE 0 --enable-error-stack -n 1 --sort_order=ascending TARGET_FILE tall.h5)
 ADD_H5_TEST (tattrcontents2 RESULT_CODE 0 --enable-error-stack -n 1 --sort_order=descending TARGET_FILE tall.h5)
 
@@ -1054,7 +1175,7 @@ ADD_H5_TEST (tchunked RESULT_CODE 0 --enable-error-stack -H -p -d chunked TARGET
 ADD_H5_TEST (texternal RESULT_CODE 0 --enable-error-stack -H -p -d external TARGET_FILE tfilters.h5)
 
 # fill values
-ADD_H5_TEST (tfill RESULT_CODE 0 --enable-error-stack -p TARGET_FILE tfvalues.h5)
+ADD_H5_TEST (tfill RESULT_CODE 0 --enable-error-stack -p TARGET_FILE tfvalues.h5 APPLY_FILTERS 1)
 
 # several datatype, with references , print path
 ADD_H5_TEST (treference RESULT_CODE 0 --enable-error-stack  TARGET_FILE tattr2.h5)
@@ -1108,7 +1229,7 @@ ADD_H5_TEST (tnbit RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d n
 ADD_H5_TEST (tscaleoffset RESULT_CODE 0 APPLY_FILTERS 4 --enable-error-stack -H -p -d scaleoffset  TARGET_FILE tfilters.h5)
 
 # all
-ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  TARGET_FILE tfilters.h5)
+ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  TARGET_FILE tfilters.h5 APPLY_FILTERS 1)
 
 # user defined
 ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  TARGET_FILE tfilters.h5)
@@ -1120,14 +1241,6 @@ ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  
 
 # detect whether the encoder is present.
 if (H5_HAVE_FILTER_DEFLATE)
-  set (USE_FILTER_DEFLATE "true")
-endif ()
-
-if (H5_HAVE_FILTER_SZIP)
-  set (USE_FILTER_SZIP "true")
-endif ()
-
-if (USE_FILTER_DEFLATE)
   # data read internal filters
   ADD_H5_TEST (treadintfilter RESULT_CODE 0 --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset TARGET_FILE tfilters.h5)
   if (HDF5_ENABLE_SZIP_SUPPORT)
@@ -1158,8 +1271,16 @@ ADD_H5_TEST (tldouble RESULT_CODE 0 --enable-error-stack TARGET_FILE tldouble.h5
 ADD_H5_TEST (tldouble_scalar RESULT_CODE 0 -p --enable-error-stack TARGET_FILE tldouble_scalar.h5)
 
 # Add tests for _Float16 type
-ADD_H5_TEST (tfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16.h5)
-ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16_be.h5)
+# VOL testing must generate the F16 files, which it can only do if F16 is enabled
+# - so mark these tests as Native only if Float16 isn't enabled.
+if (${${HDF_PREFIX}_HAVE__FLOAT16})
+  set (F16_NATIVE_ONLY "")
+else ()
+  set (F16_NATIVE_ONLY "NATIVE_ONLY")
+endif ()
+
+ADD_H5_TEST (tfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16.h5 ${F16_NATIVE_ONLY})
+ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16_be.h5 ${F16_NATIVE_ONLY})
 
 # Add tests for bfloat16 type
 ADD_H5_TEST (tbfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tbfloat16.h5)
@@ -1243,8 +1364,8 @@ ADD_H5_TEST (torderattr3 RESULT_CODE 0 --enable-error-stack -H --sort_by=creatio
 ADD_H5_TEST (torderattr4 RESULT_CODE 0 --enable-error-stack -H --sort_by=creation_order --sort_order=descending TARGET_FILE torderattr.h5)
 
 # tests for link references and order
-ADD_H5_TEST (torderlinks1 RESULT_CODE 0 H5ERRREF "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=ascending TARGET_FILE tfcontents1.h5)
-ADD_H5_TEST (torderlinks2 RESULT_CODE 0 H5ERRREF "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=descending TARGET_FILE tfcontents1.h5)
+ADD_H5_TEST (torderlinks1 RESULT_CODE 0 H5ERRREF "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=ascending TARGET_FILE tfcontents1.h5 APPLY_FILTERS 1)
+ADD_H5_TEST (torderlinks2 RESULT_CODE 0 H5ERRREF "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=descending TARGET_FILE tfcontents1.h5 APPLY_FILTERS 1)
 
 # tests for floating point user defined printf format
 ADD_H5_TEST (tfpformat RESULT_CODE 0 --enable-error-stack --format=%.7f TARGET_FILE tfpformat.h5)
@@ -1257,7 +1378,7 @@ ADD_H5_TEST (textlinkfar RESULT_CODE 0 H5ERRREF "Too many soft links in path" --
 ADD_H5_TEST (textlink RESULT_CODE 0 H5ERRREF "unable to open external file, external link file name = 'anotherfile'" --enable-error-stack TARGET_FILE textlink.h5)
 
 # test for error stack display (BZ2048)
-ADD_H5_TEST (filter_fail RESULT_CODE 1 H5ERRREF "filter plugins disabled" ENVVAR "HDF5_PLUGIN_PRELOAD" ENVVAL "::" --enable-error-stack TARGET_FILE filter_fail.h5)
+ADD_H5_TEST (filter_fail RESULT_CODE 1 H5ERRREF "filter plugins disabled" ENVVAR "HDF5_PLUGIN_PRELOAD" ENVVAL "::" --enable-error-stack TARGET_FILE filter_fail.h5 NATIVE_ONLY)
 
 # test for -o -y for dataset with attributes
 ADD_H5_TEST (tall-6 OUTPUT_FILE tall-6 TARGET_FILE tall.h5 RESULT_CODE 0 --enable-error-stack -d /g1/g1.1/dset1.1.1 -y)

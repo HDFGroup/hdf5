@@ -230,6 +230,8 @@ typedef struct H5O_copy_t {
 #define H5O_MDCI_MSG_ID    0x0018 /* Metadata Cache Image Message */
 #define H5O_UNKNOWN_ID     0x0019 /* Placeholder message ID for unknown message.  */
 /* (this should never exist in a file) */
+#define H5O_DELETED_ID 0x001a /* Placeholder in mesg array in memory for a deleted message */
+/* (this should never exist in a file) */
 /*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of
@@ -238,7 +240,7 @@ typedef struct H5O_copy_t {
  *
  * (this should never exist in a file)
  */
-#define H5O_BOGUS_INVALID_ID 0x001a /* "Bogus invalid" Message.  */
+#define H5O_BOGUS_INVALID_ID 0x001b /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -888,7 +890,7 @@ typedef herr_t (*H5O_operator_t)(const void *mesg /*in*/, unsigned idx, void *op
 
 /* Typedef for "internal library" iteration operations */
 typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
-                                     unsigned *oh_modified /*out*/, void *operator_data /*in,out*/);
+                                     void *operator_data /*in,out*/);
 
 /* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
 typedef enum H5O_mesg_operator_type_t {

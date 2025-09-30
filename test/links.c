@@ -17537,6 +17537,211 @@ error:
 } /* end obj_exists() */
 
 /*-------------------------------------------------------------------------
+ * Function:    delete_self_referential_link
+ *
+ * Purpose:     Test deleting a hard link to the parent group.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+delete_self_referential_link(hid_t fapl, bool new_format)
+{
+    char   filename[NAME_BUF_SIZE]; /* Buffer for file name */
+    hid_t  fid  = H5I_INVALID_HID;  /* File ID */
+    hid_t  gid  = H5I_INVALID_HID;  /* Group ID */
+    hid_t  gcpl = H5I_INVALID_HID;  /* GCPL ID */
+    htri_t status;                  /* Generic return value */
+
+    if (new_format)
+        TESTING("deleting self referential link (w/new group format)");
+    else
+        TESTING("deleting self referential link");
+
+    /* Set up filename and create file*/
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a group, as a destination for testing */
+    if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify that H5Lexists() succeeds for hard linked object */
+    if (true != H5Lexists(fid, "group", H5P_DEFAULT))
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns false for non-existent object in non-root group */
+    if ((status = H5Lexists(gid, "link", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 0)
+        TEST_ERROR;
+
+    /* Create hard link on group to group */
+    if (H5Lcreate_hard(gid, ".", gid, "link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns true for self referential link */
+    if ((status = H5Lexists(gid, "link", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 1)
+        TEST_ERROR;
+
+    /* Create second hard link on group to group */
+    if (H5Lcreate_hard(gid, ".", gid, "link2", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns true for self referential link */
+    if ((status = H5Lexists(gid, "link2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 1)
+        TEST_ERROR;
+
+    /* Delete first link */
+    if (H5Ldelete(gid, "link", H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns false for first link */
+    if ((status = H5Lexists(gid, "link", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns true for second link */
+    if ((status = H5Lexists(gid, "link2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 1)
+        TEST_ERROR;
+
+    /* Delete second link */
+    if (H5Ldelete(gid, "link2", H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns false for deleted link */
+    if ((status = H5Lexists(gid, "link", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns false for second link */
+    if ((status = H5Lexists(gid, "link2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 0)
+        TEST_ERROR;
+
+    /* Close group */
+    if (H5Gclose(gid) < 0)
+        FAIL_STACK_ERROR;
+    gid = H5I_INVALID_HID;
+
+    /*
+     * Now test deleting by creation order
+     */
+
+    /* Create GCPL with creation order tracked */
+    if ((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED) < 0)
+        TEST_ERROR;
+
+    /* Create a group, as a destination for testing */
+    if ((gid = H5Gcreate2(fid, "group2", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Close GCPL */
+    if (H5Pclose(gcpl) < 0)
+        TEST_ERROR;
+    gcpl = H5I_INVALID_HID;
+
+    /* Verify that H5Lexists() succeeds for hard linked object */
+    if (true != H5Lexists(fid, "group2", H5P_DEFAULT))
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns false for non-existent object in non-root group */
+    if ((status = H5Lexists(gid, "link", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 0)
+        TEST_ERROR;
+
+    /* Create hard link on group2 to group2 */
+    if (H5Lcreate_hard(gid, ".", gid, "link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns true for self referential link */
+    if ((status = H5Lexists(gid, "link", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 1)
+        TEST_ERROR;
+
+    /* Create second hard link on group to group */
+    if (H5Lcreate_hard(gid, ".", gid, "link2", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns true for self referential link */
+    if ((status = H5Lexists(gid, "link2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 1)
+        TEST_ERROR;
+
+    /* Delete first link */
+    if (H5Ldelete_by_idx(gid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns false for first link */
+    if ((status = H5Lexists(gid, "link", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns true for second link */
+    if ((status = H5Lexists(gid, "link2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 1)
+        TEST_ERROR;
+
+    /* Delete second link */
+    if (H5Ldelete_by_idx(gid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns false for deleted link */
+    if ((status = H5Lexists(gid, "link", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 0)
+        TEST_ERROR;
+
+    /* Verify that H5Lexists() returns false for second link */
+    if ((status = H5Lexists(gid, "link2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (status != 0)
+        TEST_ERROR;
+
+    /* Close group */
+    if (H5Gclose(gid) < 0)
+        FAIL_STACK_ERROR;
+    gid = H5I_INVALID_HID;
+
+    /* Close file */
+    if (H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+    fid = H5I_INVALID_HID;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(gid);
+        H5Fclose(fid);
+        H5Pclose(gcpl);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end delete_self_referential_link() */
+
+/*-------------------------------------------------------------------------
  * Function:    corder_create_empty
  *
  * Purpose:     Create an empty group with creation order indices
@@ -23526,6 +23731,7 @@ main(void)
             nerrors += obj_visit_stop(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += link_filters(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += obj_exists(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += delete_self_referential_link(my_fapl, new_format) < 0 ? 1 : 0;
 
             /* Keep this test last, it's testing files that are used above */
             /* do not do this for files used by external link tests */
