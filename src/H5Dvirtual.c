@@ -106,7 +106,7 @@
             should_insert = false;                                                                           \
         }                                                                                                    \
         /* Do not insert zero-dim mappings */                                                                \
-        else if ((_vspace && H5S_GET_EXTENT_NDIMS(_vspace) < 1)) {                                     \
+        else if ((_vspace && H5S_GET_EXTENT_NDIMS(_vspace) < 1)) {                                           \
             should_insert = false;                                                                           \
         }                                                                                                    \
         /* Otherwise, we can insert it */                                                                    \
@@ -4116,7 +4116,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__should_build_tree
  *
- * Purpose:     Determine whether to build a spatial tree of mapping indice
+ * Purpose:     Determine whether to build a spatial tree of mapping indices
  *              for the provided dataset layout
  *
  * Return:      Non-negative on success/Negative on failure
@@ -4201,7 +4201,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__virtual_read_one_mapping
+ * Function:    H5D__virtual_write_one_mapping
  *
  * Purpose:     Write to a single mapping entry in a virtual dataset
  *

@@ -975,7 +975,7 @@ test_rtree_rw(bool use_tree)
         if (rbuf[i] != expected) {
             printf("%d mappings: Post-write data mismatch at [%d]: expected %d, got %d\n", num_mappings, i,
                    expected, rbuf[i]);
-            // FAIL_STACK_ERROR;
+            FAIL_STACK_ERROR;
         }
     }
 
@@ -1044,6 +1044,15 @@ main(void)
 
     if (nerrors)
         goto error;
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(RTREE_SRC_FILENAME, H5P_DEFAULT);
+        H5Fdelete(RTREE_DAPL_FILENAME, H5P_DEFAULT);
+        H5Fdelete(RTREE_THRESHOLD_FILENAME, H5P_DEFAULT);
+        H5Fdelete(RTREE_RW_FILENAME, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 
     printf("All R-tree tests passed.\n");
     return EXIT_SUCCESS;
