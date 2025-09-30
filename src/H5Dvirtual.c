@@ -1097,9 +1097,11 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
 
             /* Allocate new pointer array */
             if ((virt->not_in_tree_list = (H5O_storage_virtual_ent_t **)H5MM_calloc(
-                     virt->not_in_tree_nalloc * sizeof(H5O_storage_virtual_ent_t *))) == NULL)
+                     virt->not_in_tree_nused * sizeof(H5O_storage_virtual_ent_t *))) == NULL)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
                             "unable to allocate not_in_tree_list pointer array");
+
+            virt->not_in_tree_nalloc = virt->not_in_tree_nused;
 
             /* Point to corresponding entries in the new list */
             for (i = 0; i < virt->not_in_tree_nused; i++) {
