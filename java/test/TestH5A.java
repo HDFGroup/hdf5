@@ -1089,27 +1089,30 @@ public class TestH5A {
                                    HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5Awrite_readVL: ", attr_id >= 0);
 
-            H5.H5AwriteVL(attr_id, atype_id, str_data);
+            // Convert String[] to ArrayList[] for VL data
+            ArrayList<String>[] vl_data = new ArrayList[str_data.length];
+            for (int i = 0; i < str_data.length; i++) {
+                vl_data[i] = new ArrayList<>();
+                vl_data[i].add(str_data[i]);
+            }
+            H5.H5AwriteVL(attr_id, atype_id, vl_data);
 
             H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
 
             for (int j = 0; j < dims.length; j++) {
                 lsize *= dims[j];
             }
-            String[] strs = new String[(int)lsize];
-            for (int j = 0; j < lsize; j++) {
-                strs[j] = "";
-            }
+            ArrayList<String>[] read_vl_data = new ArrayList[(int)lsize];
             try {
-                H5.H5AreadVL(attr_id, atype_id, strs);
+                H5.H5AreadVL(attr_id, atype_id, read_vl_data);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5Awrite_readVL:", str_data[0].equals(strs[0]));
-            assertTrue("testH5Awrite_readVL:", str_data[1].equals(strs[1]));
-            assertTrue("testH5Awrite_readVL:", str_data[2].equals(strs[2]));
-            assertTrue("testH5Awrite_readVL:", str_data[3].equals(strs[3]));
+            assertTrue("testH5Awrite_readVL: " + str_data[0] + " == " + read_vl_data[0].get(0), str_data[0].equals(read_vl_data[0].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[1] + " == " + read_vl_data[1].get(0), str_data[1].equals(read_vl_data[1].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[2] + " == " + read_vl_data[2].get(0), str_data[2].equals(read_vl_data[2].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[3] + " == " + read_vl_data[3].get(0), str_data[3].equals(read_vl_data[3].get(0)));
         }
         catch (Throwable err) {
             err.printStackTrace();

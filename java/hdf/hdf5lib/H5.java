@@ -1763,8 +1763,8 @@ public class H5 implements java.io.Serializable {
             status = H5Aread(attr_id, mem_type_id, (String[])obj);
         }
         else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-            log.trace("H5AreadVL type");
-            status = H5Aread(attr_id, mem_type_id, (Object[])obj);
+            log.trace("H5AreadVL type - using H5AreadVL directly");
+            status = H5AreadVL(attr_id, mem_type_id, (Object[])obj);
         }
         else {
             // Create a data buffer to hold the data into a Java Array
@@ -2127,6 +2127,33 @@ public class H5 implements java.io.Serializable {
                 System.arraycopy(result, 0, buf, 0, buf.length);
                 status = 0; // Success
             }
+            else if (typeClass == HDF5Constants.H5T_STRING && H5Tis_variable_str(mem_type_id)) {
+                // CRITICAL FIX: For variable-length string datatypes, use string pointer array
+                // to match the write path format - this fixes the off-by-one indexing issue
+                MemorySegment stringArray = arena.allocate(ValueLayout.ADDRESS, buf.length);
+
+                // Call native H5Aread to read string pointers
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, stringArray);
+
+                if (status >= 0) {
+                    // Convert string pointer array back to ArrayList array
+                    for (int i = 0; i < buf.length; i++) {
+                        ArrayList<String> stringList = new ArrayList<>();
+                        MemorySegment stringPtr = stringArray.getAtIndex(ValueLayout.ADDRESS, i);
+
+                        if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
+                            // Reinterpret the string pointer with proper scope for reading
+                            // Use a large but safe size limit for string reading
+                            MemorySegment boundedStringPtr = stringPtr.reinterpret(4096, Arena.global(), null);
+                            String str = boundedStringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
+                            stringList.add(str);
+                        } else {
+                            stringList.add(""); // Empty string for null pointers
+                        }
+                        buf[i] = stringList;
+                    }
+                }
+            }
             else {
                 // For VL datatypes, use hvl_t structures
                 MemorySegment hvlArray = hvl_t.allocateArray(buf.length, arena);
@@ -2475,40 +2502,22 @@ public class H5 implements java.io.Serializable {
         is1D         = (cname.lastIndexOf('[') == cname.indexOf('['));
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
 
-        //        if (is1D && (dname == 'B')) {
-        //            status = H5Awrite(attr_id, mem_type_id, (byte[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'S')) {
-        //            status = H5Awrite(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'I')) {
-        //            status = H5Awrite(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'J')) {
-        //            status = H5Awrite(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'F')) {
-        //            status = H5Awrite(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'D')) {
-        //            status = H5Awrite(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dataClass.getComponentType() == String.class)) {
-        //            log.trace("H5Dwrite_string type");
-        //            status = H5Awrite(attr_id, mem_type_id, (String[])obj);
-        //        }
-        //        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-        //            log.trace("H5AwriteVL type");
-        //            status = H5Awrite(attr_id, mem_type_id, (Object[])obj);
-        //        }
-        //        else {
-        HDFArray theArray = new HDFArray(obj);
-        byte[] buf        = theArray.byteify();
+        if (is1D && (dataClass.getComponentType() == String.class)) {
+            log.trace("H5Awrite_string type - routing to H5Awrite_VLStrings");
+            status = H5Awrite_VLStrings(attr_id, mem_type_id, (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AwriteVL type - using H5AwriteVL directly");
+            status = H5AwriteVL(attr_id, mem_type_id, (Object[])obj);
+        }
+        else {
+            HDFArray theArray = new HDFArray(obj);
+            byte[] buf        = theArray.byteify();
 
-        status   = H5Awrite(attr_id, mem_type_id, buf);
-        buf      = null;
-        theArray = null;
-        //        }
+            status   = H5Awrite(attr_id, mem_type_id, buf);
+            buf      = null;
+            theArray = null;
+        }
 
         return status;
     }
@@ -2845,22 +2854,7 @@ public class H5 implements java.io.Serializable {
             // Detect VL data to determine if H5Treclaim is needed (JNI pattern)
             vl_data_class = detectVLData(mem_type_id);
 
-            ArrayList[] arrayData;
-            try {
-                arrayData = (ArrayList[])buf;
-            }
-            catch (ClassCastException e) {
-                // Check if this is a VL string case (String[] input)
-                if (buf instanceof String[]) {
-                    // For VL strings, delegate to the specialized method
-                    return H5Awrite_VLStrings(attr_id, mem_type_id, (String[])buf);
-                }
-                else {
-                    // Re-throw the original exception with clear message
-                    throw new HDF5LibraryException("Input data must be ArrayList array: " + buf.getClass() +
-                                                   " cannot be cast to ArrayList[]");
-                }
-            }
+            ArrayList[] arrayData = (ArrayList[])buf;
 
             // Check the datatype class to determine conversion strategy
             int typeClass = H5Tget_class(mem_type_id);
@@ -2870,6 +2864,11 @@ public class H5 implements java.io.Serializable {
                 MemorySegment arrayBuffer =
                     VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, arrayBuffer);
+            }
+            else if (typeClass == HDF5Constants.H5T_STRING && H5Tis_variable_str(mem_type_id)) {
+                // For variable-length string datatypes, convert to string pointers
+                MemorySegment stringArray = VLDataConverter.convertVLStrings(arrayData, arena);
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, stringArray);
             }
             else {
                 // For VL datatypes, convert to hvl_t structures
@@ -3828,19 +3827,19 @@ public class H5 implements java.io.Serializable {
         else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
                   (is1D && (dataClass.getComponentType() == String.class))) ||
                  H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
-            log.trace("H5Dread_reg_ref");
+            log.trace("H5Dread_reg_ref - routing to H5DreadVL");
             status =
-                H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (String[])obj);
+                H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
         }
         else if (is1D && (dataClass.getComponentType() == String.class)) {
-            log.trace("H5Dread_string type");
+            log.trace("H5Dread_string type - routing to H5DreadVL");
             status =
-                H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (String[])obj);
+                H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
         }
         else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-            log.trace("H5DreadVL type");
+            log.trace("H5DreadVL type - using H5DreadVL directly");
             status =
-                H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
+                H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
         }
         else {
             // Create a data buffer to hold the data into a Java Array
@@ -4289,6 +4288,34 @@ public class H5 implements java.io.Serializable {
                 System.arraycopy(result, 0, buf, 0, buf.length);
                 status = 0; // Success
             }
+            else if (typeClass == HDF5Constants.H5T_STRING && H5Tis_variable_str(mem_type_id)) {
+                // CRITICAL FIX: For variable-length string datatypes, use string pointer array
+                // to match the write path format - this fixes the off-by-one indexing issue
+                MemorySegment stringArray = arena.allocate(ValueLayout.ADDRESS, buf.length);
+
+                // Call native H5Dread to read string pointers
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                                file_space_id, xfer_plist_id, stringArray);
+
+                if (status >= 0) {
+                    // Convert string pointer array back to ArrayList array
+                    for (int i = 0; i < buf.length; i++) {
+                        ArrayList<String> stringList = new ArrayList<>();
+                        MemorySegment stringPtr = stringArray.getAtIndex(ValueLayout.ADDRESS, i);
+
+                        if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
+                            // Reinterpret the string pointer with proper scope for reading
+                            // Use a large but safe size limit for string reading
+                            MemorySegment boundedStringPtr = stringPtr.reinterpret(4096, Arena.global(), null);
+                            String str = boundedStringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
+                            stringList.add(str);
+                        } else {
+                            stringList.add(""); // Empty string for null pointers
+                        }
+                        buf[i] = stringList;
+                    }
+                }
+            }
             else {
                 // For VL datatypes, use hvl_t structures
                 MemorySegment hvlArray = hvl_t.allocateArray(buf.length, arena);
@@ -4664,57 +4691,25 @@ public class H5 implements java.io.Serializable {
         is1D         = (cname.lastIndexOf('[') == cname.indexOf('['));
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
 
-        //        if (is1D && (dname == 'B')) {
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-        //                              (byte[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'S')) {
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                    (short[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'I')) {
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                  (int[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'J')) {
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                   (long[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'F')) {
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                    (float[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'D')) {
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                     (double[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dataClass.getComponentType() == String.class)) {
-        //            log.trace("H5Dwrite_string type");
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                     (String[])obj);
-        //        }
-        //        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-        //            log.trace("H5DwriteVL type");
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-        //                                (Object[])obj);
-        //        }
-        //        else {
-        HDFArray theArray = new HDFArray(obj);
-        byte[] buf        = theArray.byteify();
+        if (is1D && (dataClass.getComponentType() == String.class)) {
+            log.trace("H5Dwrite_string type - routing to H5Dwrite_VLStrings");
+            status = H5Dwrite_VLStrings(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DwriteVL type - using H5DwriteVL directly");
+            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
+        }
+        else {
+            HDFArray theArray = new HDFArray(obj);
+            byte[] buf        = theArray.byteify();
 
-        // will raise exception on error
-        status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
+            // will raise exception on error
+            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
 
-        // clean up these: assign 'null' as hint to gc()
-        buf      = null;
-        theArray = null;
-        //        }
+            // clean up these: assign 'null' as hint to gc()
+            buf      = null;
+            theArray = null;
+        }
 
         return status;
     }
@@ -5145,6 +5140,12 @@ public class H5 implements java.io.Serializable {
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                  file_space_id, xfer_plist_id, arrayBuffer);
             }
+            else if (typeClass == HDF5Constants.H5T_STRING && H5Tis_variable_str(mem_type_id)) {
+                // For variable-length string datatypes, convert to string pointers
+                MemorySegment stringArray = VLDataConverter.convertVLStrings(arrayData, arena);
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                                                                 file_space_id, xfer_plist_id, stringArray);
+            }
             else {
                 // For VL datatypes, convert to hvl_t structures
                 MemorySegment hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
@@ -5160,7 +5161,7 @@ public class H5 implements java.io.Serializable {
             throw new HDF5LibraryException("VL data conversion failed: " + ex.getMessage());
         }
         catch (ClassCastException ex) {
-            throw new HDF5LibraryException("Input data must be ArrayList array: " + ex.getMessage());
+            throw new HDF5LibraryException("Input data must be ArrayList array or String array: " + ex.getMessage());
         }
 
         return status;
@@ -5199,7 +5200,37 @@ public class H5 implements java.io.Serializable {
                                          long file_space_id, long xfer_plist_id, Object[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Dwrite_VLStrings not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+
+        int status = -1;
+        // CRITICAL FIX: Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
+        Arena arena = Arena.global();
+
+        try {
+            // Convert String array to VL format for HDF5
+            String[] stringArray = (String[])buf;
+            ArrayList[] vlStringArray = new ArrayList[stringArray.length];
+            for (int i = 0; i < stringArray.length; i++) {
+                vlStringArray[i] = new ArrayList<>();
+                vlStringArray[i].add(stringArray[i]);
+            }
+
+            // Use VLDataConverter to convert VL strings to hvl_t
+            MemorySegment hvlArray = VLDataConverter.convertToHVL(vlStringArray, arena);
+            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                                                             file_space_id, xfer_plist_id, hvlArray);
+
+            if (status < 0) {
+                h5libraryError();
+            }
+        }
+        catch (HDF5JavaException ex) {
+            throw new HDF5LibraryException("VL string conversion failed: " + ex.getMessage());
+        }
+
+        return status;
     }
 
     /**

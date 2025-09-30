@@ -577,6 +577,7 @@ public class HDFArray {
 
         // Put the integer value into the buffer
         byteBuffer.putInt(value);
+        //System.out.println("intToBytes: int= " + value + " bytes= " + Arrays.toString(byteBuffer.array()));
 
         // Return the backing byte array
         return byteBuffer.array();
@@ -603,7 +604,10 @@ public class HDFArray {
 
         for (int i = 0; i < nelems; i++) {
             int out = in[i].intValue();
-            System.arraycopy(intToBytes(out), 0, byteArray, i * Integer.BYTES, Integer.BYTES);
+            byte[] tmp = intToBytes(out);
+            //System.out.println("IntegerToByte: " + i + " of " + nelems + " int= " + out + " bytes= " +
+            //                   Arrays.toString(tmp));
+            System.arraycopy(tmp, 0, byteArray, i * Integer.BYTES, Integer.BYTES);
         }
         return byteArray;
     }
