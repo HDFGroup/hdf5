@@ -47,7 +47,6 @@ static int H5RT__leaf_compare(void *dim, const void *leaf1, const void *leaf2);
 static int H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
 #endif
 
-/* Check if two hyper-rectangles specified by (min1, max1) and (min2, max2) intersect */
 /*-------------------------------------------------------------------------
  * Function:    H5RT_leaf_init
  *
