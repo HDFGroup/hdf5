@@ -170,7 +170,7 @@ H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
     if (l1->mid[sort_dim] > l2->mid[sort_dim])
         return 1;
     return 0;
-}
+} /* end H5RT__leaf_compare() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT__compute_slabs
@@ -231,7 +231,7 @@ done:
         *slab_size_out  = slab_size;
     }
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5RT__compute_slabs() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT__result_set_init
@@ -261,7 +261,7 @@ H5RT__result_set_init(H5RT_result_set_t *result_set)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5RT__result_set_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT__result_set_grow
@@ -301,7 +301,7 @@ H5RT__result_set_grow(H5RT_result_set_t *result_set)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5RT__result_set_grow() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT__result_set_add
@@ -334,7 +334,7 @@ H5RT__result_set_add(H5RT_result_set_t *result_set, H5RT_leaf_t *leaf)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5RT__result_set_add() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT__result_set_cleanup
@@ -358,7 +358,7 @@ H5RT__result_set_cleanup(H5RT_result_set_t *result_set)
     }
 
     FUNC_LEAVE_NOAPI_VOID
-}
+} /* end H5RT__result_set_cleanup() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT__bulk_load
