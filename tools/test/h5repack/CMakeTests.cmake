@@ -256,7 +256,7 @@ foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
   # Setup testfiles directory
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vol}/testfiles" RESULT)
   if (NOT ${RESULT} EQUAL 0)
-    message(FATAL_ERROR "Could not create directory ${PROJECT_BINARY_DIR}/${external_vol_tgt}/testfiles")
+    message(FATAL_ERROR "Could not create directory ${PROJECT_BINARY_DIR}/${vol}/testfiles")
   endif()
 
   add_test(NAME ${external_vol_tgt}-h5repackgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5gentest> --h5repack)
