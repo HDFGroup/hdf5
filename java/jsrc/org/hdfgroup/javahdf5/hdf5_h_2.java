@@ -2,59 +2,55 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+
 public class hdf5_h_2 {
 
-    hdf5_h_2()
-    {
+    hdf5_h_2() {
         // Should not be called directly
     }
 
-    static final Arena LIBRARY_ARENA     = Arena.ofAuto();
+    static final Arena LIBRARY_ARENA = Arena.ofAuto();
     static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
 
-    static void traceDowncall(String name, Object... args)
-    {
-        String traceArgs = Arrays.stream(args).map(Object::toString).collect(Collectors.joining(", "));
-        System.out.printf("%s(%s)\n", name, traceArgs);
+    static void traceDowncall(String name, Object... args) {
+         String traceArgs = Arrays.stream(args)
+                       .map(Object::toString)
+                       .collect(Collectors.joining(", "));
+         System.out.printf("%s(%s)\n", name, traceArgs);
     }
 
-    static MemorySegment findOrThrow(String symbol)
-    {
-        return SYMBOL_LOOKUP.find(symbol).orElseThrow(
-            () -> new UnsatisfiedLinkError("unresolved symbol: " + symbol));
+    static MemorySegment findOrThrow(String symbol) {
+        return SYMBOL_LOOKUP.find(symbol)
+            .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: " + symbol));
     }
 
-    static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc)
-    {
+    static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc) {
         try {
             return MethodHandles.lookup().findVirtual(fi, name, fdesc.toMethodType());
-        }
-        catch (ReflectiveOperationException ex) {
+        } catch (ReflectiveOperationException ex) {
             throw new AssertionError(ex);
         }
     }
 
-    static MemoryLayout align(MemoryLayout layout, long align)
-    {
-        return switch (layout)
-        {
-        case PaddingLayout p -> p; case ValueLayout v -> v.withByteAlignment(align);
-            case GroupLayout g
-            -> { MemoryLayout[] alignedMembers =
-                     g.memberLayouts().stream().map(m -> align(m, align)).toArray(MemoryLayout[] ::new);
-                 yield g instanceof StructLayout ? MemoryLayout.structLayout(alignedMembers):
-            MemoryLayout.unionLayout(alignedMembers);
-        }
+    static MemoryLayout align(MemoryLayout layout, long align) {
+        return switch (layout) {
+            case PaddingLayout p -> p;
+            case ValueLayout v -> v.withByteAlignment(align);
+            case GroupLayout g -> {
+                MemoryLayout[] alignedMembers = g.memberLayouts().stream()
+                        .map(m -> align(m, align)).toArray(MemoryLayout[]::new);
+                yield g instanceof StructLayout ?
+                        MemoryLayout.structLayout(alignedMembers) : MemoryLayout.unionLayout(alignedMembers);
+            }
             case SequenceLayout s -> MemoryLayout.sequenceLayout(s.elementCount(), align(s.elementLayout(), align));
         };
     }
@@ -198,15 +194,6 @@ public class hdf5_h_2 {
      */
     public static int H5_HAVE_FCNTL() {
         return H5_HAVE_FCNTL;
-    }
-    private static final int H5_HAVE_FEATURES_H = (int)1L;
-    /**
-     * {@snippet lang=c :
-     * #define H5_HAVE_FEATURES_H 1
-     * }
-     */
-    public static int H5_HAVE_FEATURES_H() {
-        return H5_HAVE_FEATURES_H;
     }
     private static final int H5_HAVE_FILTER_DEFLATE = (int)1L;
     /**
@@ -478,15 +465,6 @@ public class hdf5_h_2 {
     public static int H5_HAVE_SYS_TIME_H() {
         return H5_HAVE_SYS_TIME_H;
     }
-    private static final int H5_HAVE_SYS_TYPES_H = (int)1L;
-    /**
-     * {@snippet lang=c :
-     * #define H5_HAVE_SYS_TYPES_H 1
-     * }
-     */
-    public static int H5_HAVE_SYS_TYPES_H() {
-        return H5_HAVE_SYS_TYPES_H;
-    }
     private static final int H5_HAVE_SZLIB_H = (int)1L;
     /**
      * {@snippet lang=c :
@@ -495,15 +473,6 @@ public class hdf5_h_2 {
      */
     public static int H5_HAVE_SZLIB_H() {
         return H5_HAVE_SZLIB_H;
-    }
-    private static final int H5_HAVE_BUILTIN_EXPECT = (int)1L;
-    /**
-     * {@snippet lang=c :
-     * #define H5_HAVE_BUILTIN_EXPECT 1
-     * }
-     */
-    public static int H5_HAVE_BUILTIN_EXPECT() {
-        return H5_HAVE_BUILTIN_EXPECT;
     }
     private static final int H5_HAVE_THREADS = (int)1L;
     /**
@@ -1459,6 +1428,15 @@ public class hdf5_h_2 {
     public static int H5Z_class_t_vers() {
         return H5Z_class_t_vers;
     }
+    private static final int _INTTYPES_H = (int)1L;
+    /**
+     * {@snippet lang=c :
+     * #define _INTTYPES_H 1
+     * }
+     */
+    public static int _INTTYPES_H() {
+        return _INTTYPES_H;
+    }
     private static final int _FEATURES_H = (int)1L;
     /**
      * {@snippet lang=c :
@@ -1782,15 +1760,6 @@ public class hdf5_h_2 {
      */
     public static int __HAVE_GENERIC_SELECTION() {
         return __HAVE_GENERIC_SELECTION;
-    }
-    private static final int _INTTYPES_H = (int)1L;
-    /**
-     * {@snippet lang=c :
-     * #define _INTTYPES_H 1
-     * }
-     */
-    public static int _INTTYPES_H() {
-        return _INTTYPES_H;
     }
     private static final int _STDINT_H = (int)1L;
     /**
@@ -2997,6 +2966,15 @@ public class hdf5_h_2 {
      */
     public static int H5_SIZEOF_HADDR_T() {
         return H5_SIZEOF_HADDR_T;
+    }
+    private static final int H5_HAVE_BUILTIN_EXPECT = (int)1L;
+    /**
+     * {@snippet lang=c :
+     * #define H5_HAVE_BUILTIN_EXPECT 1
+     * }
+     */
+    public static int H5_HAVE_BUILTIN_EXPECT() {
+        return H5_HAVE_BUILTIN_EXPECT;
     }
     private static final int H5O_SHMESG_NONE_FLAG = (int)0L;
     /**
@@ -7571,7 +7549,7 @@ public class hdf5_h_2 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5is_library_terminating(hbool_t *is_terminating)
+     * herr_t H5is_library_terminating(bool *is_terminating)
      * }
      */
     public static FunctionDescriptor H5is_library_terminating$descriptor() {
@@ -7581,7 +7559,7 @@ public class hdf5_h_2 {
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5is_library_terminating(hbool_t *is_terminating)
+     * herr_t H5is_library_terminating(bool *is_terminating)
      * }
      */
     public static MethodHandle H5is_library_terminating$handle() {
@@ -7591,7 +7569,7 @@ public class hdf5_h_2 {
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5is_library_terminating(hbool_t *is_terminating)
+     * herr_t H5is_library_terminating(bool *is_terminating)
      * }
      */
     public static MemorySegment H5is_library_terminating$address() {
@@ -7600,7 +7578,7 @@ public class hdf5_h_2 {
 
     /**
      * {@snippet lang=c :
-     * herr_t H5is_library_terminating(hbool_t *is_terminating)
+     * herr_t H5is_library_terminating(bool *is_terminating)
      * }
      */
     public static int H5is_library_terminating(MemorySegment is_terminating) {
@@ -7629,7 +7607,7 @@ public class hdf5_h_2 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5is_library_threadsafe(hbool_t *is_ts)
+     * herr_t H5is_library_threadsafe(bool *is_ts)
      * }
      */
     public static FunctionDescriptor H5is_library_threadsafe$descriptor() {
@@ -7639,7 +7617,7 @@ public class hdf5_h_2 {
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5is_library_threadsafe(hbool_t *is_ts)
+     * herr_t H5is_library_threadsafe(bool *is_ts)
      * }
      */
     public static MethodHandle H5is_library_threadsafe$handle() {
@@ -7649,7 +7627,7 @@ public class hdf5_h_2 {
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5is_library_threadsafe(hbool_t *is_ts)
+     * herr_t H5is_library_threadsafe(bool *is_ts)
      * }
      */
     public static MemorySegment H5is_library_threadsafe$address() {
@@ -7658,7 +7636,7 @@ public class hdf5_h_2 {
 
     /**
      * {@snippet lang=c :
-     * herr_t H5is_library_threadsafe(hbool_t *is_ts)
+     * herr_t H5is_library_threadsafe(bool *is_ts)
      * }
      */
     public static int H5is_library_threadsafe(MemorySegment is_ts) {
@@ -7746,7 +7724,7 @@ public class hdf5_h_2 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5allocate_memory(size_t size, hbool_t clear)
+     * void *H5allocate_memory(size_t size, bool clear)
      * }
      */
     public static FunctionDescriptor H5allocate_memory$descriptor() {
@@ -7756,7 +7734,7 @@ public class hdf5_h_2 {
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5allocate_memory(size_t size, hbool_t clear)
+     * void *H5allocate_memory(size_t size, bool clear)
      * }
      */
     public static MethodHandle H5allocate_memory$handle() {
@@ -7766,7 +7744,7 @@ public class hdf5_h_2 {
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5allocate_memory(size_t size, hbool_t clear)
+     * void *H5allocate_memory(size_t size, bool clear)
      * }
      */
     public static MemorySegment H5allocate_memory$address() {
@@ -7775,7 +7753,7 @@ public class hdf5_h_2 {
 
     /**
      * {@snippet lang=c :
-     * void *H5allocate_memory(size_t size, hbool_t clear)
+     * void *H5allocate_memory(size_t size, bool clear)
      * }
      */
     public static MemorySegment H5allocate_memory(long size, boolean clear) {
@@ -8627,7 +8605,7 @@ public class hdf5_h_2 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Iclear_type(H5I_type_t type, hbool_t force)
+     * herr_t H5Iclear_type(H5I_type_t type, bool force)
      * }
      */
     public static FunctionDescriptor H5Iclear_type$descriptor() {
@@ -8637,7 +8615,7 @@ public class hdf5_h_2 {
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Iclear_type(H5I_type_t type, hbool_t force)
+     * herr_t H5Iclear_type(H5I_type_t type, bool force)
      * }
      */
     public static MethodHandle H5Iclear_type$handle() {
@@ -8647,7 +8625,7 @@ public class hdf5_h_2 {
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Iclear_type(H5I_type_t type, hbool_t force)
+     * herr_t H5Iclear_type(H5I_type_t type, bool force)
      * }
      */
     public static MemorySegment H5Iclear_type$address() {
@@ -8656,7 +8634,7 @@ public class hdf5_h_2 {
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Iclear_type(H5I_type_t type, hbool_t force)
+     * herr_t H5Iclear_type(H5I_type_t type, bool force)
      * }
      */
     public static int H5Iclear_type(int type, boolean force) {
@@ -11327,7 +11305,7 @@ public class hdf5_h_2 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
+     * herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled)
      * }
      */
     public static FunctionDescriptor H5Oare_mdc_flushes_disabled$descriptor() {
@@ -11337,7 +11315,7 @@ public class hdf5_h_2 {
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
+     * herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled)
      * }
      */
     public static MethodHandle H5Oare_mdc_flushes_disabled$handle() {
@@ -11347,7 +11325,7 @@ public class hdf5_h_2 {
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
+     * herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled)
      * }
      */
     public static MemorySegment H5Oare_mdc_flushes_disabled$address() {
@@ -11356,7 +11334,7 @@ public class hdf5_h_2 {
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
+     * herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled)
      * }
      */
     public static int H5Oare_mdc_flushes_disabled(long object_id, MemorySegment are_disabled) {
@@ -13261,6 +13239,96 @@ public class hdf5_h_2 {
         H5T_IEEE_F64LE_g$constants.SEGMENT.set(H5T_IEEE_F64LE_g$constants.LAYOUT, 0L, varValue);
     }
 
+    private static class H5T_FLOAT_BFLOAT16BE_g$constants {
+        public static final OfLong LAYOUT = hdf5_h.C_LONG;
+        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_FLOAT_BFLOAT16BE_g").reinterpret(LAYOUT.byteSize());
+    }
+
+    /**
+     * Layout for variable:
+     * {@snippet lang=c :
+     * extern hid_t H5T_FLOAT_BFLOAT16BE_g
+     * }
+     */
+    public static OfLong H5T_FLOAT_BFLOAT16BE_g$layout() {
+        return H5T_FLOAT_BFLOAT16BE_g$constants.LAYOUT;
+    }
+
+    /**
+     * Segment for variable:
+     * {@snippet lang=c :
+     * extern hid_t H5T_FLOAT_BFLOAT16BE_g
+     * }
+     */
+    public static MemorySegment H5T_FLOAT_BFLOAT16BE_g$segment() {
+        return H5T_FLOAT_BFLOAT16BE_g$constants.SEGMENT;
+    }
+
+    /**
+     * Getter for variable:
+     * {@snippet lang=c :
+     * extern hid_t H5T_FLOAT_BFLOAT16BE_g
+     * }
+     */
+    public static long H5T_FLOAT_BFLOAT16BE_g() {
+        return H5T_FLOAT_BFLOAT16BE_g$constants.SEGMENT.get(H5T_FLOAT_BFLOAT16BE_g$constants.LAYOUT, 0L);
+    }
+
+    /**
+     * Setter for variable:
+     * {@snippet lang=c :
+     * extern hid_t H5T_FLOAT_BFLOAT16BE_g
+     * }
+     */
+    public static void H5T_FLOAT_BFLOAT16BE_g(long varValue) {
+        H5T_FLOAT_BFLOAT16BE_g$constants.SEGMENT.set(H5T_FLOAT_BFLOAT16BE_g$constants.LAYOUT, 0L, varValue);
+    }
+
+    private static class H5T_FLOAT_BFLOAT16LE_g$constants {
+        public static final OfLong LAYOUT = hdf5_h.C_LONG;
+        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_FLOAT_BFLOAT16LE_g").reinterpret(LAYOUT.byteSize());
+    }
+
+    /**
+     * Layout for variable:
+     * {@snippet lang=c :
+     * extern hid_t H5T_FLOAT_BFLOAT16LE_g
+     * }
+     */
+    public static OfLong H5T_FLOAT_BFLOAT16LE_g$layout() {
+        return H5T_FLOAT_BFLOAT16LE_g$constants.LAYOUT;
+    }
+
+    /**
+     * Segment for variable:
+     * {@snippet lang=c :
+     * extern hid_t H5T_FLOAT_BFLOAT16LE_g
+     * }
+     */
+    public static MemorySegment H5T_FLOAT_BFLOAT16LE_g$segment() {
+        return H5T_FLOAT_BFLOAT16LE_g$constants.SEGMENT;
+    }
+
+    /**
+     * Getter for variable:
+     * {@snippet lang=c :
+     * extern hid_t H5T_FLOAT_BFLOAT16LE_g
+     * }
+     */
+    public static long H5T_FLOAT_BFLOAT16LE_g() {
+        return H5T_FLOAT_BFLOAT16LE_g$constants.SEGMENT.get(H5T_FLOAT_BFLOAT16LE_g$constants.LAYOUT, 0L);
+    }
+
+    /**
+     * Setter for variable:
+     * {@snippet lang=c :
+     * extern hid_t H5T_FLOAT_BFLOAT16LE_g
+     * }
+     */
+    public static void H5T_FLOAT_BFLOAT16LE_g(long varValue) {
+        H5T_FLOAT_BFLOAT16LE_g$constants.SEGMENT.set(H5T_FLOAT_BFLOAT16LE_g$constants.LAYOUT, 0L, varValue);
+    }
+
     private static class H5T_COMPLEX_IEEE_F16BE_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG;
         public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_COMPLEX_IEEE_F16BE_g").reinterpret(LAYOUT.byteSize());
@@ -14746,3 +14814,4 @@ public class hdf5_h_2 {
         H5T_STD_REF_g$constants.SEGMENT.set(H5T_STD_REF_g$constants.LAYOUT, 0L, varValue);
     }
 }
+

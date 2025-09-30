@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -25,22 +25,25 @@ import java.util.stream.*;
  */
 public class H5Z_class1_t {
 
-    H5Z_class1_t()
-    {
+    H5Z_class1_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_INT.withName("id"), MemoryLayout.paddingLayout(4),
-                          hdf5_h.C_POINTER.withName("name"), hdf5_h.C_POINTER.withName("can_apply"),
-                          hdf5_h.C_POINTER.withName("set_local"), hdf5_h.C_POINTER.withName("filter"))
-            .withName("H5Z_class1_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_INT.withName("id"),
+        MemoryLayout.paddingLayout(4),
+        hdf5_h.C_POINTER.withName("name"),
+        hdf5_h.C_POINTER.withName("can_apply"),
+        hdf5_h.C_POINTER.withName("set_local"),
+        hdf5_h.C_POINTER.withName("filter")
+    ).withName("H5Z_class1_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfInt id$LAYOUT = (OfInt)$LAYOUT.select(groupElement("id"));
 
@@ -50,7 +53,9 @@ public class H5Z_class1_t {
      * H5Z_filter_t id
      * }
      */
-    public static final OfInt id$layout() { return id$LAYOUT; }
+    public static final OfInt id$layout() {
+        return id$LAYOUT;
+    }
 
     private static final long id$OFFSET = 0;
 
@@ -60,7 +65,9 @@ public class H5Z_class1_t {
      * H5Z_filter_t id
      * }
      */
-    public static final long id$offset() { return id$OFFSET; }
+    public static final long id$offset() {
+        return id$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -68,7 +75,9 @@ public class H5Z_class1_t {
      * H5Z_filter_t id
      * }
      */
-    public static int id(MemorySegment struct) { return struct.get(id$LAYOUT, id$OFFSET); }
+    public static int id(MemorySegment struct) {
+        return struct.get(id$LAYOUT, id$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -76,8 +85,7 @@ public class H5Z_class1_t {
      * H5Z_filter_t id
      * }
      */
-    public static void id(MemorySegment struct, int fieldValue)
-    {
+    public static void id(MemorySegment struct, int fieldValue) {
         struct.set(id$LAYOUT, id$OFFSET, fieldValue);
     }
 
@@ -89,7 +97,9 @@ public class H5Z_class1_t {
      * const char *name
      * }
      */
-    public static final AddressLayout name$layout() { return name$LAYOUT; }
+    public static final AddressLayout name$layout() {
+        return name$LAYOUT;
+    }
 
     private static final long name$OFFSET = 8;
 
@@ -99,7 +109,9 @@ public class H5Z_class1_t {
      * const char *name
      * }
      */
-    public static final long name$offset() { return name$OFFSET; }
+    public static final long name$offset() {
+        return name$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -107,7 +119,9 @@ public class H5Z_class1_t {
      * const char *name
      * }
      */
-    public static MemorySegment name(MemorySegment struct) { return struct.get(name$LAYOUT, name$OFFSET); }
+    public static MemorySegment name(MemorySegment struct) {
+        return struct.get(name$LAYOUT, name$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -115,13 +129,11 @@ public class H5Z_class1_t {
      * const char *name
      * }
      */
-    public static void name(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void name(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(name$LAYOUT, name$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout can_apply$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("can_apply"));
+    private static final AddressLayout can_apply$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("can_apply"));
 
     /**
      * Layout for field:
@@ -129,7 +141,9 @@ public class H5Z_class1_t {
      * H5Z_can_apply_func_t can_apply
      * }
      */
-    public static final AddressLayout can_apply$layout() { return can_apply$LAYOUT; }
+    public static final AddressLayout can_apply$layout() {
+        return can_apply$LAYOUT;
+    }
 
     private static final long can_apply$OFFSET = 16;
 
@@ -139,7 +153,9 @@ public class H5Z_class1_t {
      * H5Z_can_apply_func_t can_apply
      * }
      */
-    public static final long can_apply$offset() { return can_apply$OFFSET; }
+    public static final long can_apply$offset() {
+        return can_apply$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -147,8 +163,7 @@ public class H5Z_class1_t {
      * H5Z_can_apply_func_t can_apply
      * }
      */
-    public static MemorySegment can_apply(MemorySegment struct)
-    {
+    public static MemorySegment can_apply(MemorySegment struct) {
         return struct.get(can_apply$LAYOUT, can_apply$OFFSET);
     }
 
@@ -158,13 +173,11 @@ public class H5Z_class1_t {
      * H5Z_can_apply_func_t can_apply
      * }
      */
-    public static void can_apply(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void can_apply(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(can_apply$LAYOUT, can_apply$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout set_local$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("set_local"));
+    private static final AddressLayout set_local$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("set_local"));
 
     /**
      * Layout for field:
@@ -172,7 +185,9 @@ public class H5Z_class1_t {
      * H5Z_set_local_func_t set_local
      * }
      */
-    public static final AddressLayout set_local$layout() { return set_local$LAYOUT; }
+    public static final AddressLayout set_local$layout() {
+        return set_local$LAYOUT;
+    }
 
     private static final long set_local$OFFSET = 24;
 
@@ -182,7 +197,9 @@ public class H5Z_class1_t {
      * H5Z_set_local_func_t set_local
      * }
      */
-    public static final long set_local$offset() { return set_local$OFFSET; }
+    public static final long set_local$offset() {
+        return set_local$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -190,8 +207,7 @@ public class H5Z_class1_t {
      * H5Z_set_local_func_t set_local
      * }
      */
-    public static MemorySegment set_local(MemorySegment struct)
-    {
+    public static MemorySegment set_local(MemorySegment struct) {
         return struct.get(set_local$LAYOUT, set_local$OFFSET);
     }
 
@@ -201,8 +217,7 @@ public class H5Z_class1_t {
      * H5Z_set_local_func_t set_local
      * }
      */
-    public static void set_local(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void set_local(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(set_local$LAYOUT, set_local$OFFSET, fieldValue);
     }
 
@@ -214,7 +229,9 @@ public class H5Z_class1_t {
      * H5Z_func_t filter
      * }
      */
-    public static final AddressLayout filter$layout() { return filter$LAYOUT; }
+    public static final AddressLayout filter$layout() {
+        return filter$LAYOUT;
+    }
 
     private static final long filter$OFFSET = 32;
 
@@ -224,7 +241,9 @@ public class H5Z_class1_t {
      * H5Z_func_t filter
      * }
      */
-    public static final long filter$offset() { return filter$OFFSET; }
+    public static final long filter$offset() {
+        return filter$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -232,8 +251,7 @@ public class H5Z_class1_t {
      * H5Z_func_t filter
      * }
      */
-    public static MemorySegment filter(MemorySegment struct)
-    {
+    public static MemorySegment filter(MemorySegment struct) {
         return struct.get(filter$LAYOUT, filter$OFFSET);
     }
 
@@ -243,8 +261,7 @@ public class H5Z_class1_t {
      * H5Z_func_t filter
      * }
      */
-    public static void filter(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void filter(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(filter$LAYOUT, filter$OFFSET, fieldValue);
     }
 
@@ -252,8 +269,7 @@ public class H5Z_class1_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -265,14 +281,15 @@ public class H5Z_class1_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -280,8 +297,7 @@ public class H5Z_class1_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -289,9 +305,8 @@ public class H5Z_class1_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

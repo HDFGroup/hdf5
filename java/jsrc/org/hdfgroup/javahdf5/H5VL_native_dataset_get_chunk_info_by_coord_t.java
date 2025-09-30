@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,21 +24,23 @@ import java.util.stream.*;
  */
 public class H5VL_native_dataset_get_chunk_info_by_coord_t {
 
-    H5VL_native_dataset_get_chunk_info_by_coord_t()
-    {
+    H5VL_native_dataset_get_chunk_info_by_coord_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_POINTER.withName("offset"), hdf5_h.C_POINTER.withName("filter_mask"),
-                          hdf5_h.C_POINTER.withName("addr"), hdf5_h.C_POINTER.withName("size"))
-            .withName("H5VL_native_dataset_get_chunk_info_by_coord_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_POINTER.withName("offset"),
+        hdf5_h.C_POINTER.withName("filter_mask"),
+        hdf5_h.C_POINTER.withName("addr"),
+        hdf5_h.C_POINTER.withName("size")
+    ).withName("H5VL_native_dataset_get_chunk_info_by_coord_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final AddressLayout offset$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("offset"));
 
@@ -48,7 +50,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * const hsize_t *offset
      * }
      */
-    public static final AddressLayout offset$layout() { return offset$LAYOUT; }
+    public static final AddressLayout offset$layout() {
+        return offset$LAYOUT;
+    }
 
     private static final long offset$OFFSET = 0;
 
@@ -58,7 +62,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * const hsize_t *offset
      * }
      */
-    public static final long offset$offset() { return offset$OFFSET; }
+    public static final long offset$offset() {
+        return offset$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -66,8 +72,7 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * const hsize_t *offset
      * }
      */
-    public static MemorySegment offset(MemorySegment struct)
-    {
+    public static MemorySegment offset(MemorySegment struct) {
         return struct.get(offset$LAYOUT, offset$OFFSET);
     }
 
@@ -77,13 +82,11 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * const hsize_t *offset
      * }
      */
-    public static void offset(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void offset(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(offset$LAYOUT, offset$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout filter_mask$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("filter_mask"));
+    private static final AddressLayout filter_mask$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("filter_mask"));
 
     /**
      * Layout for field:
@@ -91,7 +94,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * unsigned int *filter_mask
      * }
      */
-    public static final AddressLayout filter_mask$layout() { return filter_mask$LAYOUT; }
+    public static final AddressLayout filter_mask$layout() {
+        return filter_mask$LAYOUT;
+    }
 
     private static final long filter_mask$OFFSET = 8;
 
@@ -101,7 +106,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * unsigned int *filter_mask
      * }
      */
-    public static final long filter_mask$offset() { return filter_mask$OFFSET; }
+    public static final long filter_mask$offset() {
+        return filter_mask$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -109,8 +116,7 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * unsigned int *filter_mask
      * }
      */
-    public static MemorySegment filter_mask(MemorySegment struct)
-    {
+    public static MemorySegment filter_mask(MemorySegment struct) {
         return struct.get(filter_mask$LAYOUT, filter_mask$OFFSET);
     }
 
@@ -120,8 +126,7 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * unsigned int *filter_mask
      * }
      */
-    public static void filter_mask(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void filter_mask(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(filter_mask$LAYOUT, filter_mask$OFFSET, fieldValue);
     }
 
@@ -133,7 +138,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * haddr_t *addr
      * }
      */
-    public static final AddressLayout addr$layout() { return addr$LAYOUT; }
+    public static final AddressLayout addr$layout() {
+        return addr$LAYOUT;
+    }
 
     private static final long addr$OFFSET = 16;
 
@@ -143,7 +150,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * haddr_t *addr
      * }
      */
-    public static final long addr$offset() { return addr$OFFSET; }
+    public static final long addr$offset() {
+        return addr$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -151,7 +160,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * haddr_t *addr
      * }
      */
-    public static MemorySegment addr(MemorySegment struct) { return struct.get(addr$LAYOUT, addr$OFFSET); }
+    public static MemorySegment addr(MemorySegment struct) {
+        return struct.get(addr$LAYOUT, addr$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -159,8 +170,7 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * haddr_t *addr
      * }
      */
-    public static void addr(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void addr(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(addr$LAYOUT, addr$OFFSET, fieldValue);
     }
 
@@ -172,7 +182,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * hsize_t *size
      * }
      */
-    public static final AddressLayout size$layout() { return size$LAYOUT; }
+    public static final AddressLayout size$layout() {
+        return size$LAYOUT;
+    }
 
     private static final long size$OFFSET = 24;
 
@@ -182,7 +194,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * hsize_t *size
      * }
      */
-    public static final long size$offset() { return size$OFFSET; }
+    public static final long size$offset() {
+        return size$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -190,7 +204,9 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * hsize_t *size
      * }
      */
-    public static MemorySegment size(MemorySegment struct) { return struct.get(size$LAYOUT, size$OFFSET); }
+    public static MemorySegment size(MemorySegment struct) {
+        return struct.get(size$LAYOUT, size$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -198,8 +214,7 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * hsize_t *size
      * }
      */
-    public static void size(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void size(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(size$LAYOUT, size$OFFSET, fieldValue);
     }
 
@@ -207,8 +222,7 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -220,14 +234,15 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -235,8 +250,7 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -244,9 +258,8 @@ public class H5VL_native_dataset_get_chunk_info_by_coord_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

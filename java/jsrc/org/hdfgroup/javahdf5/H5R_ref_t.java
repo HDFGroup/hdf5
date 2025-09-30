@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,18 +24,20 @@ import java.util.stream.*;
  */
 public class H5R_ref_t {
 
-    H5R_ref_t()
-    {
+    H5R_ref_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout.structLayout(H5R_ref_t.u.layout().withName("u")).withName("$anon$97:9");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        H5R_ref_t.u.layout().withName("u")
+    ).withName("$anon$97:9");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     /**
      * {@snippet lang=c :
@@ -47,24 +49,23 @@ public class H5R_ref_t {
      */
     public static class u {
 
-        u()
-        {
+        u() {
             // Should not be called directly
         }
 
-        private static final GroupLayout $LAYOUT =
-            MemoryLayout
-                .unionLayout(MemoryLayout.sequenceLayout(64, hdf5_h.C_CHAR).withName("__data"),
-                             hdf5_h.C_LONG.withName("align"))
-                .withName("$anon$98:5");
+        private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
+            MemoryLayout.sequenceLayout(64, hdf5_h.C_CHAR).withName("__data"),
+            hdf5_h.C_LONG.withName("align")
+        ).withName("$anon$98:5");
 
         /**
          * The layout of this union
          */
-        public static final GroupLayout layout() { return $LAYOUT; }
+        public static final GroupLayout layout() {
+            return $LAYOUT;
+        }
 
-        private static final SequenceLayout __data$LAYOUT =
-            (SequenceLayout)$LAYOUT.select(groupElement("__data"));
+        private static final SequenceLayout __data$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("__data"));
 
         /**
          * Layout for field:
@@ -72,7 +73,9 @@ public class H5R_ref_t {
          * uint8_t __data[64]
          * }
          */
-        public static final SequenceLayout __data$layout() { return __data$LAYOUT; }
+        public static final SequenceLayout __data$layout() {
+            return __data$LAYOUT;
+        }
 
         private static final long __data$OFFSET = 0;
 
@@ -82,7 +85,9 @@ public class H5R_ref_t {
          * uint8_t __data[64]
          * }
          */
-        public static final long __data$offset() { return __data$OFFSET; }
+        public static final long __data$offset() {
+            return __data$OFFSET;
+        }
 
         /**
          * Getter for field:
@@ -90,8 +95,7 @@ public class H5R_ref_t {
          * uint8_t __data[64]
          * }
          */
-        public static MemorySegment __data(MemorySegment union)
-        {
+        public static MemorySegment __data(MemorySegment union) {
             return union.asSlice(__data$OFFSET, __data$LAYOUT.byteSize());
         }
 
@@ -101,12 +105,11 @@ public class H5R_ref_t {
          * uint8_t __data[64]
          * }
          */
-        public static void __data(MemorySegment union, MemorySegment fieldValue)
-        {
+        public static void __data(MemorySegment union, MemorySegment fieldValue) {
             MemorySegment.copy(fieldValue, 0L, union, __data$OFFSET, __data$LAYOUT.byteSize());
         }
 
-        private static long[] __data$DIMS = {64};
+        private static long[] __data$DIMS = { 64 };
 
         /**
          * Dimensions for array field:
@@ -114,7 +117,9 @@ public class H5R_ref_t {
          * uint8_t __data[64]
          * }
          */
-        public static long[] __data$dimensions() { return __data$DIMS; }
+        public static long[] __data$dimensions() {
+            return __data$DIMS;
+        }
         private static final VarHandle __data$ELEM_HANDLE = __data$LAYOUT.varHandle(sequenceElement());
 
         /**
@@ -123,8 +128,7 @@ public class H5R_ref_t {
          * uint8_t __data[64]
          * }
          */
-        public static byte __data(MemorySegment union, long index0)
-        {
+        public static byte __data(MemorySegment union, long index0) {
             return (byte)__data$ELEM_HANDLE.get(union, 0L, index0);
         }
 
@@ -134,8 +138,7 @@ public class H5R_ref_t {
          * uint8_t __data[64]
          * }
          */
-        public static void __data(MemorySegment union, long index0, byte fieldValue)
-        {
+        public static void __data(MemorySegment union, long index0, byte fieldValue) {
             __data$ELEM_HANDLE.set(union, 0L, index0, fieldValue);
         }
 
@@ -147,7 +150,9 @@ public class H5R_ref_t {
          * int64_t align
          * }
          */
-        public static final OfLong align$layout() { return align$LAYOUT; }
+        public static final OfLong align$layout() {
+            return align$LAYOUT;
+        }
 
         private static final long align$OFFSET = 0;
 
@@ -157,7 +162,9 @@ public class H5R_ref_t {
          * int64_t align
          * }
          */
-        public static final long align$offset() { return align$OFFSET; }
+        public static final long align$offset() {
+            return align$OFFSET;
+        }
 
         /**
          * Getter for field:
@@ -165,7 +172,9 @@ public class H5R_ref_t {
          * int64_t align
          * }
          */
-        public static long align(MemorySegment union) { return union.get(align$LAYOUT, align$OFFSET); }
+        public static long align(MemorySegment union) {
+            return union.get(align$LAYOUT, align$OFFSET);
+        }
 
         /**
          * Setter for field:
@@ -173,8 +182,7 @@ public class H5R_ref_t {
          * int64_t align
          * }
          */
-        public static void align(MemorySegment union, long fieldValue)
-        {
+        public static void align(MemorySegment union, long fieldValue) {
             union.set(align$LAYOUT, align$OFFSET, fieldValue);
         }
 
@@ -182,8 +190,7 @@ public class H5R_ref_t {
          * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
          * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
          */
-        public static MemorySegment asSlice(MemorySegment array, long index)
-        {
+        public static MemorySegment asSlice(MemorySegment array, long index) {
             return array.asSlice(layout().byteSize() * index);
         }
 
@@ -195,8 +202,7 @@ public class H5R_ref_t {
         /**
          * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
          */
-        public static MemorySegment allocate(SegmentAllocator allocator)
-        {
+        public static MemorySegment allocate(SegmentAllocator allocator) {
             return allocator.allocate(layout());
         }
 
@@ -204,8 +210,7 @@ public class H5R_ref_t {
          * Allocate an array of size {@code elementCount} using {@code allocator}.
          * The returned segment has size {@code elementCount * layout().byteSize()}.
          */
-        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-        {
+        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
             return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
         }
 
@@ -213,9 +218,7 @@ public class H5R_ref_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
             return reinterpret(addr, 1, arena, cleanup);
         }
 
@@ -223,9 +226,7 @@ public class H5R_ref_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code elementCount * layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                                Consumer<MemorySegment> cleanup)
-        {
+        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
             return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
         }
     }
@@ -241,7 +242,9 @@ public class H5R_ref_t {
      * } u
      * }
      */
-    public static final GroupLayout u$layout() { return u$LAYOUT; }
+    public static final GroupLayout u$layout() {
+        return u$LAYOUT;
+    }
 
     private static final long u$OFFSET = 0;
 
@@ -254,7 +257,9 @@ public class H5R_ref_t {
      * } u
      * }
      */
-    public static final long u$offset() { return u$OFFSET; }
+    public static final long u$offset() {
+        return u$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -265,8 +270,7 @@ public class H5R_ref_t {
      * } u
      * }
      */
-    public static MemorySegment u(MemorySegment struct)
-    {
+    public static MemorySegment u(MemorySegment struct) {
         return struct.asSlice(u$OFFSET, u$LAYOUT.byteSize());
     }
 
@@ -279,8 +283,7 @@ public class H5R_ref_t {
      * } u
      * }
      */
-    public static void u(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void u(MemorySegment struct, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, struct, u$OFFSET, u$LAYOUT.byteSize());
     }
 
@@ -288,8 +291,7 @@ public class H5R_ref_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -301,14 +303,15 @@ public class H5R_ref_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -316,8 +319,7 @@ public class H5R_ref_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -325,9 +327,8 @@ public class H5R_ref_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

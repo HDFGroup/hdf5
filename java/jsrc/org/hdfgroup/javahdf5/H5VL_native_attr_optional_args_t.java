@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -21,22 +21,22 @@ import java.util.stream.*;
  */
 public class H5VL_native_attr_optional_args_t {
 
-    H5VL_native_attr_optional_args_t()
-    {
+    H5VL_native_attr_optional_args_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout.unionLayout(H5VL_native_attr_iterate_old_t.layout().withName("iterate_old"))
-            .withName("H5VL_native_attr_optional_args_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
+        H5VL_native_attr_iterate_old_t.layout().withName("iterate_old")
+    ).withName("H5VL_native_attr_optional_args_t");
 
     /**
      * The layout of this union
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
-    private static final GroupLayout iterate_old$LAYOUT =
-        (GroupLayout)$LAYOUT.select(groupElement("iterate_old"));
+    private static final GroupLayout iterate_old$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("iterate_old"));
 
     /**
      * Layout for field:
@@ -44,7 +44,9 @@ public class H5VL_native_attr_optional_args_t {
      * H5VL_native_attr_iterate_old_t iterate_old
      * }
      */
-    public static final GroupLayout iterate_old$layout() { return iterate_old$LAYOUT; }
+    public static final GroupLayout iterate_old$layout() {
+        return iterate_old$LAYOUT;
+    }
 
     private static final long iterate_old$OFFSET = 0;
 
@@ -54,7 +56,9 @@ public class H5VL_native_attr_optional_args_t {
      * H5VL_native_attr_iterate_old_t iterate_old
      * }
      */
-    public static final long iterate_old$offset() { return iterate_old$OFFSET; }
+    public static final long iterate_old$offset() {
+        return iterate_old$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -62,8 +66,7 @@ public class H5VL_native_attr_optional_args_t {
      * H5VL_native_attr_iterate_old_t iterate_old
      * }
      */
-    public static MemorySegment iterate_old(MemorySegment union)
-    {
+    public static MemorySegment iterate_old(MemorySegment union) {
         return union.asSlice(iterate_old$OFFSET, iterate_old$LAYOUT.byteSize());
     }
 
@@ -73,8 +76,7 @@ public class H5VL_native_attr_optional_args_t {
      * H5VL_native_attr_iterate_old_t iterate_old
      * }
      */
-    public static void iterate_old(MemorySegment union, MemorySegment fieldValue)
-    {
+    public static void iterate_old(MemorySegment union, MemorySegment fieldValue) {
         MemorySegment.copy(fieldValue, 0L, union, iterate_old$OFFSET, iterate_old$LAYOUT.byteSize());
     }
 
@@ -82,8 +84,7 @@ public class H5VL_native_attr_optional_args_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -95,14 +96,15 @@ public class H5VL_native_attr_optional_args_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -110,8 +112,7 @@ public class H5VL_native_attr_optional_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -119,9 +120,8 @@ public class H5VL_native_attr_optional_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+
