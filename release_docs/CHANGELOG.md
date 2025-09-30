@@ -563,6 +563,12 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 # 🪲 Bug Fixes
 
 ## Library
+### Fix bugs in object header operations
+
+   In some rare circumstances, such as deleting hard links that point to their own parent group in a file using the new file format, memory corruption could occur due to recursive operations changing data structures being operated on by multiple levels of recursion. Made changes to delay changing the data structure in a dangerous way until recursion is complete.
+
+   Fixes GitHub issue #5854
+
 
 ### Fixed security issues CVE-2025-6816, CVE-2025-6856 and CVE-2025-2923
 
