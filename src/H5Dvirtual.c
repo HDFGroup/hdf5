@@ -4002,7 +4002,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5D__mappings_to_leaves() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_build_tree
@@ -4091,7 +4091,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D__virtual_build_tree() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__should_build_tree
@@ -4143,7 +4143,7 @@ H5D__should_build_tree(H5O_storage_virtual_t *storage, hid_t dapl_id, bool *shou
     *should_build_tree = true;
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5D__should_build_tree() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_read_one_mapping
@@ -4178,7 +4178,7 @@ H5D__virtual_read_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtual
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D__virtual_read_one_mapping() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_write_one_mapping
@@ -4213,7 +4213,7 @@ H5D__virtual_write_one_mapping(H5D_dset_io_info_t *dset_info, H5O_storage_virtua
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D__virtual_write_one_mapping() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_close_mapping
@@ -4252,4 +4252,4 @@ H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping)
         } /* end if */
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5D__virtual_close_mapping() */
