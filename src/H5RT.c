@@ -765,7 +765,7 @@ H5RT__free_recurse(H5RT_node_t *node)
         }
 
     FUNC_LEAVE_NOAPI_VOID
-}
+} /* end H5RT__free_recurse() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT_free
@@ -801,7 +801,7 @@ H5RT_free(H5RT_t *rtree)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5RT_free() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT_copy
@@ -892,4 +892,4 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5RT_copy() */
