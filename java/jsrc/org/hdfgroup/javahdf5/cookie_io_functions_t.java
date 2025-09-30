@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,8 +24,8 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class cookie_io_functions_t extends _IO_cookie_io_functions_t {
 
-    cookie_io_functions_t() {
+    cookie_io_functions_t()
+    {
         // Should not be called directly
     }
 }
-

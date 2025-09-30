@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -24,25 +24,24 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5VL_native_file_get_mdc_size_t {
 
-    H5VL_native_file_get_mdc_size_t() {
+    H5VL_native_file_get_mdc_size_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("max_size"),
-        hdf5_h.C_POINTER.withName("min_clean_size"),
-        hdf5_h.C_POINTER.withName("cur_size"),
-        hdf5_h.C_POINTER.withName("cur_num_entries")
-    ).withName("H5VL_native_file_get_mdc_size_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("max_size"), hdf5_h.C_POINTER.withName("min_clean_size"),
+                          hdf5_h.C_POINTER.withName("cur_size"), hdf5_h.C_POINTER.withName("cur_num_entries"))
+            .withName("H5VL_native_file_get_mdc_size_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
-    private static final AddressLayout max_size$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("max_size"));
+    private static final AddressLayout max_size$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("max_size"));
 
     /**
      * Layout for field:
@@ -50,9 +49,7 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *max_size
      * }
      */
-    public static final AddressLayout max_size$layout() {
-        return max_size$LAYOUT;
-    }
+    public static final AddressLayout max_size$layout() { return max_size$LAYOUT; }
 
     private static final long max_size$OFFSET = 0;
 
@@ -62,9 +59,7 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *max_size
      * }
      */
-    public static final long max_size$offset() {
-        return max_size$OFFSET;
-    }
+    public static final long max_size$offset() { return max_size$OFFSET; }
 
     /**
      * Getter for field:
@@ -72,7 +67,8 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *max_size
      * }
      */
-    public static MemorySegment max_size(MemorySegment struct) {
+    public static MemorySegment max_size(MemorySegment struct)
+    {
         return struct.get(max_size$LAYOUT, max_size$OFFSET);
     }
 
@@ -82,11 +78,13 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *max_size
      * }
      */
-    public static void max_size(MemorySegment struct, MemorySegment fieldValue) {
+    public static void max_size(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(max_size$LAYOUT, max_size$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout min_clean_size$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("min_clean_size"));
+    private static final AddressLayout min_clean_size$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("min_clean_size"));
 
     /**
      * Layout for field:
@@ -94,9 +92,7 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *min_clean_size
      * }
      */
-    public static final AddressLayout min_clean_size$layout() {
-        return min_clean_size$LAYOUT;
-    }
+    public static final AddressLayout min_clean_size$layout() { return min_clean_size$LAYOUT; }
 
     private static final long min_clean_size$OFFSET = 8;
 
@@ -106,9 +102,7 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *min_clean_size
      * }
      */
-    public static final long min_clean_size$offset() {
-        return min_clean_size$OFFSET;
-    }
+    public static final long min_clean_size$offset() { return min_clean_size$OFFSET; }
 
     /**
      * Getter for field:
@@ -116,7 +110,8 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *min_clean_size
      * }
      */
-    public static MemorySegment min_clean_size(MemorySegment struct) {
+    public static MemorySegment min_clean_size(MemorySegment struct)
+    {
         return struct.get(min_clean_size$LAYOUT, min_clean_size$OFFSET);
     }
 
@@ -126,11 +121,13 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *min_clean_size
      * }
      */
-    public static void min_clean_size(MemorySegment struct, MemorySegment fieldValue) {
+    public static void min_clean_size(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(min_clean_size$LAYOUT, min_clean_size$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout cur_size$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("cur_size"));
+    private static final AddressLayout cur_size$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("cur_size"));
 
     /**
      * Layout for field:
@@ -138,9 +135,7 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *cur_size
      * }
      */
-    public static final AddressLayout cur_size$layout() {
-        return cur_size$LAYOUT;
-    }
+    public static final AddressLayout cur_size$layout() { return cur_size$LAYOUT; }
 
     private static final long cur_size$OFFSET = 16;
 
@@ -150,9 +145,7 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *cur_size
      * }
      */
-    public static final long cur_size$offset() {
-        return cur_size$OFFSET;
-    }
+    public static final long cur_size$offset() { return cur_size$OFFSET; }
 
     /**
      * Getter for field:
@@ -160,7 +153,8 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *cur_size
      * }
      */
-    public static MemorySegment cur_size(MemorySegment struct) {
+    public static MemorySegment cur_size(MemorySegment struct)
+    {
         return struct.get(cur_size$LAYOUT, cur_size$OFFSET);
     }
 
@@ -170,11 +164,13 @@ public class H5VL_native_file_get_mdc_size_t {
      * size_t *cur_size
      * }
      */
-    public static void cur_size(MemorySegment struct, MemorySegment fieldValue) {
+    public static void cur_size(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(cur_size$LAYOUT, cur_size$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout cur_num_entries$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("cur_num_entries"));
+    private static final AddressLayout cur_num_entries$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("cur_num_entries"));
 
     /**
      * Layout for field:
@@ -182,9 +178,7 @@ public class H5VL_native_file_get_mdc_size_t {
      * uint32_t *cur_num_entries
      * }
      */
-    public static final AddressLayout cur_num_entries$layout() {
-        return cur_num_entries$LAYOUT;
-    }
+    public static final AddressLayout cur_num_entries$layout() { return cur_num_entries$LAYOUT; }
 
     private static final long cur_num_entries$OFFSET = 24;
 
@@ -194,9 +188,7 @@ public class H5VL_native_file_get_mdc_size_t {
      * uint32_t *cur_num_entries
      * }
      */
-    public static final long cur_num_entries$offset() {
-        return cur_num_entries$OFFSET;
-    }
+    public static final long cur_num_entries$offset() { return cur_num_entries$OFFSET; }
 
     /**
      * Getter for field:
@@ -204,7 +196,8 @@ public class H5VL_native_file_get_mdc_size_t {
      * uint32_t *cur_num_entries
      * }
      */
-    public static MemorySegment cur_num_entries(MemorySegment struct) {
+    public static MemorySegment cur_num_entries(MemorySegment struct)
+    {
         return struct.get(cur_num_entries$LAYOUT, cur_num_entries$OFFSET);
     }
 
@@ -214,7 +207,8 @@ public class H5VL_native_file_get_mdc_size_t {
      * uint32_t *cur_num_entries
      * }
      */
-    public static void cur_num_entries(MemorySegment struct, MemorySegment fieldValue) {
+    public static void cur_num_entries(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(cur_num_entries$LAYOUT, cur_num_entries$OFFSET, fieldValue);
     }
 
@@ -222,7 +216,8 @@ public class H5VL_native_file_get_mdc_size_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -234,15 +229,14 @@ public class H5VL_native_file_get_mdc_size_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -250,7 +244,8 @@ public class H5VL_native_file_get_mdc_size_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -258,8 +253,9 @@ public class H5VL_native_file_get_mdc_size_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

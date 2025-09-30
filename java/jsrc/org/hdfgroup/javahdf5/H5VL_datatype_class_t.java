@@ -2,58 +2,56 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-
 /**
  * {@snippet lang=c :
  * struct H5VL_datatype_class_t {
- *     void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t, void **);
- *     void *(*open)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, void **);
- *     herr_t (*get)(void *, H5VL_datatype_get_args_t *, hid_t, void **);
- *     herr_t (*specific)(void *, H5VL_datatype_specific_args_t *, hid_t, void **);
- *     herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **);
- *     herr_t (*close)(void *, hid_t, void **);
+ *     void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t,
+ * void **); void *(*open)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, void **); herr_t
+ * (*get)(void *, H5VL_datatype_get_args_t *, hid_t, void **); herr_t (*specific)(void *,
+ * H5VL_datatype_specific_args_t *, hid_t, void **); herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t,
+ * void **); herr_t (*close)(void *, hid_t, void **);
  * }
  * }
  */
 public class H5VL_datatype_class_t {
 
-    H5VL_datatype_class_t() {
+    H5VL_datatype_class_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("commit"),
-        hdf5_h.C_POINTER.withName("open"),
-        hdf5_h.C_POINTER.withName("get"),
-        hdf5_h.C_POINTER.withName("specific"),
-        hdf5_h.C_POINTER.withName("optional"),
-        hdf5_h.C_POINTER.withName("close")
-    ).withName("H5VL_datatype_class_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("commit"), hdf5_h.C_POINTER.withName("open"),
+                          hdf5_h.C_POINTER.withName("get"), hdf5_h.C_POINTER.withName("specific"),
+                          hdf5_h.C_POINTER.withName("optional"), hdf5_h.C_POINTER.withName("close"))
+            .withName("H5VL_datatype_class_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     /**
      * {@snippet lang=c :
-     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t, void **)
+     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t,
+     * void **)
      * }
      */
     public static class commit {
 
-        commit() {
+        commit()
+        {
             // Should not be called directly
         }
 
@@ -61,28 +59,18 @@ public class H5VL_datatype_class_t {
          * The function pointer signature, expressed as a functional interface
          */
         public interface Function {
-            MemorySegment apply(MemorySegment _x0, MemorySegment _x1, MemorySegment _x2, long _x3, long _x4, long _x5, long _x6, long _x7, MemorySegment _x8);
+            MemorySegment apply(MemorySegment _x0, MemorySegment _x1, MemorySegment _x2, long _x3, long _x4,
+                                long _x5, long _x6, long _x7, MemorySegment _x8);
         }
 
         private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_LONG,
-            hdf5_h.C_LONG,
-            hdf5_h.C_LONG,
-            hdf5_h.C_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG,
+            hdf5_h.C_LONG, hdf5_h.C_LONG, hdf5_h.C_LONG, hdf5_h.C_LONG, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
         private static final MethodHandle UP$MH = hdf5_h.upcallHandle(commit.Function.class, "apply", $DESC);
 
@@ -90,7 +78,8 @@ public class H5VL_datatype_class_t {
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(commit.Function fi, Arena arena) {
+        public static MemorySegment allocate(commit.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -99,10 +88,15 @@ public class H5VL_datatype_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, MemorySegment _x2, long _x3, long _x4, long _x5, long _x6, long _x7, MemorySegment _x8) {
+        public static MemorySegment invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1,
+                                           MemorySegment _x2, long _x3, long _x4, long _x5, long _x6,
+                                           long _x7, MemorySegment _x8)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3, _x4, _x5, _x6, _x7, _x8);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3, _x4, _x5, _x6, _x7,
+                                                          _x8);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
@@ -113,42 +107,44 @@ public class H5VL_datatype_class_t {
     /**
      * Layout for field:
      * {@snippet lang=c :
-     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t, void **)
+     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t,
+     * void **)
      * }
      */
-    public static final AddressLayout commit$layout() {
-        return commit$LAYOUT;
-    }
+    public static final AddressLayout commit$layout() { return commit$LAYOUT; }
 
     private static final long commit$OFFSET = 0;
 
     /**
      * Offset for field:
      * {@snippet lang=c :
-     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t, void **)
+     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t,
+     * void **)
      * }
      */
-    public static final long commit$offset() {
-        return commit$OFFSET;
-    }
+    public static final long commit$offset() { return commit$OFFSET; }
 
     /**
      * Getter for field:
      * {@snippet lang=c :
-     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t, void **)
+     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t,
+     * void **)
      * }
      */
-    public static MemorySegment commit(MemorySegment struct) {
+    public static MemorySegment commit(MemorySegment struct)
+    {
         return struct.get(commit$LAYOUT, commit$OFFSET);
     }
 
     /**
      * Setter for field:
      * {@snippet lang=c :
-     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t, void **)
+     * void *(*commit)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, hid_t, hid_t, hid_t,
+     * void **)
      * }
      */
-    public static void commit(MemorySegment struct, MemorySegment fieldValue) {
+    public static void commit(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(commit$LAYOUT, commit$OFFSET, fieldValue);
     }
 
@@ -159,7 +155,8 @@ public class H5VL_datatype_class_t {
      */
     public static class open {
 
-        open() {
+        open()
+        {
             // Should not be called directly
         }
 
@@ -167,25 +164,18 @@ public class H5VL_datatype_class_t {
          * The function pointer signature, expressed as a functional interface
          */
         public interface Function {
-            MemorySegment apply(MemorySegment _x0, MemorySegment _x1, MemorySegment _x2, long _x3, long _x4, MemorySegment _x5);
+            MemorySegment apply(MemorySegment _x0, MemorySegment _x1, MemorySegment _x2, long _x3, long _x4,
+                                MemorySegment _x5);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_LONG,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG, hdf5_h.C_LONG, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
         private static final MethodHandle UP$MH = hdf5_h.upcallHandle(open.Function.class, "apply", $DESC);
 
@@ -193,7 +183,8 @@ public class H5VL_datatype_class_t {
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(open.Function fi, Arena arena) {
+        public static MemorySegment allocate(open.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -202,10 +193,13 @@ public class H5VL_datatype_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static MemorySegment invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, MemorySegment _x2, long _x3, long _x4, MemorySegment _x5) {
+        public static MemorySegment invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1,
+                                           MemorySegment _x2, long _x3, long _x4, MemorySegment _x5)
+        {
             try {
-                return (MemorySegment) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3, _x4, _x5);
-            } catch (Throwable ex$) {
+                return (MemorySegment)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3, _x4, _x5);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
@@ -219,9 +213,7 @@ public class H5VL_datatype_class_t {
      * void *(*open)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, void **)
      * }
      */
-    public static final AddressLayout open$layout() {
-        return open$LAYOUT;
-    }
+    public static final AddressLayout open$layout() { return open$LAYOUT; }
 
     private static final long open$OFFSET = 8;
 
@@ -231,9 +223,7 @@ public class H5VL_datatype_class_t {
      * void *(*open)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, void **)
      * }
      */
-    public static final long open$offset() {
-        return open$OFFSET;
-    }
+    public static final long open$offset() { return open$OFFSET; }
 
     /**
      * Getter for field:
@@ -241,9 +231,7 @@ public class H5VL_datatype_class_t {
      * void *(*open)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, void **)
      * }
      */
-    public static MemorySegment open(MemorySegment struct) {
-        return struct.get(open$LAYOUT, open$OFFSET);
-    }
+    public static MemorySegment open(MemorySegment struct) { return struct.get(open$LAYOUT, open$OFFSET); }
 
     /**
      * Setter for field:
@@ -251,7 +239,8 @@ public class H5VL_datatype_class_t {
      * void *(*open)(void *, const H5VL_loc_params_t *, const char *, hid_t, hid_t, void **)
      * }
      */
-    public static void open(MemorySegment struct, MemorySegment fieldValue) {
+    public static void open(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(open$LAYOUT, open$OFFSET, fieldValue);
     }
 
@@ -262,7 +251,8 @@ public class H5VL_datatype_class_t {
      */
     public static class get {
 
-        get() {
+        get()
+        {
             // Should not be called directly
         }
 
@@ -274,19 +264,12 @@ public class H5VL_datatype_class_t {
         }
 
         private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
         private static final MethodHandle UP$MH = hdf5_h.upcallHandle(get.Function.class, "apply", $DESC);
 
@@ -294,7 +277,8 @@ public class H5VL_datatype_class_t {
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(get.Function fi, Arena arena) {
+        public static MemorySegment allocate(get.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -303,10 +287,13 @@ public class H5VL_datatype_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, long _x2, MemorySegment _x3) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1, long _x2,
+                                 MemorySegment _x3)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
@@ -320,9 +307,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*get)(void *, H5VL_datatype_get_args_t *, hid_t, void **)
      * }
      */
-    public static final AddressLayout get$layout() {
-        return get$LAYOUT;
-    }
+    public static final AddressLayout get$layout() { return get$LAYOUT; }
 
     private static final long get$OFFSET = 16;
 
@@ -332,9 +317,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*get)(void *, H5VL_datatype_get_args_t *, hid_t, void **)
      * }
      */
-    public static final long get$offset() {
-        return get$OFFSET;
-    }
+    public static final long get$offset() { return get$OFFSET; }
 
     /**
      * Getter for field:
@@ -342,9 +325,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*get)(void *, H5VL_datatype_get_args_t *, hid_t, void **)
      * }
      */
-    public static MemorySegment get(MemorySegment struct) {
-        return struct.get(get$LAYOUT, get$OFFSET);
-    }
+    public static MemorySegment get(MemorySegment struct) { return struct.get(get$LAYOUT, get$OFFSET); }
 
     /**
      * Setter for field:
@@ -352,7 +333,8 @@ public class H5VL_datatype_class_t {
      * herr_t (*get)(void *, H5VL_datatype_get_args_t *, hid_t, void **)
      * }
      */
-    public static void get(MemorySegment struct, MemorySegment fieldValue) {
+    public static void get(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(get$LAYOUT, get$OFFSET, fieldValue);
     }
 
@@ -363,7 +345,8 @@ public class H5VL_datatype_class_t {
      */
     public static class specific {
 
-        specific() {
+        specific()
+        {
             // Should not be called directly
         }
 
@@ -375,27 +358,22 @@ public class H5VL_datatype_class_t {
         }
 
         private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(specific.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(specific.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(specific.Function fi, Arena arena) {
+        public static MemorySegment allocate(specific.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -404,16 +382,20 @@ public class H5VL_datatype_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, long _x2, MemorySegment _x3) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1, long _x2,
+                                 MemorySegment _x3)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout specific$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("specific"));
+    private static final AddressLayout specific$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("specific"));
 
     /**
      * Layout for field:
@@ -421,9 +403,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*specific)(void *, H5VL_datatype_specific_args_t *, hid_t, void **)
      * }
      */
-    public static final AddressLayout specific$layout() {
-        return specific$LAYOUT;
-    }
+    public static final AddressLayout specific$layout() { return specific$LAYOUT; }
 
     private static final long specific$OFFSET = 24;
 
@@ -433,9 +413,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*specific)(void *, H5VL_datatype_specific_args_t *, hid_t, void **)
      * }
      */
-    public static final long specific$offset() {
-        return specific$OFFSET;
-    }
+    public static final long specific$offset() { return specific$OFFSET; }
 
     /**
      * Getter for field:
@@ -443,7 +421,8 @@ public class H5VL_datatype_class_t {
      * herr_t (*specific)(void *, H5VL_datatype_specific_args_t *, hid_t, void **)
      * }
      */
-    public static MemorySegment specific(MemorySegment struct) {
+    public static MemorySegment specific(MemorySegment struct)
+    {
         return struct.get(specific$LAYOUT, specific$OFFSET);
     }
 
@@ -453,7 +432,8 @@ public class H5VL_datatype_class_t {
      * herr_t (*specific)(void *, H5VL_datatype_specific_args_t *, hid_t, void **)
      * }
      */
-    public static void specific(MemorySegment struct, MemorySegment fieldValue) {
+    public static void specific(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(specific$LAYOUT, specific$OFFSET, fieldValue);
     }
 
@@ -464,7 +444,8 @@ public class H5VL_datatype_class_t {
      */
     public static class optional {
 
-        optional() {
+        optional()
+        {
             // Should not be called directly
         }
 
@@ -476,27 +457,22 @@ public class H5VL_datatype_class_t {
         }
 
         private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(optional.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(optional.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(optional.Function fi, Arena arena) {
+        public static MemorySegment allocate(optional.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -505,16 +481,20 @@ public class H5VL_datatype_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, long _x2, MemorySegment _x3) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1, long _x2,
+                                 MemorySegment _x3)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2, _x3);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout optional$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("optional"));
+    private static final AddressLayout optional$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("optional"));
 
     /**
      * Layout for field:
@@ -522,9 +502,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **)
      * }
      */
-    public static final AddressLayout optional$layout() {
-        return optional$LAYOUT;
-    }
+    public static final AddressLayout optional$layout() { return optional$LAYOUT; }
 
     private static final long optional$OFFSET = 32;
 
@@ -534,9 +512,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **)
      * }
      */
-    public static final long optional$offset() {
-        return optional$OFFSET;
-    }
+    public static final long optional$offset() { return optional$OFFSET; }
 
     /**
      * Getter for field:
@@ -544,7 +520,8 @@ public class H5VL_datatype_class_t {
      * herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **)
      * }
      */
-    public static MemorySegment optional(MemorySegment struct) {
+    public static MemorySegment optional(MemorySegment struct)
+    {
         return struct.get(optional$LAYOUT, optional$OFFSET);
     }
 
@@ -554,7 +531,8 @@ public class H5VL_datatype_class_t {
      * herr_t (*optional)(void *, H5VL_optional_args_t *, hid_t, void **)
      * }
      */
-    public static void optional(MemorySegment struct, MemorySegment fieldValue) {
+    public static void optional(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(optional$LAYOUT, optional$OFFSET, fieldValue);
     }
 
@@ -565,7 +543,8 @@ public class H5VL_datatype_class_t {
      */
     public static class close {
 
-        close() {
+        close()
+        {
             // Should not be called directly
         }
 
@@ -576,19 +555,13 @@ public class H5VL_datatype_class_t {
             int apply(MemorySegment _x0, long _x1, MemorySegment _x2);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
         private static final MethodHandle UP$MH = hdf5_h.upcallHandle(close.Function.class, "apply", $DESC);
 
@@ -596,7 +569,8 @@ public class H5VL_datatype_class_t {
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(close.Function fi, Arena arena) {
+        public static MemorySegment allocate(close.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -605,10 +579,12 @@ public class H5VL_datatype_class_t {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, long _x1, MemorySegment _x2) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, long _x1, MemorySegment _x2)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
@@ -622,9 +598,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*close)(void *, hid_t, void **)
      * }
      */
-    public static final AddressLayout close$layout() {
-        return close$LAYOUT;
-    }
+    public static final AddressLayout close$layout() { return close$LAYOUT; }
 
     private static final long close$OFFSET = 40;
 
@@ -634,9 +608,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*close)(void *, hid_t, void **)
      * }
      */
-    public static final long close$offset() {
-        return close$OFFSET;
-    }
+    public static final long close$offset() { return close$OFFSET; }
 
     /**
      * Getter for field:
@@ -644,9 +616,7 @@ public class H5VL_datatype_class_t {
      * herr_t (*close)(void *, hid_t, void **)
      * }
      */
-    public static MemorySegment close(MemorySegment struct) {
-        return struct.get(close$LAYOUT, close$OFFSET);
-    }
+    public static MemorySegment close(MemorySegment struct) { return struct.get(close$LAYOUT, close$OFFSET); }
 
     /**
      * Setter for field:
@@ -654,7 +624,8 @@ public class H5VL_datatype_class_t {
      * herr_t (*close)(void *, hid_t, void **)
      * }
      */
-    public static void close(MemorySegment struct, MemorySegment fieldValue) {
+    public static void close(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(close$LAYOUT, close$OFFSET, fieldValue);
     }
 
@@ -662,7 +633,8 @@ public class H5VL_datatype_class_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -674,15 +646,14 @@ public class H5VL_datatype_class_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -690,7 +661,8 @@ public class H5VL_datatype_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -698,8 +670,9 @@ public class H5VL_datatype_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-
