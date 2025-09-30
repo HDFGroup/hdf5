@@ -40,12 +40,7 @@ static herr_t H5RT__result_set_init(H5RT_result_set_t *result_set);
 static herr_t H5RT__result_set_add(H5RT_result_set_t *result_set, H5RT_leaf_t *leaf);
 static herr_t H5RT__result_set_grow(H5RT_result_set_t *result_set);
 static void   H5RT__result_set_cleanup(H5RT_result_set_t *result_set);
-
-#if defined(H5_HAVE_DARWIN) || defined(H5_HAVE_WIN32_API)
-static int H5RT__leaf_compare(void *dim, const void *leaf1, const void *leaf2);
-#else
-static int H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
-#endif
+static int    H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
 
 /*-------------------------------------------------------------------------
  * Function:    H5RT_leaf_init
@@ -134,19 +129,17 @@ done:
  * Purpose:     Compare two R-tree leaves for sorting based on their midpoint
  *              coordinates in the specified dimension.
  *
+ *              Uses GNU qsort_r signature (context parameter last) for
+ *              compatibility with HDqsort_r macro.
+ *
  * Return:      -1 if leaf1 < leaf2
  *               0 if leaf1 == leaf2
  *               1 if leaf1 > leaf2
  *
  *-------------------------------------------------------------------------
  */
-#if defined(H5_HAVE_DARWIN) || defined(H5_HAVE_WIN32_API)
-static int
-H5RT__leaf_compare(void *dim, const void *leaf1, const void *leaf2)
-#else
 static int
 H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim)
-#endif
 {
     const H5RT_leaf_t *l1       = (const H5RT_leaf_t *)leaf1;
     const H5RT_leaf_t *l2       = (const H5RT_leaf_t *)leaf2;
@@ -426,15 +419,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         if (prev_sort_dim != rank - 1) {
             assert(prev_sort_dim < rank - 1);
             sort_dim = prev_sort_dim + 1;
-#if defined(H5_HAVE_WIN32_API)
-            /* Windows version is named qsort_s() */
-            qsort_s((void *)leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void *)&sort_dim);
-#elif defined(H5_HAVE_DARWIN)
-            /* MacOS version has unique argument order */
-            qsort_r((void *)leaves, count, sizeof(H5RT_leaf_t), (void *)&sort_dim, H5RT__leaf_compare);
-#else
-            qsort_r((void *)leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void *)&sort_dim);
-#endif
+            HDqsort_r((void *)leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void *)&sort_dim);
         }
         else {
             sort_dim = prev_sort_dim;
