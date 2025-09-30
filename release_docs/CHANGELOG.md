@@ -1,4 +1,4 @@
-HDF5 version 2.0.0-2 currently under development
+HDF5 version 2.0.0-3 currently under development
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -21,12 +21,12 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.0.0-2
+# 🔆 Executive Summary: HDF5 Version 2.0.0-3
 
 ## Performance Enhancements:
 
-- 30% faster opening and 25% faster closing of virtual datasets.
-- Reduced memory overhead via shared name strings and optimized spatial search algorithms for virtual datasets.
+- [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and [25% faster closing](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) of virtual datasets.
+- [Reduced memory overhead](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
 
 ## Significant Advancements:
 
@@ -252,6 +252,8 @@ Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer 
 ### The file format has been updated to 4.0<a name="fileformat"></a>
 
 The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
+
+Use of the shared strings option for Virtual Datasets reduces memory overhead and optimizes dataset close operations.
 
 ### The `H5Dread_chunk()` signature has changed
 
@@ -479,6 +481,12 @@ Simple example programs showing how to use complex number datatypes have been ad
 ### `H5Pset_vol()` now fails when used on a non-file-access property list
 
    Similar to the above. Setting the connector on a non-FAPL had no effect on library behavior, and the connector ID and information could not be read back from that plist later.
+
+### Optimized Virtual Dataset opens by delaying layout copy<a name="layoutcopydelay"></a>
+
+   On dataset open, the dataset performed an internal copy of the layout in order to populate its internal DCPL. For virtual datasets, this added a significant amount of overhead to the open operation.
+
+   This layout copy is now delayed until either a user requests the DCPL, or until the start of an operation that needs to read the layout from the DCPL.
 
 ## Parallel Library
 
