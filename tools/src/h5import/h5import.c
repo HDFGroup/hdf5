@@ -586,7 +586,7 @@ readIntegerData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in64++) {
-                        if (fscanf(strm, "%s", buffer) < 1) {
+                        if (fscanf(strm, "%255s", buffer) < 1) {
                             (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
@@ -753,7 +753,7 @@ readUIntegerData(FILE *strm, struct Input *in)
             switch (in->inputClass) {
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in64++) {
-                        if (fscanf(strm, "%s", buffer) < 1) {
+                        if (fscanf(strm, "%255s", buffer) < 1) {
                             (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
