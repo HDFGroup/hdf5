@@ -87,12 +87,9 @@ H5RT_leaf_init(H5RT_leaf_t *leaf, int rank, void *record)
     leaf->record = record;
 
 done:
-    if (ret_value < 0 && leaf && leaf->_coords) {
-        free(leaf->_coords);
-        leaf->_coords = NULL;
-        leaf->min     = NULL;
-        leaf->max     = NULL;
-        leaf->mid     = NULL;
+    if (ret_value < 0 && leaf) {
+        if (H5RT_leaf_cleanup(leaf) < 0)
+            HDONE_ERROR(H5E_INTERNAL, H5E_CANTRELEASE, FAIL, "failed to clean up leaf on error");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
