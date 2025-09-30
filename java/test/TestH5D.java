@@ -770,7 +770,8 @@ public class TestH5D {
         MemoryLayout ITER_LAYOUT = MemoryLayout.structLayout(
             MemoryLayout.sequenceLayout(SPACE_RANK, ValueLayout.JAVA_LONG).withName("fill_coords"),
             ValueLayout.JAVA_LONG.withName("fill_curr_coord"), ValueLayout.JAVA_INT.withName("fill_value"));
-        VarHandle coordsHandle = ITER_LAYOUT.arrayElementVarHandle(PathElement.groupElement("fill_coords"),PathElement.sequenceElement());
+        VarHandle coordsHandle = ITER_LAYOUT.arrayElementVarHandle(PathElement.groupElement("fill_coords"),
+                                                                   PathElement.sequenceElement());
         VarHandle curr_coordHandle = ITER_LAYOUT.varHandle(PathElement.groupElement("fill_curr_coord"));
         VarHandle valueHandle      = ITER_LAYOUT.varHandle(PathElement.groupElement("fill_value"));
         class H5D_iter_data implements H5D_iterate_t {
@@ -787,7 +788,8 @@ public class TestH5D {
             {
                 // Check value in current buffer location
                 int element = elem.get(ValueLayout.JAVA_INT, 0);
-                //System.out.println("element = " + element + " fill_value = " + (int)valueHandle.get(operator_data, 0));
+                // System.out.println("element = " + element + " fill_value = " +
+                // (int)valueHandle.get(operator_data, 0));
                 if (element != (int)valueHandle.get(operator_data, 0))
                     return -1;
                 // Check number of dimensions
@@ -864,7 +866,8 @@ public class TestH5D {
         MemoryLayout ITER_LAYOUT = MemoryLayout.structLayout(
             MemoryLayout.sequenceLayout(SPACE_RANK, ValueLayout.JAVA_LONG).withName("fill_coords"),
             ValueLayout.JAVA_LONG.withName("fill_curr_coord"), ValueLayout.JAVA_INT.withName("fill_value"));
-        VarHandle coordsHandle = ITER_LAYOUT.arrayElementVarHandle(PathElement.groupElement("fill_coords"),PathElement.sequenceElement());
+        VarHandle coordsHandle = ITER_LAYOUT.arrayElementVarHandle(PathElement.groupElement("fill_coords"),
+                                                                   PathElement.sequenceElement());
         VarHandle curr_coordHandle = ITER_LAYOUT.varHandle(PathElement.groupElement("fill_curr_coord"));
         VarHandle valueHandle      = ITER_LAYOUT.varHandle(PathElement.groupElement("fill_value"));
 
@@ -996,8 +999,10 @@ public class TestH5D {
     }
 
     @Test
-    @Ignore("DISABLED: Crashes with VL string buffer issues - will be fixed after other VL issues are resolved")
-    public void testH5Dvlen_string_buffer() throws Throwable
+    @Ignore(
+        "DISABLED: Crashes with VL string buffer issues - will be fixed after other VL issues are resolved")
+    public void
+    testH5Dvlen_string_buffer() throws Throwable
     {
         String dset_str_name = "VLStringdata";
         long dset_str_id     = HDF5Constants.H5I_INVALID_HID;

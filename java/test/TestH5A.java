@@ -1109,10 +1109,14 @@ public class TestH5A {
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5Awrite_readVL: " + str_data[0] + " == " + read_vl_data[0].get(0), str_data[0].equals(read_vl_data[0].get(0)));
-            assertTrue("testH5Awrite_readVL: " + str_data[1] + " == " + read_vl_data[1].get(0), str_data[1].equals(read_vl_data[1].get(0)));
-            assertTrue("testH5Awrite_readVL: " + str_data[2] + " == " + read_vl_data[2].get(0), str_data[2].equals(read_vl_data[2].get(0)));
-            assertTrue("testH5Awrite_readVL: " + str_data[3] + " == " + read_vl_data[3].get(0), str_data[3].equals(read_vl_data[3].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[0] + " == " + read_vl_data[0].get(0),
+                       str_data[0].equals(read_vl_data[0].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[1] + " == " + read_vl_data[1].get(0),
+                       str_data[1].equals(read_vl_data[1].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[2] + " == " + read_vl_data[2].get(0),
+                       str_data[2].equals(read_vl_data[2].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[3] + " == " + read_vl_data[3].get(0),
+                       str_data[3].equals(read_vl_data[3].get(0)));
         }
         catch (Throwable err) {
             err.printStackTrace();

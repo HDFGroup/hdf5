@@ -2139,15 +2139,18 @@ public class H5 implements java.io.Serializable {
                     // Convert string pointer array back to ArrayList array
                     for (int i = 0; i < buf.length; i++) {
                         ArrayList<String> stringList = new ArrayList<>();
-                        MemorySegment stringPtr = stringArray.getAtIndex(ValueLayout.ADDRESS, i);
+                        MemorySegment stringPtr      = stringArray.getAtIndex(ValueLayout.ADDRESS, i);
 
                         if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
                             // Reinterpret the string pointer with proper scope for reading
                             // Use a large but safe size limit for string reading
-                            MemorySegment boundedStringPtr = stringPtr.reinterpret(4096, Arena.global(), null);
-                            String str = boundedStringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
+                            MemorySegment boundedStringPtr =
+                                stringPtr.reinterpret(4096, Arena.global(), null);
+                            String str =
+                                boundedStringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
                             stringList.add(str);
-                        } else {
+                        }
+                        else {
                             stringList.add(""); // Empty string for null pointers
                         }
                         buf[i] = stringList;
@@ -4301,15 +4304,18 @@ public class H5 implements java.io.Serializable {
                     // Convert string pointer array back to ArrayList array
                     for (int i = 0; i < buf.length; i++) {
                         ArrayList<String> stringList = new ArrayList<>();
-                        MemorySegment stringPtr = stringArray.getAtIndex(ValueLayout.ADDRESS, i);
+                        MemorySegment stringPtr      = stringArray.getAtIndex(ValueLayout.ADDRESS, i);
 
                         if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
                             // Reinterpret the string pointer with proper scope for reading
                             // Use a large but safe size limit for string reading
-                            MemorySegment boundedStringPtr = stringPtr.reinterpret(4096, Arena.global(), null);
-                            String str = boundedStringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
+                            MemorySegment boundedStringPtr =
+                                stringPtr.reinterpret(4096, Arena.global(), null);
+                            String str =
+                                boundedStringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
                             stringList.add(str);
-                        } else {
+                        }
+                        else {
                             stringList.add(""); // Empty string for null pointers
                         }
                         buf[i] = stringList;
@@ -4693,11 +4699,13 @@ public class H5 implements java.io.Serializable {
 
         if (is1D && (dataClass.getComponentType() == String.class)) {
             log.trace("H5Dwrite_string type - routing to H5Dwrite_VLStrings");
-            status = H5Dwrite_VLStrings(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (String[])obj);
+            status = H5Dwrite_VLStrings(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                        (String[])obj);
         }
         else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
             log.trace("H5DwriteVL type - using H5DwriteVL directly");
-            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
+            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                (Object[])obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
@@ -5161,7 +5169,8 @@ public class H5 implements java.io.Serializable {
             throw new HDF5LibraryException("VL data conversion failed: " + ex.getMessage());
         }
         catch (ClassCastException ex) {
-            throw new HDF5LibraryException("Input data must be ArrayList array or String array: " + ex.getMessage());
+            throw new HDF5LibraryException("Input data must be ArrayList array or String array: " +
+                                           ex.getMessage());
         }
 
         return status;
@@ -5210,7 +5219,7 @@ public class H5 implements java.io.Serializable {
 
         try {
             // Convert String array to VL format for HDF5
-            String[] stringArray = (String[])buf;
+            String[] stringArray      = (String[])buf;
             ArrayList[] vlStringArray = new ArrayList[stringArray.length];
             for (int i = 0; i < stringArray.length; i++) {
                 vlStringArray[i] = new ArrayList<>();

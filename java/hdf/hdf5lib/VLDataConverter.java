@@ -114,8 +114,6 @@ public class VLDataConverter {
             long len              = hvl_t.len(hvlElement);
             MemorySegment dataPtr = hvl_t.p(hvlElement);
 
-
-
             // Check if we're getting valid data from hvl_t
             if (len == 0 || dataPtr == null || dataPtr.equals(MemorySegment.NULL)) {
                 // Empty VL element - create empty raw data
@@ -133,12 +131,13 @@ public class VLDataConverter {
                         ArrayList<String> directResult = new ArrayList<>(1);
                         if (dataPtr == null || dataPtr.equals(MemorySegment.NULL)) {
                             directResult.add(""); // Empty string for null data
-                        } else {
+                        }
+                        else {
                             // For VL strings, hvl_t.p directly contains the char* pointer
                             String str = dataPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
                             directResult.add(str);
                         }
-                        result[i] = directResult;
+                        result[i]       = directResult;
                         rawDataArray[i] = null; // Mark as already processed
                     }
                     catch (Exception e) {
@@ -416,7 +415,7 @@ public class VLDataConverter {
                         if (intArray.size() != arraySize) {
                             org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
                             throw new HDF5JavaException("Array element " + i + " has " + intArray.size() +
-                                                       " elements, expected " + arraySize);
+                                                        " elements, expected " + arraySize);
                         }
 
                         for (int j = 0; j < arraySize; j++) {
@@ -437,12 +436,13 @@ public class VLDataConverter {
                         if (doubleArray.size() != arraySize) {
                             org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
                             throw new HDF5JavaException("Array element " + i + " has " + doubleArray.size() +
-                                                       " elements, expected " + arraySize);
+                                                        " elements, expected " + arraySize);
                         }
 
                         for (int j = 0; j < arraySize; j++) {
                             Double val = doubleArray.get(j);
-                            buffer.setAtIndex(ValueLayout.JAVA_DOUBLE, i * arraySize + j, val != null ? val : 0.0);
+                            buffer.setAtIndex(ValueLayout.JAVA_DOUBLE, i * arraySize + j,
+                                              val != null ? val : 0.0);
                         }
                     }
 
@@ -458,7 +458,7 @@ public class VLDataConverter {
                         if (enumArray.size() != arraySize) {
                             org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
                             throw new HDF5JavaException("Array element " + i + " has " + enumArray.size() +
-                                                       " elements, expected " + arraySize);
+                                                        " elements, expected " + arraySize);
                         }
 
                         for (int j = 0; j < arraySize; j++) {
@@ -472,7 +472,8 @@ public class VLDataConverter {
                 }
                 else {
                     org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
-                    throw new HDF5JavaException("Unsupported array base type for FFM conversion: " + baseTypeClass);
+                    throw new HDF5JavaException("Unsupported array base type for FFM conversion: " +
+                                                baseTypeClass);
                 }
             }
         }
@@ -537,9 +538,11 @@ public class VLDataConverter {
                         if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
                             try {
                                 // Reinterpret the pointer with global scope to access the string data
-                                MemorySegment stringData = MemorySegment.ofAddress(stringPtr.address()).reinterpret(Long.MAX_VALUE);
+                                MemorySegment stringData =
+                                    MemorySegment.ofAddress(stringPtr.address()).reinterpret(Long.MAX_VALUE);
                                 copiedStringData[i][j] = stringData.getString(0, StandardCharsets.UTF_8);
-                            } catch (Exception e) {
+                            }
+                            catch (Exception e) {
                                 copiedStringData[i][j] = null;
                             }
                         }
@@ -554,8 +557,8 @@ public class VLDataConverter {
                 if (space_id >= 0) {
                     try {
                         // Reclaim memory
-                        int reclaim_status = org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(mem_type_id, space_id,
-                                                                                       HDF5Constants.H5P_DEFAULT, buffer);
+                        int reclaim_status = org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(
+                            mem_type_id, space_id, HDF5Constants.H5P_DEFAULT, buffer);
                         if (reclaim_status < 0) {
                             System.err.println("Warning: Failed to reclaim VL string memory");
                         }
@@ -634,7 +637,8 @@ public class VLDataConverter {
                 }
                 else {
                     org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
-                    throw new HDF5JavaException("Unsupported array base type for FFM reading: " + baseTypeClass);
+                    throw new HDF5JavaException("Unsupported array base type for FFM reading: " +
+                                                baseTypeClass);
                 }
             }
         }
@@ -701,7 +705,8 @@ public class VLDataConverter {
                         MemorySegment stringPtr = buffer.getAtIndex(ValueLayout.ADDRESS, i * arraySize + j);
                         if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
                             // Reinterpret the pointer with global scope to access the string data
-                            MemorySegment stringData = MemorySegment.ofAddress(stringPtr.address()).reinterpret(Long.MAX_VALUE);
+                            MemorySegment stringData =
+                                MemorySegment.ofAddress(stringPtr.address()).reinterpret(Long.MAX_VALUE);
                             copiedStringData[i][j] = stringData.getString(0, StandardCharsets.UTF_8);
                         }
                         else {
@@ -817,7 +822,8 @@ public class VLDataConverter {
                 }
                 else {
                     org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
-                    throw new HDF5JavaException("Unsupported array base type for FFM reading: " + baseTypeClass);
+                    throw new HDF5JavaException("Unsupported array base type for FFM reading: " +
+                                                baseTypeClass);
                 }
             }
         }
@@ -978,12 +984,12 @@ public class VLDataConverter {
             // CRITICAL FIX: Handle both direct string data and string pointer arrays
             try {
                 // First, try to read as direct string data (H5T_STRING + H5T_VARIABLE case)
-                String str = dataPtr.getString(0, StandardCharsets.UTF_8);
+                String str      = dataPtr.getString(0, StandardCharsets.UTF_8);
                 byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
 
                 // For direct string data, we have 1 string, so update the count
                 // Replace the length with count = 1
-                allStringBytes.set(0, (byte)1);  // count = 1
+                allStringBytes.set(0, (byte)1); // count = 1
                 allStringBytes.set(1, (byte)0);
                 allStringBytes.set(2, (byte)0);
                 allStringBytes.set(3, (byte)0);
@@ -1015,7 +1021,7 @@ public class VLDataConverter {
 
                             if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
                                 // Extract the string content immediately
-                                String str = stringPtr.getString(0, StandardCharsets.UTF_8);
+                                String str      = stringPtr.getString(0, StandardCharsets.UTF_8);
                                 byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
 
                                 // Add string length
@@ -1202,7 +1208,6 @@ public class VLDataConverter {
                 int numStrings =
                     (data[0] & 0xFF) | ((data[1] & 0xFF) << 8) | ((data[2] & 0xFF) << 16) | (data[3] << 24);
 
-
                 if (numStrings == rawData.length && numStrings > 0) {
                     // This looks like our packed format, decode it
                     int offset = 4; // Skip the count
@@ -1265,8 +1270,8 @@ public class VLDataConverter {
             // - First 4 bytes: number of references
             // - Then for each reference: 4 bytes length + reference data
             if (data.length >= 4) {
-                int numRefs = (data[0] & 0xFF) | ((data[1] & 0xFF) << 8) |
-                             ((data[2] & 0xFF) << 16) | (data[3] << 24);
+                int numRefs =
+                    (data[0] & 0xFF) | ((data[1] & 0xFF) << 8) | ((data[2] & 0xFF) << 16) | (data[3] << 24);
 
                 if (numRefs == rawData.length && numRefs > 0) {
                     int offset = 4; // Skip the count
@@ -1274,7 +1279,7 @@ public class VLDataConverter {
                     for (int i = 0; i < numRefs && offset + 4 <= data.length; i++) {
                         // Read reference length
                         int refLen = (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) |
-                                    ((data[offset + 2] & 0xFF) << 16) | (data[offset + 3] << 24);
+                                     ((data[offset + 2] & 0xFF) << 16) | (data[offset + 3] << 24);
                         offset += 4;
 
                         // Extract reference data
@@ -1283,17 +1288,20 @@ public class VLDataConverter {
                             System.arraycopy(data, offset, refData, 0, refLen);
                             result.add(refData);
                             offset += refLen;
-                        } else {
+                        }
+                        else {
                             // Invalid data, add empty byte array
                             result.add(new byte[0]);
                         }
                     }
-                } else {
+                }
+                else {
                     // If count doesn't match or is invalid, treat as single large byte array
                     // This handles cases where the data wasn't packed by our convertByteArrayVL method
                     result.add(data.clone());
                 }
-            } else {
+            }
+            else {
                 // Too small for packed format, treat as single byte array
                 result.add(data.clone());
             }
@@ -1327,9 +1335,9 @@ public class VLDataConverter {
             Arena tempArena = Arena.global(); // Use global arena to match other VL operations
 
             // The raw data contains hvl_t structures - reconstruct them
-            byte[] data = rawData.data;
-            int hvlSize = 16; // hvl_t structure size on 64-bit systems
-            int maxStructs = data.length / hvlSize;
+            byte[] data       = rawData.data;
+            int hvlSize       = 16; // hvl_t structure size on 64-bit systems
+            int maxStructs    = data.length / hvlSize;
             int actualStructs = Math.min(maxStructs, rawData.length);
 
             if (actualStructs > 0) {
@@ -1345,7 +1353,6 @@ public class VLDataConverter {
             while (result.size() < rawData.length) {
                 result.add(new ArrayList<>());
             }
-
         }
         catch (Exception e) {
             // Fallback: create empty nested lists to prevent IndexOutOfBounds
@@ -1611,20 +1618,24 @@ public class VLDataConverter {
             // Try to create a MemorySegment from the 'len' value if it looks like an address
             if (len > 0x1000000) { // Looks like a memory address
                 try {
-                    MemorySegment stringPtr = MemorySegment.ofAddress(len).reinterpret(100, Arena.global(), null);
+                    MemorySegment stringPtr =
+                        MemorySegment.ofAddress(len).reinterpret(100, Arena.global(), null);
                     String str = stringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
-                    System.out.println("DEBUG: convertStringVLFromHVL read from len-as-pointer: \"" + str + "\"");
+                    System.out.println("DEBUG: convertStringVLFromHVL read from len-as-pointer: \"" + str +
+                                       "\"");
                     result.add(str);
                     return result;
                 }
                 catch (Exception addrException) {
-                    System.out.println("DEBUG: Failed to read from len-as-pointer: " + addrException.getMessage());
+                    System.out.println("DEBUG: Failed to read from len-as-pointer: " +
+                                       addrException.getMessage());
                 }
             }
 
             // Fallback: Read the string directly from dataPtr
             String str = dataPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
-            System.out.println("DEBUG: convertStringVLFromHVL read from dataPtr: \"" + str + "\" (len=" + len + ")");
+            System.out.println("DEBUG: convertStringVLFromHVL read from dataPtr: \"" + str +
+                               "\" (len=" + len + ")");
             result.add(str);
         }
         catch (Exception e) {
@@ -1833,25 +1844,29 @@ public class VLDataConverter {
             if (javaData[i] == null || javaData[i].size() == 0) {
                 // Set null pointer for empty/null strings
                 stringArray.setAtIndex(ValueLayout.ADDRESS, i, MemorySegment.NULL);
-            } else {
+            }
+            else {
                 // Get the first string from the ArrayList (VL string format)
-                String str = (String) javaData[i].get(0);
+                String str = (String)javaData[i].get(0);
                 if (str == null) {
                     stringArray.setAtIndex(ValueLayout.ADDRESS, i, MemorySegment.NULL);
-                } else {
+                }
+                else {
                     // CRITICAL FIX: Use HDF5's memory allocator instead of Arena
                     // This prevents conflicts between HDF5's VL memory cleanup and Java's Arena
                     byte[] strBytes = str.getBytes(java.nio.charset.StandardCharsets.UTF_8);
                     // Allocate with extra byte for null terminator
-                    MemorySegment hdf5StringMem = org.hdfgroup.javahdf5.hdf5_h_2.H5allocate_memory(strBytes.length + 1, false);
+                    MemorySegment hdf5StringMem =
+                        org.hdfgroup.javahdf5.hdf5_h_2.H5allocate_memory(strBytes.length + 1, false);
                     if (hdf5StringMem == null || hdf5StringMem.equals(MemorySegment.NULL)) {
                         throw new HDF5JavaException("Failed to allocate HDF5 memory for string: " + str);
                     }
                     // Copy string bytes with proper scope management
-                    MemorySegment boundedMem = hdf5StringMem.reinterpret(strBytes.length + 1, Arena.global(), null);
+                    MemorySegment boundedMem =
+                        hdf5StringMem.reinterpret(strBytes.length + 1, Arena.global(), null);
                     boundedMem.copyFrom(MemorySegment.ofArray(strBytes));
                     // Add null terminator
-                    boundedMem.set(ValueLayout.JAVA_BYTE, strBytes.length, (byte) 0);
+                    boundedMem.set(ValueLayout.JAVA_BYTE, strBytes.length, (byte)0);
                     stringArray.setAtIndex(ValueLayout.ADDRESS, i, boundedMem);
                 }
             }
@@ -1875,8 +1890,8 @@ public class VLDataConverter {
      * @throws HDF5JavaException if reading fails
      */
     public static ArrayList[] readVLStrings(long dataset_id, long mem_type_id, long mem_space_id,
-                                          long file_space_id, long xfer_plist_id, int arrayLength, Arena arena)
-                                          throws HDF5JavaException
+                                            long file_space_id, long xfer_plist_id, int arrayLength,
+                                            Arena arena) throws HDF5JavaException
     {
         // Allocate array of string pointers for reading
         MemorySegment stringArray = arena.allocate(ValueLayout.ADDRESS, arrayLength);
@@ -1884,7 +1899,7 @@ public class VLDataConverter {
         try {
             // Call native H5Dread to read string pointers
             int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
-                                                               file_space_id, xfer_plist_id, stringArray);
+                                                                file_space_id, xfer_plist_id, stringArray);
             if (status < 0) {
                 throw new HDF5JavaException("H5Dread failed for VL strings");
             }
@@ -1900,11 +1915,13 @@ public class VLDataConverter {
                         // Read null-terminated string from pointer with bounds checking
                         String str = stringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
                         result[i].add(str);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         // If string reading fails, add empty string
                         result[i].add("");
                     }
-                } else {
+                }
+                else {
                     // Empty string case
                     result[i].add("");
                 }
@@ -1928,8 +1945,8 @@ public class VLDataConverter {
      * @return ArrayList array containing the read strings
      * @throws HDF5JavaException if reading fails
      */
-    public static ArrayList[] readVLStringsFromAttribute(long attr_id, long mem_type_id, int arrayLength, Arena arena)
-                                                       throws HDF5JavaException
+    public static ArrayList[] readVLStringsFromAttribute(long attr_id, long mem_type_id, int arrayLength,
+                                                         Arena arena) throws HDF5JavaException
     {
         // For attributes, allocate array of string pointers for reading
         MemorySegment stringArray = arena.allocate(ValueLayout.ADDRESS, arrayLength);
@@ -1952,11 +1969,13 @@ public class VLDataConverter {
                         // Read null-terminated string from pointer with bounds checking
                         String str = stringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
                         result[i].add(str);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         // If string reading fails, add empty string
                         result[i].add("");
                     }
-                } else {
+                }
+                else {
                     // Empty string case
                     result[i].add("");
                 }
