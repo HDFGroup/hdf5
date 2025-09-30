@@ -10678,8 +10678,17 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5P
      *
-     * H5Pget_dset_use_spatial_tree accesses the flag for whether or not datasets accessed with the given dapl
-     * will use a spatial tree for mappings
+     * H5Pget_dset_use_spatial_tree accesses the flag for whether to use/not use a spatial tree
+     * during mapping operations on a Virtual Dataset. The default value is true.
+     *
+     * Use of a spatial tree will accelerate the process of searching through mappings
+     * to determine which contain intersections with the user's selection region.
+     * With the tree disabled, all mappings will simply be iterated through and
+     * checked directly.
+     *
+     * Certain workflows may find that tree creation overhead outweighs the time saved
+     * on reads. In this case, disabling this property will lead to a performance improvement,
+     * though it is expected that almost all cases will benefit from the tree on net.
      *
      * @param dapl_id
      *            IN: Dataset access property list
@@ -10695,8 +10704,17 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5P
      *
-     * H5Pset_dset_use_spatial_tree sets the dapl to not use (or explicitly use) a spatial tree
-     * during mapping operations
+     * H5Pset_dset_use_spatial_tree sets the dapl to use/not use a spatial tree
+     * during mapping operations on a Virtual Dataset. The default value is true.
+     *
+     * Use of a spatial tree will accelerate the process of searching through mappings
+     * to determine which contain intersections with the user's selection region.
+     * With the tree disabled, all mappings will simply be iterated through and
+     * checked directly.
+     *
+     * Certain workflows may find that tree creation overhead outweighs the time saved
+     * on reads. In this case, disabling this property will lead to a performance improvement,
+     * though it is expected that almost all cases will benefit from the tree on net.
      *
      * @param dapl_id
      *            IN: Dataset access property list
