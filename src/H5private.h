@@ -764,56 +764,13 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDunsetenv
 #define HDunsetenv(S) unsetenv(S)
 #endif
-
-/*
- * HDqsort_r - Reentrant qsort with context parameter
- *
- * Provides a uniform interface to platform-specific reentrant qsort functions.
- * All library code should use the GNU/Linux signature for comparator functions:
- *
- *   int comparator(const void *a, const void *b, void *context)
- *
- * The macro handles platform differences internally, allowing the same
- * comparator signature to work on Windows (qsort_s), macOS (BSD qsort_r),
- * and Linux (GNU qsort_r).
- *
- * Usage:
- *   HDqsort_r(base, count, elem_size, compare_func, context);
- */
-#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN)
-/* Need wrapper for Windows and macOS which expect context-first comparators */
-typedef struct HDqsort_r_wrapper_t {
-    int (*gnu_compar)(const void *, const void *, void *);
-    void *gnu_arg;
-} HDqsort_r_wrapper_t;
-
-static inline int
-HDqsort_r_wrapper_func(
-    void *wrapper_arg,
-    const void *a, const void *b
-)
-{
-    HDqsort_r_wrapper_t *w = (HDqsort_r_wrapper_t *)wrapper_arg;
-    return w->gnu_compar(a, b, w->gnu_arg);
-}
-
-static inline void
-HDqsort_r(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *), void *arg)
-{
-    HDqsort_r_wrapper_t wrapper;
-    wrapper.gnu_compar = compar;
-    wrapper.gnu_arg    = arg;
-#if defined(H5_HAVE_WIN32_API)
-    qsort_s(base, nel, size, HDqsort_r_wrapper_func, &wrapper);
-#elif defined(H5_HAVE_DARWIN)
-    qsort_r(base, nel, size, &wrapper, HDqsort_r_wrapper_func);
-#endif
-}
+#ifndef HDqsort_context
+#ifdef H5_HAVE_DARWIN
+#define HDqsort_r(B, N, S, C, A) HDqsort_context(B, N, S, C, A)
 #else
-/* GNU/Linux: direct mapping to qsort_r */
-#define HDqsort_r(base, nel, size, compar, arg) qsort_r((base), (nel), (size), (compar), (arg))
+#define HDqsort_r(B, N, S, C, A) qsort_r(B, N, S, C, A)
 #endif
-
+#endif
 #ifndef HDvasprintf
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
