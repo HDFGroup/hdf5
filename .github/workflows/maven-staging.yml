@@ -596,7 +596,7 @@ jobs:
     name: "Test Java Examples with Maven Artifacts (${{ matrix.platform }})"
     runs-on: ${{ matrix.os }}
     needs: [detect-changes, determine-matrix, build-maven-artifacts]
-    if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.outputs.artifacts-created == 'true' }}
+    if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.result == 'success' }}
     continue-on-error: true  # Non-blocking failures
     strategy:
       fail-fast: false
