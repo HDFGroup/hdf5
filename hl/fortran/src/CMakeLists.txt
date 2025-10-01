@@ -124,7 +124,7 @@ set (HDF5_HL_F90_F_BASE_SOURCES
 
 if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5LTff_gen.F90")
   message (STATUS "No pre-generated H5LTff_gen.F90 H5TBff_gen.F90 file found - generating one")
-  if (CROSSCOMPILING)
+  if (CMAKE_CROSSCOMPILING)
     add_custom_command (TARGET H5HL_buildiface POST_BUILD
         BYPRODUCTS ${HDF5_HL_F90_BINARY_DIR}/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/H5TBff_gen.F90
         COMMAND    ${CMAKE_COMMAND}
