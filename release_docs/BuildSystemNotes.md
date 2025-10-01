@@ -32,8 +32,7 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 **Language Bindings:**
 - `HDF5_BUILD_CPP_LIB=OFF` - C++ bindings
 - `HDF5_BUILD_FORTRAN=OFF` - Fortran bindings
-- `HDF5_BUILD_JAVA=OFF` - Java bindings (FFM or JNI implementation)
-- `HDF5_ENABLE_JNI=OFF` - Force JNI implementation instead of FFM for Java 24+
+- `HDF5_BUILD_JAVA=OFF` - Java JNI bindings
 - `HDF5_ENABLE_MAVEN_DEPLOY=OFF` - Maven repository deployment support
 - `HDF5_MAVEN_SNAPSHOT=OFF` - Build Maven snapshot versions with -SNAPSHOT suffix
 
@@ -55,29 +54,14 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 - `HDF5_ENABLE_MAP_API=OFF` - Map API (experimental)
 - `HDF5_ENABLE_HDFS=OFF` - Hadoop HDFS support
 
-### Java Implementation Selection
-
-**FFM vs JNI Implementation:**
-- **Java 24+**: FFM (Foreign Function & Memory) implementation by default
-- **Java 11-23**: JNI (Java Native Interface) implementation required
-- **Force JNI**: Use `HDF5_ENABLE_JNI=ON` to force JNI even with Java 24+
-- **Artifact differentiation**: `hdf5-java-ffm` vs `hdf5-java-jni` Maven artifacts
-- **Package compatibility**: Both use `hdf.hdf5lib.*` for seamless migration
-- **Implementation detection**: Automatic based on Java version and user preferences
-
-**CMake Variables:**
-- `HDF5_JAVA_IMPLEMENTATION` - Set to "FFM" or "JNI" after configuration
-- `HDF5_JAVA_ARTIFACT_ID` - Set to "hdf5-java-ffm" or "hdf5-java-jni"
-
 ## CMake Preset System
 
 ### Preset Architecture
 - **Layered inheritance**: Base presets + feature-specific + platform-specific
-- **Hidden presets**: Reusable components (`ci-base`, `ci-Debug`, `ci-Release`, `ci-Maven`, `ci-Maven-Snapshot`, `ci-Maven-Minimal`, `ci-Maven-Minimal-Snapshot`, `ci-Java-FFM`, `ci-Java-JNI`)
+- **Hidden presets**: Reusable components (`ci-base`, `ci-Debug`, `ci-Release`, `ci-Maven`, `ci-Maven-Snapshot`, `ci-Maven-Minimal`, `ci-Maven-Minimal-Snapshot`)
 - **Platform presets**: `ci-GNUC`, `ci-Clang`, `ci-MSVC`, `ci-macos`
 - **Maven presets**: Hidden base configurations for Maven deployment support
 - **Minimal Maven presets**: Streamlined configurations for Java artifact generation only
-- **Java implementation presets**: FFM and JNI specific configurations
 - **Build type matrix**: Debug, Release (RelWithDebInfo + docs), Maven variants
 
 ### Key Preset Patterns
@@ -96,10 +80,6 @@ cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # Maven snapsho
 # Multi-platform Maven presets (minimal builds for Java artifacts only)
 cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # Windows Maven
 cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS Maven
-
-# Java implementation-specific presets
-cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh      # FFM implementation
-cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh      # JNI implementation
 
 # Naming convention: ci-[Features]-[Compiler][-Maven[-Snapshot]]
 # Features: Std (standard), Min (minimal), StdShar (standard shared), MinShar (minimal shared)
@@ -169,9 +149,6 @@ ctest -R "H5_api_test"
 - `vfd-*.yml` - Virtual File Driver testing
 - `vol_*.yml` - Virtual Object Layer connector testing
 - `analysis.yml` - Static analysis integration
-- `java-implementation-test.yml` - Java FFM/JNI implementation testing
-- `java-examples-maven-test.yml` - Java examples with Maven artifacts
-- **FFM Latest Java Testing** - Automated testing with bleeding-edge Java versions via enhanced `main.yml` workflow
 
 **Platform-Specific:**
 - `arm-main.yml` - ARM architecture testing
@@ -191,10 +168,6 @@ ctest -R "H5_api_test"
 - **Compiler diversity**: GCC, Clang, MSVC, Intel, AOCC, NVHPC
 - **Feature combinations**: Systematic testing of feature interactions
 - **Performance variants**: Debug vs Release vs specialized builds
-- **Latest Java Testing**: Non-blocking FFM testing with bleeding-edge Java versions
-  - Configurable Java version selection (11, 17, 21, 24, latest, auto)
-  - Force Java implementation (auto, ffm, jni)
-  - Integrated into main CI pipeline via `call-workflows.yml`
 
 ## Packaging & Distribution
 
@@ -239,26 +212,14 @@ ctest -R "H5_api_test"
 
 ### Maven Integration Workflow
 1. **Java Build Configuration**: Enable Maven deployment with `HDF5_ENABLE_MAVEN_DEPLOY=ON`
-2. **Implementation Selection**:
-   - Auto-detect based on Java version (FFM for 24+, JNI for 11-23)
-   - Force JNI with `HDF5_ENABLE_JNI=ON` regardless of Java version
-   - Use implementation-specific presets for explicit control
-3. **Version Management**: Use `HDF5_MAVEN_SNAPSHOT=ON` for development builds with `-SNAPSHOT` suffix
-4. **Preset Selection**: Choose Maven-enabled presets with optional implementation specification:
-   - `ci-StdShar-GNUC-Maven` or `ci-StdShar-GNUC-Maven-Snapshot` (auto-detect)
-   - `ci-MinShar-GNUC-Maven-FFM` or `ci-MinShar-GNUC-Maven-JNI` (explicit)
-5. **Artifact Differentiation**: Automatic generation of implementation-specific artifacts:
-   - `hdf5-java-ffm` for FFM implementation (Java 24+)
-   - `hdf5-java-jni` for JNI implementation (all Java versions)
-6. **Platform Artifacts**: Automatic generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
-7. **CI Integration**: Multi-matrix testing across Java versions and implementations
-8. **Implementation Testing**: Dedicated workflows for FFM/JNI validation:
-   - `java-implementation-test.yml` - Cross-platform implementation testing
-   - Matrix testing across Java 11, 17, 21, 24+ with appropriate implementations
-9. **PR Testing**: Automated Maven artifact validation for pull requests via `maven-staging.yml`
-10. **Validation Framework**: Pre-deployment validation using `.github/scripts/validate-maven-artifacts.sh`
-11. **Repository Selection**: Choose between GitHub Packages and Maven Central via workflow inputs
-12. **Release Integration**: Optional Maven deployment in release workflow with user control
+2. **Version Management**: Use `HDF5_MAVEN_SNAPSHOT=ON` for development builds with `-SNAPSHOT` suffix
+3. **Preset Selection**: Choose Maven-enabled presets (`ci-StdShar-GNUC-Maven` or `ci-StdShar-GNUC-Maven-Snapshot`)
+4. **Platform Artifacts**: Automatic generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+5. **CI Integration**: Conditional Maven artifact generation in `ctest.yml` workflow via preset system
+6. **PR Testing**: Automated Maven artifact validation for pull requests via `maven-staging.yml`
+7. **Validation Framework**: Pre-deployment validation using `.github/scripts/validate-maven-artifacts.sh`
+8. **Repository Selection**: Choose between GitHub Packages and Maven Central via workflow inputs
+9. **Release Integration**: Optional Maven deployment in release workflow with user control
 
 ## Critical Dependencies
 
@@ -268,10 +229,7 @@ ctest -R "H5_api_test"
 - **Compression libraries**: zlib, szip/libaec (optional but commonly used)
 - **MPI**: Required for parallel builds (MPI-3 standard minimum)
 - **Java 11+**: Required for Java bindings and Maven deployment (when `HDF5_BUILD_JAVA=ON`)
-  - **Java 11-23**: JNI implementation only
-  - **Java 24+**: FFM implementation by default, JNI available with `HDF5_ENABLE_JNI=ON`
 - **Maven**: Optional for local Maven operations and validation
-- **jextract**: Required for FFM binding generation (typically bundled)
 
 ### Platform-Specific Requirements
 - **Windows**: Visual Studio 2022, optional NSIS/WiX for packaging

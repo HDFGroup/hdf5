@@ -107,15 +107,10 @@ The HDF5 Java examples are now integrated with Maven deployment to provide
 complete example applications that work with HDF5 Java library Maven artifacts:
 
 ### Maven Artifacts
-* **`org.hdfgroup:hdf5-java-ffm`** - HDF5 Java FFM bindings (Java 24+ default)
-  - Uses modern Foreign Function & Memory API
-  - Platform-specific JARs: linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64
-* **`org.hdfgroup:hdf5-java-jni`** - HDF5 Java JNI bindings (legacy, all Java versions)
-  - Traditional Java Native Interface implementation
-  - Platform-specific JARs: linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64
+* **`org.hdfgroup:hdf5-java`** - HDF5 Java bindings with platform-specific JARs
+  - linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64 classifiers
 * **`org.hdfgroup:hdf5-java-examples`** - Complete collection of 62 Java examples
   - Platform-independent JAR with educational examples
-  - Compatible with both FFM and JNI implementations
   - Covers all major HDF5 functionality: datasets, datatypes, groups, tutorials
 
 ### Features
@@ -127,24 +122,13 @@ complete example applications that work with HDF5 Java library Maven artifacts:
 
 ### GitHub Packages Deployment
 ```xml
-<!-- FFM Implementation (Java 24+ default) -->
 <dependency>
     <groupId>org.hdfgroup</groupId>
-    <artifactId>hdf5-java-ffm</artifactId>
-    <version>2.0.0-3</version>
-    <classifier>linux-x86_64</classifier>
-</dependency>
-
-<!-- JNI Implementation (legacy, all Java versions) -->
-<dependency>
-    <groupId>org.hdfgroup</groupId>
-    <artifactId>hdf5-java-jni</artifactId>
+    <artifactId>hdf5-java</artifactId>
     <version>2.0.0-3</version>
     <classifier>linux-x86_64</classifier>
 </dependency>
 ```
-
-Both implementations use the same `hdf.hdf5lib.*` package structure, enabling seamless migration between implementations.
 
 The Java examples demonstrate proper usage of HDF5 Java bindings in real-world
 scenarios and serve as templates for developing HDF5-based Java applications.

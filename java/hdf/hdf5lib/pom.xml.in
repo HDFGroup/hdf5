@@ -6,12 +6,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.hdfgroup</groupId>
-    <artifactId>hdf5-java-ffm</artifactId>
+    <artifactId>hdf5-java</artifactId>
     <version>@HDF5_PACKAGE_VERSION@@HDF5_MAVEN_VERSION_SUFFIX@</version>
     <packaging>jar</packaging>
 
-    <name>HDF5 Java FFM Bindings</name>
-    <description>Java Foreign Function & Memory API bindings for the HDF5 scientific data format library</description>
+    <name>HDF5 Java Bindings</name>
+    <description>Java bindings for the HDF5 scientific data format library</description>
     <url>https://github.com/HDFGroup/hdf5</url>
 
     <licenses>
@@ -48,8 +48,6 @@
         <hdf5.version>@HDF5_PACKAGE_VERSION@</hdf5.version>
         <hdf5.platform>@HDF5_MAVEN_PLATFORM@</hdf5.platform>
         <hdf5.architecture>@HDF5_MAVEN_ARCHITECTURE@</hdf5.architecture>
-        <hdf5.java.implementation>FFM</hdf5.java.implementation>
-        <hdf5.java.minimum.version>24</hdf5.java.minimum.version>
     </properties>
 
     <dependencies>
@@ -91,8 +89,6 @@
                             <HDF5-Version>${hdf5.version}</HDF5-Version>
                             <HDF5-Platform>${hdf5.platform}</HDF5-Platform>
                             <HDF5-Architecture>${hdf5.architecture}</HDF5-Architecture>
-                            <HDF5-Java-Implementation>${hdf5.java.implementation}</HDF5-Java-Implementation>
-                            <HDF5-Java-Minimum-Version>${hdf5.java.minimum.version}</HDF5-Java-Minimum-Version>
                             <Build-Time>@CMAKE_CONFIGURE_DATE@</Build-Time>
                         </manifestEntries>
                     </archive>

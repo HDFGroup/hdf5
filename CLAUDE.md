@@ -20,17 +20,21 @@ cmake --workflow --preset ci-StdShar-Clang --fresh    # Clang
 cmake --workflow --preset ci-StdShar-MSVC --fresh     # MSVC
 
 # Maven-enabled builds (Java artifacts with deployment support)
-cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh     # Linux with snapshots (FFM)
-cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh     # Windows with snapshots (FFM)
-cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh    # macOS with snapshots (FFM)
-cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh              # Linux release (FFM)
-cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh              # Windows release (FFM)
-cmake --workflow --preset ci-MinShar-Clang-Maven --fresh             # macOS release (FFM)
+# FFM implementation (Java 24+ default)
+cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh     # Linux FFM snapshots
+cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-Snapshot --fresh     # Windows FFM snapshots
+cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-Snapshot --fresh    # macOS FFM snapshots
+cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh              # Linux FFM release
+cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM --fresh              # Windows FFM release
+cmake --workflow --preset ci-MinShar-Clang-Maven-FFM --fresh             # macOS FFM release
 
-# Maven-enabled builds with JNI (explicit JNI selection)
-cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh -DHDF5_ENABLE_JNI=ON     # Linux JNI
-cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh -DHDF5_ENABLE_JNI=ON     # Windows JNI
-cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh -DHDF5_ENABLE_JNI=ON    # macOS JNI
+# JNI implementation (all Java versions)
+cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI-Snapshot --fresh     # Linux JNI snapshots
+cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI-Snapshot --fresh     # Windows JNI snapshots
+cmake --workflow --preset ci-MinShar-Clang-Maven-JNI-Snapshot --fresh    # macOS JNI snapshots
+cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh              # Linux JNI release
+cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI --fresh              # Windows JNI release
+cmake --workflow --preset ci-MinShar-Clang-Maven-JNI --fresh             # macOS JNI release
 
 # Install
 cmake --install .
@@ -53,7 +57,7 @@ cmake --install .
 ### Java Implementation Selection
 
 - **FFM (Foreign Function & Memory)**: Default for Java 24+, provides modern native access
-- **JNI (Java Native Interface)**: Available for all Java versions when `HDF5_ENABLE_JNI=ON`, will be deprecated in future releases
+- **JNI (Java Native Interface)**: Available for all Java versions, will be deprecated in future releases
 
 ### Maven Artifacts
 
@@ -214,8 +218,10 @@ ctest -E "MPI|SWMR"         # Exclude parallel/SWMR tests
 
 5. **Maven artifact testing:**
    ```bash
-   # Test Maven staging workflow (all platforms) - FFM by default
-   gh workflow run maven-staging.yml -f platforms=all-platforms -f use_snapshot_version=true
+   # Test Maven staging workflow (all platforms) - specify implementation
+   gh workflow run maven-staging.yml -f platforms=all-platforms -f use_snapshot_version=true -f java_implementation=ffm
+   gh workflow run maven-staging.yml -f platforms=all-platforms -f use_snapshot_version=true -f java_implementation=jni
+   gh workflow run maven-staging.yml -f platforms=all-platforms -f use_snapshot_version=true -f java_implementation=both
 
    # Test Maven deployment to HDFGroup packages (dry run)
    gh workflow run test-maven-deployment.yml -f test_mode=dry-run -f target_repository=github-packages

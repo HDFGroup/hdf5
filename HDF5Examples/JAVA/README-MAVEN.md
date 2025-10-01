@@ -229,5 +229,5 @@ Examples JAR includes manifest entries:
 ## Support
 
 - GitHub Issues: https://github.com/HDFGroup/hdf5/issues
-- Documentation: https://docs.hdfgroup.org/
+- Documentation: https://support.hdfgroup.org/documentation/
 - Examples Source: Included in JAR resources

@@ -1,12 +1,16 @@
 #!/bin/bash
-# Maven artifact validation script for FFM and JNI implementations
-# Usage: validate-maven-artifacts.sh [artifact_dir] [implementation] [validation_level]
+#
+# Enhanced validation framework for Maven artifacts before deployment
+# This script validates JAR files, POM files, and deployment readiness
+#
 
-set -e
+set -euo pipefail
 
-ARTIFACT_DIR="${1:-./build/java}"
-IMPLEMENTATION="${2:-auto}"  # auto, ffm, jni, both
-VALIDATION_LEVEL="${3:-basic}"  # basic, full, strict
+# Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+ARTIFACTS_DIR="${1:-./artifacts}"
+VALIDATION_LOG="/tmp/maven-validation-$(date +%s).log"
 
 # Colors for output
 RED='\033[0;31m'
@@ -17,419 +21,510 @@ NC='\033[0m' # No Color
 
 # Logging functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}[INFO]${NC} $*" | tee -a "${VALIDATION_LOG}"
 }
 
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $*" | tee -a "${VALIDATION_LOG}"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $*" | tee -a "${VALIDATION_LOG}"
 }
 
-# Global counters
-TOTAL_TESTS=0
-PASSED_TESTS=0
-FAILED_TESTS=0
-
-# Test tracking
-increment_test() {
-    ((TOTAL_TESTS++))
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $*" | tee -a "${VALIDATION_LOG}"
 }
 
-pass_test() {
-    ((PASSED_TESTS++))
-    log_success "$1"
+# Validation counters
+VALIDATION_ERRORS=0
+VALIDATION_WARNINGS=0
+
+# Error tracking
+add_error() {
+    VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+    log_error "$*"
 }
 
-fail_test() {
-    ((FAILED_TESTS++))
-    log_error "$1"
+add_warning() {
+    VALIDATION_WARNINGS=$((VALIDATION_WARNINGS + 1))
+    log_warn "$*"
 }
 
-# Find artifacts by implementation
-find_artifacts() {
-    local impl=$1
-    local artifact_pattern
+# Java/Maven environment validation
+validate_environment() {
+    log_info "Validating build environment..."
 
-    case "$impl" in
-        "ffm")
-            artifact_pattern="*hdf5-java-ffm*.jar"
-            ;;
-        "jni")
-            artifact_pattern="*hdf5-java-jni*.jar"
-            ;;
-        *)
-            log_error "Invalid implementation for artifact search: $impl"
-            return 1
-            ;;
-    esac
-
-    find "$ARTIFACT_DIR" -name "$artifact_pattern" -type f 2>/dev/null
-}
-
-# Validate JAR file structure
-validate_jar_structure() {
-    local jar_file=$1
-    local impl=$2
-
-    increment_test
-    log_info "Validating JAR structure: $(basename "$jar_file")"
-
-    # Check if JAR is valid
-    if ! unzip -t "$jar_file" >/dev/null 2>&1; then
-        fail_test "JAR file is corrupted: $jar_file"
+    # Check Java availability
+    if ! command -v java &> /dev/null; then
+        add_error "Java is not installed or not in PATH"
         return 1
     fi
 
-    # Check for required manifest
-    if ! unzip -l "$jar_file" | grep -q "META-INF/MANIFEST.MF"; then
-        fail_test "JAR missing manifest: $jar_file"
+    JAVA_VERSION=$(java -version 2>&1 | head -n1 | cut -d'"' -f2)
+    log_info "Java version: ${JAVA_VERSION}"
+
+    # Check Maven availability
+    if ! command -v mvn &> /dev/null; then
+        add_warning "Maven is not installed - some validations will be skipped"
+    else
+        MVN_VERSION=$(mvn -version | head -n1 | cut -d' ' -f3)
+        log_info "Maven version: ${MVN_VERSION}"
+    fi
+
+    # Check JAR command
+    if ! command -v jar &> /dev/null; then
+        add_error "jar command is not available"
         return 1
     fi
 
-    # Check for Java classes
-    class_count=$(unzip -l "$jar_file" | grep -c "\.class$" || echo "0")
-    if [[ $class_count -eq 0 ]]; then
-        fail_test "JAR contains no .class files: $jar_file"
-        return 1
-    fi
-
-    # Check for hdf.hdf5lib package structure
-    if ! unzip -l "$jar_file" | grep -q "hdf/hdf5lib/"; then
-        fail_test "JAR missing hdf.hdf5lib package: $jar_file"
-        return 1
-    fi
-
-    pass_test "JAR structure validation passed for $impl: $(basename "$jar_file")"
+    log_success "Environment validation completed"
     return 0
 }
 
-# Validate JAR manifest
-validate_jar_manifest() {
-    local jar_file=$1
-    local impl=$2
+# JAR file validation
+validate_jar_file() {
+    local jar_file="$1"
+    local jar_basename
+    jar_basename=$(basename "${jar_file}")
 
-    increment_test
-    log_info "Validating JAR manifest for $impl implementation"
+    log_info "Validating JAR: ${jar_basename}"
 
-    local manifest_content
-    manifest_content=$(unzip -q -c "$jar_file" META-INF/MANIFEST.MF)
-
-    # Check implementation marker
-    if ! echo "$manifest_content" | grep -q "HDF5-Java-Implementation: ${impl^^}"; then
-        fail_test "Manifest missing implementation marker: HDF5-Java-Implementation: ${impl^^}"
-        echo "Manifest content:"
-        echo "$manifest_content"
+    # Check file exists and is readable
+    if [[ ! -f "${jar_file}" ]]; then
+        add_error "JAR file not found: ${jar_file}"
         return 1
     fi
 
-    # Check version information
-    if ! echo "$manifest_content" | grep -q "HDF5-Version:"; then
-        fail_test "Manifest missing HDF5 version information"
+    if [[ ! -r "${jar_file}" ]]; then
+        add_error "JAR file not readable: ${jar_file}"
         return 1
     fi
 
-    # Check platform information
-    if ! echo "$manifest_content" | grep -q "HDF5-Platform:"; then
-        fail_test "Manifest missing platform information"
+    # Check file size (must be > 1KB)
+    local file_size
+    file_size=$(stat -c%s "${jar_file}" 2>/dev/null || stat -f%z "${jar_file}" 2>/dev/null || echo "0")
+    if [[ ${file_size} -lt 1024 ]]; then
+        add_error "JAR file too small: ${jar_file} (${file_size} bytes)"
+        return 1
+    fi
+    log_info "JAR size: ${file_size} bytes"
+
+    # Test JAR integrity
+    if ! jar tf "${jar_file}" > /dev/null 2>&1; then
+        add_error "JAR file is corrupted or invalid: ${jar_file}"
         return 1
     fi
 
-    # Check native access for FFM
-    if [[ "$impl" == "ffm" ]]; then
-        if ! echo "$manifest_content" | grep -q "Enable-Native-Access: ALL-UNNAMED"; then
-            fail_test "FFM JAR missing native access enablement"
-            return 1
+    # Check for required HDF5 Java classes
+    local temp_dir
+    temp_dir=$(mktemp -d)
+    trap "rm -rf '${temp_dir}'" EXIT
+
+    if ! (cd "${temp_dir}" && jar xf "${jar_file}"); then
+        add_error "Failed to extract JAR: ${jar_file}"
+        rm -rf "${temp_dir}"
+        return 1
+    fi
+
+    # Check for essential HDF5 classes
+    local required_classes=(
+        "hdf/hdf5lib/H5.class"
+        "hdf/hdf5lib/HDF5Constants.class"
+        "hdf/hdf5lib/HDFArray.class"
+        "hdf/hdf5lib/HDFNativeData.class"
+    )
+
+    for class_file in "${required_classes[@]}"; do
+        if [[ ! -f "${temp_dir}/${class_file}" ]]; then
+            add_error "Missing required class in JAR: ${class_file}"
         fi
-    fi
-
-    # Check minimum Java version
-    case "$impl" in
-        "ffm")
-            if ! echo "$manifest_content" | grep -q "HDF5-Java-Minimum-Version: 24"; then
-                fail_test "FFM JAR missing or incorrect minimum Java version (expected 24)"
-                return 1
-            fi
-            ;;
-        "jni")
-            if ! echo "$manifest_content" | grep -q "HDF5-Java-Minimum-Version: 11"; then
-                fail_test "JNI JAR missing or incorrect minimum Java version (expected 11)"
-                return 1
-            fi
-            ;;
-    esac
-
-    pass_test "JAR manifest validation passed for $impl"
-    return 0
-}
-
-# Validate POM file
-validate_pom_file() {
-    local jar_file=$1
-    local impl=$2
-
-    increment_test
-    local pom_dir=$(dirname "$jar_file")
-    local pom_file=$(find "$pom_dir" -name "pom.xml" | head -1)
-
-    if [[ ! -f "$pom_file" ]]; then
-        fail_test "POM file not found for $impl implementation"
-        return 1
-    fi
-
-    log_info "Validating POM file: $pom_file"
-
-    # Check artifact ID
-    local expected_artifact="hdf5-java-$impl"
-    if ! grep -q "<artifactId>$expected_artifact</artifactId>" "$pom_file"; then
-        fail_test "POM has incorrect artifact ID (expected: $expected_artifact)"
-        grep "<artifactId>" "$pom_file" || true
-        return 1
-    fi
-
-    # Check group ID
-    if ! grep -q "<groupId>org.hdfgroup</groupId>" "$pom_file"; then
-        fail_test "POM has incorrect group ID (expected: org.hdfgroup)"
-        return 1
-    fi
-
-    # Check implementation-specific description
-    case "$impl" in
-        "ffm")
-            if ! grep -q "Foreign Function" "$pom_file"; then
-                fail_test "FFM POM missing FFM-specific description"
-                return 1
-            fi
-            if ! grep -q "hdf5.java.implementation>FFM<" "$pom_file"; then
-                fail_test "FFM POM missing implementation property"
-                return 1
-            fi
-            ;;
-        "jni")
-            if ! grep -q "Native Interface" "$pom_file"; then
-                fail_test "JNI POM missing JNI-specific description"
-                return 1
-            fi
-            if ! grep -q "hdf5.java.implementation>JNI<" "$pom_file"; then
-                fail_test "JNI POM missing implementation property"
-                return 1
-            fi
-            ;;
-    esac
-
-    # Check SLF4J dependency
-    if ! grep -q "slf4j-api" "$pom_file"; then
-        fail_test "POM missing SLF4J dependency"
-        return 1
-    fi
-
-    pass_test "POM validation passed for $impl"
-    return 0
-}
-
-# Validate artifact naming convention
-validate_naming_convention() {
-    local jar_file=$1
-    local impl=$2
-
-    increment_test
-    local jar_name=$(basename "$jar_file")
-
-    # Check naming pattern
-    local expected_pattern="hdf5-java-${impl}-[0-9]+\.[0-9]+\.[0-9]+"
-    if [[ ! "$jar_name" =~ $expected_pattern ]]; then
-        fail_test "JAR naming doesn't match convention: $jar_name (expected pattern: $expected_pattern)"
-        return 1
-    fi
-
-    # Check for platform classifier (if present)
-    if [[ "$jar_name" =~ -linux-x86_64\.jar$ ]] || \
-       [[ "$jar_name" =~ -windows-x86_64\.jar$ ]] || \
-       [[ "$jar_name" =~ -macos-x86_64\.jar$ ]] || \
-       [[ "$jar_name" =~ -macos-aarch64\.jar$ ]]; then
-        log_info "Platform-specific JAR detected: $jar_name"
-    fi
-
-    pass_test "Naming convention validation passed for $impl: $jar_name"
-    return 0
-}
-
-# Validate implementation differentiation
-validate_implementation_differentiation() {
-    increment_test
-    log_info "Validating implementation differentiation"
-
-    local ffm_artifacts=($(find_artifacts "ffm"))
-    local jni_artifacts=($(find_artifacts "jni"))
-
-    # Check that we have artifacts for both implementations (if both are expected)
-    if [[ "$IMPLEMENTATION" == "both" ]]; then
-        if [[ ${#ffm_artifacts[@]} -eq 0 ]]; then
-            fail_test "No FFM artifacts found when both implementations expected"
-            return 1
-        fi
-        if [[ ${#jni_artifacts[@]} -eq 0 ]]; then
-            fail_test "No JNI artifacts found when both implementations expected"
-            return 1
-        fi
-    fi
-
-    # Check for naming conflicts
-    for ffm_jar in "${ffm_artifacts[@]}"; do
-        for jni_jar in "${jni_artifacts[@]}"; do
-            if [[ "$(basename "$ffm_jar")" == "$(basename "$jni_jar")" ]]; then
-                fail_test "Naming conflict detected: $(basename "$ffm_jar")"
-                return 1
-            fi
-        done
     done
 
-    pass_test "Implementation differentiation validation passed"
+    # Check manifest
+    if [[ -f "${temp_dir}/META-INF/MANIFEST.MF" ]]; then
+        if grep -q "Enable-Native-Access: ALL-UNNAMED" "${temp_dir}/META-INF/MANIFEST.MF"; then
+            log_info "Native access enabled in manifest"
+        else
+            add_warning "Native access not found in manifest - may cause runtime issues"
+        fi
+    else
+        add_warning "No manifest found in JAR"
+    fi
+
+    rm -rf "${temp_dir}"
+    log_success "JAR validation completed: ${jar_basename}"
     return 0
+}
+
+# POM file validation
+validate_pom_file() {
+    local pom_file="$1"
+
+    log_info "Validating POM: $(basename "${pom_file}")"
+
+    # Check file exists
+    if [[ ! -f "${pom_file}" ]]; then
+        add_error "POM file not found: ${pom_file}"
+        return 1
+    fi
+
+    # Check XML validity
+    if command -v xmllint &> /dev/null; then
+        if ! xmllint --noout "${pom_file}" 2>/dev/null; then
+            add_error "POM file is not valid XML: ${pom_file}"
+            return 1
+        fi
+    else
+        add_warning "xmllint not available - skipping XML validation"
+    fi
+
+    # Check required Maven coordinates
+    if ! grep -q "<groupId>org.hdfgroup</groupId>" "${pom_file}"; then
+        add_error "Invalid or missing groupId in POM"
+    fi
+
+    if ! grep -q "<artifactId>hdf5-java</artifactId>" "${pom_file}"; then
+        add_error "Invalid or missing artifactId in POM"
+    fi
+
+    # Extract version
+    local version
+    version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    if [[ -z "${version}" ]]; then
+        add_error "No version found in POM"
+    else
+        log_info "POM version: ${version}"
+
+        # Validate version format
+        if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9]+)?(-SNAPSHOT)?$ ]]; then
+            add_warning "Version format may not comply with Maven conventions: ${version}"
+        fi
+    fi
+
+    # Check for required sections
+    local required_sections=(
+        "<name>"
+        "<description>"
+        "<url>"
+        "<licenses>"
+        "<developers>"
+        "<scm>"
+    )
+
+    for section in "${required_sections[@]}"; do
+        if ! grep -q "${section}" "${pom_file}"; then
+            add_warning "Missing recommended section in POM: ${section}"
+        fi
+    done
+
+    # Check dependencies
+    if grep -q "<dependencies>" "${pom_file}"; then
+        log_info "Dependencies section found in POM"
+    else
+        add_warning "No dependencies section in POM"
+    fi
+
+    log_success "POM validation completed"
+    return 0
+}
+
+# Version consistency validation
+validate_version_consistency() {
+    local pom_file="$1"
+    shift
+    local jar_files=("$@")
+
+    log_info "Validating version consistency across artifacts..."
+
+    # Extract version from POM
+    local pom_version
+    pom_version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+
+    if [[ -z "${pom_version}" ]]; then
+        add_error "Cannot extract version from POM for consistency check"
+        return 1
+    fi
+
+    log_info "POM version: ${pom_version}"
+
+    # Check JAR filenames for version consistency
+    for jar_file in "${jar_files[@]}"; do
+        local jar_basename
+        jar_basename=$(basename "${jar_file}")
+
+        # Extract version from JAR filename (allowing for classifiers)
+        local jar_version
+        jar_version=$(echo "${jar_basename}" | sed -E 's/.*-([0-9]+\.[0-9]+\.[0-9]+(-[0-9]+)?(-SNAPSHOT)?)(-[^.]+)?\.jar$/\1/' || echo "")
+
+        if [[ -z "${jar_version}" ]]; then
+            add_warning "Cannot extract version from JAR filename: ${jar_basename}"
+        elif [[ "${jar_version}" != "${pom_version}" ]]; then
+            add_error "Version mismatch: POM=${pom_version}, JAR=${jar_version} (${jar_basename})"
+        else
+            log_info "Version consistency verified: ${jar_basename}"
+        fi
+    done
+
+    return 0
+}
+
+# Platform classifier validation
+validate_platform_classifiers() {
+    local jar_files=("$@")
+
+    log_info "Validating platform classifiers..."
+
+    local valid_classifiers=(
+        "linux-x86_64"
+        "windows-x86_64"
+        "macos-x86_64"
+        "macos-aarch64"
+    )
+
+    for jar_file in "${jar_files[@]}"; do
+        local jar_basename
+        jar_basename=$(basename "${jar_file}")
+
+        # Skip universal JARs (no classifier)
+        if [[ ! "${jar_basename}" =~ -[a-z]+-[a-z0-9_]+\.jar$ ]]; then
+            log_info "Universal JAR (no classifier): ${jar_basename}"
+            continue
+        fi
+
+        # Extract classifier
+        local classifier
+        classifier=$(echo "${jar_basename}" | sed -E 's/.*-([a-z]+-[a-z0-9_]+)\.jar$/\1/' || echo "")
+
+        if [[ -z "${classifier}" ]]; then
+            add_warning "Cannot extract classifier from JAR: ${jar_basename}"
+            continue
+        fi
+
+        # Validate classifier
+        local valid=false
+        for valid_classifier in "${valid_classifiers[@]}"; do
+            if [[ "${classifier}" == "${valid_classifier}" ]]; then
+                valid=true
+                break
+            fi
+        done
+
+        if [[ "${valid}" == "true" ]]; then
+            log_info "Valid platform classifier: ${classifier} (${jar_basename})"
+        else
+            add_error "Invalid platform classifier: ${classifier} (${jar_basename})"
+        fi
+    done
+
+    return 0
+}
+
+# Maven dependency simulation
+simulate_maven_dependency() {
+    local pom_file="$1"
+
+    if ! command -v mvn &> /dev/null; then
+        add_warning "Maven not available - skipping dependency simulation"
+        return 0
+    fi
+
+    log_info "Simulating Maven dependency resolution..."
+
+    # Create temporary Maven project
+    local temp_project
+    temp_project=$(mktemp -d)
+    trap "rm -rf '${temp_project}'" EXIT
+
+    # Extract coordinates from POM
+    local group_id artifact_id version
+    group_id=$(grep -o '<groupId>[^<]*</groupId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+
+    # Create test POM
+    cat > "${temp_project}/pom.xml" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>test</groupId>
+    <artifactId>maven-validation-test</artifactId>
+    <version>1.0.0</version>
+    <dependencies>
+        <dependency>
+            <groupId>${group_id}</groupId>
+            <artifactId>${artifact_id}</artifactId>
+            <version>${version}</version>
+        </dependency>
+    </dependencies>
+</project>
+EOF
+
+    # Test dependency resolution
+    if (cd "${temp_project}" && mvn dependency:resolve -q); then
+        log_success "Maven dependency simulation passed"
+    else
+        add_warning "Maven dependency simulation failed - may indicate packaging issues"
+    fi
+
+    rm -rf "${temp_project}"
+    return 0
+}
+
+# Deployment readiness check
+check_deployment_readiness() {
+    local artifacts_dir="$1"
+
+    log_info "Checking deployment readiness..."
+
+    # Check for required files
+    local jar_files pom_files
+    # Only count HDF5 JAR files, exclude dependencies like slf4j
+    jar_files=($(find "${artifacts_dir}" -name "*hdf5*.jar" -not -name "*test*" 2>/dev/null || true))
+    pom_files=($(find "${artifacts_dir}" -name "pom.xml" 2>/dev/null || true))
+
+    if [[ ${#jar_files[@]} -eq 0 ]]; then
+        add_error "No JAR files found in artifacts directory"
+        return 1
+    fi
+
+    if [[ ${#pom_files[@]} -eq 0 ]]; then
+        add_error "No POM files found in artifacts directory"
+        return 1
+    fi
+
+    log_info "Found ${#jar_files[@]} JAR file(s) and ${#pom_files[@]} POM file(s)"
+
+    # Check environment variables for deployment
+    if [[ -z "${MAVEN_USERNAME:-}" ]]; then
+        add_warning "MAVEN_USERNAME not set - deployment will fail"
+    fi
+
+    if [[ -z "${MAVEN_PASSWORD:-}" ]]; then
+        add_warning "MAVEN_PASSWORD not set - deployment will fail"
+    fi
+
+    return 0
+}
+
+# Generate validation report
+generate_report() {
+    local artifacts_dir="$1"
+
+    log_info "=== Maven Artifact Validation Report ==="
+    log_info "Timestamp: $(date)"
+    log_info "Artifacts directory: ${artifacts_dir}"
+    log_info "Validation log: ${VALIDATION_LOG}"
+    echo
+
+    # Summary
+    if [[ ${VALIDATION_ERRORS} -eq 0 ]]; then
+        if [[ ${VALIDATION_WARNINGS} -eq 0 ]]; then
+            log_success "✅ All validations passed with no warnings"
+        else
+            log_warn "⚠️  All validations passed with ${VALIDATION_WARNINGS} warning(s)"
+        fi
+    else
+        log_error "❌ Validation failed with ${VALIDATION_ERRORS} error(s) and ${VALIDATION_WARNINGS} warning(s)"
+    fi
+
+    echo
+    log_info "Full validation log available at: ${VALIDATION_LOG}"
+
+    return ${VALIDATION_ERRORS}
 }
 
 # Main validation function
-validate_implementation() {
-    local impl=$1
-    local artifacts=($(find_artifacts "$impl"))
-
-    if [[ ${#artifacts[@]} -eq 0 ]]; then
-        log_warning "No $impl artifacts found in $ARTIFACT_DIR"
-        return 0
-    fi
-
-    log_info "Validating $impl implementation (${#artifacts[@]} artifacts found)"
-
-    local validation_passed=true
-
-    for jar_file in "${artifacts[@]}"; do
-        log_info "Processing artifact: $(basename "$jar_file")"
-
-        validate_jar_structure "$jar_file" "$impl" || validation_passed=false
-        validate_jar_manifest "$jar_file" "$impl" || validation_passed=false
-        validate_naming_convention "$jar_file" "$impl" || validation_passed=false
-
-        if [[ "$VALIDATION_LEVEL" != "basic" ]]; then
-            validate_pom_file "$jar_file" "$impl" || validation_passed=false
-        fi
-    done
-
-    if [[ "$validation_passed" == "true" ]]; then
-        log_success "All validations passed for $impl implementation"
-        return 0
-    else
-        log_error "Some validations failed for $impl implementation"
-        return 1
-    fi
-}
-
-# Print summary
-print_summary() {
-    echo ""
-    log_info "Validation Summary"
-    log_info "=================="
-    log_info "Total tests: $TOTAL_TESTS"
-    log_info "Passed: $PASSED_TESTS"
-    log_info "Failed: $FAILED_TESTS"
-
-    if [[ $FAILED_TESTS -eq 0 ]]; then
-        log_success "All Maven artifact validations passed!"
-        return 0
-    else
-        log_error "$FAILED_TESTS out of $TOTAL_TESTS validations failed"
-        return 1
-    fi
-}
-
-# Help function
-show_help() {
-    cat << EOF
-Maven Artifact Validation Script
-
-Usage: $0 [artifact_dir] [implementation] [validation_level]
-
-Arguments:
-  artifact_dir      Directory containing Maven artifacts [default: ./build/java]
-  implementation    Implementation to validate (auto, ffm, jni, both) [default: auto]
-  validation_level  Validation level (basic, full, strict) [default: basic]
-
-Validation Levels:
-  basic   - JAR structure, manifest, and naming validation
-  full    - Basic + POM validation
-  strict  - Full + additional runtime checks
-
-Examples:
-  $0                                    # Validate all found artifacts (basic)
-  $0 ./build/java ffm full             # Validate FFM artifacts (full)
-  $0 ./artifacts both strict           # Validate both implementations (strict)
-
-EOF
-}
-
-# Main execution
 main() {
-    if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-        show_help
-        exit 0
-    fi
+    local artifacts_dir="${1:-./artifacts}"
 
-    log_info "Maven Artifact Validation"
-    log_info "========================="
-    log_info "Artifact Directory: $ARTIFACT_DIR"
-    log_info "Implementation: $IMPLEMENTATION"
-    log_info "Validation Level: $VALIDATION_LEVEL"
-    log_info ""
+    log_info "Starting Maven artifact validation..."
+    log_info "Artifacts directory: ${artifacts_dir}"
 
-    if [[ ! -d "$ARTIFACT_DIR" ]]; then
-        log_error "Artifact directory not found: $ARTIFACT_DIR"
+    # Check artifacts directory
+    if [[ ! -d "${artifacts_dir}" ]]; then
+        add_error "Artifacts directory not found: ${artifacts_dir}"
+        generate_report "${artifacts_dir}"
         exit 1
     fi
 
-    case "$IMPLEMENTATION" in
-        "auto")
-            # Auto-detect based on available artifacts
-            ffm_count=$(find_artifacts "ffm" | wc -l)
-            jni_count=$(find_artifacts "jni" | wc -l)
+    # Environment validation
+    validate_environment
 
-            if [[ $ffm_count -gt 0 && $jni_count -gt 0 ]]; then
-                log_info "Auto-detected: both implementations"
-                validate_implementation "ffm"
-                validate_implementation "jni"
-                validate_implementation_differentiation
-            elif [[ $ffm_count -gt 0 ]]; then
-                log_info "Auto-detected: FFM implementation only"
-                validate_implementation "ffm"
-            elif [[ $jni_count -gt 0 ]]; then
-                log_info "Auto-detected: JNI implementation only"
-                validate_implementation "jni"
-            else
-                log_error "No Maven artifacts found in $ARTIFACT_DIR"
-                exit 1
+    # Find artifacts
+    local jar_files pom_files all_jars
+    # Only validate HDF5 JAR files, exclude dependencies like slf4j
+    jar_files=($(find "${artifacts_dir}" -name "*hdf5*.jar" -not -name "*test*" 2>/dev/null || true))
+    pom_files=($(find "${artifacts_dir}" -name "pom.xml" 2>/dev/null || true))
+    all_jars=($(find "${artifacts_dir}" -name "*.jar" 2>/dev/null || true))
+
+    # Log what we found
+    log_info "Found ${#all_jars[@]} total JAR file(s), ${#jar_files[@]} HDF5 JAR file(s) to validate"
+    if [[ ${#all_jars[@]} -gt ${#jar_files[@]} ]]; then
+        log_info "Skipping non-HDF5 JAR files (dependencies like slf4j, etc.)"
+        for jar in "${all_jars[@]}"; do
+            if [[ ! "$(basename "$jar")" =~ hdf5 ]]; then
+                log_info "  Skipping: $(basename "$jar")"
             fi
-            ;;
-        "both")
-            validate_implementation "ffm"
-            validate_implementation "jni"
-            validate_implementation_differentiation
-            ;;
-        "ffm"|"jni")
-            validate_implementation "$IMPLEMENTATION"
-            ;;
-        *)
-            log_error "Invalid implementation: $IMPLEMENTATION"
-            show_help
-            exit 1
-            ;;
-    esac
+        done
+    fi
 
-    print_summary
+    # Basic readiness check
+    check_deployment_readiness "${artifacts_dir}"
+
+    # Validate each JAR file
+    for jar_file in "${jar_files[@]}"; do
+        validate_jar_file "${jar_file}"
+    done
+
+    # Validate each POM file
+    for pom_file in "${pom_files[@]}"; do
+        validate_pom_file "${pom_file}"
+    done
+
+    # Version consistency check
+    if [[ ${#pom_files[@]} -gt 0 && ${#jar_files[@]} -gt 0 ]]; then
+        validate_version_consistency "${pom_files[0]}" "${jar_files[@]}"
+    fi
+
+    # Platform classifier validation
+    if [[ ${#jar_files[@]} -gt 0 ]]; then
+        validate_platform_classifiers "${jar_files[@]}"
+    fi
+
+    # Maven dependency simulation
+    if [[ ${#pom_files[@]} -gt 0 ]]; then
+        simulate_maven_dependency "${pom_files[0]}"
+    fi
+
+    # Generate final report
+    generate_report "${artifacts_dir}"
+    exit ${VALIDATION_ERRORS}
 }
 
-# Run main function
+# Show usage if no arguments provided
+if [[ $# -eq 0 ]]; then
+    echo "Usage: $0 <artifacts_directory>"
+    echo
+    echo "Enhanced validation framework for Maven artifacts before deployment"
+    echo
+    echo "This script validates:"
+    echo "  - JAR file integrity and content"
+    echo "  - POM file structure and compliance"
+    echo "  - Version consistency across artifacts"
+    echo "  - Platform classifier conventions"
+    echo "  - Maven dependency resolution simulation"
+    echo "  - Deployment readiness"
+    echo
+    echo "Environment variables:"
+    echo "  MAVEN_USERNAME - Maven repository username (optional for validation)"
+    echo "  MAVEN_PASSWORD - Maven repository password (optional for validation)"
+    echo
+    exit 1
+fi
+
+# Run main function with arguments
 main "$@"

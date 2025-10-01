@@ -359,12 +359,102 @@
       ]
     },
     {
+      "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
+      "description": "GNUC Minimal Config for x64 with Maven snapshot deployment (FFM)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-FFM",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
       "name": "ci-MinShar-GNUC-Maven-JNI",
       "description": "GNUC Minimal Config for x64 with Maven deployment (JNI)",
       "inherits": [
         "ci-x64-Release-GNUC",
         "ci-Java-JNI",
         "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
+      "description": "GNUC Minimal Config for x64 with Maven snapshot deployment (JNI)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-JNI",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM",
+      "description": "MSVC Minimal Config for x64 with Maven deployment (FFM)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java-FFM",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
+      "description": "MSVC Minimal Config for x64 with Maven snapshot deployment (FFM)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java-FFM",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-JNI",
+      "description": "MSVC Minimal Config for x64 with Maven deployment (JNI)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java-JNI",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
+      "description": "MSVC Minimal Config for x64 with Maven snapshot deployment (JNI)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java-JNI",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM",
+      "description": "Clang Minimal Config for x64 with Maven deployment (FFM)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java-FFM",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
+      "description": "Clang Minimal Config for x64 with Maven snapshot deployment (FFM)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java-FFM",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-JNI",
+      "description": "Clang Minimal Config for x64 with Maven deployment (JNI)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java-JNI",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
+      "description": "Clang Minimal Config for x64 with Maven snapshot deployment (JNI)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java-JNI",
+        "ci-Maven-Minimal-Snapshot"
       ]
     }
   ],
