@@ -1422,13 +1422,13 @@ H5_strcasestr(const char *haystack, const char *needle)
  *
  * The macro handles platform differences internally, allowing the same
  * comparator signature to work on Windows (qsort_s), macOS (BSD qsort_r),
- * and Linux (GNU qsort_r).
+ * FreeBSD (use BSD qsort_r < 14.0, but GNU qsort_r >= 14.0), and Linux (GNU qsort_r).
  *
  * Usage:
  *   HDqsort_context(base, count, elem_size, compare_func, context);
  */
-#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN)
-/* Need wrapper for Windows and macOS which expect context-first comparators */
+#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14)
+/* Need wrapper for Windows, macOS, and FreeBSD < 14 which expect context-first comparators */
 typedef struct HDqsort_context_wrapper_t {
     int (*gnu_compar)(const void *, const void *, void *);
     void *gnu_arg;
@@ -1450,11 +1450,12 @@ HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *,
     wrapper.gnu_arg    = arg;
 #if defined(H5_HAVE_WIN32_API)
     qsort_s(base, nel, size, HDqsort_context_wrapper_func, &wrapper);
-#elif defined(H5_HAVE_DARWIN)
+#elif defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14)
+    /* Old BSD-style: context parameter comes before comparator function */
     qsort_r(base, nel, size, &wrapper, HDqsort_context_wrapper_func);
 #endif
 }
 #else
-/* GNU/Linux: direct mapping to qsort_r */
+/* GNU/Linux and FreeBSD >= 14.0: direct mapping to qsort_r with GNU signature */
 #define HDqsort_context(base, nel, size, compar, arg) qsort_r((base), (nel), (size), (compar), (arg))
 #endif
