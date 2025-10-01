@@ -649,6 +649,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 
 #endif /* HDflock */
 
+#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14)
+H5_DLL void HDqsort_context(void *base, size_t nel, size_t size,
+                            int (*compar)(const void *, const void *, void *), void *arg);
+#endif
+
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif
