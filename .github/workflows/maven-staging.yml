@@ -96,15 +96,25 @@ jobs:
             exit 0
           fi
 
-          # For pull requests, check changed files
-          git fetch origin ${{ github.base_ref }}
+          # For push events, check the last commit
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "maven=true" >> $GITHUB_OUTPUT
+            echo "Push event - Maven testing enabled"
+            exit 0
+          fi
 
-          MAVEN_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E "(java/src/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
+          # For pull requests, check changed files
+          if [ -n "${{ github.base_ref }}" ]; then
+            git fetch origin ${{ github.base_ref }}
+            MAVEN_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E "(java/src/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
+          else
+            # Fallback: assume changes if base_ref not available
+            MAVEN_FILES="true"
+          fi
 
           if [ -n "$MAVEN_FILES" ]; then
             echo "maven=true" >> $GITHUB_OUTPUT
-            echo "Maven-related changes detected:"
-            echo "$MAVEN_FILES"
+            echo "Maven-related changes detected"
           else
             echo "maven=false" >> $GITHUB_OUTPUT
             echo "No Maven-related changes detected"
