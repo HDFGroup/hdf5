@@ -260,8 +260,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          path: hdf5
 
       - name: Set preset name
         id: set-preset
@@ -299,7 +297,7 @@ jobs:
         id: buildhdf5
         shell: bash
         run: |
-          cd ${{ runner.workspace }}/hdf5
+          cd ${{ github.workspace }}
           cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
 
       - name: Extract version information
