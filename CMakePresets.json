@@ -590,6 +590,114 @@
       "inherits": [
         "ci-x64-Release-Clang"
       ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM",
+      "description": "GNUC Minimal Build for x64 with Maven deployment (FFM)",
+      "configurePreset": "ci-MinShar-GNUC-Maven-FFM",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
+      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (FFM)",
+      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-JNI",
+      "description": "GNUC Minimal Build for x64 with Maven deployment (JNI)",
+      "configurePreset": "ci-MinShar-GNUC-Maven-JNI",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
+      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (JNI)",
+      "configurePreset": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM",
+      "description": "MSVC Minimal Build for x64 with Maven deployment (FFM)",
+      "configurePreset": "ci-MinShar-MSVC-Maven-FFM",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
+      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (FFM)",
+      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-JNI",
+      "description": "MSVC Minimal Build for x64 with Maven deployment (JNI)",
+      "configurePreset": "ci-MinShar-MSVC-Maven-JNI",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
+      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (JNI)",
+      "configurePreset": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM",
+      "description": "Clang Minimal Build for x64 with Maven deployment (FFM)",
+      "configurePreset": "ci-MinShar-Clang-Maven-FFM",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
+      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (FFM)",
+      "configurePreset": "ci-MinShar-Clang-Maven-FFM-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-JNI",
+      "description": "Clang Minimal Build for x64 with Maven deployment (JNI)",
+      "configurePreset": "ci-MinShar-Clang-Maven-JNI",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
+      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (JNI)",
+      "configurePreset": "ci-MinShar-Clang-Maven-JNI-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
     }
   ],
   "testPresets": [
@@ -790,6 +898,66 @@
     {
       "name": "ci-MinShar-Clang-Maven-Snapshot",
       "configurePreset": "ci-MinShar-Clang-Maven-Snapshot",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM",
+      "configurePreset": "ci-MinShar-GNUC-Maven-FFM",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
+      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-JNI",
+      "configurePreset": "ci-MinShar-GNUC-Maven-JNI",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
+      "configurePreset": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM",
+      "configurePreset": "ci-MinShar-MSVC-Maven-FFM",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
+      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-JNI",
+      "configurePreset": "ci-MinShar-MSVC-Maven-JNI",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
+      "configurePreset": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM",
+      "configurePreset": "ci-MinShar-Clang-Maven-FFM",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
+      "configurePreset": "ci-MinShar-Clang-Maven-FFM-Snapshot",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-JNI",
+      "configurePreset": "ci-MinShar-Clang-Maven-JNI",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
+      "configurePreset": "ci-MinShar-Clang-Maven-JNI-Snapshot",
       "inherits": "ci-x64-Release-Clang"
     }
   ],
