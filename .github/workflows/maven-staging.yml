@@ -1077,7 +1077,7 @@ jobs:
   comment-pr:
     name: Comment on Pull Request
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-maven-artifacts, build-maven-artifacts-windows, build-maven-artifacts-macos-x86_64, build-maven-artifacts-macos-aarch64, test-maven-deployment]
+    needs: [detect-changes, determine-matrix, build-maven-artifacts, test-maven-deployment]
     if: ${{ github.event_name == 'pull_request' && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.result == 'success' && needs.test-maven-deployment.result == 'success' }}
     steps:
       - name: Generate comment body
@@ -1129,7 +1129,7 @@ jobs:
   cleanup:
     name: Cleanup Staging Artifacts
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-maven-artifacts, build-maven-artifacts-windows, build-maven-artifacts-macos-x86_64, build-maven-artifacts-macos-aarch64, test-maven-deployment]
+    needs: [detect-changes, determine-matrix, build-maven-artifacts, test-maven-deployment]
     if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' }}
     steps:
       - name: Cleanup summary
