@@ -999,8 +999,13 @@ public class TestH5D {
     }
 
     @Test
+    // ISSUE: Triple-nested VL type (VL of VL of VL-String) - crashes in H5T__vlen_reclaim
+    // This test uses H5Tvlen_create(H5T_VARIABLE_STRING) creating VL<VL<Variable-Length-String>>
+    // Note: Nested VL<VL<Integer>> works (see testH5DVLwrVL), but VL<VL<VL-String>> crashes during H5Treclaim
+    // Simple VL strings work (testH5Dvlen_write_read), double-nested VL works (testH5DVLwrVL)
+    // This is the most complex VL case with three levels of variable sizing
     @Ignore(
-        "DISABLED: Crashes with VL string buffer issues - will be fixed after other VL issues are resolved")
+        "DISABLED: Triple-nested VL type (VL of VL of VL-String) crashes in H5T__vlen_reclaim during memory cleanup")
     public void
     testH5Dvlen_string_buffer() throws Throwable
     {

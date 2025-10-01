@@ -2852,6 +2852,10 @@ public class H5 implements java.io.Serializable {
         boolean vl_data_class = false;
         // CRITICAL FIX: Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
         Arena arena = Arena.global();
+        MemorySegment hvlArray = null;
+        MemorySegment arrayBuffer = null;
+        MemorySegment stringArray = null;
+        long space_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             // Detect VL data to determine if H5Treclaim is needed (JNI pattern)
@@ -2864,18 +2868,18 @@ public class H5 implements java.io.Serializable {
 
             if (typeClass == HDF5Constants.H5T_ARRAY) {
                 // For array datatypes, convert to packed array elements (not hvl_t)
-                MemorySegment arrayBuffer =
+                arrayBuffer =
                     VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, arrayBuffer);
             }
             else if (typeClass == HDF5Constants.H5T_STRING && H5Tis_variable_str(mem_type_id)) {
                 // For variable-length string datatypes, convert to string pointers
-                MemorySegment stringArray = VLDataConverter.convertVLStrings(arrayData, arena);
+                stringArray = VLDataConverter.convertVLStrings(arrayData, arena);
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, stringArray);
             }
             else {
                 // For VL datatypes, convert to hvl_t structures
-                MemorySegment hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
+                hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, hvlArray);
             }
 
@@ -2888,6 +2892,34 @@ public class H5 implements java.io.Serializable {
         }
         catch (ClassCastException ex) {
             throw new HDF5LibraryException("Input data must be ArrayList array: " + ex.getMessage());
+        }
+        finally {
+            // CRITICAL: Reclaim VL memory after write (JNI pattern)
+            // This allows HDF5 to properly free any VL memory it allocated during the write
+            if ((status >= 0) && vl_data_class && hvlArray != null) {
+                try {
+                    // Get dataspace for H5Treclaim
+                    space_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_space(attr_id);
+                    org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(
+                        mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(),
+                        hvlArray);
+                }
+                catch (Exception reclaimEx) {
+                    // Log but don't fail if reclaim has issues
+                    System.err.println("Warning: H5Treclaim failed in H5AwriteVL: " +
+                                       reclaimEx.getMessage());
+                }
+                finally {
+                    if (space_id >= 0) {
+                        try {
+                            org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_id);
+                        }
+                        catch (Exception ex) {
+                            // Ignore close errors
+                        }
+                    }
+                }
+            }
         }
 
         return status;
@@ -5132,10 +5164,17 @@ public class H5 implements java.io.Serializable {
         }
 
         int status = -1;
+        boolean vl_data_class = false;
         // CRITICAL FIX: Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
         Arena arena = Arena.global();
+        MemorySegment hvlArray = null;
+        MemorySegment arrayBuffer = null;
+        MemorySegment stringArray = null;
 
         try {
+            // Detect VL data to determine if H5Treclaim is needed (JNI pattern)
+            vl_data_class = detectVLData(mem_type_id);
+
             ArrayList[] arrayData = (ArrayList[])buf;
 
             // Check the datatype class to determine conversion strategy
@@ -5143,20 +5182,20 @@ public class H5 implements java.io.Serializable {
 
             if (typeClass == HDF5Constants.H5T_ARRAY) {
                 // For array datatypes, convert to packed array elements (not hvl_t)
-                MemorySegment arrayBuffer =
+                arrayBuffer =
                     VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                  file_space_id, xfer_plist_id, arrayBuffer);
             }
             else if (typeClass == HDF5Constants.H5T_STRING && H5Tis_variable_str(mem_type_id)) {
                 // For variable-length string datatypes, convert to string pointers
-                MemorySegment stringArray = VLDataConverter.convertVLStrings(arrayData, arena);
+                stringArray = VLDataConverter.convertVLStrings(arrayData, arena);
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                  file_space_id, xfer_plist_id, stringArray);
             }
             else {
                 // For VL datatypes, convert to hvl_t structures
-                MemorySegment hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
+                hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                  file_space_id, xfer_plist_id, hvlArray);
             }
@@ -5171,6 +5210,39 @@ public class H5 implements java.io.Serializable {
         catch (ClassCastException ex) {
             throw new HDF5LibraryException("Input data must be ArrayList array or String array: " +
                                            ex.getMessage());
+        }
+        finally {
+            // CRITICAL: Reclaim VL memory after write (JNI pattern)
+            // This allows HDF5 to properly free any VL memory it allocated during the write
+            if ((status >= 0) && vl_data_class && hvlArray != null) {
+                long space_for_reclaim = mem_space_id;
+                try {
+                    // If mem_space_id is H5S_ALL, we need to get the actual dataspace
+                    if (mem_space_id == HDF5Constants.H5S_ALL) {
+                        space_for_reclaim = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_space(dataset_id);
+                    }
+
+                    org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(
+                        mem_type_id, space_for_reclaim, org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(),
+                        hvlArray);
+                }
+                catch (Exception reclaimEx) {
+                    // Log but don't fail if reclaim has issues
+                    System.err.println("Warning: H5Treclaim failed in H5DwriteVL: " +
+                                       reclaimEx.getMessage());
+                }
+                finally {
+                    // Close the space if we opened it
+                    if (space_for_reclaim != mem_space_id && space_for_reclaim >= 0) {
+                        try {
+                            org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_for_reclaim);
+                        }
+                        catch (Exception closeEx) {
+                            // Ignore close errors
+                        }
+                    }
+                }
+            }
         }
 
         return status;
@@ -5739,17 +5811,21 @@ public class H5 implements java.io.Serializable {
         if (min_id < 0)
             throw new HDF5FunctionArgumentException("Invalid minor error identifier: " + min_id);
 
+        int retVal = -1;
         try (Arena arena = Arena.ofConfined()) {
-            // Allocate a MemorySegment to hold the string bytes
+            // Allocate MemorySegments to hold the string bytes
             MemorySegment file_segment = arena.allocateFrom(file);
             MemorySegment func_segment = arena.allocateFrom(func);
             MemorySegment msg_segment  = arena.allocateFrom(msg);
-            // Call the native method to push the error
-            // TODO contains a variable argument list, which will need research.
-            //            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Epush2(stack_id, file_segment, func_segment,
-            //            line, cls_id, maj_id,
-            //                    min_id, msg_segment, null) < 0)
-            //                h5libraryError();
+
+            // Create a variadic invoker with no additional arguments
+            // The message string is treated as a format string with no format arguments
+            var invoker = org.hdfgroup.javahdf5.hdf5_h_1.H5Epush2.makeInvoker();
+
+            // Call the native method with empty variadic args
+            if ((retVal = invoker.apply(stack_id, file_segment, func_segment, line, cls_id, maj_id,
+                                       min_id, msg_segment)) < 0)
+                h5libraryError();
         }
     }
 
