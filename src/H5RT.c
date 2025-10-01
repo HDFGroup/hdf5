@@ -39,7 +39,6 @@ static void   H5RT__free_recurse(H5RT_node_t *node);
 static herr_t H5RT__result_set_init(H5RT_result_set_t *result_set);
 static herr_t H5RT__result_set_add(H5RT_result_set_t *result_set, H5RT_leaf_t *leaf);
 static herr_t H5RT__result_set_grow(H5RT_result_set_t *result_set);
-static void   H5RT__result_set_cleanup(H5RT_result_set_t *result_set);
 static int    H5RT__leaf_compare(const void *leaf1, const void *leaf2, void *dim);
 
 /*-------------------------------------------------------------------------
@@ -326,30 +325,6 @@ done:
 } /* end H5RT__result_set_add() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5RT__result_set_cleanup
- *
- * Purpose:     Clean up a result set
- *
- * Return:      void
- *
- *-------------------------------------------------------------------------
- */
-static void
-H5RT__result_set_cleanup(H5RT_result_set_t *result_set)
-{
-    FUNC_ENTER_PACKAGE_NOERR
-
-    if (result_set && result_set->results) {
-        free(result_set->results);
-        result_set->results  = NULL;
-        result_set->capacity = 0;
-        result_set->count    = 0;
-    }
-
-    FUNC_LEAVE_NOAPI_VOID
-} /* end H5RT__result_set_cleanup() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5RT__bulk_load
  *
  * Purpose:     Load the provided leaves into the r-tree in an efficient manner.
@@ -634,10 +609,8 @@ H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_set_t **res
 done:
     if (ret_value < 0) {
         /* Clean up buffer on failure */
-        H5RT__result_set_cleanup(result_set);
-        if (result_set) {
-            free(result_set);
-        }
+        if (H5RT_free_results(result_set) < 0)
+            HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "unable to free result set on error");
         *results_out = NULL;
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -660,14 +633,14 @@ H5RT_free_results(H5RT_result_set_t *result_set)
 {
     herr_t ret_value = SUCCEED;
 
-    if (result_set) {
-        /* Free the results array buffer */
-        if (result_set->results)
-            free(result_set->results);
+    assert(result_set);
 
-        /* Free the result set structure itself */
-        free(result_set);
-    }
+    /* Free the results array buffer */
+    if (result_set->results)
+        free(result_set->results);
+
+    /* Free the result set structure itself */
+    free(result_set);
 
     return ret_value;
 } /* end H5RT_free_results() */
