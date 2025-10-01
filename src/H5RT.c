@@ -461,6 +461,17 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
     }
 
 done:
+    if (ret_value < 0) {
+        /* Free any nodes that were allocated at this level */
+        if (node && !node->children_are_leaves) {
+            for (int i = 0; i < node->nchildren; i++) {
+                if (node->children.nodes[i]) {
+                    H5FL_FREE(H5RT_node_t, node->children.nodes[i]);
+                    node->children.nodes[i] = NULL;
+                }
+            }
+        }
+    }
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RT__bulk_load() */
 
