@@ -1564,6 +1564,15 @@ done:
  *     Access the flag for whether or not datasets created by the given dcpl
  *     construct a spatial tree and use it when searching over VDS mappings
  *
+ *     Use of a spatial tree will accelerate the process of searching through mappings
+ *     to determine which contain intersections with the user's selection region.
+ *     With the tree disabled, all mappings will simply be iterated through and
+ *     checked directly.
+ *
+ *     Certain workflows may find that tree creation overhead outweighs the time saved
+ *     on reads. In this case, disabling this property will lead to a performance improvement,
+ *     though it is expected that almost all cases will benefit from the tree on net.
+ *
  * Return:
  *
  *     Failure: Negative value (FAIL)
@@ -1603,6 +1612,15 @@ done:
  *
  *     Set the DAPL to construct a spatial tree and use it when searching over
  *     VDS mappings
+ *
+ *     Use of a spatial tree will accelerate the process of searching through mappings
+ *     to determine which contain intersections with the user's selection region.
+ *     With the tree disabled, all mappings will simply be iterated through and
+ *     checked directly.
+ *
+ *     Certain workflows may find that tree creation overhead outweighs the time saved
+ *     on reads. In this case, disabling this property will lead to a performance improvement,
+ *     though it is expected that almost all cases will benefit from the tree on net.
  *
  * Return:
  *

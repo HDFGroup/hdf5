@@ -6031,6 +6031,15 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize);
  *          The setting value is returned in the boolean pointer
  *          \p use_tree.
  *
+ *          Use of a spatial tree will accelerate the process of searching through mappings
+ *          to determine which contain intersections with the user's selection region.
+ *          With the tree disabled, all mappings will simply be iterated through and
+ *          checked directly.
+ *
+ *          Certain workflows may find that tree creation overhead outweighs the time saved
+ *          on reads. In this case, disabling this property will lead to a performance improvement,
+ *          though it is expected that almost all cases will benefit from the tree on net.
+ *
  * \since 2.0.0
  *
  */
@@ -6535,6 +6544,15 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize);
  *          list \p dcpl_id will construct a spatial tree and use
  *          it in an attempt to optimize intersection-check
  *          operations on mappings when \p use_tree is set to true.
+ *
+ *          Use of a spatial tree will accelerate the process of searching through mappings
+ *          to determine which contain intersections with the user's selection region.
+ *          With the tree disabled, all mappings will simply be iterated through and
+ *          checked directly.
+ *
+ *          Certain workflows may find that tree creation overhead outweighs the time saved
+ *          on reads. In this case, disabling this property will lead to a performance improvement,
+ *          though it is expected that almost all cases will benefit from the tree on net.
  *
  * \since 2.0.0
  *
