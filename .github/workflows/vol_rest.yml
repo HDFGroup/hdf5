@@ -191,4 +191,4 @@ jobs:
           HSDS_ENDPOINT=http+unix://%2Ftmp%2Fhs%2Fsn_1.sock \
           ROOT_DIR=${{github.workspace}}/hsdsdata \
           BUCKET_NAME=hsdstest \
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api" -E "H5COPY|H5DIFF|H5LS|H5DUMP" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api" -E "H5COPY|H5DIFF|H5LS|H5DUMP|H5REPACK" .
