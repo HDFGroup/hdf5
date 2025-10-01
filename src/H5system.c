@@ -1455,7 +1455,4 @@ HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *,
     qsort_r(base, nel, size, &wrapper, HDqsort_context_wrapper_func);
 #endif
 }
-#else
-/* GNU/Linux and FreeBSD >= 14.0: direct mapping to qsort_r with GNU signature */
-#define HDqsort_context(base, nel, size, compar, arg) qsort_r((base), (nel), (size), (compar), (arg))
 #endif
