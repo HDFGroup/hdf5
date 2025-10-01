@@ -789,14 +789,8 @@ typedef struct HDqsort_r_wrapper_t {
 
 static inline int
 HDqsort_r_wrapper_func(
-#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN)
     void *wrapper_arg,
-#endif
     const void *a, const void *b
-#if !defined(H5_HAVE_WIN32_API) && !defined(H5_HAVE_DARWIN)
-    ,
-    void *wrapper_arg
-#endif
 )
 {
     HDqsort_r_wrapper_t *w = (HDqsort_r_wrapper_t *)wrapper_arg;
