@@ -577,7 +577,7 @@ macro (ADD_H5_TEST testname)
 
       if (HDF5_ENABLE_USING_MEMCHECKER OR ${ARG_DUMP_CHECK})
         # Execute h5repack directly - append absolute paths
-        list(APPEND REPACK_TOOL_ARGS "-i;${BINARY_DIR_VOL}/testfiles/${ARG_TEST_FILE};-o;${BINARY_DIR_VOL}/testfiles/${ARG_MAIN_OUT_FILE}")
+        list (APPEND REPACK_TOOL_ARGS "-i;${BINARY_DIR_VOL}/testfiles/${ARG_TEST_FILE};-o;${BINARY_DIR_VOL}/testfiles/${ARG_MAIN_OUT_FILE}")
 
         add_test (
             NAME ${REPACK_TESTNAME}
@@ -657,15 +657,15 @@ macro (ADD_H5_TEST testname)
       elseif (${ARG_COMPARE_LOCAL} AND ${ARG_FULL_DIFF})
         # h5diff via runTest
         add_test (
-          NAME ${DIFF_TESTNAME}
-          COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=-v;${ARG_ERROR_STACK_FLAG};${BINARY_DIR_VOL}/testfiles/${ARG_TEST_FILE};${BINARY_DIR_VOL}/testfiles/${ARG_MAIN_OUT_FILE}"
-            -D "TEST_FOLDER=${BINARY_DIR_VOL}/testfiles"
-            -D "TEST_OUTPUT=${ARG_MAIN_OUT_FILE}.out"
-            -D "TEST_EXPECT=${ARG_DIFF_RESULT_CODE}"
-            -D "TEST_REFERENCE=${testname}.${ARG_TEST_FILE}.tst"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+            NAME ${DIFF_TESTNAME}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_ARGS:STRING=-v;${ARG_ERROR_STACK_FLAG};${BINARY_DIR_VOL}/testfiles/${ARG_TEST_FILE};${BINARY_DIR_VOL}/testfiles/${ARG_MAIN_OUT_FILE}"
+                -D "TEST_FOLDER=${BINARY_DIR_VOL}/testfiles"
+                -D "TEST_OUTPUT=${ARG_MAIN_OUT_FILE}.out"
+                -D "TEST_EXPECT=${ARG_DIFF_RESULT_CODE}"
+                -D "TEST_REFERENCE=${testname}.${ARG_TEST_FILE}.tst"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
         set_tests_properties (${DIFF_TESTNAME} PROPERTIES
             DEPENDS ${REPACK_TESTNAME}
@@ -679,33 +679,33 @@ macro (ADD_H5_TEST testname)
         else ()
           set_tests_properties (${DIFF_TESTNAME} PROPERTIES
               ENVIRONMENT "${vol_env}"
-          )          
+          )
         endif ()
         if ("${DIFF_TESTNAME}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
           set_tests_properties (${DIFF_TESTNAME} PROPERTIES DISABLED true)
         endif ()
 
-      endif()
+      endif ()
 
       list (APPEND ARG_CLEANUP_DEPENDS "${DIFF_TESTNAME}")
 
       if (${ARG_DUMP_CHECK} OR DEFINED ARG_LAYOUT_DSET)
         # Perform check via h5dump
         add_test (
-          NAME ${DUMP_TESTNAME}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=${ARG_DUMP_OPTIONS};${ARG_MAIN_OUT_FILE}"
-              -D "TEST_FOLDER=${BINARY_DIR_VOL}/testfiles"
-              -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
-              -D "TEST_EXPECT=${ARG_RESULT_CODE}"
-              -D "TEST_SKIP_COMPARE=${ARG_DUMP_SKIP_COMPARE}"
-              -D "TEST_GREP_FILTER=${ARG_DUMP_GREP_FILTER}"
-              -D "TEST_GREP_EXPECT=${ARG_RESULT_CODE}"
-              -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
-              -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
-              -D "TEST_REFERENCE=${ARG_DUMP_REFERENCE}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+            NAME ${DUMP_TESTNAME}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_ARGS:STRING=${ARG_DUMP_OPTIONS};${ARG_MAIN_OUT_FILE}"
+                -D "TEST_FOLDER=${BINARY_DIR_VOL}/testfiles"
+                -D "TEST_OUTPUT=${ARG_STDOUT_FILE}"
+                -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+                -D "TEST_SKIP_COMPARE=${ARG_DUMP_SKIP_COMPARE}"
+                -D "TEST_GREP_FILTER=${ARG_DUMP_GREP_FILTER}"
+                -D "TEST_GREP_EXPECT=${ARG_RESULT_CODE}"
+                -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
+                -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
+                -D "TEST_REFERENCE=${ARG_DUMP_REFERENCE}"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
         if (NOT "${vol}" STREQUAL "native")
           set_tests_properties (${DUMP_TESTNAME} PROPERTIES
@@ -716,7 +716,7 @@ macro (ADD_H5_TEST testname)
         else ()
           set_tests_properties (${DUMP_TESTNAME} PROPERTIES
               ENVIRONMENT "${vol_env}"
-          )          
+          )
         endif ()
 
         set_tests_properties (${DUMP_TESTNAME} PROPERTIES
@@ -731,10 +731,9 @@ macro (ADD_H5_TEST testname)
       endif ()
 
       if (${ARG_STAT_CHECK} AND NOT HDF5_ENABLE_USING_MEMCHECKER)
-          add_test (
+        add_test (
             NAME ${STAT_TESTNAME}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
                 -D "TEST_ARGS:STRING=-S;-s;out-${ARG_STAT_ARG}.${ARG_TEST_FILE}"
                 -D "TEST_FOLDER=${BINARY_DIR_VOL}/testfiles"
@@ -752,7 +751,7 @@ macro (ADD_H5_TEST testname)
         else ()
           set_tests_properties (${STAT_TESTNAME} PROPERTIES
               ENVIRONMENT "${vol_env}"
-          )          
+          )
         endif ()
 
         set_tests_properties (${STAT_TESTNAME} PROPERTIES
@@ -767,12 +766,12 @@ macro (ADD_H5_TEST testname)
 
       # Post-test cleanup
       add_test (
-        NAME ${CLEAN_TESTNAME}
-        COMMAND ${CMAKE_COMMAND} -E remove "${BINARY_DIR_VOL}/testfiles/${ARG_MAIN_OUT_FILE}"
+          NAME ${CLEAN_TESTNAME}
+          COMMAND ${CMAKE_COMMAND} -E remove "${BINARY_DIR_VOL}/testfiles/${ARG_MAIN_OUT_FILE}"
       )
       set_tests_properties (${CLEAN_TESTNAME} PROPERTIES
-        WORKING_DIRECTORY "${BINARY_DIR_VOL}/testfiles"
-        FIXTURES_REQUIRED h5repack_vol_files
+          WORKING_DIRECTORY "${BINARY_DIR_VOL}/testfiles"
+          FIXTURES_REQUIRED h5repack_vol_files
       )
       # Only set dependencies if necessary
       if (NOT "${ARG_CLEANUP_DEPENDS}" STREQUAL "")
@@ -782,7 +781,7 @@ macro (ADD_H5_TEST testname)
       else ()
         set_tests_properties (${CLEAN_TESTNAME} PROPERTIES
             ENVIRONMENT "${vol_env}"
-        )          
+        )
       endif ()
     endif ()
   endforeach () # per-VOL loop

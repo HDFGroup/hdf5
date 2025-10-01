@@ -164,8 +164,8 @@ set_tests_properties (H5WATCH-SWMR_INCOMPAT PROPERTIES
 
 # Remove any output file left over from previous test run
 add_test (
-  NAME H5WATCH-clearall-objects
-  COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
+    NAME H5WATCH-clearall-objects
+   COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
 )
 set_tests_properties (H5WATCH-clearall-objects PROPERTIES FIXTURES_REQUIRED swmr_vfd_check_compat)
 if (last_test)
@@ -173,8 +173,8 @@ if (last_test)
 endif ()
 set (last_test "H5WATCH-cleanall-objects")
 add_test (
-  NAME H5WATCH-cleanall-objects
-  COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
+    NAME H5WATCH-cleanall-objects
+    COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
 )
 set_tests_properties (H5WATCH-cleanall-objects PROPERTIES FIXTURES_CLEANUP swmr_vfd_check_compat)
 

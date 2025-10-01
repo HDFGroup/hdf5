@@ -379,7 +379,7 @@ macro (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
         NAME H5IMPORT-DUMP-${testname}
         COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
     )
-    set_property(TEST H5IMPORT-DUMP-${testname} PROPERTY DISABLED true)
+    set_property (TEST H5IMPORT-DUMP-${testname} PROPERTY DISABLED true)
   endif ()
 endmacro ()
 

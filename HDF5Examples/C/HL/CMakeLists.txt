@@ -8,7 +8,7 @@ include (C_sourcefiles.cmake)
 
 foreach (example_name ${common_examples})
   add_executable (${EXAMPLE_VARNAME}_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)
-  target_compile_options(${EXAMPLE_VARNAME}_${example_name}
+  target_compile_options (${EXAMPLE_VARNAME}_${example_name}
       PRIVATE
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_16_API}>:-DH5_USE_16_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_18_API}>:-DH5_USE_18_API>"
@@ -195,9 +195,7 @@ if (H5EX_BUILD_TESTING)
   macro (ADD_H5_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_${testname}-clearall
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            ${testname}.h5
+        COMMAND ${CMAKE_COMMAND} -E remove ${testname}.h5
     )
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME ${EXAMPLE_VARNAME}_${testname} COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_${testname}>)
@@ -243,9 +241,7 @@ if (H5EX_BUILD_TESTING)
   macro (ADD_H5_NOCMP_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_${testname}-clearall
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            ${testname}.h5
+        COMMAND${CMAKE_COMMAND} -E remove ${testname}.h5
     )
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME ${EXAMPLE_VARNAME}_${testname} COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_${testname}>)
@@ -300,9 +296,7 @@ if (H5EX_BUILD_TESTING)
   # special test for h5ex_lite1 and h5ex_lite2
   add_test (
       NAME ${EXAMPLE_VARNAME}_h5ex_lite-clearall
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          h5ex_lite1.h5
+      COMMAND ${CMAKE_COMMAND} -E remove h5ex_lite1.h5
   )
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME ${EXAMPLE_VARNAME}_h5ex_lite1 COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_h5ex_lite1>)

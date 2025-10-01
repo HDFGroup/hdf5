@@ -38,7 +38,7 @@ include (CheckFortranFunctionExists)
 
 # Force lowercase Fortran module file names
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ef")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ef")
 endif ()
 
 set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
@@ -55,11 +55,11 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
       set (_RUN_OUTPUT_VARIABLE "RUN_OUTPUT_VARIABLE")
     else ()
       set (_RUN_OUTPUT_VARIABLE  "RUN_OUTPUT_STDOUT_VARIABLE")
-    endif()
+    endif ()
     if (${FUNCTION_NAME} STREQUAL "SIZEOF NATIVE KINDs")
-        set(TMP_CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
+        set (TMP_CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
     else ()
-        set(TMP_CMAKE_Fortran_FLAGS "")
+        set (TMP_CMAKE_Fortran_FLAGS "")
     endif ()
     TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
@@ -71,7 +71,7 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
     set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
     if (${COMPILE_RESULT_VAR})
-      set(${RETURN_VAR} ${RUN_RESULT_VAR})
+      set (${RETURN_VAR} ${RUN_RESULT_VAR})
       if (${RUN_RESULT_VAR} MATCHES 0)
         message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - OK")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -88,13 +88,13 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if the Fortran ${FUNCTION_NAME} compiles failed: ${COMPILE_RESULT_VAR}\n"
         )
-        set(${RETURN_VAR} ${COMPILE_RESULT_VAR})
+        set (${RETURN_VAR} ${COMPILE_RESULT_VAR})
     endif ()
 endmacro ()
 #-----------------------------------------------------------------------------
 #  Check to see C_LONG_DOUBLE is available
 
-READ_SOURCE("PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" "END PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" SOURCE_CODE)
+READ_SOURCE ("PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" "END PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" SOURCE_CODE)
 check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_HAVE_C_LONG_DOUBLE SRC_EXT f90)
 
 if (${FORTRAN_HAVE_C_LONG_DOUBLE})
@@ -256,14 +256,14 @@ if (${HAVE_ISO_FORTRAN_ENV})
   if (HDF5_ENABLE_PARALLEL AND BUILD_TESTING)
     string (REGEX REPLACE "," ";" VAR "${PAC_FC_ALL_LOGICAL_KINDS}")
 
-    set(CMAKE_REQUIRED_QUIET TRUE)
-    set(save_CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS})
+    set (CMAKE_REQUIRED_QUIET TRUE)
+    set (save_CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS})
     if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-       set(CMAKE_Fortran_FLAGS "-warn error")
+       set (CMAKE_Fortran_FLAGS "-warn error")
     endif ()
 
     foreach (KIND ${VAR})
-      unset(MPI_LOGICAL_KIND CACHE)
+      unset (MPI_LOGICAL_KIND CACHE)
       set (PROG_SRC
       "
           PROGRAM main
@@ -286,10 +286,10 @@ if (${HAVE_ISO_FORTRAN_ENV})
     if (${HDF_PREFIX}_MPI_LOGICAL_KIND STREQUAL "")
        message (FATAL_ERROR "Failed to determine LOGICAL KIND for MPI")
     endif ()
-    set(CMAKE_REQUIRED_QUIET FALSE)
-    set(CMAKE_Fortran_FLAGS ${save_CMAKE_Fortran_FLAGS})
-  endif()
-endif()
+    set (CMAKE_REQUIRED_QUIET FALSE)
+    set (CMAKE_Fortran_FLAGS ${save_CMAKE_Fortran_FLAGS})
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Determine the available KINDs for REALs and INTEGERs

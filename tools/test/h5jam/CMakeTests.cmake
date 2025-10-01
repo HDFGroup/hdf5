@@ -155,7 +155,7 @@ macro (CHECKFILE testname testdepends expected actual)
         ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
   endif ()
-endmacro()
+endmacro ()
 
 macro (UNJAMTEST testname setfile infile ufile chkfile outfile)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -273,7 +273,7 @@ macro (UNJAMTEST testname setfile infile ufile chkfile outfile)
 
     CHECKFILE (${testname} "H5JAM-${testname}-UNJAM-CHECK_NOUB" ${chkfile} ${outfile})
   endif ()
-endmacro()
+endmacro ()
 
 macro (JAMTEST testname jamfile infile chkfile outfile)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -408,10 +408,10 @@ endmacro ()
 # Testing h5jam
 #-------------------------------
 # help page
-TEST_H5JAM_OUTPUT(h5jam-help 0 -h)
+TEST_H5JAM_OUTPUT (h5jam-help 0 -h)
 
 # don't allow HDF5 format file as an user block file
-TEST_H5JAM_OUTPUT(h5jam-ub-nohdf5 1 -i testfiles/tall.h5 -u testfiles/tall.h5 -o tall-tmp.h5)
+TEST_H5JAM_OUTPUT (h5jam-ub-nohdf5 1 -i testfiles/tall.h5 -u testfiles/tall.h5 -o tall-tmp.h5)
 
 JAMTEST (tall_u10 u10.txt tall.h5 tall.h5 ta2.h5)
 JAMTEST (tall_u511 u511.txt tall.h5 tall.h5 ta3.h5)
@@ -457,7 +457,7 @@ JAMTEST_NONE (N_twithub513_u513_c u513.txt tall.h5 twithub513.h5 tay9.h5 --clobb
 # Testing h5unjam
 #-------------------------------
 # help page
-TEST_H5UNJAM_OUTPUT(h5unjam-help 0 -h)
+TEST_H5UNJAM_OUTPUT (h5unjam-help 0 -h)
 
 UNJAMTEST (twithub_tall twithub.h5 tai1.h5 o10.txt tall.h5 taa1.h5)
 UNJAMTEST (twithub513_tall twithub513.h5 tai2.h5 o512.txt tall.h5 taa2.h5)

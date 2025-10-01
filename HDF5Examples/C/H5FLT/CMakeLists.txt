@@ -174,7 +174,7 @@ endif ()
 foreach (example ${dyn_examples})
   add_executable (${EXAMPLE_VARNAME}_${example} ${PROJECT_SOURCE_DIR}/${example}.c)
   TARGET_C_PROPERTIES (${EXAMPLE_VARNAME}_${example} ${LIB_TYPE})
-  target_compile_options(${EXAMPLE_VARNAME}_${example}
+  target_compile_options (${EXAMPLE_VARNAME}_${example}
       PRIVATE
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_16_API}>:-DH5_USE_16_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_18_API}>:-DH5_USE_18_API>"
@@ -196,8 +196,7 @@ if (H5EX_BUILD_TESTING)
   macro (ADD_H5_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_${testname}-clearall
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
+        COMMAND ${CMAKE_COMMAND} -E remove
             ${testname}.out
             ${testname}.out.err
             ${testname}.ddl.out

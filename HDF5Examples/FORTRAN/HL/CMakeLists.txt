@@ -9,8 +9,8 @@ project (HDF5Examples_FORTRAN_HL Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EX_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+set_directory_properties (PROPERTIES INCLUDE_DIRECTORIES
+    "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EX_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
 )
 
 #-----------------------------------------------------------------------------
@@ -215,9 +215,7 @@ if (H5EX_BUILD_TESTING)
       endif ()
       add_test (
           NAME ${EXAMPLE_VARNAME}_f90_${testname}-clean
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${testname}.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ${testname}.h5
       )
       set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES DEPENDS ${last_test})
     endif ()

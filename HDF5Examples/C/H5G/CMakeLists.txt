@@ -12,7 +12,7 @@ foreach (example_name ${common_examples})
   else ()
     add_executable (${EXAMPLE_VARNAME}_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)
   endif ()
-  target_compile_options(${EXAMPLE_VARNAME}_${example_name}
+  target_compile_options (${EXAMPLE_VARNAME}_${example_name}
       PRIVATE
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_16_API}>:-DH5_USE_16_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_18_API}>:-DH5_USE_18_API>"
@@ -229,9 +229,7 @@ if (H5EX_BUILD_TESTING)
   macro (ADD_DUMP_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_${testname}-clearall
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            ${testname}.h5
+        COMMAND ${CMAKE_COMMAND} -E remove ${testname}.h5
     )
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME ${EXAMPLE_VARNAME}_${testname} COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_${testname}>)
@@ -315,8 +313,7 @@ if (H5EX_BUILD_TESTING)
   macro (ADD_H5_DUMP2_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_${testname}-clearall
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
+        COMMAND ${CMAKE_COMMAND} -E remove
             ${testname}1.h5
             ${testname}2.h5
     )
@@ -380,9 +377,7 @@ if (H5EX_BUILD_TESTING)
   macro (ADD_H5_CMP_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_${testname}-clearall
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            ${testname}.out.tmp
+        COMMAND ${CMAKE_COMMAND} -E remove ${testname}.out.tmp
     )
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME ${EXAMPLE_VARNAME}_${testname} COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_${testname}>)

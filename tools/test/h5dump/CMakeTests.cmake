@@ -16,7 +16,7 @@
 ##############################################################################
 ##############################################################################
 
-include(${HDF_CONFIG_DIR}/HDF5Macros.cmake)
+include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
 # System-independent path separator
 if (WIN32)
@@ -438,31 +438,31 @@ add_custom_target (h5dump_std_files ALL COMMENT "Copying files needed by h5dump_
 # --------------------------------------------------------------------
 # Copy test files for each external VOL connector
 # --------------------------------------------------------------------
-set(h5dump_vol_files_list "")
-foreach(external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
-  HDF5_GET_VOL_TGT_INFO(${external_vol_tgt} ext_vol_dir_name vol_env)
+set (h5dump_vol_files_list "")
+foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
+  HDF5_GET_VOL_TGT_INFO (${external_vol_tgt} ext_vol_dir_name vol_env)
   # Setup testfiles directory
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std")
 
   # Generate test files
-  add_test(NAME ${external_vol_tgt}-h5dumpgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5gentest> --h5dump)
-  set_tests_properties(${external_vol_tgt}-h5dumpgentest PROPERTIES
-    ENVIRONMENT "${vol_env}"
-    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std"
-    FIXTURES_SETUP "h5dump_vol_files"
+  add_test (NAME ${external_vol_tgt}-h5dumpgentest COMMAND $<TARGET_FILE:h5gentest> --h5dump)
+  set_tests_properties (${external_vol_tgt}-h5dumpgentest PROPERTIES
+      ENVIRONMENT "${vol_env}"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std"
+      FIXTURES_SETUP "h5dump_vol_files"
   )
 
   # These aren't HDF5 files, just copy them to the VOL's subdirectory
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_exp_file}" "h5dump_vol_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_exp_file}" "h5dump_vol_files")
   endforeach ()
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_other_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_other_file}" "h5dump_vol_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_other_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_other_file}" "h5dump_vol_files")
   endforeach ()
 
   foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_h5N_file}-N" "h5dump_vol_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/${tst_h5N_file}-N" "h5dump_vol_files")
   endforeach ()
 
   # Don't copy s3 files for each VOL connector, since the s3 files are specific to the native-exlusive ROS3 VFD
@@ -470,16 +470,16 @@ foreach(external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
   # --------------------------------------------------------------------
   # Special file handling
   # --------------------------------------------------------------------
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbin1LE.ddl" "h5dump_vol_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbin1LE.ddl" "h5dump_vol_files")
   
   # Certain versions of Visual Studio produce rounding differences compared with the reference data of the tfloatsattr test
   if (WIN32 AND (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION VERSION_LESS 10.0.18362.0))
-    configure_file(${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
+    configure_file (${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
   else ()
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbinregR.exp" "h5dump_vol_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbinregR.exp" "h5dump_vol_files")
   endif ()
 endforeach ()
-add_custom_target(h5dump_vol_files ALL COMMENT "Copying files needed by h5dump VOL tests" DEPENDS ${h5dump_vol_files_list})
+add_custom_target (h5dump_vol_files ALL COMMENT "Copying files needed by h5dump VOL tests" DEPENDS ${h5dump_vol_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -548,11 +548,11 @@ endmacro ()
 #   ANY_PATHS <paths>   - The -N/--any_path argument(s) to h5dump.
 #
 macro (ADD_H5_TEST testname)
-  cmake_parse_arguments(ARG
-    "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE;BINFILE;SKIP_TEST;NATIVE_ONLY" # Flags
-    "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE;H5ERRREF;ENVVAR;ENVVAL" # Single value args
-    "ANY_PATHS" # Multi value args
-    ${ARGN}
+  cmake_parse_arguments (ARG
+      "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE;BINFILE;SKIP_TEST;NATIVE_ONLY" # Flags
+      "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE;H5ERRREF;ENVVAR;ENVVAL" # Single value args
+      "ANY_PATHS" # Multi value args
+      ${ARGN}
   )
 
   # Validate required parameters
@@ -569,7 +569,7 @@ macro (ADD_H5_TEST testname)
     if ("${ARG_APPLY_FILTERS}" STREQUAL "")
       # default
       set (_FILTER_VAL "1")
-    else()
+    else ()
       set (_FILTER_VAL "${ARG_APPLY_FILTERS}")
     endif ()
 
@@ -602,11 +602,11 @@ macro (ADD_H5_TEST testname)
   if (DEFINED ARG_ANY_PATHS)
     set (temp_path_arg "")
     foreach (arg_path IN LISTS ARG_ANY_PATHS)
-        if (arg_path STREQUAL "")
-            message (FATAL_ERROR "ADD_H5_TEST: ANY_PATHS requires a path")
-        endif ()
+      if (arg_path STREQUAL "")
+        message (FATAL_ERROR "ADD_H5_TEST: ANY_PATHS requires a path")
+      endif ()
 
-        list (APPEND temp_path_arg "--any_path=${arg_path}")
+      list (APPEND temp_path_arg "--any_path=${arg_path}")
     endforeach ()
 
     set (ARG_ANY_PATHS ${temp_path_arg})
@@ -614,14 +614,14 @@ macro (ADD_H5_TEST testname)
 
   # both of these args want to define argument to -o flag
   if (DEFINED ARG_OUTPUT_FILE AND ${ARG_BINFILE}) 
-    message(FATAL_ERROR "ADD_H5_TEST: OUTPUT_FILE and BINFILE are mutually exclusive")
+    message  (FATAL_ERROR "ADD_H5_TEST: OUTPUT_FILE and BINFILE are mutually exclusive")
   endif()
 
   if (DEFINED ARG_OUTPUT_FILE)
     set (ARG_OUTPUT_FILEARGS "-o" "${ARG_OUTPUT_FILE}.txt")
   elseif (${ARG_BINFILE})
     set (ARG_OUTPUT_FILEARGS "-o" "${testname}.bin")
-  else()
+  else ()
     set (ARG_OUTPUT_FILEARGS "")
   endif ()
 
@@ -630,26 +630,26 @@ macro (ADD_H5_TEST testname)
 
   if (${ARG_BINFILE})
     set (ctest_testname "BIN_EXPORT-${testname}")
-  elseif(DEFINED ARG_ANY_PATHS)
+  elseif (DEFINED ARG_ANY_PATHS)
     set (ctest_testname "N-${testname}")
-  elseif(DEFINED ARG_OUTPUT_FILE AND ARG_BINARY_OUTPUT)
+  elseif (DEFINED ARG_OUTPUT_FILE AND ARG_BINARY_OUTPUT)
     set (ctest_testname "output-${testname}")
-  endif()
+  endif ()
 
   # Set up list of files to clean up
-  set(DO_CLEANUP FALSE)
-  set(CLEANUP_DEPENDENCIES "")
+  set (DO_CLEANUP FALSE)
+  set (CLEANUP_DEPENDENCIES "")
 
   if (DEFINED ARG_TARGET_FILE OR DEFINED ARG_OUTPUT_FILE OR DEFINED ARG_DDL_FILE OR DEFINED ARG_ANY_PATHS OR ${ARG_BINFILE})
-    set(DO_CLEANUP TRUE)
+    set (DO_CLEANUP TRUE)
   endif ()
 
   if (DEFINED ARG_ENVVAL AND NOT DEFINED ARG_ENVVAR)
-    message(FATAL_ERROR "ADD_H5_TEST: ENVVAL requires ENVVAR")
+    message (FATAL_ERROR "ADD_H5_TEST: ENVVAL requires ENVVAR")
   endif ()
 
   if (DEFINED ARG_ENVVAR AND NOT DEFINED ARG_ENVVAL)
-    message(FATAL_ERROR "ADD_H5_TEST: ENVVAR requires ENVVAL")
+    message (FATAL_ERROR "ADD_H5_TEST: ENVVAR requires ENVVAL")
   endif ()
 
   if (DEFINED ARG_DDL_FILE)
@@ -660,13 +660,13 @@ macro (ADD_H5_TEST testname)
 
   if (${ARG_BINARY_OUTPUT})
     if (NOT DEFINED ARG_OUTPUT_FILE)
-      message(FATAL_ERROR "ADD_H5_TEST: BINARY_OUTPUT flag requires OUTPUT_FILE")
+      message (FATAL_ERROR "ADD_H5_TEST: BINARY_OUTPUT flag requires OUTPUT_FILE")
     endif ()
 
     set (BINARY_OUTPUT_FLAG "-b")
   else ()
     set (BINARY_OUTPUT_FLAG "")
-  endif()
+  endif ()
 
   if (DEFINED ${ARG_RESULT_CHECK})
     set (ARG_RESULT_CHECK_FILE "${ARG_RESULT_CHECK}")
@@ -679,49 +679,50 @@ macro (ADD_H5_TEST testname)
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     if (DEFINED ARG_H5ERRREF OR ${ARG_BINFILE} OR ${ARG_GREP_COMPARE})
-      set(should_skip_test TRUE)
-    endif()
-  endif()
+      set (should_skip_test TRUE)
+    endif ()
+  endif ()
 
   if (${ARG_SKIP_TEST})
-    set(should_skip_test TRUE)
-  endif()
+    set (should_skip_test TRUE)
+  endif ()
 
   if (${ARG_NATIVE_ONLY})
-    set(num_ext_vols 0)
-  else()
-    list(LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
-  endif()
+    set (num_ext_vols 0)
+  else ()
+    list (LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
+  endif ()
 
   # Add a test for the native connector and each external VOL connector
   foreach (vol_idx RANGE 0 ${num_ext_vols})
-    set(vol_env "")
+    set (vol_env "")
 
     # First, populate VOL info to be passed to tests
     if (${vol_idx} EQUAL 0)
-      set(vol "native")
+      set (vol "native")
       set (vol_prefix "")
+      set (vol_env "${CROSSCOMPILING_PATH}")
       set (workdir "${PROJECT_BINARY_DIR}/testfiles/std")
     else ()
       # An external VOL connector
-      math(EXPR vol_idx_fixed "${vol_idx} - 1")
-      list(GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
-      HDF5_GET_VOL_TGT_INFO(${ext_vol_tgt} vol vol_env)
+      math (EXPR vol_idx_fixed "${vol_idx} - 1")
+      list (GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
+      HDF5_GET_VOL_TGT_INFO (${ext_vol_tgt} vol vol_env)
 
       set (vol_prefix "HDF5_VOL_${vol}-")
 
       set (workdir "${PROJECT_BINARY_DIR}/${vol}/testfiles/std")
       # Isolate plugin path string
-      string(FIND "${vol_env}" "HDF5_PLUGIN_PATH=" vol_plugin_path_posn)
+      string (FIND "${vol_env}" "HDF5_PLUGIN_PATH=" vol_plugin_path_posn)
 
       if (vol_plugin_path_posn GREATER -1)
         # Grab path string after HDF5_PLUGIN_PATH=
-        string(LENGTH "HDF5_PLUGIN_PATH=" path_prefix_len)
-        math(EXPR vol_plugin_path_posn "${vol_plugin_path_posn} + ${path_prefix_len}")
-        string(SUBSTRING "${vol_env}" ${vol_plugin_path_posn} -1 vol_plugin_path)
-      else()
-        set(vol_plugin_path "")
-      endif()
+        string (LENGTH "HDF5_PLUGIN_PATH=" path_prefix_len)
+        math (EXPR vol_plugin_path_posn "${vol_plugin_path_posn} + ${path_prefix_len}")
+        string (SUBSTRING "${vol_env}" ${vol_plugin_path_posn} -1 vol_plugin_path)
+      else ()
+        set (vol_plugin_path "")
+      endif ()
     endif () # env VOL arg setup
 
     # Clean up if test produces artifacts
@@ -743,9 +744,12 @@ macro (ADD_H5_TEST testname)
 
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER AND NOT ARG_MASK_ERROR AND NOT ARG_GREP_COMPARE AND NOT DEFINED ARG_H5ERRREF)
-      add_test (NAME ${vol_prefix}H5DUMP-${ctest_testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_DDL_FILE_CMD} ${BINARY_OUTPUT_FLAG} ${ARG_OUTPUT_FILEARGS} ${ARG_TARGET_FILE})
+      add_test (NAME ${vol_prefix}H5DUMP-${ctest_testname} COMMAND $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_DDL_FILE_CMD} ${BINARY_OUTPUT_FLAG} ${ARG_OUTPUT_FILEARGS} ${ARG_TARGET_FILE})
       if (${ARG_RESULT_CODE})
-        set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES WILL_FAIL "true")
+        set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}
+            PROPERTIES WILL_FAIL "true"
+            ENVIRONMENT "${CROSSCOMPILING_PATH}"
+        )
       endif ()
     else ()
       add_test (
@@ -769,14 +773,17 @@ macro (ADD_H5_TEST testname)
     endif ()
     set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES
         WORKING_DIRECTORY "${workdir}"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
 
     # Set VOL-specific properties
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES
-        ENVIRONMENT "${vol_env}"
-        FIXTURES_REQUIRED "h5dump_vol_files"
+          ENVIRONMENT "${vol_env}"
+          FIXTURES_REQUIRED "h5dump_vol_files"
+      )
+    else ()
+      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES
+          ENVIRONMENT "${vol_env}"
       )
     endif ()
 
@@ -784,34 +791,35 @@ macro (ADD_H5_TEST testname)
       set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
     endif ()
       
-    set(CLEANUP_DEPENDENCIES "${vol_prefix}H5DUMP-${ctest_testname}")
+    set (CLEANUP_DEPENDENCIES "${vol_prefix}H5DUMP-${ctest_testname}")
 
     if (DEFINED ARG_TARGET_FILE AND DEFINED ARG_OUTPUT_FILE)
       add_test (
-        NAME ${vol_prefix}H5DUMP-${ctest_testname}-output-cmp
-        COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${testname}.txt ${testname}.exp
+          NAME ${vol_prefix}H5DUMP-${ctest_testname}-output-cmp
+          COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${testname}.txt ${testname}.exp
       )
 
-      set_tests_properties(${vol_prefix}H5DUMP-${ctest_testname}-output-cmp PROPERTIES
-        DEPENDS H5DUMP-${ctest_testname}
-        WORKING_DIRECTORY "${workdir}"
+      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}-output-cmp PROPERTIES
+          DEPENDS H5DUMP-${ctest_testname}
+          ENVIRONMENT "${CROSSCOMPILING_PATH}"
+          WORKING_DIRECTORY "${workdir}"
       )
 
       if ("${vol_prefix}H5DUMP-${ctest_testname}-output-cmp" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}-output-cmp PROPERTIES DISABLED true)
       endif ()
 
-      list(APPEND CLEANUP_DEPENDENCIES "${vol_prefix}H5DUMP-${ctest_testname}-output-cmp")
+      list (APPEND CLEANUP_DEPENDENCIES "${vol_prefix}H5DUMP-${ctest_testname}-output-cmp")
     endif ()
 
     if (${DO_CLEANUP})
       add_test (
-        NAME ${vol_prefix}H5DUMP-${ctest_testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-          "${testname}.txt"
-          "${ARG_OUTPUT_FILE}.txt"
-          "${ARG_DDL_FILE}.txt"
-          "${testname}.bin"
+          NAME ${vol_prefix}H5DUMP-${ctest_testname}-clean-objects
+          COMMAND ${CMAKE_COMMAND} -E remove
+              "${testname}.txt"
+              "${ARG_OUTPUT_FILE}.txt"
+              "${ARG_DDL_FILE}.txt"
+              "${testname}.bin"
       )
 
       set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}-clean-objects PROPERTIES
@@ -822,8 +830,8 @@ macro (ADD_H5_TEST testname)
 
     # Mark the test as disabled if needed
     if (should_skip_test)
-      set_tests_properties(${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
-    endif()
+      set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
+    endif ()
   endforeach () # per-VOL loop
 endmacro ()
 
@@ -956,7 +964,7 @@ endmacro ()
 ##############################################################################
 ##############################################################################
 
-ADD_HELP_TEST(help 0 -h)
+ADD_HELP_TEST (help 0 -h)
 
 # test data output redirection
 #ADD_H5_TEST (tnoddl RESULT_CODE RESULT_CODE 0 --enable-error-stack -O -y TARGET_FILE packedbits.h5)
@@ -1449,10 +1457,10 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
   # AWS_PROFILE is set in order to use the correct testing
   # credentials created in CMakeTests.cmake
   set (h5dump_s3tests_env
-    "AWS_ENDPOINT_URL=http://localhost:${h5dump_s3tests_port}"
-    "HDF5_ROS3_VFD_FORCE_PATH_STYLE=1"
-    "AWS_REGION=us-east-2"
-    "AWS_PROFILE=ros3_vfd_test"
+      "AWS_ENDPOINT_URL=http://localhost:${h5dump_s3tests_port}"
+      "HDF5_ROS3_VFD_FORCE_PATH_STYLE=1"
+      "AWS_REGION=us-east-2"
+      "AWS_PROFILE=ros3_vfd_test"
   )
 
   add_test (

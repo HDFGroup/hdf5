@@ -10,7 +10,7 @@
 # help@hdfgroup.org.
 #
 
-include(${HDF_CONFIG_DIR}/HDF5Macros.cmake)
+include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
 # System-independent path separator
 if (WIN32)
@@ -29,12 +29,12 @@ endif ()
 # Copy all the HDF5 files from the source directory into the test directory
 # --------------------------------------------------------------------
 set (LIST_HDF5_TEST_FILES
-  h5copy_extlinks_src.h5
-  h5copy_extlinks_trg.h5
-  h5copy_ref.h5
-  h5copytst.h5
-  tudfilter.h5
-  tudfilter2.h5
+    h5copy_extlinks_src.h5
+    h5copy_extlinks_trg.h5
+    h5copy_ref.h5
+    h5copytst.h5
+    tudfilter.h5
+     tudfilter2.h5
 )
 
 set (LIST_OTHER_TEST_FILES
@@ -50,30 +50,30 @@ set (LIST_OTHER_TEST_FILES
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
 # Generate testfiles for VOL connector(s), if any
-set(h5copy_vol_files_list "")
+set (h5copy_vol_files_list "")
 
 foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
-  HDF5_GET_VOL_TGT_INFO(${external_vol_tgt} ext_vol_dir_name vol_env)
+  HDF5_GET_VOL_TGT_INFO (${external_vol_tgt} ext_vol_dir_name vol_env)
 
   # Setup testfiles directory
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles" RESULT)
   if (NOT ${RESULT} EQUAL 0)
-    message(FATAL_ERROR "Could not create directory ${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles")
+    message (FATAL_ERROR "Could not create directory ${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles")
   endif()
 
   add_test(NAME ${external_vol_tgt}-h5copygentest COMMAND $<TARGET_FILE:h5gentest> --h5copy)
 
-  set_tests_properties(${external_vol_tgt}-h5copygentest PROPERTIES
-    ENVIRONMENT "${vol_env};${CROSSCOMPILING_PATH}"
-    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles"
-    FIXTURES_SETUP ${external_vol_tgt}-files
+  set_tests_properties (${external_vol_tgt}-h5copygentest PROPERTIES
+      ENVIRONMENT "${vol_env};${CROSSCOMPILING_PATH}"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles"
+      FIXTURES_SETUP ${external_vol_tgt}-files
   )
 
   # These aren't HDF5 files, just copy them to the VOL's subdirectory
   foreach (listothers ${LIST_OTHER_TEST_FILES})
     HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/expected/${listothers}"
-    "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/${listothers}"
-    "h5copy_vol_files"
+        "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/${listothers}"
+        "h5copy_vol_files"
     )
   endforeach ()
 endforeach ()

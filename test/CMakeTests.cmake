@@ -694,11 +694,11 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
   # AWS_PROFILE is set in order to use the correct testing
   # credentials created in CMakeTests.cmake
   set (h5test_s3tests_env
-    "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-    "HDF5_ROS3_TEST_BUCKET_URL=http://localhost:${h5test_s3tests_port}/hdf5ros3"
-    "AWS_ENDPOINT_URL=http://localhost:${h5test_s3tests_port}"
-    "HDF5_ROS3_VFD_FORCE_PATH_STYLE=1"
-    "AWS_PROFILE=ros3_vfd_test"
+      "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+      "HDF5_ROS3_TEST_BUCKET_URL=http://localhost:${h5test_s3tests_port}/hdf5ros3"
+      "AWS_ENDPOINT_URL=http://localhost:${h5test_s3tests_port}"
+      "HDF5_ROS3_VFD_FORCE_PATH_STYLE=1"
+      "AWS_PROFILE=ros3_vfd_test"
   )
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/buckets")

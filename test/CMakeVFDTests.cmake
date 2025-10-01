@@ -16,7 +16,7 @@
 ##############################################################################
 ##############################################################################
 # included from CMakeTests.cmake
-H5_CREATE_VFD_DIR()
+H5_CREATE_VFD_DIR ()
 
 # create more test folders for each VFD
 foreach (vfdtest ${VFD_LIST})
@@ -79,29 +79,29 @@ add_custom_target (HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by H
   # Skip several tests with subfiling VFD, mostly due
   # to no support for collective I/O
   set (H5_VFD_subfiling_SKIP_TESTS
-    cache_api
-    chunk_info
-    cmpd_dset
-    cork
-    dangle
-    direct_chunk
-    dsets
-    dt_arith
-    dtransform
-    extend
-    fillval
-    filter_fail
-    istore
-    links
-    mf
-    objcopy
-    objcopy_ref
-    ohdr
-    set_extent
-    testhdf5
-    unlink
-    unregister
-    vol
+      cache_api
+      chunk_info
+      cmpd_dset
+      cork
+      dangle
+      direct_chunk
+      dsets
+      dt_arith
+      dtransform
+      extend
+      fillval
+      filter_fail
+      istore
+      links
+      mf
+      objcopy
+      objcopy_ref
+      ohdr
+      set_extent
+      testhdf5
+      unlink
+      unregister
+      vol
   )
 
   if (NOT CYGWIN)

@@ -33,9 +33,9 @@ if (WIN32 AND MSVC)
     set_target_properties (H5HL_buildiface PROPERTIES COMPILE_FLAGS "/MT")
   endif ()
 endif ()
-if(MSVC)
-  set_property(TARGET H5HL_buildiface PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE")
-endif()
+if (MSVC)
+  set_property (TARGET H5HL_buildiface PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+endif ()
 set_target_properties (H5HL_buildiface PROPERTIES
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
@@ -304,21 +304,15 @@ if (BUILD_STATIC_LIBS)
     set (mod_files ${mod_files} ${MOD_BUILD_DIR}/${mod_file})
   endforeach ()
   install (
-      FILES
-          ${mod_files}
-      DESTINATION
-          ${HDF5_INSTALL_MODULE_DIR}/static
-      COMPONENT
-          fortheaders
+      FILES ${mod_files}
+      DESTINATION ${HDF5_INSTALL_MODULE_DIR}/static
+      COMPONENT fortheaders
   )
   if (HDF5_INSTALL_MOD_FORTRAN MATCHES "STATIC")
     install (
-        FILES
-            ${mod_files}
-        DESTINATION
-            ${HDF5_INSTALL_INCLUDE_DIR}
-        COMPONENT
-            fortheaders
+        FILES ${mod_files}
+        DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
+        COMPONENT fortheaders
     )
   endif ()
 endif ()
@@ -327,21 +321,15 @@ if (BUILD_SHARED_LIBS)
     set (modsh_files ${modsh_files} ${MODSH_BUILD_DIR}/${mod_file})
   endforeach ()
   install (
-      FILES
-          ${modsh_files}
-      DESTINATION
-          ${HDF5_INSTALL_MODULE_DIR}/shared
-      COMPONENT
-          fortheaders
+      FILES ${modsh_files}
+      DESTINATION ${HDF5_INSTALL_MODULE_DIR}/shared
+      COMPONENT fortheaders
   )
   if (HDF5_INSTALL_MOD_FORTRAN MATCHES "SHARED")
     install (
-        FILES
-            ${modsh_files}
-        DESTINATION
-            ${HDF5_INSTALL_INCLUDE_DIR}
-        COMPONENT
-            fortheaders
+        FILES ${modsh_files}
+        DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
+        COMPONENT fortheaders
     )
   endif ()
 endif ()
@@ -360,10 +348,8 @@ if (HDF5_EXPORTED_TARGETS)
   endif ()
 
   install (
-      TARGETS
-          ${install_targets}
-      EXPORT
-          ${HDF5_EXPORTED_TARGETS}
+      TARGETS ${install_targets}
+      EXPORT ${HDF5_EXPORTED_TARGETS}
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlfortlibraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlfortlibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hlfortlibraries
