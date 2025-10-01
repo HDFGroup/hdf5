@@ -260,38 +260,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set file base name
-        id: set-file-base
-        shell: bash
-        run: |
-          FILE_NAME_BASE="hdf5-develop-$(date '+%Y%m%d')"
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          echo "SOURCE_BASE=hdfsrc" >> $GITHUB_OUTPUT
-
-      - name: Create source tarball
-        shell: bash
-        run: |
-          mkdir -p ${{ runner.workspace }}/source
-          cd ${{ runner.workspace }}/source
-          # Create a simplified source package for testing
-          tar -czf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz -C ${{ github.workspace }} --exclude='.git' .
-
-      - name: Extract source for build
-        id: extract
-        shell: bash
-        run: |
-          cd ${{ runner.workspace }}
-          BUILD_DIR="hdf5"
-          rm -rf "$BUILD_DIR"
-          mkdir -p "$BUILD_DIR"
-          tar -xzf ${{ runner.workspace }}/source/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz -C "$BUILD_DIR/"
-          # Move extracted contents if they're in a subdirectory
-          if [ -d "$BUILD_DIR${{ github.workspace }}" ]; then
-            mv "$BUILD_DIR${{ github.workspace }}"/* "$BUILD_DIR/" || true
-            rmdir "$BUILD_DIR${{ github.workspace }}" || true
-          fi
-          echo "BUILD_DIR=$BUILD_DIR" >> $GITHUB_OUTPUT
+        with:
+          path: hdf5
 
       - name: Set preset name
         id: set-preset
@@ -329,7 +299,7 @@ jobs:
         id: buildhdf5
         shell: bash
         run: |
-          cd ${{ runner.workspace }}/${{ steps.extract.outputs.BUILD_DIR }}
+          cd ${{ runner.workspace }}/hdf5
           cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
 
       - name: Extract version information
