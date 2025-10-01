@@ -187,10 +187,20 @@ jobs:
               PLATFORM_ARCH=$(echo "$platform" | jq -r '.arch')
 
               # Create artifact name suffix
-              if [ "$impl" = "auto" ]; then
-                ARTIFACT_SUFFIX="${PLATFORM_NAME,,}-${PLATFORM_ARCH}"
+              # Platform name already includes arch for macOS (e.g., macOS-x86_64)
+              PLATFORM_LOWER="${PLATFORM_NAME,,}"
+              if [[ "$PLATFORM_LOWER" == *"-"* ]]; then
+                # Platform name already has arch suffix (macOS case)
+                BASE_NAME="$PLATFORM_LOWER"
               else
-                ARTIFACT_SUFFIX="${PLATFORM_NAME,,}-${PLATFORM_ARCH}-${impl}"
+                # Add arch suffix (Linux, Windows case)
+                BASE_NAME="${PLATFORM_LOWER}-${PLATFORM_ARCH}"
+              fi
+
+              if [ "$impl" = "auto" ]; then
+                ARTIFACT_SUFFIX="$BASE_NAME"
+              else
+                ARTIFACT_SUFFIX="${BASE_NAME}-${impl}"
               fi
 
               MATRIX+="{\"platform\":\"$PLATFORM_NAME\",\"os\":\"$PLATFORM_OS\",\"compiler\":\"$PLATFORM_COMPILER\",\"arch\":\"$PLATFORM_ARCH\",\"implementation\":\"$impl\",\"artifact-suffix\":\"$ARTIFACT_SUFFIX\"}"
