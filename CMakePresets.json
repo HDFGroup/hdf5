@@ -931,6 +931,102 @@
         {"type": "build", "name": "ci-MinShar-Clang-Maven-Snapshot"},
         {"type": "package", "name": "ci-MinShar-Clang-Maven-Snapshot"}
       ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-FFM"},
+        {"type": "build", "name": "ci-MinShar-GNUC-Maven-FFM"},
+        {"type": "package", "name": "ci-MinShar-GNUC-Maven-FFM"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-JNI",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-JNI"},
+        {"type": "build", "name": "ci-MinShar-GNUC-Maven-JNI"},
+        {"type": "package", "name": "ci-MinShar-GNUC-Maven-JNI"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-FFM"},
+        {"type": "build", "name": "ci-MinShar-MSVC-Maven-FFM"},
+        {"type": "package", "name": "ci-MinShar-MSVC-Maven-FFM"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-JNI",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-JNI"},
+        {"type": "build", "name": "ci-MinShar-MSVC-Maven-JNI"},
+        {"type": "package", "name": "ci-MinShar-MSVC-Maven-JNI"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM"},
+        {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM"},
+        {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-JNI",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-Clang-Maven-JNI"},
+        {"type": "build", "name": "ci-MinShar-Clang-Maven-JNI"},
+        {"type": "package", "name": "ci-MinShar-Clang-Maven-JNI"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"}
+      ]
     }
   ]
 }
