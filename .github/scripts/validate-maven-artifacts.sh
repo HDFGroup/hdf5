@@ -184,8 +184,8 @@ validate_pom_file() {
         add_error "Invalid or missing groupId in POM"
     fi
 
-    if ! grep -q "<artifactId>hdf5-java</artifactId>" "${pom_file}"; then
-        add_error "Invalid or missing artifactId in POM"
+    if ! grep -qE "<artifactId>hdf5-java(-ffm|-jni)?</artifactId>" "${pom_file}"; then
+        add_error "Invalid or missing artifactId in POM (expected hdf5-java, hdf5-java-ffm, or hdf5-java-jni)"
     fi
 
     # Extract version
