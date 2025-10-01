@@ -146,7 +146,7 @@ target_include_directories (H5match_types PRIVATE "${HDF5_SRC_BINARY_DIR};${HDF5
 if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5fortran_types.F90")
   message (STATUS "No pre-generated H5fortran_types.F90 file found - generating one")
   # execute the H5match_types program
-  if (CROSSCOMPILING)
+  if (CMAKE_CROSSCOMPILING)
     add_custom_command (TARGET H5match_types POST_BUILD
         BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
         COMMAND    ${CMAKE_COMMAND}
@@ -338,7 +338,7 @@ set (f90_F_GEN_SOURCES
 # check if a pre-generated H5fortran_types.F90 file is present
 if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5_gen.F90")
   message (STATUS "No pre-generated H5_gen.F90 file found - generating one")
-  if (CROSSCOMPILING)
+  if (CMAKE_CROSSCOMPILING)
     add_custom_command (TARGET H5_buildiface POST_BUILD
         BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5_gen.F90
         COMMAND    ${CMAKE_COMMAND}
