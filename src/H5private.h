@@ -764,7 +764,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDunsetenv
 #define HDunsetenv(S) unsetenv(S)
 #endif
-#ifndef HDqsort_context
+#ifndef HDqsort_r
 #ifdef H5_HAVE_DARWIN
 #define HDqsort_r(B, N, S, C, A) HDqsort_context(B, N, S, C, A)
 #else
