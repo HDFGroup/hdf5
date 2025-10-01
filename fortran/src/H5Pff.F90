@@ -4368,8 +4368,17 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !>
 !! \ingroup FH5P
 !!
-!! \brief Gets the value of the "use spatial tree" flag which enables spatial tree
-!!        construction and usage for VDS mapping searches.
+!! \brief Retrieves the flag for whether to use/not use a spatial tree
+!! during mapping operations on a Virtual Dataset. The default value is true.
+!!
+!! Use of a spatial tree will accelerate the process of searching through mappings
+!! to determine which contain intersections with the user's selection region.
+!! With the tree disabled, all mappings will simply be iterated through and
+!! checked directly.
+!!
+!! Certain workflows may find that tree creation overhead outweighs the time saved
+!! on reads. In this case, disabling this property will lead to a performance improvement,
+!! though it is expected that almost all cases will benefit from the tree on net.
 !!
 !! \param dapl_id  Target dataset access property list identifier.
 !! \param use_tree Value of the setting.
@@ -4403,8 +4412,17 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !>
 !! \ingroup FH5P
 !!
-!! \brief Sets the value of the "use spatial tree" flag which enables spatial tree
-!!        construction and usage for large VDS mapping searches.
+!! \brief Sets the dapl to use/not use a spatial tree
+!! during mapping operations on a Virtual Dataset. The default value is true.
+!!
+!! Use of a spatial tree will accelerate the process of searching through mappings
+!! to determine which contain intersections with the user's selection region.
+!! With the tree disabled, all mappings will simply be iterated through and
+!! checked directly.
+!!
+!! Certain workflows may find that tree creation overhead outweighs the time saved
+!! on reads. In this case, disabling this property will lead to a performance improvement,
+!! though it is expected that almost all cases will benefit from the tree on net.
 !!
 !! \param dapl_id  Target dataset access property list identifier.
 !! \param use_tree Value of the setting.
