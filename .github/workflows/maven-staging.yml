@@ -297,7 +297,7 @@ jobs:
         id: buildhdf5
         shell: bash
         run: |
-          cd ${{ github.workspace }}
+          cd "${{ github.workspace }}"
           cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
 
       - name: Extract version information
@@ -351,7 +351,7 @@ jobs:
         shell: bash
         run: |
           echo "Collecting Maven artifacts for testing..."
-          mkdir -p ${{ runner.workspace }}/maven-artifacts
+          mkdir -p "${{ runner.workspace }}/maven-artifacts"
 
           BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
           echo "Looking for Maven artifacts in build root: $BUILD_ROOT"
@@ -441,18 +441,18 @@ jobs:
           done
 
           # Copy POM files
-          find "$BUILD_DIR" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          find "$BUILD_DIR" -name "pom.xml" -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
 
           # List collected artifacts
           echo "Collected Maven artifacts:"
-          ls -la ${{ runner.workspace }}/maven-artifacts/
+          ls -la "${{ runner.workspace }}/maven-artifacts/"
 
       - name: Validate artifacts
         id: artifacts-check
         shell: bash
         run: |
-          ARTIFACT_COUNT=$(find ${{ runner.workspace }}/maven-artifacts -name "*.jar" | wc -l)
-          POM_COUNT=$(find ${{ runner.workspace }}/maven-artifacts -name "pom.xml" | wc -l)
+          ARTIFACT_COUNT=$(find "${{ runner.workspace }}/maven-artifacts" -name "*.jar" | wc -l)
+          POM_COUNT=$(find "${{ runner.workspace }}/maven-artifacts" -name "pom.xml" | wc -l)
 
           echo "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files"
 
@@ -470,7 +470,7 @@ jobs:
         run: |
           if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
             echo "Running Maven artifact validation..."
-            .github/scripts/validate-maven-artifacts.sh ${{ runner.workspace }}/maven-artifacts
+            .github/scripts/validate-maven-artifacts.sh "${{ runner.workspace }}/maven-artifacts"
           else
             echo "Validation script not found - skipping validation"
           fi
