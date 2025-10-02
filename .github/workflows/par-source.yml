@@ -55,7 +55,7 @@ jobs:
           sudo apt install libaec0 libaec-dev
 
       - name: Get MPI installation (OpenMPI)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: openmpi
 
@@ -97,7 +97,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (OpenMPI)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -168,7 +168,7 @@ jobs:
     name: "Parallel Mpich GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.7
+      - uses: actions/checkout@v5
 
       - name: Install Linux Dependencies (MPICH)
         run: |
@@ -177,7 +177,7 @@ jobs:
           sudo apt install libaec0 libaec-dev
 
       - name: Get MPI installation (MPICH)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: mpich
 
@@ -219,7 +219,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MPICH)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
