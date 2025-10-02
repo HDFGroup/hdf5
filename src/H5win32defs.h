@@ -43,6 +43,9 @@ struct timezone {
 #define HDlstat(S, B)        _lstati64(S, B)
 #define HDmkdir(S, M)        _mkdir(S)
 
+/* Windows has a variant of qsort_r with a different signature */
+#define HDqsort_r(B, N, S, C, A) HDqsort_context(B, N, S, C, A)
+
 /* We only support the standards conformant preprocessor */
 #define HDopen(S, F, ...) Wopen(S, F, ##__VA_ARGS__)
 

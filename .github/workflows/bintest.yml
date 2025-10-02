@@ -23,7 +23,7 @@ jobs:
         run: choco install ninja
 
       - name: Set up JDK 19
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '19'
           distribution: 'temurin'
@@ -33,7 +33,7 @@ jobs:
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}/hdf5
@@ -101,13 +101,13 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz
 
       - name: Set up JDK 19
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '19'
           distribution: 'temurin'
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}
@@ -153,13 +153,13 @@ jobs:
         run: brew install ninja doxygen
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Get published binary (MacOS_latest)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
           path: ${{ github.workspace }}
@@ -216,13 +216,13 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz
 
       - name: Set up JDK 19
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '19'
           distribution: 'temurin'
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}

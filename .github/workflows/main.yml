@@ -196,7 +196,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
 
       # CONFIGURE
       - name: Configure
@@ -489,7 +489,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
 
       # CONFIGURE
       - name: Configure

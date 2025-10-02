@@ -23,10 +23,10 @@ jobs:
 
     steps:
       - name: Get Sources
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v5
 
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@v1.3.0
+        uses: jlumbroso/free-disk-space@v1.3.1
         with:
           android: true
           dotnet: true

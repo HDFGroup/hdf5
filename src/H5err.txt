@@ -79,6 +79,7 @@ MAJOR, H5E_CONTEXT, API Context
 MAJOR, H5E_MAP, Map
 MAJOR, H5E_EVENTSET, Event Set
 MAJOR, H5E_THREADSAFE, Threadsafety
+MAJOR, H5E_RTREE, R-Tree spatial index
 MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)
