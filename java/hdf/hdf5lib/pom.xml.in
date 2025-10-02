@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.hdfgroup</groupId>
-    <artifactId>hdf5-java</artifactId>
+    <artifactId>@HDF5_JAVA_ARTIFACT_ID@</artifactId>
     <version>@HDF5_PACKAGE_VERSION@@HDF5_MAVEN_VERSION_SUFFIX@</version>
     <packaging>jar</packaging>
 
