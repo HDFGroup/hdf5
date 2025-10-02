@@ -411,14 +411,14 @@ jobs:
           find "$BUILD_DIR" -name "*slf4j*.jar" -type f
 
           # Copy JAR files (excluding test and H5Ex_ example JARs)
-          find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
 
           # Also look for Maven dependencies in common locations
           echo "Looking for Maven dependencies in additional locations..."
 
           # Check if there's a Maven repository in the build area
           if [ -d "$BUILD_ROOT" ]; then
-            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
           fi
 
           # Check common Maven local repository locations
@@ -434,7 +434,7 @@ jobs:
               find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" | head -2 | while read jar_file; do
                 if [ -f "$jar_file" ]; then
                   echo "Found dependency: $jar_file"
-                  cp "$jar_file" ${{ runner.workspace }}/maven-artifacts/
+                  cp "$jar_file" "${{ runner.workspace }}/maven-artifacts/"
                 fi
               done
             fi
