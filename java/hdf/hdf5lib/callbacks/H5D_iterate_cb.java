@@ -22,7 +22,7 @@ import org.hdfgroup.javahdf5.*;
  * Information class for link callback for H5Diterate.
  *
  */
-public interface H5D_iterate_cb extends H5D_operator_t.Function {
+public interface H5D_iterate_cb extends org.hdfgroup.javahdf5.H5D_operator_t.Function {
     /**
      * @ingroup JCALLBK
      *

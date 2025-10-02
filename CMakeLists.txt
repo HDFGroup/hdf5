@@ -330,27 +330,6 @@ set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-2.0
 set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-2.0.16.jar)
 set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
 
-# Java implementation detection for global access
-# Note: Java version detection happens in java/CMakeLists.txt after find_package(Java)
-# These will be set by the Java subdirectory based on actual Java version
-if (HDF5_BUILD_JAVA)
-  # Initialize cache variables with default values
-  set (HDF5_JAVA_IMPLEMENTATION "JNI" CACHE STRING "Java implementation being built")
-  set (HDF5_JAVA_ARTIFACT_ID "hdf5-java-jni" CACHE STRING "Maven artifact ID for Java bindings")
-  set_property(CACHE HDF5_JAVA_IMPLEMENTATION PROPERTY STRINGS FFM JNI)
-  mark_as_advanced (HDF5_JAVA_IMPLEMENTATION HDF5_JAVA_ARTIFACT_ID)
-
-  if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
-    if (HDF5_ENABLE_JNI)
-      set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
-    else ()
-      set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
-    endif ()
-  else ()
-    set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
-  endif ()
-endif ()
-
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
 
 #-----------------------------------------------------------------------------
@@ -1106,6 +1085,20 @@ endif ()
 set (HDF5_H5CC_C_COMPILER ${_HDF5_H5CC_C_COMPILER} CACHE STRING "C compiler to use in h5cc")
 
 #-----------------------------------------------------------------------------
+# Java implementation detection for version value
+# Note: Java version detection happens after find_package(Java)
+# Everything else is set by the Java subdirectory based on actual Java version
+#-----------------------------------------------------------------------------
+if (HDF5_BUILD_JAVA)
+  if (NOT BUILD_SHARED_LIBS)
+    message (FATAL_ERROR "\nJava requires shared libraries!\n")
+  else ()
+    find_package (Java)
+    message (VERBOSE "Java version is ${Java_VERSION_STRING}")
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
 add_subdirectory (src)
@@ -1136,6 +1129,19 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
       set (HDF5_DOXY_WARNINGS "NO")
     endif ()
     message (VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
+
+    if (HDF5_BUILD_JAVA)
+      if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
+        if (HDF5_ENABLE_JNI)
+          set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
+       else ()
+          set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
+        endif ()
+      else ()
+        set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
+      endif ()
+    endif ()
+
     add_subdirectory (doxygen)
   else ()
     message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
@@ -1269,7 +1275,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
     if (NOT BUILD_SHARED_LIBS)
       message (FATAL_ERROR "\nJava requires shared libraries!\n")
     else ()
-      message (STATUS "Configuring Java ${HDF5_JAVA_IMPLEMENTATION} bindings...")
       if (HDF5_ENABLE_MAVEN_DEPLOY)
         message (STATUS "Maven deployment enabled for ${HDF5_JAVA_ARTIFACT_ID}")
       endif ()

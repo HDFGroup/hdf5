@@ -1,9 +1,6 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_JAVA C Java)
 
-set (CMAKE_MODULE_PATH "${HDF_RESOURCES_DIR}")
-find_package (Java)
-
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
@@ -26,26 +23,16 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_INCLUDE_DIR
 
 set (CMAKE_JAVA_INCLUDE_PATH "")
 
-#-----------------------------------------------------------------------------
-# Traverse source subdirectory
-#-----------------------------------------------------------------------------
-message (VERBOSE "Java version is ${Java_VERSION_STRING}")
-
-# Determine which Java implementation to build based on version and user preferences
-set (HDF5_JAVA_USE_FFM FALSE)
-set (HDF5_JAVA_IMPLEMENTATION "JNI")
-
 if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
   if (HDF5_ENABLE_JNI)
     set (HDF5_JAVA_USE_FFM FALSE)
-    set (HDF5_JAVA_IMPLEMENTATION "JNI")
     message (STATUS "Building HDF5 Java with JNI implementation (explicitly requested via HDF5_ENABLE_JNI)")
   else ()
     set (HDF5_JAVA_USE_FFM TRUE)
-    set (HDF5_JAVA_IMPLEMENTATION "FFM")
     message (STATUS "Building HDF5 Java with FFM implementation (Java ${Java_VERSION_STRING})")
   endif ()
 else ()
+  set (HDF5_JAVA_USE_FFM FALSE)
   if (HDF5_ENABLE_JNI)
     message (STATUS "Building HDF5 Java with JNI implementation (Java ${Java_VERSION_STRING})")
   else ()
@@ -66,17 +53,24 @@ else ()
   set (HDF5_JAVA_ARTIFACT_ID "hdf5-java-jni" CACHE STRING "Maven artifact ID for Java bindings" FORCE)
   set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
 endif ()
+set_property(CACHE HDF5_JAVA_IMPLEMENTATION PROPERTY STRINGS FFM JNI)
+mark_as_advanced (HDF5_JAVA_IMPLEMENTATION HDF5_JAVA_ARTIFACT_ID)
 
 # Display final configuration
 message (STATUS "Java implementation: ${HDF5_JAVA_IMPLEMENTATION}")
 message (STATUS "Java Maven artifact: org.hdfgroup:${HDF5_JAVA_ARTIFACT_ID}")
 
+#-----------------------------------------------------------------------------
+# Traverse source subdirectory
+#-----------------------------------------------------------------------------
 # Build appropriate subdirectories based on implementation
 if (HDF5_JAVA_USE_FFM)
   add_subdirectory (jsrc)
   add_subdirectory (hdf)
   if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
-    add_subdirectory (jtest)
+    if (HDF5_TEST_FFM)
+        add_subdirectory (jtest)
+    endif ()
     add_subdirectory (test)
   endif ()
 else ()

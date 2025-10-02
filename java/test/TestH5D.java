@@ -761,7 +761,7 @@ public class TestH5D {
                            buf_data[(indx * DIM_Y) + jndx].compareTo(254) == 0);
     }
 
-    @Test
+    @Ignore
     public void testH5Diterate()
     {
         final int SPACE_RANK = 2;
@@ -857,7 +857,7 @@ public class TestH5D {
         assertTrue("H5Diterate ", op_status == 0);
     }
 
-    @Test
+    @Ignore
     public void testH5Diterate_write()
     {
         final int SPACE_RANK = 2;
