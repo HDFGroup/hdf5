@@ -342,6 +342,29 @@ simulate_maven_dependency() {
     artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
     version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
 
+    # Find the JAR file in the artifacts directory
+    local jar_file
+    jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 -name "${artifact_id}-${version}.jar" -o -name "${artifact_id}-*.jar" | head -1)
+
+    if [ -z "${jar_file}" ]; then
+        add_warning "Could not find JAR file for ${artifact_id}:${version} - skipping dependency simulation"
+        return 0
+    fi
+
+    # Install artifact to local Maven repository first
+    log_info "Installing artifact to local Maven repository: ${group_id}:${artifact_id}:${version}"
+    if ! mvn install:install-file \
+        -Dfile="${jar_file}" \
+        -DgroupId="${group_id}" \
+        -DartifactId="${artifact_id}" \
+        -Dversion="${version}" \
+        -Dpackaging=jar \
+        -DpomFile="${pom_file}" \
+        -q 2>&1 | tee -a "${VALIDATION_LOG}"; then
+        add_warning "Failed to install artifact to local Maven repository"
+        return 0
+    fi
+
     # Create test POM
     cat > "${temp_project}/pom.xml" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
