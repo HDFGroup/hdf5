@@ -4394,7 +4394,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     LOGICAL(C_BOOL) :: c_use_tree
 
     INTERFACE
-        INTEGER(C_INT) FUNCTION H5Pget_virtual_dset_use_spatial_tree_c(dapl_id, use_tree) BIND(C, NAME='H5Pget_virtual_dset_use_spatial_tree')
+        INTEGER(C_INT) FUNCTION H5Pget_virtual_dset_use_spatial_tree_c(dapl_id, use_tree) &
+             BIND(C, NAME='H5Pget_virtual_dset_use_spatial_tree')
           IMPORT :: C_INT, HID_T, C_BOOL
           IMPLICIT NONE
           INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
@@ -4438,7 +4439,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     LOGICAL(C_BOOL) :: c_use_tree
 
     INTERFACE
-        INTEGER FUNCTION h5pset_virtual_dset_use_spatial_tree_c(dapl_id, use_tree) BIND(C, NAME='H5Pset_virtual_dset_use_spatial_tree')
+        INTEGER FUNCTION h5pset_virtual_dset_use_spatial_tree_c(dapl_id, use_tree) &
+             BIND(C, NAME='H5Pset_virtual_dset_use_spatial_tree')
           IMPORT :: HID_T, C_BOOL
           IMPLICIT NONE
           INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
