@@ -571,31 +571,14 @@ jobs:
           echo "🎉 Dry run deployment test passed!"
 
   test-java-examples-maven:
-    name: "Test Java Examples with Maven Artifacts (${{ matrix.platform }})"
+    name: "Test Java Examples with Maven Artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})"
     runs-on: ${{ matrix.os }}
     needs: [detect-changes, determine-matrix, build-maven-artifacts]
     if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.result == 'success' }}
     continue-on-error: true  # Non-blocking failures
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - platform: "Linux"
-            os: "ubuntu-latest"
-            artifact-name: "maven-staging-artifacts-linux-x86_64"
-            artifact-path: "linux"
-          - platform: "Windows"
-            os: "windows-latest"
-            artifact-name: "maven-staging-artifacts-windows-x86_64"
-            artifact-path: "windows"
-          - platform: "macOS-x86_64"
-            os: "macos-13"
-            artifact-name: "maven-staging-artifacts-macos-x86_64"
-            artifact-path: "macos-x86_64"
-          - platform: "macOS-aarch64"
-            os: "macos-latest"
-            artifact-name: "maven-staging-artifacts-macos-aarch64"
-            artifact-path: "macos-aarch64"
+      matrix: ${{ fromJson(needs.determine-matrix.outputs.matrix) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -613,11 +596,11 @@ jobs:
           brew install coreutils
           echo "Installed gtimeout: $(which gtimeout)"
 
-      - name: Download Maven artifacts (${{ matrix.platform }})
+      - name: Download Maven artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})
         uses: actions/download-artifact@v4
         with:
-          name: ${{ matrix.artifact-name }}
-          path: ./maven-artifacts/${{ matrix.artifact-path }}
+          name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
+          path: ./maven-artifacts/${{ matrix.platform }}
         continue-on-error: true
 
       - name: Cache Maven dependencies
