@@ -23,12 +23,7 @@
  * This file needs to access private datatypes from the H5RT package.
  */
 #define H5RT_FRIEND /*suppress error about including H5RTpkg */
-#define H5RT_TESTING
-#include "H5RTpkg.h"
-
-/* Other private headers */
-#include "H5CXprivate.h" /* API Contexts */
-#include "H5VLprivate.h" /* Virtual Object Layer */
+#include "H5RTpkg.h" /* R-tree package         */
 
 #define H5D_FRIEND /*suppress error about including H5Dpkg */
 #define H5D_TESTING
