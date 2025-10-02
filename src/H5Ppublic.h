@@ -6022,7 +6022,7 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize);
  *
  * \return \herr_t
  *
- * \details H5Pget_dset_use_spatial_tree() retrieves the
+ * \details H5Pget_virtual_dset_use_spatial_tree() retrieves the
  *          <i>use spatial tree</i> flag setting for the dataset
  *          creation property list \p dcpl_id. This setting determines
  *          whether a dataset created with the dataset creation
@@ -6043,7 +6043,7 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize);
  * \since 2.0.0
  *
  */
-H5_DLL herr_t H5Pget_dset_use_spatial_tree(hid_t dcpl_id, bool *use_tree);
+H5_DLL herr_t H5Pget_virtual_dset_use_spatial_tree(hid_t dcpl_id, bool *use_tree);
 /**
  * \ingroup DCPL
  *
@@ -6538,7 +6538,7 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize);
  *
  * \return \herr_t
  *
- * \details H5Pset_dset_use_spatial_tree() sets the use-tree flag
+ * \details H5Pset_virtual_dset_use_spatial_tree() sets the use-tree flag
  *          for the dataset creation property list \p dcpl_id.
  *          Datasets created with the dataset creation property
  *          list \p dcpl_id will construct a spatial tree and use
@@ -6557,7 +6557,7 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize);
  * \since 2.0.0
  *
  */
-H5_DLL herr_t H5Pset_dset_use_spatial_tree(hid_t dcpl_id, bool use_tree);
+H5_DLL herr_t H5Pset_virtual_dset_use_spatial_tree(hid_t dcpl_id, bool use_tree);
 /**
  * \ingroup DCPL
  *

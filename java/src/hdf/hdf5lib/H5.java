@@ -10678,7 +10678,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5P
      *
-     * H5Pget_dset_use_spatial_tree accesses the flag for whether to use/not use a spatial tree
+     * H5Pget_virtual_dset_use_spatial_tree accesses the flag for whether to use/not use a spatial tree
      * during mapping operations on a Virtual Dataset. The default value is true.
      *
      * Use of a spatial tree will accelerate the process of searching through mappings
@@ -10698,13 +10698,13 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      **/
-    public synchronized static native boolean H5Pget_dset_use_spatial_tree(long dapl_id)
+    public synchronized static native boolean H5Pget_virtual_dset_use_spatial_tree(long dapl_id)
         throws HDF5LibraryException;
 
     /**
      * @ingroup JH5P
      *
-     * H5Pset_dset_use_spatial_tree sets the dapl to use/not use a spatial tree
+     * H5Pset_virtual_dset_use_spatial_tree sets the dapl to use/not use a spatial tree
      * during mapping operations on a Virtual Dataset. The default value is true.
      *
      * Use of a spatial tree will accelerate the process of searching through mappings
@@ -10725,7 +10725,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      **/
-    public synchronized static native void H5Pset_dset_use_spatial_tree(long dapl_id, boolean use_tree)
+    public synchronized static native void H5Pset_virtual_dset_use_spatial_tree(long dapl_id, boolean use_tree)
         throws HDF5LibraryException;
 
     // public synchronized static native void H5Pset_append_flush(long plist_id, int ndims, long[] boundary,
