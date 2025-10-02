@@ -22,7 +22,7 @@
 /*
  * This file needs to access private datatypes from the H5RT package.
  */
-#define H5RT_FRIEND /*suppress error about including H5RTpkg */
+#define H5RT_FRIEND  /*suppress error about including H5RTpkg */
 #include "H5RTpkg.h" /* R-tree package         */
 
 #define H5D_FRIEND /*suppress error about including H5Dpkg */

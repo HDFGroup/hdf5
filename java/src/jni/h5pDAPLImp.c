@@ -319,7 +319,7 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1virtual_1dset_1use_1spatial_1tree(JNIEnv *env, jclass clss, jlong dapl_id,
-                                                     jboolean use_tree)
+                                                              jboolean use_tree)
 {
     bool   use_tree_val;
     herr_t retVal = FAIL;
