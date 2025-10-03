@@ -264,11 +264,6 @@ public class H5Ex_T_RegionReference {
                             catch (Exception ex) {
                             }
                         }
-                        try {
-                            H5.H5Rdestroy(dset_data[indx]);
-                        }
-                        catch (Exception e4) {
-                        }
                     } // end for
                 }
                 catch (Exception e4) {
