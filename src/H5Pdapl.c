@@ -1557,7 +1557,7 @@ done:
 } /* end H5Pget_virtual_prefix() */
 
 /*-----------------------------------------------------------------------------
- * Function: H5Pget_virtual_dset_use_spatial_tree
+ * Function: H5Pget_virtual_spatial_tree
  *
  * Purpose:
  *
@@ -1581,7 +1581,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5Pget_virtual_dset_use_spatial_tree(hid_t dcpl_id, bool *use_tree)
+H5Pget_virtual_spatial_tree(hid_t dcpl_id, bool *use_tree)
 {
     bool            setting   = false;
     H5P_genplist_t *plist     = NULL;
@@ -1603,10 +1603,10 @@ H5Pget_virtual_dset_use_spatial_tree(hid_t dcpl_id, bool *use_tree)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pget_virtual_dset_use_spatial_tree() */
+} /* H5Pget_virtual_spatial_tree() */
 
 /*-----------------------------------------------------------------------------
- * Function: H5Pset_virtual_dset_use_spatial_tree
+ * Function: H5Pset_virtual_spatial_tree
  *
  * Purpose:
  *
@@ -1630,7 +1630,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5Pset_virtual_dset_use_spatial_tree(hid_t dapl_id, bool use_tree)
+H5Pset_virtual_spatial_tree(hid_t dapl_id, bool use_tree)
 {
     H5P_genplist_t *plist     = NULL;
     bool            prev_set  = false;
@@ -1650,4 +1650,4 @@ H5Pset_virtual_dset_use_spatial_tree(hid_t dapl_id, bool use_tree)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pset_virtual_dset_use_spatial_tree() */
+} /* H5Pset_virtual_spatial_tree() */

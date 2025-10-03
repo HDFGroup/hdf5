@@ -670,7 +670,7 @@ test_rtree_dapl(bool use_tree, bool read_init)
         FAIL_STACK_ERROR;
 
     /* Set the spatial tree property */
-    if (H5Pset_virtual_dset_use_spatial_tree(dapl_id, use_tree) < 0)
+    if (H5Pset_virtual_spatial_tree(dapl_id, use_tree) < 0)
         FAIL_STACK_ERROR;
 
     if ((vdset_id = H5Dopen2(file_id, RTREE_DAPL_VDS_NAME, dapl_id)) < 0)
@@ -714,7 +714,7 @@ test_rtree_dapl(bool use_tree, bool read_init)
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_virtual_dset_use_spatial_tree(dapl_id, use_tree_inverse) < 0)
+    if (H5Pset_virtual_spatial_tree(dapl_id, use_tree_inverse) < 0)
         FAIL_STACK_ERROR;
 
     if ((file_id = H5Fopen(RTREE_DAPL_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
@@ -808,7 +808,7 @@ test_rtree_threshold(bool use_tree)
             FAIL_STACK_ERROR;
 
         /* Set the spatial tree property */
-        if (H5Pset_virtual_dset_use_spatial_tree(dapl_id, use_tree) < 0)
+        if (H5Pset_virtual_spatial_tree(dapl_id, use_tree) < 0)
             FAIL_STACK_ERROR;
 
         /* Create virtual dataset with specified number of mappings */
@@ -929,7 +929,7 @@ test_rtree_rw(bool use_tree)
         FAIL_STACK_ERROR;
 
     /* Set the spatial tree property */
-    if (H5Pset_virtual_dset_use_spatial_tree(dapl_id, use_tree) < 0)
+    if (H5Pset_virtual_spatial_tree(dapl_id, use_tree) < 0)
         FAIL_STACK_ERROR;
 
     /* Create virtual dataset with specified number of mappings */

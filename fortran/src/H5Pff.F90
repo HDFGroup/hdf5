@@ -4384,9 +4384,9 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param use_tree Value of the setting.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref H5Pget_virtual_dset_use_spatial_tree()
+!! See C API: @ref H5Pget_virtual_spatial_tree()
 !!
-  SUBROUTINE h5pget_virtual_dset_use_spatial_tree_f(dapl_id, use_tree, hdferr)
+  SUBROUTINE h5pget_virtual_spatial_tree_f(dapl_id, use_tree, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T) , INTENT(IN)              :: dapl_id
     LOGICAL        , INTENT(OUT)             :: use_tree
@@ -4394,21 +4394,21 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     LOGICAL(C_BOOL) :: c_use_tree
 
     INTERFACE
-        INTEGER(C_INT) FUNCTION H5Pget_virtual_dset_use_spatial_tree_c(dapl_id, use_tree) &
-             BIND(C, NAME='H5Pget_virtual_dset_use_spatial_tree')
+        INTEGER(C_INT) FUNCTION H5Pget_virtual_spatial_tree_c(dapl_id, use_tree) &
+             BIND(C, NAME='H5Pget_virtual_spatial_tree')
           IMPORT :: C_INT, HID_T, C_BOOL
           IMPLICIT NONE
           INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
           LOGICAL(C_BOOL), INTENT(OUT) :: use_tree
-        END FUNCTION H5Pget_virtual_dset_use_spatial_tree_c
+        END FUNCTION H5Pget_virtual_spatial_tree_c
     END INTERFACE
 
-    hdferr = INT(H5Pget_virtual_dset_use_spatial_tree_c(dapl_id, c_use_tree))
+    hdferr = INT(H5Pget_virtual_spatial_tree_c(dapl_id, c_use_tree))
 
     ! Transfer value of C C_BOOL type to Fortran LOGICAL
     use_tree = c_use_tree
 
-    END SUBROUTINE h5pget_virtual_dset_use_spatial_tree_f
+    END SUBROUTINE h5pget_virtual_spatial_tree_f
 
 !>
 !! \ingroup FH5P
@@ -4429,9 +4429,9 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param use_tree Value of the setting.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref H5Pset_virtual_dset_use_spatial_tree()
+!! See C API: @ref H5Pset_virtual_spatial_tree()
 !!
-  SUBROUTINE h5pset_virtual_dset_use_spatial_tree_f(dapl_id, use_tree, hdferr)
+  SUBROUTINE h5pset_virtual_spatial_tree_f(dapl_id, use_tree, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T) , INTENT(IN)              :: dapl_id
     LOGICAL        , INTENT(IN)              :: use_tree
@@ -4439,21 +4439,21 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     LOGICAL(C_BOOL) :: c_use_tree
 
     INTERFACE
-        INTEGER FUNCTION h5pset_virtual_dset_use_spatial_tree_c(dapl_id, use_tree) &
-             BIND(C, NAME='H5Pset_virtual_dset_use_spatial_tree')
+        INTEGER FUNCTION h5pset_virtual_spatial_tree_c(dapl_id, use_tree) &
+             BIND(C, NAME='H5Pset_virtual_spatial_tree')
           IMPORT :: HID_T, C_BOOL
           IMPLICIT NONE
           INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
           LOGICAL(C_BOOL), INTENT(IN), VALUE :: use_tree
-        END FUNCTION h5pset_virtual_dset_use_spatial_tree_c
+        END FUNCTION h5pset_virtual_spatial_tree_c
     END INTERFACE
 
     ! Transfer value of Fortran LOGICAL to C C_BOOL type
     c_use_tree = use_tree
 
-    hdferr = INT(h5pset_virtual_dset_use_spatial_tree_c(dapl_id, c_use_tree))
+    hdferr = INT(h5pset_virtual_spatial_tree_c(dapl_id, c_use_tree))
 
-  END SUBROUTINE h5pset_virtual_dset_use_spatial_tree_f
+  END SUBROUTINE h5pset_virtual_spatial_tree_f
 
 #ifdef H5_DOXYGEN
 !>

@@ -480,7 +480,7 @@ Simple example programs showing how to use complex number datatypes have been ad
    a new Dataset Access Property List (DAPL) property to control use of the spatial tree.
 
    This property can be set or queried with the new API functions
-   H5Pset_virtual_dset_use_spatial_tree()/H5Pget_virtual_dset_use_spatial_tree().
+   H5Pset_virtual_spatial_tree()/H5Pget_virtual_spatial_tree().
 
 ## Parallel Library
 

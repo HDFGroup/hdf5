@@ -314,12 +314,12 @@ done:
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pset_virtual_dset_use_spatial_tree
+ * Method:    H5Pset_virtual_spatial_tree
  * Signature: (JZ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1virtual_1dset_1use_1spatial_1tree(JNIEnv *env, jclass clss, jlong dapl_id,
-                                                              jboolean use_tree)
+Java_hdf_hdf5lib_H5_H5Pset_1virtual_1spatial_1tree(JNIEnv *env, jclass clss, jlong dapl_id,
+                                                    jboolean use_tree)
 {
     bool   use_tree_val;
     herr_t retVal = FAIL;
@@ -328,27 +328,27 @@ Java_hdf_hdf5lib_H5_H5Pset_1virtual_1dset_1use_1spatial_1tree(JNIEnv *env, jclas
 
     use_tree_val = (JNI_TRUE == use_tree) ? true : false;
 
-    if ((retVal = H5Pset_virtual_dset_use_spatial_tree((hid_t)dapl_id, (bool)use_tree_val)) < 0)
+    if ((retVal = H5Pset_virtual_spatial_tree((hid_t)dapl_id, (bool)use_tree_val)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
     return;
-} /* end Java_hdf_hdf5lib_H5_H5Pset_1virtual_1dset_1use_1spatial_1tree */
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1virtual_1spatial_1tree */
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pget_virtual_dset_use_spatial_tree
+ * Method:    H5Pget_virtual_spatial_tree
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dset_1use_1spatial_1tree(JNIEnv *env, jclass clss, jlong dapl_id)
+Java_hdf_hdf5lib_H5_H5Pget_1virtual_1spatial_1tree(JNIEnv *env, jclass clss, jlong dapl_id)
 {
     bool     use_tree = false;
     jboolean bval     = JNI_FALSE;
 
     UNUSED(clss);
 
-    if (H5Pget_virtual_dset_use_spatial_tree((hid_t)dapl_id, (bool *)&use_tree) < 0)
+    if (H5Pget_virtual_spatial_tree((hid_t)dapl_id, (bool *)&use_tree) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (use_tree == true)
@@ -356,7 +356,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dset_1use_1spatial_1tree(JNIEnv *env, jclas
 
 done:
     return bval;
-} /* end Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dset_1use_1spatial_1tree */
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1virtual_1spatial_1tree */
 
 #ifdef __cplusplus
 } /* end extern "C" */

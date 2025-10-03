@@ -832,29 +832,29 @@ SUBROUTINE test_misc_properties(total_error)
   CALL H5Pcreate_f(H5P_DATASET_ACCESS_F, dapl_id, error)
   CALL check("H5Pcreate_f", error, total_error)
 
-  ! Test H5Pset/get_dset_use_spatial_tree_f
+  ! Test H5Pset/get_virtual_spatial_tree_f
   ! true value
   use_spatial_tree = .TRUE.
-  CALL h5pset_virtual_dset_use_spatial_tree_f(dapl_id, use_spatial_tree, error)
-  CALL check("h5pset_virtual_dset_use_spatial_tree_f", error, total_error)
+  CALL h5pset_virtual_spatial_tree_f(dapl_id, use_spatial_tree, error)
+  CALL check("h5pset_virtual_spatial_tree_f", error, total_error)
   use_spatial_tree = .FALSE.
-  CALL h5pget_virtual_dset_use_spatial_tree_f(dapl_id, use_spatial_tree, error)
-  CALL check("h5pget_virtual_dset_use_spatial_tree_f", error, total_error)
+  CALL h5pget_virtual_spatial_tree_f(dapl_id, use_spatial_tree, error)
+  CALL check("h5pget_virtual_spatial_tree_f", error, total_error)
   if(use_spatial_tree .neqv. .TRUE.) then
     total_error = total_error + 1
-    write(*,*) "Got wrong use_spatial_tree flag from h5pget_virtual_dset_use_spatial_tree_f"
+    write(*,*) "Got wrong use_spatial_tree flag from h5pget_virtual_spatial_tree_f"
   endif
 
   ! false value
   use_spatial_tree = .FALSE.
-  CALL h5pset_virtual_dset_use_spatial_tree_f(dapl_id, use_spatial_tree, error)
-  CALL check("h5pset_virtual_dset_use_spatial_tree_f", error, total_error)
+  CALL h5pset_virtual_spatial_tree_f(dapl_id, use_spatial_tree, error)
+  CALL check("h5pset_virtual_spatial_tree_f", error, total_error)
   use_spatial_tree = .TRUE.
-  CALL h5pget_virtual_dset_use_spatial_tree_f(dapl_id, use_spatial_tree, error)
-  CALL check("h5pget_virtual_dset_use_spatial_tree_f", error, total_error)
+  CALL h5pget_virtual_spatial_tree_f(dapl_id, use_spatial_tree, error)
+  CALL check("h5pget_virtual_spatial_tree_f", error, total_error)
   if(use_spatial_tree .neqv. .FALSE.) then
     total_error = total_error + 1
-    write(*,*) "Got wrong use_spatial_tree flag from h5pget_virtual_dset_use_spatial_tree_f"
+    write(*,*) "Got wrong use_spatial_tree flag from h5pget_virtual_spatial_tree_f"
   endif
 
   ! Close the dapl
