@@ -371,8 +371,6 @@ public class H5 implements java.io.Serializable {
      * @ingroup JH5
      *
      * Get library error information.
-     *
-     * @return none
      */
     public static void h5libraryError() throws HDF5LibraryException
     {
@@ -3433,7 +3431,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Dget_access_plist returns an identifier for a copy of the dataset access property list for a dataset.
      *
-     * @param dset_id
+     * @param dataset_id
      *            IN: Identifier of the dataset to query.
      *
      * @return a dataset access property list identifier
@@ -3487,7 +3485,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Dget_offset returns the address in the file of the dataset dset_id.
      *
-     * @param dset_id
+     * @param dataset_id
      *            IN: Identifier of the dataset in question
      *
      * @return the offset in bytes.
@@ -3536,7 +3534,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Dget_space_status determines whether space has been allocated for the dataset dset_id.
      *
-     * @param dset_id
+     * @param dataset_id
      *            IN: Identifier of the dataset to query.
      *
      * @return the space allocation status
@@ -5471,7 +5469,7 @@ public class H5 implements java.io.Serializable {
      * H5Dflush causes all buffers associated with a dataset to be immediately flushed to disk without
      * removing the data from the cache.
      *
-     * @param dset_id
+     * @param dataset_id
      *            IN: Identifier of the dataset to be flushed.
      *
      * @exception HDF5LibraryException
@@ -5492,7 +5490,7 @@ public class H5 implements java.io.Serializable {
      * associated with it from the cache, and then re-opens the dataset. The reopened dataset is automatically
      * re-registered with the same ID.
      *
-     * @param dset_id
+     * @param dataset_id
      *            IN: Identifier of the dataset to be refreshed.
      *
      * @exception HDF5LibraryException
@@ -9283,7 +9281,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Literate_by_name iterates through links in a group.
      *
-     * @param grp_id
+     * @param loc_id
      *            IN: Identifier specifying subject group
      * @param group_name
      *            IN: Name of subject group
@@ -16930,42 +16928,42 @@ public class H5 implements java.io.Serializable {
         return retVal;
     }
 
-    /**
-     * @ingroup JH5P
-     *
-     * H5Pset_fapl_hdfs Modify the file access property list to use the H5FD_HDFS driver.
-     *
-     * @param fapl_id
-     *            IN: File access property list identifier
-     * @param fapl_conf
-     *            IN: the properties of the hdfs driver
-     *
-     * @return a non-negative value if successful; otherwise returns a negative value.
-     *
-     * @exception HDF5LibraryException
-     *            Error from the HDF5 Library.
-     *
-     **/
+//    /**
+//     * @ingroup JH5P
+//     *
+//     * H5Pset_fapl_hdfs Modify the file access property list to use the H5FD_HDFS driver.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     * @param fapl_conf
+//     *            IN: the properties of the hdfs driver
+//     *
+//     * @return a non-negative value if successful; otherwise returns a negative value.
+//     *
+//     * @exception HDF5LibraryException
+//     *            Error from the HDF5 Library.
+//     *
+//     **/
     //    public static int H5Pset_fapl_hdfs(long fapl_id, H5FD_hdfs_fapl_t fapl_conf)
     //        throws HDF5LibraryException, NullPointerException
     //    {
     //        throw new HDF5LibraryException("H5Pset_fapl_hdfs not implemented yet");
     //    }
 
-    /**
-     * @ingroup JH5P
-     *
-     * H5Pget_fapl_hdfs gets the properties hdfs I/O driver.
-     *
-     * @param fapl_id
-     *            IN: File access property list identifier
-     *
-     * @return the properties of the hdfs driver.
-     *
-     * @exception HDF5LibraryException
-     *            Error from the HDF5 Library.
-     *
-     **/
+//    /**
+//     * @ingroup JH5P
+//     *
+//     * H5Pget_fapl_hdfs gets the properties hdfs I/O driver.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     *
+//     * @return the properties of the hdfs driver.
+//     *
+//     * @exception HDF5LibraryException
+//     *            Error from the HDF5 Library.
+//     *
+//     **/
     //    public static H5FD_hdfs_fapl_t H5Pget_fapl_hdfs(long fapl_id) throws HDF5LibraryException
     //    {
     //        throw new HDF5LibraryException("H5Pget_fapl_hdfs not implemented yet");
@@ -17255,42 +17253,42 @@ public class H5 implements java.io.Serializable {
         throw new HDF5LibraryException("H5Pset_fapl_windows not implemented yet");
     }
 
-    /**
-     * @ingroup JH5P
-     *
-     * H5Pset_fapl_ros3 Modify the file access property list to use the H5FD_ROS3 driver.
-     *
-     * @param fapl_id
-     *            IN: File access property list identifier
-     * @param fapl_conf
-     *            IN: the properties of the ros3 driver
-     *
-     * @return a non-negative value if successful; otherwise returns a negative value.
-     *
-     * @exception HDF5LibraryException
-     *            Error from the HDF5 Library.
-     *
-     **/
+//    /**
+//     * @ingroup JH5P
+//     *
+//     * H5Pset_fapl_ros3 Modify the file access property list to use the H5FD_ROS3 driver.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     * @param fapl_conf
+//     *            IN: the properties of the ros3 driver
+//     *
+//     * @return a non-negative value if successful; otherwise returns a negative value.
+//     *
+//     * @exception HDF5LibraryException
+//     *            Error from the HDF5 Library.
+//     *
+//     **/
     //     public static int H5Pset_fapl_ros3(long fapl_id, H5FD_ros3_fapl_t fapl_conf)
     //         throws HDF5LibraryException, NullPointerException
     //    {
     //        throw new HDF5LibraryException("H5Pset_fapl_ros3 not implemented yet");
     //    }
 
-    /**
-     * @ingroup JH5P
-     *
-     * H5Pget_fapl_ros3 gets the properties of the ros3 I/O driver.
-     *
-     * @param fapl_id
-     *            IN: File access property list identifier
-     *
-     * @return the properties of the ros3 driver.
-     *
-     * @exception HDF5LibraryException
-     *            Error from the HDF5 Library.
-     *
-     **/
+//    /**
+//     * @ingroup JH5P
+//     *
+//     * H5Pget_fapl_ros3 gets the properties of the ros3 I/O driver.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     *
+//     * @return the properties of the ros3 driver.
+//     *
+//     * @exception HDF5LibraryException
+//     *            Error from the HDF5 Library.
+//     *
+//     **/
     //     public static H5FD_ros3_fapl_t H5Pget_fapl_ros3(long fapl_id)
     //         throws HDF5LibraryException, NullPointerException
     //    {
@@ -17674,9 +17672,9 @@ public class H5 implements java.io.Serializable {
      * @see H5R, C-API
      *
      * @see @ref H5R_UG, User Guide
-     * @Deprecated As of HDF5 1.12.0 in favor of H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr()
+     * @deprecated As of HDF5 1.12.0 in favor of H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr()
      **/
-
+    @Deprecated
     private static int H5Rcreate(byte[] ref, long loc_id, String name, int ref_type, long space_id)
         throws HDF5LibraryException, NullPointerException, HDF5FunctionArgumentException
     {
@@ -17732,8 +17730,9 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5FunctionArgumentException
      *            an input array is invalid.
      *
-     * @Deprecated As of HDF5 1.12.0 in favor of H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr()
+     * @deprecated As of HDF5 1.12.0 in favor of H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr()
      **/
+    @Deprecated
     public static byte[] H5Rcreate(long loc_id, String name, int ref_type, long space_id)
         throws HDF5LibraryException, NullPointerException, HDF5FunctionArgumentException
     {
@@ -17774,8 +17773,9 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5FunctionArgumentException
      *            output array is invalid.
      *
-     * @Deprecated As of HDF5 1.12.0 in favor of H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr()
+     * @deprecated As of HDF5 1.12.0 in favor of H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr()
      **/
+    @Deprecated
     public static long H5Rdereference(long dataset, long access_list, int ref_type, byte[] ref)
         throws HDF5LibraryException, NullPointerException, HDF5FunctionArgumentException
     {
