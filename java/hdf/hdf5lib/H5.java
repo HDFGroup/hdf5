@@ -16928,42 +16928,42 @@ public class H5 implements java.io.Serializable {
         return retVal;
     }
 
-//    /**
-//     * @ingroup JH5P
-//     *
-//     * H5Pset_fapl_hdfs Modify the file access property list to use the H5FD_HDFS driver.
-//     *
-//     * @param fapl_id
-//     *            IN: File access property list identifier
-//     * @param fapl_conf
-//     *            IN: the properties of the hdfs driver
-//     *
-//     * @return a non-negative value if successful; otherwise returns a negative value.
-//     *
-//     * @exception HDF5LibraryException
-//     *            Error from the HDF5 Library.
-//     *
-//     **/
+    //    /**
+    //     * @ingroup JH5P
+    //     *
+    //     * H5Pset_fapl_hdfs Modify the file access property list to use the H5FD_HDFS driver.
+    //     *
+    //     * @param fapl_id
+    //     *            IN: File access property list identifier
+    //     * @param fapl_conf
+    //     *            IN: the properties of the hdfs driver
+    //     *
+    //     * @return a non-negative value if successful; otherwise returns a negative value.
+    //     *
+    //     * @exception HDF5LibraryException
+    //     *            Error from the HDF5 Library.
+    //     *
+    //     **/
     //    public static int H5Pset_fapl_hdfs(long fapl_id, H5FD_hdfs_fapl_t fapl_conf)
     //        throws HDF5LibraryException, NullPointerException
     //    {
     //        throw new HDF5LibraryException("H5Pset_fapl_hdfs not implemented yet");
     //    }
 
-//    /**
-//     * @ingroup JH5P
-//     *
-//     * H5Pget_fapl_hdfs gets the properties hdfs I/O driver.
-//     *
-//     * @param fapl_id
-//     *            IN: File access property list identifier
-//     *
-//     * @return the properties of the hdfs driver.
-//     *
-//     * @exception HDF5LibraryException
-//     *            Error from the HDF5 Library.
-//     *
-//     **/
+    //    /**
+    //     * @ingroup JH5P
+    //     *
+    //     * H5Pget_fapl_hdfs gets the properties hdfs I/O driver.
+    //     *
+    //     * @param fapl_id
+    //     *            IN: File access property list identifier
+    //     *
+    //     * @return the properties of the hdfs driver.
+    //     *
+    //     * @exception HDF5LibraryException
+    //     *            Error from the HDF5 Library.
+    //     *
+    //     **/
     //    public static H5FD_hdfs_fapl_t H5Pget_fapl_hdfs(long fapl_id) throws HDF5LibraryException
     //    {
     //        throw new HDF5LibraryException("H5Pget_fapl_hdfs not implemented yet");
@@ -17253,42 +17253,42 @@ public class H5 implements java.io.Serializable {
         throw new HDF5LibraryException("H5Pset_fapl_windows not implemented yet");
     }
 
-//    /**
-//     * @ingroup JH5P
-//     *
-//     * H5Pset_fapl_ros3 Modify the file access property list to use the H5FD_ROS3 driver.
-//     *
-//     * @param fapl_id
-//     *            IN: File access property list identifier
-//     * @param fapl_conf
-//     *            IN: the properties of the ros3 driver
-//     *
-//     * @return a non-negative value if successful; otherwise returns a negative value.
-//     *
-//     * @exception HDF5LibraryException
-//     *            Error from the HDF5 Library.
-//     *
-//     **/
+    //    /**
+    //     * @ingroup JH5P
+    //     *
+    //     * H5Pset_fapl_ros3 Modify the file access property list to use the H5FD_ROS3 driver.
+    //     *
+    //     * @param fapl_id
+    //     *            IN: File access property list identifier
+    //     * @param fapl_conf
+    //     *            IN: the properties of the ros3 driver
+    //     *
+    //     * @return a non-negative value if successful; otherwise returns a negative value.
+    //     *
+    //     * @exception HDF5LibraryException
+    //     *            Error from the HDF5 Library.
+    //     *
+    //     **/
     //     public static int H5Pset_fapl_ros3(long fapl_id, H5FD_ros3_fapl_t fapl_conf)
     //         throws HDF5LibraryException, NullPointerException
     //    {
     //        throw new HDF5LibraryException("H5Pset_fapl_ros3 not implemented yet");
     //    }
 
-//    /**
-//     * @ingroup JH5P
-//     *
-//     * H5Pget_fapl_ros3 gets the properties of the ros3 I/O driver.
-//     *
-//     * @param fapl_id
-//     *            IN: File access property list identifier
-//     *
-//     * @return the properties of the ros3 driver.
-//     *
-//     * @exception HDF5LibraryException
-//     *            Error from the HDF5 Library.
-//     *
-//     **/
+    //    /**
+    //     * @ingroup JH5P
+    //     *
+    //     * H5Pget_fapl_ros3 gets the properties of the ros3 I/O driver.
+    //     *
+    //     * @param fapl_id
+    //     *            IN: File access property list identifier
+    //     *
+    //     * @return the properties of the ros3 driver.
+    //     *
+    //     * @exception HDF5LibraryException
+    //     *            Error from the HDF5 Library.
+    //     *
+    //     **/
     //     public static H5FD_ros3_fapl_t H5Pget_fapl_ros3(long fapl_id)
     //         throws HDF5LibraryException, NullPointerException
     //    {
