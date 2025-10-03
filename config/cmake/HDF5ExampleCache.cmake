@@ -113,7 +113,7 @@ else ()
     endif ()
   endif ()
   if (HDF5_BUILD_JAVA)
-    set (H5EX_PROVIDES_JNI ${HDF5_ENABLE_JNI})
+    set (HDF5_PROVIDES_JNI ${HDF5_ENABLE_JNI})
     # Set up Java library and include variables for examples
     set (HDF5_JAVA_INCLUDE_DIRS ${HDF5_JAVA_JARS} ${HDF5_JAVA_LOGGING_JAR})
     if (Java_VERSION_STRING VERSION_LESS "24.0.0" OR HDF5_ENABLE_JNI)
