@@ -20,8 +20,9 @@ I.testH5Dget_type
 .testH5Dvlen_write_read
 .testH5Dget_space
 .testH5Dget_type_closed
+.testH5Dwrite_readCompound
 
 Time:  XXXX
 
-OK (21 tests)
+OK (22 tests)
 

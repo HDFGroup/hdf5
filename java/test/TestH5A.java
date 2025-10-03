@@ -64,6 +64,76 @@ public class TestH5A {
     long lapl_id                        = HDF5Constants.H5I_INVALID_HID;
     long aapl_id                        = HDF5Constants.H5I_INVALID_HID;
 
+    // Helper class for compound datatype testing
+    static class TestSensor {
+        static final int MAXSTRINGSIZE = 32;
+        static final int INTEGERSIZE   = 4;
+        static final int DOUBLESIZE    = 8;
+
+        public int serial_no;
+        public String location;
+        public double temperature;
+        public double pressure;
+
+        TestSensor(int serial_no, String location, double temperature, double pressure)
+        {
+            this.serial_no   = serial_no;
+            this.location    = location;
+            this.temperature = temperature;
+            this.pressure    = pressure;
+        }
+
+        TestSensor(ArrayList data)
+        {
+            this.serial_no   = (Integer)data.get(0);
+            this.location    = (String)data.get(1);
+            this.temperature = (Double)data.get(2);
+            this.pressure    = (Double)data.get(3);
+        }
+
+        ArrayList toArrayList()
+        {
+            ArrayList data = new ArrayList();
+            data.add(serial_no);
+            data.add(location);
+            data.add(temperature);
+            data.add(pressure);
+            return data;
+        }
+
+        static long createMemType() throws HDF5Exception
+        {
+            long strtype_id = HDF5Constants.H5I_INVALID_HID;
+            long memtype_id = HDF5Constants.H5I_INVALID_HID;
+
+            try {
+                strtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+                H5.H5Tset_size(strtype_id, MAXSTRINGSIZE);
+
+                memtype_id =
+                    H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, INTEGERSIZE + MAXSTRINGSIZE + DOUBLESIZE + DOUBLESIZE);
+
+                H5.H5Tinsert(memtype_id, "Serial number", 0, HDF5Constants.H5T_NATIVE_INT);
+                H5.H5Tinsert(memtype_id, "Location", INTEGERSIZE, strtype_id);
+                H5.H5Tinsert(memtype_id, "Temperature", INTEGERSIZE + MAXSTRINGSIZE,
+                             HDF5Constants.H5T_NATIVE_DOUBLE);
+                H5.H5Tinsert(memtype_id, "Pressure", INTEGERSIZE + MAXSTRINGSIZE + DOUBLESIZE,
+                             HDF5Constants.H5T_NATIVE_DOUBLE);
+
+                H5.H5Tclose(strtype_id);
+            }
+            catch (Exception e) {
+                if (strtype_id >= 0)
+                    H5.H5Tclose(strtype_id);
+                if (memtype_id >= 0)
+                    H5.H5Tclose(memtype_id);
+                throw e;
+            }
+
+            return memtype_id;
+        }
+    }
+
     private final void _deleteFile(String filename)
     {
         File file = new File(filename);
@@ -1138,6 +1208,107 @@ public class TestH5A {
             if (atype_id > 0)
                 try {
                     H5.H5Tclose(atype_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    @Test
+    public void testH5Awrite_readCompound()
+    {
+        String attr_name        = "CompoundData";
+        long attr_id            = HDF5Constants.H5I_INVALID_HID;
+        long compound_type_id   = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
+        final int ARRAY_SIZE    = 4;
+
+        // Create test data - 4 sensor readings
+        ArrayList[] write_data = new ArrayList[ARRAY_SIZE];
+        write_data[0] = new TestSensor(1153, "Exterior (static)", 53.23, 24.57).toArrayList();
+        write_data[1] = new TestSensor(1184, "Intake", 55.12, 22.95).toArrayList();
+        write_data[2] = new TestSensor(1027, "Intake manifold", 103.55, 31.23).toArrayList();
+        write_data[3] = new TestSensor(1313, "Exhaust manifold", 1252.89, 84.11).toArrayList();
+
+        try {
+            // Create compound datatype
+            compound_type_id = TestSensor.createMemType();
+            assertTrue("testH5Awrite_readCompound: compound type created", compound_type_id >= 0);
+
+            // Create dataspace (1D, 4 elements)
+            long[] dims = {ARRAY_SIZE};
+            dataspace_id = H5.H5Screate_simple(1, dims, null);
+            assertTrue("testH5Awrite_readCompound: dataspace created", dataspace_id >= 0);
+
+            // Create attribute
+            attr_id = H5.H5Acreate(H5did, attr_name, compound_type_id, dataspace_id,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Awrite_readCompound: attribute created", attr_id >= 0);
+
+            // Write compound data
+            H5.H5AwriteVL(attr_id, compound_type_id, write_data);
+
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            // Read compound data back
+            ArrayList[] read_data = new ArrayList[ARRAY_SIZE];
+            H5.H5AreadVL(attr_id, compound_type_id, read_data);
+
+            // Validate sensor 0
+            assertNotNull("testH5Awrite_readCompound: read_data[0] not null", read_data[0]);
+            TestSensor sensor0 = new TestSensor(read_data[0]);
+            assertEquals("testH5Awrite_readCompound: sensor0 serial_no", 1153, sensor0.serial_no);
+            assertEquals("testH5Awrite_readCompound: sensor0 location", "Exterior (static)",
+                         sensor0.location.trim());
+            assertEquals("testH5Awrite_readCompound: sensor0 temperature", 53.23, sensor0.temperature, 0.01);
+            assertEquals("testH5Awrite_readCompound: sensor0 pressure", 24.57, sensor0.pressure, 0.01);
+
+            // Validate sensor 1
+            assertNotNull("testH5Awrite_readCompound: read_data[1] not null", read_data[1]);
+            TestSensor sensor1 = new TestSensor(read_data[1]);
+            assertEquals("testH5Awrite_readCompound: sensor1 serial_no", 1184, sensor1.serial_no);
+            assertEquals("testH5Awrite_readCompound: sensor1 location", "Intake", sensor1.location.trim());
+            assertEquals("testH5Awrite_readCompound: sensor1 temperature", 55.12, sensor1.temperature, 0.01);
+            assertEquals("testH5Awrite_readCompound: sensor1 pressure", 22.95, sensor1.pressure, 0.01);
+
+            // Validate sensor 2
+            assertNotNull("testH5Awrite_readCompound: read_data[2] not null", read_data[2]);
+            TestSensor sensor2 = new TestSensor(read_data[2]);
+            assertEquals("testH5Awrite_readCompound: sensor2 serial_no", 1027, sensor2.serial_no);
+            assertEquals("testH5Awrite_readCompound: sensor2 location", "Intake manifold",
+                         sensor2.location.trim());
+            assertEquals("testH5Awrite_readCompound: sensor2 temperature", 103.55, sensor2.temperature, 0.01);
+            assertEquals("testH5Awrite_readCompound: sensor2 pressure", 31.23, sensor2.pressure, 0.01);
+
+            // Validate sensor 3
+            assertNotNull("testH5Awrite_readCompound: read_data[3] not null", read_data[3]);
+            TestSensor sensor3 = new TestSensor(read_data[3]);
+            assertEquals("testH5Awrite_readCompound: sensor3 serial_no", 1313, sensor3.serial_no);
+            assertEquals("testH5Awrite_readCompound: sensor3 location", "Exhaust manifold",
+                         sensor3.location.trim());
+            assertEquals("testH5Awrite_readCompound: sensor3 temperature", 1252.89, sensor3.temperature, 0.01);
+            assertEquals("testH5Awrite_readCompound: sensor3 pressure", 84.11, sensor3.pressure, 0.01);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.testH5Awrite_readCompound: " + err);
+        }
+        finally {
+            if (attr_id > 0)
+                try {
+                    H5.H5Aclose(attr_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dataspace_id > 0)
+                try {
+                    H5.H5Sclose(dataspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (compound_type_id > 0)
+                try {
+                    H5.H5Tclose(compound_type_id);
                 }
                 catch (Exception ex) {
                 }

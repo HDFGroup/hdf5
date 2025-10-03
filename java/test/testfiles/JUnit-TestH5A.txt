@@ -13,6 +13,7 @@ JUnit version 4.13.2
 .testH5Adelete_by_name
 .testH5AVLwrVL
 .testH5Aopen_by_name
+.testH5Awrite_readCompound
 .testH5Aget_info
 .testH5Aget_name
 .testH5Aexists
@@ -34,5 +35,5 @@ JUnit version 4.13.2
 
 Time:  XXXX
 
-OK (32 tests)
+OK (33 tests)
 

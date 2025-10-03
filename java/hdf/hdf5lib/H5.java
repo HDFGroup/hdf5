@@ -2190,7 +2190,14 @@ public class H5 implements java.io.Serializable {
             // Check the datatype class to determine reading strategy
             int typeClass = H5Tget_class(mem_type_id);
 
-            if (typeClass == HDF5Constants.H5T_ARRAY) {
+            if (typeClass == HDF5Constants.H5T_COMPOUND) {
+                // For compound datatypes, read heterogeneous field structures
+                ArrayList[] result = VLDataConverter.readCompoundDatatype(attr_id, mem_type_id, buf.length,
+                                                                           arena, false, -1, -1, -1);
+                System.arraycopy(result, 0, buf, 0, buf.length);
+                status = 0; // Success
+            }
+            else             if (typeClass == HDF5Constants.H5T_ARRAY) {
                 // For array datatypes, read directly into array buffer (not hvl_t)
                 ArrayList[] result =
                     VLDataConverter.readArrayDatatype(attr_id, mem_type_id, buf.length, arena);
@@ -2936,7 +2943,12 @@ public class H5 implements java.io.Serializable {
             // Check the datatype class to determine conversion strategy
             int typeClass = H5Tget_class(mem_type_id);
 
-            if (typeClass == HDF5Constants.H5T_ARRAY) {
+            if (typeClass == HDF5Constants.H5T_COMPOUND) {
+                // For compound datatypes, convert ArrayList array to packed compound structures
+                arrayBuffer = VLDataConverter.convertCompoundDatatype(arrayData, mem_type_id, arena);
+                status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, arrayBuffer);
+            }
+            else             if (typeClass == HDF5Constants.H5T_ARRAY) {
                 // For array datatypes, convert to packed array elements (not hvl_t)
                 arrayBuffer = VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
                 status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, arrayBuffer);
@@ -4443,7 +4455,15 @@ public class H5 implements java.io.Serializable {
             // Check the datatype class to determine reading strategy
             int typeClass = H5Tget_class(mem_type_id);
 
-            if (typeClass == HDF5Constants.H5T_ARRAY) {
+            if (typeClass == HDF5Constants.H5T_COMPOUND) {
+                // For compound datatypes, read heterogeneous field structures
+                ArrayList[] result = VLDataConverter.readCompoundDatatype(
+                    dataset_id, mem_type_id, buf.length, arena, true, mem_space_id, file_space_id,
+                    xfer_plist_id);
+                System.arraycopy(result, 0, buf, 0, buf.length);
+                status = 0; // Success
+            }
+            else             if (typeClass == HDF5Constants.H5T_ARRAY) {
                 // For array datatypes, read directly into array buffer (not hvl_t)
                 ArrayList[] result = VLDataConverter.readArrayDatatypeFromDataset(
                     dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf.length, arena);

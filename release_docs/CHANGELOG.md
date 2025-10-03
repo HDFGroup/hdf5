@@ -48,6 +48,12 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 - Improved [ROS3 VFD](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
 
+## Java Enhancements:
+
+- Full compound datatype support for Java FFM bindings, enabling read/write of complex heterogeneous structures (integers, strings, floats) in both attributes and datasets.
+- Enhanced Maven artifact deployment with comprehensive multi-platform support (Linux, Windows, macOS x86_64, macOS aarch64).
+- Complete Java examples Maven integration (`org.hdfgroup:hdf5-java-examples`) with cross-platform CI/CD testing.
+
 # ⚠️ Breaking Changes
 
 ### Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
@@ -464,6 +470,17 @@ Simple example programs showing how to use complex number datatypes have been ad
 ## C++ Library
 
 ## Java Library
+
+### Added compound datatype support for Java FFM bindings
+
+   Implemented full read and write support for HDF5 compound datatypes in the Java Foreign Function & Memory (FFM) API:
+   - **Read implementation**: `VLDataConverter.readCompoundDatatype()` method handles heterogeneous field structures (INTEGER, FLOAT, STRING types)
+   - **Write implementation**: `VLDataConverter.convertCompoundDatatype()` method converts ArrayList arrays to packed native compound structures
+   - **API integration**: Updated `H5AreadVL()`, `H5DreadVL()`, `H5AwriteVL()`, and `H5DwriteVL()` to automatically detect and process H5T_COMPOUND types
+   - **Test coverage**: Added comprehensive unit tests (`TestH5A.testH5Awrite_readCompound()`, `TestH5D.testH5Dwrite_readCompound()`)
+   - **Example compatibility**: H5Ex_T_Compound and H5Ex_T_CompoundAttribute examples now work correctly
+   - Supports fixed-length and variable-length string fields within compound structures
+   - Handles unaligned field access with byte-level precision for cross-platform compatibility
 
 ## Tools
 

@@ -2143,4 +2143,168 @@ public class VLDataConverter {
             throw new HDF5JavaException("Compound datatype conversion failed: " + e.getMessage());
         }
     }
+
+    /**
+     * Read compound datatype data from HDF5 attribute or dataset
+     * Used for H5T_COMPOUND datatypes where each ArrayList contains mixed field types
+     *
+     * @param attr_or_dataset_id HDF5 attribute or dataset identifier
+     * @param mem_type_id HDF5 compound datatype identifier
+     * @param count Number of compound structures to read
+     * @param arena Arena for memory allocation
+     * @param isDataset true if reading from dataset, false if reading from attribute
+     * @param mem_space_id Memory dataspace (for datasets only)
+     * @param file_space_id File dataspace (for datasets only)
+     * @param xfer_plist_id Transfer property list (for datasets only)
+     * @return ArrayList array containing compound field data
+     * @throws HDF5JavaException if reading fails
+     */
+    public static ArrayList[] readCompoundDatatype(long attr_or_dataset_id, long mem_type_id, int count,
+                                                     Arena arena, boolean isDataset, long mem_space_id,
+                                                     long file_space_id, long xfer_plist_id)
+        throws HDF5JavaException
+    {
+        try {
+            // Get compound type information
+            int nmembers = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_nmembers(mem_type_id);
+            if (nmembers < 0) {
+                throw new HDF5JavaException("Failed to get number of compound members");
+            }
+
+            // Get total compound structure size
+            long compoundSize = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(mem_type_id);
+            if (compoundSize < 0) {
+                throw new HDF5JavaException("Failed to get compound size");
+            }
+
+            // Get member information for each field
+            long[] memberTypeIds  = new long[nmembers];
+            int[] memberClasses   = new int[nmembers];
+            long[] memberOffsets  = new long[nmembers];
+            long[] memberSizes    = new long[nmembers];
+            boolean[] isVLStrings = new boolean[nmembers];
+
+            for (int i = 0; i < nmembers; i++) {
+                memberTypeIds[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_type(mem_type_id, i);
+                memberClasses[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(memberTypeIds[i]);
+                memberOffsets[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_offset(mem_type_id, i);
+                memberSizes[i]    = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(memberTypeIds[i]);
+                isVLStrings[i]    = (memberClasses[i] == HDF5Constants.H5T_STRING &&
+                                   org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(memberTypeIds[i]) > 0);
+            }
+
+            // Allocate buffer for all compound structures
+            MemorySegment buffer = arena.allocate(compoundSize * count);
+
+            // Read data from HDF5
+            int status;
+            if (isDataset) {
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(attr_or_dataset_id, mem_type_id, mem_space_id,
+                                                                 file_space_id, xfer_plist_id, buffer);
+            }
+            else {
+                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_or_dataset_id, mem_type_id, buffer);
+            }
+
+            if (status < 0) {
+                throw new HDF5JavaException("H5 read failed with status: " + status);
+            }
+
+            // Parse buffer into ArrayList array
+            ArrayList[] result = new ArrayList[count];
+
+            try {
+                for (int structIdx = 0; structIdx < count; structIdx++) {
+                    ArrayList<Object> record = new ArrayList<>();
+                    long structOffset        = structIdx * compoundSize;
+
+                    // Read each field from the compound structure
+                    for (int fieldIdx = 0; fieldIdx < nmembers; fieldIdx++) {
+                        long fieldOffset     = structOffset + memberOffsets[fieldIdx];
+                        int memberClass      = memberClasses[fieldIdx];
+                        long memberSize      = memberSizes[fieldIdx];
+                        boolean isVLString   = isVLStrings[fieldIdx];
+
+                        if (memberClass == HDF5Constants.H5T_INTEGER) {
+                            // Read integer field (little-endian byte order)
+                            int intValue = (buffer.get(ValueLayout.JAVA_BYTE, fieldOffset) & 0xFF) |
+                                           ((buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 1) & 0xFF) << 8) |
+                                           ((buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 2) & 0xFF) << 16) |
+                                           (buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 3) << 24);
+                            record.add(intValue);
+                        }
+                        else if (memberClass == HDF5Constants.H5T_FLOAT) {
+                            // Read double field (8 bytes, little-endian)
+                            long longBits = 0;
+                            for (int byteIdx = 0; byteIdx < 8; byteIdx++) {
+                                long byteVal = buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + byteIdx) & 0xFFL;
+                                longBits |= (byteVal << (byteIdx * 8));
+                            }
+                            double doubleValue = Double.longBitsToDouble(longBits);
+                            record.add(doubleValue);
+                        }
+                        else if (memberClass == HDF5Constants.H5T_STRING) {
+                            if (isVLString) {
+                                // Variable-length string - read pointer
+                                MemorySegment stringPtr = buffer.get(ValueLayout.ADDRESS, fieldOffset);
+                                if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
+                                    try {
+                                        String str = stringPtr.getString(0, StandardCharsets.UTF_8);
+                                        record.add(str);
+                                    }
+                                    catch (Exception e) {
+                                        record.add("");
+                                    }
+                                }
+                                else {
+                                    record.add("");
+                                }
+                            }
+                            else {
+                                // Fixed-length string - read bytes
+                                byte[] strBytes = new byte[(int)memberSize];
+                                for (int j = 0; j < memberSize; j++) {
+                                    strBytes[j] = buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + j);
+                                }
+                                // Convert to string and trim null terminators
+                                String strValue = new String(strBytes, StandardCharsets.UTF_8);
+                                int nullIdx     = strValue.indexOf('\0');
+                                if (nullIdx >= 0) {
+                                    strValue = strValue.substring(0, nullIdx);
+                                }
+                                record.add(strValue);
+                            }
+                        }
+                        else {
+                            throw new HDF5JavaException("Unsupported compound member type class for read: " +
+                                                        memberClass);
+                        }
+                    }
+
+                    result[structIdx] = record;
+                }
+            }
+            finally {
+                // Close member type IDs
+                for (int i = 0; i < nmembers; i++) {
+                    if (memberTypeIds[i] >= 0) {
+                        try {
+                            org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(memberTypeIds[i]);
+                        }
+                        catch (Exception e) {
+                            // Ignore close errors
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+        catch (Exception e) {
+            if (e instanceof HDF5JavaException) {
+                throw e;
+            }
+            throw new HDF5JavaException("Compound datatype read failed: " + e.getMessage());
+        }
+    }
 }
