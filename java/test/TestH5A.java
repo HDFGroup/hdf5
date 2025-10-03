@@ -110,8 +110,8 @@ public class TestH5A {
                 strtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
                 H5.H5Tset_size(strtype_id, MAXSTRINGSIZE);
 
-                memtype_id =
-                    H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, INTEGERSIZE + MAXSTRINGSIZE + DOUBLESIZE + DOUBLESIZE);
+                memtype_id = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND,
+                                          INTEGERSIZE + MAXSTRINGSIZE + DOUBLESIZE + DOUBLESIZE);
 
                 H5.H5Tinsert(memtype_id, "Serial number", 0, HDF5Constants.H5T_NATIVE_INT);
                 H5.H5Tinsert(memtype_id, "Location", INTEGERSIZE, strtype_id);
@@ -1217,18 +1217,18 @@ public class TestH5A {
     @Test
     public void testH5Awrite_readCompound()
     {
-        String attr_name        = "CompoundData";
-        long attr_id            = HDF5Constants.H5I_INVALID_HID;
-        long compound_type_id   = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
-        final int ARRAY_SIZE    = 4;
+        String attr_name      = "CompoundData";
+        long attr_id          = HDF5Constants.H5I_INVALID_HID;
+        long compound_type_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id     = HDF5Constants.H5I_INVALID_HID;
+        final int ARRAY_SIZE  = 4;
 
         // Create test data - 4 sensor readings
         ArrayList[] write_data = new ArrayList[ARRAY_SIZE];
-        write_data[0] = new TestSensor(1153, "Exterior (static)", 53.23, 24.57).toArrayList();
-        write_data[1] = new TestSensor(1184, "Intake", 55.12, 22.95).toArrayList();
-        write_data[2] = new TestSensor(1027, "Intake manifold", 103.55, 31.23).toArrayList();
-        write_data[3] = new TestSensor(1313, "Exhaust manifold", 1252.89, 84.11).toArrayList();
+        write_data[0]          = new TestSensor(1153, "Exterior (static)", 53.23, 24.57).toArrayList();
+        write_data[1]          = new TestSensor(1184, "Intake", 55.12, 22.95).toArrayList();
+        write_data[2]          = new TestSensor(1027, "Intake manifold", 103.55, 31.23).toArrayList();
+        write_data[3]          = new TestSensor(1313, "Exhaust manifold", 1252.89, 84.11).toArrayList();
 
         try {
             // Create compound datatype
@@ -1236,7 +1236,7 @@ public class TestH5A {
             assertTrue("testH5Awrite_readCompound: compound type created", compound_type_id >= 0);
 
             // Create dataspace (1D, 4 elements)
-            long[] dims = {ARRAY_SIZE};
+            long[] dims  = {ARRAY_SIZE};
             dataspace_id = H5.H5Screate_simple(1, dims, null);
             assertTrue("testH5Awrite_readCompound: dataspace created", dataspace_id >= 0);
 
@@ -1286,7 +1286,8 @@ public class TestH5A {
             assertEquals("testH5Awrite_readCompound: sensor3 serial_no", 1313, sensor3.serial_no);
             assertEquals("testH5Awrite_readCompound: sensor3 location", "Exhaust manifold",
                          sensor3.location.trim());
-            assertEquals("testH5Awrite_readCompound: sensor3 temperature", 1252.89, sensor3.temperature, 0.01);
+            assertEquals("testH5Awrite_readCompound: sensor3 temperature", 1252.89, sensor3.temperature,
+                         0.01);
             assertEquals("testH5Awrite_readCompound: sensor3 pressure", 84.11, sensor3.pressure, 0.01);
         }
         catch (Throwable err) {

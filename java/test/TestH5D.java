@@ -2078,11 +2078,11 @@ public class TestH5D {
     @Test
     public void testH5Dwrite_readCompound()
     {
-        String dset_name        = "CompoundData";
-        long dset_id            = HDF5Constants.H5I_INVALID_HID;
-        long compound_type_id   = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
-        final int ARRAY_SIZE    = 4;
+        String dset_name      = "CompoundData";
+        long dset_id          = HDF5Constants.H5I_INVALID_HID;
+        long compound_type_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id     = HDF5Constants.H5I_INVALID_HID;
+        final int ARRAY_SIZE  = 4;
 
         // Create test data - 4 sensor readings
         ArrayList[] write_data = new ArrayList[ARRAY_SIZE];
@@ -2102,9 +2102,9 @@ public class TestH5D {
             assertTrue("testH5Dwrite_readCompound: dataspace created", dataspace_id >= 0);
 
             // Create dataset
-            dset_id = H5.H5Dcreate(H5fid, dset_name, compound_type_id, dataspace_id,
-                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            dset_id =
+                H5.H5Dcreate(H5fid, dset_name, compound_type_id, dataspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5Dwrite_readCompound: dataset created", dset_id >= 0);
 
             // Write compound data
@@ -2150,7 +2150,8 @@ public class TestH5D {
             assertEquals("testH5Dwrite_readCompound: sensor3 serial_no", 1313, sensor3.serial_no);
             assertEquals("testH5Dwrite_readCompound: sensor3 location", "Exhaust manifold",
                          sensor3.location.trim());
-            assertEquals("testH5Dwrite_readCompound: sensor3 temperature", 1252.89, sensor3.temperature, 0.01);
+            assertEquals("testH5Dwrite_readCompound: sensor3 temperature", 1252.89, sensor3.temperature,
+                         0.01);
             assertEquals("testH5Dwrite_readCompound: sensor3 pressure", 84.11, sensor3.pressure, 0.01);
         }
         catch (Throwable err) {

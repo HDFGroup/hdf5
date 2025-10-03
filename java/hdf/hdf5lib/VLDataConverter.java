@@ -2160,8 +2160,8 @@ public class VLDataConverter {
      * @throws HDF5JavaException if reading fails
      */
     public static ArrayList[] readCompoundDatatype(long attr_or_dataset_id, long mem_type_id, int count,
-                                                     Arena arena, boolean isDataset, long mem_space_id,
-                                                     long file_space_id, long xfer_plist_id)
+                                                   Arena arena, boolean isDataset, long mem_space_id,
+                                                   long file_space_id, long xfer_plist_id)
         throws HDF5JavaException
     {
         try {
@@ -2185,12 +2185,12 @@ public class VLDataConverter {
             boolean[] isVLStrings = new boolean[nmembers];
 
             for (int i = 0; i < nmembers; i++) {
-                memberTypeIds[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_type(mem_type_id, i);
-                memberClasses[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(memberTypeIds[i]);
-                memberOffsets[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_offset(mem_type_id, i);
-                memberSizes[i]    = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(memberTypeIds[i]);
-                isVLStrings[i]    = (memberClasses[i] == HDF5Constants.H5T_STRING &&
-                                   org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(memberTypeIds[i]) > 0);
+                memberTypeIds[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_type(mem_type_id, i);
+                memberClasses[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(memberTypeIds[i]);
+                memberOffsets[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_offset(mem_type_id, i);
+                memberSizes[i]   = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(memberTypeIds[i]);
+                isVLStrings[i]   = (memberClasses[i] == HDF5Constants.H5T_STRING &&
+                                  org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(memberTypeIds[i]) > 0);
             }
 
             // Allocate buffer for all compound structures
@@ -2200,7 +2200,7 @@ public class VLDataConverter {
             int status;
             if (isDataset) {
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(attr_or_dataset_id, mem_type_id, mem_space_id,
-                                                                 file_space_id, xfer_plist_id, buffer);
+                                                                file_space_id, xfer_plist_id, buffer);
             }
             else {
                 status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_or_dataset_id, mem_type_id, buffer);
@@ -2220,24 +2220,26 @@ public class VLDataConverter {
 
                     // Read each field from the compound structure
                     for (int fieldIdx = 0; fieldIdx < nmembers; fieldIdx++) {
-                        long fieldOffset     = structOffset + memberOffsets[fieldIdx];
-                        int memberClass      = memberClasses[fieldIdx];
-                        long memberSize      = memberSizes[fieldIdx];
-                        boolean isVLString   = isVLStrings[fieldIdx];
+                        long fieldOffset   = structOffset + memberOffsets[fieldIdx];
+                        int memberClass    = memberClasses[fieldIdx];
+                        long memberSize    = memberSizes[fieldIdx];
+                        boolean isVLString = isVLStrings[fieldIdx];
 
                         if (memberClass == HDF5Constants.H5T_INTEGER) {
                             // Read integer field (little-endian byte order)
-                            int intValue = (buffer.get(ValueLayout.JAVA_BYTE, fieldOffset) & 0xFF) |
-                                           ((buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 1) & 0xFF) << 8) |
-                                           ((buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 2) & 0xFF) << 16) |
-                                           (buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 3) << 24);
+                            int intValue =
+                                (buffer.get(ValueLayout.JAVA_BYTE, fieldOffset) & 0xFF) |
+                                ((buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 1) & 0xFF) << 8) |
+                                ((buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 2) & 0xFF) << 16) |
+                                (buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 3) << 24);
                             record.add(intValue);
                         }
                         else if (memberClass == HDF5Constants.H5T_FLOAT) {
                             // Read double field (8 bytes, little-endian)
                             long longBits = 0;
                             for (int byteIdx = 0; byteIdx < 8; byteIdx++) {
-                                long byteVal = buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + byteIdx) & 0xFFL;
+                                long byteVal =
+                                    buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + byteIdx) & 0xFFL;
                                 longBits |= (byteVal << (byteIdx * 8));
                             }
                             double doubleValue = Double.longBitsToDouble(longBits);
