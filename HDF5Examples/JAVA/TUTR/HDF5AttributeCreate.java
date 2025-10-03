@@ -144,7 +144,7 @@ public class HDF5AttributeCreate {
 
         // Allocate array of pointers to two-dimensional arrays (the
         // elements of the dataset.
-        int[][] attrData = new int[(int)attrDims[0]][1];
+        int[] attrData = new int[(int)attrDims[0]];
 
         // Read data.
         try {

@@ -1734,23 +1734,23 @@ public class H5 implements java.io.Serializable {
         }
         else if (is1D && (dname == 'S')) {
             log.trace("H5Aread_dname_S");
-            status = H5Aread(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
+            status = H5Aread_short(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'I')) {
             log.trace("H5Aread_dname_I");
-            status = H5Aread(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
+            status = H5Aread_int(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'J')) {
             log.trace("H5Aread_dname_J");
-            status = H5Aread(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
+            status = H5Aread_long(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'F')) {
             log.trace("H5Aread_dname_F");
-            status = H5Aread(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
+            status = H5Aread_float(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'D')) {
             log.trace("H5Aread_dname_D");
-            status = H5Aread(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
+            status = H5Aread_double(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
         }
         else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
                   (is1D && (dataClass.getComponentType() == String.class))) ||
@@ -1813,7 +1813,21 @@ public class H5 implements java.io.Serializable {
     public static int H5Aread_double(long attr_id, long mem_type_id, double[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Aread_double not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            // Allocate a MemorySegment to hold the double array
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_DOUBLE, buf.length);
+            if (isCriticalPinning) {
+                buf_segment.copyFrom(MemorySegment.ofArray(buf));
+            }
+            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_DOUBLE, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -1865,7 +1879,21 @@ public class H5 implements java.io.Serializable {
     public static int H5Aread_float(long attr_id, long mem_type_id, float[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Aread_float not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            // Allocate a MemorySegment to hold the float array
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_FLOAT, buf.length);
+            if (isCriticalPinning) {
+                buf_segment.copyFrom(MemorySegment.ofArray(buf));
+            }
+            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_FLOAT, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -1919,7 +1947,21 @@ public class H5 implements java.io.Serializable {
     public static int H5Aread_int(long attr_id, long mem_type_id, int[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Aread_int not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            // Allocate a MemorySegment to hold the int array
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_INT, buf.length);
+            if (isCriticalPinning) {
+                buf_segment.copyFrom(MemorySegment.ofArray(buf));
+            }
+            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_INT, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -1973,7 +2015,21 @@ public class H5 implements java.io.Serializable {
     public static int H5Aread_long(long attr_id, long mem_type_id, long[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Aread_long not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            // Allocate a MemorySegment to hold the long array
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_LONG, buf.length);
+            if (isCriticalPinning) {
+                buf_segment.copyFrom(MemorySegment.ofArray(buf));
+            }
+            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_LONG, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -2053,7 +2109,21 @@ public class H5 implements java.io.Serializable {
     public static int H5Aread_short(long attr_id, long mem_type_id, short[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Aread_short not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            // Allocate a MemorySegment to hold the short array
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_SHORT, buf.length);
+            if (isCriticalPinning) {
+                buf_segment.copyFrom(MemorySegment.ofArray(buf));
+            }
+            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_SHORT, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -3832,29 +3902,29 @@ public class H5 implements java.io.Serializable {
         }
         else if (is1D && (dname == 'S')) {
             log.trace("H5Dread_dname_S");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-                             (short[])obj, isCriticalPinning);
+            status = H5Dread_short(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                   (short[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'I')) {
             log.trace("H5Dread_dname_I");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (int[])obj,
-                             isCriticalPinning);
+            status = H5Dread_int(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                 (int[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'J')) {
             log.trace("H5Dread_dname_J");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (long[])obj,
-                             isCriticalPinning);
+            status = H5Dread_long(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                  (long[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'F')) {
             System.err.println("H5Dread_dname_F");
             log.trace("H5Dread_dname_F");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-                             (float[])obj, isCriticalPinning);
+            status = H5Dread_float(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                   (float[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'D')) {
             log.trace("H5Dread_dname_D");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-                             (double[])obj, isCriticalPinning);
+            status = H5Dread_double(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                    (double[])obj, isCriticalPinning);
         }
         else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
                   (is1D && (dataClass.getComponentType() == String.class))) ||
@@ -3927,7 +3997,19 @@ public class H5 implements java.io.Serializable {
                                      long xfer_plist_id, double[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Dread_double not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_DOUBLE, buf.length);
+            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                            file_space_id, xfer_plist_id, buf_segment);
+            if (status < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_DOUBLE, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -3995,7 +4077,19 @@ public class H5 implements java.io.Serializable {
                                     long xfer_plist_id, float[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Dread_float not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_FLOAT, buf.length);
+            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                            file_space_id, xfer_plist_id, buf_segment);
+            if (status < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_FLOAT, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -4063,7 +4157,19 @@ public class H5 implements java.io.Serializable {
                                   long xfer_plist_id, int[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Dread_int not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_INT, buf.length);
+            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                            file_space_id, xfer_plist_id, buf_segment);
+            if (status < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_INT, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -4131,7 +4237,19 @@ public class H5 implements java.io.Serializable {
                                    long xfer_plist_id, long[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Dread_long not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_LONG, buf.length);
+            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                            file_space_id, xfer_plist_id, buf_segment);
+            if (status < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_LONG, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -4232,7 +4350,19 @@ public class H5 implements java.io.Serializable {
                                     long xfer_plist_id, short[] buf, boolean isCriticalPinning)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Dread_short not implemented yet");
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_SHORT, buf.length);
+            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                            file_space_id, xfer_plist_id, buf_segment);
+            if (status < 0)
+                h5libraryError();
+            MemorySegment.copy(buf_segment, ValueLayout.JAVA_SHORT, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -5177,7 +5307,13 @@ public class H5 implements java.io.Serializable {
             // Check the datatype class to determine conversion strategy
             int typeClass = H5Tget_class(mem_type_id);
 
-            if (typeClass == HDF5Constants.H5T_ARRAY) {
+            if (typeClass == HDF5Constants.H5T_COMPOUND) {
+                // For compound datatypes, convert ArrayList array to packed compound structures
+                arrayBuffer = VLDataConverter.convertCompoundDatatype(arrayData, mem_type_id, arena);
+                status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                                                                      file_space_id, xfer_plist_id, arrayBuffer);
+            }
+            else if (typeClass == HDF5Constants.H5T_ARRAY) {
                 // For array datatypes, convert to packed array elements (not hvl_t)
                 arrayBuffer = VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
                 status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,

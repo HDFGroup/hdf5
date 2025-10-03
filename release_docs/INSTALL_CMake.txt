@@ -819,6 +819,18 @@ HDF5_BUILD_STATIC_TOOLS   "Build Static Tools Not Shared Tools" OFF
 ----------------- HDF5 Maven Integration Options ----------------------------
 HDF5_ENABLE_MAVEN_DEPLOY  "Enable Maven repository deployment"  OFF
 HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
+HDF5_ENABLE_JNI           "Force JNI implementation (default: auto-detect)" OFF
+
+  Java Implementation Selection:
+  HDF5 Java bindings support two native interface implementations:
+  - FFM (Foreign Function & Memory): Default for Java 24+, modern native access
+  - JNI (Java Native Interface): Traditional interface, available for all Java versions
+
+  Maven Artifacts:
+  - org.hdfgroup:hdf5-java-ffm - FFM implementation
+  - org.hdfgroup:hdf5-java-jni - JNI implementation
+
+  Both implementations use the same hdf.hdf5lib.* package structure for seamless migration.
 
   To build HDF5 with Maven deployment support:
   cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON ../hdf5
@@ -826,19 +838,28 @@ HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
   To build Maven snapshot versions for development:
   cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_MAVEN_SNAPSHOT:BOOL=ON ../hdf5
 
+  To force JNI implementation (default is FFM for Java 24+):
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_ENABLE_JNI:BOOL=ON ../hdf5
+
   Or use the Maven-enabled CMake presets:
 
   # Full build with Maven support (includes all components)
-  cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Release version
-  cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Snapshot version
+  cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Release version (FFM)
+  cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Snapshot version (FFM)
 
   # Minimal build for Java artifacts only (recommended for Maven deployment)
-  cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # Release version
-  cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # Snapshot version
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh          # FFM Release
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh # FFM Snapshot
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh          # JNI Release
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI-Snapshot --fresh # JNI Snapshot
 
-  # Multi-platform minimal Maven presets
-  cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # Windows
-  cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS
+  # Multi-platform minimal Maven presets (FFM)
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM --fresh      # Windows FFM
+  cmake --workflow --preset ci-MinShar-Clang-Maven-FFM --fresh     # macOS FFM
+
+  # Multi-platform minimal Maven presets (JNI)
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI --fresh      # Windows JNI
+  cmake --workflow --preset ci-MinShar-Clang-Maven-JNI --fresh     # macOS JNI
 
   Note: Minimal Maven presets skip examples, testing, tools, C++, and Fortran
         builds to optimize for Java artifact generation only.
