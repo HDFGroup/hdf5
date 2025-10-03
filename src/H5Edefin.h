@@ -49,6 +49,7 @@ hid_t H5E_PLUGIN_g         = H5I_INVALID_HID;      /* Plugin for dynamically loa
 hid_t H5E_REFERENCE_g      = H5I_INVALID_HID;      /* References */
 hid_t H5E_RESOURCE_g       = H5I_INVALID_HID;      /* Resource unavailable */
 hid_t H5E_RS_g             = H5I_INVALID_HID;      /* Reference Counted Strings */
+hid_t H5E_RTREE_g          = H5I_INVALID_HID;      /* R-Tree spatial index */
 hid_t H5E_SLIST_g          = H5I_INVALID_HID;      /* Skip Lists */
 hid_t H5E_SOHM_g           = H5I_INVALID_HID;      /* Shared Object Header Messages */
 hid_t H5E_STORAGE_g        = H5I_INVALID_HID;      /* Data storage */
@@ -59,7 +60,7 @@ hid_t H5E_VFL_g            = H5I_INVALID_HID;      /* Virtual File Layer */
 hid_t H5E_VOL_g            = H5I_INVALID_HID;      /* Virtual Object Layer */
 
 /* Number of major error messages */
-#define H5E_NUM_MAJ_ERRORS 40
+#define H5E_NUM_MAJ_ERRORS 41
 
 /* Minor error IDs */
 
