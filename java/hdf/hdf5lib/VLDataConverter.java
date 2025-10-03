@@ -2025,12 +2025,12 @@ public class VLDataConverter {
             boolean[] isVLStrings = new boolean[nmembers];
 
             for (int i = 0; i < nmembers; i++) {
-                memberTypeIds[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_type(mem_type_id, i);
-                memberClasses[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(memberTypeIds[i]);
-                memberOffsets[i]  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_offset(mem_type_id, i);
-                memberSizes[i]    = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(memberTypeIds[i]);
-                isVLStrings[i]    = (memberClasses[i] == HDF5Constants.H5T_STRING &&
-                                   org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(memberTypeIds[i]) > 0);
+                memberTypeIds[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_type(mem_type_id, i);
+                memberClasses[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(memberTypeIds[i]);
+                memberOffsets[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_offset(mem_type_id, i);
+                memberSizes[i]   = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(memberTypeIds[i]);
+                isVLStrings[i]   = (memberClasses[i] == HDF5Constants.H5T_STRING &&
+                                  org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(memberTypeIds[i]) > 0);
             }
 
             try {
@@ -2040,33 +2040,35 @@ public class VLDataConverter {
 
                     if (record == null || record.size() != nmembers) {
                         throw new HDF5JavaException("ArrayList at index " + structIdx + " has " +
-                                                    (record == null ? "null" : record.size()) + " elements, expected " +
-                                                    nmembers);
+                                                    (record == null ? "null" : record.size()) +
+                                                    " elements, expected " + nmembers);
                     }
 
                     long structOffset = structIdx * compoundSize;
 
                     // Pack each field into the compound structure
                     for (int fieldIdx = 0; fieldIdx < nmembers; fieldIdx++) {
-                        Object fieldValue    = record.get(fieldIdx);
-                        long fieldOffset     = structOffset + memberOffsets[fieldIdx];
-                        int memberClass      = memberClasses[fieldIdx];
-                        long memberSize      = memberSizes[fieldIdx];
-                        boolean isVLString   = isVLStrings[fieldIdx];
+                        Object fieldValue  = record.get(fieldIdx);
+                        long fieldOffset   = structOffset + memberOffsets[fieldIdx];
+                        int memberClass    = memberClasses[fieldIdx];
+                        long memberSize    = memberSizes[fieldIdx];
+                        boolean isVLString = isVLStrings[fieldIdx];
 
                         if (memberClass == HDF5Constants.H5T_INTEGER) {
                             // Integer field - write bytes for unaligned HDF5 compound offsets
                             int intValue = (fieldValue instanceof Integer) ? (Integer)fieldValue : 0;
                             buffer.set(ValueLayout.JAVA_BYTE, fieldOffset, (byte)(intValue & 0xFF));
-                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 1, (byte)((intValue >> 8) & 0xFF));
-                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 2, (byte)((intValue >> 16) & 0xFF));
-                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 3, (byte)((intValue >> 24) & 0xFF));
+                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 1,
+                                       (byte)((intValue >> 8) & 0xFF));
+                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 2,
+                                       (byte)((intValue >> 16) & 0xFF));
+                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 3,
+                                       (byte)((intValue >> 24) & 0xFF));
                         }
                         else if (memberClass == HDF5Constants.H5T_FLOAT) {
                             // Double field - write bytes for unaligned HDF5 compound offsets
-                            double doubleValue =
-                                (fieldValue instanceof Double) ? (Double)fieldValue : 0.0;
-                            long longBits = Double.doubleToRawLongBits(doubleValue);
+                            double doubleValue = (fieldValue instanceof Double) ? (Double)fieldValue : 0.0;
+                            long longBits      = Double.doubleToRawLongBits(doubleValue);
                             for (int byteIdx = 0; byteIdx < 8; byteIdx++) {
                                 buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + byteIdx,
                                            (byte)((longBits >> (byteIdx * 8)) & 0xFF));
@@ -2080,10 +2082,11 @@ public class VLDataConverter {
 
                                 // Allocate with HDF5's memory allocator for VL strings
                                 MemorySegment hdf5StringMem =
-                                    org.hdfgroup.javahdf5.hdf5_h_2.H5allocate_memory(strBytes.length + 1, false);
+                                    org.hdfgroup.javahdf5.hdf5_h_2.H5allocate_memory(strBytes.length + 1,
+                                                                                     false);
                                 if (hdf5StringMem == null || hdf5StringMem.equals(MemorySegment.NULL)) {
-                                    throw new HDF5JavaException("Failed to allocate HDF5 memory for string: " +
-                                                                strValue);
+                                    throw new HDF5JavaException(
+                                        "Failed to allocate HDF5 memory for string: " + strValue);
                                 }
 
                                 MemorySegment boundedMem =
