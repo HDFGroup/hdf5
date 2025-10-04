@@ -1428,7 +1428,7 @@ H5_strcasestr(const char *haystack, const char *needle)
  * Usage:
  *   HDqsort_context(base, count, elem_size, compare_func, context);
  */
-#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14) || \
+#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14) ||   \
     !defined(H5_HAVE_QSORT_R)
 /* Need wrapper for Windows, macOS, FreeBSD < 14, and systems without qsort_r */
 typedef struct HDqsort_context_wrapper_t {
@@ -1436,11 +1436,11 @@ typedef struct HDqsort_context_wrapper_t {
     void *gnu_arg;
 } HDqsort_context_wrapper_t;
 
-#if !defined(H5_HAVE_WIN32_API) && !defined(H5_HAVE_DARWIN) && \
+#if !defined(H5_HAVE_WIN32_API) && !defined(H5_HAVE_DARWIN) &&                                               \
     !(defined(__FreeBSD__) && __FreeBSD__ < 14) && !defined(H5_HAVE_QSORT_R)
 /* Thread-local storage for context on systems without any reentrant qsort */
 #ifdef H5_HAVE_THREADSAFE
-static H5TS_key_t qsort_context_key;
+static H5TS_key_t  qsort_context_key;
 static H5TS_once_t qsort_context_once = H5TS_ONCE_INITIALIZER;
 
 static void
@@ -1457,7 +1457,8 @@ static int
 HDqsort_context_wrapper_func_noarg(const void *a, const void *b)
 {
 #ifdef H5_HAVE_THREADSAFE
-    HDqsort_context_wrapper_t *w = (HDqsort_context_wrapper_t *)H5TS_get_thread_local_value(qsort_context_key);
+    HDqsort_context_wrapper_t *w =
+        (HDqsort_context_wrapper_t *)H5TS_get_thread_local_value(qsort_context_key);
 #else
     HDqsort_context_wrapper_t *w = qsort_context_static;
 #endif
