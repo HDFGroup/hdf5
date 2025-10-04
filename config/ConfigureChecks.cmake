@@ -440,6 +440,11 @@ CHECK_FUNCTION_EXISTS (vasprintf         ${HDF_PREFIX}_HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS (waitpid           ${HDF_PREFIX}_HAVE_WAITPID)
 
 #-----------------------------------------------------------------------------
+# Check for qsort_r (not available on older Linux systems like CentOS-5)
+#-----------------------------------------------------------------------------
+CHECK_FUNCTION_EXISTS (qsort_r           ${HDF_PREFIX}_HAVE_QSORT_R)
+
+#-----------------------------------------------------------------------------
 # sigsetjmp is special; may actually be a macro
 #-----------------------------------------------------------------------------
 if (NOT ${HDF_PREFIX}_HAVE_SIGSETJMP)

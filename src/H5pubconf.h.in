@@ -347,6 +347,9 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
 
+/* Define to 1 if you have the `qsort_r' function. */
+#cmakedefine H5_HAVE_QSORT_R @H5_HAVE_QSORT_R@
+
 /* Define to 1 if you have the `waitpid' function. */
 #cmakedefine H5_HAVE_WAITPID @H5_HAVE_WAITPID@
 

@@ -1423,23 +1423,55 @@ H5_strcasestr(const char *haystack, const char *needle)
  * The macro handles platform differences internally, allowing the same
  * comparator signature to work on Windows (qsort_s), macOS (BSD qsort_r),
  * FreeBSD (use BSD qsort_r < 14.0, but GNU qsort_r >= 14.0), and Linux (GNU qsort_r).
+ * For older systems without any reentrant qsort, a thread-local fallback is used.
  *
  * Usage:
  *   HDqsort_context(base, count, elem_size, compare_func, context);
  */
-#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14)
-/* Need wrapper for Windows, macOS, and FreeBSD < 14 which expect context-first comparators */
+#if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14) || \
+    !defined(H5_HAVE_QSORT_R)
+/* Need wrapper for Windows, macOS, FreeBSD < 14, and systems without qsort_r */
 typedef struct HDqsort_context_wrapper_t {
     int (*gnu_compar)(const void *, const void *, void *);
     void *gnu_arg;
 } HDqsort_context_wrapper_t;
 
+#if !defined(H5_HAVE_WIN32_API) && !defined(H5_HAVE_DARWIN) && \
+    !(defined(__FreeBSD__) && __FreeBSD__ < 14) && !defined(H5_HAVE_QSORT_R)
+/* Thread-local storage for context on systems without any reentrant qsort */
+#ifdef H5_HAVE_THREADSAFE
+static H5TS_key_t qsort_context_key;
+static H5TS_once_t qsort_context_once = H5TS_ONCE_INITIALIZER;
+
+static void
+HDqsort_context_key_init(void)
+{
+    H5TS_key_create(&qsort_context_key, NULL);
+}
+#else
+/* Non-threaded fallback - use static variable */
+static HDqsort_context_wrapper_t *qsort_context_static = NULL;
+#endif
+
+static int
+HDqsort_context_wrapper_func_noarg(const void *a, const void *b)
+{
+#ifdef H5_HAVE_THREADSAFE
+    HDqsort_context_wrapper_t *w = (HDqsort_context_wrapper_t *)H5TS_get_thread_local_value(qsort_context_key);
+#else
+    HDqsort_context_wrapper_t *w = qsort_context_static;
+#endif
+    return w->gnu_compar(a, b, w->gnu_arg);
+}
+#else
+/* Wrapper for platforms with qsort_s or BSD qsort_r */
 static int
 HDqsort_context_wrapper_func(void *wrapper_arg, const void *a, const void *b)
 {
     HDqsort_context_wrapper_t *w = (HDqsort_context_wrapper_t *)wrapper_arg;
     return w->gnu_compar(a, b, w->gnu_arg);
 }
+#endif
 
 void
 HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
@@ -1453,6 +1485,20 @@ HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *,
 #elif defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14)
     /* Old BSD-style: context parameter comes before comparator function */
     qsort_r(base, nel, size, &wrapper, HDqsort_context_wrapper_func);
+#elif !defined(H5_HAVE_QSORT_R)
+    /* Fallback for systems without any reentrant qsort (e.g., CentOS-5) */
+#ifdef H5_HAVE_THREADSAFE
+    H5TS_once(&qsort_context_once, HDqsort_context_key_init);
+    H5TS_set_thread_local_value(qsort_context_key, &wrapper);
+#else
+    qsort_context_static = &wrapper;
+#endif
+    qsort(base, nel, size, HDqsort_context_wrapper_func_noarg);
+#ifdef H5_HAVE_THREADSAFE
+    H5TS_set_thread_local_value(qsort_context_key, NULL);
+#else
+    qsort_context_static = NULL;
+#endif
 #endif
 }
 #endif
