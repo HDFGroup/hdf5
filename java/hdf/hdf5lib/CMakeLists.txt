@@ -210,6 +210,9 @@ SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS_TO_EXPORT "${HDF5_JAVA_JARS_TO_EXPORT};${${H
 add_dependencies (${HDF5_JAVA_HDF5_LIB_TARGET} ${HDF5_JAVA_JSRC_LIB_TARGET})
 set_target_properties (${HDF5_JAVA_HDF5_LIB_TARGET} PROPERTIES FOLDER libraries/java)
 
+# Set HDF5_JAVA_LIBRARY for examples to depend on
+SET_GLOBAL_VARIABLE (HDF5_JAVA_LIBRARY ${HDF5_JAVA_HDF5_LIB_TARGET})
+
 #-----------------------------------------------------------------------------
 # Maven POM Generation
 #-----------------------------------------------------------------------------
