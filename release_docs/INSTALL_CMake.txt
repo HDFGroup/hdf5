@@ -299,9 +299,8 @@ IV. Further Considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake from the Kitware
-      web site. The HDF5 2."X"."Y" product requires a minimum CMake version 3.18.
-      If you are using VS2022, the CMake minimum version is 3.21. CMakePresets
-      requires CMake 3.25.
+      web site. The HDF5 2."X"."Y" product requires a minimum CMake version 3.26.
+      CMakePresets requires CMake 3.25.
 
    2. If you plan to use Zlib or Szip (aka libaec):
       A. Download the binary packages and install them in a central location.
