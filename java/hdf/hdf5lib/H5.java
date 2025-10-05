@@ -17269,8 +17269,8 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      *
      **/
-     public static int H5Pset_fapl_ros3(long fapl_id, Object fapl_conf)
-         throws HDF5LibraryException, NullPointerException
+    public static int H5Pset_fapl_ros3(long fapl_id, Object fapl_conf)
+        throws HDF5LibraryException, NullPointerException
     {
         throw new HDF5LibraryException("H5Pset_fapl_ros3 not implemented yet");
     }
@@ -17289,8 +17289,7 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      *
      **/
-    public static Object H5Pget_fapl_ros3(long fapl_id)
-        throws HDF5LibraryException, NullPointerException
+    public static Object H5Pget_fapl_ros3(long fapl_id) throws HDF5LibraryException, NullPointerException
     {
         throw new HDF5LibraryException("H5Pget_fapl_ros3 not implemented yet");
     }
