@@ -55,13 +55,13 @@ public class TestH5Tffm {
 
     // String padding
 
-    long H5tid = H5I_INVALID_HID();
+    long H5tid = hdf5_h.H5I_INVALID_HID();
 
     @After
     public void cleanup()
     {
         closeQuietly(H5tid, hdf5_h_1::H5Tclose);
-        H5tid = H5I_INVALID_HID();
+        H5tid = hdf5_h.H5I_INVALID_HID();
         System.out.println();
     }
 
@@ -78,7 +78,7 @@ public class TestH5Tffm {
     public void testH5Tequal()
     {
         System.out.print(testname.getMethodName());
-        long tid2 = H5I_INVALID_HID();
+        long tid2 = hdf5_h.H5I_INVALID_HID();
 
         try {
             H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
@@ -299,7 +299,7 @@ public class TestH5Tffm {
     public void testH5Tget_member_type()
     {
         System.out.print(testname.getMethodName());
-        long memberType = H5I_INVALID_HID();
+        long memberType = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             H5tid = hdf5_h_1.H5Tcreate(hdf5_h.H5T_COMPOUND(), 12);
@@ -495,7 +495,7 @@ public class TestH5Tffm {
 
         int result = hdf5_h_1.H5Tclose(H5tid);
         assertTrue("H5Tclose failed", isSuccess(result));
-        H5tid = H5I_INVALID_HID();
+        H5tid = hdf5_h.H5I_INVALID_HID();
     }
 
     @Test

@@ -41,13 +41,13 @@ public class TestH5Sffm {
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
 
-    long H5sid = H5I_INVALID_HID();
+    long H5sid = hdf5_h.H5I_INVALID_HID();
 
     @After
     public void cleanup()
     {
         closeQuietly(H5sid, hdf5_h_1::H5Sclose);
-        H5sid = H5I_INVALID_HID();
+        H5sid = hdf5_h.H5I_INVALID_HID();
         System.out.println();
     }
 
@@ -111,7 +111,7 @@ public class TestH5Sffm {
     public void testH5Scopy()
     {
         System.out.print(testname.getMethodName());
-        long sid_copy = H5I_INVALID_HID();
+        long sid_copy = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create original dataspace
@@ -446,7 +446,7 @@ public class TestH5Sffm {
     public void testH5Sextent_copy()
     {
         System.out.print(testname.getMethodName());
-        long sid_dest = H5I_INVALID_HID();
+        long sid_dest = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create source dataspace with specific dimensions
@@ -483,8 +483,8 @@ public class TestH5Sffm {
     public void testH5Sextent_equal()
     {
         System.out.print(testname.getMethodName());
-        long sid2 = H5I_INVALID_HID();
-        long sid3 = H5I_INVALID_HID();
+        long sid2 = hdf5_h.H5I_INVALID_HID();
+        long sid3 = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create first dataspace
@@ -628,7 +628,7 @@ public class TestH5Sffm {
 
             int result = hdf5_h_1.H5Sclose(H5sid);
             assertTrue("H5Sclose failed", isSuccess(result));
-            H5sid = H5I_INVALID_HID();
+            H5sid = hdf5_h.H5I_INVALID_HID();
         }
     }
 
@@ -914,7 +914,7 @@ public class TestH5Sffm {
     public void testH5Sselect_copy()
     {
         System.out.print(testname.getMethodName());
-        long H5sid2 = H5I_INVALID_HID();
+        long H5sid2 = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create source dataspace with selection
@@ -962,7 +962,7 @@ public class TestH5Sffm {
     public void testH5Sselect_shape_same()
     {
         System.out.print(testname.getMethodName());
-        long H5sid2 = H5I_INVALID_HID();
+        long H5sid2 = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create first dataspace with selection

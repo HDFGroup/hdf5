@@ -42,7 +42,7 @@ public class TestH5Fffm {
     private static final String H5_FILE  = "testFffm.h5";
     private static final String H5_FILE2 = "testFffm2.h5";
 
-    long H5fid = H5I_INVALID_HID();
+    long H5fid = hdf5_h.H5I_INVALID_HID();
 
     private void deleteFile(String filename)
     {
@@ -78,7 +78,7 @@ public class TestH5Fffm {
     {
         if (H5fid >= 0) {
             closeQuietly(H5fid, hdf5_h_1::H5Fclose);
-            H5fid = H5I_INVALID_HID();
+            H5fid = hdf5_h.H5I_INVALID_HID();
         }
         deleteFile(H5_FILE);
         deleteFile(H5_FILE2);
@@ -86,9 +86,14 @@ public class TestH5Fffm {
     }
 
     @Test
+<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
     public void testH5Fopen()
     {
         long fid = H5I_INVALID_HID();
+=======
+    public void testH5Fopen() {
+        long fid = hdf5_h.H5I_INVALID_HID();
+>>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE);
@@ -101,9 +106,14 @@ public class TestH5Fffm {
     }
 
     @Test
+<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
     public void testH5Freopen()
     {
         long fid2 = H5I_INVALID_HID();
+=======
+    public void testH5Freopen() {
+        long fid2 = hdf5_h.H5I_INVALID_HID();
+>>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             fid2 = hdf5_h_1.H5Freopen(H5fid);
@@ -116,9 +126,14 @@ public class TestH5Fffm {
     }
 
     @Test
+<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
     public void testH5Fget_create_plist()
     {
         long plist = H5I_INVALID_HID();
+=======
+    public void testH5Fget_create_plist() {
+        long plist = hdf5_h.H5I_INVALID_HID();
+>>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             plist = hdf5_h_1.H5Fget_create_plist(H5fid);
@@ -130,9 +145,14 @@ public class TestH5Fffm {
     }
 
     @Test
+<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
     public void testH5Fget_access_plist()
     {
         long plist = H5I_INVALID_HID();
+=======
+    public void testH5Fget_access_plist() {
+        long plist = hdf5_h.H5I_INVALID_HID();
+>>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             plist = hdf5_h_1.H5Fget_access_plist(H5fid);
@@ -219,7 +239,7 @@ public class TestH5Fffm {
         try (Arena arena = Arena.ofConfined()) {
             // Close the file first
             closeQuietly(H5fid, hdf5_h_1::H5Fclose);
-            H5fid = H5I_INVALID_HID();
+            H5fid = hdf5_h.H5I_INVALID_HID();
 
             // Check if file is accessible
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE);
@@ -241,9 +261,14 @@ public class TestH5Fffm {
     }
 
     @Test
+<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
     public void testH5Fclose()
     {
         long fid = H5I_INVALID_HID();
+=======
+    public void testH5Fclose() {
+        long fid = hdf5_h.H5I_INVALID_HID();
+>>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE2);
@@ -253,7 +278,7 @@ public class TestH5Fffm {
 
             int result = hdf5_h_1.H5Fclose(fid);
             assertTrue("H5Fclose failed", isSuccess(result));
-            fid = H5I_INVALID_HID();
+            fid = hdf5_h.H5I_INVALID_HID();
         }
     }
 }

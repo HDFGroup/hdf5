@@ -41,10 +41,10 @@ public class TestH5Affm {
     @Rule
     public TestName testname = new TestName();
 
-    long H5fid = H5I_INVALID_HID();
-    long H5did = H5I_INVALID_HID();
-    long H5sid = H5I_INVALID_HID();
-    long H5aid = H5I_INVALID_HID();
+    long H5fid = hdf5_h.H5I_INVALID_HID();
+    long H5did = hdf5_h.H5I_INVALID_HID();
+    long H5sid = hdf5_h.H5I_INVALID_HID();
+    long H5aid = hdf5_h.H5I_INVALID_HID();
 
     @Before
     public void createH5file() throws Exception
@@ -80,10 +80,10 @@ public class TestH5Affm {
         closeQuietly(H5sid, hdf5_h_1::H5Sclose);
         closeQuietly(H5fid, hdf5_h_1::H5Fclose);
 
-        H5aid = H5I_INVALID_HID();
-        H5did = H5I_INVALID_HID();
-        H5sid = H5I_INVALID_HID();
-        H5fid = H5I_INVALID_HID();
+        H5aid = hdf5_h.H5I_INVALID_HID();
+        H5did = hdf5_h.H5I_INVALID_HID();
+        H5sid = hdf5_h.H5I_INVALID_HID();
+        H5fid = hdf5_h.H5I_INVALID_HID();
     }
 
     static
@@ -197,7 +197,7 @@ public class TestH5Affm {
             int result = hdf5_h_1.H5Aclose(H5aid);
             assertTrue("H5Aclose failed", isSuccess(result));
 
-            H5aid = H5I_INVALID_HID();
+            H5aid = hdf5_h.H5I_INVALID_HID();
             hdf5_h_1.H5Sclose(attr_sid);
         }
     }

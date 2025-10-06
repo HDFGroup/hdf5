@@ -27,6 +27,7 @@ import org.hdfgroup.javahdf5.hdf5_h;
 public class FfmTestSupport {
 
     /**
+<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
      * Get the invalid HDF5 identifier value.
      *
      * @return The invalid HDF5 identifier
@@ -34,6 +35,8 @@ public class FfmTestSupport {
     public static long H5I_INVALID_HID() { return hdf5_h.H5I_INVALID_HID(); }
 
     /**
+=======
+>>>>>>> 60427d5 Cleanup and add H5P tests
      * Check if an HDF5 return value indicates success.
      *
      * @param retVal The return value from an HDF5 function
@@ -180,6 +183,16 @@ public class FfmTestSupport {
      * @return The long value at offset 0
      */
     public static long getLong(MemorySegment segment) { return segment.get(ValueLayout.JAVA_LONG, 0); }
+
+    /**
+     * Get a double value from a MemorySegment.
+     *
+     * @param segment The MemorySegment to read from
+     * @return The double value at offset 0
+     */
+    public static double getDouble(MemorySegment segment) {
+        return segment.get(ValueLayout.JAVA_DOUBLE, 0);
+    }
 
     /**
      * Set an integer value in a MemorySegment.
