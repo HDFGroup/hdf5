@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Java test suite
+# This file sets up the build, and test execution rules for the HDF5 Java test suite.
+# It handles Java test source grouping, JAR creation, test data management, test execution (including VOL tests),
+# and integration with the HDF5 Java FFM and core libraries.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_JAVA_JTEST Java)
 
@@ -5,96 +11,75 @@ set (CMAKE_VERBOSE_MAKEFILE 1)
 
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_JSRC_SOURCE_DIR};${HDF5_JAVA_JSRC_BINARY_DIR};${HDF5_JAVA_JSRC_LIB_DIR};${HDF5_JAVA_LIB_DIR}")
 
-set (HDF5_JAVA_JTEST_SOURCES
-    TestH5
-#    TestH5Eparams
-#    TestH5Eregister
-#    TestH5Fparams
-#    TestH5Fbasic
-#    TestH5F
-#    TestH5Fswmr
-#    TestH5Gbasic
-#    TestH5G
-#    TestH5Sbasic
-#    TestH5S
-#    TestH5Tparams
-#    TestH5Tbasic
-#    TestH5T
-#    TestH5Dparams
-#    TestH5D
-#    TestH5Dplist
-#    TestH5Drw
-#    TestH5Lparams
-#    TestH5Lbasic
-#    TestH5Lcreate
-#    TestH5R
-#    TestH5Rref
-#    TestH5P
-#    TestH5PData
-#    TestH5Pfapl
-#    TestH5Pvirtual
-#    TestH5Plist
-#    TestH5A
-#    TestH5Arw
-#    TestH5Oparams
-#    TestH5Obasic
-#    TestH5Ocreate
-#    TestH5OcopyOld
-#    TestH5Ocopy
-    TestH5PL
-    TestH5VL
-    TestH5Z
+#-----------------------------------------------------------------------------
+# Build FFM-only tests (no hdf.hdf5lib dependencies)
+# Build FfmTestSupport first, then test files that depend on it
+#-----------------------------------------------------------------------------
+
+# Set classpath for FfmTestSupport compilation (needs FFM bindings)
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVAHDF5_JARS}")
+
+# Build FfmTestSupport utility class first
+file (WRITE ${PROJECT_BINARY_DIR}/FfmTestSupportManifest.txt
+"Main-Class: jtest.FfmTestSupport
+Enable-Native-Access: ALL-UNNAMED
+"
 )
 
-#if (NOT HDF5_ENABLE_DEBUG_APIS)
-#  set (HDF5_JAVA_JTEST_SOURCES
-#      ${HDF5_JAVA_JTEST_SOURCES}
-#      TestH5E
-#      TestH5Edefault
-#      TestH5Giterate
-#  )
-#endif ()
-#
-#if (HDF5_ENABLE_ROS3_VFD)
-#  set (HDF5_JAVA_JTEST_SOURCES
-#      ${HDF5_JAVA_JTEST_SOURCES}
-#      TestH5Pfapls3
-#  )
-#endif ()
+add_jar (${HDF5_JAVA_JTEST_LIB_TARGET}_FfmTestSupport
+  MANIFEST ${PROJECT_BINARY_DIR}/FfmTestSupportManifest.txt
+  FfmTestSupport.java
+)
 
-#if (HDF5_ENABLE_HDFS)
-#  set (HDF5_JAVA_JTEST_SOURCES
-#      ${HDF5_JAVA_JTEST_SOURCES}
-#      TestH5Pfaplhdfs
-#  )
-#endif ()
+get_target_property (${HDF5_JAVA_JTEST_LIB_TARGET}_FfmTestSupport_JAR_FILE
+                     ${HDF5_JAVA_JTEST_LIB_TARGET}_FfmTestSupport JAR_FILE)
 
-set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVAHDF5_JARS};${HDF5_JAVA_LIB_DIR}/org.junit.jar;${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar;${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_SIMPLE_JAR}")
+add_dependencies (${HDF5_JAVA_JTEST_LIB_TARGET}_FfmTestSupport ${HDF5_JAVA_JSRC_LIB_TARGET})
+set_target_properties (${HDF5_JAVA_JTEST_LIB_TARGET}_FfmTestSupport PROPERTIES FOLDER test/java/ffm)
 
-foreach (test_file ${HDF5_JAVA_JTEST_SOURCES})
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_JAVA_JTEST_FfmTestSupport_SRC_FORMAT FfmTestSupport.java)
+endif ()
 
-  file (WRITE ${PROJECT_BINARY_DIR}/${test_file}Manifest.txt
-  "Main-Class: test.${test_file}
+# Build FFM test files (they depend on FfmTestSupport)
+set (HDF5_JAVA_JTEST_FFM_TEST_SOURCES
+    TestH5Fffm
+    TestH5Dffm
+    TestH5Sffm
+    TestH5Tffm
+    TestH5Affm
+)
+
+# Update classpath to include FfmTestSupport JAR for test compilation
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVAHDF5_JARS};${${HDF5_JAVA_JTEST_LIB_TARGET}_FfmTestSupport_JAR_FILE};${HDF5_JAVA_LIB_DIR}/org.junit.jar;${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar;${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_SIMPLE_JAR}")
+
+foreach (ffm_test_file ${HDF5_JAVA_JTEST_FFM_TEST_SOURCES})
+
+  file (WRITE ${PROJECT_BINARY_DIR}/${ffm_test_file}FfmManifest.txt
+  "Main-Class: jtest.${ffm_test_file}
 Enable-Native-Access: ALL-UNNAMED
 "
   )
 
-  add_jar (${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file} MANIFEST ${PROJECT_BINARY_DIR}/${test_file}Manifest.txt ${test_file}.java)
+  add_jar (${HDF5_JAVA_JTEST_LIB_TARGET}_${ffm_test_file}
+    MANIFEST ${PROJECT_BINARY_DIR}/${ffm_test_file}FfmManifest.txt
+    ${ffm_test_file}.java
+  )
 
-  get_target_property (${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file}_JAR_FILE ${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file} JAR_FILE)
-  #install_jar (${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file} ${HJAVA_INSTALL_DATA_DIR}/tests tests)
-  #get_target_property (${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file}_CLASSPATH ${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file} CLASSDIR)
+  get_target_property (${HDF5_JAVA_JTEST_LIB_TARGET}_${ffm_test_file}_JAR_FILE
+                       ${HDF5_JAVA_JTEST_LIB_TARGET}_${ffm_test_file} JAR_FILE)
 
-  add_dependencies (${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file} ${HDF5_JAVA_JSRC_LIB_TARGET})
-  set_target_properties (${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file} PROPERTIES FOLDER test/java)
+  # FFM tests depend on both javahdf5 JAR and FfmTestSupport JAR
+  add_dependencies (${HDF5_JAVA_JTEST_LIB_TARGET}_${ffm_test_file} ${HDF5_JAVA_JSRC_LIB_TARGET} ${HDF5_JAVA_JTEST_LIB_TARGET}_FfmTestSupport)
+  set_target_properties (${HDF5_JAVA_JTEST_LIB_TARGET}_${ffm_test_file} PROPERTIES FOLDER test/java/ffm)
 
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
   if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_JAVA_JTEST_${test_file}_SRC_FORMAT ${test_file}.java)
+    clang_format (HDF5_JAVA_JTEST_${ffm_test_file}_FFM_SRC_FORMAT ${ffm_test_file}.java)
   endif ()
 endforeach ()
+
+# Restore classpath for other tests
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVAHDF5_JARS};${HDF5_JAVA_LIB_DIR}/org.junit.jar;${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar;${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_SIMPLE_JAR}")
 
 foreach (h5_file ${HDF5_JAVA_JTEST_SOURCES})
   HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/JUnit-${h5_file}.txt" "${PROJECT_BINARY_DIR}/JUnit-${h5_file}.txt" "${HDF5_JAVA_JTEST_LIB_TARGET}_files")
@@ -121,7 +106,6 @@ else ()
 endif ()
 
 get_property (target_name TARGET ${HDF5_JAVA_JSRC_LIB_TARGET} PROPERTY OUTPUT_NAME)
-#set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 set (CMAKE_JAVA_CLASSPATH ".")
 foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
@@ -150,36 +134,33 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
   )
   set_tests_properties (JUnitExt-clean-objects PROPERTIES FIXTURES_CLEANUP clear_JUnitExt)
 
-  # enable FFM java access
-  set (CMAKE_Java_RUNTIME_FLAGS "${CMAKE_Java_RUNTIME_FLAGS};--enable-native-access=ALL-UNNAMED")
-  foreach (test_file ${HDF5_JAVA_JTEST_SOURCES})
-    set (TEST_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_JTEST_LIB_TARGET}_${test_file}_JAR_FILE}")
+  #-----------------------------------------------------------------------------
+  # Add FFM-only test execution (Test* files, skip FfmTestSupport utility)
+  #-----------------------------------------------------------------------------
+  foreach (ffm_test_file ${HDF5_JAVA_JTEST_FFM_TEST_SOURCES})
+    set (TEST_FFM_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_JTEST_LIB_TARGET}_${ffm_test_file}_JAR_FILE}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_JTEST_LIB_TARGET}_FfmTestSupport_JAR_FILE}")
 
     add_test (
-        NAME JUnitExt-${test_file}
+        NAME JUnitFFM-${ffm_test_file}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
-            -D "TEST_CLASSPATH:STRING=${TEST_JAVA_CLASSPATH}"
+            -D "TEST_JAVA=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
+            -D "TEST_CLASSPATH:STRING=${TEST_FFM_JAVA_CLASSPATH}"
             -D "TEST_ARGS:STRING=${CMD_ARGS}-ea;org.junit.runner.JUnitCore"
-            -D "TEST_PROGRAM=test.${test_file}"
+            -D "TEST_PROGRAM=jtest.${ffm_test_file}"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
             -D "TEST_FOLDER=${HDF5_BINARY_DIR}/java/jtest"
-            -D "TEST_OUTPUT=JUnit-${test_file}.out"
-#            -D "TEST_LOG_LEVEL=trace"
+            -D "TEST_OUTPUT=JUnitFFM-${ffm_test_file}.out"
             -D "TEST_EXPECT=0"
-            -D "SKIP_APPEND=1"
             -D "TEST_MASK_ERROR=TRUE"
-#            -D "TEST_FILTER:STRING=${testfilter}"
-            -D "TEST_REFERENCE=JUnit-${test_file}.txt"
-            -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
-    set_tests_properties (JUnitExt-${test_file} PROPERTIES
+    set_tests_properties (JUnitFFM-${ffm_test_file} PROPERTIES
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
         FIXTURES_REQUIRED clear_JUnitExt
         WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/jtest
     )
-    if ("JUnit-${test_file}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (JUnitExt-${test_file} PROPERTIES DISABLED true)
+    if ("JUnitFFM-${ffm_test_file}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (JUnitFFM-${ffm_test_file} PROPERTIES DISABLED true)
     endif ()
   endforeach ()
 endif ()
