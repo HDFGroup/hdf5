@@ -12,8 +12,9 @@
 
 package jtest;
 
-import static jtest.FfmTestSupport.*;
 import static org.junit.Assert.*;
+
+import static jtest.FfmTestSupport.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -21,7 +22,6 @@ import java.lang.foreign.MemorySegment;
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.hdfgroup.javahdf5.hdf5_h_1;
 import org.hdfgroup.javahdf5.hdf5_h_2;
-
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -37,18 +37,19 @@ public class TestH5Tffm {
     @Rule
     public TestName testname = new TestName();
 
-    static {
+    static
+    {
         // Initialize FFM library by calling H5open()
         // This ensures global type variables are properly initialized
         try {
             hdf5_h_1.H5open();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.err.println("Warning: H5open() failed during FFM initialization: " + e);
         }
     }
 
     // Predefined datatype constants
-    
 
     // Datatype classes
 
@@ -57,14 +58,16 @@ public class TestH5Tffm {
     long H5tid = H5I_INVALID_HID();
 
     @After
-    public void cleanup() {
+    public void cleanup()
+    {
         closeQuietly(H5tid, hdf5_h_1::H5Tclose);
         H5tid = H5I_INVALID_HID();
         System.out.println();
     }
 
     @Test
-    public void testH5Tcopy() {
+    public void testH5Tcopy()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
@@ -72,7 +75,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tequal() {
+    public void testH5Tequal()
+    {
         System.out.print(testname.getMethodName());
         long tid2 = H5I_INVALID_HID();
 
@@ -89,13 +93,15 @@ public class TestH5Tffm {
             // Compare with different type
             result = hdf5_h_1.H5Tequal(H5tid, hdf5_h_1.H5T_NATIVE_FLOAT_g());
             assertFalse("Types should not be equal", result > 0);
-        } finally {
+        }
+        finally {
             closeQuietly(tid2, hdf5_h_1::H5Tclose);
         }
     }
 
     @Test
-    public void testH5Tget_class() {
+    public void testH5Tget_class()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
@@ -106,7 +112,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_size() {
+    public void testH5Tget_size()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
@@ -118,7 +125,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tset_size() {
+    public void testH5Tset_size()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_C_S1_g());
@@ -132,7 +140,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_order() {
+    public void testH5Tget_order()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_STD_I32LE_g());
@@ -143,7 +152,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_precision() {
+    public void testH5Tget_precision()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
@@ -154,7 +164,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tset_precision() {
+    public void testH5Tset_precision()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
@@ -168,7 +179,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_strpad() {
+    public void testH5Tget_strpad()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_C_S1_g());
@@ -179,8 +191,11 @@ public class TestH5Tffm {
     }
 
     @Test
-    @Ignore("FFM initialization issue with H5T_C_S1_g() when run as first test - functionality covered by testH5Tget_strpad")
-    public void testH5Tset_strpad() {
+    @Ignore(
+        "FFM initialization issue with H5T_C_S1_g() when run as first test - functionality covered by testH5Tget_strpad")
+    public void
+    testH5Tset_strpad()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_C_S1_g());
@@ -194,13 +209,14 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tcreate_compound() {
+    public void testH5Tcreate_compound()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Create a compound type with int and double
             int compoundSize = 4 + 8; // sizeof(int) + sizeof(double)
-            H5tid = hdf5_h_1.H5Tcreate(hdf5_h.H5T_COMPOUND(), compoundSize);
+            H5tid            = hdf5_h_1.H5Tcreate(hdf5_h.H5T_COMPOUND(), compoundSize);
             assertTrue("H5Tcreate failed", isValidId(H5tid));
 
             // Insert int member
@@ -224,7 +240,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_nmembers() {
+    public void testH5Tget_nmembers()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
@@ -240,14 +257,15 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_member_name() {
+    public void testH5Tget_member_name()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             H5tid = hdf5_h_1.H5Tcreate(hdf5_h.H5T_COMPOUND(), 12);
             assertTrue("H5Tcreate failed", isValidId(H5tid));
 
-            String fieldName = "test_field";
+            String fieldName          = "test_field";
             MemorySegment nameSegment = stringToSegment(arena, fieldName);
             hdf5_h_1.H5Tinsert(H5tid, nameSegment, 0, hdf5_h_1.H5T_NATIVE_INT_g());
 
@@ -260,14 +278,15 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_member_offset() {
+    public void testH5Tget_member_offset()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             H5tid = hdf5_h_1.H5Tcreate(hdf5_h.H5T_COMPOUND(), 12);
             assertTrue("H5Tcreate failed", isValidId(H5tid));
 
-            long expectedOffset = 4;
+            long expectedOffset       = 4;
             MemorySegment nameSegment = stringToSegment(arena, "field");
             hdf5_h_1.H5Tinsert(H5tid, nameSegment, expectedOffset, hdf5_h_1.H5T_NATIVE_INT_g());
 
@@ -277,7 +296,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_member_type() {
+    public void testH5Tget_member_type()
+    {
         System.out.print(testname.getMethodName());
         long memberType = H5I_INVALID_HID();
 
@@ -294,19 +314,21 @@ public class TestH5Tffm {
             // Verify it's an integer type
             int tclass = hdf5_h_1.H5Tget_class(memberType);
             assertEquals("Member type should be INTEGER", hdf5_h.H5T_INTEGER(), tclass);
-        } finally {
+        }
+        finally {
             closeQuietly(memberType, hdf5_h_1::H5Tclose);
         }
     }
 
     @Test
-    public void testH5Tarray_create() {
+    public void testH5Tarray_create()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Create array type: int[3][4]
-            int rank = 2;
-            long[] dims = {3, 4};
+            int rank                  = 2;
+            long[] dims               = {3, 4};
             MemorySegment dimsSegment = allocateLongArray(arena, rank);
             copyToSegment(dimsSegment, dims);
 
@@ -320,12 +342,13 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_array_ndims() {
+    public void testH5Tget_array_ndims()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            int rank = 2;
-            long[] dims = {3, 4};
+            int rank                  = 2;
+            long[] dims               = {3, 4};
             MemorySegment dimsSegment = allocateLongArray(arena, rank);
             copyToSegment(dimsSegment, dims);
 
@@ -338,12 +361,13 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_array_dims() {
+    public void testH5Tget_array_dims()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            int rank = 2;
-            long[] expectedDims = {3, 4};
+            int rank                  = 2;
+            long[] expectedDims       = {3, 4};
             MemorySegment dimsSegment = allocateLongArray(arena, rank);
             copyToSegment(dimsSegment, expectedDims);
 
@@ -351,7 +375,7 @@ public class TestH5Tffm {
             assertTrue("H5Tarray_create2 failed", isValidId(H5tid));
 
             MemorySegment returnedDimsSegment = allocateLongArray(arena, rank);
-            int result = hdf5_h_1.H5Tget_array_dims2(H5tid, returnedDimsSegment);
+            int result                        = hdf5_h_1.H5Tget_array_dims2(H5tid, returnedDimsSegment);
             assertEquals("H5Tget_array_dims2 should return rank", rank, result);
 
             long[] returnedDims = new long[rank];
@@ -361,7 +385,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tenum_operations() {
+    public void testH5Tenum_operations()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
@@ -370,19 +395,19 @@ public class TestH5Tffm {
             assertTrue("H5Tenum_create failed", isValidId(H5tid));
 
             // Insert enum values
-            MemorySegment redSegment = stringToSegment(arena, "RED");
+            MemorySegment redSegment      = stringToSegment(arena, "RED");
             MemorySegment redValueSegment = allocateInt(arena);
             setInt(redValueSegment, 0);
             int result = hdf5_h_1.H5Tenum_insert(H5tid, redSegment, redValueSegment);
             assertTrue("H5Tenum_insert RED failed", isSuccess(result));
 
-            MemorySegment greenSegment = stringToSegment(arena, "GREEN");
+            MemorySegment greenSegment      = stringToSegment(arena, "GREEN");
             MemorySegment greenValueSegment = allocateInt(arena);
             setInt(greenValueSegment, 1);
             result = hdf5_h_1.H5Tenum_insert(H5tid, greenSegment, greenValueSegment);
             assertTrue("H5Tenum_insert GREEN failed", isSuccess(result));
 
-            MemorySegment blueSegment = stringToSegment(arena, "BLUE");
+            MemorySegment blueSegment      = stringToSegment(arena, "BLUE");
             MemorySegment blueValueSegment = allocateInt(arena);
             setInt(blueValueSegment, 2);
             result = hdf5_h_1.H5Tenum_insert(H5tid, blueSegment, blueValueSegment);
@@ -396,8 +421,8 @@ public class TestH5Tffm {
             MemorySegment lookupValueSegment = allocateInt(arena);
             setInt(lookupValueSegment, 1);
 
-            MemorySegment nameSegment = arena.allocate(64);  // Allocate buffer for name
-            int nameResult = hdf5_h_1.H5Tenum_nameof(H5tid, lookupValueSegment, nameSegment, 64);
+            MemorySegment nameSegment = arena.allocate(64); // Allocate buffer for name
+            int nameResult            = hdf5_h_1.H5Tenum_nameof(H5tid, lookupValueSegment, nameSegment, 64);
             assertTrue("H5Tenum_nameof failed", isSuccess(nameResult));
 
             String name = nameSegment.getString(0);
@@ -405,7 +430,7 @@ public class TestH5Tffm {
 
             // Test H5Tenum_valueof - get value from name
             MemorySegment lookupNameSegment = stringToSegment(arena, "BLUE");
-            MemorySegment valueSegment = allocateInt(arena);
+            MemorySegment valueSegment      = allocateInt(arena);
             result = hdf5_h_1.H5Tenum_valueof(H5tid, lookupNameSegment, valueSegment);
             assertTrue("H5Tenum_valueof failed", isSuccess(result));
 
@@ -419,7 +444,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tis_variable_str() {
+    public void testH5Tis_variable_str()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
@@ -438,7 +464,7 @@ public class TestH5Tffm {
             H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_C_S1_g());
             assertTrue("H5Tcopy failed", isValidId(H5tid));
 
-            hdf5_h_1.H5Tset_size(H5tid, -1);  // H5T_VARIABLE
+            hdf5_h_1.H5Tset_size(H5tid, -1); // H5T_VARIABLE
 
             result = hdf5_h_1.H5Tis_variable_str(H5tid);
             assertTrue("Variable-length string should be variable", result > 0);
@@ -446,7 +472,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_cset() {
+    public void testH5Tget_cset()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_C_S1_g());
@@ -459,7 +486,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tclose() {
+    public void testH5Tclose()
+    {
         System.out.print(testname.getMethodName());
 
         H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
@@ -471,7 +499,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tvlen_create() {
+    public void testH5Tvlen_create()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
@@ -496,13 +525,14 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Topaque_operations() {
+    public void testH5Topaque_operations()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Create opaque type with 16 bytes
             long size = 16;
-            H5tid = hdf5_h_1.H5Tcreate(hdf5_h.H5T_OPAQUE(), size);
+            H5tid     = hdf5_h_1.H5Tcreate(hdf5_h.H5T_OPAQUE(), size);
             assertTrue("H5Tcreate opaque failed", isValidId(H5tid));
 
             // Verify it's opaque
@@ -510,9 +540,9 @@ public class TestH5Tffm {
             assertEquals("Should be H5T_OPAQUE class", hdf5_h.H5T_OPAQUE(), tclass);
 
             // Set tag for opaque type
-            String tag = "16-byte opaque data";
+            String tag               = "16-byte opaque data";
             MemorySegment tagSegment = stringToSegment(arena, tag);
-            int result = hdf5_h_1.H5Tset_tag(H5tid, tagSegment);
+            int result               = hdf5_h_1.H5Tset_tag(H5tid, tagSegment);
             assertTrue("H5Tset_tag failed", isSuccess(result));
 
             // Get tag back
@@ -529,7 +559,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_sign_set_sign() {
+    public void testH5Tget_sign_set_sign()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
@@ -552,7 +583,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_offset_set_offset() {
+    public void testH5Tget_offset_set_offset()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
@@ -566,7 +598,7 @@ public class TestH5Tffm {
 
             // Set new offset (shift by 2 bits)
             long newOffset = 2;
-            int result = hdf5_h_1.H5Tset_offset(H5tid, newOffset);
+            int result     = hdf5_h_1.H5Tset_offset(H5tid, newOffset);
             assertTrue("H5Tset_offset failed", isSuccess(result));
 
             // Verify offset changed
@@ -576,7 +608,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    public void testH5Tget_pad_set_pad() {
+    public void testH5Tget_pad_set_pad()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
@@ -587,7 +620,7 @@ public class TestH5Tffm {
             // Get current padding
             MemorySegment lsbSegment = allocateInt(arena);
             MemorySegment msbSegment = allocateInt(arena);
-            int result = hdf5_h_1.H5Tget_pad(H5tid, lsbSegment, msbSegment);
+            int result               = hdf5_h_1.H5Tget_pad(H5tid, lsbSegment, msbSegment);
             assertTrue("H5Tget_pad failed", isSuccess(result));
 
             // Set new padding (both to zero)
@@ -597,7 +630,7 @@ public class TestH5Tffm {
             // Verify padding changed
             MemorySegment newLsbSegment = allocateInt(arena);
             MemorySegment newMsbSegment = allocateInt(arena);
-            result = hdf5_h_1.H5Tget_pad(H5tid, newLsbSegment, newMsbSegment);
+            result                      = hdf5_h_1.H5Tget_pad(H5tid, newLsbSegment, newMsbSegment);
             assertTrue("H5Tget_pad failed", isSuccess(result));
 
             assertEquals("LSB padding should be ZERO", hdf5_h.H5T_PAD_ZERO(), getInt(newLsbSegment));

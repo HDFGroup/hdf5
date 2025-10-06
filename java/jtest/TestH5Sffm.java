@@ -12,8 +12,9 @@
 
 package jtest;
 
-import static jtest.FfmTestSupport.*;
 import static org.junit.Assert.*;
+
+import static jtest.FfmTestSupport.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -22,7 +23,6 @@ import java.lang.foreign.ValueLayout;
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.hdfgroup.javahdf5.hdf5_h_1;
 import org.hdfgroup.javahdf5.hdf5_h_2;
-
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,26 +37,27 @@ public class TestH5Sffm {
     @Rule
     public TestName testname = new TestName();
 
-    private static final int RANK = 2;
+    private static final int RANK  = 2;
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
-    
 
     long H5sid = H5I_INVALID_HID();
 
     @After
-    public void cleanup() {
+    public void cleanup()
+    {
         closeQuietly(H5sid, hdf5_h_1::H5Sclose);
         H5sid = H5I_INVALID_HID();
         System.out.println();
     }
 
     @Test
-    public void testH5Screate_simple() {
+    public void testH5Screate_simple()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -66,14 +67,15 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Screate_simple_with_maxdims() {
+    public void testH5Screate_simple_with_maxdims()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims    = {DIM_X, DIM_Y};
             long[] maxdims = {2 * DIM_X, 2 * DIM_Y};
 
-            MemorySegment dimsSegment = allocateLongArray(arena, RANK);
+            MemorySegment dimsSegment    = allocateLongArray(arena, RANK);
             MemorySegment maxdimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
             copyToSegment(maxdimsSegment, maxdims);
@@ -84,7 +86,8 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Screate() {
+    public void testH5Screate()
+    {
         System.out.print(testname.getMethodName());
 
         H5sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SIMPLE());
@@ -92,7 +95,8 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Screate_scalar() {
+    public void testH5Screate_scalar()
+    {
         System.out.print(testname.getMethodName());
 
         H5sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
@@ -104,13 +108,14 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Scopy() {
+    public void testH5Scopy()
+    {
         System.out.print(testname.getMethodName());
         long sid_copy = H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create original dataspace
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -129,17 +134,19 @@ public class TestH5Sffm {
             long[] copyDims = new long[RANK];
             copyFromSegment(copyDimsSegment, copyDims);
             assertArrayEquals("Dimensions should match", dims, copyDims);
-        } finally {
+        }
+        finally {
             closeQuietly(sid_copy, hdf5_h_1::H5Sclose);
         }
     }
 
     @Test
-    public void testH5Sget_simple_extent_ndims() {
+    public void testH5Sget_simple_extent_ndims()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -152,11 +159,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_simple_extent_npoints() {
+    public void testH5Sget_simple_extent_npoints()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -169,11 +177,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_simple_extent_type() {
+    public void testH5Sget_simple_extent_type()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -186,14 +195,15 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sset_extent_simple() {
+    public void testH5Sset_extent_simple()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             H5sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SIMPLE());
             assertTrue("H5Screate failed", isValidId(H5sid));
 
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -207,11 +217,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sselect_hyperslab() {
+    public void testH5Sselect_hyperslab()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -227,9 +238,8 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            
             int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                     MemorySegment.NULL, countSegment, MemorySegment.NULL);
+                                                      MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Verify selection
@@ -239,11 +249,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sselect_elements() {
+    public void testH5Sselect_elements()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -252,15 +263,14 @@ public class TestH5Sffm {
 
             // Select 3 specific points
             long[] coords = {
-                0, 0,  // Point 1
-                1, 1,  // Point 2
-                2, 2   // Point 3
+                0, 0, // Point 1
+                1, 1, // Point 2
+                2, 2  // Point 3
             };
 
             MemorySegment coordsSegment = allocateLongArray(arena, coords.length);
             copyToSegment(coordsSegment, coords);
 
-            
             int result = hdf5_h_1.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(), 3, coordsSegment);
             assertTrue("H5Sselect_elements failed", isSuccess(result));
 
@@ -271,11 +281,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sselect_all() {
+    public void testH5Sselect_all()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -292,11 +303,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sselect_none() {
+    public void testH5Sselect_none()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -313,14 +325,15 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_simple_extent_dims() {
+    public void testH5Sget_simple_extent_dims()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] expectedDims = {DIM_X, DIM_Y};
+            long[] expectedDims    = {DIM_X, DIM_Y};
             long[] expectedMaxDims = {2 * DIM_X, 2 * DIM_Y};
 
-            MemorySegment dimsSegment = allocateLongArray(arena, RANK);
+            MemorySegment dimsSegment    = allocateLongArray(arena, RANK);
             MemorySegment maxdimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, expectedDims);
             copyToSegment(maxdimsSegment, expectedMaxDims);
@@ -329,13 +342,14 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Get dimensions back
-            MemorySegment returnedDimsSegment = allocateLongArray(arena, RANK);
+            MemorySegment returnedDimsSegment    = allocateLongArray(arena, RANK);
             MemorySegment returnedMaxDimsSegment = allocateLongArray(arena, RANK);
 
-            int ndims = hdf5_h_1.H5Sget_simple_extent_dims(H5sid, returnedDimsSegment, returnedMaxDimsSegment);
+            int ndims =
+                hdf5_h_1.H5Sget_simple_extent_dims(H5sid, returnedDimsSegment, returnedMaxDimsSegment);
             assertEquals("Rank should match", RANK, ndims);
 
-            long[] returnedDims = new long[RANK];
+            long[] returnedDims    = new long[RANK];
             long[] returnedMaxDims = new long[RANK];
             copyFromSegment(returnedDimsSegment, returnedDims);
             copyFromSegment(returnedMaxDimsSegment, returnedMaxDims);
@@ -346,11 +360,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_select_type() {
+    public void testH5Sget_select_type()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -362,15 +377,15 @@ public class TestH5Sffm {
             assertEquals("Default selection should be ALL", hdf5_h.H5S_SEL_ALL(), selType);
 
             // Select hyperslab
-            long[] start = {1, 1};
-            long[] count = {2, 3};
+            long[] start               = {1, 1};
+            long[] count               = {2, 3};
             MemorySegment startSegment = allocateLongArray(arena, RANK);
             MemorySegment countSegment = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                        MemorySegment.NULL, countSegment, MemorySegment.NULL);
+            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
+                                         countSegment, MemorySegment.NULL);
 
             selType = hdf5_h_1.H5Sget_select_type(H5sid);
             assertEquals("Selection type should be HYPERSLABS", hdf5_h.H5S_SEL_HYPERSLABS(), selType);
@@ -383,11 +398,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_select_bounds() {
+    public void testH5Sget_select_bounds()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -395,31 +411,31 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a hyperslab from (1,2) with count (2,3)
-            long[] start = {1, 2};
-            long[] count = {2, 3};
+            long[] start               = {1, 2};
+            long[] count               = {2, 3};
             MemorySegment startSegment = allocateLongArray(arena, RANK);
             MemorySegment countSegment = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                        MemorySegment.NULL, countSegment, MemorySegment.NULL);
+            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
+                                         countSegment, MemorySegment.NULL);
 
             // Get selection bounds
             MemorySegment boundsStartSegment = allocateLongArray(arena, RANK);
-            MemorySegment boundsEndSegment = allocateLongArray(arena, RANK);
+            MemorySegment boundsEndSegment   = allocateLongArray(arena, RANK);
 
             int result = hdf5_h_1.H5Sget_select_bounds(H5sid, boundsStartSegment, boundsEndSegment);
             assertTrue("H5Sget_select_bounds failed", isSuccess(result));
 
             long[] boundsStart = new long[RANK];
-            long[] boundsEnd = new long[RANK];
+            long[] boundsEnd   = new long[RANK];
             copyFromSegment(boundsStartSegment, boundsStart);
             copyFromSegment(boundsEndSegment, boundsEnd);
 
             // Bounds should be: start=(1,2), end=(2,4) because end = start + count - 1
             long[] expectedStart = {1, 2};
-            long[] expectedEnd = {2, 4};  // (1+2-1, 2+3-1)
+            long[] expectedEnd   = {2, 4}; // (1+2-1, 2+3-1)
 
             assertArrayEquals("Bounds start should match", expectedStart, boundsStart);
             assertArrayEquals("Bounds end should match", expectedEnd, boundsEnd);
@@ -427,13 +443,14 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sextent_copy() {
+    public void testH5Sextent_copy()
+    {
         System.out.print(testname.getMethodName());
         long sid_dest = H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create source dataspace with specific dimensions
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -456,20 +473,22 @@ public class TestH5Sffm {
             long[] destDims = new long[RANK];
             copyFromSegment(destDimsSegment, destDims);
             assertArrayEquals("Dimensions should match", dims, destDims);
-        } finally {
+        }
+        finally {
             closeQuietly(sid_dest, hdf5_h_1::H5Sclose);
         }
     }
 
     @Test
-    public void testH5Sextent_equal() {
+    public void testH5Sextent_equal()
+    {
         System.out.print(testname.getMethodName());
         long sid2 = H5I_INVALID_HID();
         long sid3 = H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create first dataspace
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -481,7 +500,7 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(sid2));
 
             // Create third dataspace with different dimensions
-            long[] diffDims = {DIM_X + 1, DIM_Y};
+            long[] diffDims               = {DIM_X + 1, DIM_Y};
             MemorySegment diffDimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(diffDimsSegment, diffDims);
 
@@ -494,18 +513,20 @@ public class TestH5Sffm {
 
             result = hdf5_h_1.H5Sextent_equal(H5sid, sid3);
             assertFalse("Extents should not be equal", result > 0);
-        } finally {
+        }
+        finally {
             closeQuietly(sid2, hdf5_h_1::H5Sclose);
             closeQuietly(sid3, hdf5_h_1::H5Sclose);
         }
     }
 
     @Test
-    public void testH5Sget_select_hyper_nblocks() {
+    public void testH5Sget_select_hyper_nblocks()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -513,26 +534,26 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select first hyperslab
-            long[] start1 = {0, 0};
-            long[] count1 = {2, 2};
+            long[] start1               = {0, 0};
+            long[] count1               = {2, 2};
             MemorySegment start1Segment = allocateLongArray(arena, RANK);
             MemorySegment count1Segment = allocateLongArray(arena, RANK);
             copyToSegment(start1Segment, start1);
             copyToSegment(count1Segment, count1);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment,
-                                        MemorySegment.NULL, count1Segment, MemorySegment.NULL);
+            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment, MemorySegment.NULL,
+                                         count1Segment, MemorySegment.NULL);
 
             // Add second hyperslab (OR operation)
-            long[] start2 = {2, 2};
-            long[] count2 = {2, 2};
+            long[] start2               = {2, 2};
+            long[] count2               = {2, 2};
             MemorySegment start2Segment = allocateLongArray(arena, RANK);
             MemorySegment count2Segment = allocateLongArray(arena, RANK);
             copyToSegment(start2Segment, start2);
             copyToSegment(count2Segment, count2);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_OR(), start2Segment,
-                                        MemorySegment.NULL, count2Segment, MemorySegment.NULL);
+            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_OR(), start2Segment, MemorySegment.NULL,
+                                         count2Segment, MemorySegment.NULL);
 
             // Get number of blocks
             long nblocks = hdf5_h_1.H5Sget_select_hyper_nblocks(H5sid);
@@ -541,12 +562,13 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sencode_decode() {
+    public void testH5Sencode_decode()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Create dataspace with hyperslab selection
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -554,19 +576,20 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a hyperslab
-            long[] start = {1, 1};
-            long[] count = {2, 3};
+            long[] start               = {1, 1};
+            long[] count               = {2, 3};
             MemorySegment startSegment = allocateLongArray(arena, RANK);
             MemorySegment countSegment = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                        MemorySegment.NULL, countSegment, MemorySegment.NULL);
+            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
+                                         countSegment, MemorySegment.NULL);
 
             // Get encoded size
             MemorySegment nalloc_segment = allocateLong(arena);
-            int result = hdf5_h_1.H5Sencode2(H5sid, MemorySegment.NULL, nalloc_segment, hdf5_h_1.H5P_DEFAULT());
+            int result =
+                hdf5_h_1.H5Sencode2(H5sid, MemorySegment.NULL, nalloc_segment, hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Sencode2 (get size) failed", isSuccess(result));
 
             long nalloc = getLong(nalloc_segment);
@@ -574,7 +597,7 @@ public class TestH5Sffm {
 
             // Encode dataspace
             MemorySegment buf = arena.allocate(nalloc);
-            result = hdf5_h_1.H5Sencode2(H5sid, buf, nalloc_segment, hdf5_h_1.H5P_DEFAULT());
+            result            = hdf5_h_1.H5Sencode2(H5sid, buf, nalloc_segment, hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Sencode2 failed", isSuccess(result));
 
             // Decode dataspace
@@ -582,7 +605,7 @@ public class TestH5Sffm {
             assertTrue("H5Sdecode failed", isValidId(decoded_sid));
 
             // Verify decoded dataspace has same selection
-            long npoints_orig = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            long npoints_orig    = hdf5_h_1.H5Sget_select_npoints(H5sid);
             long npoints_decoded = hdf5_h_1.H5Sget_select_npoints(decoded_sid);
             assertEquals("Selected points should match", npoints_orig, npoints_decoded);
 
@@ -591,11 +614,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sclose() {
+    public void testH5Sclose()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -609,11 +633,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_select_npoints() {
+    public void testH5Sget_select_npoints()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -628,16 +653,15 @@ public class TestH5Sffm {
             assertEquals("Should have DIM_X * DIM_Y points", DIM_X * DIM_Y, npoints);
 
             // Select hyperslab - 2x3 = 6 points
-            long[] start = {1, 1};
-            long[] count = {2, 3};
+            long[] start               = {1, 1};
+            long[] count               = {2, 3};
             MemorySegment startSegment = allocateLongArray(arena, RANK);
             MemorySegment countSegment = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                  startSegment, MemorySegment.NULL,
-                                                  countSegment, MemorySegment.NULL);
+            result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+                                                  MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
@@ -646,11 +670,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_select_valid() {
+    public void testH5Sget_select_valid()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -658,16 +683,15 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a valid hyperslab
-            long[] start = {0, 0};
-            long[] count = {2, 2};
+            long[] start               = {0, 0};
+            long[] count               = {2, 2};
             MemorySegment startSegment = allocateLongArray(arena, RANK);
             MemorySegment countSegment = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                      startSegment, MemorySegment.NULL,
-                                                      countSegment, MemorySegment.NULL);
+            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+                                                      MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Verify selection is valid
@@ -677,11 +701,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_select_hyper_blocklist() {
+    public void testH5Sget_select_hyper_blocklist()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -689,22 +714,21 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a single hyperslab block from [1,1] to [2,3]
-            long[] start = {1, 1};
-            long[] stride = {1, 1};
-            long[] count = {1, 1};  // 1 block
-            long[] block = {2, 3};  // Block size 2x3
-            MemorySegment startSegment = allocateLongArray(arena, RANK);
+            long[] start                = {1, 1};
+            long[] stride               = {1, 1};
+            long[] count                = {1, 1}; // 1 block
+            long[] block                = {2, 3}; // Block size 2x3
+            MemorySegment startSegment  = allocateLongArray(arena, RANK);
             MemorySegment strideSegment = allocateLongArray(arena, RANK);
-            MemorySegment countSegment = allocateLongArray(arena, RANK);
-            MemorySegment blockSegment = allocateLongArray(arena, RANK);
+            MemorySegment countSegment  = allocateLongArray(arena, RANK);
+            MemorySegment blockSegment  = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(strideSegment, stride);
             copyToSegment(countSegment, count);
             copyToSegment(blockSegment, block);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                      startSegment, strideSegment,
-                                                      countSegment, blockSegment);
+            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+                                                      strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get number of blocks (should be 1)
@@ -713,7 +737,7 @@ public class TestH5Sffm {
 
             // Get blocklist (start and end coordinates)
             // Each block has 2 coordinates (start, end) with RANK values each
-            long blocklistSize = nblocks * RANK * 2;
+            long blocklistSize      = nblocks * RANK * 2;
             MemorySegment blocklist = allocateLongArray(arena, (int)blocklistSize);
 
             result = hdf5_h_1.H5Sget_select_hyper_blocklist(H5sid, 0, nblocks, blocklist);
@@ -729,11 +753,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sselect_adjust() {
+    public void testH5Sselect_adjust()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -741,29 +766,28 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select hyperslab from [2,2] with count [2,2]
-            long[] start = {2, 2};
-            long[] count = {2, 2};
+            long[] start               = {2, 2};
+            long[] count               = {2, 2};
             MemorySegment startSegment = allocateLongArray(arena, RANK);
             MemorySegment countSegment = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                      startSegment, MemorySegment.NULL,
-                                                      countSegment, MemorySegment.NULL);
+            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+                                                      MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get original bounds
             MemorySegment startBounds1 = allocateLongArray(arena, RANK);
-            MemorySegment endBounds1 = allocateLongArray(arena, RANK);
-            result = hdf5_h_1.H5Sget_select_bounds(H5sid, startBounds1, endBounds1);
+            MemorySegment endBounds1   = allocateLongArray(arena, RANK);
+            result                     = hdf5_h_1.H5Sget_select_bounds(H5sid, startBounds1, endBounds1);
             assertTrue("H5Sget_select_bounds failed", isSuccess(result));
 
             long[] origStart = new long[RANK];
             copyFromSegment(startBounds1, origStart);
 
             // Adjust selection by offset [1, 1] (SUBTRACTS offset from selection coordinates)
-            long[] offset = {1, 1};
+            long[] offset               = {1, 1};
             MemorySegment offsetSegment = allocateLongArray(arena, RANK);
             copyToSegment(offsetSegment, offset);
 
@@ -772,8 +796,8 @@ public class TestH5Sffm {
 
             // Get bounds after adjustment
             MemorySegment startBounds2 = allocateLongArray(arena, RANK);
-            MemorySegment endBounds2 = allocateLongArray(arena, RANK);
-            result = hdf5_h_1.H5Sget_select_bounds(H5sid, startBounds2, endBounds2);
+            MemorySegment endBounds2   = allocateLongArray(arena, RANK);
+            result                     = hdf5_h_1.H5Sget_select_bounds(H5sid, startBounds2, endBounds2);
             assertTrue("H5Sget_select_bounds failed", isSuccess(result));
 
             long[] newStart = new long[RANK];
@@ -786,11 +810,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_select_elem_pointlist() {
+    public void testH5Sget_select_elem_pointlist()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -799,17 +824,17 @@ public class TestH5Sffm {
 
             // Select 3 specific points
             long[] coords = {
-                0, 0,  // Point 1: [0,0]
-                1, 2,  // Point 2: [1,2]
-                3, 5   // Point 3: [3,5]
+                0, 0, // Point 1: [0,0]
+                1, 2, // Point 2: [1,2]
+                3, 5  // Point 3: [3,5]
             };
             int numPoints = 3;
 
             MemorySegment coordsSegment = allocateLongArray(arena, coords.length);
             copyToSegment(coordsSegment, coords);
 
-            int result = hdf5_h_1.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                     numPoints, coordsSegment);
+            int result =
+                hdf5_h_1.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(), numPoints, coordsSegment);
             assertTrue("H5Sselect_elements failed", isSuccess(result));
 
             // Get number of element points
@@ -818,7 +843,7 @@ public class TestH5Sffm {
 
             // Get the point list back
             MemorySegment pointlist = allocateLongArray(arena, (int)(npoints * RANK));
-            result = hdf5_h_1.H5Sget_select_elem_pointlist(H5sid, 0, npoints, pointlist);
+            result                  = hdf5_h_1.H5Sget_select_elem_pointlist(H5sid, 0, npoints, pointlist);
             assertTrue("H5Sget_select_elem_pointlist failed", isSuccess(result));
 
             // Verify the coordinates
@@ -830,12 +855,13 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sis_simple() {
+    public void testH5Sis_simple()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Test simple dataspace
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -857,12 +883,13 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sset_extent_none() {
+    public void testH5Sset_extent_none()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Create a simple dataspace
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -884,13 +911,14 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sselect_copy() {
+    public void testH5Sselect_copy()
+    {
         System.out.print(testname.getMethodName());
         long H5sid2 = H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create source dataspace with selection
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -902,16 +930,15 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple for dest failed", isValidId(H5sid2));
 
             // Select hyperslab in source
-            long[] start = {1, 1};
-            long[] count = {2, 3};
+            long[] start               = {1, 1};
+            long[] count               = {2, 3};
             MemorySegment startSegment = allocateLongArray(arena, RANK);
             MemorySegment countSegment = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                      startSegment, MemorySegment.NULL,
-                                                      countSegment, MemorySegment.NULL);
+            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+                                                      MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get original selection npoints
@@ -932,13 +959,14 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sselect_shape_same() {
+    public void testH5Sselect_shape_same()
+    {
         System.out.print(testname.getMethodName());
         long H5sid2 = H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create first dataspace with selection
-            long[] dims1 = {DIM_X, DIM_Y};
+            long[] dims1               = {DIM_X, DIM_Y};
             MemorySegment dims1Segment = allocateLongArray(arena, RANK);
             copyToSegment(dims1Segment, dims1);
 
@@ -946,7 +974,7 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Create second dataspace with different dims but same selection shape
-            long[] dims2 = {8, 10};  // Different total dims
+            long[] dims2               = {8, 10}; // Different total dims
             MemorySegment dims2Segment = allocateLongArray(arena, RANK);
             copyToSegment(dims2Segment, dims2);
 
@@ -954,28 +982,26 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple for sid2 failed", isValidId(H5sid2));
 
             // Select same shaped hyperslab in both (2x3 block)
-            long[] start1 = {1, 1};
-            long[] count1 = {2, 3};
+            long[] start1               = {1, 1};
+            long[] count1               = {2, 3};
             MemorySegment start1Segment = allocateLongArray(arena, RANK);
             MemorySegment count1Segment = allocateLongArray(arena, RANK);
             copyToSegment(start1Segment, start1);
             copyToSegment(count1Segment, count1);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                      start1Segment, MemorySegment.NULL,
-                                                      count1Segment, MemorySegment.NULL);
+            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment,
+                                                      MemorySegment.NULL, count1Segment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab for sid1 failed", isSuccess(result));
 
-            long[] start2 = {2, 3};  // Different position
-            long[] count2 = {2, 3};  // Same shape
+            long[] start2               = {2, 3}; // Different position
+            long[] count2               = {2, 3}; // Same shape
             MemorySegment start2Segment = allocateLongArray(arena, RANK);
             MemorySegment count2Segment = allocateLongArray(arena, RANK);
             copyToSegment(start2Segment, start2);
             copyToSegment(count2Segment, count2);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(H5sid2, hdf5_h.H5S_SELECT_SET(),
-                                                  start2Segment, MemorySegment.NULL,
-                                                  count2Segment, MemorySegment.NULL);
+            result = hdf5_h_1.H5Sselect_hyperslab(H5sid2, hdf5_h.H5S_SELECT_SET(), start2Segment,
+                                                  MemorySegment.NULL, count2Segment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab for sid2 failed", isSuccess(result));
 
             // Check if selections have same shape
@@ -988,11 +1014,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sis_regular_hyperslab() {
+    public void testH5Sis_regular_hyperslab()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -1000,22 +1027,21 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select regular hyperslab (single block)
-            long[] start = {1, 1};
-            long[] stride = {1, 1};
-            long[] count = {1, 1};
-            long[] block = {2, 3};
-            MemorySegment startSegment = allocateLongArray(arena, RANK);
+            long[] start                = {1, 1};
+            long[] stride               = {1, 1};
+            long[] count                = {1, 1};
+            long[] block                = {2, 3};
+            MemorySegment startSegment  = allocateLongArray(arena, RANK);
             MemorySegment strideSegment = allocateLongArray(arena, RANK);
-            MemorySegment countSegment = allocateLongArray(arena, RANK);
-            MemorySegment blockSegment = allocateLongArray(arena, RANK);
+            MemorySegment countSegment  = allocateLongArray(arena, RANK);
+            MemorySegment blockSegment  = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(strideSegment, stride);
             copyToSegment(countSegment, count);
             copyToSegment(blockSegment, block);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                      startSegment, strideSegment,
-                                                      countSegment, blockSegment);
+            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+                                                      strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Check if it's regular
@@ -1025,11 +1051,12 @@ public class TestH5Sffm {
     }
 
     @Test
-    public void testH5Sget_regular_hyperslab() {
+    public void testH5Sget_regular_hyperslab()
+    {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long[] dims = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
@@ -1037,32 +1064,30 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select regular hyperslab
-            long[] start = {1, 1};
-            long[] stride = {2, 2};
-            long[] count = {2, 2};
-            long[] block = {1, 1};
-            MemorySegment startSegment = allocateLongArray(arena, RANK);
+            long[] start                = {1, 1};
+            long[] stride               = {2, 2};
+            long[] count                = {2, 2};
+            long[] block                = {1, 1};
+            MemorySegment startSegment  = allocateLongArray(arena, RANK);
             MemorySegment strideSegment = allocateLongArray(arena, RANK);
-            MemorySegment countSegment = allocateLongArray(arena, RANK);
-            MemorySegment blockSegment = allocateLongArray(arena, RANK);
+            MemorySegment countSegment  = allocateLongArray(arena, RANK);
+            MemorySegment blockSegment  = allocateLongArray(arena, RANK);
             copyToSegment(startSegment, start);
             copyToSegment(strideSegment, stride);
             copyToSegment(countSegment, count);
             copyToSegment(blockSegment, block);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(),
-                                                      startSegment, strideSegment,
-                                                      countSegment, blockSegment);
+            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+                                                      strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get regular hyperslab info
-            MemorySegment outStart = allocateLongArray(arena, RANK);
+            MemorySegment outStart  = allocateLongArray(arena, RANK);
             MemorySegment outStride = allocateLongArray(arena, RANK);
-            MemorySegment outCount = allocateLongArray(arena, RANK);
-            MemorySegment outBlock = allocateLongArray(arena, RANK);
+            MemorySegment outCount  = allocateLongArray(arena, RANK);
+            MemorySegment outBlock  = allocateLongArray(arena, RANK);
 
-            result = hdf5_h_1.H5Sget_regular_hyperslab(H5sid, outStart, outStride,
-                                                       outCount, outBlock);
+            result = hdf5_h_1.H5Sget_regular_hyperslab(H5sid, outStart, outStride, outCount, outBlock);
             assertTrue("H5Sget_regular_hyperslab failed", isSuccess(result));
 
             // Verify parameters match

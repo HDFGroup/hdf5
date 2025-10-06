@@ -31,9 +31,7 @@ public class FfmTestSupport {
      *
      * @return The invalid HDF5 identifier
      */
-    public static long H5I_INVALID_HID() {
-        return hdf5_h.H5I_INVALID_HID();
-    }
+    public static long H5I_INVALID_HID() { return hdf5_h.H5I_INVALID_HID(); }
 
     /**
      * Check if an HDF5 return value indicates success.
@@ -41,9 +39,7 @@ public class FfmTestSupport {
      * @param retVal The return value from an HDF5 function
      * @return true if the operation succeeded (retVal >= 0), false otherwise
      */
-    public static boolean isSuccess(int retVal) {
-        return retVal >= 0;
-    }
+    public static boolean isSuccess(int retVal) { return retVal >= 0; }
 
     /**
      * Check if an HDF5 return value indicates success.
@@ -51,9 +47,7 @@ public class FfmTestSupport {
      * @param retVal The return value from an HDF5 function (long version)
      * @return true if the operation succeeded (retVal >= 0), false otherwise
      */
-    public static boolean isSuccess(long retVal) {
-        return retVal >= 0;
-    }
+    public static boolean isSuccess(long retVal) { return retVal >= 0; }
 
     /**
      * Check if an HDF5 identifier is valid.
@@ -61,9 +55,7 @@ public class FfmTestSupport {
      * @param hid The HDF5 identifier to check
      * @return true if the identifier is valid (>= 0), false otherwise
      */
-    public static boolean isValidId(long hid) {
-        return hid >= 0;
-    }
+    public static boolean isValidId(long hid) { return hid >= 0; }
 
     /**
      * Create a MemorySegment from a Java String using the provided Arena.
@@ -73,7 +65,8 @@ public class FfmTestSupport {
      * @param str The Java String to convert
      * @return A MemorySegment containing the null-terminated string
      */
-    public static MemorySegment stringToSegment(Arena arena, String str) {
+    public static MemorySegment stringToSegment(Arena arena, String str)
+    {
         if (str == null) {
             return MemorySegment.NULL;
         }
@@ -86,9 +79,7 @@ public class FfmTestSupport {
      * @param arena The Arena to use for allocation
      * @return A MemorySegment that can hold one integer value
      */
-    public static MemorySegment allocateInt(Arena arena) {
-        return arena.allocate(ValueLayout.JAVA_INT);
-    }
+    public static MemorySegment allocateInt(Arena arena) { return arena.allocate(ValueLayout.JAVA_INT); }
 
     /**
      * Create a MemorySegment for a long output parameter.
@@ -96,9 +87,7 @@ public class FfmTestSupport {
      * @param arena The Arena to use for allocation
      * @return A MemorySegment that can hold one long value
      */
-    public static MemorySegment allocateLong(Arena arena) {
-        return arena.allocate(ValueLayout.JAVA_LONG);
-    }
+    public static MemorySegment allocateLong(Arena arena) { return arena.allocate(ValueLayout.JAVA_LONG); }
 
     /**
      * Create a MemorySegment for an integer array.
@@ -107,7 +96,8 @@ public class FfmTestSupport {
      * @param length The number of integers in the array
      * @return A MemorySegment that can hold the integer array
      */
-    public static MemorySegment allocateIntArray(Arena arena, int length) {
+    public static MemorySegment allocateIntArray(Arena arena, int length)
+    {
         return arena.allocate(ValueLayout.JAVA_INT, length);
     }
 
@@ -118,7 +108,8 @@ public class FfmTestSupport {
      * @param length The number of longs in the array
      * @return A MemorySegment that can hold the long array
      */
-    public static MemorySegment allocateLongArray(Arena arena, int length) {
+    public static MemorySegment allocateLongArray(Arena arena, int length)
+    {
         return arena.allocate(ValueLayout.JAVA_LONG, length);
     }
 
@@ -128,7 +119,8 @@ public class FfmTestSupport {
      * @param segment The destination MemorySegment
      * @param data The source int array
      */
-    public static void copyToSegment(MemorySegment segment, int[] data) {
+    public static void copyToSegment(MemorySegment segment, int[] data)
+    {
         for (int i = 0; i < data.length; i++) {
             segment.setAtIndex(ValueLayout.JAVA_INT, i, data[i]);
         }
@@ -140,7 +132,8 @@ public class FfmTestSupport {
      * @param segment The destination MemorySegment
      * @param data The source long array
      */
-    public static void copyToSegment(MemorySegment segment, long[] data) {
+    public static void copyToSegment(MemorySegment segment, long[] data)
+    {
         for (int i = 0; i < data.length; i++) {
             segment.setAtIndex(ValueLayout.JAVA_LONG, i, data[i]);
         }
@@ -152,7 +145,8 @@ public class FfmTestSupport {
      * @param segment The source MemorySegment
      * @param data The destination int array
      */
-    public static void copyFromSegment(MemorySegment segment, int[] data) {
+    public static void copyFromSegment(MemorySegment segment, int[] data)
+    {
         for (int i = 0; i < data.length; i++) {
             data[i] = segment.getAtIndex(ValueLayout.JAVA_INT, i);
         }
@@ -164,7 +158,8 @@ public class FfmTestSupport {
      * @param segment The source MemorySegment
      * @param data The destination long array
      */
-    public static void copyFromSegment(MemorySegment segment, long[] data) {
+    public static void copyFromSegment(MemorySegment segment, long[] data)
+    {
         for (int i = 0; i < data.length; i++) {
             data[i] = segment.getAtIndex(ValueLayout.JAVA_LONG, i);
         }
@@ -176,9 +171,7 @@ public class FfmTestSupport {
      * @param segment The MemorySegment to read from
      * @return The integer value at offset 0
      */
-    public static int getInt(MemorySegment segment) {
-        return segment.get(ValueLayout.JAVA_INT, 0);
-    }
+    public static int getInt(MemorySegment segment) { return segment.get(ValueLayout.JAVA_INT, 0); }
 
     /**
      * Get a long value from a MemorySegment.
@@ -186,9 +179,7 @@ public class FfmTestSupport {
      * @param segment The MemorySegment to read from
      * @return The long value at offset 0
      */
-    public static long getLong(MemorySegment segment) {
-        return segment.get(ValueLayout.JAVA_LONG, 0);
-    }
+    public static long getLong(MemorySegment segment) { return segment.get(ValueLayout.JAVA_LONG, 0); }
 
     /**
      * Set an integer value in a MemorySegment.
@@ -196,7 +187,8 @@ public class FfmTestSupport {
      * @param segment The MemorySegment to write to
      * @param value The integer value to write
      */
-    public static void setInt(MemorySegment segment, int value) {
+    public static void setInt(MemorySegment segment, int value)
+    {
         segment.set(ValueLayout.JAVA_INT, 0, value);
     }
 
@@ -206,7 +198,8 @@ public class FfmTestSupport {
      * @param segment The MemorySegment to write to
      * @param value The long value to write
      */
-    public static void setLong(MemorySegment segment, long value) {
+    public static void setLong(MemorySegment segment, long value)
+    {
         segment.set(ValueLayout.JAVA_LONG, 0, value);
     }
 
@@ -217,7 +210,8 @@ public class FfmTestSupport {
      * @param retVal The error return value
      * @return A formatted error message
      */
-    public static String formatError(String operation, int retVal) {
+    public static String formatError(String operation, int retVal)
+    {
         return String.format("%s failed with return value: %d", operation, retVal);
     }
 
@@ -228,7 +222,8 @@ public class FfmTestSupport {
      * @param retVal The error return value (long version)
      * @return A formatted error message
      */
-    public static String formatError(String operation, long retVal) {
+    public static String formatError(String operation, long retVal)
+    {
         return String.format("%s failed with return value: %d", operation, retVal);
     }
 
@@ -240,11 +235,13 @@ public class FfmTestSupport {
      * @param closeFunc A function that closes the identifier (returns int)
      * @return true if close succeeded or id was invalid, false if close failed
      */
-    public static boolean closeQuietly(long hid, java.util.function.LongToIntFunction closeFunc) {
+    public static boolean closeQuietly(long hid, java.util.function.LongToIntFunction closeFunc)
+    {
         if (hid >= 0) {
             try {
                 return closeFunc.applyAsInt(hid) >= 0;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 return false;
             }
         }

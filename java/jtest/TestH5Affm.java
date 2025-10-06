@@ -12,8 +12,9 @@
 
 package jtest;
 
-import static jtest.FfmTestSupport.*;
 import static org.junit.Assert.*;
+
+import static jtest.FfmTestSupport.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -56,7 +57,7 @@ public class TestH5Affm {
             assertTrue("H5Fcreate failed", isValidId(H5fid));
 
             // Create dataspace
-            long[] dims              = {DIM_X, DIM_Y};
+            long[] dims               = {DIM_X, DIM_Y};
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
             H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
@@ -64,9 +65,9 @@ public class TestH5Affm {
 
             // Create dataset for attaching attributes
             MemorySegment dsetName = stringToSegment(arena, "dset");
-            H5did = hdf5_h_1.H5Dcreate2(H5fid, dsetName, hdf5_h_1.H5T_NATIVE_INT_g(), H5sid,
-                                        hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT(),
-                                        hdf5_h_1.H5P_DEFAULT());
+            H5did =
+                hdf5_h_1.H5Dcreate2(H5fid, dsetName, hdf5_h_1.H5T_NATIVE_INT_g(), H5sid,
+                                    hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(H5did));
         }
     }
@@ -85,7 +86,8 @@ public class TestH5Affm {
         H5fid = H5I_INVALID_HID();
     }
 
-    static {
+    static
+    {
         try {
             System.loadLibrary("hdf5");
             hdf5_h_1.H5open();
@@ -135,8 +137,8 @@ public class TestH5Affm {
             assertTrue("H5Acreate2 failed", isValidId(H5aid));
 
             // Write data
-            int[] write_data              = {10, 20, 30};
-            MemorySegment writeSegment    = allocateIntArray(arena, 3);
+            int[] write_data           = {10, 20, 30};
+            MemorySegment writeSegment = allocateIntArray(arena, 3);
             copyToSegment(writeSegment, write_data);
 
             int result = hdf5_h_1.H5Awrite(H5aid, hdf5_h_1.H5T_NATIVE_INT_g(), writeSegment);
@@ -144,7 +146,7 @@ public class TestH5Affm {
 
             // Read back
             MemorySegment readSegment = allocateIntArray(arena, 3);
-            result = hdf5_h_1.H5Aread(H5aid, hdf5_h_1.H5T_NATIVE_INT_g(), readSegment);
+            result                    = hdf5_h_1.H5Aread(H5aid, hdf5_h_1.H5T_NATIVE_INT_g(), readSegment);
             assertTrue("H5Aread failed", isSuccess(result));
 
             // Verify
@@ -163,8 +165,8 @@ public class TestH5Affm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create attribute first
-            long attr_sid           = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
-            MemorySegment attrName  = stringToSegment(arena, "test_attr");
+            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            MemorySegment attrName = stringToSegment(arena, "test_attr");
 
             long aid = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
                                            hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
@@ -236,7 +238,7 @@ public class TestH5Affm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create attribute with specific dimensions
-            long[] dims              = {5, 3};
+            long[] dims               = {5, 3};
             MemorySegment dimsSegment = allocateLongArray(arena, 2);
             copyToSegment(dimsSegment, dims);
 
@@ -302,7 +304,7 @@ public class TestH5Affm {
             // Create one attribute
             long attr_sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
             long aid      = hdf5_h_1.H5Acreate2(H5did, existingName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
-                                           hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+                                                hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Acreate2 failed", isValidId(aid));
             hdf5_h_1.H5Aclose(aid);
 
@@ -329,7 +331,7 @@ public class TestH5Affm {
             // Create attribute
             long attr_sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
             long aid      = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
-                                           hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+                                                hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Acreate2 failed", isValidId(aid));
             hdf5_h_1.H5Aclose(aid);
 
@@ -368,8 +370,8 @@ public class TestH5Affm {
             assertTrue("H5Acreate2 failed", isValidId(H5aid));
 
             // Write data
-            int[] data                 = new int[10];
-            MemorySegment dataSegment  = allocateIntArray(arena, 10);
+            int[] data                = new int[10];
+            MemorySegment dataSegment = allocateIntArray(arena, 10);
             copyToSegment(dataSegment, data);
             hdf5_h_1.H5Awrite(H5aid, hdf5_h_1.H5T_NATIVE_INT_g(), dataSegment);
 
@@ -434,7 +436,7 @@ public class TestH5Affm {
             // Create attribute
             long attr_sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
             long aid      = hdf5_h_1.H5Acreate2(H5did, oldName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
-                                           hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+                                                hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Acreate2 failed", isValidId(aid));
             hdf5_h_1.H5Aclose(aid);
 
@@ -468,8 +470,8 @@ public class TestH5Affm {
 
             for (int i = 0; i < 3; i++) {
                 MemorySegment attrName = stringToSegment(arena, "attr_" + i);
-                long aid               = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_INT_g(),
-                                               attr_sid, hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+                long aid = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
+                                               hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
                 assertTrue("H5Acreate2 failed for attr_" + i, isValidId(aid));
                 hdf5_h_1.H5Aclose(aid);
             }
