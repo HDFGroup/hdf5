@@ -900,9 +900,9 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dapl failed", isValidId(dapl));
 
             // Set chunk cache parameters
-            long rdccNslots = 521;        // Number of chunk slots in cache
-            long rdccNbytes = 1048576;    // Size of chunk cache in bytes (1 MB)
-            double rdccW0   = 0.75;       // Preemption policy
+            long rdccNslots = 521;     // Number of chunk slots in cache
+            long rdccNbytes = 1048576; // Size of chunk cache in bytes (1 MB)
+            double rdccW0   = 0.75;    // Preemption policy
 
             int result = hdf5_h.H5Pset_chunk_cache(dapl, rdccNslots, rdccNbytes, rdccW0);
             assertTrue("H5Pset_chunk_cache failed", isSuccess(result));
@@ -1042,7 +1042,8 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set library version bounds to latest
-            int result = hdf5_h.H5Pset_libver_bounds(fapl, hdf5_h.H5F_LIBVER_LATEST(), hdf5_h.H5F_LIBVER_LATEST());
+            int result =
+                hdf5_h.H5Pset_libver_bounds(fapl, hdf5_h.H5F_LIBVER_LATEST(), hdf5_h.H5F_LIBVER_LATEST());
             assertTrue("H5Pset_libver_bounds failed", isSuccess(result));
 
             // Get library version bounds back
