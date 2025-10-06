@@ -82,10 +82,6 @@ endforeach ()
 # Restore classpath for other tests
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVAHDF5_JARS};${HDF5_JAVA_LIB_DIR}/org.junit.jar;${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar;${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_SIMPLE_JAR}")
 
-foreach (h5_file ${HDF5_JAVA_JTEST_SOURCES})
-  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/JUnit-${h5_file}.txt" "${PROJECT_BINARY_DIR}/JUnit-${h5_file}.txt" "${HDF5_JAVA_JTEST_LIB_TARGET}_files")
-endforeach ()
-
 HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig" "${PROJECT_BINARY_DIR}/h5ex_g_iterate.hdf" "${HDF5_JAVA_JTEST_LIB_TARGET}_files")
 HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig" "${PROJECT_BINARY_DIR}/h5ex_g_iterateL1.hdf" "${HDF5_JAVA_JTEST_LIB_TARGET}_files")
 HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig" "${PROJECT_BINARY_DIR}/h5ex_g_iterateL2.hdf" "${HDF5_JAVA_JTEST_LIB_TARGET}_files")
