@@ -91,7 +91,8 @@ public class TestH5Fffm {
     {
         long fid = H5I_INVALID_HID();
 =======
-    public void testH5Fopen() {
+    public void testH5Fopen()
+    {
         long fid = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -111,7 +112,8 @@ public class TestH5Fffm {
     {
         long fid2 = H5I_INVALID_HID();
 =======
-    public void testH5Freopen() {
+    public void testH5Freopen()
+    {
         long fid2 = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -131,7 +133,8 @@ public class TestH5Fffm {
     {
         long plist = H5I_INVALID_HID();
 =======
-    public void testH5Fget_create_plist() {
+    public void testH5Fget_create_plist()
+    {
         long plist = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -150,7 +153,8 @@ public class TestH5Fffm {
     {
         long plist = H5I_INVALID_HID();
 =======
-    public void testH5Fget_access_plist() {
+    public void testH5Fget_access_plist()
+    {
         long plist = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -266,7 +270,8 @@ public class TestH5Fffm {
     {
         long fid = H5I_INVALID_HID();
 =======
-    public void testH5Fclose() {
+    public void testH5Fclose()
+    {
         long fid = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 

@@ -1,7 +1,8 @@
 package jtest;
 
-import static jtest.FfmTestSupport.*;
 import static org.junit.Assert.*;
+
+import static jtest.FfmTestSupport.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -53,8 +54,7 @@ public class TestH5Pffm {
         assertTrue("H5Pcreate fapl", isValidId(H5fapl));
 
         try (Arena arena = Arena.ofConfined()) {
-            H5fid = hdf5_h.H5Fcreate(stringToSegment(arena, H5_FILE), hdf5_h.H5F_ACC_TRUNC(), H5fcpl,
-                                       H5fapl);
+            H5fid = hdf5_h.H5Fcreate(stringToSegment(arena, H5_FILE), hdf5_h.H5F_ACC_TRUNC(), H5fcpl, H5fapl);
         }
         assertTrue("H5Fcreate", isValidId(H5fid));
     }
@@ -446,11 +446,11 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set cache parameters
-            int mdc_nelmts    = 0; // Not used, set to 0
-            long rdcc_nslots  = 521;
-            long rdcc_nbytes  = 1048576;
-            double rdcc_w0    = 0.75;
-            int result        = hdf5_h.H5Pset_cache(fapl, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
+            int mdc_nelmts   = 0; // Not used, set to 0
+            long rdcc_nslots = 521;
+            long rdcc_nbytes = 1048576;
+            double rdcc_w0   = 0.75;
+            int result       = hdf5_h.H5Pset_cache(fapl, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
             assertTrue("H5Pset_cache failed", isSuccess(result));
 
             // Get cache parameters back
@@ -461,9 +461,9 @@ public class TestH5Pffm {
             result                 = hdf5_h.H5Pget_cache(fapl, mdcSeg, nslotSeg, nbyteSeg, w0Seg);
             assertTrue("H5Pget_cache failed", isSuccess(result));
 
-            long nslots_retrieved  = getLong(nslotSeg);
-            long nbytes_retrieved  = getLong(nbyteSeg);
-            double w0_retrieved    = getDouble(w0Seg);
+            long nslots_retrieved = getLong(nslotSeg);
+            long nbytes_retrieved = getLong(nbyteSeg);
+            double w0_retrieved   = getDouble(w0Seg);
             assertEquals("rdcc_nslots should match", rdcc_nslots, nslots_retrieved);
             assertEquals("rdcc_nbytes should match", rdcc_nbytes, nbytes_retrieved);
             assertEquals("rdcc_w0 should match", rdcc_w0, w0_retrieved, 0.001);

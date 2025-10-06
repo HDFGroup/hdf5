@@ -190,9 +190,7 @@ public class FfmTestSupport {
      * @param segment The MemorySegment to read from
      * @return The double value at offset 0
      */
-    public static double getDouble(MemorySegment segment) {
-        return segment.get(ValueLayout.JAVA_DOUBLE, 0);
-    }
+    public static double getDouble(MemorySegment segment) { return segment.get(ValueLayout.JAVA_DOUBLE, 0); }
 
     /**
      * Set an integer value in a MemorySegment.

@@ -46,13 +46,13 @@ public class TestH5Dffm {
     private static final int RANK            = 2;
 
 <<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    long H5fid  = H5I_INVALID_HID();
-    long H5dsid = H5I_INVALID_HID();
-    long H5did  = H5I_INVALID_HID();
+    long H5fid                               = H5I_INVALID_HID();
+    long H5dsid                              = H5I_INVALID_HID();
+    long H5did                               = H5I_INVALID_HID();
 =======
-    long H5fid = hdf5_h.H5I_INVALID_HID();
+    long H5fid  = hdf5_h.H5I_INVALID_HID();
     long H5dsid = hdf5_h.H5I_INVALID_HID();
-    long H5did = hdf5_h.H5I_INVALID_HID();
+    long H5did  = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
     private void deleteFile(String filename)
@@ -112,9 +112,9 @@ public class TestH5Dffm {
         H5dsid = H5I_INVALID_HID();
         H5fid  = H5I_INVALID_HID();
 =======
-        H5did = hdf5_h.H5I_INVALID_HID();
+        H5did  = hdf5_h.H5I_INVALID_HID();
         H5dsid = hdf5_h.H5I_INVALID_HID();
-        H5fid = hdf5_h.H5I_INVALID_HID();
+        H5fid  = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
         deleteFile(H5_FILE);
@@ -127,7 +127,8 @@ public class TestH5Dffm {
     {
         long did = H5I_INVALID_HID();
 =======
-    public void testH5Dopen() {
+    public void testH5Dopen()
+    {
         long did = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -147,7 +148,8 @@ public class TestH5Dffm {
     {
         long sid = H5I_INVALID_HID();
 =======
-    public void testH5Dget_space() {
+    public void testH5Dget_space()
+    {
         long sid = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -178,7 +180,8 @@ public class TestH5Dffm {
     {
         long tid = H5I_INVALID_HID();
 =======
-    public void testH5Dget_type() {
+    public void testH5Dget_type()
+    {
         long tid = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -197,7 +200,8 @@ public class TestH5Dffm {
     {
         long plist = H5I_INVALID_HID();
 =======
-    public void testH5Dget_create_plist() {
+    public void testH5Dget_create_plist()
+    {
         long plist = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -216,7 +220,8 @@ public class TestH5Dffm {
     {
         long plist = H5I_INVALID_HID();
 =======
-    public void testH5Dget_access_plist() {
+    public void testH5Dget_access_plist()
+    {
         long plist = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -312,7 +317,8 @@ public class TestH5Dffm {
     {
         long anon_did = H5I_INVALID_HID();
 =======
-    public void testH5Dcreate_anon() {
+    public void testH5Dcreate_anon()
+    {
         long anon_did = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
@@ -375,7 +381,8 @@ public class TestH5Dffm {
         long compound_did = H5I_INVALID_HID();
         long compound_sid = H5I_INVALID_HID();
 =======
-    public void testH5Dwrite_readCompound() {
+    public void testH5Dwrite_readCompound()
+    {
         long compound_tid = hdf5_h.H5I_INVALID_HID();
         long compound_did = hdf5_h.H5I_INVALID_HID();
         long compound_sid = hdf5_h.H5I_INVALID_HID();
@@ -459,7 +466,8 @@ public class TestH5Dffm {
         long array_did = H5I_INVALID_HID();
         long array_sid = H5I_INVALID_HID();
 =======
-    public void testH5DArraywr() {
+    public void testH5DArraywr()
+    {
         long array_tid = hdf5_h.H5I_INVALID_HID();
         long array_did = hdf5_h.H5I_INVALID_HID();
         long array_sid = hdf5_h.H5I_INVALID_HID();
@@ -534,7 +542,8 @@ public class TestH5Dffm {
         long vlen_did = H5I_INVALID_HID();
         long vlen_sid = H5I_INVALID_HID();
 =======
-    public void testH5Dvlen_write_read() {
+    public void testH5Dvlen_write_read()
+    {
         long vlen_tid = hdf5_h.H5I_INVALID_HID();
         long vlen_did = hdf5_h.H5I_INVALID_HID();
         long vlen_sid = hdf5_h.H5I_INVALID_HID();
@@ -587,8 +596,9 @@ public class TestH5Dffm {
     {
         long did = H5I_INVALID_HID();
 =======
-    public void testH5Dclose() {
-        long did = hdf5_h.H5I_INVALID_HID();
+    public void testH5Dclose()
+    {
+        long did          = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
@@ -612,8 +622,8 @@ public class TestH5Dffm {
         long chunked_did  = H5I_INVALID_HID();
 =======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
-        long chunked_sid = hdf5_h.H5I_INVALID_HID();
-        long chunked_did = hdf5_h.H5I_INVALID_HID();
+        long chunked_sid  = hdf5_h.H5I_INVALID_HID();
+        long chunked_did  = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
@@ -681,8 +691,8 @@ public class TestH5Dffm {
         long chunked_did  = H5I_INVALID_HID();
 =======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
-        long chunked_sid = hdf5_h.H5I_INVALID_HID();
-        long chunked_did = hdf5_h.H5I_INVALID_HID();
+        long chunked_sid  = hdf5_h.H5I_INVALID_HID();
+        long chunked_did  = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
@@ -754,8 +764,8 @@ public class TestH5Dffm {
         long chunked_did  = H5I_INVALID_HID();
 =======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
-        long chunked_sid = hdf5_h.H5I_INVALID_HID();
-        long chunked_did = hdf5_h.H5I_INVALID_HID();
+        long chunked_sid  = hdf5_h.H5I_INVALID_HID();
+        long chunked_did  = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
@@ -828,11 +838,12 @@ public class TestH5Dffm {
         long array_did = H5I_INVALID_HID();
         long array_sid = H5I_INVALID_HID();
 =======
-    public void testH5DArrayenum_rw() {
-        long enum_tid = hdf5_h.H5I_INVALID_HID();
-        long array_tid = hdf5_h.H5I_INVALID_HID();
-        long array_did = hdf5_h.H5I_INVALID_HID();
-        long array_sid = hdf5_h.H5I_INVALID_HID();
+    public void testH5DArrayenum_rw()
+    {
+        long enum_tid     = hdf5_h.H5I_INVALID_HID();
+        long array_tid    = hdf5_h.H5I_INVALID_HID();
+        long array_did    = hdf5_h.H5I_INVALID_HID();
+        long array_sid    = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
@@ -947,8 +958,8 @@ public class TestH5Dffm {
         long chunked_did  = H5I_INVALID_HID();
 =======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
-        long chunked_sid = hdf5_h.H5I_INVALID_HID();
-        long chunked_did = hdf5_h.H5I_INVALID_HID();
+        long chunked_sid  = hdf5_h.H5I_INVALID_HID();
+        long chunked_did  = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
@@ -1028,8 +1039,8 @@ public class TestH5Dffm {
         long chunked_did  = H5I_INVALID_HID();
 =======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
-        long chunked_sid = hdf5_h.H5I_INVALID_HID();
-        long chunked_did = hdf5_h.H5I_INVALID_HID();
+        long chunked_sid  = hdf5_h.H5I_INVALID_HID();
+        long chunked_did  = hdf5_h.H5I_INVALID_HID();
 >>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
