@@ -32,3 +32,6 @@ set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On CACHE BOOL "Export windows symbols")
 
 set (CMAKE_AR:FILEPATH /usr/bin/${TOOLCHAIN_PREFIX}-ar)
 set (CMAKE_RANLIB:FILEPATH /usr/bin/${TOOLCHAIN_PREFIX}-ranlib)
+
+set (HDF5_USE_PREGEN_DIR "${CMAKE_CURRENT_LIST_DIR}/fortpregen/gfortran" CACHE PATH "Path to pregenerated Fortran files")
+

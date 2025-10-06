@@ -41,3 +41,7 @@ set (PAC_FORTRAN_NATIVE_REAL_SIZEOF k CACHE INTERNAL "Find sizeof of native kind
 set (PAC_FORTRAN_NATIVE_REAL_KIND m CACHE INTERNAL "Find sizeof of native kinds kind of REAL")
 set (PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF n CACHE INTERNAL "Find sizeof of native kinds sizeof DOUBLE PRECISION")
 set (PAC_FORTRAN_NATIVE_DOUBLE_KIND o CACHE INTERNAL "Find sizeof of native kinds kind of DOUBLE PRECISION")
+
+# Optional set the path to a pregenerated Fortran directory that contains pregenerated files
+set (HDF5_USE_PREGEN_DIR "${CMAKE_CURRENT_LIST_DIR}/path/to/pregenerated/fortran/files" CACHE PATH "Path to pregenerated Fortran files")
+
