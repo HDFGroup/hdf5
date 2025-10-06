@@ -372,6 +372,7 @@ set (H5_EXPRESS_TESTS
     farray
     earray
     fheap
+    rtree
     objcopy_ref
     objcopy
 )

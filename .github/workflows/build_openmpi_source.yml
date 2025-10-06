@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install build-essential libtool libtool-bin
 
       - name: Get OpenMPI source
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: 'open-mpi/ompi'
           path: 'ompi'
