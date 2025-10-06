@@ -13,6 +13,7 @@
 package jtest;
 
 import static org.junit.Assert.*;
+
 import static jtest.FfmTestSupport.*;
 
 import java.lang.foreign.Arena;

@@ -19,9 +19,9 @@ import static jtest.FfmTestSupport.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
+import org.hdfgroup.javahdf5.H5L_info2_t;
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.hdfgroup.javahdf5.hdf5_h_1;
-import org.hdfgroup.javahdf5.H5L_info2_t;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,12 +37,12 @@ public class TestH5Lffm {
     @Rule
     public TestName testname = new TestName();
 
-    private static final String H5_FILE      = "test_H5Lffm.h5";
-    private static final String H5_FILE_EXT  = "test_H5Lffm_ext.h5";
+    private static final String H5_FILE     = "test_H5Lffm.h5";
+    private static final String H5_FILE_EXT = "test_H5Lffm_ext.h5";
 
-    long H5fid  = hdf5_h.H5I_INVALID_HID();
-    long H5gid  = hdf5_h.H5I_INVALID_HID();
-    long H5did  = hdf5_h.H5I_INVALID_HID();
+    long H5fid = hdf5_h.H5I_INVALID_HID();
+    long H5gid = hdf5_h.H5I_INVALID_HID();
+    long H5did = hdf5_h.H5I_INVALID_HID();
 
     @Before
     public void createH5file()
@@ -71,9 +71,8 @@ public class TestH5Lffm {
             assertTrue("H5Screate_simple failed", isValidId(sid));
 
             MemorySegment dsetname = stringToSegment(arena, "Dataset1");
-            H5did = hdf5_h_1.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(), sid,
-                                        hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                        hdf5_h.H5P_DEFAULT());
+            H5did                  = hdf5_h_1.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(), sid,
+                                                         hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(H5did));
 
             hdf5_h_1.H5Sclose(sid);
@@ -110,8 +109,8 @@ public class TestH5Lffm {
             MemorySegment src_name  = stringToSegment(arena, "Dataset1");
             MemorySegment link_name = stringToSegment(arena, "HardLink1");
 
-            int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, link_name,
-                                                 hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, link_name, hdf5_h.H5P_DEFAULT(),
+                                                 hdf5_h.H5P_DEFAULT());
             assertTrue("H5Lcreate_hard failed", isSuccess(result));
 
             // Verify link exists
@@ -154,8 +153,8 @@ public class TestH5Lffm {
             MemorySegment moved_name = stringToSegment(arena, "MovedLink");
 
             // Create initial link
-            int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, link_name,
-                                                 hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, link_name, hdf5_h.H5P_DEFAULT(),
+                                                 hdf5_h.H5P_DEFAULT());
             assertTrue("H5Lcreate_hard failed", isSuccess(result));
 
             // Move link
@@ -194,7 +193,7 @@ public class TestH5Lffm {
             assertTrue("Soft link should exist", result > 0);
 
             // Get link value (use reasonable buffer size for soft link)
-            long buf_size = 256;
+            long buf_size            = 256;
             MemorySegment val_buffer = arena.allocate(buf_size);
             result = hdf5_h_1.H5Lget_val(H5fid, link_name, val_buffer, buf_size, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Lget_val failed", isSuccess(result));
@@ -220,8 +219,8 @@ public class TestH5Lffm {
 
             // Create group in external file
             MemorySegment ext_groupname = stringToSegment(arena, "ExtGroup");
-            long ext_gid = hdf5_h_1.H5Gcreate2(ext_fid, ext_groupname, hdf5_h.H5P_DEFAULT(),
-                                               hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            long ext_gid                = hdf5_h_1.H5Gcreate2(ext_fid, ext_groupname, hdf5_h.H5P_DEFAULT(),
+                                                              hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 external failed", isValidId(ext_gid));
 
             hdf5_h_1.H5Gclose(ext_gid);
@@ -255,7 +254,7 @@ public class TestH5Lffm {
             assertTrue("H5Lcreate_external failed", isSuccess(result));
 
             // Get link value (use reasonable buffer size)
-            long buf_size = 512;
+            long buf_size            = 512;
             MemorySegment val_buffer = arena.allocate(buf_size);
             result = hdf5_h_1.H5Lget_val(H5fid, link_name, val_buffer, buf_size, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Lget_val failed", isSuccess(result));
@@ -264,8 +263,8 @@ public class TestH5Lffm {
             MemorySegment file_ptr = allocateLong(arena); // Pointer to filename string
             MemorySegment obj_ptr  = allocateLong(arena); // Pointer to object path string
 
-            result = hdf5_h_1.H5Lunpack_elink_val(val_buffer, buf_size, MemorySegment.NULL, file_ptr,
-                                                  obj_ptr);
+            result =
+                hdf5_h_1.H5Lunpack_elink_val(val_buffer, buf_size, MemorySegment.NULL, file_ptr, obj_ptr);
             assertTrue("H5Lunpack_elink_val failed", isSuccess(result));
         }
     }
@@ -282,8 +281,8 @@ public class TestH5Lffm {
             MemorySegment src_name  = stringToSegment(arena, "Dataset1");
             MemorySegment link_name = stringToSegment(arena, "LinkToDelete");
 
-            int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, link_name,
-                                                 hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, link_name, hdf5_h.H5P_DEFAULT(),
+                                                 hdf5_h.H5P_DEFAULT());
             assertTrue("H5Lcreate_hard failed", isSuccess(result));
 
             // Verify link exists
@@ -309,25 +308,25 @@ public class TestH5Lffm {
                 MemorySegment src_name  = stringToSegment(arena, "Dataset1");
                 MemorySegment link_name = stringToSegment(arena, "Link" + i);
 
-                int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5gid, link_name,
-                                                     hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5gid, link_name, hdf5_h.H5P_DEFAULT(),
+                                                     hdf5_h.H5P_DEFAULT());
                 assertTrue("H5Lcreate_hard failed", isSuccess(result));
             }
 
             // Delete link at index 1 by name order
             MemorySegment dotname = stringToSegment(arena, ".");
-            int result = hdf5_h_1.H5Ldelete_by_idx(H5gid, dotname, hdf5_h.H5_INDEX_NAME(),
-                                                   hdf5_h.H5_ITER_INC(), 1, hdf5_h.H5P_DEFAULT());
+            int result            = hdf5_h_1.H5Ldelete_by_idx(H5gid, dotname, hdf5_h.H5_INDEX_NAME(),
+                                                              hdf5_h.H5_ITER_INC(), 1, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Ldelete_by_idx failed", isSuccess(result));
 
             // Verify link at index 1 is deleted (Link1)
             MemorySegment deleted_name = stringToSegment(arena, "Link1");
-            result = hdf5_h_1.H5Lexists(H5gid, deleted_name, hdf5_h.H5P_DEFAULT());
+            result                     = hdf5_h_1.H5Lexists(H5gid, deleted_name, hdf5_h.H5P_DEFAULT());
             assertEquals("Link1 should not exist after deletion", 0, result);
 
             // Verify other links still exist
             MemorySegment link0_name = stringToSegment(arena, "Link0");
-            result = hdf5_h_1.H5Lexists(H5gid, link0_name, hdf5_h.H5P_DEFAULT());
+            result                   = hdf5_h_1.H5Lexists(H5gid, link0_name, hdf5_h.H5P_DEFAULT());
             assertTrue("Link0 should still exist", result > 0);
         }
     }
@@ -342,7 +341,7 @@ public class TestH5Lffm {
         try (Arena arena = Arena.ofConfined()) {
             // Check existing object
             MemorySegment existing_name = stringToSegment(arena, "Dataset1");
-            int result = hdf5_h_1.H5Lexists(H5fid, existing_name, hdf5_h.H5P_DEFAULT());
+            int result                  = hdf5_h_1.H5Lexists(H5fid, existing_name, hdf5_h.H5P_DEFAULT());
             assertTrue("Dataset1 should exist", result > 0);
 
             // Check non-existing object
@@ -361,22 +360,22 @@ public class TestH5Lffm {
                 MemorySegment src_name  = stringToSegment(arena, "Dataset1");
                 MemorySegment link_name = stringToSegment(arena, "IndexLink" + i);
 
-                int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, link_name,
-                                                     hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, link_name, hdf5_h.H5P_DEFAULT(),
+                                                     hdf5_h.H5P_DEFAULT());
                 assertTrue("H5Lcreate_hard failed", isSuccess(result));
             }
 
             // Get name at index 1 by name order
             MemorySegment dotname = stringToSegment(arena, ".");
-            long name_size = hdf5_h_1.H5Lget_name_by_idx(H5fid, dotname, hdf5_h.H5_INDEX_NAME(),
-                                                         hdf5_h.H5_ITER_INC(), 1, MemorySegment.NULL, 0,
-                                                         hdf5_h.H5P_DEFAULT());
+            long name_size =
+                hdf5_h_1.H5Lget_name_by_idx(H5fid, dotname, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), 1,
+                                            MemorySegment.NULL, 0, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Lget_name_by_idx size query failed", name_size > 0);
 
             MemorySegment name_buffer = arena.allocate(name_size + 1);
-            long actual_size = hdf5_h_1.H5Lget_name_by_idx(H5fid, dotname, hdf5_h.H5_INDEX_NAME(),
-                                                           hdf5_h.H5_ITER_INC(), 1, name_buffer,
-                                                           name_size + 1, hdf5_h.H5P_DEFAULT());
+            long actual_size =
+                hdf5_h_1.H5Lget_name_by_idx(H5fid, dotname, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), 1,
+                                            name_buffer, name_size + 1, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Lget_name_by_idx failed", actual_size > 0);
 
             String retrieved_name = name_buffer.getString(0);
@@ -396,8 +395,8 @@ public class TestH5Lffm {
             MemorySegment src_name  = stringToSegment(arena, "Dataset1");
             MemorySegment hard_link = stringToSegment(arena, "HardLinkWorkflow");
 
-            int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, hard_link,
-                                                 hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            int result = hdf5_h_1.H5Lcreate_hard(H5fid, src_name, H5fid, hard_link, hdf5_h.H5P_DEFAULT(),
+                                                 hdf5_h.H5P_DEFAULT());
             assertTrue("Create hard link failed", isSuccess(result));
 
             // 2. Create soft link

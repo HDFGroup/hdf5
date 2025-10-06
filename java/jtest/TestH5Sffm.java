@@ -1140,9 +1140,8 @@ public class TestH5Sffm {
             copyToSegment(count2s, count2);
 
             // Combine creates a new dataspace
-            long combined_sid =
-                hdf5_h_1.H5Scombine_hyperslab(H5sid, hdf5_h.H5S_SELECT_OR(), start2s, MemorySegment.NULL,
-                                              count2s, MemorySegment.NULL);
+            long combined_sid = hdf5_h_1.H5Scombine_hyperslab(
+                H5sid, hdf5_h.H5S_SELECT_OR(), start2s, MemorySegment.NULL, count2s, MemorySegment.NULL);
             assertTrue("H5Scombine_hyperslab failed", isValidId(combined_sid));
 
             // Verify combined selection has more points than original
@@ -1300,8 +1299,8 @@ public class TestH5Sffm {
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Test intersection with overlapping block [1,1] to [2,2]
-            long[] block_start  = {1, 1};
-            long[] block_end    = {2, 2};
+            long[] block_start   = {1, 1};
+            long[] block_end     = {2, 2};
             MemorySegment bstart = allocateLongArray(arena, RANK);
             MemorySegment bend   = allocateLongArray(arena, RANK);
             copyToSegment(bstart, block_start);
@@ -1311,8 +1310,8 @@ public class TestH5Sffm {
             assertTrue("Block [1,1]-[2,2] should intersect with selection [1,1]-[2,2]", result > 0);
 
             // Test non-intersecting block [0,0] to [0,0]
-            long[] block_start2  = {0, 0};
-            long[] block_end2    = {0, 0};
+            long[] block_start2   = {0, 0};
+            long[] block_end2     = {0, 0};
             MemorySegment bstart2 = allocateLongArray(arena, RANK);
             MemorySegment bend2   = allocateLongArray(arena, RANK);
             copyToSegment(bstart2, block_start2);
@@ -1330,8 +1329,8 @@ public class TestH5Sffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create 3D source dataspace
-            int src_rank          = 3;
-            long[] src_dims       = {4, 6, 8};
+            int src_rank             = 3;
+            long[] src_dims          = {4, 6, 8};
             MemorySegment srcDimsSeg = allocateLongArray(arena, src_rank);
             copyToSegment(srcDimsSeg, src_dims);
 
@@ -1339,8 +1338,8 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple src failed", isValidId(src_sid));
 
             // Select region in source [0,1,1] count [1,2,2] (4 points)
-            long[] src_start         = {0, 1, 1};
-            long[] src_count         = {1, 2, 2};
+            long[] src_start        = {0, 1, 1};
+            long[] src_count        = {1, 2, 2};
             MemorySegment srcStarts = allocateLongArray(arena, src_rank);
             MemorySegment srcCounts = allocateLongArray(arena, src_rank);
             copyToSegment(srcStarts, src_start);
@@ -1355,8 +1354,8 @@ public class TestH5Sffm {
             assertTrue("H5Screate_simple dst failed", isValidId(dst_sid));
 
             // Select matching region in destination [0,0,0] count [1,3,3] (9 points, overlaps with src)
-            long[] dst_start         = {0, 0, 0};
-            long[] dst_count         = {1, 3, 3};
+            long[] dst_start        = {0, 0, 0};
+            long[] dst_count        = {1, 3, 3};
             MemorySegment dstStarts = allocateLongArray(arena, src_rank);
             MemorySegment dstCounts = allocateLongArray(arena, src_rank);
             copyToSegment(dstStarts, dst_start);
@@ -1367,8 +1366,8 @@ public class TestH5Sffm {
             assertTrue("H5Sselect_hyperslab dst failed", isSuccess(result));
 
             // Create 2D projection space
-            int proj_rank          = 2;
-            long[] proj_dims       = {6, 8};
+            int proj_rank             = 2;
+            long[] proj_dims          = {6, 8};
             MemorySegment projDimsSeg = allocateLongArray(arena, proj_rank);
             copyToSegment(projDimsSeg, proj_dims);
 
@@ -1424,8 +1423,8 @@ public class TestH5Sffm {
             copyToSegment(starts, start);
             copyToSegment(counts, count);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
-                                                  MemorySegment.NULL, counts, MemorySegment.NULL);
+            result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts, MemorySegment.NULL,
+                                                  counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             result = hdf5_h_1.H5Sselect_valid(H5sid);
@@ -1466,7 +1465,7 @@ public class TestH5Sffm {
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Apply offset [1, 1]
-            long[] offset          = {1, 1};
+            long[] offset           = {1, 1};
             MemorySegment offsetSeg = allocateLongArray(arena, RANK);
             copyToSegment(offsetSeg, offset);
 
@@ -1529,8 +1528,7 @@ public class TestH5Sffm {
 
             // Encode with H5Sencode2 (first get size)
             MemorySegment sizePtr = allocateLong(arena);
-            result                = hdf5_h_1.H5Sencode2(H5sid, MemorySegment.NULL, sizePtr,
-                                                        hdf5_h.H5P_DEFAULT());
+            result = hdf5_h_1.H5Sencode2(H5sid, MemorySegment.NULL, sizePtr, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Sencode2 size query failed", isSuccess(result));
 
             long size = getLong(sizePtr);
@@ -1588,15 +1586,15 @@ public class TestH5Sffm {
             assertTrue("H5Ssel_iter_create failed", isValidId(iter_id));
 
             // Get sequence list
-            long maxseq              = 10;
-            long maxelmts            = 100;
-            MemorySegment nseqPtr    = allocateLong(arena);
-            MemorySegment neltsPtr   = allocateLong(arena);
-            MemorySegment offArray   = allocateLongArray(arena, (int)maxseq);
-            MemorySegment lenArray   = allocateLongArray(arena, (int)maxseq);
+            long maxseq            = 10;
+            long maxelmts          = 100;
+            MemorySegment nseqPtr  = allocateLong(arena);
+            MemorySegment neltsPtr = allocateLong(arena);
+            MemorySegment offArray = allocateLongArray(arena, (int)maxseq);
+            MemorySegment lenArray = allocateLongArray(arena, (int)maxseq);
 
-            result = hdf5_h_1.H5Ssel_iter_get_seq_list(iter_id, maxseq, maxelmts, nseqPtr, neltsPtr,
-                                                       offArray, lenArray);
+            result = hdf5_h_1.H5Ssel_iter_get_seq_list(iter_id, maxseq, maxelmts, nseqPtr, neltsPtr, offArray,
+                                                       lenArray);
             assertTrue("H5Ssel_iter_get_seq_list failed", isSuccess(result));
 
             long nseq  = getLong(nseqPtr);

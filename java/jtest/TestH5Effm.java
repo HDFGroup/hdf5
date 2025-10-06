@@ -97,7 +97,7 @@ public class TestH5Effm {
             assertTrue("H5Eget_class_name size query failed", name_size > 0);
 
             MemorySegment nameBuffer = arena.allocate(name_size + 1);
-            long actual_size = hdf5_h_1.H5Eget_class_name(class_id, nameBuffer, name_size + 1);
+            long actual_size         = hdf5_h_1.H5Eget_class_name(class_id, nameBuffer, name_size + 1);
             assertTrue("H5Eget_class_name failed", actual_size > 0);
 
             String retrieved_name = nameBuffer.getString(0);
@@ -115,17 +115,16 @@ public class TestH5Effm {
         try (Arena arena = Arena.ofConfined()) {
             // Create major error message
             MemorySegment major_msg = stringToSegment(arena, "Test major error");
-            long maj_err_id =
-                hdf5_h_1.H5Ecreate_msg(hdf_java_classid, hdf5_h.H5E_MAJOR(), major_msg);
+            long maj_err_id         = hdf5_h_1.H5Ecreate_msg(hdf_java_classid, hdf5_h.H5E_MAJOR(), major_msg);
             assertTrue("H5Ecreate_msg major failed", isValidId(maj_err_id));
 
             // Get message back
             MemorySegment typePtr = allocateInt(arena);
-            long msg_size = hdf5_h_1.H5Eget_msg(maj_err_id, typePtr, MemorySegment.NULL, 0);
+            long msg_size         = hdf5_h_1.H5Eget_msg(maj_err_id, typePtr, MemorySegment.NULL, 0);
             assertTrue("H5Eget_msg size query failed", msg_size > 0);
 
             MemorySegment msgBuffer = arena.allocate(msg_size + 1);
-            long actual_size = hdf5_h_1.H5Eget_msg(maj_err_id, typePtr, msgBuffer, msg_size + 1);
+            long actual_size        = hdf5_h_1.H5Eget_msg(maj_err_id, typePtr, msgBuffer, msg_size + 1);
             assertTrue("H5Eget_msg failed", actual_size > 0);
 
             String retrieved_msg = msgBuffer.getString(0);
@@ -140,8 +139,7 @@ public class TestH5Effm {
 
             // Create minor error message
             MemorySegment minor_msg = stringToSegment(arena, "Test minor error");
-            long min_err_id =
-                hdf5_h_1.H5Ecreate_msg(hdf_java_classid, hdf5_h.H5E_MINOR(), minor_msg);
+            long min_err_id         = hdf5_h_1.H5Ecreate_msg(hdf_java_classid, hdf5_h.H5E_MINOR(), minor_msg);
             assertTrue("H5Ecreate_msg minor failed", isValidId(min_err_id));
 
             // Close minor message
@@ -312,7 +310,7 @@ public class TestH5Effm {
 
             // Check if paused (should not be paused initially)
             MemorySegment isPausedPtr = allocateInt(arena); // Using int for boolean
-            int result = hdf5_h_1.H5Eis_paused(stack_id, isPausedPtr);
+            int result                = hdf5_h_1.H5Eis_paused(stack_id, isPausedPtr);
             assertTrue("H5Eis_paused failed", isSuccess(result));
 
             boolean is_paused = (getInt(isPausedPtr) != 0);
@@ -363,11 +361,11 @@ public class TestH5Effm {
 
             // 2. Create error messages
             MemorySegment major_msg = stringToSegment(arena, "Workflow major error");
-            long maj_id = hdf5_h_1.H5Ecreate_msg(class_id, hdf5_h.H5E_MAJOR(), major_msg);
+            long maj_id             = hdf5_h_1.H5Ecreate_msg(class_id, hdf5_h.H5E_MAJOR(), major_msg);
             assertTrue("Create major message failed", isValidId(maj_id));
 
             MemorySegment minor_msg = stringToSegment(arena, "Workflow minor error");
-            long min_id = hdf5_h_1.H5Ecreate_msg(class_id, hdf5_h.H5E_MINOR(), minor_msg);
+            long min_id             = hdf5_h_1.H5Ecreate_msg(class_id, hdf5_h.H5E_MINOR(), minor_msg);
             assertTrue("Create minor message failed", isValidId(min_id));
 
             // 3. Create and manipulate error stack

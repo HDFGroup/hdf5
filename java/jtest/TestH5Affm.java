@@ -730,9 +730,9 @@ public class TestH5Affm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create multiple attributes with known names
-            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
-            String[] attrNames     = {"apple", "banana", "cherry"};
-            String[] sortedNames   = {"apple", "banana", "cherry"}; // Already sorted
+            long attr_sid        = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            String[] attrNames   = {"apple", "banana", "cherry"};
+            String[] sortedNames = {"apple", "banana", "cherry"}; // Already sorted
 
             for (String name : attrNames) {
                 MemorySegment attrName = stringToSegment(arena, name);
@@ -744,13 +744,13 @@ public class TestH5Affm {
 
             // Open second attribute by index (index 1)
             MemorySegment objName = stringToSegment(arena, ".");
-            long aid = hdf5_h_1.H5Aopen_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), 1,
-                                               hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+            long aid = hdf5_h_1.H5Aopen_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(),
+                                               1, hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Aopen_by_idx failed", isValidId(aid));
 
             // Verify we opened the correct attribute by checking its name
-            long nameSize          = hdf5_h_1.H5Aget_name(aid, 0, MemorySegment.NULL);
-            MemorySegment nameBuf  = arena.allocate(nameSize + 1);
+            long nameSize         = hdf5_h_1.H5Aget_name(aid, 0, MemorySegment.NULL);
+            MemorySegment nameBuf = arena.allocate(nameSize + 1);
             hdf5_h_1.H5Aget_name(aid, nameSize + 1, nameBuf);
             String retrievedName = nameBuf.getString(0);
             assertEquals("Should have opened 'banana' (index 1)", sortedNames[1], retrievedName);
@@ -780,8 +780,8 @@ public class TestH5Affm {
 
             // Delete middle attribute (index 1 = "second")
             MemorySegment objName = stringToSegment(arena, ".");
-            int result = hdf5_h_1.H5Adelete_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(),
-                                                   hdf5_h.H5_ITER_INC(), 1, hdf5_h_1.H5P_DEFAULT());
+            int result            = hdf5_h_1.H5Adelete_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(),
+                                                              hdf5_h.H5_ITER_INC(), 1, hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Adelete_by_idx failed", isSuccess(result));
 
             // Verify "second" is gone
@@ -823,8 +823,7 @@ public class TestH5Affm {
 
             // Delete by name from file using dataset path
             MemorySegment objName = stringToSegment(arena, "dset");
-            int result =
-                hdf5_h_1.H5Adelete_by_name(H5fid, objName, attrName, hdf5_h_1.H5P_DEFAULT());
+            int result = hdf5_h_1.H5Adelete_by_name(H5fid, objName, attrName, hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Adelete_by_name failed", isSuccess(result));
 
             // Verify it's gone
@@ -842,11 +841,11 @@ public class TestH5Affm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create attribute on dataset
-            String oldNameStr      = "old_name_by_path";
-            String newNameStr      = "new_name_by_path";
-            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
-            MemorySegment oldName  = stringToSegment(arena, oldNameStr);
-            MemorySegment newName  = stringToSegment(arena, newNameStr);
+            String oldNameStr     = "old_name_by_path";
+            String newNameStr     = "new_name_by_path";
+            long attr_sid         = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            MemorySegment oldName = stringToSegment(arena, oldNameStr);
+            MemorySegment newName = stringToSegment(arena, newNameStr);
 
             long aid = hdf5_h_1.H5Acreate2(H5did, oldName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
                                            hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
@@ -859,8 +858,7 @@ public class TestH5Affm {
 
             // Rename by name from file using dataset path
             MemorySegment objName = stringToSegment(arena, "dset");
-            int result =
-                hdf5_h_1.H5Arename_by_name(H5fid, objName, oldName, newName, hdf5_h_1.H5P_DEFAULT());
+            int result = hdf5_h_1.H5Arename_by_name(H5fid, objName, oldName, newName, hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Arename_by_name failed", isSuccess(result));
 
             // Verify new name exists and old doesn't
@@ -893,11 +891,12 @@ public class TestH5Affm {
             }
 
             // Create iteration callback
-            final int[] count          = {0};
-            final String[] names       = new String[10];
-            H5A_operator2_t.Function cb = (loc_id, attr_name, ainfo, op_data) -> {
+            final int[] count           = {0};
+            final String[] names        = new String[10];
+            H5A_operator2_t.Function cb = (loc_id, attr_name, ainfo, op_data) ->
+            {
                 try {
-                    String name = attr_name.getString(0);
+                    String name     = attr_name.getString(0);
                     names[count[0]] = name;
                     count[0]++;
                     return 0; // Continue iteration
@@ -959,8 +958,9 @@ public class TestH5Affm {
             }
 
             // Create iteration callback
-            final int[] count    = {0};
-            H5A_operator2_t.Function cb = (loc_id, attr_name, ainfo, op_data) -> {
+            final int[] count           = {0};
+            H5A_operator2_t.Function cb = (loc_id, attr_name, ainfo, op_data) ->
+            {
                 count[0]++;
                 return 0; // Continue
             };
@@ -971,9 +971,9 @@ public class TestH5Affm {
 
             // Iterate from file using dataset path
             MemorySegment objName = stringToSegment(arena, "dset");
-            int result = hdf5_h_1.H5Aiterate_by_name(H5fid, objName, hdf5_h.H5_INDEX_NAME(),
-                                                     hdf5_h.H5_ITER_INC(), idx, callback,
-                                                     MemorySegment.NULL, hdf5_h_1.H5P_DEFAULT());
+            int result =
+                hdf5_h_1.H5Aiterate_by_name(H5fid, objName, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), idx,
+                                            callback, MemorySegment.NULL, hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Aiterate_by_name failed", isSuccess(result));
 
             // Verify we iterated at least our 3 attributes
@@ -995,10 +995,9 @@ public class TestH5Affm {
             MemorySegment objName  = stringToSegment(arena, "dset");
             MemorySegment attrName = stringToSegment(arena, attrNameStr);
 
-            long aid =
-                hdf5_h_1.H5Acreate_by_name(H5fid, objName, attrName, hdf5_h_1.H5T_NATIVE_DOUBLE_g(),
-                                           attr_sid, hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT(),
-                                           hdf5_h_1.H5P_DEFAULT());
+            long aid = hdf5_h_1.H5Acreate_by_name(H5fid, objName, attrName, hdf5_h_1.H5T_NATIVE_DOUBLE_g(),
+                                                  attr_sid, hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT(),
+                                                  hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Acreate_by_name failed", isValidId(aid));
 
             // Write data

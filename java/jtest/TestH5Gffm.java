@@ -19,9 +19,9 @@ import static jtest.FfmTestSupport.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
+import org.hdfgroup.javahdf5.H5G_info_t;
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.hdfgroup.javahdf5.hdf5_h_1;
-import org.hdfgroup.javahdf5.H5G_info_t;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -155,8 +155,8 @@ public class TestH5Gffm {
             // Create subgroups
             for (int i = 0; i < 3; i++) {
                 MemorySegment subname = stringToSegment(arena, "SubGroup" + i);
-                long sub_gid = hdf5_h_1.H5Gcreate2(H5gid, subname, hdf5_h.H5P_DEFAULT(),
-                                                   hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                long sub_gid = hdf5_h_1.H5Gcreate2(H5gid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+                                                   hdf5_h.H5P_DEFAULT());
                 assertTrue("H5Gcreate2 subgroup failed", isValidId(sub_gid));
                 hdf5_h_1.H5Gclose(sub_gid);
             }
@@ -189,7 +189,7 @@ public class TestH5Gffm {
 
             // Get info by name from file
             MemorySegment ginfo = H5G_info_t.allocate(arena);
-            int result = hdf5_h_1.H5Gget_info_by_name(H5fid, subname, ginfo, hdf5_h.H5P_DEFAULT());
+            int result          = hdf5_h_1.H5Gget_info_by_name(H5fid, subname, ginfo, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gget_info_by_name failed", isSuccess(result));
 
             // Verify storage type
@@ -205,17 +205,17 @@ public class TestH5Gffm {
             // Create multiple groups
             for (int i = 0; i < 3; i++) {
                 MemorySegment subname = stringToSegment(arena, "IdxGroup" + i);
-                long sub_gid = hdf5_h_1.H5Gcreate2(H5fid, subname, hdf5_h.H5P_DEFAULT(),
-                                                   hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                long sub_gid = hdf5_h_1.H5Gcreate2(H5fid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+                                                   hdf5_h.H5P_DEFAULT());
                 assertTrue("H5Gcreate2 failed", isValidId(sub_gid));
                 hdf5_h_1.H5Gclose(sub_gid);
             }
 
             // Get info for group at index 1
-            MemorySegment ginfo = H5G_info_t.allocate(arena);
+            MemorySegment ginfo   = H5G_info_t.allocate(arena);
             MemorySegment dotname = stringToSegment(arena, ".");
-            int result = hdf5_h_1.H5Gget_info_by_idx(H5fid, dotname, hdf5_h.H5_INDEX_NAME(),
-                                                     hdf5_h.H5_ITER_INC(), 1, ginfo, hdf5_h.H5P_DEFAULT());
+            int result            = hdf5_h_1.H5Gget_info_by_idx(H5fid, dotname, hdf5_h.H5_INDEX_NAME(),
+                                                                hdf5_h.H5_ITER_INC(), 1, ginfo, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gget_info_by_idx failed", isSuccess(result));
 
             // Verify storage type is valid
@@ -313,8 +313,8 @@ public class TestH5Gffm {
             // 2. Create subgroups
             for (int i = 0; i < 3; i++) {
                 MemorySegment subname = stringToSegment(arena, "Sub" + i);
-                long sub_gid = hdf5_h_1.H5Gcreate2(gid, subname, hdf5_h.H5P_DEFAULT(),
-                                                   hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                long sub_gid = hdf5_h_1.H5Gcreate2(gid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+                                                   hdf5_h.H5P_DEFAULT());
                 assertTrue("Create subgroup failed", isValidId(sub_gid));
                 hdf5_h_1.H5Gclose(sub_gid);
             }
