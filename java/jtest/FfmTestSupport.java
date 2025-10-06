@@ -67,6 +67,20 @@ public class FfmTestSupport {
     }
 
     /**
+     * Convert a MemorySegment containing a null-terminated string to a Java String.
+     *
+     * @param segment The MemorySegment containing the string
+     * @return The Java string, or null if segment is NULL
+     */
+    public static String segmentToString(MemorySegment segment)
+    {
+        if (segment == null || segment == MemorySegment.NULL) {
+            return null;
+        }
+        return segment.getString(0);
+    }
+
+    /**
      * Create a MemorySegment for an integer output parameter.
      *
      * @param arena The Arena to use for allocation
