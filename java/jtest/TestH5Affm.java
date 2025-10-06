@@ -20,6 +20,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
+import org.hdfgroup.javahdf5.H5A_info_t;
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.hdfgroup.javahdf5.hdf5_h_1;
 import org.junit.After;
@@ -479,6 +480,238 @@ public class TestH5Affm {
             // Get number of attributes
             int num_attrs = hdf5_h_1.H5Aget_num_attrs(H5did);
             assertTrue("Should have at least 3 attributes", num_attrs >= 3);
+
+            hdf5_h_1.H5Sclose(attr_sid);
+        }
+    }
+
+    // =========================
+    // Phase 1: Essential Query Operations
+    // =========================
+
+    @Test
+    public void testH5Aget_info()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create attribute with scalar dataspace
+            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            MemorySegment attrName = stringToSegment(arena, "info_test_attr");
+
+            long aid = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
+                                           hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+            assertTrue("H5Acreate2 failed", isValidId(aid));
+
+            // Write some data
+            MemorySegment data = allocateInt(arena);
+            setInt(data, 42);
+            int writeResult = hdf5_h_1.H5Awrite(aid, hdf5_h_1.H5T_NATIVE_INT_g(), data);
+            assertTrue("H5Awrite failed", isSuccess(writeResult));
+
+            // Get attribute info
+            MemorySegment info = H5A_info_t.allocate(arena);
+            int result         = hdf5_h_1.H5Aget_info(aid, info);
+            assertTrue("H5Aget_info failed", isSuccess(result));
+
+            // Verify info fields
+            long data_size = H5A_info_t.data_size(info);
+            assertEquals("Data size should be 4 bytes (sizeof int)", 4L, data_size);
+
+            // corder_valid may be false if creation order tracking is not enabled
+            boolean corder_valid = H5A_info_t.corder_valid(info);
+            // Just verify we can read it (no assertion on value)
+            assertNotNull("corder_valid should be readable", Boolean.valueOf(corder_valid));
+
+            // cset should be ASCII by default
+            int cset = H5A_info_t.cset(info);
+            assertEquals("Character set should be ASCII", hdf5_h.H5T_CSET_ASCII(), cset);
+
+            hdf5_h_1.H5Aclose(aid);
+            hdf5_h_1.H5Sclose(attr_sid);
+        }
+    }
+
+    @Test
+    public void testH5Aget_info_by_idx()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create multiple attributes to test indexing
+            long attr_sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+
+            String[] attrNames = {"first_attr", "second_attr", "third_attr"};
+            for (String name : attrNames) {
+                MemorySegment attrName = stringToSegment(arena, name);
+                long aid = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_DOUBLE_g(), attr_sid,
+                                               hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+                assertTrue("H5Acreate2 failed for " + name, isValidId(aid));
+                hdf5_h_1.H5Aclose(aid);
+            }
+
+            // Get info for the second attribute (index 1) by name order
+            MemorySegment objName = stringToSegment(arena, ".");
+            MemorySegment info    = H5A_info_t.allocate(arena);
+
+            int result = hdf5_h_1.H5Aget_info_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(),
+                                                     hdf5_h.H5_ITER_INC(), 1, info, hdf5_h_1.H5P_DEFAULT());
+            assertTrue("H5Aget_info_by_idx failed", isSuccess(result));
+
+            // Verify we got valid info
+            long data_size = H5A_info_t.data_size(info);
+            assertEquals("Data size should be 8 bytes (sizeof double)", 8L, data_size);
+
+            hdf5_h_1.H5Sclose(attr_sid);
+        }
+    }
+
+    @Test
+    public void testH5Aget_info_by_name()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create attribute on dataset
+            String attrNameStr     = "named_info_attr";
+            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            MemorySegment attrName = stringToSegment(arena, attrNameStr);
+
+            long aid = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_FLOAT_g(), attr_sid,
+                                           hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+            assertTrue("H5Acreate2 failed", isValidId(aid));
+            hdf5_h_1.H5Aclose(aid);
+
+            // Get info by name from the file (using dataset path)
+            MemorySegment objName = stringToSegment(arena, "dset");
+            MemorySegment info    = H5A_info_t.allocate(arena);
+
+            int result = hdf5_h_1.H5Aget_info_by_name(H5fid, objName, attrName, info, hdf5_h_1.H5P_DEFAULT());
+            assertTrue("H5Aget_info_by_name failed", isSuccess(result));
+
+            // Verify info
+            long data_size = H5A_info_t.data_size(info);
+            assertEquals("Data size should be 4 bytes (sizeof float)", 4L, data_size);
+
+            hdf5_h_1.H5Sclose(attr_sid);
+        }
+    }
+
+    @Test
+    public void testH5Aget_name_by_idx()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create multiple attributes with known names
+            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            String[] attrNames     = {"alpha", "beta", "gamma"};
+            String[] sortedNames   = {"alpha", "beta", "gamma"}; // Already sorted alphabetically
+
+            for (String name : attrNames) {
+                MemorySegment attrName = stringToSegment(arena, name);
+                long aid = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
+                                               hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+                assertTrue("H5Acreate2 failed for " + name, isValidId(aid));
+                hdf5_h_1.H5Aclose(aid);
+            }
+
+            // Get name of each attribute by index (alphabetical order)
+            MemorySegment objName = stringToSegment(arena, ".");
+
+            for (int i = 0; i < sortedNames.length; i++) {
+                // Get name size first
+                long nameSize = hdf5_h_1.H5Aget_name_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(),
+                                                            hdf5_h.H5_ITER_INC(), i, MemorySegment.NULL, 0,
+                                                            hdf5_h_1.H5P_DEFAULT());
+                assertTrue("H5Aget_name_by_idx size query failed for index " + i, nameSize > 0);
+
+                // Get actual name
+                MemorySegment nameBuffer = arena.allocate(nameSize + 1);
+                long result = hdf5_h_1.H5Aget_name_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(),
+                                                          hdf5_h.H5_ITER_INC(), i, nameBuffer, nameSize + 1,
+                                                          hdf5_h_1.H5P_DEFAULT());
+                assertTrue("H5Aget_name_by_idx failed for index " + i, result > 0);
+
+                String retrievedName = nameBuffer.getString(0);
+                assertEquals("Name at index " + i + " should match", sortedNames[i], retrievedName);
+            }
+
+            hdf5_h_1.H5Sclose(attr_sid);
+        }
+    }
+
+    @Test
+    public void testH5Aget_create_plist()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create attribute creation property list with specific settings
+            long acpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_ATTRIBUTE_CREATE_ID_g());
+            assertTrue("H5Pcreate acpl failed", isValidId(acpl));
+
+            // Set character encoding to UTF-8
+            int setResult = hdf5_h.H5Pset_char_encoding(acpl, hdf5_h.H5T_CSET_UTF8());
+            assertTrue("H5Pset_char_encoding failed", isSuccess(setResult));
+
+            // Create attribute with this property list
+            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            MemorySegment attrName = stringToSegment(arena, "plist_attr");
+
+            long aid = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid, acpl,
+                                           hdf5_h_1.H5P_DEFAULT());
+            assertTrue("H5Acreate2 failed", isValidId(aid));
+
+            // Get the creation property list back
+            long retrieved_acpl = hdf5_h_1.H5Aget_create_plist(aid);
+            assertTrue("H5Aget_create_plist failed", isValidId(retrieved_acpl));
+
+            // Verify the encoding is UTF-8
+            MemorySegment encoding = allocateInt(arena);
+            int getResult          = hdf5_h.H5Pget_char_encoding(retrieved_acpl, encoding);
+            assertTrue("H5Pget_char_encoding failed", isSuccess(getResult));
+
+            int retrievedEncoding = getInt(encoding);
+            assertEquals("Character encoding should be UTF-8", hdf5_h.H5T_CSET_UTF8(), retrievedEncoding);
+
+            hdf5_h.H5Pclose(retrieved_acpl);
+            hdf5_h.H5Pclose(acpl);
+            hdf5_h_1.H5Aclose(aid);
+            hdf5_h_1.H5Sclose(attr_sid);
+        }
+    }
+
+    @Test
+    public void testH5Aexists_by_name()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create attribute on dataset
+            String existingAttrName    = "existing_by_name";
+            String nonExistingAttrName = "nonexistent_by_name";
+
+            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            MemorySegment attrName = stringToSegment(arena, existingAttrName);
+
+            long aid = hdf5_h_1.H5Acreate2(H5did, attrName, hdf5_h_1.H5T_NATIVE_INT_g(), attr_sid,
+                                           hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+            assertTrue("H5Acreate2 failed", isValidId(aid));
+            hdf5_h_1.H5Aclose(aid);
+
+            // Check existence from file using dataset path
+            MemorySegment objName            = stringToSegment(arena, "dset");
+            MemorySegment existingAttrNameSeg = stringToSegment(arena, existingAttrName);
+            MemorySegment missingAttrNameSeg  = stringToSegment(arena, nonExistingAttrName);
+
+            // Should exist
+            int exists = hdf5_h_1.H5Aexists_by_name(H5fid, objName, existingAttrNameSeg, hdf5_h_1.H5P_DEFAULT());
+            assertTrue("Attribute should exist", exists > 0);
+
+            // Should not exist
+            exists = hdf5_h_1.H5Aexists_by_name(H5fid, objName, missingAttrNameSeg, hdf5_h_1.H5P_DEFAULT());
+            assertEquals("Attribute should not exist", 0, exists);
 
             hdf5_h_1.H5Sclose(attr_sid);
         }
