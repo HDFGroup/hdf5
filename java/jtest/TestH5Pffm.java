@@ -593,14 +593,12 @@ public class TestH5Pffm {
             MemorySegment fillSegment = allocateInt(arena);
             setInt(fillSegment, fillValue);
 
-            int result =
-                hdf5_h.H5Pset_fill_value(dcpl, hdf5_h_1.H5T_NATIVE_INT_g(), fillSegment);
+            int result = hdf5_h.H5Pset_fill_value(dcpl, hdf5_h_1.H5T_NATIVE_INT_g(), fillSegment);
             assertTrue("H5Pset_fill_value failed", isSuccess(result));
 
             // Get fill value back
             MemorySegment outFillSegment = allocateInt(arena);
-            result =
-                hdf5_h.H5Pget_fill_value(dcpl, hdf5_h_1.H5T_NATIVE_INT_g(), outFillSegment);
+            result = hdf5_h.H5Pget_fill_value(dcpl, hdf5_h_1.H5T_NATIVE_INT_g(), outFillSegment);
             assertTrue("H5Pget_fill_value failed", isSuccess(result));
 
             int retrieved = getInt(outFillSegment);
@@ -629,8 +627,7 @@ public class TestH5Pffm {
             assertTrue("H5Pget_fill_time failed", isSuccess(result));
 
             int fillTime = getInt(fillTimeSeg);
-            assertEquals("Fill time should be H5D_FILL_TIME_ALLOC", hdf5_h.H5D_FILL_TIME_ALLOC(),
-                         fillTime);
+            assertEquals("Fill time should be H5D_FILL_TIME_ALLOC", hdf5_h.H5D_FILL_TIME_ALLOC(), fillTime);
 
             hdf5_h.H5Pclose(dcpl);
         }
@@ -655,8 +652,8 @@ public class TestH5Pffm {
             assertTrue("H5Pget_alloc_time failed", isSuccess(result));
 
             int allocTime = getInt(allocTimeSeg);
-            assertEquals("Allocation time should be H5D_ALLOC_TIME_EARLY",
-                         hdf5_h.H5D_ALLOC_TIME_EARLY(), allocTime);
+            assertEquals("Allocation time should be H5D_ALLOC_TIME_EARLY", hdf5_h.H5D_ALLOC_TIME_EARLY(),
+                         allocTime);
 
             hdf5_h.H5Pclose(dcpl);
         }
