@@ -86,7 +86,8 @@ public class TestH5Fffm {
     }
 
     @Test
-    public void testH5Fopen() {
+    public void testH5Fopen()
+    {
         long fid = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
@@ -100,7 +101,8 @@ public class TestH5Fffm {
     }
 
     @Test
-    public void testH5Freopen() {
+    public void testH5Freopen()
+    {
         long fid2 = hdf5_h.H5I_INVALID_HID();
 
         try {
@@ -114,7 +116,8 @@ public class TestH5Fffm {
     }
 
     @Test
-    public void testH5Fget_create_plist() {
+    public void testH5Fget_create_plist()
+    {
         long plist = hdf5_h.H5I_INVALID_HID();
 
         try {
@@ -127,7 +130,8 @@ public class TestH5Fffm {
     }
 
     @Test
-    public void testH5Fget_access_plist() {
+    public void testH5Fget_access_plist()
+    {
         long plist = hdf5_h.H5I_INVALID_HID();
 
         try {
