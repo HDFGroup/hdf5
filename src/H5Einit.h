@@ -153,6 +153,10 @@ if((H5E_RESOURCE_g = H5I_register(H5I_ERROR_MSG, &H5E_RESOURCE_msg_s, false)) < 
 assert(H5I_INVALID_HID == H5E_RS_g);
 if((H5E_RS_g = H5I_register(H5I_ERROR_MSG, &H5E_RS_msg_s, false)) < 0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message");
+/* H5E_RTREE */
+assert(H5I_INVALID_HID == H5E_RTREE_g);
+if((H5E_RTREE_g = H5I_register(H5I_ERROR_MSG, &H5E_RTREE_msg_s, false)) < 0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message");
 /* H5E_SLIST */
 assert(H5I_INVALID_HID == H5E_SLIST_g);
 if((H5E_SLIST_g = H5I_register(H5I_ERROR_MSG, &H5E_SLIST_msg_s, false)) < 0)
