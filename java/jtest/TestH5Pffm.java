@@ -1230,15 +1230,15 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate gcpl failed", isValidId(gcpl));
 
             // Set link phase change thresholds
-            int maxCompact = 8;  // Max links in compact storage
-            int minDense   = 6;  // Min links for dense storage
+            int maxCompact = 8; // Max links in compact storage
+            int minDense   = 6; // Min links for dense storage
             int result     = hdf5_h.H5Pset_link_phase_change(gcpl, maxCompact, minDense);
             assertTrue("H5Pset_link_phase_change failed", isSuccess(result));
 
             // Get thresholds back
             MemorySegment outMaxCompact = allocateIntArray(arena, 1);
             MemorySegment outMinDense   = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_link_phase_change(gcpl, outMaxCompact, outMinDense);
+            result                      = hdf5_h.H5Pget_link_phase_change(gcpl, outMaxCompact, outMinDense);
             assertTrue("H5Pget_link_phase_change failed", isSuccess(result));
 
             assertEquals("Max compact should match", maxCompact, getInt(outMaxCompact));
@@ -1266,7 +1266,7 @@ public class TestH5Pffm {
             // Get thresholds back
             MemorySegment outMaxCompact = allocateIntArray(arena, 1);
             MemorySegment outMinDense   = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_attr_phase_change(ocpl, outMaxCompact, outMinDense);
+            result                      = hdf5_h.H5Pget_attr_phase_change(ocpl, outMaxCompact, outMinDense);
             assertTrue("H5Pget_attr_phase_change failed", isSuccess(result));
 
             assertEquals("Max compact should match", maxCompact, getInt(outMaxCompact));
@@ -1397,8 +1397,8 @@ public class TestH5Pffm {
 
             // Set file space strategy (aggregation strategy)
             int strategy    = hdf5_h.H5F_FSPACE_STRATEGY_FSM_AGGR(); // Free-space manager with aggregation
-            boolean persist = true;                                   // Persist free-space
-            long threshold  = 1;                                      // Threshold
+            boolean persist = true;                                  // Persist free-space
+            long threshold  = 1;                                     // Threshold
             int result      = hdf5_h.H5Pset_file_space_strategy(fcpl, strategy, persist, threshold);
             assertTrue("H5Pset_file_space_strategy failed", isSuccess(result));
 
@@ -1477,15 +1477,15 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate gcpl failed", isValidId(gcpl));
 
             // Set estimated link info
-            int estNumEntries  = 100;  // Estimated number of links
-            int estNameLen     = 20;   // Estimated link name length
-            int result         = hdf5_h.H5Pset_est_link_info(gcpl, estNumEntries, estNameLen);
+            int estNumEntries = 100; // Estimated number of links
+            int estNameLen    = 20;  // Estimated link name length
+            int result        = hdf5_h.H5Pset_est_link_info(gcpl, estNumEntries, estNameLen);
             assertTrue("H5Pset_est_link_info failed", isSuccess(result));
 
             // Get estimates back
             MemorySegment outNumEntries = allocateIntArray(arena, 1);
             MemorySegment outNameLen    = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_est_link_info(gcpl, outNumEntries, outNameLen);
+            result                      = hdf5_h.H5Pget_est_link_info(gcpl, outNumEntries, outNameLen);
             assertTrue("H5Pget_est_link_info failed", isSuccess(result));
 
             assertEquals("Num entries should match", estNumEntries, getInt(outNumEntries));
