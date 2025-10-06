@@ -56,6 +56,7 @@ extern "C" {
 #define H5E_REFERENCE        (H5OPEN H5E_REFERENCE_g)
 #define H5E_RESOURCE         (H5OPEN H5E_RESOURCE_g)
 #define H5E_RS               (H5OPEN H5E_RS_g)
+#define H5E_RTREE            (H5OPEN H5E_RTREE_g)
 #define H5E_SLIST            (H5OPEN H5E_SLIST_g)
 #define H5E_SOHM             (H5OPEN H5E_SOHM_g)
 #define H5E_STORAGE          (H5OPEN H5E_STORAGE_g)
@@ -96,6 +97,7 @@ H5_DLLVAR hid_t H5E_PLUGIN_g;        /* Plugin for dynamically loaded library */
 H5_DLLVAR hid_t H5E_REFERENCE_g;     /* References */
 H5_DLLVAR hid_t H5E_RESOURCE_g;      /* Resource unavailable */
 H5_DLLVAR hid_t H5E_RS_g;            /* Reference Counted Strings */
+H5_DLLVAR hid_t H5E_RTREE_g;         /* R-Tree spatial index */
 H5_DLLVAR hid_t H5E_SLIST_g;         /* Skip Lists */
 H5_DLLVAR hid_t H5E_SOHM_g;          /* Shared Object Header Messages */
 H5_DLLVAR hid_t H5E_STORAGE_g;       /* Data storage */

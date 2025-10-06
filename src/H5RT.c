@@ -83,7 +83,7 @@ H5RT_leaf_init(H5RT_leaf_t *leaf, int rank, void *record)
 done:
     if (ret_value < 0 && leaf) {
         if (H5RT_leaf_cleanup(leaf) < 0)
-            HDONE_ERROR(H5E_INTERNAL, H5E_CANTRELEASE, FAIL, "failed to clean up leaf on error");
+            HDONE_ERROR(H5E_RTREE, H5E_CANTRELEASE, FAIL, "failed to clean up leaf on error");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -196,14 +196,14 @@ H5RT__compute_slabs(size_t node_capacity, size_t leaf_count, size_t *slab_count_
         slab_size_d = ceil((double)leaf_count / (double)node_capacity);
 
         if (slab_size_d > (double)SIZE_MAX)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "slab size overflows size_t");
+            HGOTO_ERROR(H5E_RTREE, H5E_OVERFLOW, FAIL, "slab size overflows size_t");
         assert(slab_size_d > 0.0);
         slab_size = (size_t)slab_size_d;
         assert(slab_size > 0);
 
         num_slabs_d = ceil((double)leaf_count / (double)slab_size);
         if (num_slabs_d > (double)SIZE_MAX)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "number of slabs overflows size_t");
+            HGOTO_ERROR(H5E_RTREE, H5E_OVERFLOW, FAIL, "number of slabs overflows size_t");
         assert(num_slabs_d > 0.0);
         num_slabs = (size_t)num_slabs_d;
     }
@@ -277,7 +277,7 @@ H5RT__result_set_grow(H5RT_result_set_t *result_set)
 
     /* Overflow check */
     if (new_capacity < result_set->capacity || new_capacity > (SIZE_MAX / sizeof(H5RT_leaf_t *)))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, FAIL, "result buffer capacity overflow");
+        HGOTO_ERROR(H5E_RTREE, H5E_OVERFLOW, FAIL, "result buffer capacity overflow");
 
     /* Reallocate the buffer */
     new_results = (H5RT_leaf_t **)realloc(result_set->results, new_capacity * sizeof(H5RT_leaf_t *));
@@ -313,7 +313,7 @@ H5RT__result_set_add(H5RT_result_set_t *result_set, H5RT_leaf_t *leaf)
     /* Grow buffer if full */
     if (result_set->count >= result_set->capacity) {
         if (H5RT__result_set_grow(result_set) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTALLOC, FAIL, "failed to grow result buffer");
+            HGOTO_ERROR(H5E_RTREE, H5E_CANTALLOC, FAIL, "failed to grow result buffer");
     }
 
     /* Add the new result */
@@ -427,7 +427,7 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
              * 'child_leaf_count' */
             if (H5RT__bulk_load(node->children.nodes[i], rank, child_leaf_start, child_leaf_count, sort_dim) <
                 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "failed to fill R-tree");
+                HGOTO_ERROR(H5E_RTREE, H5E_CANTINIT, FAIL, "failed to fill R-tree");
 
             /* The next 'child_leaf_count' leaves are now assigned */
             child_leaf_start += child_leaf_count;
@@ -488,7 +488,7 @@ H5RT_create(int rank, H5RT_leaf_t *leaves, size_t count)
 
     /* Populate the r-tree with nodes containing the provided leaves */
     if (H5RT__bulk_load(&rtree->root, rank, rtree->leaves, count, -1) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, NULL, "failed to fill R-tree");
+        HGOTO_ERROR(H5E_RTREE, H5E_CANTINIT, NULL, "failed to fill R-tree");
 
     ret_value = rtree;
 
@@ -540,7 +540,7 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
                 /* We found an intersecting leaf, add it to the result set */
                 if (H5RT__result_set_add(result_set, curr_leaf) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTALLOC, FAIL, "failed to add result to result set");
+                    HGOTO_ERROR(H5E_RTREE, H5E_CANTALLOC, FAIL, "failed to add result to result set");
             }
         }
         else {
@@ -553,7 +553,7 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
                 /* We found an intersecting internal node, recurse into it */
                 if (H5RT__search_recurse(curr_node, rank, min, max, result_set) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "recursive search failed");
+                    HGOTO_ERROR(H5E_RTREE, H5E_CANTGET, FAIL, "recursive search failed");
             }
         }
 
@@ -597,11 +597,11 @@ H5RT_search(H5RT_t *rtree, hsize_t min[], hsize_t max[], H5RT_result_set_t **res
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate result set");
 
     if (H5RT__result_set_init(result_set) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "failed to initialize result buffer");
+        HGOTO_ERROR(H5E_RTREE, H5E_CANTINIT, FAIL, "failed to initialize result buffer");
 
     /* Perform the actual search */
     if (H5RT__search_recurse(&rtree->root, rtree->rank, min, max, result_set) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "search failed");
+        HGOTO_ERROR(H5E_RTREE, H5E_CANTGET, FAIL, "search failed");
 
     /* Don't cleanup result set on success - caller owns it now */
     *results_out = result_set;
@@ -610,7 +610,7 @@ done:
     if (ret_value < 0) {
         /* Clean up buffer on failure */
         if (H5RT_free_results(result_set) < 0)
-            HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "unable to free result set on error");
+            HDONE_ERROR(H5E_RTREE, H5E_CANTFREE, FAIL, "unable to free result set on error");
         *results_out = NULL;
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -695,7 +695,7 @@ H5RT__node_copy(H5RT_node_t *dest_node, const H5RT_node_t *src_node, const H5RT_
             /* Recursively copy the child */
             if (H5RT__node_copy(dest_node->children.nodes[i], src_node->children.nodes[i], old_leaves_base,
                                 new_leaves_base) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, FAIL, "failed to copy child node");
+                HGOTO_ERROR(H5E_RTREE, H5E_CANTCOPY, FAIL, "failed to copy child node");
         }
     }
 
@@ -846,7 +846,7 @@ H5RT_copy(const H5RT_t *rtree)
 
     /* Deep copy the root node structure */
     if (H5RT__node_copy(&new_tree->root, &rtree->root, rtree->leaves, new_leaves) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "failed to copy r-tree structure");
+        HGOTO_ERROR(H5E_RTREE, H5E_CANTCOPY, NULL, "failed to copy r-tree structure");
 
     ret_value = new_tree;
 
@@ -854,7 +854,7 @@ done:
     if (!ret_value) {
         if (new_tree) {
             if (H5RT_free(new_tree) < 0)
-                HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "unable to free partially copied r-tree");
+                HDONE_ERROR(H5E_RTREE, H5E_CANTFREE, NULL, "unable to free partially copied r-tree");
         }
         else if (new_leaves) {
             /* Free copied leaves and their coordinates */
