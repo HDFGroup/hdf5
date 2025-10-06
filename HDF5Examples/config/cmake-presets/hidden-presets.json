@@ -112,14 +112,14 @@
       "name": "ci-HL",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_HL": "ON"
+        "H5EXAMPLE_BUILD_HL": "ON"
       }
     },
     {
       "name": "ci-Fortran",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_FORTRAN": "ON"
+        "H5EXAMPLE_BUILD_FORTRAN": "ON"
       }
     },
     {
@@ -139,14 +139,14 @@
       "name": "ci-CPP",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_CXX": "ON"
+        "H5EXAMPLE_BUILD_CXX": "ON"
       }
     },
     {
       "name": "ci-Java",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_JAVA": "ON"
+        "H5EXAMPLE_BUILD_JAVA": "ON"
       }
     },
     {

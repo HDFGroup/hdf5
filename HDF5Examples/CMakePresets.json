@@ -11,35 +11,35 @@
         "CPACK_PACKAGE_VERSION": "2.0.4",
         "HDF5_NAMESPACE": {"type": "STRING", "value": "hdf5::"},
         "HDF5_PACKAGE_NAME": {"type": "STRING", "value": "hdf5"},
-        "H5EX_BUILD_TESTING": "ON"
+        "H5EXAMPLE_BUILD_TESTING": "ON"
       }
     },
     {
       "name": "ci-StdHL",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_HL": "ON"
+        "H5EXAMPLE_BUILD_HL": "ON"
       }
     },
     {
       "name": "ci-StdJava",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_JAVA": "ON"
+        "H5EXAMPLE_BUILD_JAVA": "ON"
       }
     },
     {
       "name": "ci-StdFortran",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_FORTRAN": "ON"
+        "H5EXAMPLE_BUILD_FORTRAN": "ON"
       }
     },
     {
       "name": "ci-StdPlugins",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_FILTERS": "ON"
+        "H5EXAMPLE_BUILD_FILTERS": "ON"
       }
     },
     {

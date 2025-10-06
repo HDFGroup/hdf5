@@ -5,7 +5,7 @@ project (HDF5Examples_FORTRAN_TUTR Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EX_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EXAMPLE_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
 )
 
 #-----------------------------------------------------------------------------
@@ -13,7 +13,7 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
 #-----------------------------------------------------------------------------
 include (Fortran_sourcefiles.cmake)
 
-#if (H5EX_ENABLE_F2003)
+#if (H5EXAMPLE_ENABLE_F2003)
   foreach (example_name ${f03_examples})
     add_executable (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.f90)
     target_compile_options(${EXAMPLE_VARNAME}_f90_tutr_${example_name}
@@ -28,7 +28,7 @@ include (Fortran_sourcefiles.cmake)
     if (H5_HAVE_PARALLEL)
       target_include_directories (${EXAMPLE_VARNAME}_f90_tutr_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
     endif ()
-    target_link_libraries (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${H5EX_LINK_Fortran_LIBS})
+    target_link_libraries (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${H5EXAMPLE_LINK_Fortran_LIBS})
     set_target_properties (${EXAMPLE_VARNAME}_f90_tutr_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)
   endforeach ()
 #endif ()
@@ -47,11 +47,11 @@ foreach (example_name ${common_examples})
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_f90_tutr_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
   endif ()
-  target_link_libraries (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${H5EX_LINK_Fortran_LIBS})
+  target_link_libraries (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${H5EXAMPLE_LINK_Fortran_LIBS})
   set_target_properties (${EXAMPLE_VARNAME}_f90_tutr_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)
 endforeach ()
 
-if (H5EX_BUILD_TESTING)
+if (H5EXAMPLE_BUILD_TESTING)
   set (${EXAMPLE_VARNAME}_f90_tutr_CLEANFILES
       compound.h5
       copy1.h5
@@ -102,7 +102,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (${EXAMPLE_VARNAME}_f90_tutr_${testname} PROPERTIES FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_f90_tutr)
@@ -112,7 +112,7 @@ if (H5EX_BUILD_TESTING)
     set (last_test "${EXAMPLE_VARNAME}_f90_tutr_${testname}")
   endmacro ()
 
-  #if (H5EX_ENABLE_F2003)
+  #if (H5EXAMPLE_ENABLE_F2003)
     foreach (example_name ${f03_examples} ${common_examples})
       ADD_H5_TEST (${example_name})
     endforeach ()

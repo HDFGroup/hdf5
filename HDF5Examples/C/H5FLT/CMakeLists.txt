@@ -186,13 +186,13 @@ foreach (example ${dyn_examples})
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_${example} PUBLIC ${MPI_C_INCLUDE_DIRS})
   endif ()
-  target_link_libraries (${EXAMPLE_VARNAME}_${example} PRIVATE ${H5EX_HDF5_LINK_LIBS})
+  target_link_libraries (${EXAMPLE_VARNAME}_${example} PRIVATE ${H5EXAMPLE_HDF5_LINK_LIBS})
   if (NOT WIN32)
     target_link_libraries (${EXAMPLE_VARNAME}_${example} PRIVATE dl)
   endif ()
 endforeach ()
 
-if (H5EX_BUILD_TESTING)
+if (H5EXAMPLE_BUILD_TESTING)
   macro (ADD_H5_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_${testname}-clearall
@@ -221,12 +221,12 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_REFERENCE=${testname}.tst"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
+              -D "TEST_ENV_VALUE=${H5EXAMPLE_HDF5_PLUGIN_PATH}"
               -D "TEST_SKIP_COMPARE=1"
               -D "TEST_ERRREF=1"
               -D "GREP_ERRREF=Filter present but encoding disabled"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname}-ERR PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
       add_test (
@@ -248,9 +248,9 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_REFERENCE=${testname}.tst"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
+              -D "TEST_ENV_VALUE=${H5EXAMPLE_HDF5_PLUGIN_PATH}"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
     endif ()
@@ -261,7 +261,7 @@ if (H5EX_BUILD_TESTING)
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
+                -D "TEST_PROGRAM=${H5EXAMPLE_HDF5_DUMP_EXECUTABLE}"
                 -D "TEST_ARGS:STRING=--enable-error-stack;-p;${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
@@ -270,16 +270,16 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
+                -D "TEST_ENV_VALUE=${H5EXAMPLE_HDF5_PLUGIN_PATH}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-                -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+                -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
         )
       elseif ("${ARGN}" STREQUAL "FILTERHEADER")
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
+                -D "TEST_PROGRAM=${H5EXAMPLE_HDF5_DUMP_EXECUTABLE}"
                 -D "TEST_ARGS:STRING=--enable-error-stack;-pH;${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
@@ -288,16 +288,16 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
+                -D "TEST_ENV_VALUE=${H5EXAMPLE_HDF5_PLUGIN_PATH}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-                -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+                -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
+                -D "TEST_PROGRAM=${H5EXAMPLE_HDF5_DUMP_EXECUTABLE}"
                 -D "TEST_ARGS:STRING=--enable-error-stack;-p;${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
@@ -306,9 +306,9 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
+                -D "TEST_ENV_VALUE=${H5EXAMPLE_HDF5_PLUGIN_PATH}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-                -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+                -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
       set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname})
