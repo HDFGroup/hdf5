@@ -322,7 +322,6 @@ if ($CHANGELOG) {
   for (my $i = 0; $i < $#contents; ++$i) {
     if ($contents[$i] =~ /^# 🔆 Executive Summary: HDF5 Version/) {
       $contents[$i] = sprintf("# 🔆 Executive Summary: HDF5 Version %d.%d.%d\n", @newver[0,1,2]);
-                              @newver[0,1,2]);
       last;
     }
   }
