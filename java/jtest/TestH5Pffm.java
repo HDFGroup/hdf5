@@ -523,4 +523,142 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(fapl);
         }
     }
+
+    // ================================================================================
+    // Phase 6B - Dataset Creation Properties
+    // ================================================================================
+
+    @Test
+    public void testH5Pset_chunk()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Set chunk dimensions: 10x20
+            long[] chunkDims               = {10, 20};
+            MemorySegment chunkDimsSegment = allocateLongArray(arena, 2);
+            copyToSegment(chunkDimsSegment, chunkDims);
+
+            int result = hdf5_h.H5Pset_chunk(dcpl, 2, chunkDimsSegment);
+            assertTrue("H5Pset_chunk failed", isSuccess(result));
+
+            // Get chunk dimensions back
+            MemorySegment outChunkSegment = allocateLongArray(arena, 2);
+            int ndims                     = hdf5_h.H5Pget_chunk(dcpl, 2, outChunkSegment);
+            assertEquals("Should have 2 dimensions", 2, ndims);
+
+            long[] retrieved = new long[2];
+            copyFromSegment(outChunkSegment, retrieved);
+            assertArrayEquals("Chunk dimensions should match", chunkDims, retrieved);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_layout()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Set layout to compact
+            int result = hdf5_h.H5Pset_layout(dcpl, hdf5_h.H5D_COMPACT());
+            assertTrue("H5Pset_layout failed", isSuccess(result));
+
+            // Get layout back
+            int layout = hdf5_h.H5Pget_layout(dcpl);
+            assertEquals("Layout should be H5D_COMPACT", hdf5_h.H5D_COMPACT(), layout);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_fill_value()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Set fill value to 42
+            int fillValue             = 42;
+            MemorySegment fillSegment = allocateInt(arena);
+            setInt(fillSegment, fillValue);
+
+            int result =
+                hdf5_h.H5Pset_fill_value(dcpl, hdf5_h_1.H5T_NATIVE_INT_g(), fillSegment);
+            assertTrue("H5Pset_fill_value failed", isSuccess(result));
+
+            // Get fill value back
+            MemorySegment outFillSegment = allocateInt(arena);
+            result =
+                hdf5_h.H5Pget_fill_value(dcpl, hdf5_h_1.H5T_NATIVE_INT_g(), outFillSegment);
+            assertTrue("H5Pget_fill_value failed", isSuccess(result));
+
+            int retrieved = getInt(outFillSegment);
+            assertEquals("Fill value should match", fillValue, retrieved);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_fill_time()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Set fill time to ALLOC (fill on allocation)
+            int result = hdf5_h.H5Pset_fill_time(dcpl, hdf5_h.H5D_FILL_TIME_ALLOC());
+            assertTrue("H5Pset_fill_time failed", isSuccess(result));
+
+            // Get fill time back
+            MemorySegment fillTimeSeg = arena.allocate(ValueLayout.JAVA_INT);
+            result                    = hdf5_h.H5Pget_fill_time(dcpl, fillTimeSeg);
+            assertTrue("H5Pget_fill_time failed", isSuccess(result));
+
+            int fillTime = getInt(fillTimeSeg);
+            assertEquals("Fill time should be H5D_FILL_TIME_ALLOC", hdf5_h.H5D_FILL_TIME_ALLOC(),
+                         fillTime);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_alloc_time()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Set allocation time to EARLY (allocate on creation)
+            int result = hdf5_h.H5Pset_alloc_time(dcpl, hdf5_h.H5D_ALLOC_TIME_EARLY());
+            assertTrue("H5Pset_alloc_time failed", isSuccess(result));
+
+            // Get allocation time back
+            MemorySegment allocTimeSeg = arena.allocate(ValueLayout.JAVA_INT);
+            result                     = hdf5_h.H5Pget_alloc_time(dcpl, allocTimeSeg);
+            assertTrue("H5Pget_alloc_time failed", isSuccess(result));
+
+            int allocTime = getInt(allocTimeSeg);
+            assertEquals("Allocation time should be H5D_ALLOC_TIME_EARLY",
+                         hdf5_h.H5D_ALLOC_TIME_EARLY(), allocTime);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
 }
