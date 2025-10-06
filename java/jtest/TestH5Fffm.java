@@ -86,15 +86,8 @@ public class TestH5Fffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Fopen()
-    {
-        long fid = H5I_INVALID_HID();
-=======
-    public void testH5Fopen()
-    {
+    public void testH5Fopen() {
         long fid = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE);
@@ -107,15 +100,8 @@ public class TestH5Fffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Freopen()
-    {
-        long fid2 = H5I_INVALID_HID();
-=======
-    public void testH5Freopen()
-    {
+    public void testH5Freopen() {
         long fid2 = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             fid2 = hdf5_h_1.H5Freopen(H5fid);
@@ -128,15 +114,8 @@ public class TestH5Fffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Fget_create_plist()
-    {
-        long plist = H5I_INVALID_HID();
-=======
-    public void testH5Fget_create_plist()
-    {
+    public void testH5Fget_create_plist() {
         long plist = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             plist = hdf5_h_1.H5Fget_create_plist(H5fid);
@@ -148,15 +127,8 @@ public class TestH5Fffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Fget_access_plist()
-    {
-        long plist = H5I_INVALID_HID();
-=======
-    public void testH5Fget_access_plist()
-    {
+    public void testH5Fget_access_plist() {
         long plist = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             plist = hdf5_h_1.H5Fget_access_plist(H5fid);
@@ -265,15 +237,9 @@ public class TestH5Fffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Fclose()
-    {
-        long fid = H5I_INVALID_HID();
-=======
     public void testH5Fclose()
     {
         long fid = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE2);

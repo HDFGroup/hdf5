@@ -45,15 +45,9 @@ public class TestH5Dffm {
     private static final int DIM_Y           = 6;
     private static final int RANK            = 2;
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    long H5fid                               = H5I_INVALID_HID();
-    long H5dsid                              = H5I_INVALID_HID();
-    long H5did                               = H5I_INVALID_HID();
-=======
     long H5fid  = hdf5_h.H5I_INVALID_HID();
     long H5dsid = hdf5_h.H5I_INVALID_HID();
     long H5did  = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
     private void deleteFile(String filename)
     {
@@ -107,30 +101,17 @@ public class TestH5Dffm {
         closeQuietly(H5dsid, hdf5_h_1::H5Sclose);
         closeQuietly(H5fid, hdf5_h_1::H5Fclose);
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-        H5did  = H5I_INVALID_HID();
-        H5dsid = H5I_INVALID_HID();
-        H5fid  = H5I_INVALID_HID();
-=======
         H5did  = hdf5_h.H5I_INVALID_HID();
         H5dsid = hdf5_h.H5I_INVALID_HID();
         H5fid  = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         deleteFile(H5_FILE);
         System.out.println();
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dopen()
-    {
-        long did = H5I_INVALID_HID();
-=======
-    public void testH5Dopen()
-    {
+    public void testH5Dopen() {
         long did = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetNameSegment = stringToSegment(arena, DATASET_NAME);
@@ -143,15 +124,8 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dget_space()
-    {
-        long sid = H5I_INVALID_HID();
-=======
-    public void testH5Dget_space()
-    {
+    public void testH5Dget_space() {
         long sid = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             sid = hdf5_h_1.H5Dget_space(H5did);
@@ -175,15 +149,8 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dget_type()
-    {
-        long tid = H5I_INVALID_HID();
-=======
-    public void testH5Dget_type()
-    {
+    public void testH5Dget_type() {
         long tid = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             tid = hdf5_h_1.H5Dget_type(H5did);
@@ -195,15 +162,8 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dget_create_plist()
-    {
-        long plist = H5I_INVALID_HID();
-=======
-    public void testH5Dget_create_plist()
-    {
+    public void testH5Dget_create_plist() {
         long plist = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             plist = hdf5_h_1.H5Dget_create_plist(H5did);
@@ -215,15 +175,8 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dget_access_plist()
-    {
-        long plist = H5I_INVALID_HID();
-=======
-    public void testH5Dget_access_plist()
-    {
+    public void testH5Dget_access_plist() {
         long plist = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             plist = hdf5_h_1.H5Dget_access_plist(H5did);
@@ -312,15 +265,8 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dcreate_anon()
-    {
-        long anon_did = H5I_INVALID_HID();
-=======
-    public void testH5Dcreate_anon()
-    {
+    public void testH5Dcreate_anon() {
         long anon_did = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try {
             // Create anonymous dataset
@@ -374,19 +320,10 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dwrite_readCompound()
-    {
-        long compound_tid = H5I_INVALID_HID();
-        long compound_did = H5I_INVALID_HID();
-        long compound_sid = H5I_INVALID_HID();
-=======
-    public void testH5Dwrite_readCompound()
-    {
+    public void testH5Dwrite_readCompound() {
         long compound_tid = hdf5_h.H5I_INVALID_HID();
         long compound_did = hdf5_h.H5I_INVALID_HID();
         long compound_sid = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             // Create compound type with int and double
@@ -459,19 +396,10 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5DArraywr()
-    {
-        long array_tid = H5I_INVALID_HID();
-        long array_did = H5I_INVALID_HID();
-        long array_sid = H5I_INVALID_HID();
-=======
-    public void testH5DArraywr()
-    {
+    public void testH5DArraywr() {
         long array_tid = hdf5_h.H5I_INVALID_HID();
         long array_did = hdf5_h.H5I_INVALID_HID();
         long array_sid = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             // Create array datatype: int[3][2]
@@ -535,19 +463,10 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dvlen_write_read()
-    {
-        long vlen_tid = H5I_INVALID_HID();
-        long vlen_did = H5I_INVALID_HID();
-        long vlen_sid = H5I_INVALID_HID();
-=======
-    public void testH5Dvlen_write_read()
-    {
+    public void testH5Dvlen_write_read() {
         long vlen_tid = hdf5_h.H5I_INVALID_HID();
         long vlen_did = hdf5_h.H5I_INVALID_HID();
         long vlen_sid = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             // Create variable-length datatype
@@ -591,15 +510,8 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5Dclose()
-    {
-        long did = H5I_INVALID_HID();
-=======
-    public void testH5Dclose()
-    {
-        long did          = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
+    public void testH5Dclose() {
+        long did = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetNameSegment = stringToSegment(arena, DATASET_NAME);
@@ -616,15 +528,9 @@ public class TestH5Dffm {
     public void testH5Dget_num_chunks()
     {
         System.out.print(testname.getMethodName());
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-        long chunked_dcpl = H5I_INVALID_HID();
-        long chunked_sid  = H5I_INVALID_HID();
-        long chunked_did  = H5I_INVALID_HID();
-=======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
         long chunked_sid  = hdf5_h.H5I_INVALID_HID();
         long chunked_did  = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             // Create chunked dataset creation property list
@@ -685,15 +591,9 @@ public class TestH5Dffm {
     public void testH5Dget_chunk_storage_size()
     {
         System.out.print(testname.getMethodName());
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-        long chunked_dcpl = H5I_INVALID_HID();
-        long chunked_sid  = H5I_INVALID_HID();
-        long chunked_did  = H5I_INVALID_HID();
-=======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
         long chunked_sid  = hdf5_h.H5I_INVALID_HID();
         long chunked_did  = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             // Create chunked dataset creation property list
@@ -758,15 +658,9 @@ public class TestH5Dffm {
     public void testH5Dset_extent()
     {
         System.out.print(testname.getMethodName());
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-        long chunked_dcpl = H5I_INVALID_HID();
-        long chunked_sid  = H5I_INVALID_HID();
-        long chunked_did  = H5I_INVALID_HID();
-=======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
         long chunked_sid  = hdf5_h.H5I_INVALID_HID();
         long chunked_did  = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             // Create chunked dataset creation property list
@@ -830,21 +724,11 @@ public class TestH5Dffm {
     }
 
     @Test
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    public void testH5DArrayenum_rw()
-    {
-        long enum_tid  = H5I_INVALID_HID();
-        long array_tid = H5I_INVALID_HID();
-        long array_did = H5I_INVALID_HID();
-        long array_sid = H5I_INVALID_HID();
-=======
-    public void testH5DArrayenum_rw()
-    {
-        long enum_tid     = hdf5_h.H5I_INVALID_HID();
-        long array_tid    = hdf5_h.H5I_INVALID_HID();
-        long array_did    = hdf5_h.H5I_INVALID_HID();
-        long array_sid    = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
+    public void testH5DArrayenum_rw() {
+        long enum_tid  = hdf5_h.H5I_INVALID_HID();
+        long array_tid = hdf5_h.H5I_INVALID_HID();
+        long array_did = hdf5_h.H5I_INVALID_HID();
+        long array_sid = hdf5_h.H5I_INVALID_HID();
 
         try (Arena arena = Arena.ofConfined()) {
             // Create enum type
@@ -952,15 +836,9 @@ public class TestH5Dffm {
     public void testH5Dget_chunk_info()
     {
         System.out.print(testname.getMethodName());
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-        long chunked_dcpl = H5I_INVALID_HID();
-        long chunked_sid  = H5I_INVALID_HID();
-        long chunked_did  = H5I_INVALID_HID();
-=======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
         long chunked_sid  = hdf5_h.H5I_INVALID_HID();
         long chunked_did  = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             // Create chunked dataset creation property list
@@ -1033,15 +911,9 @@ public class TestH5Dffm {
     public void testH5Dget_chunk_info_by_coord()
     {
         System.out.print(testname.getMethodName());
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-        long chunked_dcpl = H5I_INVALID_HID();
-        long chunked_sid  = H5I_INVALID_HID();
-        long chunked_did  = H5I_INVALID_HID();
-=======
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
         long chunked_sid  = hdf5_h.H5I_INVALID_HID();
         long chunked_did  = hdf5_h.H5I_INVALID_HID();
->>>>>>> 60427d5 Cleanup and add H5P tests
 
         try (Arena arena = Arena.ofConfined()) {
             // Create chunked dataset creation property list

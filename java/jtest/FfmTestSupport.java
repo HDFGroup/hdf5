@@ -27,16 +27,6 @@ import org.hdfgroup.javahdf5.hdf5_h;
 public class FfmTestSupport {
 
     /**
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-     * Get the invalid HDF5 identifier value.
-     *
-     * @return The invalid HDF5 identifier
-     */
-    public static long H5I_INVALID_HID() { return hdf5_h.H5I_INVALID_HID(); }
-
-    /**
-=======
->>>>>>> 60427d5 Cleanup and add H5P tests
      * Check if an HDF5 return value indicates success.
      *
      * @param retVal The return value from an HDF5 function
