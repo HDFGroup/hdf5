@@ -4329,8 +4329,9 @@ H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping)
         for (size_t j = mapping->sub_dset_io_start; j < mapping->sub_dset_io_end; j++)
             /* Close projected memory space */
             if (mapping->sub_dset[j].projected_mem_space) {
+                /* Use HDONE_ERROR to attempt to close all spaces even after failure */
                 if (H5S_close(mapping->sub_dset[j].projected_mem_space) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
+                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
                 mapping->sub_dset[j].projected_mem_space = NULL;
             } /* end if */
     }         /* end if */
@@ -4338,9 +4339,9 @@ H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping)
         /* Close projected memory space */
         if (mapping->source_dset.projected_mem_space) {
             if (H5S_close(mapping->source_dset.projected_mem_space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
             mapping->source_dset.projected_mem_space = NULL;
         } /* end if */
-done:
+
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D__virtual_close_mapping() */
