@@ -107,6 +107,18 @@ public class FfmTestSupport {
     }
 
     /**
+     * Create a MemorySegment for a double array.
+     *
+     * @param arena The Arena to use for allocation
+     * @param length The number of doubles in the array
+     * @return A MemorySegment that can hold the double array
+     */
+    public static MemorySegment allocateDoubleArray(Arena arena, int length)
+    {
+        return arena.allocate(ValueLayout.JAVA_DOUBLE, length);
+    }
+
+    /**
      * Copy data from a Java int array to a MemorySegment.
      *
      * @param segment The destination MemorySegment

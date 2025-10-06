@@ -658,4 +658,462 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(dcpl);
         }
     }
+
+    // ================================================================================
+    // Phase 6C - Compression and Filters
+    // ================================================================================
+
+    @Test
+    public void testH5Pset_deflate()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Must set chunk first for compression
+            long[] chunkDims               = {10, 20};
+            MemorySegment chunkDimsSegment = allocateLongArray(arena, 2);
+            copyToSegment(chunkDimsSegment, chunkDims);
+            int result = hdf5_h.H5Pset_chunk(dcpl, 2, chunkDimsSegment);
+            assertTrue("H5Pset_chunk failed", isSuccess(result));
+
+            // Set deflate compression (gzip) with level 6
+            int compressionLevel = 6;
+            result               = hdf5_h.H5Pset_deflate(dcpl, compressionLevel);
+            assertTrue("H5Pset_deflate failed", isSuccess(result));
+
+            // Get number of filters
+            int nfilters = hdf5_h.H5Pget_nfilters(dcpl);
+            assertEquals("Should have 1 filter", 1, nfilters);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_nfilters()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Initially no filters
+            int nfilters = hdf5_h.H5Pget_nfilters(dcpl);
+            assertEquals("Should have 0 filters initially", 0, nfilters);
+
+            // Add chunk (required for filters)
+            long[] chunkDims               = {10, 20};
+            MemorySegment chunkDimsSegment = allocateLongArray(arena, 2);
+            copyToSegment(chunkDimsSegment, chunkDims);
+            hdf5_h.H5Pset_chunk(dcpl, 2, chunkDimsSegment);
+
+            // Add deflate filter
+            hdf5_h.H5Pset_deflate(dcpl, 6);
+
+            // Now should have 1 filter
+            nfilters = hdf5_h.H5Pget_nfilters(dcpl);
+            assertEquals("Should have 1 filter after adding deflate", 1, nfilters);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pall_filters_avail()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Add chunk (required for filters)
+            long[] chunkDims               = {10, 20};
+            MemorySegment chunkDimsSegment = allocateLongArray(arena, 2);
+            copyToSegment(chunkDimsSegment, chunkDims);
+            hdf5_h.H5Pset_chunk(dcpl, 2, chunkDimsSegment);
+
+            // Add deflate filter (should be available in standard builds)
+            hdf5_h.H5Pset_deflate(dcpl, 6);
+
+            // Check if all filters are available
+            int avail = hdf5_h.H5Pall_filters_avail(dcpl);
+            // Note: Result depends on HDF5 build configuration
+            // Just verify the function works (returns 0 or 1)
+            assertTrue("H5Pall_filters_avail should return valid result", avail == 0 || avail > 0);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_shuffle()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Add chunk (required for filters)
+            long[] chunkDims               = {10, 20};
+            MemorySegment chunkDimsSegment = allocateLongArray(arena, 2);
+            copyToSegment(chunkDimsSegment, chunkDims);
+            hdf5_h.H5Pset_chunk(dcpl, 2, chunkDimsSegment);
+
+            // Set shuffle filter (improves compression)
+            int result = hdf5_h.H5Pset_shuffle(dcpl);
+            assertTrue("H5Pset_shuffle failed", isSuccess(result));
+
+            // Verify filter was added
+            int nfilters = hdf5_h.H5Pget_nfilters(dcpl);
+            assertEquals("Should have 1 filter", 1, nfilters);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_fletcher32()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Add chunk (required for filters)
+            long[] chunkDims               = {10, 20};
+            MemorySegment chunkDimsSegment = allocateLongArray(arena, 2);
+            copyToSegment(chunkDimsSegment, chunkDims);
+            hdf5_h.H5Pset_chunk(dcpl, 2, chunkDimsSegment);
+
+            // Set Fletcher32 checksum filter (error detection)
+            int result = hdf5_h.H5Pset_fletcher32(dcpl);
+            assertTrue("H5Pset_fletcher32 failed", isSuccess(result));
+
+            // Verify filter was added
+            int nfilters = hdf5_h.H5Pget_nfilters(dcpl);
+            assertEquals("Should have 1 filter", 1, nfilters);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    // ================================================================================
+    // Phase 6D - Data Transfer and Advanced Properties
+    // ================================================================================
+
+    // Note: H5Pget_filter might not be available in FFM bindings yet
+    // Skipping this test until API is available
+    /*
+    @Test
+    public void testH5Pget_filter()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Must set chunk first
+            long[] chunkDims               = {10, 20};
+            MemorySegment chunkDimsSegment = allocateLongArray(arena, 2);
+            copyToSegment(chunkDimsSegment, chunkDims);
+            int result = hdf5_h.H5Pset_chunk(dcpl, 2, chunkDimsSegment);
+            assertTrue("H5Pset_chunk failed", isSuccess(result));
+
+            // Add deflate filter
+            int compressionLevel = 6;
+            result               = hdf5_h.H5Pset_deflate(dcpl, compressionLevel);
+            assertTrue("H5Pset_deflate failed", isSuccess(result));
+
+            // Get filter information
+            MemorySegment flags  = allocateIntArray(arena, 1);
+            MemorySegment cdNelts = allocateLongArray(arena, 1);
+            MemorySegment cdValues = allocateIntArray(arena, 10); // Space for filter params
+            MemorySegment nameSegment = arena.allocate(256);
+            MemorySegment filterConfig = allocateIntArray(arena, 1);
+
+            // Set initial cd_nelmts to max size
+            copyToSegment(cdNelts, new long[]{10});
+
+            int filterId = hdf5_h.H5Pget_filter(dcpl, 0, flags, cdNelts, cdValues,
+                                                256, nameSegment, filterConfig);
+            assertTrue("H5Pget_filter should return valid filter ID", filterId >= 0);
+
+            // Verify it's the deflate filter
+            assertEquals("Should be deflate filter", hdf5_h.H5Z_FILTER_DEFLATE(), filterId);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+    */
+
+    @Test
+    public void testH5Premove_filter()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Must set chunk first
+            long[] chunkDims               = {10, 20};
+            MemorySegment chunkDimsSegment = allocateLongArray(arena, 2);
+            copyToSegment(chunkDimsSegment, chunkDims);
+            int result = hdf5_h.H5Pset_chunk(dcpl, 2, chunkDimsSegment);
+            assertTrue("H5Pset_chunk failed", isSuccess(result));
+
+            // Add deflate filter
+            result = hdf5_h.H5Pset_deflate(dcpl, 6);
+            assertTrue("H5Pset_deflate failed", isSuccess(result));
+
+            // Verify filter was added
+            int nfilters = hdf5_h.H5Pget_nfilters(dcpl);
+            assertEquals("Should have 1 filter", 1, nfilters);
+
+            // Remove the deflate filter
+            result = hdf5_h.H5Premove_filter(dcpl, hdf5_h.H5Z_FILTER_DEFLATE());
+            assertTrue("H5Premove_filter failed", isSuccess(result));
+
+            // Verify filter was removed
+            nfilters = hdf5_h.H5Pget_nfilters(dcpl);
+            assertEquals("Should have 0 filters after removal", 0, nfilters);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_chunk_cache()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_ACCESS_ID_g());
+            assertTrue("H5Pcreate dapl failed", isValidId(dapl));
+
+            // Set chunk cache parameters
+            long rdccNslots = 521;        // Number of chunk slots in cache
+            long rdccNbytes = 1048576;    // Size of chunk cache in bytes (1 MB)
+            double rdccW0   = 0.75;       // Preemption policy
+
+            int result = hdf5_h.H5Pset_chunk_cache(dapl, rdccNslots, rdccNbytes, rdccW0);
+            assertTrue("H5Pset_chunk_cache failed", isSuccess(result));
+
+            // Get chunk cache parameters back
+            MemorySegment outNslots = allocateLongArray(arena, 1);
+            MemorySegment outNbytes = allocateLongArray(arena, 1);
+            MemorySegment outW0     = allocateDoubleArray(arena, 1);
+
+            result = hdf5_h.H5Pget_chunk_cache(dapl, outNslots, outNbytes, outW0);
+            assertTrue("H5Pget_chunk_cache failed", isSuccess(result));
+
+            // Verify values
+            assertEquals("Nslots should match", rdccNslots, getLong(outNslots));
+            assertEquals("Nbytes should match", rdccNbytes, getLong(outNbytes));
+            assertEquals("W0 should match", rdccW0, getDouble(outW0), 0.01);
+
+            hdf5_h.H5Pclose(dapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_hyper_vector_size()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Set hyperslab vector size
+            long vectorSize = 1024;
+            int result      = hdf5_h.H5Pset_hyper_vector_size(dxpl, vectorSize);
+            assertTrue("H5Pset_hyper_vector_size failed", isSuccess(result));
+
+            // Get vector size back
+            MemorySegment outSize = allocateLongArray(arena, 1);
+            result                = hdf5_h.H5Pget_hyper_vector_size(dxpl, outSize);
+            assertTrue("H5Pget_hyper_vector_size failed", isSuccess(result));
+
+            assertEquals("Vector size should match", vectorSize, getLong(outSize));
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_btree_ratios()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Set B-tree split ratios
+            double left   = 0.1;
+            double middle = 0.5;
+            double right  = 0.9;
+
+            int result = hdf5_h.H5Pset_btree_ratios(dxpl, left, middle, right);
+            assertTrue("H5Pset_btree_ratios failed", isSuccess(result));
+
+            // Get ratios back
+            MemorySegment outLeft   = allocateDoubleArray(arena, 1);
+            MemorySegment outMiddle = allocateDoubleArray(arena, 1);
+            MemorySegment outRight  = allocateDoubleArray(arena, 1);
+
+            result = hdf5_h.H5Pget_btree_ratios(dxpl, outLeft, outMiddle, outRight);
+            assertTrue("H5Pget_btree_ratios failed", isSuccess(result));
+
+            assertEquals("Left ratio should match", left, getDouble(outLeft), 0.01);
+            assertEquals("Middle ratio should match", middle, getDouble(outMiddle), 0.01);
+            assertEquals("Right ratio should match", right, getDouble(outRight), 0.01);
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_edc_check()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Enable error detection (EDC)
+            int result = hdf5_h.H5Pset_edc_check(dxpl, hdf5_h.H5Z_ENABLE_EDC());
+            assertTrue("H5Pset_edc_check failed", isSuccess(result));
+
+            // Get EDC check setting
+            int edcCheck = hdf5_h.H5Pget_edc_check(dxpl);
+            assertEquals("EDC check should be enabled", hdf5_h.H5Z_ENABLE_EDC(), edcCheck);
+
+            // Disable error detection
+            result = hdf5_h.H5Pset_edc_check(dxpl, hdf5_h.H5Z_DISABLE_EDC());
+            assertTrue("H5Pset_edc_check (disable) failed", isSuccess(result));
+
+            edcCheck = hdf5_h.H5Pget_edc_check(dxpl);
+            assertEquals("EDC check should be disabled", hdf5_h.H5Z_DISABLE_EDC(), edcCheck);
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_buffer()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Set type conversion buffer size (1 MB)
+            long bufferSize = 1048576;
+            int result      = hdf5_h.H5Pset_buffer(dxpl, bufferSize, MemorySegment.NULL, MemorySegment.NULL);
+            assertTrue("H5Pset_buffer failed", isSuccess(result));
+
+            // Get buffer size back
+            long retrievedSize = hdf5_h.H5Pget_buffer(dxpl, MemorySegment.NULL, MemorySegment.NULL);
+            assertEquals("Buffer size should match", bufferSize, retrievedSize);
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_libver_bounds()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set library version bounds to latest
+            int result = hdf5_h.H5Pset_libver_bounds(fapl, hdf5_h.H5F_LIBVER_LATEST(), hdf5_h.H5F_LIBVER_LATEST());
+            assertTrue("H5Pset_libver_bounds failed", isSuccess(result));
+
+            // Get library version bounds back
+            MemorySegment low  = allocateIntArray(arena, 1);
+            MemorySegment high = allocateIntArray(arena, 1);
+
+            result = hdf5_h.H5Pget_libver_bounds(fapl, low, high);
+            assertTrue("H5Pget_libver_bounds failed", isSuccess(result));
+
+            assertEquals("Low bound should be latest", hdf5_h.H5F_LIBVER_LATEST(), getInt(low));
+            assertEquals("High bound should be latest", hdf5_h.H5F_LIBVER_LATEST(), getInt(high));
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_small_data_block_size()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set small data block size (2048 bytes)
+            long blockSize = 2048;
+            int result     = hdf5_h.H5Pset_small_data_block_size(fapl, blockSize);
+            assertTrue("H5Pset_small_data_block_size failed", isSuccess(result));
+
+            // Get block size back
+            MemorySegment outSize = allocateLongArray(arena, 1);
+            result                = hdf5_h.H5Pget_small_data_block_size(fapl, outSize);
+            assertTrue("H5Pget_small_data_block_size failed", isSuccess(result));
+
+            assertEquals("Block size should match", blockSize, getLong(outSize));
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_gc_references()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Enable garbage collection for references
+            int result = hdf5_h.H5Pset_gc_references(fapl, 1);
+            assertTrue("H5Pset_gc_references failed", isSuccess(result));
+
+            // Get GC references setting
+            MemorySegment gcRefs = allocateIntArray(arena, 1);
+            result               = hdf5_h.H5Pget_gc_references(fapl, gcRefs);
+            assertTrue("H5Pget_gc_references failed", isSuccess(result));
+
+            assertEquals("GC references should be enabled", 1, getInt(gcRefs));
+
+            // Disable garbage collection
+            result = hdf5_h.H5Pset_gc_references(fapl, 0);
+            assertTrue("H5Pset_gc_references (disable) failed", isSuccess(result));
+
+            result = hdf5_h.H5Pget_gc_references(fapl, gcRefs);
+            assertTrue("H5Pget_gc_references (after disable) failed", isSuccess(result));
+
+            assertEquals("GC references should be disabled", 0, getInt(gcRefs));
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
 }
