@@ -13,7 +13,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdf5#help-and-support)
 
 ## 📖 Contents
-* [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200)
+* [Executive Summary](CHANGELOG.md#execsummary)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](CHANGELOG.md#-bug-fixes)
@@ -21,7 +21,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.0.0
+# 🔆 Executive Summary: HDF5 Version 2.0.0 <a name="execsummary">
 
 ## Performance Enhancements:
 
