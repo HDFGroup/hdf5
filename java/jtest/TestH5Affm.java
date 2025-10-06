@@ -604,9 +604,9 @@ public class TestH5Affm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create multiple attributes with known names
-            long attr_sid          = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
-            String[] attrNames     = {"alpha", "beta", "gamma"};
-            String[] sortedNames   = {"alpha", "beta", "gamma"}; // Already sorted alphabetically
+            long attr_sid        = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            String[] attrNames   = {"alpha", "beta", "gamma"};
+            String[] sortedNames = {"alpha", "beta", "gamma"}; // Already sorted alphabetically
 
             for (String name : attrNames) {
                 MemorySegment attrName = stringToSegment(arena, name);
@@ -621,16 +621,16 @@ public class TestH5Affm {
 
             for (int i = 0; i < sortedNames.length; i++) {
                 // Get name size first
-                long nameSize = hdf5_h_1.H5Aget_name_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(),
-                                                            hdf5_h.H5_ITER_INC(), i, MemorySegment.NULL, 0,
-                                                            hdf5_h_1.H5P_DEFAULT());
+                long nameSize =
+                    hdf5_h_1.H5Aget_name_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(),
+                                                i, MemorySegment.NULL, 0, hdf5_h_1.H5P_DEFAULT());
                 assertTrue("H5Aget_name_by_idx size query failed for index " + i, nameSize > 0);
 
                 // Get actual name
                 MemorySegment nameBuffer = arena.allocate(nameSize + 1);
-                long result = hdf5_h_1.H5Aget_name_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(),
-                                                          hdf5_h.H5_ITER_INC(), i, nameBuffer, nameSize + 1,
-                                                          hdf5_h_1.H5P_DEFAULT());
+                long result =
+                    hdf5_h_1.H5Aget_name_by_idx(H5did, objName, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(),
+                                                i, nameBuffer, nameSize + 1, hdf5_h_1.H5P_DEFAULT());
                 assertTrue("H5Aget_name_by_idx failed for index " + i, result > 0);
 
                 String retrievedName = nameBuffer.getString(0);
@@ -701,12 +701,13 @@ public class TestH5Affm {
             hdf5_h_1.H5Aclose(aid);
 
             // Check existence from file using dataset path
-            MemorySegment objName            = stringToSegment(arena, "dset");
+            MemorySegment objName             = stringToSegment(arena, "dset");
             MemorySegment existingAttrNameSeg = stringToSegment(arena, existingAttrName);
             MemorySegment missingAttrNameSeg  = stringToSegment(arena, nonExistingAttrName);
 
             // Should exist
-            int exists = hdf5_h_1.H5Aexists_by_name(H5fid, objName, existingAttrNameSeg, hdf5_h_1.H5P_DEFAULT());
+            int exists =
+                hdf5_h_1.H5Aexists_by_name(H5fid, objName, existingAttrNameSeg, hdf5_h_1.H5P_DEFAULT());
             assertTrue("Attribute should exist", exists > 0);
 
             // Should not exist
