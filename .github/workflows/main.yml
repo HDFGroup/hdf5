@@ -113,7 +113,7 @@ jobs:
             cpp: ON
             fortran: OFF
             java: ON
-            docs: ON
+            docs: OFF
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
