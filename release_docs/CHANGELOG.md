@@ -134,7 +134,7 @@ Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added `#if
 
 ### Renamed HDF5Examples build options from `H5EX_<option>` to `H5EXAMPLE_<option>`
 
-Changed the prefix to better distinguish the examples build options from the library options when building the examples along with the library.s
+Changed the prefix to better distinguish the examples build options from the library options when building the examples along with the library.
 
 ### Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
 
