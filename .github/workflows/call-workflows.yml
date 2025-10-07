@@ -85,6 +85,7 @@ jobs:
             concurrent: ""
             thread_safety: ""
             build_mode: "Debug"
+            force_java_implementation: "jni"
 
     call-release-cmake:
         name: "Release Workflows"
@@ -95,6 +96,7 @@ jobs:
             thread_safety: ""
             build_mode: "Release"
             save_binary: "std"
+            force_java_implementation: "jni"
 
     call-release-cmake4:
         name: "CMake 4 Release Workflows"
@@ -104,6 +106,7 @@ jobs:
             concurrent: ""
             thread_safety: ""
             build_mode: "Release"
+            force_java_implementation: "jni"
 
     call-release-cmakeMin:
         name: "Minimum Release Workflows"
@@ -113,6 +116,18 @@ jobs:
             concurrent: ""
             thread_safety: ""
             build_mode: "Release"
+            force_java_implementation: "jni"
+
+    call-jni-latest-java:
+        name: "JNI Latest Java Testing"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+            java_version: "latest"
+            force_java_implementation: "jni"
 
     call-ffm-latest-java:
         name: "FFM Latest Java Testing"

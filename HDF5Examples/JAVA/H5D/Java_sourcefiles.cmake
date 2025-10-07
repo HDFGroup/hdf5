@@ -17,7 +17,7 @@ set (HDF_JAVA_EXAMPLES
 )
 
 # Unlimited examples have known FFM memory issues - only include with JNI
-if (HDF5_ENABLE_JNI)
+if (HDF5_PROVIDES_JNI)
     set (HDF_JAVA_EXAMPLES ${HDF_JAVA_EXAMPLES}
         H5Ex_D_UnlimitedAdd.java
         H5Ex_D_UnlimitedMod.java
@@ -30,7 +30,7 @@ set (HDF_JAVA_ZLIB_EXAMPLES
 )
 
 # UnlimitedGzip has known FFM memory issues - only include with JNI
-if (HDF5_ENABLE_JNI)
+if (HDF5_PROVIDES_JNI)
     set (HDF_JAVA_ZLIB_EXAMPLES ${HDF_JAVA_ZLIB_EXAMPLES}
         H5Ex_D_UnlimitedGzip.java
     )
