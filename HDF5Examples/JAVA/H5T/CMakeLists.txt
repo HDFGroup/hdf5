@@ -46,7 +46,7 @@ Class-Path: ${HDFJAVA_CLASSJARS}
   get_target_property (${EXAMPLE_VARNAME}J_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}J_${example_name} JAR_FILE)
   get_target_property (${EXAMPLE_VARNAME}J_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}J_${example_name} CLASSDIR)
   if (HDF5_PROVIDES_JNI AND HDF5_Java_FOUND)
-    add_dependencies (${EXAMPLE_VARNAME}J_${example_name} ${H5EX_JAVA_LIBRARY})
+    add_dependencies (${EXAMPLE_VARNAME}J_${example_name} ${H5EX_JAVA_LIBRARIES})
   endif ()
 endforeach ()
 
