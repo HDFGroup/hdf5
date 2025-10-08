@@ -13,10 +13,10 @@
 package hdf.hdf5lib.structs;
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 
 import java.io.Serializable;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.*;
 
@@ -94,7 +94,7 @@ public class H5FD_ros3_fapl_t implements Serializable {
         if (id == null)
             id = "";
         else
-            this.secret_id  = id;
+            this.secret_id = id;
         if (key == null)
             key = "";
         else
@@ -112,9 +112,12 @@ public class H5FD_ros3_fapl_t implements Serializable {
     {
         this.version      = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.version(config);
         this.authenticate = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.authenticate(config);
-        this.aws_region   = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.aws_region(config).getString(0, java.nio.charset.StandardCharsets.UTF_8);
-        this.secret_id    = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_id(config).getString(0, java.nio.charset.StandardCharsets.UTF_8);
-        this.secret_key   = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_key(config).getString(0, java.nio.charset.StandardCharsets.UTF_8);
+        this.aws_region   = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.aws_region(config).getString(
+            0, java.nio.charset.StandardCharsets.UTF_8);
+        this.secret_id = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_id(config).getString(
+            0, java.nio.charset.StandardCharsets.UTF_8);
+        this.secret_key = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_key(config).getString(
+            0, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     @Override

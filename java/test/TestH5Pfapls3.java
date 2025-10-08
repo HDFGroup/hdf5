@@ -119,15 +119,18 @@ public class TestH5Pfapls3 {
             return;
 
         final hdf.hdf5lib.structs.H5FD_ros3_fapl_t config = new hdf.hdf5lib.structs.H5FD_ros3_fapl_t();
-        assertEquals("Default fapl has unexpected contents", new hdf.hdf5lib.structs.H5FD_ros3_fapl_t("", "", ""), config);
+        assertEquals("Default fapl has unexpected contents",
+                     new hdf.hdf5lib.structs.H5FD_ros3_fapl_t("", "", ""), config);
 
         H5.H5Pset_fapl_ros3(fapl_id, config);
 
         assertEquals("driver types don't match", HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
 
         /* get_fapl_ros3 can throw exception in error cases */
-        hdf.hdf5lib.structs.H5FD_ros3_fapl_t copy = (hdf.hdf5lib.structs.H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
-        assertEquals("contents of fapl set and get don't match", new hdf.hdf5lib.structs.H5FD_ros3_fapl_t("", "", ""), copy);
+        hdf.hdf5lib.structs.H5FD_ros3_fapl_t copy =
+            (hdf.hdf5lib.structs.H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
+        assertEquals("contents of fapl set and get don't match",
+                     new hdf.hdf5lib.structs.H5FD_ros3_fapl_t("", "", ""), copy);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -135,7 +138,8 @@ public class TestH5Pfapls3 {
     {
         if (HDF5Constants.H5FD_ROS3 < 0)
             throw new HDF5LibraryException("skip");
-        hdf.hdf5lib.structs.H5FD_ros3_fapl_t fails = (hdf.hdf5lib.structs.H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(-1);
+        hdf.hdf5lib.structs.H5FD_ros3_fapl_t fails =
+            (hdf.hdf5lib.structs.H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(-1);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -149,7 +153,8 @@ public class TestH5Pfapls3 {
 
         H5.H5Pset_fapl_sec2(fapl_id);
         assertEquals("fapl_id was not set properly", HDF5Constants.H5FD_SEC2, H5.H5Pget_driver(fapl_id));
-        hdf.hdf5lib.structs.H5FD_ros3_fapl_t fails = (hdf.hdf5lib.structs.H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
+        hdf.hdf5lib.structs.H5FD_ros3_fapl_t fails =
+            (hdf.hdf5lib.structs.H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
     }
 
     @Test
@@ -162,11 +167,13 @@ public class TestH5Pfapls3 {
         String acc_id  = "my_access_id";
         String acc_key = "my_access_key";
 
-        final hdf.hdf5lib.structs.H5FD_ros3_fapl_t config = new hdf.hdf5lib.structs.H5FD_ros3_fapl_t(region, acc_id, acc_key);
+        final hdf.hdf5lib.structs.H5FD_ros3_fapl_t config =
+            new hdf.hdf5lib.structs.H5FD_ros3_fapl_t(region, acc_id, acc_key);
         H5.H5Pset_fapl_ros3(fapl_id, config);
         assertEquals("driver types don't match", HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
 
-        hdf.hdf5lib.structs.H5FD_ros3_fapl_t copy = (hdf.hdf5lib.structs.H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
+        hdf.hdf5lib.structs.H5FD_ros3_fapl_t copy =
+            (hdf.hdf5lib.structs.H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
         assertEquals("contents of fapl set and get don't match",
                      new hdf.hdf5lib.structs.H5FD_ros3_fapl_t(region, acc_id, acc_key), copy);
     }
