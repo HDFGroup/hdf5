@@ -103,7 +103,6 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1virtual_1spatial_1tree(JNIEnv
  */
 JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Pget_1virtual_1spatial_1tree(JNIEnv *, jclass, jlong);
 
-
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

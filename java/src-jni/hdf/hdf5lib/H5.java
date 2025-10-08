@@ -10728,7 +10728,6 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Pset_virtual_spatial_tree(long dapl_id, boolean use_tree)
         throws HDF5LibraryException;
 
-    
     // public synchronized static native void H5Pset_append_flush(long plist_id, int ndims, long[] boundary,
     // H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
 
