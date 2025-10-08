@@ -83,6 +83,8 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
 
+#define SPATIAL_TREE_FILENAME "spatial_tree"
+
 #define FILENAME_BUF_SIZE 1024
 #define KB                1024
 
