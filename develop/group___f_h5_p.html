@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-10-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-10-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -431,6 +431,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:gab22587e46aeb629e8cd560959add1b2a" id="r_gab22587e46aeb629e8cd560959add1b2a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab22587e46aeb629e8cd560959add1b2a">h5pget_virtual_printf_gap_f</a> (dapl_id, gap_size, hdferr)</td></tr>
 <tr class="memdesc:gab22587e46aeb629e8cd560959add1b2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the maximum number of missing source files and/or datasets with the printf-style names when getting the extent for an unlimited virtual dataset.  <br /></td></tr>
 <tr class="separator:gab22587e46aeb629e8cd560959add1b2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3906f757fb9ae98d9ee69ccb0b8d0364" id="r_ga3906f757fb9ae98d9ee69ccb0b8d0364"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3906f757fb9ae98d9ee69ccb0b8d0364">h5pget_virtual_spatial_tree_f</a> (dapl_id, use_tree, hdferr)</td></tr>
+<tr class="memdesc:ga3906f757fb9ae98d9ee69ccb0b8d0364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the flag for whether to use/not use a spatial tree during mapping operations on a Virtual Dataset. The default value is true.  <br /></td></tr>
+<tr class="separator:ga3906f757fb9ae98d9ee69ccb0b8d0364"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6f37ffbe3b61ce80c7b15d555892b29a" id="r_ga6f37ffbe3b61ce80c7b15d555892b29a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga6f37ffbe3b61ce80c7b15d555892b29a">h5pget_virtual_srcspace_f</a> (dcpl_id, index, ds_id, hdferr)</td></tr>
 <tr class="memdesc:ga6f37ffbe3b61ce80c7b15d555892b29a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a dataspace identifier for the selection within the source dataset used in the mapping.  <br /></td></tr>
 <tr class="separator:ga6f37ffbe3b61ce80c7b15d555892b29a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -689,6 +692,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga3dab2ea1f0db667f20264a459b29618c" id="r_ga3dab2ea1f0db667f20264a459b29618c"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3dab2ea1f0db667f20264a459b29618c">h5pset_virtual_printf_gap_f</a> (dapl_id, gap_size, hdferr)</td></tr>
 <tr class="memdesc:ga3dab2ea1f0db667f20264a459b29618c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the maximum number of missing source files and/or datasets with the printf-style names when getting the extent of an unlimited virtual dataset.  <br /></td></tr>
 <tr class="separator:ga3dab2ea1f0db667f20264a459b29618c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac25edc5219b2c4d95c6dc4b4bae39b1c" id="r_gac25edc5219b2c4d95c6dc4b4bae39b1c"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac25edc5219b2c4d95c6dc4b4bae39b1c">h5pset_virtual_spatial_tree_f</a> (dapl_id, use_tree, hdferr)</td></tr>
+<tr class="memdesc:gac25edc5219b2c4d95c6dc4b4bae39b1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the dapl to use/not use a spatial tree during mapping operations on a Virtual Dataset. The default value is true.  <br /></td></tr>
+<tr class="separator:gac25edc5219b2c4d95c6dc4b4bae39b1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2c419683a5fd4294c9a5609b9792302d" id="r_ga2c419683a5fd4294c9a5609b9792302d"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga2c419683a5fd4294c9a5609b9792302d">h5pset_virtual_view_f</a> (dapl_id, view, hdferr)</td></tr>
 <tr class="memdesc:ga2c419683a5fd4294c9a5609b9792302d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the view of the virtual dataset (VDS) to include or exclude missing mapped elements.  <br /></td></tr>
 <tr class="separator:ga2c419683a5fd4294c9a5609b9792302d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -4580,6 +4586,45 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ga3906f757fb9ae98d9ee69ccb0b8d0364" name="ga3906f757fb9ae98d9ee69ccb0b8d0364"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3906f757fb9ae98d9ee69ccb0b8d0364">&#9670;&#160;</a></span>h5pget_virtual_spatial_tree_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5pget_virtual_spatial_tree_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>dapl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">logical, intent(out)</td>          <td class="paramname"><span class="paramname"><em>use_tree</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the flag for whether to use/not use a spatial tree during mapping operations on a Virtual Dataset. The default value is true. </p>
+<p>Use of a spatial tree will accelerate the process of searching through mappings to determine which contain intersections with the user's selection region. With the tree disabled, all mappings will simply be iterated through and checked directly.</p>
+<p>Certain workflows may find that tree creation overhead outweighs the time saved on reads. In this case, disabling this property will lead to a performance improvement, though it is expected that almost all cases will benefit from the tree on net.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dapl_id</td><td>Target dataset access property list identifier. </td></tr>
+    <tr><td class="paramname">use_tree</td><td>Value of the setting. </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___d_c_p_l.html#ga39ac9ba6cc5c86c3dd8c46bae0ee17e9">H5Pget_virtual_spatial_tree()</a> </p>
+
+</div>
+</div>
 <a id="ga6f37ffbe3b61ce80c7b15d555892b29a" name="ga6f37ffbe3b61ce80c7b15d555892b29a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga6f37ffbe3b61ce80c7b15d555892b29a">&#9670;&#160;</a></span>h5pget_virtual_srcspace_f()</h2>
 
@@ -8149,6 +8194,45 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___d_a_p_l.html#ga8bb25e402e860133b8af3715e429bacf">H5Pset_virtual_printf_gap()</a> </p>
+
+</div>
+</div>
+<a id="gac25edc5219b2c4d95c6dc4b4bae39b1c" name="gac25edc5219b2c4d95c6dc4b4bae39b1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac25edc5219b2c4d95c6dc4b4bae39b1c">&#9670;&#160;</a></span>h5pset_virtual_spatial_tree_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5pset_virtual_spatial_tree_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>dapl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">logical, intent(in)</td>          <td class="paramname"><span class="paramname"><em>use_tree</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the dapl to use/not use a spatial tree during mapping operations on a Virtual Dataset. The default value is true. </p>
+<p>Use of a spatial tree will accelerate the process of searching through mappings to determine which contain intersections with the user's selection region. With the tree disabled, all mappings will simply be iterated through and checked directly.</p>
+<p>Certain workflows may find that tree creation overhead outweighs the time saved on reads. In this case, disabling this property will lead to a performance improvement, though it is expected that almost all cases will benefit from the tree on net.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dapl_id</td><td>Target dataset access property list identifier. </td></tr>
+    <tr><td class="paramname">use_tree</td><td>Value of the setting. </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___d_c_p_l.html#ga5a83d2c1075cc5ff47460b5526ec23ff">H5Pset_virtual_spatial_tree()</a> </p>
 
 </div>
 </div>

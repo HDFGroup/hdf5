@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-10-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-10-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -275,6 +275,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga5c17780cc9a72a0f62d70f6138510afa" id="r_ga5c17780cc9a72a0f62d70f6138510afa"><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga5c17780cc9a72a0f62d70f6138510afa">H5Pget_virtual_filename</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, size_t index, char *name, size_t size)</td></tr>
 <tr class="memdesc:ga5c17780cc9a72a0f62d70f6138510afa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the filename of a source dataset used in the mapping.  <br /></td></tr>
 <tr class="separator:ga5c17780cc9a72a0f62d70f6138510afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga39ac9ba6cc5c86c3dd8c46bae0ee17e9" id="r_ga39ac9ba6cc5c86c3dd8c46bae0ee17e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga39ac9ba6cc5c86c3dd8c46bae0ee17e9">H5Pget_virtual_spatial_tree</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, bool *use_tree)</td></tr>
+<tr class="memdesc:ga39ac9ba6cc5c86c3dd8c46bae0ee17e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the setting for whether or not to use a spatial tree for VDS mappings.  <br /></td></tr>
+<tr class="separator:ga39ac9ba6cc5c86c3dd8c46bae0ee17e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8319e9386cdb9b3881a8b698edfc78fc" id="r_ga8319e9386cdb9b3881a8b698edfc78fc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8319e9386cdb9b3881a8b698edfc78fc">H5Pget_virtual_srcspace</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, size_t index)</td></tr>
 <tr class="memdesc:ga8319e9386cdb9b3881a8b698edfc78fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a dataspace identifier for the selection within the source dataset used in the mapping.  <br /></td></tr>
 <tr class="separator:ga8319e9386cdb9b3881a8b698edfc78fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -323,6 +326,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gadec895092dbbedb94f85d9cacf8924f5" id="r_gadec895092dbbedb94f85d9cacf8924f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadec895092dbbedb94f85d9cacf8924f5">H5Pset_virtual</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> vspace_id, const char *src_file_name, const char *src_dset_name, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> src_space_id)</td></tr>
 <tr class="memdesc:gadec895092dbbedb94f85d9cacf8924f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the mapping between virtual and source datasets.  <br /></td></tr>
 <tr class="separator:gadec895092dbbedb94f85d9cacf8924f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5a83d2c1075cc5ff47460b5526ec23ff" id="r_ga5a83d2c1075cc5ff47460b5526ec23ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga5a83d2c1075cc5ff47460b5526ec23ff">H5Pset_virtual_spatial_tree</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, bool use_tree)</td></tr>
+<tr class="memdesc:ga5a83d2c1075cc5ff47460b5526ec23ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the flag to use a spatial tree for mappings.  <br /></td></tr>
+<tr class="separator:ga5a83d2c1075cc5ff47460b5526ec23ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga70f5346250698afc950532e9593c3988" name="ga70f5346250698afc950532e9593c3988"></a>
@@ -1043,6 +1049,41 @@ VDS Functions: <a class="el" href="#ga83dcce1ce110d1ff6eae0fb77d4a7c85" title="G
 <dd>
 VDS Functions: <a class="el" href="#ga83dcce1ce110d1ff6eae0fb77d4a7c85" title="Gets the number of mappings for the virtual dataset.">H5Pget_virtual_count()</a>, <a class="el" href="#gaf50620fd5d83dc9ca1e5c3f374c5a952" title="Gets the name of a source dataset used in the mapping.">H5Pget_virtual_dsetname()</a>, <a class="el" href="#ga5c17780cc9a72a0f62d70f6138510afa" title="Gets the filename of a source dataset used in the mapping.">H5Pget_virtual_filename()</a>, <a class="el" href="group___d_a_p_l.html#ga9a48c80955877c20d53e8fd3f49a2995" title="Retrieves prefix applied to VDS source file paths.">H5Pget_virtual_prefix()</a>, <a class="el" href="group___d_a_p_l.html#ga833dfc6d9c87738c9d94b610e70a818f" title="Returns the maximum number of missing source files and/or datasets with the printf-style names when g...">H5Pget_virtual_printf_gap()</a>, <a class="el" href="#ga8319e9386cdb9b3881a8b698edfc78fc" title="Gets a dataspace identifier for the selection within the source dataset used in the mapping.">H5Pget_virtual_srcspace()</a>, <a class="el" href="group___d_a_p_l.html#ga7173663654b085e8583ab609c988b47c" title="Retrieves the view of a virtual dataset accessed with dapl_id.">H5Pget_virtual_view()</a>, <a class="el" href="#ga6425cabbc055b66e218b4728d6eb911d" title="Gets a dataspace identifier for the selection within the virtual dataset used in the mapping.">H5Pget_virtual_vspace()</a>, <a class="el" href="#gadec895092dbbedb94f85d9cacf8924f5" title="Sets the mapping between virtual and source datasets.">H5Pset_virtual()</a>, <a class="el" href="group___d_a_p_l.html#ga6816e0de35a335f636922c3cd5569819" title="Sets prefix to be applied to VDS source file paths.">H5Pset_virtual_prefix()</a>, <a class="el" href="group___d_a_p_l.html#ga8bb25e402e860133b8af3715e429bacf" title="Sets the maximum number of missing source files and/or datasets with the printf-style names when gett...">H5Pset_virtual_printf_gap()</a>, <a class="el" href="group___d_a_p_l.html#gac65520e7cd7748f93d94c4a42abd01b4" title="Sets the view of the virtual dataset (VDS) to include or exclude missing mapped elements.">H5Pset_virtual_view()</a></dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
+
+</div>
+</div>
+<a id="ga39ac9ba6cc5c86c3dd8c46bae0ee17e9" name="ga39ac9ba6cc5c86c3dd8c46bae0ee17e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga39ac9ba6cc5c86c3dd8c46bae0ee17e9">&#9670;&#160;</a></span>H5Pget_virtual_spatial_tree()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pget_virtual_spatial_tree </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>dcpl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool *</td>          <td class="paramname"><span class="paramname"><em>use_tree</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the setting for whether or not to use a spatial tree for VDS mappings. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">dcpl_id</td><td>Dataset creation property list identifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">use_tree</td><td>Flag indicating whether the dataset will or will not use a spatial tree</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga39ac9ba6cc5c86c3dd8c46bae0ee17e9" title="Retrieves the setting for whether or not to use a spatial tree for VDS mappings.">H5Pget_virtual_spatial_tree()</a> retrieves the <em>use spatial tree</em> flag setting for the dataset creation property list <code class="param">dcpl_id</code>. This setting determines whether a dataset created with the dataset creation property list <code class="param">dcpl_id</code> will construct a spatial tree and use it in an attempt to optimize certain operations. The setting value is returned in the boolean pointer <code class="param">use_tree</code>.</p>
+<p>Use of a spatial tree will accelerate the process of searching through mappings to determine which contain intersections with the user's selection region. With the tree disabled, all mappings will simply be iterated through and checked directly.</p>
+<p>Certain workflows may find that tree creation overhead outweighs the time saved on reads. In this case, disabling this property will lead to a performance improvement, though it is expected that almost all cases will benefit from the tree on net.</p>
+<dl class="section since"><dt>Since</dt><dd>2.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1868,6 +1909,41 @@ Supporting Functions: <a class="el" href="#ga655530b0f40990507fedeef6b3068db3" t
 VDS Functions: <a class="el" href="#ga83dcce1ce110d1ff6eae0fb77d4a7c85" title="Gets the number of mappings for the virtual dataset.">H5Pget_virtual_count()</a>, <a class="el" href="#gaf50620fd5d83dc9ca1e5c3f374c5a952" title="Gets the name of a source dataset used in the mapping.">H5Pget_virtual_dsetname()</a>, <a class="el" href="#ga5c17780cc9a72a0f62d70f6138510afa" title="Gets the filename of a source dataset used in the mapping.">H5Pget_virtual_filename()</a>, <a class="el" href="group___d_a_p_l.html#ga9a48c80955877c20d53e8fd3f49a2995" title="Retrieves prefix applied to VDS source file paths.">H5Pget_virtual_prefix()</a>, <a class="el" href="group___d_a_p_l.html#ga833dfc6d9c87738c9d94b610e70a818f" title="Returns the maximum number of missing source files and/or datasets with the printf-style names when g...">H5Pget_virtual_printf_gap()</a>, <a class="el" href="#ga8319e9386cdb9b3881a8b698edfc78fc" title="Gets a dataspace identifier for the selection within the source dataset used in the mapping.">H5Pget_virtual_srcspace()</a>, <a class="el" href="group___d_a_p_l.html#ga7173663654b085e8583ab609c988b47c" title="Retrieves the view of a virtual dataset accessed with dapl_id.">H5Pget_virtual_view()</a>, <a class="el" href="#ga6425cabbc055b66e218b4728d6eb911d" title="Gets a dataspace identifier for the selection within the virtual dataset used in the mapping.">H5Pget_virtual_vspace()</a>, <a class="el" href="#gadec895092dbbedb94f85d9cacf8924f5" title="Sets the mapping between virtual and source datasets.">H5Pset_virtual()</a>, <a class="el" href="group___d_a_p_l.html#ga6816e0de35a335f636922c3cd5569819" title="Sets prefix to be applied to VDS source file paths.">H5Pset_virtual_prefix()</a>, <a class="el" href="group___d_a_p_l.html#ga8bb25e402e860133b8af3715e429bacf" title="Sets the maximum number of missing source files and/or datasets with the printf-style names when gett...">H5Pset_virtual_printf_gap()</a>, <a class="el" href="group___d_a_p_l.html#gac65520e7cd7748f93d94c4a42abd01b4" title="Sets the view of the virtual dataset (VDS) to include or exclude missing mapped elements.">H5Pset_virtual_view()</a></dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.10.2 A change was made to the method of searching for VDS source files. </dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
+
+</div>
+</div>
+<a id="ga5a83d2c1075cc5ff47460b5526ec23ff" name="ga5a83d2c1075cc5ff47460b5526ec23ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5a83d2c1075cc5ff47460b5526ec23ff">&#9670;&#160;</a></span>H5Pset_virtual_spatial_tree()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pset_virtual_spatial_tree </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>dcpl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>use_tree</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the flag to use a spatial tree for mappings. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">dcpl_id</td><td>Dataset creation property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">use_tree</td><td>Flag for indicating whether or not a dataset should use a spatial tree for mappings</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga5a83d2c1075cc5ff47460b5526ec23ff" title="Sets the flag to use a spatial tree for mappings.">H5Pset_virtual_spatial_tree()</a> sets the use-tree flag for the dataset creation property list <code class="param">dcpl_id</code>. Datasets created with the dataset creation property list <code class="param">dcpl_id</code> will construct a spatial tree and use it in an attempt to optimize intersection-check operations on mappings when <code class="param">use_tree</code> is set to true.</p>
+<p>Use of a spatial tree will accelerate the process of searching through mappings to determine which contain intersections with the user's selection region. With the tree disabled, all mappings will simply be iterated through and checked directly.</p>
+<p>Certain workflows may find that tree creation overhead outweighs the time saved on reads. In this case, disabling this property will lead to a performance improvement, though it is expected that almost all cases will benefit from the tree on net.</p>
+<dl class="section since"><dt>Since</dt><dd>2.0.0 </dd></dl>
 
 </div>
 </div>
