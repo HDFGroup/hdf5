@@ -25,6 +25,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
+- Up to [2500% faster](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#rtree) Virtual Dataset read/write operations
 - [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and [25% faster closing](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) of virtual datasets.
 - [Reduced memory overhead](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
 
@@ -464,6 +465,26 @@ Simple example programs showing how to use complex number datatypes have been ad
    On dataset open, the dataset performed an internal copy of the layout in order to populate its internal DCPL. For virtual datasets, this added a significant amount of overhead to the open operation.
 
    This layout copy is now delayed until either a user requests the DCPL, or until the start of an operation that needs to read the layout from the DCPL.
+
+### Virtual datasets now use a spatial tree to optimize searches<a name="rtree"></a>
+
+   Virtual dataset operations with many (>1,000) mappings were much slower than
+   corresponding operations on normal datasets. This was due to the need
+   to iterate through every source dataset's dataspace and check for an intersection
+   with the user-selected region for a read/write in the virtual dataset.
+
+   Virtual datasets with many mappings now use an r-tree (defined in H5RT.c) to
+   perform a spatial search. This allows the dataspaces that intersect the
+   user-selection to be computed with, in most cases, much fewer intersection checks,
+   improving the speed of VDS read/write operations.
+
+   Virtual datasets will use the r-tree by default, since the majority of use cases,
+   should see improvements from use of the tree. However, because some workflows may
+   find that the overhead of the tree outweighs the time saved on searches, there is
+   a new Dataset Access Property List (DAPL) property to control use of the spatial tree.
+
+   This property can be set or queried with the new API functions
+   H5Pset_virtual_spatial_tree()/H5Pget_virtual_spatial_tree().
 
 ## Parallel Library
 
