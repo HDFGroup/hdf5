@@ -1,4 +1,4 @@
-# HDF5 2.0.0 - 2025-09-30
+HDF5 version 2.0.0-3 currently under development
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -25,8 +25,9 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
-- 30% faster opening and 25% faster closing of virtual datasets.
-- Reduced memory overhead via shared name strings and optimized spatial search algorithms for virtual datasets.
+- Up to [2500% faster](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#rtree) Virtual Dataset read/write operations
+- [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and [25% faster closing](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) of virtual datasets.
+- [Reduced memory overhead](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
 
 ## Significant Advancements:
 
@@ -196,6 +197,20 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ## Library
 
+### Added predefined datatypes for bfloat16 data
+
+   Predefined datatypes have been added for little- and big-endian bfloat16 (https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
+
+   The following new macros have been added:
+
+    - H5T_FLOAT_BFLOAT16LE / H5T_FLOAT_BFLOAT16BE
+
+      These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
+
+      Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+### Removed hbool_t from public API calls
+                                  
 ### Removed `hbool_t` from public API calls
 
 The `hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
@@ -235,6 +250,8 @@ Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer 
 ### The file format has been updated to 4.0<a name="fileformat"></a>
 
 The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
+
+Use of the shared strings option for Virtual Datasets reduces memory overhead and optimizes dataset close operations.
 
 ### The `H5Dread_chunk()` signature has changed
 
@@ -463,9 +480,44 @@ Simple example programs showing how to use complex number datatypes have been ad
 
    Similar to the above. Setting the connector on a non-FAPL had no effect on library behavior, and the connector ID and information could not be read back from that plist later.
 
+### Optimized Virtual Dataset opens by delaying layout copy<a name="layoutcopydelay"></a>
+
+   On dataset open, the dataset performed an internal copy of the layout in order to populate its internal DCPL. For virtual datasets, this added a significant amount of overhead to the open operation.
+
+   This layout copy is now delayed until either a user requests the DCPL, or until the start of an operation that needs to read the layout from the DCPL.
+
+### Virtual datasets now use a spatial tree to optimize searches<a name="rtree"></a>
+
+   Virtual dataset operations with many (>1,000) mappings were much slower than
+   corresponding operations on normal datasets. This was due to the need
+   to iterate through every source dataset's dataspace and check for an intersection
+   with the user-selected region for a read/write in the virtual dataset.
+
+   Virtual datasets with many mappings now use an r-tree (defined in H5RT.c) to
+   perform a spatial search. This allows the dataspaces that intersect the
+   user-selection to be computed with, in most cases, much fewer intersection checks,
+   improving the speed of VDS read/write operations.
+
+   Virtual datasets will use the r-tree by default, since the majority of use cases,
+   should see improvements from use of the tree. However, because some workflows may
+   find that the overhead of the tree outweighs the time saved on searches, there is
+   a new Dataset Access Property List (DAPL) property to control use of the spatial tree.
+
+   This property can be set or queried with the new API functions
+   H5Pset_virtual_spatial_tree()/H5Pget_virtual_spatial_tree().
+
 ## Parallel Library
 
+### Added H5FDsubfiling_get_file_mapping() API function for subfiling VFD
+
+Added H5FDsubfiling_get_file_mapping() API function to retrieve the names of all physical subfiles that collectively make up a logical HDF5 file when using the subfiling Virtual File Driver.
+
 ## Fortran Library
+
+### Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for subfiling VFD
+
+Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file mapping functionality, ensuring complete language binding support.
+
 
 ## C++ Library
 
@@ -527,12 +579,36 @@ Simple example programs showing how to use complex number datatypes have been ad
 # 🪲 Bug Fixes
 
 ## Library
+### Fix bugs in object header operations
+
+   In some rare circumstances, such as deleting hard links that point to their own parent group in a file using the new file format, memory corruption could occur due to recursive operations changing data structures being operated on by multiple levels of recursion. Made changes to delay changing the data structure in a dangerous way until recursion is complete.
+
+   Fixes GitHub issue #5854
+
+
+### Fixed security issues CVE-2025-6816, CVE-2025-6856 and CVE-2025-2923
+
+   A specially constructed HDF5 file could contain a corrupted object header with a continuation message that points back to itself. This could result in an internal buffer being allocated with too small of a size, leading to a heap buffer overflow. This has been fixed by checking the expected number of object header chunks against the actual value as chunks are being deserialized.
+
+   Fixes GitHub issues #5571, #5574 and #5381
+
+### Fixed security issue CVE-2025-6750
+
+   A heap buffer overflow occurred because an mtime message was not properly decoded, resulting in a buffer of size 0 being passed into the encoder.  This has been fixed by decoding old and new mtime messages which will allow invalid message size to be detected.
+
+   Fixes GitHub issue #5549
+
+### Fixed CVE-2025-6269
+
+   There were several security vulnerabilities found in the function H5C__reconstruct_cache_entry(), including buffer overflows and memory leaks.  The function has been hardened with bounds checks, input validation, and safe cleanup.
+
+   Fixes GitHub issues #5579 and #5581
 
 ### Fixed a problem with the scale-offset filter
 
-A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
+   A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
 
-Fixes GitHub issue #5861
+   Fixes GitHub issue #5861
 
 ### Fixed security issue CVE-2025-6857
 
@@ -703,7 +779,8 @@ Fixes GitHub issue #5861
 
 # ☑️ Platforms Tested
 
-Data to come from cdash.
+A table of platforms tested can be seen on the [wiki](https://github.com/HDFGroup/hdf5/wiki/Platforms-Tested).
+Current test results are available [here](https://my.cdash.org/index.php?project=HDF5).
 
 # ⛔ Known Problems
 
