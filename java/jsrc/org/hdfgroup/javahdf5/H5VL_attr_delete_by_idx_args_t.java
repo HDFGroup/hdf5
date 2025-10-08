@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -23,21 +23,22 @@ import java.util.stream.*;
  */
 public class H5VL_attr_delete_by_idx_args_t {
 
-    H5VL_attr_delete_by_idx_args_t()
-    {
+    H5VL_attr_delete_by_idx_args_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_INT.withName("idx_type"), hdf5_h.C_INT.withName("order"),
-                          hdf5_h.C_LONG.withName("n"))
-            .withName("H5VL_attr_delete_by_idx_args_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_INT.withName("idx_type"),
+        hdf5_h.C_INT.withName("order"),
+        hdf5_h.C_LONG.withName("n")
+    ).withName("H5VL_attr_delete_by_idx_args_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfInt idx_type$LAYOUT = (OfInt)$LAYOUT.select(groupElement("idx_type"));
 
@@ -47,7 +48,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * H5_index_t idx_type
      * }
      */
-    public static final OfInt idx_type$layout() { return idx_type$LAYOUT; }
+    public static final OfInt idx_type$layout() {
+        return idx_type$LAYOUT;
+    }
 
     private static final long idx_type$OFFSET = 0;
 
@@ -57,7 +60,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * H5_index_t idx_type
      * }
      */
-    public static final long idx_type$offset() { return idx_type$OFFSET; }
+    public static final long idx_type$offset() {
+        return idx_type$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -65,7 +70,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * H5_index_t idx_type
      * }
      */
-    public static int idx_type(MemorySegment struct) { return struct.get(idx_type$LAYOUT, idx_type$OFFSET); }
+    public static int idx_type(MemorySegment struct) {
+        return struct.get(idx_type$LAYOUT, idx_type$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -73,8 +80,7 @@ public class H5VL_attr_delete_by_idx_args_t {
      * H5_index_t idx_type
      * }
      */
-    public static void idx_type(MemorySegment struct, int fieldValue)
-    {
+    public static void idx_type(MemorySegment struct, int fieldValue) {
         struct.set(idx_type$LAYOUT, idx_type$OFFSET, fieldValue);
     }
 
@@ -86,7 +92,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * H5_iter_order_t order
      * }
      */
-    public static final OfInt order$layout() { return order$LAYOUT; }
+    public static final OfInt order$layout() {
+        return order$LAYOUT;
+    }
 
     private static final long order$OFFSET = 4;
 
@@ -96,7 +104,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * H5_iter_order_t order
      * }
      */
-    public static final long order$offset() { return order$OFFSET; }
+    public static final long order$offset() {
+        return order$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -104,7 +114,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * H5_iter_order_t order
      * }
      */
-    public static int order(MemorySegment struct) { return struct.get(order$LAYOUT, order$OFFSET); }
+    public static int order(MemorySegment struct) {
+        return struct.get(order$LAYOUT, order$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -112,8 +124,7 @@ public class H5VL_attr_delete_by_idx_args_t {
      * H5_iter_order_t order
      * }
      */
-    public static void order(MemorySegment struct, int fieldValue)
-    {
+    public static void order(MemorySegment struct, int fieldValue) {
         struct.set(order$LAYOUT, order$OFFSET, fieldValue);
     }
 
@@ -125,7 +136,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * hsize_t n
      * }
      */
-    public static final OfLong n$layout() { return n$LAYOUT; }
+    public static final OfLong n$layout() {
+        return n$LAYOUT;
+    }
 
     private static final long n$OFFSET = 8;
 
@@ -135,7 +148,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * hsize_t n
      * }
      */
-    public static final long n$offset() { return n$OFFSET; }
+    public static final long n$offset() {
+        return n$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -143,7 +158,9 @@ public class H5VL_attr_delete_by_idx_args_t {
      * hsize_t n
      * }
      */
-    public static long n(MemorySegment struct) { return struct.get(n$LAYOUT, n$OFFSET); }
+    public static long n(MemorySegment struct) {
+        return struct.get(n$LAYOUT, n$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -151,8 +168,7 @@ public class H5VL_attr_delete_by_idx_args_t {
      * hsize_t n
      * }
      */
-    public static void n(MemorySegment struct, long fieldValue)
-    {
+    public static void n(MemorySegment struct, long fieldValue) {
         struct.set(n$LAYOUT, n$OFFSET, fieldValue);
     }
 
@@ -160,8 +176,7 @@ public class H5VL_attr_delete_by_idx_args_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -173,14 +188,15 @@ public class H5VL_attr_delete_by_idx_args_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -188,8 +204,7 @@ public class H5VL_attr_delete_by_idx_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -197,9 +212,8 @@ public class H5VL_attr_delete_by_idx_args_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

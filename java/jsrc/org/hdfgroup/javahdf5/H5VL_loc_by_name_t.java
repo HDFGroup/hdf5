@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -22,8 +22,8 @@ import java.util.stream.*;
  */
 public class H5VL_loc_by_name_t extends H5VL_loc_by_name {
 
-    H5VL_loc_by_name_t()
-    {
+    H5VL_loc_by_name_t() {
         // Should not be called directly
     }
 }
+

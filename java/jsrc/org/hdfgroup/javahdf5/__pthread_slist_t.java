@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -21,8 +21,8 @@ import java.util.stream.*;
  */
 public class __pthread_slist_t extends __pthread_internal_slist {
 
-    __pthread_slist_t()
-    {
+    __pthread_slist_t() {
         // Should not be called directly
     }
 }
+

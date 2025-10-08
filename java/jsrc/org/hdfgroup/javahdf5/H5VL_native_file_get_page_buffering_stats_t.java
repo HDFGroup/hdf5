@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -25,25 +25,26 @@ import java.util.stream.*;
  */
 public class H5VL_native_file_get_page_buffering_stats_t {
 
-    H5VL_native_file_get_page_buffering_stats_t()
-    {
+    H5VL_native_file_get_page_buffering_stats_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_POINTER.withName("accesses"), hdf5_h.C_POINTER.withName("hits"),
-                          hdf5_h.C_POINTER.withName("misses"), hdf5_h.C_POINTER.withName("evictions"),
-                          hdf5_h.C_POINTER.withName("bypasses"))
-            .withName("H5VL_native_file_get_page_buffering_stats_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_POINTER.withName("accesses"),
+        hdf5_h.C_POINTER.withName("hits"),
+        hdf5_h.C_POINTER.withName("misses"),
+        hdf5_h.C_POINTER.withName("evictions"),
+        hdf5_h.C_POINTER.withName("bypasses")
+    ).withName("H5VL_native_file_get_page_buffering_stats_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
-    private static final AddressLayout accesses$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("accesses"));
+    private static final AddressLayout accesses$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("accesses"));
 
     /**
      * Layout for field:
@@ -51,7 +52,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *accesses
      * }
      */
-    public static final AddressLayout accesses$layout() { return accesses$LAYOUT; }
+    public static final AddressLayout accesses$layout() {
+        return accesses$LAYOUT;
+    }
 
     private static final long accesses$OFFSET = 0;
 
@@ -61,7 +64,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *accesses
      * }
      */
-    public static final long accesses$offset() { return accesses$OFFSET; }
+    public static final long accesses$offset() {
+        return accesses$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -69,8 +74,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *accesses
      * }
      */
-    public static MemorySegment accesses(MemorySegment struct)
-    {
+    public static MemorySegment accesses(MemorySegment struct) {
         return struct.get(accesses$LAYOUT, accesses$OFFSET);
     }
 
@@ -80,8 +84,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *accesses
      * }
      */
-    public static void accesses(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void accesses(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(accesses$LAYOUT, accesses$OFFSET, fieldValue);
     }
 
@@ -93,7 +96,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *hits
      * }
      */
-    public static final AddressLayout hits$layout() { return hits$LAYOUT; }
+    public static final AddressLayout hits$layout() {
+        return hits$LAYOUT;
+    }
 
     private static final long hits$OFFSET = 8;
 
@@ -103,7 +108,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *hits
      * }
      */
-    public static final long hits$offset() { return hits$OFFSET; }
+    public static final long hits$offset() {
+        return hits$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -111,7 +118,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *hits
      * }
      */
-    public static MemorySegment hits(MemorySegment struct) { return struct.get(hits$LAYOUT, hits$OFFSET); }
+    public static MemorySegment hits(MemorySegment struct) {
+        return struct.get(hits$LAYOUT, hits$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -119,8 +128,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *hits
      * }
      */
-    public static void hits(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void hits(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(hits$LAYOUT, hits$OFFSET, fieldValue);
     }
 
@@ -132,7 +140,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *misses
      * }
      */
-    public static final AddressLayout misses$layout() { return misses$LAYOUT; }
+    public static final AddressLayout misses$layout() {
+        return misses$LAYOUT;
+    }
 
     private static final long misses$OFFSET = 16;
 
@@ -142,7 +152,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *misses
      * }
      */
-    public static final long misses$offset() { return misses$OFFSET; }
+    public static final long misses$offset() {
+        return misses$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -150,8 +162,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *misses
      * }
      */
-    public static MemorySegment misses(MemorySegment struct)
-    {
+    public static MemorySegment misses(MemorySegment struct) {
         return struct.get(misses$LAYOUT, misses$OFFSET);
     }
 
@@ -161,13 +172,11 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *misses
      * }
      */
-    public static void misses(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void misses(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(misses$LAYOUT, misses$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout evictions$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("evictions"));
+    private static final AddressLayout evictions$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("evictions"));
 
     /**
      * Layout for field:
@@ -175,7 +184,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *evictions
      * }
      */
-    public static final AddressLayout evictions$layout() { return evictions$LAYOUT; }
+    public static final AddressLayout evictions$layout() {
+        return evictions$LAYOUT;
+    }
 
     private static final long evictions$OFFSET = 24;
 
@@ -185,7 +196,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *evictions
      * }
      */
-    public static final long evictions$offset() { return evictions$OFFSET; }
+    public static final long evictions$offset() {
+        return evictions$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -193,8 +206,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *evictions
      * }
      */
-    public static MemorySegment evictions(MemorySegment struct)
-    {
+    public static MemorySegment evictions(MemorySegment struct) {
         return struct.get(evictions$LAYOUT, evictions$OFFSET);
     }
 
@@ -204,13 +216,11 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *evictions
      * }
      */
-    public static void evictions(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void evictions(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(evictions$LAYOUT, evictions$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout bypasses$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("bypasses"));
+    private static final AddressLayout bypasses$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("bypasses"));
 
     /**
      * Layout for field:
@@ -218,7 +228,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *bypasses
      * }
      */
-    public static final AddressLayout bypasses$layout() { return bypasses$LAYOUT; }
+    public static final AddressLayout bypasses$layout() {
+        return bypasses$LAYOUT;
+    }
 
     private static final long bypasses$OFFSET = 32;
 
@@ -228,7 +240,9 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *bypasses
      * }
      */
-    public static final long bypasses$offset() { return bypasses$OFFSET; }
+    public static final long bypasses$offset() {
+        return bypasses$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -236,8 +250,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *bypasses
      * }
      */
-    public static MemorySegment bypasses(MemorySegment struct)
-    {
+    public static MemorySegment bypasses(MemorySegment struct) {
         return struct.get(bypasses$LAYOUT, bypasses$OFFSET);
     }
 
@@ -247,8 +260,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * unsigned int *bypasses
      * }
      */
-    public static void bypasses(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void bypasses(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(bypasses$LAYOUT, bypasses$OFFSET, fieldValue);
     }
 
@@ -256,8 +268,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -269,14 +280,15 @@ public class H5VL_native_file_get_page_buffering_stats_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -284,8 +296,7 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -293,9 +304,8 @@ public class H5VL_native_file_get_page_buffering_stats_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

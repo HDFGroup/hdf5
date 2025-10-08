@@ -12,7 +12,13 @@
 
 package hdf.hdf5lib.structs;
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
 import java.io.Serializable;
+
+import org.hdfgroup.javahdf5.*;
 
 /**
  * Java representation of the ROS3 VFD file access property list (fapl)
@@ -45,15 +51,15 @@ public class H5FD_ros3_fapl_t implements Serializable {
     private static final long serialVersionUID = 8985533001471224030L;
 
     /** Version number of the H5FD_ros3_fapl_t structure */
-    private int version;
+    public int version;
     /** Flag TRUE or FALSE whether or not requests are to be authenticated with the AWS4 algorithm. */
-    private boolean authenticate;
+    public boolean authenticate;
     /** region "aws region" for authenticating request */
-    private String aws_region;
+    public String aws_region;
     /** id "secret id" or "access id" for authenticating request */
-    private String secret_id;
+    public String secret_id;
     /** key "secret key" or "access key" for authenticating request */
-    private String secret_key;
+    public String secret_key;
 
     /**
      * Create a "default" fapl_t structure, for anonymous access.
@@ -61,10 +67,11 @@ public class H5FD_ros3_fapl_t implements Serializable {
     public H5FD_ros3_fapl_t()
     {
         /* H5FD_ros3_fapl_t("", "", ""); */ /* defer */
-        this.version    = 1;
-        this.aws_region = "";
-        this.secret_id  = "";
-        this.secret_key = "";
+        this.version      = 1;
+        this.authenticate = false;
+        this.aws_region   = "";
+        this.secret_id    = "";
+        this.secret_key   = "";
     }
 
     /**
@@ -80,9 +87,34 @@ public class H5FD_ros3_fapl_t implements Serializable {
     {
         this.version = 1; /* must equal H5FD_CURR_ROS3_FAPL_T_VERSION */
                           /* as found in H5FDros3.h                    */
-        this.aws_region = region;
-        this.secret_id  = id;
-        this.secret_key = key;
+        if (region == null)
+            region = "";
+        else
+            this.aws_region = region;
+        if (id == null)
+            id = "";
+        else
+            this.secret_id  = id;
+        if (key == null)
+            key = "";
+        else
+            this.secret_key = key;
+        if (region == null && id == null && key == null)
+            this.authenticate = false;
+        else if (region != null && id != null)
+            this.authenticate = true;
+    }
+
+    /**
+     * Create a fapl_t structure from a MemorySegment.
+     */
+    public H5FD_ros3_fapl_t(MemorySegment config)
+    {
+        this.version      = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.version(config);
+        this.authenticate = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.authenticate(config);
+        this.aws_region   = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.aws_region(config).getString(0, java.nio.charset.StandardCharsets.UTF_8);
+        this.secret_id    = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_id(config).getString(0, java.nio.charset.StandardCharsets.UTF_8);
+        this.secret_key   = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_key(config).getString(0, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     @Override

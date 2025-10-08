@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -22,19 +22,21 @@ import java.util.stream.*;
  */
 public class H5VL_native_file_set_libver_bounds_t {
 
-    H5VL_native_file_set_libver_bounds_t()
-    {
+    H5VL_native_file_set_libver_bounds_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout.structLayout(hdf5_h.C_INT.withName("low"), hdf5_h.C_INT.withName("high"))
-            .withName("H5VL_native_file_set_libver_bounds_t");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_INT.withName("low"),
+        hdf5_h.C_INT.withName("high")
+    ).withName("H5VL_native_file_set_libver_bounds_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfInt low$LAYOUT = (OfInt)$LAYOUT.select(groupElement("low"));
 
@@ -44,7 +46,9 @@ public class H5VL_native_file_set_libver_bounds_t {
      * H5F_libver_t low
      * }
      */
-    public static final OfInt low$layout() { return low$LAYOUT; }
+    public static final OfInt low$layout() {
+        return low$LAYOUT;
+    }
 
     private static final long low$OFFSET = 0;
 
@@ -54,7 +58,9 @@ public class H5VL_native_file_set_libver_bounds_t {
      * H5F_libver_t low
      * }
      */
-    public static final long low$offset() { return low$OFFSET; }
+    public static final long low$offset() {
+        return low$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -62,7 +68,9 @@ public class H5VL_native_file_set_libver_bounds_t {
      * H5F_libver_t low
      * }
      */
-    public static int low(MemorySegment struct) { return struct.get(low$LAYOUT, low$OFFSET); }
+    public static int low(MemorySegment struct) {
+        return struct.get(low$LAYOUT, low$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -70,8 +78,7 @@ public class H5VL_native_file_set_libver_bounds_t {
      * H5F_libver_t low
      * }
      */
-    public static void low(MemorySegment struct, int fieldValue)
-    {
+    public static void low(MemorySegment struct, int fieldValue) {
         struct.set(low$LAYOUT, low$OFFSET, fieldValue);
     }
 
@@ -83,7 +90,9 @@ public class H5VL_native_file_set_libver_bounds_t {
      * H5F_libver_t high
      * }
      */
-    public static final OfInt high$layout() { return high$LAYOUT; }
+    public static final OfInt high$layout() {
+        return high$LAYOUT;
+    }
 
     private static final long high$OFFSET = 4;
 
@@ -93,7 +102,9 @@ public class H5VL_native_file_set_libver_bounds_t {
      * H5F_libver_t high
      * }
      */
-    public static final long high$offset() { return high$OFFSET; }
+    public static final long high$offset() {
+        return high$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -101,7 +112,9 @@ public class H5VL_native_file_set_libver_bounds_t {
      * H5F_libver_t high
      * }
      */
-    public static int high(MemorySegment struct) { return struct.get(high$LAYOUT, high$OFFSET); }
+    public static int high(MemorySegment struct) {
+        return struct.get(high$LAYOUT, high$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -109,8 +122,7 @@ public class H5VL_native_file_set_libver_bounds_t {
      * H5F_libver_t high
      * }
      */
-    public static void high(MemorySegment struct, int fieldValue)
-    {
+    public static void high(MemorySegment struct, int fieldValue) {
         struct.set(high$LAYOUT, high$OFFSET, fieldValue);
     }
 
@@ -118,8 +130,7 @@ public class H5VL_native_file_set_libver_bounds_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -131,14 +142,15 @@ public class H5VL_native_file_set_libver_bounds_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -146,8 +158,7 @@ public class H5VL_native_file_set_libver_bounds_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -155,9 +166,8 @@ public class H5VL_native_file_set_libver_bounds_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

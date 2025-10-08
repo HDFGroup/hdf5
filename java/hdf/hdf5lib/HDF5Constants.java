@@ -643,7 +643,7 @@ public class HDF5Constants {
     /** */
     public static final long H5FD_WINDOWS = H5FD_SEC2_id_g();
     /** */
-    public static final long H5FD_ROS3 = H5FD_ROS3();
+    public static final long H5FD_ROS3 = H5FD_ROS3_id_g(); // if not enabled, then H5FD_ROS3()
     /** */
     public static final long H5FD_HDFS = H5FD_HDFS();
     /** */

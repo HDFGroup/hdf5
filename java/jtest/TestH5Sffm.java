@@ -207,7 +207,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            int result = hdf5_h_1.H5Sset_extent_simple(H5sid, RANK, dimsSegment, MemorySegment.NULL);
+            int result = hdf5_h.H5Sset_extent_simple(H5sid, RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Sset_extent_simple failed", isSuccess(result));
 
             // Verify dimensions were set
@@ -695,7 +695,7 @@ public class TestH5Sffm {
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Verify selection is valid
-            int valid = hdf5_h_1.H5Sselect_valid(H5sid);
+            int valid = hdf5_h.H5Sselect_valid(H5sid);
             assertTrue("Selection should be valid", valid > 0);
         }
     }
@@ -901,7 +901,7 @@ public class TestH5Sffm {
             assertEquals("Should be H5S_SIMPLE", hdf5_h.H5S_SIMPLE(), type);
 
             // Set extent to none (null dataspace)
-            int result = hdf5_h_1.H5Sset_extent_none(H5sid);
+            int result = hdf5_h.H5Sset_extent_none(H5sid);
             assertTrue("H5Sset_extent_none failed", isSuccess(result));
 
             // Verify it's now null
@@ -1412,7 +1412,7 @@ public class TestH5Sffm {
             int result = hdf5_h_1.H5Sselect_none(H5sid);
             assertTrue("H5Sselect_none failed", isSuccess(result));
 
-            result = hdf5_h_1.H5Sselect_valid(H5sid);
+            result = hdf5_h.H5Sselect_valid(H5sid);
             assertTrue("NONE selection should be valid", result > 0);
 
             // Select valid hyperslab
@@ -1427,14 +1427,14 @@ public class TestH5Sffm {
                                                   counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
-            result = hdf5_h_1.H5Sselect_valid(H5sid);
+            result = hdf5_h.H5Sselect_valid(H5sid);
             assertTrue("Valid hyperslab selection should be valid", result > 0);
 
             // Select ALL
             result = hdf5_h_1.H5Sselect_all(H5sid);
             assertTrue("H5Sselect_all failed", isSuccess(result));
 
-            result = hdf5_h_1.H5Sselect_valid(H5sid);
+            result = hdf5_h.H5Sselect_valid(H5sid);
             assertTrue("ALL selection should be valid", result > 0);
         }
     }

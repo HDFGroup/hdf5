@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -29,24 +29,28 @@ import java.util.stream.*;
  */
 public class H5L_class_t {
 
-    H5L_class_t()
-    {
+    H5L_class_t() {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT =
-        MemoryLayout
-            .structLayout(hdf5_h.C_INT.withName("version"), hdf5_h.C_INT.withName("id"),
-                          hdf5_h.C_POINTER.withName("comment"), hdf5_h.C_POINTER.withName("create_func"),
-                          hdf5_h.C_POINTER.withName("move_func"), hdf5_h.C_POINTER.withName("copy_func"),
-                          hdf5_h.C_POINTER.withName("trav_func"), hdf5_h.C_POINTER.withName("del_func"),
-                          hdf5_h.C_POINTER.withName("query_func"))
-            .withName("$anon$93:9");
+    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
+        hdf5_h.C_INT.withName("version"),
+        hdf5_h.C_INT.withName("id"),
+        hdf5_h.C_POINTER.withName("comment"),
+        hdf5_h.C_POINTER.withName("create_func"),
+        hdf5_h.C_POINTER.withName("move_func"),
+        hdf5_h.C_POINTER.withName("copy_func"),
+        hdf5_h.C_POINTER.withName("trav_func"),
+        hdf5_h.C_POINTER.withName("del_func"),
+        hdf5_h.C_POINTER.withName("query_func")
+    ).withName("$anon$93:9");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() { return $LAYOUT; }
+    public static final GroupLayout layout() {
+        return $LAYOUT;
+    }
 
     private static final OfInt version$LAYOUT = (OfInt)$LAYOUT.select(groupElement("version"));
 
@@ -56,7 +60,9 @@ public class H5L_class_t {
      * int version
      * }
      */
-    public static final OfInt version$layout() { return version$LAYOUT; }
+    public static final OfInt version$layout() {
+        return version$LAYOUT;
+    }
 
     private static final long version$OFFSET = 0;
 
@@ -66,7 +72,9 @@ public class H5L_class_t {
      * int version
      * }
      */
-    public static final long version$offset() { return version$OFFSET; }
+    public static final long version$offset() {
+        return version$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -74,7 +82,9 @@ public class H5L_class_t {
      * int version
      * }
      */
-    public static int version(MemorySegment struct) { return struct.get(version$LAYOUT, version$OFFSET); }
+    public static int version(MemorySegment struct) {
+        return struct.get(version$LAYOUT, version$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -82,8 +92,7 @@ public class H5L_class_t {
      * int version
      * }
      */
-    public static void version(MemorySegment struct, int fieldValue)
-    {
+    public static void version(MemorySegment struct, int fieldValue) {
         struct.set(version$LAYOUT, version$OFFSET, fieldValue);
     }
 
@@ -95,7 +104,9 @@ public class H5L_class_t {
      * H5L_type_t id
      * }
      */
-    public static final OfInt id$layout() { return id$LAYOUT; }
+    public static final OfInt id$layout() {
+        return id$LAYOUT;
+    }
 
     private static final long id$OFFSET = 4;
 
@@ -105,7 +116,9 @@ public class H5L_class_t {
      * H5L_type_t id
      * }
      */
-    public static final long id$offset() { return id$OFFSET; }
+    public static final long id$offset() {
+        return id$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -113,7 +126,9 @@ public class H5L_class_t {
      * H5L_type_t id
      * }
      */
-    public static int id(MemorySegment struct) { return struct.get(id$LAYOUT, id$OFFSET); }
+    public static int id(MemorySegment struct) {
+        return struct.get(id$LAYOUT, id$OFFSET);
+    }
 
     /**
      * Setter for field:
@@ -121,13 +136,11 @@ public class H5L_class_t {
      * H5L_type_t id
      * }
      */
-    public static void id(MemorySegment struct, int fieldValue)
-    {
+    public static void id(MemorySegment struct, int fieldValue) {
         struct.set(id$LAYOUT, id$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout comment$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("comment"));
+    private static final AddressLayout comment$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("comment"));
 
     /**
      * Layout for field:
@@ -135,7 +148,9 @@ public class H5L_class_t {
      * const char *comment
      * }
      */
-    public static final AddressLayout comment$layout() { return comment$LAYOUT; }
+    public static final AddressLayout comment$layout() {
+        return comment$LAYOUT;
+    }
 
     private static final long comment$OFFSET = 8;
 
@@ -145,7 +160,9 @@ public class H5L_class_t {
      * const char *comment
      * }
      */
-    public static final long comment$offset() { return comment$OFFSET; }
+    public static final long comment$offset() {
+        return comment$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -153,8 +170,7 @@ public class H5L_class_t {
      * const char *comment
      * }
      */
-    public static MemorySegment comment(MemorySegment struct)
-    {
+    public static MemorySegment comment(MemorySegment struct) {
         return struct.get(comment$LAYOUT, comment$OFFSET);
     }
 
@@ -164,13 +180,11 @@ public class H5L_class_t {
      * const char *comment
      * }
      */
-    public static void comment(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void comment(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(comment$LAYOUT, comment$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout create_func$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("create_func"));
+    private static final AddressLayout create_func$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("create_func"));
 
     /**
      * Layout for field:
@@ -178,7 +192,9 @@ public class H5L_class_t {
      * H5L_create_func_t create_func
      * }
      */
-    public static final AddressLayout create_func$layout() { return create_func$LAYOUT; }
+    public static final AddressLayout create_func$layout() {
+        return create_func$LAYOUT;
+    }
 
     private static final long create_func$OFFSET = 16;
 
@@ -188,7 +204,9 @@ public class H5L_class_t {
      * H5L_create_func_t create_func
      * }
      */
-    public static final long create_func$offset() { return create_func$OFFSET; }
+    public static final long create_func$offset() {
+        return create_func$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -196,8 +214,7 @@ public class H5L_class_t {
      * H5L_create_func_t create_func
      * }
      */
-    public static MemorySegment create_func(MemorySegment struct)
-    {
+    public static MemorySegment create_func(MemorySegment struct) {
         return struct.get(create_func$LAYOUT, create_func$OFFSET);
     }
 
@@ -207,13 +224,11 @@ public class H5L_class_t {
      * H5L_create_func_t create_func
      * }
      */
-    public static void create_func(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void create_func(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(create_func$LAYOUT, create_func$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout move_func$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("move_func"));
+    private static final AddressLayout move_func$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("move_func"));
 
     /**
      * Layout for field:
@@ -221,7 +236,9 @@ public class H5L_class_t {
      * H5L_move_func_t move_func
      * }
      */
-    public static final AddressLayout move_func$layout() { return move_func$LAYOUT; }
+    public static final AddressLayout move_func$layout() {
+        return move_func$LAYOUT;
+    }
 
     private static final long move_func$OFFSET = 24;
 
@@ -231,7 +248,9 @@ public class H5L_class_t {
      * H5L_move_func_t move_func
      * }
      */
-    public static final long move_func$offset() { return move_func$OFFSET; }
+    public static final long move_func$offset() {
+        return move_func$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -239,8 +258,7 @@ public class H5L_class_t {
      * H5L_move_func_t move_func
      * }
      */
-    public static MemorySegment move_func(MemorySegment struct)
-    {
+    public static MemorySegment move_func(MemorySegment struct) {
         return struct.get(move_func$LAYOUT, move_func$OFFSET);
     }
 
@@ -250,13 +268,11 @@ public class H5L_class_t {
      * H5L_move_func_t move_func
      * }
      */
-    public static void move_func(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void move_func(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(move_func$LAYOUT, move_func$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout copy_func$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("copy_func"));
+    private static final AddressLayout copy_func$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("copy_func"));
 
     /**
      * Layout for field:
@@ -264,7 +280,9 @@ public class H5L_class_t {
      * H5L_copy_func_t copy_func
      * }
      */
-    public static final AddressLayout copy_func$layout() { return copy_func$LAYOUT; }
+    public static final AddressLayout copy_func$layout() {
+        return copy_func$LAYOUT;
+    }
 
     private static final long copy_func$OFFSET = 32;
 
@@ -274,7 +292,9 @@ public class H5L_class_t {
      * H5L_copy_func_t copy_func
      * }
      */
-    public static final long copy_func$offset() { return copy_func$OFFSET; }
+    public static final long copy_func$offset() {
+        return copy_func$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -282,8 +302,7 @@ public class H5L_class_t {
      * H5L_copy_func_t copy_func
      * }
      */
-    public static MemorySegment copy_func(MemorySegment struct)
-    {
+    public static MemorySegment copy_func(MemorySegment struct) {
         return struct.get(copy_func$LAYOUT, copy_func$OFFSET);
     }
 
@@ -293,13 +312,11 @@ public class H5L_class_t {
      * H5L_copy_func_t copy_func
      * }
      */
-    public static void copy_func(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void copy_func(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(copy_func$LAYOUT, copy_func$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout trav_func$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("trav_func"));
+    private static final AddressLayout trav_func$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("trav_func"));
 
     /**
      * Layout for field:
@@ -307,7 +324,9 @@ public class H5L_class_t {
      * H5L_traverse_func_t trav_func
      * }
      */
-    public static final AddressLayout trav_func$layout() { return trav_func$LAYOUT; }
+    public static final AddressLayout trav_func$layout() {
+        return trav_func$LAYOUT;
+    }
 
     private static final long trav_func$OFFSET = 40;
 
@@ -317,7 +336,9 @@ public class H5L_class_t {
      * H5L_traverse_func_t trav_func
      * }
      */
-    public static final long trav_func$offset() { return trav_func$OFFSET; }
+    public static final long trav_func$offset() {
+        return trav_func$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -325,8 +346,7 @@ public class H5L_class_t {
      * H5L_traverse_func_t trav_func
      * }
      */
-    public static MemorySegment trav_func(MemorySegment struct)
-    {
+    public static MemorySegment trav_func(MemorySegment struct) {
         return struct.get(trav_func$LAYOUT, trav_func$OFFSET);
     }
 
@@ -336,13 +356,11 @@ public class H5L_class_t {
      * H5L_traverse_func_t trav_func
      * }
      */
-    public static void trav_func(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void trav_func(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(trav_func$LAYOUT, trav_func$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout del_func$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("del_func"));
+    private static final AddressLayout del_func$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("del_func"));
 
     /**
      * Layout for field:
@@ -350,7 +368,9 @@ public class H5L_class_t {
      * H5L_delete_func_t del_func
      * }
      */
-    public static final AddressLayout del_func$layout() { return del_func$LAYOUT; }
+    public static final AddressLayout del_func$layout() {
+        return del_func$LAYOUT;
+    }
 
     private static final long del_func$OFFSET = 48;
 
@@ -360,7 +380,9 @@ public class H5L_class_t {
      * H5L_delete_func_t del_func
      * }
      */
-    public static final long del_func$offset() { return del_func$OFFSET; }
+    public static final long del_func$offset() {
+        return del_func$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -368,8 +390,7 @@ public class H5L_class_t {
      * H5L_delete_func_t del_func
      * }
      */
-    public static MemorySegment del_func(MemorySegment struct)
-    {
+    public static MemorySegment del_func(MemorySegment struct) {
         return struct.get(del_func$LAYOUT, del_func$OFFSET);
     }
 
@@ -379,13 +400,11 @@ public class H5L_class_t {
      * H5L_delete_func_t del_func
      * }
      */
-    public static void del_func(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void del_func(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(del_func$LAYOUT, del_func$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout query_func$LAYOUT =
-        (AddressLayout)$LAYOUT.select(groupElement("query_func"));
+    private static final AddressLayout query_func$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("query_func"));
 
     /**
      * Layout for field:
@@ -393,7 +412,9 @@ public class H5L_class_t {
      * H5L_query_func_t query_func
      * }
      */
-    public static final AddressLayout query_func$layout() { return query_func$LAYOUT; }
+    public static final AddressLayout query_func$layout() {
+        return query_func$LAYOUT;
+    }
 
     private static final long query_func$OFFSET = 56;
 
@@ -403,7 +424,9 @@ public class H5L_class_t {
      * H5L_query_func_t query_func
      * }
      */
-    public static final long query_func$offset() { return query_func$OFFSET; }
+    public static final long query_func$offset() {
+        return query_func$OFFSET;
+    }
 
     /**
      * Getter for field:
@@ -411,8 +434,7 @@ public class H5L_class_t {
      * H5L_query_func_t query_func
      * }
      */
-    public static MemorySegment query_func(MemorySegment struct)
-    {
+    public static MemorySegment query_func(MemorySegment struct) {
         return struct.get(query_func$LAYOUT, query_func$OFFSET);
     }
 
@@ -422,8 +444,7 @@ public class H5L_class_t {
      * H5L_query_func_t query_func
      * }
      */
-    public static void query_func(MemorySegment struct, MemorySegment fieldValue)
-    {
+    public static void query_func(MemorySegment struct, MemorySegment fieldValue) {
         struct.set(query_func$LAYOUT, query_func$OFFSET, fieldValue);
     }
 
@@ -431,8 +452,7 @@ public class H5L_class_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index)
-    {
+    public static MemorySegment asSlice(MemorySegment array, long index) {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -444,14 +464,15 @@ public class H5L_class_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
+    public static MemorySegment allocate(SegmentAllocator allocator) {
+        return allocator.allocate(layout());
+    }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
-    {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -459,8 +480,7 @@ public class H5L_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -468,9 +488,8 @@ public class H5L_class_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
-                                            Consumer<MemorySegment> cleanup)
-    {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
+

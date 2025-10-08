@@ -2,59 +2,55 @@
 
 package org.hdfgroup.javahdf5;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.ValueLayout.*;
-
-import java.lang.foreign.*;
 import java.lang.invoke.*;
+import java.lang.foreign.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+
 public class hdf5_h_2 {
 
-    hdf5_h_2()
-    {
+    hdf5_h_2() {
         // Should not be called directly
     }
 
-    static final Arena LIBRARY_ARENA     = Arena.ofAuto();
+    static final Arena LIBRARY_ARENA = Arena.ofAuto();
     static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
 
-    static void traceDowncall(String name, Object... args)
-    {
-        String traceArgs = Arrays.stream(args).map(Object::toString).collect(Collectors.joining(", "));
-        System.out.printf("%s(%s)\n", name, traceArgs);
+    static void traceDowncall(String name, Object... args) {
+         String traceArgs = Arrays.stream(args)
+                       .map(Object::toString)
+                       .collect(Collectors.joining(", "));
+         System.out.printf("%s(%s)\n", name, traceArgs);
     }
 
-    static MemorySegment findOrThrow(String symbol)
-    {
-        return SYMBOL_LOOKUP.find(symbol).orElseThrow(
-            () -> new UnsatisfiedLinkError("unresolved symbol: " + symbol));
+    static MemorySegment findOrThrow(String symbol) {
+        return SYMBOL_LOOKUP.find(symbol)
+            .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: " + symbol));
     }
 
-    static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc)
-    {
+    static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc) {
         try {
             return MethodHandles.lookup().findVirtual(fi, name, fdesc.toMethodType());
-        }
-        catch (ReflectiveOperationException ex) {
+        } catch (ReflectiveOperationException ex) {
             throw new AssertionError(ex);
         }
     }
 
-    static MemoryLayout align(MemoryLayout layout, long align)
-    {
-        return switch (layout)
-        {
-        case PaddingLayout p -> p; case ValueLayout v -> v.withByteAlignment(align);
-            case GroupLayout g
-            -> { MemoryLayout[] alignedMembers =
-                     g.memberLayouts().stream().map(m -> align(m, align)).toArray(MemoryLayout[] ::new);
-                 yield g instanceof StructLayout ? MemoryLayout.structLayout(alignedMembers):
-            MemoryLayout.unionLayout(alignedMembers);
-        }
+    static MemoryLayout align(MemoryLayout layout, long align) {
+        return switch (layout) {
+            case PaddingLayout p -> p;
+            case ValueLayout v -> v.withByteAlignment(align);
+            case GroupLayout g -> {
+                MemoryLayout[] alignedMembers = g.memberLayouts().stream()
+                        .map(m -> align(m, align)).toArray(MemoryLayout[]::new);
+                yield g instanceof StructLayout ?
+                        MemoryLayout.structLayout(alignedMembers) : MemoryLayout.unionLayout(alignedMembers);
+            }
             case SequenceLayout s -> MemoryLayout.sequenceLayout(s.elementCount(), align(s.elementLayout(), align));
         };
     }
@@ -369,6 +365,15 @@ public class hdf5_h_2 {
      */
     public static int H5_HAVE_PWD_H() {
         return H5_HAVE_PWD_H;
+    }
+    private static final int H5_HAVE_ROS3_VFD = (int)1L;
+    /**
+     * {@snippet lang=c :
+     * #define H5_HAVE_ROS3_VFD 1
+     * }
+     */
+    public static int H5_HAVE_ROS3_VFD() {
+        return H5_HAVE_ROS3_VFD;
     }
     private static final int H5_HAVE_STAT_ST_BLOCKS = (int)1L;
     /**
@@ -5436,6 +5441,51 @@ public class hdf5_h_2 {
      */
     public static int H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN() {
         return H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN;
+    }
+    private static final int H5FD_CURR_ROS3_FAPL_T_VERSION = (int)1L;
+    /**
+     * {@snippet lang=c :
+     * #define H5FD_CURR_ROS3_FAPL_T_VERSION 1
+     * }
+     */
+    public static int H5FD_CURR_ROS3_FAPL_T_VERSION() {
+        return H5FD_CURR_ROS3_FAPL_T_VERSION;
+    }
+    private static final int H5FD_ROS3_MAX_REGION_LEN = (int)32L;
+    /**
+     * {@snippet lang=c :
+     * #define H5FD_ROS3_MAX_REGION_LEN 32
+     * }
+     */
+    public static int H5FD_ROS3_MAX_REGION_LEN() {
+        return H5FD_ROS3_MAX_REGION_LEN;
+    }
+    private static final int H5FD_ROS3_MAX_SECRET_ID_LEN = (int)128L;
+    /**
+     * {@snippet lang=c :
+     * #define H5FD_ROS3_MAX_SECRET_ID_LEN 128
+     * }
+     */
+    public static int H5FD_ROS3_MAX_SECRET_ID_LEN() {
+        return H5FD_ROS3_MAX_SECRET_ID_LEN;
+    }
+    private static final int H5FD_ROS3_MAX_SECRET_KEY_LEN = (int)128L;
+    /**
+     * {@snippet lang=c :
+     * #define H5FD_ROS3_MAX_SECRET_KEY_LEN 128
+     * }
+     */
+    public static int H5FD_ROS3_MAX_SECRET_KEY_LEN() {
+        return H5FD_ROS3_MAX_SECRET_KEY_LEN;
+    }
+    private static final int H5FD_ROS3_MAX_SECRET_TOK_LEN = (int)4096L;
+    /**
+     * {@snippet lang=c :
+     * #define H5FD_ROS3_MAX_SECRET_TOK_LEN 4096
+     * }
+     */
+    public static int H5FD_ROS3_MAX_SECRET_TOK_LEN() {
+        return H5FD_ROS3_MAX_SECRET_TOK_LEN;
     }
     private static final int H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION = (int)1L;
     /**
@@ -14547,274 +14597,5 @@ public class hdf5_h_2 {
     public static void H5T_STD_B32BE_g(long varValue) {
         H5T_STD_B32BE_g$constants.SEGMENT.set(H5T_STD_B32BE_g$constants.LAYOUT, 0L, varValue);
     }
-
-    private static class H5T_STD_B32LE_g$constants {
-        public static final OfLong LAYOUT = hdf5_h.C_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_STD_B32LE_g").reinterpret(LAYOUT.byteSize());
-    }
-
-    /**
-     * Layout for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B32LE_g
-     * }
-     */
-    public static OfLong H5T_STD_B32LE_g$layout() {
-        return H5T_STD_B32LE_g$constants.LAYOUT;
-    }
-
-    /**
-     * Segment for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B32LE_g
-     * }
-     */
-    public static MemorySegment H5T_STD_B32LE_g$segment() {
-        return H5T_STD_B32LE_g$constants.SEGMENT;
-    }
-
-    /**
-     * Getter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B32LE_g
-     * }
-     */
-    public static long H5T_STD_B32LE_g() {
-        return H5T_STD_B32LE_g$constants.SEGMENT.get(H5T_STD_B32LE_g$constants.LAYOUT, 0L);
-    }
-
-    /**
-     * Setter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B32LE_g
-     * }
-     */
-    public static void H5T_STD_B32LE_g(long varValue) {
-        H5T_STD_B32LE_g$constants.SEGMENT.set(H5T_STD_B32LE_g$constants.LAYOUT, 0L, varValue);
-    }
-
-    private static class H5T_STD_B64BE_g$constants {
-        public static final OfLong LAYOUT = hdf5_h.C_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_STD_B64BE_g").reinterpret(LAYOUT.byteSize());
-    }
-
-    /**
-     * Layout for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B64BE_g
-     * }
-     */
-    public static OfLong H5T_STD_B64BE_g$layout() {
-        return H5T_STD_B64BE_g$constants.LAYOUT;
-    }
-
-    /**
-     * Segment for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B64BE_g
-     * }
-     */
-    public static MemorySegment H5T_STD_B64BE_g$segment() {
-        return H5T_STD_B64BE_g$constants.SEGMENT;
-    }
-
-    /**
-     * Getter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B64BE_g
-     * }
-     */
-    public static long H5T_STD_B64BE_g() {
-        return H5T_STD_B64BE_g$constants.SEGMENT.get(H5T_STD_B64BE_g$constants.LAYOUT, 0L);
-    }
-
-    /**
-     * Setter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B64BE_g
-     * }
-     */
-    public static void H5T_STD_B64BE_g(long varValue) {
-        H5T_STD_B64BE_g$constants.SEGMENT.set(H5T_STD_B64BE_g$constants.LAYOUT, 0L, varValue);
-    }
-
-    private static class H5T_STD_B64LE_g$constants {
-        public static final OfLong LAYOUT = hdf5_h.C_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_STD_B64LE_g").reinterpret(LAYOUT.byteSize());
-    }
-
-    /**
-     * Layout for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B64LE_g
-     * }
-     */
-    public static OfLong H5T_STD_B64LE_g$layout() {
-        return H5T_STD_B64LE_g$constants.LAYOUT;
-    }
-
-    /**
-     * Segment for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B64LE_g
-     * }
-     */
-    public static MemorySegment H5T_STD_B64LE_g$segment() {
-        return H5T_STD_B64LE_g$constants.SEGMENT;
-    }
-
-    /**
-     * Getter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B64LE_g
-     * }
-     */
-    public static long H5T_STD_B64LE_g() {
-        return H5T_STD_B64LE_g$constants.SEGMENT.get(H5T_STD_B64LE_g$constants.LAYOUT, 0L);
-    }
-
-    /**
-     * Setter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_B64LE_g
-     * }
-     */
-    public static void H5T_STD_B64LE_g(long varValue) {
-        H5T_STD_B64LE_g$constants.SEGMENT.set(H5T_STD_B64LE_g$constants.LAYOUT, 0L, varValue);
-    }
-
-    private static class H5T_STD_REF_OBJ_g$constants {
-        public static final OfLong LAYOUT = hdf5_h.C_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_STD_REF_OBJ_g").reinterpret(LAYOUT.byteSize());
-    }
-
-    /**
-     * Layout for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_OBJ_g
-     * }
-     */
-    public static OfLong H5T_STD_REF_OBJ_g$layout() {
-        return H5T_STD_REF_OBJ_g$constants.LAYOUT;
-    }
-
-    /**
-     * Segment for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_OBJ_g
-     * }
-     */
-    public static MemorySegment H5T_STD_REF_OBJ_g$segment() {
-        return H5T_STD_REF_OBJ_g$constants.SEGMENT;
-    }
-
-    /**
-     * Getter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_OBJ_g
-     * }
-     */
-    public static long H5T_STD_REF_OBJ_g() {
-        return H5T_STD_REF_OBJ_g$constants.SEGMENT.get(H5T_STD_REF_OBJ_g$constants.LAYOUT, 0L);
-    }
-
-    /**
-     * Setter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_OBJ_g
-     * }
-     */
-    public static void H5T_STD_REF_OBJ_g(long varValue) {
-        H5T_STD_REF_OBJ_g$constants.SEGMENT.set(H5T_STD_REF_OBJ_g$constants.LAYOUT, 0L, varValue);
-    }
-
-    private static class H5T_STD_REF_DSETREG_g$constants {
-        public static final OfLong LAYOUT = hdf5_h.C_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_STD_REF_DSETREG_g").reinterpret(LAYOUT.byteSize());
-    }
-
-    /**
-     * Layout for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_DSETREG_g
-     * }
-     */
-    public static OfLong H5T_STD_REF_DSETREG_g$layout() {
-        return H5T_STD_REF_DSETREG_g$constants.LAYOUT;
-    }
-
-    /**
-     * Segment for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_DSETREG_g
-     * }
-     */
-    public static MemorySegment H5T_STD_REF_DSETREG_g$segment() {
-        return H5T_STD_REF_DSETREG_g$constants.SEGMENT;
-    }
-
-    /**
-     * Getter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_DSETREG_g
-     * }
-     */
-    public static long H5T_STD_REF_DSETREG_g() {
-        return H5T_STD_REF_DSETREG_g$constants.SEGMENT.get(H5T_STD_REF_DSETREG_g$constants.LAYOUT, 0L);
-    }
-
-    /**
-     * Setter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_DSETREG_g
-     * }
-     */
-    public static void H5T_STD_REF_DSETREG_g(long varValue) {
-        H5T_STD_REF_DSETREG_g$constants.SEGMENT.set(H5T_STD_REF_DSETREG_g$constants.LAYOUT, 0L, varValue);
-    }
-
-    private static class H5T_STD_REF_g$constants {
-        public static final OfLong LAYOUT = hdf5_h.C_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5T_STD_REF_g").reinterpret(LAYOUT.byteSize());
-    }
-
-    /**
-     * Layout for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_g
-     * }
-     */
-    public static OfLong H5T_STD_REF_g$layout() {
-        return H5T_STD_REF_g$constants.LAYOUT;
-    }
-
-    /**
-     * Segment for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_g
-     * }
-     */
-    public static MemorySegment H5T_STD_REF_g$segment() {
-        return H5T_STD_REF_g$constants.SEGMENT;
-    }
-
-    /**
-     * Getter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_g
-     * }
-     */
-    public static long H5T_STD_REF_g() {
-        return H5T_STD_REF_g$constants.SEGMENT.get(H5T_STD_REF_g$constants.LAYOUT, 0L);
-    }
-
-    /**
-     * Setter for variable:
-     * {@snippet lang=c :
-     * extern hid_t H5T_STD_REF_g
-     * }
-     */
-    public static void H5T_STD_REF_g(long varValue) {
-        H5T_STD_REF_g$constants.SEGMENT.set(H5T_STD_REF_g$constants.LAYOUT, 0L, varValue);
-    }
 }
+
