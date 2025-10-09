@@ -5,7 +5,7 @@ project (HDF5Examples_FORTRAN_H5T Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EX_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EXAMPLE_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
 )
 
 #-----------------------------------------------------------------------------
@@ -13,7 +13,7 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
 #-----------------------------------------------------------------------------
 include (Fortran_sourcefiles.cmake)
 
-#if (H5EX_ENABLE_F2003)
+#if (H5EXAMPLE_ENABLE_F2003)
   foreach (example_name ${f03_examples})
     add_executable (${EXAMPLE_VARNAME}_f90_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.F90)
     target_compile_options(${EXAMPLE_VARNAME}_f90_${example_name}
@@ -28,9 +28,9 @@ include (Fortran_sourcefiles.cmake)
     if (H5_HAVE_PARALLEL)
       target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
     endif ()
-    target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EX_LINK_Fortran_LIBS})
+    target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EXAMPLE_LINK_Fortran_LIBS})
     set_target_properties (${EXAMPLE_VARNAME}_f90_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)
-    if (H5EX_BUILD_TESTING)
+    if (H5EXAMPLE_BUILD_TESTING)
       add_custom_command (
           TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
           POST_BUILD
@@ -55,9 +55,9 @@ foreach (example_name ${common_examples})
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
   endif ()
-  target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EX_LINK_Fortran_LIBS})
+  target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EXAMPLE_LINK_Fortran_LIBS})
   set_target_properties (${EXAMPLE_VARNAME}_f90_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)
-  if (H5EX_BUILD_TESTING)
+  if (H5EXAMPLE_BUILD_TESTING)
     add_custom_command (
         TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
         POST_BUILD
@@ -69,7 +69,7 @@ endforeach ()
 
 #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.10")
 #  foreach (example_name ${1_10_examples})
-#    if (H5EX_BUILD_TESTING)
+#    if (H5EXAMPLE_BUILD_TESTING)
 #      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
 #          POST_BUILD
@@ -81,7 +81,7 @@ endforeach ()
 #endif ()
 #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.12")
 #  foreach (example_name ${1_12_examples})
-#    if (H5EX_BUILD_TESTING)
+#    if (H5EXAMPLE_BUILD_TESTING)
 #      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
 #          POST_BUILD
@@ -93,7 +93,7 @@ endforeach ()
 #endif ()
 #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.14")
 #  foreach (example_name ${1_14_examples})
-#    if (H5EX_BUILD_TESTING)
+#    if (H5EXAMPLE_BUILD_TESTING)
 #      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
 #          POST_BUILD
@@ -105,7 +105,7 @@ endforeach ()
 #endif ()
 #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
 #  foreach (example_name ${2_0_examples})
-#    if (H5EX_BUILD_TESTING)
+#    if (H5EXAMPLE_BUILD_TESTING)
 #      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
 #          POST_BUILD
@@ -126,7 +126,7 @@ if (HDF5_PROVIDES_TOOLS)
     )
   endforeach ()
 
-  #if (H5EX_ENABLE_F2003)
+  #if (H5EXAMPLE_ENABLE_F2003)
     foreach (example_name ${f03_examples})
       if (NOT ${example_name} STREQUAL "h5ex_t_convert_F03")
         if (${example_name} STREQUAL "h5ex_t_vlen_F03" OR ${example_name} STREQUAL "h5ex_t_vlenatt_F03")
@@ -297,7 +297,7 @@ if (HDF5_PROVIDES_TOOLS)
 #  endforeach ()
 endif ()
 
-if (H5EX_BUILD_TESTING)
+if (H5EXAMPLE_BUILD_TESTING)
   macro (ADD_H5_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_f90_${testname}-clearall
@@ -327,7 +327,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_REFERENCE=${testname}.tst"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
       if (last_test)
         set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${last_test})
@@ -338,14 +338,14 @@ if (H5EX_BUILD_TESTING)
             NAME ${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
+                -D "TEST_PROGRAM=${H5EXAMPLE_HDF5_DUMP_EXECUTABLE}"
                 -D "TEST_ARGS:STRING=${ARGN};${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-                -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+                -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-f90_${testname} PROPERTIES DEPENDS ${last_test})
         set (last_test "${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}")
@@ -381,7 +381,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_REFERENCE=${testname}.tst"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
@@ -404,7 +404,7 @@ if (H5EX_BUILD_TESTING)
     endif ()
   endmacro ()
 
-  #if (H5EX_ENABLE_F2003)
+  #if (H5EXAMPLE_ENABLE_F2003)
     foreach (example_name ${f03_examples} ${common_examples})
       TEST_EXAMPLE (${example_name})
     endforeach ()
