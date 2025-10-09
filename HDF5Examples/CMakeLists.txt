@@ -3,7 +3,7 @@
 # Fortran, Java, and filter examples.
 # It also handles MPI/parallel support, version parsing, and testing configuration.
 #
-# The option naming convention is H5EX_* for examples options and HDF5_* for HDF5
+# The option naming convention is H5EXAMPLE_* for examples options and HDF5_* for HDF5
 # library features.
 
 cmake_minimum_required (VERSION 3.26)
@@ -12,24 +12,24 @@ project (H5EXAMPLES C)
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
 #-----------------------------------------------------------------------------
-set (H5EX_C_SRC_DIR          ${H5EXAMPLES_SOURCE_DIR}/C)
-set (H5EX_CXX_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/CXX)
-set (H5EX_F90_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/FORTRAN)
-set (H5EX_JAVA_DIR           ${H5EXAMPLES_SOURCE_DIR}/JAVA)
+set (H5EXAMPLE_C_SRC_DIR          ${H5EXAMPLES_SOURCE_DIR}/C)
+set (H5EXAMPLE_CXX_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/CXX)
+set (H5EXAMPLE_F90_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/FORTRAN)
+set (H5EXAMPLE_JAVA_DIR           ${H5EXAMPLES_SOURCE_DIR}/JAVA)
 #-----------------------------------------------------------------------------
 # Basic HDF5Examples stuff here
 #-----------------------------------------------------------------------------
 if (NOT EXAMPLES_EXTERNALLY_CONFIGURED)
-  set (H5EX_CONFIG_DIR      ${H5EXAMPLES_SOURCE_DIR}/config)
-  set (H5EX_RESOURCES_DIR   ${H5EXAMPLES_SOURCE_DIR}/config/cmake)
+  set (H5EXAMPLE_CONFIG_DIR      ${H5EXAMPLES_SOURCE_DIR}/config)
+  set (H5EXAMPLE_RESOURCES_DIR   ${H5EXAMPLES_SOURCE_DIR}/config/cmake)
 
   include (TestBigEndian)
   if (NOT WINDOWS)
-    TEST_BIG_ENDIAN (H5EX_WORDS_BIGENDIAN)
+    TEST_BIG_ENDIAN (H5EXAMPLE_WORDS_BIGENDIAN)
   endif ()
 
-  include (${H5EX_CONFIG_DIR}/HDFMacros.cmake)
-  include (${H5EX_RESOURCES_DIR}/HDFExampleMacros.cmake)
+  include (${H5EXAMPLE_CONFIG_DIR}/HDFMacros.cmake)
+  include (${H5EXAMPLE_RESOURCES_DIR}/HDFExampleMacros.cmake)
   set (CMAKE_JAVA_INCLUDE_PATH "")
 
   SET_HDF_BUILD_TYPE()
@@ -47,14 +47,14 @@ if (NOT EXAMPLES_EXTERNALLY_CONFIGURED)
   #-----------------------------------------------------------------------------
   PYTHON_SUPPORT ()
 endif ()
-message (STATUS "HDF5 link libs: ${H5EX_HDF5_LINK_LIBS}")
+message (STATUS "HDF5 link libs: ${H5EXAMPLE_HDF5_LINK_LIBS}")
 message (STATUS "HDF5 H5_LIBVER_DIR: ${H5_LIBVER_DIR} HDF5_VERSION_MAJOR: ${HDF5_VERSION_MAJOR}")
 
 #-----------------------------------------------------------------------------
 # Option to build JAVA examples
 #-----------------------------------------------------------------------------
-option (H5EX_BUILD_JAVA "Build JAVA support" OFF)
-if (H5EX_BUILD_JAVA)
+option (H5EXAMPLE_BUILD_JAVA "Build JAVA support" OFF)
+if (H5EXAMPLE_BUILD_JAVA)
   find_package (Java)
 
   include (UseJava)
@@ -64,7 +64,7 @@ endif ()
 # parse the full version number from H5public.h and include in H5_VERS_INFO
 #-----------------------------------------------------------------------------
 if(NOT DEFINED _h5public_h_contents)
-  find_file (_h5public_h H5public.h ${H5EX_HDF5_INCLUDE_DIRS})
+  find_file (_h5public_h H5public.h ${H5EXAMPLE_HDF5_INCLUDE_DIRS})
   file (READ ${_h5public_h} _h5public_h_contents)
 
   string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
@@ -86,9 +86,9 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH ${H5EX_CONFIG_DIR} ${H5EX_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
-option (H5EX_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
-if (H5EX_ENABLE_PARALLEL)
+set (CMAKE_MODULE_PATH ${H5EXAMPLE_CONFIG_DIR} ${H5EXAMPLE_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
+option (H5EXAMPLE_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
+if (H5EXAMPLE_ENABLE_PARALLEL)
   find_package(MPI REQUIRED)
   if (MPI_C_FOUND)
     set (H5_HAVE_PARALLEL 1)
@@ -106,7 +106,7 @@ endif ()
 
 # Parallel IO usage requires MPI to be Linked and Included
 if (H5_HAVE_PARALLEL)
-  set (H5EX_HDF5_LINK_LIBS ${H5EX_HDF5_LINK_LIBS} ${MPI_C_LIBRARIES})
+  set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${MPI_C_LIBRARIES})
   if (MPI_C_LINK_FLAGS)
     set (CMAKE_EXE_LINKER_FLAGS "${MPI_C_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
   endif ()
@@ -114,21 +114,21 @@ if (H5_HAVE_PARALLEL)
 endif ()
 
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES 
-    "${H5EX_HDF5_INCLUDE_DIRS}"
+    "${H5EXAMPLE_HDF5_INCLUDE_DIRS}"
 )
 
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------
-option (H5EX_BUILD_TESTING "Build HDF5 Example Testing" OFF)
-if (H5EX_BUILD_TESTING)
+option (H5EXAMPLE_BUILD_TESTING "Build HDF5 Example Testing" OFF)
+if (H5EXAMPLE_BUILD_TESTING)
   set (DART_TESTING_TIMEOUT 1200 CACHE STRING
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
   enable_testing ()
   include (CTest)
   include (${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${H5EX_CONFIG_DIR}/CTestCustom.cmake ${PROJECT_BINARY_DIR}/CTestCustom.ctest @ONLY)
+  configure_file (${H5EXAMPLE_CONFIG_DIR}/CTestCustom.cmake ${PROJECT_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif ()
 
 if (${H5_LIBVER_DIR} GREATER 16)
@@ -141,25 +141,25 @@ if (${H5_LIBVER_DIR} GREATER 16)
   set (H5_FC_FUNC  "H5_FC_FUNC(name,NAME) name ## _")
   set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/FORTRAN" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/FORTRAN")
-    option (H5EX_BUILD_FORTRAN "Build examples FORTRAN support" OFF)
-    if (H5EX_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
-      set (H5EX_LINK_Fortran_LIBS ${H5EX_HDF5_LINK_LIBS})
+    option (H5EXAMPLE_BUILD_FORTRAN "Build examples FORTRAN support" OFF)
+    if (H5EXAMPLE_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
+      set (H5EXAMPLE_LINK_Fortran_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS})
 
       # Parallel IO usage requires MPI to be Linked and Included
       if (H5_HAVE_PARALLEL)
-        set (H5EX_LINK_Fortran_LIBS ${H5EX_LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
+        set (H5EXAMPLE_LINK_Fortran_LIBS ${H5EXAMPLE_LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
         if (MPI_Fortran_LINK_FLAGS)
           set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
         endif ()
       endif ()
 
-      configure_file (${H5EX_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5D/h5_version.h @ONLY)
-      configure_file (${H5EX_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5G/h5_version.h @ONLY)
+      configure_file (${H5EXAMPLE_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5D/h5_version.h @ONLY)
+      configure_file (${H5EXAMPLE_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5G/h5_version.h @ONLY)
     else ()
-      set (H5EX_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
+      set (H5EXAMPLE_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
     endif ()
   else ()
-    set (H5EX_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
+    set (H5EXAMPLE_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
   endif ()
 
   if (${H5_LIBVER_DIR} GREATER 18)
@@ -167,71 +167,71 @@ if (${H5_LIBVER_DIR} GREATER 16)
     # Option to build JAVA examples
     #-----------------------------------------------------------------------------
     if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/JAVA" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/JAVA")
-      option (H5EX_BUILD_JAVA "Build examples JAVA support" OFF)
+      option (H5EXAMPLE_BUILD_JAVA "Build examples JAVA support" OFF)
     else ()
-      set (H5EX_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
+      set (H5EXAMPLE_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
     endif ()
   else ()
-    set (H5EX_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
+    set (H5EXAMPLE_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
   endif ()
 
   #-----------------------------------------------------------------------------
   # Build the HL Examples
   #-----------------------------------------------------------------------------
-  option (H5EX_BUILD_HL "Build examples HIGH Level support" OFF)
+  option (H5EXAMPLE_BUILD_HL "Build examples HIGH Level support" OFF)
 
   #-----------------------------------------------------------------------------
   # Build the CPP Examples
   #-----------------------------------------------------------------------------
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/CXX" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/CXX")
-    option (H5EX_BUILD_CXX "Build examples C++ support" OFF)
+    option (H5EXAMPLE_BUILD_CXX "Build examples C++ support" OFF)
   else ()
-    set (H5EX_BUILD_CXX OFF CACHE BOOL "Build examples C++ support" FORCE)
+    set (H5EXAMPLE_BUILD_CXX OFF CACHE BOOL "Build examples C++ support" FORCE)
   endif ()
 
   #-----------------------------------------------------------------------------
   # Option to build filter examples
   #-----------------------------------------------------------------------------
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/C/H5FLT" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/C/H5FLT")
-    option (H5EX_BUILD_FILTERS "Build examples PLUGIN filter support" OFF)
-    if (H5EX_BUILD_FILTERS AND HDF5_PROVIDES_PLUGIN_SUPPORT)
+    option (H5EXAMPLE_BUILD_FILTERS "Build examples PLUGIN filter support" OFF)
+    if (H5EXAMPLE_BUILD_FILTERS AND HDF5_PROVIDES_PLUGIN_SUPPORT)
       if(DEFINED ENV{HDF5_PLUGIN_PATH})
         message (STATUS "ENV PATH=$ENV{HDF5_PLUGIN_PATH}")
-        set (H5EX_HDF5_PLUGIN_PATH $ENV{HDF5_PLUGIN_PATH})
+        set (H5EXAMPLE_HDF5_PLUGIN_PATH $ENV{HDF5_PLUGIN_PATH})
       else ()
-        if(NOT DEFINED H5EX_HDF5_PLUGIN_PATH)
+        if(NOT DEFINED H5EXAMPLE_HDF5_PLUGIN_PATH)
           message (STATUS "LIBRARY PATH=${HDF5_LIBRARY_PATH}/plugin")
-          set (H5EX_HDF5_PLUGIN_PATH ${HDF5_LIBRARY_PATH}/plugin)
+          set (H5EXAMPLE_HDF5_PLUGIN_PATH ${HDF5_LIBRARY_PATH}/plugin)
         endif ()
       endif ()
-      message (STATUS "H5EX_HDF5_PLUGIN_PATH=${H5EX_HDF5_PLUGIN_PATH}")
+      message (STATUS "H5EXAMPLE_HDF5_PLUGIN_PATH=${H5EXAMPLE_HDF5_PLUGIN_PATH}")
     else ()
-      set (H5EX_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
+      set (H5EXAMPLE_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
     endif ()
   else ()
-    set (H5EX_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
+    set (H5EXAMPLE_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
   endif ()
 else ()
-  set (H5EX_BUILD_HL OFF CACHE BOOL "Build examples High Level support" FORCE)
-  set (H5EX_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
-  set (H5EX_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
-  set (H5EX_BUILD_CXX OFF CACHE BOOL "Build examples C++ support" FORCE)
-  set (H5EX_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
+  set (H5EXAMPLE_BUILD_HL OFF CACHE BOOL "Build examples High Level support" FORCE)
+  set (H5EXAMPLE_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
+  set (H5EXAMPLE_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
+  set (H5EXAMPLE_BUILD_CXX OFF CACHE BOOL "Build examples C++ support" FORCE)
+  set (H5EXAMPLE_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
 endif ()
 
 #-----------------------------------------------------------------------------
 # Build examples
 #-----------------------------------------------------------------------------
 add_subdirectory (C)
-if (H5EX_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
+if (H5EXAMPLE_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
   add_subdirectory (FORTRAN)
 endif ()
-if (H5EX_BUILD_JAVA AND HDF5_PROVIDES_JAVA)
+if (H5EXAMPLE_BUILD_JAVA AND HDF5_PROVIDES_JAVA)
   add_subdirectory (JAVA)
 endif ()
-if (H5EX_BUILD_CXX AND HDF5_PROVIDES_CPP_LIB)
+if (H5EXAMPLE_BUILD_CXX AND HDF5_PROVIDES_CPP_LIB)
   add_subdirectory (CXX)
 endif ()
-if (H5EX_BUILD_PYTHON)
+if (H5EXAMPLE_BUILD_PYTHON)
   add_subdirectory (PYTHON)
 endif ()

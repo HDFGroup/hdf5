@@ -20,11 +20,11 @@ foreach (example_name ${examples})
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_tutr_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})
   endif ()
-  target_link_libraries (${EXAMPLE_VARNAME}_tutr_${example_name} ${H5EX_HDF5_LINK_LIBS})
+  target_link_libraries (${EXAMPLE_VARNAME}_tutr_${example_name} ${H5EXAMPLE_HDF5_LINK_LIBS})
 endforeach ()
 
 
-if (H5EX_BUILD_TESTING)
+if (H5EXAMPLE_BUILD_TESTING)
   file (MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/red ${PROJECT_BINARY_DIR}/blue ${PROJECT_BINARY_DIR}/u2w)
 
   set (${EXAMPLE_VARNAME}_tutr_CLEANFILES
@@ -97,7 +97,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_tutr)
