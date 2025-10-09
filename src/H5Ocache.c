@@ -1400,8 +1400,8 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
             else {
                 /* Check for message of unshareable class marked as "shareable"
                  */
-                if ((flags & H5O_MSG_FLAG_SHAREABLE) && H5O_msg_class_g[id] &&
-                    !(H5O_msg_class_g[id]->share_flags & H5O_SHARE_IS_SHARABLE))
+                if (((flags & H5O_MSG_FLAG_SHARED) || (flags & H5O_MSG_FLAG_SHAREABLE)) &&
+                    H5O_msg_class_g[id] && !(H5O_msg_class_g[id]->share_flags & H5O_SHARE_IS_SHARABLE))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL,
                                 "message of unshareable class flagged as shareable");
 

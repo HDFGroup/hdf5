@@ -125,12 +125,12 @@ main(void)
     for (i = 0; i < dims[0]; i++)
         printf("%s[%d]: %s\n", ATTRIBUTE, i, rdata[i]);
 
-        /*
-         * Close and release resources.  Note that H5Dvlen_reclaim works
-         * for variable-length strings as well as variable-length arrays.
-         * Also note that we must still free the array of pointers stored
-         * in rdata, as H5Tvlen_reclaim only frees the data these point to.
-         */
+    /*
+     * Close and release resources.  Note that H5Dvlen_reclaim works
+     * for variable-length strings as well as variable-length arrays.
+     * Also note that we must still free the array of pointers stored
+     * in rdata, as H5Tvlen_reclaim only frees the data these point to.
+     */
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status = H5Treclaim(memtype, space, H5P_DEFAULT, rdata);
 #else
