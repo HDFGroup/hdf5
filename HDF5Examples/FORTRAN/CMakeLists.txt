@@ -14,6 +14,6 @@ if (H5_HAVE_PARALLEL AND HDF5_PROVIDES_PARALLEL)
 endif ()
 
 #-- Add High Level Examples
-if (H5EX_BUILD_HL AND HDF5_PROVIDES_HL_LIB)
+if (H5EXAMPLE_BUILD_HL AND HDF5_PROVIDES_HL_LIB)
   add_subdirectory (HL)
 endif ()

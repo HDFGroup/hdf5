@@ -6,7 +6,7 @@ project (HDF5Examples_PYTHON)
 #-----------------------------------------------------------------------------
 include (Py_sourcefiles.cmake)
 
-if (H5EX_BUILD_TESTING)
+if (H5EXAMPLE_BUILD_TESTING)
   set (${EXAMPLE_VARNAME}_PY_CLEANFILES
     compound.h5
     dset.h5

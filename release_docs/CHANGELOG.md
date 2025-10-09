@@ -141,6 +141,10 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added `#ifdef` around the compression function calls. Added including the correct header file with the same `#ifdef`.
 
+### Renamed HDF5Examples build options from `H5EX_<option>` to `H5EXAMPLE_<option>`
+
+Changed the prefix to better distinguish the examples build options from the library options when building the examples along with the library.
+
 ### Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
 
 | Old | New |
