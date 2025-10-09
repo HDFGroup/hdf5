@@ -121,7 +121,7 @@ if (HDF5_PROVIDES_TOOLS)
   )
   foreach (example_name ${common_examples})
     if (NOT ${example_name} STREQUAL "h5ex_lite1" AND NOT ${example_name} STREQUAL "h5ex_lite2")
-      if (H5EX_WORDS_BIGENDIAN)
+      if (H5EXAMPLE_WORDS_BIGENDIAN)
         add_custom_command (
             TARGET     ${EXAMPLE_VARNAME}_${example_name}
             POST_BUILD
@@ -221,7 +221,7 @@ if (H5EXAMPLE_BUILD_TESTING)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
+                -D "TEST_PROGRAM=${H5EXAMPLE_HDF5_DUMP_EXECUTABLE}"
                 -D "TEST_ARGS:STRING=${ARGN};${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
@@ -267,7 +267,7 @@ if (H5EXAMPLE_BUILD_TESTING)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
+                -D "TEST_PROGRAM=${H5EXAMPLE_HDF5_DUMP_EXECUTABLE}"
                 -D "TEST_ARGS:STRING=${ARGN};${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
