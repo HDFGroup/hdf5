@@ -1613,10 +1613,13 @@ public class HDF5Constants {
     /** scale offset filter - Number of parameters that users can set */
     public static final int H5Z_SCALEOFFSET_USER_NPARMS = H5Z_SCALEOFFSET_USER_NPARMS();
 
-    private static final long H5_FD_ROS3() {
-        if (ROS3_ON) { return H5FD_ROS3_id_g(); }
-        else { return H5_VFD_INVALID(); }
+    private static final long H5_FD_ROS3()
+    {
+        if (ROS3_ON) {
+            return H5FD_ROS3_id_g();
+        }
+        else {
+            return H5_VFD_INVALID();
+        }
     }
-
-    
 }
