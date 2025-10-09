@@ -103,8 +103,9 @@ public class H5FD_hdfs_fapl_t implements Serializable {
     public String toString()
     {
         return "H5FD_hdfs_fapl_t (Version: " + this.version + ") {"
-            + "\n    namenode_name: '" + this.namenode_name + "'\n    namenode_port: " + this.namenode_port +
-            "\n    user_name: '" + this.user_name + "'\n    kerberos_ticket_cache: '" +
-            this.kerberos_ticket_cache + "'\n    stream_buffer_size: " + this.stream_buffer_size + "\n}\n";
+            + "\n    namenode_name: '" + this.namenode_name +
+            "'\n    namenode_port: " + this.namenode_port + "\n    user_name: '" + this.user_name +
+            "'\n    kerberos_ticket_cache: '" + this.kerberos_ticket_cache +
+            "'\n    stream_buffer_size: " + this.stream_buffer_size + "\n}\n";
     }
 }

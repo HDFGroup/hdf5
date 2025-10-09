@@ -1076,8 +1076,8 @@ public class TestH5D {
     // Note: Nested VL<VL<Integer>> works (see testH5DVLwrVL), but VL<VL<VL-String>> crashes during H5Treclaim
     // Simple VL strings work (testH5Dvlen_write_read), double-nested VL works (testH5DVLwrVL)
     // This is the most complex VL case with three levels of variable sizing
-    @Ignore(
-        "DISABLED: Triple-nested VL type (VL of VL of VL-String) crashes in H5T__vlen_reclaim during memory cleanup")
+    @Ignore("DISABLED: Triple-nested VL type (VL of VL of VL-String) crashes in H5T__vlen_reclaim during "
+            + "memory cleanup")
     public void
     testH5Dvlen_string_buffer() throws Throwable
     {

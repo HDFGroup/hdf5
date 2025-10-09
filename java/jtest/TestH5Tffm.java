@@ -191,8 +191,8 @@ public class TestH5Tffm {
     }
 
     @Test
-    @Ignore(
-        "FFM initialization issue with H5T_C_S1_g() when run as first test - functionality covered by testH5Tget_strpad")
+    @Ignore("FFM initialization issue with H5T_C_S1_g() when run as first test - functionality covered by "
+            + "testH5Tget_strpad")
     public void
     testH5Tset_strpad()
     {
