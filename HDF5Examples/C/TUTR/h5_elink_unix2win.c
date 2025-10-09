@@ -153,11 +153,11 @@ unix2win_example(void)
     if (H5Lcreate_external("u2w/../u2w/u2w_target.h5", "/", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
         goto error;
 
-    /* If we are not on Windows, assume we are on a Unix-y filesystem and
-     * follow the external link normally.
-     * If we are on Windows, register the unix2win traversal function so
-     * that external links can be traversed.
-     */
+        /* If we are not on Windows, assume we are on a Unix-y filesystem and
+         * follow the external link normally.
+         * If we are on Windows, register the unix2win traversal function so
+         * that external links can be traversed.
+         */
 
 #ifdef H5_HAVE_WIN32_API
     /* Register the elink_unix2win class defined above to replace default

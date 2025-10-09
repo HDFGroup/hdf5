@@ -46,15 +46,15 @@ public class hdf5_h_2 {
 
     static MemoryLayout align(MemoryLayout layout, long align)
     {
-        return switch (layout) {
-            case PaddingLayout p -> p;
-            case ValueLayout v -> v.withByteAlignment(align);
-            case GroupLayout g -> {
-                MemoryLayout[] alignedMembers =
-                    g.memberLayouts().stream().map(m -> align(m, align)).toArray(MemoryLayout[] ::new);
-                yield g instanceof StructLayout ? MemoryLayout.structLayout(alignedMembers)
-                                                : MemoryLayout.unionLayout(alignedMembers);
-            }
+        return switch (layout)
+        {
+        case PaddingLayout p -> p; case ValueLayout v -> v.withByteAlignment(align);
+            case GroupLayout g
+            -> { MemoryLayout[] alignedMembers =
+                     g.memberLayouts().stream().map(m -> align(m, align)).toArray(MemoryLayout[] ::new);
+                 yield g instanceof StructLayout ? MemoryLayout.structLayout(alignedMembers):
+            MemoryLayout.unionLayout(alignedMembers);
+        }
             case SequenceLayout s ->
                 MemoryLayout.sequenceLayout(s.elementCount(), align(s.elementLayout(), align));
         };
