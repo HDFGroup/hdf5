@@ -597,6 +597,12 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    Fixes GitHub issue #5861
 
+### Fixed security issue CVE-2025-2153
+   
+   The message flags field could be modified such that a message that is not sharable according to the share_flags field in H5O_msg_class_t can be treated as sharable. An assert has been added in H5O__msg_write_real to make sure messages that are not sharable can't be modified to shared. Additionally, the check in H5O__chunk_deserialize that catches unsharable messages being marked as sharable has been improved.
+
+   Fixes GitHub issue #5329
+
 ### Fixed security issue CVE-2025-6857
 
    An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.
