@@ -1541,9 +1541,9 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
 
             // Set a data transform expression (multiply by 2)
-            String transform = "x*2";
+            String transform           = "x*2";
             MemorySegment transformSeg = stringToSegment(arena, transform);
-            int result = hdf5_h.H5Pset_data_transform(dxpl, transformSeg);
+            int result                 = hdf5_h.H5Pset_data_transform(dxpl, transformSeg);
             assertTrue("H5Pset_data_transform failed", isSuccess(result));
 
             // Get size of transform expression
@@ -1552,7 +1552,7 @@ public class TestH5Pffm {
 
             // Get transform expression back
             MemorySegment outTransform = arena.allocate(size + 1);
-            long actualSize = hdf5_h.H5Pget_data_transform(dxpl, outTransform, size + 1);
+            long actualSize            = hdf5_h.H5Pget_data_transform(dxpl, outTransform, size + 1);
             assertTrue("H5Pget_data_transform failed", actualSize > 0);
 
             String retrievedTransform = segmentToString(outTransform);
@@ -1573,12 +1573,12 @@ public class TestH5Pffm {
 
             // Set copy object flags (shallow hierarchy copy, copy without attributes)
             int copyFlags = hdf5_h.H5O_COPY_SHALLOW_HIERARCHY_FLAG() | hdf5_h.H5O_COPY_WITHOUT_ATTR_FLAG();
-            int result = hdf5_h.H5Pset_copy_object(ocpypl, copyFlags);
+            int result    = hdf5_h.H5Pset_copy_object(ocpypl, copyFlags);
             assertTrue("H5Pset_copy_object failed", isSuccess(result));
 
             // Get copy object flags back
             MemorySegment outFlags = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_copy_object(ocpypl, outFlags);
+            result                 = hdf5_h.H5Pget_copy_object(ocpypl, outFlags);
             assertTrue("H5Pget_copy_object failed", isSuccess(result));
 
             assertEquals("Copy flags should match", copyFlags, getInt(outFlags));
@@ -1597,7 +1597,7 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
             // Set chunking (required for filters)
-            long[] chunkDims = {10, 20};
+            long[] chunkDims       = {10, 20};
             MemorySegment chunkSeg = allocateLongArray(arena, 2);
             copyToSegment(chunkSeg, chunkDims);
             hdf5_h.H5Pset_chunk(dcpl, 2, chunkSeg);
@@ -1606,17 +1606,17 @@ public class TestH5Pffm {
             hdf5_h.H5Pset_deflate(dcpl, 6);
 
             // Query the deflate filter by ID
-            int filterId = hdf5_h.H5Z_FILTER_DEFLATE();
-            MemorySegment flags = allocateIntArray(arena, 1);
+            int filterId            = hdf5_h.H5Z_FILTER_DEFLATE();
+            MemorySegment flags     = allocateIntArray(arena, 1);
             MemorySegment nElements = allocateLongArray(arena, 1);
             nElements.set(ValueLayout.JAVA_LONG, 0, 8); // Max 8 cd_values
-            MemorySegment cdValues = allocateIntArray(arena, 8);
-            long nameSize = 256;
-            MemorySegment filterName = arena.allocate(nameSize);
+            MemorySegment cdValues     = allocateIntArray(arena, 8);
+            long nameSize              = 256;
+            MemorySegment filterName   = arena.allocate(nameSize);
             MemorySegment filterConfig = allocateIntArray(arena, 1);
 
-            int result = hdf5_h.H5Pget_filter_by_id2(dcpl, filterId, flags, nElements, cdValues,
-                                                     nameSize, filterName, filterConfig);
+            int result = hdf5_h.H5Pget_filter_by_id2(dcpl, filterId, flags, nElements, cdValues, nameSize,
+                                                     filterName, filterConfig);
             assertTrue("H5Pget_filter_by_id2 failed", isSuccess(result));
 
             // Verify deflate was found
@@ -1641,9 +1641,9 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dapl failed", isValidId(dapl));
 
             // Set chunk cache parameters
-            long rdccNslots = 521;  // Number of chunk slots in cache
+            long rdccNslots = 521;     // Number of chunk slots in cache
             long rdccNbytes = 1048576; // Size of chunk cache in bytes (1 MB)
-            double rdccW0 = 0.75;   // Preemption policy
+            double rdccW0   = 0.75;    // Preemption policy
 
             int result = hdf5_h.H5Pset_chunk_cache(dapl, rdccNslots, rdccNbytes, rdccW0);
             assertTrue("H5Pset_chunk_cache failed", isSuccess(result));
@@ -1651,7 +1651,7 @@ public class TestH5Pffm {
             // Get chunk cache parameters back
             MemorySegment outNslots = allocateLongArray(arena, 1);
             MemorySegment outNbytes = allocateLongArray(arena, 1);
-            MemorySegment outW0 = allocateDoubleArray(arena, 1);
+            MemorySegment outW0     = allocateDoubleArray(arena, 1);
 
             result = hdf5_h.H5Pget_chunk_cache(dapl, outNslots, outNbytes, outW0);
             assertTrue("H5Pget_chunk_cache failed", isSuccess(result));
@@ -1674,7 +1674,7 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
             // Set chunking (required for filters)
-            long[] chunkDims = {10, 20};
+            long[] chunkDims       = {10, 20};
             MemorySegment chunkSeg = allocateLongArray(arena, 2);
             copyToSegment(chunkSeg, chunkDims);
             hdf5_h.H5Pset_chunk(dcpl, 2, chunkSeg);
@@ -1683,9 +1683,9 @@ public class TestH5Pffm {
             hdf5_h.H5Pset_deflate(dcpl, 6);
 
             // Modify deflate filter to use compression level 9
-            int filterId = hdf5_h.H5Z_FILTER_DEFLATE();
-            int flags = 0; // Mandatory filter
-            long nElements = 1; // One cd_value (compression level)
+            int filterId           = hdf5_h.H5Z_FILTER_DEFLATE();
+            int flags              = 0; // Mandatory filter
+            long nElements         = 1; // One cd_value (compression level)
             MemorySegment cdValues = allocateIntArray(arena, 1);
             cdValues.set(ValueLayout.JAVA_INT, 0, 9); // Level 9
 
@@ -1693,15 +1693,15 @@ public class TestH5Pffm {
             assertTrue("H5Pmodify_filter failed", isSuccess(result));
 
             // Verify the filter was modified
-            MemorySegment outFlags = allocateIntArray(arena, 1);
+            MemorySegment outFlags     = allocateIntArray(arena, 1);
             MemorySegment outNElements = allocateLongArray(arena, 1);
             outNElements.set(ValueLayout.JAVA_LONG, 0, 8);
             MemorySegment outCdValues = allocateIntArray(arena, 8);
-            MemorySegment outName = arena.allocate(256);
-            MemorySegment outConfig = allocateIntArray(arena, 1);
+            MemorySegment outName     = arena.allocate(256);
+            MemorySegment outConfig   = allocateIntArray(arena, 1);
 
-            result = hdf5_h.H5Pget_filter_by_id2(dcpl, filterId, outFlags, outNElements,
-                                                 outCdValues, 256, outName, outConfig);
+            result = hdf5_h.H5Pget_filter_by_id2(dcpl, filterId, outFlags, outNElements, outCdValues, 256,
+                                                 outName, outConfig);
             assertTrue("H5Pget_filter_by_id2 failed", isSuccess(result));
 
             // Verify compression level is now 9
