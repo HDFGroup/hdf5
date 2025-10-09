@@ -66,6 +66,31 @@ cmake --install .
 
 Both implementations use the same `hdf.hdf5lib.*` package structure for seamless migration.
 
+### FFM Test Coverage
+
+**Status as of October 9, 2025**: 224 FFM tests across 11 modules, all passing ✅
+
+| Module | Tests | Coverage | Status |
+|--------|-------|----------|--------|
+| H5F (Files) | 12 | Files, VFDs | ✅ Active |
+| H5D (Datasets) | 23 | Dataset I/O, chunks | ✅ Active |
+| H5S (Dataspaces) | 41 | Selections, hyperslabs | ✅ Active |
+| H5T (Datatypes) | 26 | Types, conversion | ✅ Active |
+| H5A (Attributes) | 26 | Metadata attributes | ✅ Active |
+| H5P (Properties) | 50 | Property lists | ✅ Active |
+| H5E (Errors) | 9 | Error handling | ✅ Active |
+| H5G (Groups) | 10 | Group operations | ✅ Active |
+| H5I (Identifiers) | 6 | ID management | ✅ Active |
+| H5L (Links) | 11 | Hard/soft/external links | ✅ Active |
+| H5R (References) | 10 | Object/region refs | ✅ Active |
+
+**Run FFM tests**:
+```bash
+cd build && ctest -R "JUnitFFM" -V
+```
+
+**Test location**: `java/jtest/TestH5*ffm.java`
+
 ## Java Examples Maven Integration
 
 ### Java Examples as Maven Artifact

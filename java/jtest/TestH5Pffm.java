@@ -1526,4 +1526,189 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(fcpl);
         }
     }
+
+    // =========================
+    // Additional Property List Tests for C API Coverage
+    // =========================
+
+    @Test
+    public void testH5Pset_data_transform()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Set a data transform expression (multiply by 2)
+            String transform = "x*2";
+            MemorySegment transformSeg = stringToSegment(arena, transform);
+            int result = hdf5_h.H5Pset_data_transform(dxpl, transformSeg);
+            assertTrue("H5Pset_data_transform failed", isSuccess(result));
+
+            // Get size of transform expression
+            long size = hdf5_h.H5Pget_data_transform(dxpl, MemorySegment.NULL, 0);
+            assertTrue("H5Pget_data_transform size query failed", size > 0);
+
+            // Get transform expression back
+            MemorySegment outTransform = arena.allocate(size + 1);
+            long actualSize = hdf5_h.H5Pget_data_transform(dxpl, outTransform, size + 1);
+            assertTrue("H5Pget_data_transform failed", actualSize > 0);
+
+            String retrievedTransform = segmentToString(outTransform);
+            assertEquals("Transform should match", transform, retrievedTransform);
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_copy_object()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long ocpypl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_OBJECT_COPY_ID_g());
+            assertTrue("H5Pcreate ocpypl failed", isValidId(ocpypl));
+
+            // Set copy object flags (shallow hierarchy copy, copy without attributes)
+            int copyFlags = hdf5_h.H5O_COPY_SHALLOW_HIERARCHY_FLAG() | hdf5_h.H5O_COPY_WITHOUT_ATTR_FLAG();
+            int result = hdf5_h.H5Pset_copy_object(ocpypl, copyFlags);
+            assertTrue("H5Pset_copy_object failed", isSuccess(result));
+
+            // Get copy object flags back
+            MemorySegment outFlags = allocateIntArray(arena, 1);
+            result = hdf5_h.H5Pget_copy_object(ocpypl, outFlags);
+            assertTrue("H5Pget_copy_object failed", isSuccess(result));
+
+            assertEquals("Copy flags should match", copyFlags, getInt(outFlags));
+
+            hdf5_h.H5Pclose(ocpypl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_filter_by_id()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Set chunking (required for filters)
+            long[] chunkDims = {10, 20};
+            MemorySegment chunkSeg = allocateLongArray(arena, 2);
+            copyToSegment(chunkSeg, chunkDims);
+            hdf5_h.H5Pset_chunk(dcpl, 2, chunkSeg);
+
+            // Add deflate filter with compression level 6
+            hdf5_h.H5Pset_deflate(dcpl, 6);
+
+            // Query the deflate filter by ID
+            int filterId = hdf5_h.H5Z_FILTER_DEFLATE();
+            MemorySegment flags = allocateIntArray(arena, 1);
+            MemorySegment nElements = allocateLongArray(arena, 1);
+            nElements.set(ValueLayout.JAVA_LONG, 0, 8); // Max 8 cd_values
+            MemorySegment cdValues = allocateIntArray(arena, 8);
+            long nameSize = 256;
+            MemorySegment filterName = arena.allocate(nameSize);
+            MemorySegment filterConfig = allocateIntArray(arena, 1);
+
+            int result = hdf5_h.H5Pget_filter_by_id2(dcpl, filterId, flags, nElements, cdValues,
+                                                     nameSize, filterName, filterConfig);
+            assertTrue("H5Pget_filter_by_id2 failed", isSuccess(result));
+
+            // Verify deflate was found
+            long actualNElements = nElements.get(ValueLayout.JAVA_LONG, 0);
+            assertTrue("Should have cd_values for deflate", actualNElements > 0);
+
+            // First cd_value should be compression level (6)
+            int compressionLevel = cdValues.get(ValueLayout.JAVA_INT, 0);
+            assertEquals("Compression level should be 6", 6, compressionLevel);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_chunk_cache()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_ACCESS_ID_g());
+            assertTrue("H5Pcreate dapl failed", isValidId(dapl));
+
+            // Set chunk cache parameters
+            long rdccNslots = 521;  // Number of chunk slots in cache
+            long rdccNbytes = 1048576; // Size of chunk cache in bytes (1 MB)
+            double rdccW0 = 0.75;   // Preemption policy
+
+            int result = hdf5_h.H5Pset_chunk_cache(dapl, rdccNslots, rdccNbytes, rdccW0);
+            assertTrue("H5Pset_chunk_cache failed", isSuccess(result));
+
+            // Get chunk cache parameters back
+            MemorySegment outNslots = allocateLongArray(arena, 1);
+            MemorySegment outNbytes = allocateLongArray(arena, 1);
+            MemorySegment outW0 = allocateDoubleArray(arena, 1);
+
+            result = hdf5_h.H5Pget_chunk_cache(dapl, outNslots, outNbytes, outW0);
+            assertTrue("H5Pget_chunk_cache failed", isSuccess(result));
+
+            assertEquals("Nslots should match", rdccNslots, getLong(outNslots));
+            assertEquals("Nbytes should match", rdccNbytes, getLong(outNbytes));
+            assertEquals("W0 should match", rdccW0, getDouble(outW0), 0.001);
+
+            hdf5_h.H5Pclose(dapl);
+        }
+    }
+
+    @Test
+    public void testH5Pmodify_filter()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Set chunking (required for filters)
+            long[] chunkDims = {10, 20};
+            MemorySegment chunkSeg = allocateLongArray(arena, 2);
+            copyToSegment(chunkSeg, chunkDims);
+            hdf5_h.H5Pset_chunk(dcpl, 2, chunkSeg);
+
+            // Add deflate filter with compression level 6
+            hdf5_h.H5Pset_deflate(dcpl, 6);
+
+            // Modify deflate filter to use compression level 9
+            int filterId = hdf5_h.H5Z_FILTER_DEFLATE();
+            int flags = 0; // Mandatory filter
+            long nElements = 1; // One cd_value (compression level)
+            MemorySegment cdValues = allocateIntArray(arena, 1);
+            cdValues.set(ValueLayout.JAVA_INT, 0, 9); // Level 9
+
+            int result = hdf5_h.H5Pmodify_filter(dcpl, filterId, flags, nElements, cdValues);
+            assertTrue("H5Pmodify_filter failed", isSuccess(result));
+
+            // Verify the filter was modified
+            MemorySegment outFlags = allocateIntArray(arena, 1);
+            MemorySegment outNElements = allocateLongArray(arena, 1);
+            outNElements.set(ValueLayout.JAVA_LONG, 0, 8);
+            MemorySegment outCdValues = allocateIntArray(arena, 8);
+            MemorySegment outName = arena.allocate(256);
+            MemorySegment outConfig = allocateIntArray(arena, 1);
+
+            result = hdf5_h.H5Pget_filter_by_id2(dcpl, filterId, outFlags, outNElements,
+                                                 outCdValues, 256, outName, outConfig);
+            assertTrue("H5Pget_filter_by_id2 failed", isSuccess(result));
+
+            // Verify compression level is now 9
+            int compressionLevel = outCdValues.get(ValueLayout.JAVA_INT, 0);
+            assertEquals("Compression level should be 9 after modify", 9, compressionLevel);
+
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
 }
