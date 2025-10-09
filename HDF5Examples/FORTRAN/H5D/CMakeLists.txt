@@ -11,6 +11,7 @@ project (HDF5Examples_FORTRAN_H5D Fortran)
 #-----------------------------------------------------------------------------
 set_directory_properties (PROPERTIES INCLUDE_DIRECTORIES
     "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EX_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+)
 
 #-----------------------------------------------------------------------------
 # Define Sources
@@ -274,7 +275,7 @@ if (H5EXAMPLE_BUILD_TESTING)
       if (HDF5_PROVIDES_TOOLS)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}
-            COMMAND "${CMAKE_COMMAND}"g
+            COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
                 -D "TEST_ARGS:STRING=${ARGN};${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
