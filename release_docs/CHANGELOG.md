@@ -654,6 +654,11 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    Fixed GitHub issue [#4952](https://github.com/HDFGroup/hdf5/issues/4952)
 
+### Fixed security issue CVE-2025-2310
+
+   A malformed HDF5 file could have an attribute with a recorded name length of zero.This would lead to an overflow and an invalid memory access. An integrity check
+   has been added to detect this case and safely stop file decoding.
+
 ## Java Library
 
 ### Renamed the Callbacks.java file to H5Callbacks.java
