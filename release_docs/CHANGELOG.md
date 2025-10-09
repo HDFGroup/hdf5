@@ -157,6 +157,10 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added `#ifdef` around the compression function calls. Added including the correct header file with the same `#ifdef`.
 
+### Renamed HDF5Examples build options from `H5EX_<option>` to `H5EXAMPLE_<option>`
+
+Changed the prefix to better distinguish the examples build options from the library options when building the examples along with the library.
+
 ### Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
 
 | Old | New |
@@ -609,6 +613,12 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
    A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
 
    Fixes GitHub issue #5861
+
+### Fixed security issue CVE-2025-2153
+   
+   The message flags field could be modified such that a message that is not sharable according to the share_flags field in H5O_msg_class_t can be treated as sharable. An assert has been added in H5O__msg_write_real to make sure messages that are not sharable can't be modified to shared. Additionally, the check in H5O__chunk_deserialize that catches unsharable messages being marked as sharable has been improved.
+
+   Fixes GitHub issue #5329
 
 ### Fixed security issue CVE-2025-6857
 

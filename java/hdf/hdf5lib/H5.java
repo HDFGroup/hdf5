@@ -288,7 +288,7 @@ public class H5 implements java.io.Serializable {
 
     // Feature variable
     public static final boolean ROS3_ON =
-        org.hdfgroup.javahdf5.hdf5_h_2.H5_HAVE_ROS3_VFD() != H5_VFD_INVALID();
+        org.hdfgroup.javahdf5.hdf5_h.H5FD_ROS3_VALUE() != H5_VFD_INVALID();
 
     /**
      * @ingroup JH5

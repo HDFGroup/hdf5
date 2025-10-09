@@ -45,10 +45,7 @@ Class-Path: ${HDFJAVA_CLASSJARS}
   )
   get_target_property (${EXAMPLE_VARNAME}J_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}J_${example_name} JAR_FILE)
   get_target_property (${EXAMPLE_VARNAME}J_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}J_${example_name} CLASSDIR)
-  if (HDF5_PROVIDES_JNI AND HDF5_Java_FOUND)
-    add_dependencies (${EXAMPLE_VARNAME}J_${example_name} ${H5EXAMPLE_JAVA_LIBRARIES})
-    message (STATUS "HDF5 Example depends lib/jar: ${H5EXAMPLE_JAVA_LIBRARIES} jar: ${HDF5_JAVA_HDF5_LIB_TARGET}")
-  endif ()
+  add_dependencies (${EXAMPLE_VARNAME}J_${example_name} ${H5EXAMPLE_JAVA_LIBRARIES})
 endforeach ()
 
 if (H5EXAMPLE_BUILD_TESTING)
