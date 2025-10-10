@@ -603,6 +603,11 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    Fixes GitHub issue #5329
 
+### Fixed security issue CVE-2025-2925
+   Actual_len + H5C_IMAGE_EXTRA_SPACE, which was used by H5MM_realloc as the size input, could equal 0 due to bad inputs. When H5MM_realloc was called, it freed image, but then could get sent to done before new_image could be assigned to image. Because the pointer for image wasn't null, it was freed again in done, causing a double-free vulnerability. H5C__load_entry() now checks for an image buffer length of 0 before calling H5MM_realloc.
+
+   Fixes Github issue #5383
+
 ### Fixed security issue CVE-2025-6857
 
    An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.
@@ -671,6 +676,11 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
    We've added an #ifdef `FE_INVALID` block around the exception clearing code to correct this.
 
    Fixed GitHub issue [#4952](https://github.com/HDFGroup/hdf5/issues/4952)
+
+### Fixed security issue CVE-2025-2310
+
+   A malformed HDF5 file could have an attribute with a recorded name length of zero.This would lead to an overflow and an invalid memory access. An integrity check
+   has been added to detect this case and safely stop file decoding.
 
 ## Java Library
 
