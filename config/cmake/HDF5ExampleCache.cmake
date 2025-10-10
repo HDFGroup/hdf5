@@ -6,7 +6,10 @@
 
 # Set example options to match main HDF5 build options
 set (H5EXAMPLE_BUILD_TESTING ${BUILD_TESTING} CACHE BOOL "Enable examples testing" FORCE)
+<<<<<<< HEAD
 set (H5EXAMPLE_BUILD_EXAMPLES ${HDF5_BUILD_EXAMPLES} CACHE BOOL "Build Examples" FORCE)
+=======
+>>>>>>> branch 'develop' of https://github.com/byrnHDF/hdf5.git
 set (H5EXAMPLE_BUILD_FORTRAN ${HDF5_BUILD_FORTRAN} CACHE BOOL "Build examples FORTRAN support" FORCE)
 set (H5EXAMPLE_BUILD_JAVA ${HDF5_BUILD_JAVA} CACHE BOOL "Build examples JAVA support" FORCE)
 set (H5EXAMPLE_BUILD_FILTERS ${HDF5_ENABLE_PLUGIN_SUPPORT} CACHE BOOL "Build examples PLUGIN filter support" FORCE)
@@ -117,6 +120,7 @@ else ()
     message (STATUS "HDF5 Provides JNI: ${HDF5_PROVIDES_JNI}")
     # Set up Java library and include variables for examples
     set (HDF5_JAVA_INCLUDE_DIRS ${HDF5_JAVA_JARS} ${HDF5_JAVA_LOGGING_JAR})
+<<<<<<< HEAD
     set (HDF5_Java_FOUND 1)
     if (Java_VERSION_STRING VERSION_LESS "24.0.0" OR HDF5_ENABLE_JNI)
       set (H5EXAMPLE_JAVA_LIBRARY ${HDF5_JAVA_JNI_LIB_TARGET})
@@ -125,8 +129,16 @@ else ()
     endif ()
     message (STATUS "HDF5 Example java lib: ${H5EXAMPLE_JAVA_LIBRARY} jars: ${HDF5_JAVA_INCLUDE_DIRS}")
     set (H5EXAMPLE_JAVA_LIBRARIES ${HDF5_JAVA_HDF5_LIB_TARGET} ${H5EXAMPLE_JAVA_LIBRARY})
+=======
+    set (H5EXAMPLE_JAVA_LIBRARY ${HDF5_JAVA_JNI_LIB_TARGET})
+    set (H5EXAMPLE_JAVA_LIBRARIES ${HDF5_JAVA_HDF5_LIB_TARGET} ${HDF5_JAVA_JNI_LIB_TARGET})
+>>>>>>> branch 'develop' of https://github.com/byrnHDF/hdf5.git
     set (HDF5_LIBRARY_PATH ${CMAKE_TEST_OUTPUT_DIRECTORY})
+<<<<<<< HEAD
     message (STATUS "HDF5 Example java jar: ${HDF5_JAVA_HDF5_LIB_TARGET} path: ${CMAKE_TEST_OUTPUT_DIRECTORY}")
+=======
+    message (STATUS "HDF5 Example java lib: ${H5EXAMPLE_JAVA_LIBRARY} jars: ${HDF5_JAVA_INCLUDE_DIRS}")
+>>>>>>> branch 'develop' of https://github.com/byrnHDF/hdf5.git
   endif ()
   if (HDF5_ENABLE_PLUGIN_SUPPORT)
     set (H5EXAMPLE_HDF5_PLUGIN_PATH "${CMAKE_BINARY_DIR}/plugins")

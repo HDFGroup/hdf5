@@ -301,9 +301,14 @@ macro (HDF5_SUPPORT)
           endif ()
         endif ()
 
+<<<<<<< HEAD
         if (H5EXAMPLE_BUILD_JAVA)
+=======
+        if (H5EXAMPLE_BUILD_JAVA AND HDF5_Java_FOUND)
+>>>>>>> branch 'develop' of https://github.com/byrnHDF/hdf5.git
           if (${HDF5_PROVIDES_JAVA})
             set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH};${HDF5_JAVA_INCLUDE_DIRS}")
+<<<<<<< HEAD
             if (HDF5_PROVIDES_JNI AND HDF5_Java_FOUND)
               get_target_property (libsoname ${HDF5_JAVA_LIBRARY} IMPORTED_SONAME${UPPER_BUILD_TYPE})
               get_filename_component (libname ${libsoname} NAME_WE)
@@ -313,6 +318,15 @@ macro (HDF5_SUPPORT)
               set (H5EXAMPLE_JAVA_LIBRARIES ${HDF5_JAVA_LIBRARY})
             endif ()
             message (STATUS "HDF5 java lib:${H5EXAMPLE_JAVA_LIBRARY} jars:${HDF5_JAVA_INCLUDE_DIRS}}")
+=======
+            get_target_property (libsoname ${HDF5_JAVA_LIBRARY} IMPORTED_SONAME${UPPER_BUILD_TYPE})
+            get_filename_component (libname ${libsoname} NAME_WE)
+            string (REGEX REPLACE "^lib" "" libname ${libname})
+            message (STATUS "HDF5 lib:${HDF5_JAVA_LIBRARY} OR ${libsoname} OR ${libname}")
+            set (H5EXAMPLE_JAVA_LIBRARY ${libname})
+            set (H5EXAMPLE_JAVA_LIBRARIES ${HDF5_JAVA_LIBRARY})
+            message (STATUS "HDF5 lib:${H5EXAMPLE_JAVA_LIBRARY} jars:${HDF5_JAVA_INCLUDE_DIRS}}")
+>>>>>>> branch 'develop' of https://github.com/byrnHDF/hdf5.git
           else ()
             set (H5EXAMPLE_BUILD_JAVA OFF CACHE BOOL "Build Java support" FORCE)
             message (STATUS "HDF5 Java libs not found - disable build of Java examples")

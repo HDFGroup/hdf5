@@ -167,6 +167,11 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, name_len); /* Including null */
+
+    /* Verify that retrieved name length (including null byte) is valid */
+    if (name_len <= 1)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "decoded name length is invalid");
+
     if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, attr->shared->dt_size);
@@ -190,6 +195,7 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
      */
     if (H5_IS_BUFFER_OVERFLOW(p, name_len, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+
     if (NULL == (attr->shared->name = H5MM_strndup((const char *)p, name_len - 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 

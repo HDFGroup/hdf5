@@ -18,9 +18,13 @@ set (CMAKE_JAVA_INCLUDE_PATH ".")
 foreach (CMAKE_JINCLUDE_PATH ${HDF5_JAVA_INCLUDE_DIRS})
   set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_JINCLUDE_PATH}")
 endforeach ()
+<<<<<<< HEAD
 if (Java_VERSION_STRING VERSION_LESS "24.0.0" OR HDF5_PROVIDES_JNI)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${H5EXAMPLE_JAVA_LIBRARY}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 endif ()
+=======
+set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${H5EXAMPLE_JAVA_LIBRARY}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
+>>>>>>> branch 'develop' of https://github.com/byrnHDF/hdf5.git
 
 set (CMAKE_JAVA_CLASSPATH ".")
 foreach (CMAKE_INCLUDE_PATH ${HDF5_JAVA_INCLUDE_DIRS})
