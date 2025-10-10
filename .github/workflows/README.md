@@ -64,6 +64,7 @@ There are a few that only get triggered manually.
     * in release mode and -Werror compiler option
     * with minimum CMake Version 3.18
 - main.yml configure, build, test, and package HDF5 on Ubuntu, macOS, and Windows
+- main-static.yml configure, build, test static only HDF5 on Ubuntu, macOS, and Windows
 - bintest.yml test binary packages created by main.yml
 - main-par.yml configure, build, and test HDF5 with openmpi
 - main-par-spc.yml configure, build, and test HDF5 with HDF5_ENABLE_WARNINGS_AS_ERRORS=ON

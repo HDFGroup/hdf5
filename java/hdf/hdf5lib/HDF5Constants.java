@@ -41,8 +41,6 @@ public class HDF5Constants {
     // /////////////////////////////////////////////////////////////////////////
     // Get the HDF5 constants from the library //
     // /////////////////////////////////////////////////////////////////////////
-    public static final boolean ROS3_ON = org.hdfgroup.javahdf5.hdf5_h.H5FD_ROS3_VALUE() != H5_VFD_INVALID();
-
     /** Special parameters for szip compression */
     public static final int H5_SZIP_MAX_PIXELS_PER_BLOCK = H5_SZIP_MAX_PIXELS_PER_BLOCK();
     /** Special parameters for szip compression */
@@ -644,7 +642,7 @@ public class HDF5Constants {
     /** */
     public static final long H5FD_WINDOWS = H5FD_SEC2_id_g();
     /** */
-    public static final long H5FD_ROS3 = H5_FD_ROS3();
+    public static final long H5FD_ROS3 = H5FD_ROS3_id_g();
     /** */
     public static final long H5FD_HDFS = H5FD_HDFS();
     /** */
@@ -1612,14 +1610,4 @@ public class HDF5Constants {
     public static final int H5Z_NBIT_USER_NPARMS = H5Z_NBIT_USER_NPARMS();
     /** scale offset filter - Number of parameters that users can set */
     public static final int H5Z_SCALEOFFSET_USER_NPARMS = H5Z_SCALEOFFSET_USER_NPARMS();
-
-    private static final long H5_FD_ROS3()
-    {
-        if (ROS3_ON) {
-            return H5FD_ROS3_id_g();
-        }
-        else {
-            return H5_VFD_INVALID();
-        }
-    }
 }

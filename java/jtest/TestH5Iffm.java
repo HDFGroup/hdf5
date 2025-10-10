@@ -18,7 +18,10 @@ import static jtest.FfmTestSupport.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
+import org.hdfgroup.javahdf5.H5I_free_t;
+import org.hdfgroup.javahdf5.H5I_iterate_func_t;
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.hdfgroup.javahdf5.hdf5_h_1;
 import org.hdfgroup.javahdf5.hdf5_h_2;
@@ -166,6 +169,204 @@ public class TestH5Iffm {
             assertTrue("Ref count should be positive", ref_count > 0);
 
             hdf5_h_1.H5Fclose(file_id);
+        }
+    }
+
+    // ============================================================================
+    // User-Defined ID Type Tests (H5Iregister_type2)
+    // ============================================================================
+
+    @Test
+    public void testH5Iregister_type2()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            // Define free function callback (no-op for this test)
+            H5I_free_t.Function freeFunc = (MemorySegment obj, MemorySegment request) -> {
+                // Simple free function that does nothing
+                // In real usage, this would free memory associated with the object
+                return 0; // Success
+            };
+
+            // Allocate callback function pointer
+            MemorySegment freeFuncPtr = H5I_free_t.allocate(freeFunc, arena);
+
+            // Register a new user-defined type
+            int myType = hdf5_h_2.H5Iregister_type2(0, freeFuncPtr);
+            assertTrue("H5Iregister_type2 should succeed", myType >= hdf5_h.H5I_NTYPES());
+
+            // Verify type exists
+            int exists = hdf5_h_2.H5Itype_exists(myType);
+            assertTrue("User type should exist", exists > 0);
+
+            // Get initial member count (should be 0)
+            MemorySegment numMembers = allocateLongArray(arena, 1);
+            int result               = hdf5_h_2.H5Inmembers(myType, numMembers);
+            assertTrue("H5Inmembers should succeed", isSuccess(result));
+            assertEquals("Should have 0 members initially", 0L, getLong(numMembers));
+
+            // Destroy the type
+            result = hdf5_h_2.H5Idestroy_type(myType);
+            assertTrue("H5Idestroy_type should succeed", isSuccess(result));
+
+            // Verify type no longer exists
+            exists = hdf5_h_2.H5Itype_exists(myType);
+            assertEquals("User type should not exist after destroy", 0, exists);
+        }
+    }
+
+    @Test
+    public void testH5Iregister_and_operations()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            // Track whether free function was called
+            MemorySegment freeCalled = allocateIntArray(arena, 1);
+            freeCalled.set(ValueLayout.JAVA_INT, 0, 0);
+
+            // Define free function callback that tracks calls
+            H5I_free_t.Function freeFunc = (MemorySegment obj, MemorySegment request) -> {
+                freeCalled.set(ValueLayout.JAVA_INT, 0, 1);
+                return 0; // Success
+            };
+
+            MemorySegment freeFuncPtr = H5I_free_t.allocate(freeFunc, arena);
+
+            // Register user-defined type
+            int myType = hdf5_h_2.H5Iregister_type2(0, freeFuncPtr);
+            assertTrue("H5Iregister_type2 should succeed", myType >= hdf5_h.H5I_NTYPES());
+
+            // Create a test object (just a simple integer in memory)
+            MemorySegment testObj = allocateIntArray(arena, 1);
+            testObj.set(ValueLayout.JAVA_INT, 0, 42);
+
+            // Register the object with the user type
+            long objId = hdf5_h_2.H5Iregister(myType, testObj);
+            assertTrue("H5Iregister should succeed", isValidId(objId));
+
+            // Verify ID is valid
+            int valid = hdf5_h_2.H5Iis_valid(objId);
+            assertTrue("Object ID should be valid", valid > 0);
+
+            // Verify ID type matches
+            int idType = hdf5_h_2.H5Iget_type(objId);
+            assertEquals("ID type should match registered type", myType, idType);
+
+            // Check member count (should be 1 now)
+            MemorySegment numMembers = allocateLongArray(arena, 1);
+            int result               = hdf5_h_2.H5Inmembers(myType, numMembers);
+            assertTrue("H5Inmembers should succeed", isSuccess(result));
+            assertEquals("Should have 1 member", 1L, getLong(numMembers));
+
+            // Increment reference count
+            int refCount = hdf5_h_2.H5Iinc_ref(objId);
+            assertEquals("Ref count should be 2", 2, refCount);
+
+            // Decrement reference count
+            refCount = hdf5_h_2.H5Idec_ref(objId);
+            assertEquals("Ref count should be 1", 1, refCount);
+
+            // Clear type (should call free function)
+            result = hdf5_h_2.H5Iclear_type(myType, false);
+            assertTrue("H5Iclear_type should succeed", isSuccess(result));
+
+            // Verify free function was called
+            assertEquals("Free function should have been called", 1, getInt(freeCalled));
+
+            // Verify member count is now 0
+            result = hdf5_h_2.H5Inmembers(myType, numMembers);
+            assertTrue("H5Inmembers should succeed", isSuccess(result));
+            assertEquals("Should have 0 members after clear", 0L, getLong(numMembers));
+
+            // Destroy type
+            result = hdf5_h_2.H5Idestroy_type(myType);
+            assertTrue("H5Idestroy_type should succeed", isSuccess(result));
+        }
+    }
+
+    @Test
+    public void testH5Iiterate_user_type()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            // Free function
+            H5I_free_t.Function freeFunc = (MemorySegment obj, MemorySegment request) -> 0;
+            MemorySegment freeFuncPtr    = H5I_free_t.allocate(freeFunc, arena);
+
+            // Register user type
+            int myType = hdf5_h_2.H5Iregister_type2(0, freeFuncPtr);
+            assertTrue("H5Iregister_type2 should succeed", myType >= hdf5_h.H5I_NTYPES());
+
+            // Register 3 objects
+            MemorySegment obj1 = allocateIntArray(arena, 1);
+            MemorySegment obj2 = allocateIntArray(arena, 1);
+            MemorySegment obj3 = allocateIntArray(arena, 1);
+            obj1.set(ValueLayout.JAVA_INT, 0, 10);
+            obj2.set(ValueLayout.JAVA_INT, 0, 20);
+            obj3.set(ValueLayout.JAVA_INT, 0, 30);
+
+            long id1 = hdf5_h_2.H5Iregister(myType, obj1);
+            long id2 = hdf5_h_2.H5Iregister(myType, obj2);
+            long id3 = hdf5_h_2.H5Iregister(myType, obj3);
+            assertTrue("All IDs should be valid", isValidId(id1) && isValidId(id2) && isValidId(id3));
+
+            // Iterate and count IDs
+            MemorySegment counter = allocateIntArray(arena, 1);
+            counter.set(ValueLayout.JAVA_INT, 0, 0);
+
+            H5I_iterate_func_t.Function callback = (long id, MemorySegment udata) -> {
+                int current = udata.get(ValueLayout.JAVA_INT, 0);
+                udata.set(ValueLayout.JAVA_INT, 0, current + 1);
+                return 0; // Continue
+            };
+
+            MemorySegment callbackPtr = H5I_iterate_func_t.allocate(callback, arena);
+            int result                = hdf5_h_2.H5Iiterate(myType, callbackPtr, counter);
+            assertTrue("H5Iiterate should succeed", isSuccess(result));
+
+            // Should have iterated over all 3 objects
+            assertEquals("Should iterate over 3 IDs", 3, getInt(counter));
+
+            // Cleanup - clear type first to free all IDs
+            result = hdf5_h_2.H5Iclear_type(myType, false);
+            assertTrue("H5Iclear_type should succeed", isSuccess(result));
+            result = hdf5_h_2.H5Idestroy_type(myType);
+            assertTrue("H5Idestroy_type should succeed", isSuccess(result));
+        }
+    }
+
+    @Test
+    public void testH5Itype_ref_counting()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            // Free function
+            H5I_free_t.Function freeFunc = (MemorySegment obj, MemorySegment request) -> 0;
+            MemorySegment freeFuncPtr    = H5I_free_t.allocate(freeFunc, arena);
+
+            // Register user type
+            int myType = hdf5_h_2.H5Iregister_type2(0, freeFuncPtr);
+            assertTrue("H5Iregister_type2 should succeed", myType >= hdf5_h.H5I_NTYPES());
+
+            // Get initial type ref count
+            int initialRef = hdf5_h_2.H5Iget_type_ref(myType);
+            assertTrue("Initial ref count should be positive", initialRef > 0);
+
+            // Increment type ref count
+            int newRef = hdf5_h_2.H5Iinc_type_ref(myType);
+            assertEquals("Ref count should increase by 1", initialRef + 1, newRef);
+
+            // Verify with get
+            int currentRef = hdf5_h_2.H5Iget_type_ref(myType);
+            assertEquals("Ref count should match", newRef, currentRef);
+
+            // Decrement type ref count
+            newRef = hdf5_h_2.H5Idec_type_ref(myType);
+            assertEquals("Ref count should decrease by 1", initialRef, newRef);
+
+            // Verify type still exists
+            int exists = hdf5_h_2.H5Itype_exists(myType);
+            assertTrue("Type should still exist", exists > 0);
+
+            // Final cleanup
+            int result = hdf5_h_2.H5Idestroy_type(myType);
+            assertTrue("H5Idestroy_type should succeed", isSuccess(result));
         }
     }
 }

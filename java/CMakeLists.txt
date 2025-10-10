@@ -24,7 +24,7 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_INCLUDE_DIR
 set (CMAKE_JAVA_INCLUDE_PATH "")
 
 if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
-  if (HDF5_ENABLE_JNI)
+  if (HDF5_ENABLE_JNI OR NOT HDF5_ENABLE_ROS3_VFD)
     set (HDF5_JAVA_USE_FFM FALSE)
     message (STATUS "Building HDF5 Java with JNI implementation (explicitly requested via HDF5_ENABLE_JNI)")
   else ()

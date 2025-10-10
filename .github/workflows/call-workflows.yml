@@ -50,6 +50,15 @@ jobs:
             thread_safety: ""
             build_mode: "Debug"
 
+    call-static-debug-concurrent-cmake:
+        name: "Debug Static Concurrency Workflows"
+        uses: ./.github/workflows/main-static.yml
+        with:
+            cmake_version: "latest"
+            concurrent: "CC"
+            thread_safety: ""
+            build_mode: "Debug"
+
     call-release-concurrent-cmake:
         name: "Release Concurrency Workflows"
         uses: ./.github/workflows/main.yml
@@ -62,6 +71,15 @@ jobs:
     call-debug-thread-cmake:
         name: "Debug Thread-Safety Workflows"
         uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: "TS"
+            build_mode: "Debug"
+
+    call-static-debug-thread-cmake:
+        name: "Debug Static Thread-Safety Workflows"
+        uses: ./.github/workflows/main-static.yml
         with:
             cmake_version: "latest"
             concurrent: ""
@@ -87,6 +105,15 @@ jobs:
             build_mode: "Debug"
             force_java_implementation: "jni"
 
+    call-debug-static-cmake:
+        name: "Debug Static Workflows"
+        uses: ./.github/workflows/main-static.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Debug"
+
     call-release-cmake:
         name: "Release Workflows"
         uses: ./.github/workflows/main.yml
@@ -98,15 +125,14 @@ jobs:
             save_binary: "std"
             force_java_implementation: "jni"
 
-    call-release-cmake4:
-        name: "CMake 4 Release Workflows"
-        uses: ./.github/workflows/main.yml
+    call-release-static:
+        name: "Release Static Workflows"
+        uses: ./.github/workflows/main-static.yml
         with:
             cmake_version: "latest"
             concurrent: ""
             thread_safety: ""
             build_mode: "Release"
-            force_java_implementation: "jni"
 
     call-release-cmakeMin:
         name: "Minimum Release Workflows"
@@ -158,15 +184,6 @@ jobs:
             concurrent: ""
             thread_safety: ""
             build_mode: "Debug"
-
-    call-arm64-cmake4:
-        name: "CMake 4 arm64 Workflows"
-        uses: ./.github/workflows/arm-main.yml
-        with:
-            cmake_version: "latest"
-            concurrent: ""
-            thread_safety: ""
-            build_mode: "Release"
 
     call-maven-staging:
         name: "Maven Staging Tests"
