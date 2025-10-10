@@ -181,7 +181,8 @@ public class TestH5Iffm {
     {
         try (Arena arena = Arena.ofConfined()) {
             // Define free function callback (no-op for this test)
-            H5I_free_t.Function freeFunc = (MemorySegment obj, MemorySegment request) -> {
+            H5I_free_t.Function freeFunc = (MemorySegment obj, MemorySegment request) ->
+            {
                 // Simple free function that does nothing
                 // In real usage, this would free memory associated with the object
                 return 0; // Success
@@ -223,7 +224,8 @@ public class TestH5Iffm {
             freeCalled.set(ValueLayout.JAVA_INT, 0, 0);
 
             // Define free function callback that tracks calls
-            H5I_free_t.Function freeFunc = (MemorySegment obj, MemorySegment request) -> {
+            H5I_free_t.Function freeFunc = (MemorySegment obj, MemorySegment request) ->
+            {
                 freeCalled.set(ValueLayout.JAVA_INT, 0, 1);
                 return 0; // Success
             };
@@ -311,7 +313,8 @@ public class TestH5Iffm {
             MemorySegment counter = allocateIntArray(arena, 1);
             counter.set(ValueLayout.JAVA_INT, 0, 0);
 
-            H5I_iterate_func_t.Function callback = (long id, MemorySegment udata) -> {
+            H5I_iterate_func_t.Function callback = (long id, MemorySegment udata) ->
+            {
                 int current = udata.get(ValueLayout.JAVA_INT, 0);
                 udata.set(ValueLayout.JAVA_INT, 0, current + 1);
                 return 0; // Continue

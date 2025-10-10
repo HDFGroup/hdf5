@@ -17346,27 +17346,26 @@ public class H5 implements java.io.Serializable {
         }
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment config_segment =
-                arena.allocate(org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.sizeof());
+            MemorySegment config_segment = arena.allocate(org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.sizeof());
             org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.version(config_segment, config_ptr.version);
             org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.authenticate(config_segment, config_ptr.authenticate);
             MemorySegment aws_region_segment = arena.allocate(
                 ValueLayout.JAVA_BYTE, org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.aws_region$dimensions()[0]);
             aws_region_segment.fill((byte)0);
-            MemorySegment.copy(config_ptr.aws_region.getBytes(), 0, aws_region_segment,
-                               ValueLayout.JAVA_BYTE, 0L, config_ptr.aws_region.length());
+            MemorySegment.copy(config_ptr.aws_region.getBytes(), 0, aws_region_segment, ValueLayout.JAVA_BYTE,
+                               0L, config_ptr.aws_region.length());
             org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.aws_region(config_segment, aws_region_segment);
             MemorySegment secret_id_segment = arena.allocate(
                 ValueLayout.JAVA_BYTE, org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_id$dimensions()[0]);
             secret_id_segment.fill((byte)0);
-            MemorySegment.copy(config_ptr.secret_id.getBytes(), 0, secret_id_segment,
-                               ValueLayout.JAVA_BYTE, 0L, config_ptr.secret_id.length());
+            MemorySegment.copy(config_ptr.secret_id.getBytes(), 0, secret_id_segment, ValueLayout.JAVA_BYTE,
+                               0L, config_ptr.secret_id.length());
             org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_id(config_segment, secret_id_segment);
             MemorySegment secret_key_segment = arena.allocate(
                 ValueLayout.JAVA_BYTE, org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_key$dimensions()[0]);
             secret_key_segment.fill((byte)0);
-            MemorySegment.copy(config_ptr.secret_key.getBytes(), 0, secret_key_segment,
-                               ValueLayout.JAVA_BYTE, 0L, config_ptr.secret_key.length());
+            MemorySegment.copy(config_ptr.secret_key.getBytes(), 0, secret_key_segment, ValueLayout.JAVA_BYTE,
+                               0L, config_ptr.secret_key.length());
             org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_key(config_segment, secret_key_segment);
 
             if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pset_fapl_ros3(fapl_id, config_segment)) < 0)
@@ -17389,12 +17388,12 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      *
      **/
-    public static hdf.hdf5lib.structs.H5FD_ros3_fapl_t H5Pget_fapl_ros3(long fapl_id) throws HDF5LibraryException, NullPointerException
+    public static hdf.hdf5lib.structs.H5FD_ros3_fapl_t H5Pget_fapl_ros3(long fapl_id)
+        throws HDF5LibraryException, NullPointerException
     {
         hdf.hdf5lib.structs.H5FD_ros3_fapl_t config = null;
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment config_segment =
-                arena.allocate(org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.sizeof());
+            MemorySegment config_segment = arena.allocate(org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.sizeof());
 
             if (org.hdfgroup.javahdf5.hdf5_h.H5Pget_fapl_ros3(fapl_id, config_segment) < 0)
                 h5libraryError();
