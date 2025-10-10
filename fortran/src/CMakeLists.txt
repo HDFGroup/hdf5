@@ -500,6 +500,7 @@ set (mod_export_files
     h5r.mod
     h5s.mod
     h5t.mod
+    h5vfd.mod
     h5vl.mod
     h5z.mod
     h5_gen.mod
