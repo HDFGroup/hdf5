@@ -228,7 +228,7 @@ gen_h5dump_files(void)
 
     gent_compound_intsizes();
     gent_compound_attr_intsizes();
-    
+
     nerrors += (gent_nested_compound_dt() < 0 ? 1 : 0);
     nerrors += (gent_intscalars() < 0 ? 1 : 0);
     gent_attr_intscalars();
