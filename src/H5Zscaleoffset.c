@@ -1206,6 +1206,9 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         unsigned           minval_size  = 0;
 
         minbits = 0;
+        if (*buf_size < 4)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
         for (i = 0; i < 4; i++) {
             minbits_mask = ((unsigned char *)*buf)[i];
             minbits_mask <<= i * 8;
