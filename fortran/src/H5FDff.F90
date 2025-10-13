@@ -1,6 +1,6 @@
 !> @defgroup FH5VFD Fortran VFD (H5VFD) Interface
 !!
-!! @see H5FD, C-API
+!! @see H5VFD, C-API
 !!
 
 !> @ingroup FH5VFD
@@ -38,7 +38,7 @@
 
 #include <H5config_f.inc>
 
-MODULE H5VFD
+MODULE H5FD
 
   USE H5GLOBAL
   USE H5fortkit
@@ -280,4 +280,4 @@ END SUBROUTINE h5fdsubfiling_get_file_mapping_f
 
 #endif
 
-END MODULE H5VFD
+END MODULE H5FD

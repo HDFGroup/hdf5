@@ -15,7 +15,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-H5_CREATE_VFD_DIR()
+H5_CREATE_VFD_DIR ()
 
 set (H5REPACK_VFD_subfiling_SKIP_TESTS
   h5repacktest
@@ -70,7 +70,6 @@ macro (ADD_VFD_TEST vfdname resultcode)
       add_test (
           NAME H5REPACK_VFD-${vfdname}-h5repacktest
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VFD:STRING=${vfdname}"
@@ -80,6 +79,7 @@ macro (ADD_VFD_TEST vfdname resultcode)
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (H5REPACK_VFD-${vfdname}-h5repacktest PROPERTIES
+          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           DEPENDS H5REPACK_VFD-${vfdname}-h5repacktest-clear-objects
           TIMEOUT ${CTEST_SHORT_TIMEOUT}
       )

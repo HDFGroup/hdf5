@@ -72,15 +72,15 @@ file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST")
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST/testfiles")
 
 foreach (ddl_file ${HDF5_REFERENCE_FILES})
-  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
+  HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/expected/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
 endforeach ()
 foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
 endforeach ()
 foreach (lists3file ${H5STAT_S3PROXY_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${lists3file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${lists3file}" "h5stat_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${lists3file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${lists3file}" "h5stat_files")
 endforeach ()
-add_custom_target(h5stat_files ALL COMMENT "Copying files needed by h5stat tests" DEPENDS ${h5stat_files_list})
+add_custom_target (h5stat_files ALL COMMENT "Copying files needed by h5stat tests" DEPENDS ${h5stat_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -91,7 +91,7 @@ add_custom_target(h5stat_files ALL COMMENT "Copying files needed by h5stat tests
 macro (ADD_H5_TEST resultfile resultcode)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
+    add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -99,7 +99,6 @@ macro (ADD_H5_TEST resultfile resultcode)
     add_test (
         NAME H5STAT-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
             -D "TEST_ARGS=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -110,6 +109,7 @@ macro (ADD_H5_TEST resultfile resultcode)
     )
   endif ()
   set_tests_properties (H5STAT-${resultfile} PROPERTIES
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   )
   if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -120,7 +120,7 @@ endmacro ()
 macro (ADD_H5_ERR_TEST resultfile resultcode errtext)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
+    add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -128,7 +128,6 @@ macro (ADD_H5_ERR_TEST resultfile resultcode errtext)
     add_test (
         NAME H5STAT-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -141,6 +140,7 @@ macro (ADD_H5_ERR_TEST resultfile resultcode errtext)
     )
   endif ()
   set_tests_properties (H5STAT-${resultfile} PROPERTIES
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   )
   if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -151,7 +151,7 @@ endmacro ()
 macro (ADD_H5_CMP_TEST resultfile resultcode errtext)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
+    add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -159,7 +159,6 @@ macro (ADD_H5_CMP_TEST resultfile resultcode errtext)
     add_test (
         NAME H5STAT-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -172,6 +171,7 @@ macro (ADD_H5_CMP_TEST resultfile resultcode errtext)
     )
   endif ()
   set_tests_properties (H5STAT-${resultfile} PROPERTIES
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   )
   if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -182,7 +182,7 @@ endmacro ()
 macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
+    add_test (NAME H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -190,7 +190,6 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
     add_test (
         NAME H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
             -D "TEST_ARGS=--enable-error-stack=2;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
@@ -204,7 +203,7 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   endif ()
   set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
       FIXTURES_REQUIRED h5stat_s3_proxy
-      ENVIRONMENT "${h5stat_s3tests_env}"
+      ENVIRONMENT "${h5stat_s3tests_env};${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
   )
   if ("H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
