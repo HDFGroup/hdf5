@@ -44,7 +44,7 @@ set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
     callbacks/H5P_iterate_t.java
 )
 
-set (HDF5_JAVADOC_HDF_HDF5_CALLBACKS_SOURCES
+set (HDF5_JAVADOC_HDFH5I_INVALID_HID_HDF5_CALLBACKS_SOURCES
     ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
     callbacks/package-info.java
 )
@@ -103,7 +103,6 @@ set (HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES
 )
 
 set (HDF5_JAVA_HDF_HDF5_SOURCES
-    HDF5Features.java
     HDFArray.java
     HDF5Constants.java
     HDFNativeData.java
