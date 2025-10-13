@@ -77,10 +77,6 @@ if (HDF5_JAVA_USE_FFM)
   endforeach ()
   add_custom_target(HDF5_JSRC_files ALL COMMENT "Copying files needed by HDF5_JSRC_files tests" DEPENDS ${HDF5_JSRC_files_list})
   add_subdirectory (jsrc)
-  configure_file (
-    ${PROJECT_SOURCE_DIR}/hdf/hdf5lib/HDF5Features.java.in
-    ${PROJECT_SOURCE_DIR}/hdf/hdf5lib/HDF5Features.java ESCAPE_QUOTES @ONLY
-  )
   add_subdirectory (hdf)
   if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
     add_subdirectory (jtest)
