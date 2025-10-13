@@ -17328,7 +17328,7 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
-     * @param fapl_conf
+     * @param config_ptr
      *            IN: the properties of the ros3 driver
      *
      * @return a non-negative value if successful; otherwise returns a negative value.

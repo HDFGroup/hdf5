@@ -66,23 +66,54 @@ cmake --install .
 
 Both implementations use the same `hdf.hdf5lib.*` package structure for seamless migration.
 
+### FFM Feature Variants
+
+**As of October 13, 2025**: FFM bindings support optional ROS3 (S3 cloud storage) VFD feature selection:
+
+**Directory Structure:**
+```
+java/jsrc/
+├── features/
+│   ├── plain/          # Standard FFM bindings (no ROS3 VFD support)
+│   │   ├── hdf5_h.java
+│   │   ├── hdf5_h_1.java
+│   │   └── hdf5_h_2.java
+│   └── ros3/           # FFM bindings with ROS3 VFD support (+9 ROS3 APIs)
+│       ├── hdf5_h.java
+│       ├── hdf5_h_1.java
+│       └── hdf5_h_2.java
+└── org/hdfgroup/javahdf5/  # Common FFM structs/types (both variants)
+```
+
+**Build Selection:**
+- CMake automatically selects the appropriate variant based on `HDF5_ENABLE_ROS3_VFD`
+- Maven artifacts will be built with the corresponding feature set
+- Tests are compatible with both variants (use common API surface)
+
+**Feature Comparison:**
+- **Plain**: ~82,000 lines, standard HDF5 VFD support
+- **ROS3**: ~83,000 lines, includes H5FD_ros3_* APIs for S3 cloud storage
+
 ### FFM Test Coverage
 
-**Status as of October 9, 2025**: 233 FFM tests across 11 modules, all passing ✅
+**Status as of October 13, 2025**: 254 FFM tests (253 active, 1 ignored) across 12 modules, all active tests passing ✅
+
+**Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested and complete.
 
 | Module | Tests | Coverage | Status |
 |--------|-------|----------|--------|
 | H5F (Files) | 12 | Files, VFDs | ✅ Active |
 | H5D (Datasets) | 23 | Dataset I/O, chunks | ✅ Active |
 | H5S (Dataspaces) | 41 | Selections, hyperslabs | ✅ Active |
-| H5T (Datatypes) | 26 | Types, conversion | ✅ Active |
+| H5T (Datatypes) | 27 | Types, conversion | ✅ Active (1 ignored) |
 | H5A (Attributes) | 26 | Metadata attributes | ✅ Active |
-| H5P (Properties) | 55 | Property lists (expanded) | ✅ Active |
+| H5P (Properties) | 55 | Property lists | ✅ Active |
 | H5E (Errors) | 9 | Error handling | ✅ Active |
 | H5G (Groups) | 10 | Group operations | ✅ Active |
-| H5I (Identifiers) | 10 | ID mgmt + user-defined types | ✅ Active |
+| H5I (Identifiers) | 10 | ID management | ✅ Active |
 | H5L (Links) | 11 | Hard/soft/external links | ✅ Active |
 | H5R (References) | 10 | Object/region refs | ✅ Active |
+| H5O (Objects) | 20 | Object operations | ✅ Active |
 
 **Run FFM tests**:
 ```bash
