@@ -13,6 +13,7 @@
 package hdf.hdf5lib;
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+
 import java.lang.foreign.MemorySegment;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -1607,6 +1608,4 @@ public class HDF5Constants {
     public static final int H5Z_NBIT_USER_NPARMS = H5Z_NBIT_USER_NPARMS();
     /** scale offset filter - Number of parameters that users can set */
     public static final int H5Z_SCALEOFFSET_USER_NPARMS = H5Z_SCALEOFFSET_USER_NPARMS();
-
-    
 }

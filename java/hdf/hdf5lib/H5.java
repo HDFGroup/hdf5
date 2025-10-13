@@ -13,6 +13,7 @@
 package hdf.hdf5lib;
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+
 import java.io.File;
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
@@ -17343,8 +17344,7 @@ public class H5 implements java.io.Serializable {
         if (config_ptr == null) {
             throw new NullPointerException("config_ptr is null");
         }
-        throw new HDF5LibraryException(
-            "H5Pset_fapl_ros3 not implemented");
+        throw new HDF5LibraryException("H5Pset_fapl_ros3 not implemented");
         return retVal;
     }
 
@@ -17366,8 +17366,7 @@ public class H5 implements java.io.Serializable {
         throws HDF5LibraryException, NullPointerException
     {
         hdf.hdf5lib.structs.H5FD_ros3_fapl_t config = null;
-        throw new HDF5LibraryException(
-            "H5Pget_fapl_ros3 not implemented");
+        throw new HDF5LibraryException("H5Pget_fapl_ros3 not implemented");
         return config;
     }
 
