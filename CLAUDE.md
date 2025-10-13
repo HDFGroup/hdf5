@@ -96,24 +96,24 @@ java/jsrc/
 
 ### FFM Test Coverage
 
-**Status as of October 13, 2025**: 254 FFM tests (253 active, 1 ignored) across 12 modules, all active tests passing ✅
+**Status as of October 13, 2025**: 273 FFM tests (272 active, 1 ignored) across 12 modules, all active tests passing ✅
 
 **Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested and complete.
 
 | Module | Tests | Coverage | Status |
 |--------|-------|----------|--------|
-| H5F (Files) | 12 | Files, VFDs | ✅ Active |
-| H5D (Datasets) | 23 | Dataset I/O, chunks | ✅ Active |
+| H5P (Properties) | 66 | Property lists, VFDs | ✅ Active |
 | H5S (Dataspaces) | 41 | Selections, hyperslabs | ✅ Active |
 | H5T (Datatypes) | 27 | Types, conversion | ✅ Active (1 ignored) |
 | H5A (Attributes) | 26 | Metadata attributes | ✅ Active |
-| H5P (Properties) | 55 | Property lists | ✅ Active |
-| H5E (Errors) | 9 | Error handling | ✅ Active |
+| H5D (Datasets) | 23 | Dataset I/O, chunks | ✅ Active |
+| H5O (Objects) | 20 | Object operations | ✅ Active |
+| H5F (Files) | 20 | Files, VFDs, metadata cache | ✅ Active |
+| H5L (Links) | 11 | Hard/soft/external links | ✅ Active |
 | H5G (Groups) | 10 | Group operations | ✅ Active |
 | H5I (Identifiers) | 10 | ID management | ✅ Active |
-| H5L (Links) | 11 | Hard/soft/external links | ✅ Active |
 | H5R (References) | 10 | Object/region refs | ✅ Active |
-| H5O (Objects) | 20 | Object operations | ✅ Active |
+| H5E (Errors) | 9 | Error handling | ✅ Active |
 
 **Run FFM tests**:
 ```bash

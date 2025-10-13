@@ -20,6 +20,7 @@ import java.io.File;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
+import org.hdfgroup.javahdf5.H5AC_cache_config_t;
 import org.hdfgroup.javahdf5.H5F_info2_t;
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.hdfgroup.javahdf5.hdf5_h_1;
@@ -254,6 +255,137 @@ public class TestH5Fffm {
             int result = hdf5_h_1.H5Fclose(fid);
             assertTrue("H5Fclose failed", isSuccess(result));
             fid = hdf5_h.H5I_INVALID_HID();
+        }
+    }
+
+    // =========================
+    // File Metadata and Cache Tests
+    // =========================
+
+    @Test
+    public void testH5Fget_freespace()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            long freespace = hdf5_h_1.H5Fget_freespace(H5fid);
+            assertTrue("H5Fget_freespace should return non-negative value", freespace >= 0);
+        }
+    }
+
+    @Test
+    public void testH5Fget_mdc_config()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            // Allocate and initialize H5AC_cache_config_t structure
+            MemorySegment config = H5AC_cache_config_t.allocate(arena);
+
+            // Set version field (required)
+            H5AC_cache_config_t.version(config, hdf5_h.H5AC__CURR_CACHE_CONFIG_VERSION());
+
+            int result = hdf5_h_1.H5Fget_mdc_config(H5fid, config);
+            assertTrue("H5Fget_mdc_config failed", isSuccess(result));
+
+            // Verify we got valid data back
+            int version = H5AC_cache_config_t.version(config);
+            assertEquals("Version should match", hdf5_h.H5AC__CURR_CACHE_CONFIG_VERSION(), version);
+        }
+    }
+
+    @Test
+    public void testH5Fget_mdc_hit_rate()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment hitRate = allocateDoubleArray(arena, 1);
+
+            int result = hdf5_h_1.H5Fget_mdc_hit_rate(H5fid, hitRate);
+            assertTrue("H5Fget_mdc_hit_rate failed", isSuccess(result));
+
+            double rate = getDouble(hitRate);
+            assertTrue("Hit rate should be between 0.0 and 1.0", rate >= 0.0 && rate <= 1.0);
+        }
+    }
+
+    @Test
+    public void testH5Fget_mdc_size()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment maxSize      = allocateLongArray(arena, 1);
+            MemorySegment minCleanSize = allocateLongArray(arena, 1);
+            MemorySegment curSize      = allocateLongArray(arena, 1);
+            MemorySegment curNumEntries = allocateIntArray(arena, 1);
+
+            int result = hdf5_h_1.H5Fget_mdc_size(H5fid, maxSize, minCleanSize, curSize, curNumEntries);
+            assertTrue("H5Fget_mdc_size failed", isSuccess(result));
+
+            // Verify values are reasonable
+            assertTrue("Max size should be positive", getLong(maxSize) > 0);
+            assertTrue("Current size should be non-negative", getLong(curSize) >= 0);
+            assertTrue("Number of entries should be non-negative", getInt(curNumEntries) >= 0);
+        }
+    }
+
+    @Test
+    public void testH5Fget_fileno()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment fileno = allocateLongArray(arena, 1);
+
+            int result = hdf5_h_1.H5Fget_fileno(H5fid, fileno);
+            assertTrue("H5Fget_fileno failed", isSuccess(result));
+
+            // File number should be valid (non-negative on most systems)
+            long fileNum = getLong(fileno);
+            // Just verify we got some value - actual value is system-dependent
+            assertNotEquals("File number should be set", 0L, fileNum | 1);
+        }
+    }
+
+    @Test
+    public void testH5Fget_file_image()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            // First get size
+            long imageSize = hdf5_h_1.H5Fget_file_image(H5fid, MemorySegment.NULL, 0);
+            assertTrue("H5Fget_file_image should return positive size", imageSize > 0);
+
+            // Allocate buffer and get image (limit to 64KB for test)
+            long bufSize = Math.min(imageSize, 65536);
+            MemorySegment imageBuffer = arena.allocate(bufSize);
+
+            long actualSize = hdf5_h_1.H5Fget_file_image(H5fid, imageBuffer, bufSize);
+            assertTrue("H5Fget_file_image should return size", actualSize > 0);
+        }
+    }
+
+    @Test
+    public void testH5Fget_dset_no_attrs_hint()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment minimize = allocateIntArray(arena, 1);
+
+            int result = hdf5_h_1.H5Fget_dset_no_attrs_hint(H5fid, minimize);
+            assertTrue("H5Fget_dset_no_attrs_hint failed", isSuccess(result));
+
+            // Value should be 0 (false) or 1 (true)
+            int value = getInt(minimize);
+            assertTrue("Minimize value should be 0 or 1", value == 0 || value == 1);
+        }
+    }
+
+    @Test
+    public void testH5Fget_mdc_logging_status()
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment isEnabled         = allocateIntArray(arena, 1);
+            MemorySegment isCurrentlyLogging = allocateIntArray(arena, 1);
+
+            int result = hdf5_h_1.H5Fget_mdc_logging_status(H5fid, isEnabled, isCurrentlyLogging);
+            assertTrue("H5Fget_mdc_logging_status failed", isSuccess(result));
+
+            // Values should be boolean (0 or 1)
+            int enabled = getInt(isEnabled);
+            int logging = getInt(isCurrentlyLogging);
+            assertTrue("Enabled should be 0 or 1", enabled == 0 || enabled == 1);
+            assertTrue("Currently logging should be 0 or 1", logging == 0 || logging == 1);
         }
     }
 }

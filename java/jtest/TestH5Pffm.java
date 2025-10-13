@@ -1711,4 +1711,321 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(dcpl);
         }
     }
+
+    // =========================
+    // VFD Configuration Tests (Batch 1)
+    // =========================
+
+    @Test
+    public void testH5Pset_fapl_core()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set core (memory) VFD with 1MB increment and backing store enabled
+            long increment      = 1024 * 1024; // 1MB
+            boolean backingStore = true;        // Enable backing store
+            int result          = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
+            assertTrue("H5Pset_fapl_core failed", isSuccess(result));
+
+            // Get settings back
+            MemorySegment outIncrement     = allocateLongArray(arena, 1);
+            MemorySegment outBackingStore = allocateIntArray(arena, 1);
+            result = hdf5_h.H5Pget_fapl_core(fapl, outIncrement, outBackingStore);
+            assertTrue("H5Pget_fapl_core failed", isSuccess(result));
+
+            assertEquals("Increment should match", increment, getLong(outIncrement));
+            // Boolean is returned as int: 0 = false, non-zero = true
+            boolean retrievedBackingStore = getInt(outBackingStore) != 0;
+            assertEquals("Backing store should match", backingStore, retrievedBackingStore);
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_fapl_log()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set log VFD with log file and flags
+            String logFile = "test_h5pffm.log";
+            long flags     = hdf5_h.H5FD_LOG_LOC_IO() | hdf5_h.H5FD_LOG_ALLOC(); // Log I/O and allocation
+            long bufSize   = 4096;                                                // 4KB buffer
+
+            int result = hdf5_h.H5Pset_fapl_log(fapl, stringToSegment(arena, logFile), flags, bufSize);
+            assertTrue("H5Pset_fapl_log failed", isSuccess(result));
+
+            // Note: H5Pget_fapl_log doesn't exist, just verify VFD was set
+            long driverId = hdf5_h.H5Pget_driver(fapl);
+            assertTrue("Driver ID should be valid", isValidId(driverId));
+
+            hdf5_h.H5Pclose(fapl);
+
+            // Clean up log file
+            _deleteFile(logFile);
+        }
+    }
+
+    @Test
+    public void testH5Pset_fapl_sec2()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set sec2 (standard I/O) VFD
+            int result = hdf5_h.H5Pset_fapl_sec2(fapl);
+            assertTrue("H5Pset_fapl_sec2 failed", isSuccess(result));
+
+            // Verify VFD was set
+            long driverId = hdf5_h.H5Pget_driver(fapl);
+            assertTrue("Driver ID should be valid", isValidId(driverId));
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_fapl_family()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Create member FAPL (use default)
+            long memberFapl = hdf5_h.H5P_DEFAULT();
+
+            // Set family VFD with 1MB member size
+            long memberSize = 1024 * 1024; // 1MB per family member
+            int result      = hdf5_h.H5Pset_fapl_family(fapl, memberSize, memberFapl);
+            assertTrue("H5Pset_fapl_family failed", isSuccess(result));
+
+            // Get settings back
+            MemorySegment outMemberSize = allocateLongArray(arena, 1);
+            MemorySegment outMemberFapl = allocateLongArray(arena, 1);
+            result = hdf5_h.H5Pget_fapl_family(fapl, outMemberSize, outMemberFapl);
+            assertTrue("H5Pget_fapl_family failed", isSuccess(result));
+
+            assertEquals("Member size should match", memberSize, getLong(outMemberSize));
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_driver()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Get default driver (should be sec2)
+            long driverId = hdf5_h.H5Pget_driver(fapl);
+            assertTrue("Default driver ID should be valid", isValidId(driverId));
+
+            // Set core VFD
+            int result = hdf5_h.H5Pset_fapl_core(fapl, 1024, false);
+            assertTrue("H5Pset_fapl_core failed", isSuccess(result));
+
+            // Get driver again (should be core)
+            long coreDriverId = hdf5_h.H5Pget_driver(fapl);
+            assertTrue("Core driver ID should be valid", isValidId(coreDriverId));
+
+            // Driver IDs should be different
+            assertNotEquals("Driver IDs should differ after changing VFD", driverId, coreDriverId);
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    // =========================
+    // File Image + MDC Configuration Tests (Batch 2)
+    // =========================
+
+    @Test
+    public void testH5Pset_file_image()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Create a small file image buffer (simulating an in-memory HDF5 file)
+            long imageSize = 1024; // 1KB
+            MemorySegment imageBuffer = arena.allocate(imageSize);
+
+            // Initialize buffer with some data
+            for (long i = 0; i < imageSize; i++) {
+                imageBuffer.set(ValueLayout.JAVA_BYTE, i, (byte)(i % 256));
+            }
+
+            // Set file image
+            int result = hdf5_h.H5Pset_file_image(fapl, imageBuffer, imageSize);
+            assertTrue("H5Pset_file_image failed", isSuccess(result));
+
+            // Get file image back
+            MemorySegment outBufferPtr = allocateLongArray(arena, 1);
+            MemorySegment outSize      = allocateLongArray(arena, 1);
+            result = hdf5_h.H5Pget_file_image(fapl, outBufferPtr, outSize);
+            assertTrue("H5Pget_file_image failed", isSuccess(result));
+
+            // Verify size matches
+            long retrievedSize = getLong(outSize);
+            assertEquals("File image size should match", imageSize, retrievedSize);
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_mdc_log_options()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set MDC (metadata cache) log options
+            boolean isEnabled   = true;
+            String location    = "test_mdc.log";
+            boolean startOnAccess = true;
+
+            int result = hdf5_h.H5Pset_mdc_log_options(fapl, isEnabled, stringToSegment(arena, location),
+                                                       startOnAccess);
+            assertTrue("H5Pset_mdc_log_options failed", isSuccess(result));
+
+            // Get MDC log options back
+            MemorySegment outIsEnabled      = allocateIntArray(arena, 1);
+            MemorySegment outLocation       = arena.allocate(256);
+            MemorySegment outLocationSize  = allocateLongArray(arena, 1);
+            MemorySegment outStartOnAccess = allocateIntArray(arena, 1);
+
+            result = hdf5_h.H5Pget_mdc_log_options(fapl, outIsEnabled, outLocation, outLocationSize,
+                                                   outStartOnAccess);
+            assertTrue("H5Pget_mdc_log_options failed", isSuccess(result));
+
+            // Verify settings
+            boolean retrievedEnabled = getInt(outIsEnabled) != 0;
+            boolean retrievedStartOnAccess = getInt(outStartOnAccess) != 0;
+            assertEquals("MDC logging should be enabled", isEnabled, retrievedEnabled);
+            assertEquals("Start on access should match", startOnAccess, retrievedStartOnAccess);
+
+            hdf5_h.H5Pclose(fapl);
+
+            // Clean up log file if created
+            _deleteFile(location);
+        }
+    }
+
+    // =========================
+    // DXPL Enhancement Tests (Batch 3)
+    // =========================
+
+    @Test
+    public void testH5Pset_edc_check_disable()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Disable error detection (EDC)
+            int result = hdf5_h.H5Pset_edc_check(dxpl, hdf5_h.H5Z_DISABLE_EDC());
+            assertTrue("H5Pset_edc_check failed", isSuccess(result));
+
+            // Get EDC check setting back
+            int edcCheck = hdf5_h.H5Pget_edc_check(dxpl);
+            assertEquals("EDC should be disabled", hdf5_h.H5Z_DISABLE_EDC(), edcCheck);
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_edc_check_enable()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Enable error detection (EDC)
+            int result = hdf5_h.H5Pset_edc_check(dxpl, hdf5_h.H5Z_ENABLE_EDC());
+            assertTrue("H5Pset_edc_check failed", isSuccess(result));
+
+            // Get EDC check setting back
+            int edcCheck = hdf5_h.H5Pget_edc_check(dxpl);
+            assertEquals("EDC should be enabled", hdf5_h.H5Z_ENABLE_EDC(), edcCheck);
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_selection_io()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Enable selection I/O
+            int result = hdf5_h.H5Pset_selection_io(dxpl, hdf5_h.H5D_SELECTION_IO_MODE_ON());
+            assertTrue("H5Pset_selection_io failed", isSuccess(result));
+
+            // Get selection I/O mode back
+            MemorySegment outMode = allocateIntArray(arena, 1);
+            result = hdf5_h.H5Pget_selection_io(dxpl, outMode);
+            assertTrue("H5Pget_selection_io failed", isSuccess(result));
+
+            int mode = getInt(outMode);
+            assertEquals("Selection I/O should be enabled", hdf5_h.H5D_SELECTION_IO_MODE_ON(), mode);
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_selection_io_off()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Disable selection I/O
+            int result = hdf5_h.H5Pset_selection_io(dxpl, hdf5_h.H5D_SELECTION_IO_MODE_OFF());
+            assertTrue("H5Pset_selection_io failed", isSuccess(result));
+
+            // Get selection I/O mode back
+            MemorySegment outMode = allocateIntArray(arena, 1);
+            result = hdf5_h.H5Pget_selection_io(dxpl, outMode);
+            assertTrue("H5Pget_selection_io failed", isSuccess(result));
+
+            int mode = getInt(outMode);
+            assertEquals("Selection I/O should be disabled", hdf5_h.H5D_SELECTION_IO_MODE_OFF(), mode);
+
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
 }
