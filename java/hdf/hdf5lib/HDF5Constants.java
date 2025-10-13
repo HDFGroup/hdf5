@@ -13,7 +13,6 @@
 package hdf.hdf5lib;
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
-
 import java.lang.foreign.MemorySegment;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -38,9 +37,7 @@ import org.hdfgroup.javahdf5.*;
 public class HDF5Constants {
 
     static { System.err.println("OpenIDs = " + H5.getOpenIDCount()); }
-    // /////////////////////////////////////////////////////////////////////////
-    // Get the HDF5 constants from the library //
-    // /////////////////////////////////////////////////////////////////////////
+
     /** Special parameters for szip compression */
     public static final int H5_SZIP_MAX_PIXELS_PER_BLOCK = H5_SZIP_MAX_PIXELS_PER_BLOCK();
     /** Special parameters for szip compression */
@@ -642,9 +639,9 @@ public class HDF5Constants {
     /** */
     public static final long H5FD_WINDOWS = H5FD_SEC2_id_g();
     /** */
-    public static final long H5FD_ROS3 = H5FD_ROS3_id_g();
+    public static final long H5FD_ROS3 = H5I_INVALID_HID();
     /** */
-    public static final long H5FD_HDFS = H5FD_HDFS();
+    public static final long H5FD_HDFS = H5I_INVALID_HID();
     /** */
     public static final int H5FD_LOG_LOC_READ = H5FD_LOG_LOC_READ();
     /** */
@@ -1610,4 +1607,6 @@ public class HDF5Constants {
     public static final int H5Z_NBIT_USER_NPARMS = H5Z_NBIT_USER_NPARMS();
     /** scale offset filter - Number of parameters that users can set */
     public static final int H5Z_SCALEOFFSET_USER_NPARMS = H5Z_SCALEOFFSET_USER_NPARMS();
+
+    
 }

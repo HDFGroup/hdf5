@@ -227,7 +227,6 @@ jobs:
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ inputs.force_java_implementation == 'ffm' }} \
             -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
             $GITHUB_WORKSPACE
         shell: bash
@@ -318,7 +317,7 @@ jobs:
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@v4
         with:
-              name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
@@ -326,7 +325,7 @@ jobs:
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
@@ -334,7 +333,7 @@ jobs:
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
+              name: tgz-macos14_clang-${{ inputs.build_mode }-${{ inputs.save_binary }}}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.ostype == 'macos') && ( inputs.save_binary != 'skip') }}

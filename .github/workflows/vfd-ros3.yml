@@ -19,6 +19,21 @@ on:
         description: "Tag of aws-c-s3 to use when building from source"
         required: false
         type: string
+      save_binary:
+        description: "binary-ext-name or missing"
+        required: false
+        default: "skip"
+        type: string
+      java_version:
+        description: "Java version for testing (11, 17, 21, 24, latest, auto)"
+        required: false
+        default: "auto"
+        type: string
+      force_java_implementation:
+        description: "Force specific Java implementation (auto, ffm, jni)"
+        required: false
+        default: "auto"
+        type: string
 
 permissions:
   contents: read
@@ -310,6 +325,24 @@ jobs:
         if: ${{ matrix.os_name == 'MacOS Clang' }}
         run: brew install aws-c-s3
 
+      - name: Set up Java (if specified)
+        if: inputs.java_version != 'auto'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: |
+            ${{
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+
+      - name: Verify Java Setup
+        if: inputs.java_version != 'auto'
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+
       - name: Set environment for MSVC (Windows)
         if: ${{ matrix.os_name == 'Windows MSVC' }}
         run: |
@@ -344,6 +377,8 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -369,6 +404,8 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -450,3 +487,36 @@ jobs:
           # For now, just run S3 tests
           ctest . -C ${{ inputs.build_mode }} -R "S3TEST" -V
         working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: List files in the space
+        run: |
+              ls -l ${{ runner.workspace }}/build
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@v4
+        with:
+              name: zip-vs2022_cl-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
+
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-ubuntu-2404_gcc-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
+
+      - name: Save published binary (Mac_latest)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-macos14_clang-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (matrix.ostype == 'macos') && ( inputs.save_binary != 'skip') }}

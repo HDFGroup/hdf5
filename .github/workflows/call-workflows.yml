@@ -41,6 +41,20 @@ jobs:
         # until a package is available to install 
         aws_c_s3_tag: "v0.8.0"
 
+    call-workflow-ros3-ffm-cmake:
+      name: "ROS3 VFD Workflows"
+      uses: ./.github/workflows/vfd-ros3.yml
+      with:
+        build_mode: "Release"
+        build_aws_c_s3_only: false
+        aws_c_s3_build_type: "package"
+        # Use latest release for building from source on Ubuntu
+        # until a package is available to install 
+        aws_c_s3_tag: "v0.8.0"
+        save_binary: "ffm"
+        java_version: "latest"
+        force_java_implementation: "ffm"
+
     call-debug-concurrent-cmake:
         name: "Debug Concurrency Workflows"
         uses: ./.github/workflows/main.yml
@@ -163,6 +177,7 @@ jobs:
             concurrent: ""
             thread_safety: ""
             build_mode: "Release"
+            save_binary: "ffm"
             java_version: "latest"
             force_java_implementation: "ffm"
 
