@@ -17345,7 +17345,6 @@ public class H5 implements java.io.Serializable {
             throw new NullPointerException("config_ptr is null");
         }
         throw new HDF5LibraryException("H5Pset_fapl_ros3 not implemented");
-        return retVal;
     }
 
     /**
@@ -17365,9 +17364,7 @@ public class H5 implements java.io.Serializable {
     public static hdf.hdf5lib.structs.H5FD_ros3_fapl_t H5Pget_fapl_ros3(long fapl_id)
         throws HDF5LibraryException, NullPointerException
     {
-        hdf.hdf5lib.structs.H5FD_ros3_fapl_t config = null;
         throw new HDF5LibraryException("H5Pget_fapl_ros3 not implemented");
-        return config;
     }
 
     // /////// unimplemented ////////

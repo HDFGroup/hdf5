@@ -116,6 +116,7 @@ else ()
     set (HDF5_PROVIDES_JNI ${HDF5_ENABLE_JNI})
     message (STATUS "HDF5 Provides JNI: ${HDF5_PROVIDES_JNI}")
     # Set up Java library and include variables for examples
+    message (STATUS "HDF5 java cache jar: ${HDF5_JAVA_JARS}")
     set (HDF5_JAVA_INCLUDE_DIRS ${HDF5_JAVA_JARS} ${HDF5_JAVA_LOGGING_JAR})
     set (HDF5_Java_FOUND 1)
     if (Java_VERSION_STRING VERSION_LESS "24.0.0" OR HDF5_ENABLE_JNI)
