@@ -22,11 +22,6 @@ set (HDF5_JAVA_INCLUDE_DIRECTORIES
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_INCLUDE_DIRECTORIES}")
 
 set (CMAKE_JAVA_INCLUDE_PATH "")
-set (HDF5_JSRC_FILES
-    hdf5_h.java
-    hdf5_h_1.java
-    hdf5_h_2.java
-)
 
 if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
   if (HDF5_ENABLE_JNI)
@@ -67,15 +62,6 @@ message (STATUS "Java Maven artifact: org.hdfgroup:${HDF5_JAVA_ARTIFACT_ID}")
 #-----------------------------------------------------------------------------
 # Build appropriate subdirectories based on implementation
 if (HDF5_JAVA_USE_FFM)
-  if (HDF5_ENABLE_ROS3_VFD)
-    set (jsrc_features "ros3")
-  else ()
-    set (jsrc_features "plain")
-  endif ()
-  foreach (h5_jfile ${HDF5_JSRC_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/jsrc/features/${jsrc_features}/${h5_jfile}" "${PROJECT_SOURCE_DIR}/jsrc/org/hdfgroup/javahdf5/${h5_jfile}" "HDF5_JSRC_files")
-  endforeach ()
-  add_custom_target(HDF5_JSRC_files ALL COMMENT "Copying files needed by HDF5_JSRC_files tests" DEPENDS ${HDF5_JSRC_files_list})
   add_subdirectory (jsrc)
   add_subdirectory (hdf)
   if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
