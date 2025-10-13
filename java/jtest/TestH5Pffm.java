@@ -1726,15 +1726,15 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set core (memory) VFD with 1MB increment and backing store enabled
-            long increment      = 1024 * 1024; // 1MB
+            long increment       = 1024 * 1024; // 1MB
             boolean backingStore = true;        // Enable backing store
-            int result          = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
+            int result           = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
             assertTrue("H5Pset_fapl_core failed", isSuccess(result));
 
             // Get settings back
-            MemorySegment outIncrement     = allocateLongArray(arena, 1);
+            MemorySegment outIncrement    = allocateLongArray(arena, 1);
             MemorySegment outBackingStore = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_fapl_core(fapl, outIncrement, outBackingStore);
+            result                        = hdf5_h.H5Pget_fapl_core(fapl, outIncrement, outBackingStore);
             assertTrue("H5Pget_fapl_core failed", isSuccess(result));
 
             assertEquals("Increment should match", increment, getLong(outIncrement));
@@ -1758,7 +1758,7 @@ public class TestH5Pffm {
             // Set log VFD with log file and flags
             String logFile = "test_h5pffm.log";
             long flags     = hdf5_h.H5FD_LOG_LOC_IO() | hdf5_h.H5FD_LOG_ALLOC(); // Log I/O and allocation
-            long bufSize   = 4096;                                                // 4KB buffer
+            long bufSize   = 4096;                                               // 4KB buffer
 
             int result = hdf5_h.H5Pset_fapl_log(fapl, stringToSegment(arena, logFile), flags, bufSize);
             assertTrue("H5Pset_fapl_log failed", isSuccess(result));
@@ -1815,7 +1815,7 @@ public class TestH5Pffm {
             // Get settings back
             MemorySegment outMemberSize = allocateLongArray(arena, 1);
             MemorySegment outMemberFapl = allocateLongArray(arena, 1);
-            result = hdf5_h.H5Pget_fapl_family(fapl, outMemberSize, outMemberFapl);
+            result                      = hdf5_h.H5Pget_fapl_family(fapl, outMemberSize, outMemberFapl);
             assertTrue("H5Pget_fapl_family failed", isSuccess(result));
 
             assertEquals("Member size should match", memberSize, getLong(outMemberSize));
@@ -1866,7 +1866,7 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Create a small file image buffer (simulating an in-memory HDF5 file)
-            long imageSize = 1024; // 1KB
+            long imageSize            = 1024; // 1KB
             MemorySegment imageBuffer = arena.allocate(imageSize);
 
             // Initialize buffer with some data
@@ -1881,7 +1881,7 @@ public class TestH5Pffm {
             // Get file image back
             MemorySegment outBufferPtr = allocateLongArray(arena, 1);
             MemorySegment outSize      = allocateLongArray(arena, 1);
-            result = hdf5_h.H5Pget_file_image(fapl, outBufferPtr, outSize);
+            result                     = hdf5_h.H5Pget_file_image(fapl, outBufferPtr, outSize);
             assertTrue("H5Pget_file_image failed", isSuccess(result));
 
             // Verify size matches
@@ -1902,8 +1902,8 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set MDC (metadata cache) log options
-            boolean isEnabled   = true;
-            String location    = "test_mdc.log";
+            boolean isEnabled     = true;
+            String location       = "test_mdc.log";
             boolean startOnAccess = true;
 
             int result = hdf5_h.H5Pset_mdc_log_options(fapl, isEnabled, stringToSegment(arena, location),
@@ -1911,8 +1911,8 @@ public class TestH5Pffm {
             assertTrue("H5Pset_mdc_log_options failed", isSuccess(result));
 
             // Get MDC log options back
-            MemorySegment outIsEnabled      = allocateIntArray(arena, 1);
-            MemorySegment outLocation       = arena.allocate(256);
+            MemorySegment outIsEnabled     = allocateIntArray(arena, 1);
+            MemorySegment outLocation      = arena.allocate(256);
             MemorySegment outLocationSize  = allocateLongArray(arena, 1);
             MemorySegment outStartOnAccess = allocateIntArray(arena, 1);
 
@@ -1921,7 +1921,7 @@ public class TestH5Pffm {
             assertTrue("H5Pget_mdc_log_options failed", isSuccess(result));
 
             // Verify settings
-            boolean retrievedEnabled = getInt(outIsEnabled) != 0;
+            boolean retrievedEnabled       = getInt(outIsEnabled) != 0;
             boolean retrievedStartOnAccess = getInt(outStartOnAccess) != 0;
             assertEquals("MDC logging should be enabled", isEnabled, retrievedEnabled);
             assertEquals("Start on access should match", startOnAccess, retrievedStartOnAccess);
@@ -1994,7 +1994,7 @@ public class TestH5Pffm {
 
             // Get selection I/O mode back
             MemorySegment outMode = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_selection_io(dxpl, outMode);
+            result                = hdf5_h.H5Pget_selection_io(dxpl, outMode);
             assertTrue("H5Pget_selection_io failed", isSuccess(result));
 
             int mode = getInt(outMode);
@@ -2019,7 +2019,7 @@ public class TestH5Pffm {
 
             // Get selection I/O mode back
             MemorySegment outMode = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_selection_io(dxpl, outMode);
+            result                = hdf5_h.H5Pget_selection_io(dxpl, outMode);
             assertTrue("H5Pget_selection_io failed", isSuccess(result));
 
             int mode = getInt(outMode);

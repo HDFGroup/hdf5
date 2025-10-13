@@ -308,9 +308,9 @@ public class TestH5Fffm {
     public void testH5Fget_mdc_size()
     {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment maxSize      = allocateLongArray(arena, 1);
-            MemorySegment minCleanSize = allocateLongArray(arena, 1);
-            MemorySegment curSize      = allocateLongArray(arena, 1);
+            MemorySegment maxSize       = allocateLongArray(arena, 1);
+            MemorySegment minCleanSize  = allocateLongArray(arena, 1);
+            MemorySegment curSize       = allocateLongArray(arena, 1);
             MemorySegment curNumEntries = allocateIntArray(arena, 1);
 
             int result = hdf5_h_1.H5Fget_mdc_size(H5fid, maxSize, minCleanSize, curSize, curNumEntries);
@@ -348,7 +348,7 @@ public class TestH5Fffm {
             assertTrue("H5Fget_file_image should return positive size", imageSize > 0);
 
             // Allocate buffer and get image (limit to 64KB for test)
-            long bufSize = Math.min(imageSize, 65536);
+            long bufSize              = Math.min(imageSize, 65536);
             MemorySegment imageBuffer = arena.allocate(bufSize);
 
             long actualSize = hdf5_h_1.H5Fget_file_image(H5fid, imageBuffer, bufSize);
@@ -375,7 +375,7 @@ public class TestH5Fffm {
     public void testH5Fget_mdc_logging_status()
     {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment isEnabled         = allocateIntArray(arena, 1);
+            MemorySegment isEnabled          = allocateIntArray(arena, 1);
             MemorySegment isCurrentlyLogging = allocateIntArray(arena, 1);
 
             int result = hdf5_h_1.H5Fget_mdc_logging_status(H5fid, isEnabled, isCurrentlyLogging);
