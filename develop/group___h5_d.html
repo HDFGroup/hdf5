@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-10-11</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-10-13</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -526,7 +526,7 @@ Functions</h2></td></tr>
 <div class="line">            }</div>
 <div class="line">            <span class="comment">// calculate the nominal chunk size</span></div>
 <div class="line">            size = 1;</div>
-<div class="line">            <span class="keywordflow">for</span> (i = 0; i &lt; (size_t)rank; ++i)</div>
+<div class="line">            <span class="keywordflow">for</span> (i = 0; i &lt; (<a class="code hl_variable" href="namespaceh5fortran__types.html#a3be2e7678b801f965eed1fffb85947bd">size_t</a>)rank; ++i)</div>
 <div class="line">                size *= cdims[i];</div>
 <div class="line">            <span class="comment">// print dataset info</span></div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s%s : nominal chunk size %lu [B] \n&quot;</span>, base_path, name, size);</div>

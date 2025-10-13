@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-10-11</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-10-13</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -434,7 +434,7 @@ Functions</h2></td></tr>
 <p>The set local callback must set any filter parameters that are specific to this dataset, based on the combination of the dataset creation property list values, the datatype, and the dataspace. For example, some filters perform different actions based on different datatypes, datatype sizes, numbers of dimensions, or dataspace sizes.</p>
 <p>The <em>set local</em> callback may be the NULL pointer, in which case, the library will assume that there are no dataset-specific settings for this filter.</p>
 <p>The <em>set local</em> callback function must return a non-negative value on success and a negative value for an error.</p>
-<p>The <em>filter operation</em> callback function, defining the filter's operation on the data, is defined as follows: </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> size_t (*<a class="code hl_typedef" href="_h5_zdevelop_8h.html#a130d8964a46667029c7d3c14572577c6">H5Z_func_t</a>)(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> flags, <span class="keywordtype">size_t</span> cd_nelmts, <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cd_values[],</div>
+<p>The <em>filter operation</em> callback function, defining the filter's operation on the data, is defined as follows: </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code hl_variable" href="namespaceh5fortran__types.html#a3be2e7678b801f965eed1fffb85947bd">size_t</a> (*<a class="code hl_typedef" href="_h5_zdevelop_8h.html#a130d8964a46667029c7d3c14572577c6">H5Z_func_t</a>)(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> flags, <span class="keywordtype">size_t</span> cd_nelmts, <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cd_values[],</div>
 <div class="line">                             <span class="keywordtype">size_t</span> nbytes, <span class="keywordtype">size_t</span> *buf_size, <span class="keywordtype">void</span> **buf);</div>
 </div><!-- fragment --><p>The parameters <code>flags</code>, <code>cd_nelmts</code>, and <code>cd_values</code> are the same as for the function <a class="el" href="group___o_c_p_l.html#gae7ac4c110e9ec3fcf38966928b96cda3" title="Adds a filter to the filter pipeline.">H5Pset_filter()</a>. The one exception is that an additional flag, <a class="el" href="_h5_zpublic_8h.html#a843859882318f69c9b4a38d3a88e0bfb">H5Z_FLAG_REVERSE</a>, is set when the filter is called as part of the input pipeline.</p>
 <p>The parameter <code>buf</code> points to the input buffer which has a size of <code>buf_size</code> bytes, <code>nbytes</code> of which are valid data.</p>
