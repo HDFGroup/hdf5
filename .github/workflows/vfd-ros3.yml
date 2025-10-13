@@ -39,6 +39,21 @@ permissions:
   contents: read
 
 jobs:
+  check_artifact:
+    runs-on: ubuntu-latest
+    outputs:
+      has_artifact: ${{ steps.check_artifact.outputs.exists }}
+    steps:
+      - name: Check if 'libaws-c-s33-${{ inputs.build_mode }}' exists
+        id: check_artifact
+        uses: softwareforgood/check-artifact-v4-existence@v1
+        with:
+          artifact-name: libaws-c-s3-${{ inputs.build_mode }}
+
+      - name: Status of artifact check
+        if: steps.check_artifact.outputs.exists == 'true'
+        run: echo "Artifact 'libaws-c-s3-${{ inputs.build_mode }}' exists.."
+
   # Build the aws-c-s3 library from source using the specified tag
   # and cache the results, currently only on Ubuntu. The result is
   # compressed into a 'libaws-c-s3.tar' archive to preserve permissions
@@ -49,11 +64,10 @@ jobs:
   build_aws_c_s3:
     # Ubuntu doesn't have a package for aws-c-s3 yet
     # if: ${{ inputs.aws_c_s3_build_type == 'source' }}
-
     name: "Build aws-c-s3 library"
-
     runs-on: ubuntu-latest
-
+    needs: check_artifact
+    if: ${{ needs.check_artifact.outputs.has_artifact == 'false' }}
     steps:
       - name: Get aws-c-s3 sources (main)
         if: inputs.aws_c_s3_tag == ''
@@ -281,10 +295,8 @@ jobs:
             os: macos-latest
             test_ros3: OFF
 
-    name: "Build and test the ROS3 VFD (${{ matrix.os_name }} ${{ inputs.build_mode }})"
-
+    name: "ROS3 VFD (${{ matrix.os_name }} ${{ inputs.build_mode }}-${{ inputs.force_java_implementation }})"
     runs-on: ${{ matrix.os }}
-
     steps:
       - name: Install aws-c-s3 (Windows)
         if: ${{ matrix.os_name == 'Windows MSVC' }}
@@ -424,13 +436,9 @@ jobs:
   # currently only on Ubuntu.
   build_and_test_vfd:
     if: ${{ inputs.aws_c_s3_build_type == 'source' && ! inputs.build_aws_c_s3_only }}
-
     needs: build_aws_c_s3
-
-    name: "Build and test the ROS3 VFD (Ubuntu ${{ inputs.build_mode }})"
-
+    name: "ROS3 VFD Source AWS (Ubuntu ${{ inputs.build_mode }})"
     runs-on: ubuntu-latest
-
     steps:
       - name: Install libaws-c-s3 (Cached installation)
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
