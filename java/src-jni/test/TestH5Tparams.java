@@ -39,7 +39,7 @@ public class TestH5Tparams {
         System.out.println();
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test
     public void testH5Tclose_invalid() throws Throwable
     {
         long tid = H5.H5Tclose(-1);

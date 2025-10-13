@@ -485,10 +485,10 @@ public class TestH5S {
         long hibounds[]  = {-1, -1};
         try {
             H5.H5Sget_select_bounds(H5sid, lowbounds, hibounds);
-            assertTrue("H5.H5Sget_select_bounds", 0 == lowbounds[0]);
-            assertTrue("H5.H5Sget_select_bounds", 0 == lowbounds[1]);
-            assertTrue("H5.H5Sget_select_bounds", (H5dims[0] - 1) == hibounds[0]);
-            assertTrue("H5.H5Sget_select_bounds", (H5dims[1] - 1) == hibounds[1]);
+            assertTrue("H5.H5Sget_select_bounds:" + lowbounds[0], 0 == lowbounds[0]);
+            assertTrue("H5.H5Sget_select_bounds:" + lowbounds[1], 0 == lowbounds[1]);
+            assertTrue("H5.H5Sget_select_bounds:" + hibounds[0], (H5dims[0] - 1) == hibounds[0]);
+            assertTrue("H5.H5Sget_select_bounds:" + hibounds[1], (H5dims[1] - 1) == hibounds[1]);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -505,10 +505,10 @@ public class TestH5S {
         try {
             H5.H5Sselect_elements(H5sid, HDF5Constants.H5S_SELECT_SET, 4, coord);
             H5.H5Sget_select_bounds(H5sid, lowbounds, hibounds);
-            assertTrue("H5.H5Sget_select_bounds", 2 == lowbounds[0]);
-            assertTrue("H5.H5Sget_select_bounds", 2 == lowbounds[1]);
-            assertTrue("H5.H5Sget_select_bounds", (H5dims[0] - 1) == hibounds[0]);
-            assertTrue("H5.H5Sget_select_bounds", (H5dims[1] - 1) == hibounds[1]);
+            assertTrue("H5.H5Sget_select_bounds:" + lowbounds[0], 2 == lowbounds[0]);
+            assertTrue("H5.H5Sget_select_bounds:" + lowbounds[1], 2 == lowbounds[1]);
+            assertTrue("H5.H5Sget_select_bounds:" + hibounds[0], (H5dims[0] - 1) == hibounds[0]);
+            assertTrue("H5.H5Sget_select_bounds:" + hibounds[1], (H5dims[1] - 1) == hibounds[1]);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -518,10 +518,10 @@ public class TestH5S {
             long offset[] = {-1, -1};
             H5.H5Soffset_simple(H5sid, offset);
             H5.H5Sget_select_bounds(H5sid, lowbounds, hibounds);
-            assertTrue("H5.H5Sget_select_bounds", 1 == lowbounds[0]);
-            assertTrue("H5.H5Sget_select_bounds", 1 == lowbounds[1]);
-            assertTrue("H5.H5Sget_select_bounds", (H5dims[0] - 2) == hibounds[0]);
-            assertTrue("H5.H5Sget_select_bounds", (H5dims[1] - 2) == hibounds[1]);
+            assertTrue("H5.H5Sget_select_bounds:" + lowbounds[0], 1 == lowbounds[0]);
+            assertTrue("H5.H5Sget_select_bounds:" + lowbounds[1], 1 == lowbounds[1]);
+            assertTrue("H5.H5Sget_select_bounds:" + hibounds[0], (H5dims[0] - 2) == hibounds[0]);
+            assertTrue("H5.H5Sget_select_bounds:" + hibounds[1], (H5dims[1] - 2) == hibounds[1]);
         }
         catch (Throwable err) {
             err.printStackTrace();

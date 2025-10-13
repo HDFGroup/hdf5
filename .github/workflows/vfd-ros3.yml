@@ -48,7 +48,7 @@ jobs:
         id: check_artifact
         uses: softwareforgood/check-artifact-v4-existence@v0
         with:
-          artifact-name: libaws-c-s3-${{ inputs.build_mode }}
+          name: libaws-c-s3-${{ inputs.build_mode }}
 
       - name: Status of artifact check
         if: steps.check_artifact.outputs.exists == 'true'
@@ -435,8 +435,8 @@ jobs:
   # Build and test the ROS3 VFD using aws-c-s3 built from source,
   # currently only on Ubuntu.
   build_and_test_vfd:
-    if: ${{ inputs.aws_c_s3_build_type == 'source' && ! inputs.build_aws_c_s3_only }}
-    needs: build_aws_c_s3
+    if: always() && (${{ inputs.aws_c_s3_build_type == 'source' && ! inputs.build_aws_c_s3_only }}) && (needs.build_aws_c_s3.result == 'success' || needs.build_aws_c_s3.result == 'skipped')
+    needs: [check_artifact, build_aws_c_s3]
     name: "ROS3 VFD Source AWS (Ubuntu ${{ inputs.build_mode }})"
     runs-on: ubuntu-latest
     steps:

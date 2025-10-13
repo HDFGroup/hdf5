@@ -88,7 +88,7 @@ public class TestH5Gbasic {
         System.out.println();
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test
     public void testH5Gclose_invalid() throws Throwable
     {
         long gid = H5.H5Gclose(-1);

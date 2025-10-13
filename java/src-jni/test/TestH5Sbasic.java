@@ -41,7 +41,7 @@ public class TestH5Sbasic {
         System.out.println();
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test
     public void testH5Sclose_invalid() throws Throwable
     {
         long sid = H5.H5Sclose(-1);

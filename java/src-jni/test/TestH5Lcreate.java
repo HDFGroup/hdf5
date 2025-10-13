@@ -517,7 +517,7 @@ public class TestH5Lcreate {
         assertTrue("Link Type", link_type == HDF5Constants.H5L_TYPE_EXTERNAL);
         assertFalse("H5Lget_value ", link_value[0] == null);
         assertFalse("H5Lget_value ", link_value[1] == null);
-        assertTrue("Link Value ", link_value[0].compareTo("DT1") == 0);
+        assertTrue("Link Value " + link_value[0], link_value[0].compareTo("DT1") == 0);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -686,8 +686,8 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info_by_idx: " + err);
         }
-        assertFalse("testH5Lget_value_by_idx_ext ", link_info == null);
-        assertTrue("testH5Lget_value_by_idx_ext link type " + link_info.type,
+        assertFalse("testH5Lget_value_by_idx ", link_info == null);
+        assertTrue("testH5Lget_value_by_idx link type " + link_info.type,
                    link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL);
         try {
             link_type =
@@ -721,8 +721,8 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info_by_idx: " + err);
         }
-        assertFalse("testH5Lget_value_by_idx_ext ", link_info == null);
-        assertTrue("testH5Lget_value_by_idx_ext link type " + link_info.type,
+        assertFalse("testH5Lget_value_by_idx ", link_info == null);
+        assertTrue("testH5Lget_value_by_idx link type " + link_info.type,
                    link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL);
         try {
             link_type =

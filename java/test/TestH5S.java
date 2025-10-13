@@ -466,12 +466,12 @@ public class TestH5S {
         try {
             H5.H5Sselect_elements(H5sid, HDF5Constants.H5S_SELECT_SET, 3, coord);
             H5.H5Sget_select_elem_pointlist(H5sid, 0, 3, getcoord);
-            assertTrue("H5.H5Sget_select_elem_pointlist", coord[0][0] == getcoord[0]);
-            assertTrue("H5.H5Sget_select_elem_pointlist", coord[0][1] == getcoord[1]);
-            assertTrue("H5.H5Sget_select_elem_pointlist", coord[1][0] == getcoord[2]);
-            assertTrue("H5.H5Sget_select_elem_pointlist", coord[1][1] == getcoord[3]);
-            assertTrue("H5.H5Sget_select_elem_pointlist", coord[2][0] == getcoord[4]);
-            assertTrue("H5.H5Sget_select_elem_pointlist", coord[2][1] == getcoord[5]);
+            assertTrue("H5.H5Sget_select_elem_pointlist:" + getcoord[0], coord[0][0] == getcoord[0]);
+            assertTrue("H5.H5Sget_select_elem_pointlist:" + getcoord[1], coord[0][1] == getcoord[1]);
+            assertTrue("H5.H5Sget_select_elem_pointlist:" + getcoord[2], coord[1][0] == getcoord[2]);
+            assertTrue("H5.H5Sget_select_elem_pointlist:" + getcoord[3], coord[1][1] == getcoord[3]);
+            assertTrue("H5.H5Sget_select_elem_pointlist:" + getcoord[4], coord[2][0] == getcoord[4]);
+            assertTrue("H5.H5Sget_select_elem_pointlist:" + getcoord[5], coord[2][1] == getcoord[5]);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -555,10 +555,10 @@ public class TestH5S {
             H5.H5Sget_select_hyper_blocklist(space1, 0, nblocks, blocks);
 
             // Verify that the correct block is defined
-            assertTrue("H5.H5Sget_select_hyper_blocklist", start[0] == blocks[0]);
-            assertTrue("H5.H5Sget_select_hyper_blocklist", start[1] == blocks[1]);
-            assertTrue("H5.H5Sget_select_hyper_blocklist", (block[0] - 1) == blocks[2]);
-            assertTrue("H5.H5Sget_select_hyper_blocklist", (block[1] - 1) == blocks[3]);
+            assertTrue("H5.H5Sget_select_hyper_blocklist:" + blocks[0], start[0] == blocks[0]);
+            assertTrue("H5.H5Sget_select_hyper_blocklist:" + blocks[1], start[1] == blocks[1]);
+            assertTrue("H5.H5Sget_select_hyper_blocklist:" + blocks[2], (block[0] - 1) == blocks[2]);
+            assertTrue("H5.H5Sget_select_hyper_blocklist:" + blocks[3], (block[1] - 1) == blocks[3]);
         }
         catch (Throwable err) {
             err.printStackTrace();

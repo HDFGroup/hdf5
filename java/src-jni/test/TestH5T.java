@@ -209,7 +209,7 @@ public class TestH5T {
     {
         long filetype_id = HDF5Constants.H5I_INVALID_HID;
         int ndims        = 0;
-        long[] adims     = {3, 5};
+        long[] adims     = {3L, 5L};
         long[] rdims     = new long[2];
 
         try {

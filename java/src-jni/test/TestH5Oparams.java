@@ -41,7 +41,7 @@ public class TestH5Oparams {
         System.out.println();
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test
     public void testH5Oclose_invalid() throws Throwable
     {
         long oid = H5.H5Oclose(-1);
