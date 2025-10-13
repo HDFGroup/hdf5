@@ -58,7 +58,7 @@ public class TestH5Offm {
         try (Arena arena = Arena.ofConfined()) {
             // Create primary file
             MemorySegment fileName = stringToSegment(arena, H5_FILE);
-            H5fid                  = hdf5_h_1.H5Fcreate(fileName, hdf5_h.H5F_ACC_TRUNC(), hdf5_h_1.H5P_DEFAULT(),
+            H5fid = hdf5_h_1.H5Fcreate(fileName, hdf5_h.H5F_ACC_TRUNC(), hdf5_h_1.H5P_DEFAULT(),
                                        hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Fcreate failed", isValidId(H5fid));
 
@@ -197,7 +197,7 @@ public class TestH5Offm {
             MemorySegment oinfo    = H5O_info2_t.allocate(arena);
 
             int ret = hdf5_h_2.H5Oget_info_by_name3(H5fid, dsetName, oinfo, hdf5_h.H5O_INFO_ALL(),
-                                                     hdf5_h_1.H5P_DEFAULT());
+                                                    hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Oget_info_by_name3 should succeed", isSuccess(ret));
 
             int type = H5O_info2_t.type(oinfo);
@@ -216,9 +216,9 @@ public class TestH5Offm {
             MemorySegment oinfo    = H5O_info2_t.allocate(arena);
 
             // Get info for first object in root group (by creation order)
-            int ret = hdf5_h_2.H5Oget_info_by_idx3(H5fid, rootName, hdf5_h.H5_INDEX_NAME(),
-                                                    hdf5_h.H5_ITER_INC(), 0, oinfo, hdf5_h.H5O_INFO_ALL(),
-                                                    hdf5_h_1.H5P_DEFAULT());
+            int ret =
+                hdf5_h_2.H5Oget_info_by_idx3(H5fid, rootName, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), 0,
+                                             oinfo, hdf5_h.H5O_INFO_ALL(), hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Oget_info_by_idx3 should succeed", isSuccess(ret));
 
             int type = H5O_info2_t.type(oinfo);
@@ -256,7 +256,8 @@ public class TestH5Offm {
             MemorySegment linkName = stringToSegment(arena, "dset_link");
 
             // Create hard link to dataset
-            int ret = hdf5_h_2.H5Olink(H5did, H5fid, linkName, hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
+            int ret =
+                hdf5_h_2.H5Olink(H5did, H5fid, linkName, hdf5_h_1.H5P_DEFAULT(), hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Olink should succeed", isSuccess(ret));
 
             // Verify link exists
@@ -297,7 +298,7 @@ public class TestH5Offm {
         try (Arena arena = Arena.ofConfined()) {
             // Create second file
             MemorySegment fileName2 = stringToSegment(arena, H5_FILE2);
-            H5fid2                  = hdf5_h_1.H5Fcreate(fileName2, hdf5_h.H5F_ACC_TRUNC(), hdf5_h_1.H5P_DEFAULT(),
+            H5fid2 = hdf5_h_1.H5Fcreate(fileName2, hdf5_h.H5F_ACC_TRUNC(), hdf5_h_1.H5P_DEFAULT(),
                                         hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Fcreate for second file should succeed", isValidId(H5fid2));
 
@@ -323,7 +324,7 @@ public class TestH5Offm {
     public void testH5O_comment()
     {
         try (Arena arena = Arena.ofConfined()) {
-            String comment = "This is a test dataset";
+            String comment           = "This is a test dataset";
             MemorySegment commentSeg = stringToSegment(arena, comment);
 
             // Set comment on dataset
@@ -351,23 +352,23 @@ public class TestH5Offm {
     public void testH5O_comment_by_name()
     {
         try (Arena arena = Arena.ofConfined()) {
-            String comment            = "Dataset comment by name";
-            MemorySegment commentSeg  = stringToSegment(arena, comment);
-            MemorySegment dsetName    = stringToSegment(arena, "dset");
+            String comment           = "Dataset comment by name";
+            MemorySegment commentSeg = stringToSegment(arena, comment);
+            MemorySegment dsetName   = stringToSegment(arena, "dset");
 
             // Set comment by name
             int ret = hdf5_h_2.H5Oset_comment_by_name(H5fid, dsetName, commentSeg, hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Oset_comment_by_name should succeed", isSuccess(ret));
 
             // Get comment size by name
-            long commentSize =
-                hdf5_h_2.H5Oget_comment_by_name(H5fid, dsetName, MemorySegment.NULL, 0, hdf5_h_1.H5P_DEFAULT());
+            long commentSize = hdf5_h_2.H5Oget_comment_by_name(H5fid, dsetName, MemorySegment.NULL, 0,
+                                                               hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Oget_comment_by_name should return positive size", commentSize > 0);
 
             // Get comment by name
             MemorySegment buffer = arena.allocate(commentSize + 1);
-            long actualSize = hdf5_h_2.H5Oget_comment_by_name(H5fid, dsetName, buffer, commentSize + 1,
-                                                              hdf5_h_1.H5P_DEFAULT());
+            long actualSize      = hdf5_h_2.H5Oget_comment_by_name(H5fid, dsetName, buffer, commentSize + 1,
+                                                                   hdf5_h_1.H5P_DEFAULT());
             assertTrue("Should get actual comment size", actualSize > 0);
 
             String retrievedComment = segmentToString(buffer);
@@ -431,8 +432,8 @@ public class TestH5Offm {
             MemorySegment dsetName = stringToSegment(arena, "dset");
             MemorySegment ninfo    = H5O_native_info_t.allocate(arena);
 
-            int ret = hdf5_h_2.H5Oget_native_info_by_name(H5fid, dsetName, ninfo, hdf5_h.H5O_NATIVE_INFO_ALL(),
-                                                           hdf5_h_1.H5P_DEFAULT());
+            int ret = hdf5_h_2.H5Oget_native_info_by_name(
+                H5fid, dsetName, ninfo, hdf5_h.H5O_NATIVE_INFO_ALL(), hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Oget_native_info_by_name should succeed", isSuccess(ret));
 
             MemorySegment hdr = H5O_native_info_t.hdr(ninfo);
@@ -450,8 +451,8 @@ public class TestH5Offm {
             MemorySegment rootName = stringToSegment(arena, ".");
 
             // Open first object by name index
-            long oid = hdf5_h_2.H5Oopen_by_idx(H5fid, rootName, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), 0,
-                                               hdf5_h_1.H5P_DEFAULT());
+            long oid = hdf5_h_2.H5Oopen_by_idx(H5fid, rootName, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(),
+                                               0, hdf5_h_1.H5P_DEFAULT());
             assertTrue("H5Oopen_by_idx should return valid ID", isValidId(oid));
 
             int ret = hdf5_h_2.H5Oclose(oid);
@@ -468,7 +469,7 @@ public class TestH5Offm {
         try (Arena arena = Arena.ofConfined()) {
             // Get token for dataset
             MemorySegment oinfo = H5O_info2_t.allocate(arena);
-            int ret = hdf5_h_2.H5Oget_info3(H5did, oinfo, hdf5_h.H5O_INFO_BASIC());
+            int ret             = hdf5_h_2.H5Oget_info3(H5did, oinfo, hdf5_h.H5O_INFO_BASIC());
             assertTrue("H5Oget_info3 should succeed", isSuccess(ret));
 
             // Get the token
