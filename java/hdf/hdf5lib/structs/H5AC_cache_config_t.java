@@ -312,7 +312,7 @@ public class H5AC_cache_config_t implements Serializable {
         this.lower_hr_threshold      = lower_hr_threshold;
         this.increment               = increment;
         this.apply_max_increment     = apply_max_increment;
-        this.max_increment           = flash_incr_mode;
+        this.max_increment           = max_increment;
         this.flash_incr_mode         = flash_incr_mode;
         this.flash_multiple          = flash_multiple;
         this.flash_threshold         = flash_threshold;
