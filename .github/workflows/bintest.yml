@@ -8,6 +8,11 @@ on:
         description: "release vs. debug build"
         required: true
         type: string
+      save_binary:
+        description: "binary-ext-name or missing"
+        required: true
+        default: "skip"
+        type: string
 
 permissions:
   contents: read
@@ -35,7 +40,7 @@ jobs:
       - name: Get published binary (Windows)
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
-              name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}/hdf5
 
       - name: Uncompress hdf5 binary (Win)
@@ -109,7 +114,7 @@ jobs:
       - name: Get published binary (Linux)
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
-              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (Linux)
@@ -161,7 +166,7 @@ jobs:
       - name: Get published binary (MacOS_latest)
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
-          name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
+          name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
           path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (MacOS_latest)
@@ -224,7 +229,7 @@ jobs:
       - name: Get published binary (Linux)
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
-              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (Linux)
