@@ -657,8 +657,8 @@ public class TestH5Tffm {
             // Convert int to double
             long srcType = hdf5_h_1.H5T_NATIVE_INT_g();
             long dstType = hdf5_h_1.H5T_NATIVE_DOUBLE_g();
-            int result =
-                hdf5_h_1.H5Tconvert(srcType, dstType, numElements, buffer, MemorySegment.NULL, hdf5_h.H5P_DEFAULT());
+            int result   = hdf5_h_1.H5Tconvert(srcType, dstType, numElements, buffer, MemorySegment.NULL,
+                                               hdf5_h.H5P_DEFAULT());
             assertTrue("H5Tconvert failed", isSuccess(result));
 
             // Verify first converted value
@@ -713,7 +713,7 @@ public class TestH5Tffm {
             assertTrue("H5Tset_size failed", isSuccess(result));
 
             // Create simple 1D dataspace with 1 element
-            long[] dimsArray = {1};
+            long[] dimsArray   = {1};
             MemorySegment dims = allocateLongArray(arena, 1);
             copyToSegment(dims, dimsArray);
             long space = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
@@ -882,11 +882,11 @@ public class TestH5Tffm {
 
             // Set custom field layout
             // For 32-bit float: sign(1) + exponent(8) + mantissa(23) = 32 bits
-            long spos  = 31;  // Sign at bit 31
-            long epos  = 23;  // Exponent starts at bit 23
-            long esize = 8;   // Exponent is 8 bits
-            long mpos  = 0;   // Mantissa starts at bit 0
-            long msize = 23;  // Mantissa is 23 bits
+            long spos  = 31; // Sign at bit 31
+            long epos  = 23; // Exponent starts at bit 23
+            long esize = 8;  // Exponent is 8 bits
+            long mpos  = 0;  // Mantissa starts at bit 0
+            long msize = 23; // Mantissa is 23 bits
 
             int result = hdf5_h_1.H5Tset_fields(floatType, spos, epos, esize, mpos, msize);
             assertTrue("H5Tset_fields failed", isSuccess(result));

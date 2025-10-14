@@ -2044,14 +2044,14 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
             // Create virtual dataspace (10x20)
-            long[] vdimsArray = {10, 20};
+            long[] vdimsArray   = {10, 20};
             MemorySegment vdims = allocateLongArray(arena, 2);
             copyToSegment(vdims, vdimsArray);
             long vspace = hdf5_h_1.H5Screate_simple(2, vdims, MemorySegment.NULL);
             assertTrue("H5Screate_simple vspace failed", isValidId(vspace));
 
             // Create source dataspace (10x20)
-            long[] sdimsArray = {10, 20};
+            long[] sdimsArray   = {10, 20};
             MemorySegment sdims = allocateLongArray(arena, 2);
             copyToSegment(sdims, sdimsArray);
             long srcspace = hdf5_h_1.H5Screate_simple(2, sdims, MemorySegment.NULL);
@@ -2060,12 +2060,12 @@ public class TestH5Pffm {
             // Set virtual mapping
             MemorySegment srcFile = stringToSegment(arena, "source.h5");
             MemorySegment srcDset = stringToSegment(arena, "/source_dataset");
-            int result = hdf5_h.H5Pset_virtual(dcpl, vspace, srcFile, srcDset, srcspace);
+            int result            = hdf5_h.H5Pset_virtual(dcpl, vspace, srcFile, srcDset, srcspace);
             assertTrue("H5Pset_virtual failed", isSuccess(result));
 
             // Get virtual count
             MemorySegment count = allocateLongArray(arena, 1);
-            result = hdf5_h.H5Pget_virtual_count(dcpl, count);
+            result              = hdf5_h.H5Pget_virtual_count(dcpl, count);
             assertTrue("H5Pget_virtual_count failed", isSuccess(result));
             assertEquals("Should have 1 virtual mapping", 1L, getLong(count));
 
@@ -2086,16 +2086,16 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
             // Create dataspaces
-            long[] dimsArray = {100};
+            long[] dimsArray   = {100};
             MemorySegment dims = allocateLongArray(arena, 1);
             copyToSegment(dims, dimsArray);
-            long vspace = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
+            long vspace   = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
             long srcspace = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
 
             // Set virtual mapping with specific filename
             String expectedFilename = "virtual_source_file.h5";
-            MemorySegment srcFile = stringToSegment(arena, expectedFilename);
-            MemorySegment srcDset = stringToSegment(arena, "/data");
+            MemorySegment srcFile   = stringToSegment(arena, expectedFilename);
+            MemorySegment srcDset   = stringToSegment(arena, "/data");
             hdf5_h.H5Pset_virtual(dcpl, vspace, srcFile, srcDset, srcspace);
 
             // Query filename length
@@ -2104,7 +2104,7 @@ public class TestH5Pffm {
 
             // Get filename
             MemorySegment nameBuf = arena.allocate(nameLen + 1);
-            long actualLen = hdf5_h.H5Pget_virtual_filename(dcpl, 0, nameBuf, nameLen + 1);
+            long actualLen        = hdf5_h.H5Pget_virtual_filename(dcpl, 0, nameBuf, nameLen + 1);
             assertEquals("Filename length should match", nameLen, actualLen);
 
             String actualFilename = segmentToString(nameBuf);
@@ -2127,16 +2127,16 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
             // Create dataspaces
-            long[] dimsArray = {50, 100};
+            long[] dimsArray   = {50, 100};
             MemorySegment dims = allocateLongArray(arena, 2);
             copyToSegment(dims, dimsArray);
-            long vspace = hdf5_h_1.H5Screate_simple(2, dims, MemorySegment.NULL);
+            long vspace   = hdf5_h_1.H5Screate_simple(2, dims, MemorySegment.NULL);
             long srcspace = hdf5_h_1.H5Screate_simple(2, dims, MemorySegment.NULL);
 
             // Set virtual mapping with specific dataset name
             String expectedDsetName = "/group/virtual_dataset";
-            MemorySegment srcFile = stringToSegment(arena, "source.h5");
-            MemorySegment srcDset = stringToSegment(arena, expectedDsetName);
+            MemorySegment srcFile   = stringToSegment(arena, "source.h5");
+            MemorySegment srcDset   = stringToSegment(arena, expectedDsetName);
             hdf5_h.H5Pset_virtual(dcpl, vspace, srcFile, srcDset, srcspace);
 
             // Query dataset name length
@@ -2145,7 +2145,7 @@ public class TestH5Pffm {
 
             // Get dataset name
             MemorySegment nameBuf = arena.allocate(nameLen + 1);
-            long actualLen = hdf5_h.H5Pget_virtual_dsetname(dcpl, 0, nameBuf, nameLen + 1);
+            long actualLen        = hdf5_h.H5Pget_virtual_dsetname(dcpl, 0, nameBuf, nameLen + 1);
             assertEquals("Dataset name length should match", nameLen, actualLen);
 
             String actualDsetName = segmentToString(nameBuf);
@@ -2168,13 +2168,13 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
             // Create virtual dataspace with specific dimensions
-            long[] vdimsArray = {30, 40};
+            long[] vdimsArray   = {30, 40};
             MemorySegment vdims = allocateLongArray(arena, 2);
             copyToSegment(vdims, vdimsArray);
             long vspace = hdf5_h_1.H5Screate_simple(2, vdims, MemorySegment.NULL);
 
             // Create source dataspace with different dimensions
-            long[] sdimsArray = {30, 40};
+            long[] sdimsArray   = {30, 40};
             MemorySegment sdims = allocateLongArray(arena, 2);
             copyToSegment(sdims, sdimsArray);
             long srcspace = hdf5_h_1.H5Screate_simple(2, sdims, MemorySegment.NULL);
@@ -2228,7 +2228,7 @@ public class TestH5Pffm {
 
             // Get virtual view back
             MemorySegment view = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_virtual_view(dapl, view);
+            result             = hdf5_h.H5Pget_virtual_view(dapl, view);
             assertTrue("H5Pget_virtual_view failed", isSuccess(result));
             assertEquals("View should be FIRST_MISSING", hdf5_h_1.H5D_VDS_FIRST_MISSING(), getInt(view));
 
@@ -2355,7 +2355,7 @@ public class TestH5Pffm {
             // Get settings back
             MemorySegment maxCompactOut = allocateIntArray(arena, 1);
             MemorySegment minDenseOut   = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_attr_phase_change(ocpl, maxCompactOut, minDenseOut);
+            result                      = hdf5_h.H5Pget_attr_phase_change(ocpl, maxCompactOut, minDenseOut);
             assertTrue("H5Pget_attr_phase_change failed", isSuccess(result));
 
             int retrievedMaxCompact = getInt(maxCompactOut);
