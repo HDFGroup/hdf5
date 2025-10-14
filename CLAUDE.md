@@ -100,20 +100,30 @@ java/jsrc/
 
 **Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested and complete.
 
-| Module | Tests | Coverage | Status |
-|--------|-------|----------|--------|
-| H5P (Properties) | 80 | Property lists, VFDs, virtual datasets, object copy, link properties | ✅ Active |
-| H5S (Dataspaces) | 41 | Selections, hyperslabs | ✅ Active |
-| H5T (Datatypes) | 37 | Types, conversion, reclamation, floating point | ✅ Active (1 ignored) |
-| H5A (Attributes) | 29 | Metadata attributes, storage, iteration | ✅ Active |
-| H5D (Datasets) | 28 | Dataset I/O, chunks, flush/refresh | ✅ Active |
-| H5F (Files) | 20 | Files, VFDs, metadata cache | ✅ Active |
-| H5O (Objects) | 19 | Object operations | ✅ Active |
-| H5L (Links) | 16 | Hard/soft/external links, info queries | ✅ Active |
-| H5G (Groups) | 15 | Group operations, object queries, comments | ✅ Active |
-| H5I (Identifiers) | 15 | ID management, type operations | ✅ Active |
-| H5R (References) | 15 | Object/region refs, queries | ✅ Active |
-| H5E (Errors) | 14 | Error handling, stack operations | ✅ Active |
+**Coverage Target:** 70%+ for critical modules (H5F, H5D, H5A, H5T, H5S, H5P)
+
+| Module | Tests | C APIs | Coverage | Focus Area | Status |
+|--------|-------|--------|----------|------------|--------|
+| H5P (Properties) | 80 | 266 | 30% | Property lists, VFDs, virtual datasets, object copy | ✅ Active, expanding |
+| H5S (Dataspaces) | 41 | 43 | 95% | Selections, hyperslabs, extents | ✅ Excellent coverage |
+| H5T (Datatypes) | 37 | 176 | 21% | Types, conversion, reclamation | ✅ Active, priority expansion |
+| H5A (Attributes) | 29 | 55 | 53% | Metadata attributes, storage, iteration | ✅ Active |
+| H5D (Datasets) | 28 | 56 | 50% | Dataset I/O, chunks, flush/refresh | ✅ Active |
+| H5F (Files) | 20 | 57 | 35% | Files, VFDs, metadata cache | ✅ Active, needs expansion |
+| H5O (Objects) | 19 | 55 | 35% | Object operations, visitation | ✅ Active, needs expansion |
+| H5L (Links) | 16 | 38 | 42% | Hard/soft/external links, iteration | ✅ Active |
+| H5G (Groups) | 15 | 37 | 41% | Group operations, queries, comments | ✅ Active |
+| H5I (Identifiers) | 15 | 21 | 71% | ID management, type operations | ✅ Good coverage |
+| H5R (References) | 15 | 27 | 56% | Object/region/attribute refs | ✅ Good coverage |
+| H5E (Errors) | 14 | 32 | 44% | Error handling, stack operations | ✅ Active |
+| **TOTAL** | **329** | **863** | **38%** | **All core modules** | ✅ **All passing** |
+
+**Implementation Priorities:**
+1. **H5T (Datatypes)**: Expand from 37 to 120 tests (target: 68% coverage) - array, enum, vlen, opaque, complex types
+2. **H5P (Properties)**: Expand from 80 to 150 tests (target: 56% coverage) - VFD properties, virtual datasets
+3. **H5F (Files)**: Expand from 20 to 45 tests (target: 79% coverage) - metadata cache, SWMR, file images
+4. **H5O (Objects)**: Expand from 19 to 45 tests (target: 82% coverage) - visitation, metadata operations
+5. **Advanced Modules**: H5VL (VOL), H5Z (Filters), H5ES (Event Sets) - deferred to later phase
 
 **Run FFM tests**:
 ```bash

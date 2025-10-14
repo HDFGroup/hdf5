@@ -497,7 +497,7 @@ public class TestH5Gffm {
             String targetPath       = "/some/target";
             MemorySegment targetSeg = stringToSegment(arena, targetPath);
             MemorySegment linkName  = stringToSegment(arena, "softlink");
-            int result              = hdf5_h_1.H5Glink(gid, hdf5_h_1.H5G_LINK_SOFT(), targetSeg, linkName);
+            int result              = hdf5_h_1.H5Glink(gid, hdf5_h.H5G_LINK_SOFT(), targetSeg, linkName);
             assertTrue("H5Glink failed", isSuccess(result));
 
             // Get link value

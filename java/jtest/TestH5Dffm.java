@@ -256,20 +256,6 @@ public class TestH5Dffm {
     }
 
     @Test
-    public void testH5Dget_space_status()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment statusSegment = allocateInt(arena);
-            int result                  = hdf5_h_1.H5Dget_space_status(H5did, statusSegment);
-            assertTrue("H5Dget_space_status failed", isSuccess(result));
-
-            int status = getInt(statusSegment);
-            // H5D_SPACE_STATUS_NOT_ALLOCATED = 0, H5D_SPACE_STATUS_ALLOCATED = 2
-            assertTrue("Status should be valid", status >= 0 && status <= 2);
-        }
-    }
-
-    @Test
     public void testH5Dcreate_anon()
     {
         long anon_did = hdf5_h.H5I_INVALID_HID();
@@ -535,7 +521,7 @@ public class TestH5Dffm {
     }
 
     @Test
-    public void testH5Dget_num_chunks()
+    public void testH5Dget_num_chunks_rw()
     {
         System.out.print(testname.getMethodName());
         long chunked_dcpl = hdf5_h.H5I_INVALID_HID();
@@ -1116,7 +1102,7 @@ public class TestH5Dffm {
             hdf5_h.H5Pset_chunk(dcpl, 2, chunkSegment);
 
             MemorySegment dsetname = stringToSegment(arena, "/chunked_ds");
-            long did               = hdf5_h_2.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(), sid,
+            long did               = hdf5_h_1.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(), sid,
                                                          hdf5_h.H5P_DEFAULT(), dcpl, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(did));
 

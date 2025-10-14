@@ -428,15 +428,15 @@ public class TestH5Iffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Register a user-defined type
-            long user_type = hdf5_h_1.H5Iregister_type(128, 0, MemorySegment.NULL);
+            int user_type = hdf5_h_2.H5Iregister_type2(0, MemorySegment.NULL);
             assertTrue("Register type failed", isValidId(user_type));
 
             // Clear type (remove all objects of this type)
-            int result = hdf5_h_1.H5Iclear_type(user_type, 0);
+            int result = hdf5_h_2.H5Iclear_type(user_type, false);
             assertTrue("H5Iclear_type should succeed", isSuccess(result));
 
             // Destroy type
-            result = hdf5_h_1.H5Idestroy_type(user_type);
+            result = hdf5_h_2.H5Idestroy_type(user_type);
             assertTrue("Destroy type should succeed", isSuccess(result));
         }
     }

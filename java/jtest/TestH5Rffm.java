@@ -174,35 +174,6 @@ public class TestH5Rffm {
         }
     }
 
-    @Test
-    public void testH5Rget_obj_name()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            // Create object reference
-            MemorySegment ref_ptr  = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
-            MemorySegment dsetname = stringToSegment(arena, "dset");
-
-            int result = hdf5_h_1.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
-            assertTrue("H5Rcreate_object failed", isSuccess(result));
-
-            // Get object name size
-            long name_size = hdf5_h_1.H5Rget_obj_name(ref_ptr, hdf5_h.H5P_DEFAULT(), MemorySegment.NULL, 0);
-            assertTrue("H5Rget_obj_name size query failed", name_size > 0);
-
-            // Get object name
-            MemorySegment nameBuffer = arena.allocate(name_size + 1);
-            long actual_size =
-                hdf5_h_1.H5Rget_obj_name(ref_ptr, hdf5_h.H5P_DEFAULT(), nameBuffer, name_size + 1);
-            assertTrue("H5Rget_obj_name failed", actual_size > 0);
-
-            String retrieved_name = nameBuffer.getString(0);
-            assertEquals("Object name should be /dset", "/dset", retrieved_name);
-
-            // Destroy reference
-            hdf5_h_1.H5Rdestroy(ref_ptr);
-        }
-    }
-
     // ============================================================================
     // Phase 2: Region Reference Operations
     // ============================================================================
@@ -498,7 +469,7 @@ public class TestH5Rffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            MemorySegment ref_ptr  = arena.allocate(hdf5_h_1.H5R_REF_BUF_SIZE());
+            MemorySegment ref_ptr  = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
 
             int result = hdf5_h_1.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
             assertTrue("H5Rcreate_object failed", isSuccess(result));
@@ -518,7 +489,7 @@ public class TestH5Rffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            MemorySegment ref_ptr  = arena.allocate(hdf5_h_1.H5R_REF_BUF_SIZE());
+            MemorySegment ref_ptr  = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
 
             int result = hdf5_h_1.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
             assertTrue("H5Rcreate_object failed", isSuccess(result));
@@ -536,42 +507,13 @@ public class TestH5Rffm {
     }
 
     @Test
-    public void testH5Rget_attr_name()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            MemorySegment attrname = stringToSegment(arena, "ATTR1");
-            MemorySegment ref_ptr  = arena.allocate(hdf5_h_1.H5R_REF_BUF_SIZE());
-
-            int result = hdf5_h_1.H5Rcreate_attr(H5fid, dsetname, attrname, hdf5_h.H5P_DEFAULT(), ref_ptr);
-            assertTrue("H5Rcreate_attr failed", isSuccess(result));
-
-            // Get attribute name size
-            long name_size = hdf5_h_1.H5Rget_attr_name(ref_ptr, MemorySegment.NULL, 0);
-            assertTrue("H5Rget_attr_name size query failed", name_size > 0);
-
-            // Get attribute name
-            MemorySegment nameBuffer = arena.allocate(name_size + 1);
-            long actual_size         = hdf5_h_1.H5Rget_attr_name(ref_ptr, nameBuffer, name_size + 1);
-            assertTrue("H5Rget_attr_name failed", actual_size > 0);
-
-            String attr_name = segmentToString(nameBuffer);
-            assertEquals("Attribute name should match", "ATTR1", attr_name);
-
-            hdf5_h_1.H5Rdestroy(ref_ptr);
-        }
-    }
-
-    @Test
     public void testH5Rget_obj_name()
     {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            MemorySegment ref_ptr  = arena.allocate(hdf5_h_1.H5R_REF_BUF_SIZE());
+            MemorySegment ref_ptr  = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
 
             int result = hdf5_h_1.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
             assertTrue("H5Rcreate_object failed", isSuccess(result));
@@ -600,8 +542,8 @@ public class TestH5Rffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            MemorySegment ref_ptr1 = arena.allocate(hdf5_h_1.H5R_REF_BUF_SIZE());
-            MemorySegment ref_ptr2 = arena.allocate(hdf5_h_1.H5R_REF_BUF_SIZE());
+            MemorySegment ref_ptr1 = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
+            MemorySegment ref_ptr2 = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
 
             // Create two identical references
             int result = hdf5_h_1.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr1);

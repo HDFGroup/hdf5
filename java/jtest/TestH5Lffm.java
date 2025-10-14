@@ -22,6 +22,7 @@ import java.lang.foreign.MemorySegment;
 import org.hdfgroup.javahdf5.H5L_info2_t;
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.hdfgroup.javahdf5.hdf5_h_1;
+import org.hdfgroup.javahdf5.hdf5_h_2;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -451,7 +452,7 @@ public class TestH5Lffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create a group for testing
             MemorySegment groupName = stringToSegment(arena, "/test_group_info");
-            long gid = hdf5_h_2.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+            long gid = hdf5_h_1.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
                                            hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
@@ -467,7 +468,7 @@ public class TestH5Lffm {
             assertTrue("H5Lget_info2 failed", isSuccess(result));
 
             // Cleanup
-            hdf5_h_2.H5Gclose(gid);
+            hdf5_h_1.H5Gclose(gid);
         }
     }
 
@@ -479,13 +480,13 @@ public class TestH5Lffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create a group with some links
             MemorySegment groupName = stringToSegment(arena, "/test_group_idx");
-            long gid = hdf5_h_2.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+            long gid = hdf5_h_1.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
                                            hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Create subgroups to have links
             MemorySegment subgroup1 = stringToSegment(arena, "subgroup1");
-            long gid1 = hdf5_h_2.H5Gcreate2(gid, subgroup1, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+            long gid1 = hdf5_h_1.H5Gcreate2(gid, subgroup1, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
                                             hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 subgroup1 failed", isValidId(gid1));
 
@@ -497,8 +498,8 @@ public class TestH5Lffm {
             assertTrue("H5Lget_info_by_idx2 failed", isSuccess(result));
 
             // Cleanup
-            hdf5_h_2.H5Gclose(gid1);
-            hdf5_h_2.H5Gclose(gid);
+            hdf5_h_1.H5Gclose(gid1);
+            hdf5_h_1.H5Gclose(gid);
         }
     }
 
@@ -533,7 +534,7 @@ public class TestH5Lffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create a group
             MemorySegment groupName = stringToSegment(arena, "/test_group_val_idx");
-            long gid = hdf5_h_2.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+            long gid = hdf5_h_1.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
                                            hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
@@ -551,7 +552,7 @@ public class TestH5Lffm {
             assertTrue("H5Lget_val_by_idx should succeed", isSuccess(result));
 
             // Cleanup
-            hdf5_h_2.H5Gclose(gid);
+            hdf5_h_1.H5Gclose(gid);
         }
     }
 
@@ -563,17 +564,17 @@ public class TestH5Lffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create a group with multiple links
             MemorySegment groupName = stringToSegment(arena, "/test_multiple_links");
-            long gid = hdf5_h_2.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+            long gid = hdf5_h_1.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
                                            hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Create multiple subgroups
             for (int i = 0; i < 3; i++) {
                 MemorySegment subName = stringToSegment(arena, "sub" + i);
-                long subGid = hdf5_h_2.H5Gcreate2(gid, subName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
+                long subGid = hdf5_h_1.H5Gcreate2(gid, subName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
                                                   hdf5_h.H5P_DEFAULT());
                 assertTrue("H5Gcreate2 sub" + i + " failed", isValidId(subGid));
-                hdf5_h_2.H5Gclose(subGid);
+                hdf5_h_1.H5Gclose(subGid);
             }
 
             // Get name of first link by index
@@ -593,7 +594,7 @@ public class TestH5Lffm {
             assertFalse("Link name should not be empty", linkName.isEmpty());
 
             // Cleanup
-            hdf5_h_2.H5Gclose(gid);
+            hdf5_h_1.H5Gclose(gid);
         }
     }
 }

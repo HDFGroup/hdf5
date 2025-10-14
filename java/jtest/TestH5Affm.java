@@ -1030,22 +1030,6 @@ public class TestH5Affm {
     }
 
     @Test
-    public void testH5Aget_storage_size()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            long aid = hdf5_h_1.H5Aopen(H5did, stringToSegment(arena, ATTR1_NAME), hdf5_h.H5P_DEFAULT());
-            assertTrue("H5Aopen failed", isValidId(aid));
-
-            long storageSize = hdf5_h_1.H5Aget_storage_size(aid);
-            assertTrue("Storage size should be > 0", storageSize > 0);
-
-            hdf5_h_1.H5Aclose(aid);
-        }
-    }
-
-    @Test
     public void testH5Aiterate()
     {
         System.out.print(testname.getMethodName());
@@ -1058,27 +1042,6 @@ public class TestH5Affm {
             long result = hdf5_h_1.H5Aiterate2(H5did, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), idx,
                                                MemorySegment.NULL, MemorySegment.NULL);
             assertTrue("H5Aiterate2 should complete", result >= 0);
-        }
-    }
-
-    @Test
-    public void testH5Aflush_refresh()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            long aid = hdf5_h_1.H5Aopen(H5did, stringToSegment(arena, ATTR1_NAME), hdf5_h.H5P_DEFAULT());
-            assertTrue("H5Aopen failed", isValidId(aid));
-
-            // Flush attribute
-            int result = hdf5_h_1.H5Aflush(aid);
-            assertTrue("H5Aflush should succeed", isSuccess(result));
-
-            // Refresh attribute
-            result = hdf5_h_1.H5Arefresh(aid);
-            assertTrue("H5Arefresh should succeed", isSuccess(result));
-
-            hdf5_h_1.H5Aclose(aid);
         }
     }
 }
