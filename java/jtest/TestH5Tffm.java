@@ -878,7 +878,7 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create 1D array of integers [10]
-            long[] dimValues = {10};
+            long[] dimValues   = {10};
             MemorySegment dims = allocateLongArray(arena, 1);
             copyToSegment(dims, dimValues);
 
@@ -898,7 +898,7 @@ public class TestH5Tffm {
             int result                  = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
 =======
             MemorySegment retrievedDims = allocateLongArray(arena, 1);
-            int result = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
+            int result                  = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
 >>>>>>> ec3582e More tests added
             assertEquals("H5Tget_array_dims2 should succeed", 1, result);
             assertEquals("Dimension should be 10", 10, retrievedDims.get(ValueLayout.JAVA_LONG, 0));
@@ -963,8 +963,8 @@ public class TestH5Tffm {
             MemorySegment dims1 = arena.allocate(hdf5_h.C_LONG, 10);
             long tid1           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 1, dims1);
 =======
-            MemorySegment dims1 = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
-            long tid1 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 1, dims1);
+            MemorySegment dims1         = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
+            long tid1                   = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 1, dims1);
 >>>>>>> ec3582e More tests added
             assertEquals("Should be 1D", 1, hdf5_h_1.H5Tget_array_ndims(tid1));
             hdf5_h_1.H5Tclose(tid1);
@@ -973,8 +973,8 @@ public class TestH5Tffm {
             MemorySegment dims2 = arena.allocateFrom(hdf5_h.C_LONG, 5, 6);
             long tid2           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
 =======
-            MemorySegment dims2 = arena.allocateFrom(ValueLayout.JAVA_LONG, 5L, 6L);
-            long tid2 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
+            MemorySegment dims2         = arena.allocateFrom(ValueLayout.JAVA_LONG, 5L, 6L);
+            long tid2                   = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
 >>>>>>> ec3582e More tests added
             assertEquals("Should be 2D", 2, hdf5_h_1.H5Tget_array_ndims(tid2));
             hdf5_h_1.H5Tclose(tid2);
@@ -983,8 +983,8 @@ public class TestH5Tffm {
             MemorySegment dims3 = arena.allocateFrom(hdf5_h.C_LONG, 2, 3, 4);
             H5tid               = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 3, dims3);
 =======
-            MemorySegment dims3 = arena.allocateFrom(ValueLayout.JAVA_LONG, 2L, 3L, 4L);
-            H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 3, dims3);
+            MemorySegment dims3         = arena.allocateFrom(ValueLayout.JAVA_LONG, 2L, 3L, 4L);
+            H5tid                       = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 3, dims3);
 >>>>>>> ec3582e More tests added
             assertEquals("Should be 3D", 3, hdf5_h_1.H5Tget_array_ndims(H5tid));
         }
@@ -1029,8 +1029,8 @@ public class TestH5Tffm {
             MemorySegment dims = arena.allocate(hdf5_h.C_LONG, 5);
             H5tid              = hdf5_h_1.H5Tarray_create2(compoundType, 1, dims);
 =======
-            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 5L);
-            H5tid = hdf5_h_1.H5Tarray_create2(compoundType, 1, dims);
+            MemorySegment dims          = arena.allocateFrom(ValueLayout.JAVA_LONG, 5L);
+            H5tid                       = hdf5_h_1.H5Tarray_create2(compoundType, 1, dims);
 >>>>>>> ec3582e More tests added
             assertTrue("H5Tarray_create2 with compound base failed", isValidId(H5tid));
 
@@ -1060,8 +1060,8 @@ public class TestH5Tffm {
             MemorySegment dims = arena.allocate(hdf5_h.C_LONG, 10);
             H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_SHORT_g(), 1, dims);
 =======
-            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
-            H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_SHORT_g(), 1, dims);
+            MemorySegment dims          = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
+            H5tid                       = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_SHORT_g(), 1, dims);
 >>>>>>> ec3582e More tests added
 
             // Get the base type
@@ -1128,9 +1128,9 @@ public class TestH5Tffm {
             MemorySegment val0 = arena.allocate(hdf5_h.C_INT, 0);
             int result         = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("RED"), val0);
 =======
-            MemorySegment val0 = allocateInt(arena);
+            MemorySegment val0          = allocateInt(arena);
             setInt(val0, 0);
-            int result = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "RED"), val0);
+            int result         = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "RED"), val0);
 >>>>>>> ec3582e More tests added
             assertEquals("H5Tenum_insert RED failed", 0, result);
 
@@ -1140,7 +1140,7 @@ public class TestH5Tffm {
 =======
             MemorySegment val1 = allocateInt(arena);
             setInt(val1, 1);
-            result = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "GREEN"), val1);
+            result             = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "GREEN"), val1);
 >>>>>>> ec3582e More tests added
             assertEquals("H5Tenum_insert GREEN failed", 0, result);
 
@@ -1150,7 +1150,7 @@ public class TestH5Tffm {
 =======
             MemorySegment val2 = allocateInt(arena);
             setInt(val2, 2);
-            result = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "BLUE"), val2);
+            result                 = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "BLUE"), val2);
 >>>>>>> ec3582e More tests added
             assertEquals("H5Tenum_insert BLUE failed", 0, result);
 
@@ -1448,7 +1448,8 @@ public class TestH5Tffm {
 
             // Verify base type is compound
             long superType = hdf5_h_1.H5Tget_super(H5tid);
-            assertEquals("Super type should be compound", hdf5_h.H5T_COMPOUND(), hdf5_h_1.H5Tget_class(superType));
+            assertEquals("Super type should be compound", hdf5_h.H5T_COMPOUND(),
+                         hdf5_h_1.H5Tget_class(superType));
 
             hdf5_h_1.H5Tclose(superType);
             hdf5_h_1.H5Tclose(compoundType);
@@ -1642,7 +1643,7 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Convert int array to float array
-            int nelem = 5;
+            int nelem             = 5;
             MemorySegment intData = arena.allocateFrom(hdf5_h.C_INT, 10, 20, 30, 40, 50);
 
             long srcType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
@@ -1708,9 +1709,8 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create a test file
-            long file_id = hdf5_h_1.H5Fcreate(arena.allocateFrom("test_commit.h5"),
-                                              hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                              hdf5_h.H5P_DEFAULT());
+            long file_id = hdf5_h_1.H5Fcreate(arena.allocateFrom("test_commit.h5"), hdf5_h.H5F_ACC_TRUNC(),
+                                              hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("File creation failed", isValidId(file_id));
 
             // Create compound type
@@ -1720,9 +1720,9 @@ public class TestH5Tffm {
             hdf5_h_1.H5Tinsert(H5tid, arena.allocateFrom("c"), 8, hdf5_h_1.H5T_NATIVE_INT_g());
 
             // Commit the type
-            int result = hdf5_h_1.H5Tcommit2(file_id, arena.allocateFrom("mytype"), H5tid,
-                                             hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                             hdf5_h.H5P_DEFAULT());
+            int result =
+                hdf5_h_1.H5Tcommit2(file_id, arena.allocateFrom("mytype"), H5tid, hdf5_h.H5P_DEFAULT(),
+                                    hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertEquals("H5Tcommit2 failed", 0, result);
 
             // Verify it's committed
@@ -1739,18 +1739,17 @@ public class TestH5Tffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long file_id = hdf5_h_1.H5Fcreate(arena.allocateFrom("test_commit_anon.h5"),
-                                              hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                              hdf5_h.H5P_DEFAULT());
+            long file_id =
+                hdf5_h_1.H5Fcreate(arena.allocateFrom("test_commit_anon.h5"), hdf5_h.H5F_ACC_TRUNC(),
+                                   hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
 
             // Create enum type
-            H5tid = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_INT_g());
+            H5tid             = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_INT_g());
             MemorySegment val = arena.allocate(hdf5_h.C_INT, 0);
             hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("RED"), val);
 
             // Commit anonymously (no name)
-            int result = hdf5_h_1.H5Tcommit_anon(file_id, H5tid, hdf5_h.H5P_DEFAULT(),
-                                                 hdf5_h.H5P_DEFAULT());
+            int result = hdf5_h_1.H5Tcommit_anon(file_id, H5tid, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertEquals("H5Tcommit_anon failed", 0, result);
 
             // Verify it's committed
@@ -1766,14 +1765,13 @@ public class TestH5Tffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long file_id = hdf5_h_1.H5Fcreate(arena.allocateFrom("test_open.h5"),
-                                              hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                              hdf5_h.H5P_DEFAULT());
+            long file_id = hdf5_h_1.H5Fcreate(arena.allocateFrom("test_open.h5"), hdf5_h.H5F_ACC_TRUNC(),
+                                              hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
 
             // Create and commit a type
             long tid1 = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_DOUBLE_g());
-            hdf5_h_1.H5Tcommit2(file_id, arena.allocateFrom("double_type"), tid1,
-                                hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            hdf5_h_1.H5Tcommit2(file_id, arena.allocateFrom("double_type"), tid1, hdf5_h.H5P_DEFAULT(),
+                                hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             hdf5_h_1.H5Tclose(tid1);
 
             // Open the committed type
@@ -1797,17 +1795,17 @@ public class TestH5Tffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long file_id = hdf5_h_1.H5Fcreate(arena.allocateFrom("test_get_cplist.h5"),
-                                              hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                              hdf5_h.H5P_DEFAULT());
+            long file_id =
+                hdf5_h_1.H5Fcreate(arena.allocateFrom("test_get_cplist.h5"), hdf5_h.H5F_ACC_TRUNC(),
+                                   hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
 
             // Create type with custom creation properties
             long tcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATATYPE_CREATE_ID_g());
             assertTrue("TCPL creation failed", isValidId(tcpl));
 
             H5tid = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
-            hdf5_h_1.H5Tcommit2(file_id, arena.allocateFrom("int_type"), H5tid, hdf5_h.H5P_DEFAULT(),
-                                tcpl, hdf5_h.H5P_DEFAULT());
+            hdf5_h_1.H5Tcommit2(file_id, arena.allocateFrom("int_type"), H5tid, hdf5_h.H5P_DEFAULT(), tcpl,
+                                hdf5_h.H5P_DEFAULT());
 
             // Get creation property list
             long retrieved_tcpl = hdf5_h_1.H5Tget_create_plist(H5tid);
@@ -2014,8 +2012,8 @@ public class TestH5Tffm {
 
             // Different dimensions should not be equal
             MemorySegment dims2 = arena.allocateFrom(hdf5_h.C_LONG, 5, 11);
-            long tid3 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims);
-            long tid4 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
+            long tid3           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims);
+            long tid4           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
 
             equal = hdf5_h_1.H5Tequal(tid3, tid4);
             assertFalse("Different dimension arrays should not be equal", equal > 0);
@@ -2033,7 +2031,7 @@ public class TestH5Tffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create 4D array [2][3][4][5]
             MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 2, 3, 4, 5);
-            H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_DOUBLE_g(), 4, dims);
+            H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_DOUBLE_g(), 4, dims);
 
             // Verify rank
             assertEquals("Should be 4D", 4, hdf5_h_1.H5Tget_array_ndims(H5tid));
@@ -2063,21 +2061,21 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Enum based on byte
-            long enumByte = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_SCHAR_g());
-            MemorySegment val = arena.allocate(hdf5_h.C_CHAR, (byte) 1);
+            long enumByte     = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_SCHAR_g());
+            MemorySegment val = arena.allocate(hdf5_h.C_CHAR, (byte)1);
             hdf5_h_1.H5Tenum_insert(enumByte, arena.allocateFrom("ONE"), val);
             assertEquals("Size should be 1", 1, hdf5_h_1.H5Tget_size(enumByte));
             hdf5_h_1.H5Tclose(enumByte);
 
             // Enum based on short
-            long enumShort = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_SHORT_g());
-            MemorySegment val2 = arena.allocate(hdf5_h.C_SHORT, (short) 1);
+            long enumShort     = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_SHORT_g());
+            MemorySegment val2 = arena.allocate(hdf5_h.C_SHORT, (short)1);
             hdf5_h_1.H5Tenum_insert(enumShort, arena.allocateFrom("ONE"), val2);
             assertEquals("Size should be 2", 2, hdf5_h_1.H5Tget_size(enumShort));
             hdf5_h_1.H5Tclose(enumShort);
 
             // Enum based on long
-            long enumLong = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_LONG_g());
+            long enumLong      = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_LONG_g());
             MemorySegment val3 = arena.allocate(hdf5_h.C_LONG, 1L);
             hdf5_h_1.H5Tenum_insert(enumLong, arena.allocateFrom("ONE"), val3);
             assertEquals("Size should be 8", 8, hdf5_h_1.H5Tget_size(enumLong));
