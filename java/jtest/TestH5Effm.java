@@ -389,4 +389,100 @@ public class TestH5Effm {
             assertTrue("Unregister class failed", isSuccess(result));
         }
     }
+
+    @Test
+    public void testH5Eget_num()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Get number of errors on default stack
+            long num_errors = hdf5_h_1.H5Eget_num(hdf5_h_1.H5E_DEFAULT());
+            assertTrue("Number of errors should be >= 0", num_errors >= 0);
+        }
+    }
+
+    @Test
+    public void testH5Eclear()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Clear error stack
+            int result = hdf5_h_1.H5Eclear2(hdf5_h_1.H5E_DEFAULT());
+            assertTrue("H5Eclear2 failed", isSuccess(result));
+
+            // Verify stack is empty
+            long num_errors = hdf5_h_1.H5Eget_num(hdf5_h_1.H5E_DEFAULT());
+            assertEquals("Stack should be empty", 0L, num_errors);
+        }
+    }
+
+    @Test
+    public void testH5Eget_current_stack()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Get current error stack
+            long stack_id = hdf5_h_1.H5Eget_current_stack();
+            assertTrue("Stack ID should be valid", isValidId(stack_id));
+
+            // Close stack
+            int result = hdf5_h_1.H5Eclose_stack(stack_id);
+            assertTrue("H5Eclose_stack failed", isSuccess(result));
+        }
+    }
+
+    @Test
+    public void testH5Epop()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Clear stack first
+            hdf5_h_1.H5Eclear2(hdf5_h_1.H5E_DEFAULT());
+
+            // Pop errors (should succeed even if empty)
+            int result = hdf5_h_1.H5Epop(hdf5_h_1.H5E_DEFAULT(), 1);
+            assertTrue("H5Epop should succeed", isSuccess(result));
+        }
+    }
+
+    @Test
+    public void testH5Eget_msg()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create error class
+            MemorySegment cls_name = stringToSegment(arena, "TestClass");
+            MemorySegment lib_name = stringToSegment(arena, "TestLib");
+            MemorySegment version = stringToSegment(arena, "1.0");
+
+            long class_id = hdf5_h_1.H5Eregister_class(cls_name, lib_name, version);
+            assertTrue("Register class failed", isValidId(class_id));
+
+            // Create error message
+            MemorySegment msg_text = stringToSegment(arena, "Test error message");
+            long msg_id = hdf5_h_1.H5Ecreate_msg(class_id, hdf5_h_1.H5E_MAJOR(), msg_text);
+            assertTrue("Create message failed", isValidId(msg_id));
+
+            // Get message
+            MemorySegment type = allocateIntArray(arena, 1);
+            long msg_size = hdf5_h_1.H5Eget_msg(msg_id, type, MemorySegment.NULL, 0);
+            assertTrue("Message size should be > 0", msg_size > 0);
+
+            MemorySegment msg_buf = arena.allocate(msg_size + 1);
+            long actual_size = hdf5_h_1.H5Eget_msg(msg_id, type, msg_buf, msg_size + 1);
+            assertTrue("Actual size should match", actual_size > 0);
+
+            String retrieved_msg = segmentToString(msg_buf);
+            assertEquals("Message should match", "Test error message", retrieved_msg);
+
+            // Cleanup
+            hdf5_h_1.H5Eclose_msg(msg_id);
+            hdf5_h_1.H5Eunregister_class(class_id);
+        }
+    }
 }

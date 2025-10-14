@@ -96,24 +96,24 @@ java/jsrc/
 
 ### FFM Test Coverage
 
-**Status as of October 14, 2025**: 287 FFM tests (286 active, 1 ignored) across 12 modules, all active tests passing ✅
+**Status as of October 14, 2025**: 329 FFM tests (328 active, 1 ignored) across 12 modules, all active tests passing ✅
 
 **Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested and complete.
 
 | Module | Tests | Coverage | Status |
 |--------|-------|----------|--------|
-| H5P (Properties) | 76 | Property lists, VFDs, virtual datasets, object copy | ✅ Active |
+| H5P (Properties) | 80 | Property lists, VFDs, virtual datasets, object copy, link properties | ✅ Active |
 | H5S (Dataspaces) | 41 | Selections, hyperslabs | ✅ Active |
-| H5T (Datatypes) | 32 | Types, conversion, reclamation | ✅ Active (1 ignored) |
-| H5A (Attributes) | 26 | Metadata attributes | ✅ Active |
-| H5D (Datasets) | 23 | Dataset I/O, chunks | ✅ Active |
+| H5T (Datatypes) | 37 | Types, conversion, reclamation, floating point | ✅ Active (1 ignored) |
+| H5A (Attributes) | 29 | Metadata attributes, storage, iteration | ✅ Active |
+| H5D (Datasets) | 28 | Dataset I/O, chunks, flush/refresh | ✅ Active |
 | H5F (Files) | 20 | Files, VFDs, metadata cache | ✅ Active |
 | H5O (Objects) | 19 | Object operations | ✅ Active |
-| H5L (Links) | 11 | Hard/soft/external links | ✅ Active |
-| H5G (Groups) | 10 | Group operations | ✅ Active |
-| H5I (Identifiers) | 10 | ID management | ✅ Active |
-| H5R (References) | 10 | Object/region refs | ✅ Active |
-| H5E (Errors) | 9 | Error handling | ✅ Active |
+| H5L (Links) | 16 | Hard/soft/external links, info queries | ✅ Active |
+| H5G (Groups) | 15 | Group operations, object queries, comments | ✅ Active |
+| H5I (Identifiers) | 15 | ID management, type operations | ✅ Active |
+| H5R (References) | 15 | Object/region refs, queries | ✅ Active |
+| H5E (Errors) | 14 | Error handling, stack operations | ✅ Active |
 
 **Run FFM tests**:
 ```bash

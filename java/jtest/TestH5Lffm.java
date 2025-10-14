@@ -442,4 +442,158 @@ public class TestH5Lffm {
             assertEquals("Copied link should not exist after deletion", 0, result);
         }
     }
+
+    @Test
+    public void testH5Lget_info()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create a group for testing
+            MemorySegment groupName = stringToSegment(arena, "/test_group_info");
+            long gid                = hdf5_h_2.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(),
+                                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Gcreate2 failed", isValidId(gid));
+
+            // Create a link
+            MemorySegment linkName = stringToSegment(arena, "/test_link_info");
+            int result             = hdf5_h_1.H5Lcreate_hard(H5fid, groupName, H5fid, linkName,
+                                                              hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Lcreate_hard failed", isSuccess(result));
+
+            // Get link info
+            MemorySegment linfo = arena.allocate(56); // H5L_info_t size
+            result              = hdf5_h_1.H5Lget_info2(H5fid, linkName, linfo, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Lget_info2 failed", isSuccess(result));
+
+            // Cleanup
+            hdf5_h_2.H5Gclose(gid);
+        }
+    }
+
+    @Test
+    public void testH5Lget_info_by_idx()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create a group with some links
+            MemorySegment groupName = stringToSegment(arena, "/test_group_idx");
+            long gid                = hdf5_h_2.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(),
+                                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Gcreate2 failed", isValidId(gid));
+
+            // Create subgroups to have links
+            MemorySegment subgroup1 = stringToSegment(arena, "subgroup1");
+            long gid1               = hdf5_h_2.H5Gcreate2(gid, subgroup1, hdf5_h.H5P_DEFAULT(),
+                                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Gcreate2 subgroup1 failed", isValidId(gid1));
+
+            // Get link info by index
+            MemorySegment linfo = arena.allocate(56); // H5L_info_t size
+            int result          = hdf5_h_1.H5Lget_info_by_idx2(gid, stringToSegment(arena, "."),
+                                                                hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(),
+                                                                0, linfo, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Lget_info_by_idx2 failed", isSuccess(result));
+
+            // Cleanup
+            hdf5_h_2.H5Gclose(gid1);
+            hdf5_h_2.H5Gclose(gid);
+        }
+    }
+
+    @Test
+    public void testH5Lget_val()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create a soft link
+            MemorySegment targetPath = stringToSegment(arena, "/target");
+            MemorySegment linkName   = stringToSegment(arena, "/soft_link_val");
+            int result               = hdf5_h_1.H5Lcreate_soft(targetPath, H5fid, linkName,
+                                                                hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Lcreate_soft failed", isSuccess(result));
+
+            // Get link value size first
+            MemorySegment size = allocateLongArray(arena, 1);
+            result             = hdf5_h_1.H5Lget_val(H5fid, linkName, MemorySegment.NULL, 0, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Lget_val (size query) should succeed", isSuccess(result));
+
+            // Note: H5Lget_val returns size via return value in some versions
+            // For FFM testing, we verify the call succeeds
+        }
+    }
+
+    @Test
+    public void testH5Lget_val_by_idx()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create a group
+            MemorySegment groupName = stringToSegment(arena, "/test_group_val_idx");
+            long gid                = hdf5_h_2.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(),
+                                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Gcreate2 failed", isValidId(gid));
+
+            // Create a soft link inside the group
+            MemorySegment targetPath = stringToSegment(arena, "/target");
+            MemorySegment linkName   = stringToSegment(arena, "soft_link");
+            int result               = hdf5_h_1.H5Lcreate_soft(targetPath, gid, linkName,
+                                                                hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Lcreate_soft failed", isSuccess(result));
+
+            // Get link value by index
+            result = hdf5_h_1.H5Lget_val_by_idx(gid, stringToSegment(arena, "."), hdf5_h.H5_INDEX_NAME(),
+                                                 hdf5_h.H5_ITER_INC(), 0, MemorySegment.NULL, 0,
+                                                 hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Lget_val_by_idx should succeed", isSuccess(result));
+
+            // Cleanup
+            hdf5_h_2.H5Gclose(gid);
+        }
+    }
+
+    @Test
+    public void testH5Lget_name_by_idx_multiple()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create a group with multiple links
+            MemorySegment groupName = stringToSegment(arena, "/test_multiple_links");
+            long gid                = hdf5_h_2.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(),
+                                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Gcreate2 failed", isValidId(gid));
+
+            // Create multiple subgroups
+            for (int i = 0; i < 3; i++) {
+                MemorySegment subName = stringToSegment(arena, "sub" + i);
+                long subGid           = hdf5_h_2.H5Gcreate2(gid, subName, hdf5_h.H5P_DEFAULT(),
+                                                             hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                assertTrue("H5Gcreate2 sub" + i + " failed", isValidId(subGid));
+                hdf5_h_2.H5Gclose(subGid);
+            }
+
+            // Get name of first link by index
+            long nameSize  = hdf5_h_1.H5Lget_name_by_idx(gid, stringToSegment(arena, "."),
+                                                          hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), 0,
+                                                          MemorySegment.NULL, 0, hdf5_h.H5P_DEFAULT());
+            assertTrue("Name size should be > 0", nameSize > 0);
+
+            // Get the actual name
+            MemorySegment nameBuf = arena.allocate(nameSize + 1);
+            long actualSize       = hdf5_h_1.H5Lget_name_by_idx(gid, stringToSegment(arena, "."),
+                                                                 hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(),
+                                                                 0, nameBuf, nameSize + 1, hdf5_h.H5P_DEFAULT());
+            assertTrue("Actual size should match", actualSize == nameSize);
+
+            String linkName = segmentToString(nameBuf);
+            assertFalse("Link name should not be empty", linkName.isEmpty());
+
+            // Cleanup
+            hdf5_h_2.H5Gclose(gid);
+        }
+    }
 }

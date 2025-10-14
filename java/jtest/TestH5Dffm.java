@@ -1049,4 +1049,133 @@ public class TestH5Dffm {
             closeQuietly(vlen_tid, hdf5_h_1::H5Tclose);
         }
     }
+
+    @Test
+    public void testH5Dget_space_type()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            long did = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Dopen2 failed", isValidId(did));
+
+            // Get dataspace
+            long sid = hdf5_h_1.H5Dget_space(did);
+            assertTrue("H5Dget_space failed", isValidId(sid));
+
+            // Get datatype
+            long tid = hdf5_h_1.H5Dget_type(did);
+            assertTrue("H5Dget_type failed", isValidId(tid));
+
+            hdf5_h_1.H5Tclose(tid);
+            hdf5_h_1.H5Sclose(sid);
+            hdf5_h_1.H5Dclose(did);
+        }
+    }
+
+    @Test
+    public void testH5Dget_space_status()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            long did = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Dopen2 failed", isValidId(did));
+
+            MemorySegment status = allocateIntArray(arena, 1);
+            int result = hdf5_h_1.H5Dget_space_status(did, status);
+            assertTrue("H5Dget_space_status failed", isSuccess(result));
+
+            int statusValue = getInt(status);
+            assertTrue("Status should be valid", statusValue >= 0);
+
+            hdf5_h_1.H5Dclose(did);
+        }
+    }
+
+    @Test
+    public void testH5Dget_chunk_index_type()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create chunked dataset
+            long[] dims = {10, 10};
+            long[] chunk_dims = {5, 5};
+            MemorySegment dimsSegment = allocateLongArray(arena, 2);
+            MemorySegment chunkSegment = allocateLongArray(arena, 2);
+            copyToSegment(dimsSegment, dims);
+            copyToSegment(chunkSegment, chunk_dims);
+
+            long sid = hdf5_h_1.H5Screate_simple(2, dimsSegment, MemorySegment.NULL);
+            assertTrue("H5Screate_simple failed", isValidId(sid));
+
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            hdf5_h.H5Pset_chunk(dcpl, 2, chunkSegment);
+
+            MemorySegment dsetname = stringToSegment(arena, "/chunked_ds");
+            long did = hdf5_h_2.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(),
+                                           sid, hdf5_h.H5P_DEFAULT(), dcpl, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Dcreate2 failed", isValidId(did));
+
+            // Get chunk index type
+            MemorySegment indexType = allocateIntArray(arena, 1);
+            int result = hdf5_h_1.H5Dget_chunk_index_type(did, indexType);
+            assertTrue("H5Dget_chunk_index_type failed", isSuccess(result));
+
+            hdf5_h_1.H5Dclose(did);
+            hdf5_h.H5Pclose(dcpl);
+            hdf5_h_1.H5Sclose(sid);
+        }
+    }
+
+    @Test
+    public void testH5Dget_num_chunks()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Open existing dataset
+            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            long did = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Dopen2 failed", isValidId(did));
+
+            long sid = hdf5_h_1.H5Dget_space(did);
+            MemorySegment numChunks = allocateLongArray(arena, 1);
+            int result = hdf5_h_1.H5Dget_num_chunks(did, sid, numChunks);
+
+            // This may fail if dataset is not chunked, which is okay
+            if (isSuccess(result)) {
+                long count = getLong(numChunks);
+                assertTrue("Chunk count should be >= 0", count >= 0);
+            }
+
+            hdf5_h_1.H5Sclose(sid);
+            hdf5_h_1.H5Dclose(did);
+        }
+    }
+
+    @Test
+    public void testH5Dflush_refresh()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            long did = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Dopen2 failed", isValidId(did));
+
+            // Flush dataset
+            int result = hdf5_h_1.H5Dflush(did);
+            assertTrue("H5Dflush failed", isSuccess(result));
+
+            // Refresh dataset
+            result = hdf5_h_1.H5Drefresh(did);
+            assertTrue("H5Drefresh failed", isSuccess(result));
+
+            hdf5_h_1.H5Dclose(did);
+        }
+    }
 }

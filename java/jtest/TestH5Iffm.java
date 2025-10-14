@@ -372,4 +372,87 @@ public class TestH5Iffm {
             assertTrue("H5Idestroy_type should succeed", isSuccess(result));
         }
     }
+
+    @Test
+    public void testH5Iget_type_ref()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Get reference count for a type
+            int ref_count = hdf5_h_1.H5Iget_type_ref(hdf5_h_1.H5I_FILE());
+            assertTrue("Type ref count should be >= 0", ref_count >= 0);
+        }
+    }
+
+    @Test
+    public void testH5Iinc_type_ref()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Get initial ref count
+            int initial_ref = hdf5_h_1.H5Iget_type_ref(hdf5_h_1.H5I_DATATYPE());
+            assertTrue("Initial ref should be >= 0", initial_ref >= 0);
+
+            // Increment type ref count
+            int new_ref = hdf5_h_1.H5Iinc_type_ref(hdf5_h_1.H5I_DATATYPE());
+            assertEquals("Ref should increment", initial_ref + 1, new_ref);
+
+            // Decrement back
+            int dec_ref = hdf5_h_1.H5Idec_type_ref(hdf5_h_1.H5I_DATATYPE());
+            assertEquals("Ref should decrement", initial_ref, dec_ref);
+        }
+    }
+
+    @Test
+    public void testH5Inmembers()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Get number of members of a type
+            MemorySegment num_members = allocateLongArray(arena, 1);
+            int result = hdf5_h_1.H5Inmembers(hdf5_h_1.H5I_FILE(), num_members);
+            assertTrue("H5Inmembers should succeed", isSuccess(result));
+
+            long count = getLong(num_members);
+            assertTrue("Member count should be >= 0", count >= 0);
+        }
+    }
+
+    @Test
+    public void testH5Iclear_type()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Register a user-defined type
+            long user_type = hdf5_h_1.H5Iregister_type(128, 0, MemorySegment.NULL);
+            assertTrue("Register type failed", isValidId(user_type));
+
+            // Clear type (remove all objects of this type)
+            int result = hdf5_h_1.H5Iclear_type(user_type, 0);
+            assertTrue("H5Iclear_type should succeed", isSuccess(result));
+
+            // Destroy type
+            result = hdf5_h_1.H5Idestroy_type(user_type);
+            assertTrue("Destroy type should succeed", isSuccess(result));
+        }
+    }
+
+    @Test
+    public void testH5Itype_exists()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Check if standard types exist
+            int exists = hdf5_h_1.H5Itype_exists(hdf5_h_1.H5I_FILE());
+            assertTrue("FILE type should exist", exists > 0);
+
+            exists = hdf5_h_1.H5Itype_exists(hdf5_h_1.H5I_DATASET());
+            assertTrue("DATASET type should exist", exists > 0);
+        }
+    }
 }

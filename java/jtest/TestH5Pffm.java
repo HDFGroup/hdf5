@@ -2374,4 +2374,156 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(ocpypl);
         }
     }
+
+    @Test
+    public void testH5Pset_elink_prefix()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create link access property list
+            long lapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_LINK_ACCESS_ID_g());
+            assertTrue("H5Pcreate lapl failed", isValidId(lapl));
+
+            // Set external link prefix
+            String prefix           = "/path/to/external/files";
+            MemorySegment prefixSeg = stringToSegment(arena, prefix);
+            int result              = hdf5_h.H5Pset_elink_prefix(lapl, prefixSeg);
+            assertTrue("H5Pset_elink_prefix failed", isSuccess(result));
+
+            // Query prefix length
+            long prefixLen = hdf5_h.H5Pget_elink_prefix(lapl, MemorySegment.NULL, 0);
+            assertTrue("Prefix length should be > 0", prefixLen > 0);
+
+            // Get prefix
+            MemorySegment prefixBuf = arena.allocate(prefixLen + 1);
+            long actualLen          = hdf5_h.H5Pget_elink_prefix(lapl, prefixBuf, prefixLen + 1);
+            assertEquals("Prefix length should match", prefixLen, actualLen);
+
+            String retrievedPrefix = segmentToString(prefixBuf);
+            assertEquals("Prefix should match", prefix, retrievedPrefix);
+
+            hdf5_h.H5Pclose(lapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_elink_fapl()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create link access property list
+            long lapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_LINK_ACCESS_ID_g());
+            assertTrue("H5Pcreate lapl failed", isValidId(lapl));
+
+            // Create file access property list to use for external links
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set external link file access property list
+            int result = hdf5_h.H5Pset_elink_fapl(lapl, fapl);
+            assertTrue("H5Pset_elink_fapl failed", isSuccess(result));
+
+            // Get external link fapl
+            long retrievedFapl = hdf5_h.H5Pget_elink_fapl(lapl);
+            assertTrue("Retrieved fapl should be valid", isValidId(retrievedFapl));
+
+            // Cleanup
+            hdf5_h.H5Pclose(retrievedFapl);
+            hdf5_h.H5Pclose(fapl);
+            hdf5_h.H5Pclose(lapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_link_creation_order()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create group creation property list
+            long gcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_GROUP_CREATE_ID_g());
+            assertTrue("H5Pcreate gcpl failed", isValidId(gcpl));
+
+            // Set link creation order tracking and indexing
+            int crtOrderFlags = hdf5_h.H5P_CRT_ORDER_TRACKED() | hdf5_h.H5P_CRT_ORDER_INDEXED();
+            int result        = hdf5_h.H5Pset_link_creation_order(gcpl, crtOrderFlags);
+            assertTrue("H5Pset_link_creation_order failed", isSuccess(result));
+
+            // Get link creation order flags
+            MemorySegment flags = allocateIntArray(arena, 1);
+            result              = hdf5_h.H5Pget_link_creation_order(gcpl, flags);
+            assertTrue("H5Pget_link_creation_order failed", isSuccess(result));
+
+            int retrievedFlags = getInt(flags);
+            assertEquals("Flags should match", crtOrderFlags, retrievedFlags);
+
+            // Verify individual flags
+            assertTrue("Should have TRACKED flag", (retrievedFlags & hdf5_h.H5P_CRT_ORDER_TRACKED()) != 0);
+            assertTrue("Should have INDEXED flag", (retrievedFlags & hdf5_h.H5P_CRT_ORDER_INDEXED()) != 0);
+
+            hdf5_h.H5Pclose(gcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_est_link_info()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create group creation property list
+            long gcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_GROUP_CREATE_ID_g());
+            assertTrue("H5Pcreate gcpl failed", isValidId(gcpl));
+
+            // Set estimated link info (number of links, length of link names)
+            int estNumEntries = 50;
+            int estNameLen    = 20;
+            int result        = hdf5_h.H5Pset_est_link_info(gcpl, estNumEntries, estNameLen);
+            assertTrue("H5Pset_est_link_info failed", isSuccess(result));
+
+            // Get estimated link info
+            MemorySegment numEntries = allocateIntArray(arena, 1);
+            MemorySegment nameLen    = allocateIntArray(arena, 1);
+            result                   = hdf5_h.H5Pget_est_link_info(gcpl, numEntries, nameLen);
+            assertTrue("H5Pget_est_link_info failed", isSuccess(result));
+
+            assertEquals("Number of entries should match", estNumEntries, getInt(numEntries));
+            assertEquals("Name length should match", estNameLen, getInt(nameLen));
+
+            hdf5_h.H5Pclose(gcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_link_phase_change()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create group creation property list
+            long gcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_GROUP_CREATE_ID_g());
+            assertTrue("H5Pcreate gcpl failed", isValidId(gcpl));
+
+            // Set link phase change thresholds
+            // max_compact: maximum number of links in compact storage
+            // min_dense: minimum number of links in dense storage
+            int maxCompact = 12;
+            int minDense   = 10;
+            int result     = hdf5_h.H5Pset_link_phase_change(gcpl, maxCompact, minDense);
+            assertTrue("H5Pset_link_phase_change failed", isSuccess(result));
+
+            // Get link phase change thresholds
+            MemorySegment maxCompactOut = allocateIntArray(arena, 1);
+            MemorySegment minDenseOut   = allocateIntArray(arena, 1);
+            result = hdf5_h.H5Pget_link_phase_change(gcpl, maxCompactOut, minDenseOut);
+            assertTrue("H5Pget_link_phase_change failed", isSuccess(result));
+
+            assertEquals("Max compact should match", maxCompact, getInt(maxCompactOut));
+            assertEquals("Min dense should match", minDense, getInt(minDenseOut));
+
+            hdf5_h.H5Pclose(gcpl);
+        }
+    }
 }
