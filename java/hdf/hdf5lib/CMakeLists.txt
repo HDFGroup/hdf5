@@ -87,8 +87,6 @@ set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
     structs/H5AC_cache_config_t.java
     structs/H5E_error2_t.java
     structs/H5F_info2_t.java
-    structs/H5FD_ros3_fapl_t.java
-#    structs/H5FD_hdfs_fapl_t.java
     structs/H5G_info_t.java
     structs/H5L_info_t.java
     structs/H5O_hdr_info_t.java
@@ -96,6 +94,10 @@ set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
     structs/H5O_native_info_t.java
     structs/H5O_token_t.java
 )
+if (HDF5_ENABLE_ROS3_VFD)
+  list(APPEND HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES structs/H5FD_ros3_fapl_t.java)
+endif ()
+#    list(APPEND HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES structs/H5FD_hdfs_fapl_t.java)
 
 set (HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES
     ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
