@@ -19,9 +19,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.structs.H5G_info_t;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_G_Phase {
     private static String FILENAME = "H5Ex_G_Phase.h5";
@@ -54,11 +54,11 @@ public class H5Ex_G_Phase {
 
     private static void CreateGroup()
     {
-        long file_id     = HDF5Constants.H5I_INVALID_HID;
-        long group_id    = HDF5Constants.H5I_INVALID_HID;
-        long subgroup_id = HDF5Constants.H5I_INVALID_HID;
-        long fapl_id     = HDF5Constants.H5I_INVALID_HID;
-        long gcpl_id     = HDF5Constants.H5I_INVALID_HID;
+        long file_id     = H5I_INVALID_HID();
+        long group_id    = H5I_INVALID_HID();
+        long subgroup_id = H5I_INVALID_HID();
+        long fapl_id     = H5I_INVALID_HID();
+        long gcpl_id     = H5I_INVALID_HID();
         H5G_info_t ginfo;
         String name = "G0"; // Name of subgroup_id
         int i;

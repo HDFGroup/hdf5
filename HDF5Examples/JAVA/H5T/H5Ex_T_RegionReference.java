@@ -23,8 +23,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_RegionReference {
     private static String FILENAME     = "H5Ex_T_RegionReference.h5";
@@ -38,11 +39,11 @@ public class H5Ex_T_RegionReference {
 
     private static void writeRegRef()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long group_id     = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long filespace_id = H5I_INVALID_HID();
+        long group_id     = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         long[] dims       = {DIM0};
         long[] dims2      = {DS2DIM0, DS2DIM1};
         // data buffer for writing region reference
@@ -182,12 +183,12 @@ public class H5Ex_T_RegionReference {
 
     private static void readRegRef()
     {
-        long file_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id  = HDF5Constants.H5I_INVALID_HID;
+        long file_id       = H5I_INVALID_HID();
+        long dataset_id    = H5I_INVALID_HID();
+        long dataspace_id  = H5I_INVALID_HID();
         int object_type    = -1;
-        long object_id     = HDF5Constants.H5I_INVALID_HID;
-        long region_id     = HDF5Constants.H5I_INVALID_HID;
+        long object_id     = H5I_INVALID_HID();
+        long region_id     = H5I_INVALID_HID();
         long[] dims        = {DIM0};
         byte[][] dset_data = new byte[DIM0][HDF5Constants.H5R_REF_BUF_SIZE];
         StringBuffer str_data;

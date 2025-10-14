@@ -18,8 +18,9 @@
   outputs it to the screen.
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_StringAttribute {
     private static String FILENAME      = "H5Ex_T_StringAttribute.h5";
@@ -31,12 +32,12 @@ public class H5Ex_T_StringAttribute {
 
     private static void CreateDataset()
     {
-        long file_id            = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id         = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id        = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id         = HDF5Constants.H5I_INVALID_HID;
-        long attribute_id       = HDF5Constants.H5I_INVALID_HID;
+        long file_id            = H5I_INVALID_HID();
+        long memtype_id         = H5I_INVALID_HID();
+        long filetype_id        = H5I_INVALID_HID();
+        long dataspace_id       = H5I_INVALID_HID();
+        long dataset_id         = H5I_INVALID_HID();
+        long attribute_id       = H5I_INVALID_HID();
         long[] dims             = {DIM0};
         byte[][] dset_data      = new byte[DIM0][SDIM];
         StringBuffer[] str_data = {new StringBuffer("Parting"), new StringBuffer("is such"),
@@ -79,7 +80,7 @@ public class H5Ex_T_StringAttribute {
                                           HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
                                           HDF5Constants.H5P_DEFAULT);
                 H5.H5Sclose(dataspace_id);
-                dataspace_id = HDF5Constants.H5I_INVALID_HID;
+                dataspace_id = H5I_INVALID_HID();
             }
         }
         catch (Exception e) {
@@ -178,12 +179,12 @@ public class H5Ex_T_StringAttribute {
 
     private static void ReadDataset()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id  = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id   = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long attribute_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long filetype_id  = H5I_INVALID_HID();
+        long memtype_id   = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long attribute_id = H5I_INVALID_HID();
         long sdim         = 0;
         long[] dims       = {DIM0};
         byte[][] dset_data;

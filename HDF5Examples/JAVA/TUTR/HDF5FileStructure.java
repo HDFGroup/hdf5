@@ -11,10 +11,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.structs.H5G_info_t;
-import hdf.hdf5lib.structs.H5O_token_t;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 /**
  * <p>
@@ -42,8 +41,8 @@ public class HDF5FileStructure {
 
     private static void FileStructure()
     {
-        long file_id  = HDF5Constants.H5I_INVALID_HID;
-        long group_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id  = H5I_INVALID_HID();
+        long group_id = H5I_INVALID_HID();
 
         // create the file and add groups and dataset into the file
         try {
@@ -123,7 +122,7 @@ public class HDF5FileStructure {
         indent += "    ";
         for (int i = 0; i < names_found; i++) {
             System.out.println(indent + objNames[i]);
-            long group_id = HDF5Constants.H5I_INVALID_HID;
+            long group_id = H5I_INVALID_HID();
             if (objTypes[i] == HDF5Constants.H5O_TYPE_GROUP) {
                 // Open the group, obtaining a new handle.
                 try {
@@ -160,12 +159,12 @@ public class HDF5FileStructure {
     {
         long[] dims2D      = {20, 10};
         long[] dims3D      = {20, 10, 5};
-        long file_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id1 = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id2 = HDF5Constants.H5I_INVALID_HID;
-        long group_id1     = HDF5Constants.H5I_INVALID_HID;
-        long group_id2     = HDF5Constants.H5I_INVALID_HID;
+        long file_id       = H5I_INVALID_HID();
+        long dataset_id    = H5I_INVALID_HID();
+        long dataspace_id1 = H5I_INVALID_HID();
+        long dataspace_id2 = H5I_INVALID_HID();
+        long group_id1     = H5I_INVALID_HID();
+        long group_id2     = H5I_INVALID_HID();
 
         // Create a new file using default properties.
         try {
@@ -224,7 +223,7 @@ public class HDF5FileStructure {
         try {
             if (dataset_id >= 0)
                 H5.H5Dclose(dataset_id);
-            dataset_id = HDF5Constants.H5I_INVALID_HID;
+            dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -250,7 +249,7 @@ public class HDF5FileStructure {
         try {
             if (dataset_id >= 0)
                 H5.H5Dclose(dataset_id);
-            dataset_id = HDF5Constants.H5I_INVALID_HID;
+            dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -276,7 +275,7 @@ public class HDF5FileStructure {
         try {
             if (dataset_id >= 0)
                 H5.H5Dclose(dataset_id);
-            dataset_id = HDF5Constants.H5I_INVALID_HID;
+            dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -302,7 +301,7 @@ public class HDF5FileStructure {
         try {
             if (dataset_id >= 0)
                 H5.H5Dclose(dataset_id);
-            dataset_id = HDF5Constants.H5I_INVALID_HID;
+            dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -312,10 +311,10 @@ public class HDF5FileStructure {
         try {
             if (dataspace_id1 >= 0)
                 H5.H5Sclose(dataspace_id1);
-            dataspace_id1 = HDF5Constants.H5I_INVALID_HID;
+            dataspace_id1 = H5I_INVALID_HID();
             if (dataspace_id2 >= 0)
                 H5.H5Sclose(dataspace_id2);
-            dataspace_id2 = HDF5Constants.H5I_INVALID_HID;
+            dataspace_id2 = H5I_INVALID_HID();
         }
         catch (Exception e) {
             e.printStackTrace();

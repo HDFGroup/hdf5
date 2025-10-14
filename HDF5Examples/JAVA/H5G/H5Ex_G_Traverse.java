@@ -21,12 +21,9 @@ implements the structure described in the User's Guide,
 chapter 4, figure 26.
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.callbacks.H5L_iterate_opdata_t;
-import hdf.hdf5lib.callbacks.H5L_iterate_t;
-import hdf.hdf5lib.structs.H5L_info_t;
-import hdf.hdf5lib.structs.H5O_info_t;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 import examples.groups.H5Ex_G_Iterate.H5O_type;
 
@@ -43,7 +40,7 @@ public class H5Ex_G_Traverse {
 
     private static void OpenGroup()
     {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id = H5I_INVALID_HID();
         H5O_info_t infobuf;
         opdata od = new opdata();
 

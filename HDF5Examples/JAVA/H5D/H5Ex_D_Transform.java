@@ -21,8 +21,9 @@
       the results to the screen.
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_D_Transform {
 
@@ -35,10 +36,10 @@ public class H5Ex_D_Transform {
 
     private static void writeData()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long dxpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long filespace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long dxpl_id      = H5I_INVALID_HID();
 
         long[] dims       = {DIM_X, DIM_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
@@ -145,9 +146,9 @@ public class H5Ex_D_Transform {
     private static void readData()
     {
 
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long dxpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long dxpl_id      = H5I_INVALID_HID();
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open an existing file using the default properties.

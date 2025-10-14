@@ -114,6 +114,7 @@ else ()
   endif ()
   if (HDF5_BUILD_JAVA)
     set (HDF5_PROVIDES_JNI ${HDF5_ENABLE_JNI})
+    set (HDF5_PROVIDES_COMPAT ${HDF5_JAVA_ENABLE_COMPAT})
     message (STATUS "HDF5 Provides JNI: ${HDF5_PROVIDES_JNI}")
     # Set up Java library and include variables for examples
     message (STATUS "HDF5 java cache jar: ${HDF5_JAVA_JARS}")

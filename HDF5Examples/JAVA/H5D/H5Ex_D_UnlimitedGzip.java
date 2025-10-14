@@ -26,8 +26,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_D_UnlimitedGzip {
     private static String FILENAME    = "H5Ex_D_UnlimitedGzip.h5";
@@ -99,10 +100,10 @@ public class H5Ex_D_UnlimitedGzip {
 
     private static void writeUnlimited()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dcpl_id      = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         long[] dims       = {DIM_X, DIM_Y};
         long[] chunk_dims = {CHUNK_X, CHUNK_Y};
         long[] maxdims    = {HDF5Constants.H5S_UNLIMITED, HDF5Constants.H5S_UNLIMITED};
@@ -201,9 +202,9 @@ public class H5Ex_D_UnlimitedGzip {
 
     private static void extendUnlimited()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         long[] dims       = {DIM_X, DIM_Y};
         long[] extdims    = {EDIM_X, EDIM_Y};
         long[] start      = {0, 0};
@@ -352,10 +353,10 @@ public class H5Ex_D_UnlimitedGzip {
 
     private static void readUnlimited()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long dcpl_id      = H5I_INVALID_HID();
         long[] dims       = {DIM_X, DIM_Y};
         int[][] dset_data;
 

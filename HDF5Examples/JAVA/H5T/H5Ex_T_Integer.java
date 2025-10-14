@@ -20,8 +20,9 @@
 
 import java.text.DecimalFormat;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_Integer {
     private static String FILENAME    = "H5Ex_T_Integer.h5";
@@ -32,9 +33,9 @@ public class H5Ex_T_Integer {
 
     private static void CreateDataset()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         long[] dims       = {DIM0, DIM1};
         int[][] dset_data = new int[DIM0][DIM1];
 
@@ -116,9 +117,9 @@ public class H5Ex_T_Integer {
 
     private static void ReadDataset()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         long[] dims       = {DIM0, DIM1};
         int[][] dset_data;
 

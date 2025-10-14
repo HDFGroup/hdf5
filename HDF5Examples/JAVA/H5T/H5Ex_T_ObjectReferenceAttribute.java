@@ -23,8 +23,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_ObjectReferenceAttribute {
     private static String FILENAME      = "H5Ex_T_ObjectReferenceAttribute.h5";
@@ -60,11 +61,11 @@ public class H5Ex_T_ObjectReferenceAttribute {
 
     private static void CreateDataset()
     {
-        long file_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id  = HDF5Constants.H5I_INVALID_HID;
-        long group_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
-        long attribute_id  = HDF5Constants.H5I_INVALID_HID;
+        long file_id       = H5I_INVALID_HID();
+        long dataspace_id  = H5I_INVALID_HID();
+        long group_id      = H5I_INVALID_HID();
+        long dataset_id    = H5I_INVALID_HID();
+        long attribute_id  = H5I_INVALID_HID();
         long[] dims        = {DIM0};
         byte[][] dset_data = new byte[DIM0][HDF5Constants.H5R_REF_BUF_SIZE];
 
@@ -86,9 +87,9 @@ public class H5Ex_T_ObjectReferenceAttribute {
                                           HDF5Constants.H5P_DEFAULT);
                 if (dataset_id >= 0)
                     H5.H5Dclose(dataset_id);
-                dataset_id = HDF5Constants.H5I_INVALID_HID;
+                dataset_id = H5I_INVALID_HID();
                 H5.H5Sclose(dataspace_id);
-                dataspace_id = HDF5Constants.H5I_INVALID_HID;
+                dataspace_id = H5I_INVALID_HID();
             }
         }
         catch (Exception e) {
@@ -102,7 +103,7 @@ public class H5Ex_T_ObjectReferenceAttribute {
                                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             if (group_id >= 0)
                 H5.H5Gclose(group_id);
-            group_id = HDF5Constants.H5I_INVALID_HID;
+            group_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -134,7 +135,7 @@ public class H5Ex_T_ObjectReferenceAttribute {
                                               HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
                                               HDF5Constants.H5P_DEFAULT);
                     H5.H5Sclose(dataspace_id);
-                    dataspace_id = HDF5Constants.H5I_INVALID_HID;
+                    dataspace_id = H5I_INVALID_HID();
                 }
             }
             catch (Exception e) {
@@ -223,12 +224,12 @@ public class H5Ex_T_ObjectReferenceAttribute {
 
     private static void ReadDataset()
     {
-        long file_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id  = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
-        long attribute_id  = HDF5Constants.H5I_INVALID_HID;
+        long file_id       = H5I_INVALID_HID();
+        long dataspace_id  = H5I_INVALID_HID();
+        long dataset_id    = H5I_INVALID_HID();
+        long attribute_id  = H5I_INVALID_HID();
         int object_type    = -1;
-        long object_id     = HDF5Constants.H5I_INVALID_HID;
+        long object_id     = H5I_INVALID_HID();
         long[] dims        = {DIM0};
         byte[][] dset_data = new byte[DIM0][HDF5Constants.H5R_REF_BUF_SIZE];
 

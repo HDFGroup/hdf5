@@ -19,9 +19,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.structs.H5O_token_t;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_G_Iterate {
     private static String FILENAME    = "groups/h5ex_g_iterate.h5";
@@ -52,7 +52,7 @@ public class H5Ex_G_Iterate {
 
     private static void do_iterate()
     {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id = H5I_INVALID_HID();
 
         // Open a file using default properties.
         try {

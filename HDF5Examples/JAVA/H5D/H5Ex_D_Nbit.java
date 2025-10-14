@@ -23,8 +23,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_D_Nbit {
     private static String FILENAME    = "H5Ex_D_Nbit.h5";
@@ -95,11 +96,11 @@ public class H5Ex_D_Nbit {
 
     private static void writeData() throws Exception
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long dtype_id     = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long filespace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long dtype_id     = H5I_INVALID_HID();
+        long dcpl_id      = H5I_INVALID_HID();
         long[] dims       = {DIM_X, DIM_Y};
         long[] chunk_dims = {CHUNK_X, CHUNK_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
@@ -157,9 +158,9 @@ public class H5Ex_D_Nbit {
 
     private static void readData() throws Exception
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long dcpl_id      = H5I_INVALID_HID();
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open an existing file.

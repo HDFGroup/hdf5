@@ -20,12 +20,13 @@
   allocated and their allocation size.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
+
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Alloc {
     private static String FILENAME     = "H5Ex_D_Alloc.h5";
@@ -61,11 +62,11 @@ public class H5Ex_D_Alloc {
 
     private static void allocation()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id1  = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id2  = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long filespace_id = H5I_INVALID_HID();
+        long dataset_id1  = H5I_INVALID_HID();
+        long dataset_id2  = H5I_INVALID_HID();
+        long dcpl_id      = H5I_INVALID_HID();
         long[] dims       = {DIM_X, DIM_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
         int space_status  = 0;

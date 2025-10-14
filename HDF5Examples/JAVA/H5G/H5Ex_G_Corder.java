@@ -14,19 +14,19 @@
     groups in alphabetical and creation order.
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.structs.H5G_info_t;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_G_Corder {
     private static String FILENAME = "H5Ex_G_Corder.h5";
 
     private static void CreateGroup() throws Exception
     {
-        long file_id     = HDF5Constants.H5I_INVALID_HID;
-        long group_id    = HDF5Constants.H5I_INVALID_HID;
-        long subgroup_id = HDF5Constants.H5I_INVALID_HID;
-        long gcpl_id     = HDF5Constants.H5I_INVALID_HID;
+        long file_id     = H5I_INVALID_HID();
+        long group_id    = H5I_INVALID_HID();
+        long subgroup_id = H5I_INVALID_HID();
+        long gcpl_id     = H5I_INVALID_HID();
         int status;
         H5G_info_t ginfo;
         int i;

@@ -25,8 +25,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_Compound {
     private static String FILENAME           = "H5Ex_T_Compound.h5";
@@ -154,12 +155,12 @@ public class H5Ex_T_Compound {
 
     private static void CreateDataset()
     {
-        long file_id            = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id         = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id         = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id        = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id         = HDF5Constants.H5I_INVALID_HID;
+        long file_id            = H5I_INVALID_HID();
+        long strtype_id         = H5I_INVALID_HID();
+        long memtype_id         = H5I_INVALID_HID();
+        long filetype_id        = H5I_INVALID_HID();
+        long dataspace_id       = H5I_INVALID_HID();
+        long dataset_id         = H5I_INVALID_HID();
         long[] dims             = {DIM0};
         ArrayList[] object_data = new ArrayList[DIM0];
         byte[] dset_data        = null;
@@ -312,11 +313,11 @@ public class H5Ex_T_Compound {
 
     private static void ReadDataset()
     {
-        long file_id          = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id       = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id     = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id       = HDF5Constants.H5I_INVALID_HID;
+        long file_id          = H5I_INVALID_HID();
+        long strtype_id       = H5I_INVALID_HID();
+        long memtype_id       = H5I_INVALID_HID();
+        long dataspace_id     = H5I_INVALID_HID();
+        long dataset_id       = H5I_INVALID_HID();
         long[] dims           = {DIM0};
         Sensor[] object_data2 = new Sensor[(int)dims[0]];
 

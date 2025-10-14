@@ -21,14 +21,9 @@
 
 import java.util.ArrayList;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.callbacks.H5L_iterate_opdata_t;
-import hdf.hdf5lib.callbacks.H5L_iterate_t;
-import hdf.hdf5lib.callbacks.H5O_iterate_opdata_t;
-import hdf.hdf5lib.callbacks.H5O_iterate_t;
-import hdf.hdf5lib.structs.H5L_info_t;
-import hdf.hdf5lib.structs.H5O_info_t;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_G_Visit {
 
@@ -47,7 +42,7 @@ public class H5Ex_G_Visit {
     private void VisitGroup() throws Exception
     {
 
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id = H5I_INVALID_HID();
 
         try {
             // Open file

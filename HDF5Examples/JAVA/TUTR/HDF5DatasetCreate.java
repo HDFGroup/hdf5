@@ -11,8 +11,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 /**
  * <p>
@@ -42,12 +43,12 @@ public class HDF5DatasetCreate {
 
     private static void CreateDataset()
     {
-        long file_id       = HDF5Constants.H5I_INVALID_HID;
-        long group_id1     = HDF5Constants.H5I_INVALID_HID;
-        long group_id2     = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id1 = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id2 = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
+        long file_id       = H5I_INVALID_HID();
+        long group_id1     = H5I_INVALID_HID();
+        long group_id2     = H5I_INVALID_HID();
+        long dataspace_id1 = H5I_INVALID_HID();
+        long dataspace_id2 = H5I_INVALID_HID();
+        long dataset_id    = H5I_INVALID_HID();
 
         // Create a new file using default properties.
         try {

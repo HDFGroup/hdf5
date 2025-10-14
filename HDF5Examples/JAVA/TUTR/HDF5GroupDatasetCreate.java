@@ -14,8 +14,9 @@
     Create two datasets within groups.
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class HDF5GroupDatasetCreate {
     private static String FILENAME     = "HDF5GroupDatasetCreate.h5";
@@ -30,12 +31,12 @@ public class HDF5GroupDatasetCreate {
 
     private static void h5_crtgrpd()
     {
-        long file_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id  = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
-        long group_id      = HDF5Constants.H5I_INVALID_HID;
-        long group1_id     = HDF5Constants.H5I_INVALID_HID;
-        long group2_id     = HDF5Constants.H5I_INVALID_HID;
+        long file_id       = H5I_INVALID_HID();
+        long dataspace_id  = H5I_INVALID_HID();
+        long dataset_id    = H5I_INVALID_HID();
+        long group_id      = H5I_INVALID_HID();
+        long group1_id     = H5I_INVALID_HID();
+        long group2_id     = H5I_INVALID_HID();
         int[][] dset1_data = new int[DIM1_X][DIM1_Y];
         int[][] dset2_data = new int[DIM2_X][DIM2_Y];
         long[] dims1       = {DIM1_X, DIM1_Y};
@@ -108,7 +109,7 @@ public class HDF5GroupDatasetCreate {
         try {
             if (dataspace_id >= 0)
                 H5.H5Sclose(dataspace_id);
-            dataspace_id = HDF5Constants.H5I_INVALID_HID;
+            dataspace_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -118,7 +119,7 @@ public class HDF5GroupDatasetCreate {
         try {
             if (dataset_id >= 0)
                 H5.H5Dclose(dataset_id);
-            dataset_id = HDF5Constants.H5I_INVALID_HID;
+            dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
             e.printStackTrace();

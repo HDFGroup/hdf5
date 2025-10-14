@@ -27,8 +27,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_D_Sofloat {
 
@@ -99,10 +100,10 @@ public class H5Ex_D_Sofloat {
 
     private static void writeData()
     {
-        long file_id         = HDF5Constants.H5I_INVALID_HID;
-        long filespace_id    = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id      = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id         = HDF5Constants.H5I_INVALID_HID;
+        long file_id         = H5I_INVALID_HID();
+        long filespace_id    = H5I_INVALID_HID();
+        long dataset_id      = H5I_INVALID_HID();
+        long dcpl_id         = H5I_INVALID_HID();
         long[] dims          = {DIM_X, DIM_Y};
         long[] chunk_dims    = {CHUNK_X, CHUNK_Y};
         double[][] dset_data = new double[DIM_X][DIM_Y];
@@ -218,9 +219,9 @@ public class H5Ex_D_Sofloat {
 
     private static void readData()
     {
-        long file_id         = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id      = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id         = HDF5Constants.H5I_INVALID_HID;
+        long file_id         = H5I_INVALID_HID();
+        long dataset_id      = H5I_INVALID_HID();
+        long dcpl_id         = H5I_INVALID_HID();
         double[][] dset_data = new double[DIM_X][DIM_Y];
 
         // Open file using the default properties.

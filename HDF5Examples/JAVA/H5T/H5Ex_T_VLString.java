@@ -14,8 +14,9 @@
     Creating and writing a VL string to a file.
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_VLString {
     private static String FILENAME    = "H5Ex_T_VLString.h5";
@@ -23,10 +24,10 @@ public class H5Ex_T_VLString {
 
     private static void createDataset()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long type_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long type_id      = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         int rank          = 1;
         String[] str_data = {"Parting", "is such", "sweet", "sorrow."};
         long[] dims       = {str_data.length};
@@ -92,9 +93,9 @@ public class H5Ex_T_VLString {
 
     private static void readDataset()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long type_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long type_id      = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         String[] str_data = {"", "", "", ""};
 
         try {

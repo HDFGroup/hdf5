@@ -23,8 +23,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_Commit {
     private static String FILENAME           = "H5Ex_T_Commit.h5";
@@ -97,9 +98,9 @@ public class H5Ex_T_Commit {
 
     private static void CreateDataType()
     {
-        long file_id              = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id           = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id          = HDF5Constants.H5I_INVALID_HID;
+        long file_id              = H5I_INVALID_HID();
+        long strtype_id           = H5I_INVALID_HID();
+        long filetype_id          = H5I_INVALID_HID();
         Sensor_Datatype datatypes = new Sensor_Datatype();
         // Create a new file using default properties.
         try {
@@ -180,9 +181,9 @@ public class H5Ex_T_Commit {
 
     private static void ReadDataType()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long typeclass_id = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id  = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long typeclass_id = H5I_INVALID_HID();
+        long filetype_id  = H5I_INVALID_HID();
 
         // Open an existing file.
         try {

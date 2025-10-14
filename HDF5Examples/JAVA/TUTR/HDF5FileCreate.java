@@ -11,8 +11,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 /**
  * <p>
@@ -30,7 +31,7 @@ public class HDF5FileCreate {
 
     private static void CreateFile()
     {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id = H5I_INVALID_HID();
 
         // Create a new file using default properties.
         try {

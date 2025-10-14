@@ -14,8 +14,9 @@
    Creating groups using absolute and relative names.
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import org.hdfgroup.javahdf5.*;
 
 public class HDF5GroupAbsoluteRelativeCreate {
     private static String FILENAME    = "HDF5GroupAbsoluteRelativeCreate.h5";
@@ -25,10 +26,10 @@ public class HDF5GroupAbsoluteRelativeCreate {
 
     private static void CreateGroupAbsoluteAndRelative()
     {
-        long file_id   = HDF5Constants.H5I_INVALID_HID;
-        long group1_id = HDF5Constants.H5I_INVALID_HID;
-        long group2_id = HDF5Constants.H5I_INVALID_HID;
-        long group3_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id   = H5I_INVALID_HID();
+        long group1_id = H5I_INVALID_HID();
+        long group2_id = H5I_INVALID_HID();
+        long group3_id = H5I_INVALID_HID();
 
         // Create a new file using default properties.
         try {
