@@ -2517,7 +2517,7 @@ public class TestH5Pffm {
             // Get link phase change thresholds
             MemorySegment maxCompactOut = allocateIntArray(arena, 1);
             MemorySegment minDenseOut   = allocateIntArray(arena, 1);
-            result = hdf5_h.H5Pget_link_phase_change(gcpl, maxCompactOut, minDenseOut);
+            result                      = hdf5_h.H5Pget_link_phase_change(gcpl, maxCompactOut, minDenseOut);
             assertTrue("H5Pget_link_phase_change failed", isSuccess(result));
 
             assertEquals("Max compact should match", maxCompact, getInt(maxCompactOut));

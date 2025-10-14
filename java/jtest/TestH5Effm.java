@@ -458,23 +458,23 @@ public class TestH5Effm {
             // Create error class
             MemorySegment cls_name = stringToSegment(arena, "TestClass");
             MemorySegment lib_name = stringToSegment(arena, "TestLib");
-            MemorySegment version = stringToSegment(arena, "1.0");
+            MemorySegment version  = stringToSegment(arena, "1.0");
 
             long class_id = hdf5_h_1.H5Eregister_class(cls_name, lib_name, version);
             assertTrue("Register class failed", isValidId(class_id));
 
             // Create error message
             MemorySegment msg_text = stringToSegment(arena, "Test error message");
-            long msg_id = hdf5_h_1.H5Ecreate_msg(class_id, hdf5_h_1.H5E_MAJOR(), msg_text);
+            long msg_id            = hdf5_h_1.H5Ecreate_msg(class_id, hdf5_h_1.H5E_MAJOR(), msg_text);
             assertTrue("Create message failed", isValidId(msg_id));
 
             // Get message
             MemorySegment type = allocateIntArray(arena, 1);
-            long msg_size = hdf5_h_1.H5Eget_msg(msg_id, type, MemorySegment.NULL, 0);
+            long msg_size      = hdf5_h_1.H5Eget_msg(msg_id, type, MemorySegment.NULL, 0);
             assertTrue("Message size should be > 0", msg_size > 0);
 
             MemorySegment msg_buf = arena.allocate(msg_size + 1);
-            long actual_size = hdf5_h_1.H5Eget_msg(msg_id, type, msg_buf, msg_size + 1);
+            long actual_size      = hdf5_h_1.H5Eget_msg(msg_id, type, msg_buf, msg_size + 1);
             assertTrue("Actual size should match", actual_size > 0);
 
             String retrieved_msg = segmentToString(msg_buf);

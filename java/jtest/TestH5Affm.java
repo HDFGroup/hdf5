@@ -1052,11 +1052,11 @@ public class TestH5Affm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment idx = allocateLongArray(arena, 1);
-            copyToSegment(idx, new long[]{0});
+            copyToSegment(idx, new long[] {0});
 
             // Just verify the API works, iteration callback complex for FFM
-            long result = hdf5_h_1.H5Aiterate2(H5did, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(),
-                                                idx, MemorySegment.NULL, MemorySegment.NULL);
+            long result = hdf5_h_1.H5Aiterate2(H5did, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), idx,
+                                               MemorySegment.NULL, MemorySegment.NULL);
             assertTrue("H5Aiterate2 should complete", result >= 0);
         }
     }

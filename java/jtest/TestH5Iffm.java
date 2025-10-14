@@ -413,7 +413,7 @@ public class TestH5Iffm {
         try (Arena arena = Arena.ofConfined()) {
             // Get number of members of a type
             MemorySegment num_members = allocateLongArray(arena, 1);
-            int result = hdf5_h_1.H5Inmembers(hdf5_h_1.H5I_FILE(), num_members);
+            int result                = hdf5_h_1.H5Inmembers(hdf5_h_1.H5I_FILE(), num_members);
             assertTrue("H5Inmembers should succeed", isSuccess(result));
 
             long count = getLong(num_members);

@@ -1057,7 +1057,7 @@ public class TestH5Dffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            long did = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
+            long did               = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dopen2 failed", isValidId(did));
 
             // Get dataspace
@@ -1081,11 +1081,11 @@ public class TestH5Dffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            long did = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
+            long did               = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dopen2 failed", isValidId(did));
 
             MemorySegment status = allocateIntArray(arena, 1);
-            int result = hdf5_h_1.H5Dget_space_status(did, status);
+            int result           = hdf5_h_1.H5Dget_space_status(did, status);
             assertTrue("H5Dget_space_status failed", isSuccess(result));
 
             int statusValue = getInt(status);
@@ -1102,9 +1102,9 @@ public class TestH5Dffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create chunked dataset
-            long[] dims = {10, 10};
-            long[] chunk_dims = {5, 5};
-            MemorySegment dimsSegment = allocateLongArray(arena, 2);
+            long[] dims                = {10, 10};
+            long[] chunk_dims          = {5, 5};
+            MemorySegment dimsSegment  = allocateLongArray(arena, 2);
             MemorySegment chunkSegment = allocateLongArray(arena, 2);
             copyToSegment(dimsSegment, dims);
             copyToSegment(chunkSegment, chunk_dims);
@@ -1116,13 +1116,13 @@ public class TestH5Dffm {
             hdf5_h.H5Pset_chunk(dcpl, 2, chunkSegment);
 
             MemorySegment dsetname = stringToSegment(arena, "/chunked_ds");
-            long did = hdf5_h_2.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(),
-                                           sid, hdf5_h.H5P_DEFAULT(), dcpl, hdf5_h.H5P_DEFAULT());
+            long did               = hdf5_h_2.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(), sid,
+                                                         hdf5_h.H5P_DEFAULT(), dcpl, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(did));
 
             // Get chunk index type
             MemorySegment indexType = allocateIntArray(arena, 1);
-            int result = hdf5_h_1.H5Dget_chunk_index_type(did, indexType);
+            int result              = hdf5_h_1.H5Dget_chunk_index_type(did, indexType);
             assertTrue("H5Dget_chunk_index_type failed", isSuccess(result));
 
             hdf5_h_1.H5Dclose(did);
@@ -1139,12 +1139,12 @@ public class TestH5Dffm {
         try (Arena arena = Arena.ofConfined()) {
             // Open existing dataset
             MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            long did = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
+            long did               = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dopen2 failed", isValidId(did));
 
-            long sid = hdf5_h_1.H5Dget_space(did);
+            long sid                = hdf5_h_1.H5Dget_space(did);
             MemorySegment numChunks = allocateLongArray(arena, 1);
-            int result = hdf5_h_1.H5Dget_num_chunks(did, sid, numChunks);
+            int result              = hdf5_h_1.H5Dget_num_chunks(did, sid, numChunks);
 
             // This may fail if dataset is not chunked, which is okay
             if (isSuccess(result)) {
@@ -1164,7 +1164,7 @@ public class TestH5Dffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dsetname = stringToSegment(arena, "/DS1");
-            long did = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
+            long did               = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dopen2 failed", isValidId(did));
 
             // Flush dataset
