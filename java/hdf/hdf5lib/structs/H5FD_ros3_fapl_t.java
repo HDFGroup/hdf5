@@ -105,21 +105,6 @@ public class H5FD_ros3_fapl_t implements Serializable {
             this.authenticate = true;
     }
 
-    /**
-     * Create a fapl_t structure from a MemorySegment.
-     */
-    public H5FD_ros3_fapl_t(MemorySegment config)
-    {
-        this.version      = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.version(config);
-        this.authenticate = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.authenticate(config);
-        this.aws_region   = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.aws_region(config).getString(
-            0, java.nio.charset.StandardCharsets.UTF_8);
-        this.secret_id = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_id(config).getString(
-            0, java.nio.charset.StandardCharsets.UTF_8);
-        this.secret_key = org.hdfgroup.javahdf5.H5FD_ros3_fapl_t.secret_key(config).getString(
-            0, java.nio.charset.StandardCharsets.UTF_8);
-    }
-
     @Override
     public boolean equals(Object o)
     {

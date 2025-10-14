@@ -94,9 +94,7 @@ set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
     structs/H5O_native_info_t.java
     structs/H5O_token_t.java
 )
-if (HDF5_ENABLE_ROS3_VFD)
-  list(APPEND HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES structs/H5FD_ros3_fapl_t.java)
-endif ()
+list(APPEND HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES structs/H5FD_ros3_fapl_t.java)
 #    list(APPEND HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES structs/H5FD_hdfs_fapl_t.java)
 
 set (HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES

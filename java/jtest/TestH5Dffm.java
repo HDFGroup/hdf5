@@ -1042,7 +1042,7 @@ public class TestH5Dffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            MemorySegment dsetname = stringToSegment(arena, "/dset");
             long did               = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dopen2 failed", isValidId(did));
 
@@ -1066,7 +1066,7 @@ public class TestH5Dffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            MemorySegment dsetname = stringToSegment(arena, "/dset");
             long did               = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dopen2 failed", isValidId(did));
 
@@ -1124,7 +1124,7 @@ public class TestH5Dffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Open existing dataset
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            MemorySegment dsetname = stringToSegment(arena, "/dset");
             long did               = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dopen2 failed", isValidId(did));
 
@@ -1149,7 +1149,7 @@ public class TestH5Dffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            MemorySegment dsetname = stringToSegment(arena, "/dset");
             long did               = hdf5_h_1.H5Dopen2(H5fid, dsetname, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dopen2 failed", isValidId(did));
 

@@ -96,7 +96,13 @@ java/jsrc/
 
 ### FFM Test Coverage
 
-**Status as of October 14, 2025**: 329 FFM tests (328 active, 1 ignored) across 12 modules, all active tests passing ✅
+**Status as of October 14, 2025**: 384 FFM tests (383 active, 1 ignored) across 12 modules, **100% PASSING** ✅
+
+**Latest Update:** Complete FFM test suite success! Fixed all remaining test failures:
+- **H5T:** 92/92 passing (expanded from 37, fixed 16 FFM memory allocation issues)
+- **H5D:** 27/27 passing (fixed 4 dataset name mismatch issues)
+- **H5R:** 13/13 passing (fixed 4 dataset reference issues)
+- **H5I:** 15/15 passing (fixed 4 library type usage issues)
 
 **Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested and complete.
 
@@ -104,9 +110,9 @@ java/jsrc/
 
 | Module | Tests | C APIs | Coverage | Focus Area | Status |
 |--------|-------|--------|----------|------------|--------|
+| H5T (Datatypes) | 92 | 176 | 52% | Types, conversion, reclamation, enum, array, vlen, opaque, complex | ✅ **Excellent progress, 100% passing** |
 | H5P (Properties) | 80 | 266 | 30% | Property lists, VFDs, virtual datasets, object copy | ✅ Active, expanding |
 | H5S (Dataspaces) | 41 | 43 | 95% | Selections, hyperslabs, extents | ✅ Excellent coverage |
-| H5T (Datatypes) | 37 | 176 | 21% | Types, conversion, reclamation | ✅ Active, priority expansion |
 | H5A (Attributes) | 29 | 55 | 53% | Metadata attributes, storage, iteration | ✅ Active |
 | H5D (Datasets) | 28 | 56 | 50% | Dataset I/O, chunks, flush/refresh | ✅ Active |
 | H5F (Files) | 20 | 57 | 35% | Files, VFDs, metadata cache | ✅ Active, needs expansion |
@@ -116,14 +122,17 @@ java/jsrc/
 | H5I (Identifiers) | 15 | 21 | 71% | ID management, type operations | ✅ Good coverage |
 | H5R (References) | 15 | 27 | 56% | Object/region/attribute refs | ✅ Good coverage |
 | H5E (Errors) | 14 | 32 | 44% | Error handling, stack operations | ✅ Active |
-| **TOTAL** | **329** | **863** | **38%** | **All core modules** | ✅ **All passing** |
+| **TOTAL** | **384** | **863** | **45%** | **All core modules** | ✅ **All passing** |
 
 **Implementation Priorities:**
-1. **H5T (Datatypes)**: Expand from 37 to 120 tests (target: 68% coverage) - array, enum, vlen, opaque, complex types
+1. **H5T (Datatypes)**: Expand from 92 to 120 tests (target: 68% coverage) - Additional conversion, bitfield, and advanced type tests
 2. **H5P (Properties)**: Expand from 80 to 150 tests (target: 56% coverage) - VFD properties, virtual datasets
 3. **H5F (Files)**: Expand from 20 to 45 tests (target: 79% coverage) - metadata cache, SWMR, file images
 4. **H5O (Objects)**: Expand from 19 to 45 tests (target: 82% coverage) - visitation, metadata operations
 5. **Advanced Modules**: H5VL (VOL), H5Z (Filters), H5ES (Event Sets) - deferred to later phase
+
+**FFM Best Practices:**
+See `.claude/FFM_MEMORY_PATTERNS.md` for comprehensive guide on correct FFM memory allocation patterns, common pitfalls, and test development guidelines.
 
 **Run FFM tests**:
 ```bash

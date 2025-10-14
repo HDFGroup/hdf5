@@ -468,7 +468,7 @@ public class TestH5Rffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            MemorySegment dsetname = stringToSegment(arena, "/dset");
             MemorySegment ref_ptr  = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
 
             int result = hdf5_h_1.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
@@ -488,7 +488,7 @@ public class TestH5Rffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            MemorySegment dsetname = stringToSegment(arena, "/dset");
             MemorySegment ref_ptr  = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
 
             int result = hdf5_h_1.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
@@ -512,7 +512,7 @@ public class TestH5Rffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            MemorySegment dsetname = stringToSegment(arena, "/dset");
             MemorySegment ref_ptr  = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
 
             int result = hdf5_h_1.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
@@ -529,7 +529,7 @@ public class TestH5Rffm {
             assertTrue("H5Rget_obj_name failed", actual_size > 0);
 
             String obj_name = segmentToString(nameBuffer);
-            assertEquals("Object name should match", "/DS1", obj_name);
+            assertEquals("Object name should match", "/dset", obj_name);
 
             hdf5_h_1.H5Rdestroy(ref_ptr);
         }
@@ -541,7 +541,7 @@ public class TestH5Rffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dsetname = stringToSegment(arena, "/DS1");
+            MemorySegment dsetname = stringToSegment(arena, "/dset");
             MemorySegment ref_ptr1 = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
             MemorySegment ref_ptr2 = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
 

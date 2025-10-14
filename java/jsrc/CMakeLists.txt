@@ -20,7 +20,7 @@ if (HDF5_ENABLE_ROS3_VFD)
 endif ()
 
 file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
-"
+"Enable-Native-Access: ALL-UNNAMED
 "
 )
 

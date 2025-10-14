@@ -379,9 +379,16 @@ public class TestH5Iffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            // Get reference count for a type
-            int ref_count = hdf5_h_1.H5Iget_type_ref(hdf5_h_1.H5I_FILE());
+            // Create a user type (library types like H5I_FILE cannot be used with this API)
+            int user_type = hdf5_h_2.H5Iregister_type2(0, MemorySegment.NULL);
+            assertTrue("Register type failed", isValidId(user_type));
+
+            // Get reference count for the user type
+            int ref_count = hdf5_h_1.H5Iget_type_ref(user_type);
             assertTrue("Type ref count should be >= 0", ref_count >= 0);
+
+            // Cleanup
+            hdf5_h_2.H5Idestroy_type(user_type);
         }
     }
 
@@ -391,17 +398,24 @@ public class TestH5Iffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
+            // Create a user type (library types like H5I_DATATYPE cannot be used with this API)
+            int user_type = hdf5_h_2.H5Iregister_type2(0, MemorySegment.NULL);
+            assertTrue("Register type failed", isValidId(user_type));
+
             // Get initial ref count
-            int initial_ref = hdf5_h_1.H5Iget_type_ref(hdf5_h_1.H5I_DATATYPE());
+            int initial_ref = hdf5_h_1.H5Iget_type_ref(user_type);
             assertTrue("Initial ref should be >= 0", initial_ref >= 0);
 
             // Increment type ref count
-            int new_ref = hdf5_h_1.H5Iinc_type_ref(hdf5_h_1.H5I_DATATYPE());
+            int new_ref = hdf5_h_1.H5Iinc_type_ref(user_type);
             assertEquals("Ref should increment", initial_ref + 1, new_ref);
 
             // Decrement back
-            int dec_ref = hdf5_h_1.H5Idec_type_ref(hdf5_h_1.H5I_DATATYPE());
+            int dec_ref = hdf5_h_1.H5Idec_type_ref(user_type);
             assertEquals("Ref should decrement", initial_ref, dec_ref);
+
+            // Cleanup
+            hdf5_h_2.H5Idestroy_type(user_type);
         }
     }
 
@@ -411,13 +425,20 @@ public class TestH5Iffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            // Get number of members of a type
+            // Create a user type (library types like H5I_FILE cannot be used with this API)
+            int user_type = hdf5_h_2.H5Iregister_type2(0, MemorySegment.NULL);
+            assertTrue("Register type failed", isValidId(user_type));
+
+            // Get number of members of the user type
             MemorySegment num_members = allocateLongArray(arena, 1);
-            int result                = hdf5_h_1.H5Inmembers(hdf5_h_1.H5I_FILE(), num_members);
+            int result                = hdf5_h_1.H5Inmembers(user_type, num_members);
             assertTrue("H5Inmembers should succeed", isSuccess(result));
 
             long count = getLong(num_members);
             assertTrue("Member count should be >= 0", count >= 0);
+
+            // Cleanup
+            hdf5_h_2.H5Idestroy_type(user_type);
         }
     }
 
@@ -447,12 +468,21 @@ public class TestH5Iffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            // Check if standard types exist
-            int exists = hdf5_h_1.H5Itype_exists(hdf5_h_1.H5I_FILE());
-            assertTrue("FILE type should exist", exists > 0);
+            // Create a user type to test existence
+            int user_type = hdf5_h_2.H5Iregister_type2(0, MemorySegment.NULL);
+            assertTrue("Register type failed", isValidId(user_type));
 
-            exists = hdf5_h_1.H5Itype_exists(hdf5_h_1.H5I_DATASET());
-            assertTrue("DATASET type should exist", exists > 0);
+            // Check if the user type exists
+            int exists = hdf5_h_1.H5Itype_exists(user_type);
+            assertTrue("User type should exist", exists > 0);
+
+            // Destroy the type
+            int result = hdf5_h_2.H5Idestroy_type(user_type);
+            assertTrue("Destroy type should succeed", isSuccess(result));
+
+            // After destruction, type should not exist
+            exists = hdf5_h_1.H5Itype_exists(user_type);
+            assertTrue("Destroyed type should not exist", exists == 0);
         }
     }
 }
