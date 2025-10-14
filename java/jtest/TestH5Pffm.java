@@ -2028,4 +2028,378 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(dxpl);
         }
     }
+
+    // =========================
+    // Virtual Dataset Property Tests
+    // =========================
+
+    @Test
+    public void testH5Pset_virtual_basic()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create dataset creation property list
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Create virtual dataspace (10x20)
+            long[] vdimsArray = {10, 20};
+            MemorySegment vdims = allocateLongArray(arena, 2);
+            copyToSegment(vdims, vdimsArray);
+            long vspace = hdf5_h_1.H5Screate_simple(2, vdims, MemorySegment.NULL);
+            assertTrue("H5Screate_simple vspace failed", isValidId(vspace));
+
+            // Create source dataspace (10x20)
+            long[] sdimsArray = {10, 20};
+            MemorySegment sdims = allocateLongArray(arena, 2);
+            copyToSegment(sdims, sdimsArray);
+            long srcspace = hdf5_h_1.H5Screate_simple(2, sdims, MemorySegment.NULL);
+            assertTrue("H5Screate_simple srcspace failed", isValidId(srcspace));
+
+            // Set virtual mapping
+            MemorySegment srcFile = stringToSegment(arena, "source.h5");
+            MemorySegment srcDset = stringToSegment(arena, "/source_dataset");
+            int result = hdf5_h.H5Pset_virtual(dcpl, vspace, srcFile, srcDset, srcspace);
+            assertTrue("H5Pset_virtual failed", isSuccess(result));
+
+            // Get virtual count
+            MemorySegment count = allocateLongArray(arena, 1);
+            result = hdf5_h.H5Pget_virtual_count(dcpl, count);
+            assertTrue("H5Pget_virtual_count failed", isSuccess(result));
+            assertEquals("Should have 1 virtual mapping", 1L, getLong(count));
+
+            // Cleanup
+            hdf5_h.H5Sclose(srcspace);
+            hdf5_h.H5Sclose(vspace);
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_virtual_filename()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Create dataspaces
+            long[] dimsArray = {100};
+            MemorySegment dims = allocateLongArray(arena, 1);
+            copyToSegment(dims, dimsArray);
+            long vspace = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
+            long srcspace = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
+
+            // Set virtual mapping with specific filename
+            String expectedFilename = "virtual_source_file.h5";
+            MemorySegment srcFile = stringToSegment(arena, expectedFilename);
+            MemorySegment srcDset = stringToSegment(arena, "/data");
+            hdf5_h.H5Pset_virtual(dcpl, vspace, srcFile, srcDset, srcspace);
+
+            // Query filename length
+            long nameLen = hdf5_h.H5Pget_virtual_filename(dcpl, 0, MemorySegment.NULL, 0);
+            assertTrue("H5Pget_virtual_filename length query failed", nameLen > 0);
+
+            // Get filename
+            MemorySegment nameBuf = arena.allocate(nameLen + 1);
+            long actualLen = hdf5_h.H5Pget_virtual_filename(dcpl, 0, nameBuf, nameLen + 1);
+            assertEquals("Filename length should match", nameLen, actualLen);
+
+            String actualFilename = segmentToString(nameBuf);
+            assertEquals("Filename should match", expectedFilename, actualFilename);
+
+            // Cleanup
+            hdf5_h.H5Sclose(srcspace);
+            hdf5_h.H5Sclose(vspace);
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_virtual_dsetname()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Create dataspaces
+            long[] dimsArray = {50, 100};
+            MemorySegment dims = allocateLongArray(arena, 2);
+            copyToSegment(dims, dimsArray);
+            long vspace = hdf5_h_1.H5Screate_simple(2, dims, MemorySegment.NULL);
+            long srcspace = hdf5_h_1.H5Screate_simple(2, dims, MemorySegment.NULL);
+
+            // Set virtual mapping with specific dataset name
+            String expectedDsetName = "/group/virtual_dataset";
+            MemorySegment srcFile = stringToSegment(arena, "source.h5");
+            MemorySegment srcDset = stringToSegment(arena, expectedDsetName);
+            hdf5_h.H5Pset_virtual(dcpl, vspace, srcFile, srcDset, srcspace);
+
+            // Query dataset name length
+            long nameLen = hdf5_h.H5Pget_virtual_dsetname(dcpl, 0, MemorySegment.NULL, 0);
+            assertTrue("H5Pget_virtual_dsetname length query failed", nameLen > 0);
+
+            // Get dataset name
+            MemorySegment nameBuf = arena.allocate(nameLen + 1);
+            long actualLen = hdf5_h.H5Pget_virtual_dsetname(dcpl, 0, nameBuf, nameLen + 1);
+            assertEquals("Dataset name length should match", nameLen, actualLen);
+
+            String actualDsetName = segmentToString(nameBuf);
+            assertEquals("Dataset name should match", expectedDsetName, actualDsetName);
+
+            // Cleanup
+            hdf5_h.H5Sclose(srcspace);
+            hdf5_h.H5Sclose(vspace);
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_virtual_vspace_and_srcspace()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Create virtual dataspace with specific dimensions
+            long[] vdimsArray = {30, 40};
+            MemorySegment vdims = allocateLongArray(arena, 2);
+            copyToSegment(vdims, vdimsArray);
+            long vspace = hdf5_h_1.H5Screate_simple(2, vdims, MemorySegment.NULL);
+
+            // Create source dataspace with different dimensions
+            long[] sdimsArray = {30, 40};
+            MemorySegment sdims = allocateLongArray(arena, 2);
+            copyToSegment(sdims, sdimsArray);
+            long srcspace = hdf5_h_1.H5Screate_simple(2, sdims, MemorySegment.NULL);
+
+            // Set virtual mapping
+            hdf5_h.H5Pset_virtual(dcpl, vspace, stringToSegment(arena, "src.h5"),
+                                  stringToSegment(arena, "/dset"), srcspace);
+
+            // Get virtual dataspace back
+            long retrieved_vspace = hdf5_h.H5Pget_virtual_vspace(dcpl, 0);
+            assertTrue("H5Pget_virtual_vspace failed", isValidId(retrieved_vspace));
+
+            // Verify virtual dataspace dimensions
+            MemorySegment retrieved_vdims = allocateLongArray(arena, 2);
+            hdf5_h_1.H5Sget_simple_extent_dims(retrieved_vspace, retrieved_vdims, MemorySegment.NULL);
+            assertEquals("Virtual dim 0 should match", 30L, retrieved_vdims.get(ValueLayout.JAVA_LONG, 0));
+            assertEquals("Virtual dim 1 should match", 40L, retrieved_vdims.get(ValueLayout.JAVA_LONG, 8));
+
+            // Get source dataspace back
+            long retrieved_srcspace = hdf5_h.H5Pget_virtual_srcspace(dcpl, 0);
+            assertTrue("H5Pget_virtual_srcspace failed", isValidId(retrieved_srcspace));
+
+            // Verify source dataspace dimensions
+            MemorySegment retrieved_sdims = allocateLongArray(arena, 2);
+            hdf5_h_1.H5Sget_simple_extent_dims(retrieved_srcspace, retrieved_sdims, MemorySegment.NULL);
+            assertEquals("Source dim 0 should match", 30L, retrieved_sdims.get(ValueLayout.JAVA_LONG, 0));
+            assertEquals("Source dim 1 should match", 40L, retrieved_sdims.get(ValueLayout.JAVA_LONG, 8));
+
+            // Cleanup
+            hdf5_h.H5Sclose(retrieved_srcspace);
+            hdf5_h.H5Sclose(retrieved_vspace);
+            hdf5_h.H5Sclose(srcspace);
+            hdf5_h.H5Sclose(vspace);
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_virtual_view()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create dataset access property list
+            long dapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_ACCESS_ID_g());
+            assertTrue("H5Pcreate dapl failed", isValidId(dapl));
+
+            // Set virtual view to FIRST_MISSING
+            int result = hdf5_h.H5Pset_virtual_view(dapl, hdf5_h_1.H5D_VDS_FIRST_MISSING());
+            assertTrue("H5Pset_virtual_view failed", isSuccess(result));
+
+            // Get virtual view back
+            MemorySegment view = allocateIntArray(arena, 1);
+            result = hdf5_h.H5Pget_virtual_view(dapl, view);
+            assertTrue("H5Pget_virtual_view failed", isSuccess(result));
+            assertEquals("View should be FIRST_MISSING", hdf5_h_1.H5D_VDS_FIRST_MISSING(), getInt(view));
+
+            // Change to LAST_AVAILABLE
+            result = hdf5_h.H5Pset_virtual_view(dapl, hdf5_h_1.H5D_VDS_LAST_AVAILABLE());
+            assertTrue("H5Pset_virtual_view (LAST_AVAILABLE) failed", isSuccess(result));
+
+            result = hdf5_h.H5Pget_virtual_view(dapl, view);
+            assertTrue("H5Pget_virtual_view (2nd call) failed", isSuccess(result));
+            assertEquals("View should be LAST_AVAILABLE", hdf5_h_1.H5D_VDS_LAST_AVAILABLE(), getInt(view));
+
+            hdf5_h.H5Pclose(dapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_copy_object_basic()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create object copy property list
+            long ocpypl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_OBJECT_COPY_ID_g());
+            assertTrue("H5Pcreate ocpypl failed", isValidId(ocpypl));
+
+            // Set copy options - shallow hierarchy
+            int copyOptions = hdf5_h.H5O_COPY_SHALLOW_HIERARCHY_FLAG();
+            int result      = hdf5_h.H5Pset_copy_object(ocpypl, copyOptions);
+            assertTrue("H5Pset_copy_object failed", isSuccess(result));
+
+            // Get copy options back
+            MemorySegment options = allocateIntArray(arena, 1);
+            result                = hdf5_h.H5Pget_copy_object(ocpypl, options);
+            assertTrue("H5Pget_copy_object failed", isSuccess(result));
+
+            int retrievedOptions = getInt(options);
+            assertEquals("Copy options should match", copyOptions, retrievedOptions);
+
+            // Cleanup
+            hdf5_h.H5Pclose(ocpypl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_copy_object_multiple_flags()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long ocpypl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_OBJECT_COPY_ID_g());
+            assertTrue("H5Pcreate ocpypl failed", isValidId(ocpypl));
+
+            // Set multiple copy options with bitwise OR
+            int copyOptions = hdf5_h.H5O_COPY_SHALLOW_HIERARCHY_FLAG() | hdf5_h.H5O_COPY_WITHOUT_ATTR_FLAG();
+            int result      = hdf5_h.H5Pset_copy_object(ocpypl, copyOptions);
+            assertTrue("H5Pset_copy_object failed", isSuccess(result));
+
+            // Verify
+            MemorySegment options = allocateIntArray(arena, 1);
+            result                = hdf5_h.H5Pget_copy_object(ocpypl, options);
+            assertTrue("H5Pget_copy_object failed", isSuccess(result));
+
+            int retrievedOptions = getInt(options);
+            assertEquals("Copy options should match", copyOptions, retrievedOptions);
+
+            // Verify individual flags are set
+            assertTrue("Should have SHALLOW_HIERARCHY flag",
+                       (retrievedOptions & hdf5_h.H5O_COPY_SHALLOW_HIERARCHY_FLAG()) != 0);
+            assertTrue("Should have WITHOUT_ATTR flag",
+                       (retrievedOptions & hdf5_h.H5O_COPY_WITHOUT_ATTR_FLAG()) != 0);
+
+            hdf5_h.H5Pclose(ocpypl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_copy_object_expand_links()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long ocpypl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_OBJECT_COPY_ID_g());
+            assertTrue("H5Pcreate ocpypl failed", isValidId(ocpypl));
+
+            // Set options to expand soft and external links
+            int copyOptions =
+                hdf5_h.H5O_COPY_EXPAND_SOFT_LINK_FLAG() | hdf5_h.H5O_COPY_EXPAND_EXT_LINK_FLAG();
+            int result = hdf5_h.H5Pset_copy_object(ocpypl, copyOptions);
+            assertTrue("H5Pset_copy_object failed", isSuccess(result));
+
+            // Verify
+            MemorySegment options = allocateIntArray(arena, 1);
+            result                = hdf5_h.H5Pget_copy_object(ocpypl, options);
+            assertTrue("H5Pget_copy_object failed", isSuccess(result));
+
+            int retrievedOptions = getInt(options);
+            assertTrue("Should have EXPAND_SOFT_LINK flag",
+                       (retrievedOptions & hdf5_h.H5O_COPY_EXPAND_SOFT_LINK_FLAG()) != 0);
+            assertTrue("Should have EXPAND_EXT_LINK flag",
+                       (retrievedOptions & hdf5_h.H5O_COPY_EXPAND_EXT_LINK_FLAG()) != 0);
+
+            hdf5_h.H5Pclose(ocpypl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_attr_phase_change()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create object creation property list
+            long ocpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_OBJECT_CREATE_ID_g());
+            assertTrue("H5Pcreate ocpl failed", isValidId(ocpl));
+
+            // Set attribute phase change thresholds
+            // max_compact: maximum number of attributes in compact storage
+            // min_dense: minimum number of attributes in dense storage
+            int maxCompact = 10;
+            int minDense   = 8;
+            int result     = hdf5_h.H5Pset_attr_phase_change(ocpl, maxCompact, minDense);
+            assertTrue("H5Pset_attr_phase_change failed", isSuccess(result));
+
+            // Get settings back
+            MemorySegment maxCompactOut = allocateIntArray(arena, 1);
+            MemorySegment minDenseOut   = allocateIntArray(arena, 1);
+            result = hdf5_h.H5Pget_attr_phase_change(ocpl, maxCompactOut, minDenseOut);
+            assertTrue("H5Pget_attr_phase_change failed", isSuccess(result));
+
+            int retrievedMaxCompact = getInt(maxCompactOut);
+            int retrievedMinDense   = getInt(minDenseOut);
+            assertEquals("Max compact should match", maxCompact, retrievedMaxCompact);
+            assertEquals("Min dense should match", minDense, retrievedMinDense);
+
+            hdf5_h.H5Pclose(ocpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_copy_object_preserve_null()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long ocpypl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_OBJECT_COPY_ID_g());
+            assertTrue("H5Pcreate ocpypl failed", isValidId(ocpypl));
+
+            // Test PRESERVE_NULL flag
+            int copyOptions = hdf5_h.H5O_COPY_PRESERVE_NULL_FLAG();
+            int result      = hdf5_h.H5Pset_copy_object(ocpypl, copyOptions);
+            assertTrue("H5Pset_copy_object failed", isSuccess(result));
+
+            // Verify
+            MemorySegment options = allocateIntArray(arena, 1);
+            result                = hdf5_h.H5Pget_copy_object(ocpypl, options);
+            assertTrue("H5Pget_copy_object failed", isSuccess(result));
+
+            int retrievedOptions = getInt(options);
+            assertEquals("Should have PRESERVE_NULL flag", copyOptions, retrievedOptions);
+
+            // Test with ALL flags
+            result = hdf5_h.H5Pset_copy_object(ocpypl, hdf5_h.H5O_COPY_ALL());
+            assertTrue("H5Pset_copy_object (ALL) failed", isSuccess(result));
+
+            result = hdf5_h.H5Pget_copy_object(ocpypl, options);
+            assertTrue("H5Pget_copy_object failed", isSuccess(result));
+
+            retrievedOptions = getInt(options);
+            assertEquals("Should have ALL flags", hdf5_h.H5O_COPY_ALL(), retrievedOptions);
+
+            hdf5_h.H5Pclose(ocpypl);
+        }
+    }
 }

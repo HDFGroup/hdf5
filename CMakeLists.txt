@@ -1136,16 +1136,15 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     endif ()
     message (VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
 
-    if (HDF5_BUILD_JAVA)
-      if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
-        if (HDF5_ENABLE_JNI)
-          set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
-       else ()
-          set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
-        endif ()
-      else ()
+    # Set the default directory for the Java sources for doxygen
+    if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
+      if (HDF5_ENABLE_JNI)
         set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
+     else ()
+        set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
       endif ()
+    else ()
+      set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
     endif ()
 
     add_subdirectory (doxygen)

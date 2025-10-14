@@ -637,4 +637,269 @@ public class TestH5Tffm {
             assertEquals("MSB padding should be ZERO", hdf5_h.H5T_PAD_ZERO(), getInt(newMsbSegment));
         }
     }
+
+    @Test
+    public void testH5Tconvert_basic()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create buffer with int values
+            int numElements = 5;
+            int[] intData   = {1, 2, 3, 4, 5};
+
+            // Allocate buffer and copy int data
+            MemorySegment buffer = arena.allocate(numElements * 8); // Enough for doubles
+            for (int i = 0; i < numElements; i++) {
+                buffer.setAtIndex(java.lang.foreign.ValueLayout.JAVA_INT, i, intData[i]);
+            }
+
+            // Convert int to double
+            long srcType = hdf5_h_1.H5T_NATIVE_INT_g();
+            long dstType = hdf5_h_1.H5T_NATIVE_DOUBLE_g();
+            int result =
+                hdf5_h_1.H5Tconvert(srcType, dstType, numElements, buffer, MemorySegment.NULL, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Tconvert failed", isSuccess(result));
+
+            // Verify first converted value
+            double convertedValue = buffer.getAtIndex(java.lang.foreign.ValueLayout.JAVA_DOUBLE, 0);
+            assertEquals("First value should be 1.0", 1.0, convertedValue, 0.001);
+        }
+    }
+
+    @Test
+    public void testH5Tconvert_int_to_float()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create buffer with int values
+            int numElements = 3;
+            int[] intData   = {10, 20, 30};
+
+            // Allocate separate buffers for in-place conversion
+            MemorySegment buffer = arena.allocate(numElements * 4); // 4 bytes per int/float
+            for (int i = 0; i < numElements; i++) {
+                buffer.setAtIndex(java.lang.foreign.ValueLayout.JAVA_INT, i, intData[i]);
+            }
+
+            // Convert int to float in-place
+            int result = hdf5_h_1.H5Tconvert(hdf5_h_1.H5T_NATIVE_INT_g(), hdf5_h_1.H5T_NATIVE_FLOAT_g(),
+                                             numElements, buffer, MemorySegment.NULL, hdf5_h.H5P_DEFAULT());
+            assertTrue("H5Tconvert failed", isSuccess(result));
+
+            // Verify converted values
+            float val0 = buffer.getAtIndex(java.lang.foreign.ValueLayout.JAVA_FLOAT, 0);
+            float val1 = buffer.getAtIndex(java.lang.foreign.ValueLayout.JAVA_FLOAT, 1);
+            float val2 = buffer.getAtIndex(java.lang.foreign.ValueLayout.JAVA_FLOAT, 2);
+
+            assertEquals("First value should be 10.0", 10.0f, val0, 0.001f);
+            assertEquals("Second value should be 20.0", 20.0f, val1, 0.001f);
+            assertEquals("Third value should be 30.0", 30.0f, val2, 0.001f);
+        }
+    }
+
+    @Test
+    public void testH5Treclaim_with_vlen_string()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create variable-length string type
+            long strType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_C_S1_g());
+            assertTrue("H5Tcopy failed", isValidId(strType));
+
+            int result = hdf5_h_1.H5Tset_size(strType, -1); // H5T_VARIABLE
+            assertTrue("H5Tset_size failed", isSuccess(result));
+
+            // Create simple 1D dataspace with 1 element
+            long[] dimsArray = {1};
+            MemorySegment dims = allocateLongArray(arena, 1);
+            copyToSegment(dims, dimsArray);
+            long space = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
+            assertTrue("H5Screate_simple failed", isValidId(space));
+
+            // Allocate buffer for pointer to string
+            MemorySegment buffer = arena.allocate(8); // Pointer size
+
+            // Set to NULL initially (nothing to reclaim, but tests the API)
+            buffer.set(java.lang.foreign.ValueLayout.ADDRESS, 0, MemorySegment.NULL);
+
+            // Test H5Treclaim - should succeed even with NULL pointer
+            result = hdf5_h_1.H5Treclaim(strType, space, hdf5_h.H5P_DEFAULT(), buffer);
+            assertTrue("H5Treclaim should succeed", isSuccess(result));
+
+            // Cleanup
+            hdf5_h.H5Sclose(space);
+            hdf5_h_1.H5Tclose(strType);
+        }
+    }
+
+    @Test
+    public void testH5Tfind_conversion_path()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Try to find conversion path from int to float
+            MemorySegment pcdata = arena.allocate(8); // Pointer to H5T_cdata_t*
+            pcdata.set(java.lang.foreign.ValueLayout.ADDRESS, 0, MemorySegment.NULL);
+
+            MemorySegment convFunc =
+                hdf5_h.H5Tfind(hdf5_h_1.H5T_NATIVE_INT_g(), hdf5_h_1.H5T_NATIVE_FLOAT_g(), pcdata);
+
+            // H5Tfind returns function pointer (can be NULL if no conversion exists)
+            // For native types, conversion should exist
+            assertFalse("Conversion function should be found", convFunc.equals(MemorySegment.NULL));
+        }
+    }
+
+    @Test
+    public void testH5Tfind_same_type()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Find conversion path from type to itself (should be no-op conversion)
+            MemorySegment pcdata = arena.allocate(8);
+            pcdata.set(java.lang.foreign.ValueLayout.ADDRESS, 0, MemorySegment.NULL);
+
+            MemorySegment convFunc =
+                hdf5_h.H5Tfind(hdf5_h_1.H5T_NATIVE_INT_g(), hdf5_h_1.H5T_NATIVE_INT_g(), pcdata);
+
+            // Conversion from type to itself should exist (no-op)
+            assertFalse("No-op conversion should be found", convFunc.equals(MemorySegment.NULL));
+        }
+    }
+
+    @Test
+    public void testH5Tget_fields()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create a copy of a floating point type
+            long floatType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_IEEE_F64LE_g());
+            assertTrue("H5Tcopy failed", isValidId(floatType));
+
+            // Get field positions for floating point type
+            MemorySegment spos  = allocateLongArray(arena, 1); // sign position
+            MemorySegment epos  = allocateLongArray(arena, 1); // exponent position
+            MemorySegment esize = allocateLongArray(arena, 1); // exponent size
+            MemorySegment mpos  = allocateLongArray(arena, 1); // mantissa position
+            MemorySegment msize = allocateLongArray(arena, 1); // mantissa size
+
+            int result = hdf5_h_1.H5Tget_fields(floatType, spos, epos, esize, mpos, msize);
+            assertTrue("H5Tget_fields failed", isSuccess(result));
+
+            // Verify we got valid values (all should be >= 0)
+            long sposVal  = getLong(spos);
+            long eposVal  = getLong(epos);
+            long esizeVal = getLong(esize);
+            long mposVal  = getLong(mpos);
+            long msizeVal = getLong(msize);
+
+            assertTrue("Sign position should be valid", sposVal >= 0);
+            assertTrue("Exponent position should be valid", eposVal >= 0);
+            assertTrue("Exponent size should be > 0", esizeVal > 0);
+            assertTrue("Mantissa position should be valid", mposVal >= 0);
+            assertTrue("Mantissa size should be > 0", msizeVal > 0);
+
+            hdf5_h_1.H5Tclose(floatType);
+        }
+    }
+
+    @Test
+    public void testH5Tget_ebias()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Get exponent bias for double
+            long floatType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_IEEE_F64LE_g());
+            assertTrue("H5Tcopy failed", isValidId(floatType));
+
+            long ebias = hdf5_h_1.H5Tget_ebias(floatType);
+            assertTrue("Exponent bias should be > 0", ebias > 0);
+
+            // For IEEE 754 double, exponent bias is typically 1023
+            // We won't test exact value as it's platform-dependent, but it should be reasonable
+            assertTrue("Exponent bias should be reasonable", ebias < 10000);
+
+            hdf5_h_1.H5Tclose(floatType);
+        }
+    }
+
+    @Test
+    public void testH5Tget_norm()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Get normalization type for floating point
+            long floatType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_FLOAT_g());
+            assertTrue("H5Tcopy failed", isValidId(floatType));
+
+            int norm = hdf5_h_1.H5Tget_norm(floatType);
+            assertTrue("Normalization should be valid", norm >= 0);
+
+            // Typical normalization types: IMPLIED (0), MSBSET (1), NONE (2)
+            assertTrue("Normalization should be in valid range", norm <= 2);
+
+            hdf5_h_1.H5Tclose(floatType);
+        }
+    }
+
+    @Test
+    public void testH5Tget_inpad()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Get internal padding type for floating point
+            long floatType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_DOUBLE_g());
+            assertTrue("H5Tcopy failed", isValidId(floatType));
+
+            int inpad = hdf5_h_1.H5Tget_inpad(floatType);
+            assertTrue("Internal padding should be valid", inpad >= 0);
+
+            // Padding types: ZERO (0), ONE (1), BACKGROUND (2)
+            assertTrue("Internal padding should be in valid range", inpad <= 2);
+
+            hdf5_h_1.H5Tclose(floatType);
+        }
+    }
+
+    @Test
+    public void testH5Tset_fields_and_ebias()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create a custom floating point type
+            long floatType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_IEEE_F32LE_g());
+            assertTrue("H5Tcopy failed", isValidId(floatType));
+
+            // Set custom field layout
+            // For 32-bit float: sign(1) + exponent(8) + mantissa(23) = 32 bits
+            long spos  = 31;  // Sign at bit 31
+            long epos  = 23;  // Exponent starts at bit 23
+            long esize = 8;   // Exponent is 8 bits
+            long mpos  = 0;   // Mantissa starts at bit 0
+            long msize = 23;  // Mantissa is 23 bits
+
+            int result = hdf5_h_1.H5Tset_fields(floatType, spos, epos, esize, mpos, msize);
+            assertTrue("H5Tset_fields failed", isSuccess(result));
+
+            // Set exponent bias (for 8-bit exponent, typical bias is 127)
+            result = hdf5_h_1.H5Tset_ebias(floatType, 127);
+            assertTrue("H5Tset_ebias failed", isSuccess(result));
+
+            // Verify the settings
+            long retrievedEbias = hdf5_h_1.H5Tget_ebias(floatType);
+            assertEquals("Exponent bias should match", 127, retrievedEbias);
+
+            hdf5_h_1.H5Tclose(floatType);
+        }
+    }
 }
