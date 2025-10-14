@@ -891,7 +891,7 @@ public class TestH5Tffm {
             assertEquals("Should be 1D array", 1, ndims);
 
             MemorySegment retrievedDims = arena.allocate(hdf5_h.C_LONG, 1);
-            int result = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
+            int result                  = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
             assertEquals("H5Tget_array_dims2 should succeed", 1, result);
             assertEquals("Dimension should be 10", 10, retrievedDims.get(hdf5_h.C_LONG, 0));
         }
@@ -952,17 +952,17 @@ public class TestH5Tffm {
         try (Arena arena = Arena.ofConfined()) {
             // Test with different dimensionalities
             MemorySegment dims1 = arena.allocate(hdf5_h.C_LONG, 10);
-            long tid1 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 1, dims1);
+            long tid1           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 1, dims1);
             assertEquals("Should be 1D", 1, hdf5_h_1.H5Tget_array_ndims(tid1));
             hdf5_h_1.H5Tclose(tid1);
 
             MemorySegment dims2 = arena.allocateFrom(hdf5_h.C_LONG, 5, 6);
-            long tid2 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
+            long tid2           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
             assertEquals("Should be 2D", 2, hdf5_h_1.H5Tget_array_ndims(tid2));
             hdf5_h_1.H5Tclose(tid2);
 
             MemorySegment dims3 = arena.allocateFrom(hdf5_h.C_LONG, 2, 3, 4);
-            H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 3, dims3);
+            H5tid               = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 3, dims3);
             assertEquals("Should be 3D", 3, hdf5_h_1.H5Tget_array_ndims(H5tid));
         }
     }
@@ -975,11 +975,11 @@ public class TestH5Tffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create array with specific dimensions
             MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 7, 8, 9);
-            H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_LONG_g(), 3, dims);
+            H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_LONG_g(), 3, dims);
 
             // Retrieve dimensions
             MemorySegment retrievedDims = arena.allocate(hdf5_h.C_LONG, 3);
-            int result = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
+            int result                  = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
             assertEquals("H5Tget_array_dims2 should return rank", 3, result);
 
             // Verify each dimension
@@ -1003,7 +1003,7 @@ public class TestH5Tffm {
 
             // Create array of compound types [5]
             MemorySegment dims = arena.allocate(hdf5_h.C_LONG, 5);
-            H5tid = hdf5_h_1.H5Tarray_create2(compoundType, 1, dims);
+            H5tid              = hdf5_h_1.H5Tarray_create2(compoundType, 1, dims);
             assertTrue("H5Tarray_create2 with compound base failed", isValidId(H5tid));
 
             // Verify array properties
@@ -1013,7 +1013,8 @@ public class TestH5Tffm {
             // Get super type (base type)
             long superType = hdf5_h_1.H5Tget_super(H5tid);
             assertTrue("Should have valid super type", isValidId(superType));
-            assertEquals("Super type should be compound", hdf5_h.H5T_COMPOUND(), hdf5_h_1.H5Tget_class(superType));
+            assertEquals("Super type should be compound", hdf5_h.H5T_COMPOUND(),
+                         hdf5_h_1.H5Tget_class(superType));
 
             hdf5_h_1.H5Tclose(superType);
             hdf5_h_1.H5Tclose(compoundType);
@@ -1028,7 +1029,7 @@ public class TestH5Tffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create array type
             MemorySegment dims = arena.allocate(hdf5_h.C_LONG, 10);
-            H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_SHORT_g(), 1, dims);
+            H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_SHORT_g(), 1, dims);
 
             // Get the base type
             long superType = hdf5_h_1.H5Tget_super(H5tid);
@@ -1050,14 +1051,14 @@ public class TestH5Tffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create array [5][10] of ints (4 bytes each)
             MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 5, 10);
-            H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims);
+            H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims);
 
             // Get size - should be 5 * 10 * 4 = 200 bytes
             long size = hdf5_h_1.H5Tget_size(H5tid);
             assertEquals("Array size should be 200 bytes", 200, size);
 
             // For doubles (8 bytes each): 5 * 10 * 8 = 400 bytes
-            long tid2 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_DOUBLE_g(), 2, dims);
+            long tid2  = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_DOUBLE_g(), 2, dims);
             long size2 = hdf5_h_1.H5Tget_size(tid2);
             assertEquals("Array size should be 400 bytes", 400, size2);
             hdf5_h_1.H5Tclose(tid2);
@@ -1091,15 +1092,15 @@ public class TestH5Tffm {
 
             // Insert enum values
             MemorySegment val0 = arena.allocate(hdf5_h.C_INT, 0);
-            int result = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("RED"), val0);
+            int result         = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("RED"), val0);
             assertEquals("H5Tenum_insert RED failed", 0, result);
 
             MemorySegment val1 = arena.allocate(hdf5_h.C_INT, 1);
-            result = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("GREEN"), val1);
+            result             = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("GREEN"), val1);
             assertEquals("H5Tenum_insert GREEN failed", 0, result);
 
             MemorySegment val2 = arena.allocate(hdf5_h.C_INT, 2);
-            result = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("BLUE"), val2);
+            result             = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("BLUE"), val2);
             assertEquals("H5Tenum_insert BLUE failed", 0, result);
 
             // Verify member count
@@ -1144,8 +1145,8 @@ public class TestH5Tffm {
 
             // Get name for value 100
             MemorySegment nameBuffer = arena.allocate(20);
-            MemorySegment queryVal = arena.allocate(hdf5_h.C_INT, 100);
-            int result = hdf5_h_1.H5Tenum_nameof(H5tid, queryVal, nameBuffer, 20);
+            MemorySegment queryVal   = arena.allocate(hdf5_h.C_INT, 100);
+            int result               = hdf5_h_1.H5Tenum_nameof(H5tid, queryVal, nameBuffer, 20);
             assertEquals("H5Tenum_nameof failed", 0, result);
 
             String name = nameBuffer.getString(0);
