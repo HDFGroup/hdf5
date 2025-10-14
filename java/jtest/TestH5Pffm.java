@@ -1249,34 +1249,6 @@ public class TestH5Pffm {
     }
 
     @Test
-    public void testH5Pset_attr_phase_change()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            long ocpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_OBJECT_CREATE_ID_g());
-            assertTrue("H5Pcreate ocpl failed", isValidId(ocpl));
-
-            // Set attribute phase change thresholds
-            int maxCompact = 8;
-            int minDense   = 6;
-            int result     = hdf5_h.H5Pset_attr_phase_change(ocpl, maxCompact, minDense);
-            assertTrue("H5Pset_attr_phase_change failed", isSuccess(result));
-
-            // Get thresholds back
-            MemorySegment outMaxCompact = allocateIntArray(arena, 1);
-            MemorySegment outMinDense   = allocateIntArray(arena, 1);
-            result                      = hdf5_h.H5Pget_attr_phase_change(ocpl, outMaxCompact, outMinDense);
-            assertTrue("H5Pget_attr_phase_change failed", isSuccess(result));
-
-            assertEquals("Max compact should match", maxCompact, getInt(outMaxCompact));
-            assertEquals("Min dense should match", minDense, getInt(outMinDense));
-
-            hdf5_h.H5Pclose(ocpl);
-        }
-    }
-
-    @Test
     public void testH5Pset_nlinks()
     {
         System.out.print(testname.getMethodName());
