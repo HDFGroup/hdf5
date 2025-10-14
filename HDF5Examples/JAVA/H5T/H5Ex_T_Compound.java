@@ -18,14 +18,14 @@
   back the data, and outputs it to the screen.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.hdfgroup.javahdf5.hdf5_h.*;
 
 import org.hdfgroup.javahdf5.*;
 

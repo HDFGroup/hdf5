@@ -19,9 +19,9 @@
  Guide, chapter 4, figure 26.
  ************************************************************/
 
-import java.util.ArrayList;
-
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.util.ArrayList;
 
 import org.hdfgroup.javahdf5.*;
 

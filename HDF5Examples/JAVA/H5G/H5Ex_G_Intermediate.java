@@ -15,9 +15,9 @@
  a single call to H5Gcreate.
  ************************************************************/
 
-import java.util.ArrayList;
-
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.util.ArrayList;
 
 import org.hdfgroup.javahdf5.*;
 

@@ -22,11 +22,11 @@
   screen.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.hdfgroup.javahdf5.hdf5_h.*;
 
 import org.hdfgroup.javahdf5.*;
 

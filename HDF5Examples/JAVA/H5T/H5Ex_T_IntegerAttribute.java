@@ -18,9 +18,9 @@
   outputs it to the screen.
  ************************************************************/
 
-import java.text.DecimalFormat;
-
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.text.DecimalFormat;
 
 import org.hdfgroup.javahdf5.*;
 

@@ -22,11 +22,11 @@
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
 
-import org.hdfgroup.javahdf5.*;
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_D_Alloc {
     private static String FILENAME     = "H5Ex_D_Alloc.h5";

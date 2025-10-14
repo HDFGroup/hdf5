@@ -18,11 +18,11 @@
   outputs it to the screen.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-
-import static org.hdfgroup.javahdf5.hdf5_h.*;
 
 import org.hdfgroup.javahdf5.*;
 
