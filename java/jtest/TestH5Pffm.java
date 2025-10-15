@@ -2418,4 +2418,147 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(gcpl);
         }
     }
+
+    // ================================
+    // Phase 2A Expansion Tests
+    // ================================
+
+    @Test
+    public void testH5Pset_evict_on_close()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set evict on close to true
+            int result = hdf5_h.H5Pset_evict_on_close(fapl, true);
+            assertTrue("H5Pset_evict_on_close failed", isSuccess(result));
+
+            // Get evict on close setting
+            MemorySegment evictSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
+            result                 = hdf5_h.H5Pget_evict_on_close(fapl, evictSeg);
+            assertTrue("H5Pget_evict_on_close failed", isSuccess(result));
+
+            boolean evict = evictSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
+            assertTrue("Evict on close should be true", evict);
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_file_locking()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set file locking (use_file_locking=true, ignore_when_disabled=false)
+            int result = hdf5_h.H5Pset_file_locking(fapl, true, false);
+            assertTrue("H5Pset_file_locking failed", isSuccess(result));
+
+            // Get file locking settings
+            MemorySegment useLockingSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
+            MemorySegment ignoreFailSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
+            result = hdf5_h.H5Pget_file_locking(fapl, useLockingSeg, ignoreFailSeg);
+            assertTrue("H5Pget_file_locking failed", isSuccess(result));
+
+            boolean useLocking  = useLockingSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
+            boolean ignoreFail = ignoreFailSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
+            assertTrue("Use locking should be true", useLocking);
+            assertFalse("Ignore fail should be false", ignoreFail);
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_page_buffer_size()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set page buffer size (4MB buffer, 50% metadata, 25% raw data)
+            long bufSize    = 4 * 1024 * 1024; // 4MB
+            int minMetaPct = 50;
+            int minRawPct  = 25;
+            int result     = hdf5_h.H5Pset_page_buffer_size(fapl, bufSize, minMetaPct, minRawPct);
+            assertTrue("H5Pset_page_buffer_size failed", isSuccess(result));
+
+            // Get page buffer size
+            MemorySegment bufSizeSeg    = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment minMetaPctSeg = arena.allocate(ValueLayout.JAVA_INT);
+            MemorySegment minRawPctSeg  = arena.allocate(ValueLayout.JAVA_INT);
+            result = hdf5_h.H5Pget_page_buffer_size(fapl, bufSizeSeg, minMetaPctSeg, minRawPctSeg);
+            assertTrue("H5Pget_page_buffer_size failed", isSuccess(result));
+
+            long retBufSize = bufSizeSeg.get(ValueLayout.JAVA_LONG, 0);
+            int retMetaPct  = minMetaPctSeg.get(ValueLayout.JAVA_INT, 0);
+            int retRawPct   = minRawPctSeg.get(ValueLayout.JAVA_INT, 0);
+
+            assertEquals("Buffer size should match", bufSize, retBufSize);
+            assertEquals("Metadata percent should match", minMetaPct, retMetaPct);
+            assertEquals("Raw data percent should match", minRawPct, retRawPct);
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_metadata_read_attempts()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set metadata read attempts to 5
+            int attempts = 5;
+            int result   = hdf5_h.H5Pset_metadata_read_attempts(fapl, attempts);
+            assertTrue("H5Pset_metadata_read_attempts failed", isSuccess(result));
+
+            // Get metadata read attempts
+            MemorySegment attemptsSeg = arena.allocate(ValueLayout.JAVA_INT);
+            result                    = hdf5_h.H5Pget_metadata_read_attempts(fapl, attemptsSeg);
+            assertTrue("H5Pget_metadata_read_attempts failed", isSuccess(result));
+
+            int retAttempts = attemptsSeg.get(ValueLayout.JAVA_INT, 0);
+            assertEquals("Attempts should match", attempts, retAttempts);
+
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_obj_track_times()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            long ocpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_OBJECT_CREATE_ID_g());
+            assertTrue("H5Pcreate ocpl failed", isValidId(ocpl));
+
+            // Set object time tracking to false
+            int result = hdf5_h.H5Pset_obj_track_times(ocpl, false);
+            assertTrue("H5Pset_obj_track_times failed", isSuccess(result));
+
+            // Get object time tracking setting
+            MemorySegment trackSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
+            result                 = hdf5_h.H5Pget_obj_track_times(ocpl, trackSeg);
+            assertTrue("H5Pget_obj_track_times failed", isSuccess(result));
+
+            boolean track = trackSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
+            assertFalse("Track times should be false", track);
+
+            hdf5_h.H5Pclose(ocpl);
+        }
+    }
 }
