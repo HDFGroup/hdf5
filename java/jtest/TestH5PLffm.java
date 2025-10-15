@@ -49,7 +49,7 @@ public class TestH5PLffm {
         // Save initial plugin loading state
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment stateSeg = arena.allocate(ValueLayout.JAVA_INT);
-            int result              = hdf5_h.H5PLget_loading_state(stateSeg);
+            int result             = hdf5_h.H5PLget_loading_state(stateSeg);
             if (result >= 0) {
                 initialPluginState = stateSeg.get(ValueLayout.JAVA_INT, 0);
             }
