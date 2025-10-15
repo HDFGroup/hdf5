@@ -2561,4 +2561,336 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(ocpl);
         }
     }
+
+    // ================================
+    // Phase 2B Expansion Tests - Virtual Datasets
+    // ================================
+
+    @Test
+    public void testH5Pset_virtual_basic()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create DCPL for virtual dataset
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Create dataspaces for virtual and source datasets
+            long[] dims = {10, 20};
+            MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+            long vspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+            assertTrue("H5Screate_simple vspace failed", isValidId(vspace));
+
+            long srcspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+            assertTrue("H5Screate_simple srcspace failed", isValidId(srcspace));
+
+            // Set virtual dataset mapping
+            MemorySegment srcFileName = stringToSegment(arena, "source.h5");
+            MemorySegment srcDsetName = stringToSegment(arena, "/source_dset");
+            int result = hdf5_h.H5Pset_virtual(dcpl, vspace, srcFileName, srcDsetName, srcspace);
+            assertTrue("H5Pset_virtual failed", isSuccess(result));
+
+            // Get virtual dataset count
+            long vcount = hdf5_h.H5Pget_virtual_count(dcpl);
+            assertEquals("Virtual count should be 1", 1, vcount);
+
+            // Cleanup
+            hdf5_h_1.H5Sclose(vspace);
+            hdf5_h_1.H5Sclose(srcspace);
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_virtual_info()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create DCPL with virtual dataset mapping
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            long[] dims = {5, 10};
+            MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+            long vspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+            long srcspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+
+            MemorySegment srcFileName = stringToSegment(arena, "test_source.h5");
+            MemorySegment srcDsetName = stringToSegment(arena, "/data");
+            hdf5_h.H5Pset_virtual(dcpl, vspace, srcFileName, srcDsetName, srcspace);
+
+            // Get virtual dataset info
+            long vcount = hdf5_h.H5Pget_virtual_count(dcpl);
+            assertEquals("Should have 1 virtual mapping", 1, vcount);
+
+            // Get virtual vspace for index 0
+            long retrieved_vspace = hdf5_h.H5Pget_virtual_vspace(dcpl, 0);
+            assertTrue("H5Pget_virtual_vspace should succeed", isValidId(retrieved_vspace));
+
+            // Get virtual source space for index 0
+            long retrieved_srcspace = hdf5_h.H5Pget_virtual_srcspace(dcpl, 0);
+            assertTrue("H5Pget_virtual_srcspace should succeed", isValidId(retrieved_srcspace));
+
+            // Cleanup
+            hdf5_h_1.H5Sclose(retrieved_vspace);
+            hdf5_h_1.H5Sclose(retrieved_srcspace);
+            hdf5_h_1.H5Sclose(vspace);
+            hdf5_h_1.H5Sclose(srcspace);
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    // ================================
+    // Phase 2B Expansion Tests - External Storage
+    // ================================
+
+    @Test
+    public void testH5Pset_external()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create DCPL for external storage
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Add external file
+            MemorySegment extFile = stringToSegment(arena, "external_data.bin");
+            long offset = 0;
+            long size = 1024; // 1KB
+            int result = hdf5_h.H5Pset_external(dcpl, extFile, offset, size);
+            assertTrue("H5Pset_external failed", isSuccess(result));
+
+            // Get external file count
+            int extCount = hdf5_h.H5Pget_external_count(dcpl);
+            assertEquals("Should have 1 external file", 1, extCount);
+
+            // Cleanup
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pget_external()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create DCPL and add external file
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            String extFileName = "my_external.bin";
+            MemorySegment extFile = stringToSegment(arena, extFileName);
+            long offset = 1024;
+            long size = 4096;
+            hdf5_h.H5Pset_external(dcpl, extFile, offset, size);
+
+            // Get external file info
+            int nameSize = 256;
+            MemorySegment nameBuf = arena.allocate(nameSize);
+            MemorySegment offsetSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+
+            long retval = hdf5_h.H5Pget_external(dcpl, 0, nameSize, nameBuf, offsetSeg, sizeSeg);
+            assertTrue("H5Pget_external should succeed", retval >= 0);
+
+            // Verify retrieved values
+            String retrievedName = segmentToString(nameBuf);
+            assertEquals("File name should match", extFileName, retrievedName);
+
+            long retrievedOffset = offsetSeg.get(ValueLayout.JAVA_LONG, 0);
+            assertEquals("Offset should match", offset, retrievedOffset);
+
+            long retrievedSize = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
+            assertEquals("Size should match", size, retrievedSize);
+
+            // Cleanup
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_external_multiple()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create DCPL
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Add multiple external files
+            hdf5_h.H5Pset_external(dcpl, stringToSegment(arena, "ext1.bin"), 0, 1024);
+            hdf5_h.H5Pset_external(dcpl, stringToSegment(arena, "ext2.bin"), 0, 2048);
+            hdf5_h.H5Pset_external(dcpl, stringToSegment(arena, "ext3.bin"), 0, 4096);
+
+            // Verify count
+            int extCount = hdf5_h.H5Pget_external_count(dcpl);
+            assertEquals("Should have 3 external files", 3, extCount);
+
+            // Cleanup
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    // ================================
+    // Phase 2B Expansion Tests - Advanced VFD Configuration
+    // ================================
+
+    @Test
+    public void testH5Pset_fapl_core()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create FAPL
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set core (memory) VFD
+            long increment = 1024 * 1024; // 1MB increments
+            boolean backingStore = false;  // No file backing
+            int result = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
+            assertTrue("H5Pset_fapl_core failed", isSuccess(result));
+
+            // Get core VFD settings
+            MemorySegment incrementSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment backingStoreSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
+            result = hdf5_h.H5Pget_fapl_core(fapl, incrementSeg, backingStoreSeg);
+            assertTrue("H5Pget_fapl_core failed", isSuccess(result));
+
+            long retIncrement = incrementSeg.get(ValueLayout.JAVA_LONG, 0);
+            assertEquals("Increment should match", increment, retIncrement);
+
+            boolean retBackingStore = backingStoreSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
+            assertEquals("Backing store should match", backingStore, retBackingStore);
+
+            // Cleanup
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_fapl_sec2()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create FAPL
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Set sec2 (POSIX) VFD
+            int result = hdf5_h.H5Pset_fapl_sec2(fapl);
+            assertTrue("H5Pset_fapl_sec2 failed", isSuccess(result));
+
+            // Verify driver is sec2
+            long driverId = hdf5_h.H5Pget_driver(fapl);
+            assertTrue("Driver ID should be valid", driverId >= 0);
+
+            // Cleanup
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_fapl_family()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create FAPL
+            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
+            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
+
+            // Create member FAPL (use default)
+            long memb_fapl = hdf5_h.H5P_DEFAULT();
+
+            // Set family VFD with 1MB member files
+            long membSize = 1024 * 1024; // 1MB per family member
+            int result = hdf5_h.H5Pset_fapl_family(fapl, membSize, memb_fapl);
+            assertTrue("H5Pset_fapl_family failed", isSuccess(result));
+
+            // Get family VFD settings
+            MemorySegment membSizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment membFaplSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            result = hdf5_h.H5Pget_fapl_family(fapl, membSizeSeg, membFaplSeg);
+            assertTrue("H5Pget_fapl_family failed", isSuccess(result));
+
+            long retMembSize = membSizeSeg.get(ValueLayout.JAVA_LONG, 0);
+            assertEquals("Member size should match", membSize, retMembSize);
+
+            // Cleanup
+            hdf5_h.H5Pclose(fapl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_efile_prefix()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create DCPL (for external file prefix)
+            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
+            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
+
+            // Set external file prefix
+            String prefix = "/data/external/";
+            MemorySegment prefixSeg = stringToSegment(arena, prefix);
+            int result = hdf5_h.H5Pset_efile_prefix(dcpl, prefixSeg);
+            assertTrue("H5Pset_efile_prefix failed", isSuccess(result));
+
+            // Get prefix size
+            long prefixSize = hdf5_h.H5Pget_efile_prefix(dcpl, MemorySegment.NULL, 0);
+            assertTrue("H5Pget_efile_prefix size query failed", prefixSize > 0);
+
+            // Get prefix value
+            MemorySegment prefixBuf = arena.allocate(prefixSize + 1);
+            result = (int)hdf5_h.H5Pget_efile_prefix(dcpl, prefixBuf, prefixSize + 1);
+            assertTrue("H5Pget_efile_prefix failed", result >= 0);
+
+            String retrievedPrefix = segmentToString(prefixBuf);
+            assertEquals("Prefix should match", prefix, retrievedPrefix);
+
+            // Cleanup
+            hdf5_h.H5Pclose(dcpl);
+        }
+    }
+
+    @Test
+    public void testH5Pset_data_transform()
+    {
+        System.out.print(testname.getMethodName());
+
+        try (Arena arena = Arena.ofConfined()) {
+            // Create DXPL
+            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
+            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
+
+            // Set data transform expression
+            String transform = "x + 10";
+            MemorySegment transformSeg = stringToSegment(arena, transform);
+            int result = hdf5_h.H5Pset_data_transform(dxpl, transformSeg);
+            assertTrue("H5Pset_data_transform failed", isSuccess(result));
+
+            // Get transform size
+            long transformSize = hdf5_h.H5Pget_data_transform(dxpl, MemorySegment.NULL, 0);
+            assertTrue("H5Pget_data_transform size query failed", transformSize > 0);
+
+            // Get transform expression
+            MemorySegment transformBuf = arena.allocate(transformSize + 1);
+            result = (int)hdf5_h.H5Pget_data_transform(dxpl, transformBuf, transformSize + 1);
+            assertTrue("H5Pget_data_transform failed", result >= 0);
+
+            String retrievedTransform = segmentToString(transformBuf);
+            assertEquals("Transform should match", transform, retrievedTransform);
+
+            // Cleanup
+            hdf5_h.H5Pclose(dxpl);
+        }
+    }
 }
