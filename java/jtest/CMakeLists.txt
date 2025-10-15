@@ -56,6 +56,9 @@ set (HDF5_JAVA_JTEST_FFM_TEST_SOURCES
     TestH5Rffm
     TestH5Offm
     TestH5VLffm
+    TestH5PLffm
+    TestH5Zffm
+    TestH5FDffm
 )
 
 # Update classpath to include FfmTestSupport JAR for test compilation
