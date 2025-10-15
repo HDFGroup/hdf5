@@ -75,7 +75,7 @@ public class TestH5VLffm {
         try (Arena arena = Arena.ofConfined()) {
             // Native VOL connector should be registered
             MemorySegment name = stringToSegment(arena, "native");
-            int result      = hdf5_h_1.H5VLis_connector_registered_by_name(name);
+            int result         = hdf5_h_1.H5VLis_connector_registered_by_name(name);
             assertTrue("Native VOL connector should be registered", result > 0);
 
             // Non-existent connector should not be registered
@@ -214,8 +214,8 @@ public class TestH5VLffm {
     public void testH5VLregister_connector_by_value()
     {
         // Register native connector by value
-        long connector_id = hdf5_h_1.H5VLregister_connector_by_value(hdf5_h.H5_VOL_NATIVE(),
-                                                                      hdf5_h.H5P_DEFAULT());
+        long connector_id =
+            hdf5_h_1.H5VLregister_connector_by_value(hdf5_h.H5_VOL_NATIVE(), hdf5_h.H5P_DEFAULT());
         assertTrue("Should get valid connector ID", isValidId(connector_id));
 
         // Close the connector ID
@@ -257,9 +257,8 @@ public class TestH5VLffm {
             long sid               = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
             assertTrue("H5Screate failed", isValidId(sid));
 
-            dset_id =
-                hdf5_h_1.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(), sid, hdf5_h.H5P_DEFAULT(),
-                                    hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            dset_id = hdf5_h_1.H5Dcreate2(H5fid, dsetname, hdf5_h_1.H5T_NATIVE_INT_g(), sid,
+                                          hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(dset_id));
 
             closeQuietly(sid, hdf5_h_1::H5Sclose);
