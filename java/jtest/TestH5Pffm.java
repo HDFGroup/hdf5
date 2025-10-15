@@ -2577,9 +2577,9 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
             // Create dataspaces for virtual and source datasets
-            long[] dims = {10, 20};
+            long[] dims           = {10, 20};
             MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
-            long vspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+            long vspace           = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
             assertTrue("H5Screate_simple vspace failed", isValidId(vspace));
 
             long srcspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
@@ -2612,10 +2612,10 @@ public class TestH5Pffm {
             long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
-            long[] dims = {5, 10};
+            long[] dims           = {5, 10};
             MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
-            long vspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
-            long srcspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+            long vspace           = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+            long srcspace         = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
 
             MemorySegment srcFileName = stringToSegment(arena, "test_source.h5");
             MemorySegment srcDsetName = stringToSegment(arena, "/data");
@@ -2658,9 +2658,9 @@ public class TestH5Pffm {
 
             // Add external file
             MemorySegment extFile = stringToSegment(arena, "external_data.bin");
-            long offset = 0;
-            long size = 1024; // 1KB
-            int result = hdf5_h.H5Pset_external(dcpl, extFile, offset, size);
+            long offset           = 0;
+            long size             = 1024; // 1KB
+            int result            = hdf5_h.H5Pset_external(dcpl, extFile, offset, size);
             assertTrue("H5Pset_external failed", isSuccess(result));
 
             // Get external file count
@@ -2682,17 +2682,17 @@ public class TestH5Pffm {
             long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
-            String extFileName = "my_external.bin";
+            String extFileName    = "my_external.bin";
             MemorySegment extFile = stringToSegment(arena, extFileName);
-            long offset = 1024;
-            long size = 4096;
+            long offset           = 1024;
+            long size             = 4096;
             hdf5_h.H5Pset_external(dcpl, extFile, offset, size);
 
             // Get external file info
-            int nameSize = 256;
-            MemorySegment nameBuf = arena.allocate(nameSize);
+            int nameSize            = 256;
+            MemorySegment nameBuf   = arena.allocate(nameSize);
             MemorySegment offsetSeg = arena.allocate(ValueLayout.JAVA_LONG);
-            MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment sizeSeg   = arena.allocate(ValueLayout.JAVA_LONG);
 
             long retval = hdf5_h.H5Pget_external(dcpl, 0, nameSize, nameBuf, offsetSeg, sizeSeg);
             assertTrue("H5Pget_external should succeed", retval >= 0);
@@ -2751,15 +2751,15 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set core (memory) VFD
-            long increment = 1024 * 1024; // 1MB increments
-            boolean backingStore = false;  // No file backing
-            int result = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
+            long increment       = 1024 * 1024; // 1MB increments
+            boolean backingStore = false;       // No file backing
+            int result           = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
             assertTrue("H5Pset_fapl_core failed", isSuccess(result));
 
             // Get core VFD settings
-            MemorySegment incrementSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment incrementSeg    = arena.allocate(ValueLayout.JAVA_LONG);
             MemorySegment backingStoreSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
-            result = hdf5_h.H5Pget_fapl_core(fapl, incrementSeg, backingStoreSeg);
+            result                        = hdf5_h.H5Pget_fapl_core(fapl, incrementSeg, backingStoreSeg);
             assertTrue("H5Pget_fapl_core failed", isSuccess(result));
 
             long retIncrement = incrementSeg.get(ValueLayout.JAVA_LONG, 0);
@@ -2811,13 +2811,13 @@ public class TestH5Pffm {
 
             // Set family VFD with 1MB member files
             long membSize = 1024 * 1024; // 1MB per family member
-            int result = hdf5_h.H5Pset_fapl_family(fapl, membSize, memb_fapl);
+            int result    = hdf5_h.H5Pset_fapl_family(fapl, membSize, memb_fapl);
             assertTrue("H5Pset_fapl_family failed", isSuccess(result));
 
             // Get family VFD settings
             MemorySegment membSizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
             MemorySegment membFaplSeg = arena.allocate(ValueLayout.JAVA_LONG);
-            result = hdf5_h.H5Pget_fapl_family(fapl, membSizeSeg, membFaplSeg);
+            result                    = hdf5_h.H5Pget_fapl_family(fapl, membSizeSeg, membFaplSeg);
             assertTrue("H5Pget_fapl_family failed", isSuccess(result));
 
             long retMembSize = membSizeSeg.get(ValueLayout.JAVA_LONG, 0);
@@ -2839,9 +2839,9 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
 
             // Set external file prefix
-            String prefix = "/data/external/";
+            String prefix           = "/data/external/";
             MemorySegment prefixSeg = stringToSegment(arena, prefix);
-            int result = hdf5_h.H5Pset_efile_prefix(dcpl, prefixSeg);
+            int result              = hdf5_h.H5Pset_efile_prefix(dcpl, prefixSeg);
             assertTrue("H5Pset_efile_prefix failed", isSuccess(result));
 
             // Get prefix size
@@ -2850,7 +2850,7 @@ public class TestH5Pffm {
 
             // Get prefix value
             MemorySegment prefixBuf = arena.allocate(prefixSize + 1);
-            result = (int)hdf5_h.H5Pget_efile_prefix(dcpl, prefixBuf, prefixSize + 1);
+            result                  = (int)hdf5_h.H5Pget_efile_prefix(dcpl, prefixBuf, prefixSize + 1);
             assertTrue("H5Pget_efile_prefix failed", result >= 0);
 
             String retrievedPrefix = segmentToString(prefixBuf);
@@ -2872,9 +2872,9 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
 
             // Set data transform expression
-            String transform = "x + 10";
+            String transform           = "x + 10";
             MemorySegment transformSeg = stringToSegment(arena, transform);
-            int result = hdf5_h.H5Pset_data_transform(dxpl, transformSeg);
+            int result                 = hdf5_h.H5Pset_data_transform(dxpl, transformSeg);
             assertTrue("H5Pset_data_transform failed", isSuccess(result));
 
             // Get transform size
