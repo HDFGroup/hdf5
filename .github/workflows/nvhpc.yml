@@ -62,6 +62,7 @@ jobs:
       - name: Configure
         shell: bash
         run: |
+          export UCX_WARN_UNUSED_ENV_VARS=n
           export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin:$PATH
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
