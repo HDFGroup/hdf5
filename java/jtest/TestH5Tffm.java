@@ -1154,7 +1154,7 @@ public class TestH5Tffm {
 
             // Get name for value 100
             MemorySegment nameBuffer = arena.allocate(20);
-            MemorySegment queryVal = allocateInt(arena);
+            MemorySegment queryVal   = allocateInt(arena);
             setInt(queryVal, 100);
             int result = hdf5_h_1.H5Tenum_nameof(H5tid, queryVal, nameBuffer, 20);
             assertEquals("H5Tenum_nameof failed", 0, result);
