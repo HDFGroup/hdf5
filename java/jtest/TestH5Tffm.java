@@ -893,13 +893,8 @@ public class TestH5Tffm {
             int ndims = hdf5_h_1.H5Tget_array_ndims(H5tid);
             assertEquals("Should be 1D array", 1, ndims);
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment retrievedDims = arena.allocate(hdf5_h.C_LONG, 1);
-            int result                  = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
-=======
             MemorySegment retrievedDims = allocateLongArray(arena, 1);
             int result                  = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
->>>>>>> ec3582e More tests added
             assertEquals("H5Tget_array_dims2 should succeed", 1, result);
             assertEquals("Dimension should be 10", 10, retrievedDims.get(ValueLayout.JAVA_LONG, 0));
         }
@@ -959,33 +954,18 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Test with different dimensionalities
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment dims1 = arena.allocate(hdf5_h.C_LONG, 10);
+            MemorySegment dims1 = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
             long tid1           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 1, dims1);
-=======
-            MemorySegment dims1         = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
-            long tid1                   = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 1, dims1);
->>>>>>> ec3582e More tests added
             assertEquals("Should be 1D", 1, hdf5_h_1.H5Tget_array_ndims(tid1));
             hdf5_h_1.H5Tclose(tid1);
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment dims2 = arena.allocateFrom(hdf5_h.C_LONG, 5, 6);
+            MemorySegment dims2 = arena.allocateFrom(ValueLayout.JAVA_LONG, 5L, 6L);
             long tid2           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
-=======
-            MemorySegment dims2         = arena.allocateFrom(ValueLayout.JAVA_LONG, 5L, 6L);
-            long tid2                   = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 2, dims2);
->>>>>>> ec3582e More tests added
             assertEquals("Should be 2D", 2, hdf5_h_1.H5Tget_array_ndims(tid2));
             hdf5_h_1.H5Tclose(tid2);
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment dims3 = arena.allocateFrom(hdf5_h.C_LONG, 2, 3, 4);
+            MemorySegment dims3 = arena.allocateFrom(ValueLayout.JAVA_LONG, 2L, 3L, 4L);
             H5tid               = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 3, dims3);
-=======
-            MemorySegment dims3         = arena.allocateFrom(ValueLayout.JAVA_LONG, 2L, 3L, 4L);
-            H5tid                       = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_INT_g(), 3, dims3);
->>>>>>> ec3582e More tests added
             assertEquals("Should be 3D", 3, hdf5_h_1.H5Tget_array_ndims(H5tid));
         }
     }
@@ -1025,13 +1005,8 @@ public class TestH5Tffm {
             hdf5_h_1.H5Tinsert(compoundType, stringToSegment(arena, "z"), 8, hdf5_h_1.H5T_NATIVE_INT_g());
 
             // Create array of compound types [5]
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment dims = arena.allocate(hdf5_h.C_LONG, 5);
+            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 5L);
             H5tid              = hdf5_h_1.H5Tarray_create2(compoundType, 1, dims);
-=======
-            MemorySegment dims          = arena.allocateFrom(ValueLayout.JAVA_LONG, 5L);
-            H5tid                       = hdf5_h_1.H5Tarray_create2(compoundType, 1, dims);
->>>>>>> ec3582e More tests added
             assertTrue("H5Tarray_create2 with compound base failed", isValidId(H5tid));
 
             // Verify array properties
@@ -1056,13 +1031,8 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create array type
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment dims = arena.allocate(hdf5_h.C_LONG, 10);
+            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
             H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_SHORT_g(), 1, dims);
-=======
-            MemorySegment dims          = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
-            H5tid                       = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_SHORT_g(), 1, dims);
->>>>>>> ec3582e More tests added
 
             // Get the base type
             long superType = hdf5_h_1.H5Tget_super(H5tid);
@@ -1124,34 +1094,19 @@ public class TestH5Tffm {
             H5tid = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_NATIVE_INT_g());
 
             // Insert enum values
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment val0 = arena.allocate(hdf5_h.C_INT, 0);
-            int result         = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("RED"), val0);
-=======
-            MemorySegment val0          = allocateInt(arena);
+            MemorySegment val0 = allocateInt(arena);
             setInt(val0, 0);
-            int result         = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "RED"), val0);
->>>>>>> ec3582e More tests added
+            int result = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "RED"), val0);
             assertEquals("H5Tenum_insert RED failed", 0, result);
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment val1 = arena.allocate(hdf5_h.C_INT, 1);
-            result             = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("GREEN"), val1);
-=======
             MemorySegment val1 = allocateInt(arena);
             setInt(val1, 1);
-            result             = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "GREEN"), val1);
->>>>>>> ec3582e More tests added
+            result = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "GREEN"), val1);
             assertEquals("H5Tenum_insert GREEN failed", 0, result);
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment val2 = arena.allocate(hdf5_h.C_INT, 2);
-            result             = hdf5_h_1.H5Tenum_insert(H5tid, arena.allocateFrom("BLUE"), val2);
-=======
             MemorySegment val2 = allocateInt(arena);
             setInt(val2, 2);
-            result                 = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "BLUE"), val2);
->>>>>>> ec3582e More tests added
+            result = hdf5_h_1.H5Tenum_insert(H5tid, stringToSegment(arena, "BLUE"), val2);
             assertEquals("H5Tenum_insert BLUE failed", 0, result);
 
             // Verify member count
@@ -1199,14 +1154,9 @@ public class TestH5Tffm {
 
             // Get name for value 100
             MemorySegment nameBuffer = arena.allocate(20);
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-            MemorySegment queryVal   = arena.allocate(hdf5_h.C_INT, 100);
-            int result               = hdf5_h_1.H5Tenum_nameof(H5tid, queryVal, nameBuffer, 20);
-=======
             MemorySegment queryVal = allocateInt(arena);
             setInt(queryVal, 100);
             int result = hdf5_h_1.H5Tenum_nameof(H5tid, queryVal, nameBuffer, 20);
->>>>>>> ec3582e More tests added
             assertEquals("H5Tenum_nameof failed", 0, result);
 
             String name = nameBuffer.getString(0);
