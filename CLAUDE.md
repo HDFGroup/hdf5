@@ -20,13 +20,21 @@ cmake --workflow --preset ci-StdShar-Clang --fresh    # Clang
 cmake --workflow --preset ci-StdShar-MSVC --fresh     # MSVC
 
 # Maven-enabled builds (Java artifacts with deployment support)
-# FFM implementation (Java 24+ default)
+# FFM implementation (Java 24+ default) - Plain variant (no ROS3)
 cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh     # Linux FFM snapshots
 cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-Snapshot --fresh     # Windows FFM snapshots
 cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-Snapshot --fresh    # macOS FFM snapshots
 cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh              # Linux FFM release
 cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM --fresh              # Windows FFM release
 cmake --workflow --preset ci-MinShar-Clang-Maven-FFM --fresh             # macOS FFM release
+
+# FFM implementation with ROS3 VFD (S3 cloud storage support)
+cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot --fresh     # Linux FFM+ROS3 snapshots
+cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot --fresh     # Windows FFM+ROS3 snapshots
+cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot --fresh    # macOS FFM+ROS3 snapshots
+cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-ROS3 --fresh              # Linux FFM+ROS3 release
+cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-ROS3 --fresh              # Windows FFM+ROS3 release
+cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-ROS3 --fresh             # macOS FFM+ROS3 release
 
 # JNI implementation (all Java versions)
 cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI-Snapshot --fresh     # Linux JNI snapshots

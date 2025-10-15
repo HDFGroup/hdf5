@@ -368,6 +368,26 @@
       ]
     },
     {
+      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
+      "description": "GNUC Minimal Config for x64 with Maven deployment (FFM with ROS3 VFD)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-FFM",
+        "ci-S3",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
+      "description": "GNUC Minimal Config for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-FFM",
+        "ci-S3",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
       "name": "ci-MinShar-GNUC-Maven-JNI",
       "description": "GNUC Minimal Config for x64 with Maven deployment (JNI)",
       "inherits": [
@@ -404,6 +424,26 @@
       ]
     },
     {
+      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
+      "description": "MSVC Minimal Config for x64 with Maven deployment (FFM with ROS3 VFD)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java-FFM",
+        "ci-S3",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
+      "description": "MSVC Minimal Config for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java-FFM",
+        "ci-S3",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
       "name": "ci-MinShar-MSVC-Maven-JNI",
       "description": "MSVC Minimal Config for x64 with Maven deployment (JNI)",
       "inherits": [
@@ -436,6 +476,26 @@
       "inherits": [
         "ci-x64-Release-Clang",
         "ci-Java-FFM",
+        "ci-Maven-Minimal-Snapshot"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
+      "description": "Clang Minimal Config for x64 with Maven deployment (FFM with ROS3 VFD)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java-FFM",
+        "ci-S3",
+        "ci-Maven-Minimal"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
+      "description": "Clang Minimal Config for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java-FFM",
+        "ci-S3",
         "ci-Maven-Minimal-Snapshot"
       ]
     },
@@ -610,6 +670,24 @@
       ]
     },
     {
+      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
+      "description": "GNUC Minimal Build for x64 with Maven deployment (FFM with ROS3 VFD)",
+      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
+      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
+      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
       "name": "ci-MinShar-GNUC-Maven-JNI",
       "description": "GNUC Minimal Build for x64 with Maven deployment (JNI)",
       "configurePreset": "ci-MinShar-GNUC-Maven-JNI",
@@ -646,6 +724,24 @@
       ]
     },
     {
+      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
+      "description": "MSVC Minimal Build for x64 with Maven deployment (FFM with ROS3 VFD)",
+      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
+      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
+      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-MinShar-MSVC-Maven-JNI",
       "description": "MSVC Minimal Build for x64 with Maven deployment (JNI)",
       "configurePreset": "ci-MinShar-MSVC-Maven-JNI",
@@ -676,6 +772,24 @@
       "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
       "description": "Clang Minimal Build for x64 with Maven snapshot deployment (FFM)",
       "configurePreset": "ci-MinShar-Clang-Maven-FFM-Snapshot",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
+      "description": "Clang Minimal Build for x64 with Maven deployment (FFM with ROS3 VFD)",
+      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
+      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
+      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
       "verbose": true,
       "inherits": [
         "ci-x64-Release-Clang"
@@ -911,6 +1025,16 @@
       "inherits": "ci-x64-Release-GNUC"
     },
     {
+      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
+      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
+      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
       "name": "ci-MinShar-GNUC-Maven-JNI",
       "configurePreset": "ci-MinShar-GNUC-Maven-JNI",
       "inherits": "ci-x64-Release-GNUC"
@@ -931,6 +1055,16 @@
       "inherits": "ci-x64-Release-MSVC"
     },
     {
+      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
+      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
+      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
       "name": "ci-MinShar-MSVC-Maven-JNI",
       "configurePreset": "ci-MinShar-MSVC-Maven-JNI",
       "inherits": "ci-x64-Release-MSVC"
@@ -948,6 +1082,16 @@
     {
       "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
       "configurePreset": "ci-MinShar-Clang-Maven-FFM-Snapshot",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
+      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
+      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
       "inherits": "ci-x64-Release-Clang"
     },
     {
@@ -1117,6 +1261,22 @@
       ]
     },
     {
+      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3"},
+        {"type": "build", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3"},
+        {"type": "package", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot"}
+      ]
+    },
+    {
       "name": "ci-MinShar-GNUC-Maven-JNI",
       "steps": [
         {"type": "configure", "name": "ci-MinShar-GNUC-Maven-JNI"},
@@ -1149,6 +1309,22 @@
       ]
     },
     {
+      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3"},
+        {"type": "build", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3"},
+        {"type": "package", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot"}
+      ]
+    },
+    {
       "name": "ci-MinShar-MSVC-Maven-JNI",
       "steps": [
         {"type": "configure", "name": "ci-MinShar-MSVC-Maven-JNI"},
@@ -1178,6 +1354,22 @@
         {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"},
         {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"},
         {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM-ROS3"},
+        {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM-ROS3"},
+        {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM-ROS3"}
+      ]
+    },
+    {
+      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
+      "steps": [
+        {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot"},
+        {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot"},
+        {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot"}
       ]
     },
     {
