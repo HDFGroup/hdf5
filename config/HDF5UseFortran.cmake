@@ -391,7 +391,7 @@ if (PAC_FC_ALL_REAL_KINDS_SIZEOF STREQUAL "")
 endif ()
 
 set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${PAC_FC_ALL_REAL_KINDS_SIZEOF}/)")
-message (STATUS "....FOUND SIZEOF for REAL KINDs \{${PAC_FC_ALL_REAL_KINDS_SIZEOF}\}")
+message (STATUS "....FOUND SIZEOF for REAL KINDs ${PAC_FC_ALL_REAL_KINDS_SIZEOF}")
 
 #find the maximum kind of the real
 string (REGEX REPLACE "," ";" VAR "${PAC_FC_ALL_REAL_KINDS_SIZEOF}")
