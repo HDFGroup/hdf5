@@ -2464,10 +2464,10 @@ public class TestH5Pffm {
             // Get file locking settings
             MemorySegment useLockingSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
             MemorySegment ignoreFailSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
-            result = hdf5_h.H5Pget_file_locking(fapl, useLockingSeg, ignoreFailSeg);
+            result                      = hdf5_h.H5Pget_file_locking(fapl, useLockingSeg, ignoreFailSeg);
             assertTrue("H5Pget_file_locking failed", isSuccess(result));
 
-            boolean useLocking  = useLockingSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
+            boolean useLocking = useLockingSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
             boolean ignoreFail = ignoreFailSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
             assertTrue("Use locking should be true", useLocking);
             assertFalse("Ignore fail should be false", ignoreFail);
@@ -2486,7 +2486,7 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set page buffer size (4MB buffer, 50% metadata, 25% raw data)
-            long bufSize    = 4 * 1024 * 1024; // 4MB
+            long bufSize   = 4 * 1024 * 1024; // 4MB
             int minMetaPct = 50;
             int minRawPct  = 25;
             int result     = hdf5_h.H5Pset_page_buffer_size(fapl, bufSize, minMetaPct, minRawPct);
