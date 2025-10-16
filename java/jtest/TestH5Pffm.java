@@ -1236,7 +1236,7 @@ public class TestH5Pffm {
             assertTrue("H5Pset_efile_prefix failed", isSuccess(result));
 
             // Get prefix back
-            long prefixSize               = hdf5_h.H5Pget_efile_prefix(dapl, MemorySegment.NULL, 0);
+            long prefixSize = hdf5_h.H5Pget_efile_prefix(dapl, MemorySegment.NULL, 0);
             assertTrue("H5Pget_efile_prefix size query failed", prefixSize > 0);
 
             MemorySegment prefixBuf = arena.allocate(prefixSize + 1);
