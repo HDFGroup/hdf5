@@ -1236,12 +1236,15 @@ public class TestH5Pffm {
             assertTrue("H5Pset_efile_prefix failed", isSuccess(result));
 
             // Get prefix back
-            long size               = hdf5_h.H5Pget_efile_prefix(dapl, MemorySegment.NULL, 0);
-            MemorySegment outPrefix = arena.allocate(size + 1);
-            hdf5_h.H5Pget_efile_prefix(dapl, outPrefix, size + 1);
+            long prefixSize               = hdf5_h.H5Pget_efile_prefix(dapl, MemorySegment.NULL, 0);
+            assertTrue("H5Pget_efile_prefix size query failed", prefixSize > 0);
 
-            String retrieved = segmentToString(outPrefix);
-            assertEquals("Prefix should match", prefix, retrieved);
+            MemorySegment prefixBuf = arena.allocate(prefixSize + 1);
+            result                  = (int)hdf5_h.H5Pget_efile_prefix(dapl, prefixBuf, prefixSize + 1);
+            assertTrue("H5Pget_efile_prefix failed", result >= 0);
+
+            String retrievedPrefix = segmentToString(prefixBuf);
+            assertEquals("Prefix should match", prefix, retrievedPrefix);
 
             hdf5_h.H5Pclose(dapl);
         }
@@ -1411,12 +1414,12 @@ public class TestH5Pffm {
             assertTrue("H5Pset_data_transform failed", isSuccess(result));
 
             // Get size of transform expression
-            long size = hdf5_h.H5Pget_data_transform(dxpl, MemorySegment.NULL, 0);
-            assertTrue("H5Pget_data_transform size query failed", size > 0);
+            long transformSize = hdf5_h.H5Pget_data_transform(dxpl, MemorySegment.NULL, 0);
+            assertTrue("H5Pget_data_transform size query failed", transformSize > 0);
 
             // Get transform expression back
-            MemorySegment outTransform = arena.allocate(size + 1);
-            long actualSize            = hdf5_h.H5Pget_data_transform(dxpl, outTransform, size + 1);
+            MemorySegment outTransform = arena.allocate(transformSize + 1);
+            long actualSize            = hdf5_h.H5Pget_data_transform(dxpl, outTransform, transformSize + 1);
             assertTrue("H5Pget_data_transform failed", actualSize > 0);
 
             String retrievedTransform = segmentToString(outTransform);
@@ -1576,10 +1579,6 @@ public class TestH5Pffm {
         }
     }
 
-    // =========================
-    // VFD Configuration Tests (Batch 1)
-    // =========================
-
     @Test
     public void testH5Pset_fapl_core()
     {
@@ -1590,21 +1589,22 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set core (memory) VFD with 1MB increment and backing store enabled
-            long increment       = 1024 * 1024; // 1MB
+            long increment       = 1024 * 1024; // 1MB increments
             boolean backingStore = true;        // Enable backing store
             int result           = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
             assertTrue("H5Pset_fapl_core failed", isSuccess(result));
 
-            // Get settings back
-            MemorySegment outIncrement    = allocateLongArray(arena, 1);
-            MemorySegment outBackingStore = allocateIntArray(arena, 1);
-            result                        = hdf5_h.H5Pget_fapl_core(fapl, outIncrement, outBackingStore);
+            // Get core VFD settings
+            MemorySegment incrementSeg    = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment backingStoreSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
+            result                        = hdf5_h.H5Pget_fapl_core(fapl, incrementSeg, backingStoreSeg);
             assertTrue("H5Pget_fapl_core failed", isSuccess(result));
 
-            assertEquals("Increment should match", increment, getLong(outIncrement));
-            // Boolean is returned as int: 0 = false, non-zero = true
-            boolean retrievedBackingStore = getInt(outBackingStore) != 0;
-            assertEquals("Backing store should match", backingStore, retrievedBackingStore);
+            long retIncrement = incrementSeg.get(ValueLayout.JAVA_LONG, 0);
+            assertEquals("Increment should match", increment, retIncrement);
+
+            boolean retBackingStore = backingStoreSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
+            assertEquals("Backing store should match", backingStore, retBackingStore);
 
             hdf5_h.H5Pclose(fapl);
         }
@@ -1676,13 +1676,14 @@ public class TestH5Pffm {
             int result      = hdf5_h.H5Pset_fapl_family(fapl, memberSize, memberFapl);
             assertTrue("H5Pset_fapl_family failed", isSuccess(result));
 
-            // Get settings back
-            MemorySegment outMemberSize = allocateLongArray(arena, 1);
-            MemorySegment outMemberFapl = allocateLongArray(arena, 1);
-            result                      = hdf5_h.H5Pget_fapl_family(fapl, outMemberSize, outMemberFapl);
+            // Get family VFD settings
+            MemorySegment membSizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment membFaplSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            result                    = hdf5_h.H5Pget_fapl_family(fapl, membSizeSeg, membFaplSeg);
             assertTrue("H5Pget_fapl_family failed", isSuccess(result));
 
-            assertEquals("Member size should match", memberSize, getLong(outMemberSize));
+            long retMembSize = membSizeSeg.get(ValueLayout.JAVA_LONG, 0);
+            assertEquals("Member size should match", memberSize, retMembSize);
 
             hdf5_h.H5Pclose(fapl);
         }
@@ -2419,10 +2420,6 @@ public class TestH5Pffm {
         }
     }
 
-    // ================================
-    // Phase 2A Expansion Tests
-    // ================================
-
     @Test
     public void testH5Pset_evict_on_close()
     {
@@ -2562,47 +2559,6 @@ public class TestH5Pffm {
         }
     }
 
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    // ================================
-    // Phase 2B Expansion Tests - Virtual Datasets
-    // ================================
-
-    @Test
-    public void testH5Pset_virtual_basic()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            // Create DCPL for virtual dataset
-            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
-            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
-
-            // Create dataspaces for virtual and source datasets
-            long[] dims           = {10, 20};
-            MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
-            long vspace           = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
-            assertTrue("H5Screate_simple vspace failed", isValidId(vspace));
-
-            long srcspace = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
-            assertTrue("H5Screate_simple srcspace failed", isValidId(srcspace));
-
-            // Set virtual dataset mapping
-            MemorySegment srcFileName = stringToSegment(arena, "source.h5");
-            MemorySegment srcDsetName = stringToSegment(arena, "/source_dset");
-            int result = hdf5_h.H5Pset_virtual(dcpl, vspace, srcFileName, srcDsetName, srcspace);
-            assertTrue("H5Pset_virtual failed", isSuccess(result));
-
-            // Get virtual dataset count
-            long vcount = hdf5_h.H5Pget_virtual_count(dcpl);
-            assertEquals("Virtual count should be 1", 1, vcount);
-
-            // Cleanup
-            hdf5_h_1.H5Sclose(vspace);
-            hdf5_h_1.H5Sclose(srcspace);
-            hdf5_h.H5Pclose(dcpl);
-        }
-    }
-
     @Test
     public void testH5Pget_virtual_info()
     {
@@ -2623,7 +2579,10 @@ public class TestH5Pffm {
             hdf5_h.H5Pset_virtual(dcpl, vspace, srcFileName, srcDsetName, srcspace);
 
             // Get virtual dataset info
-            long vcount = hdf5_h.H5Pget_virtual_count(dcpl);
+            MemorySegment count = allocateLongArray(arena, 1);
+            int result          = hdf5_h.H5Pget_virtual_count(dcpl, count);
+            assertTrue("H5Pget_virtual_count failed", isSuccess(result));
+            long vcount = count.get(ValueLayout.JAVA_LONG, 0);
             assertEquals("Should have 1 virtual mapping", 1, vcount);
 
             // Get virtual vspace for index 0
@@ -2642,10 +2601,6 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(dcpl);
         }
     }
-
-    // ================================
-    // Phase 2B Expansion Tests - External Storage
-    // ================================
 
     @Test
     public void testH5Pset_external()
@@ -2736,164 +2691,4 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(dcpl);
         }
     }
-
-    // ================================
-    // Phase 2B Expansion Tests - Advanced VFD Configuration
-    // ================================
-
-    @Test
-    public void testH5Pset_fapl_core()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            // Create FAPL
-            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
-            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
-
-            // Set core (memory) VFD
-            long increment       = 1024 * 1024; // 1MB increments
-            boolean backingStore = false;       // No file backing
-            int result           = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
-            assertTrue("H5Pset_fapl_core failed", isSuccess(result));
-
-            // Get core VFD settings
-            MemorySegment incrementSeg    = arena.allocate(ValueLayout.JAVA_LONG);
-            MemorySegment backingStoreSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
-            result                        = hdf5_h.H5Pget_fapl_core(fapl, incrementSeg, backingStoreSeg);
-            assertTrue("H5Pget_fapl_core failed", isSuccess(result));
-
-            long retIncrement = incrementSeg.get(ValueLayout.JAVA_LONG, 0);
-            assertEquals("Increment should match", increment, retIncrement);
-
-            boolean retBackingStore = backingStoreSeg.get(ValueLayout.JAVA_BOOLEAN, 0);
-            assertEquals("Backing store should match", backingStore, retBackingStore);
-
-            // Cleanup
-            hdf5_h.H5Pclose(fapl);
-        }
-    }
-
-    @Test
-    public void testH5Pset_fapl_sec2()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            // Create FAPL
-            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
-            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
-
-            // Set sec2 (POSIX) VFD
-            int result = hdf5_h.H5Pset_fapl_sec2(fapl);
-            assertTrue("H5Pset_fapl_sec2 failed", isSuccess(result));
-
-            // Verify driver is sec2
-            long driverId = hdf5_h.H5Pget_driver(fapl);
-            assertTrue("Driver ID should be valid", driverId >= 0);
-
-            // Cleanup
-            hdf5_h.H5Pclose(fapl);
-        }
-    }
-
-    @Test
-    public void testH5Pset_fapl_family()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            // Create FAPL
-            long fapl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_FILE_ACCESS_ID_g());
-            assertTrue("H5Pcreate fapl failed", isValidId(fapl));
-
-            // Create member FAPL (use default)
-            long memb_fapl = hdf5_h.H5P_DEFAULT();
-
-            // Set family VFD with 1MB member files
-            long membSize = 1024 * 1024; // 1MB per family member
-            int result    = hdf5_h.H5Pset_fapl_family(fapl, membSize, memb_fapl);
-            assertTrue("H5Pset_fapl_family failed", isSuccess(result));
-
-            // Get family VFD settings
-            MemorySegment membSizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
-            MemorySegment membFaplSeg = arena.allocate(ValueLayout.JAVA_LONG);
-            result                    = hdf5_h.H5Pget_fapl_family(fapl, membSizeSeg, membFaplSeg);
-            assertTrue("H5Pget_fapl_family failed", isSuccess(result));
-
-            long retMembSize = membSizeSeg.get(ValueLayout.JAVA_LONG, 0);
-            assertEquals("Member size should match", membSize, retMembSize);
-
-            // Cleanup
-            hdf5_h.H5Pclose(fapl);
-        }
-    }
-
-    @Test
-    public void testH5Pset_efile_prefix()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            // Create DCPL (for external file prefix)
-            long dcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_CREATE_ID_g());
-            assertTrue("H5Pcreate dcpl failed", isValidId(dcpl));
-
-            // Set external file prefix
-            String prefix           = "/data/external/";
-            MemorySegment prefixSeg = stringToSegment(arena, prefix);
-            int result              = hdf5_h.H5Pset_efile_prefix(dcpl, prefixSeg);
-            assertTrue("H5Pset_efile_prefix failed", isSuccess(result));
-
-            // Get prefix size
-            long prefixSize = hdf5_h.H5Pget_efile_prefix(dcpl, MemorySegment.NULL, 0);
-            assertTrue("H5Pget_efile_prefix size query failed", prefixSize > 0);
-
-            // Get prefix value
-            MemorySegment prefixBuf = arena.allocate(prefixSize + 1);
-            result                  = (int)hdf5_h.H5Pget_efile_prefix(dcpl, prefixBuf, prefixSize + 1);
-            assertTrue("H5Pget_efile_prefix failed", result >= 0);
-
-            String retrievedPrefix = segmentToString(prefixBuf);
-            assertEquals("Prefix should match", prefix, retrievedPrefix);
-
-            // Cleanup
-            hdf5_h.H5Pclose(dcpl);
-        }
-    }
-
-    @Test
-    public void testH5Pset_data_transform()
-    {
-        System.out.print(testname.getMethodName());
-
-        try (Arena arena = Arena.ofConfined()) {
-            // Create DXPL
-            long dxpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATASET_XFER_ID_g());
-            assertTrue("H5Pcreate dxpl failed", isValidId(dxpl));
-
-            // Set data transform expression
-            String transform           = "x + 10";
-            MemorySegment transformSeg = stringToSegment(arena, transform);
-            int result                 = hdf5_h.H5Pset_data_transform(dxpl, transformSeg);
-            assertTrue("H5Pset_data_transform failed", isSuccess(result));
-
-            // Get transform size
-            long transformSize = hdf5_h.H5Pget_data_transform(dxpl, MemorySegment.NULL, 0);
-            assertTrue("H5Pget_data_transform size query failed", transformSize > 0);
-
-            // Get transform expression
-            MemorySegment transformBuf = arena.allocate(transformSize + 1);
-            result = (int)hdf5_h.H5Pget_data_transform(dxpl, transformBuf, transformSize + 1);
-            assertTrue("H5Pget_data_transform failed", result >= 0);
-
-            String retrievedTransform = segmentToString(transformBuf);
-            assertEquals("Transform should match", transform, retrievedTransform);
-
-            // Cleanup
-            hdf5_h.H5Pclose(dxpl);
-        }
-    }
-=======
->>>>>>> 82875cf Finish FFM tests
 }

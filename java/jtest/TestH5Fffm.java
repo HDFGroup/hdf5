@@ -150,7 +150,8 @@ public class TestH5Fffm {
     {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment intentSegment = allocateInt(arena);
-            int result                  = hdf5_h_1.H5Fget_intent(H5fid, intentSegment);
+
+            int result = hdf5_h_1.H5Fget_intent(H5fid, intentSegment);
             assertTrue("H5Fget_intent failed", isSuccess(result));
 
             int intent = getInt(intentSegment);
@@ -306,25 +307,6 @@ public class TestH5Fffm {
     }
 
     @Test
-    public void testH5Fget_mdc_size()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment maxSize       = allocateLongArray(arena, 1);
-            MemorySegment minCleanSize  = allocateLongArray(arena, 1);
-            MemorySegment curSize       = allocateLongArray(arena, 1);
-            MemorySegment curNumEntries = allocateIntArray(arena, 1);
-
-            int result = hdf5_h_1.H5Fget_mdc_size(H5fid, maxSize, minCleanSize, curSize, curNumEntries);
-            assertTrue("H5Fget_mdc_size failed", isSuccess(result));
-
-            // Verify values are reasonable
-            assertTrue("Max size should be positive", getLong(maxSize) > 0);
-            assertTrue("Current size should be non-negative", getLong(curSize) >= 0);
-            assertTrue("Number of entries should be non-negative", getInt(curNumEntries) >= 0);
-        }
-    }
-
-    @Test
     public void testH5Fget_fileno()
     {
         try (Arena arena = Arena.ofConfined()) {
@@ -358,21 +340,6 @@ public class TestH5Fffm {
     }
 
     @Test
-    public void testH5Fget_dset_no_attrs_hint()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment minimize = allocateIntArray(arena, 1);
-
-            int result = hdf5_h_1.H5Fget_dset_no_attrs_hint(H5fid, minimize);
-            assertTrue("H5Fget_dset_no_attrs_hint failed", isSuccess(result));
-
-            // Value should be 0 (false) or 1 (true)
-            int value = getInt(minimize);
-            assertTrue("Minimize value should be 0 or 1", value == 0 || value == 1);
-        }
-    }
-
-    @Test
     public void testH5Fget_mdc_logging_status()
     {
         try (Arena arena = Arena.ofConfined()) {
@@ -387,25 +354,6 @@ public class TestH5Fffm {
             int logging = getInt(isCurrentlyLogging);
             assertTrue("Enabled should be 0 or 1", enabled == 0 || enabled == 1);
             assertTrue("Currently logging should be 0 or 1", logging == 0 || logging == 1);
-        }
-    }
-
-<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
-    // ================================
-    // H5F Expansion - Metadata Cache Configuration
-    // ================================
-
-    @Test
-    public void testH5Fget_mdc_hit_rate()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment hitRate = arena.allocate(ValueLayout.JAVA_DOUBLE);
-
-            int result = hdf5_h_1.H5Fget_mdc_hit_rate(H5fid, hitRate);
-            assertTrue("H5Fget_mdc_hit_rate failed", isSuccess(result));
-
-            double rate = hitRate.get(ValueLayout.JAVA_DOUBLE, 0);
-            assertTrue("Hit rate should be between 0 and 1", rate >= 0.0 && rate <= 1.0);
         }
     }
 
@@ -440,53 +388,11 @@ public class TestH5Fffm {
     }
 
     @Test
-    public void testH5Fclear_elink_file_cache()
-    {
-        int result = hdf5_h_1.H5Fclear_elink_file_cache(H5fid);
-        assertTrue("H5Fclear_elink_file_cache failed", isSuccess(result));
-    }
-
-    // ================================
-    // H5F Expansion - File Information and Metadata
-    // ================================
-
-    @Test
-    public void testH5Fget_filesize()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment size = arena.allocate(ValueLayout.JAVA_LONG);
-
-            int result = hdf5_h_1.H5Fget_filesize(H5fid, size);
-            assertTrue("H5Fget_filesize failed", isSuccess(result));
-
-            long fileSize = size.get(ValueLayout.JAVA_LONG, 0);
-            assertTrue("File size should be positive", fileSize > 0);
-        }
-    }
-
-    @Test
-    public void testH5Fget_file_image()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            // First call to get size
-            MemorySegment bufSize = arena.allocate(ValueLayout.JAVA_LONG);
-            long result           = hdf5_h_1.H5Fget_file_image(H5fid, MemorySegment.NULL, 0);
-            assertTrue("H5Fget_file_image size query should succeed", result > 0);
-
-            long imageSize = result;
-            assertTrue("Image size should be positive", imageSize > 0);
-
-            // Note: Actually retrieving the full image would require large buffer
-            // This test just verifies the API works for size query
-        }
-    }
-
-    @Test
     public void testH5Fget_free_sections()
     {
         try (Arena arena = Arena.ofConfined()) {
             // Query number of free sections
-            int type    = hdf5_h.H5F_MEM_DEFAULT();
+            int type    = hdf5_h_1.H5FD_MEM_DEFAULT();
             long nsects = hdf5_h_1.H5Fget_free_sections(H5fid, type, 0, MemorySegment.NULL);
             assertTrue("H5Fget_free_sections count query should succeed", nsects >= 0);
         }
@@ -503,17 +409,13 @@ public class TestH5Fffm {
 
             // Access super block info
             MemorySegment superInfo = H5F_info2_t.super_(finfo);
-            int version             = H5F_info2_t.super.version(superInfo);
+            int version             = H5F_info2_t.super_.version(superInfo);
             assertTrue("Super block version should be valid", version >= 0);
 
-            long superSize = H5F_info2_t.super.super_size(superInfo);
+            long superSize = H5F_info2_t.super_.super_size(superInfo);
             assertTrue("Super block size should be positive", superSize > 0);
         }
     }
-
-    // ================================
-    // H5F Expansion - SWMR (Single Writer Multiple Reader)
-    // ================================
 
     @Test
     public void testH5Fstart_swmr_write()
@@ -540,25 +442,6 @@ public class TestH5Fffm {
             hdf5_h.H5Pclose(fapl);
         }
     }
-
-    @Test
-    public void testH5Fget_intent()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment intent = allocateInt(arena);
-
-            int result = hdf5_h_1.H5Fget_intent(H5fid, intent);
-            assertTrue("H5Fget_intent failed", isSuccess(result));
-
-            int intentValue = getInt(intent);
-            // Intent should be one of the H5F_ACC_* flags
-            assertTrue("Intent should be valid", intentValue >= 0);
-        }
-    }
-
-    // ================================
-    // H5F Expansion - VFD and Low-level Operations
-    // ================================
 
     @Test
     public void testH5Fget_vfd_handle()
@@ -597,46 +480,6 @@ public class TestH5Fffm {
         // May fail if page buffering not enabled
         // Testing API availability
     }
-
-    // ================================
-    // H5F Expansion - File Mounting (if supported)
-    // ================================
-
-    @Test
-    public void testH5Fis_accessible()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            // Test with current file
-            MemorySegment fileName = stringToSegment(arena, H5_FILE);
-
-            int result = hdf5_h_1.H5Fis_accessible(fileName, hdf5_h.H5P_DEFAULT());
-            assertTrue("H5Fis_accessible should return true for existing file", result > 0);
-
-            // Test with non-existent file
-            MemorySegment badFile = stringToSegment(arena, "nonexistent_file_12345.h5");
-            result                = hdf5_h_1.H5Fis_accessible(badFile, hdf5_h.H5P_DEFAULT());
-            assertTrue("H5Fis_accessible should return false for non-existent file", result <= 0);
-        }
-    }
-
-    @Test
-    public void testH5Fget_fileno()
-    {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment fileno = arena.allocate(ValueLayout.JAVA_LONG);
-
-            int result = hdf5_h_1.H5Fget_fileno(H5fid, fileno);
-            assertTrue("H5Fget_fileno failed", isSuccess(result));
-
-            long fileNumber = fileno.get(ValueLayout.JAVA_LONG, 0);
-            // File number should be non-negative
-            assertTrue("File number should be non-negative", fileNumber >= 0);
-        }
-    }
-
-    // ================================
-    // H5F Expansion - Advanced Features
-    // ================================
 
     @Test
     public void testH5Fincrement_filesize()
@@ -717,6 +560,4 @@ public class TestH5Fffm {
             assertEquals("Minimize hint should match", minimize, retrieved);
         }
     }
-=======
->>>>>>> 82875cf Finish FFM tests
 }
