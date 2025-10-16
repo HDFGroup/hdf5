@@ -17,9 +17,9 @@ jobs:
     name: "nvhpc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     env:
-      CUDAVERDOT: "12.9"
-      NVERDOT: "25.7"
-      NVERDASH: "25-7"
+      CUDAVERDOT: "13.0"
+      NVERDOT: "25.9"
+      NVERDASH: "25-9"
 
     steps:
       - name: Get Sources
@@ -54,15 +54,15 @@ jobs:
           echo "OMPI_CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvc++" >> $GITHUB_ENV
           echo "OMPI_CC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvc" >> $GITHUB_ENV
           echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvfortran" >> $GITHUB_ENV
-          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/openmpi4/bin/mpicc" >> $GITHUB_ENV
-          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/openmpi4/bin/mpifort" >> $GITHUB_ENV
+          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin/mpifort" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/cuda/${{ env.CUDAVERDOT }}/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/lib" >> $GITHUB_ENV
           echo "DESTDIR=/tmp" >> $GITHUB_ENV
 
       - name: Configure
         shell: bash
         run: |
-          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin:$PATH
+          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin:$PATH
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
@@ -100,5 +100,6 @@ jobs:
       - name: Run Parallel Tests
         shell: bash
         run: |
+          export UCX_WARN_UNUSED_ENV_VARS=n
           ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
