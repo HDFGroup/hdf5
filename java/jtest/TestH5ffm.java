@@ -109,8 +109,8 @@ public class TestH5ffm {
             int result = hdf5_h.H5get_libversion(majnum, minnum, relnum);
             assertTrue("H5get_libversion failed", isSuccess(result));
 
-            int major = getInt(majnum);
-            int minor = getInt(minnum);
+            int major   = getInt(majnum);
+            int minor   = getInt(minnum);
             int release = getInt(relnum);
 
             assertTrue("Major version should be >= 1", major >= 1);
@@ -132,8 +132,8 @@ public class TestH5ffm {
 
             hdf5_h.H5get_libversion(majnum, minnum, relnum);
 
-            int major = getInt(majnum);
-            int minor = getInt(minnum);
+            int major   = getInt(majnum);
+            int minor   = getInt(minnum);
             int release = getInt(relnum);
 
             // Check against current version should succeed
@@ -185,7 +185,7 @@ public class TestH5ffm {
     {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate 1KB of memory
-            long size = 1024;
+            long size         = 1024;
             MemorySegment mem = hdf5_h.H5allocate_memory(size, false);
             assertNotNull("H5allocate_memory should return non-null", mem);
             assertFalse("Allocated memory should not be NULL segment", mem.equals(MemorySegment.NULL));
@@ -201,7 +201,7 @@ public class TestH5ffm {
     {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate 1KB of cleared memory
-            long size = 1024;
+            long size         = 1024;
             MemorySegment mem = hdf5_h.H5allocate_memory(size, true);
             assertNotNull("H5allocate_memory (cleared) should return non-null", mem);
             assertFalse("Allocated memory should not be NULL segment", mem.equals(MemorySegment.NULL));
@@ -221,12 +221,12 @@ public class TestH5ffm {
     {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate initial memory
-            long initialSize = 1024;
+            long initialSize  = 1024;
             MemorySegment mem = hdf5_h.H5allocate_memory(initialSize, false);
             assertNotNull("Initial allocation should succeed", mem);
 
             // Resize to larger size
-            long newSize = 2048;
+            long newSize          = 2048;
             MemorySegment resized = hdf5_h.H5resize_memory(mem, newSize);
             assertNotNull("H5resize_memory should return non-null", resized);
             assertFalse("Resized memory should not be NULL segment", resized.equals(MemorySegment.NULL));
@@ -259,14 +259,13 @@ public class TestH5ffm {
     {
         // Set conservative limits for free lists
         int reg_global_lim = 1; // 1 MB
-        int reg_list_lim = 1;   // 1 MB
+        int reg_list_lim   = 1; // 1 MB
         int arr_global_lim = 1; // 1 MB
-        int arr_list_lim = 1;   // 1 MB
+        int arr_list_lim   = 1; // 1 MB
         int blk_global_lim = 1; // 1 MB
-        int blk_list_lim = 1;   // 1 MB
+        int blk_list_lim   = 1; // 1 MB
 
-        int result = hdf5_h.H5set_free_list_limits(reg_global_lim, reg_list_lim,
-                                                   arr_global_lim, arr_list_lim,
+        int result = hdf5_h.H5set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim,
                                                    blk_global_lim, blk_list_lim);
         assertTrue("H5set_free_list_limits should succeed", isSuccess(result));
     }
