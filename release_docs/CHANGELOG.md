@@ -1,4 +1,4 @@
-HDF5 version 2.0.0-3 currently under development
+HDF5 version 2.0.0-4 currently under development
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -62,6 +62,14 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Improved the cross-compile support in the build system
+
+   The CMake build system has been improved to better support cross-compiling. This includes the following changes:
+   - The CMake option, `CMAKE_CROSS_COMPILING`, indicates that the library is being cross-compiled. This option, usually in a toolchain file, can be set to ON when cross-compiling.
+   - Removed the `CMAKE_CROSSCOMPILING_EMULATOR` when cross-compiling, CMake will automatically insert it in the command.
+   - Added an option `HDF5_USE_PREGEN` to supply pre-generated files located in `HDF5_USE_PREGEN_DIR` directory, to bypass running feature detection programs when cross-compiling.
+   - Added a variable `CROSSCOMPILING_PATH` to specify a path to search for programs when cross-compiling. This is useful when the build system needs to run programs that were built for the host system.
 
 ### Refactored `HDF5_BUILD/ENABLE_{feature}` variable in hdf5-config.cmake file
 
@@ -151,7 +159,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added `#ifdef` around the compression function calls. Added including the correct header file with the same `#ifdef`.
 
-### Renamed HDF5Examples build options from `H5EX_<option>` to `H5EXAMPLE_<option>`
+### Renamed HDF5Examples build options from `H5EXAMPLE_<option>` to `H5EXAMPLE_<option>`
 
 Changed the prefix to better distinguish the examples build options from the library options when building the examples along with the library.
 

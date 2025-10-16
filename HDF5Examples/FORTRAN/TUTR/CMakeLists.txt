@@ -5,7 +5,7 @@ project (HDF5Examples_FORTRAN_TUTR Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EXAMPLE_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+    "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EXAMPLE_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
 )
 
 #-----------------------------------------------------------------------------
@@ -89,12 +89,11 @@ if (H5EXAMPLE_BUILD_TESTING)
   )
   macro (ADD_H5_TEST testname)
     if (HDF5_USING_ANALYSIS_TOOL)
-      add_test (NAME ${EXAMPLE_VARNAME}_f90_tutr_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_f90_tutr_${testname}>)
+      add_test (NAME ${EXAMPLE_VARNAME}_f90_tutr_${testname} COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_f90_tutr_${testname}>)
     else ()
       add_test (
           NAME ${EXAMPLE_VARNAME}_f90_tutr_${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${EXAMPLE_VARNAME}_f90_tutr_${testname}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -105,7 +104,10 @@ if (H5EXAMPLE_BUILD_TESTING)
               -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
-    set_tests_properties (${EXAMPLE_VARNAME}_f90_tutr_${testname} PROPERTIES FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_f90_tutr)
+    set_tests_properties (${EXAMPLE_VARNAME}_f90_tutr_${testname} PROPERTIES
+        FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_f90_tutr
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
+    )
     if (last_test)
       set_tests_properties (${EXAMPLE_VARNAME}_f90_tutr_${testname} PROPERTIES DEPENDS ${last_test})
     endif ()

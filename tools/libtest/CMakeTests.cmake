@@ -24,7 +24,10 @@
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode)
-    add_test (NAME H5LIBTEST-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5tools_test_utils> ${ARGN})
+    add_test (NAME H5LIBTEST-${resultfile} COMMAND $<TARGET_FILE:h5tools_test_utils> ${ARGN})
+    set_tests_properties (H5LIBTEST-${resultfile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
+    )
     if (NOT "${resultcode}" STREQUAL "0")
       set_tests_properties (H5LIBTEST-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()

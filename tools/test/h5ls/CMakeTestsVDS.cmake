@@ -58,22 +58,22 @@ file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
 # copy the list of test files
 foreach (listfiles ${LIST_HDF5_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listfiles}" "h5ls_vds_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listfiles}" "h5ls_vds_files")
 endforeach ()
 
 foreach (listothers ${LIST_OTHER_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5ls/expected/vds/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listothers}" "h5ls_vds_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5ls/expected/vds/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listothers}" "h5ls_vds_files")
 endforeach ()
 
 foreach (listfiles ${LIST_HDF5_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listfiles}" "h5ls_vds_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listfiles}" "h5ls_vds_files")
 endforeach ()
 
 foreach (listothers ${LIST_OTHER_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5ls/vds_prefix/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listothers}" "h5ls_vds_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5ls/vds_prefix/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listothers}" "h5ls_vds_files")
 endforeach ()
 
-add_custom_target(h5ls_vds_files ALL COMMENT "Copying files needed by h5ls_vds tests" DEPENDS ${h5ls_vds_files_list})
+add_custom_target (h5ls_vds_files ALL COMMENT "Copying files needed by h5ls_vds tests" DEPENDS ${h5ls_vds_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -84,8 +84,7 @@ add_custom_target(h5ls_vds_files ALL COMMENT "Copying files needed by h5ls_vds t
 macro (ADD_H5_VDS_TEST resultfile resultcode)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
-    set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
+    add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
     if ("${resultcode}" STREQUAL "1")
       set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -93,7 +92,6 @@ macro (ADD_H5_VDS_TEST resultfile resultcode)
     add_test (
         NAME H5LS-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
             -D "TEST_ARGS=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
@@ -103,6 +101,10 @@ macro (ADD_H5_VDS_TEST resultfile resultcode)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
+  set_tests_properties (H5LS-${resultfile} PROPERTIES
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
+  )
   if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
   endif ()
@@ -111,9 +113,9 @@ endmacro ()
 macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5LS_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
+    add_test (NAME H5LS_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
     set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES
-        ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}"
+        ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN};${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
     if ("${resultcode}" STREQUAL "1")
@@ -123,7 +125,6 @@ macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
     add_test (
         NAME H5LS_PREFIX-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
             -D "TEST_ARGS=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -135,6 +136,10 @@ macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
+    set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+    )
   if ("H5LS_PREFIX-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES DISABLED true)
   endif ()
