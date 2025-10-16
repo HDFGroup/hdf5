@@ -19,6 +19,7 @@ import static jtest.FfmTestSupport.*;
 import java.io.File;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.H5AC_cache_config_t;
 import org.hdfgroup.javahdf5.H5F_info2_t;
@@ -389,6 +390,7 @@ public class TestH5Fffm {
         }
     }
 
+<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
     // ================================
     // H5F Expansion - Metadata Cache Configuration
     // ================================
@@ -715,4 +717,6 @@ public class TestH5Fffm {
             assertEquals("Minimize hint should match", minimize, retrieved);
         }
     }
+=======
+>>>>>>> 82875cf Finish FFM tests
 }

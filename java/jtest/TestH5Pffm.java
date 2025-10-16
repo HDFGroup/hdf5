@@ -2562,6 +2562,7 @@ public class TestH5Pffm {
         }
     }
 
+<<<<<<< Upstream, based on branch 'develop-jextract22' of https://github.com/byrnHDF/hdf5.git
     // ================================
     // Phase 2B Expansion Tests - Virtual Datasets
     // ================================
@@ -2893,4 +2894,6 @@ public class TestH5Pffm {
             hdf5_h.H5Pclose(dxpl);
         }
     }
+=======
+>>>>>>> 82875cf Finish FFM tests
 }

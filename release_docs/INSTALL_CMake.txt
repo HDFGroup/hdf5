@@ -17,6 +17,7 @@ Section IX:   Considerations for Cross-Compiling
 Section X:    Using CMakePresets.json for Compiling
 Section XI:   Using the Library
 Section XII:  Using CMake Regex Options for Testing
+Section XIII: Java FFM Testing
 
 ************************************************************************
 
@@ -1374,6 +1375,76 @@ XII. Using the CMake Regex Options for Testing
     For more information on using regular expressions with ctest,
     see the CMake documentation:
         https://cmake.org/cmake/help/latest/manual/ctest.1.html#regular-expressions
+
+
+========================================================================
+XIII. Java FFM Testing
+========================================================================
+
+HDF5 2.0 includes comprehensive Foreign Function & Memory (FFM) API tests
+for Java 24+. As of October 2025, the test suite provides 56% coverage of
+the HDF5 C API surface with 444 tests across 17 modules.
+
+FFM Test Organization
+---------------------
+Tests are organized by HDF5 module in java/jtest/:
+
+Module Test Files:
+  - TestH5ffm.java     - General library operations (14 tests)
+                         H5open, H5close, memory management, version info
+  - TestH5Affm.java    - Attribute operations (27 tests)
+  - TestH5Dffm.java    - Dataset operations (27 tests)
+  - TestH5Effm.java    - Error handling (14 tests)
+  - TestH5Fffm.java    - File operations (20 tests)
+  - TestH5FDffm.java   - File drivers (10 tests)
+  - TestH5Gffm.java    - Group operations (15 tests)
+  - TestH5Iffm.java    - Identifier management (15 tests)
+  - TestH5Lffm.java    - Link operations (16 tests)
+  - TestH5Offm.java    - Object operations (19 tests)
+  - TestH5Pffm.java    - Property lists (81 tests)
+  - TestH5PLffm.java   - Plugin management (11 tests)
+  - TestH5Rffm.java    - References (13 tests)
+  - TestH5Sffm.java    - Dataspace operations (41 tests)
+  - TestH5Tffm.java    - Datatype operations (92 tests)
+  - TestH5VLffm.java   - VOL connector (12 tests)
+  - TestH5Zffm.java    - Filter operations (17 tests)
+
+Running FFM Tests
+-----------------
+To run all FFM tests:
+    ctest -R "JUnitFFM" -V
+
+To run specific module tests:
+    ctest -R "JUnit-TestH5Affm" -V    # Attributes
+    ctest -R "JUnit-TestH5Pffm" -V    # Properties
+    ctest -R "JUnit-TestH5Tffm" -V    # Datatypes
+    ctest -R "JUnit-TestH5Sffm" -V    # Dataspaces
+
+Test Requirements:
+  - Java 24+ with --enable-native-access=ALL-UNNAMED
+  - FFM bindings JAR (javahdf5-*.jar)
+  - JUnit 4.x test framework
+  - HDF5 native libraries in LD_LIBRARY_PATH
+
+FFM Test Patterns:
+  - All tests use Arena.ofConfined() for memory management
+  - Proper cleanup in try-with-resources blocks
+  - Return value checking with isSuccess() / isValidId()
+  - See java/jtest/FfmTestSupport.java for utility methods
+
+ROS3 Variant Testing:
+  - Tests are compatible with both plain and ROS3 FFM variants
+  - Use ci-MinShar-*-Maven-FFM-ROS3 presets for ROS3 builds
+  - Same test suite validates both feature sets
+
+Coverage Information:
+  - Current: 56% overall API coverage (444 tests / 794 APIs)
+  - Top modules: H5S (95%), H5VL (100%), H5I (83%)
+  - Active expansion: H5P, H5F, H5O, H5D modules
+  - Target: 50%+ coverage maintained across all modules
+
+For FFM test development guidelines and memory patterns, see:
+  .claude/FFM_MEMORY_PATTERNS.md in the source tree
 
 
 ========================================================================
