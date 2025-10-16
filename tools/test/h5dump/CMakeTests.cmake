@@ -1220,10 +1220,23 @@ ADD_H5_TEST (texceedsubblock RESULT_CODE 1 H5ERRREF "exceed dataset dims" --enab
 
 # tests for filters
 # SZIP
-ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip TARGET_FILE tfilters.h5)
+# For VOL connectors, test files are generated during testing, which requires the filter itself to be available.
+if (HDF5_ENABLE_SZIP_SUPPORT)
+  set (SZIP_NATIVE_ONLY "")
+else ()
+  set (SZIP_NATIVE_ONLY "NATIVE_ONLY")
+endif ()
+
+ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip TARGET_FILE tfilters.h5 ${SZIP_NATIVE_ONLY})
 
 # deflate
-ADD_H5_TEST (tdeflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate TARGET_FILE tfilters.h5)
+# For VOL connectors, test files are generated during testing, which requires the filter itself to be available.
+if (H5_HAVE_FILTER_DEFLATE)
+  set (DEFLATE_NATIVE_ONLY "")
+else ()
+  set (DEFLATE_NATIVE_ONLY "NATIVE_ONLY")
+endif ()
+ADD_H5_TEST (tdeflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate TARGET_FILE tfilters.h5 ${DEFLATE_NATIVE_ONLY})
 
 # shuffle
 ADD_H5_TEST (tshuffle RESULT_CODE 0 --enable-error-stack -H -p -d shuffle TARGET_FILE tfilters.h5)
@@ -1238,7 +1251,12 @@ ADD_H5_TEST (tnbit RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d n
 ADD_H5_TEST (tscaleoffset RESULT_CODE 0 APPLY_FILTERS 4 --enable-error-stack -H -p -d scaleoffset  TARGET_FILE tfilters.h5)
 
 # all
-ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  TARGET_FILE tfilters.h5 APPLY_FILTERS 1)
+if (HDF5_ENABLE_SZIP_SUPPORT AND H5_HAVE_FILTER_DEFLATE)
+  set (ALL_NATIVE_ONLY "")
+else ()
+  set (ALL_NATIVE_ONLY "NATIVE_ONLY")
+endif ()
+ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  TARGET_FILE tfilters.h5 APPLY_FILTERS 1 ${ALL_NATIVE_ONLY})
 
 # user defined
 ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  TARGET_FILE tfilters.h5)

@@ -1,4 +1,4 @@
-HDF5 version 2.0.0-3 currently under development
+HDF5 version 2.0.0-4 currently under development
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
