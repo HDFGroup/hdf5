@@ -22,8 +22,14 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 public class H5Ex_D_Transform {
 
@@ -34,7 +40,7 @@ public class H5Ex_D_Transform {
     private static String TRANSFORM  = "x+1";
     private static String RTRANSFORM = "x-1";
 
-    private static void writeData()
+    private static void writeData(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long filespace_id = H5I_INVALID_HID();
@@ -60,8 +66,8 @@ public class H5Ex_D_Transform {
 
         // Create a new file using the default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +76,7 @@ public class H5Ex_D_Transform {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5.H5Screate_simple(2, dims, null);
+            filespace_id = H5Screate_simple(2, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -78,9 +84,9 @@ public class H5Ex_D_Transform {
 
         // Create the dataset transfer property list and define the transform expression.
         try {
-            dxpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_XFER);
+            dxpl_id = H5Pcreate(H5P_CLS_DATASET_XFER_ID_g());
             if (dxpl_id >= 0)
-                H5.H5Pset_data_transform(dxpl_id, TRANSFORM);
+                H5Pset_data_transform(dxpl_id, TRANSFORM);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -90,9 +96,9 @@ public class H5Ex_D_Transform {
         // a native type or the transform operation will fail.
         try {
             if ((file_id >= 0) && (filespace_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASET, HDF5Constants.H5T_NATIVE_INT, filespace_id,
-                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                          HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dcreate2(file_id, DATASET, H5T_NATIVE_INT_g(), filespace_id,
+                                          H5P_DEFAULT(), H5P_DEFAULT(),
+                                          H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -101,8 +107,8 @@ public class H5Ex_D_Transform {
         // Write the data to the dataset using the dataset transfer property list.
         try {
             if ((dataset_id >= 0) && (dxpl_id >= 0))
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5S_ALL, dxpl_id, dset_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), dxpl_id, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -111,7 +117,7 @@ public class H5Ex_D_Transform {
         // End access to the dataset and release resources used by it.
         try {
             if (dxpl_id >= 0)
-                H5.H5Pclose(dxpl_id);
+                H5Pclose(dxpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -119,7 +125,7 @@ public class H5Ex_D_Transform {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -127,7 +133,7 @@ public class H5Ex_D_Transform {
 
         try {
             if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
+                H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -136,14 +142,14 @@ public class H5Ex_D_Transform {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void readData()
+    private static void readData(Arena arena)
     {
 
         long file_id      = H5I_INVALID_HID();
@@ -153,7 +159,7 @@ public class H5Ex_D_Transform {
 
         // Open an existing file using the default properties.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -162,7 +168,7 @@ public class H5Ex_D_Transform {
         // Open an existing dataset using the default properties.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASET, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, DATASET, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -171,8 +177,8 @@ public class H5Ex_D_Transform {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                           H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -189,9 +195,9 @@ public class H5Ex_D_Transform {
 
         // Create the dataset transfer property list and define the transform expression.
         try {
-            dxpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_XFER);
+            dxpl_id = H5Pcreate(H5P_CLS_DATASET_XFER_ID_g());
             if (dxpl_id >= 0)
-                H5.H5Pset_data_transform(dxpl_id, RTRANSFORM);
+                H5Pset_data_transform(dxpl_id, RTRANSFORM);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -200,8 +206,8 @@ public class H5Ex_D_Transform {
         // Read the data using the dataset transfer property list.
         try {
             if ((dataset_id >= 0) && (dxpl_id >= 0))
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5S_ALL, dxpl_id, dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                           H5S_ALL(), dxpl_id, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -221,21 +227,21 @@ public class H5Ex_D_Transform {
         // Close and release resources.
         try {
             if (dxpl_id >= 0)
-                H5.H5Pclose(dxpl_id);
+                H5Pclose(dxpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -244,7 +250,11 @@ public class H5Ex_D_Transform {
 
     public static void main(String[] args)
     {
-        H5Ex_D_Transform.writeData();
-        H5Ex_D_Transform.readData();
-    }
+
+        try (Arena arena = Arena.ofConfined()) {
+        H5Ex_D_Transform.writeData(arena);
+                H5Ex_D_Transform.readData(arena);
+        }
+            }
+        }
 }

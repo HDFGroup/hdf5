@@ -22,12 +22,18 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
 
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_D_Checksum {
     private static String FILENAME    = "H5Ex_D_Checksum.h5";
@@ -71,7 +77,7 @@ public class H5Ex_D_Checksum {
     private static boolean checkFletcher32Filter()
     {
         try {
-            int available = H5.H5Zfilter_avail(H5Z_filter.H5Z_FILTER_FLETCHER32.getCode());
+            int available = H5Zfilter_avail(H5Z_filter.H5Z_FILTER_FLETCHER32.getCode());
             if (available == 0) {
                 System.out.println("N-Bit filter not available.");
                 return false;
@@ -82,9 +88,9 @@ public class H5Ex_D_Checksum {
         }
 
         try {
-            int filter_info = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_FLETCHER32);
-            if (((filter_info & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
-                ((filter_info & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0)) {
+            int filter_info = H5Zget_filter_info(H5Z_FILTER_FLETCHER32());
+            if (((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED()) == 0) ||
+                ((filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED()) == 0)) {
                 System.out.println("N-Bit filter not available for encoding and decoding.");
                 return false;
             }
@@ -95,7 +101,7 @@ public class H5Ex_D_Checksum {
         return true;
     }
 
-    private static void writeChecksum()
+    private static void writeChecksum(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long filespace_id = H5I_INVALID_HID();
@@ -112,8 +118,8 @@ public class H5Ex_D_Checksum {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -122,7 +128,7 @@ public class H5Ex_D_Checksum {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5.H5Screate_simple(RANK, dims, null);
+            filespace_id = H5Screate_simple(RANK, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -130,11 +136,11 @@ public class H5Ex_D_Checksum {
 
         // Create the dataset creation property list, add the N-Bit filter.
         try {
-            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            dcpl_id = H5Pcreate(H5P_DATASET_CREATE());
             if (dcpl_id >= 0) {
-                H5.H5Pset_fletcher32(dcpl_id);
+                H5Pset_fletcher32(dcpl_id);
                 // Set the chunk size.
-                H5.H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
+                H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
             }
         }
         catch (Exception e) {
@@ -144,8 +150,8 @@ public class H5Ex_D_Checksum {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, filespace_id,
-                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), filespace_id,
+                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -154,8 +160,8 @@ public class H5Ex_D_Checksum {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -164,7 +170,7 @@ public class H5Ex_D_Checksum {
         // End access to the dataset and release resources used by it.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -172,7 +178,7 @@ public class H5Ex_D_Checksum {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -180,7 +186,7 @@ public class H5Ex_D_Checksum {
 
         try {
             if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
+                H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -189,14 +195,14 @@ public class H5Ex_D_Checksum {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void readChecksum()
+    private static void readChecksum(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long dataset_id   = H5I_INVALID_HID();
@@ -205,7 +211,7 @@ public class H5Ex_D_Checksum {
 
         // Open an existing file.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -214,7 +220,7 @@ public class H5Ex_D_Checksum {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -223,7 +229,7 @@ public class H5Ex_D_Checksum {
         // Retrieve the dataset creation property list.
         try {
             if (dataset_id >= 0)
-                dcpl_id = H5.H5Dget_create_plist(dataset_id);
+                dcpl_id = H5Dget_create_plist(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -240,7 +246,7 @@ public class H5Ex_D_Checksum {
                 String[] filter_name = {""};
                 int[] filter_config  = {0};
                 int filter_type      = -1;
-                filter_type = H5.H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name,
+                filter_type = H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name,
                                                filter_config);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
@@ -269,8 +275,8 @@ public class H5Ex_D_Checksum {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0) {
-                int status = H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                                        HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+                int status = H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                                        H5S_ALL(), H5P_DEFAULT(), dset_data);
                 // Check if the read was successful. Normally we do not perform
                 // error checking in these examples for the sake of clarity, but in
                 // this case we will make an exception because this is how the
@@ -279,11 +285,11 @@ public class H5Ex_D_Checksum {
                     System.out.print("Dataset read failed!");
                     try {
                         if (dcpl_id >= 0)
-                            H5.H5Pclose(dcpl_id);
+                            H5Pclose(dcpl_id);
                         if (dataset_id >= 0)
-                            H5.H5Dclose(dataset_id);
+                            H5Dclose(dataset_id);
                         if (file_id >= 0)
-                            H5.H5Fclose(file_id);
+                            H5Fclose(file_id);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -310,7 +316,7 @@ public class H5Ex_D_Checksum {
         // End access to the dataset and release resources used by it.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -318,7 +324,7 @@ public class H5Ex_D_Checksum {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -327,7 +333,7 @@ public class H5Ex_D_Checksum {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -336,15 +342,13 @@ public class H5Ex_D_Checksum {
 
     public static void main(String[] args)
     {
-        // Check if the Fletcher32 filter is available and can be used for
-        // both encoding and decoding. Normally we do not perform error
-        // checking in these examples for the sake of clarity, but in this
-        // case we will make an exception because this filter is an
-        // optional part of the hdf5 library.
-        // size to be the current size.
-        if (H5Ex_D_Checksum.checkFletcher32Filter()) {
-            H5Ex_D_Checksum.writeChecksum();
-            H5Ex_D_Checksum.readChecksum();
+
+        try (Arena arena = Arena.ofConfined()) {
+                if (H5Ex_D_Checksum.checkFletcher32Filter(arena);) {
+                    H5Ex_D_Checksum.writeChecksum(arena);
+                    H5Ex_D_Checksum.readChecksum(arena);
         }
+            }
+            }
     }
 }

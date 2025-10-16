@@ -22,8 +22,14 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 public class H5Ex_D_UnlimitedMod {
     private static String FILENAME    = "H5Ex_D_UnlimitedMod.h5";
@@ -37,7 +43,7 @@ public class H5Ex_D_UnlimitedMod {
     private static final int RANK     = 2;
     private static final int NDIMS    = 2;
 
-    private static void writeUnlimited()
+    private static void writeUnlimited(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long dcpl_id      = H5I_INVALID_HID();
@@ -45,7 +51,7 @@ public class H5Ex_D_UnlimitedMod {
         long dataset_id   = H5I_INVALID_HID();
         long[] dims       = {DIM_X, DIM_Y};
         long[] chunk_dims = {CHUNK_X, CHUNK_Y};
-        long[] maxdims    = {HDF5Constants.H5S_UNLIMITED, HDF5Constants.H5S_UNLIMITED};
+        long[] maxdims    = {H5S_UNLIMITED(), H5S_UNLIMITED()};
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Initialize the dataset.
@@ -55,8 +61,8 @@ public class H5Ex_D_UnlimitedMod {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -64,7 +70,7 @@ public class H5Ex_D_UnlimitedMod {
 
         // Create dataspace with unlimited dimensions.
         try {
-            dataspace_id = H5.H5Screate_simple(RANK, dims, maxdims);
+            dataspace_id = H5Screate_simple(RANK, dims, maxdims);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -72,7 +78,7 @@ public class H5Ex_D_UnlimitedMod {
 
         // Create the dataset creation property list.
         try {
-            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            dcpl_id = H5Pcreate(H5P_DATASET_CREATE());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -81,7 +87,7 @@ public class H5Ex_D_UnlimitedMod {
         // Set the chunk size.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
+                H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -90,8 +96,8 @@ public class H5Ex_D_UnlimitedMod {
         // Create the unlimited dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, dataspace_id,
-                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), dataspace_id,
+                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -100,8 +106,8 @@ public class H5Ex_D_UnlimitedMod {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -110,7 +116,7 @@ public class H5Ex_D_UnlimitedMod {
         // End access to the dataset and release resources used by it.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -118,7 +124,7 @@ public class H5Ex_D_UnlimitedMod {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -126,7 +132,7 @@ public class H5Ex_D_UnlimitedMod {
 
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -135,14 +141,14 @@ public class H5Ex_D_UnlimitedMod {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void extendUnlimited()
+    private static void extendUnlimited(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long dataspace_id = H5I_INVALID_HID();
@@ -154,7 +160,7 @@ public class H5Ex_D_UnlimitedMod {
 
         // Open an existing file.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +169,7 @@ public class H5Ex_D_UnlimitedMod {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -174,7 +180,7 @@ public class H5Ex_D_UnlimitedMod {
         // in steps.
         try {
             if (dataset_id >= 0)
-                dataspace_id = H5.H5Dget_space(dataset_id);
+                dataspace_id = H5Dget_space(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -182,7 +188,7 @@ public class H5Ex_D_UnlimitedMod {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sget_simple_extent_dims(dataspace_id, dims, null);
+                H5Sget_simple_extent_dims(dataspace_id, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -194,8 +200,8 @@ public class H5Ex_D_UnlimitedMod {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                           H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -213,7 +219,7 @@ public class H5Ex_D_UnlimitedMod {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -222,7 +228,7 @@ public class H5Ex_D_UnlimitedMod {
         // Extend the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dset_extent(dataset_id, extdims);
+                H5Dset_extent(dataset_id, extdims);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -231,7 +237,7 @@ public class H5Ex_D_UnlimitedMod {
         // Retrieve the dataspace for the newly extended dataset.
         try {
             if (dataset_id >= 0)
-                dataspace_id = H5.H5Dget_space(dataset_id);
+                dataspace_id = H5Dget_space(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -245,8 +251,8 @@ public class H5Ex_D_UnlimitedMod {
         // Write the data tto the extended dataset.
         try {
             if ((dataspace_id >= 0) && (dataset_id >= 0))
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, dataspace_id,
-                            HDF5Constants.H5P_DEFAULT, extend_dset_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), dataspace_id,
+                            H5P_DEFAULT(), extend_dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -255,7 +261,7 @@ public class H5Ex_D_UnlimitedMod {
         // End access to the dataset and release resources used by it.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -263,7 +269,7 @@ public class H5Ex_D_UnlimitedMod {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -272,14 +278,14 @@ public class H5Ex_D_UnlimitedMod {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void readUnlimited()
+    private static void readUnlimited(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long dataspace_id = H5I_INVALID_HID();
@@ -289,7 +295,7 @@ public class H5Ex_D_UnlimitedMod {
 
         // Open an existing file.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -298,7 +304,7 @@ public class H5Ex_D_UnlimitedMod {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -307,7 +313,7 @@ public class H5Ex_D_UnlimitedMod {
         // Get dataspace and allocate memory for the read buffer as before.
         try {
             if (dataset_id >= 0)
-                dataspace_id = H5.H5Dget_space(dataset_id);
+                dataspace_id = H5Dget_space(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -315,7 +321,7 @@ public class H5Ex_D_UnlimitedMod {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sget_simple_extent_dims(dataspace_id, dims, null);
+                H5Sget_simple_extent_dims(dataspace_id, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -326,8 +332,8 @@ public class H5Ex_D_UnlimitedMod {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                           H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -346,7 +352,7 @@ public class H5Ex_D_UnlimitedMod {
         // End access to the dataset and release resources used by it.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -354,7 +360,7 @@ public class H5Ex_D_UnlimitedMod {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -363,7 +369,7 @@ public class H5Ex_D_UnlimitedMod {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -372,8 +378,12 @@ public class H5Ex_D_UnlimitedMod {
 
     public static void main(String[] args)
     {
-        H5Ex_D_UnlimitedMod.writeUnlimited();
-        H5Ex_D_UnlimitedMod.extendUnlimited();
-        H5Ex_D_UnlimitedMod.readUnlimited();
-    }
+
+        try (Arena arena = Arena.ofConfined()) {
+        H5Ex_D_UnlimitedMod.writeUnlimited(arena);
+                H5Ex_D_UnlimitedMod.extendUnlimited(arena);
+                H5Ex_D_UnlimitedMod.readUnlimited(arena);
+        }
+            }
+        }
 }

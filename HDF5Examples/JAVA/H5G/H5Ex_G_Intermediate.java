@@ -16,10 +16,16 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
 
 import java.util.ArrayList;
 
-import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_G_Intermediate {
 
@@ -34,19 +40,19 @@ public class H5Ex_G_Intermediate {
 
         try {
             // Create a new file_id using the default properties.
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
 
             // Create group_id creation property list and set it to allow creation of intermediate group_ids.
-            gcpl_id = H5.H5Pcreate(HDF5Constants.H5P_LINK_CREATE);
-            H5.H5Pset_create_intermediate_group(gcpl_id, true);
+            gcpl_id = H5Pcreate(H5P_LINK_CREATE());
+            H5Pset_create_intermediate_group(gcpl_id, true);
 
             /*
              * Create the group_id /G1/G2/G3. Note that /G1 and /G1/G2 do not exist yet. This call would cause
              * an error if we did not use the previously created property list.
              */
-            group_id = H5.H5Gcreate(file_id, "/G1/G2/G3", gcpl_id, HDF5Constants.H5P_DEFAULT,
-                                    HDF5Constants.H5P_DEFAULT);
+            group_id = H5Gcreate(file_id, "/G1/G2/G3", gcpl_id, H5P_DEFAULT(),
+                                    H5P_DEFAULT());
             // Print all the objects in the file_ids to show that intermediate group_ids have been created.
             System.out.println("Objects in the file_id:");
 
@@ -54,7 +60,7 @@ public class H5Ex_G_Intermediate {
             H5O_iterate_opdata_t iter_data = new H5O_iter_data();
             H5O_iterate_t iter_cb          = new H5O_iter_callback();
 
-            H5.H5Ovisit(file_id, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_NATIVE, iter_cb,
+            H5Ovisit(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), iter_cb,
                         iter_data);
         }
         catch (Exception e) {
@@ -63,19 +69,23 @@ public class H5Ex_G_Intermediate {
         finally {
             // Close and release resources.
             if (gcpl_id >= 0)
-                H5.H5Pclose(gcpl_id);
+                H5Pclose(gcpl_id);
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
     }
 
     public static void main(String[] args)
     {
+
+        try (Arena arena = Arena.ofConfined()) {
         try {
-            (new H5Ex_G_Intermediate()).CreateGroup();
+                    (new H5Ex_G_Intermediate()).CreateGroup();
         }
+            }
+            }
         catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -108,11 +118,11 @@ public class H5Ex_G_Intermediate {
 
             if (name.charAt(0) == '.') /* Root group, do not print '.' */
                 System.out.println("  (Group)");
-            else if (info.type == HDF5Constants.H5O_TYPE_GROUP)
+            else if (info.type == H5O_TYPE_GROUP())
                 System.out.println(name + "  (Group)");
-            else if (info.type == HDF5Constants.H5O_TYPE_DATASET)
+            else if (info.type == H5O_TYPE_DATASET())
                 System.out.println(name + "  (Dataset)");
-            else if (info.type == HDF5Constants.H5O_TYPE_NAMED_DATATYPE)
+            else if (info.type == H5O_TYPE_NAMED_DATATYPE())
                 System.out.println(name + "  (Datatype)");
             else
                 System.out.println(name + "  (Unknown)");

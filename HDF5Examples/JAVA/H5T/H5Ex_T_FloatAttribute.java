@@ -19,12 +19,18 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_FloatAttribute {
     private static String FILENAME      = "H5Ex_T_FloatAttribute.h5";
@@ -34,7 +40,7 @@ public class H5Ex_T_FloatAttribute {
     private static final int DIM1       = 7;
     private static final int RANK       = 2;
 
-    private static void CreateDataset()
+    private static void CreateDataset(Arena arena)
     {
         long file_id         = H5I_INVALID_HID();
         long dataspace_id    = H5I_INVALID_HID();
@@ -51,8 +57,8 @@ public class H5Ex_T_FloatAttribute {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -60,12 +66,12 @@ public class H5Ex_T_FloatAttribute {
 
         // Create dataset with a scalar dataspace.
         try {
-            dataspace_id = H5.H5Screate(HDF5Constants.H5S_SCALAR);
+            dataspace_id = H5Screate(H5S_SCALAR());
             if (dataspace_id >= 0) {
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, dataspace_id,
-                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                          HDF5Constants.H5P_DEFAULT);
-                H5.H5Sclose(dataspace_id);
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), dataspace_id,
+                                          H5P_DEFAULT(), H5P_DEFAULT(),
+                                          H5P_DEFAULT());
+                H5Sclose(dataspace_id);
                 dataspace_id = H5I_INVALID_HID();
             }
         }
@@ -76,7 +82,7 @@ public class H5Ex_T_FloatAttribute {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5.H5Screate_simple(RANK, dims, null);
+            dataspace_id = H5Screate_simple(RANK, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -86,8 +92,8 @@ public class H5Ex_T_FloatAttribute {
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0))
                 attribute_id =
-                    H5.H5Acreate(dataset_id, ATTRIBUTENAME, HDF5Constants.H5T_IEEE_F64LE, dataspace_id,
-                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    H5Acreate(dataset_id, ATTRIBUTENAME, H5T_IEEE_F64LE_g(), dataspace_id,
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -96,7 +102,7 @@ public class H5Ex_T_FloatAttribute {
         // Write the dataset.
         try {
             if (attribute_id >= 0)
-                H5.H5Awrite(attribute_id, HDF5Constants.H5T_NATIVE_DOUBLE, dset_data);
+                H5Awrite(attribute_id, H5T_NATIVE_DOUBLE_g(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +111,7 @@ public class H5Ex_T_FloatAttribute {
         // End access to the dataset and release resources used by it.
         try {
             if (attribute_id >= 0)
-                H5.H5Aclose(attribute_id);
+                H5Aclose(attribute_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -113,7 +119,7 @@ public class H5Ex_T_FloatAttribute {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -122,7 +128,7 @@ public class H5Ex_T_FloatAttribute {
         // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -131,14 +137,14 @@ public class H5Ex_T_FloatAttribute {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void ReadDataset()
+    private static void ReadDataset(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long dataspace_id = H5I_INVALID_HID();
@@ -149,7 +155,7 @@ public class H5Ex_T_FloatAttribute {
 
         // Open an existing file.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -158,7 +164,7 @@ public class H5Ex_T_FloatAttribute {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -166,8 +172,8 @@ public class H5Ex_T_FloatAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                                                  HDF5Constants.H5P_DEFAULT);
+                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(),
+                                                  H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -176,7 +182,7 @@ public class H5Ex_T_FloatAttribute {
         // Get dataspace and allocate memory for read buffer.
         try {
             if (attribute_id >= 0)
-                dataspace_id = H5.H5Aget_space(attribute_id);
+                dataspace_id = H5Aget_space(attribute_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -184,7 +190,7 @@ public class H5Ex_T_FloatAttribute {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sget_simple_extent_dims(dataspace_id, dims, null);
+                H5Sget_simple_extent_dims(dataspace_id, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -197,7 +203,7 @@ public class H5Ex_T_FloatAttribute {
         // Read data.
         try {
             if (attribute_id >= 0)
-                H5.H5Aread(attribute_id, HDF5Constants.H5T_NATIVE_DOUBLE, dset_data);
+                H5Aread(attribute_id, H5T_NATIVE_DOUBLE_g(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -218,7 +224,7 @@ public class H5Ex_T_FloatAttribute {
         // End access to the dataset and release resources used by it.
         try {
             if (attribute_id >= 0)
-                H5.H5Aclose(attribute_id);
+                H5Aclose(attribute_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -226,7 +232,7 @@ public class H5Ex_T_FloatAttribute {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -235,7 +241,7 @@ public class H5Ex_T_FloatAttribute {
         // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -244,7 +250,7 @@ public class H5Ex_T_FloatAttribute {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -253,11 +259,11 @@ public class H5Ex_T_FloatAttribute {
 
     public static void main(String[] args)
     {
-        H5Ex_T_FloatAttribute.CreateDataset();
-        // Now we begin the read section of this example. Here we assume
-        // the dataset and array have the same name and rank, but can have
-        // any size. Therefore we must allocate a new array to read in
-        // data using malloc().
-        H5Ex_T_FloatAttribute.ReadDataset();
-    }
+
+        try (Arena arena = Arena.ofConfined()) {
+        H5Ex_T_FloatAttribute.CreateDataset(arena);
+                H5Ex_T_FloatAttribute.ReadDataset(arena);
+        }
+            }
+        }
 }

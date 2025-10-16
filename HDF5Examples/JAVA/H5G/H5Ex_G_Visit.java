@@ -20,10 +20,16 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
 
 import java.util.ArrayList;
 
-import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_G_Visit {
 
@@ -31,9 +37,13 @@ public class H5Ex_G_Visit {
 
     public static void main(String[] args)
     {
+
+        try (Arena arena = Arena.ofConfined()) {
         try {
-            (new H5Ex_G_Visit()).VisitGroup();
+                    (new H5Ex_G_Visit()).VisitGroup();
         }
+            }
+            }
         catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -46,20 +56,20 @@ public class H5Ex_G_Visit {
 
         try {
             // Open file
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
 
             // Begin iteration using H5Ovisit
             System.out.println("Objects in the file:");
             H5O_iterate_opdata_t iter_data = new H5O_iter_data();
             H5O_iterate_t iter_cb          = new H5O_iter_callback();
-            H5.H5Ovisit(file_id, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_NATIVE, iter_cb,
+            H5Ovisit(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), iter_cb,
                         iter_data);
             System.out.println();
             // Repeat the same process using H5Lvisit
             H5L_iterate_opdata_t iter_data2 = new H5L_iter_data();
             H5L_iterate_t iter_cb2          = new H5L_iter_callback();
             System.out.println("Links in the file:");
-            H5.H5Lvisit(file_id, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_NATIVE, iter_cb2,
+            H5Lvisit(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), iter_cb2,
                         iter_data2);
         }
         catch (Exception e) {
@@ -68,7 +78,7 @@ public class H5Ex_G_Visit {
         finally {
             // Close and release resources.
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
     }
 
@@ -104,7 +114,7 @@ public class H5Ex_G_Visit {
             try {
                 // Get type of the object and display its name and type. The name of the object is passed to
                 // this function by the Library.
-                infobuf                = H5.H5Oget_info_by_name(group, name, HDF5Constants.H5P_DEFAULT);
+                infobuf                = H5Oget_info_by_name(group, name, H5P_DEFAULT());
                 H5O_iterate_t iter_cbO = new H5O_iter_callback();
                 H5O_iterate_opdata_t iter_dataO = new H5O_iter_data();
                 ret                             = iter_cbO.callback(group, name, infobuf, iter_dataO);
@@ -133,11 +143,11 @@ public class H5Ex_G_Visit {
 
             if (name.charAt(0) == '.') /* Root group, do not print '.' */
                 System.out.println("  (Group)");
-            else if (info.type == HDF5Constants.H5O_TYPE_GROUP)
+            else if (info.type == H5O_TYPE_GROUP())
                 System.out.println(name + "  (Group)");
-            else if (info.type == HDF5Constants.H5O_TYPE_DATASET)
+            else if (info.type == H5O_TYPE_DATASET())
                 System.out.println(name + "  (Dataset)");
-            else if (info.type == HDF5Constants.H5O_TYPE_NAMED_DATATYPE)
+            else if (info.type == H5O_TYPE_NAMED_DATATYPE())
                 System.out.println(name + "  (Datatype)");
             else
                 System.out.println(name + "  (Unknown)");

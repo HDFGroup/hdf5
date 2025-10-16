@@ -12,8 +12,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 /**
  * <p>
@@ -39,7 +45,7 @@ import org.hdfgroup.javahdf5.*;
 public class HDF5FileStructure {
     private static String fname = "HDF5FileStructure.h5";
 
-    private static void FileStructure()
+    private static void FileStructure(Arena arena)
     {
         long file_id  = H5I_INVALID_HID();
         long group_id = H5I_INVALID_HID();
@@ -54,7 +60,7 @@ public class HDF5FileStructure {
 
         // Open file using the default properties.
         try {
-            file_id = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(fname, H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -63,7 +69,7 @@ public class HDF5FileStructure {
         // Open the group, obtaining a new handle.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gopen(file_id, "/", HDF5Constants.H5P_DEFAULT);
+                group_id = H5Gopen(file_id, "/", H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -79,7 +85,7 @@ public class HDF5FileStructure {
         // Close the group.
         try {
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -88,7 +94,7 @@ public class HDF5FileStructure {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -105,15 +111,15 @@ public class HDF5FileStructure {
         if (g_id < 0)
             return;
 
-        H5G_info_t members      = H5.H5Gget_info(g_id);
+        H5G_info_t members      = H5Gget_info(g_id);
         String objNames[]       = new String[(int)members.nlinks];
         int objTypes[]          = new int[(int)members.nlinks];
         int lnkTypes[]          = new int[(int)members.nlinks];
         H5O_token_t objTokens[] = new H5O_token_t[(int)members.nlinks];
         int names_found         = 0;
         try {
-            names_found = H5.H5Gget_obj_info_all(g_id, null, objNames, objTypes, lnkTypes, objTokens,
-                                                 HDF5Constants.H5_INDEX_NAME);
+            names_found = H5Gget_obj_info_all(g_id, null, objNames, objTypes, lnkTypes, objTokens,
+                                                 H5_INDEX_NAME());
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -123,11 +129,11 @@ public class HDF5FileStructure {
         for (int i = 0; i < names_found; i++) {
             System.out.println(indent + objNames[i]);
             long group_id = H5I_INVALID_HID();
-            if (objTypes[i] == HDF5Constants.H5O_TYPE_GROUP) {
+            if (objTypes[i] == H5O_TYPE_GROUP()) {
                 // Open the group, obtaining a new handle.
                 try {
                     if (g_id >= 0)
-                        group_id = H5.H5Gopen(g_id, objNames[i], HDF5Constants.H5P_DEFAULT);
+                        group_id = H5Gopen(g_id, objNames[i], H5P_DEFAULT());
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -139,7 +145,7 @@ public class HDF5FileStructure {
                 // Close the group.
                 try {
                     if (group_id >= 0)
-                        H5.H5Gclose(group_id);
+                        H5Gclose(group_id);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -155,7 +161,7 @@ public class HDF5FileStructure {
      * @see javaExample.HDF5DatasetCreate
      * @throws Exception
      */
-    private static void createFile() throws Exception
+    private static void createFile(Arena arena) throws Exception
     {
         long[] dims2D      = {20, 10};
         long[] dims3D      = {20, 10, 5};
@@ -168,8 +174,8 @@ public class HDF5FileStructure {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -178,16 +184,16 @@ public class HDF5FileStructure {
         // Create groups in the file.
         try {
             if (file_id >= 0) {
-                group_id1 = H5.H5Gcreate(file_id,
+                group_id1 = H5Gcreate(file_id,
                                          "/"
                                              + "integer arrays",
-                                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                         HDF5Constants.H5P_DEFAULT);
-                group_id1 = H5.H5Gcreate(file_id,
+                                         H5P_DEFAULT(), H5P_DEFAULT(),
+                                         H5P_DEFAULT());
+                group_id1 = H5Gcreate(file_id,
                                          "/"
                                              + "float arrays",
-                                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                         HDF5Constants.H5P_DEFAULT);
+                                         H5P_DEFAULT(), H5P_DEFAULT(),
+                                         H5P_DEFAULT());
             }
         }
         catch (Exception e) {
@@ -196,8 +202,8 @@ public class HDF5FileStructure {
 
         // Create the data space for the datasets.
         try {
-            dataspace_id1 = H5.H5Screate_simple(2, dims2D, null);
-            dataspace_id2 = H5.H5Screate_simple(3, dims3D, null);
+            dataspace_id1 = H5Screate_simple(2, dims2D, null);
+            dataspace_id2 = H5Screate_simple(3, dims3D, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -207,13 +213,13 @@ public class HDF5FileStructure {
         try {
             if ((file_id >= 0) && (dataspace_id1 >= 0))
                 dataset_id =
-                    H5.H5Dcreate(file_id,
+                    H5Dcreate2(file_id,
                                  "/"
                                      + "integer arrays"
                                      + "/"
                                      + "2D 32-bit integer 20x10",
-                                 HDF5Constants.H5T_STD_I32LE, dataspace_id1, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                 H5T_STD_I32LE_g(), dataspace_id1, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -222,7 +228,7 @@ public class HDF5FileStructure {
         // Close the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
             dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
@@ -233,13 +239,13 @@ public class HDF5FileStructure {
         try {
             if ((file_id >= 0) && (dataspace_id2 >= 0))
                 dataset_id =
-                    H5.H5Dcreate(file_id,
+                    H5Dcreate2(file_id,
                                  "/"
                                      + "integer arrays"
                                      + "/"
                                      + "3D 8-bit unsigned integer 20x10x5",
-                                 HDF5Constants.H5T_STD_I64LE, dataspace_id2, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                 H5T_STD_I64LE_g(), dataspace_id2, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -248,7 +254,7 @@ public class HDF5FileStructure {
         // Close the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
             dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
@@ -259,13 +265,13 @@ public class HDF5FileStructure {
         try {
             if ((file_id >= 0) && (dataspace_id1 >= 0))
                 dataset_id =
-                    H5.H5Dcreate(file_id,
+                    H5Dcreate2(file_id,
                                  "/"
                                      + "float arrays"
                                      + "/"
                                      + "2D 64-bit double 20x10",
-                                 HDF5Constants.H5T_NATIVE_DOUBLE, dataspace_id1, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                 H5T_NATIVE_DOUBLE_g(), dataspace_id1, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -274,7 +280,7 @@ public class HDF5FileStructure {
         // Close the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
             dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
@@ -285,13 +291,13 @@ public class HDF5FileStructure {
         try {
             if ((file_id >= 0) && (dataspace_id2 >= 0))
                 dataset_id =
-                    H5.H5Dcreate(file_id,
+                    H5Dcreate2(file_id,
                                  "/"
                                      + "float arrays"
                                      + "/"
                                      + "3D 32-bit float  20x10x5",
-                                 HDF5Constants.H5T_NATIVE_FLOAT, dataspace_id2, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                 H5T_NATIVE_FLOAT_g(), dataspace_id2, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -300,7 +306,7 @@ public class HDF5FileStructure {
         // Close the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
             dataset_id = H5I_INVALID_HID();
         }
         catch (Exception e) {
@@ -310,10 +316,10 @@ public class HDF5FileStructure {
         // Close the data space.
         try {
             if (dataspace_id1 >= 0)
-                H5.H5Sclose(dataspace_id1);
+                H5Sclose(dataspace_id1);
             dataspace_id1 = H5I_INVALID_HID();
             if (dataspace_id2 >= 0)
-                H5.H5Sclose(dataspace_id2);
+                H5Sclose(dataspace_id2);
             dataspace_id2 = H5I_INVALID_HID();
         }
         catch (Exception e) {
@@ -323,9 +329,9 @@ public class HDF5FileStructure {
         // Close the groups.
         try {
             if (group_id1 >= 0)
-                H5.H5Gclose(group_id1);
+                H5Gclose(group_id1);
             if (group_id2 >= 0)
-                H5.H5Gclose(group_id2);
+                H5Gclose(group_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -334,7 +340,7 @@ public class HDF5FileStructure {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();

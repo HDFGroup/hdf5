@@ -19,6 +19,13 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -27,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_T_Compound {
     private static String FILENAME           = "H5Ex_T_Compound.h5";
@@ -43,10 +49,10 @@ public class H5Ex_T_Compound {
         static int[] memberDims  = {1, 1, 1, 1};
 
         static String[] memberNames   = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
-        static long[] memberMemTypes  = {HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5T_C_S1,
-                                         HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE};
-        static long[] memberFileTypes = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
-                                         HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
+        static long[] memberMemTypes  = {H5T_NATIVE_INT_g(), H5T_C_S1_g(),
+                                         H5T_NATIVE_DOUBLE_g(), H5T_NATIVE_DOUBLE_g()};
+        static long[] memberFileTypes = {H5T_STD_I32BE_g(), H5T_C_S1_g(),
+                                         H5T_IEEE_F64BE_g(), H5T_IEEE_F64BE_g()};
         static int[] memberStorage    = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
 
         // Data size is the storage size for the members.
@@ -153,7 +159,7 @@ public class H5Ex_T_Compound {
         }
     }
 
-    private static void CreateDataset()
+    private static void CreateDataset(Arena arena)
     {
         long file_id            = H5I_INVALID_HID();
         long strtype_id         = H5I_INVALID_HID();
@@ -173,8 +179,8 @@ public class H5Ex_T_Compound {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -182,9 +188,9 @@ public class H5Ex_T_Compound {
 
         // Create string datatype.
         try {
-            strtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            strtype_id = H5Tcopy(H5T_C_S1_g());
             if (strtype_id >= 0)
-                H5.H5Tset_size(strtype_id, MAXSTRINGSIZE);
+                H5Tset_size(strtype_id, MAXSTRINGSIZE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -192,13 +198,13 @@ public class H5Ex_T_Compound {
 
         // Create the compound datatype for memory.
         try {
-            memtype_id = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, Sensor_Datatype.getDataSize());
+            memtype_id = H5Tcreate(H5T_COMPOUND(), Sensor_Datatype.getDataSize());
             if (memtype_id >= 0) {
                 for (int indx = 0; indx < Sensor_Datatype.numberMembers; indx++) {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
-                    if (type_id == HDF5Constants.H5T_C_S1)
+                    if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5.H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx],
+                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx],
                                  Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
@@ -212,13 +218,13 @@ public class H5Ex_T_Compound {
         // the corresponding native types, we must manually calculate the
         // offset of each member.
         try {
-            filetype_id = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, Sensor_Datatype.getDataSize());
+            filetype_id = H5Tcreate(H5T_COMPOUND(), Sensor_Datatype.getDataSize());
             if (filetype_id >= 0) {
                 for (int indx = 0; indx < Sensor_Datatype.numberMembers; indx++) {
                     long type_id = Sensor_Datatype.memberFileTypes[indx];
-                    if (type_id == HDF5Constants.H5T_C_S1)
+                    if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5.H5Tinsert(filetype_id, Sensor_Datatype.memberNames[indx],
+                    H5Tinsert(filetype_id, Sensor_Datatype.memberNames[indx],
                                  Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
@@ -230,7 +236,7 @@ public class H5Ex_T_Compound {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5.H5Screate_simple(RANK, dims, null);
+            dataspace_id = H5Screate_simple(RANK, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -240,8 +246,8 @@ public class H5Ex_T_Compound {
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
                 dataset_id =
-                    H5.H5Dcreate(file_id, DATASETNAME, filetype_id, dataspace_id, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    H5Dcreate2(file_id, DATASETNAME, filetype_id, dataspace_id, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -250,8 +256,8 @@ public class H5Ex_T_Compound {
         // Write the compound data to the dataset.
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5.H5DwriteVL(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                              HDF5Constants.H5P_DEFAULT, (Object[])object_data);
+                H5DwriteVL(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(),
+                              H5P_DEFAULT(), (Object[])object_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -260,7 +266,7 @@ public class H5Ex_T_Compound {
         // End access to the dataset and release resources used by it.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -269,7 +275,7 @@ public class H5Ex_T_Compound {
         // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -278,7 +284,7 @@ public class H5Ex_T_Compound {
         // Terminate access to the file type.
         try {
             if (filetype_id >= 0)
-                H5.H5Tclose(filetype_id);
+                H5Tclose(filetype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -287,7 +293,7 @@ public class H5Ex_T_Compound {
         // Terminate access to the mem type.
         try {
             if (memtype_id >= 0)
-                H5.H5Tclose(memtype_id);
+                H5Tclose(memtype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -295,7 +301,7 @@ public class H5Ex_T_Compound {
 
         try {
             if (strtype_id >= 0)
-                H5.H5Tclose(strtype_id);
+                H5Tclose(strtype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -304,14 +310,14 @@ public class H5Ex_T_Compound {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void ReadDataset()
+    private static void ReadDataset(Arena arena)
     {
         long file_id          = H5I_INVALID_HID();
         long strtype_id       = H5I_INVALID_HID();
@@ -323,7 +329,7 @@ public class H5Ex_T_Compound {
 
         // Open an existing file.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -332,7 +338,7 @@ public class H5Ex_T_Compound {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -341,7 +347,7 @@ public class H5Ex_T_Compound {
         // Get dataspace and allocate memory for read buffer.
         try {
             if (dataset_id >= 0)
-                dataspace_id = H5.H5Dget_space(dataset_id);
+                dataspace_id = H5Dget_space(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -349,7 +355,7 @@ public class H5Ex_T_Compound {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sget_simple_extent_dims(dataspace_id, dims, null);
+                H5Sget_simple_extent_dims(dataspace_id, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -357,9 +363,9 @@ public class H5Ex_T_Compound {
 
         // Create string datatype.
         try {
-            strtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            strtype_id = H5Tcopy(H5T_C_S1_g());
             if (strtype_id >= 0)
-                H5.H5Tset_size(strtype_id, MAXSTRINGSIZE);
+                H5Tset_size(strtype_id, MAXSTRINGSIZE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -367,13 +373,13 @@ public class H5Ex_T_Compound {
 
         // Create the compound datatype for memory.
         try {
-            memtype_id = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, Sensor_Datatype.getDataSize());
+            memtype_id = H5Tcreate(H5T_COMPOUND(), Sensor_Datatype.getDataSize());
             if (memtype_id >= 0) {
                 for (int indx = 0; indx < Sensor_Datatype.numberMembers; indx++) {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
-                    if (type_id == HDF5Constants.H5T_C_S1)
+                    if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5.H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx],
+                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx],
                                  Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
@@ -387,8 +393,8 @@ public class H5Ex_T_Compound {
         // Read data.
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5.H5DreadVL(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                             HDF5Constants.H5P_DEFAULT, (Object[])object_data);
+                H5DreadVL(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(),
+                             H5P_DEFAULT(), (Object[])object_data);
 
             for (int indx = 0; indx < (int)dims[0]; indx++) {
                 object_data2[indx] = new Sensor(object_data[indx]);
@@ -407,7 +413,7 @@ public class H5Ex_T_Compound {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -416,7 +422,7 @@ public class H5Ex_T_Compound {
         // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -425,7 +431,7 @@ public class H5Ex_T_Compound {
         // Terminate access to the mem type.
         try {
             if (memtype_id >= 0)
-                H5.H5Tclose(memtype_id);
+                H5Tclose(memtype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -433,7 +439,7 @@ public class H5Ex_T_Compound {
 
         try {
             if (strtype_id >= 0)
-                H5.H5Tclose(strtype_id);
+                H5Tclose(strtype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -442,7 +448,7 @@ public class H5Ex_T_Compound {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -451,11 +457,11 @@ public class H5Ex_T_Compound {
 
     public static void main(String[] args)
     {
-        H5Ex_T_Compound.CreateDataset();
-        // Now we begin the read section of this example. Here we assume
-        // the dataset and array have the same name and rank, but can have
-        // any size. Therefore we must allocate a new array to read in
-        // data using malloc().
-        H5Ex_T_Compound.ReadDataset();
-    }
+
+        try (Arena arena = Arena.ofConfined()) {
+        H5Ex_T_Compound.CreateDataset(arena);
+                H5Ex_T_Compound.ReadDataset(arena);
+        }
+            }
+        }
 }

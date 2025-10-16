@@ -22,8 +22,14 @@ chapter 4, figure 26.
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 import examples.groups.H5Ex_G_Iterate.H5O_type;
 
@@ -38,7 +44,7 @@ public class H5Ex_G_Traverse {
     private static String FILENAME      = "h5ex_g_traverse.h5";
     public static H5L_iterate_t iter_cb = new H5L_iter_callbackT();
 
-    private static void OpenGroup()
+    private static void OpenGroup(Arena arena)
     {
         long file_id = H5I_INVALID_HID();
         H5O_info_t infobuf;
@@ -46,9 +52,9 @@ public class H5Ex_G_Traverse {
 
         // Open file and initialize the operator data structure.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
             if (file_id >= 0) {
-                infobuf      = H5.H5Oget_info(file_id);
+                infobuf      = H5Oget_info(file_id);
                 od.recurs    = 0;
                 od.prev      = null;
                 od.obj_token = infobuf.token;
@@ -62,7 +68,7 @@ public class H5Ex_G_Traverse {
         try {
             System.out.println("/ {");
             // H5L_iterate_t iter_cb = new H5L_iter_callbackT();
-            H5.H5Literate(file_id, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb,
+            H5Literate(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), 0L, iter_cb,
                           od);
             System.out.println("}");
         }
@@ -73,7 +79,7 @@ public class H5Ex_G_Traverse {
         // Close and release resources.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -95,7 +101,7 @@ class H5L_iter_callbackT implements H5L_iterate_t {
         // Get type of the object and display its name and type.
         // The name of the object is passed to this function by the Library.
         try {
-            infobuf = H5.H5Oget_info_by_name(group, name, HDF5Constants.H5P_DEFAULT);
+            infobuf = H5Oget_info_by_name(group, name, H5P_DEFAULT());
 
             for (int i = 0; i < spaces; i++)
                 System.out.print(" "); // Format output.
@@ -126,9 +132,9 @@ class H5L_iter_callbackT implements H5L_iterate_t {
                     nextod.prev            = od;
                     nextod.obj_token       = infobuf.token;
                     H5L_iterate_t iter_cb2 = new H5L_iter_callbackT();
-                    return_val             = H5.H5Literate_by_name(group, name, HDF5Constants.H5_INDEX_NAME,
-                                                                   HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb2, nextod,
-                                                                   HDF5Constants.H5P_DEFAULT);
+                    return_val             = H5Literate_by_name(group, name, H5_INDEX_NAME(),
+                                                                   H5_ITER_NATIVE(), 0L, iter_cb2, nextod,
+                                                                   H5P_DEFAULT());
                 }
                 for (int i = 0; i < spaces; i++)
                     System.out.print(" ");

@@ -20,8 +20,14 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 public class H5Ex_D_External {
     private static String FILENAME         = "H5Ex_D_External.h5";
@@ -32,7 +38,7 @@ public class H5Ex_D_External {
     private static final int RANK          = 2;
     private static final int NAME_BUF_SIZE = 32;
 
-    private static void writeExternal()
+    private static void writeExternal(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long dcpl_id      = H5I_INVALID_HID();
@@ -48,8 +54,8 @@ public class H5Ex_D_External {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -58,7 +64,7 @@ public class H5Ex_D_External {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5.H5Screate_simple(RANK, dims, null);
+            filespace_id = H5Screate_simple(RANK, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -66,7 +72,7 @@ public class H5Ex_D_External {
 
         // Create the dataset creation property list.
         try {
-            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            dcpl_id = H5Pcreate(H5P_DATASET_CREATE());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +81,7 @@ public class H5Ex_D_External {
         // set the external file.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pset_external(dcpl_id, EXTERNALNAME, 0, HDF5Constants.H5F_UNLIMITED);
+                H5Pset_external(dcpl_id, EXTERNALNAME, 0, H5F_UNLIMITED());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -84,8 +90,8 @@ public class H5Ex_D_External {
         // Create the HDF5Constants.dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, filespace_id,
-                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), filespace_id,
+                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -93,8 +99,8 @@ public class H5Ex_D_External {
 
         // Write the dataset.
         try {
-            H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                        H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -103,7 +109,7 @@ public class H5Ex_D_External {
         // End access to the dataset and release resources used by it.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -112,7 +118,7 @@ public class H5Ex_D_External {
         // Terminate access to the data space.
         try {
             if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
+                H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -120,7 +126,7 @@ public class H5Ex_D_External {
 
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -129,14 +135,14 @@ public class H5Ex_D_External {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void readExternal()
+    private static void readExternal(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long dcpl_id      = H5I_INVALID_HID();
@@ -146,7 +152,7 @@ public class H5Ex_D_External {
 
         // Open file using the default properties.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -155,7 +161,7 @@ public class H5Ex_D_External {
         // Open dataset using the default properties.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -164,7 +170,7 @@ public class H5Ex_D_External {
         // Retrieve the dataset creation property list.
         try {
             if (dataset_id >= 0)
-                dcpl_id = H5.H5Dget_create_plist(dataset_id);
+                dcpl_id = H5Dget_create_plist(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -174,7 +180,7 @@ public class H5Ex_D_External {
         long[] Xsize = new long[NAME_BUF_SIZE];
         try {
             if (dcpl_id >= 0)
-                H5.H5Pget_external(dcpl_id, 0, Xsize.length, Xname, Xsize);
+                H5Pget_external(dcpl_id, 0, Xsize.length, Xname, Xsize);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -184,8 +190,8 @@ public class H5Ex_D_External {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                           H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -204,7 +210,7 @@ public class H5Ex_D_External {
         // Close the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -212,7 +218,7 @@ public class H5Ex_D_External {
 
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -221,7 +227,7 @@ public class H5Ex_D_External {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -230,7 +236,11 @@ public class H5Ex_D_External {
 
     public static void main(String[] args)
     {
-        H5Ex_D_External.writeExternal();
-        H5Ex_D_External.readExternal();
-    }
+
+        try (Arena arena = Arena.ofConfined()) {
+        H5Ex_D_External.writeExternal(arena);
+                H5Ex_D_External.readExternal(arena);
+        }
+            }
+        }
 }

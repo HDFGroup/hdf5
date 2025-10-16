@@ -15,22 +15,28 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 public class H5Ex_G_Create {
     private static String FILENAME  = "H5Ex_G_Create.h5";
     private static String GROUPNAME = "G1";
 
-    private static void CreateGroup()
+    private static void CreateGroup(Arena arena)
     {
         long file_id  = H5I_INVALID_HID();
         long group_id = H5I_INVALID_HID();
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -39,8 +45,8 @@ public class H5Ex_G_Create {
         // Create a group in the file.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gcreate(file_id, "/" + GROUPNAME, HDF5Constants.H5P_DEFAULT,
-                                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                group_id = H5Gcreate(file_id, "/" + GROUPNAME, H5P_DEFAULT(),
+                                        H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -49,7 +55,7 @@ public class H5Ex_G_Create {
         // Close the group. The handle "group" can no longer be used.
         try {
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -58,7 +64,7 @@ public class H5Ex_G_Create {
         // Re-open the group, obtaining a new handle.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gopen(file_id, "/" + GROUPNAME, HDF5Constants.H5P_DEFAULT);
+                group_id = H5Gopen(file_id, "/" + GROUPNAME, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -67,7 +73,7 @@ public class H5Ex_G_Create {
         // Close the group.
         try {
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +82,7 @@ public class H5Ex_G_Create {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -15,12 +15,18 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
 
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_G_Compact {
 
@@ -61,8 +67,8 @@ public class H5Ex_G_Compact {
 
         // Create file 1. This file will use original format groups.
         try {
-            file_id = H5.H5Fcreate(FILE1, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -70,8 +76,8 @@ public class H5Ex_G_Compact {
         // Create a group in the file1.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gcreate(file_id, GROUP, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                        HDF5Constants.H5P_DEFAULT);
+                group_id = H5Gcreate(file_id, GROUP, H5P_DEFAULT(), H5P_DEFAULT(),
+                                        H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -80,7 +86,7 @@ public class H5Ex_G_Compact {
         // Obtain the group info and print the group storage type.
         try {
             if (group_id >= 0) {
-                ginfo = H5.H5Gget_info(group_id);
+                ginfo = H5Gget_info(group_id);
                 System.out.print("Group storage type for " + FILE1 + " is: ");
                 switch (H5G_storage.get(ginfo.storage_type)) {
                 case H5G_STORAGE_TYPE_COMPACT:
@@ -108,7 +114,7 @@ public class H5Ex_G_Compact {
         // Close the group.
         try {
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -117,7 +123,7 @@ public class H5Ex_G_Compact {
         // close the file 1.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +131,7 @@ public class H5Ex_G_Compact {
 
         // Re-open file 1. Need to get the correct file size.
         try {
-            file_id = H5.H5Fopen(FILE1, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILE1, H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -134,7 +140,7 @@ public class H5Ex_G_Compact {
         // Obtain and print the file size.
         try {
             if (file_id >= 0) {
-                size = H5.H5Fget_filesize(file_id);
+                size = H5Fget_filesize(file_id);
                 System.out.println("File size for " + FILE1 + " is: " + size + " bytes");
             }
         }
@@ -145,7 +151,7 @@ public class H5Ex_G_Compact {
         // Close FILE1.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -154,10 +160,10 @@ public class H5Ex_G_Compact {
         // Set file access property list to allow the latest file format.
         // This will allow the library to create new compact format groups.
         try {
-            fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+            fapl_id = H5Pcreate(H5P_FILE_ACCESS());
             if (fapl_id >= 0)
-                H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST,
-                                        HDF5Constants.H5F_LIBVER_LATEST);
+                H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST(),
+                                        H5F_LIBVER_LATEST());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -165,7 +171,7 @@ public class H5Ex_G_Compact {
         System.out.println();
         // Create file 2 using the new file access property list.
         try {
-            file_id = H5.H5Fcreate(FILE2, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, fapl_id);
+            file_id = H5Fcreate(FILE2, H5F_ACC_TRUNC(), H5P_DEFAULT(), fapl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -173,8 +179,8 @@ public class H5Ex_G_Compact {
         // Create group in file2.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gcreate(file_id, GROUP, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                        HDF5Constants.H5P_DEFAULT);
+                group_id = H5Gcreate(file_id, GROUP, H5P_DEFAULT(), H5P_DEFAULT(),
+                                        H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -183,7 +189,7 @@ public class H5Ex_G_Compact {
         // Obtain the group info and print the group storage type.
         try {
             if (group_id >= 0) {
-                ginfo = H5.H5Gget_info(group_id);
+                ginfo = H5Gget_info(group_id);
                 System.out.print("Group storage type for " + FILE2 + " is: ");
                 switch (H5G_storage.get(ginfo.storage_type)) {
                 case H5G_STORAGE_TYPE_COMPACT:
@@ -211,7 +217,7 @@ public class H5Ex_G_Compact {
         // Close the group.
         try {
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -220,7 +226,7 @@ public class H5Ex_G_Compact {
         // close the file 2.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -228,7 +234,7 @@ public class H5Ex_G_Compact {
 
         // Re-open file 2. Needed to get the correct file size.
         try {
-            file_id = H5.H5Fopen(FILE2, HDF5Constants.H5F_ACC_RDONLY, fapl_id);
+            file_id = H5Fopen(FILE2, H5F_ACC_RDONLY(), fapl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -237,7 +243,7 @@ public class H5Ex_G_Compact {
         // Obtain and print the file size.
         try {
             if (file_id >= 0) {
-                size = H5.H5Fget_filesize(file_id);
+                size = H5Fget_filesize(file_id);
                 System.out.println("File size for " + FILE2 + " is: " + size + " bytes");
             }
         }
@@ -248,7 +254,7 @@ public class H5Ex_G_Compact {
         // Close FILE2.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();

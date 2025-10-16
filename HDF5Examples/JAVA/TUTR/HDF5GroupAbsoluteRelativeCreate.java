@@ -15,8 +15,14 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 public class HDF5GroupAbsoluteRelativeCreate {
     private static String FILENAME    = "HDF5GroupAbsoluteRelativeCreate.h5";
@@ -24,7 +30,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
     private static String GROUPNAME_A = "GroupA";
     private static String GROUPNAME_B = "GroupB";
 
-    private static void CreateGroupAbsoluteAndRelative()
+    private static void CreateGroupAbsoluteAndRelative(Arena arena)
     {
         long file_id   = H5I_INVALID_HID();
         long group1_id = H5I_INVALID_HID();
@@ -33,8 +39,8 @@ public class HDF5GroupAbsoluteRelativeCreate {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -43,8 +49,8 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create a group named "/MyGroup" in the file.
         try {
             if (file_id >= 0)
-                group1_id = H5.H5Gcreate(file_id, "/" + GROUPNAME, HDF5Constants.H5P_DEFAULT,
-                                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                group1_id = H5Gcreate(file_id, "/" + GROUPNAME, H5P_DEFAULT(),
+                                         H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -54,8 +60,8 @@ public class HDF5GroupAbsoluteRelativeCreate {
         try {
             if (file_id >= 0)
                 group2_id =
-                    H5.H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -64,8 +70,8 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create group "Group_B" in group "MyGroup" using relative name.
         try {
             if (group1_id >= 0)
-                group3_id = H5.H5Gcreate(group1_id, GROUPNAME_B, HDF5Constants.H5P_DEFAULT,
-                                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                group3_id = H5Gcreate(group1_id, GROUPNAME_B, H5P_DEFAULT(),
+                                         H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -74,7 +80,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Close the group3.
         try {
             if (group3_id >= 0)
-                H5.H5Gclose(group3_id);
+                H5Gclose(group3_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -83,7 +89,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Close the group2.
         try {
             if (group2_id >= 0)
-                H5.H5Gclose(group2_id);
+                H5Gclose(group2_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -92,7 +98,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Close the group1.
         try {
             if (group1_id >= 0)
-                H5.H5Gclose(group1_id);
+                H5Gclose(group1_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -101,7 +107,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -110,6 +116,10 @@ public class HDF5GroupAbsoluteRelativeCreate {
 
     public static void main(String[] args)
     {
-        HDF5GroupAbsoluteRelativeCreate.CreateGroupAbsoluteAndRelative();
-    }
+
+        try (Arena arena = Arena.ofConfined()) {
+        HDF5GroupAbsoluteRelativeCreate.CreateGroupAbsoluteAndRelative(arena);
+        }
+            }
+        }
 }

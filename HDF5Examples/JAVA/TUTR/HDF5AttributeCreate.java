@@ -12,8 +12,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 /**
  * <p>
@@ -38,7 +44,7 @@ public class HDF5AttributeCreate {
     private static String attrname = "data range";
     private static long[] dims2D   = {20, 10};
 
-    private static void CreateDatasetAttribute()
+    private static void CreateDatasetAttribute(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long dataspace_id = H5I_INVALID_HID();
@@ -55,7 +61,7 @@ public class HDF5AttributeCreate {
 
         // Open file using the default properties.
         try {
-            file_id = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(fname, H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -64,7 +70,7 @@ public class HDF5AttributeCreate {
         // Open dataset using the default properties.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, dsname, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, dsname, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +81,7 @@ public class HDF5AttributeCreate {
 
         // Create the data space for the attribute.
         try {
-            dataspace_id = H5.H5Screate_simple(1, attrDims, null);
+            dataspace_id = H5Screate_simple(1, attrDims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -84,8 +90,8 @@ public class HDF5AttributeCreate {
         // Create a dataset attribute.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0))
-                attribute_id = H5.H5Acreate(dataset_id, attrname, HDF5Constants.H5T_STD_I32BE, dataspace_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                attribute_id = H5Acreate(dataset_id, attrname, H5T_STD_I32BE_g(), dataspace_id,
+                                            H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -93,7 +99,7 @@ public class HDF5AttributeCreate {
         // Write the attribute data.
         try {
             if (attribute_id >= 0)
-                H5.H5Awrite(attribute_id, HDF5Constants.H5T_NATIVE_INT, attrValue);
+                H5Awrite(attribute_id, H5T_NATIVE_INT_g(), attrValue);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -102,7 +108,7 @@ public class HDF5AttributeCreate {
         // Close the attribute.
         try {
             if (attribute_id >= 0)
-                H5.H5Aclose(attribute_id);
+                H5Aclose(attribute_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -111,7 +117,7 @@ public class HDF5AttributeCreate {
         // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -119,8 +125,8 @@ public class HDF5AttributeCreate {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5.H5Aopen_by_name(dataset_id, ".", attrname, HDF5Constants.H5P_DEFAULT,
-                                                  HDF5Constants.H5P_DEFAULT);
+                attribute_id = H5Aopen_by_name(dataset_id, ".", attrname, H5P_DEFAULT(),
+                                                  H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -129,7 +135,7 @@ public class HDF5AttributeCreate {
         // Get dataspace and allocate memory for read buffer.
         try {
             if (attribute_id >= 0)
-                dataspace_id = H5.H5Aget_space(attribute_id);
+                dataspace_id = H5Aget_space(attribute_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -137,7 +143,7 @@ public class HDF5AttributeCreate {
 
         try {
             if (dataspace_id >= 0)
-                H5.H5Sget_simple_extent_dims(dataspace_id, attrDims, null);
+                H5Sget_simple_extent_dims(dataspace_id, attrDims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -150,7 +156,7 @@ public class HDF5AttributeCreate {
         // Read data.
         try {
             if (attribute_id >= 0)
-                H5.H5Aread(attribute_id, HDF5Constants.H5T_NATIVE_INT, attrData);
+                H5Aread(attribute_id, H5T_NATIVE_INT_g(), attrData);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +169,7 @@ public class HDF5AttributeCreate {
         // Close the dataspace.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -172,7 +178,7 @@ public class HDF5AttributeCreate {
         // Close to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -181,7 +187,7 @@ public class HDF5AttributeCreate {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -195,7 +201,7 @@ public class HDF5AttributeCreate {
      * @see javaExample.HDF5DatasetCreate
      * @throws Exception
      */
-    private static void createFile() throws Exception
+    private static void createFile(Arena arena) throws Exception
     {
         long file_id      = H5I_INVALID_HID();
         long dataspace_id = H5I_INVALID_HID();
@@ -203,8 +209,8 @@ public class HDF5AttributeCreate {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -212,7 +218,7 @@ public class HDF5AttributeCreate {
 
         // Create the data space for the dataset.
         try {
-            dataspace_id = H5.H5Screate_simple(2, dims2D, null);
+            dataspace_id = H5Screate_simple(2, dims2D, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -221,9 +227,9 @@ public class HDF5AttributeCreate {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, dsname, HDF5Constants.H5T_STD_I32LE, dataspace_id,
-                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                          HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dcreate2(file_id, dsname, H5T_STD_I32LE_g(), dataspace_id,
+                                          H5P_DEFAULT(), H5P_DEFAULT(),
+                                          H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -232,7 +238,7 @@ public class HDF5AttributeCreate {
         // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -249,8 +255,8 @@ public class HDF5AttributeCreate {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dataIn);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dataIn);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -259,7 +265,7 @@ public class HDF5AttributeCreate {
         // End access to the dataset and release resources used by it.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -268,7 +274,7 @@ public class HDF5AttributeCreate {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();

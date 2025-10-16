@@ -22,8 +22,14 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+
 
 public class H5Ex_D_Hyperslab {
     private static String FILENAME    = "H5Ex_D_Hyperslab.h5";
@@ -32,7 +38,7 @@ public class H5Ex_D_Hyperslab {
     private static final int DIM_Y    = 8;
     private static final int RANK     = 2;
 
-    private static void writeHyperslab()
+    private static void writeHyperslab(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long filespace_id = H5I_INVALID_HID();
@@ -57,8 +63,8 @@ public class H5Ex_D_Hyperslab {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -67,7 +73,7 @@ public class H5Ex_D_Hyperslab {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5.H5Screate_simple(RANK, dims, null);
+            filespace_id = H5Screate_simple(RANK, dims, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -76,9 +82,9 @@ public class H5Ex_D_Hyperslab {
         // Create the dataset. We will use all default properties for this example.
         try {
             if ((file_id >= 0) && (filespace_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, filespace_id,
-                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                          HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), filespace_id,
+                                          H5P_DEFAULT(), H5P_DEFAULT(),
+                                          H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -91,7 +97,7 @@ public class H5Ex_D_Hyperslab {
         long[] block  = {2, 2};
         try {
             if ((filespace_id >= 0))
-                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count,
+                H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), start, stride, count,
                                        block);
         }
         catch (Exception e) {
@@ -104,13 +110,13 @@ public class H5Ex_D_Hyperslab {
         block[1] = 1;
         try {
             if ((filespace_id >= 0)) {
-                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_NOTB, start, stride, count,
+                H5Sselect_hyperslab(filespace_id, H5S_SELECT_NOTB(), start, stride, count,
                                        block);
 
                 // Write the data to the dataset.
                 if (dataset_id >= 0)
-                    H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, filespace_id,
-                                HDF5Constants.H5P_DEFAULT, dset_data);
+                    H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), filespace_id,
+                                H5P_DEFAULT(), dset_data);
             }
         }
         catch (Exception e) {
@@ -120,7 +126,7 @@ public class H5Ex_D_Hyperslab {
         // End access to the dataset and release resources used by it.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -128,7 +134,7 @@ public class H5Ex_D_Hyperslab {
 
         try {
             if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
+                H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -137,14 +143,14 @@ public class H5Ex_D_Hyperslab {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void readHyperslab()
+    private static void readHyperslab(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long filespace_id = H5I_INVALID_HID();
@@ -154,7 +160,7 @@ public class H5Ex_D_Hyperslab {
 
         // Open an existing file.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +169,7 @@ public class H5Ex_D_Hyperslab {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -172,8 +178,8 @@ public class H5Ex_D_Hyperslab {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                           H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -197,7 +203,7 @@ public class H5Ex_D_Hyperslab {
         // Define and select the hyperslab to use for reading.
         try {
             if (dataset_id >= 0) {
-                filespace_id = H5.H5Dget_space(dataset_id);
+                filespace_id = H5Dget_space(dataset_id);
 
                 long[] start  = {0, 1};
                 long[] stride = {4, 4};
@@ -205,13 +211,13 @@ public class H5Ex_D_Hyperslab {
                 long[] block  = {2, 3};
 
                 if (filespace_id >= 0) {
-                    H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count,
+                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), start, stride, count,
                                            block);
 
                     // Read the data using the previously defined hyperslab.
                     if ((dataset_id >= 0) && (filespace_id >= 0))
-                        H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                                   filespace_id, HDF5Constants.H5P_DEFAULT, dset_data);
+                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                                   filespace_id, H5P_DEFAULT(), dset_data);
                 }
             }
         }
@@ -232,7 +238,7 @@ public class H5Ex_D_Hyperslab {
         // End access to the dataset and release resources used by it.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -240,7 +246,7 @@ public class H5Ex_D_Hyperslab {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -248,7 +254,7 @@ public class H5Ex_D_Hyperslab {
 
         try {
             if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
+                H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -257,7 +263,7 @@ public class H5Ex_D_Hyperslab {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -266,7 +272,11 @@ public class H5Ex_D_Hyperslab {
 
     public static void main(String[] args)
     {
-        H5Ex_D_Hyperslab.writeHyperslab();
-        H5Ex_D_Hyperslab.readHyperslab();
-    }
+
+        try (Arena arena = Arena.ofConfined()) {
+        H5Ex_D_Hyperslab.writeHyperslab(arena);
+                H5Ex_D_Hyperslab.readHyperslab(arena);
+        }
+            }
+        }
 }

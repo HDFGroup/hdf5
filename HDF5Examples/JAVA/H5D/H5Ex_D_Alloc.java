@@ -21,12 +21,18 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
+import static org.hdfgroup.javahdf5.hdf5_h_1.*;
+import static org.hdfgroup.javahdf5.hdf5_h_2.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
 
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_D_Alloc {
     private static String FILENAME     = "H5Ex_D_Alloc.h5";
@@ -60,7 +66,7 @@ public class H5Ex_D_Alloc {
         public static H5D_space_status get(int code) { return lookup.get(code); }
     }
 
-    private static void allocation()
+    private static void allocation(Arena arena)
     {
         long file_id      = H5I_INVALID_HID();
         long filespace_id = H5I_INVALID_HID();
@@ -79,8 +85,9 @@ public class H5Ex_D_Alloc {
 
         // Create a file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            MemorySegment filename = arena.allocateFrom(FILENAME);
+            file_id = H5Fcreate(filename, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -89,7 +96,8 @@ public class H5Ex_D_Alloc {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5.H5Screate_simple(RANK, dims, null);
+            MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+            filespace_id = H5Screate_simple(RANK, dimsSeg, MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -97,7 +105,7 @@ public class H5Ex_D_Alloc {
 
         // Create the dataset creation property list, and set the chunk size.
         try {
-            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            dcpl_id = H5Pcreate(H5P_CLS_DATASET_CREATE_ID_g());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -108,7 +116,7 @@ public class H5Ex_D_Alloc {
         // return the fill value.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pset_alloc_time(dcpl_id, HDF5Constants.H5D_ALLOC_TIME_EARLY);
+                H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -121,10 +129,12 @@ public class H5Ex_D_Alloc {
 
         // Create the dataset using the dataset default creation property list.
         try {
-            if ((file_id >= 0) && (filespace_id >= 0))
-                dataset_id1 = H5.H5Dcreate(file_id, DATASETNAME1, HDF5Constants.H5T_NATIVE_INT, filespace_id,
-                                           HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                           HDF5Constants.H5P_DEFAULT);
+            if ((file_id >= 0) && (filespace_id >= 0)) {
+                MemorySegment datasetname1 = arena.allocateFrom(DATASETNAME1);
+                dataset_id1 = H5Dcreate2(file_id, datasetname1, H5T_NATIVE_INT_g(), filespace_id,
+                                           H5P_DEFAULT(), H5P_DEFAULT(),
+                                           H5P_DEFAULT());
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -132,9 +142,11 @@ public class H5Ex_D_Alloc {
 
         // Create the dataset using the dataset creation property list.
         try {
-            if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id2 = H5.H5Dcreate(file_id, DATASETNAME2, HDF5Constants.H5T_NATIVE_INT, filespace_id,
-                                           HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+            if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0)) {
+                MemorySegment datasetname2 = arena.allocateFrom(DATASETNAME2);
+                dataset_id2 = H5Dcreate2(file_id, datasetname2, H5T_NATIVE_INT_g(), filespace_id,
+                                           H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -143,14 +155,14 @@ public class H5Ex_D_Alloc {
         // Retrieve and print space status and storage size for dset1.
         try {
             if (dataset_id1 >= 0)
-                space_status = H5.H5Dget_space_status(dataset_id1);
+                space_status = H5Dget_space_status(dataset_id1);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (dataset_id1 >= 0)
-                storage_size = H5.H5Dget_storage_size(dataset_id1);
+                storage_size = H5Dget_storage_size(dataset_id1);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -164,14 +176,14 @@ public class H5Ex_D_Alloc {
         // Retrieve and print space status and storage size for dset2.
         try {
             if (dataset_id2 >= 0)
-                space_status = H5.H5Dget_space_status(dataset_id2);
+                space_status = H5Dget_space_status(dataset_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (dataset_id2 >= 0)
-                storage_size = H5.H5Dget_storage_size(dataset_id2);
+                storage_size = H5Dget_storage_size(dataset_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -188,17 +200,43 @@ public class H5Ex_D_Alloc {
 
         // Write the data to the datasets.
         try {
-            if (dataset_id1 >= 0)
-                H5.H5Dwrite(dataset_id1, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data[0]);
+            if (dataset_id1 >= 0) {
+                // Flatten 2D array to 1D for MemorySegment
+                int[] flatData = new int[DIM_X * DIM_Y];
+                for (int i = 0; i < DIM_X; i++) {
+                    for (int j = 0; j < DIM_Y; j++) {
+                        flatData[i * DIM_Y + j] = dset_data[i][j];
+                    }
+                }
+                // Copy to MemorySegment
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, flatData.length);
+                for (int i = 0; i < flatData.length; i++) {
+                    dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
+                }
+                H5Dwrite(dataset_id1, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
-            if (dataset_id2 >= 0)
-                H5.H5Dwrite(dataset_id2, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data[0]);
+            if (dataset_id2 >= 0) {
+                // Flatten 2D array to 1D for MemorySegment
+                int[] flatData = new int[DIM_X * DIM_Y];
+                for (int i = 0; i < DIM_X; i++) {
+                    for (int j = 0; j < DIM_Y; j++) {
+                        flatData[i * DIM_Y + j] = dset_data[i][j];
+                    }
+                }
+                // Copy to MemorySegment
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, flatData.length);
+                for (int i = 0; i < flatData.length; i++) {
+                    dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
+                }
+                H5Dwrite(dataset_id2, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -207,14 +245,14 @@ public class H5Ex_D_Alloc {
         // Retrieve and print space status and storage size for dset1.
         try {
             if (dataset_id1 >= 0)
-                space_status = H5.H5Dget_space_status(dataset_id1);
+                space_status = H5Dget_space_status(dataset_id1);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (dataset_id1 >= 0)
-                storage_size = H5.H5Dget_storage_size(dataset_id1);
+                storage_size = H5Dget_storage_size(dataset_id1);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -228,14 +266,14 @@ public class H5Ex_D_Alloc {
         // Retrieve and print space status and storage size for dset2.
         try {
             if (dataset_id2 >= 0)
-                space_status = H5.H5Dget_space_status(dataset_id2);
+                space_status = H5Dget_space_status(dataset_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (dataset_id2 >= 0)
-                storage_size = H5.H5Dget_storage_size(dataset_id2);
+                storage_size = H5Dget_storage_size(dataset_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -250,7 +288,7 @@ public class H5Ex_D_Alloc {
         // End access to the dataset and release resources used by it.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -258,7 +296,7 @@ public class H5Ex_D_Alloc {
 
         try {
             if (dataset_id1 >= 0)
-                H5.H5Dclose(dataset_id1);
+                H5Dclose(dataset_id1);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -266,7 +304,7 @@ public class H5Ex_D_Alloc {
 
         try {
             if (dataset_id2 >= 0)
-                H5.H5Dclose(dataset_id2);
+                H5Dclose(dataset_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -274,7 +312,7 @@ public class H5Ex_D_Alloc {
 
         try {
             if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
+                H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -283,7 +321,7 @@ public class H5Ex_D_Alloc {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
