@@ -102,7 +102,7 @@ public class H5Ex_D_FillValue {
         // Set the fill value for the dataset
         try {
             if (dcpl_id >= 0) {
-                int[] fill_value          = {FILLVAL};
+                int[] fill_value           = {FILLVAL};
                 MemorySegment fillValueSeg = arena.allocateFrom(ValueLayout.JAVA_INT, fill_value);
                 H5Pset_fill_value(dcpl_id, H5T_NATIVE_INT_g(), fillValueSeg);
             }
@@ -127,7 +127,7 @@ public class H5Ex_D_FillValue {
             if ((file_id >= 0) && (dataspace_id >= 0) && (dcpl_id >= 0)) {
                 MemorySegment datasetname = arena.allocateFrom(DATASETNAME);
                 dataset_id = H5Dcreate2(file_id, datasetname, H5T_STD_I32LE_g(), dataspace_id, H5P_DEFAULT(),
-                                       dcpl_id, H5P_DEFAULT());
+                                        dcpl_id, H5P_DEFAULT());
             }
         }
         catch (Exception e) {

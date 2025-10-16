@@ -95,7 +95,7 @@ public class H5Ex_D_Chunk {
         // Create a new file using default properties.
         try {
             MemorySegment filename = arena.allocateFrom(FILENAME);
-            file_id = H5Fcreate(filename, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id                = H5Fcreate(filename, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +105,7 @@ public class H5Ex_D_Chunk {
         // size to be the current size.
         try {
             MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
-            filespace_id = H5Screate_simple(RANK, dimsSeg, MemorySegment.NULL);
+            filespace_id          = H5Screate_simple(RANK, dimsSeg, MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -344,12 +344,14 @@ public class H5Ex_D_Chunk {
                     MemorySegment strideSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, stride);
                     MemorySegment countSeg  = arena.allocateFrom(ValueLayout.JAVA_LONG, count);
                     MemorySegment blockSeg  = arena.allocateFrom(ValueLayout.JAVA_LONG, block);
-                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), startSeg, strideSeg, countSeg, blockSeg);
+                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), startSeg, strideSeg, countSeg,
+                                        blockSeg);
 
                     // Read the data using the previously defined hyperslab.
                     if ((dataset_id >= 0) && (filespace_id >= 0)) {
                         MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
-                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), filespace_id, H5P_DEFAULT(), dataSeg);
+                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), filespace_id, H5P_DEFAULT(),
+                                dataSeg);
                         // Unflatten to 2D array
                         for (int i = 0; i < DIM_X; i++) {
                             for (int j = 0; j < DIM_Y; j++) {

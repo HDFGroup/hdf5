@@ -116,7 +116,7 @@ public class H5Ex_D_Compact {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0)) {
                 MemorySegment datasetname = arena.allocateFrom(DATASETNAME);
                 dataset_id = H5Dcreate2(file_id, datasetname, H5T_STD_I32LE_g(), filespace_id, H5P_DEFAULT(),
-                                       dcpl_id, H5P_DEFAULT());
+                                        dcpl_id, H5P_DEFAULT());
             }
         }
         catch (Exception e) {
