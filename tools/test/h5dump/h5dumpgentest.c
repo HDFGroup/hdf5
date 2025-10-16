@@ -3188,7 +3188,11 @@ gent_array1_big(void)
     H5Dwrite(dset2, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
 
     /* Close Dataset */
+    ret = H5Sclose(sid2);
+    assert(ret >= 0);
     ret = H5Dclose(dataset);
+    assert(ret >= 0);
+    ret = H5Dclose(dset2);
     assert(ret >= 0);
     ret = H5Tclose(tid1);
     assert(ret >= 0);
@@ -8638,18 +8642,30 @@ gent_compound_attr_intsizes(void)
     status = H5Aclose(attr);
     assert(status >= 0);
 
+    status = H5Gclose(root);
+    assert(status >= 0);
+
     status = H5Fclose(fid);
     assert(status >= 0);
 
     free(Array1);
 }
 
-void
+herr_t
 gent_nested_compound_dt(void)
 { /* test nested data type */
-    hid_t    fid, group, dataset, space, type, create_plist, type1, type2;
-    hid_t    array_dt, enum_dt;
+    hid_t    fid          = H5I_INVALID_HID;
+    hid_t    group        = H5I_INVALID_HID; /* Group ID */
+    hid_t    dataset      = H5I_INVALID_HID; /* Dataset ID */
+    hid_t    space        = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t    type         = H5I_INVALID_HID; /* Data type ID */
+    hid_t    create_plist = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t    type1        = H5I_INVALID_HID; /* Data type ID */
+    hid_t    type2        = H5I_INVALID_HID; /* Data type ID */
+    hid_t    array_dt     = H5I_INVALID_HID; /* Array data type */
+    hid_t    enum_dt      = H5I_INVALID_HID; /* Enum data type */
     enumtype val;
+    herr_t   ret_value = SUCCEED;
 
     typedef struct {
         int   a;
@@ -8698,102 +8714,371 @@ gent_nested_compound_dt(void)
         dset3[i].c.b = (float)((float)i * 1.0F);
     }
 
-    fid = H5Fcreate(FILE72, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if ((fid = H5Fcreate(FILE72, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("failed to create file\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    create_plist = H5Pcreate(H5P_DATASET_CREATE);
+    if ((create_plist = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        printf("failed to create property list\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     sdim = 2;
-    H5Pset_chunk(create_plist, 1, &sdim);
+    if (H5Pset_chunk(create_plist, 1, &sdim) < 0) {
+        printf("failed to set chunk size\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     sdim   = 6;
     maxdim = H5S_UNLIMITED;
 
-    space = H5Screate_simple(1, &sdim, &maxdim);
+    if ((space = H5Screate_simple(1, &sdim, &maxdim)) < 0) {
+        printf("failed to create space\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    type = H5Tcreate(H5T_COMPOUND, sizeof(dset1[0]));
-    H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32LE);
-    H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32LE);
+    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(dset1[0]))) < 0) {
+        printf("failed to create type\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32LE) < 0) {
+        printf("failed to insert field a\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32LE) < 0) {
+        printf("failed to insert field b\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    dataset = H5Dcreate2(fid, "/dset1", type, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
+    if ((dataset = H5Dcreate2(fid, "/dset1", type, space, H5P_DEFAULT, create_plist, H5P_DEFAULT)) < 0) {
+        printf("failed to create dataset dset1\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+    if (H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1) < 0) {
+        printf("failed to write dataset dset1\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    H5Tclose(type);
-    H5Dclose(dataset);
+    if (H5Tclose(type) < 0) {
+        printf("failed to close type\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    type = H5I_INVALID_HID;
+    if (H5Dclose(dataset) < 0) {
+        printf("failed to close dataset\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    dataset = H5I_INVALID_HID;
 
     /* Create the shared enumerated datatype. */
-    enum_dt = H5Tenum_create(H5T_NATIVE_INT);
-    val     = (enumtype)RED;
-    H5Tenum_insert(enum_dt, "Red", &val);
+    if ((enum_dt = H5Tenum_create(H5T_NATIVE_INT)) < 0) {
+        printf("failed to create enum type\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    val = (enumtype)RED;
+    if (H5Tenum_insert(enum_dt, "Red", &val) < 0) {
+        printf("failed to insert Red\n");
+        ret_value = FAIL;
+        goto done;
+    }
     val = (enumtype)GREEN;
-    H5Tenum_insert(enum_dt, "Green", &val);
+    if (H5Tenum_insert(enum_dt, "Green", &val) < 0) {
+        printf("failed to insert Green\n");
+        ret_value = FAIL;
+        goto done;
+    }
     val = (enumtype)BLUE;
-    H5Tenum_insert(enum_dt, "Blue", &val);
+    if (H5Tenum_insert(enum_dt, "Blue", &val) < 0) {
+        printf("failed to insert Blue\n");
+        ret_value = FAIL;
+        goto done;
+    }
     val = (enumtype)WHITE;
-    H5Tenum_insert(enum_dt, "White", &val);
+    if (H5Tenum_insert(enum_dt, "White", &val) < 0) {
+        printf("failed to insert White\n");
+        ret_value = FAIL;
+        goto done;
+    }
     val = (enumtype)BLACK;
-    H5Tenum_insert(enum_dt, "Black", &val);
-    H5Tcommit2(fid, "enumtype", enum_dt, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (H5Tenum_insert(enum_dt, "Black", &val) < 0) {
+        printf("failed to insert Black\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tcommit2(fid, "enumtype", enum_dt, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
+        printf("failed to commit enum type\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    type2 = H5Tcreate(H5T_COMPOUND, sizeof(dset2[0]));
+    if ((type2 = H5Tcreate(H5T_COMPOUND, sizeof(dset2[0]))) < 0) {
+        printf("failed to create type2\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    H5Tinsert(type2, "a_name", HOFFSET(dset2_t, a), H5T_NATIVE_INT);
-    H5Tinsert(type2, "b_name", HOFFSET(dset2_t, b), H5T_NATIVE_FLOAT);
-    H5Tinsert(type2, "c_name", HOFFSET(dset2_t, c), enum_dt);
+    if (H5Tinsert(type2, "a_name", HOFFSET(dset2_t, a), H5T_NATIVE_INT) < 0) {
+        printf("failed to insert field a\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tinsert(type2, "b_name", HOFFSET(dset2_t, b), H5T_NATIVE_FLOAT) < 0) {
+        printf("failed to insert field b\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tinsert(type2, "c_name", HOFFSET(dset2_t, c), enum_dt) < 0) {
+        printf("failed to insert field c\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    dataset = H5Dcreate2(fid, "/dset2", type2, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
+    if ((dataset = H5Dcreate2(fid, "/dset2", type2, space, H5P_DEFAULT, create_plist, H5P_DEFAULT)) < 0) {
+        printf("failed to create dataset dset2\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+    if (H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2) < 0) {
+        printf("failed to write dataset dset2\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    H5Tclose(type2);
+    if (H5Tclose(type2) < 0) {
+        printf("failed to close type2\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    type2 = H5I_INVALID_HID;
 
-    dataset = H5Dcreate2(fid, "/dset4", enum_dt, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
-    H5Dwrite(dataset, enum_dt, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
+    if (H5Dclose(dataset) < 0) {
+        printf("failed to close dataset\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    dataset = H5I_INVALID_HID;
 
-    H5Tclose(enum_dt);
-    H5Dclose(dataset);
+    if ((dataset = H5Dcreate2(fid, "/dset4", enum_dt, space, H5P_DEFAULT, create_plist, H5P_DEFAULT)) < 0) {
+        printf("failed to create dataset dset4\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dwrite(dataset, enum_dt, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4) < 0) {
+        printf("failed to write dataset dset4\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (H5Tclose(enum_dt) < 0) {
+        printf("failed to close enum_dt\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    enum_dt = H5I_INVALID_HID;
+    if (H5Dclose(dataset) < 0) {
+        printf("failed to close dataset\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    dataset = H5I_INVALID_HID;
 
     /* shared data type 1 */
-    type1 = H5Tcreate(H5T_COMPOUND, sizeof(dset1_t));
-    H5Tinsert(type1, "int_name", HOFFSET(dset1_t, a), H5T_STD_I32LE);
-    H5Tinsert(type1, "float_name", HOFFSET(dset1_t, b), H5T_IEEE_F32LE);
-    H5Tcommit2(fid, "type1", type1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((type1 = H5Tcreate(H5T_COMPOUND, sizeof(dset1_t))) < 0) {
+        printf("failed to create type1\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tinsert(type1, "int_name", HOFFSET(dset1_t, a), H5T_STD_I32LE) < 0) {
+        printf("failed to insert field a\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tinsert(type1, "float_name", HOFFSET(dset1_t, b), H5T_IEEE_F32LE) < 0) {
+        printf("failed to insert field b\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tcommit2(fid, "type1", type1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
+        printf("failed to commit type1\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    group = H5Gcreate2(fid, "/group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((group = H5Gcreate2(fid, "/group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("failed to create group1\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    type2 = H5Tcreate(H5T_COMPOUND, sizeof(dset3_t));
+    if ((type2 = H5Tcreate(H5T_COMPOUND, sizeof(dset3_t))) < 0) {
+        printf("failed to create type2\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    ndims    = 1;
-    dim[0]   = 5;
-    array_dt = H5Tarray_create2(H5T_STD_I32LE, ndims, dim);
-    H5Tinsert(type2, "int_name", HOFFSET(dset3_t, a), array_dt);
-    H5Tclose(array_dt);
+    ndims  = 1;
+    dim[0] = 5;
+    if ((array_dt = H5Tarray_create2(H5T_STD_I32LE, ndims, dim)) < 0) {
+        printf("failed to create array_dt\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tinsert(type2, "int_name", HOFFSET(dset3_t, a), array_dt) < 0) {
+        printf("failed to insert field a\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tclose(array_dt) < 0) {
+        printf("failed to close array_dt\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    array_dt = H5I_INVALID_HID;
 
-    ndims    = 2;
-    dim[0]   = 5;
-    dim[1]   = 6;
-    array_dt = H5Tarray_create2(H5T_IEEE_F32LE, ndims, dim);
-    H5Tinsert(type2, "float_name", HOFFSET(dset3_t, b), array_dt);
-    H5Tclose(array_dt);
+    ndims  = 2;
+    dim[0] = 5;
+    dim[1] = 6;
+    if ((array_dt = H5Tarray_create2(H5T_IEEE_F32LE, ndims, dim)) < 0) {
+        printf("failed to create array_dt\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tinsert(type2, "float_name", HOFFSET(dset3_t, b), array_dt) < 0) {
+        printf("failed to insert field b\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Tclose(array_dt) < 0) {
+        printf("failed to close array_dt\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    array_dt = H5I_INVALID_HID;
 
-    H5Tinsert(type2, "cmpd_name", HOFFSET(dset3_t, c), type1);
+    if (H5Tinsert(type2, "cmpd_name", HOFFSET(dset3_t, c), type1) < 0) {
+        printf("failed to insert field c\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    dataset = H5Dcreate2(group, "dset3", type2, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
+    if ((dataset = H5Dcreate2(group, "dset3", type2, space, H5P_DEFAULT, create_plist, H5P_DEFAULT)) < 0) {
+        printf("failed to create dataset dset3\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3);
+    if (H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3) < 0) {
+        printf("failed to write dataset dset3\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    dataset = H5Dcreate2(fid, "/dset5", type1, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
-    H5Dwrite(dataset, type1, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+    if (H5Dclose(dataset) < 0) {
+        printf("failed to close dataset\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    dataset = H5I_INVALID_HID;
 
-    H5Tclose(type1);
-    H5Tclose(type2);
-    H5Sclose(space);
-    H5Dclose(dataset);
-    H5Gclose(group);
+    if ((dataset = H5Dcreate2(fid, "/dset5", type1, space, H5P_DEFAULT, create_plist, H5P_DEFAULT)) < 0) {
+        printf("failed to create dataset dset5\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dwrite(dataset, type1, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1) < 0) {
+        printf("failed to write dataset dset5\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    H5Pclose(create_plist);
+done:
+    if (type > 0) {
+        if (H5Tclose(type) < 0) {
+            printf("failed to close type\n");
+            ret_value = FAIL;
+        }
+        type = H5I_INVALID_HID;
+    }
+    if (enum_dt > 0) {
+        if (H5Tclose(enum_dt) < 0) {
+            printf("failed to close enum_dt\n");
+            ret_value = FAIL;
+        }
+        enum_dt = H5I_INVALID_HID;
+    }
+    if (type1 > 0) {
+        if (H5Tclose(type1) < 0) {
+            printf("failed to close type1\n");
+            ret_value = FAIL;
+        }
+        type1 = H5I_INVALID_HID;
+    }
+    if (type2 > 0) {
+        if (H5Tclose(type2) < 0) {
+            printf("failed to close type2\n");
+            ret_value = FAIL;
+        }
+        type2 = H5I_INVALID_HID;
+    }
+    if (array_dt > 0) {
+        if (H5Tclose(array_dt) < 0) {
+            printf("failed to close array_dt\n");
+            ret_value = FAIL;
+        }
+        array_dt = H5I_INVALID_HID;
+    }
+    if (space > 0) {
+        if (H5Sclose(space) < 0) {
+            printf("failed to close space\n");
+            ret_value = FAIL;
+        }
+        space = H5I_INVALID_HID;
+    }
+    if (dataset > 0) {
+        if (H5Dclose(dataset) < 0) {
+            printf("failed to close dataset\n");
+            ret_value = FAIL;
+        }
+        dataset = H5I_INVALID_HID;
+    }
+    if (group > 0) {
+        if (H5Gclose(group) < 0) {
+            printf("failed to close group\n");
+            ret_value = FAIL;
+        }
+        group = H5I_INVALID_HID;
+    }
+    if (create_plist > 0) {
+        if (H5Pclose(create_plist) < 0) {
+            printf("failed to close create_plist\n");
+            ret_value = FAIL;
+        }
+        create_plist = H5I_INVALID_HID;
+    }
+    if (fid > 0) {
+        if (H5Fclose(fid) < 0) {
+            printf("failed to close file\n");
+            ret_value = FAIL;
+        }
+        fid = H5I_INVALID_HID;
+    }
 
-    H5Fclose(fid);
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -8806,7 +9091,7 @@ gent_nested_compound_dt(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-void
+herr_t
 gent_intscalars(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -8814,6 +9099,7 @@ gent_intscalars(void)
     hid_t   space   = H5I_INVALID_HID;
     hid_t   tid     = H5I_INVALID_HID;
     hsize_t dims[2];
+    herr_t  ret_value = SUCCEED;
 
     struct {
         uint8_t arr[F73_XDIM][F73_YDIM8];
@@ -8866,13 +9152,33 @@ gent_intscalars(void)
     dsetdbl = malloc(sizeof(*dsetdbl));
 
     fid = H5Fcreate(FILE73, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid < 0) {
+        printf("ERROR: H5Fcreate failed for " FILE73 "\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Dataset of 8 bits unsigned int */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM8;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_STD_U8LE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DATASETU08, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DATASETU08\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if ((tid = H5Tarray_create2(H5T_STD_U8LE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DATASETU08\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if ((dataset = H5Dcreate2(fid, F73_DATASETU08, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DATASETU08\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     valu8bits = (uint8_t)~0u; /* all 1s */
     for (i = 0; i < dims[0]; i++) {
@@ -8883,16 +9189,42 @@ gent_intscalars(void)
         valu8bits = (uint8_t)(valu8bits << 1);
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu8);
-    H5Sclose(space);
-    H5Dclose(dataset);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu8) < 0) {
+        printf("ERROR: H5Dwrite failed for DATASETU08\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (H5Sclose(space) < 0) {
+        printf("ERROR: H5Sclose failed for DATASETU08\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (H5Dclose(dataset) < 0) {
+        printf("ERROR: H5Dclose failed for DATASETU08\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Dataset of 16 bits unsigned int */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM16;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_STD_U16LE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DATASETU16, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DATASETU16\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((tid = H5Tarray_create2(H5T_STD_U16LE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DATASETU16\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((dataset = H5Dcreate2(fid, F73_DATASETU16, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DATASETU16\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     valu16bits = (uint16_t)~0u; /* all 1s */
     for (i = 0; i < dims[0]; i++) {
@@ -8903,16 +9235,41 @@ gent_intscalars(void)
         valu16bits = (uint16_t)(valu16bits << 1);
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu16);
-    H5Sclose(space);
-    H5Dclose(dataset);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu16) < 0) {
+        printf("ERROR: H5Dwrite failed for DATASETU16\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Sclose(space) < 0) {
+        printf("ERROR: H5Sclose failed for DATASETU16\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dclose(dataset) < 0) {
+        printf("ERROR: H5Dclose failed for DATASETU16\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Dataset of 32 bits unsigned int */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM32;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_STD_U32LE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DATASETU32, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DATASETU32\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((tid = H5Tarray_create2(H5T_STD_U32LE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DATASETU32\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if ((dataset = H5Dcreate2(fid, F73_DATASETU32, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DATASETU32\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     valu32bits = (uint32_t)~0u; /* all 1s */
     for (i = 0; i < dims[0]; i++) {
@@ -8923,16 +9280,40 @@ gent_intscalars(void)
         valu32bits <<= 1;
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu32);
-    H5Sclose(space);
-    H5Dclose(dataset);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu32) < 0) {
+        printf("ERROR: H5Dwrite failed for DATASETU32\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Sclose(space) < 0) {
+        printf("ERROR: H5Sclose failed for DATASETU32\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dclose(dataset) < 0) {
+        printf("ERROR: H5Dclose failed for DATASETU32\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Dataset of 64 bits unsigned int */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM64;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_STD_U64LE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DATASETU64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DATASETU64\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((tid = H5Tarray_create2(H5T_STD_U64LE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DATASETU64\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((dataset = H5Dcreate2(fid, F73_DATASETU64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DATASETU64\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
@@ -8943,16 +9324,40 @@ gent_intscalars(void)
         valu64bits <<= 1;
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu64);
-    H5Sclose(space);
-    H5Dclose(dataset);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu64) < 0) {
+        printf("ERROR: H5Dwrite failed for DATASETU64\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Sclose(space) < 0) {
+        printf("ERROR: H5Sclose failed for DATASETU64\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dclose(dataset) < 0) {
+        printf("ERROR: H5Dclose failed for DATASETU64\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Dataset of 8 bits signed int */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM8;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_STD_I8LE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DATASETS08, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DATASETS08\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((tid = H5Tarray_create2(H5T_STD_I8LE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DATASETS08\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((dataset = H5Dcreate2(fid, F73_DATASETS08, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DATASETS08\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     val8bits = (int8_t)~0; /* all 1s */
     for (i = 0; i < dims[0]; i++) {
@@ -8963,16 +9368,40 @@ gent_intscalars(void)
         val8bits = (int8_t)(val8bits << 1);
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset8);
-    H5Sclose(space);
-    H5Dclose(dataset);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset8) < 0) {
+        printf("ERROR: H5Dwrite failed for DATASETS08\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Sclose(space) < 0) {
+        printf("ERROR: H5Sclose failed for DATASETS08\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dclose(dataset) < 0) {
+        printf("ERROR: H5Dclose failed for DATASETS08\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Dataset of 16 bits signed int */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM16;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_STD_I16LE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DATASETS16, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DATASETS16\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((tid = H5Tarray_create2(H5T_STD_I16LE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DATASETS16\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((dataset = H5Dcreate2(fid, F73_DATASETS16, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DATASETS16\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     val16bits = (int16_t)~0; /* all 1s */
     for (i = 0; i < dims[0]; i++) {
@@ -8983,16 +9412,40 @@ gent_intscalars(void)
         val16bits = (int16_t)(val16bits << 1);
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset16);
-    H5Sclose(space);
-    H5Dclose(dataset);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset16) < 0) {
+        printf("ERROR: H5Dwrite failed for DATASETS16\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Sclose(space) < 0) {
+        printf("ERROR: H5Sclose failed for DATASETS16\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dclose(dataset) < 0) {
+        printf("ERROR: H5Dclose failed for DATASETS16\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Dataset of 32 bits signed int */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM32;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_STD_I32LE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DATASETS32, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DATASETS32\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((tid = H5Tarray_create2(H5T_STD_I32LE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DATASETS32\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((dataset = H5Dcreate2(fid, F73_DATASETS32, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DATASETS32\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     val32bits = (int32_t)~0; /* all 1s */
     for (i = 0; i < dims[0]; i++) {
@@ -9003,16 +9456,40 @@ gent_intscalars(void)
         val32bits <<= 1;
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset32);
-    H5Sclose(space);
-    H5Dclose(dataset);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset32) < 0) {
+        printf("ERROR: H5Dwrite failed for DATASETS32\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Sclose(space) < 0) {
+        printf("ERROR: H5Sclose failed for DATASETS32\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dclose(dataset) < 0) {
+        printf("ERROR: H5Dclose failed for DATASETS32\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Dataset of 64 bits signed int */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM64;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_STD_I64LE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DATASETS64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DATASETS64\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((tid = H5Tarray_create2(H5T_STD_I64LE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DATASETS64\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((dataset = H5Dcreate2(fid, F73_DATASETS64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DATASETS64\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
@@ -9023,26 +9500,64 @@ gent_intscalars(void)
         val64bits <<= 1;
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset64);
-    H5Sclose(space);
-    H5Dclose(dataset);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset64) < 0) {
+        printf("ERROR: H5Dwrite failed for DATASETS64\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Sclose(space) < 0) {
+        printf("ERROR: H5Sclose failed for DATASETS64\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (H5Dclose(dataset) < 0) {
+        printf("ERROR: H5Dclose failed for DATASETS64\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Double Dummy set for failure tests */
     dims[0] = F73_XDIM;
     dims[1] = F73_YDIM8;
-    space   = H5Screate(H5S_SCALAR);
-    tid     = H5Tarray_create2(H5T_NATIVE_DOUBLE, F73_ARRAY_RANK, dims);
-    dataset = H5Dcreate2(fid, F73_DUMMYDBL, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if ((space = H5Screate(H5S_SCALAR)) < 0) {
+        printf("ERROR: H5Screate failed for DUMMYDBL\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, F73_ARRAY_RANK, dims)) < 0) {
+        printf("ERROR: H5Tarray_create2 failed for DUMMYDBL\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if ((dataset = H5Dcreate2(fid, F73_DUMMYDBL, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        printf("ERROR: H5Dcreate2 failed for DUMMYDBL\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
             dsetdbl->arr[i][j] = 0.0001 * (double)j + (double)i;
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl);
+    if (H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl) < 0) {
+        printf("ERROR: H5Dwrite failed for DUMMYDBL\n");
+        ret_value = FAIL;
+        goto done;
+    }
 
-    H5Sclose(space);
-    H5Dclose(dataset);
-    H5Fclose(fid);
+done:
+    if (space >= 0)
+        if (H5Sclose(space) < 0)
+            ret_value = FAIL;
+    if (dataset >= 0)
+        if (H5Dclose(dataset) < 0)
+            ret_value = FAIL;
+    if (tid >= 0)
+        if (H5Tclose(tid) < 0)
+            ret_value = FAIL;
+    if (fid >= 0)
+        if (H5Fclose(fid) < 0)
+            ret_value = FAIL;
 
     free(dsetu8);
     free(dsetu16);
@@ -9053,6 +9568,8 @@ gent_intscalars(void)
     free(dset32);
     free(dset64);
     free(dsetdbl);
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
