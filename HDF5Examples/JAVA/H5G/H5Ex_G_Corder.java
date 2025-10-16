@@ -22,8 +22,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class H5Ex_G_Corder {
     private static String FILENAME = "H5Ex_G_Corder.h5";
 
@@ -40,35 +38,28 @@ public class H5Ex_G_Corder {
 
         try {
             // Create a new file using default properties.
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
 
             // Create group creation property list and enable link creation order tracking.
             gcpl_id = H5Pcreate(H5P_CLS_GROUP_CREATE_ID_g());
-            status  = H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED() +
-                                                                 H5P_CRT_ORDER_INDEXED());
+            status  = H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED() + H5P_CRT_ORDER_INDEXED());
 
             // Create primary group using the property list.
             if (status >= 0)
-                group_id = H5Gcreate(file_id, "index_group", H5P_DEFAULT(), gcpl_id,
-                                        H5P_DEFAULT());
+                group_id = H5Gcreate(file_id, "index_group", H5P_DEFAULT(), gcpl_id, H5P_DEFAULT());
 
             try {
                 /*
                  * Create subgroups in the primary group. These will be tracked by creation order. Note that
                  * these groups do not have to have the creation order tracking property set.
                  */
-                subgroup_id = H5Gcreate(group_id, "H", H5P_DEFAULT(),
-                                           H5P_DEFAULT(), H5P_DEFAULT());
+                subgroup_id = H5Gcreate(group_id, "H", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 status      = H5Gclose(subgroup_id);
-                subgroup_id = H5Gcreate(group_id, "D", H5P_DEFAULT(),
-                                           H5P_DEFAULT(), H5P_DEFAULT());
+                subgroup_id = H5Gcreate(group_id, "D", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 status      = H5Gclose(subgroup_id);
-                subgroup_id = H5Gcreate(group_id, "F", H5P_DEFAULT(),
-                                           H5P_DEFAULT(), H5P_DEFAULT());
+                subgroup_id = H5Gcreate(group_id, "F", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 status      = H5Gclose(subgroup_id);
-                subgroup_id = H5Gcreate(group_id, "5", H5P_DEFAULT(),
-                                           H5P_DEFAULT(), H5P_DEFAULT());
+                subgroup_id = H5Gcreate(group_id, "5", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 status      = H5Gclose(subgroup_id);
 
                 // Get group info.
@@ -78,8 +69,8 @@ public class H5Ex_G_Corder {
                 System.out.println("Traversing group using alphabetical indices:");
                 for (i = 0; i < ginfo.nlinks; i++) {
                     // Retrieve the name of the ith link in a group
-                    name = H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME(),
-                                                 H5_ITER_INC(), i, H5P_DEFAULT());
+                    name =
+                        H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME(), H5_ITER_INC(), i, H5P_DEFAULT());
                     System.out.println("Index " + i + ": " + name);
                 }
 
@@ -87,8 +78,8 @@ public class H5Ex_G_Corder {
                 System.out.println("Traversing group using creation order indices:");
                 for (i = 0; i < ginfo.nlinks; i++) {
                     // Retrieve the name of the ith link in a group
-                    name = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER(),
-                                                 H5_ITER_INC(), i, H5P_DEFAULT());
+                    name = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER(), H5_ITER_INC(), i,
+                                              H5P_DEFAULT());
                     System.out.println("Index " + i + ": " + name);
                 }
             }
@@ -114,13 +105,11 @@ public class H5Ex_G_Corder {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        try {
-                    H5Ex_G_Corder.CreateGroup(arena);
-        }
+            try {
+                H5Ex_G_Corder.CreateGroup(arena);
             }
-            }
-        catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
+    catch (Exception ex) { ex.printStackTrace(); }
+}
 }

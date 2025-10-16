@@ -29,8 +29,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class H5Ex_D_Hyperslab {
     private static String FILENAME    = "H5Ex_D_Hyperslab.h5";
     private static String DATASETNAME = "DS1";
@@ -63,8 +61,7 @@ public class H5Ex_D_Hyperslab {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -82,9 +79,8 @@ public class H5Ex_D_Hyperslab {
         // Create the dataset. We will use all default properties for this example.
         try {
             if ((file_id >= 0) && (filespace_id >= 0))
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), filespace_id,
-                                          H5P_DEFAULT(), H5P_DEFAULT(),
-                                          H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), filespace_id, H5P_DEFAULT(),
+                                        H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -97,8 +93,7 @@ public class H5Ex_D_Hyperslab {
         long[] block  = {2, 2};
         try {
             if ((filespace_id >= 0))
-                H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), start, stride, count,
-                                       block);
+                H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), start, stride, count, block);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -110,13 +105,12 @@ public class H5Ex_D_Hyperslab {
         block[1] = 1;
         try {
             if ((filespace_id >= 0)) {
-                H5Sselect_hyperslab(filespace_id, H5S_SELECT_NOTB(), start, stride, count,
-                                       block);
+                H5Sselect_hyperslab(filespace_id, H5S_SELECT_NOTB(), start, stride, count, block);
 
                 // Write the data to the dataset.
                 if (dataset_id >= 0)
-                    H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), filespace_id,
-                                H5P_DEFAULT(), dset_data);
+                    H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), filespace_id, H5P_DEFAULT(),
+                             dset_data);
             }
         }
         catch (Exception e) {
@@ -178,8 +172,7 @@ public class H5Ex_D_Hyperslab {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                           H5S_ALL(), H5P_DEFAULT(), dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -211,13 +204,12 @@ public class H5Ex_D_Hyperslab {
                 long[] block  = {2, 3};
 
                 if (filespace_id >= 0) {
-                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), start, stride, count,
-                                           block);
+                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), start, stride, count, block);
 
                     // Read the data using the previously defined hyperslab.
                     if ((dataset_id >= 0) && (filespace_id >= 0))
-                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                                   filespace_id, H5P_DEFAULT(), dset_data);
+                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), filespace_id, H5P_DEFAULT(),
+                                dset_data);
                 }
             }
         }
@@ -274,9 +266,9 @@ public class H5Ex_D_Hyperslab {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        H5Ex_D_Hyperslab.writeHyperslab(arena);
-                H5Ex_D_Hyperslab.readHyperslab(arena);
+            H5Ex_D_Hyperslab.writeHyperslab(arena);
+            H5Ex_D_Hyperslab.readHyperslab(arena);
         }
-            }
-        }
+    }
+}
 }

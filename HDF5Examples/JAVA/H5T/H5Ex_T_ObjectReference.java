@@ -26,12 +26,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_T_ObjectReference {
     private static String FILENAME     = "H5Ex_T_ObjectReference.h5";
@@ -76,8 +73,7 @@ public class H5Ex_T_ObjectReference {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -87,9 +83,8 @@ public class H5Ex_T_ObjectReference {
         try {
             dataspace_id = H5Screate(H5S_SCALAR());
             if ((file_id >= 0) && (dataspace_id >= 0)) {
-                dataset_id = H5Dcreate2(file_id, DATASETNAME2, H5T_STD_I32LE_g(), dataspace_id,
-                                          H5P_DEFAULT(), H5P_DEFAULT(),
-                                          H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, DATASETNAME2, H5T_STD_I32LE_g(), dataspace_id, H5P_DEFAULT(),
+                                        H5P_DEFAULT(), H5P_DEFAULT());
                 if (dataset_id >= 0)
                     H5Dclose(dataset_id);
                 dataset_id = H5I_INVALID_HID();
@@ -104,8 +99,7 @@ public class H5Ex_T_ObjectReference {
         // Create a group in the file.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate(file_id, GROUPNAME, H5P_DEFAULT(),
-                                        H5P_DEFAULT(), H5P_DEFAULT());
+                group_id = H5Gcreate(file_id, GROUPNAME, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
             if (group_id >= 0)
                 H5Gclose(group_id);
             group_id = H5I_INVALID_HID();
@@ -144,8 +138,7 @@ public class H5Ex_T_ObjectReference {
             try {
                 if ((file_id >= 0) && (filespace_id >= 0))
                     dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_REF_g(), filespace_id,
-                                              H5P_DEFAULT(), H5P_DEFAULT(),
-                                              H5P_DEFAULT());
+                                            H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -154,8 +147,7 @@ public class H5Ex_T_ObjectReference {
             // Write the object references to it.
             try {
                 if (dataset_id >= 0)
-                    H5Dwrite(dataset_id, H5T_STD_REF_g(), H5S_ALL(),
-                                H5S_ALL(), H5P_DEFAULT(), dset_data);
+                    H5Dwrite(dataset_id, H5T_STD_REF_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -229,8 +221,7 @@ public class H5Ex_T_ObjectReference {
                     H5Sget_simple_extent_dims(dataspace_id, dims, null);
 
                     // Read data.
-                    H5Dread(dataset_id, H5T_STD_REF_g(), H5S_ALL(),
-                               H5S_ALL(), H5P_DEFAULT(), dset_data);
+                    H5Dread(dataset_id, H5T_STD_REF_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
 
                     // Output the data to the screen.
                     for (int indx = 0; indx < dims[0]; indx++) {
@@ -238,10 +229,9 @@ public class H5Ex_T_ObjectReference {
                         System.out.print("  ->");
                         // Open the referenced object, get its name and type.
                         try {
-                            object_id = H5Ropen_object(dset_data[indx], H5P_DEFAULT(),
-                                                          H5P_DEFAULT());
+                            object_id = H5Ropen_object(dset_data[indx], H5P_DEFAULT(), H5P_DEFAULT());
                             try {
-                                object_type = H5Rget_obj_type3(dset_data[indx], H5R_OBJECT());
+                                object_type     = H5Rget_obj_type3(dset_data[indx], H5R_OBJECT());
                                 String obj_name = null;
                                 if (object_type >= 0) {
                                     // Get the name.
@@ -326,9 +316,9 @@ public class H5Ex_T_ObjectReference {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        H5Ex_T_ObjectReference.writeObjRef(arena);
-                H5Ex_T_ObjectReference.readObjRef(arena);
+            H5Ex_T_ObjectReference.writeObjRef(arena);
+            H5Ex_T_ObjectReference.readObjRef(arena);
         }
-            }
-        }
+    }
+}
 }

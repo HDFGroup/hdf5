@@ -19,8 +19,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 /**
  * <p>
  * Title: HDF Native Package (Java) Example
@@ -53,8 +51,7 @@ public class HDF5GroupCreate {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -65,11 +62,9 @@ public class HDF5GroupCreate {
         // Create a group in the file.
         try {
             if (file_id >= 0) {
-                group_id1 = H5Gcreate(file_id, "g1", H5P_DEFAULT(), H5P_DEFAULT(),
-                                         H5P_DEFAULT());
+                group_id1 = H5Gcreate(file_id, "g1", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (group_id1 >= 0) {
-                    subgroup_id = H5Gcreate(group_id1, "g11", H5P_DEFAULT(),
-                                               H5P_DEFAULT(), H5P_DEFAULT());
+                    subgroup_id = H5Gcreate(group_id1, "g11", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
                             H5Gclose(subgroup_id);
@@ -77,8 +72,7 @@ public class HDF5GroupCreate {
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    subgroup_id = H5Gcreate(group_id1, "g12", H5P_DEFAULT(),
-                                               H5P_DEFAULT(), H5P_DEFAULT());
+                    subgroup_id = H5Gcreate(group_id1, "g12", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
                             H5Gclose(subgroup_id);
@@ -87,11 +81,9 @@ public class HDF5GroupCreate {
                         e.printStackTrace();
                     }
                 }
-                group_id2 = H5Gcreate(file_id, "g2", H5P_DEFAULT(), H5P_DEFAULT(),
-                                         H5P_DEFAULT());
+                group_id2 = H5Gcreate(file_id, "g2", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (group_id2 >= 0) {
-                    subgroup_id = H5Gcreate(group_id2, "g21", H5P_DEFAULT(),
-                                               H5P_DEFAULT(), H5P_DEFAULT());
+                    subgroup_id = H5Gcreate(group_id2, "g21", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
                             H5Gclose(subgroup_id);
@@ -99,8 +91,7 @@ public class HDF5GroupCreate {
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    subgroup_id = H5Gcreate(group_id2, "g22", H5P_DEFAULT(),
-                                               H5P_DEFAULT(), H5P_DEFAULT());
+                    subgroup_id = H5Gcreate(group_id2, "g22", H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
                             H5Gclose(subgroup_id);

@@ -29,12 +29,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_D_UnlimitedGzip {
     private static String FILENAME    = "H5Ex_D_UnlimitedGzip.h5";
@@ -122,8 +119,7 @@ public class H5Ex_D_UnlimitedGzip {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -154,8 +150,8 @@ public class H5Ex_D_UnlimitedGzip {
         // Create the unlimited dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), dataspace_id,
-                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), dataspace_id, H5P_DEFAULT(),
+                                        dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -164,8 +160,7 @@ public class H5Ex_D_UnlimitedGzip {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                            H5S_ALL(), H5P_DEFAULT(), dset_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -260,8 +255,7 @@ public class H5Ex_D_UnlimitedGzip {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                           H5S_ALL(), H5P_DEFAULT(), dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -322,8 +316,8 @@ public class H5Ex_D_UnlimitedGzip {
 
                 // Write the data to the selected portion of the dataset.
                 if (dataset_id >= 0)
-                    H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), dataspace_id,
-                                H5P_DEFAULT(), extend_dset_data);
+                    H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), dataspace_id, H5P_DEFAULT(),
+                             extend_dset_data);
             }
         }
         catch (Exception e) {
@@ -403,8 +397,8 @@ public class H5Ex_D_UnlimitedGzip {
                 String[] filter_name = {""};
                 int[] filter_config  = {0};
                 int filter_type      = -1;
-                filter_type = H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name,
-                                               filter_config);
+                filter_type =
+                    H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name, filter_config);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -451,8 +445,7 @@ public class H5Ex_D_UnlimitedGzip {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                           H5S_ALL(), H5P_DEFAULT(), dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -499,12 +492,12 @@ public class H5Ex_D_UnlimitedGzip {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-                if (H5Ex_D_UnlimitedGzip.checkGzipFilter(arena);) {
-                    H5Ex_D_UnlimitedGzip.writeUnlimited(arena);
-                    H5Ex_D_UnlimitedGzip.extendUnlimited(arena);
-                    H5Ex_D_UnlimitedGzip.readUnlimited(arena);
+            if (H5Ex_D_UnlimitedGzip.checkGzipFilter(arena);) {
+                H5Ex_D_UnlimitedGzip.writeUnlimited(arena);
+                H5Ex_D_UnlimitedGzip.extendUnlimited(arena);
+                H5Ex_D_UnlimitedGzip.readUnlimited(arena);
+            }
         }
-            }
-            }
     }
+}
 }

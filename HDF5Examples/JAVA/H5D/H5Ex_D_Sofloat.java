@@ -27,15 +27,12 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 
 public class H5Ex_D_Sofloat {
 
@@ -140,8 +137,7 @@ public class H5Ex_D_Sofloat {
 
         // Create a new file using the default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -171,8 +167,8 @@ public class H5Ex_D_Sofloat {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_IEEE_F64LE_g(), filespace_id,
-                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_IEEE_F64LE_g(), filespace_id, H5P_DEFAULT(),
+                                        dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -181,8 +177,7 @@ public class H5Ex_D_Sofloat {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(),
-                            H5S_ALL(), H5P_DEFAULT(), dset_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -267,8 +262,8 @@ public class H5Ex_D_Sofloat {
                 int[] filter_config  = {0};
                 int filter_type      = -1;
 
-                filter_type = H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name,
-                                               filter_config);
+                filter_type =
+                    H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name, filter_config);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -302,8 +297,7 @@ public class H5Ex_D_Sofloat {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(),
-                           H5S_ALL(), H5P_DEFAULT(), dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -356,11 +350,11 @@ public class H5Ex_D_Sofloat {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-                if (H5Ex_D_Sofloat.checkScaleoffsetFilter(arena);) {
-                    H5Ex_D_Sofloat.writeData(arena);
-                    H5Ex_D_Sofloat.readData(arena);
-        }
-                }
+            if (H5Ex_D_Sofloat.checkScaleoffsetFilter(arena);) {
+                H5Ex_D_Sofloat.writeData(arena);
+                H5Ex_D_Sofloat.readData(arena);
+            }
         }
     }
+}
 }

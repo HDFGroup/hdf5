@@ -22,8 +22,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class H5Ex_G_Create {
     private static String FILENAME  = "H5Ex_G_Create.h5";
     private static String GROUPNAME = "G1";
@@ -35,8 +33,7 @@ public class H5Ex_G_Create {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -45,8 +42,7 @@ public class H5Ex_G_Create {
         // Create a group in the file.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate(file_id, "/" + GROUPNAME, H5P_DEFAULT(),
-                                        H5P_DEFAULT(), H5P_DEFAULT());
+                group_id = H5Gcreate(file_id, "/" + GROUPNAME, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

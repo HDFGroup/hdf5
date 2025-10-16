@@ -22,8 +22,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class HDF5GroupAbsoluteRelativeCreate {
     private static String FILENAME    = "HDF5GroupAbsoluteRelativeCreate.h5";
     private static String GROUPNAME   = "MyGroup";
@@ -39,8 +37,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -49,8 +46,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create a group named "/MyGroup" in the file.
         try {
             if (file_id >= 0)
-                group1_id = H5Gcreate(file_id, "/" + GROUPNAME, H5P_DEFAULT(),
-                                         H5P_DEFAULT(), H5P_DEFAULT());
+                group1_id = H5Gcreate(file_id, "/" + GROUPNAME, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -59,9 +55,8 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create group "Group_A" in group "MyGroup" using absolute name.
         try {
             if (file_id >= 0)
-                group2_id =
-                    H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, H5P_DEFAULT(),
-                                 H5P_DEFAULT(), H5P_DEFAULT());
+                group2_id = H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, H5P_DEFAULT(),
+                                      H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -70,8 +65,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create group "Group_B" in group "MyGroup" using relative name.
         try {
             if (group1_id >= 0)
-                group3_id = H5Gcreate(group1_id, GROUPNAME_B, H5P_DEFAULT(),
-                                         H5P_DEFAULT(), H5P_DEFAULT());
+                group3_id = H5Gcreate(group1_id, GROUPNAME_B, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -118,8 +112,8 @@ public class HDF5GroupAbsoluteRelativeCreate {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        HDF5GroupAbsoluteRelativeCreate.CreateGroupAbsoluteAndRelative(arena);
+            HDF5GroupAbsoluteRelativeCreate.CreateGroupAbsoluteAndRelative(arena);
         }
-            }
-        }
+    }
+}
 }

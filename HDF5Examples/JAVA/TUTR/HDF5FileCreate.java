@@ -19,8 +19,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 /**
  * <p>
  * Title: HDF Native Package (Java) Example
@@ -41,8 +39,7 @@ public class HDF5FileCreate {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

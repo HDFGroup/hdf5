@@ -26,12 +26,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_D_Nbit {
     private static String FILENAME    = "H5Ex_D_Nbit.h5";
@@ -118,8 +115,7 @@ public class H5Ex_D_Nbit {
 
         try {
             // Create a new file using the default properties.
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
 
             // Create dataspace. Setting maximum size to NULL sets the maximum
             // size to be the current size.
@@ -137,12 +133,11 @@ public class H5Ex_D_Nbit {
             H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
 
             // Create the dataset.
-            dataset_id = H5Dcreate2(file_id, DATASETNAME, dtype_id, filespace_id, H5P_DEFAULT(),
-                                      dcpl_id, H5P_DEFAULT());
+            dataset_id = H5Dcreate2(file_id, DATASETNAME, dtype_id, filespace_id, H5P_DEFAULT(), dcpl_id,
+                                    H5P_DEFAULT());
 
             // Write the data to the dataset.
-            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                        H5S_ALL(), H5P_DEFAULT(), dset_data);
+            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -206,8 +201,8 @@ public class H5Ex_D_Nbit {
                 String[] filter_name = {""};
                 int[] filter_config  = {0};
                 int filter_type      = -1;
-                filter_type = H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name,
-                                               filter_config);
+                filter_type =
+                    H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name, filter_config);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -241,8 +236,8 @@ public class H5Ex_D_Nbit {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0) {
-                int status = H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                                        H5S_ALL(), H5P_DEFAULT(), dset_data);
+                int status =
+                    H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
                 // Check if the read was successful.
                 if (status < 0)
                     System.out.print("Dataset read failed!");
@@ -294,24 +289,21 @@ public class H5Ex_D_Nbit {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-                /*
-                 * Check if N-Bit compression is available and can be used for both compression and decompression.
-                 * Normally we do not perform error checking in these examples for the sake of clarity, but in this
-                 * case we will make an exception because this filter is an optional part of the hdf5 library.
-                 */
-                if (H5Ex_D_Nbit.checkNbitFilter(arena);) {
-                    try {
-                        H5Ex_D_Nbit.writeData(arena);
-                        H5Ex_D_Nbit.readData(arena);
-        }
-                    }
-                catch (Exception ex) {
-                    ex.printStackTrace();
+            /*
+             * Check if N-Bit compression is available and can be used for both compression and decompression.
+             * Normally we do not perform error checking in these examples for the sake of clarity, but in
+             * this case we will make an exception because this filter is an optional part of the hdf5
+             * library.
+             */
+            if (H5Ex_D_Nbit.checkNbitFilter(arena);) {
+                try {
+                    H5Ex_D_Nbit.writeData(arena);
+                    H5Ex_D_Nbit.readData(arena);
                 }
             }
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
+            catch (Exception ex) { ex.printStackTrace(); }
         }
     }
+    catch (Exception ex) { ex.printStackTrace(); }
+}
 }

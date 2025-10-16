@@ -25,12 +25,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-
 
 public class H5Ex_T_Float {
     private static String FILENAME    = "H5Ex_T_Float.h5";
@@ -55,8 +52,7 @@ public class H5Ex_T_Float {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -78,9 +74,8 @@ public class H5Ex_T_Float {
         // types.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_IEEE_F64LE_g(), dataspace_id,
-                                          H5P_DEFAULT(), H5P_DEFAULT(),
-                                          H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_IEEE_F64LE_g(), dataspace_id, H5P_DEFAULT(),
+                                        H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -89,8 +84,7 @@ public class H5Ex_T_Float {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(),
-                            H5S_ALL(), H5P_DEFAULT(), dset_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -173,8 +167,7 @@ public class H5Ex_T_Float {
         // Read data.
         try {
             if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(),
-                           H5S_ALL(), H5P_DEFAULT(), dset_data);
+                H5Dread(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -224,9 +217,9 @@ public class H5Ex_T_Float {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        H5Ex_T_Float.CreateDataset(arena);
-                H5Ex_T_Float.ReadDataset(arena);
+            H5Ex_T_Float.CreateDataset(arena);
+            H5Ex_T_Float.ReadDataset(arena);
         }
-            }
-        }
+    }
+}
 }

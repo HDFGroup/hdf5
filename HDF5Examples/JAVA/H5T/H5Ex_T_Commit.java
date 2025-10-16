@@ -26,12 +26,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_T_Commit {
     private static String FILENAME           = "H5Ex_T_Commit.h5";
@@ -55,7 +52,7 @@ public class H5Ex_T_Commit {
         H5T_VLEN(H5T_VLEN()),           // Variable-Length types
         H5T_ARRAY(H5T_ARRAY()),         // Array types
         H5T_COMPLEX(H5T_COMPLEX()),     // Complex number types
-        H5T_NCLASSES(12);                           // this must be last
+        H5T_NCLASSES(12);               // this must be last
 
         private static final Map<Long, H5T_class> lookup = new HashMap<Long, H5T_class>();
 
@@ -79,9 +76,8 @@ public class H5Ex_T_Commit {
         static int numberMembers = 4;
         static int[] memberDims  = {1, 1, 1, 1};
 
-        String[] memberNames       = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
-        long[] memberFileTypes     = {H5T_STD_I32BE_g(), H5T_C_S1_g(),
-                                      H5T_IEEE_F64BE_g(), H5T_IEEE_F64BE_g()};
+        String[] memberNames   = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
+        long[] memberFileTypes = {H5T_STD_I32BE_g(), H5T_C_S1_g(), H5T_IEEE_F64BE_g(), H5T_IEEE_F64BE_g()};
         static int[] memberStorage = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
 
         // Data size is the storage size for the members not the object.
@@ -110,8 +106,7 @@ public class H5Ex_T_Commit {
         Sensor_Datatype datatypes = new Sensor_Datatype();
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -139,7 +134,7 @@ public class H5Ex_T_Commit {
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
                     H5Tinsert(filetype_id, datatypes.memberNames[indx], Sensor_Datatype.getOffset(indx),
-                                 type_id);
+                              type_id);
                 }
             }
         }
@@ -150,8 +145,7 @@ public class H5Ex_T_Commit {
         // Commit the compound datatype to the file, creating a named datatype.
         try {
             if ((file_id >= 0) && (filetype_id >= 0))
-                H5Tcommit(file_id, DATATYPENAME, filetype_id, H5P_DEFAULT(),
-                             H5P_DEFAULT(), H5P_DEFAULT());
+                H5Tcommit(file_id, DATATYPENAME, filetype_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -258,9 +252,9 @@ public class H5Ex_T_Commit {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        H5Ex_T_Commit.CreateDataType(arena);
-                H5Ex_T_Commit.ReadDataType(arena);
+            H5Ex_T_Commit.CreateDataType(arena);
+            H5Ex_T_Commit.ReadDataType(arena);
         }
-            }
-        }
+    }
+}
 }
