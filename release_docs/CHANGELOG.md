@@ -495,7 +495,7 @@ Simple example programs showing how to use complex number datatypes have been ad
 
 ## Library
 
-### Fixed security issue CVE-2025-2915
+### Fixed security issue CVE-2025-2915 and OSV-2024-381
    Fixed a heap-based buffer overflow in H5F__accum_free caused by an integer overflow when calculating new_accum_size. Added validation in H5O__mdci_decode to detect and reject invalid values early, preventing the overflow condition.
 
    Fixes GitHub issue #5380
