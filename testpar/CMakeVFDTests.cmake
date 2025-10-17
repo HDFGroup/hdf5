@@ -15,7 +15,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-H5_CREATE_VFD_DIR()
+H5_CREATE_VFD_DIR ()
 
 set (H5P_VFD_TESTS
     t_pflush1
@@ -34,7 +34,6 @@ macro (ADD_VFD_TEST vfdname resultcode)
         add_test (
             NAME MPI_TEST_VFD-${vfdname}-${h5_test}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
                 -D "TEST_ARGS:STRING="
                 -D "TEST_VFD:STRING=${vfdname}"
@@ -44,7 +43,7 @@ macro (ADD_VFD_TEST vfdname resultcode)
                 -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (MPI_TEST_VFD-${vfdname}-${h5_test} PROPERTIES
-            ENVIRONMENT "srcdir=${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}"
+            ENVIRONMENT "srcdir=${HDF5_TEST_PAR_BINARY_DIR}/${vfdname};${CROSSCOMPILING_PATH}"
             WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}
         )
         if ("MPI_TEST_VFD-${vfdname}-${h5_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

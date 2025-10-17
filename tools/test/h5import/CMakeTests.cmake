@@ -76,25 +76,25 @@ set (HDF5_TOOLS_TEST_FILES
 
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 foreach (conf_file ${HDF5_REFERENCE_CONF_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5import/testfiles/${conf_file}" "${PROJECT_BINARY_DIR}/testfiles/${conf_file}" "h5import_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5import/testfiles/${conf_file}" "${PROJECT_BINARY_DIR}/testfiles/${conf_file}" "h5import_files")
 endforeach ()
 
 foreach (txt_file ${HDF5_REFERENCE_TXT_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5import/testfiles/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5import_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5import/testfiles/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5import_files")
 endforeach ()
 
 foreach (txt_file ${HDF5_REFERENCE_DDL_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5import/testfiles/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5import_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5import/testfiles/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5import_files")
 endforeach ()
 
 foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5import_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5import_files")
 endforeach ()
 
 foreach (h5_file ${HDF5_TOOLS_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5import_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5import_files")
 endforeach ()
-add_custom_target(h5import_files ALL COMMENT "Copying files needed by h5import tests" DEPENDS ${h5import_files_list})
+add_custom_target (h5import_files ALL COMMENT "Copying files needed by h5import tests" DEPENDS ${h5import_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -113,8 +113,9 @@ macro (ADD_H5_TEST testname importfile conffile testfile)
       FIXTURES_REQUIRED set_h5importtest
   )
 
-  add_test (NAME H5IMPORT-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
+  add_test (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
   set_tests_properties (H5IMPORT-${testname} PROPERTIES
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       DEPENDS H5IMPORT-${testname}-clear-objects
       FIXTURES_REQUIRED set_h5importtest
   )
@@ -126,7 +127,6 @@ macro (ADD_H5_TEST testname importfile conffile testfile)
     add_test (
         NAME H5IMPORT-${testname}-H5DMP
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${testfile}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -138,6 +138,7 @@ macro (ADD_H5_TEST testname importfile conffile testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5IMPORT-${testname}-H5DMP PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5IMPORT-${testname}
         FIXTURES_REQUIRED set_h5importtest
     )
@@ -147,7 +148,6 @@ macro (ADD_H5_TEST testname importfile conffile testfile)
     add_test (
         NAME H5IMPORT-${testname}-H5DMP_CMP
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=testfiles/${testfile}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -158,6 +158,7 @@ macro (ADD_H5_TEST testname importfile conffile testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5IMPORT-${testname}-H5DMP_CMP PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5IMPORT-${testname}-H5DMP
         FIXTURES_REQUIRED set_h5importtest
     )
@@ -197,7 +198,6 @@ macro (ADD_H5_DUMPTEST testname datasetname testfile)
       add_test (
           NAME H5IMPORT-DUMP-${testname}-H5DMP
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=-p;-d;${datasetname};-o;d${testfile}.bin;-b;NATIVE;testfiles/${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -211,7 +211,6 @@ macro (ADD_H5_DUMPTEST testname datasetname testfile)
       add_test (
           NAME H5IMPORT-DUMP-${testname}-H5DMP
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=-p;-d;${datasetname};-o;d${testfile}.bin;-y;--width=1;testfiles/${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -223,6 +222,7 @@ macro (ADD_H5_DUMPTEST testname datasetname testfile)
       )
     endif ()
     set_tests_properties (H5IMPORT-DUMP-${testname}-H5DMP PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5IMPORT-DUMP-${testname}-clear-objects"
         FIXTURES_REQUIRED set_h5importtest
     )
@@ -233,7 +233,6 @@ macro (ADD_H5_DUMPTEST testname datasetname testfile)
     add_test (
         NAME H5IMPORT-DUMP-${testname}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5import>"
             -D "TEST_ARGS:STRING=d${testfile}.bin;-c;d${testfile}.dmp;-o;d${testfile}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -243,6 +242,7 @@ macro (ADD_H5_DUMPTEST testname datasetname testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5IMPORT-DUMP-${testname} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5IMPORT-DUMP-${testname}-H5DMP"
         FIXTURES_REQUIRED set_h5importtest
     )
@@ -253,7 +253,6 @@ macro (ADD_H5_DUMPTEST testname datasetname testfile)
     add_test (
         NAME H5IMPORT-DUMP-${testname}-H5DFF
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
             -D "TEST_ARGS:STRING=-r;d${testfile};testfiles/${testfile};${datasetname};${datasetname}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -264,6 +263,7 @@ macro (ADD_H5_DUMPTEST testname datasetname testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5IMPORT-DUMP-${testname}-H5DFF PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5IMPORT-DUMP-${testname}"
         FIXTURES_REQUIRED set_h5importtest
     )
@@ -302,7 +302,6 @@ macro (ADD_H5_DUMPSUBTEST testname testfile datasetname)
     add_test (
         NAME H5IMPORT_SUB-DUMP-${testname}-H5DMP
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=-p;-d;${datasetname};${ARGN};-o;ds${testname}.bin;-b;NATIVE;testfiles/${testfile}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -313,6 +312,7 @@ macro (ADD_H5_DUMPSUBTEST testname testfile datasetname)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-H5DMP PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5IMPORT_SUB-DUMP-${testname}-clear-objects"
         FIXTURES_REQUIRED set_h5importtest
     )
@@ -323,7 +323,6 @@ macro (ADD_H5_DUMPSUBTEST testname testfile datasetname)
     add_test (
         NAME H5IMPORT_SUB-DUMP-${testname}-H5IMP
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5import>"
             -D "TEST_ARGS:STRING=ds${testname}.bin;-c;ds${testname}.dmp;-o;ds${testname}.h5"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -333,6 +332,7 @@ macro (ADD_H5_DUMPSUBTEST testname testfile datasetname)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-H5IMP PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5DMP"
         FIXTURES_REQUIRED set_h5importtest
     )
@@ -342,7 +342,6 @@ macro (ADD_H5_DUMPSUBTEST testname testfile datasetname)
     add_test (
         NAME H5IMPORT_SUB-DUMP-${testname}-CMP
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=-p;ds${testname}.h5"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -352,6 +351,7 @@ macro (ADD_H5_DUMPSUBTEST testname testfile datasetname)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-CMP PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5IMP"
         FIXTURES_REQUIRED set_h5importtest
     )
@@ -379,7 +379,7 @@ macro (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
         NAME H5IMPORT-DUMP-${testname}
         COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
     )
-    set_property(TEST H5IMPORT-DUMP-${testname} PROPERTY DISABLED true)
+    set_property (TEST H5IMPORT-DUMP-${testname} PROPERTY DISABLED true)
   endif ()
 endmacro ()
 
@@ -499,8 +499,9 @@ add_test (
     COMMAND ${CMAKE_COMMAND} -E remove ${H5IMPORTTEST_CLEANFILES}
 )
 
-add_test (NAME H5IMPORT-h5importtest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5importtest>)
+add_test (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
 set_tests_properties (H5IMPORT-h5importtest PROPERTIES
+    ENVIRONMENT "${CROSSCOMPILING_PATH}"
     FIXTURES_SETUP set_h5importtest
     DEPENDS H5IMPORT-h5importtest-clear-objects
 )

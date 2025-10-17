@@ -69,11 +69,11 @@ function(clang_format TARGET_NAME)
 
     # Make the target
     if(FORMAT_FILES)
-      add_custom_target(${TARGET_NAME} COMMAND ${CLANG_FORMAT_EXE} -i
+      add_custom_target (${TARGET_NAME} COMMAND ${CLANG_FORMAT_EXE} -i
                                                -style=file ${FORMAT_FILES})
 
       if(NOT TARGET format)
-        add_custom_target(format)
+        add_custom_target (format)
       endif()
 
       add_dependencies(format ${TARGET_NAME})
@@ -123,11 +123,11 @@ function(cmake_format TARGET_NAME)
           ERROR
           "Cannot create cmake-format target '${TARGET_NAME}', already exists.")
       else()
-        add_custom_target(${TARGET_NAME} COMMAND ${CMAKE_FORMAT_EXE} -i
+        add_custom_target (${TARGET_NAME} COMMAND ${CMAKE_FORMAT_EXE} -i
                                                  ${FORMAT_FILES})
 
         if(NOT TARGET cmake-format)
-          add_custom_target(cmake-format)
+          add_custom_target (cmake-format)
         endif()
         add_dependencies(cmake-format ${TARGET_NAME})
       endif()

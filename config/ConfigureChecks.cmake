@@ -153,12 +153,12 @@ endif ()
 # gcc puts symbols like FLT128_DIG in quadmath.h instead of float.h, so
 # check for that. This is only used by the build system and doesn't need
 # to be exported to H5pubconf.h.
-CHECK_INCLUDE_FILES("quadmath.h" INCLUDE_QUADMATH_H)
+CHECK_INCLUDE_FILES ("quadmath.h" INCLUDE_QUADMATH_H)
 # Convert TRUE/FALSE to 0/1 for preprocessor values in test code, below
 if (${INCLUDE_QUADMATH_H})
-  set(C_INCLUDE_QUADMATH_H 1)
+  set (C_INCLUDE_QUADMATH_H 1)
 else ()
-  set(C_INCLUDE_QUADMATH_H 0)
+  set (C_INCLUDE_QUADMATH_H 0)
 endif ()
 
 if (MINGW OR CYGWIN)
@@ -282,7 +282,7 @@ endif ()
 # MinGW and Cygwin
 if (MINGW OR CYGWIN)
   set (CMAKE_REQUIRED_DEFINITIONS
-    "${CURRENT_TEST_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
+      "${CURRENT_TEST_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
   )
 endif ()
 
@@ -350,7 +350,11 @@ if (MINGW OR NOT WINDOWS)
   HDF_CHECK_TYPE_SIZE (ptrdiff_t    ${HDF_PREFIX}_SIZEOF_PTRDIFF_T)
 endif ()
 
-HDF_CHECK_TYPE_SIZE (off_t          ${HDF_PREFIX}_SIZEOF_OFF_T)
+if (NOT MINGW)
+  HDF_CHECK_TYPE_SIZE (off_t        ${HDF_PREFIX}_SIZEOF_OFF_T)
+else ()
+  set (${HDF_PREFIX}_SIZEOF_OFF_T   4)
+endif ()
 HDF_CHECK_TYPE_SIZE (time_t         ${HDF_PREFIX}_SIZEOF_TIME_T)
 
 #-----------------------------------------------------------------------------
@@ -371,12 +375,12 @@ if (MINGW OR NOT WINDOWS)
   #-----------------------------------------------------------------------------
   # Check a bunch of time functions
   #-----------------------------------------------------------------------------
-  CHECK_STRUCT_HAS_MEMBER("struct tm" tm_gmtoff "time.h" ${HDF_PREFIX}_HAVE_TM_GMTOFF)
-  CHECK_STRUCT_HAS_MEMBER("struct tm" __tm_gmtoff "time.h" ${HDF_PREFIX}_HAVE___TM_GMTOFF)
+  CHECK_STRUCT_HAS_MEMBER ("struct tm" tm_gmtoff "time.h" ${HDF_PREFIX}_HAVE_TM_GMTOFF)
+  CHECK_STRUCT_HAS_MEMBER ("struct tm" __tm_gmtoff "time.h" ${HDF_PREFIX}_HAVE___TM_GMTOFF)
   if (${HDF_PREFIX}_HAVE_SYS_TIME_H)
-    CHECK_STRUCT_HAS_MEMBER("struct tm" tz_minuteswest "sys/types.h;sys/time.h;time.h" ${HDF_PREFIX}_HAVE_STRUCT_TIMEZONE)
+    CHECK_STRUCT_HAS_MEMBER ("struct tm" tz_minuteswest "sys/types.h;sys/time.h;time.h" ${HDF_PREFIX}_HAVE_STRUCT_TIMEZONE)
   else ()
-    CHECK_STRUCT_HAS_MEMBER("struct tm" tz_minuteswest "sys/types.h;time.h" ${HDF_PREFIX}_HAVE_STRUCT_TIMEZONE)
+    CHECK_STRUCT_HAS_MEMBER ("struct tm" tz_minuteswest "sys/types.h;time.h" ${HDF_PREFIX}_HAVE_STRUCT_TIMEZONE)
   endif ()
   CHECK_FUNCTION_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
   foreach (time_test
@@ -457,7 +461,7 @@ foreach (other_test
     HAVE_BUILTIN_EXPECT
     PTHREAD_BARRIER
     HAVE_SOCKLEN_T
-  )
+)
   HDF_FUNCTION_TEST (${other_test})
 endforeach ()
 
@@ -675,17 +679,17 @@ endif ()
 # ----------------------------------------------------------------------
 option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)
 if (HDF5_ENABLE_MIRROR_VFD)
-  if ( ${HDF_PREFIX}_HAVE_NETINET_IN_H AND
-       ${HDF_PREFIX}_HAVE_NETDB_H      AND
-       ${HDF_PREFIX}_HAVE_ARPA_INET_H  AND
-       ${HDF_PREFIX}_HAVE_SYS_SOCKET_H AND
-       ${HDF_PREFIX}_HAVE_FORK)
-      set (${HDF_PREFIX}_HAVE_MIRROR_VFD 1)
-  else()
-      set (HDF5_ENABLE_MIRROR_VFD OFF CACHE BOOL "Build the Mirror Virtual File Driver" FORCE)
-      message(WARNING "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
-  endif()
-endif()
+  if (${HDF_PREFIX}_HAVE_NETINET_IN_H AND
+      ${HDF_PREFIX}_HAVE_NETDB_H      AND
+      ${HDF_PREFIX}_HAVE_ARPA_INET_H  AND
+      ${HDF_PREFIX}_HAVE_SYS_SOCKET_H AND
+      ${HDF_PREFIX}_HAVE_FORK)
+    set (${HDF_PREFIX}_HAVE_MIRROR_VFD 1)
+  else ()
+    set (HDF5_ENABLE_MIRROR_VFD OFF CACHE BOOL "Build the Mirror Virtual File Driver" FORCE)
+    message (WARNING "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Check if C has __float128 extension (used for Fortran only)
@@ -740,7 +744,7 @@ if (HDF5_BUILD_FORTRAN)
           set (_RUN_OUTPUT_VARIABLE "RUN_OUTPUT_VARIABLE")
         else ()
           set (_RUN_OUTPUT_VARIABLE  "RUN_OUTPUT_STDOUT_VARIABLE")
-        endif()
+        endif ()
         TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
             ${CMAKE_BINARY_DIR}
             ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
@@ -893,12 +897,12 @@ if (${HDF_PREFIX}_HAVE_COMPLEX_H)
     # If using MSVC, the _Complex types (if available) are _Fcomplex, _Dcomplex and _Lcomplex.
     # The standard types are checked for first in case MSVC uses them in the future or in case
     # the compiler used is simulating MSVC and uses the standard types.
-    cmake_push_check_state()
+    cmake_push_check_state ()
     list (APPEND CMAKE_EXTRA_INCLUDE_FILES complex.h)
     HDF_CHECK_TYPE_SIZE ("_Fcomplex" ${HDF_PREFIX}_SIZEOF__FCOMPLEX)
     HDF_CHECK_TYPE_SIZE ("_Dcomplex" ${HDF_PREFIX}_SIZEOF__DCOMPLEX)
     HDF_CHECK_TYPE_SIZE ("_Lcomplex" ${HDF_PREFIX}_SIZEOF__LCOMPLEX)
-    cmake_pop_check_state()
+    cmake_pop_check_state ()
     if (${HDF_PREFIX}_SIZEOF__FCOMPLEX AND ${HDF_PREFIX}_SIZEOF__DCOMPLEX AND
         ${HDF_PREFIX}_SIZEOF__FCOMPLEX)
       set (${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX ${${HDF_PREFIX}_SIZEOF__FCOMPLEX}
@@ -1119,7 +1123,7 @@ endif ()
 
 #-----------------------------------------------------------------------------
 # Check if the platform has pkg-config support
-find_package(PkgConfig)
+find_package (PkgConfig)
 if (PKG_CONFIG_FOUND)
   set (${HDF_PREFIX}_HAVE_PKGCONFIG 1)
 else ()

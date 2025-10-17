@@ -5,7 +5,7 @@ project (HDF5_UTILS_TOOLS_H5DWALK C)
 # Add the h5dwalk and test executables
 # --------------------------------------------------------------------
 add_executable (h5dwalk ${HDF5_UTILS_TOOLS_H5DWALK_SOURCE_DIR}/h5dwalk.c)
-#add_custom_target(generate_demo ALL
+#add_custom_target (generate_demo ALL
 #  DEPENDS "${HDF5_TOOLS_ROOT_DIR}/test/demo_destfiles.test"
 #)
 target_include_directories (h5dwalk PRIVATE "${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")

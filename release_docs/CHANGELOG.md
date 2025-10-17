@@ -1,10 +1,10 @@
-# HDF5 2.0.0 - 2025-09-30
+HDF5 version 2.0.0-4 currently under development
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
 HDF5 release, platforms tested, and known problems in this release.
 
-*For releases prior to version 2.0.0, please see the [release_archive.txt](release_archive.txt) file and for more details check the HISTORY*.txt files in the HDF5 source.*
+For releases prior to version 2.0.0, please see the release.txt file and for more details check the HISTORY*.txt files in the HDF5 source.
 
 # 🔗 Quick Links
 * [HDF5 documentation](https://support.hdfgroup.org/documentation/hdf5/latest/)
@@ -16,17 +16,18 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
-* [Bug Fixes](#-bug-fixes)
-* [Support for new platforms and languages](#-support-for-new-platforms-and-languages)
-* [Platforms Tested](#%EF%B8%8F-platforms-tested)
-* [Known Problems](#-known-problems)
+* [Bug Fixes](CHANGELOG.md#-bug-fixes)
+* [Support for new platforms and languages](CHANGELOG.md#-support-for-new-platforms-and-languages)
+* [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
+* [Known Problems](CHANGELOG.md#-known-problems)
 
 # 🔆 Executive Summary: HDF5 Version 2.0.0
 
 ## Performance Enhancements:
 
-- 30% faster opening and 25% faster closing of virtual datasets.
-- Reduced memory overhead via shared name strings and optimized spatial search algorithms for virtual datasets.
+- Up to [2500% faster](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#rtree) Virtual Dataset read/write operations
+- [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and [25% faster closing](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) of virtual datasets.
+- [Reduced memory overhead](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
 
 ## Significant Advancements:
 
@@ -52,7 +53,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ### Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
 
-   The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
+   The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.
 
 ### Autotools support was removed from HDF5<a name="cmake">
 
@@ -61,6 +62,14 @@ HDF5 release, platforms tested, and known problems in this release.
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Improved the cross-compile support in the build system
+
+   The CMake build system has been improved to better support cross-compiling. This includes the following changes:
+   - The CMake option, `CMAKE_CROSS_COMPILING`, indicates that the library is being cross-compiled. This option, usually in a toolchain file, can be set to ON when cross-compiling.
+   - Removed the `CMAKE_CROSSCOMPILING_EMULATOR` when cross-compiling, CMake will automatically insert it in the command.
+   - Added an option `HDF5_USE_PREGEN` to supply pre-generated files located in `HDF5_USE_PREGEN_DIR` directory, to bypass running feature detection programs when cross-compiling.
+   - Added a variable `CROSSCOMPILING_PATH` to specify a path to search for programs when cross-compiling. This is useful when the build system needs to run programs that were built for the host system.
 
 ### Refactored `HDF5_BUILD/ENABLE_{feature}` variable in hdf5-config.cmake file
 
@@ -99,8 +108,6 @@ HDF5 release, platforms tested, and known problems in this release.
 
    To help users find their plugins, the default plugin path has been changed to include the `CMAKE_INSTALL_PREFIX`. Adding the install prefix allows users to skip setting the `HDF5_PLUGIN_PATH` environment variable when using plugins with the default lib/plugin location.
 
-### Removed support for the autotools build system.
-
 ### Converted documentation in the source folder, doc, to doxygen files.
 
 ### Added configuration option for API concurrency support:
@@ -133,6 +140,10 @@ HDF5 release, platforms tested, and known problems in this release.
 ### Added support for native zlib-ng compression
 
 Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added `#ifdef` around the compression function calls. Added including the correct header file with the same `#ifdef`.
+
+### Renamed HDF5Examples build options from `H5EXAMPLE_<option>` to `H5EXAMPLE_<option>`
+
+Changed the prefix to better distinguish the examples build options from the library options when building the examples along with the library.
 
 ### Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
 
@@ -174,8 +185,22 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ## Library
 
-### Removed `hbool_t` from public API calls
+### Added predefined datatypes for bfloat16 data
 
+   Predefined datatypes have been added for little- and big-endian bfloat16 (https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
+
+   The following new macros have been added:
+
+    - H5T_FLOAT_BFLOAT16LE / H5T_FLOAT_BFLOAT16BE
+
+      These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
+
+      Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+### Removed hbool_t from public API calls
+                                  
+### Removed `hbool_t` from public API calls
+                                  
 The `hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
 
 It had been previously purged from the bulk of the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
@@ -213,6 +238,8 @@ Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer 
 ### The file format has been updated to 4.0<a name="fileformat"></a>
 
 The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
+
+Use of the shared strings option for Virtual Datasets reduces memory overhead and optimizes dataset close operations.
 
 ### The `H5Dread_chunk()` signature has changed
 
@@ -441,9 +468,44 @@ Simple example programs showing how to use complex number datatypes have been ad
 
    Similar to the above. Setting the connector on a non-FAPL had no effect on library behavior, and the connector ID and information could not be read back from that plist later.
 
+### Optimized Virtual Dataset opens by delaying layout copy<a name="layoutcopydelay"></a>
+
+   On dataset open, the dataset performed an internal copy of the layout in order to populate its internal DCPL. For virtual datasets, this added a significant amount of overhead to the open operation.
+
+   This layout copy is now delayed until either a user requests the DCPL, or until the start of an operation that needs to read the layout from the DCPL.
+
+### Virtual datasets now use a spatial tree to optimize searches<a name="rtree"></a>
+
+   Virtual dataset operations with many (>1,000) mappings were much slower than
+   corresponding operations on normal datasets. This was due to the need
+   to iterate through every source dataset's dataspace and check for an intersection
+   with the user-selected region for a read/write in the virtual dataset.
+
+   Virtual datasets with many mappings now use an r-tree (defined in H5RT.c) to
+   perform a spatial search. This allows the dataspaces that intersect the
+   user-selection to be computed with, in most cases, much fewer intersection checks,
+   improving the speed of VDS read/write operations.
+
+   Virtual datasets will use the r-tree by default, since the majority of use cases,
+   should see improvements from use of the tree. However, because some workflows may
+   find that the overhead of the tree outweighs the time saved on searches, there is
+   a new Dataset Access Property List (DAPL) property to control use of the spatial tree.
+
+   This property can be set or queried with the new API functions
+   H5Pset_virtual_spatial_tree()/H5Pget_virtual_spatial_tree().
+
 ## Parallel Library
 
+### Added H5FDsubfiling_get_file_mapping() API function for subfiling VFD
+
+Added H5FDsubfiling_get_file_mapping() API function to retrieve the names of all physical subfiles that collectively make up a logical HDF5 file when using the subfiling Virtual File Driver.
+
 ## Fortran Library
+
+### Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for subfiling VFD
+
+Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file mapping functionality, ensuring complete language binding support.
+
 
 ## C++ Library
 
@@ -495,10 +557,58 @@ Simple example programs showing how to use complex number datatypes have been ad
 
 ## Library
 
+
 ### Fixed security issue CVE-2025-2915 and OSV-2024-381
    Fixed a heap-based buffer overflow in H5F__accum_free caused by an integer overflow when calculating new_accum_size. Added validation in H5O__mdci_decode to detect and reject invalid values early, preventing the overflow condition.
 
    Fixes GitHub issue #5380
+  
+### Fixed security issue CVE-2025-7068
+
+   Failures during the discard process on a metadata cache entry could cause the library to skip calling the callback to free the cache entry. This could result in resource leaks and issues with flushing and closing the metadata cache during file close. This has been fixed by noting errors during the discard process, but attempting to fully free a cache entry before signalling that an error has occurred.
+
+   Fixes GitHub issue #5578
+
+### Fix bugs in object header operations
+
+   In some rare circumstances, such as deleting hard links that point to their own parent group in a file using the new file format, memory corruption could occur due to recursive operations changing data structures being operated on by multiple levels of recursion. Made changes to delay changing the data structure in a dangerous way until recursion is complete.
+
+   Fixes GitHub issue #5854
+
+### Fixed security issues CVE-2025-6816, CVE-2025-6856 and CVE-2025-2923
+
+   A specially constructed HDF5 file could contain a corrupted object header with a continuation message that points back to itself. This could result in an internal buffer being allocated with too small of a size, leading to a heap buffer overflow. This has been fixed by checking the expected number of object header chunks against the actual value as chunks are being deserialized.
+
+   Fixes GitHub issues #5571, #5574 and #5381
+
+### Fixed security issue CVE-2025-6750
+
+   A heap buffer overflow occurred because an mtime message was not properly decoded, resulting in a buffer of size 0 being passed into the encoder.  This has been fixed by decoding old and new mtime messages which will allow invalid message size to be detected.
+
+   Fixes GitHub issue #5549
+
+### Fixed CVE-2025-6269
+
+   There were several security vulnerabilities found in the function H5C__reconstruct_cache_entry(), including buffer overflows and memory leaks.  The function has been hardened with bounds checks, input validation, and safe cleanup.
+
+   Fixes GitHub issues #5579 and #5581
+
+### Fixed a problem with the scale-offset filter
+
+   A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
+
+   Fixes GitHub issue #5861
+
+### Fixed security issue CVE-2025-2153
+
+   The message flags field could be modified such that a message that is not sharable according to the share_flags field in H5O_msg_class_t can be treated as sharable. An assert has been added in H5O__msg_write_real to make sure messages that are not sharable can't be modified to shared. Additionally, the check in H5O__chunk_deserialize that catches unsharable messages being marked as sharable has been improved.
+
+   Fixes GitHub issue #5329
+
+### Fixed security issue CVE-2025-2925
+   Actual_len + H5C_IMAGE_EXTRA_SPACE, which was used by H5MM_realloc as the size input, could equal 0 due to bad inputs. When H5MM_realloc was called, it freed image, but then could get sent to done before new_image could be assigned to image. Because the pointer for image wasn't null, it was freed again in done, causing a double-free vulnerability. H5C__load_entry() now checks for an image buffer length of 0 before calling H5MM_realloc.
+
+   Fixes Github issue #5383
 
 ### Fixed security issue CVE-2025-6857
 
@@ -568,6 +678,11 @@ Simple example programs showing how to use complex number datatypes have been ad
    We've added an #ifdef `FE_INVALID` block around the exception clearing code to correct this.
 
    Fixed GitHub issue [#4952](https://github.com/HDFGroup/hdf5/issues/4952)
+
+### Fixed security issue CVE-2025-2310
+
+   A malformed HDF5 file could have an attribute with a recorded name length of zero.This would lead to an overflow and an invalid memory access. An integrity check
+   has been added to detect this case and safely stop file decoding.
 
 ## Java Library
 
@@ -669,12 +784,12 @@ Simple example programs showing how to use complex number datatypes have been ad
 
 # ☑️ Platforms Tested
 
-Data to come from cdash.
+A table of platforms tested can be seen on the [wiki](https://github.com/HDFGroup/hdf5/wiki/Platforms-Tested).
+Current test results are available [here](https://my.cdash.org/index.php?project=HDF5).
 
 # ⛔ Known Problems
 
-###  When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library
-fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
+- When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
 
      #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
      major: Datatype
@@ -684,42 +799,42 @@ fails to initialize due to not being able to detect the byte order of the _Float
 
      `CMake: HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16=OFF`
 
- ###  When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur in the following tests:
+- When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur in the following tests:
 
       H5PLUGIN-filter_plugin <br>
       H5TEST-flush2<br>
       H5TEST-testhdf5-base<br>
       MPI_TEST_t_filters_parallel<br>
 
-      Sporadic failures (even with lower -O levels):<br>
+  Sporadic failures (even with lower -O levels):<br>
 
       Java JUnit-TestH5Pfapl<br>
       Java JUnit-TestH5D<br>
 
-      Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of 'use of undefined value' when the optimization level is -O2 or higher.
+  Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of 'use of undefined value' when the optimization level is -O2 or higher.
 
       This is confirmed to be a [bug in the nvc compiler](https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045) that has been fixed as of 23.11. If you are using an affected version of the NVidia compiler, the work-around is to set the optimization level to -O1.
 
-### CMake files do not behave correctly with paths containing spaces
+- CMake files do not behave correctly with paths containing spaces
 
    Do not use spaces in paths because the required escaping for handling spaces results in very complex and fragile build files.
 
-### At present, metadata cache images may not be generated by parallel applications. Parallel applications can read files with metadata cache images, but since this is a collective operation, a deadlock is possible if one or more processes do not participate.
+- At present, metadata cache images may not be generated by parallel applications. Parallel applications can read files with metadata cache images, but since this is a collective operation, a deadlock is possible if one or more processes do not participate.
 
-### The subsetting option in `ph5diff` currently will fail and should be avoided
+- The subsetting option in `ph5diff` currently will fail and should be avoided
 
    The subsetting option works correctly in serial `h5diff`.
 
-### Flang Fortran compilation will fail (last check version 17) due to not yet implemented: (1) derived type argument passed by value (H5VLff.F90), and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
+- Flang Fortran compilation will fail (last check version 17) due to not yet implemented: (1) derived type argument passed by value (H5VLff.F90), and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
 
-### Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers greater than version 16.0 due to a compiler bug. The latest version verified as failing was version 17.0.
+- Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers greater than version 16.0 due to a compiler bug. The latest version verified as failing was version 17.0.
 
-### Several tests currently fail on certain platforms:
+- Several tests currently fail on certain platforms:
    MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
 
    MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
    cray-mpich on theta and with XL compilers on ppc64le platforms.
 
-### File space may not be released when overwriting or deleting certain nested variable length or reference types.
+- File space may not be released when overwriting or deleting certain nested variable length or reference types.
 
-### Known problems in previous releases can be found in the HISTORY*.txt files in the HDF5 source. Please report any new problems found to help@hdfgroup.org.
+Known problems in previous releases can be found in the HISTORY*.txt files in the HDF5 source. Please report any new problems found to <a href="mailto:help@hdfgroup.org">help@hdfgroup.org</a>.

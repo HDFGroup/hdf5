@@ -632,4 +632,7 @@ H5FC_DLL int_f h5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namele
                                     int_f *order, hsize_t_f *idx, H5L_iterate2_t op, void *op_data,
                                     hid_t_f *lapl_id);
 
+/* Subfiling VFD support functions */
+H5FC_DLL int_f h5free_string_array_memory_c(void **array_ptr, size_t_f *num_files);
+
 #endif /* H5f90proto_H */

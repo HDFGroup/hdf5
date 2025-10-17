@@ -44,7 +44,7 @@
 
 /* The number of predefined floating point types in HDF5
  */
-#define NUM_PREDEFINED_FLOAT_TYPES 6
+#define NUM_PREDEFINED_FLOAT_TYPES 8
 
 /* The number of predefined complex number types in HDF5
  */
@@ -320,6 +320,12 @@ generate_random_datatype_float(H5T_class_t H5_ATTR_UNUSED parent_class, bool H5_
             break;
         case 5:
             type_to_copy = H5T_IEEE_F64LE;
+            break;
+        case 6:
+            type_to_copy = H5T_FLOAT_BFLOAT16BE;
+            break;
+        case 7:
+            type_to_copy = H5T_FLOAT_BFLOAT16LE;
             break;
 
         default:

@@ -33,7 +33,7 @@ jobs:
           git config --global core.autocrlf input
 
       - name: Get Sources
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
 
       - name: Install Cygwin
         uses: cygwin/cygwin-install-action@master
@@ -56,7 +56,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Cygwin)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
               name: zip-tarball
               path: ${{ github.workspace }}

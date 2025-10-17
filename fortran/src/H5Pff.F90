@@ -4365,6 +4365,96 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_chunk_cache_f
 
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the flag for whether to use/not use a spatial tree
+!! during mapping operations on a Virtual Dataset. The default value is true.
+!!
+!! Use of a spatial tree will accelerate the process of searching through mappings
+!! to determine which contain intersections with the user's selection region.
+!! With the tree disabled, all mappings will simply be iterated through and
+!! checked directly.
+!!
+!! Certain workflows may find that tree creation overhead outweighs the time saved
+!! on reads. In this case, disabling this property will lead to a performance improvement,
+!! though it is expected that almost all cases will benefit from the tree on net.
+!!
+!! \param dapl_id  Target dataset access property list identifier.
+!! \param use_tree Value of the setting.
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pget_virtual_spatial_tree()
+!!
+  SUBROUTINE h5pget_virtual_spatial_tree_f(dapl_id, use_tree, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: dapl_id
+    LOGICAL        , INTENT(OUT)             :: use_tree
+    INTEGER        , INTENT(OUT)             :: hdferr
+    LOGICAL(C_BOOL) :: c_use_tree
+
+    INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_virtual_spatial_tree_c(dapl_id, use_tree) &
+             BIND(C, NAME='H5Pget_virtual_spatial_tree')
+          IMPORT :: C_INT, HID_T, C_BOOL
+          IMPLICIT NONE
+          INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
+          LOGICAL(C_BOOL), INTENT(OUT) :: use_tree
+        END FUNCTION H5Pget_virtual_spatial_tree_c
+    END INTERFACE
+
+    hdferr = INT(H5Pget_virtual_spatial_tree_c(dapl_id, c_use_tree))
+
+    ! Transfer value of C C_BOOL type to Fortran LOGICAL
+    use_tree = c_use_tree
+
+    END SUBROUTINE h5pget_virtual_spatial_tree_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets the dapl to use/not use a spatial tree
+!! during mapping operations on a Virtual Dataset. The default value is true.
+!!
+!! Use of a spatial tree will accelerate the process of searching through mappings
+!! to determine which contain intersections with the user's selection region.
+!! With the tree disabled, all mappings will simply be iterated through and
+!! checked directly.
+!!
+!! Certain workflows may find that tree creation overhead outweighs the time saved
+!! on reads. In this case, disabling this property will lead to a performance improvement,
+!! though it is expected that almost all cases will benefit from the tree on net.
+!!
+!! \param dapl_id  Target dataset access property list identifier.
+!! \param use_tree Value of the setting.
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pset_virtual_spatial_tree()
+!!
+  SUBROUTINE h5pset_virtual_spatial_tree_f(dapl_id, use_tree, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: dapl_id
+    LOGICAL        , INTENT(IN)              :: use_tree
+    INTEGER        , INTENT(OUT)             :: hdferr
+    LOGICAL(C_BOOL) :: c_use_tree
+
+    INTERFACE
+        INTEGER FUNCTION h5pset_virtual_spatial_tree_c(dapl_id, use_tree) &
+             BIND(C, NAME='H5Pset_virtual_spatial_tree')
+          IMPORT :: HID_T, C_BOOL
+          IMPLICIT NONE
+          INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
+          LOGICAL(C_BOOL), INTENT(IN), VALUE :: use_tree
+        END FUNCTION h5pset_virtual_spatial_tree_c
+    END INTERFACE
+
+    ! Transfer value of Fortran LOGICAL to C C_BOOL type
+    c_use_tree = use_tree
+
+    hdferr = INT(h5pset_virtual_spatial_tree_c(dapl_id, c_use_tree))
+
+  END SUBROUTINE h5pset_virtual_spatial_tree_f
+
 #ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5P

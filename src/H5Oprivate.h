@@ -42,6 +42,7 @@ typedef struct H5O_fill_t H5O_fill_t;
 #include "H5Tprivate.h"  /* Datatype functions			*/
 #include "H5VLprivate.h" /* Virtual Object Layer                */
 #include "H5Zprivate.h"  /* I/O pipeline filters		*/
+#include "H5RTprivate.h" /* R-tree for virtual dataspaces      */
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
@@ -230,6 +231,8 @@ typedef struct H5O_copy_t {
 #define H5O_MDCI_MSG_ID    0x0018 /* Metadata Cache Image Message */
 #define H5O_UNKNOWN_ID     0x0019 /* Placeholder message ID for unknown message.  */
 /* (this should never exist in a file) */
+#define H5O_DELETED_ID 0x001a /* Placeholder in mesg array in memory for a deleted message */
+/* (this should never exist in a file) */
 /*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of
@@ -238,7 +241,7 @@ typedef struct H5O_copy_t {
  *
  * (this should never exist in a file)
  */
-#define H5O_BOGUS_INVALID_ID 0x001a /* "Bogus invalid" Message.  */
+#define H5O_BOGUS_INVALID_ID 0x001b /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -601,6 +604,12 @@ typedef struct H5O_storage_virtual_t {
     H5O_storage_virtual_ent_t
         *source_dset_hash_table; /* Hash table of virtual entries sorted by source dataset name. Only the
                                     first occurrence of each source dataset name is stored. */
+    H5RT_t *tree;
+    size_t  not_in_tree_nused;  /* Number of entries in not_in_tree_list */
+    size_t  not_in_tree_nalloc; /* Allocated size of not_in_tree_list (grows by power of 2) */
+    H5O_storage_virtual_ent_t *
+        *not_in_tree_list; /* Array of POINTERS to mappings NOT in tree for quick access
+                            * Some mappings cannot be stored in the tree and must be searched manually */
 } H5O_storage_virtual_t;
 
 typedef struct H5O_storage_t {
@@ -888,7 +897,7 @@ typedef herr_t (*H5O_operator_t)(const void *mesg /*in*/, unsigned idx, void *op
 
 /* Typedef for "internal library" iteration operations */
 typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
-                                     unsigned *oh_modified /*out*/, void *operator_data /*in,out*/);
+                                     void *operator_data /*in,out*/);
 
 /* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
 typedef enum H5O_mesg_operator_type_t {

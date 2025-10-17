@@ -53,6 +53,7 @@ static const H5E_msg_t H5E_PLUGIN_msg_s = {false, "Plugin for dynamically loaded
 static const H5E_msg_t H5E_REFERENCE_msg_s = {false, "References", H5E_MAJOR, &H5E_err_cls_s};
 static const H5E_msg_t H5E_RESOURCE_msg_s = {false, "Resource unavailable", H5E_MAJOR, &H5E_err_cls_s};
 static const H5E_msg_t H5E_RS_msg_s = {false, "Reference Counted Strings", H5E_MAJOR, &H5E_err_cls_s};
+static const H5E_msg_t H5E_RTREE_msg_s = {false, "R-Tree spatial index", H5E_MAJOR, &H5E_err_cls_s};
 static const H5E_msg_t H5E_SLIST_msg_s = {false, "Skip Lists", H5E_MAJOR, &H5E_err_cls_s};
 static const H5E_msg_t H5E_SOHM_msg_s = {false, "Shared Object Header Messages", H5E_MAJOR, &H5E_err_cls_s};
 static const H5E_msg_t H5E_STORAGE_msg_s = {false, "Data storage", H5E_MAJOR, &H5E_err_cls_s};

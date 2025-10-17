@@ -23,7 +23,7 @@ jobs:
     permissions:
         contents: write # In order to allow EndBug/add-and-commit to commit changes
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v5
 
     - name: Fix C and Java formatting issues detected by clang-format
       uses: DoozyX/clang-format-lint-action@v0.20

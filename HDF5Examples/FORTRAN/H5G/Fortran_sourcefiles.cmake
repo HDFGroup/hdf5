@@ -23,7 +23,7 @@ if (HDF5_VERSION_STRING VERSION_GREATER_EQUAL "1.10.0")
     )
   endif()
 else ()
-  if (H5EX_ENABLE_F2003)
+  if (H5EXAMPLE_ENABLE_F2003)
     set (common_examples
       ${common_examples}
       h5ex_g_intermediate
