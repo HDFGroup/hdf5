@@ -1,6 +1,10 @@
 	    Installation instructions for Parallel HDF5
 	    -------------------------------------------
 
+IMPORTANT: HDF5 2.0 and later requires CMake for building.
+           See INSTALL_CMake.txt for complete build instructions using CMake Presets.
+           The Autotools examples below are for HDF5 1.x only (legacy reference).
+
 0. Use Build Scripts
 --------------------
 The HDF Group is accumulating build scripts to handle building parallel HDF5
