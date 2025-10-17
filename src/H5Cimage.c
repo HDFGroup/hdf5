@@ -126,9 +126,9 @@
  *
  ****************************************************************************/
 typedef struct H5C_recon_entry_t {
-    haddr_t addr;        /* The file address as key */
+    haddr_t            addr; /* The file address as key */
     H5C_cache_entry_t *entry_ptr;
-    UT_hash_handle hh;   /* Hash table handle */
+    UT_hash_handle     hh; /* Hash table handle */
 } H5C_recon_entry_t;
 
 /********************/
@@ -2396,7 +2396,7 @@ done:
 static herr_t
 H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
 {
-    H5C_cache_entry_t *pf_entry_ptr = NULL;        /* Pointer to prefetched entry */
+    H5C_cache_entry_t *pf_entry_ptr = NULL; /* Pointer to prefetched entry */
     H5C_cache_entry_t *parent_ptr;          /* Pointer to parent of prefetched entry */
     hsize_t            image_len;           /* Image length */
     const uint8_t     *p;                   /* Pointer into image buffer */
@@ -2405,8 +2405,8 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
 
     /* Declare a uthash table to detect duplicate addresses.  It will be destroyed
        after decoding the cache contents */
-    H5C_recon_entry_t *recon_table = NULL;    /* Hash table head */
-    H5C_recon_entry_t *recon_entry = NULL;    /* Points to an address struct */
+    H5C_recon_entry_t *recon_table = NULL; /* Hash table head */
+    H5C_recon_entry_t *recon_entry = NULL; /* Points to an address struct */
 
     FUNC_ENTER_PACKAGE
 
@@ -2432,7 +2432,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
 
     /* Reconstruct entries in image */
     for (u = 0; u < cache_ptr->num_entries_in_image; u++) {
-        haddr_t addr;   /* temporary var */
+        haddr_t addr; /* temporary var */
 
         /* Create the prefetched entry described by the ith
          * entry in cache_ptr->image_entrise.
@@ -2450,7 +2450,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
             /* Insert address into the hash table */
             if (NULL == (recon_entry = (H5C_recon_entry_t *)H5MM_malloc(sizeof(H5C_recon_entry_t))))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for address entry");
-            recon_entry->addr = addr;
+            recon_entry->addr      = addr;
             recon_entry->entry_ptr = pf_entry_ptr;
             HASH_ADD(hh, recon_table, addr, sizeof(haddr_t), recon_entry);
         }
@@ -2595,14 +2595,15 @@ done:
         /* If we failed during reconstruction, remove reconstructed entries */
         H5C_recon_entry_t *recon_entry, *tmp;
 
-        HASH_ITER(hh, recon_table, recon_entry, tmp) {
+        HASH_ITER(hh, recon_table, recon_entry, tmp)
+        {
             H5C_cache_entry_t *entry_ptr = recon_entry->entry_ptr;
 
             /* Only touch entries from the image reconstruction */
             if (entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID) {
- /*                 if (!entry_ptr->is_pinned && !entry_ptr->is_protected)
- */ 
-                    H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, recon_entry->addr, H5AC__NO_FLAGS_SET);
+                /*                 if (!entry_ptr->is_pinned && !entry_ptr->is_protected)
+                 */
+                H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, recon_entry->addr, H5AC__NO_FLAGS_SET);
 
                 if (entry_ptr->image_ptr)
                     H5MM_xfree(entry_ptr->image_ptr);
@@ -2611,11 +2612,11 @@ done:
             HASH_DEL(recon_table, recon_entry);
             H5MM_xfree(recon_entry);
         }
-    /* The temporary hash table should be empty */
-    assert(recon_table == NULL);
+        /* The temporary hash table should be empty */
+        assert(recon_table == NULL);
 #endif /* NDEBUG */
 
-    /* Free the half-processed entry */
+        /* Free the half-processed entry */
         if (pf_entry_ptr->image_ptr)
             H5MM_xfree(pf_entry_ptr->image_ptr);
         if (pf_entry_ptr->fd_parent_count > 0 && pf_entry_ptr->fd_parent_addrs)
@@ -2626,7 +2627,8 @@ done:
     else if (recon_table) {
         /* Free the temporary hash table */
         H5C_recon_entry_t *cur, *tmp;
-        HASH_ITER(hh, recon_table, cur, tmp) {
+        HASH_ITER(hh, recon_table, cur, tmp)
+        {
             HASH_DEL(recon_table, cur);
             H5MM_xfree(cur);
         }
