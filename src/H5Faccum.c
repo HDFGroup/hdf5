@@ -881,7 +881,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                 H5_CHECKED_ASSIGN(overlap_size, size_t, (addr + size) - accum->loc, haddr_t);
                 /* Sanity check */
                 /* Overlap size should not result in "negative" value after subtraction */
-                assert(overlap_size > accum->size);
+                assert(overlap_size < accum->size);
                 new_accum_size = accum->size - overlap_size;
 
                 /* Move the accumulator buffer information to eliminate the freed block */
