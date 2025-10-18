@@ -8,7 +8,11 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_JSRC_SOURCE
 if (HDF5_ENABLE_ROS3_VFD)
   set (jsrc_features "ros3")
 else ()
-  set (jsrc_features "plain")
+  if (WIN32)
+    set (jsrc_features "wplain")
+  else ()
+    set (jsrc_features "plain")
+  endif ()
 endif ()
 
 file (GLOB HDF5_JAVA_JSRC_SOURCES LIST_DIRECTORIES false ${HDF5_JAVA_JSRC_SOURCE_DIR}/org/hdfgroup/javahdf5/*.java)

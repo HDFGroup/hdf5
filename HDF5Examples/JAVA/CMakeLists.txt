@@ -6,6 +6,7 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
 )
 
 if (NOT HDF5_PROVIDES_JNI AND ${H5_LIBVER_DIR} GREATER 114)
+  message (STATUS "HDF5 Java examples FFM support when using libver >= v1.14")
   add_subdirectory (H5D)
   add_subdirectory (H5T)
   add_subdirectory (H5G)
@@ -13,5 +14,6 @@ if (NOT HDF5_PROVIDES_JNI AND ${H5_LIBVER_DIR} GREATER 114)
 endif ()
 
 if (HDF5_PROVIDES_COMPAT OR HDF5_PROVIDES_JNI)
+  message (STATUS "HDF5 Java examples compat support")
   add_subdirectory (compat)
 endif ()

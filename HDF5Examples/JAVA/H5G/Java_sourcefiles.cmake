@@ -10,4 +10,3 @@ set (HDF_JAVA_EXAMPLES
     H5Ex_G_Intermediate.java
     H5Ex_G_Visit.java
 )
-endif ()

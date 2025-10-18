@@ -39,24 +39,24 @@ foreach (example ${HDF_JAVA_EXAMPLES})
 Class-Path: ${HDFJAVA_CLASSJARS}
 "
   )
-  add_jar (${EXAMPLE_VARNAME}J_${example_name}
+  add_jar (${EXAMPLE_VARNAME}JC_${example_name}
       SOURCES ${example}
       MANIFEST ${PROJECT_BINARY_DIR}/${example_name}_Manifest.txt
   )
-  get_target_property (${EXAMPLE_VARNAME}J_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}J_${example_name} JAR_FILE)
-  get_target_property (${EXAMPLE_VARNAME}J_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}J_${example_name} CLASSDIR)
-  add_dependencies (${EXAMPLE_VARNAME}J_${example_name} ${H5EXAMPLE_JAVA_LIBRARIES})
+  get_target_property (${EXAMPLE_VARNAME}JC_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}JC_${example_name} JAR_FILE)
+  get_target_property (${EXAMPLE_VARNAME}JC_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}JC_${example_name} CLASSDIR)
+  add_dependencies (${EXAMPLE_VARNAME}JC_${example_name} ${H5EXAMPLE_JAVA_LIBRARIES})
 endforeach ()
 
 if (H5EXAMPLE_BUILD_TESTING)
   macro (ADD_H5_TEST resultfile resultcode)
     add_test (
-        NAME ${EXAMPLE_VARNAME}_jnative-h5-${resultfile}
+        NAME ${EXAMPLE_VARNAME}_jcompat-h5-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_JAVA=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
             -D "TEST_PROGRAM=${resultfile}"
             -D "TEST_ARGS:STRING=${ARGN};${CMD_ARGS}"
-            -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${EXAMPLE_VARNAME}J_${resultfile}_JAR_FILE}"
+            -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${EXAMPLE_VARNAME}JC_${resultfile}_JAR_FILE}"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
             -D "TEST_OUTPUT=${PROJECT_BINARY_DIR}/${resultfile}.out"
@@ -66,15 +66,15 @@ if (H5EXAMPLE_BUILD_TESTING)
             -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
     )
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${resultfile} PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (${EXAMPLE_VARNAME}_jcompat-h5-${resultfile} PROPERTIES DEPENDS ${last_test})
     endif ()
-    set (last_test "${EXAMPLE_VARNAME}_jnative-h5-${resultfile}")
+    set (last_test "${EXAMPLE_VARNAME}_jcompat-h5-${resultfile}")
   endmacro ()
 
   foreach (example ${HDF_JAVA_EXAMPLES})
     get_filename_component (example_name ${example} NAME_WE)
     add_test (
-        NAME ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects
+        NAME ${EXAMPLE_VARNAME}_jcompat-h5-${example_name}-clearall-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${PROJECT_BINARY_DIR}/${example_name}.h5
@@ -82,27 +82,27 @@ if (H5EXAMPLE_BUILD_TESTING)
             ${PROJECT_BINARY_DIR}/${example_name}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (${EXAMPLE_VARNAME}_jcompat-h5-${example_name}-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     add_test (
-        NAME ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-copy-objects
+        NAME ${EXAMPLE_VARNAME}_jcompat-h5-${example_name}-copy-objects
         COMMAND    ${CMAKE_COMMAND}
             -E copy_if_different
             ${PROJECT_SOURCE_DIR}/tfiles/110/${example_name}.txt
             ${PROJECT_BINARY_DIR}/${example_name}.txt
     )
-    set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-copy-objects PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clearall-objects)
-    set (last_test "${EXAMPLE_VARNAME}_jnative-h5-${example_name}-copy-objects")
+    set_tests_properties (${EXAMPLE_VARNAME}_jcompat-h5-${example_name}-copy-objects PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_jcompat-h5-${example_name}-clearall-objects)
+    set (last_test "${EXAMPLE_VARNAME}_jcompat-h5-${example_name}-copy-objects")
     ADD_H5_TEST (${example_name} 0)
     add_test (
-        NAME ${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clean
+        NAME ${EXAMPLE_VARNAME}_jcompat-h5-${example_name}-clean
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${PROJECT_BINARY_DIR}/${example_name}.h5
             ${PROJECT_BINARY_DIR}/${example_name}.out
             ${PROJECT_BINARY_DIR}/${example_name}.out.err
     )
-    set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${example_name}-clean PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (${EXAMPLE_VARNAME}_jcompat-h5-${example_name}-clean PROPERTIES DEPENDS ${last_test})
   endforeach ()
 
 endif ()
