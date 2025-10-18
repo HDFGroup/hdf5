@@ -29,8 +29,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 import examples.groups.H5Ex_G_Iterate.H5O_type;
 
 class opdata implements H5L_iterate_opdata_t {
@@ -68,8 +66,7 @@ public class H5Ex_G_Traverse {
         try {
             System.out.println("/ {");
             // H5L_iterate_t iter_cb = new H5L_iter_callbackT();
-            H5Literate(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), 0L, iter_cb,
-                          od);
+            H5Literate(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), 0L, iter_cb, od);
             System.out.println("}");
         }
         catch (Exception e) {
@@ -132,9 +129,8 @@ class H5L_iter_callbackT implements H5L_iterate_t {
                     nextod.prev            = od;
                     nextod.obj_token       = infobuf.token;
                     H5L_iterate_t iter_cb2 = new H5L_iter_callbackT();
-                    return_val             = H5Literate_by_name(group, name, H5_INDEX_NAME(),
-                                                                   H5_ITER_NATIVE(), 0L, iter_cb2, nextod,
-                                                                   H5P_DEFAULT());
+                    return_val = H5Literate_by_name(group, name, H5_INDEX_NAME(), H5_ITER_NATIVE(), 0L,
+                                                    iter_cb2, nextod, H5P_DEFAULT());
                 }
                 for (int i = 0; i < spaces; i++)
                     System.out.print(" ");

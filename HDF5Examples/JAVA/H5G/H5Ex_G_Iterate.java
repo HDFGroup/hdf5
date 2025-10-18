@@ -22,12 +22,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_G_Iterate {
     private static String FILENAME    = "groups/h5ex_g_iterate.h5";
@@ -77,8 +74,7 @@ public class H5Ex_G_Iterate {
                 int[] otype           = new int[count];
                 int[] ltype           = new int[count];
                 H5O_token_t[] otokens = new H5O_token_t[count];
-                H5Gget_obj_info_all(file_id, DATASETNAME, oname, otype, ltype, otokens,
-                                       H5_INDEX_NAME());
+                H5Gget_obj_info_all(file_id, DATASETNAME, oname, otype, ltype, otokens, H5_INDEX_NAME());
 
                 // Get type of the object and display its name and type.
                 for (int indx = 0; indx < otype.length; indx++) {

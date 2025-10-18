@@ -27,8 +27,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class H5Ex_D_External {
     private static String FILENAME         = "H5Ex_D_External.h5";
     private static String EXTERNALNAME     = "H5Ex_D_External.data";
@@ -54,8 +52,7 @@ public class H5Ex_D_External {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -64,7 +61,8 @@ public class H5Ex_D_External {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
+            filespace_id =
+                H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -90,8 +88,8 @@ public class H5Ex_D_External {
         // Create the HDF5Constants.dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(), filespace_id,
-                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(),
+                                        filespace_id, H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -191,9 +189,9 @@ public class H5Ex_D_External {
         try {
             if (dcpl_id >= 0) {
                 MemorySegment namelenSeg = arena.allocate(ValueLayout.JAVA_LONG);
-                MemorySegment nameSeg = arena.allocate(256);
-                MemorySegment offsetSeg = arena.allocate(ValueLayout.JAVA_LONG);
-                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                MemorySegment nameSeg    = arena.allocate(256);
+                MemorySegment offsetSeg  = arena.allocate(ValueLayout.JAVA_LONG);
+                MemorySegment sizeSeg    = arena.allocate(ValueLayout.JAVA_LONG);
                 H5Pget_external(dcpl_id, 0, 256, nameSeg, offsetSeg, sizeSeg);
                 externalFileName = nameSeg.getString(0);
             }

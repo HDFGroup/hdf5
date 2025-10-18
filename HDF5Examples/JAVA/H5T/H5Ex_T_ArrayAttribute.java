@@ -26,8 +26,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class H5Ex_T_ArrayAttribute {
     private static String FILENAME      = "H5Ex_T_ArrayAttribute.h5";
     private static String DATASETNAME   = "DS1";
@@ -59,8 +57,7 @@ public class H5Ex_T_ArrayAttribute {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -86,9 +83,8 @@ public class H5Ex_T_ArrayAttribute {
         try {
             dataspace_id = H5Screate(H5S_SCALAR());
             if (dataspace_id >= 0) {
-                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(), dataspace_id,
-                                          H5P_DEFAULT(), H5P_DEFAULT(),
-                                          H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(),
+                                        dataspace_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 H5Sclose(dataspace_id);
                 dataspace_id = H5I_INVALID_HID();
             }
@@ -100,7 +96,8 @@ public class H5Ex_T_ArrayAttribute {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
+            dataspace_id =
+                H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -109,8 +106,8 @@ public class H5Ex_T_ArrayAttribute {
         // Create the attribute and write the array data to it.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id,
-                                            H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id, H5P_DEFAULT(),
+                                         H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -209,8 +206,7 @@ public class H5Ex_T_ArrayAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(),
-                                                  H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -317,8 +313,8 @@ public class H5Ex_T_ArrayAttribute {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        H5Ex_T_ArrayAttribute.CreateDataset(arena);
-                H5Ex_T_ArrayAttribute.ReadDataset(arena);
+            H5Ex_T_ArrayAttribute.CreateDataset(arena);
+            H5Ex_T_ArrayAttribute.ReadDataset(arena);
         }
-            }
-        }
+    }
+}

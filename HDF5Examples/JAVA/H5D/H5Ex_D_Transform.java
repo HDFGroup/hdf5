@@ -29,8 +29,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class H5Ex_D_Transform {
 
     private static String FILENAME   = "H5Ex_D_Transform.h5";
@@ -66,8 +64,7 @@ public class H5Ex_D_Transform {
 
         // Create a new file using the default properties.
         try {
-            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +73,8 @@ public class H5Ex_D_Transform {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
+            filespace_id =
+                H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -96,9 +94,8 @@ public class H5Ex_D_Transform {
         // a native type or the transform operation will fail.
         try {
             if ((file_id >= 0) && (filespace_id >= 0))
-                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASET), H5T_NATIVE_INT_g(), filespace_id,
-                                          H5P_DEFAULT(), H5P_DEFAULT(),
-                                          H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASET), H5T_NATIVE_INT_g(),
+                                        filespace_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -118,8 +115,7 @@ public class H5Ex_D_Transform {
                 for (int i = 0; i < flatData.length; i++) {
                     dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
                 }
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                            H5S_ALL(), dxpl_id, dataSeg);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), dxpl_id, dataSeg);
             }
         }
         catch (Exception e) {
@@ -190,8 +186,7 @@ public class H5Ex_D_Transform {
         try {
             if (dataset_id >= 0) {
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                           H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
                 // Unflatten to 2D array
                 for (int i = 0; i < DIM_X; i++) {
                     for (int j = 0; j < DIM_Y; j++) {
@@ -227,8 +222,7 @@ public class H5Ex_D_Transform {
         try {
             if ((dataset_id >= 0) && (dxpl_id >= 0)) {
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                           H5S_ALL(), dxpl_id, dataSeg);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), dxpl_id, dataSeg);
                 // Unflatten to 2D array
                 for (int i = 0; i < DIM_X; i++) {
                     for (int j = 0; j < DIM_Y; j++) {
@@ -280,8 +274,8 @@ public class H5Ex_D_Transform {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        H5Ex_D_Transform.writeData(arena);
-                H5Ex_D_Transform.readData(arena);
+            H5Ex_D_Transform.writeData(arena);
+            H5Ex_D_Transform.readData(arena);
         }
-            }
-        }
+    }
+}

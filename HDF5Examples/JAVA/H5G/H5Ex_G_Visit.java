@@ -26,10 +26,7 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.ArrayList;
-
 
 public class H5Ex_G_Visit {
 
@@ -39,119 +36,115 @@ public class H5Ex_G_Visit {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        try {
-                    (new H5Ex_G_Visit()).VisitGroup();
-        }
+            try {
+                (new H5Ex_G_Visit()).VisitGroup();
             }
-            }
-        catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
+    catch (Exception ex) { ex.printStackTrace(); }
+}
 
-    private void VisitGroup() throws Exception
+private void VisitGroup() throws Exception
+{
+
+    long file_id = H5I_INVALID_HID();
+
+    try {
+        // Open file
+        file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
+
+        // Begin iteration using H5Ovisit
+        System.out.println("Objects in the file:");
+        H5O_iterate_opdata_t iter_data = new H5O_iter_data();
+        H5O_iterate_t iter_cb          = new H5O_iter_callback();
+        H5Ovisit(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), iter_cb, iter_data);
+        System.out.println();
+        // Repeat the same process using H5Lvisit
+        H5L_iterate_opdata_t iter_data2 = new H5L_iter_data();
+        H5L_iterate_t iter_cb2          = new H5L_iter_callback();
+        System.out.println("Links in the file:");
+        H5Lvisit(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), iter_cb2, iter_data2);
+    }
+    catch (Exception e) {
+        e.printStackTrace();
+    }
+    finally {
+        // Close and release resources.
+        if (file_id >= 0)
+            H5Fclose(file_id);
+    }
+}
+
+/************************************************************
+ * Operator function for H5Lvisit. This function simply retrieves the info for the object the current link
+ *points to, and calls the operator function for H5Ovisit.
+ ************************************************************/
+
+private class idata {
+    public String link_name = null;
+    public int link_type    = -1;
+
+    idata(String name, int type)
+    {
+        this.link_name = name;
+        this.link_type = type;
+    }
+}
+
+private class H5L_iter_data implements H5L_iterate_opdata_t {
+    public ArrayList<idata> iterdata = new ArrayList<idata>();
+}
+
+private class H5L_iter_callback implements H5L_iterate_t {
+    public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data)
     {
 
-        long file_id = H5I_INVALID_HID();
+        idata id = new idata(name, info.type);
+        ((H5L_iter_data)op_data).iterdata.add(id);
 
+        H5O_info_t infobuf;
+        int ret = 0;
         try {
-            // Open file
-            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
-
-            // Begin iteration using H5Ovisit
-            System.out.println("Objects in the file:");
-            H5O_iterate_opdata_t iter_data = new H5O_iter_data();
-            H5O_iterate_t iter_cb          = new H5O_iter_callback();
-            H5Ovisit(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), iter_cb,
-                        iter_data);
-            System.out.println();
-            // Repeat the same process using H5Lvisit
-            H5L_iterate_opdata_t iter_data2 = new H5L_iter_data();
-            H5L_iterate_t iter_cb2          = new H5L_iter_callback();
-            System.out.println("Links in the file:");
-            H5Lvisit(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), iter_cb2,
-                        iter_data2);
+            // Get type of the object and display its name and type. The name of the object is passed to
+            // this function by the Library.
+            infobuf                         = H5Oget_info_by_name(group, name, H5P_DEFAULT());
+            H5O_iterate_t iter_cbO          = new H5O_iter_callback();
+            H5O_iterate_opdata_t iter_dataO = new H5O_iter_data();
+            ret                             = iter_cbO.callback(group, name, infobuf, iter_dataO);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
-            // Close and release resources.
-            if (file_id >= 0)
-                H5Fclose(file_id);
-        }
+
+        return ret;
     }
+}
 
-    /************************************************************
-     * Operator function for H5Lvisit. This function simply retrieves the info for the object the current link
-     *points to, and calls the operator function for H5Ovisit.
-     ************************************************************/
+private class H5O_iter_data implements H5O_iterate_opdata_t {
+    public ArrayList<idata> iterdata = new ArrayList<idata>();
+}
 
-    private class idata {
-        public String link_name = null;
-        public int link_type    = -1;
+private class H5O_iter_callback implements H5O_iterate_t {
+    public int callback(long group, String name, H5O_info_t info, H5O_iterate_opdata_t op_data)
+    {
+        idata id = new idata(name, info.type);
+        ((H5O_iter_data)op_data).iterdata.add(id);
 
-        idata(String name, int type)
-        {
-            this.link_name = name;
-            this.link_type = type;
-        }
+        System.out.print("/"); /* Print root group in object path */
+
+        // Check if the current object is the root group, and if not print the full path name and type.
+
+        if (name.charAt(0) == '.') /* Root group, do not print '.' */
+            System.out.println("  (Group)");
+        else if (info.type == H5O_TYPE_GROUP())
+            System.out.println(name + "  (Group)");
+        else if (info.type == H5O_TYPE_DATASET())
+            System.out.println(name + "  (Dataset)");
+        else if (info.type == H5O_TYPE_NAMED_DATATYPE())
+            System.out.println(name + "  (Datatype)");
+        else
+            System.out.println(name + "  (Unknown)");
+
+        return 0;
     }
-
-    private class H5L_iter_data implements H5L_iterate_opdata_t {
-        public ArrayList<idata> iterdata = new ArrayList<idata>();
-    }
-
-    private class H5L_iter_callback implements H5L_iterate_t {
-        public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data)
-        {
-
-            idata id = new idata(name, info.type);
-            ((H5L_iter_data)op_data).iterdata.add(id);
-
-            H5O_info_t infobuf;
-            int ret = 0;
-            try {
-                // Get type of the object and display its name and type. The name of the object is passed to
-                // this function by the Library.
-                infobuf                = H5Oget_info_by_name(group, name, H5P_DEFAULT());
-                H5O_iterate_t iter_cbO = new H5O_iter_callback();
-                H5O_iterate_opdata_t iter_dataO = new H5O_iter_data();
-                ret                             = iter_cbO.callback(group, name, infobuf, iter_dataO);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return ret;
-        }
-    }
-
-    private class H5O_iter_data implements H5O_iterate_opdata_t {
-        public ArrayList<idata> iterdata = new ArrayList<idata>();
-    }
-
-    private class H5O_iter_callback implements H5O_iterate_t {
-        public int callback(long group, String name, H5O_info_t info, H5O_iterate_opdata_t op_data)
-        {
-            idata id = new idata(name, info.type);
-            ((H5O_iter_data)op_data).iterdata.add(id);
-
-            System.out.print("/"); /* Print root group in object path */
-
-            // Check if the current object is the root group, and if not print the full path name and type.
-
-            if (name.charAt(0) == '.') /* Root group, do not print '.' */
-                System.out.println("  (Group)");
-            else if (info.type == H5O_TYPE_GROUP())
-                System.out.println(name + "  (Group)");
-            else if (info.type == H5O_TYPE_DATASET())
-                System.out.println(name + "  (Dataset)");
-            else if (info.type == H5O_TYPE_NAMED_DATATYPE())
-                System.out.println(name + "  (Datatype)");
-            else
-                System.out.println(name + "  (Unknown)");
-
-            return 0;
-        }
-    }
+}

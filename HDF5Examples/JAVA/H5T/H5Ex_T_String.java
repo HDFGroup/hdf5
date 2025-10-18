@@ -26,8 +26,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class H5Ex_T_String {
     private static String FILENAME    = "H5Ex_T_String.h5";
     private static String DATASETNAME = "DS1";
@@ -49,8 +47,7 @@ public class H5Ex_T_String {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -79,7 +76,8 @@ public class H5Ex_T_String {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
+            dataspace_id =
+                H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -88,9 +86,8 @@ public class H5Ex_T_String {
         // Create the dataset and write the string data to it.
         try {
             if ((file_id >= 0) && (filetype_id >= 0) && (dataspace_id >= 0))
-                dataset_id =
-                    H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), filetype_id, dataspace_id, H5P_DEFAULT(),
-                                 H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), filetype_id, dataspace_id,
+                                        H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -107,8 +104,7 @@ public class H5Ex_T_String {
                 }
             }
             if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5Dwrite(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(),
-                            H5P_DEFAULT(), dset_data);
+                H5Dwrite(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -236,8 +232,7 @@ public class H5Ex_T_String {
         // Read data.
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5Dread(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(),
-                           H5P_DEFAULT(), dset_data);
+                H5Dread(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
             byte[] tempbuf = new byte[(int)sdim];
             for (int indx = 0; indx < (int)dims[0]; indx++) {
                 for (int jndx = 0; jndx < sdim; jndx++) {
@@ -306,8 +301,8 @@ public class H5Ex_T_String {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        H5Ex_T_String.CreateDataset(arena);
-                H5Ex_T_String.ReadDataset(arena);
+            H5Ex_T_String.CreateDataset(arena);
+            H5Ex_T_String.ReadDataset(arena);
         }
-            }
-        }
+    }
+}

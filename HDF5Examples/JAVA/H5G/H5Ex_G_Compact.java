@@ -21,12 +21,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_G_Compact {
 
@@ -67,8 +64,7 @@ public class H5Ex_G_Compact {
 
         // Create file 1. This file will use original format groups.
         try {
-            file_id = H5Fcreate(arena.allocateFrom(FILE1), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILE1), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -76,8 +72,7 @@ public class H5Ex_G_Compact {
         // Create a group in the file1.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate(file_id, GROUP, H5P_DEFAULT(), H5P_DEFAULT(),
-                                        H5P_DEFAULT());
+                group_id = H5Gcreate(file_id, GROUP, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -162,8 +157,7 @@ public class H5Ex_G_Compact {
         try {
             fapl_id = H5Pcreate(H5P_CLS_FILE_ACCESS_ID_g());
             if (fapl_id >= 0)
-                H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST(),
-                                        H5F_LIBVER_LATEST());
+                H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST(), H5F_LIBVER_LATEST());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -179,8 +173,7 @@ public class H5Ex_G_Compact {
         // Create group in file2.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate(file_id, GROUP, H5P_DEFAULT(), H5P_DEFAULT(),
-                                        H5P_DEFAULT());
+                group_id = H5Gcreate(file_id, GROUP, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

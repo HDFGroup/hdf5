@@ -26,12 +26,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_D_Nbit {
     private static String FILENAME    = "H5Ex_D_Nbit.h5";
@@ -120,12 +117,12 @@ public class H5Ex_D_Nbit {
 
         try {
             // Create a new file using the default properties.
-            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
 
             // Create dataspace. Setting maximum size to NULL sets the maximum
             // size to be the current size.
-            filespace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
+            filespace_id =
+                H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
 
             // Create the datatype to use with the N-Bit filter. It has an uncompressed size of 32 bits,
             // but will have a size of 16 bits after being packed by the N-Bit filter.
@@ -139,8 +136,8 @@ public class H5Ex_D_Nbit {
             H5Pset_chunk(dcpl_id, NDIMS, arena.allocateFrom(ValueLayout.JAVA_LONG, chunk_dims));
 
             // Create the dataset.
-            dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), dtype_id, filespace_id, H5P_DEFAULT(),
-                                      dcpl_id, H5P_DEFAULT());
+            dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), dtype_id, filespace_id,
+                                    H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
 
             // Write the data to the dataset.
             // Flatten 2D array for FFM
@@ -152,9 +149,7 @@ public class H5Ex_D_Nbit {
                 for (int j = 0; j < DIM_Y; j++) {
 
                     flatData[i * DIM_Y + j] = dset_data[i][j];
-
                 }
-
             }
 
             MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, flatData.length);
@@ -162,7 +157,6 @@ public class H5Ex_D_Nbit {
             for (int i = 0; i < flatData.length; i++) {
 
                 dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
-
             }
 
             H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
@@ -223,13 +217,14 @@ public class H5Ex_D_Nbit {
         try {
             if (dcpl_id >= 0) {
                 // FFM requires MemorySegment parameters
-                MemorySegment flagsSeg = arena.allocate(ValueLayout.JAVA_INT);
+                MemorySegment flagsSeg   = arena.allocate(ValueLayout.JAVA_INT);
                 MemorySegment cdNeltsSeg = arena.allocate(ValueLayout.JAVA_LONG);
                 cdNeltsSeg.set(ValueLayout.JAVA_LONG, 0, 10L);
-                MemorySegment cdValuesSeg = arena.allocate(ValueLayout.JAVA_INT, 10);
-                MemorySegment nameSegment = arena.allocate(256);
+                MemorySegment cdValuesSeg     = arena.allocate(ValueLayout.JAVA_INT, 10);
+                MemorySegment nameSegment     = arena.allocate(256);
                 MemorySegment filterConfigSeg = arena.allocate(ValueLayout.JAVA_INT);
-                int filter_type = H5Pget_filter2(dcpl_id, 0, flagsSeg, cdNeltsSeg, cdValuesSeg, 256, nameSegment, filterConfigSeg);
+                int filter_type = H5Pget_filter2(dcpl_id, 0, flagsSeg, cdNeltsSeg, cdValuesSeg, 256,
+                                                 nameSegment, filterConfigSeg);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -319,20 +314,21 @@ public class H5Ex_D_Nbit {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-                /*
-                 * Check if N-Bit compression is available and can be used for both compression and decompression.
-                 * Normally we do not perform error checking in these examples for the sake of clarity, but in this
-                 * case we will make an exception because this filter is an optional part of the hdf5 library.
-                 */
-                if (H5Ex_D_Nbit.checkNbitFilter()) {
-                    try {
-                        H5Ex_D_Nbit.writeData(arena);
-                        H5Ex_D_Nbit.readData(arena);
-                    }
-                    catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+            /*
+             * Check if N-Bit compression is available and can be used for both compression and decompression.
+             * Normally we do not perform error checking in these examples for the sake of clarity, but in
+             * this case we will make an exception because this filter is an optional part of the hdf5
+             * library.
+             */
+            if (H5Ex_D_Nbit.checkNbitFilter()) {
+                try {
+                    H5Ex_D_Nbit.writeData(arena);
+                    H5Ex_D_Nbit.readData(arena);
                 }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
         catch (Exception ex) {
             ex.printStackTrace();

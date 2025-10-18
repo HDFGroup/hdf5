@@ -125,14 +125,14 @@ public class HDF5SubsetSelect {
                 long[] block  = null;
 
                 if (filespace_id >= 0) {
-                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), start, stride, count,
-                                           block);
+                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), start, stride, count, block);
 
-                    memspace_id = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, count), MemorySegment.NULL);
+                    memspace_id = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, count),
+                                                   MemorySegment.NULL);
                     // Read the data using the previously defined hyperslab.
                     if ((dataset_id >= 0) && (filespace_id >= 0) && (memspace_id >= 0))
-                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), memspace_id, filespace_id,
-                                   H5P_DEFAULT(), dataRead);
+                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), memspace_id, filespace_id, H5P_DEFAULT(),
+                                dataRead);
                 }
             }
         }
@@ -191,8 +191,7 @@ public class HDF5SubsetSelect {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(arena.allocateFrom(fname), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(fname), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -200,7 +199,8 @@ public class HDF5SubsetSelect {
 
         // Create the data space for the dataset.
         try {
-            dataspace_id = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims2D), MemorySegment.NULL);
+            dataspace_id =
+                H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims2D), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -210,8 +210,7 @@ public class HDF5SubsetSelect {
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
                 dataset_id = H5Dcreate2(file_id, arena.allocateFrom(dsname), H5T_STD_I32LE_g(), dataspace_id,
-                                          H5P_DEFAULT(), H5P_DEFAULT(),
-                                          H5P_DEFAULT());
+                                        H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -237,8 +236,7 @@ public class HDF5SubsetSelect {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                            H5S_ALL(), H5P_DEFAULT(), dataIn);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataIn);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -22,12 +22,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_G_Phase {
     private static String FILENAME = "H5Ex_G_Phase.h5";
@@ -74,8 +71,7 @@ public class H5Ex_G_Phase {
         try {
             fapl_id = H5Pcreate(H5P_CLS_FILE_ACCESS_ID_g());
             if (fapl_id >= 0)
-                H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST(),
-                                        H5F_LIBVER_LATEST());
+                H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST(), H5F_LIBVER_LATEST());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -94,8 +90,7 @@ public class H5Ex_G_Phase {
         // Create a new file using the default properties.
         try {
             if (fapl_id >= 0)
-                file_id =
-                    H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), fapl_id);
+                file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), fapl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -104,8 +99,7 @@ public class H5Ex_G_Phase {
         // Create primary group.
         try {
             if ((file_id >= 0) && (gcpl_id >= 0))
-                group_id = H5Gcreate(file_id, name, H5P_DEFAULT(), gcpl_id,
-                                        H5P_DEFAULT());
+                group_id = H5Gcreate(file_id, name, H5P_DEFAULT(), gcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -119,8 +113,7 @@ public class H5Ex_G_Phase {
             name        = name + append; /* G1, G2, G3 etc. */
             try {
                 if (group_id >= 0) {
-                    subgroup_id = H5Gcreate(group_id, name, H5P_DEFAULT(),
-                                               H5P_DEFAULT(), H5P_DEFAULT());
+                    subgroup_id = H5Gcreate(group_id, name, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                     H5Gclose(subgroup_id);
                 }
             }

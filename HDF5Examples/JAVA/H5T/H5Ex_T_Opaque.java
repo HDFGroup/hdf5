@@ -26,8 +26,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-
-
 public class H5Ex_T_Opaque {
     private static String FILENAME    = "H5Ex_T_Opaque.h5";
     private static String DATASETNAME = "DS1";
@@ -54,8 +52,7 @@ public class H5Ex_T_Opaque {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +73,8 @@ public class H5Ex_T_Opaque {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
+            dataspace_id =
+                H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -88,9 +86,8 @@ public class H5Ex_T_Opaque {
         // automatically converts between different integer types.
         try {
             if ((file_id >= 0) && (datatype_id >= 0) && (dataspace_id >= 0))
-                dataset_id =
-                    H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), datatype_id, dataspace_id, H5P_DEFAULT(),
-                                 H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), datatype_id, dataspace_id,
+                                        H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -99,8 +96,7 @@ public class H5Ex_T_Opaque {
         // Write the opaque data to the dataset.
         try {
             if ((dataset_id >= 0) && (datatype_id >= 0))
-                H5Dwrite(dataset_id, datatype_id, H5S_ALL(), H5S_ALL(),
-                            H5P_DEFAULT(), dset_data);
+                H5Dwrite(dataset_id, datatype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -206,8 +202,7 @@ public class H5Ex_T_Opaque {
         // Read data.
         try {
             if ((dataset_id >= 0) && (datatype_id >= 0))
-                H5Dread(dataset_id, datatype_id, H5S_ALL(), H5S_ALL(),
-                           H5P_DEFAULT(), dset_data);
+                H5Dread(dataset_id, datatype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -265,8 +260,8 @@ public class H5Ex_T_Opaque {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-        H5Ex_T_Opaque.CreateDataset(arena);
-                H5Ex_T_Opaque.ReadDataset(arena);
+            H5Ex_T_Opaque.CreateDataset(arena);
+            H5Ex_T_Opaque.ReadDataset(arena);
         }
-            }
-        }
+    }
+}

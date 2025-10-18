@@ -28,12 +28,9 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class H5Ex_D_Checksum {
     private static String FILENAME    = "H5Ex_D_Checksum.h5";
@@ -123,8 +120,7 @@ public class H5Ex_D_Checksum {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
-                                   H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -133,7 +129,8 @@ public class H5Ex_D_Checksum {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
+            filespace_id =
+                H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -155,8 +152,8 @@ public class H5Ex_D_Checksum {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(), filespace_id,
-                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(),
+                                        filespace_id, H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -256,15 +253,15 @@ public class H5Ex_D_Checksum {
         try {
             if (dcpl_id >= 0) {
                 // Allocate MemorySegments for output parameters
-                MemorySegment flagsSeg = arena.allocate(ValueLayout.JAVA_INT);
+                MemorySegment flagsSeg   = arena.allocate(ValueLayout.JAVA_INT);
                 MemorySegment cdNeltsSeg = arena.allocate(ValueLayout.JAVA_LONG);
                 cdNeltsSeg.set(ValueLayout.JAVA_LONG, 0, 10L); // max cd_values
-                MemorySegment cdValuesSeg = arena.allocate(ValueLayout.JAVA_INT, 10);
-                MemorySegment nameSegment = arena.allocate(256);
+                MemorySegment cdValuesSeg     = arena.allocate(ValueLayout.JAVA_INT, 10);
+                MemorySegment nameSegment     = arena.allocate(256);
                 MemorySegment filterConfigSeg = arena.allocate(ValueLayout.JAVA_INT);
 
-                int filter_type = H5Pget_filter2(dcpl_id, 0, flagsSeg, cdNeltsSeg, cdValuesSeg,
-                                                 256, nameSegment, filterConfigSeg);
+                int filter_type = H5Pget_filter2(dcpl_id, 0, flagsSeg, cdNeltsSeg, cdValuesSeg, 256,
+                                                 nameSegment, filterConfigSeg);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -293,8 +290,8 @@ public class H5Ex_D_Checksum {
         try {
             if (dataset_id >= 0) {
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
-                int status = H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
-                                        H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                int status =
+                    H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
                 // Check if the read was successful. Normally we do not perform
                 // error checking in these examples for the sake of clarity, but in
                 // this case we will make an exception because this is how the
