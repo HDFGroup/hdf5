@@ -57,7 +57,7 @@ public class H5Ex_D_ReadWrite {
         // Create a new file using default properties.
         try {
             MemorySegment filename = arena.allocateFrom(FILENAME);
-            file_id                = H5Fcreate(filename, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(filename, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -67,7 +67,7 @@ public class H5Ex_D_ReadWrite {
         // size to be the current size.
         try {
             MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
-            filespace_id          = H5Screate_simple(RANK, dimsSeg, MemorySegment.NULL);
+            filespace_id = H5Screate_simple(RANK, dimsSeg, MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -77,8 +77,9 @@ public class H5Ex_D_ReadWrite {
         try {
             if ((file_id >= 0) && (filespace_id >= 0)) {
                 MemorySegment datasetname = arena.allocateFrom(DATASETNAME);
-                dataset_id = H5Dcreate2(file_id, datasetname, H5T_STD_I32LE_g(), filespace_id, H5P_DEFAULT(),
-                                        H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id =
+                    H5Dcreate2(file_id, datasetname, H5T_STD_I32LE_g(), filespace_id, H5P_DEFAULT(),
+                               H5P_DEFAULT(), H5P_DEFAULT());
             }
         }
         catch (Exception e) {

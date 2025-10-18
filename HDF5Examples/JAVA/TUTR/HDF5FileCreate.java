@@ -39,7 +39,8 @@ public class HDF5FileCreate {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(fname), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

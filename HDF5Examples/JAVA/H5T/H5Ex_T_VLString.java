@@ -22,6 +22,8 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
+
+
 public class H5Ex_T_VLString {
     private static String FILENAME    = "H5Ex_T_VLString.h5";
     private static String DATASETNAME = "DS1";
@@ -38,7 +40,8 @@ public class H5Ex_T_VLString {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -55,7 +58,7 @@ public class H5Ex_T_VLString {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5Screate_simple(rank, dims, null);
+            dataspace_id = H5Screate_simple(rank, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -64,8 +67,9 @@ public class H5Ex_T_VLString {
         // Create the dataset and write the string data to it.
         try {
             if ((file_id >= 0) && (type_id >= 0) && (dataspace_id >= 0)) {
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, type_id, dataspace_id, H5P_DEFAULT(),
-                                        H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id =
+                    H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), type_id, dataspace_id, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
             }
         }
         catch (Exception e) {
@@ -75,7 +79,8 @@ public class H5Ex_T_VLString {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5DwriteVL(dataset_id, type_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), str_data);
+                H5DwriteVL(dataset_id, type_id, H5S_ALL(), H5S_ALL(),
+                              H5P_DEFAULT(), str_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -100,16 +105,17 @@ public class H5Ex_T_VLString {
         String[] str_data = {"", "", "", ""};
 
         try {
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
-            dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
+            dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
             type_id    = H5Dget_type(dataset_id);
-            H5DreadVL(dataset_id, type_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), str_data);
+            H5DreadVL(dataset_id, type_id, H5S_ALL(), H5S_ALL(),
+                         H5P_DEFAULT(), str_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -132,9 +138,8 @@ public class H5Ex_T_VLString {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-            H5Ex_T_VLString.createDataset(arena);
-            H5Ex_T_VLString.readDataset(arena);
+        H5Ex_T_VLString.createDataset(arena);
+                H5Ex_T_VLString.readDataset(arena);
         }
-    }
-}
-}
+            }
+        }

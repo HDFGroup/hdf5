@@ -58,7 +58,7 @@ public class HDF5FileStructure {
 
         // Open file using the default properties.
         try {
-            file_id = H5Fopen(fname, H5F_ACC_RDWR(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(fname), H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -116,8 +116,8 @@ public class HDF5FileStructure {
         H5O_token_t objTokens[] = new H5O_token_t[(int)members.nlinks];
         int names_found         = 0;
         try {
-            names_found =
-                H5Gget_obj_info_all(g_id, null, objNames, objTypes, lnkTypes, objTokens, H5_INDEX_NAME());
+            names_found = H5Gget_obj_info_all(g_id, null, objNames, objTypes, lnkTypes, objTokens,
+                                                 H5_INDEX_NAME());
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -172,7 +172,8 @@ public class HDF5FileStructure {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(fname), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -181,14 +182,14 @@ public class HDF5FileStructure {
         // Create groups in the file.
         try {
             if (file_id >= 0) {
-                group_id1 = H5Gcreate(file_id,
-                                      "/"
-                                          + "integer arrays",
-                                      H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
-                group_id1 = H5Gcreate(file_id,
-                                      "/"
-                                          + "float arrays",
-                                      H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group_id1 = H5Gcreate(file_id, arena.allocateFrom("/")
+                                             + "integer arrays",
+                                         H5P_DEFAULT(), H5P_DEFAULT(),
+                                         H5P_DEFAULT());
+                group_id1 = H5Gcreate(file_id, arena.allocateFrom("/")
+                                             + "float arrays",
+                                         H5P_DEFAULT(), H5P_DEFAULT(),
+                                         H5P_DEFAULT());
             }
         }
         catch (Exception e) {
@@ -197,8 +198,8 @@ public class HDF5FileStructure {
 
         // Create the data space for the datasets.
         try {
-            dataspace_id1 = H5Screate_simple(2, dims2D, null);
-            dataspace_id2 = H5Screate_simple(3, dims3D, null);
+            dataspace_id1 = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims2D), MemorySegment.NULL);
+            dataspace_id2 = H5Screate_simple(3, arena.allocateFrom(ValueLayout.JAVA_LONG, dims3D), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -209,11 +210,12 @@ public class HDF5FileStructure {
             if ((file_id >= 0) && (dataspace_id1 >= 0))
                 dataset_id =
                     H5Dcreate2(file_id,
-                               "/"
-                                   + "integer arrays"
-                                   + "/"
-                                   + "2D 32-bit integer 20x10",
-                               H5T_STD_I32LE_g(), dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                                 "/"
+                                     + "integer arrays"
+                                     + "/"
+                                     + "2D 32-bit integer 20x10",
+                                 H5T_STD_I32LE_g(), dataspace_id1, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -234,11 +236,12 @@ public class HDF5FileStructure {
             if ((file_id >= 0) && (dataspace_id2 >= 0))
                 dataset_id =
                     H5Dcreate2(file_id,
-                               "/"
-                                   + "integer arrays"
-                                   + "/"
-                                   + "3D 8-bit unsigned integer 20x10x5",
-                               H5T_STD_I64LE_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                                 "/"
+                                     + "integer arrays"
+                                     + "/"
+                                     + "3D 8-bit unsigned integer 20x10x5",
+                                 H5T_STD_I64LE_g(), dataspace_id2, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -257,13 +260,14 @@ public class HDF5FileStructure {
         // create 2D 64-bit (8 bytes) double dataset of 20 by 10
         try {
             if ((file_id >= 0) && (dataspace_id1 >= 0))
-                dataset_id = H5Dcreate2(file_id,
-                                        "/"
-                                            + "float arrays"
-                                            + "/"
-                                            + "2D 64-bit double 20x10",
-                                        H5T_NATIVE_DOUBLE_g(), dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(),
-                                        H5P_DEFAULT());
+                dataset_id =
+                    H5Dcreate2(file_id,
+                                 "/"
+                                     + "float arrays"
+                                     + "/"
+                                     + "2D 64-bit double 20x10",
+                                 H5T_NATIVE_DOUBLE_g(), dataspace_id1, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -282,13 +286,14 @@ public class HDF5FileStructure {
         // create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         try {
             if ((file_id >= 0) && (dataspace_id2 >= 0))
-                dataset_id = H5Dcreate2(file_id,
-                                        "/"
-                                            + "float arrays"
-                                            + "/"
-                                            + "3D 32-bit float  20x10x5",
-                                        H5T_NATIVE_FLOAT_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(),
-                                        H5P_DEFAULT());
+                dataset_id =
+                    H5Dcreate2(file_id,
+                                 "/"
+                                     + "float arrays"
+                                     + "/"
+                                     + "3D 32-bit float  20x10x5",
+                                 H5T_NATIVE_FLOAT_g(), dataspace_id2, H5P_DEFAULT(),
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

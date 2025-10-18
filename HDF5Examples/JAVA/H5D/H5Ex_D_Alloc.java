@@ -27,9 +27,12 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+
+
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class H5Ex_D_Alloc {
     private static String FILENAME     = "H5Ex_D_Alloc.h5";
@@ -83,7 +86,8 @@ public class H5Ex_D_Alloc {
         // Create a file using default properties.
         try {
             MemorySegment filename = arena.allocateFrom(FILENAME);
-            file_id                = H5Fcreate(filename, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(filename, H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -93,7 +97,7 @@ public class H5Ex_D_Alloc {
         // size to be the current size.
         try {
             MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
-            filespace_id          = H5Screate_simple(RANK, dimsSeg, MemorySegment.NULL);
+            filespace_id = H5Screate_simple(RANK, dimsSeg, MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -128,7 +132,8 @@ public class H5Ex_D_Alloc {
             if ((file_id >= 0) && (filespace_id >= 0)) {
                 MemorySegment datasetname1 = arena.allocateFrom(DATASETNAME1);
                 dataset_id1 = H5Dcreate2(file_id, datasetname1, H5T_NATIVE_INT_g(), filespace_id,
-                                         H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                                           H5P_DEFAULT(), H5P_DEFAULT(),
+                                           H5P_DEFAULT());
             }
         }
         catch (Exception e) {
@@ -140,7 +145,7 @@ public class H5Ex_D_Alloc {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0)) {
                 MemorySegment datasetname2 = arena.allocateFrom(DATASETNAME2);
                 dataset_id2 = H5Dcreate2(file_id, datasetname2, H5T_NATIVE_INT_g(), filespace_id,
-                                         H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
+                                           H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
             }
         }
         catch (Exception e) {
@@ -149,8 +154,11 @@ public class H5Ex_D_Alloc {
 
         // Retrieve and print space status and storage size for dset1.
         try {
-            if (dataset_id1 >= 0)
-                space_status = H5Dget_space_status(dataset_id1);
+            if (dataset_id1 >= 0) {
+                MemorySegment statusSeg = arena.allocate(ValueLayout.JAVA_INT);
+                H5Dget_space_status(dataset_id1, statusSeg);
+                space_status = statusSeg.get(ValueLayout.JAVA_INT, 0);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -170,8 +178,11 @@ public class H5Ex_D_Alloc {
 
         // Retrieve and print space status and storage size for dset2.
         try {
-            if (dataset_id2 >= 0)
-                space_status = H5Dget_space_status(dataset_id2);
+            if (dataset_id2 >= 0) {
+                MemorySegment statusSeg = arena.allocate(ValueLayout.JAVA_INT);
+                H5Dget_space_status(dataset_id2, statusSeg);
+                space_status = statusSeg.get(ValueLayout.JAVA_INT, 0);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -208,7 +219,8 @@ public class H5Ex_D_Alloc {
                 for (int i = 0; i < flatData.length; i++) {
                     dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
                 }
-                H5Dwrite(dataset_id1, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                H5Dwrite(dataset_id1, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dataSeg);
             }
         }
         catch (Exception e) {
@@ -228,7 +240,8 @@ public class H5Ex_D_Alloc {
                 for (int i = 0; i < flatData.length; i++) {
                     dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
                 }
-                H5Dwrite(dataset_id2, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                H5Dwrite(dataset_id2, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dataSeg);
             }
         }
         catch (Exception e) {
@@ -237,8 +250,11 @@ public class H5Ex_D_Alloc {
 
         // Retrieve and print space status and storage size for dset1.
         try {
-            if (dataset_id1 >= 0)
-                space_status = H5Dget_space_status(dataset_id1);
+            if (dataset_id1 >= 0) {
+                MemorySegment statusSeg = arena.allocate(ValueLayout.JAVA_INT);
+                H5Dget_space_status(dataset_id1, statusSeg);
+                space_status = statusSeg.get(ValueLayout.JAVA_INT, 0);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -258,8 +274,11 @@ public class H5Ex_D_Alloc {
 
         // Retrieve and print space status and storage size for dset2.
         try {
-            if (dataset_id2 >= 0)
-                space_status = H5Dget_space_status(dataset_id2);
+            if (dataset_id2 >= 0) {
+                MemorySegment statusSeg = arena.allocate(ValueLayout.JAVA_INT);
+                H5Dget_space_status(dataset_id2, statusSeg);
+                space_status = statusSeg.get(ValueLayout.JAVA_INT, 0);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -321,5 +340,10 @@ public class H5Ex_D_Alloc {
         }
     }
 
-    public static void main(String[] args) { H5Ex_D_Alloc.allocation(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_D_Alloc.allocation(arena);
+        }
+    }
 }

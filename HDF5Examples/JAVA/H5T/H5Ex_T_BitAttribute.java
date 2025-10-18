@@ -26,6 +26,8 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
+
+
 public class H5Ex_T_BitAttribute {
     private static String FILENAME      = "H5Ex_T_BitAttribute.h5";
     private static String DATASETNAME   = "DS1";
@@ -55,7 +57,8 @@ public class H5Ex_T_BitAttribute {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -65,8 +68,9 @@ public class H5Ex_T_BitAttribute {
         try {
             dataspace_id = H5Screate(H5S_SCALAR());
             if (dataspace_id >= 0) {
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), dataspace_id, H5P_DEFAULT(),
-                                        H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(), dataspace_id,
+                                          H5P_DEFAULT(), H5P_DEFAULT(),
+                                          H5P_DEFAULT());
                 H5Sclose(dataspace_id);
                 dataspace_id = H5I_INVALID_HID();
             }
@@ -78,7 +82,7 @@ public class H5Ex_T_BitAttribute {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5Screate_simple(RANK, dims, null);
+            dataspace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -87,8 +91,9 @@ public class H5Ex_T_BitAttribute {
         // Create the attribute and write the array data to it.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0))
-                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, H5T_STD_B8BE_g(), dataspace_id,
-                                         H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id =
+                    H5Acreate(dataset_id, ATTRIBUTENAME, H5T_STD_B8BE_g(), dataspace_id,
+                                 H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -150,7 +155,7 @@ public class H5Ex_T_BitAttribute {
 
         // Open an existing file.
         try {
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -159,7 +164,7 @@ public class H5Ex_T_BitAttribute {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -167,7 +172,8 @@ public class H5Ex_T_BitAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(),
+                                                  H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -257,9 +263,8 @@ public class H5Ex_T_BitAttribute {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-            H5Ex_T_BitAttribute.CreateDataset(arena);
-            H5Ex_T_BitAttribute.ReadDataset(arena);
+        H5Ex_T_BitAttribute.CreateDataset(arena);
+                H5Ex_T_BitAttribute.ReadDataset(arena);
         }
-    }
-}
-}
+            }
+        }

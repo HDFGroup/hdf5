@@ -29,9 +29,12 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+
+
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class H5Ex_D_UnlimitedGzip {
     private static String FILENAME    = "H5Ex_D_UnlimitedGzip.h5";
@@ -88,13 +91,17 @@ public class H5Ex_D_UnlimitedGzip {
         }
 
         try {
-            int filter_info = H5Zget_filter_info(H5Z_FILTER_DEFLATE());
+            try (Arena arena = Arena.ofConfined()) {
+                        MemorySegment filterInfoSeg = arena.allocate(ValueLayout.JAVA_INT);
+                        H5Zget_filter_info(H5Z_FILTER_DEFLATE(), filterInfoSeg);
+                        int filter_info = filterInfoSeg.get(ValueLayout.JAVA_INT, 0);
             if (((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED()) == 0) ||
                 ((filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED()) == 0)) {
                 System.out.println("gzip filter not available for encoding and decoding.");
                 return false;
             }
         }
+                    }
         catch (Exception e) {
             e.printStackTrace();
         }
@@ -119,7 +126,8 @@ public class H5Ex_D_UnlimitedGzip {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -136,11 +144,11 @@ public class H5Ex_D_UnlimitedGzip {
         // Create the dataset creation property list, add the gzip compression
         // filter.
         try {
-            dcpl_id = H5Pcreate(H5P_DATASET_CREATE());
+            dcpl_id = H5Pcreate(H5P_CLS_DATASET_CREATE_ID_g());
             if (dcpl_id >= 0) {
                 H5Pset_deflate(dcpl_id, 9);
                 // Set the chunk size.
-                H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
+                H5Pset_chunk(dcpl_id, NDIMS, arena.allocateFrom(ValueLayout.JAVA_LONG, chunk_dims));
             }
         }
         catch (Exception e) {
@@ -150,8 +158,8 @@ public class H5Ex_D_UnlimitedGzip {
         // Create the unlimited dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), dataspace_id, H5P_DEFAULT(),
-                                        dcpl_id, H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(), dataspace_id,
+                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -159,8 +167,31 @@ public class H5Ex_D_UnlimitedGzip {
 
         // Write the data to the dataset.
         try {
-            if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if (dataset_id >= 0) {
+                // Flatten 2D array for FFM
+
+                int[] flatData = new int[DIM_X * DIM_Y];
+
+                for (int i = 0; i < DIM_X; i++) {
+
+                    for (int j = 0; j < DIM_Y; j++) {
+
+                        flatData[i * DIM_Y + j] = dset_data[i][j];
+
+                    }
+
+                }
+
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, flatData.length);
+
+                for (int i = 0; i < flatData.length; i++) {
+
+                    dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
+
+                }
+
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -215,7 +246,7 @@ public class H5Ex_D_UnlimitedGzip {
 
         // Open an existing file.
         try {
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDWR(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -224,7 +255,7 @@ public class H5Ex_D_UnlimitedGzip {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -254,8 +285,23 @@ public class H5Ex_D_UnlimitedGzip {
 
         // Read the data using the default properties.
         try {
-            if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if (dataset_id >= 0) {
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
+
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+
+                // Unflatten to 2D array
+
+                for (int i = 0; i < DIM_X; i++) {
+
+                    for (int j = 0; j < DIM_Y; j++) {
+
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i * DIM_Y + j);
+
+                    }
+
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -316,8 +362,8 @@ public class H5Ex_D_UnlimitedGzip {
 
                 // Write the data to the selected portion of the dataset.
                 if (dataset_id >= 0)
-                    H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), dataspace_id, H5P_DEFAULT(),
-                             extend_dset_data);
+                    H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), dataspace_id,
+                                H5P_DEFAULT(), extend_dset_data);
             }
         }
         catch (Exception e) {
@@ -362,7 +408,7 @@ public class H5Ex_D_UnlimitedGzip {
 
         // Open an existing file.
         try {
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -371,7 +417,7 @@ public class H5Ex_D_UnlimitedGzip {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -390,15 +436,15 @@ public class H5Ex_D_UnlimitedGzip {
         // first filter because we know that we only added one filter.
         try {
             if (dcpl_id >= 0) {
-                // Java lib requires a valid filter_name object and cd_values
-                int[] flags          = {0};
-                long[] cd_nelmts     = {1};
-                int[] cd_values      = {0};
-                String[] filter_name = {""};
-                int[] filter_config  = {0};
-                int filter_type      = -1;
-                filter_type =
-                    H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name, filter_config);
+                // FFM requires MemorySegment parameters
+                MemorySegment flagsSeg = arena.allocate(ValueLayout.JAVA_INT);
+                MemorySegment cdNeltsSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                cdNeltsSeg.set(ValueLayout.JAVA_LONG, 0, 10L);
+                MemorySegment cdValuesSeg = arena.allocate(ValueLayout.JAVA_INT, 10);
+                MemorySegment nameSegment = arena.allocate(256);
+                MemorySegment filterConfigSeg = arena.allocate(ValueLayout.JAVA_INT);
+                int filter_type = H5Pget_filter2(dcpl_id, 0, flagsSeg, cdNeltsSeg, cdValuesSeg, 256, nameSegment,
+                                               filterConfigSeg);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -444,8 +490,23 @@ public class H5Ex_D_UnlimitedGzip {
 
         // Read the data using the default properties.
         try {
-            if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if (dataset_id >= 0) {
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
+
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+
+                // Unflatten to 2D array
+
+                for (int i = 0; i < DIM_X; i++) {
+
+                    for (int j = 0; j < DIM_Y; j++) {
+
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i * DIM_Y + j);
+
+                    }
+
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -490,14 +551,12 @@ public class H5Ex_D_UnlimitedGzip {
 
     public static void main(String[] args)
     {
-
         try (Arena arena = Arena.ofConfined()) {
-            if (H5Ex_D_UnlimitedGzip.checkGzipFilter(arena);) {
+            if (H5Ex_D_UnlimitedGzip.checkGzipFilter()) {
                 H5Ex_D_UnlimitedGzip.writeUnlimited(arena);
                 H5Ex_D_UnlimitedGzip.extendUnlimited(arena);
                 H5Ex_D_UnlimitedGzip.readUnlimited(arena);
             }
         }
     }
-}
 }

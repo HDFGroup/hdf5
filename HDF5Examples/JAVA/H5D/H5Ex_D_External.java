@@ -27,6 +27,8 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
+
+
 public class H5Ex_D_External {
     private static String FILENAME         = "H5Ex_D_External.h5";
     private static String EXTERNALNAME     = "H5Ex_D_External.data";
@@ -52,7 +54,8 @@ public class H5Ex_D_External {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -61,7 +64,7 @@ public class H5Ex_D_External {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5Screate_simple(RANK, dims, null);
+            filespace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -69,7 +72,7 @@ public class H5Ex_D_External {
 
         // Create the dataset creation property list.
         try {
-            dcpl_id = H5Pcreate(H5P_DATASET_CREATE());
+            dcpl_id = H5Pcreate(H5P_CLS_DATASET_CREATE_ID_g());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -78,7 +81,7 @@ public class H5Ex_D_External {
         // set the external file.
         try {
             if (dcpl_id >= 0)
-                H5Pset_external(dcpl_id, EXTERNALNAME, 0, H5F_UNLIMITED());
+                H5Pset_external(dcpl_id, arena.allocateFrom(EXTERNALNAME), 0, H5F_UNLIMITED());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -87,8 +90,8 @@ public class H5Ex_D_External {
         // Create the HDF5Constants.dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), filespace_id, H5P_DEFAULT(),
-                                        dcpl_id, H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(), filespace_id,
+                                          H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -96,7 +99,18 @@ public class H5Ex_D_External {
 
         // Write the dataset.
         try {
-            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            // Flatten 2D array for FFM
+            int[] flatData = new int[DIM_X * DIM_Y];
+            for (int i = 0; i < DIM_X; i++) {
+                for (int j = 0; j < DIM_Y; j++) {
+                    flatData[i * DIM_Y + j] = dset_data[i][j];
+                }
+            }
+            MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, flatData.length);
+            for (int i = 0; i < flatData.length; i++) {
+                dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
+            }
+            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -148,7 +162,7 @@ public class H5Ex_D_External {
 
         // Open file using the default properties.
         try {
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDWR(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -157,7 +171,7 @@ public class H5Ex_D_External {
         // Open dataset using the default properties.
         try {
             if (file_id >= 0)
-                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -173,20 +187,34 @@ public class H5Ex_D_External {
         }
 
         // Retrieve and print the name of the external file.
-        long[] Xsize = new long[NAME_BUF_SIZE];
+        String externalFileName = "";
         try {
-            if (dcpl_id >= 0)
-                H5Pget_external(dcpl_id, 0, Xsize.length, Xname, Xsize);
+            if (dcpl_id >= 0) {
+                MemorySegment namelenSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                MemorySegment nameSeg = arena.allocate(256);
+                MemorySegment offsetSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                H5Pget_external(dcpl_id, 0, 256, nameSeg, offsetSeg, sizeSeg);
+                externalFileName = nameSeg.getString(0);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(DATASETNAME + " is stored in file: " + Xname[0]);
+        System.out.println(DATASETNAME + " is stored in file: " + externalFileName);
 
         // Read the data using the default properties.
         try {
-            if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if (dataset_id >= 0) {
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                // Unflatten to 2D array
+                for (int i = 0; i < DIM_X; i++) {
+                    for (int j = 0; j < DIM_Y; j++) {
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i * DIM_Y + j);
+                    }
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -231,11 +259,9 @@ public class H5Ex_D_External {
 
     public static void main(String[] args)
     {
-
         try (Arena arena = Arena.ofConfined()) {
             H5Ex_D_External.writeExternal(arena);
             H5Ex_D_External.readExternal(arena);
         }
     }
-}
 }

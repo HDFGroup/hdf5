@@ -26,9 +26,12 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+
+
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class H5Ex_D_Nbit {
     private static String FILENAME    = "H5Ex_D_Nbit.h5";
@@ -83,8 +86,10 @@ public class H5Ex_D_Nbit {
             e.printStackTrace();
         }
 
-        try {
-            int filter_info = H5Zget_filter_info(H5Z_FILTER_NBIT());
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment filterInfoSeg = arena.allocate(ValueLayout.JAVA_INT);
+            H5Zget_filter_info(H5Z_FILTER_NBIT(), filterInfoSeg);
+            int filter_info = filterInfoSeg.get(ValueLayout.JAVA_INT, 0);
             if (((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED()) == 0) ||
                 ((filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED()) == 0)) {
                 System.out.println("N-Bit filter not available for encoding and decoding.");
@@ -115,11 +120,12 @@ public class H5Ex_D_Nbit {
 
         try {
             // Create a new file using the default properties.
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
 
             // Create dataspace. Setting maximum size to NULL sets the maximum
             // size to be the current size.
-            filespace_id = H5Screate_simple(RANK, dims, null);
+            filespace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
 
             // Create the datatype to use with the N-Bit filter. It has an uncompressed size of 32 bits,
             // but will have a size of 16 bits after being packed by the N-Bit filter.
@@ -128,16 +134,38 @@ public class H5Ex_D_Nbit {
             H5Tset_offset(dtype_id, 5);
 
             // Create the dataset creation property list, add the N-Bit filter and set the chunk size.
-            dcpl_id = H5Pcreate(H5P_DATASET_CREATE());
+            dcpl_id = H5Pcreate(H5P_CLS_DATASET_CREATE_ID_g());
             H5Pset_nbit(dcpl_id);
-            H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
+            H5Pset_chunk(dcpl_id, NDIMS, arena.allocateFrom(ValueLayout.JAVA_LONG, chunk_dims));
 
             // Create the dataset.
-            dataset_id = H5Dcreate2(file_id, DATASETNAME, dtype_id, filespace_id, H5P_DEFAULT(), dcpl_id,
-                                    H5P_DEFAULT());
+            dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), dtype_id, filespace_id, H5P_DEFAULT(),
+                                      dcpl_id, H5P_DEFAULT());
 
             // Write the data to the dataset.
-            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            // Flatten 2D array for FFM
+
+            int[] flatData = new int[DIM_X * DIM_Y];
+
+            for (int i = 0; i < DIM_X; i++) {
+
+                for (int j = 0; j < DIM_Y; j++) {
+
+                    flatData[i * DIM_Y + j] = dset_data[i][j];
+
+                }
+
+            }
+
+            MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, flatData.length);
+
+            for (int i = 0; i < flatData.length; i++) {
+
+                dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
+
+            }
+
+            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -166,7 +194,7 @@ public class H5Ex_D_Nbit {
 
         // Open an existing file.
         try {
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -175,7 +203,7 @@ public class H5Ex_D_Nbit {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -194,15 +222,14 @@ public class H5Ex_D_Nbit {
         // first filter because we know that we only added one filter.
         try {
             if (dcpl_id >= 0) {
-                // Java lib requires a valid filter_name object and cd_values
-                int[] flags          = {0};
-                long[] cd_nelmts     = {1};
-                int[] cd_values      = {0};
-                String[] filter_name = {""};
-                int[] filter_config  = {0};
-                int filter_type      = -1;
-                filter_type =
-                    H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name, filter_config);
+                // FFM requires MemorySegment parameters
+                MemorySegment flagsSeg = arena.allocate(ValueLayout.JAVA_INT);
+                MemorySegment cdNeltsSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                cdNeltsSeg.set(ValueLayout.JAVA_LONG, 0, 10L);
+                MemorySegment cdValuesSeg = arena.allocate(ValueLayout.JAVA_INT, 10);
+                MemorySegment nameSegment = arena.allocate(256);
+                MemorySegment filterConfigSeg = arena.allocate(ValueLayout.JAVA_INT);
+                int filter_type = H5Pget_filter2(dcpl_id, 0, flagsSeg, cdNeltsSeg, cdValuesSeg, 256, nameSegment, filterConfigSeg);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -236,11 +263,14 @@ public class H5Ex_D_Nbit {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0) {
-                int status =
-                    H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
-                // Check if the read was successful.
-                if (status < 0)
-                    System.out.print("Dataset read failed!");
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                // Unflatten to 2D array
+                for (int i = 0; i < DIM_X; i++) {
+                    for (int j = 0; j < DIM_Y; j++) {
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i * DIM_Y + j);
+                    }
+                }
             }
         }
         catch (Exception e) {
@@ -289,21 +319,23 @@ public class H5Ex_D_Nbit {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-            /*
-             * Check if N-Bit compression is available and can be used for both compression and decompression.
-             * Normally we do not perform error checking in these examples for the sake of clarity, but in
-             * this case we will make an exception because this filter is an optional part of the hdf5
-             * library.
-             */
-            if (H5Ex_D_Nbit.checkNbitFilter(arena);) {
-                try {
-                    H5Ex_D_Nbit.writeData(arena);
-                    H5Ex_D_Nbit.readData(arena);
+                /*
+                 * Check if N-Bit compression is available and can be used for both compression and decompression.
+                 * Normally we do not perform error checking in these examples for the sake of clarity, but in this
+                 * case we will make an exception because this filter is an optional part of the hdf5 library.
+                 */
+                if (H5Ex_D_Nbit.checkNbitFilter()) {
+                    try {
+                        H5Ex_D_Nbit.writeData(arena);
+                        H5Ex_D_Nbit.readData(arena);
+                    }
+                    catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
-            }
-            catch (Exception ex) { ex.printStackTrace(); }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
-    catch (Exception ex) { ex.printStackTrace(); }
-}
 }

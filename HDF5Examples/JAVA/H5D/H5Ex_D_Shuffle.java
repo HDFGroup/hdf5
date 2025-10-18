@@ -33,42 +33,45 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class H5Ex_D_Shuffle {
-    private static String FILENAME    = "H5Ex_D_Shuffle.h5";
-    private static String DATASETNAME = "DS1";
-    private static final int DIM_X    = 32;
-    private static final int DIM_Y    = 64;
-    private static final int CHUNK_X  = 4;
-    private static final int CHUNK_Y  = 8;
-    private static final int RANK     = 2;
-    private static final int NDIMS    = 2;
+    private static String    FILENAME    = "H5Ex_D_Shuffle.h5";
+    private static String    DATASETNAME = "DS1";
+    private static final int DIM_X       = 32;
+    private static final int DIM_Y       = 64;
+    private static final int CHUNK_X     = 4;
+    private static final int CHUNK_Y     = 8;
+    private static final int RANK        = 2;
+    private static final int NDIMS       = 2;
 
     // Values for the status of space allocation
     enum H5Z_filter {
-        H5Z_FILTER_ERROR(H5Z_FILTER_ERROR()),
-        H5Z_FILTER_NONE(H5Z_FILTER_NONE()),
-        H5Z_FILTER_DEFLATE(H5Z_FILTER_DEFLATE()),
-        H5Z_FILTER_SHUFFLE(H5Z_FILTER_SHUFFLE()),
-        H5Z_FILTER_FLETCHER32(H5Z_FILTER_FLETCHER32()),
-        H5Z_FILTER_SZIP(H5Z_FILTER_SZIP()),
-        H5Z_FILTER_NBIT(H5Z_FILTER_NBIT()),
-        H5Z_FILTER_SCALEOFFSET(H5Z_FILTER_SCALEOFFSET()),
-        H5Z_FILTER_RESERVED(H5Z_FILTER_RESERVED()),
-        H5Z_FILTER_MAX(H5Z_FILTER_MAX());
+        H5Z_FILTER_ERROR(H5Z_FILTER_ERROR()), H5Z_FILTER_NONE(H5Z_FILTER_NONE()),
+        H5Z_FILTER_DEFLATE(H5Z_FILTER_DEFLATE()), H5Z_FILTER_SHUFFLE(H5Z_FILTER_SHUFFLE()),
+        H5Z_FILTER_FLETCHER32(H5Z_FILTER_FLETCHER32()), H5Z_FILTER_SZIP(H5Z_FILTER_SZIP()),
+        H5Z_FILTER_NBIT(H5Z_FILTER_NBIT()), H5Z_FILTER_SCALEOFFSET(H5Z_FILTER_SCALEOFFSET()),
+        H5Z_FILTER_RESERVED(H5Z_FILTER_RESERVED()), H5Z_FILTER_MAX(H5Z_FILTER_MAX());
+
         private static final Map<Integer, H5Z_filter> lookup = new HashMap<Integer, H5Z_filter>();
 
-        static
-        {
+        static {
             for (H5Z_filter s : EnumSet.allOf(H5Z_filter.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5Z_filter(int layout_type) { this.code = layout_type; }
+        H5Z_filter(int layout_type) {
+            this.code = layout_type;
+        }
 
-        public int getCode() { return this.code; }
+        public int getCode()
+        {
+            return this.code;
+        }
 
-        public static H5Z_filter get(int code) { return lookup.get(code); }
+        public static H5Z_filter get(int code)
+        {
+            return lookup.get(code);
+        }
     }
 
     private static boolean checkGzipFilter()
@@ -85,11 +88,15 @@ public class H5Ex_D_Shuffle {
         }
 
         try {
-            int filter_info = H5Zget_filter_info(H5Z_FILTER_DEFLATE());
-            if (((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED()) == 0) ||
-                ((filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED()) == 0)) {
-                System.out.println("gzip filter not available for encoding and decoding.");
-                return false;
+            try (Arena arena = Arena.ofConfined()) {
+                MemorySegment filterInfoSeg = arena.allocate(ValueLayout.JAVA_INT);
+                H5Zget_filter_info(H5Z_FILTER_DEFLATE(), filterInfoSeg);
+                int filter_info = filterInfoSeg.get(ValueLayout.JAVA_INT, 0);
+                if (((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED()) == 0)
+                        || ((filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED()) == 0)) {
+                    System.out.println("gzip filter not available for encoding and decoding.");
+                    return false;
+                }
             }
         }
         catch (Exception e) {
@@ -112,11 +119,15 @@ public class H5Ex_D_Shuffle {
         }
 
         try {
-            int filter_info = H5Zget_filter_info(H5Z_FILTER_SHUFFLE());
-            if (((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED()) == 0) ||
-                ((filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED()) == 0)) {
-                System.out.println("Shuffle filter not available for encoding and decoding.");
-                return false;
+            try (Arena arena = Arena.ofConfined()) {
+                MemorySegment filterInfoSeg = arena.allocate(ValueLayout.JAVA_INT);
+                H5Zget_filter_info(H5Z_FILTER_SHUFFLE(), filterInfoSeg);
+                int filter_info = filterInfoSeg.get(ValueLayout.JAVA_INT, 0);
+                if (((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED()) == 0)
+                        || ((filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED()) == 0)) {
+                    System.out.println("Shuffle filter not available for encoding and decoding.");
+                    return false;
+                }
             }
         }
         catch (Exception e) {
@@ -127,13 +138,13 @@ public class H5Ex_D_Shuffle {
 
     private static void writeShuffle(Arena arena)
     {
-        long file_id      = H5I_INVALID_HID();
-        long filespace_id = H5I_INVALID_HID();
-        long dataset_id   = H5I_INVALID_HID();
-        long dcpl_id      = H5I_INVALID_HID();
-        long[] dims       = {DIM_X, DIM_Y};
-        long[] chunk_dims = {CHUNK_X, CHUNK_Y};
-        int[][] dset_data = new int[DIM_X][DIM_Y];
+        long    file_id      = H5I_INVALID_HID();
+        long    filespace_id = H5I_INVALID_HID();
+        long    dataset_id   = H5I_INVALID_HID();
+        long    dcpl_id      = H5I_INVALID_HID();
+        long[]  dims         = { DIM_X, DIM_Y };
+        long[]  chunk_dims   = { CHUNK_X, CHUNK_Y };
+        int[][] dset_data    = new int[DIM_X][DIM_Y];
 
         // Initialize data.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -142,7 +153,7 @@ public class H5Ex_D_Shuffle {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -151,7 +162,7 @@ public class H5Ex_D_Shuffle {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5Screate_simple(RANK, dims, null);
+            filespace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -165,12 +176,12 @@ public class H5Ex_D_Shuffle {
         // list is the order in which they will be invoked when writing
         // data.
         try {
-            dcpl_id = H5Pcreate(H5P_DATASET_CREATE());
+            dcpl_id = H5Pcreate(H5P_CLS_DATASET_CREATE_ID_g());
             if (dcpl_id >= 0) {
                 H5Pset_shuffle(dcpl_id);
                 H5Pset_deflate(dcpl_id, 9);
                 // Set the chunk size.
-                H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
+                H5Pset_chunk(dcpl_id, NDIMS, arena.allocateFrom(ValueLayout.JAVA_LONG, chunk_dims));
             }
         }
         catch (Exception e) {
@@ -180,8 +191,8 @@ public class H5Ex_D_Shuffle {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), filespace_id, H5P_DEFAULT(),
-                                        dcpl_id, H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(), filespace_id,
+                        H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -233,14 +244,14 @@ public class H5Ex_D_Shuffle {
 
     private static void readShuffle(Arena arena)
     {
-        long file_id      = H5I_INVALID_HID();
-        long dataset_id   = H5I_INVALID_HID();
-        long dcpl_id      = H5I_INVALID_HID();
-        int[][] dset_data = new int[DIM_X][DIM_Y];
+        long    file_id    = H5I_INVALID_HID();
+        long    dataset_id = H5I_INVALID_HID();
+        long    dcpl_id    = H5I_INVALID_HID();
+        int[][] dset_data  = new int[DIM_X][DIM_Y];
 
         // Open an existing file.
         try {
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -249,7 +260,7 @@ public class H5Ex_D_Shuffle {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -270,15 +281,15 @@ public class H5Ex_D_Shuffle {
             if (dcpl_id >= 0) {
                 int nfilters = H5Pget_nfilters(dcpl_id);
                 for (int indx = 0; indx < nfilters; indx++) {
-                    // Java lib requires a valid filter_name object and cd_values
-                    int[] flags          = {0};
-                    long[] cd_nelmts     = {1};
-                    int[] cd_values      = {0};
-                    String[] filter_name = {""};
-                    int[] filter_config  = {0};
-                    int filter_type      = -1;
-                    filter_type = H5Pget_filter(dcpl_id, indx, flags, cd_nelmts, cd_values, 120, filter_name,
-                                                filter_config);
+                    // FFM requires MemorySegment parameters
+                    MemorySegment flagsSeg   = arena.allocate(ValueLayout.JAVA_INT);
+                    MemorySegment cdNeltsSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                    cdNeltsSeg.set(ValueLayout.JAVA_LONG, 0, 10L);
+                    MemorySegment cdValuesSeg     = arena.allocate(ValueLayout.JAVA_INT, 10);
+                    MemorySegment nameSegment     = arena.allocate(256);
+                    MemorySegment filterConfigSeg = arena.allocate(ValueLayout.JAVA_INT);
+                    int           filter_type     = H5Pget_filter2(dcpl_id, indx, flagsSeg, cdNeltsSeg, cdValuesSeg,
+                            256, nameSegment, filterConfigSeg);
                     System.out.print("Filter " + indx + ": Type is: ");
                     switch (H5Z_filter.get(filter_type)) {
                     case H5Z_FILTER_DEFLATE:
@@ -360,13 +371,11 @@ public class H5Ex_D_Shuffle {
 
     public static void main(String[] args)
     {
-
         try (Arena arena = Arena.ofConfined()) {
-            if (H5Ex_D_Shuffle.checkGzipFilter(arena); &&H5Ex_D_Shuffle.checkShuffleFilter(arena);) {
+            if (H5Ex_D_Shuffle.checkGzipFilter() && H5Ex_D_Shuffle.checkShuffleFilter()) {
                 H5Ex_D_Shuffle.writeShuffle(arena);
                 H5Ex_D_Shuffle.readShuffle(arena);
             }
         }
     }
-}
 }

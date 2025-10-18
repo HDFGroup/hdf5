@@ -19,6 +19,8 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
+
+
 /**
  * <p>
  * Title: HDF Native Package (Java) Example
@@ -55,7 +57,7 @@ public class HDF5DatasetRead {
 
         // Open file using the default properties.
         try {
-            file_id = H5Fopen(fname, H5F_ACC_RDWR(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(fname), H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -64,7 +66,7 @@ public class HDF5DatasetRead {
         // Open dataset using the default properties.
         try {
             if (file_id >= 0)
-                dataset_id = H5Dopen2(file_id, dsname, H5P_DEFAULT());
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(dsname), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +78,8 @@ public class HDF5DatasetRead {
 
         try {
             if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataRead);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                           H5S_ALL(), H5P_DEFAULT(), dataRead);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -101,7 +104,8 @@ public class HDF5DatasetRead {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataRead);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dataRead);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -112,7 +116,8 @@ public class HDF5DatasetRead {
 
         try {
             if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataModified);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                           H5S_ALL(), H5P_DEFAULT(), dataModified);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -161,7 +166,8 @@ public class HDF5DatasetRead {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(fname, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(fname), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -169,7 +175,7 @@ public class HDF5DatasetRead {
 
         // Create the data space for the dataset.
         try {
-            dataspace_id = H5Screate_simple(2, dims2D, null);
+            dataspace_id = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims2D), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -178,8 +184,9 @@ public class HDF5DatasetRead {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5Dcreate2(file_id, dsname, H5T_STD_I32LE_g(), dataspace_id, H5P_DEFAULT(),
-                                        H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(dsname), H5T_STD_I32LE_g(), dataspace_id,
+                                          H5P_DEFAULT(), H5P_DEFAULT(),
+                                          H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -205,7 +212,8 @@ public class HDF5DatasetRead {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataIn);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dataIn);
         }
         catch (Exception e) {
             e.printStackTrace();

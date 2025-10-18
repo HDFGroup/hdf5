@@ -25,12 +25,15 @@ import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 
 public class H5Ex_T_CompoundAttribute {
     private static String FILENAME           = "H5Ex_T_CompoundAttribute.h5";
@@ -47,10 +50,10 @@ public class H5Ex_T_CompoundAttribute {
         static int[] memberDims  = {1, 1, 1, 1};
 
         static String[] memberNames   = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
-        static long[] memberMemTypes  = {H5T_NATIVE_INT_g(), H5T_C_S1_g(), H5T_NATIVE_DOUBLE_g(),
-                                         H5T_NATIVE_DOUBLE_g()};
-        static long[] memberFileTypes = {H5T_STD_I32BE_g(), H5T_C_S1_g(), H5T_IEEE_F64BE_g(),
-                                         H5T_IEEE_F64BE_g()};
+        static long[] memberMemTypes  = {H5T_NATIVE_INT_g(), H5T_C_S1_g(),
+                                         H5T_NATIVE_DOUBLE_g(), H5T_NATIVE_DOUBLE_g()};
+        static long[] memberFileTypes = {H5T_STD_I32BE_g(), H5T_C_S1_g(),
+                                         H5T_IEEE_F64BE_g(), H5T_IEEE_F64BE_g()};
         static int[] memberStorage    = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
 
         // Data size is the storage size for the members not the object.
@@ -178,7 +181,8 @@ public class H5Ex_T_CompoundAttribute {
 
         // Create a new file using default properties.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -202,8 +206,8 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
-                              type_id);
+                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx],
+                                 Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -222,8 +226,8 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberFileTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(filetype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
-                              type_id);
+                    H5Tinsert(filetype_id, Sensor_Datatype.memberNames[indx],
+                                 Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -235,8 +239,9 @@ public class H5Ex_T_CompoundAttribute {
         try {
             dataspace_id = H5Screate(H5S_SCALAR());
             if (dataspace_id >= 0) {
-                dataset_id = H5Dcreate2(file_id, DATASETNAME, H5T_STD_I32LE_g(), dataspace_id, H5P_DEFAULT(),
-                                        H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(), dataspace_id,
+                                          H5P_DEFAULT(), H5P_DEFAULT(),
+                                          H5P_DEFAULT());
                 H5Sclose(dataspace_id);
                 dataspace_id = H5I_INVALID_HID();
             }
@@ -248,7 +253,7 @@ public class H5Ex_T_CompoundAttribute {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5Screate_simple(RANK, dims, null);
+            dataspace_id = H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -257,8 +262,8 @@ public class H5Ex_T_CompoundAttribute {
         // Create the attribute.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id, H5P_DEFAULT(),
-                                         H5P_DEFAULT());
+                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id,
+                                            H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -348,7 +353,7 @@ public class H5Ex_T_CompoundAttribute {
 
         // Open an existing file.
         try {
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY(), H5P_DEFAULT());
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -357,7 +362,7 @@ public class H5Ex_T_CompoundAttribute {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5Dopen2(file_id, DATASETNAME, H5P_DEFAULT());
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -365,7 +370,8 @@ public class H5Ex_T_CompoundAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(),
+                                                  H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -408,8 +414,8 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
-                              type_id);
+                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx],
+                                 Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -495,9 +501,8 @@ public class H5Ex_T_CompoundAttribute {
     {
 
         try (Arena arena = Arena.ofConfined()) {
-            H5Ex_T_CompoundAttribute.CreateDataset(arena);
-            H5Ex_T_CompoundAttribute.ReadDataset(arena);
+        H5Ex_T_CompoundAttribute.CreateDataset(arena);
+                H5Ex_T_CompoundAttribute.ReadDataset(arena);
         }
-    }
-}
-}
+            }
+        }

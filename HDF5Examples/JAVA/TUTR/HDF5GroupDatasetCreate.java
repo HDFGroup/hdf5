@@ -58,14 +58,17 @@ public class HDF5GroupDatasetCreate {
 
         // Create a file.
         try {
-            file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(),
+                                   H5P_DEFAULT());
             // Create a group named "/MyGroup" in the file.
             if (file_id >= 0) {
-                group1_id = H5Gcreate(file_id, "/" + GROUPNAME, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group1_id = H5Gcreate(file_id, arena.allocateFrom("/") + GROUPNAME, H5P_DEFAULT(),
+                                         H5P_DEFAULT(), H5P_DEFAULT());
                 // Create group "Group_A" in group "MyGroup" using absolute name.
                 if (group1_id >= 0) {
-                    group2_id = H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, H5P_DEFAULT(),
-                                          H5P_DEFAULT(), H5P_DEFAULT());
+                    group2_id =
+                        H5Gcreate(file_id, arena.allocateFrom("/") + GROUPNAME + "/" + GROUPNAME_A, H5P_DEFAULT(),
+                                     H5P_DEFAULT(), H5P_DEFAULT());
                     if (group2_id >= 0)
                         H5Gclose(group2_id);
                 }
@@ -79,7 +82,7 @@ public class HDF5GroupDatasetCreate {
 
         // Create the data space for the first dataset.
         try {
-            dataspace_id = H5Screate_simple(2, dims1, null);
+            dataspace_id = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims1), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -88,8 +91,9 @@ public class HDF5GroupDatasetCreate {
         // Create the dataset in group "MyGroup".
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5Dcreate2(file_id, "/" + GROUPNAME + "/" + DATASETNAME1, H5T_STD_I32BE_g(),
-                                        dataspace_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id = H5Dcreate2(
+                    file_id, "/" + GROUPNAME + "/" + DATASETNAME1, H5T_STD_I32BE_g(), dataspace_id,
+                    H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -98,7 +102,8 @@ public class HDF5GroupDatasetCreate {
         // Write the first dataset.
         try {
             if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset1_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dset1_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -127,7 +132,8 @@ public class HDF5GroupDatasetCreate {
         // Open an existing group of the specified file.
         try {
             if (file_id >= 0)
-                group_id = H5Gopen(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, H5P_DEFAULT());
+                group_id =
+                    H5Gopen(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -135,7 +141,7 @@ public class HDF5GroupDatasetCreate {
 
         // Create the data space for the second dataset.
         try {
-            dataspace_id = H5Screate_simple(2, dims2, null);
+            dataspace_id = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims2), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -144,8 +150,9 @@ public class HDF5GroupDatasetCreate {
         // Create the second dataset in group "Group_A".
         try {
             if ((group_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5Dcreate2(group_id, DATASETNAME2, H5T_STD_I32BE_g(), dataspace_id,
-                                        H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id = H5Dcreate2(group_id, arena.allocateFrom(DATASETNAME2), H5T_STD_I32BE_g(), dataspace_id,
+                                          H5P_DEFAULT(), H5P_DEFAULT(),
+                                          H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -154,7 +161,8 @@ public class HDF5GroupDatasetCreate {
         // Write the second dataset.
         try {
             if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset2_data);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(),
+                            H5S_ALL(), H5P_DEFAULT(), dset2_data);
         }
         catch (Exception e) {
             e.printStackTrace();
