@@ -61,11 +61,11 @@ public class HDF5GroupDatasetCreate {
             file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
             // Create a group named "/MyGroup" in the file.
             if (file_id >= 0) {
-                group1_id = H5Gcreate2(file_id, arena.allocateFrom("/") + GROUPNAME, H5P_DEFAULT(),
+                group1_id = H5Gcreate2(file_id, arena.allocateFrom("/" + GROUPNAME), H5P_DEFAULT(),
                                        H5P_DEFAULT(), H5P_DEFAULT());
                 // Create group "Group_A" in group "MyGroup" using absolute name.
                 if (group1_id >= 0) {
-                    group2_id = H5Gcreate2(file_id, arena.allocateFrom("/") + GROUPNAME + "/" + GROUPNAME_A,
+                    group2_id = H5Gcreate2(file_id, arena.allocateFrom("/" + GROUPNAME + "/" + GROUPNAME_A),
                                            H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                     if (group2_id >= 0)
                         H5Gclose(group2_id);
@@ -90,7 +90,7 @@ public class HDF5GroupDatasetCreate {
         // Create the dataset in group "MyGroup".
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5Dcreate2(file_id, "/" + GROUPNAME + "/" + DATASETNAME1, H5T_STD_I32BE_g(),
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom("/" + GROUPNAME + "/" + DATASETNAME1), H5T_STD_I32BE_g(),
                                         dataspace_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -129,7 +129,7 @@ public class HDF5GroupDatasetCreate {
         // Open an existing group of the specified file.
         try {
             if (file_id >= 0)
-                group_id = H5Gopen2(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, H5P_DEFAULT());
+                group_id = H5Gopen2(file_id, arena.allocateFrom("/" + GROUPNAME + "/" + GROUPNAME_A), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

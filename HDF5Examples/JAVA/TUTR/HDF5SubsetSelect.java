@@ -87,7 +87,7 @@ public class HDF5SubsetSelect {
 
         // create the file and add groups and dataset into the file
         try {
-            createFile();
+            createFile(arena);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -263,5 +263,5 @@ public class HDF5SubsetSelect {
         }
     }
 
-    public static void main(String[] args) { HDF5SubsetSelect.SubsetSelect(); }
+    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { HDF5SubsetSelect.SubsetSelect(arena); } }
 }

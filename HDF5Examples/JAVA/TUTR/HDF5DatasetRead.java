@@ -47,7 +47,7 @@ public class HDF5DatasetRead {
 
         // create the file and add groups and dataset into the file
         try {
-            createFile();
+            createFile(arena);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -233,5 +233,5 @@ public class HDF5DatasetRead {
         }
     }
 
-    public static void main(String[] args) { HDF5DatasetRead.ReadWriteDataset(); }
+    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { HDF5DatasetRead.ReadWriteDataset(arena); } }
 }

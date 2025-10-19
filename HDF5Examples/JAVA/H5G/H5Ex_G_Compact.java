@@ -56,7 +56,7 @@ public class H5Ex_G_Compact {
         public static H5G_storage get(int code) { return lookup.get(code); }
     }
 
-    public static void CreateGroup()
+    public static void CreateGroup(Arena arena)
     {
         long file_id        = H5I_INVALID_HID();
         long group_id       = H5I_INVALID_HID();
@@ -138,7 +138,7 @@ public class H5Ex_G_Compact {
         // Obtain and print the file size.
         try {
             if (file_id >= 0) {
-                size = H5Fget_filesize(file_id);
+                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG); H5Fget_filesize(file_id, sizeSeg); size = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
                 System.out.println("File size for " + FILE1 + " is: " + size + " bytes");
             }
         }
@@ -240,7 +240,7 @@ public class H5Ex_G_Compact {
         // Obtain and print the file size.
         try {
             if (file_id >= 0) {
-                size = H5Fget_filesize(file_id);
+                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG); H5Fget_filesize(file_id, sizeSeg); size = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
                 System.out.println("File size for " + FILE2 + " is: " + size + " bytes");
             }
         }
@@ -258,5 +258,5 @@ public class H5Ex_G_Compact {
         }
     }
 
-    public static void main(String[] args) { H5Ex_G_Compact.CreateGroup(); }
+    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { H5Ex_G_Compact.CreateGroup(arena); } }
 }

@@ -126,7 +126,7 @@ public class HDF5DatasetCreate {
         // create 2D 64-bit (8 bytes) double dataset of 20 by 10
         try {
             if ((group_id2 >= 0) && (dataspace_id1 >= 0)) {
-                dataset_id = H5Dcreate2(group_id2, "2D 64-bit double 20x10", H5T_NATIVE_DOUBLE_g(),
+                dataset_id = H5Dcreate2(group_id2, arena.allocateFrom("2D 64-bit double 20x10"), H5T_NATIVE_DOUBLE_g(),
                                         dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (dataset_id >= 0)
                     H5Dclose(dataset_id);
@@ -139,7 +139,7 @@ public class HDF5DatasetCreate {
         // create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         try {
             if ((group_id2 >= 0) && (dataspace_id2 >= 0)) {
-                dataset_id = H5Dcreate2(group_id2, "3D 32-bit float  20x10x5", H5T_NATIVE_FLOAT_g(),
+                dataset_id = H5Dcreate2(group_id2, arena.allocateFrom("3D 32-bit float  20x10x5"), H5T_NATIVE_FLOAT_g(),
                                         dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (dataset_id >= 0)
                     H5Dclose(dataset_id);
@@ -191,5 +191,5 @@ public class HDF5DatasetCreate {
         }
     }
 
-    public static void main(String[] args) { HDF5DatasetCreate.CreateDataset(); }
+    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { HDF5DatasetCreate.CreateDataset(arena); } }
 }

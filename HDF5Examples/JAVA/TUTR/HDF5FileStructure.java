@@ -50,7 +50,7 @@ public class HDF5FileStructure {
 
         // create the file and add groups and dataset into the file
         try {
-            createFile();
+            createFile(arena);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -181,9 +181,9 @@ public class HDF5FileStructure {
         // Create groups in the file.
         try {
             if (file_id >= 0) {
-                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("/") + "integer arrays", H5P_DEFAULT(),
+                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("/integer arrays"), H5P_DEFAULT(),
                                        H5P_DEFAULT(), H5P_DEFAULT());
-                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("/") + "float arrays", H5P_DEFAULT(),
+                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("/float arrays"), H5P_DEFAULT(),
                                        H5P_DEFAULT(), H5P_DEFAULT());
             }
         }

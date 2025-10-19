@@ -129,7 +129,7 @@ public class H5Ex_G_Phase {
             try {
                 if (group_id >= 0) {
                     H5Gget_info(group_id, ginfo);
-                    System.out.print(ginfo.nlinks + " Group" + (ginfo.nlinks == 1 ? " " : "s") +
+                    System.out.print(H5G_info_t.nlinks(ginfo) + " Group" + (H5G_info_t.nlinks(ginfo) == 1 ? " " : "s") +
                                      ": Storage type is ");
                     switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                     case H5G_STORAGE_TYPE_COMPACT:
@@ -172,7 +172,7 @@ public class H5Ex_G_Phase {
             try {
                 if (group_id >= 0) {
                     H5Gget_info(group_id, ginfo);
-                    System.out.print(ginfo.nlinks + " Group" + (ginfo.nlinks == 1 ? " " : "s") +
+                    System.out.print(H5G_info_t.nlinks(ginfo) + " Group" + (H5G_info_t.nlinks(ginfo) == 1 ? " " : "s") +
                                      ": Storage type is ");
                     switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                     case H5G_STORAGE_TYPE_COMPACT:
@@ -234,5 +234,5 @@ public class H5Ex_G_Phase {
         }
     }
 
-    public static void main(String[] args) { H5Ex_G_Phase.CreateGroup(arena); }
+    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { H5Ex_G_Phase.CreateGroup(arena); } }
 }
