@@ -9,5 +9,7 @@ set (HDF_JAVA_EXAMPLES
     H5Ex_G_Iterate.java
     H5Ex_G_Intermediate.java
     H5Ex_G_Visit.java
+)
+set (HDF_JAVA_EXTRA_EXAMPLES
     H5Ex_G_Traverse.java
 )
