@@ -18,6 +18,8 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
+import org.hdfgroup.javahdf5.H5G_info_t;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -32,7 +34,7 @@ public class H5Ex_G_Corder {
         long subgroup_id = H5I_INVALID_HID();
         long gcpl_id     = H5I_INVALID_HID();
         int status;
-        H5G_info_t ginfo;
+        MemorySegment ginfo = H5G_info_t.allocate(arena);
         int i;
         String name;
 
@@ -68,23 +70,34 @@ public class H5Ex_G_Corder {
                 status      = H5Gclose(subgroup_id);
 
                 // Get group info.
-                ginfo = H5Gget_info(group_id);
+                H5Gget_info(group_id, ginfo);
+                long nlinks = H5G_info_t.nlinks(ginfo);
 
                 // Traverse links in the primary group using alphabetical indices (H5_INDEX_NAME).
                 System.out.println("Traversing group using alphabetical indices:");
-                for (i = 0; i < ginfo.nlinks; i++) {
-                    // Retrieve the name of the ith link in a group
-                    name =
-                        H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME(), H5_ITER_INC(), i, H5P_DEFAULT());
+                for (i = 0; i < nlinks; i++) {
+                    // Retrieve the name of the ith link in a group - first query size
+                    long name_size = H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_NAME(),
+                                                        H5_ITER_INC(), i, MemorySegment.NULL, 0,
+                                                        H5P_DEFAULT());
+                    MemorySegment nameBuffer = arena.allocate(name_size + 1);
+                    H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_NAME(), H5_ITER_INC(), i,
+                                       nameBuffer, name_size + 1, H5P_DEFAULT());
+                    name = nameBuffer.getString(0);
                     System.out.println("Index " + i + ": " + name);
                 }
 
                 // Traverse links in the primary group by creation order (H5_INDEX_CRT_ORDER).
                 System.out.println("Traversing group using creation order indices:");
-                for (i = 0; i < ginfo.nlinks; i++) {
-                    // Retrieve the name of the ith link in a group
-                    name = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER(), H5_ITER_INC(), i,
-                                              H5P_DEFAULT());
+                for (i = 0; i < nlinks; i++) {
+                    // Retrieve the name of the ith link in a group - first query size
+                    long name_size = H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_CRT_ORDER(),
+                                                        H5_ITER_INC(), i, MemorySegment.NULL, 0,
+                                                        H5P_DEFAULT());
+                    MemorySegment nameBuffer = arena.allocate(name_size + 1);
+                    H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_CRT_ORDER(), H5_ITER_INC(),
+                                       i, nameBuffer, name_size + 1, H5P_DEFAULT());
+                    name = nameBuffer.getString(0);
                     System.out.println("Index " + i + ": " + name);
                 }
             }
