@@ -71,7 +71,6 @@ static const char *FILENAME_TBD[] = {"sparse",                    /* 0 */
 #define EXT2_SPARSE_DSET "ext2_sparse_dset"
 
 #define SPARSE_DSET        "sparse_dset"
-#define SPARSE_DSET        "sparse_dset"
 #define SPARSE_DSET2       "sparse_dset2"
 #define SPARSE_FILTER_DSET "sparse_filter_dset"
 
