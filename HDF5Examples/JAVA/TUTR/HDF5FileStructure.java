@@ -19,6 +19,10 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.structs.H5G_info_t;
+import hdf.hdf5lib.structs.H5O_token_t;
+
 /**
  * <p>
  * Title: HDF Native Package (Java) Example
@@ -74,7 +78,7 @@ public class HDF5FileStructure {
         }
 
         try {
-            printGroup(group_id, "/", "");
+            printGroup(arena, group_id, "/", "");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -104,20 +108,23 @@ public class HDF5FileStructure {
      *
      * @throws Exception
      */
-    private static void printGroup(long g_id, String gname, String indent) throws Exception
+    private static void printGroup(Arena arena, long g_id, String gname, String indent) throws Exception
     {
         if (g_id < 0)
             return;
 
-        H5G_info_t members      = H5Gget_info(g_id);
-        String objNames[]       = new String[(int)members.nlinks];
-        int objTypes[]          = new int[(int)members.nlinks];
-        int lnkTypes[]          = new int[(int)members.nlinks];
-        H5O_token_t objTokens[] = new H5O_token_t[(int)members.nlinks];
+        MemorySegment ginfo = arena.allocate(org.hdfgroup.javahdf5.H5G_info_t.sizeof());
+        H5Gget_info(g_id, ginfo);
+        long nlinks = org.hdfgroup.javahdf5.H5G_info_t.nlinks(ginfo);
+
+        String objNames[]       = new String[(int)nlinks];
+        int objTypes[]          = new int[(int)nlinks];
+        int lnkTypes[]          = new int[(int)nlinks];
+        H5O_token_t objTokens[] = new H5O_token_t[(int)nlinks];
         int names_found         = 0;
         try {
             names_found =
-                H5Gget_obj_info_all(g_id, null, objNames, objTypes, lnkTypes, objTokens, H5_INDEX_NAME());
+                H5.H5Gget_obj_info_all(g_id, null, objNames, objTypes, lnkTypes, objTokens, H5_INDEX_NAME());
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -131,14 +138,14 @@ public class HDF5FileStructure {
                 // Open the group, obtaining a new handle.
                 try {
                     if (g_id >= 0)
-                        group_id = H5Gopen2(g_id, objNames[i], H5P_DEFAULT());
+                        group_id = H5Gopen2(g_id, arena.allocateFrom(objNames[i]), H5P_DEFAULT());
                 }
                 catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 if (group_id >= 0)
-                    printGroup(group_id, objNames[i], indent);
+                    printGroup(arena, group_id, objNames[i], indent);
 
                 // Close the group.
                 try {
@@ -207,10 +214,7 @@ public class HDF5FileStructure {
             if ((file_id >= 0) && (dataspace_id1 >= 0))
                 dataset_id =
                     H5Dcreate2(file_id,
-                               "/"
-                                   + "integer arrays"
-                                   + "/"
-                                   + "2D 32-bit integer 20x10",
+                               arena.allocateFrom("/integer arrays/2D 32-bit integer 20x10"),
                                H5T_STD_I32LE_g(), dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -232,10 +236,7 @@ public class HDF5FileStructure {
             if ((file_id >= 0) && (dataspace_id2 >= 0))
                 dataset_id =
                     H5Dcreate2(file_id,
-                               "/"
-                                   + "integer arrays"
-                                   + "/"
-                                   + "3D 8-bit unsigned integer 20x10x5",
+                               arena.allocateFrom("/integer arrays/3D 8-bit unsigned integer 20x10x5"),
                                H5T_STD_I64LE_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -256,10 +257,7 @@ public class HDF5FileStructure {
         try {
             if ((file_id >= 0) && (dataspace_id1 >= 0))
                 dataset_id = H5Dcreate2(file_id,
-                                        "/"
-                                            + "float arrays"
-                                            + "/"
-                                            + "2D 64-bit double 20x10",
+                                        arena.allocateFrom("/float arrays/2D 64-bit double 20x10"),
                                         H5T_NATIVE_DOUBLE_g(), dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(),
                                         H5P_DEFAULT());
         }
@@ -281,10 +279,7 @@ public class HDF5FileStructure {
         try {
             if ((file_id >= 0) && (dataspace_id2 >= 0))
                 dataset_id = H5Dcreate2(file_id,
-                                        "/"
-                                            + "float arrays"
-                                            + "/"
-                                            + "3D 32-bit float  20x10x5",
+                                        arena.allocateFrom("/float arrays/3D 32-bit float  20x10x5"),
                                         H5T_NATIVE_FLOAT_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(),
                                         H5P_DEFAULT());
         }
@@ -336,5 +331,10 @@ public class HDF5FileStructure {
         }
     }
 
-    public static void main(String[] args) { HDF5FileStructure.FileStructure(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5FileStructure.FileStructure(arena);
+        }
+    }
 }

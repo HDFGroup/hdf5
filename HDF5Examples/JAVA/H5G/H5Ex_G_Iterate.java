@@ -26,6 +26,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.structs.H5O_token_t;
+
 public class H5Ex_G_Iterate {
     private static String FILENAME    = "groups/h5ex_g_iterate.h5";
     private static String DATASETNAME = "/";
@@ -69,12 +72,12 @@ public class H5Ex_G_Iterate {
         System.out.println("Objects in root group:");
         try {
             if (file_id >= 0) {
-                int count             = (int)H5Gn_members(file_id, DATASETNAME);
+                int count             = (int)H5.H5Gn_members(file_id, DATASETNAME);
                 String[] oname        = new String[count];
                 int[] otype           = new int[count];
                 int[] ltype           = new int[count];
                 H5O_token_t[] otokens = new H5O_token_t[count];
-                H5Gget_obj_info_all(file_id, DATASETNAME, oname, otype, ltype, otokens, H5_INDEX_NAME());
+                H5.H5Gget_obj_info_all(file_id, DATASETNAME, oname, otype, ltype, otokens, H5_INDEX_NAME());
 
                 // Get type of the object and display its name and type.
                 for (int indx = 0; indx < otype.length; indx++) {
@@ -108,5 +111,10 @@ public class H5Ex_G_Iterate {
         }
     }
 
-    public static void main(String[] args) { H5Ex_G_Iterate.do_iterate(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_G_Iterate.do_iterate(arena);
+        }
+    }
 }

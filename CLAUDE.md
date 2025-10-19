@@ -175,9 +175,9 @@ HDF5 Java examples (62 examples) are available as a Maven artifact:
 ### Example Categories
 - **H5D/** - Dataset operations (25 examples) - ✅ 100% FFM complete
 - **H5T/** - Datatype operations (20 examples) - ✅ 100% FFM complete
-- **H5G/** - Group operations (8 examples) - ⚠️ 50% FFM (4 callback-based deferred)
-- **TUTR/** - Tutorial examples (9 examples) - ✅ 89% FFM (1 iterator-based deferred)
-- **Total:** 62 examples - **92% FFM complete (57/62)**
+- **H5G/** - Group operations (8 examples) - ✅ 100% FFM complete (callbacks implemented)
+- **TUTR/** - Tutorial examples (9 examples) - ✅ 100% FFM complete
+- **Total:** 62 examples - **✅ 100% FFM complete (62/62)**
 
 ### Building Java Examples with Maven
 ```bash

@@ -10,7 +10,5 @@ set (HDF_JAVA_EXAMPLES
     HDF5GroupDatasetCreate.java
     HDF5SubsetSelect.java
     HDF5GroupAbsoluteRelativeCreate.java
-)
-set (HDF_JAVA_ITER_EXAMPLES
     HDF5FileStructure.java
 )

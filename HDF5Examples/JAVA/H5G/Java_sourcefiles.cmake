@@ -6,8 +6,6 @@ set (HDF_JAVA_EXAMPLES
     H5Ex_G_Compact.java
     H5Ex_G_Corder.java
     H5Ex_G_Phase.java
-)
-set (HDF_JAVA_ITER_EXAMPLES
     H5Ex_G_Iterate.java
     H5Ex_G_Intermediate.java
     H5Ex_G_Visit.java
