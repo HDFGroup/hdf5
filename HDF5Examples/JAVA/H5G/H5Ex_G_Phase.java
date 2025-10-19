@@ -19,6 +19,7 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
+nimport org.hdfgroup.javahdf5.H5G_info_t;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -62,7 +63,7 @@ public class H5Ex_G_Phase {
         long subgroup_id = H5I_INVALID_HID();
         long fapl_id     = H5I_INVALID_HID();
         long gcpl_id     = H5I_INVALID_HID();
-        H5G_info_t ginfo;
+        MemorySegment ginfo = H5G_info_t.allocate(arena);
         String name = "G0"; // Name of subgroup_id
         int i;
 
@@ -126,10 +127,10 @@ public class H5Ex_G_Phase {
             // Obtain the group info and print the group storage type
             try {
                 if (group_id >= 0) {
-                    ginfo = H5Gget_info(group_id);
+                    H5Gget_info(group_id, ginfo);
                     System.out.print(ginfo.nlinks + " Group" + (ginfo.nlinks == 1 ? " " : "s") +
                                      ": Storage type is ");
-                    switch (H5G_storage.get(ginfo.storage_type)) {
+                    switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                     case H5G_STORAGE_TYPE_COMPACT:
                         System.out.println("H5G_STORAGE_TYPE_COMPACT"); // New compact format
                         break;
@@ -169,10 +170,10 @@ public class H5Ex_G_Phase {
             // Obtain the group info and print the group storage type
             try {
                 if (group_id >= 0) {
-                    ginfo = H5Gget_info(group_id);
+                    H5Gget_info(group_id, ginfo);
                     System.out.print(ginfo.nlinks + " Group" + (ginfo.nlinks == 1 ? " " : "s") +
                                      ": Storage type is ");
-                    switch (H5G_storage.get(ginfo.storage_type)) {
+                    switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                     case H5G_STORAGE_TYPE_COMPACT:
                         System.out.println("H5G_STORAGE_TYPE_COMPACT"); // New compact format
                         break;
@@ -232,5 +233,5 @@ public class H5Ex_G_Phase {
         }
     }
 
-    public static void main(String[] args) { H5Ex_G_Phase.CreateGroup(); }
+    public static void main(String[] args) { H5Ex_G_Phase.CreateGroup(arena); }
 }

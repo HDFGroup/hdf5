@@ -18,6 +18,8 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
+import org.hdfgroup.javahdf5.H5G_info_t;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -59,7 +61,7 @@ public class H5Ex_G_Compact {
         long file_id  = H5I_INVALID_HID();
         long group_id = H5I_INVALID_HID();
         long fapl_id  = H5I_INVALID_HID();
-        H5G_info_t ginfo;
+        MemorySegment ginfo = H5G_info_t.allocate(arena);
         long size;
 
         // Create file 1. This file will use original format groups.
@@ -82,9 +84,9 @@ public class H5Ex_G_Compact {
         // Obtain the group info and print the group storage type.
         try {
             if (group_id >= 0) {
-                ginfo = H5Gget_info(group_id);
+                H5Gget_info(group_id, ginfo);
                 System.out.print("Group storage type for " + FILE1 + " is: ");
-                switch (H5G_storage.get(ginfo.storage_type)) {
+                switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                 case H5G_STORAGE_TYPE_COMPACT:
                     System.out.println("H5G_STORAGE_TYPE_COMPACT"); // New compact format
                     break;
@@ -184,9 +186,9 @@ public class H5Ex_G_Compact {
         // Obtain the group info and print the group storage type.
         try {
             if (group_id >= 0) {
-                ginfo = H5Gget_info(group_id);
+                H5Gget_info(group_id, ginfo);
                 System.out.print("Group storage type for " + FILE2 + " is: ");
-                switch (H5G_storage.get(ginfo.storage_type)) {
+                switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                 case H5G_STORAGE_TYPE_COMPACT:
                     System.out.println("H5G_STORAGE_TYPE_COMPACT"); // New compact format
                     break;
