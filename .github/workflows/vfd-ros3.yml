@@ -32,7 +32,7 @@ on:
       force_java_implementation:
         description: "Force specific Java implementation (auto, ffm, jni)"
         required: false
-        default: "auto"
+        default: "jni"
         type: string
 
 permissions:
