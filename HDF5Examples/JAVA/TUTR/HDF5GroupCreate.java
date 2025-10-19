@@ -138,5 +138,10 @@ public class HDF5GroupCreate {
         }
     }
 
-    public static void main(String[] args) { HDF5GroupCreate.CreateGroup(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5GroupCreate.CreateGroup(arena);
+        }
+    }
 }

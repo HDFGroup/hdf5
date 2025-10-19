@@ -57,5 +57,10 @@ public class HDF5FileCreate {
         }
     }
 
-    public static void main(String[] args) { HDF5FileCreate.CreateFile(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5FileCreate.CreateFile(arena);
+        }
+    }
 }
