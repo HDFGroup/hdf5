@@ -63,9 +63,9 @@ public class HDF5GroupCreate {
         try {
             if (file_id >= 0) {
                 group_id1 =
-                    H5Gcreate(file_id, arena.allocateFrom("g1"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                    H5Gcreate2(file_id, arena.allocateFrom("g1"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (group_id1 >= 0) {
-                    subgroup_id = H5Gcreate(group_id1, arena.allocateFrom("g11"), H5P_DEFAULT(),
+                    subgroup_id = H5Gcreate2(group_id1, arena.allocateFrom("g11"), H5P_DEFAULT(),
                                             H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
@@ -74,7 +74,7 @@ public class HDF5GroupCreate {
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    subgroup_id = H5Gcreate(group_id1, arena.allocateFrom("g12"), H5P_DEFAULT(),
+                    subgroup_id = H5Gcreate2(group_id1, arena.allocateFrom("g12"), H5P_DEFAULT(),
                                             H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
@@ -85,9 +85,9 @@ public class HDF5GroupCreate {
                     }
                 }
                 group_id2 =
-                    H5Gcreate(file_id, arena.allocateFrom("g2"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                    H5Gcreate2(file_id, arena.allocateFrom("g2"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (group_id2 >= 0) {
-                    subgroup_id = H5Gcreate(group_id2, arena.allocateFrom("g21"), H5P_DEFAULT(),
+                    subgroup_id = H5Gcreate2(group_id2, arena.allocateFrom("g21"), H5P_DEFAULT(),
                                             H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
@@ -96,7 +96,7 @@ public class HDF5GroupCreate {
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    subgroup_id = H5Gcreate(group_id2, arena.allocateFrom("g22"), H5P_DEFAULT(),
+                    subgroup_id = H5Gcreate2(group_id2, arena.allocateFrom("g22"), H5P_DEFAULT(),
                                             H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)

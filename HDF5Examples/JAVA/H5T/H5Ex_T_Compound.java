@@ -22,6 +22,8 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
+import hdf.hdf5lib.H5;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -200,7 +202,7 @@ public class H5Ex_T_Compound {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
+                    H5Tinsert(memtype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
                               type_id);
                 }
             }
@@ -220,7 +222,7 @@ public class H5Ex_T_Compound {
                     long type_id = Sensor_Datatype.memberFileTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(filetype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
+                    H5Tinsert(filetype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
                               type_id);
                 }
             }
@@ -252,8 +254,8 @@ public class H5Ex_T_Compound {
         // Write the compound data to the dataset.
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5DwriteVL(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(),
-                           (Object[])object_data);
+                H5.H5DwriteVL(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(),
+                              (Object[])object_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -350,8 +352,14 @@ public class H5Ex_T_Compound {
         }
 
         try {
-            if (dataspace_id >= 0)
-                H5Sget_simple_extent_dims(dataspace_id, dims, null);
+            if (dataspace_id >= 0) {
+                MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -375,7 +383,7 @@ public class H5Ex_T_Compound {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
+                    H5Tinsert(memtype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
                               type_id);
                 }
             }
@@ -389,7 +397,7 @@ public class H5Ex_T_Compound {
         // Read data.
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5DreadVL(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), (Object[])object_data);
+                H5.H5DreadVL(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), (Object[])object_data);
 
             for (int indx = 0; indx < (int)dims[0]; indx++) {
                 object_data2[indx] = new Sensor(object_data[indx]);

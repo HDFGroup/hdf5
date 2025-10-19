@@ -34,14 +34,15 @@ public class H5Ex_G_Visit {
 
     public static void main(String[] args)
     {
-
         try (Arena arena = Arena.ofConfined()) {
             try {
                 (new H5Ex_G_Visit()).VisitGroup();
             }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
-    catch (Exception ex) { ex.printStackTrace(); }
 }
 
 private void VisitGroup() throws Exception

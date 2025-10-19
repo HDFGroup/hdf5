@@ -18,6 +18,8 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
+import hdf.hdf5lib.H5;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -76,7 +78,7 @@ public class H5Ex_T_VLString {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5DwriteVL(dataset_id, type_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), str_data);
+                H5.H5DwriteVL(dataset_id, type_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), str_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -110,7 +112,7 @@ public class H5Ex_T_VLString {
         try {
             dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
             type_id    = H5Dget_type(dataset_id);
-            H5DreadVL(dataset_id, type_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), str_data);
+            H5.H5DreadVL(dataset_id, type_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), str_data);
         }
         catch (Exception e) {
             e.printStackTrace();

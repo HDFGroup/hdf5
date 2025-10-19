@@ -22,6 +22,8 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
+import hdf.hdf5lib.H5;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -202,7 +204,7 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
+                    H5Tinsert(memtype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
                               type_id);
                 }
             }
@@ -222,7 +224,7 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberFileTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(filetype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
+                    H5Tinsert(filetype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
                               type_id);
                 }
             }
@@ -258,7 +260,7 @@ public class H5Ex_T_CompoundAttribute {
         // Create the attribute.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id, H5P_DEFAULT(),
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), filetype_id, dataspace_id, H5P_DEFAULT(),
                                          H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -268,7 +270,7 @@ public class H5Ex_T_CompoundAttribute {
         // Write the compound data.
         try {
             if ((attribute_id >= 0) && (memtype_id >= 0))
-                H5AwriteVL(attribute_id, memtype_id, (Object[])object_data);
+                H5.H5AwriteVL(attribute_id, memtype_id, (Object[])object_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -366,7 +368,7 @@ public class H5Ex_T_CompoundAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -384,8 +386,14 @@ public class H5Ex_T_CompoundAttribute {
         }
 
         try {
-            if (dataspace_id >= 0)
-                H5Sget_simple_extent_dims(dataspace_id, dims, null);
+            if (dataspace_id >= 0) {
+                MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -409,7 +417,7 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
+                    H5Tinsert(memtype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
                               type_id);
                 }
             }
@@ -423,7 +431,7 @@ public class H5Ex_T_CompoundAttribute {
         // Read data.
         try {
             if ((attribute_id >= 0) && (memtype_id >= 0))
-                H5AreadVL(attribute_id, memtype_id, (Object[])object_data);
+                H5.H5AreadVL(attribute_id, memtype_id, (Object[])object_data);
 
             for (int indx = 0; indx < (int)dims[0]; indx++) {
                 object_data2[indx] = new Sensor(object_data[indx]);

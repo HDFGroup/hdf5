@@ -50,7 +50,11 @@ public class H5Ex_T_RegionReference {
         long[] dims       = {DIM0};
         long[] dims2      = {DS2DIM0, DS2DIM1};
         // data buffer for writing region reference
-        byte[][] dset_data = new byte[DIM0][H5R_REF_BUF_SIZE()];
+        // Allocate MemorySegments for references
+        MemorySegment[] refs = new MemorySegment[DIM0];
+        for (int i = 0; i < DIM0; i++) {
+            refs[i] = arena.allocate(H5R_REF_BUF_SIZE());
+        }
         // data buffer for writing dataset
         byte[][] write_data     = new byte[DS2DIM0][DS2DIM1];
         StringBuffer[] str_data = {new StringBuffer("The quick brown"), new StringBuffer("fox jumps over "),
@@ -79,7 +83,15 @@ public class H5Ex_T_RegionReference {
                             write_data[indx][jndx] = 0;
                     }
                 }
-                H5Dwrite(dataset_id, H5T_NATIVE_CHAR_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), write_data);
+                // Flatten 2D byte array to 1D for MemorySegment
+                byte[] flatData = new byte[DS2DIM0 * DS2DIM1];
+                for (int i = 0; i < DS2DIM0; i++) {
+                    for (int j = 0; j < DS2DIM1; j++) {
+                        flatData[i * DS2DIM1 + j] = write_data[i][j];
+                    }
+                }
+                MemorySegment writeSeg = arena.allocateFrom(ValueLayout.JAVA_BYTE, flatData);
+                H5Dwrite(dataset_id, H5T_STD_I8LE_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), writeSeg);
             }
         }
         catch (Exception e) {
@@ -89,10 +101,16 @@ public class H5Ex_T_RegionReference {
         // Create reference to a list of elements in dset2.
         try {
             long[][] coords = {{0, 1}, {2, 11}, {1, 0}, {2, 4}};
-
-            H5Sselect_elements(dataspace_id, H5S_SELECT_SET(), 4, coords);
+            // Flatten coords for MemorySegment
+            long[] flatCoords = new long[4 * 2];
+            for (int i = 0; i < 4; i++) {
+                flatCoords[i * 2] = coords[i][0];
+                flatCoords[i * 2 + 1] = coords[i][1];
+            }
+            MemorySegment coordsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, flatCoords);
+            H5Sselect_elements(dataspace_id, H5S_SELECT_SET(), 4, coordsSeg);
             if (file_id >= 0)
-                dset_data[0] = H5Rcreate_region(file_id, DATASETNAME2, dataspace_id, H5P_DEFAULT());
+                H5Rcreate_region(file_id, arena.allocateFrom(DATASETNAME2), dataspace_id, H5P_DEFAULT(), refs[0]);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -104,10 +122,14 @@ public class H5Ex_T_RegionReference {
             long[] stride = {2, 11}; // Stride of hyperslab
             long[] count  = {2, 2};  // Element count of hyperslab
             long[] block  = {1, 3};  // Block size of hyperslab
-
-            H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET(), start, stride, count, block);
+            // Convert arrays to MemorySegments
+            MemorySegment startSeg  = arena.allocateFrom(ValueLayout.JAVA_LONG, start);
+            MemorySegment strideSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, stride);
+            MemorySegment countSeg  = arena.allocateFrom(ValueLayout.JAVA_LONG, count);
+            MemorySegment blockSeg  = arena.allocateFrom(ValueLayout.JAVA_LONG, block);
+            H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET(), startSeg, strideSeg, countSeg, blockSeg);
             if (file_id >= 0)
-                dset_data[1] = H5Rcreate_region(file_id, DATASETNAME2, dataspace_id, H5P_DEFAULT());
+                H5Rcreate_region(file_id, arena.allocateFrom(DATASETNAME2), dataspace_id, H5P_DEFAULT(), refs[1]);
             ;
         }
         catch (Exception e) {
@@ -127,7 +149,13 @@ public class H5Ex_T_RegionReference {
             if ((file_id >= 0) && (dataspace_id >= 0)) {
                 dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_REF_g(),
                                         dataspace_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
-                H5Dwrite(dataset_id, H5T_STD_REF_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+                // Pack references into contiguous MemorySegment
+                int refSize = H5R_REF_BUF_SIZE();
+                MemorySegment refData = arena.allocate(refSize * DIM0);
+                for (int i = 0; i < DIM0; i++) {
+                    MemorySegment.copy(refs[i], 0, refData, i * refSize, refSize);
+                }
+                H5Dwrite(dataset_id, H5T_STD_REF_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), refData);
             }
         }
         catch (Exception e) {
@@ -135,13 +163,13 @@ public class H5Ex_T_RegionReference {
         }
 
         try {
-            H5Rdestroy(dset_data[0]);
+            H5Rdestroy(refs[0]);
         }
         catch (Exception ex) {
         }
 
         try {
-            H5Rdestroy(dset_data[1]);
+            H5Rdestroy(refs[1]);
         }
         catch (Exception ex) {
         }
@@ -188,7 +216,11 @@ public class H5Ex_T_RegionReference {
         long object_id     = H5I_INVALID_HID();
         long region_id     = H5I_INVALID_HID();
         long[] dims        = {DIM0};
-        byte[][] dset_data = new byte[DIM0][H5R_REF_BUF_SIZE()];
+        // Allocate MemorySegments for references
+        MemorySegment[] refs = new MemorySegment[DIM0];
+        for (int i = 0; i < DIM0; i++) {
+            refs[i] = arena.allocate(H5R_REF_BUF_SIZE());
+        }
         StringBuffer str_data;
 
         // Open an existing file.
@@ -202,10 +234,23 @@ public class H5Ex_T_RegionReference {
                 try {
                     // Get dataspace and allocate memory for read buffer.
                     dataspace_id = H5Dget_space(dataset_id);
-                    H5Sget_simple_extent_dims(dataspace_id, dims, null);
+                    MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
 
                     // Read data.
-                    H5Dread(dataset_id, H5T_STD_REF_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+                    // Read data into contiguous MemorySegment
+                    int refSize = H5R_REF_BUF_SIZE();
+                    MemorySegment refData = arena.allocate(refSize * dims[0]);
+                    H5Dread(dataset_id, H5T_STD_REF_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), refData);
+
+                    // Unpack references from contiguous MemorySegment
+                    for (int i = 0; i < dims[0]; i++) {
+                        MemorySegment.copy(refData, i * refSize, refs[i], 0, refSize);
+                    }
 
                     // Output the data to the screen.
                     for (int indx = 0; indx < dims[0]; indx++) {
@@ -213,11 +258,18 @@ public class H5Ex_T_RegionReference {
                         System.out.print("  ->");
                         // Open the referenced object.
                         try {
-                            object_id = H5Ropen_object(dset_data[indx], H5P_DEFAULT(), H5P_DEFAULT());
+                            object_id = H5Ropen_object(refs[indx], H5P_DEFAULT(), H5P_DEFAULT());
                             try {
-                                String obj_name = H5Iget_name(object_id);
+                                // Get the name - first query size
+                                long name_size = H5Iget_name(object_id, MemorySegment.NULL, 0);
+                                String obj_name = null;
+                                if (name_size > 0) {
+                                    MemorySegment nameBuffer = arena.allocate(name_size + 1);
+                                    H5Iget_name(object_id, nameBuffer, name_size + 1);
+                                    obj_name = nameBuffer.getString(0);
+                                }
 
-                                region_id = H5Ropen_region(dset_data[indx], H5P_DEFAULT(), H5P_DEFAULT());
+                                region_id = H5Ropen_region(refs[indx], H5P_DEFAULT(), H5P_DEFAULT());
                                 if ((object_id >= 0) && (region_id >= 0)) {
                                     try {
                                         long reg_npoints = H5Sget_select_npoints(region_id);
@@ -228,11 +280,11 @@ public class H5Ex_T_RegionReference {
                                             MemorySegment.NULL);
 
                                         // Read data.
-                                        byte[] refbuf = new byte[(int)reg_npoints + 1];
-                                        H5Dread(object_id, H5T_NATIVE_CHAR_g(), dataspace_id, region_id,
+                                        MemorySegment refbuf = arena.allocate((int)reg_npoints + 1);
+                                        H5Dread(object_id, H5T_STD_I8LE_g(), dataspace_id, region_id,
                                                 H5P_DEFAULT(), refbuf);
-                                        refbuf[(int)reg_npoints] = 0;
-                                        str_data = new StringBuffer(new String(refbuf).trim());
+                                        refbuf.set(ValueLayout.JAVA_BYTE, (int)reg_npoints, (byte)0);
+                                        str_data = new StringBuffer(refbuf.getString(0).trim());
 
                                         System.out.println(" " + obj_name + ": " + str_data);
                                     }
@@ -271,7 +323,7 @@ public class H5Ex_T_RegionReference {
                     try {
                         H5Sclose(dataspace_id);
                         for (int indx = 0; indx < dims[0]; indx++)
-                            H5Rdestroy(dset_data[indx]);
+                            H5Rdestroy(refs[indx]);
                     }
                     catch (Exception e4) {
                     }

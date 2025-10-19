@@ -70,7 +70,12 @@ public class H5Ex_T_ObjectReferenceAttribute {
         long dataset_id    = H5I_INVALID_HID();
         long attribute_id  = H5I_INVALID_HID();
         long[] dims        = {DIM0};
-        byte[][] dset_data = new byte[DIM0][H5R_REF_BUF_SIZE()];
+        
+        // Allocate MemorySegments for references
+        MemorySegment[] refs = new MemorySegment[DIM0];
+        for (int i = 0; i < DIM0; i++) {
+            refs[i] = arena.allocate(H5R_REF_BUF_SIZE());
+        }
 
         // Create a new file using default properties.
         try {
@@ -100,7 +105,7 @@ public class H5Ex_T_ObjectReferenceAttribute {
         // Create a group in the file.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate(file_id, GROUPNAME, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group_id = H5Gcreate2(file_id, arena.allocateFrom(GROUPNAME), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
             if (group_id >= 0)
                 H5Gclose(group_id);
             group_id = H5I_INVALID_HID();
@@ -112,14 +117,14 @@ public class H5Ex_T_ObjectReferenceAttribute {
         try {
             if (file_id >= 0) {
                 try {
-                    dset_data[0] = H5Rcreate_object(file_id, GROUPNAME, H5P_DEFAULT());
+                    H5Rcreate_object(file_id, arena.allocateFrom(GROUPNAME), H5P_DEFAULT(), refs[0]);
                 }
                 catch (Throwable err) {
                     err.printStackTrace();
                 }
 
                 try {
-                    dset_data[1] = H5Rcreate_object(file_id, DATASETNAME2, H5P_DEFAULT());
+                    H5Rcreate_object(file_id, arena.allocateFrom(DATASETNAME2), H5P_DEFAULT(), refs[1]);
                 }
                 catch (Throwable err) {
                     err.printStackTrace();
@@ -154,17 +159,24 @@ public class H5Ex_T_ObjectReferenceAttribute {
             // Create the attribute and write the array data to it.
             try {
                 if ((dataset_id >= 0) && (dataspace_id >= 0))
-                    attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, H5T_STD_REF_g(), dataspace_id,
-                                             H5P_DEFAULT(), H5P_DEFAULT());
+                    attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), H5T_STD_REF_g(), dataspace_id,
+                                              H5P_DEFAULT(), H5P_DEFAULT());
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
 
-            // Write the dataset.
+            // Write the attribute.
             try {
-                if (attribute_id >= 0)
-                    H5Awrite(attribute_id, H5T_STD_REF_g(), dset_data);
+                if (attribute_id >= 0) {
+                    // Pack references into contiguous MemorySegment
+                    int refSize = H5R_REF_BUF_SIZE();
+                    MemorySegment refData = arena.allocate(refSize * DIM0);
+                    for (int i = 0; i < DIM0; i++) {
+                        MemorySegment.copy(refs[i], 0, refData, i * refSize, refSize);
+                    }
+                    H5Awrite(attribute_id, H5T_STD_REF_g(), refData);
+                }
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -175,12 +187,12 @@ public class H5Ex_T_ObjectReferenceAttribute {
         }
         finally {
             try {
-                H5Rdestroy(dset_data[1]);
+                H5Rdestroy(refs[1]);
             }
             catch (Exception ex) {
             }
             try {
-                H5Rdestroy(dset_data[0]);
+                H5Rdestroy(refs[0]);
             }
             catch (Exception ex) {
             }
@@ -230,7 +242,12 @@ public class H5Ex_T_ObjectReferenceAttribute {
         int object_type    = -1;
         long object_id     = H5I_INVALID_HID();
         long[] dims        = {DIM0};
-        byte[][] dset_data = new byte[DIM0][H5R_REF_BUF_SIZE()];
+        
+        // Allocate MemorySegments for references
+        MemorySegment[] refs = new MemorySegment[DIM0];
+        for (int i = 0; i < DIM0; i++) {
+            refs[i] = arena.allocate(H5R_REF_BUF_SIZE());
+        }
 
         // Open an existing file.
         try {
@@ -242,15 +259,35 @@ public class H5Ex_T_ObjectReferenceAttribute {
 
                 try {
                     attribute_id =
-                        H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(), H5P_DEFAULT());
+                        H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
 
                     // Get dataspace and allocate memory for read buffer.
                     try {
                         dataspace_id = H5Aget_space(attribute_id);
-                        H5Sget_simple_extent_dims(dataspace_id, dims, null);
+                        MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                    H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                    // Read back the dimensions
+                    for (int i = 0; i < dims.length; i++) {
+                        dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                    }
 
                         // Read data.
-                        H5Aread(attribute_id, H5T_STD_REF_g(), dset_data);
+                        // Read data into contiguous MemorySegment
+
+                        int refSize = H5R_REF_BUF_SIZE();
+
+                        MemorySegment refData = arena.allocate(refSize * dims[0]);
+
+                        H5Aread(attribute_id, H5T_STD_REF_g(), refData);
+
+
+                        // Unpack references from contiguous MemorySegment
+
+                        for (int i = 0; i < dims[0]; i++) {
+
+                            MemorySegment.copy(refData, i * refSize, refs[i], 0, refSize);
+
+                        }
 
                         // Output the data to the screen.
                         for (int indx = 0; indx < dims[0]; indx++) {
@@ -258,13 +295,22 @@ public class H5Ex_T_ObjectReferenceAttribute {
                             System.out.print("  ->");
                             // Open the referenced object, get its name and type.
                             try {
-                                object_id = H5Ropen_object(dset_data[indx], H5P_DEFAULT(), H5P_DEFAULT());
+                                object_id = H5Ropen_object(refs[indx], H5P_DEFAULT(), H5P_DEFAULT());
                                 try {
-                                    object_type     = H5Rget_obj_type3(dset_data[indx], H5R_OBJECT());
+                                    // Get object type
+                                MemorySegment objTypeSeg = arena.allocate(ValueLayout.JAVA_INT);
+                                H5Rget_obj_type3(refs[indx], H5P_DEFAULT(), objTypeSeg);
+                                object_type = objTypeSeg.get(ValueLayout.JAVA_INT, 0);
                                     String obj_name = null;
                                     if (object_type >= 0) {
                                         // Get the name.
-                                        obj_name = H5Iget_name(object_id);
+                                        // Get the name - first query size
+                                    long name_size = H5Iget_name(object_id, MemorySegment.NULL, 0);
+                                    if (name_size > 0) {
+                                        MemorySegment nameBuffer = arena.allocate(name_size + 1);
+                                        H5Iget_name(object_id, nameBuffer, name_size + 1);
+                                        obj_name = nameBuffer.getString(0);
+                                    }
                                     }
                                     if ((object_id >= 0) && (object_type >= -1)) {
                                         switch (H5G_obj.get(object_type)) {
@@ -300,7 +346,7 @@ public class H5Ex_T_ObjectReferenceAttribute {
                             }
                             finally {
                                 try {
-                                    H5Rdestroy(dset_data[indx]);
+                                    H5Rdestroy(refs[indx]);
                                 }
                                 catch (Exception e5) {
                                 }

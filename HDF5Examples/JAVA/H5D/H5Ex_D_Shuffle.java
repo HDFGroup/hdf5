@@ -199,8 +199,17 @@ public class H5Ex_D_Shuffle {
 
         // Write the data to the dataset.
         try {
-            if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if (dataset_id >= 0) {
+                // Flatten the 2D array to 1D for MemorySegment
+                int[] flatData = new int[DIM_X * DIM_Y];
+                for (int i = 0; i < DIM_X; i++) {
+                    for (int j = 0; j < DIM_Y; j++) {
+                        flatData[i * DIM_Y + j] = dset_data[i][j];
+                    }
+                }
+                MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_INT, flatData);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -323,7 +332,14 @@ public class H5Ex_D_Shuffle {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0) {
-                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                // Unflatten the 1D MemorySegment to 2D array
+                for (int i = 0; i < DIM_X; i++) {
+                    for (int j = 0; j < DIM_Y; j++) {
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i * DIM_Y + j);
+                    }
+                }
             }
         }
         catch (Exception e) {

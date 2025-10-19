@@ -80,7 +80,7 @@ public class H5Ex_T_OpaqueAttribute {
         try {
             datatype_id = H5Tcreate(H5T_OPAQUE(), (long)LEN);
             if (datatype_id >= 0)
-                H5Tset_tag(datatype_id, "Character array");
+                H5Tset_tag(datatype_id, arena.allocateFrom("Character array"));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -99,7 +99,7 @@ public class H5Ex_T_OpaqueAttribute {
         // Create the attribute and write the array data to it.
         try {
             if ((dataset_id >= 0) && (datatype_id >= 0) && (dataspace_id >= 0))
-                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, datatype_id, dataspace_id, H5P_DEFAULT(),
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), datatype_id, dataspace_id, H5P_DEFAULT(),
                                          H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -108,8 +108,10 @@ public class H5Ex_T_OpaqueAttribute {
 
         // Write the dataset.
         try {
-            if ((attribute_id >= 0) && (datatype_id >= 0))
-                H5Awrite(attribute_id, datatype_id, dset_data);
+            if ((attribute_id >= 0) && (datatype_id >= 0)) {
+                MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_BYTE, dset_data);
+                H5Awrite(attribute_id, datatype_id, dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -190,7 +192,7 @@ public class H5Ex_T_OpaqueAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -202,7 +204,8 @@ public class H5Ex_T_OpaqueAttribute {
                 datatype_id = H5Aget_type(attribute_id);
             if (datatype_id >= 0) {
                 type_len = H5Tget_size(datatype_id);
-                tag_name = H5Tget_tag(datatype_id);
+                MemorySegment tagSeg = H5Tget_tag(datatype_id);
+                tag_name = tagSeg.getString(0);
             }
         }
         catch (Exception e) {
@@ -219,8 +222,14 @@ public class H5Ex_T_OpaqueAttribute {
         }
 
         try {
-            if (dataspace_id >= 0)
-                H5Sget_simple_extent_dims(dataspace_id, dims, null);
+            if (dataspace_id >= 0) {
+                MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -231,8 +240,14 @@ public class H5Ex_T_OpaqueAttribute {
 
         // Read data.
         try {
-            if ((attribute_id >= 0) && (datatype_id >= 0))
-                H5Aread(attribute_id, datatype_id, dset_data);
+            if ((attribute_id >= 0) && (datatype_id >= 0)) {
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_BYTE, dset_data.length);
+                H5Aread(attribute_id, datatype_id, dataSeg);
+                // Copy from MemorySegment back to byte array
+                for (int i = 0; i < dset_data.length; i++) {
+                    dset_data[i] = dataSeg.get(ValueLayout.JAVA_BYTE, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();

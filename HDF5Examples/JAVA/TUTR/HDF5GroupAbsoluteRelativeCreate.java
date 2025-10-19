@@ -46,7 +46,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create a group named "/MyGroup" in the file.
         try {
             if (file_id >= 0)
-                group1_id = H5Gcreate(file_id, arena.allocateFrom("/") + GROUPNAME, H5P_DEFAULT(),
+                group1_id = H5Gcreate2(file_id, arena.allocateFrom("/") + GROUPNAME, H5P_DEFAULT(),
                                       H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -56,7 +56,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create group "Group_A" in group "MyGroup" using absolute name.
         try {
             if (file_id >= 0)
-                group2_id = H5Gcreate(file_id, arena.allocateFrom("/") + GROUPNAME + "/" + GROUPNAME_A,
+                group2_id = H5Gcreate2(file_id, arena.allocateFrom("/") + GROUPNAME + "/" + GROUPNAME_A,
                                       H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -66,7 +66,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create group "Group_B" in group "MyGroup" using relative name.
         try {
             if (group1_id >= 0)
-                group3_id = H5Gcreate(group1_id, GROUPNAME_B, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group3_id = H5Gcreate2(group1_id, GROUPNAME_B, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

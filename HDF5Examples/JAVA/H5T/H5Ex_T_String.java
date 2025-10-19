@@ -103,8 +103,17 @@ public class H5Ex_T_String {
                         dset_data[indx][jndx] = 0;
                 }
             }
-            if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5Dwrite(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if ((dataset_id >= 0) && (memtype_id >= 0)) {
+                // Flatten 2D byte array to 1D for MemorySegment
+                byte[] flatData = new byte[DIM0 * SDIM];
+                for (int i = 0; i < DIM0; i++) {
+                    for (int j = 0; j < SDIM; j++) {
+                        flatData[i * SDIM + j] = dset_data[i][j];
+                    }
+                }
+                MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_BYTE, flatData);
+                H5Dwrite(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -208,8 +217,14 @@ public class H5Ex_T_String {
         }
 
         try {
-            if (dataspace_id >= 0)
-                H5Sget_simple_extent_dims(dataspace_id, dims, null);
+            if (dataspace_id >= 0) {
+                MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -231,8 +246,17 @@ public class H5Ex_T_String {
 
         // Read data.
         try {
-            if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5Dread(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if ((dataset_id >= 0) && (memtype_id >= 0)) {
+                int totalSize = (int)dims[0] * (int)sdim;
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_BYTE, totalSize);
+                H5Dread(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                // Unflatten 1D MemorySegment to 2D byte array
+                for (int i = 0; i < (int)dims[0]; i++) {
+                    for (int j = 0; j < sdim; j++) {
+                        dset_data[i][j] = dataSeg.get(ValueLayout.JAVA_BYTE, i * sdim + j);
+                    }
+                }
+            }
             byte[] tempbuf = new byte[(int)sdim];
             for (int indx = 0; indx < (int)dims[0]; indx++) {
                 for (int jndx = 0; jndx < sdim; jndx++) {

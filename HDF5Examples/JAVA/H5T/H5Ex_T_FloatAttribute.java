@@ -87,7 +87,7 @@ public class H5Ex_T_FloatAttribute {
         // Create the attribute and write the array data to it.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0))
-                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, H5T_IEEE_F64LE_g(), dataspace_id,
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), H5T_IEEE_F64LE_g(), dataspace_id,
                                          H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -96,8 +96,17 @@ public class H5Ex_T_FloatAttribute {
 
         // Write the dataset.
         try {
-            if (attribute_id >= 0)
-                H5Awrite(attribute_id, H5T_NATIVE_DOUBLE_g(), dset_data);
+            if (attribute_id >= 0) {
+                // Flatten the 2D array to 1D for MemorySegment
+                double[] flatData = new double[4 * 7];
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 7; j++) {
+                        flatData[i * 7 + j] = dset_data[i][j];
+                    }
+                }
+                MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_DOUBLE, flatData);
+                H5Awrite(attribute_id, H5T_NATIVE_DOUBLE_g(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -167,7 +176,7 @@ public class H5Ex_T_FloatAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -183,8 +192,14 @@ public class H5Ex_T_FloatAttribute {
         }
 
         try {
-            if (dataspace_id >= 0)
-                H5Sget_simple_extent_dims(dataspace_id, dims, null);
+            if (dataspace_id >= 0) {
+                MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -196,8 +211,17 @@ public class H5Ex_T_FloatAttribute {
 
         // Read data.
         try {
-            if (attribute_id >= 0)
-                H5Aread(attribute_id, H5T_NATIVE_DOUBLE_g(), dset_data);
+            if (attribute_id >= 0) {
+                int totalSize = 4 * 7;
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_DOUBLE, totalSize);
+                H5Aread(attribute_id, H5T_NATIVE_DOUBLE_g(), dataSeg);
+                // Unflatten the 1D MemorySegment to 2D array
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 7; j++) {
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_DOUBLE, i * 7 + j);
+                    }
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();

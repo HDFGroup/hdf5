@@ -81,8 +81,17 @@ public class H5Ex_T_Bit {
 
         // Write the bitfield data to the dataset.
         try {
-            if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_B8_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if (dataset_id >= 0) {
+                // Flatten the 2D array to 1D for MemorySegment
+                int[] flatData = new int[DIM0 * DIM1];
+                for (int i = 0; i < DIM0; i++) {
+                    for (int j = 0; j < DIM1; j++) {
+                        flatData[i * DIM1 + j] = dset_data[i][j];
+                    }
+                }
+                MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_INT, flatData);
+                H5Dwrite(dataset_id, H5T_NATIVE_B8_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -151,8 +160,14 @@ public class H5Ex_T_Bit {
         }
 
         try {
-            if (dataspace_id >= 0)
-                H5Sget_simple_extent_dims(dataspace_id, dims, null);
+            if (dataspace_id >= 0) {
+                MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -164,8 +179,17 @@ public class H5Ex_T_Bit {
 
         // Read data.
         try {
-            if (dataset_id >= 0)
-                H5Dread(dataset_id, H5T_NATIVE_B8_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if (dataset_id >= 0) {
+                int totalSize = (int)(dims[0] * dims[1]);
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, totalSize);
+                H5Dread(dataset_id, H5T_NATIVE_B8_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                // Unflatten the 1D MemorySegment to 2D array
+                for (int i = 0; i < dims[0]; i++) {
+                    for (int j = 0; j < dims[1]; j++) {
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i * (int)dims[1] + j);
+                    }
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();

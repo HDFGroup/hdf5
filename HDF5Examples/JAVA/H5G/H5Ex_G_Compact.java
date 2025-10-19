@@ -72,7 +72,7 @@ public class H5Ex_G_Compact {
         // Create a group in the file1.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate(file_id, GROUP, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group_id = H5Gcreate2(file_id, arena.allocateFrom(GROUP), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -173,7 +173,7 @@ public class H5Ex_G_Compact {
         // Create group in file2.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate(file_id, GROUP, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group_id = H5Gcreate2(file_id, arena.allocateFrom(GROUP), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

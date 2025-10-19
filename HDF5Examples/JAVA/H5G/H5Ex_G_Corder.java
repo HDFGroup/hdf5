@@ -46,7 +46,7 @@ public class H5Ex_G_Corder {
 
             // Create primary group using the property list.
             if (status >= 0)
-                group_id = H5Gcreate(file_id, arena.allocateFrom("index_group"), H5P_DEFAULT(), gcpl_id,
+                group_id = H5Gcreate2(file_id, arena.allocateFrom("index_group"), H5P_DEFAULT(), gcpl_id,
                                      H5P_DEFAULT());
 
             try {
@@ -55,16 +55,16 @@ public class H5Ex_G_Corder {
                  * these groups do not have to have the creation order tracking property set.
                  */
                 subgroup_id =
-                    H5Gcreate(group_id, arena.allocateFrom("H"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                    H5Gcreate2(group_id, arena.allocateFrom("H"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 status = H5Gclose(subgroup_id);
                 subgroup_id =
-                    H5Gcreate(group_id, arena.allocateFrom("D"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                    H5Gcreate2(group_id, arena.allocateFrom("D"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 status = H5Gclose(subgroup_id);
                 subgroup_id =
-                    H5Gcreate(group_id, arena.allocateFrom("F"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                    H5Gcreate2(group_id, arena.allocateFrom("F"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 status = H5Gclose(subgroup_id);
                 subgroup_id =
-                    H5Gcreate(group_id, arena.allocateFrom("5"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                    H5Gcreate2(group_id, arena.allocateFrom("5"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 status = H5Gclose(subgroup_id);
 
                 // Get group info.
@@ -108,12 +108,13 @@ public class H5Ex_G_Corder {
 
     public static void main(String[] args)
     {
-
         try (Arena arena = Arena.ofConfined()) {
             try {
                 H5Ex_G_Corder.CreateGroup(arena);
             }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
-    catch (Exception ex) { ex.printStackTrace(); }
 }

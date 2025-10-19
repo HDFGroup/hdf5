@@ -42,7 +42,7 @@ public class H5Ex_G_Create {
         // Create a group in the file.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate(file_id, arena.allocateFrom("/") + GROUPNAME, H5P_DEFAULT(),
+                group_id = H5Gcreate2(file_id, arena.allocateFrom("/" + GROUPNAME), H5P_DEFAULT(),
                                      H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -61,7 +61,7 @@ public class H5Ex_G_Create {
         // Re-open the group, obtaining a new handle.
         try {
             if (file_id >= 0)
-                group_id = H5Gopen(file_id, "/" + GROUPNAME, H5P_DEFAULT());
+                group_id = H5Gopen2(file_id, arena.allocateFrom("/" + GROUPNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -86,5 +86,10 @@ public class H5Ex_G_Create {
         }
     }
 
-    public static void main(String[] args) { H5Ex_G_Create.CreateGroup(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_G_Create.CreateGroup(arena);
+        }
+    }
 }

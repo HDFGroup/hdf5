@@ -64,7 +64,7 @@ public class H5Ex_T_Opaque {
         try {
             datatype_id = H5Tcreate(H5T_OPAQUE(), (long)LEN);
             if (datatype_id >= 0)
-                H5Tset_tag(datatype_id, "Character array");
+                H5Tset_tag(datatype_id, arena.allocateFrom("Character array"));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -95,8 +95,10 @@ public class H5Ex_T_Opaque {
 
         // Write the opaque data to the dataset.
         try {
-            if ((dataset_id >= 0) && (datatype_id >= 0))
-                H5Dwrite(dataset_id, datatype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if ((dataset_id >= 0) && (datatype_id >= 0)) {
+                MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_BYTE, dset_data);
+                H5Dwrite(dataset_id, datatype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -172,7 +174,8 @@ public class H5Ex_T_Opaque {
                 datatype_id = H5Dget_type(dataset_id);
             if (datatype_id >= 0) {
                 type_len = H5Tget_size(datatype_id);
-                tag_name = H5Tget_tag(datatype_id);
+                MemorySegment tagSeg = H5Tget_tag(datatype_id);
+                tag_name = tagSeg.getString(0);
             }
         }
         catch (Exception e) {
@@ -189,8 +192,14 @@ public class H5Ex_T_Opaque {
         }
 
         try {
-            if (dataspace_id >= 0)
-                H5Sget_simple_extent_dims(dataspace_id, dims, null);
+            if (dataspace_id >= 0) {
+                MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -201,8 +210,14 @@ public class H5Ex_T_Opaque {
 
         // Read data.
         try {
-            if ((dataset_id >= 0) && (datatype_id >= 0))
-                H5Dread(dataset_id, datatype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset_data);
+            if ((dataset_id >= 0) && (datatype_id >= 0)) {
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_BYTE, dset_data.length);
+                H5Dread(dataset_id, datatype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+                // Copy from MemorySegment back to byte array
+                for (int i = 0; i < dset_data.length; i++) {
+                    dset_data[i] = dataSeg.get(ValueLayout.JAVA_BYTE, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();

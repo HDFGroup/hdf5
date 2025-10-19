@@ -65,7 +65,7 @@ public class H5Ex_T_ArrayAttribute {
 
         // Create array datatypes for file.
         try {
-            filetype_id = H5Tarray_create(H5T_STD_I64LE_g(), NDIMS, adims);
+            filetype_id = H5Tarray_create2(H5T_STD_I64LE_g(), NDIMS, arena.allocateFrom(ValueLayout.JAVA_LONG, adims));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -73,7 +73,7 @@ public class H5Ex_T_ArrayAttribute {
 
         // Create array datatypes for memory.
         try {
-            memtype_id = H5Tarray_create(H5T_NATIVE_INT_g(), NDIMS, adims);
+            memtype_id = H5Tarray_create2(H5T_NATIVE_INT_g(), NDIMS, arena.allocateFrom(ValueLayout.JAVA_LONG, adims));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -106,7 +106,7 @@ public class H5Ex_T_ArrayAttribute {
         // Create the attribute and write the array data to it.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                attribute_id = H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id, H5P_DEFAULT(),
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), filetype_id, dataspace_id, H5P_DEFAULT(),
                                          H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -115,8 +115,20 @@ public class H5Ex_T_ArrayAttribute {
 
         // Write the dataset.
         try {
-            if ((attribute_id >= 0) && (memtype_id >= 0))
-                H5Awrite(attribute_id, memtype_id, dset_data);
+            if ((attribute_id >= 0) && (memtype_id >= 0)) {
+                // Flatten the 3D array to 1D for MemorySegment
+                int totalSize = DIM0 * ADIM0 * ADIM1;
+                int[] flatData = new int[totalSize];
+                for (int i = 0; i < DIM0; i++) {
+                    for (int j = 0; j < ADIM0; j++) {
+                        for (int k = 0; k < ADIM1; k++) {
+                            flatData[i * ADIM0 * ADIM1 + j * ADIM1 + k] = dset_data[i][j][k];
+                        }
+                    }
+                }
+                MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_INT, flatData);
+                H5Awrite(attribute_id, memtype_id, dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -206,7 +218,7 @@ public class H5Ex_T_ArrayAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -223,8 +235,14 @@ public class H5Ex_T_ArrayAttribute {
 
         // Get the datatype's dimensions.
         try {
-            if (filetype_id >= 0)
-                H5Tget_array_dims(filetype_id, adims);
+            if (filetype_id >= 0) {
+                MemorySegment adimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, adims);
+                H5Tget_array_dims2(filetype_id, adimsSeg);
+                // Read back the dimensions
+                for (int i = 0; i < adims.length; i++) {
+                    adims[i] = adimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -236,7 +254,7 @@ public class H5Ex_T_ArrayAttribute {
 
         // Create array datatypes for memory.
         try {
-            memtype_id = H5Tarray_create(H5T_NATIVE_INT_g(), 2, adims);
+            memtype_id = H5Tarray_create2(H5T_NATIVE_INT_g(), 2, arena.allocateFrom(ValueLayout.JAVA_LONG, adims));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -244,8 +262,20 @@ public class H5Ex_T_ArrayAttribute {
 
         // Read data.
         try {
-            if ((attribute_id >= 0) && (memtype_id >= 0))
-                H5Aread(attribute_id, memtype_id, dset_data);
+            if ((attribute_id >= 0) && (memtype_id >= 0)) {
+                int totalSize = (int)(dims[0] * adims[0] * adims[1]);
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, totalSize);
+                H5Aread(attribute_id, memtype_id, dataSeg);
+                // Unflatten the 1D MemorySegment to 3D array
+                for (int i = 0; i < dims[0]; i++) {
+                    for (int j = 0; j < adims[0]; j++) {
+                        for (int k = 0; k < adims[1]; k++) {
+                            dset_data[i][j][k] = dataSeg.getAtIndex(ValueLayout.JAVA_INT,
+                                (int)(i * adims[0] * adims[1] + j * adims[1] + k));
+                        }
+                    }
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -48,7 +48,7 @@ public class H5Ex_G_Intermediate {
              * an error if we did not use the previously created property list.
              */
             group_id =
-                H5Gcreate(file_id, arena.allocateFrom("/G1/G2/G3"), gcpl_id, H5P_DEFAULT(), H5P_DEFAULT());
+                H5Gcreate2(file_id, arena.allocateFrom("/G1/G2/G3"), gcpl_id, H5P_DEFAULT(), H5P_DEFAULT());
             // Print all the objects in the file_ids to show that intermediate group_ids have been created.
             System.out.println("Objects in the file_id:");
 
@@ -74,14 +74,15 @@ public class H5Ex_G_Intermediate {
 
     public static void main(String[] args)
     {
-
         try (Arena arena = Arena.ofConfined()) {
             try {
                 (new H5Ex_G_Intermediate()).CreateGroup();
             }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
-    catch (Exception ex) { ex.printStackTrace(); }
 }
 
 private class idata {

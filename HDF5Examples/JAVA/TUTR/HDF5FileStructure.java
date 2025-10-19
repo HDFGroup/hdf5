@@ -67,7 +67,7 @@ public class HDF5FileStructure {
         // Open the group, obtaining a new handle.
         try {
             if (file_id >= 0)
-                group_id = H5Gopen(file_id, "/", H5P_DEFAULT());
+                group_id = H5Gopen2(file_id, arena.allocateFrom("/"), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -131,7 +131,7 @@ public class HDF5FileStructure {
                 // Open the group, obtaining a new handle.
                 try {
                     if (g_id >= 0)
-                        group_id = H5Gopen(g_id, objNames[i], H5P_DEFAULT());
+                        group_id = H5Gopen2(g_id, objNames[i], H5P_DEFAULT());
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -181,9 +181,9 @@ public class HDF5FileStructure {
         // Create groups in the file.
         try {
             if (file_id >= 0) {
-                group_id1 = H5Gcreate(file_id, arena.allocateFrom("/") + "integer arrays", H5P_DEFAULT(),
+                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("/") + "integer arrays", H5P_DEFAULT(),
                                       H5P_DEFAULT(), H5P_DEFAULT());
-                group_id1 = H5Gcreate(file_id, arena.allocateFrom("/") + "float arrays", H5P_DEFAULT(),
+                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("/") + "float arrays", H5P_DEFAULT(),
                                       H5P_DEFAULT(), H5P_DEFAULT());
             }
         }

@@ -99,7 +99,7 @@ public class H5Ex_G_Phase {
         // Create primary group.
         try {
             if ((file_id >= 0) && (gcpl_id >= 0))
-                group_id = H5Gcreate(file_id, name, H5P_DEFAULT(), gcpl_id, H5P_DEFAULT());
+                group_id = H5Gcreate2(file_id, arena.allocateFrom(name), H5P_DEFAULT(), gcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -113,7 +113,7 @@ public class H5Ex_G_Phase {
             name        = name + append; /* G1, G2, G3 etc. */
             try {
                 if (group_id >= 0) {
-                    subgroup_id = H5Gcreate(group_id, name, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                    subgroup_id = H5Gcreate2(group_id, arena.allocateFrom(name), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                     H5Gclose(subgroup_id);
                 }
             }
@@ -157,7 +157,7 @@ public class H5Ex_G_Phase {
         for (i = MAX_GROUPS; i >= 1; i--) {
             // Define the subgroup name and delete the subgroup.
             try {
-                H5Ldelete(group_id, name, H5P_DEFAULT());
+                H5Ldelete(group_id, arena.allocateFrom(name), H5P_DEFAULT());
             }
             catch (Exception e) {
                 e.printStackTrace();
