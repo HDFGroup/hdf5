@@ -100,8 +100,15 @@ public class HDF5GroupDatasetCreate {
 
         // Write the first dataset.
         try {
-            if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset1_data);
+            if (dataset_id >= 0) {
+                // Flatten 2D array to 1D for MemorySegment
+                int[] flatData1 = new int[DIM1_X * DIM1_Y];
+                for (int i = 0; i < DIM1_X; i++)
+                    for (int j = 0; j < DIM1_Y; j++)
+                        flatData1[i * DIM1_Y + j] = dset1_data[i][j];
+                MemorySegment dataSeg1 = arena.allocateFrom(ValueLayout.JAVA_INT, flatData1);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg1);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -158,8 +165,15 @@ public class HDF5GroupDatasetCreate {
 
         // Write the second dataset.
         try {
-            if (dataset_id >= 0)
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dset2_data);
+            if (dataset_id >= 0) {
+                // Flatten 2D array to 1D for MemorySegment
+                int[] flatData2 = new int[DIM2_X * DIM2_Y];
+                for (int i = 0; i < DIM2_X; i++)
+                    for (int j = 0; j < DIM2_Y; j++)
+                        flatData2[i * DIM2_Y + j] = dset2_data[i][j];
+                MemorySegment dataSeg2 = arena.allocateFrom(ValueLayout.JAVA_INT, flatData2);
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg2);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -202,5 +216,9 @@ public class HDF5GroupDatasetCreate {
         }
     }
 
-    public static void main(String[] args) { HDF5GroupDatasetCreate.h5_crtgrpd(); }
+    public static void main(String[] args) {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5GroupDatasetCreate.h5_crtgrpd(arena);
+        }
+    }
 }
