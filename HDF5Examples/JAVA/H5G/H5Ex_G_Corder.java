@@ -18,11 +18,11 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.H5G_info_t;
-
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+
+import org.hdfgroup.javahdf5.H5G_info_t;
 
 public class H5Ex_G_Corder {
     private static String FILENAME = "H5Ex_G_Corder.h5";
@@ -77,9 +77,9 @@ public class H5Ex_G_Corder {
                 System.out.println("Traversing group using alphabetical indices:");
                 for (i = 0; i < nlinks; i++) {
                     // Retrieve the name of the ith link in a group - first query size
-                    long name_size = H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_NAME(),
-                                                        H5_ITER_INC(), i, MemorySegment.NULL, 0,
-                                                        H5P_DEFAULT());
+                    long name_size =
+                        H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_NAME(), H5_ITER_INC(),
+                                           i, MemorySegment.NULL, 0, H5P_DEFAULT());
                     MemorySegment nameBuffer = arena.allocate(name_size + 1);
                     H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_NAME(), H5_ITER_INC(), i,
                                        nameBuffer, name_size + 1, H5P_DEFAULT());
@@ -91,9 +91,9 @@ public class H5Ex_G_Corder {
                 System.out.println("Traversing group using creation order indices:");
                 for (i = 0; i < nlinks; i++) {
                     // Retrieve the name of the ith link in a group - first query size
-                    long name_size = H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_CRT_ORDER(),
-                                                        H5_ITER_INC(), i, MemorySegment.NULL, 0,
-                                                        H5P_DEFAULT());
+                    long name_size =
+                        H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_CRT_ORDER(),
+                                           H5_ITER_INC(), i, MemorySegment.NULL, 0, H5P_DEFAULT());
                     MemorySegment nameBuffer = arena.allocate(name_size + 1);
                     H5Lget_name_by_idx(group_id, arena.allocateFrom("."), H5_INDEX_CRT_ORDER(), H5_ITER_INC(),
                                        i, nameBuffer, name_size + 1, H5P_DEFAULT());
