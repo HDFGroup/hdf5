@@ -1205,7 +1205,7 @@ test_struct_chunk_extent_2d(hid_t fcpl, hid_t fapl, bool filtered, bool early, b
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
 
-    TESTING("structured chunk with HD5set_extent() on 2d dataset");
+    TESTING("structured chunk with H5Dset_extent() on 2d dataset");
 
     if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
         TEST_ERROR;
