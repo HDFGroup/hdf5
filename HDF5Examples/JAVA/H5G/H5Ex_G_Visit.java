@@ -55,9 +55,11 @@ public class H5Ex_G_Visit {
             System.out.println("Objects in the file:");
 
             // Create callback for H5Ovisit
-            H5O_iterate2_t.Function obj_callback = (long group, MemorySegment name, MemorySegment info, MemorySegment op_data) -> {
+            H5O_iterate2_t.Function obj_callback =
+                (long group, MemorySegment name, MemorySegment info, MemorySegment op_data) ->
+            {
                 String obj_name = name.getString(0);
-                int obj_type = H5O_info2_t.type(info);
+                int obj_type    = H5O_info2_t.type(info);
 
                 System.out.print("/"); // Print root group in object path
 
@@ -79,15 +81,15 @@ public class H5Ex_G_Visit {
                     System.out.println(obj_name + "  (Unknown)");
                 }
 
-                return 0;  // Continue iteration
+                return 0; // Continue iteration
             };
 
             // Allocate upcall stub for object callback
             MemorySegment obj_callback_stub = H5O_iterate2_t.allocate(obj_callback, arena);
 
             // Call H5Ovisit
-            H5Ovisit3(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(),
-                     obj_callback_stub, MemorySegment.NULL, H5O_INFO_ALL());
+            H5Ovisit3(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), obj_callback_stub, MemorySegment.NULL,
+                      H5O_INFO_ALL());
 
             System.out.println();
 
@@ -95,9 +97,11 @@ public class H5Ex_G_Visit {
             System.out.println("Links in the file:");
 
             // Create callback for H5Lvisit
-            H5L_iterate2_t.Function link_callback = (long group, MemorySegment name, MemorySegment info, MemorySegment op_data) -> {
+            H5L_iterate2_t.Function link_callback =
+                (long group, MemorySegment name, MemorySegment info, MemorySegment op_data) ->
+            {
                 String link_name = name.getString(0);
-                int link_type = H5L_info2_t.type(info);
+                int link_type    = H5L_info2_t.type(info);
 
                 // Get type of the object the link points to
                 try {
@@ -131,15 +135,14 @@ public class H5Ex_G_Visit {
                     e.printStackTrace();
                 }
 
-                return 0;  // Continue iteration
+                return 0; // Continue iteration
             };
 
             // Allocate upcall stub for link callback
             MemorySegment link_callback_stub = H5L_iterate2_t.allocate(link_callback, arena);
 
             // Call H5Lvisit
-            H5Lvisit2(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(),
-                     link_callback_stub, MemorySegment.NULL);
+            H5Lvisit2(file_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), link_callback_stub, MemorySegment.NULL);
         }
         finally {
             // Close and release resources

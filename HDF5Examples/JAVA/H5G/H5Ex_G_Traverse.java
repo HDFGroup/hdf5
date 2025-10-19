@@ -31,8 +31,9 @@ import java.lang.foreign.ValueLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hdfgroup.javahdf5.*;
 import hdf.hdf5lib.structs.H5O_token_t;
+
+import org.hdfgroup.javahdf5.*;
 
 public class H5Ex_G_Traverse {
 
@@ -40,9 +41,9 @@ public class H5Ex_G_Traverse {
 
     // Operator data structure for iteration
     static class OpData {
-        int recurs;  // Recursion level
-        OpData prev;  // Previous operator data
-        H5O_token_t obj_token;  // Object token
+        int recurs;            // Recursion level
+        OpData prev;           // Previous operator data
+        H5O_token_t obj_token; // Object token
     }
 
     private static void OpenGroup(Arena arena)
@@ -59,9 +60,9 @@ public class H5Ex_G_Traverse {
                 H5Oget_info3(file_id, root_info, H5O_INFO_ALL());
 
                 // Initialize operator data
-                OpData od = new OpData();
-                od.recurs = 0;
-                od.prev = null;
+                OpData od    = new OpData();
+                od.recurs    = 0;
+                od.prev      = null;
                 od.obj_token = new H5O_token_t(H5O_info2_t.token(root_info));
 
                 // Print root group and begin iteration
@@ -91,9 +92,11 @@ public class H5Ex_G_Traverse {
     private static void iterateGroup(Arena arena, long group_id, OpData od)
     {
         // Create callback for H5Literate
-        H5L_iterate2_t.Function link_callback = (long group, MemorySegment name, MemorySegment info, MemorySegment op_data) -> {
+        H5L_iterate2_t.Function link_callback =
+            (long group, MemorySegment name, MemorySegment info, MemorySegment op_data) ->
+        {
             String link_name = name.getString(0);
-            int spaces = 2 * (od.recurs + 1);  // Indentation
+            int spaces       = 2 * (od.recurs + 1); // Indentation
 
             try {
                 // Get object info
@@ -101,7 +104,7 @@ public class H5Ex_G_Traverse {
                 int ret = H5Oget_info_by_name3(group, name, obj_info, H5O_INFO_ALL(), H5P_DEFAULT());
 
                 if (ret >= 0) {
-                    int obj_type = H5O_info2_t.type(obj_info);
+                    int obj_type          = H5O_info2_t.type(obj_info);
                     H5O_token_t obj_token = new H5O_token_t(H5O_info2_t.token(obj_info));
 
                     // Print indentation
@@ -119,9 +122,9 @@ public class H5Ex_G_Traverse {
                         }
                         else {
                             // Create new operator data for recursion
-                            OpData nextod = new OpData();
-                            nextod.recurs = od.recurs + 1;
-                            nextod.prev = od;
+                            OpData nextod    = new OpData();
+                            nextod.recurs    = od.recurs + 1;
+                            nextod.prev      = od;
                             nextod.obj_token = obj_token;
 
                             // Recurse into group
@@ -155,26 +158,26 @@ public class H5Ex_G_Traverse {
                 e.printStackTrace();
             }
 
-            return 0;  // Continue iteration
+            return 0; // Continue iteration
         };
 
         // Allocate upcall stub
         MemorySegment link_callback_stub = H5L_iterate2_t.allocate(link_callback, arena);
 
         // Iterate over links in group
-        H5Literate2(group_id, H5_INDEX_NAME(), H5_ITER_NATIVE(),
-                   MemorySegment.NULL, link_callback_stub, MemorySegment.NULL);
+        H5Literate2(group_id, H5_INDEX_NAME(), H5_ITER_NATIVE(), MemorySegment.NULL, link_callback_stub,
+                    MemorySegment.NULL);
     }
 
     // Check if we've already visited this object token (loop detection)
     private static boolean groupCheck(OpData od, H5O_token_t target_token)
     {
         if (od.obj_token.equals(target_token))
-            return true;  // Object tokens match
+            return true; // Object tokens match
         else if (od.recurs == 0)
-            return false;  // Root group reached with no matches
+            return false; // Root group reached with no matches
         else
-            return groupCheck(od.prev, target_token);  // Recursively examine the next node
+            return groupCheck(od.prev, target_token); // Recursively examine the next node
     }
 
     public static void main(String[] args)

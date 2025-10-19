@@ -213,8 +213,7 @@ public class HDF5FileStructure {
         try {
             if ((file_id >= 0) && (dataspace_id1 >= 0))
                 dataset_id =
-                    H5Dcreate2(file_id,
-                               arena.allocateFrom("/integer arrays/2D 32-bit integer 20x10"),
+                    H5Dcreate2(file_id, arena.allocateFrom("/integer arrays/2D 32-bit integer 20x10"),
                                H5T_STD_I32LE_g(), dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
@@ -234,10 +233,9 @@ public class HDF5FileStructure {
         // create 3D 8-bit (1 byte) unsigned integer dataset of 20 by 10 by 5
         try {
             if ((file_id >= 0) && (dataspace_id2 >= 0))
-                dataset_id =
-                    H5Dcreate2(file_id,
-                               arena.allocateFrom("/integer arrays/3D 8-bit unsigned integer 20x10x5"),
-                               H5T_STD_I64LE_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id = H5Dcreate2(
+                    file_id, arena.allocateFrom("/integer arrays/3D 8-bit unsigned integer 20x10x5"),
+                    H5T_STD_I64LE_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -256,8 +254,7 @@ public class HDF5FileStructure {
         // create 2D 64-bit (8 bytes) double dataset of 20 by 10
         try {
             if ((file_id >= 0) && (dataspace_id1 >= 0))
-                dataset_id = H5Dcreate2(file_id,
-                                        arena.allocateFrom("/float arrays/2D 64-bit double 20x10"),
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom("/float arrays/2D 64-bit double 20x10"),
                                         H5T_NATIVE_DOUBLE_g(), dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(),
                                         H5P_DEFAULT());
         }
@@ -278,8 +275,7 @@ public class HDF5FileStructure {
         // create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         try {
             if ((file_id >= 0) && (dataspace_id2 >= 0))
-                dataset_id = H5Dcreate2(file_id,
-                                        arena.allocateFrom("/float arrays/3D 32-bit float  20x10x5"),
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom("/float arrays/3D 32-bit float  20x10x5"),
                                         H5T_NATIVE_FLOAT_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(),
                                         H5P_DEFAULT());
         }
