@@ -77,7 +77,7 @@ public class HDF5DatasetRead {
         try {
             if (dataset_id >= 0) {
                 // Allocate MemorySegment for reading
-                int totalSize = (int)dims2D[0] * (int)dims2D[1];
+                int totalSize         = (int)dims2D[0] * (int)dims2D[1];
                 MemorySegment readSeg = arena.allocate(ValueLayout.JAVA_INT, totalSize);
                 H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), readSeg);
                 // Unflatten 1D MemorySegment to 2D array
@@ -110,7 +110,7 @@ public class HDF5DatasetRead {
         try {
             if (dataset_id >= 0) {
                 // Flatten 2D array to 1D for MemorySegment
-                int totalSize = (int)dims2D[0] * (int)dims2D[1];
+                int totalSize  = (int)dims2D[0] * (int)dims2D[1];
                 int[] flatData = new int[totalSize];
                 for (int i = 0; i < (int)dims2D[0]; i++)
                     for (int j = 0; j < (int)dims2D[1]; j++)
@@ -129,13 +129,14 @@ public class HDF5DatasetRead {
         try {
             if (dataset_id >= 0) {
                 // Allocate MemorySegment for reading
-                int totalSize = (int)dims2D[0] * (int)dims2D[1];
+                int totalSize             = (int)dims2D[0] * (int)dims2D[1];
                 MemorySegment modifiedSeg = arena.allocate(ValueLayout.JAVA_INT, totalSize);
                 H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), modifiedSeg);
                 // Unflatten 1D MemorySegment to 2D array
                 for (int i = 0; i < (int)dims2D[0]; i++)
                     for (int j = 0; j < (int)dims2D[1]; j++)
-                        dataModified[i][j] = modifiedSeg.getAtIndex(ValueLayout.JAVA_INT, i * (int)dims2D[1] + j);
+                        dataModified[i][j] =
+                            modifiedSeg.getAtIndex(ValueLayout.JAVA_INT, i * (int)dims2D[1] + j);
             }
         }
         catch (Exception e) {

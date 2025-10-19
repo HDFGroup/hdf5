@@ -216,7 +216,8 @@ public class HDF5GroupDatasetCreate {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         try (Arena arena = Arena.ofConfined()) {
             HDF5GroupDatasetCreate.h5_crtgrpd(arena);
         }

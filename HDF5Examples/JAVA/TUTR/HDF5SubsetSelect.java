@@ -126,19 +126,21 @@ public class HDF5SubsetSelect {
 
                 if (filespace_id >= 0) {
                     // Convert arrays to MemorySegments for hyperslab selection
-                    MemorySegment startSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, start);
+                    MemorySegment startSeg  = arena.allocateFrom(ValueLayout.JAVA_LONG, start);
                     MemorySegment strideSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, stride);
-                    MemorySegment countSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, count);
-                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), startSeg, strideSeg, countSeg, MemorySegment.NULL);
+                    MemorySegment countSeg  = arena.allocateFrom(ValueLayout.JAVA_LONG, count);
+                    H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET(), startSeg, strideSeg, countSeg,
+                                        MemorySegment.NULL);
 
                     memspace_id = H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, count),
                                                    MemorySegment.NULL);
                     // Read the data using the previously defined hyperslab.
                     if ((dataset_id >= 0) && (filespace_id >= 0) && (memspace_id >= 0)) {
                         // Allocate MemorySegment for reading
-                        int totalSize = 5 * 3;
+                        int totalSize         = 5 * 3;
                         MemorySegment readSeg = arena.allocate(ValueLayout.JAVA_INT, totalSize);
-                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), memspace_id, filespace_id, H5P_DEFAULT(), readSeg);
+                        H5Dread(dataset_id, H5T_NATIVE_INT_g(), memspace_id, filespace_id, H5P_DEFAULT(),
+                                readSeg);
                         // Unflatten 1D MemorySegment to 2D array
                         for (int i = 0; i < 5; i++)
                             for (int j = 0; j < 3; j++)
