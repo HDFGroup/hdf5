@@ -2423,20 +2423,17 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                     if (H5D__struct_chunk_create(dset /*in,out*/) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
 
-                    /* Indicate that we set the storage addr */
+                    /* Indicate that we set the chunk index addr */
                     addr_set = true;
 
-                    /* Indicate that we should initialize storage space */
-                    must_init_space = true;
-                } /* end if */
+                    /* NOTE for structured chunk: 
+                     * --must_init_space is false 
+                     * --no space to be allocated for early allocation:
+                     *      if (dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY &&
+                     *          time_alloc == H5D_ALLOC_EXTEND)
+                     */
 
-                /* If space allocation is set to 'early' and we are extending
-                 * the dataset, indicate that space should be allocated, so the
-                 * index gets expanded. -QAK
-                 */
-                if (dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY &&
-                    time_alloc == H5D_ALLOC_EXTEND)
-                    must_init_space = true;
+                } /* end if */
                 break;
 
             case H5D_COMPACT:
@@ -2486,6 +2483,7 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
         /* Check if we need to initialize the space */
         if (must_init_space) {
             if (layout->type == H5D_CHUNKED) {
+
                 /* If we are doing incremental allocation and the index got
                  * created during a H5Dwrite call, don't initialize the storage
                  * now, wait for the actual writes to each block and let the
@@ -2501,22 +2499,6 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                     "unable to initialize dataset with fill value");
             }
-            else if (layout->type == H5D_STRUCT_CHUNK) {
-                /* If we are doing incremental allocation and the index got
-                 * created during a H5Dwrite call, don't initialize the storage
-                 * now, wait for the actual writes to each block and let the
-                 * low-level chunking routines handle initialize the fill-values.
-                 * Otherwise, pass along the space initialization call and let
-                 * the low-level chunking routines sort out whether to write
-                 * fill values to the chunks they allocate space for.  Yes,
-                 * this is icky. -QAK
-                 */
-                if (!(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_INCR &&
-                      time_alloc == H5D_ALLOC_WRITE))
-                    /* TBD: not handled yet for structured chunk */
-                    assert("not implemented yet" && 0);
-
-            } /* end if */
             else {
                 H5D_fill_value_t fill_status; /* The fill value status */
 
@@ -2644,6 +2626,16 @@ H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size)
         case H5D_CHUNKED:
             if ((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
                 if (H5D__chunk_allocated(dset, storage_size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                "can't retrieve chunked dataset allocated size");
+            } /* end if */
+            else
+                *storage_size = 0;
+            break;
+
+        case H5D_STRUCT_CHUNK:
+            if ((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
+                if (H5D__struct_chunk_allocated(dset, storage_size) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                                 "can't retrieve chunked dataset allocated size");
             } /* end if */
@@ -3279,6 +3271,11 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
         } /* end if */
 
         /* Allocate space for the new parts of the dataset, if appropriate */
+        /* 
+         *  NOTE for structured chunk:
+         *  --follow the logic to call H5D__alloc_storage() to create chunk index 
+         *    but space is not allocated
+         */
         if (expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
             if (H5D__alloc_storage(dset, H5D_ALLOC_EXTEND, false, curr_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset storage");
@@ -3299,7 +3296,6 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
 
             /* Update chunks that are no longer edge chunks as a result of
              * expansion */
-            /* TBD: check to modify here when H5Dset_extent is implemented for structured chunk */
             if (expand &&
                 (dset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
                 (dset->shared->dcpl_cache.pline.nused > 0))

@@ -714,10 +714,18 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (dset_info[i].dset->shared->dcpl_cache.pline.nused > 0)
             io_info.filtered_count++;
 
+        /*
+         *  NOTE for structured chunk: 
+         *  --if early allocation:
+         *    root for chunk index is set up so is_space_alloc returns true
+         *  --if NOT early allocation:
+         *    root for chunk index is not set up so is_space_alloc returns false
+         */
         /* Allocate dataspace and initialize it if it hasn't been. */
         should_alloc_space = dset_info[i].dset->shared->dcpl_cache.efl.nused == 0 &&
                              !(*dset_info[i].dset->shared->layout.ops->is_space_alloc)(
                                  &dset_info[i].dset->shared->layout.storage);
+
 
         /*
          * If not using an MPI-based VFD, we only need to allocate
@@ -745,6 +753,11 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                 full_overwrite = (bool)((hsize_t)file_nelmts == dset_info[i].nelmts ? true : false);
 
             /* Allocate storage */
+            /*
+             *  NOTE for structured chunk:
+             *  --follow the logic to call H5D__alloc_storage() to create the chunk index
+             *    but space is not allocated
+             */
             if (H5D__alloc_storage(dset_info[i].dset, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage");
         } /* end if */

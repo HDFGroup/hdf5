@@ -67,9 +67,16 @@ static const char *FILENAME_TBD[] = {"sparse",                    /* 0 */
 
 #define FILENAME_BUF_SIZE 1024
 
+
+#define EXT1_SPARSE_DSET     "ext1_sparse_dset"
+#define EXT2_SPARSE_DSET     "ext2_sparse_dset"
+
+#define SPARSE_DSET        "sparse_dset"
 #define SPARSE_DSET        "sparse_dset"
 #define SPARSE_DSET2       "sparse_dset2"
 #define SPARSE_FILTER_DSET "sparse_filter_dset"
+
+#define CHUNKED_DSET        "chunked_dset"
 
 #define RANK     2
 #define NX       10
@@ -77,22 +84,24 @@ static const char *FILENAME_TBD[] = {"sparse",                    /* 0 */
 #define CHUNK_NX 5
 #define CHUNK_NY 5
 
+#define CHK_SINGLE  1
+#define CHK_FA      2
+#define CHK_EA      3
+
 /* Size of a chunk */
 #define CHK_SIZE (CHUNK_NX * CHUNK_NY * sizeof(int))
 
-static herr_t test_struct_chunk_api(hid_t fcpl, hid_t fapl);
-static herr_t test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered);
-static herr_t test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered);
-static herr_t test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered);
-static herr_t test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered);
-static herr_t test_struct_chunk_filter_register(hid_t fcpl, hid_t fapl);
+static herr_t test_struct_chunk_info_1d(hid_t fcpl, hid_t fapl, bool filtered, bool early, unsigned chk_type);
+static herr_t test_struct_chunk_info_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered, bool early);
+static herr_t test_struct_chunk_extent_1d(hid_t fcpl, hid_t fapl, bool filtered, bool early);
+static herr_t test_struct_chunk_extent_2d(hid_t fcpl, hid_t fapl, bool filtered, bool early, bool expand);
 
-#ifdef OUT
-static herr_t test_sparse_data(hid_t fapl);
-static herr_t test_sparse_filter(hid_t fapl);
-static herr_t test_sparse_filter_2d(hid_t fapl);
-static herr_t test_sparse_filter_register(hid_t fapl);
-#endif
+static herr_t test_struct_chunk_api(hid_t fcpl, hid_t fapl);
+static herr_t test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered, bool early);
+static herr_t test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered, bool early);
+static herr_t test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered, bool early);
+static herr_t test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered, bool early);
+static herr_t test_struct_chunk_filter_register(hid_t fcpl, hid_t fapl);
 
 static herr_t filter_class3_set_local(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id,
                                       H5_section_type_t sec_type);
@@ -114,6 +123,1258 @@ const H5Z_class3_t H5Z_TEST_CLASS3[1] = {{
     filter_class3_set_local,             /* The "set local" callback     */
     filter_class3,                       /* The actual filter function    */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    test_struct_chunk_info_1d
+ *
+ * Purpose:     Verify H5Oget_native_info() for 1d dataset with 
+ *              fixed array or extensible array chunk index
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_struct_chunk_info_1d(hid_t fcpl, hid_t fapl, bool filtered, bool early, unsigned chk_type)
+{
+    char  filename[FILENAME_BUF_SIZE]; /* File name */
+    hid_t fid  = H5I_INVALID_HID;
+    hid_t sid  = H5I_INVALID_HID;
+    hid_t dcpl = H5I_INVALID_HID;
+    hid_t did  = H5I_INVALID_HID;
+
+    hsize_t           sg_dim[1]       = {30}; /* 1-d dataspace */
+    hsize_t           sg_chunk_dim[1] = {30}; /* Chunk size */
+
+    hsize_t           fa_dim[1]       = {30}; /* 1-d dataspace */
+    hsize_t           fa_max_dim[1] = {50};
+
+    hsize_t           ea_dim[1]       = {30}; /* 1-d dataspace */
+    hsize_t           ea_max_dim[1] = {H5S_UNLIMITED};
+
+    hsize_t           chunk_dim[1] = {5}; /* Chunk size */
+
+    H5D_chunk_index_t idx_type;            /* dataset chunk index type */
+
+    int wbuf[30]; /* Write buffer */
+
+    hsize_t start[1];
+    hsize_t stride[1];
+    hsize_t count[1];
+    hsize_t block[1];
+
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+
+    int          nfilters;
+    unsigned     options;
+
+    H5O_native_info_t nat_info;
+
+    H5F_libver_t low, high; /* File format bound */
+    bool         fail_as_expected = false;
+
+    TESTING("structured chunk with H5Oget_native_info() on 1d dataset with Single/Fixed/Extensible array chunk index type");
+
+    if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
+        TEST_ERROR;
+
+    /* Create a file */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create property list for dataset creation */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_layout(dcpl, H5D_STRUCT_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_struct_chunk(dcpl, 1, (chk_type == CHK_SINGLE ? sg_chunk_dim: chunk_dim), H5D_SPARSE_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
+
+    if (filtered) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_FIXED, &nfilters) < 0)
+            TEST_ERROR;
+
+        if (nfilters != 1)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+
+    /* Create dataspace */
+    if (chk_type == CHK_SINGLE) {
+        if ((sid = H5Screate_simple(1, sg_dim, NULL)) < 0)
+            TEST_ERROR;
+    } else if (chk_type == CHK_FA) {
+        if ((sid = H5Screate_simple(1, fa_dim, fa_max_dim)) < 0)
+            TEST_ERROR;
+    } else if (chk_type == CHK_EA) {
+        if ((sid = H5Screate_simple(1, ea_dim, ea_max_dim)) < 0)
+            TEST_ERROR;
+    }
+
+    /* Create dataset */
+
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    /* Should fail for high bound < latest format */
+    if (high < H5F_LIBVER_LATEST) {
+        if (did >= 0)
+            TEST_ERROR;
+        else {
+            /* Fail as expected: clean up and return succeed */
+            fail_as_expected = true;
+            goto done;
+        }
+    }
+    else if (did < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+
+    if (idx_type != (chk_type == CHK_SINGLE ? H5D_CHUNK_IDX_SINGLE : (chk_type == CHK_FA ? H5D_CHUNK_IDX_FARRAY : H5D_CHUNK_IDX_EARRAY)))
+        FAIL_PUTS_ERROR("should be using the expected array chunk index");
+
+    /* Starting at 4, select 3 blocks of size 2 each */
+    /* Selection is across chunks and within the chunk */
+    start[0]  = 4;
+    stride[0] = 6;
+    count[0]  = 3;
+    block[0]  = 2;
+    H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+
+    memset(wbuf, 0, sizeof(wbuf));
+
+    /* Starting at 4, initialize 3 blocks of size 2 to the dataset */
+    wbuf[4]  = 4;
+    wbuf[5]  = 5;
+    wbuf[10] = 10;
+    wbuf[11] = 11;
+    wbuf[16] = 16;
+    wbuf[17] = 17;
+
+    /* Starting at 1, select 3 blocks of size 1 each */
+    start[0]  = 1;
+    stride[0] = 6;
+    count[0]  = 3;
+    block[0]  = 1;
+    H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, stride, count, block);
+
+    wbuf[1]  = 1;
+    wbuf[7]  = 7;
+    wbuf[13] = 13;
+
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_chunk(dcpl, 1, (chk_type == CHK_SINGLE ? sg_chunk_dim: chunk_dim)) < 0)
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
+
+    if (filtered) {
+         if (H5Pset_deflate(dcpl, 9) < 0)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+    }
+
+
+    /* Create dataspace */
+    if (chk_type == CHK_SINGLE) {
+        if ((sid = H5Screate_simple(1, sg_dim, NULL)) < 0)
+            TEST_ERROR;
+    } else if (chk_type == CHK_FA) {
+        if ((sid = H5Screate_simple(1, fa_dim, fa_max_dim)) < 0)
+            TEST_ERROR;
+    } else if (chk_type == CHK_EA) {
+        if ((sid = H5Screate_simple(1, ea_dim, ea_max_dim)) < 0)
+            TEST_ERROR;
+    }
+
+    /*
+     * Create legacy chunked dataset
+     * This is done just to compare the meta data size
+     * between structured chunk and legacy chunked datasets
+     */
+    if ((did = H5Dcreate2(fid, CHUNKED_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Obtain the correct chunk indexing type */
+    /* This may be v1-btree chunk index */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+
+    /* Starting at 4, select 3 blocks of size 2 each */
+    start[0]  = 4;
+    stride[0] = 6;
+    block[0]  = 2;
+    H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+
+    memset(wbuf, 0, sizeof(wbuf));
+
+
+    /* Starting at 1, select 1 blocks of size 1 each */
+    start[0]  = 1;
+    stride[0] = 6;
+    count[0]  = 1;
+    block[0]  = 1;
+    H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+
+    wbuf[1]  = 1;
+
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((did = H5Dopen2(fid, SPARSE_DSET, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Obtain the correct chunk indexing type */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+
+    memset(&nat_info, 0, sizeof(nat_info));
+    if (H5Oget_native_info(did, &nat_info, H5O_NATIVE_INFO_META_SIZE) < 0)
+        TEST_ERROR;
+
+    /* Verify the size of meta data */
+    /* This may change as the implementation of structured chunk is still in progress */
+    if (chk_type == CHK_SINGLE) {
+        if (nat_info.meta_size.obj.index_size != 0)
+            TEST_ERROR;
+    } else if (chk_type == CHK_FA) {
+        if (nat_info.meta_size.obj.index_size != (filtered ? 466 : 226))
+            TEST_ERROR;
+    } else if(chk_type == CHK_EA) {
+        if (nat_info.meta_size.obj.index_size != (filtered ? 274 : 178))
+            TEST_ERROR;
+    }
+        
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if ((did = H5Dopen2(fid, CHUNKED_DSET, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Obtain the correct chunk indexing type */
+    /* This may be v1-btree chunk index */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+
+    memset(&nat_info, 0, sizeof(nat_info));
+    if (H5Oget_native_info(did, &nat_info, H5O_NATIVE_INFO_META_SIZE) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+done:
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    if (fail_as_expected) {
+        PASSED();
+        return SUCCEED;
+    }
+
+    return FAIL;
+} /* end test_struct_chunk_info_1d() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_struct_chunk_info_2d_bt2
+ *
+ * Purpose:     Verify H5Oget_native_info() for 2d dataset with 
+ *              v2-btree chunk index
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_struct_chunk_info_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered, bool early)
+{
+    char              filename[FILENAME_BUF_SIZE];    /* File name */
+    hid_t             fid          = H5I_INVALID_HID; /* File ID */
+    hid_t             sid          = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             did          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t             dcpl         = H5I_INVALID_HID; /* Creation plist */
+    hsize_t           dim[2]       = {10, 19};        /* 2-d dataspace (contains partial edge chunk) */
+    hsize_t           dmax[2]      = {H5S_UNLIMITED, H5S_UNLIMITED}; /* maximum dimension */
+    hsize_t           chunk_dim[2] = {5, 5};                         /* Chunk size */
+    H5D_chunk_index_t idx_type;                                      /* dataset chunk index type     */
+
+    int          wbuf[190]; /* Write buffer */
+    hsize_t      start[2];
+    hsize_t      stride[2];
+    hsize_t      count[2];
+    hsize_t      block[2];
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+
+    int          nfilters;
+    unsigned     options;
+
+    H5O_native_info_t nat_info;
+
+    H5F_libver_t low, high; /* File format bound */
+    bool         fail_as_expected = false;
+
+    TESTING("structured chunk with H5Oget_native_info() on 2d dataset with bt2 chunk index");
+
+    if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
+        TEST_ERROR;
+
+    /* Create the file */
+    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+
+    /* Create a new file. */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_layout(dcpl, H5D_STRUCT_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_struct_chunk(dcpl, 2, chunk_dim, H5D_SPARSE_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
+
+    if (filtered) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_FIXED, &nfilters) < 0)
+            TEST_ERROR;
+        if (nfilters != 1)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+
+    /* Create dataspace */
+    if ((sid = H5Screate_simple(2, dim, dmax)) < 0)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, SPARSE_FILTER_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    /* Should fail for high bound < latest format */
+    if (high < H5F_LIBVER_LATEST) {
+        if (did >= 0)
+            TEST_ERROR;
+        else {
+            /* Fail as expected: clean up and return succeed */
+            fail_as_expected = true;
+            goto done;
+        }
+    }
+    else if (did < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if (idx_type != H5D_CHUNK_IDX_BT2)
+        FAIL_PUTS_ERROR("should be using version 2 btree chunk index");
+
+    /* Starting at [3, 3], select 2 blocks of size 3x3 each */
+    start[0]  = 3;
+    start[1]  = 3;
+    stride[0] = 4;
+    stride[1] = 12;
+    count[0]  = 1;
+    count[1]  = 2;
+    block[0]  = 3;
+    block[1]  = 3;
+    if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR;
+
+    memset(wbuf, 0, sizeof(wbuf));
+
+    /* Initialize 2 3x3 blocks */
+    wbuf[60] = 60;
+    wbuf[61] = 61;
+    wbuf[62] = 62;
+
+    wbuf[72] = 72;
+    wbuf[73] = 73;
+    wbuf[74] = 74;
+
+    wbuf[79] = 79;
+    wbuf[80] = 80;
+    wbuf[81] = 81;
+
+    wbuf[91] = 91;
+    wbuf[92] = 92;
+    wbuf[93] = 93;
+
+    wbuf[98]  = 98;
+    wbuf[99]  = 99;
+    wbuf[100] = 100;
+
+    wbuf[110] = 110;
+    wbuf[111] = 111;
+    wbuf[112] = 112;
+
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* 
+     * Create legacy chunked dataset 
+     */
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_chunk(dcpl, 2, chunk_dim) < 0)
+        TEST_ERROR;
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
+
+    if (filtered) {
+         if (H5Pset_deflate(dcpl, 9) < 0)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+    }
+
+    /* Create dataspace */
+    if ((sid = H5Screate_simple(2, dim, dmax)) < 0)
+        TEST_ERROR;
+
+    /*
+     * Create legacy chunked dataset
+     * This is done just to compare the meta data size
+     * between structured chunk and legacy chunked datasets
+     */
+    if ((did = H5Dcreate2(fid, CHUNKED_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the chunk indexing type */
+    /* This may be v1-btree or v2-btree chunk index */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+
+
+    /* Starting at [3, 3], select 2 blocks of size 3x3 each */
+    start[0]  = 3;
+    start[1]  = 3;
+    stride[0] = 4;
+    stride[1] = 12;
+    count[0]  = 1;
+    count[1]  = 2;
+    block[0]  = 3;
+    block[1]  = 3;
+    if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR;
+
+    memset(wbuf, 0, sizeof(wbuf));
+
+    /* Initialize 2 3x3 blocks */
+    wbuf[60] = 60;
+    wbuf[61] = 61;
+    wbuf[62] = 62;
+
+    wbuf[72] = 72;
+    wbuf[73] = 73;
+    wbuf[74] = 74;
+
+    wbuf[79] = 79;
+    wbuf[80] = 80;
+    wbuf[81] = 81;
+
+    wbuf[91] = 91;
+    wbuf[92] = 92;
+    wbuf[93] = 93;
+
+    wbuf[98]  = 98;
+    wbuf[99]  = 99;
+    wbuf[100] = 100;
+    
+    wbuf[110] = 110;
+    wbuf[111] = 111;
+    wbuf[112] = 112;
+
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Open the structured chunk dataset */
+    if ((did = H5Dopen2(fid, SPARSE_FILTER_DSET, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the chunk indexing type */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+
+    memset(&nat_info, 0, sizeof(nat_info));
+    if (H5Oget_native_info(did, &nat_info, H5O_NATIVE_INFO_META_SIZE) < 0)
+        TEST_ERROR;
+
+    if (nat_info.meta_size.obj.index_size != 2086)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    /* Open the legacy chunked dataset */
+    if ((did = H5Dopen2(fid, CHUNKED_DSET, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    
+    /* Retrieve the chunk indexing type */
+    /* This may be v1-btree or v2-btree chunk index */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+
+    memset(&nat_info, 0, sizeof(nat_info));
+    if (H5Oget_native_info(did, &nat_info, H5O_NATIVE_INFO_META_SIZE) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+done:
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    if (fail_as_expected) {
+        PASSED();
+        return SUCCEED;
+    }
+
+    return FAIL;
+} /* test_struct_chunk_info_2d_bt2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_struct_chunk_extent_1d
+ *
+ * Purpose:     Verify H5Dset_extent() for:
+ *                  --1d dataset with fixed array and extensible array chunk index
+ *                  --Chunks were not written before H5Dset_extent()
+ *              Expand or shrink for H5Dset_extent should succeed
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_struct_chunk_extent_1d(hid_t fcpl, hid_t fapl, bool filtered, bool early)
+{
+    char  filename[FILENAME_BUF_SIZE]; /* File name */
+    hid_t fid  = H5I_INVALID_HID;
+    hid_t sid  = H5I_INVALID_HID;
+    hid_t dcpl = H5I_INVALID_HID;
+    hid_t did  = H5I_INVALID_HID;
+    hid_t new_sid = H5I_INVALID_HID;
+    hid_t msid = H5I_INVALID_HID;
+
+    hsize_t           fa_dim[1]       = {20}; /* 1-d dataspace */
+    hsize_t           fa_max_dim[1] = {50};
+
+    hsize_t           chunk_dim[1] = {5}; /* Chunk size */
+
+    hsize_t           ea_dim[1]       = {20}; /* 1-d dataspace */
+    hsize_t           ea_max_dim[1] = {H5S_UNLIMITED};
+    int status;
+
+    H5D_chunk_index_t idx_type;            /* dataset chunk index type */
+
+    hsize_t shrink_dim[1] = {10};
+    hsize_t expand_dim[1] = {50};
+
+    int wbuf1[30]; /* Write buffer */
+    int wbuf2[30]; /* Write buffer */
+    int rbuf[30]; /* Read buffer */
+
+    hsize_t start[1];
+    hsize_t stride[1];
+    hsize_t count[1];
+    hsize_t block[1];
+
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+
+    int          nfilters;
+    unsigned     options;
+
+    H5F_libver_t low, high; /* File format bound */
+    bool         fail_as_expected = false;
+
+    TESTING("structured chunk with HD5set_extent() on 1d dataset");
+
+    if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
+        TEST_ERROR;
+
+    /* Create a file */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create dataspace */
+    if ((sid = H5Screate_simple(1, fa_dim, fa_max_dim)) < 0)
+        TEST_ERROR;
+
+    /* Create property list for dataset creation */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_layout(dcpl, H5D_STRUCT_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
+
+    if (filtered) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
+            TEST_ERROR;
+
+        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
+            TEST_ERROR;
+        if (nfilters != 2)
+            TEST_ERROR;
+
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_FIXED, &nfilters) < 0)
+            TEST_ERROR;
+
+        if (nfilters != 1)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+
+
+    /* Create 1st dataset */
+
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, EXT1_SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    /* Should fail for high bound < latest format */
+    if (high < H5F_LIBVER_LATEST) {
+        if (did >= 0)
+            TEST_ERROR;
+        else {
+            /* Fail as expected: clean up and return succeed */
+            fail_as_expected = true;
+            goto done;
+        }
+    }
+    else if (did < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if (idx_type != H5D_CHUNK_IDX_FARRAY)
+        FAIL_PUTS_ERROR("should be using fixed array chunk index");
+
+
+    /* Expand case */
+    H5E_BEGIN_TRY
+    {
+        status = H5Dset_extent(did, expand_dim);
+    }
+    H5E_END_TRY
+
+    if (early) {
+        if (status >= 0)
+            TEST_ERROR;
+    } else {
+        if (status < 0)
+            TEST_ERROR;
+    }
+
+    if ((new_sid = H5Dget_space(did)) < 0)
+        TEST_ERROR;
+
+    if (!early) {
+
+        /* Starting at 20, select 1 blocks of size 3 each */
+        start[0]  = 20;
+        stride[0] = 1;
+        count[0]  = 3;
+        block[0]  = 1;
+        H5Sselect_hyperslab(new_sid, H5S_SELECT_OR, start, stride, count, block);
+
+        memset(wbuf1, 0, sizeof(wbuf1));
+        wbuf1[20] = 20;
+        wbuf1[21] = 21;
+        wbuf1[22] = 22;
+
+        if (H5Dwrite(did, H5T_NATIVE_INT, new_sid, new_sid, H5P_DEFAULT, wbuf1) < 0)
+            TEST_ERROR;
+    }
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(new_sid) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+
+    /* Create 2nd dataset */
+
+    /* Create dataspace */
+    if ((sid = H5Screate_simple(1, ea_dim, ea_max_dim)) < 0)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, EXT2_SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    /* Should fail for high bound < latest format */
+    if (high < H5F_LIBVER_LATEST) {
+        if (did >= 0)
+            TEST_ERROR;
+        else {
+            /* Fail as expected: clean up and return succeed */
+            fail_as_expected = true;
+            goto done;
+        }
+    }
+    else if (did < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if (idx_type != H5D_CHUNK_IDX_EARRAY)
+        FAIL_PUTS_ERROR("should be using extensible array chunk index");
+
+    /* Shrink case */
+    H5E_BEGIN_TRY
+    {
+        status = H5Dset_extent(did, shrink_dim);
+    }
+    H5E_END_TRY
+
+    if (early) {
+        if (status >= 0)
+            TEST_ERROR;
+    } else {
+        if (status < 0)
+            TEST_ERROR;
+    }
+
+    if ((new_sid = H5Dget_space(did)) < 0)
+        TEST_ERROR;
+
+    if (!early) {
+
+        /* Starting at 1, select 1 block of size 3 each */
+        start[0]  = 1;
+        stride[0] = 1;
+        count[0]  = 3;
+        block[0]  = 1;
+        H5Sselect_hyperslab(new_sid, H5S_SELECT_SET, start, stride, count, block);
+
+        memset(wbuf2, 0, sizeof(wbuf2));
+        wbuf2[1] = 1;
+        wbuf2[2] = 2;
+        wbuf2[3] = 3;
+
+        if (H5Dwrite(did, H5T_NATIVE_INT, new_sid, new_sid, H5P_DEFAULT, wbuf2) < 0)
+            TEST_ERROR;
+    }
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(new_sid) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    if (!early) {
+        if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
+
+        if ((did = H5Dopen2(fid, EXT1_SPARSE_DSET, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+
+        if ((new_sid = H5Dget_space(did)) < 0)
+            TEST_ERROR;
+
+        /* Just read the selected chunk, otherwise H5SC_read didn't handle the case 
+           properly when reading in all chunks (which may or may not be allocated) */
+        if ((msid = H5Screate_simple(1, count, NULL)) < 0)
+            TEST_ERROR;
+        start[0]  = 20;
+        stride[0] = 1;
+        count[0]  = 3;
+        block[0]  = 1;
+        H5Sselect_hyperslab(new_sid, H5S_SELECT_SET, start, stride, count, block);
+    
+        memset(rbuf, 0, sizeof(rbuf));
+ 
+        if (H5Dread(did, H5T_NATIVE_INT, msid, new_sid, H5P_DEFAULT, rbuf) < 0)
+            TEST_ERROR;
+
+        /* Verify data read */
+        if (rbuf[0] != 20 || rbuf[1] != 21 || rbuf[2] != 22)
+            TEST_ERROR;
+
+        if (H5Dclose(did) < 0)
+            TEST_ERROR;
+
+        if (H5Sclose(msid) < 0)
+            TEST_ERROR;
+
+        if (H5Sclose(new_sid) < 0)
+            TEST_ERROR;
+
+        if ((did = H5Dopen2(fid, EXT2_SPARSE_DSET, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+
+        if ((new_sid = H5Dget_space(did)) < 0)
+            TEST_ERROR;
+
+        /* Just read the selected chunk, otherwise H5SC_read didn't handle the case 
+           properly when reading in all chunks (which may or may not be allocated) */
+        if ((msid = H5Screate_simple(1, count, NULL)) < 0)
+            TEST_ERROR;
+        start[0]  = 1;
+        stride[0] = 1;
+        count[0]  = 3;
+        block[0]  = 1;
+        H5Sselect_hyperslab(new_sid, H5S_SELECT_SET, start, stride, count, block);
+
+        memset(rbuf, 0, sizeof(rbuf));
+
+        if (H5Dread(did, H5T_NATIVE_INT, msid, new_sid, H5P_DEFAULT, rbuf) < 0)
+            TEST_ERROR;
+
+        /* Verify data read */
+        if (rbuf[0] != 1 || rbuf[1] != 2 || rbuf[2] != 3)
+            TEST_ERROR;
+
+        if (H5Dclose(did) < 0)
+            TEST_ERROR;
+
+        if (H5Sclose(new_sid) < 0)
+            TEST_ERROR;
+
+        if (H5Sclose(msid) < 0)
+            TEST_ERROR;
+
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+
+    }
+
+    PASSED();
+    return SUCCEED;
+
+done:
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Sclose(new_sid);
+        H5Sclose(msid);
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    if (fail_as_expected) {
+        PASSED();
+        return SUCCEED;
+    }
+
+    return FAIL;
+} /* end test_struct_chunk_extent_1d() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_struct_chunk_extent_2d
+ *
+ * Purpose:     Verify H5Dset_extent() for 2d dataset with v2-btree chunk index;
+ *              there is a write before set_extent()
+ *
+ *              Expand or shrink for H5Dset_extent should fail for now
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_struct_chunk_extent_2d(hid_t fcpl, hid_t fapl, bool filtered, bool early, bool expand)
+{
+    char              filename[FILENAME_BUF_SIZE];    /* File name */
+    hid_t             fid          = H5I_INVALID_HID; /* File ID */
+    hid_t             sid          = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             did          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t             dcpl         = H5I_INVALID_HID; /* Creation plist */
+    hsize_t           dim[2]       = {10, 19};        /* 2-d dataspace (contains partial edge chunk) */
+    hsize_t           dmax[2]      = {H5S_UNLIMITED, H5S_UNLIMITED}; /* maximum dimension */
+    hsize_t           chunk_dim[2] = {5, 5};                         /* Chunk size */
+    H5D_chunk_index_t idx_type;                                      /* dataset chunk index type     */
+
+    hsize_t           expand_dim[2] = {20, 29};                         /* Chunk size */
+    hsize_t           shrink_dim[2] = {5, 9};                         /* Chunk size */
+    int               status;
+
+    int          wbuf[190]; /* Write buffer */
+    hsize_t      start[2];
+    hsize_t      stride[2];
+    hsize_t      count[2];
+    hsize_t      block[2];
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+
+    int          nfilters;
+    unsigned     options;
+
+    H5F_libver_t low, high; /* File format bound */
+    bool         fail_as_expected = false;
+
+    TESTING("structured chunk with HD5set_extent() on 2d dataset");
+
+    if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
+        TEST_ERROR;
+
+    /* Create the file */
+    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+
+    /* Create a new file. */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create dataspace */
+    if ((sid = H5Screate_simple(2, dim, dmax)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_layout(dcpl, H5D_STRUCT_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_struct_chunk(dcpl, 2, chunk_dim, H5D_SPARSE_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
+
+    if (filtered) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
+            TEST_ERROR;
+        if (nfilters != 2)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+    else {
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, SPARSE_FILTER_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    /* Should fail for high bound < latest format */
+    if (high < H5F_LIBVER_LATEST) {
+        if (did >= 0)
+            TEST_ERROR;
+        else {
+            /* Fail as expected: clean up and return succeed */
+            fail_as_expected = true;
+            goto done;
+        }
+    }
+    else if (did < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if (idx_type != H5D_CHUNK_IDX_BT2)
+        FAIL_PUTS_ERROR("should be using version 2 btree chunk index");
+
+    /* Starting at [3, 3], select 2 blocks of size 3x3 each */
+    start[0]  = 3;
+    start[1]  = 3;
+    stride[0] = 4;
+    stride[1] = 12;
+    count[0]  = 1;
+    count[1]  = 2;
+    block[0]  = 3;
+    block[1]  = 3;
+    if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR;
+
+    memset(wbuf, 0, sizeof(wbuf));
+
+    /* Initialize 2 3x3 blocks */
+    wbuf[60] = 60;
+    wbuf[61] = 61;
+    wbuf[62] = 62;
+
+    wbuf[72] = 72;
+    wbuf[73] = 73;
+    wbuf[74] = 74;
+
+    wbuf[79] = 79;
+    wbuf[80] = 80;
+    wbuf[81] = 81;
+
+    wbuf[91] = 91;
+    wbuf[92] = 92;
+    wbuf[93] = 93;
+
+    wbuf[98]  = 98;
+    wbuf[99]  = 99;
+    wbuf[100] = 100;
+
+    wbuf[110] = 110;
+    wbuf[111] = 111;
+    wbuf[112] = 112;
+
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    /* Expand case */
+    H5E_BEGIN_TRY
+    {
+        status = H5Dset_extent(did, expand ? expand_dim : shrink_dim);
+    }
+    H5E_END_TRY
+
+    if (status >= 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+done:
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    if (fail_as_expected) {
+        PASSED();
+        return SUCCEED;
+    }
+
+    return FAIL;
+} /* test_struct_chunk_extent_2d() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_struct_chunk_api
@@ -310,7 +1571,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered)
+test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered, bool early)
 {
     char  filename[FILENAME_BUF_SIZE]; /* File name */
     hid_t fid  = H5I_INVALID_HID;
@@ -369,6 +1630,12 @@ test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered)
 
     if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
+
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
 
     if (filtered) {
         if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
@@ -585,7 +1852,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
+test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered, bool early)
 {
     char              filename[FILENAME_BUF_SIZE];    /* File name */
     hid_t             fid          = H5I_INVALID_HID; /* File ID */
@@ -643,6 +1910,11 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
 
     if (H5Pset_struct_chunk(dcpl, 2, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
 
     if (filtered) {
         if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
@@ -853,7 +2125,7 @@ error:
         return SUCCEED;
     }
 
-    return 1;
+    return FAIL;
 } /* test_struct_chunk_2d() */
 
 /*-------------------------------------------------------------------------
@@ -872,7 +2144,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered)
+test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered, bool early)
 {
     char              filename[FILENAME_BUF_SIZE];    /* File name */
     hid_t             fid          = H5I_INVALID_HID; /* File ID */
@@ -929,6 +2201,12 @@ test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered)
 
     if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
+
 
     if (filtered) {
         if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
@@ -1124,7 +2402,7 @@ error:
         return SUCCEED;
     }
 
-    return 1;
+    return FAIL;
 } /* test_struct_chunk_1d_fa() */
 
 /*-------------------------------------------------------------------------
@@ -1143,7 +2421,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
+test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered, bool early)
 {
     char              filename[FILENAME_BUF_SIZE];    /* File name */
     hid_t             fid          = H5I_INVALID_HID; /* File ID */
@@ -1200,6 +2478,11 @@ test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
 
     if (H5Pset_struct_chunk(dcpl, 2, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
+
+    if (early) {
+        if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+            TEST_ERROR;
+    }
 
     if (filtered) {
         if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
@@ -1410,7 +2693,7 @@ error:
         return SUCCEED;
     }
 
-    return 1;
+    return FAIL;
 } /* test_struct_chunk_2d_ea() */
 
 /*-------------------------------------------------------------------------
@@ -1660,7 +2943,7 @@ error:
         return SUCCEED;
     }
 
-    return 1;
+    return FAIL;
 } /* test_struct_chunk_filter_register() */
 
 #ifdef TBD
@@ -1983,7 +3266,7 @@ test_sparse_direct_chunk(hid_t fapl)
         TEST_ERROR;
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY
@@ -1996,7 +3279,7 @@ error:
     H5E_END_TRY
 
     H5_FAILED();
-    return 1;
+    return FAIL;
 
 } /* test_sparse_direct_chunk() */
 
@@ -2240,7 +3523,7 @@ test_sparse_direct_chunk_query(hid_t fapl)
     HDremove(filename);
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY
@@ -2252,7 +3535,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return FAIL;
 } /* test_sparse_direct_chunk_query() */
 
 typedef struct chunk_iter_info_t {
@@ -2405,7 +3688,7 @@ test_dense_chunk_api_on_sparse(hid_t fapl)
     HDremove(filename);
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY
@@ -2417,7 +3700,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return FAIL;
 } /* test_dense_chunk_api_on_sparse() */
 
 #endif /* TBD */
@@ -2440,6 +3723,7 @@ main(void)
 {
     unsigned     paged;
     unsigned     filtered;
+    unsigned     early;
     int          nerrors = 0;
     const char  *driver_name;
     bool         contig_addr_vfd; /* Whether VFD used has a contiguous address space */
@@ -2483,78 +3767,111 @@ main(void)
         if (!contig_addr_vfd && paged)
             continue;
 
-        for (filtered = false; filtered <= true; filtered++) {
+        for (early = false; early <= true; early++) {
 
-            for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-                if ((libver_fapl = H5Pcopy(fapl)) < 0)
-                    TEST_ERROR;
+            for (filtered = false; filtered <= true; filtered++) {
 
-                for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+                for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+                    if ((libver_fapl = H5Pcopy(fapl)) < 0)
+                        TEST_ERROR;
 
-                    hid_t       my_fcpl = H5I_INVALID_HID;
-                    herr_t      ret;
-                    const char *low_string;  /* Message for library version low bound */
-                    const char *high_string; /* Message for library version high bound */
+                    for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
-                    /* Set version bounds */
-                    H5E_BEGIN_TRY
-                    {
-                        ret = H5Pset_libver_bounds(libver_fapl, low, high);
-                    }
-                    H5E_END_TRY
+                        hid_t       my_fcpl = H5I_INVALID_HID;
+                        herr_t      ret;
+                        const char *low_string;  /* Message for library version low bound */
+                        const char *high_string; /* Message for library version high bound */
 
-                    if (ret < 0) /* Invalid low/high combinations */
-                        continue;
+                        /* Set version bounds */
+                        H5E_BEGIN_TRY
+                        {
+                            ret = H5Pset_libver_bounds(libver_fapl, low, high);
+                        }
+                        H5E_END_TRY
 
-                    /* Paged aggregation needs high bound to be at least H5F_LIBVER_V110 */
-                    if (paged && high < H5F_LIBVER_V110)
-                        continue;
+                        if (ret < 0) /* Invalid low/high combinations */
+                            continue;
 
-                    low_string  = h5_get_version_string(low);
-                    high_string = h5_get_version_string(high);
+                        /* Paged aggregation needs high bound to be at least H5F_LIBVER_V110 */
+                        if (paged && high < H5F_LIBVER_V110)
+                            continue;
 
-                    if (paged) {
-                        my_fcpl = page_fcpl;
-                        if (filtered)
-                            printf("\nTesting with paged aggregation, filtered and libver (%s, %s)\n",
-                                   low_string, high_string);
-                        else
-                            printf("\nTesting with paged aggregation, non-filtered and libver (%s, %s)\n",
-                                   low_string, high_string);
-                    }
-                    else {
-                        my_fcpl = fcpl;
-                        if (filtered)
-                            printf("\nTesting with non-paged aggregation, filtered and libver (%s, %s)\n",
-                                   low_string, high_string);
-                        else
-                            printf("\nTesting with non-paged aggregation, non-filtered and libver (%s, %s)\n",
-                                   low_string, high_string);
-                    }
+                        low_string  = h5_get_version_string(low);
+                        high_string = h5_get_version_string(high);
 
-                    nerrors += (test_struct_chunk_api(my_fcpl, libver_fapl) < 0 ? 1 : 0);
-                    nerrors += (test_struct_chunk_1d_single(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
-                    nerrors += (test_struct_chunk_2d_bt2(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
-                    nerrors += (test_struct_chunk_1d_fa(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
-                    nerrors += (test_struct_chunk_2d_ea(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
-                    nerrors += (test_struct_chunk_filter_register(my_fcpl, libver_fapl) < 0 ? 1 : 0);
+                        if (paged) {
+                            my_fcpl = page_fcpl;
 
-                    /* Tests to be worked on when APIs are implemented */
+                            if (early) {
+                                if (filtered)
+                                    printf("\nTesting with paged aggregation, early alloc, filtered and libver (%s, %s)\n",
+                                        low_string, high_string);
+                                else
+                                    printf("\nTesting with paged aggregation, early alloc, non-filtered and libver (%s, %s)\n",
+                                        low_string, high_string);
+                            } else {
+
+                                if (filtered)
+                                    printf("\nTesting with paged aggregation, default alloc, filtered and libver (%s, %s)\n",
+                                        low_string, high_string);
+                                else
+                                    printf("\nTesting with paged aggregation, default alloc, non-filtered and libver (%s, %s)\n",
+                                        low_string, high_string);
+                            }
+                        }
+                        else {
+                            my_fcpl = fcpl;
+
+                            if (early) {
+                                if (filtered)
+                                    printf("\nTesting with non-paged aggregation, early alloc, filtered and libver (%s, %s)\n",
+                                        low_string, high_string);
+                                else
+                                    printf("\nTesting with non-paged aggregation, early alloc, non-filtered and libver (%s, %s)\n",
+                                        low_string, high_string);
+                            } else {
+                                if (filtered)
+                                    printf("\nTesting with non-paged aggregation, default alloc, filtered and libver (%s, %s)\n",
+                                        low_string, high_string);
+                                else
+                                    printf("\nTesting with non-paged aggregation, default alloc, non-filtered and libver (%s, %s)\n",
+                                        low_string, high_string);
+                            }
+                        }
+
+                        nerrors += (test_struct_chunk_info_1d(my_fcpl, libver_fapl, filtered, early, CHK_SINGLE) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_info_1d(my_fcpl, libver_fapl, filtered, early, CHK_FA) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_info_1d(my_fcpl, libver_fapl, filtered, early, CHK_EA) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_info_2d_bt2(my_fcpl, libver_fapl, filtered, early) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_extent_1d(my_fcpl, libver_fapl, filtered, early) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_extent_2d(my_fcpl, libver_fapl, filtered, early, true) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_extent_2d(my_fcpl, libver_fapl, filtered, early, false) < 0 ? 1 : 0);
+
+                        nerrors += (test_struct_chunk_api(my_fcpl, libver_fapl) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_1d_single(my_fcpl, libver_fapl, filtered, early) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_2d_bt2(my_fcpl, libver_fapl, filtered, early) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_1d_fa(my_fcpl, libver_fapl, filtered, early) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_2d_ea(my_fcpl, libver_fapl, filtered, early) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_filter_register(my_fcpl, libver_fapl) < 0 ? 1 : 0);
+
+                        /* Tests to be worked on when APIs are implemented */
 #ifdef TBD
-                    nerrors += (test_struct_chunk_api_defined_erase(my_fapl) < 0 ? 1 : 0);
-                    nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
-                    nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);
-                    nerrors += (test_dense_chunk_api_on_sparse(my_fapl) < 0 ? 1 : 0);
+                        nerrors += (test_struct_chunk_api_defined_erase(my_fapl) < 0 ? 1 : 0);
+                        nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
+                        nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);
+                        nerrors += (test_dense_chunk_api_on_sparse(my_fapl) < 0 ? 1 : 0);
 #endif
-                } /* end for high */
+                    } /* end for high */
 
-                h5_delete_all_test_files(FILENAME, libver_fapl);
-                if (H5Pclose(libver_fapl) < 0)
-                    TEST_ERROR;
+                    h5_delete_all_test_files(FILENAME, libver_fapl);
+                    if (H5Pclose(libver_fapl) < 0)
+                        TEST_ERROR;
 
-            } /* end for low */
+                } /* end for low */
 
-        } /* end filtered */
+            } /* end filtered */
+
+        } /* end early */
 
     } /* end paged */
 

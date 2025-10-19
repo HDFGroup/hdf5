@@ -108,7 +108,6 @@ typedef struct H5D_chunk_cache_mem_t {
  */
 static herr_t H5D__struct_chunk_construct(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset);
 static herr_t H5D__struct_chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id);
-static bool   H5D__struct_chunk_is_space_alloc(const H5O_storage_t *storage);
 static herr_t H5D__struct_chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t H5D__struct_chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t H5D__struct_chunk_io_term(H5D_io_info_t H5_ATTR_UNUSED *io_info, H5D_dset_io_info_t *di);
@@ -120,7 +119,6 @@ static herr_t H5D__struct_chunk_may_use_select_io(H5D_io_info_t            *io_i
 static herr_t H5D__struct_chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t H5D__struct_chunk_set_info_real(H5O_layout_struct_chunk_t *layout, unsigned ndims,
                                               const hsize_t *curr_dims, const hsize_t *max_dims);
-static herr_t H5D__struct_chunk_set_info(const H5D_t *dset);
 
 /*
  *  Shared chunk cache layout callbacks for structured chunk
@@ -635,7 +633,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__struct_chunk_set_info(const H5D_t *dset)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -907,6 +905,76 @@ H5D__struct_chunk_is_space_alloc(const H5O_storage_t *store)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__struct_chunk_is_space_alloc() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__struct_chunk_allocated_cb
+ *
+ * Purpose:    Simply counts the number of chunks for a dataset.
+ *
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__struct_chunk_allocated_cb(const void *rec, void *_udata)
+{
+    const H5D_struct_chunk_rec_t *chunk_rec = (const H5D_struct_chunk_rec_t *)rec;
+    hsize_t               *nbytes    = (hsize_t *)_udata;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    *(hsize_t *)nbytes += chunk_rec->nbytes;
+
+    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
+} /* H5D__chunk_allocated_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__struct_chunk_allocated
+ *
+ * Purpose:    Return the number of bytes allocated in the file for storage
+ *        of raw data in the structured chunk dataset
+ *
+ * Return:    Success:    Number of bytes stored in all chunks.
+ *        Failure:    0
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__struct_chunk_allocated(const H5D_t *dset, hsize_t *nbytes)
+{
+    H5D_chk_idx_info_t   idx_info;                            /* Chunked index info */
+    hsize_t              chunk_bytes = 0;                     /* Number of bytes allocated for chunks */
+    H5O_storage_struct_chunk_t *sc          = &(dset->shared->layout.storage.u.struct_chunk);
+    herr_t               ret_value   = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    assert(dset);
+    assert(dset->shared);
+    H5D_STRUCT_CHUNK_STORAGE_INDEX_CHK(sc);
+
+    /* Probably need to do this when shared chunk cache is ready */
+    /* Search for cached chunks that haven't been written out */
+
+    /* Compose chunked index info struct */
+    idx_info.f       = dset->oloc.file;
+    idx_info.pline   = &dset->shared->dcpl_cache.pline;
+    idx_info.stc_layout  = &dset->shared->layout.u.struct_chunk;
+    idx_info.stc_storage = sc;
+
+    /* Iterate over the chunks */
+    if ((sc->ops->iterate)(&idx_info, H5D__struct_chunk_allocated_cb, &chunk_bytes) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                    "unable to retrieve allocated chunk information from index");
+
+    /* Set number of bytes for caller */
+    *nbytes = chunk_bytes;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_allocated() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__struct_chunk_io_init
@@ -3712,3 +3780,78 @@ H5D__struct_chunk_delete_chunk(H5D_t *dset, const hsize_t *scaled /*in*/, haddr_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__struct_chunk_delete_chunk() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__struct_chunk_bh_info
+ *
+ * Purpose:     Retrieve the amount of index storage for structured chunk dataset
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__struct_chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout, hsize_t *index_size)
+{
+    H5D_chk_idx_info_t   idx_info;     /* Chunked index info */
+    H5S_t               *space = NULL; /* Dataset's dataspace */
+    H5O_pline_t          pline;        /* I/O pipeline message */
+    H5O_storage_struct_chunk_t *sc = &(layout->storage.u.struct_chunk);
+    htri_t               exists;                  /* Flag if header message of interest exists */
+    bool                 idx_info_init = false;   /* Whether the chunk index info has been initialized */
+    bool                 pline_read    = false;   /* Whether the I/O pipeline message was read */
+    herr_t               ret_value     = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    assert(loc);
+    assert(loc->file);
+    assert(H5_addr_defined(loc->addr));
+    assert(layout);
+    H5D_STRUCT_CHUNK_STORAGE_INDEX_CHK(sc);
+    assert(index_size);
+
+    /* Check for I/O pipeline message */
+    if ((exists = H5O_msg_exists_oh(oh, H5O_PLINE_ID)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
+    else if (exists) {
+        if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_PLINE_ID, &pline))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't find I/O pipeline message");
+        pline_read = true;
+    } /* end else if */
+    else
+        memset(&pline, 0, sizeof(pline));
+
+    /* Compose chunked index info struct */
+    idx_info.f       = loc->file;
+    idx_info.pline   = &pline;
+    idx_info.stc_layout  = &layout->u.struct_chunk;
+    idx_info.stc_storage = sc;
+
+    /* Get the dataspace for the dataset */
+    if (NULL == (space = H5S_read(loc)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load dataspace info from dataset header");
+
+    /* Allocate any indexing structures */
+    if (sc->ops->init && (sc->ops->init)(&idx_info, space, loc->addr) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information");
+    idx_info_init = true;
+
+    /* Get size of index structure */
+    if (sc->ops->size && (sc->ops->size)(&idx_info, index_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve chunk index info");
+
+done:
+    /* Free resources, if they've been initialized */
+    if (idx_info_init && sc->ops->dest && (sc->ops->dest)(&idx_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info");
+    if (pline_read && H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline message");
+    if (space && H5S_close(space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__struct_chunk_bh_info() */

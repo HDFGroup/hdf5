@@ -15,6 +15,8 @@ File space information for file metadata (in bytes):
 		Heap: 0
 	Chunked datasets:
 		Index: 31392
+	Structured chunk datasets:
+		Index: 0
 	Datasets:
 		Heap: 72
 	Shared Messages:

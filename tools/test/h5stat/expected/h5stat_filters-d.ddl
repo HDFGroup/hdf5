@@ -22,12 +22,34 @@ Dataset layout information:
 	Dataset layout counts[STRUCT_CHUNK]: 0
 	Number of external files : 2
 Dataset filters information:
-	Number of datasets with:
-		NO filter: 7
-		GZIP filter: 2
-		SHUFFLE filter: 2
-		FLETCHER32 filter: 2
-		SZIP filter: 2
-		NBIT filter: 2
-		SCALEOFFSET filter: 1
-		USER-DEFINED filter: 1
+	Chunked dataset:
+		Number of datasets with:
+			NO filter: 7
+			GZIP filter: 2
+			SHUFFLE filter: 2
+			FLETCHER32 filter: 2
+			SZIP filter: 2
+			NBIT filter: 2
+			SCALEOFFSET filter: 1
+			USER-DEFINED filter: 1
+	Structured chunk dataset:
+		Section type: SELECTION
+			Number of datasets with:
+				NO filter: 0
+				GZIP filter: 0
+				SHUFFLE filter: 0
+				FLETCHER32 filter: 0
+				SZIP filter: 0
+				NBIT filter: 0
+				SCALEOFFSET filter: 0
+				USER-DEFINED filter: 0
+		Section type: DATA
+			Number of datasets with:
+				NO filter: 0
+				GZIP filter: 0
+				SHUFFLE filter: 0
+				FLETCHER32 filter: 0
+				SZIP filter: 0
+				NBIT filter: 0
+				SCALEOFFSET filter: 0
+				USER-DEFINED filter: 0

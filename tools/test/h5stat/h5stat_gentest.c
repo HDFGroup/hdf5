@@ -46,6 +46,10 @@
 /* For gen_err_refcount() */
 #define ERR_REFCOUNT_FILE "h5stat_err_refcount.h5"
 
+/* Declarations for gen_struct_chunk_file() */
+#define STRUCT_CHUNK_FILE    "h5stat_struct_chunk.h5"
+#define SPARSE_DATASET_NAME "SPARSE_DATASET_NAME"
+
 /*
  * Generate HDF5 file with latest format with
  * NUM_GRPS groups and NUM_ATTRS attributes for the dataset
@@ -584,6 +588,205 @@ error:
 } /* gen_err_refcount() */
 
 /*
+ * Generate a file with structured chunk dataset.
+ */
+static herr_t
+gen_struct_chunk_file(const char *fname)
+{
+    hid_t fid     = H5I_INVALID_HID; /* File id */
+    hid_t sid     = H5I_INVALID_HID; /* Dataspace id */
+    hid_t fapl    = H5I_INVALID_HID; /* File creation property list id */
+    hid_t dcpl    = H5I_INVALID_HID; /* Dataset creation property list id */
+    hid_t did     = H5I_INVALID_HID; /* Dataset id */
+    hsize_t           ea_dim[1]       = {30}; /* 1-d dataspace */
+    hsize_t           ea_max_dim[1] = {H5S_UNLIMITED};
+    hsize_t           chunk_dim[1] = {5}; /* Chunk size */
+    hsize_t start[1];
+    hsize_t stride[1];
+    hsize_t count[1];
+    hsize_t block[1];
+    unsigned int      level        = 9;
+    unsigned int      cd_values[1] = {level};
+    size_t            cd_nelmts    = 1;
+    int wbuf[30];                       /* Write buffer */
+
+    /* Get a copy file access property list */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+
+    /* Set to use latest library format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        goto error;
+
+    /* Create file */
+    if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+
+    /*
+     * Create structured chunk dataset
+     */
+
+    /* Create property list for dataset creation */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+
+    if (H5Pset_layout(dcpl, H5D_STRUCT_CHUNK) < 0)
+        goto error;
+
+    if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
+        goto error;
+
+    /* Set filter on selection and fixed data sections */
+    if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                       cd_values) < 0)
+        goto error;
+
+    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                       cd_values) < 0)
+        goto error;
+
+    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                       NULL) < 0)
+        goto error;
+
+    /* Create dataspace for dataset */
+    if ((sid = H5Screate_simple(1, ea_dim, ea_max_dim)) < 0)
+        goto error;
+
+    /* Create structured chunk dataset */
+    if ((did = H5Dcreate2(fid, SPARSE_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Starting at 4, select 3 blocks of size 2 each */
+    /* Selection is across chunks and within the chunk */
+    start[0]  = 4;
+    stride[0] = 6;
+    count[0]  = 3;
+    block[0]  = 2;
+    H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+
+    memset(wbuf, 0, sizeof(wbuf));
+
+    /* Starting at 4, initialize 3 blocks of size 2 to the dataset */
+    wbuf[4]  = 4;
+    wbuf[5]  = 5;
+    wbuf[10] = 10;
+    wbuf[11] = 11;
+    wbuf[16] = 16;
+    wbuf[17] = 17;
+
+    /* Starting at 1, select 3 blocks of size 1 each */
+    start[0]  = 1;
+    stride[0] = 6;
+    count[0]  = 3;
+    block[0]  = 1;
+    H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, stride, count, block);
+
+    wbuf[1]  = 1;
+    wbuf[7]  = 7;
+    wbuf[13] = 13;
+
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
+        goto error;
+
+    /* Close dataset, dataspace, datatype, file */
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    if (H5Sclose(sid) < 0)
+        goto error;
+
+    if (H5Pclose(dcpl) < 0)
+        goto error;
+
+
+    /*
+     * Create legacy chunked dataset
+     */
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+
+    if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0)
+        goto error;
+
+    if (H5Pset_chunk(dcpl, 1, chunk_dim) < 0)
+        goto error;
+
+    if (H5Pset_deflate(dcpl, level) < 0)
+        goto error;
+
+    /* Create dataspace */
+    if ((sid = H5Screate_simple(1, ea_dim, ea_max_dim)) < 0)
+        goto error;
+
+    if ((did = H5Dcreate2(fid, DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Starting at 4, select 3 blocks of size 2 each */
+    /* Selection is across chunks and within the chunk */
+    start[0]  = 4;
+    stride[0] = 6;
+    count[0]  = 3;
+    block[0]  = 2;
+    H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+
+    memset(wbuf, 0, sizeof(wbuf));
+
+    /* Starting at 4, initialize 3 blocks of size 2 to the dataset */
+    wbuf[4]  = 4;
+    wbuf[5]  = 5;
+    wbuf[10] = 10;
+    wbuf[11] = 11;
+    wbuf[16] = 16;
+    wbuf[17] = 17;
+
+    /* Starting at 1, select 3 blocks of size 1 each */
+    start[0]  = 1;
+    stride[0] = 6;
+    count[0]  = 3;
+    block[0]  = 1;
+    H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, stride, count, block);
+
+    wbuf[1]  = 1;
+    wbuf[7]  = 7;
+    wbuf[13] = 13;
+
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
+        goto error;
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    if (H5Sclose(sid) < 0)
+        goto error;
+
+    if (H5Pclose(dcpl) < 0)
+        goto error;
+
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    if (H5Pclose(fapl) < 0)
+        goto error;
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(fapl);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+} /* gen_struct_chunk_file() */
+
+/*
  * The following two test files are generated with older versions
  * of the library for HDFFV-10333.  They are used for testing in
  * testh5stat.sh.in.
@@ -621,6 +824,9 @@ main(void)
 
     /* Generate a file with a refcount message ID */
     if (gen_err_refcount(ERR_REFCOUNT_FILE) < 0)
+        goto error;
+
+    if (gen_struct_chunk_file(STRUCT_CHUNK_FILE) < 0)
         goto error;
 
     return EXIT_SUCCESS;

@@ -23,6 +23,8 @@ File space information for file metadata (in bytes):
 		Heap: 0
 	Chunked datasets:
 		Index: 202
+	Structured chunk datasets:
+		Index: 0
 	Datasets:
 		Heap: 0
 	Shared Messages:
@@ -60,15 +62,37 @@ Dataset layout information:
 	Dataset layout counts[STRUCT_CHUNK]: 0
 	Number of external files : 0
 Dataset filters information:
-	Number of datasets with:
-		NO filter: 1
-		GZIP filter: 1
-		SHUFFLE filter: 0
-		FLETCHER32 filter: 0
-		SZIP filter: 0
-		NBIT filter: 0
-		SCALEOFFSET filter: 0
-		USER-DEFINED filter: 0
+	Chunked dataset:
+		Number of datasets with:
+			NO filter: 1
+			GZIP filter: 1
+			SHUFFLE filter: 0
+			FLETCHER32 filter: 0
+			SZIP filter: 0
+			NBIT filter: 0
+			SCALEOFFSET filter: 0
+			USER-DEFINED filter: 0
+	Structured chunk dataset:
+		Section type: SELECTION
+			Number of datasets with:
+				NO filter: 0
+				GZIP filter: 0
+				SHUFFLE filter: 0
+				FLETCHER32 filter: 0
+				SZIP filter: 0
+				NBIT filter: 0
+				SCALEOFFSET filter: 0
+				USER-DEFINED filter: 0
+		Section type: DATA
+			Number of datasets with:
+				NO filter: 0
+				GZIP filter: 0
+				SHUFFLE filter: 0
+				FLETCHER32 filter: 0
+				SZIP filter: 0
+				NBIT filter: 0
+				SCALEOFFSET filter: 0
+				USER-DEFINED filter: 0
 Dataset datatype information:
 	# of unique datatypes used by datasets: 1
 	Dataset datatype #0:

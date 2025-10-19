@@ -360,6 +360,11 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
         if (H5D__chunk_bh_info(loc, oh, &layout, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info");
     } /* end if */
+    else if (layout.type == H5D_STRUCT_CHUNK && H5D__struct_chunk_is_space_alloc(&layout.storage)) {
+        /* Get size of chunk index */
+        if (H5D__struct_chunk_bh_info(loc, oh, &layout, &(bh_info->index_size)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine structured chunk dataset index info");
+    }
     else if (layout.type == H5D_VIRTUAL && (layout.storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF)) {
         size_t virtual_heap_size;
 
