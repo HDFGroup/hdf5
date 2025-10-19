@@ -173,9 +173,9 @@ public class H5Ex_T_Opaque {
             if (dataset_id >= 0)
                 datatype_id = H5Dget_type(dataset_id);
             if (datatype_id >= 0) {
-                type_len = H5Tget_size(datatype_id);
+                type_len             = H5Tget_size(datatype_id);
                 MemorySegment tagSeg = H5Tget_tag(datatype_id);
-                tag_name = tagSeg.getString(0);
+                tag_name             = tagSeg.getString(0);
             }
         }
         catch (Exception e) {

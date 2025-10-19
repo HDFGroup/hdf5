@@ -133,8 +133,8 @@ public class H5Ex_T_Commit {
                     long type_id = datatypes.memberFileTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(filetype_id, arena.allocateFrom(datatypes.memberNames[indx]), Sensor_Datatype.getOffset(indx),
-                              type_id);
+                    H5Tinsert(filetype_id, arena.allocateFrom(datatypes.memberNames[indx]),
+                              Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -145,7 +145,8 @@ public class H5Ex_T_Commit {
         // Commit the compound datatype to the file, creating a named datatype.
         try {
             if ((file_id >= 0) && (filetype_id >= 0))
-                H5Tcommit2(file_id, arena.allocateFrom(DATATYPENAME), filetype_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                H5Tcommit2(file_id, arena.allocateFrom(DATATYPENAME), filetype_id, H5P_DEFAULT(),
+                           H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -221,7 +222,7 @@ public class H5Ex_T_Commit {
                 // Iterate over compound datatype members.
                 for (int indx = 0; indx < nmembs; indx++) {
                     MemorySegment nameSeg = H5Tget_member_name(filetype_id, indx);
-                    String member_name = nameSeg.getString(0);
+                    String member_name    = nameSeg.getString(0);
                     System.out.println("    " + member_name);
                 }
             }

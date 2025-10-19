@@ -47,25 +47,25 @@ public class H5Ex_G_Corder {
             // Create primary group using the property list.
             if (status >= 0)
                 group_id = H5Gcreate2(file_id, arena.allocateFrom("index_group"), H5P_DEFAULT(), gcpl_id,
-                                     H5P_DEFAULT());
+                                      H5P_DEFAULT());
 
             try {
                 /*
                  * Create subgroups in the primary group. These will be tracked by creation order. Note that
                  * these groups do not have to have the creation order tracking property set.
                  */
-                subgroup_id =
-                    H5Gcreate2(group_id, arena.allocateFrom("H"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
-                status = H5Gclose(subgroup_id);
-                subgroup_id =
-                    H5Gcreate2(group_id, arena.allocateFrom("D"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
-                status = H5Gclose(subgroup_id);
-                subgroup_id =
-                    H5Gcreate2(group_id, arena.allocateFrom("F"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
-                status = H5Gclose(subgroup_id);
-                subgroup_id =
-                    H5Gcreate2(group_id, arena.allocateFrom("5"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
-                status = H5Gclose(subgroup_id);
+                subgroup_id = H5Gcreate2(group_id, arena.allocateFrom("H"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                         H5P_DEFAULT());
+                status      = H5Gclose(subgroup_id);
+                subgroup_id = H5Gcreate2(group_id, arena.allocateFrom("D"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                         H5P_DEFAULT());
+                status      = H5Gclose(subgroup_id);
+                subgroup_id = H5Gcreate2(group_id, arena.allocateFrom("F"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                         H5P_DEFAULT());
+                status      = H5Gclose(subgroup_id);
+                subgroup_id = H5Gcreate2(group_id, arena.allocateFrom("5"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                         H5P_DEFAULT());
+                status      = H5Gclose(subgroup_id);
 
                 // Get group info.
                 ginfo = H5Gget_info(group_id);

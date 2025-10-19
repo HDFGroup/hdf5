@@ -47,7 +47,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         try {
             if (file_id >= 0)
                 group1_id = H5Gcreate2(file_id, arena.allocateFrom("/") + GROUPNAME, H5P_DEFAULT(),
-                                      H5P_DEFAULT(), H5P_DEFAULT());
+                                       H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -57,7 +57,7 @@ public class HDF5GroupAbsoluteRelativeCreate {
         try {
             if (file_id >= 0)
                 group2_id = H5Gcreate2(file_id, arena.allocateFrom("/") + GROUPNAME + "/" + GROUPNAME_A,
-                                      H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                                       H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

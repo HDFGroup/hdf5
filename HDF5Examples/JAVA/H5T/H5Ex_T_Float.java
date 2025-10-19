@@ -183,7 +183,7 @@ public class H5Ex_T_Float {
         // Read data.
         try {
             if (dataset_id >= 0) {
-                int totalSize = 4 * 7;
+                int totalSize         = 4 * 7;
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_DOUBLE, totalSize);
                 H5Dread(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
                 // Unflatten the 1D MemorySegment to 2D array

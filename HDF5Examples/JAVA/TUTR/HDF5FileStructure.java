@@ -182,9 +182,9 @@ public class HDF5FileStructure {
         try {
             if (file_id >= 0) {
                 group_id1 = H5Gcreate2(file_id, arena.allocateFrom("/") + "integer arrays", H5P_DEFAULT(),
-                                      H5P_DEFAULT(), H5P_DEFAULT());
+                                       H5P_DEFAULT(), H5P_DEFAULT());
                 group_id1 = H5Gcreate2(file_id, arena.allocateFrom("/") + "float arrays", H5P_DEFAULT(),
-                                      H5P_DEFAULT(), H5P_DEFAULT());
+                                       H5P_DEFAULT(), H5P_DEFAULT());
             }
         }
         catch (Exception e) {

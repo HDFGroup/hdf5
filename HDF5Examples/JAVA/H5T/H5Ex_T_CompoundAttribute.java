@@ -22,8 +22,6 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import hdf.hdf5lib.H5;
-
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -33,6 +31,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import hdf.hdf5lib.H5;
 
 public class H5Ex_T_CompoundAttribute {
     private static String FILENAME           = "H5Ex_T_CompoundAttribute.h5";
@@ -204,8 +204,8 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(memtype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
-                              type_id);
+                    H5Tinsert(memtype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]),
+                              Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -224,8 +224,8 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberFileTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(filetype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
-                              type_id);
+                    H5Tinsert(filetype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]),
+                              Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -260,8 +260,8 @@ public class H5Ex_T_CompoundAttribute {
         // Create the attribute.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), filetype_id, dataspace_id, H5P_DEFAULT(),
-                                         H5P_DEFAULT());
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), filetype_id,
+                                          dataspace_id, H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -368,7 +368,9 @@ public class H5Ex_T_CompoundAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id =
+                    H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME),
+                                    H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -417,8 +419,8 @@ public class H5Ex_T_CompoundAttribute {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5Tinsert(memtype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]), Sensor_Datatype.getOffset(indx),
-                              type_id);
+                    H5Tinsert(memtype_id, arena.allocateFrom(Sensor_Datatype.memberNames[indx]),
+                              Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }

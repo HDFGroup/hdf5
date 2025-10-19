@@ -247,7 +247,7 @@ public class H5Ex_T_String {
         // Read data.
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0)) {
-                int totalSize = (int)dims[0] * (int)sdim;
+                int totalSize         = (int)dims[0] * (int)sdim;
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_BYTE, totalSize);
                 H5Dread(dataset_id, memtype_id, H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
                 // Unflatten 1D MemorySegment to 2D byte array

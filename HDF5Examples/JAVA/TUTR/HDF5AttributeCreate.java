@@ -89,8 +89,8 @@ public class HDF5AttributeCreate {
         // Create a dataset attribute.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0))
-                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(attrname), H5T_STD_I32BE_g(), dataspace_id, H5P_DEFAULT(),
-                                         H5P_DEFAULT());
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(attrname), H5T_STD_I32BE_g(),
+                                          dataspace_id, H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -99,7 +99,7 @@ public class HDF5AttributeCreate {
         try {
             if (attribute_id >= 0)
                 MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_INT, attrValue);
-                H5Awrite(attribute_id, H5T_NATIVE_INT_g(), dataSeg);
+            H5Awrite(attribute_id, H5T_NATIVE_INT_g(), dataSeg);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +125,8 @@ public class HDF5AttributeCreate {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), attrname, H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), attrname, H5P_DEFAULT(),
+                                               H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -143,11 +144,11 @@ public class HDF5AttributeCreate {
         try {
             if (dataspace_id >= 0)
                 MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, attrDims);
-                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
-                // Read back the dimensions
-                for (int i = 0; i < attrDims.length; i++) {
-                    attrDims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
-                }
+            H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+            // Read back the dimensions
+            for (int i = 0; i < attrDims.length; i++) {
+                attrDims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -161,10 +162,10 @@ public class HDF5AttributeCreate {
         try {
             if (attribute_id >= 0)
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, attrData.length);
-                H5Aread(attribute_id, H5T_NATIVE_INT_g(), dataSeg);
-                for (int i = 0; i < attrData.length; i++) {
-                    attrData[i] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i);
-                }
+            H5Aread(attribute_id, H5T_NATIVE_INT_g(), dataSeg);
+            for (int i = 0; i < attrData.length; i++) {
+                attrData[i] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -263,7 +264,7 @@ public class HDF5AttributeCreate {
         try {
             if (dataset_id >= 0)
                 MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_INT, dataIn);
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
         }
         catch (Exception e) {
             e.printStackTrace();

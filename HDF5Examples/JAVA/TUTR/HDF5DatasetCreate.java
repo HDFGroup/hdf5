@@ -67,10 +67,10 @@ public class HDF5DatasetCreate {
         // Create a group in the file.
         try {
             if (file_id >= 0) {
-                group_id1 =
-                    H5Gcreate2(file_id, arena.allocateFrom("g1"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
-                group_id2 =
-                    H5Gcreate2(file_id, arena.allocateFrom("g2"), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("g1"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                       H5P_DEFAULT());
+                group_id2 = H5Gcreate2(file_id, arena.allocateFrom("g2"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                       H5P_DEFAULT());
             }
         }
         catch (Exception e) {

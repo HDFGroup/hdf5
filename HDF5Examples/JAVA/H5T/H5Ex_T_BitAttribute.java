@@ -88,8 +88,8 @@ public class H5Ex_T_BitAttribute {
         // Create the attribute and write the array data to it.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0))
-                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), H5T_STD_B8BE_g(), dataspace_id,
-                                         H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), H5T_STD_B8BE_g(),
+                                          dataspace_id, H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -177,7 +177,9 @@ public class H5Ex_T_BitAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id =
+                    H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME),
+                                    H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -213,7 +215,7 @@ public class H5Ex_T_BitAttribute {
         // Read data.
         try {
             if (attribute_id >= 0) {
-                int totalSize = 4 * 7;
+                int totalSize         = 4 * 7;
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, totalSize);
                 H5Aread(attribute_id, H5T_NATIVE_B8_g(), dataSeg);
                 // Unflatten the 1D MemorySegment to 2D array

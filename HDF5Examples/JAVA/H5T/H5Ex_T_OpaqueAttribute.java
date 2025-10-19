@@ -99,8 +99,8 @@ public class H5Ex_T_OpaqueAttribute {
         // Create the attribute and write the array data to it.
         try {
             if ((dataset_id >= 0) && (datatype_id >= 0) && (dataspace_id >= 0))
-                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), datatype_id, dataspace_id, H5P_DEFAULT(),
-                                         H5P_DEFAULT());
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), datatype_id,
+                                          dataspace_id, H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -192,7 +192,9 @@ public class H5Ex_T_OpaqueAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id =
+                    H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME),
+                                    H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -203,9 +205,9 @@ public class H5Ex_T_OpaqueAttribute {
             if (attribute_id >= 0)
                 datatype_id = H5Aget_type(attribute_id);
             if (datatype_id >= 0) {
-                type_len = H5Tget_size(datatype_id);
+                type_len             = H5Tget_size(datatype_id);
                 MemorySegment tagSeg = H5Tget_tag(datatype_id);
-                tag_name = tagSeg.getString(0);
+                tag_name             = tagSeg.getString(0);
             }
         }
         catch (Exception e) {

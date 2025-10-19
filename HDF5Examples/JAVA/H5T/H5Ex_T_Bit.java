@@ -180,7 +180,7 @@ public class H5Ex_T_Bit {
         // Read data.
         try {
             if (dataset_id >= 0) {
-                int totalSize = (int)(dims[0] * dims[1]);
+                int totalSize         = (int)(dims[0] * dims[1]);
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, totalSize);
                 H5Dread(dataset_id, H5T_NATIVE_B8_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
                 // Unflatten the 1D MemorySegment to 2D array

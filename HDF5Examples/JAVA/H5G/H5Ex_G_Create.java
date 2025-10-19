@@ -43,7 +43,7 @@ public class H5Ex_G_Create {
         try {
             if (file_id >= 0)
                 group_id = H5Gcreate2(file_id, arena.allocateFrom("/" + GROUPNAME), H5P_DEFAULT(),
-                                     H5P_DEFAULT(), H5P_DEFAULT());
+                                      H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

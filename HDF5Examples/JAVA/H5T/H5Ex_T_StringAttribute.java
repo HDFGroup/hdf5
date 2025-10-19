@@ -102,8 +102,8 @@ public class H5Ex_T_StringAttribute {
         // Create the attribute.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), filetype_id, dataspace_id, H5P_DEFAULT(),
-                                         H5P_DEFAULT());
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), filetype_id,
+                                          dataspace_id, H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -221,7 +221,9 @@ public class H5Ex_T_StringAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME), H5P_DEFAULT(), H5P_DEFAULT());
+                attribute_id =
+                    H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME),
+                                    H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -280,7 +282,7 @@ public class H5Ex_T_StringAttribute {
         // Read data.
         try {
             if ((attribute_id >= 0) && (memtype_id >= 0)) {
-                int totalSize = (int)dims[0] * (int)sdim;
+                int totalSize         = (int)dims[0] * (int)sdim;
                 MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_BYTE, totalSize);
                 H5Aread(attribute_id, memtype_id, dataSeg);
                 // Unflatten 1D MemorySegment to 2D byte array

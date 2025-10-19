@@ -237,7 +237,7 @@ public class HDF5SubsetSelect {
         try {
             if (dataset_id >= 0)
                 MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_INT, dataIn);
-                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
         }
         catch (Exception e) {
             e.printStackTrace();

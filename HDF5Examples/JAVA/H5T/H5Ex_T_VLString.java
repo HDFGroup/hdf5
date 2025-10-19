@@ -18,11 +18,11 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import hdf.hdf5lib.H5;
-
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+
+import hdf.hdf5lib.H5;
 
 public class H5Ex_T_VLString {
     private static String FILENAME    = "H5Ex_T_VLString.h5";

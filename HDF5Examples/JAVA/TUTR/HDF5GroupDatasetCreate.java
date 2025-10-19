@@ -62,11 +62,11 @@ public class HDF5GroupDatasetCreate {
             // Create a group named "/MyGroup" in the file.
             if (file_id >= 0) {
                 group1_id = H5Gcreate2(file_id, arena.allocateFrom("/") + GROUPNAME, H5P_DEFAULT(),
-                                      H5P_DEFAULT(), H5P_DEFAULT());
+                                       H5P_DEFAULT(), H5P_DEFAULT());
                 // Create group "Group_A" in group "MyGroup" using absolute name.
                 if (group1_id >= 0) {
                     group2_id = H5Gcreate2(file_id, arena.allocateFrom("/") + GROUPNAME + "/" + GROUPNAME_A,
-                                          H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                                           H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                     if (group2_id >= 0)
                         H5Gclose(group2_id);
                 }

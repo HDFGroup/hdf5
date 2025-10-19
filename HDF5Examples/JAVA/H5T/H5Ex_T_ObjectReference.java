@@ -63,12 +63,12 @@ public class H5Ex_T_ObjectReference {
 
     private static void writeObjRef(Arena arena)
     {
-        long file_id       = H5I_INVALID_HID();
-        long dataspace_id  = H5I_INVALID_HID();
-        long filespace_id  = H5I_INVALID_HID();
-        long group_id      = H5I_INVALID_HID();
-        long dataset_id    = H5I_INVALID_HID();
-        long[] dims        = {DIM0};
+        long file_id      = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long filespace_id = H5I_INVALID_HID();
+        long group_id     = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long[] dims       = {DIM0};
 
         // Allocate MemorySegments for references
         MemorySegment[] refs = new MemorySegment[DIM0];
@@ -104,7 +104,8 @@ public class H5Ex_T_ObjectReference {
         // Create a group in the file.
         try {
             if (file_id >= 0)
-                group_id = H5Gcreate2(file_id, arena.allocateFrom(GROUPNAME), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group_id = H5Gcreate2(file_id, arena.allocateFrom(GROUPNAME), H5P_DEFAULT(), H5P_DEFAULT(),
+                                      H5P_DEFAULT());
             if (group_id >= 0)
                 H5Gclose(group_id);
             group_id = H5I_INVALID_HID();
@@ -156,7 +157,7 @@ public class H5Ex_T_ObjectReference {
             try {
                 if (dataset_id >= 0) {
                     // Pack references into contiguous MemorySegment
-                    int refSize = H5R_REF_BUF_SIZE();
+                    int refSize           = H5R_REF_BUF_SIZE();
                     MemorySegment refData = arena.allocate(refSize * DIM0);
                     for (int i = 0; i < DIM0; i++) {
                         MemorySegment.copy(refs[i], 0, refData, i * refSize, refSize);
@@ -214,12 +215,12 @@ public class H5Ex_T_ObjectReference {
 
     private static void readObjRef(Arena arena)
     {
-        long file_id       = H5I_INVALID_HID();
-        long dataset_id    = H5I_INVALID_HID();
-        long dataspace_id  = H5I_INVALID_HID();
-        int object_type    = -1;
-        long object_id     = H5I_INVALID_HID();
-        long[] dims        = {DIM0};
+        long file_id      = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        int object_type   = -1;
+        long object_id    = H5I_INVALID_HID();
+        long[] dims       = {DIM0};
 
         // Allocate MemorySegments for references
         MemorySegment[] refs = new MemorySegment[DIM0];
@@ -237,7 +238,7 @@ public class H5Ex_T_ObjectReference {
 
                 try {
                     // Get dataspace and allocate memory for read buffer.
-                    dataspace_id = H5Dget_space(dataset_id);
+                    dataspace_id          = H5Dget_space(dataset_id);
                     MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
                     H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
                     // Read back the dimensions
@@ -246,7 +247,7 @@ public class H5Ex_T_ObjectReference {
                     }
 
                     // Read data into contiguous MemorySegment
-                    int refSize = H5R_REF_BUF_SIZE();
+                    int refSize           = H5R_REF_BUF_SIZE();
                     MemorySegment refData = arena.allocate(refSize * dims[0]);
                     H5Dread(dataset_id, H5T_STD_REF_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), refData);
 
