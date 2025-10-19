@@ -215,6 +215,9 @@ H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info)
     else
         assert(!(idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER));
 
+    /* Set to HADDR_MAX to indicate that the chunk index is created */
+    idx_info->storage->idx_addr = HADDR_MAX;
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__single_idx_create() */
 
@@ -372,7 +375,12 @@ H5D__single_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     assert(idx_info->layout->max_nchunks == 1);
     assert(udata);
 
+    /* Reset it back to HADDR_UNDEF */
+    if (H5_addr_eq(idx_info->storage->idx_addr, HADDR_MAX))
+        idx_info->storage->idx_addr = HADDR_UNDEF;
+
     udata->chunk_block.offset = idx_info->storage->idx_addr;
+
     if (idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
         udata->chunk_block.length = idx_info->storage->u.single.nbytes;
         udata->filter_mask        = idx_info->storage->u.single.filter_mask;
@@ -734,6 +742,9 @@ H5D__single_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
     else
         assert(!(idx_info->stc_layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER));
 
+    /* Set to HADDR_MAX to indicate that the chunk index is created */
+    idx_info->stc_storage->idx_addr = HADDR_MAX;
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__single_stc_idx_create() */
 
@@ -911,6 +922,10 @@ H5D__single_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
     assert(idx_info->stc_layout->nchunks == 1);
     assert(idx_info->stc_layout->max_nchunks == 1);
     assert(udata);
+
+    /* Reset it back to HADDR_UNDEF */
+    if (H5_addr_eq(idx_info->stc_storage->idx_addr, HADDR_MAX))
+        idx_info->stc_storage->idx_addr = HADDR_UNDEF;
 
     udata->chunk_block.offset = idx_info->stc_storage->idx_addr;
     udata->chunk_block.length = idx_info->stc_storage->u.single.chunk_size;

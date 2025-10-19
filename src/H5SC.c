@@ -1402,11 +1402,35 @@ done:
 } /* end H5SC_erase() */
 
 /*-------------------------------------------------------------------------
+ * Function: H5SC_prune_by_extent
+ *
+ * Purpose:  TBD: just FAIL for now
+ *
+ * Return:   SUCCEED on success, FAIL on failure
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5SC_prune_by_extent(H5SC_t *cache, H5D_t *dset, const hsize_t H5_ATTR_UNUSED *old_dims)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    assert(cache);
+    assert(dset);
+    assert(dset->shared->layout.sc_ops);
+
+    FUNC_LEAVE_NOAPI(FAIL)
+
+} /* end H5SC_prune_by_extent() */
+
+/*-------------------------------------------------------------------------
  * Function: H5SC_set_extent_notify
  *
  * Purpose:  Called after H5Dset_extent() has been called for a dataset,
  *           so the cache can recompute chunk indices, delete chunks,
- *           clear unused sections of chunks, etc.
+ *           clear unused sections of chunks, etc. as needed for structured chunk.
+ *
+ *           This routine follows the logic in H5D__set_extent() for dense chunks
+ *           when "changed" is true.
  *
  * Return:   SUCCEED on success, FAIL on failure
  *-------------------------------------------------------------------------
@@ -1414,7 +1438,11 @@ done:
 herr_t
 H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, const hsize_t *old_dims)
 {
-    herr_t ret_value = SUCCEED;
+    hsize_t  ext_dims[H5S_MAX_RANK]; /* The extended dimension sizes */
+    unsigned dim_idx;                /* Dimension index */
+    bool     shrink    = false;      /* Flag to indicate a dimension has shrank */
+    bool     expand    = false;      /* Flag to indicate a dimension has grown */
+    herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1422,6 +1450,58 @@ H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, const hsize_t *old_dims)
     assert(dset);
     assert(dset->shared->layout.sc_ops);
     assert(old_dims);
+
+    /* This should be the extended space which is done in H5D__set_extent() */
+    if (H5S_get_simple_extent_dims(dset->shared->space, ext_dims, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't cache dataspace dimensions");
+
+    /* Determine if we are shrinking and/or expanding any dimensions */
+    for (dim_idx = 0; dim_idx < dset->shared->ndims; dim_idx++) {
+        /* Check for various status changes */
+        if (ext_dims[dim_idx] < old_dims[dim_idx])
+            shrink = true;
+        if (ext_dims[dim_idx] > old_dims[dim_idx])
+            expand = true;
+
+        /* Update the cached copy of the dataset's dimensions */
+        dset->shared->curr_dims[dim_idx] = ext_dims[dim_idx];
+    } /* end for */
+
+    /*-------------------------------------------------------------------------
+     * Modify the dataset storage
+     *-------------------------------------------------------------------------
+     */
+    /* Update the index values for the cached chunks for this dataset */
+    if (H5D_STRUCT_CHUNK == dset->shared->layout.type) {
+        /* Set the cached chunk info */
+        if (H5D__struct_chunk_set_info(dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks");
+    }
+
+    /* NOTE for structured chunk:
+     * --for [shrink/expand] case:
+     *   Let H5SC_prune_by_extent() decide what to do later, it fails for now
+     */
+    /*-------------------------------------------------------------------------
+     * Remove chunk information in the case of chunked datasets
+     * This removal takes place only in case we are shrinking the dataset
+     * and if the chunks are written
+     *-------------------------------------------------------------------------
+     */
+    if (H5D_STRUCT_CHUNK == dset->shared->layout.type) {
+        if ((expand || shrink) &&
+            ((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)))
+            /* This routine just fails for now. */
+            if (H5SC_prune_by_extent(cache, dset, old_dims) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to prune chunks");
+
+        /* NOTE for structured chunk:
+         * --for [expand] case: nothing to be done
+         *      if (expand &&
+         *          (dset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
+         * && (dset->shared->dcpl_cache.pline.nused > 0))
+         */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

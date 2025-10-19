@@ -663,6 +663,12 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
      * allocation until later.
      */
     if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
+        /*
+         * NOTE for structured chunk:
+         *  --follow the logic to call H5D__alloc_storage() to create the chunk index
+         *    but space is not allocated
+         *
+         */
         if (H5D__alloc_storage(dset, H5D_ALLOC_CREATE, false, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage");
 
@@ -717,9 +723,12 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     /* (Don't make layout message constant unless allocation time is early and
      *  non-filtered and has >0 elements, since space may not be allocated -QAK) */
     /* (Note: this is relying on H5D__alloc_storage not calling H5O_msg_write during dataset creation) */
+    /*
+     * NOTE for structured chunk: don't make it constant
+     */
     if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type &&
-        !dset->shared->dcpl_cache.pline.nused && !dset->shared->dcpl_cache.pline.tot_filt_nsects &&
-        (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
+        H5D_STRUCT_CHUNK != layout->type && !dset->shared->dcpl_cache.pline.nused &&
+        !dset->shared->dcpl_cache.pline.tot_filt_nsects && (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
         layout_mesg_flags = H5O_MSG_FLAG_CONSTANT;
     else
         layout_mesg_flags = 0;

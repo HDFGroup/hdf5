@@ -907,6 +907,11 @@ herr_t H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, const hs
 
 /* Functions that operate on structured chunk storage */
 H5_DLL herr_t H5D__struct_chunk_set_sizes(H5D_t *dset);
+H5_DLL herr_t H5D__struct_chunk_set_info(const H5D_t *dset);
+H5_DLL herr_t H5D__struct_chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout,
+                                        hsize_t *btree_size);
+H5_DLL bool   H5D__struct_chunk_is_space_alloc(const H5O_storage_t *storage);
+H5_DLL herr_t H5D__struct_chunk_allocated(const H5D_t *dset, hsize_t *nbytes);
 H5_DLL herr_t H5D__struct_chunk_create(const H5D_t *dset /*in,out*/);
 H5_DLL hid_t  H5D__get_defined(H5D_t *dset, const H5S_t *fspace);
 H5_DLL herr_t H5D__erase(H5D_t *dset, const H5S_t *fspace);

@@ -82,37 +82,40 @@ typedef struct iter_t {
     unsigned long *small_dset_dims;                 /* Size of dimensions of small datasets tracked */
     unsigned long  dset_layouts[H5D_NLAYOUTS];      /* Type of storage for each dataset */
     unsigned long  dset_comptype[H5_NFILTERS_IMPL]; /* Number of currently implemented filters */
-    unsigned long  dset_ntypes;                     /* Number of diff. dataset datatypes found */
-    dtype_info_t  *dset_type_info;                  /* Pointer to dataset datatype information found */
-    unsigned       dset_dim_nbins;                  /* Number of bins for dataset dimensions */
-    unsigned long *dset_dim_bins;                   /* Pointer to array of bins for dataset dimensions */
-    ohdr_info_t    dset_ohdr_info;                  /* Object header information for datasets */
-    hsize_t        dset_storage_size;               /* Size of raw data for datasets */
-    hsize_t        dset_external_storage_size;      /* Size of raw data for datasets with external storage */
-    ohdr_info_t    dtype_ohdr_info;                 /* Object header information for datatypes */
-    hsize_t        groups_btree_storage_size;       /* btree size for group */
-    hsize_t        groups_heap_storage_size;        /* heap size for group */
-    hsize_t        attrs_btree_storage_size;        /* btree size for attributes (1.8) */
-    hsize_t        attrs_heap_storage_size;         /* fractal heap size for attributes (1.8) */
-    hsize_t        SM_hdr_storage_size;             /* header size for SOHM table (1.8) */
-    hsize_t        SM_index_storage_size;           /* index (btree & list) size for SOHM table (1.8) */
-    hsize_t        SM_heap_storage_size;            /* fractal heap size for SOHM table (1.8) */
-    hsize_t        super_size;                      /* superblock size */
-    hsize_t        super_ext_size;                  /* superblock extension size */
-    hsize_t        ublk_size;                       /* user block size (if exists) */
-    H5F_fspace_strategy_t fs_strategy;              /* File space management strategy */
-    bool                  fs_persist;               /* Free-space persist or not */
-    hsize_t               fs_threshold;             /* Free-space section threshold */
-    hsize_t               fsp_size;                 /* File space page size */
-    hsize_t               free_space;               /* Amount of freespace in the file */
-    hsize_t               free_hdr;                 /* Size of free space manager metadata in the file */
+    unsigned long  stc_dset_comptype[H5_SECTION_NUM][H5_NFILTERS_IMPL]; /* Number of currently implemented
+                                                                           filters for structured chunk */
+    unsigned long  dset_ntypes;                /* Number of diff. dataset datatypes found */
+    dtype_info_t  *dset_type_info;             /* Pointer to dataset datatype information found */
+    unsigned       dset_dim_nbins;             /* Number of bins for dataset dimensions */
+    unsigned long *dset_dim_bins;              /* Pointer to array of bins for dataset dimensions */
+    ohdr_info_t    dset_ohdr_info;             /* Object header information for datasets */
+    hsize_t        dset_storage_size;          /* Size of raw data for datasets */
+    hsize_t        dset_external_storage_size; /* Size of raw data for datasets with external storage */
+    ohdr_info_t    dtype_ohdr_info;            /* Object header information for datatypes */
+    hsize_t        groups_btree_storage_size;  /* btree size for group */
+    hsize_t        groups_heap_storage_size;   /* heap size for group */
+    hsize_t        attrs_btree_storage_size;   /* btree size for attributes (1.8) */
+    hsize_t        attrs_heap_storage_size;    /* fractal heap size for attributes (1.8) */
+    hsize_t        SM_hdr_storage_size;        /* header size for SOHM table (1.8) */
+    hsize_t        SM_index_storage_size;      /* index (btree & list) size for SOHM table (1.8) */
+    hsize_t        SM_heap_storage_size;       /* fractal heap size for SOHM table (1.8) */
+    hsize_t        super_size;                 /* superblock size */
+    hsize_t        super_ext_size;             /* superblock extension size */
+    hsize_t        ublk_size;                  /* user block size (if exists) */
+    H5F_fspace_strategy_t fs_strategy;         /* File space management strategy */
+    bool                  fs_persist;          /* Free-space persist or not */
+    hsize_t               fs_threshold;        /* Free-space section threshold */
+    hsize_t               fsp_size;            /* File space page size */
+    hsize_t               free_space;          /* Amount of freespace in the file */
+    hsize_t               free_hdr;            /* Size of free space manager metadata in the file */
     unsigned long         num_small_sects[SIZE_SMALL_SECTS]; /* Size of small free-space sections */
     unsigned              sect_nbins;                        /* Number of bins for free-space section sizes */
     unsigned long        *sect_bins; /* Pointer to array of bins for free-space section sizes */
     hsize_t               datasets_index_storage_size; /* meta size for chunked dataset's indexing type */
-    hsize_t               datasets_heap_storage_size;  /* heap size for dataset with external storage */
-    unsigned long         nexternal;                   /* Number of external files for a dataset */
-    int                   local;                       /* Flag to indicate iteration over the object*/
+    hsize_t stc_datasets_index_storage_size; /* meta size for structured chunk dataset's indexing type */
+    hsize_t datasets_heap_storage_size;      /* heap size for dataset with external storage */
+    unsigned long nexternal;                 /* Number of external files for a dataset */
+    int           local;                     /* Flag to indicate iteration over the object*/
 } iter_t;
 
 static const char *drivername = NULL;
@@ -415,7 +418,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
                                      /* already found */
     int          ndims;              /* Number of dimensions of dataset */
     hsize_t      storage;            /* Size of dataset storage */
-    unsigned     u;                  /* Local index variable */
+    unsigned     k, u;               /* Local index variable */
     int          num_ext;            /* Number of external files for a dataset */
     int          nfltr;              /* Number of filters for a dataset */
     H5Z_filter_t fltr;               /* Filter identifier */
@@ -432,7 +435,18 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         H5TOOLS_GOTO_ERROR(FAIL, "H5Dopen() failed");
 
     /* Update dataset metadata info */
-    iter->datasets_index_storage_size += native_oi->meta_size.obj.index_size;
+    /* Gather layout statistics */
+    if ((dcpl = H5Dget_create_plist(did)) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dget_create_plist() failed");
+
+    if ((lout = H5Pget_layout(dcpl)) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_layout() failed");
+
+    if (lout == H5D_STRUCT_CHUNK)
+        iter->stc_datasets_index_storage_size += native_oi->meta_size.obj.index_size;
+    else
+        iter->datasets_index_storage_size += native_oi->meta_size.obj.index_size;
+
     iter->datasets_heap_storage_size += native_oi->meta_size.obj.heap_size;
 
     /* Update attribute metadata info */
@@ -442,13 +456,6 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
     /* Get storage info */
     /* Failure 0 indistinguishable from no-data-stored 0 */
     storage = H5Dget_storage_size(did);
-
-    /* Gather layout statistics */
-    if ((dcpl = H5Dget_create_plist(did)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, "H5Dget_create_plist() failed");
-
-    if ((lout = H5Pget_layout(dcpl)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_layout() failed");
 
     /* Object header's total size for H5D_COMPACT layout includes raw data size */
     /* "storage" also includes H5D_COMPACT raw data size */
@@ -557,20 +564,41 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
     if (H5Tclose(tid) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "H5Tclose() failed");
 
-    /* Track different filters */
-    if ((nfltr = H5Pget_nfilters1(dcpl)) >= 0) {
-        if (nfltr == 0)
-            iter->dset_comptype[0]++;
-        for (u = 0; u < (unsigned)nfltr; u++) {
-            fltr = H5Pget_filter2(dcpl, u, 0, 0, 0, 0, 0, NULL);
-            if (fltr >= 0) {
-                if (fltr < (H5_NFILTERS_IMPL - 1))
-                    iter->dset_comptype[fltr]++;
-                else
-                    iter->dset_comptype[H5_NFILTERS_IMPL - 1]++; /*other filters*/
-            }                                                    /* end if */
-        }                                                        /* end for */
-    }                                                            /* endif nfltr */
+    if (lout == H5D_STRUCT_CHUNK) {
+        /* Track different filters for structured chunk dataset */
+        /* For now don't do anything for H5_VL_DATA */
+        for (k = 0; k < (H5_SECTION_NUM - 1); k++) {
+            if ((H5Pget_nfilters2(dcpl, k, &nfltr)) >= 0) {
+                if (nfltr == 0)
+                    iter->stc_dset_comptype[k][0]++;
+                for (u = 0; u < (unsigned)nfltr; u++) {
+                    fltr = H5Pget_filter3(dcpl, k, u, 0, 0, 0, 0, 0, NULL);
+                    if (fltr >= 0) {
+                        if (fltr < (H5_NFILTERS_IMPL - 1))
+                            iter->stc_dset_comptype[k][fltr]++;
+                        else
+                            iter->stc_dset_comptype[k][H5_NFILTERS_IMPL - 1]++; /*other filters*/
+                    }
+                } /* end for u */
+            }
+        } /* end for k */
+    }
+    else {
+        /* Track different filters for legacy chunked dataset */
+        if ((nfltr = H5Pget_nfilters1(dcpl)) >= 0) {
+            if (nfltr == 0)
+                iter->dset_comptype[0]++;
+            for (u = 0; u < (unsigned)nfltr; u++) {
+                fltr = H5Pget_filter2(dcpl, u, 0, 0, 0, 0, 0, NULL);
+                if (fltr >= 0) {
+                    if (fltr < (H5_NFILTERS_IMPL - 1))
+                        iter->dset_comptype[fltr]++;
+                    else
+                        iter->dset_comptype[H5_NFILTERS_IMPL - 1]++; /*other filters*/
+                }                                                    /* end if */
+            }                                                        /* end for */
+        }                                                            /* endif nfltr */
+    }
 
     if (H5Pclose(dcpl) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "H5Pclose() failed");
@@ -1129,6 +1157,9 @@ print_file_metadata(const iter_t *iter)
     fprintf(stdout, "\tChunked datasets:\n");
     fprintf(stdout, "\t\tIndex: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
 
+    fprintf(stdout, "\tStructured chunk datasets:\n");
+    fprintf(stdout, "\t\tIndex: %" PRIuHSIZE "\n", iter->stc_datasets_index_storage_size);
+
     fprintf(stdout, "\tDatasets:\n");
     fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
@@ -1289,15 +1320,32 @@ print_dataset_info(const iter_t *iter)
         printf("\tNumber of external files : %lu\n", iter->nexternal);
 
         printf("Dataset filters information:\n");
-        printf("\tNumber of datasets with:\n");
-        printf("\t\tNO filter: %lu\n", iter->dset_comptype[H5Z_FILTER_ERROR + 1]);
-        printf("\t\tGZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_DEFLATE]);
-        printf("\t\tSHUFFLE filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SHUFFLE]);
-        printf("\t\tFLETCHER32 filter: %lu\n", iter->dset_comptype[H5Z_FILTER_FLETCHER32]);
-        printf("\t\tSZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SZIP]);
-        printf("\t\tNBIT filter: %lu\n", iter->dset_comptype[H5Z_FILTER_NBIT]);
-        printf("\t\tSCALEOFFSET filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SCALEOFFSET]);
-        printf("\t\tUSER-DEFINED filter: %lu\n", iter->dset_comptype[H5_NFILTERS_IMPL - 1]);
+        printf("\tChunked dataset:\n");
+        printf("\t\tNumber of datasets with:\n");
+        printf("\t\t\tNO filter: %lu\n", iter->dset_comptype[H5Z_FILTER_ERROR + 1]);
+        printf("\t\t\tGZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_DEFLATE]);
+        printf("\t\t\tSHUFFLE filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SHUFFLE]);
+        printf("\t\t\tFLETCHER32 filter: %lu\n", iter->dset_comptype[H5Z_FILTER_FLETCHER32]);
+        printf("\t\t\tSZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SZIP]);
+        printf("\t\t\tNBIT filter: %lu\n", iter->dset_comptype[H5Z_FILTER_NBIT]);
+        printf("\t\t\tSCALEOFFSET filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SCALEOFFSET]);
+        printf("\t\t\tUSER-DEFINED filter: %lu\n", iter->dset_comptype[H5_NFILTERS_IMPL - 1]);
+
+        printf("\tStructured chunk dataset:\n");
+        /* For now: don't print out H5_SECTION_VL */
+        for (u = 0; u < (H5_SECTION_NUM - 1); u++) {
+            printf("\t\tSection type: %s\n", (u == H5_SECTION_SELECTION ? "SELECTION" : "DATA"));
+            printf("\t\t\tNumber of datasets with:\n");
+            printf("\t\t\t\tNO filter: %lu\n", iter->stc_dset_comptype[u][H5Z_FILTER_ERROR + 1]);
+            printf("\t\t\t\tGZIP filter: %lu\n", iter->stc_dset_comptype[u][H5Z_FILTER_DEFLATE]);
+            printf("\t\t\t\tSHUFFLE filter: %lu\n", iter->stc_dset_comptype[u][H5Z_FILTER_SHUFFLE]);
+            printf("\t\t\t\tFLETCHER32 filter: %lu\n", iter->stc_dset_comptype[u][H5Z_FILTER_FLETCHER32]);
+            printf("\t\t\t\tSZIP filter: %lu\n", iter->stc_dset_comptype[u][H5Z_FILTER_SZIP]);
+            printf("\t\t\t\tNBIT filter: %lu\n", iter->stc_dset_comptype[u][H5Z_FILTER_NBIT]);
+            printf("\t\t\t\tSCALEOFFSET filter: %lu\n", iter->stc_dset_comptype[u][H5Z_FILTER_SCALEOFFSET]);
+            printf("\t\t\t\tUSER-DEFINED filter: %lu\n", iter->stc_dset_comptype[u][H5_NFILTERS_IMPL - 1]);
+        }
+
     } /* end if */
 
     return 0;
@@ -1323,6 +1371,8 @@ print_dset_metadata(const iter_t *iter)
             iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
 
     fprintf(stdout, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
+    fprintf(stdout, "\tIndex for Structured chunk datasets: %" PRIuHSIZE "\n",
+            iter->stc_datasets_index_storage_size);
     fprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
     return 0;
@@ -1482,8 +1532,9 @@ print_storage_summary(const iter_t *iter)
         iter->super_size + iter->super_ext_size + iter->ublk_size + iter->group_ohdr_info.total_size +
         iter->dset_ohdr_info.total_size + iter->dtype_ohdr_info.total_size + iter->groups_btree_storage_size +
         iter->groups_heap_storage_size + iter->attrs_btree_storage_size + iter->attrs_heap_storage_size +
-        iter->datasets_index_storage_size + iter->datasets_heap_storage_size + iter->SM_hdr_storage_size +
-        iter->SM_index_storage_size + iter->SM_heap_storage_size + iter->free_hdr;
+        iter->datasets_index_storage_size + iter->stc_datasets_index_storage_size +
+        iter->datasets_heap_storage_size + iter->SM_hdr_storage_size + iter->SM_index_storage_size +
+        iter->SM_heap_storage_size + iter->free_hdr;
 
     fprintf(stdout, "  File metadata: %" PRIuHSIZE " bytes\n", total_meta);
     fprintf(stdout, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
