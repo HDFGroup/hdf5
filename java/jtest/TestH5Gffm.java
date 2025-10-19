@@ -354,7 +354,7 @@ public class TestH5Gffm {
     }
 
     @Test
-    public void testH5Gget_obj_info_all()
+    public void testH5Gget_num_objs()
     {
         System.out.print(testname.getMethodName());
 
