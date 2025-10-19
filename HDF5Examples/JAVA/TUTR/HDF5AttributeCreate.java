@@ -126,8 +126,8 @@ public class HDF5AttributeCreate {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(attrname), H5P_DEFAULT(),
-                                               H5P_DEFAULT());
+                attribute_id = H5Aopen_by_name(dataset_id, arena.allocateFrom("."),
+                                               arena.allocateFrom(attrname), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -293,5 +293,10 @@ public class HDF5AttributeCreate {
         }
     }
 
-    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { HDF5AttributeCreate.CreateDatasetAttribute(arena); } }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5AttributeCreate.CreateDatasetAttribute(arena);
+        }
+    }
 }

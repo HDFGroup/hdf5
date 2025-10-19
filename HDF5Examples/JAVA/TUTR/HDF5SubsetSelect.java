@@ -263,5 +263,10 @@ public class HDF5SubsetSelect {
         }
     }
 
-    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { HDF5SubsetSelect.SubsetSelect(arena); } }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5SubsetSelect.SubsetSelect(arena);
+        }
+    }
 }

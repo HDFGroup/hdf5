@@ -138,7 +138,9 @@ public class H5Ex_G_Compact {
         // Obtain and print the file size.
         try {
             if (file_id >= 0) {
-                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG); H5Fget_filesize(file_id, sizeSeg); size = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
+                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                H5Fget_filesize(file_id, sizeSeg);
+                size = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
                 System.out.println("File size for " + FILE1 + " is: " + size + " bytes");
             }
         }
@@ -240,7 +242,9 @@ public class H5Ex_G_Compact {
         // Obtain and print the file size.
         try {
             if (file_id >= 0) {
-                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG); H5Fget_filesize(file_id, sizeSeg); size = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
+                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                H5Fget_filesize(file_id, sizeSeg);
+                size = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
                 System.out.println("File size for " + FILE2 + " is: " + size + " bytes");
             }
         }
@@ -258,5 +262,10 @@ public class H5Ex_G_Compact {
         }
     }
 
-    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { H5Ex_G_Compact.CreateGroup(arena); } }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_G_Compact.CreateGroup(arena);
+        }
+    }
 }

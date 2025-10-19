@@ -66,7 +66,8 @@ public class HDF5GroupAbsoluteRelativeCreate {
         // Create group "Group_B" in group "MyGroup" using relative name.
         try {
             if (group1_id >= 0)
-                group3_id = H5Gcreate2(group1_id, arena.allocateFrom(GROUPNAME_B), H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                group3_id = H5Gcreate2(group1_id, arena.allocateFrom(GROUPNAME_B), H5P_DEFAULT(),
+                                       H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();

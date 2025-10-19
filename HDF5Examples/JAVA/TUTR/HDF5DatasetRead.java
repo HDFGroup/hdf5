@@ -233,5 +233,10 @@ public class HDF5DatasetRead {
         }
     }
 
-    public static void main(String[] args) { try (Arena arena = Arena.ofConfined()) { HDF5DatasetRead.ReadWriteDataset(arena); } }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5DatasetRead.ReadWriteDataset(arena);
+        }
+    }
 }

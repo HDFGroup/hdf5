@@ -90,8 +90,9 @@ public class HDF5GroupDatasetCreate {
         // Create the dataset in group "MyGroup".
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5Dcreate2(file_id, arena.allocateFrom("/" + GROUPNAME + "/" + DATASETNAME1), H5T_STD_I32BE_g(),
-                                        dataspace_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                dataset_id =
+                    H5Dcreate2(file_id, arena.allocateFrom("/" + GROUPNAME + "/" + DATASETNAME1),
+                               H5T_STD_I32BE_g(), dataspace_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -129,7 +130,8 @@ public class HDF5GroupDatasetCreate {
         // Open an existing group of the specified file.
         try {
             if (file_id >= 0)
-                group_id = H5Gopen2(file_id, arena.allocateFrom("/" + GROUPNAME + "/" + GROUPNAME_A), H5P_DEFAULT());
+                group_id =
+                    H5Gopen2(file_id, arena.allocateFrom("/" + GROUPNAME + "/" + GROUPNAME_A), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
