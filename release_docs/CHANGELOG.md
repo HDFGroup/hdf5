@@ -557,6 +557,20 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ## Library
 
+### Security issue CVE-2025-6818
+
+   A bad file caused H5C__load_entry() to attempt to allocate a very large buffer,
+   resulting in a crash.  This issue is indirectly fixed by PR #5710.
+
+   Fixes GitHub issue #5572
+
+### Security issue CVE-2025-6818
+
+   A bad file caused a heap-buffer-overflow in H5O__chunk_protect() and the issue is
+   indirectly fixed by PR #5829.
+
+   Fixes GitHub issue #5573
+
 ### Fixed security issue CVE-2025-7068
 
    Failures during the discard process on a metadata cache entry could cause the library to skip calling the callback to free the cache entry. This could result in resource leaks and issues with flushing and closing the metadata cache during file close. This has been fixed by noting errors during the discard process, but attempting to fully free a cache entry before signalling that an error has occurred.
