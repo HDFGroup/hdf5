@@ -18,14 +18,14 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.H5G_info_t;
-
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.hdfgroup.javahdf5.H5G_info_t;
 
 public class H5Ex_G_Compact {
 
@@ -58,9 +58,9 @@ public class H5Ex_G_Compact {
 
     public static void CreateGroup()
     {
-        long file_id  = H5I_INVALID_HID();
-        long group_id = H5I_INVALID_HID();
-        long fapl_id  = H5I_INVALID_HID();
+        long file_id        = H5I_INVALID_HID();
+        long group_id       = H5I_INVALID_HID();
+        long fapl_id        = H5I_INVALID_HID();
         MemorySegment ginfo = H5G_info_t.allocate(arena);
         long size;
 

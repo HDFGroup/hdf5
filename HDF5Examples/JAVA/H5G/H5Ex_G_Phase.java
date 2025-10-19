@@ -19,13 +19,14 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-import org.hdfgroup.javahdf5.H5G_info_t;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.hdfgroup.javahdf5.H5G_info_t;
 
 public class H5Ex_G_Phase {
     private static String FILENAME = "H5Ex_G_Phase.h5";
@@ -58,13 +59,13 @@ public class H5Ex_G_Phase {
 
     private static void CreateGroup(Arena arena)
     {
-        long file_id     = H5I_INVALID_HID();
-        long group_id    = H5I_INVALID_HID();
-        long subgroup_id = H5I_INVALID_HID();
-        long fapl_id     = H5I_INVALID_HID();
-        long gcpl_id     = H5I_INVALID_HID();
+        long file_id        = H5I_INVALID_HID();
+        long group_id       = H5I_INVALID_HID();
+        long subgroup_id    = H5I_INVALID_HID();
+        long fapl_id        = H5I_INVALID_HID();
+        long gcpl_id        = H5I_INVALID_HID();
         MemorySegment ginfo = H5G_info_t.allocate(arena);
-        String name = "G0"; // Name of subgroup_id
+        String name         = "G0"; // Name of subgroup_id
         int i;
 
         // Set file access property list to allow the latest file format.This will allow the library to create
