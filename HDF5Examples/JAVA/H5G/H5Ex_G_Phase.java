@@ -19,7 +19,7 @@ import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.hdfgroup.javahdf5.hdf5_h_1.*;
 import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
-nimport org.hdfgroup.javahdf5.H5G_info_t;
+import org.hdfgroup.javahdf5.H5G_info_t;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
