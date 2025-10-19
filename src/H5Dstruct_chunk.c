@@ -920,7 +920,7 @@ static int
 H5D__struct_chunk_allocated_cb(const void *rec, void *_udata)
 {
     const H5D_struct_chunk_rec_t *chunk_rec = (const H5D_struct_chunk_rec_t *)rec;
-    hsize_t               *nbytes    = (hsize_t *)_udata;
+    hsize_t                      *nbytes    = (hsize_t *)_udata;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -943,10 +943,10 @@ H5D__struct_chunk_allocated_cb(const void *rec, void *_udata)
 herr_t
 H5D__struct_chunk_allocated(const H5D_t *dset, hsize_t *nbytes)
 {
-    H5D_chk_idx_info_t   idx_info;                            /* Chunked index info */
-    hsize_t              chunk_bytes = 0;                     /* Number of bytes allocated for chunks */
+    H5D_chk_idx_info_t          idx_info;        /* Chunked index info */
+    hsize_t                     chunk_bytes = 0; /* Number of bytes allocated for chunks */
     H5O_storage_struct_chunk_t *sc          = &(dset->shared->layout.storage.u.struct_chunk);
-    herr_t               ret_value   = SUCCEED; /* Return value */
+    herr_t                      ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -958,8 +958,8 @@ H5D__struct_chunk_allocated(const H5D_t *dset, hsize_t *nbytes)
     /* Search for cached chunks that haven't been written out */
 
     /* Compose chunked index info struct */
-    idx_info.f       = dset->oloc.file;
-    idx_info.pline   = &dset->shared->dcpl_cache.pline;
+    idx_info.f           = dset->oloc.file;
+    idx_info.pline       = &dset->shared->dcpl_cache.pline;
     idx_info.stc_layout  = &dset->shared->layout.u.struct_chunk;
     idx_info.stc_storage = sc;
 
@@ -974,7 +974,6 @@ H5D__struct_chunk_allocated(const H5D_t *dset, hsize_t *nbytes)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_allocated() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__struct_chunk_io_init
@@ -3781,7 +3780,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__struct_chunk_delete_chunk() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5D__struct_chunk_bh_info
  *
@@ -3795,14 +3793,14 @@ done:
 herr_t
 H5D__struct_chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout, hsize_t *index_size)
 {
-    H5D_chk_idx_info_t   idx_info;     /* Chunked index info */
-    H5S_t               *space = NULL; /* Dataset's dataspace */
-    H5O_pline_t          pline;        /* I/O pipeline message */
+    H5D_chk_idx_info_t          idx_info;     /* Chunked index info */
+    H5S_t                      *space = NULL; /* Dataset's dataspace */
+    H5O_pline_t                 pline;        /* I/O pipeline message */
     H5O_storage_struct_chunk_t *sc = &(layout->storage.u.struct_chunk);
-    htri_t               exists;                  /* Flag if header message of interest exists */
-    bool                 idx_info_init = false;   /* Whether the chunk index info has been initialized */
-    bool                 pline_read    = false;   /* Whether the I/O pipeline message was read */
-    herr_t               ret_value     = SUCCEED; /* Return value */
+    htri_t                      exists;                /* Flag if header message of interest exists */
+    bool                        idx_info_init = false; /* Whether the chunk index info has been initialized */
+    bool                        pline_read    = false; /* Whether the I/O pipeline message was read */
+    herr_t                      ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3826,8 +3824,8 @@ H5D__struct_chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout,
         memset(&pline, 0, sizeof(pline));
 
     /* Compose chunked index info struct */
-    idx_info.f       = loc->file;
-    idx_info.pline   = &pline;
+    idx_info.f           = loc->file;
+    idx_info.pline       = &pline;
     idx_info.stc_layout  = &layout->u.struct_chunk;
     idx_info.stc_storage = sc;
 

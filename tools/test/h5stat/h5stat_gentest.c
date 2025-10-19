@@ -47,7 +47,7 @@
 #define ERR_REFCOUNT_FILE "h5stat_err_refcount.h5"
 
 /* Declarations for gen_struct_chunk_file() */
-#define STRUCT_CHUNK_FILE    "h5stat_struct_chunk.h5"
+#define STRUCT_CHUNK_FILE   "h5stat_struct_chunk.h5"
 #define SPARSE_DATASET_NAME "SPARSE_DATASET_NAME"
 
 /*
@@ -593,22 +593,22 @@ error:
 static herr_t
 gen_struct_chunk_file(const char *fname)
 {
-    hid_t fid     = H5I_INVALID_HID; /* File id */
-    hid_t sid     = H5I_INVALID_HID; /* Dataspace id */
-    hid_t fapl    = H5I_INVALID_HID; /* File creation property list id */
-    hid_t dcpl    = H5I_INVALID_HID; /* Dataset creation property list id */
-    hid_t did     = H5I_INVALID_HID; /* Dataset id */
-    hsize_t           ea_dim[1]       = {30}; /* 1-d dataspace */
-    hsize_t           ea_max_dim[1] = {H5S_UNLIMITED};
-    hsize_t           chunk_dim[1] = {5}; /* Chunk size */
-    hsize_t start[1];
-    hsize_t stride[1];
-    hsize_t count[1];
-    hsize_t block[1];
-    unsigned int      level        = 9;
-    unsigned int      cd_values[1] = {level};
-    size_t            cd_nelmts    = 1;
-    int wbuf[30];                       /* Write buffer */
+    hid_t        fid           = H5I_INVALID_HID; /* File id */
+    hid_t        sid           = H5I_INVALID_HID; /* Dataspace id */
+    hid_t        fapl          = H5I_INVALID_HID; /* File creation property list id */
+    hid_t        dcpl          = H5I_INVALID_HID; /* Dataset creation property list id */
+    hid_t        did           = H5I_INVALID_HID; /* Dataset id */
+    hsize_t      ea_dim[1]     = {30};            /* 1-d dataspace */
+    hsize_t      ea_max_dim[1] = {H5S_UNLIMITED};
+    hsize_t      chunk_dim[1]  = {5}; /* Chunk size */
+    hsize_t      start[1];
+    hsize_t      stride[1];
+    hsize_t      count[1];
+    hsize_t      block[1];
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+    int          wbuf[30]; /* Write buffer */
 
     /* Get a copy file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -637,16 +637,16 @@ gen_struct_chunk_file(const char *fname)
         goto error;
 
     /* Set filter on selection and fixed data sections */
-    if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
-                       cd_values) < 0)
+    if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) <
+        0)
         goto error;
 
     if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
                        cd_values) < 0)
         goto error;
 
-    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
-                       NULL) < 0)
+    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) <
+        0)
         goto error;
 
     /* Create dataspace for dataset */
@@ -698,7 +698,6 @@ gen_struct_chunk_file(const char *fname)
 
     if (H5Pclose(dcpl) < 0)
         goto error;
-
 
     /*
      * Create legacy chunked dataset

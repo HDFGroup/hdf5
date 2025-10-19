@@ -2426,8 +2426,8 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                     /* Indicate that we set the chunk index addr */
                     addr_set = true;
 
-                    /* NOTE for structured chunk: 
-                     * --must_init_space is false 
+                    /* NOTE for structured chunk:
+                     * --must_init_space is false
                      * --no space to be allocated for early allocation:
                      *      if (dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY &&
                      *          time_alloc == H5D_ALLOC_EXTEND)
@@ -3271,9 +3271,9 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
         } /* end if */
 
         /* Allocate space for the new parts of the dataset, if appropriate */
-        /* 
+        /*
          *  NOTE for structured chunk:
-         *  --follow the logic to call H5D__alloc_storage() to create chunk index 
+         *  --follow the logic to call H5D__alloc_storage() to create chunk index
          *    but space is not allocated
          */
         if (expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)

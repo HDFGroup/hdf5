@@ -1401,11 +1401,10 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SC_erase() */
 
-
 /*-------------------------------------------------------------------------
  * Function: H5SC_prune_by_extent
  *
- * Purpose:  TBD: just FAIL for now 
+ * Purpose:  TBD: just FAIL for now
  *
  * Return:   SUCCEED on success, FAIL on failure
  *-------------------------------------------------------------------------
@@ -1418,7 +1417,6 @@ H5SC_prune_by_extent(H5SC_t *cache, H5D_t *dset, const hsize_t H5_ATTR_UNUSED *o
     assert(cache);
     assert(dset);
     assert(dset->shared->layout.sc_ops);
-
 
     FUNC_LEAVE_NOAPI(FAIL)
 
@@ -1442,9 +1440,9 @@ H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, const hsize_t *old_dims)
 {
     hsize_t  ext_dims[H5S_MAX_RANK]; /* The extended dimension sizes */
     unsigned dim_idx;                /* Dimension index */
-    bool shrink        = false; /* Flag to indicate a dimension has shrank */
-    bool expand        = false; /* Flag to indicate a dimension has grown */
-    herr_t ret_value = SUCCEED;
+    bool     shrink    = false;      /* Flag to indicate a dimension has shrank */
+    bool     expand    = false;      /* Flag to indicate a dimension has grown */
+    herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1459,14 +1457,14 @@ H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, const hsize_t *old_dims)
 
     /* Determine if we are shrinking and/or expanding any dimensions */
     for (dim_idx = 0; dim_idx < dset->shared->ndims; dim_idx++) {
-            /* Check for various status changes */
-            if (ext_dims[dim_idx] < old_dims[dim_idx])
-                shrink = true;
-            if (ext_dims[dim_idx] > old_dims[dim_idx])
-                expand = true;
+        /* Check for various status changes */
+        if (ext_dims[dim_idx] < old_dims[dim_idx])
+            shrink = true;
+        if (ext_dims[dim_idx] > old_dims[dim_idx])
+            expand = true;
 
-            /* Update the cached copy of the dataset's dimensions */
-            dset->shared->curr_dims[dim_idx] = ext_dims[dim_idx];
+        /* Update the cached copy of the dataset's dimensions */
+        dset->shared->curr_dims[dim_idx] = ext_dims[dim_idx];
     } /* end for */
 
     /*-------------------------------------------------------------------------
@@ -1478,7 +1476,6 @@ H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, const hsize_t *old_dims)
         /* Set the cached chunk info */
         if (H5D__struct_chunk_set_info(dset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks");
-
     }
 
     /* NOTE for structured chunk:
@@ -1490,21 +1487,20 @@ H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, const hsize_t *old_dims)
      * This removal takes place only in case we are shrinking the dataset
      * and if the chunks are written
      *-------------------------------------------------------------------------
-    */
+     */
     if (H5D_STRUCT_CHUNK == dset->shared->layout.type) {
-        if ( (expand || shrink) && ((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage) ))
+        if ((expand || shrink) &&
+            ((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)))
             /* This routine just fails for now. */
             if (H5SC_prune_by_extent(cache, dset, old_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to prune chunks");
 
-
         /* NOTE for structured chunk:
          * --for [expand] case: nothing to be done
          *      if (expand &&
-         *          (dset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
-         *          (dset->shared->dcpl_cache.pline.nused > 0))
+         *          (dset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
+         * && (dset->shared->dcpl_cache.pline.nused > 0))
          */
-
     }
 
 done:

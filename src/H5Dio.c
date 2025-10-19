@@ -715,7 +715,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             io_info.filtered_count++;
 
         /*
-         *  NOTE for structured chunk: 
+         *  NOTE for structured chunk:
          *  --if early allocation:
          *    root for chunk index is set up so is_space_alloc returns true
          *  --if NOT early allocation:
@@ -725,7 +725,6 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         should_alloc_space = dset_info[i].dset->shared->dcpl_cache.efl.nused == 0 &&
                              !(*dset_info[i].dset->shared->layout.ops->is_space_alloc)(
                                  &dset_info[i].dset->shared->layout.storage);
-
 
         /*
          * If not using an MPI-based VFD, we only need to allocate
