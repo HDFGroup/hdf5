@@ -391,17 +391,23 @@ jobs:
               Write-Host "Download successful!"
 
               # Extract tar.gz using tar command (available in Windows 10+)
-              Push-Location $JextractHome
-              tar -xzf jextract.tar.gz --strip-components=1
-              Pop-Location
+              # Use absolute paths and extract to current directory
+              tar -xzf "$TarPath" --strip-components=1 -C "$JextractHome"
 
               Remove-Item -Path $TarPath -Force
 
-              $Success = $true
-              break
+              # Verify extraction worked
+              if (Test-Path "$JextractHome\bin\jextract.exe") {
+                Write-Host "Jextract extracted successfully to $JextractHome"
+                $Success = $true
+                break
+              } else {
+                Write-Host "Extraction failed - jextract.exe not found"
+              }
             }
             catch {
-              Write-Host "Failed to download from $Url, trying next..."
+              Write-Host "Failed to download or extract from $Url, trying next..."
+              Write-Host "Error: $_"
             }
           }
 
