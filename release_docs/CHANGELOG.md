@@ -557,17 +557,17 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ## Library
 
-### Security issue CVE-2025-6818
+### Security issue CVE-2025-6817
 
-   A bad file caused H5C__load_entry() to attempt to allocate a very large buffer,
-   resulting in a crash.  This issue is indirectly fixed by PR #5710.
+   A malformed file caused H5C__load_entry() to attempt to allocate a very large
+   buffer, resulting in a crash.  This issue is indirectly fixed by PR #5710.
 
    Fixes GitHub issue #5572
 
 ### Security issue CVE-2025-6818
 
-   A bad file caused a heap-buffer-overflow in H5O__chunk_protect() and the issue is
-   indirectly fixed by PR #5829.
+   A malformed file caused a heap-buffer-overflow in H5O__chunk_protect() and
+   the issue is indirectly fixed by PR #5829.
 
    Fixes GitHub issue #5573
 
