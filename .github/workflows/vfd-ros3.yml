@@ -42,14 +42,14 @@ jobs:
     steps:
       - name: Get aws-c-s3 sources (main)
         if: inputs.aws_c_s3_tag == ''
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-s3
           path: aws-c-s3
 
       - name: Get aws-c-s3 sources (tag)
         if: inputs.aws_c_s3_tag != ''
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-s3
           path: aws-c-s3
@@ -75,70 +75,70 @@ jobs:
 
       - name: Get aws-lc sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: aws/aws-lc
           path: aws-lc
 
       - name: Get s2n-tls sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: aws/s2n-tls
           path: s2n-tls
 
       - name: Get aws-c-common sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-common
           path: aws-c-common
 
       - name: Get aws-checksums sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-checksums
           path: aws-checksums
 
       - name: Get aws-c-cal sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-cal
           path: aws-c-cal
 
       - name: Get aws-c-io sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-io
           path: aws-c-io
 
       - name: Get aws-c-compression sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-compression
           path: aws-c-compression
 
       - name: Get aws-c-http sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-http
           path: aws-c-http
 
       - name: Get aws-c-sdkutils sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-sdkutils
           path: aws-c-sdkutils
 
       - name: Get aws-c-auth sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
         with:
           repository: awslabs/aws-c-auth
           path: aws-c-auth
@@ -285,7 +285,7 @@ jobs:
 
       - name: Install libaws-c-s3 (Ubuntu) (Cached installation)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: libaws-c-s3-${{ inputs.build_mode }}
 
@@ -318,7 +318,7 @@ jobs:
           echo "CC=cl.exe" >> $GITHUB_ENV
 
       - name: Get HDF5 sources
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
 
       # For Windows, use vcpkg toolchain file to allow find_package() calls to resolve
       - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
@@ -396,7 +396,7 @@ jobs:
 
     steps:
       - name: Install libaws-c-s3 (Cached installation)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: libaws-c-s3-${{ inputs.build_mode }}
 
@@ -415,7 +415,7 @@ jobs:
           echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
 
       - name: Get HDF5 sources
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5
 
       - name: Configure
         run: |

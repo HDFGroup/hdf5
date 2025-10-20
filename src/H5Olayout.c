@@ -565,13 +565,14 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     ret_value = mesg;
 
 done:
-    if (ret_value == NULL)
+    if (ret_value == NULL) {
         if (mesg) {
             if (mesg->type == H5D_VIRTUAL)
                 if (H5D__virtual_reset_layout(mesg) < 0)
                     HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to reset virtual layout");
             H5FL_FREE(H5O_layout_t, mesg);
         }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__layout_decode() */

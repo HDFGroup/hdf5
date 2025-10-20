@@ -49,6 +49,7 @@
     H5E_REFERENCE_g =
     H5E_RESOURCE_g =
     H5E_RS_g =
+    H5E_RTREE_g =
     H5E_SLIST_g =
     H5E_SOHM_g =
     H5E_STORAGE_g =

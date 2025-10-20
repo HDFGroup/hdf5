@@ -16,8 +16,7 @@
 ##############################################################################
 ##############################################################################
 
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-
+file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
 ##############################################################################
 ##############################################################################
@@ -25,32 +24,33 @@
 ##############################################################################
 ##############################################################################
 
-  macro (ADD_H5_TEST resultfile resultcode)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      message("Entered ADD_H5_TEST - 0")
-      add_test (NAME H5DWALK-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dwalk> ${ARGN})
-      set_tests_properties (H5DWALK-${resultfile} PROPERTIES
-		WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if ("${resultcode}" STREQUAL "1")
-        set_tests_properties (H5DWALK-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-    else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DWALK-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dwalk>"
-              -D "TEST_ARGS=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.h5dwalk"
-              -D "TEST_LIBRARY_DIRECTORY=${LL_PATH}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
+macro (ADD_H5_TEST resultfile resultcode)
+  # If using memchecker add tests without using scripts
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    message("Entered ADD_H5_TEST - 0")
+    add_test (NAME H5DWALK-${resultfile} COMMAND $<TARGET_FILE:h5dwalk> ${ARGN})
+    if ("${resultcode}" STREQUAL "1")
+      set_tests_properties (H5DWALK-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
-  endmacro ()
+  else ()
+    # Remove any output file left over from previous test run
+    add_test (
+        NAME H5DWALK-${resultfile}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5dwalk>"
+            -D "TEST_ARGS=${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=${resultfile}.h5dwalk"
+            -D "TEST_LIBRARY_DIRECTORY=${LL_PATH}"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+  endif ()
+  set_tests_properties (H5DWALK-${resultfile} PROPERTIES
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+endmacro ()
 
-  ADD_H5_TEST(help-1 0 -h)
+ADD_H5_TEST(help-1 0 -h)

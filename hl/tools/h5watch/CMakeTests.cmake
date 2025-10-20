@@ -58,9 +58,9 @@ set (H5WATCH_TEST_FILES
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
 foreach (h5watch_file ${H5WATCH_TEST_FILES})
-  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5watch_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5watch_file}" "H5WATCH_files")
+  HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/testfiles/${h5watch_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5watch_file}" "H5WATCH_files")
 endforeach ()
-add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tests" DEPENDS ${H5WATCH_files_list})
+add_custom_target (H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tests" DEPENDS ${H5WATCH_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -73,7 +73,6 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       add_test (
           NAME H5WATCH_ARGS-h5watch-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -85,6 +84,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
+          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if ("H5WATCH_ARGS-h5watch-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DISABLED true)
@@ -98,7 +98,6 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       add_test (
           NAME H5WATCH_ARGS-h5watch-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -112,6 +111,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
+          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if ("H5WATCH_ARGS-h5watch-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DISABLED true)
@@ -125,7 +125,6 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       add_test (
           NAME H5WATCH-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -137,6 +136,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       set_tests_properties (H5WATCH-${resultfile} PROPERTIES
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
+          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if ("H5WATCH-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5WATCH-${resultfile} PROPERTIES DISABLED true)
@@ -157,12 +157,15 @@ add_test (
     NAME H5WATCH-SWMR_INCOMPAT
     COMMAND swmr_check_compat_vfd
 )
-set_tests_properties (H5WATCH-SWMR_INCOMPAT PROPERTIES FIXTURES_SETUP swmr_vfd_check_compat)
+set_tests_properties (H5WATCH-SWMR_INCOMPAT PROPERTIES
+    FIXTURES_SETUP swmr_vfd_check_compat
+    ENVIRONMENT "${CROSSCOMPILING_PATH}"
+)
 
 # Remove any output file left over from previous test run
 add_test (
-  NAME H5WATCH-clearall-objects
-  COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
+    NAME H5WATCH-clearall-objects
+   COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
 )
 set_tests_properties (H5WATCH-clearall-objects PROPERTIES FIXTURES_REQUIRED swmr_vfd_check_compat)
 if (last_test)
@@ -170,8 +173,8 @@ if (last_test)
 endif ()
 set (last_test "H5WATCH-cleanall-objects")
 add_test (
-  NAME H5WATCH-cleanall-objects
-  COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
+    NAME H5WATCH-cleanall-objects
+    COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
 )
 set_tests_properties (H5WATCH-cleanall-objects PROPERTIES FIXTURES_CLEANUP swmr_vfd_check_compat)
 
@@ -195,10 +198,11 @@ set_tests_properties (H5WATCH-cleanall-objects PROPERTIES FIXTURES_CLEANUP swmr_
 #                                               #
 #################################################################################################
 # create the output files to be used.
-add_test (NAME H5WATCH-h5watchgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5watchgentest>)
+add_test (NAME H5WATCH-h5watchgentest COMMAND $<TARGET_FILE:h5watchgentest>)
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     DEPENDS H5WATCH-clearall-objects
+    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_SETUP gen_test_watch)
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_REQUIRED swmr_vfd_check_compat)

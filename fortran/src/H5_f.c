@@ -245,6 +245,14 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
         return ret_value;
     if ((floatingtypes[3] = (hid_t_f)H5Tcopy(H5T_IEEE_F64LE)) < 0)
         return ret_value;
+    if ((floatingtypes[4] = (hid_t_f)H5Tcopy(H5T_IEEE_F16BE)) < 0)
+        return ret_value;
+    if ((floatingtypes[5] = (hid_t_f)H5Tcopy(H5T_IEEE_F16LE)) < 0)
+        return ret_value;
+    if ((floatingtypes[6] = (hid_t_f)H5Tcopy(H5T_FLOAT_BFLOAT16BE)) < 0)
+        return ret_value;
+    if ((floatingtypes[7] = (hid_t_f)H5Tcopy(H5T_FLOAT_BFLOAT16LE)) < 0)
+        return ret_value;
 
     if ((integertypes[0] = (hid_t_f)H5Tcopy(H5T_STD_I8BE)) < 0)
         return ret_value;
@@ -1123,5 +1131,51 @@ h5dont_atexit_c(void)
     if (H5dont_atexit() < 0)
         return ret_value;
     ret_value = 0;
+    return ret_value;
+}
+
+/****if* H5_f/h5free_string_array_memory_c
+ * NAME
+ *  h5free_string_array_memory_c
+ * PURPOSE
+ *  Frees internal memory allocated for a char** string array
+ * INPUTS
+ *  array_ptr - pointer to char** array
+ *  num_files - number of strings in the array
+ * RETURNS
+ *  0 on success, -1 on failure
+ * SOURCE
+ */
+int_f
+h5free_string_array_memory_c(void **array_ptr, size_t_f *num_files)
+/******/
+{
+    int    ret_value = 0;
+    char **array;
+    size_t len;
+
+    if (array_ptr == NULL || num_files == NULL) {
+        return ret_value; /* Nothing to free */
+    }
+
+    array = (char **)(*array_ptr);
+    len   = (size_t)(*num_files);
+
+    if (array == NULL || len == 0) {
+        return ret_value; /* Nothing to free */
+    }
+
+    /* Free each individual string */
+    for (size_t i = 0; i < len; i++) {
+        if (array[i] != NULL) {
+            H5free_memory(array[i]);
+            array[i] = NULL;
+        }
+    }
+
+    /* Free the array of pointers */
+    H5free_memory(array);
+    *array_ptr = NULL;
+
     return ret_value;
 }

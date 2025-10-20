@@ -6013,6 +6013,40 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize);
 /**
  * \ingroup DCPL
  *
+ * \brief Retrieves the setting for whether or not to use a spatial tree
+ *        for VDS mappings
+ *
+ * \dcpl_id
+ * \param[out] use_tree  Flag indicating whether the dataset will or
+ *                       will not use a spatial tree
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_virtual_spatial_tree() retrieves the
+ *          <i>use spatial tree</i> flag setting for the dataset
+ *          creation property list \p dcpl_id. This setting determines
+ *          whether a dataset created with the dataset creation
+ *          property list \p dcpl_id will construct a spatial tree
+ *          and use it in an attempt to optimize certain operations.
+ *          The setting value is returned in the boolean pointer
+ *          \p use_tree.
+ *
+ *          Use of a spatial tree will accelerate the process of searching through mappings
+ *          to determine which contain intersections with the user's selection region.
+ *          With the tree disabled, all mappings will simply be iterated through and
+ *          checked directly.
+ *
+ *          Certain workflows may find that tree creation overhead outweighs the time saved
+ *          on reads. In this case, disabling this property will lead to a performance improvement,
+ *          though it is expected that almost all cases will benefit from the tree on net.
+ *
+ * \since 2.0.0
+ *
+ */
+H5_DLL herr_t H5Pget_virtual_spatial_tree(hid_t dcpl_id, bool *use_tree);
+/**
+ * \ingroup DCPL
+ *
  * \brief Returns information about an external file
  *
  * \dcpl_id{plist_id}
@@ -6493,6 +6527,37 @@ H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
  *
  */
 H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize);
+/**
+ * \ingroup DCPL
+ *
+ * \brief Sets the flag to use a spatial tree for mappings
+ *
+ * \dcpl_id
+ * \param[in] use_tree Flag for indicating whether or not a dataset
+ *                     should use a spatial tree for mappings
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_virtual_spatial_tree() sets the use-tree flag
+ *          for the dataset creation property list \p dcpl_id.
+ *          Datasets created with the dataset creation property
+ *          list \p dcpl_id will construct a spatial tree and use
+ *          it in an attempt to optimize intersection-check
+ *          operations on mappings when \p use_tree is set to true.
+ *
+ *          Use of a spatial tree will accelerate the process of searching through mappings
+ *          to determine which contain intersections with the user's selection region.
+ *          With the tree disabled, all mappings will simply be iterated through and
+ *          checked directly.
+ *
+ *          Certain workflows may find that tree creation overhead outweighs the time saved
+ *          on reads. In this case, disabling this property will lead to a performance improvement,
+ *          though it is expected that almost all cases will benefit from the tree on net.
+ *
+ * \since 2.0.0
+ *
+ */
+H5_DLL herr_t H5Pset_virtual_spatial_tree(hid_t dcpl_id, bool use_tree);
 /**
  * \ingroup DCPL
  *

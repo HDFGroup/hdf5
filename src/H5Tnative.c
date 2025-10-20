@@ -28,7 +28,7 @@ static H5T_t *H5T__get_native_type(H5T_t *dt, H5T_direction_t direction, size_t 
                                    size_t *comp_size);
 static H5T_t *H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
                                       size_t *struct_align, size_t *offset, size_t *comp_size);
-static H5T_t *H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_align,
+static H5T_t *H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *struct_align,
                                     size_t *offset, size_t *comp_size);
 static H5T_t *H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_align,
                                        size_t *offset, size_t *comp_size);
@@ -161,7 +161,8 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
         break;
 
         case H5T_FLOAT:
-            if (NULL == (ret_value = H5T__get_native_float(size, direction, struct_align, offset, comp_size)))
+            if (NULL ==
+                (ret_value = H5T__get_native_float(dtype, direction, struct_align, offset, comp_size)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
 
             break;
@@ -706,11 +707,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5T_t *
-H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_align, size_t *offset,
+H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *struct_align, size_t *offset,
                       size_t *comp_size)
 {
     H5T_t *dt          = NULL; /* Appropriate native datatype to copy */
     hid_t  tid         = (-1); /* Datatype ID of appropriate native datatype */
+    size_t size        = 0;    /* Size of datatype to make native */
     size_t align       = 0;    /* Alignment necessary for native datatype */
     size_t native_size = 0;    /* Datatype size of the native type */
     enum match_type {          /* The different kinds of floating point types we can match */
@@ -724,18 +726,44 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 
     FUNC_ENTER_PACKAGE
 
-    assert(size > 0);
+    if (0 == (size = H5T_get_size(dtype)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid size");
 
     H5_WARN_DUPLICATED_BRANCHES_OFF
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
+        if (size <= 2) {
 #ifdef H5_HAVE__FLOAT16
-        if (size <= sizeof(H5__Float16)) {
-            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
-            native_size = sizeof(H5__Float16);
-        }
-        else
+            /*
+             * When _Float16 support is available, map _Float16-like types
+             * to the native type and all other types of this size group
+             * without a specific carve-out to the native float type.
+             */
+            H5T_t *f16_le_dt = NULL; /* Datatype for little-endian float16 */
+            H5T_t *f16_be_dt = NULL; /* Datatype for big-endian float16 */
+
+            if (NULL == (f16_le_dt = H5I_object(H5T_IEEE_F16LE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f16_be_dt = H5I_object(H5T_IEEE_F16BE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+            if (0 == H5T_cmp(dtype, f16_le_dt, false) || 0 == H5T_cmp(dtype, f16_be_dt, false)) {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+                native_size = sizeof(H5__Float16);
+            }
+            else {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                native_size = sizeof(float);
+            }
+#else
+            /* When _Float16 support is not available, just map all types of
+             * this size group without a specific carve-out to the native
+             * float type.
+             */
+            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+            native_size = sizeof(float);
 #endif
-            if (size <= sizeof(float)) {
+        }
+        else if (size <= sizeof(float)) {
             match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
             native_size = sizeof(float);
         }
@@ -761,20 +789,44 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
             match       = H5T_NATIVE_FLOAT_MATCH_DOUBLE;
             native_size = sizeof(double);
         }
-        else
+        else {
 #ifdef H5_HAVE__FLOAT16
-            if (size > sizeof(H5__Float16))
-#endif
-        {
+            if (size > sizeof(H5__Float16)) {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                native_size = sizeof(float);
+            }
+            else {
+                /*
+                 * When _Float16 support is available, map _Float16-like types
+                 * to the native type and all other types of this size group
+                 * without a specific carve-out to the native float type.
+                 */
+                H5T_t *f16_le_dt = NULL; /* Datatype for little-endian float16 */
+                H5T_t *f16_be_dt = NULL; /* Datatype for big-endian float16 */
+
+                if (NULL == (f16_le_dt = H5I_object(H5T_IEEE_F16LE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f16_be_dt = H5I_object(H5T_IEEE_F16BE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+                if (0 == H5T_cmp(dtype, f16_le_dt, false) || 0 == H5T_cmp(dtype, f16_be_dt, false)) {
+                    match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+                    native_size = sizeof(H5__Float16);
+                }
+                else {
+                    match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                    native_size = sizeof(float);
+                }
+            }
+#else
+            /* When _Float16 support is not available, just map all types of
+             * this size group without a specific carve-out to the native
+             * float type.
+             */
             match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
             native_size = sizeof(float);
-        }
-#ifdef H5_HAVE__FLOAT16
-        else {
-            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
-            native_size = sizeof(H5__Float16);
-        }
 #endif
+        }
     }
     H5_WARN_DUPLICATED_BRANCHES_ON
 
