@@ -162,6 +162,21 @@
       }
     },
     {
+      "name": "ci-Maven-Testing",
+      "description": "Maven Configuration with Testing Enabled - For debugging FFM/JNI issues",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_EXAMPLES": "ON",
+        "BUILD_TESTING": "ON",
+        "HDF5_BUILD_TOOLS": "ON",
+        "HDF5_BUILD_FORTRAN": "OFF",
+        "HDF5_BUILD_CPP_LIB": "OFF",
+        "HDF5_BUILD_JAVA": "ON",
+        "HDF5_ENABLE_MAVEN_DEPLOY": "OFF",
+        "HDF5_MAVEN_SNAPSHOT": "OFF"
+      }
+    },
+    {
       "name": "ci-StdShar",
       "hidden": true,
       "inherits": ["ci-StdCompression", "ci-StdExamples", "ci-StdPlugins"],
@@ -516,6 +531,60 @@
         "ci-Java-JNI",
         "ci-Maven-Minimal-Snapshot"
       ]
+    },
+    {
+      "name": "ci-Testing-GNUC-FFM",
+      "description": "GNUC Test-Enabled Config for FFM (Java 24+) - For debugging Windows FFM issues",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-FFM",
+        "ci-Maven-Testing"
+      ]
+    },
+    {
+      "name": "ci-Testing-MSVC-FFM",
+      "description": "MSVC Test-Enabled Config for FFM (Java 24+) - For debugging Windows FFM issues",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java-FFM",
+        "ci-Maven-Testing"
+      ]
+    },
+    {
+      "name": "ci-Testing-Clang-FFM",
+      "description": "Clang Test-Enabled Config for FFM (Java 24+) - For debugging macOS FFM issues",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java-FFM",
+        "ci-Maven-Testing"
+      ]
+    },
+    {
+      "name": "ci-Testing-GNUC-JNI",
+      "description": "GNUC Test-Enabled Config for JNI (Java 11+) - For debugging JNI issues",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-Java-JNI",
+        "ci-Maven-Testing"
+      ]
+    },
+    {
+      "name": "ci-Testing-MSVC-JNI",
+      "description": "MSVC Test-Enabled Config for JNI (Java 11+) - For debugging Windows JNI issues",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-Java-JNI",
+        "ci-Maven-Testing"
+      ]
+    },
+    {
+      "name": "ci-Testing-Clang-JNI",
+      "description": "Clang Test-Enabled Config for JNI (Java 11+) - For debugging macOS JNI issues",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-Java-JNI",
+        "ci-Maven-Testing"
+      ]
     }
   ],
   "buildPresets": [
@@ -812,6 +881,60 @@
       "inherits": [
         "ci-x64-Release-Clang"
       ]
+    },
+    {
+      "name": "ci-Testing-GNUC-FFM",
+      "description": "GNUC Test-Enabled Build for FFM (Java 24+)",
+      "configurePreset": "ci-Testing-GNUC-FFM",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-Testing-MSVC-FFM",
+      "description": "MSVC Test-Enabled Build for FFM (Java 24+)",
+      "configurePreset": "ci-Testing-MSVC-FFM",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-Testing-Clang-FFM",
+      "description": "Clang Test-Enabled Build for FFM (Java 24+)",
+      "configurePreset": "ci-Testing-Clang-FFM",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-Testing-GNUC-JNI",
+      "description": "GNUC Test-Enabled Build for JNI (Java 11+)",
+      "configurePreset": "ci-Testing-GNUC-JNI",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-Testing-MSVC-JNI",
+      "description": "MSVC Test-Enabled Build for JNI (Java 11+)",
+      "configurePreset": "ci-Testing-MSVC-JNI",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-Testing-Clang-JNI",
+      "description": "Clang Test-Enabled Build for JNI (Java 11+)",
+      "configurePreset": "ci-Testing-Clang-JNI",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
     }
   ],
   "testPresets": [
@@ -1059,6 +1182,48 @@
     {
       "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
       "configurePreset": "ci-MinShar-Clang-Maven-JNI-Snapshot",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-Testing-GNUC-FFM",
+      "configurePreset": "ci-Testing-GNUC-FFM",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-Testing-MSVC-FFM",
+      "configurePreset": "ci-Testing-MSVC-FFM",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-Testing-Clang-FFM",
+      "configurePreset": "ci-Testing-Clang-FFM",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-Testing-GNUC-JNI",
+      "configurePreset": "ci-Testing-GNUC-JNI",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-Testing-MSVC-JNI",
+      "configurePreset": "ci-Testing-MSVC-JNI",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-Testing-Clang-JNI",
+      "configurePreset": "ci-Testing-Clang-JNI",
       "inherits": [
         "ci-x64-Release-Clang"
       ]
@@ -1530,6 +1695,54 @@
         {"type": "build", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"},
         {"type": "test", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"},
         {"type": "package", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"}
+      ]
+    },
+    {
+      "name": "ci-Testing-GNUC-FFM",
+      "steps": [
+        {"type": "configure", "name": "ci-Testing-GNUC-FFM"},
+        {"type": "build", "name": "ci-Testing-GNUC-FFM"},
+        {"type": "test", "name": "ci-Testing-GNUC-FFM"}
+      ]
+    },
+    {
+      "name": "ci-Testing-MSVC-FFM",
+      "steps": [
+        {"type": "configure", "name": "ci-Testing-MSVC-FFM"},
+        {"type": "build", "name": "ci-Testing-MSVC-FFM"},
+        {"type": "test", "name": "ci-Testing-MSVC-FFM"}
+      ]
+    },
+    {
+      "name": "ci-Testing-Clang-FFM",
+      "steps": [
+        {"type": "configure", "name": "ci-Testing-Clang-FFM"},
+        {"type": "build", "name": "ci-Testing-Clang-FFM"},
+        {"type": "test", "name": "ci-Testing-Clang-FFM"}
+      ]
+    },
+    {
+      "name": "ci-Testing-GNUC-JNI",
+      "steps": [
+        {"type": "configure", "name": "ci-Testing-GNUC-JNI"},
+        {"type": "build", "name": "ci-Testing-GNUC-JNI"},
+        {"type": "test", "name": "ci-Testing-GNUC-JNI"}
+      ]
+    },
+    {
+      "name": "ci-Testing-MSVC-JNI",
+      "steps": [
+        {"type": "configure", "name": "ci-Testing-MSVC-JNI"},
+        {"type": "build", "name": "ci-Testing-MSVC-JNI"},
+        {"type": "test", "name": "ci-Testing-MSVC-JNI"}
+      ]
+    },
+    {
+      "name": "ci-Testing-Clang-JNI",
+      "steps": [
+        {"type": "configure", "name": "ci-Testing-Clang-JNI"},
+        {"type": "build", "name": "ci-Testing-Clang-JNI"},
+        {"type": "test", "name": "ci-Testing-Clang-JNI"}
       ]
     }
   ]
