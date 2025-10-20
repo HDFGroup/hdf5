@@ -111,11 +111,12 @@ jobs:
             PLATFORM="linux-x64"
           fi
 
-          # Try different versions
+          # Try different versions (current as of October 2025)
+          # Check https://jdk.java.net/jextract/ for latest builds
           JEXTRACT_URLS=(
-            "https://download.java.net/java/early_access/jextract/22/openjdk-22-jextract+6-33_${PLATFORM}_bin.tar.gz"
-            "https://download.java.net/java/early_access/jextract/21/openjdk-21-jextract+5-31_${PLATFORM}_bin.tar.gz"
-            "https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_${PLATFORM}_bin.tar.gz"
+            "https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_${PLATFORM}_bin.tar.gz"
+            "https://download.java.net/java/early_access/jextract/21/5/openjdk-21-jextract+5-31_${PLATFORM}_bin.tar.gz"
+            "https://download.java.net/java/early_access/jextract/20/1/openjdk-20-jextract+1-2_${PLATFORM}_bin.tar.gz"
           )
 
           mkdir -p $HOME/jextract
@@ -155,10 +156,11 @@ jobs:
 
           # Try multiple jextract versions (latest to older)
           # Check https://jdk.java.net/jextract/ for available builds
+          # Note: Windows now uses .tar.gz format
           $JextractUrls = @(
-            "https://download.java.net/java/early_access/jextract/22/openjdk-22-jextract+6-33_windows-x64_bin.zip",
-            "https://download.java.net/java/early_access/jextract/21/openjdk-21-jextract+5-31_windows-x64_bin.zip",
-            "https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_windows-x64_bin.zip"
+            "https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_windows-x64_bin.tar.gz",
+            "https://download.java.net/java/early_access/jextract/21/5/openjdk-21-jextract+5-31_windows-x64_bin.tar.gz",
+            "https://download.java.net/java/early_access/jextract/20/1/openjdk-20-jextract+1-2_windows-x64_bin.tar.gz"
           )
 
           $JextractHome = "$env:USERPROFILE\jextract"
@@ -167,22 +169,18 @@ jobs:
           $Success = $false
           foreach ($Url in $JextractUrls) {
             Write-Host "Trying to download from: $Url"
-            $ZipPath = "$JextractHome\jextract.zip"
+            $TarPath = "$JextractHome\jextract.tar.gz"
 
             try {
-              Invoke-WebRequest -Uri $Url -OutFile $ZipPath -ErrorAction Stop
+              Invoke-WebRequest -Uri $Url -OutFile $TarPath -ErrorAction Stop
               Write-Host "Download successful!"
 
-              Expand-Archive -Path $ZipPath -DestinationPath $JextractHome -Force
+              # Extract tar.gz using tar command (available in Windows 10+)
+              Push-Location $JextractHome
+              tar -xzf jextract.tar.gz --strip-components=1
+              Pop-Location
 
-              # Find the extracted directory (usually has version in name)
-              $ExtractedDir = Get-ChildItem -Path $JextractHome -Directory | Select-Object -First 1
-
-              if ($ExtractedDir) {
-                # Move contents up one level
-                Get-ChildItem -Path $ExtractedDir.FullName | Move-Item -Destination $JextractHome -Force
-                Remove-Item -Path $ExtractedDir.FullName -Force
-              }
+              Remove-Item -Path $TarPath -Force
 
               $Success = $true
               break
