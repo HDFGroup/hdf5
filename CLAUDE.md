@@ -110,14 +110,19 @@ java/jsrc/
 
 **Purpose:** Generates FFM bindings using jextract across all platforms (Linux, Windows, macOS) with both plain and ROS3 variants, validates platform consistency, and creates a unified artifact for manual review.
 
-**Trigger (Manual):**
+**Triggers:**
 ```bash
+# Manual trigger (on-demand)
 # Via GitHub Actions UI
 Go to Actions → "Generate FFM Bindings (jextract)" → Run workflow
 Select Java version (24, 25, or latest)
 
 # Via GitHub CLI
 gh workflow run generate-ffm-bindings.yml -f java_version=25
+
+# Automatic (daily builds)
+# Integrated into daily-build.yml workflow
+# Runs automatically when HDF5 C API changes detected
 ```
 
 **Process:**
@@ -149,7 +154,12 @@ gh workflow run generate-ffm-bindings.yml -f java_version=25
 4. If validation passed, replace `java/jsrc/features/` and `java/jsrc/org/`
 5. Commit changes with workflow run ID reference
 
-**Future:** Automatic PR creation (currently manual workflow only)
+**Daily Build Integration:**
+- ✅ Automatically runs in `daily-build.yml` when changes detected
+- Bindings generated as part of daily snapshot builds
+- Artifacts available for review after each daily build
+
+**Future:** Automatic PR creation for generated bindings
 
 ### FFM Test Coverage
 
