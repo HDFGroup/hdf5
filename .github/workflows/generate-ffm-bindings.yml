@@ -253,7 +253,6 @@ jobs:
             "$JEXTRACT_HOME"
 
           echo "Jextract completed!"
-          ls -la "${{ github.workspace }}/jextract-output/org/hdfgroup/javahdf5/" 2>&1 | head -20 || true
 
       - name: Run jextract (Windows)
         if: runner.os == 'Windows'
@@ -267,7 +266,6 @@ jobs:
             "$env:JEXTRACT_HOME"
 
           Write-Host "Jextract completed!"
-          Get-ChildItem -Path "${{ github.workspace }}\jextract-output\org\hdfgroup\javahdf5" | Select-Object -First 20
 
       - name: Upload jextract output
         uses: actions/upload-artifact@v4
