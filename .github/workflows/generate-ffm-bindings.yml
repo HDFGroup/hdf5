@@ -102,19 +102,43 @@ jobs:
         run: |
           echo "Installing jextract..."
 
-          # Download latest jextract from jdk.java.net
-          JEXTRACT_VERSION="24"  # Adjust based on availability
-          JEXTRACT_URL="https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_linux-x64_bin.tar.gz"
+          # Try multiple jextract versions (latest to older)
+          # Check https://jdk.java.net/jextract/ for available builds
 
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            JEXTRACT_URL="https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_macos-x64_bin.tar.gz"
+            PLATFORM="macos-x64"
+          else
+            PLATFORM="linux-x64"
           fi
 
-          # Download and extract
+          # Try different versions
+          JEXTRACT_URLS=(
+            "https://download.java.net/java/early_access/jextract/22/openjdk-22-jextract+6-33_${PLATFORM}_bin.tar.gz"
+            "https://download.java.net/java/early_access/jextract/21/openjdk-21-jextract+5-31_${PLATFORM}_bin.tar.gz"
+            "https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_${PLATFORM}_bin.tar.gz"
+          )
+
           mkdir -p $HOME/jextract
           cd $HOME/jextract
-          curl -L -o jextract.tar.gz "$JEXTRACT_URL"
-          tar -xzf jextract.tar.gz --strip-components=1
+
+          SUCCESS=false
+          for URL in "${JEXTRACT_URLS[@]}"; do
+            echo "Trying to download from: $URL"
+            if curl -L -f -o jextract.tar.gz "$URL" 2>/dev/null; then
+              echo "Download successful!"
+              tar -xzf jextract.tar.gz --strip-components=1
+              SUCCESS=true
+              break
+            else
+              echo "Failed to download from $URL, trying next..."
+            fi
+          done
+
+          if [ "$SUCCESS" = false ]; then
+            echo "ERROR: Failed to download jextract from any known source"
+            echo "Please check https://jdk.java.net/jextract/ for available builds"
+            exit 1
+          fi
 
           # Set environment variable
           echo "JEXTRACT_HOME=$HOME/jextract" >> $GITHUB_ENV
@@ -129,25 +153,49 @@ jobs:
         run: |
           Write-Host "Installing jextract..."
 
-          # Download latest jextract for Windows
-          $JextractUrl = "https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_windows-x64_bin.zip"
+          # Try multiple jextract versions (latest to older)
+          # Check https://jdk.java.net/jextract/ for available builds
+          $JextractUrls = @(
+            "https://download.java.net/java/early_access/jextract/22/openjdk-22-jextract+6-33_windows-x64_bin.zip",
+            "https://download.java.net/java/early_access/jextract/21/openjdk-21-jextract+5-31_windows-x64_bin.zip",
+            "https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_windows-x64_bin.zip"
+          )
 
-          # Download and extract
           $JextractHome = "$env:USERPROFILE\jextract"
           New-Item -ItemType Directory -Force -Path $JextractHome
 
-          $ZipPath = "$JextractHome\jextract.zip"
-          Invoke-WebRequest -Uri $JextractUrl -OutFile $ZipPath
+          $Success = $false
+          foreach ($Url in $JextractUrls) {
+            Write-Host "Trying to download from: $Url"
+            $ZipPath = "$JextractHome\jextract.zip"
 
-          Expand-Archive -Path $ZipPath -DestinationPath $JextractHome -Force
+            try {
+              Invoke-WebRequest -Uri $Url -OutFile $ZipPath -ErrorAction Stop
+              Write-Host "Download successful!"
 
-          # Find the extracted directory (usually has version in name)
-          $ExtractedDir = Get-ChildItem -Path $JextractHome -Directory | Select-Object -First 1
+              Expand-Archive -Path $ZipPath -DestinationPath $JextractHome -Force
 
-          if ($ExtractedDir) {
-            # Move contents up one level
-            Get-ChildItem -Path $ExtractedDir.FullName | Move-Item -Destination $JextractHome -Force
-            Remove-Item -Path $ExtractedDir.FullName -Force
+              # Find the extracted directory (usually has version in name)
+              $ExtractedDir = Get-ChildItem -Path $JextractHome -Directory | Select-Object -First 1
+
+              if ($ExtractedDir) {
+                # Move contents up one level
+                Get-ChildItem -Path $ExtractedDir.FullName | Move-Item -Destination $JextractHome -Force
+                Remove-Item -Path $ExtractedDir.FullName -Force
+              }
+
+              $Success = $true
+              break
+            }
+            catch {
+              Write-Host "Failed to download from $Url, trying next..."
+            }
+          }
+
+          if (-not $Success) {
+            Write-Host "ERROR: Failed to download jextract from any known source"
+            Write-Host "Please check https://jdk.java.net/jextract/ for available builds"
+            exit 1
           }
 
           # Set environment variables
