@@ -102,6 +102,55 @@ java/jsrc/
 - **Plain**: ~82,000 lines, standard HDF5 VFD support
 - **ROS3**: ~83,000 lines, includes H5FD_ros3_* APIs for S3 cloud storage
 
+### Generating FFM Bindings with jextract
+
+**As of October 20, 2025**: Automated workflow for multi-platform FFM binding generation
+
+**Workflow:** `.github/workflows/generate-ffm-bindings.yml`
+
+**Purpose:** Generates FFM bindings using jextract across all platforms (Linux, Windows, macOS) with both plain and ROS3 variants, validates platform consistency, and creates a unified artifact for manual review.
+
+**Trigger (Manual):**
+```bash
+# Via GitHub Actions UI
+Go to Actions → "Generate FFM Bindings (jextract)" → Run workflow
+Select Java version (24, 25, or latest)
+
+# Via GitHub CLI
+gh workflow run generate-ffm-bindings.yml -f java_version=25
+```
+
+**Process:**
+1. Builds HDF5 (minimal configuration) on each platform
+2. Runs jextract to generate FFM bindings
+3. Validates platform-independent code is identical
+4. Merges into unified structure:
+   - `features/plain/` - Linux/macOS (no ROS3)
+   - `features/wplain/` - Windows (no ROS3)
+   - `features/ros3/` - ROS3 VFD (all platforms)
+   - `org/hdfgroup/javahdf5/` - Platform-independent code
+
+**Artifacts:**
+- `ffm-bindings-merged` - Final merged bindings (30 days retention)
+- `validation-report` - Platform consistency validation (30 days retention)
+- Individual platform outputs (7 days retention)
+
+**Scripts:**
+- `bin/jextract-generate.sh` - Linux/macOS jextract wrapper
+- `bin/jextract-generate.bat` - Windows jextract wrapper
+- `bin/merge-ffm-bindings.py` - Merge and validate bindings
+
+**Documentation:** `.claude/FFM_BINDINGS_GENERATION_WORKFLOW.md`
+
+**Manual Review Process:**
+1. Download `ffm-bindings-merged` artifact
+2. Review `validation-report` for platform consistency
+3. Inspect generated Java files
+4. If validation passed, replace `java/jsrc/features/` and `java/jsrc/org/`
+5. Commit changes with workflow run ID reference
+
+**Future:** Automatic PR creation (currently manual workflow only)
+
 ### FFM Test Coverage
 
 **Status as of October 16, 2025**: 444 FFM tests (443 active, 1 ignored) across 17 modules, **100% PASSING** ✅

@@ -1,0 +1,343 @@
+name: Generate FFM Bindings (jextract)
+
+# This workflow generates FFM bindings for HDF5 using jextract on all platforms.
+# It builds HDF5 (minimal configuration) with and without ROS3 VFD on Linux, Windows, and macOS,
+# runs jextract to generate FFM bindings, validates platform-independent code is identical,
+# and creates a unified artifact with platform-specific feature variants.
+
+on:
+  workflow_dispatch:
+    inputs:
+      java_version:
+        description: 'Java version for jextract (24, 25, latest)'
+        required: false
+        default: '25'
+        type: choice
+        options:
+          - '24'
+          - '25'
+          - 'latest'
+      create_pr:
+        description: 'Create PR with generated bindings (future)'
+        required: false
+        default: false
+        type: boolean
+  workflow_call:
+    inputs:
+      java_version:
+        description: 'Java version for jextract'
+        required: false
+        default: '25'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-hdf5-and-jextract:
+    name: Build HDF5 and Run jextract (${{ matrix.platform }} - ${{ matrix.variant }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux builds
+          - platform: linux
+            os: ubuntu-latest
+            variant: plain
+            cmake_preset: ci-StdShar-GNUC
+            enable_ros3: 'OFF'
+            shell: bash
+
+          - platform: linux
+            os: ubuntu-latest
+            variant: ros3
+            cmake_preset: ci-StdShar-GNUC-S3
+            enable_ros3: 'ON'
+            shell: bash
+
+          # Windows builds
+          - platform: windows
+            os: windows-latest
+            variant: plain
+            cmake_preset: ci-StdShar-MSVC
+            enable_ros3: 'OFF'
+            shell: pwsh
+
+          - platform: windows
+            os: windows-latest
+            variant: ros3
+            cmake_preset: ci-StdShar-MSVC
+            enable_ros3: 'ON'
+            shell: pwsh
+
+          # macOS builds
+          - platform: macos
+            os: macos-latest
+            variant: plain
+            cmake_preset: ci-StdShar-Clang
+            enable_ros3: 'OFF'
+            shell: bash
+
+          - platform: macos
+            os: macos-latest
+            variant: ros3
+            cmake_preset: ci-StdShar-Clang
+            enable_ros3: 'ON'
+            shell: bash
+
+    steps:
+      - name: Checkout HDF5
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ inputs.java_version || '25' }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'oracle'
+          java-version: ${{ inputs.java_version || '25' }}
+
+      - name: Install jextract (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          echo "Installing jextract..."
+
+          # Download latest jextract from jdk.java.net
+          JEXTRACT_VERSION="24"  # Adjust based on availability
+          JEXTRACT_URL="https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_linux-x64_bin.tar.gz"
+
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            JEXTRACT_URL="https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_macos-x64_bin.tar.gz"
+          fi
+
+          # Download and extract
+          mkdir -p $HOME/jextract
+          cd $HOME/jextract
+          curl -L -o jextract.tar.gz "$JEXTRACT_URL"
+          tar -xzf jextract.tar.gz --strip-components=1
+
+          # Set environment variable
+          echo "JEXTRACT_HOME=$HOME/jextract" >> $GITHUB_ENV
+          echo "PATH=$HOME/jextract/bin:$PATH" >> $GITHUB_ENV
+
+          # Verify installation
+          $HOME/jextract/bin/jextract --version || echo "Jextract installed (version check may not be supported)"
+
+      - name: Install jextract (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Installing jextract..."
+
+          # Download latest jextract for Windows
+          $JextractUrl = "https://download.java.net/java/early_access/jextract/2/openjdk-24-jextract+2-3_windows-x64_bin.zip"
+
+          # Download and extract
+          $JextractHome = "$env:USERPROFILE\jextract"
+          New-Item -ItemType Directory -Force -Path $JextractHome
+
+          $ZipPath = "$JextractHome\jextract.zip"
+          Invoke-WebRequest -Uri $JextractUrl -OutFile $ZipPath
+
+          Expand-Archive -Path $ZipPath -DestinationPath $JextractHome -Force
+
+          # Find the extracted directory (usually has version in name)
+          $ExtractedDir = Get-ChildItem -Path $JextractHome -Directory | Select-Object -First 1
+
+          if ($ExtractedDir) {
+            # Move contents up one level
+            Get-ChildItem -Path $ExtractedDir.FullName | Move-Item -Destination $JextractHome -Force
+            Remove-Item -Path $ExtractedDir.FullName -Force
+          }
+
+          # Set environment variables
+          "JEXTRACT_HOME=$JextractHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "$JextractHome\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+          # Verify installation
+          & "$JextractHome\bin\jextract.exe" --version
+          if (-not $?) {
+            Write-Host "Jextract installed (version check may not be supported)"
+          }
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.26.x'
+
+      - name: Configure HDF5 (Minimal build for jextract)
+        shell: bash
+        run: |
+          echo "Configuring HDF5 with ROS3=${{ matrix.enable_ros3 }}..."
+
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DHDF5_BUILD_EXAMPLES=OFF \
+            -DBUILD_TESTING=OFF \
+            -DHDF5_BUILD_TOOLS=OFF \
+            -DHDF5_BUILD_FORTRAN=OFF \
+            -DHDF5_BUILD_CPP_LIB=OFF \
+            -DHDF5_BUILD_JAVA=OFF \
+            -DHDF5_ENABLE_ROS3_VFD=${{ matrix.enable_ros3 }} \
+            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
+
+      - name: Build HDF5
+        shell: bash
+        run: |
+          echo "Building HDF5..."
+          cmake --build build --config Release -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)
+
+      - name: Install HDF5
+        shell: bash
+        run: |
+          echo "Installing HDF5..."
+          cmake --install build --config Release
+
+      - name: Run jextract (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          echo "Running jextract..."
+
+          chmod +x bin/jextract-generate.sh
+
+          ./bin/jextract-generate.sh \
+            "${{ github.workspace }}/install" \
+            "${{ github.workspace }}/jextract-output" \
+            "$JEXTRACT_HOME"
+
+          echo "Jextract completed!"
+          ls -la "${{ github.workspace }}/jextract-output/org/hdfgroup/javahdf5/" | head -20
+
+      - name: Run jextract (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Running jextract..."
+
+          & bin\jextract-generate.bat `
+            "${{ github.workspace }}\install" `
+            "${{ github.workspace }}\jextract-output" `
+            "$env:JEXTRACT_HOME"
+
+          Write-Host "Jextract completed!"
+          Get-ChildItem -Path "${{ github.workspace }}\jextract-output\org\hdfgroup\javahdf5" | Select-Object -First 20
+
+      - name: Upload jextract output
+        uses: actions/upload-artifact@v4
+        with:
+          name: jextract-${{ matrix.platform }}-${{ matrix.variant }}
+          path: jextract-output/
+          retention-days: 7
+
+  merge-and-validate:
+    name: Merge and Validate FFM Bindings
+    needs: build-hdf5-and-jextract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout HDF5
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Download all jextract outputs
+        uses: actions/download-artifact@v4
+        with:
+          path: jextract-downloads
+
+      - name: List downloaded artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          ls -la jextract-downloads/
+          echo ""
+          for dir in jextract-downloads/*/; do
+            echo "=== $(basename $dir) ==="
+            find "$dir" -name "*.java" | wc -l
+            echo "Java files found"
+            echo ""
+          done
+
+      - name: Merge FFM bindings
+        run: |
+          echo "Merging FFM bindings from all platforms..."
+
+          chmod +x bin/merge-ffm-bindings.py
+
+          python3 bin/merge-ffm-bindings.py \
+            ffm-bindings-merged \
+            jextract-downloads/jextract-linux-plain \
+            jextract-downloads/jextract-linux-ros3 \
+            jextract-downloads/jextract-windows-plain \
+            jextract-downloads/jextract-windows-ros3 \
+            jextract-downloads/jextract-macos-plain \
+            jextract-downloads/jextract-macos-ros3
+
+      - name: Display merge summary
+        run: |
+          echo "============================================"
+          echo "FFM Bindings Merge Summary"
+          echo "============================================"
+          echo ""
+
+          if [ -f ffm-bindings-merged/VALIDATION_REPORT.md ]; then
+            cat ffm-bindings-merged/VALIDATION_REPORT.md
+          fi
+
+          echo ""
+          echo "============================================"
+          echo "Output Structure:"
+          echo "============================================"
+          tree -L 3 ffm-bindings-merged/ || find ffm-bindings-merged/ -type f | head -30
+
+      - name: Upload merged FFM bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffm-bindings-merged
+          path: ffm-bindings-merged/
+          retention-days: 30
+
+      - name: Upload validation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-report
+          path: ffm-bindings-merged/VALIDATION_REPORT.md
+          retention-days: 30
+
+  create-summary:
+    name: Create Workflow Summary
+    needs: merge-and-validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download validation report
+        uses: actions/download-artifact@v4
+        with:
+          name: validation-report
+
+      - name: Create workflow summary
+        run: |
+          echo "# FFM Bindings Generation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Validation Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat VALIDATION_REPORT.md >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download the \`ffm-bindings-merged\` artifact" >> $GITHUB_STEP_SUMMARY
+          echo "2. Review the generated bindings" >> $GITHUB_STEP_SUMMARY
+          echo "3. If validation passed, commit to repository:" >> $GITHUB_STEP_SUMMARY
+          echo "   - Extract artifact contents" >> $GITHUB_STEP_SUMMARY
+          echo "   - Replace \`java/jsrc/features/\` with new bindings" >> $GITHUB_STEP_SUMMARY
+          echo "   - Replace \`java/jsrc/org/\` with new bindings" >> $GITHUB_STEP_SUMMARY
+          echo "   - Create PR with changes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **ffm-bindings-merged**: Final merged bindings (30 days retention)" >> $GITHUB_STEP_SUMMARY
+          echo "- **validation-report**: Detailed validation report (30 days retention)" >> $GITHUB_STEP_SUMMARY
+          echo "- **jextract-\<platform\>-\<variant\>**: Individual platform outputs (7 days retention)" >> $GITHUB_STEP_SUMMARY
