@@ -253,7 +253,7 @@ jobs:
             "$JEXTRACT_HOME"
 
           echo "Jextract completed!"
-          ls -la "${{ github.workspace }}/jextract-output/org/hdfgroup/javahdf5/" | head -20
+          ls -la "${{ github.workspace }}/jextract-output/org/hdfgroup/javahdf5/" 2>&1 | head -20 || true
 
       - name: Run jextract (Windows)
         if: runner.os == 'Windows'
