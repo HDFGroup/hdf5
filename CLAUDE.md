@@ -104,11 +104,16 @@ java/jsrc/
 
 ### Generating FFM Bindings with jextract
 
-**As of October 20, 2025**: Automated workflow for multi-platform FFM binding generation
+**As of October 20, 2025**: Automated workflow for multi-platform FFM binding generation with ROS3 VFD support
 
 **Workflow:** `.github/workflows/generate-ffm-bindings.yml`
 
 **Purpose:** Generates FFM bindings using jextract across all platforms (Linux, Windows, macOS) with both plain and ROS3 variants, validates platform consistency, and creates a unified artifact for manual review.
+
+**ROS3 VFD Dependencies** (platform-specific strategies):
+- **Ubuntu**: Builds aws-c-s3 from source with caching (~15-20 min first run, ~1 min cached)
+- **Windows**: Uses vcpkg package manager
+- **macOS**: Uses Homebrew package manager
 
 **Triggers:**
 ```bash
