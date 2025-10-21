@@ -391,18 +391,43 @@ jobs:
               Write-Host "Download successful!"
 
               # Extract tar.gz using tar command (available in Windows 10+)
-              # Use absolute paths and extract to current directory
-              tar -xzf "$TarPath" --strip-components=1 -C "$JextractHome"
+              # First, list contents to see structure
+              Write-Host "Checking archive contents..."
+              $tarList = tar -tzf "$TarPath" 2>&1 | Select-Object -First 5
+              Write-Host "Archive structure: $tarList"
 
-              Remove-Item -Path $TarPath -Force
+              # Extract to temporary location first to see what we get
+              $TempExtract = "$JextractHome\temp"
+              New-Item -ItemType Directory -Force -Path $TempExtract | Out-Null
+              tar -xzf "$TarPath" -C "$TempExtract" 2>&1
 
-              # Verify extraction worked
-              if (Test-Path "$JextractHome\bin\jextract.exe") {
-                Write-Host "Jextract extracted successfully to $JextractHome"
-                $Success = $true
-                break
+              # Find where jextract.exe actually is
+              $JextractExe = Get-ChildItem -Path $TempExtract -Filter "jextract.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+
+              if ($JextractExe) {
+                Write-Host "Found jextract.exe at: $($JextractExe.FullName)"
+
+                # Move the parent directory contents to JextractHome
+                $JextractRoot = $JextractExe.Directory.Parent.FullName
+                Write-Host "Moving from $JextractRoot to $JextractHome"
+
+                Get-ChildItem -Path $JextractRoot | ForEach-Object {
+                  Move-Item -Path $_.FullName -Destination $JextractHome -Force
+                }
+
+                # Clean up temp
+                Remove-Item -Path $TempExtract -Recurse -Force
+                Remove-Item -Path $TarPath -Force
+
+                # Verify
+                if (Test-Path "$JextractHome\bin\jextract.exe") {
+                  Write-Host "Jextract extracted successfully to $JextractHome"
+                  $Success = $true
+                  break
+                }
               } else {
-                Write-Host "Extraction failed - jextract.exe not found"
+                Write-Host "Could not find jextract.exe in extracted files"
+                Remove-Item -Path $TempExtract -Recurse -Force -ErrorAction SilentlyContinue
               }
             }
             catch {
