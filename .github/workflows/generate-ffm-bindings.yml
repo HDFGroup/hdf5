@@ -586,6 +586,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: jextract-downloads
+          pattern: jextract-*
 
       - name: List downloaded artifacts
         run: |
