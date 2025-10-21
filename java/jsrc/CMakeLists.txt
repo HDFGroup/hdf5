@@ -19,12 +19,8 @@ else ()
 endif ()
 
 file (GLOB HDF5_JAVA_JSRC_SOURCES LIST_DIRECTORIES false ${HDF5_JAVA_JSRC_SOURCE_DIR}/org/${jsrc_platform}/hdfgroup/javahdf5/*.java)
-list(APPEND HDF5_JAVA_JSRC_SOURCES ${HDF5_JAVA_JSRC_SOURCE_DIR}/features/${jsrc_features}/${jsrc_platform}/hdf5_h.java)
-list(APPEND HDF5_JAVA_JSRC_SOURCES ${HDF5_JAVA_JSRC_SOURCE_DIR}/features/${jsrc_features}/${jsrc_platform}/hdf5_h_1.java)
-list(APPEND HDF5_JAVA_JSRC_SOURCES ${HDF5_JAVA_JSRC_SOURCE_DIR}/features/${jsrc_features}/${jsrc_platform}/hdf5_h_2.java)
-if (HDF5_ENABLE_ROS3_VFD)
-  list(APPEND HDF5_JAVA_JSRC_SOURCES ${HDF5_JAVA_JSRC_SOURCE_DIR}/features/${jsrc_features}/H5FD_ros3_fapl_t.java)
-endif ()
+file (GLOB HDF5_JAVA_JSRC_FEATURES_SOURCES LIST_DIRECTORIES false ${HDF5_JAVA_JSRC_SOURCE_DIR}/${jsrc_features}/${jsrc_platform}/hdfgroup/javahdf5/*.java)
+list (APPEND HDF5_JAVA_JSRC_SOURCES ${HDF5_JAVA_JSRC_FEATURES_SOURCES})
 
 file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
 "Enable-Native-Access: ALL-UNNAMED
