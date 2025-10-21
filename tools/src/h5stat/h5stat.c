@@ -568,11 +568,11 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         /* Track different filters for structured chunk dataset */
         /* For now don't do anything for H5_VL_DATA */
         for (k = 0; k < (H5_SECTION_NUM - 1); k++) {
-            if ((H5Pget_nfilters2(dcpl, k, &nfltr)) >= 0) {
+            if ((H5Pget_nfilters2(dcpl, (H5_section_type_t)k, &nfltr)) >= 0) {
                 if (nfltr == 0)
                     iter->stc_dset_comptype[k][0]++;
                 for (u = 0; u < (unsigned)nfltr; u++) {
-                    fltr = H5Pget_filter3(dcpl, k, u, 0, 0, 0, 0, 0, NULL);
+                    fltr = H5Pget_filter3(dcpl, (H5_section_type_t)k, u, 0, 0, 0, 0, 0, NULL);
                     if (fltr >= 0) {
                         if (fltr < (H5_NFILTERS_IMPL - 1))
                             iter->stc_dset_comptype[k][fltr]++;
