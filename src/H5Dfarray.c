@@ -2413,7 +2413,7 @@ H5D__farray_stc_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, vo
     else {
         const H5D_farray_stc_elmt_t *elmt = (const H5D_farray_stc_elmt_t *)_elmt;
 
-        udata->stc_rec.chunk_addr = (const haddr_t *)elmt->addr;
+        udata->stc_rec.chunk_addr = elmt->addr;
         udata->stc_rec.nbytes     = elmt->nbytes;
         for (unsigned u = 0; u < udata->stc_nsects; u++) {
             udata->stc_rec.offset[u]      = elmt->offset[u];
