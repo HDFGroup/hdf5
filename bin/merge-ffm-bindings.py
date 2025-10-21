@@ -183,31 +183,38 @@ def merge_bindings(output_dir: Path, platforms: Dict[str, Dict[str, Path]]) -> b
     print("MERGING FFM BINDINGS")
     print("="*60)
 
-    all_valid = True
-
     # Process each variant (plain, ros3)
     for variant, platform_dirs in platforms.items():
         print(f"\n{'='*60}")
         print(f"Processing {variant.upper()} variant")
         print(f"{'='*60}")
 
-        # Validate platform-independent code
-        is_valid, errors = validate_platform_independent_code(platform_dirs, variant)
+        # Note: Platform validation is skipped because jextract generates
+        # platform-specific types (FILE, pthread_*, callbacks, etc.).
+        # This is expected and correct behavior.
+        print(f"\n⚠️  Skipping platform validation - platform-specific types are expected")
+        print(f"   (FILE, pthread_*, callbacks contain platform-specific code)")
 
-        if not is_valid:
-            print(f"\n❌ Validation FAILED for {variant} variant:")
-            for error in errors:
-                print(f"  {error}")
-            all_valid = False
-            continue
-        else:
-            print(f"\n✅ All platform-independent files are identical ({variant})")
+        # Copy org/ directory per-platform since types differ across platforms
+        if variant == "plain":  # Only copy org/ from plain variant
+            for platform_name, platform_dir in platform_dirs.items():
+                if platform_dir:
+                    src_org = platform_dir / "org"
+                    if platform_name == "linux":
+                        # Linux org/ → org/linux/
+                        dst_org = output_dir / "org" / "linux"
+                    elif platform_name == "windows":
+                        # Windows org/ → org/windows/
+                        dst_org = output_dir / "org" / "windows"
+                    elif platform_name == "macos":
+                        # macOS org/ → org/macos/
+                        dst_org = output_dir / "org" / "macos"
 
-        # Copy platform-independent code (use Linux as reference)
-        if variant == "plain":  # Only copy org/ once (from plain variant)
-            linux_dir = platform_dirs.get('linux')
-            if linux_dir:
-                copy_platform_independent_code(linux_dir, output_dir)
+                    if src_org.exists():
+                        if dst_org.exists():
+                            shutil.rmtree(dst_org)
+                        shutil.copytree(src_org, dst_org)
+                        print(f"  ✓ Copied org/ from {platform_name} to org/{platform_name}/")
 
         # Extract and copy feature files
         print(f"\n📦 Extracting feature files ({variant})...")
@@ -241,7 +248,8 @@ def merge_bindings(output_dir: Path, platforms: Dict[str, Dict[str, Path]]) -> b
                 print(f"\n  📂 features/ros3/ (ROS3 VFD):")
                 copy_feature_files(linux_dir, ros3_dir, feature_files)
 
-    return all_valid
+    # Always return True since platform-specific differences are expected
+    return True
 
 
 def generate_validation_report(output_dir: Path, platforms: Dict[str, Dict[str, Path]]):
@@ -280,11 +288,14 @@ def generate_validation_report(output_dir: Path, platforms: Dict[str, Dict[str, 
         f.write("├── features/\n")
         f.write("│   ├── plain/          # Linux/macOS (no ROS3)\n")
         f.write("│   ├── wplain/         # Windows (no ROS3)\n")
-        f.write("│   └── ros3/           # ROS3 VFD (all platforms)\n")
+        f.write("│   └── ros3/           # ROS3 VFD (Linux, cross-platform)\n")
         f.write("└── org/\n")
-        f.write("    └── hdfgroup/\n")
-        f.write("        └── javahdf5/   # Platform-independent code\n")
+        f.write("    ├── linux/          # Linux platform-specific types\n")
+        f.write("    ├── windows/        # Windows platform-specific types\n")
+        f.write("    └── macos/          # macOS platform-specific types\n")
         f.write("```\n\n")
+        f.write("**Note:** Platform-specific directories are required because jextract\n")
+        f.write("generates platform-specific code for FILE, pthread_*, and callback types.\n\n")
 
         # Count files
         total_files = 0
