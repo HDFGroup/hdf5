@@ -76,31 +76,40 @@ Both implementations use the same `hdf.hdf5lib.*` package structure for seamless
 
 ### FFM Feature Variants
 
-**As of October 13, 2025**: FFM bindings support optional ROS3 (S3 cloud storage) VFD feature selection:
+**As of October 21, 2025**: FFM bindings are platform-specific and support optional ROS3 (S3 cloud storage) VFD feature selection:
 
 **Directory Structure:**
 ```
 java/jsrc/
 ├── features/
 │   ├── plain/          # Standard FFM bindings (no ROS3 VFD support)
-│   │   ├── hdf5_h.java
-│   │   ├── hdf5_h_1.java
-│   │   └── hdf5_h_2.java
+│   │   ├── linux/      # Linux-specific hdf5_h*.java files
+│   │   ├── macos/      # macOS-specific hdf5_h*.java files
+│   │   └── windows/    # Windows-specific hdf5_h*.java files
 │   └── ros3/           # FFM bindings with ROS3 VFD support (+9 ROS3 APIs)
-│       ├── hdf5_h.java
-│       ├── hdf5_h_1.java
-│       └── hdf5_h_2.java
-└── org/hdfgroup/javahdf5/  # Common FFM structs/types (both variants)
+│       ├── linux/      # Linux ROS3 hdf5_h*.java + H5FD_ros3_fapl_t.java
+│       ├── macos/      # macOS ROS3 hdf5_h*.java + H5FD_ros3_fapl_t.java
+│       └── windows/    # Windows ROS3 hdf5_h*.java + H5FD_ros3_fapl_t.java
+└── org/                # Platform-specific FFM structs/types
+    ├── linux/hdfgroup/javahdf5/    # Linux types (FILE, pthread_*, etc.)
+    ├── macos/hdfgroup/javahdf5/    # macOS types
+    └── windows/hdfgroup/javahdf5/  # Windows types
 ```
+
+**Platform-Specific Nature:**
+- Both `features/` and `org/` directories are platform-specific
+- jextract generates platform-specific code for native types (FILE, pthread_*, callbacks)
+- Each platform has its own complete set of FFM bindings
 
 **Build Selection:**
 - CMake automatically selects the appropriate variant based on `HDF5_ENABLE_ROS3_VFD`
-- Maven artifacts will be built with the corresponding feature set
+- CMake automatically selects the platform-specific files for the build platform
+- Maven artifacts will be built with the corresponding feature set and platform
 - Tests are compatible with both variants (use common API surface)
 
 **Feature Comparison:**
-- **Plain**: ~82,000 lines, standard HDF5 VFD support
-- **ROS3**: ~83,000 lines, includes H5FD_ros3_* APIs for S3 cloud storage
+- **Plain**: ~82,000 lines per platform, standard HDF5 VFD support
+- **ROS3**: ~83,000 lines per platform, includes H5FD_ros3_* APIs for S3 cloud storage
 
 ### Generating FFM Bindings with jextract
 

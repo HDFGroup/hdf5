@@ -22,12 +22,18 @@ Arguments:
 Output structure:
     output_dir/
     ├── features/
-    │   ├── plain/          # Linux/macOS common (no ROS3)
-    │   ├── wplain/         # Windows-specific (no ROS3)
-    │   └── ros3/           # ROS3 variant (platform-agnostic if possible)
+    │   ├── plain/
+    │   │   ├── linux/      # Linux plain variant hdf5_h*.java
+    │   │   ├── macos/      # macOS plain variant hdf5_h*.java
+    │   │   └── windows/    # Windows plain variant hdf5_h*.java
+    │   └── ros3/
+    │       ├── linux/      # Linux ROS3 variant hdf5_h*.java + H5FD_ros3*
+    │       ├── macos/      # macOS ROS3 variant hdf5_h*.java + H5FD_ros3*
+    │       └── windows/    # Windows ROS3 variant hdf5_h*.java + H5FD_ros3*
     └── org/
-        └── hdfgroup/
-            └── javahdf5/   # Platform-independent structs/types
+        ├── linux/          # Linux platform-specific types
+        ├── macos/          # macOS platform-specific types
+        └── windows/        # Windows platform-specific types
 """
 
 import os
@@ -216,37 +222,19 @@ def merge_bindings(output_dir: Path, platforms: Dict[str, Dict[str, Path]]) -> b
                         shutil.copytree(src_org, dst_org)
                         print(f"  ✓ Copied org/ from {platform_name} to org/{platform_name}/")
 
-        # Extract and copy feature files
+        # Extract and copy feature files (platform-specific per variant)
         print(f"\n📦 Extracting feature files ({variant})...")
 
-        if variant == "plain":
-            # Linux/macOS -> features/plain/
-            linux_dir = platform_dirs.get('linux')
-            macos_dir = platform_dirs.get('macos')
+        # Each platform gets its own feature directory under variant
+        for platform_name, platform_dir in platform_dirs.items():
+            if platform_dir and platform_dir.exists():
+                feature_files = extract_feature_files(platform_dir)
 
-            # Use Linux as reference for plain
-            if linux_dir:
-                feature_files = extract_feature_files(linux_dir)
-                plain_dir = output_dir / "features" / "plain"
-                print(f"\n  📂 features/plain/ (Linux/macOS):")
-                copy_feature_files(linux_dir, plain_dir, feature_files)
+                # features/{variant}/{platform}/
+                variant_platform_dir = output_dir / "features" / variant / platform_name
 
-            # Windows -> features/wplain/
-            windows_dir = platform_dirs.get('windows')
-            if windows_dir:
-                feature_files = extract_feature_files(windows_dir)
-                wplain_dir = output_dir / "features" / "wplain"
-                print(f"\n  📂 features/wplain/ (Windows):")
-                copy_feature_files(windows_dir, wplain_dir, feature_files)
-
-        elif variant == "ros3":
-            # ROS3 -> features/ros3/ (use Linux as reference)
-            linux_dir = platform_dirs.get('linux')
-            if linux_dir:
-                feature_files = extract_feature_files(linux_dir)
-                ros3_dir = output_dir / "features" / "ros3"
-                print(f"\n  📂 features/ros3/ (ROS3 VFD):")
-                copy_feature_files(linux_dir, ros3_dir, feature_files)
+                print(f"\n  📂 features/{variant}/{platform_name}/:")
+                copy_feature_files(platform_dir, variant_platform_dir, feature_files)
 
     # Always return True since platform-specific differences are expected
     return True
@@ -286,16 +274,22 @@ def generate_validation_report(output_dir: Path, platforms: Dict[str, Dict[str, 
         f.write("```\n")
         f.write("output/\n")
         f.write("├── features/\n")
-        f.write("│   ├── plain/          # Linux/macOS (no ROS3)\n")
-        f.write("│   ├── wplain/         # Windows (no ROS3)\n")
-        f.write("│   └── ros3/           # ROS3 VFD (Linux, cross-platform)\n")
+        f.write("│   ├── plain/\n")
+        f.write("│   │   ├── linux/      # Linux plain hdf5_h*.java\n")
+        f.write("│   │   ├── macos/      # macOS plain hdf5_h*.java\n")
+        f.write("│   │   └── windows/    # Windows plain hdf5_h*.java\n")
+        f.write("│   └── ros3/\n")
+        f.write("│       ├── linux/      # Linux ROS3 hdf5_h*.java + H5FD_ros3*\n")
+        f.write("│       ├── macos/      # macOS ROS3 hdf5_h*.java + H5FD_ros3*\n")
+        f.write("│       └── windows/    # Windows ROS3 hdf5_h*.java + H5FD_ros3*\n")
         f.write("└── org/\n")
         f.write("    ├── linux/          # Linux platform-specific types\n")
-        f.write("    ├── windows/        # Windows platform-specific types\n")
-        f.write("    └── macos/          # macOS platform-specific types\n")
+        f.write("    ├── macos/          # macOS platform-specific types\n")
+        f.write("    └── windows/        # Windows platform-specific types\n")
         f.write("```\n\n")
-        f.write("**Note:** Platform-specific directories are required because jextract\n")
-        f.write("generates platform-specific code for FILE, pthread_*, and callback types.\n\n")
+        f.write("**Note:** Both features/ and org/ are platform-specific because jextract\n")
+        f.write("generates platform-specific code for hdf5_h*.java wrapper files, FILE, pthread_*,\n")
+        f.write("and callback types. Each variant (plain/ros3) has platform-specific feature files.\n\n")
 
         # Count files
         total_files = 0
