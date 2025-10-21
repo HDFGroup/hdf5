@@ -497,6 +497,13 @@ jobs:
         run: |
           echo "Configuring HDF5 with ROS3=${{ matrix.enable_ros3 }}..."
 
+          # Convert Windows path to Unix-style for CMake in bash
+          INSTALL_PREFIX="${{ github.workspace }}/install"
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            # Convert D:\a\hdf5\hdf5 to /d/a/hdf5/hdf5
+            INSTALL_PREFIX=$(echo "$INSTALL_PREFIX" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\L\1|')
+          fi
+
           # Add vcpkg toolchain for Windows ROS3 builds
           VCPKG_TOOLCHAIN=""
           if [[ "${{ matrix.platform }}" == "windows" && "${{ matrix.variant }}" == "ros3" ]]; then
@@ -512,7 +519,7 @@ jobs:
             -DHDF5_BUILD_CPP_LIB=OFF \
             -DHDF5_BUILD_JAVA=OFF \
             -DHDF5_ENABLE_ROS3_VFD=${{ matrix.enable_ros3 }} \
-            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
+            -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" \
             $VCPKG_TOOLCHAIN
 
       - name: Build HDF5
