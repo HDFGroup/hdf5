@@ -1456,3 +1456,99 @@ HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *,
 #endif
 }
 #endif
+
+/*
+ * HDqsort_fallback - Fallback qsort implementation for platforms without qsort_r/qsort_s
+ *
+ * For platforms that don't provide any reentrant qsort variant, this fallback uses
+ * thread-local storage (when thread-safety is
+ * enabled) or a global variable to store the comparator context, then uses standard qsort().
+ *
+ * The threadsafe version uses thread-local storage but does not support recursive sorting (a
+ * comparator calling HDqsort_r) as it would overwrite the previous context.
+ */
+#ifndef H5_HAVE_QSORT_REENTRANT
+
+typedef struct HDqsort_fallback_context_t {
+    int (*gnu_compar)(const void *, const void *, void *);
+    void *gnu_arg;
+} HDqsort_fallback_context_t;
+
+#ifdef H5_HAVE_THREADSAFE
+/* Thread-local storage approach for thread-safe builds */
+static H5TS_key_t  HDqsort_fallback_key;
+static H5TS_once_t HDqsort_fallback_key_once = H5TS_ONCE_INITIALIZER;
+
+static void
+HDqsort_fallback_key_init(void)
+{
+    /* Create the thread-local storage key (no destructor needed) */
+    H5TS_key_create(&HDqsort_fallback_key, NULL);
+}
+
+static int
+HDqsort_fallback_wrapper(const void *a, const void *b)
+{
+    HDqsort_fallback_context_t *ctx = NULL;
+
+    /* Retrieve the context from thread-local storage
+     * This should never fail since we just set it in HDqsort_fallback() */
+    if (H5_UNLIKELY(H5TS_key_get_value(HDqsort_fallback_key, (void **)&ctx) < 0))
+        return 0; /* Should never happen, but return 0 (equal) if it does */
+
+    /* Call the original GNU-style comparator with context */
+    return ctx->gnu_compar(a, b, ctx->gnu_arg);
+}
+
+void
+HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
+                 void *arg)
+{
+    HDqsort_fallback_context_t ctx;
+
+    /* Ensure the TLS key is initialized */
+    H5TS_once(&HDqsort_fallback_key_once, HDqsort_fallback_key_init);
+
+    ctx.gnu_compar = compar;
+    ctx.gnu_arg    = arg;
+
+    /* Store context in thread-local storage */
+    H5TS_key_set_value(HDqsort_fallback_key, &ctx);
+
+    qsort(base, nel, size, HDqsort_fallback_wrapper);
+
+    /* Clear the thread-local storage */
+    H5TS_key_set_value(HDqsort_fallback_key, NULL);
+}
+
+#else
+/* Non-threadsafe: use global variable */
+static HDqsort_fallback_context_t *HDqsort_fallback_global_ctx = NULL;
+
+static int
+HDqsort_fallback_wrapper(const void *a, const void *b)
+{
+    /* Call the original GNU-style comparator with context from global */
+    return HDqsort_fallback_global_ctx->gnu_compar(a, b, HDqsort_fallback_global_ctx->gnu_arg);
+}
+
+void
+HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
+                 void *arg)
+{
+    HDqsort_fallback_context_t ctx;
+
+    ctx.gnu_compar = compar;
+    ctx.gnu_arg    = arg;
+
+    /* Store context in global variable */
+    HDqsort_fallback_global_ctx = &ctx;
+
+    qsort(base, nel, size, HDqsort_fallback_wrapper);
+
+    /* Clear the global pointer */
+    HDqsort_fallback_global_ctx = NULL;
+}
+#endif /* H5_HAVE_THREADSAFE */
+
+#endif /* !H5_HAVE_QSORT_REENTRANT */

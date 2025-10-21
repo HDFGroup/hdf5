@@ -654,6 +654,11 @@ H5_DLL void HDqsort_context(void *base, size_t nel, size_t size,
                             int (*compar)(const void *, const void *, void *), void *arg);
 #endif
 
+#ifndef H5_HAVE_QSORT_REENTRANT
+H5_DLL void HDqsort_fallback(void *base, size_t nel, size_t size,
+                             int (*compar)(const void *, const void *, void *), void *arg);
+#endif
+
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif
@@ -770,10 +775,15 @@ H5_DLL void HDqsort_context(void *base, size_t nel, size_t size,
 #define HDunsetenv(S) unsetenv(S)
 #endif
 #ifndef HDqsort_r
+#ifdef H5_HAVE_QSORT_REENTRANT
 #ifdef H5_HAVE_DARWIN
 #define HDqsort_r(B, N, S, C, A) HDqsort_context(B, N, S, C, A)
 #else
 #define HDqsort_r(B, N, S, C, A) qsort_r(B, N, S, C, A)
+#endif
+#else
+/* No native qsort_r/qsort_s available - use fallback implementation */
+#define HDqsort_r(B, N, S, C, A) HDqsort_fallback(B, N, S, C, A)
 #endif
 #endif
 #ifndef HDvasprintf
