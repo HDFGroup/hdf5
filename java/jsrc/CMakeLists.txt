@@ -19,7 +19,7 @@ else ()
 endif ()
 
 file (GLOB HDF5_JAVA_JSRC_SOURCES LIST_DIRECTORIES false ${HDF5_JAVA_JSRC_SOURCE_DIR}/org/${jsrc_platform}/hdfgroup/javahdf5/*.java)
-file (GLOB HDF5_JAVA_JSRC_FEATURES_SOURCES LIST_DIRECTORIES false ${HDF5_JAVA_JSRC_SOURCE_DIR}/${jsrc_features}/${jsrc_platform}/hdfgroup/javahdf5/*.java)
+file (GLOB HDF5_JAVA_JSRC_FEATURES_SOURCES LIST_DIRECTORIES false ${HDF5_JAVA_JSRC_SOURCE_DIR}/${jsrc_features}/${jsrc_platform}/*.java)
 list (APPEND HDF5_JAVA_JSRC_SOURCES ${HDF5_JAVA_JSRC_FEATURES_SOURCES})
 
 file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
