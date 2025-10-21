@@ -401,14 +401,14 @@ jobs:
               New-Item -ItemType Directory -Force -Path $TempExtract | Out-Null
               tar -xzf "$TarPath" -C "$TempExtract" 2>&1
 
-              # Find where jextract.exe actually is
-              $JextractExe = Get-ChildItem -Path $TempExtract -Filter "jextract.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+              # Find where jextract.bat actually is (Windows uses .bat, not .exe)
+              $JextractBat = Get-ChildItem -Path $TempExtract -Filter "jextract.bat" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
 
-              if ($JextractExe) {
-                Write-Host "Found jextract.exe at: $($JextractExe.FullName)"
+              if ($JextractBat) {
+                Write-Host "Found jextract.bat at: $($JextractBat.FullName)"
 
                 # Move the parent directory contents to JextractHome
-                $JextractRoot = $JextractExe.Directory.Parent.FullName
+                $JextractRoot = $JextractBat.Directory.Parent.FullName
                 Write-Host "Moving from $JextractRoot to $JextractHome"
 
                 Get-ChildItem -Path $JextractRoot | ForEach-Object {
@@ -420,13 +420,13 @@ jobs:
                 Remove-Item -Path $TarPath -Force
 
                 # Verify
-                if (Test-Path "$JextractHome\bin\jextract.exe") {
+                if (Test-Path "$JextractHome\bin\jextract.bat") {
                   Write-Host "Jextract extracted successfully to $JextractHome"
                   $Success = $true
                   break
                 }
               } else {
-                Write-Host "Could not find jextract.exe in extracted files"
+                Write-Host "Could not find jextract.bat in extracted files"
                 Remove-Item -Path $TempExtract -Recurse -Force -ErrorAction SilentlyContinue
               }
             }
@@ -446,8 +446,8 @@ jobs:
           "JEXTRACT_HOME=$JextractHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "$JextractHome\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-          # Verify installation
-          & "$JextractHome\bin\jextract.exe" --version
+          # Verify installation (Windows uses .bat, not .exe)
+          & "$JextractHome\bin\jextract.bat" --version
           if (-not $?) {
             Write-Host "Jextract installed (version check may not be supported)"
           }
