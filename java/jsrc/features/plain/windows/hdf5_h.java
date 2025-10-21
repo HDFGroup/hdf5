@@ -2,28 +2,26 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
-
 public class hdf5_h extends hdf5_h_1 {
 
-    hdf5_h() {
+    hdf5_h()
+    {
         // Should not be called directly
     }
 
     private static class H5Pset_mdc_config {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_mdc_config");
 
@@ -36,9 +34,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
      * }
      */
-    public static FunctionDescriptor H5Pset_mdc_config$descriptor() {
-        return H5Pset_mdc_config.DESC;
-    }
+    public static FunctionDescriptor H5Pset_mdc_config$descriptor() { return H5Pset_mdc_config.DESC; }
 
     /**
      * Downcall method handle for:
@@ -46,9 +42,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
      * }
      */
-    public static MethodHandle H5Pset_mdc_config$handle() {
-        return H5Pset_mdc_config.HANDLE;
-    }
+    public static MethodHandle H5Pset_mdc_config$handle() { return H5Pset_mdc_config.HANDLE; }
 
     /**
      * Address for:
@@ -56,35 +50,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
      * }
      */
-    public static MemorySegment H5Pset_mdc_config$address() {
-        return H5Pset_mdc_config.ADDR;
-    }
+    public static MemorySegment H5Pset_mdc_config$address() { return H5Pset_mdc_config.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
      * }
      */
-    public static int H5Pset_mdc_config(long plist_id, MemorySegment config_ptr) {
+    public static int H5Pset_mdc_config(long plist_id, MemorySegment config_ptr)
+    {
         var mh$ = H5Pset_mdc_config.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_mdc_config", plist_id, config_ptr);
             }
             return (int)mh$.invokeExact(plist_id, config_ptr);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_mdc_log_options {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_BOOL,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_BOOL
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_BOOL, hdf5_h.C_POINTER, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_mdc_log_options");
 
@@ -94,56 +83,57 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pset_mdc_log_options(hid_t plist_id, bool is_enabled, const char *location, bool start_on_access)
+     * herr_t H5Pset_mdc_log_options(hid_t plist_id, bool is_enabled, const char *location, bool
+     * start_on_access)
      * }
      */
-    public static FunctionDescriptor H5Pset_mdc_log_options$descriptor() {
+    public static FunctionDescriptor H5Pset_mdc_log_options$descriptor()
+    {
         return H5Pset_mdc_log_options.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pset_mdc_log_options(hid_t plist_id, bool is_enabled, const char *location, bool start_on_access)
+     * herr_t H5Pset_mdc_log_options(hid_t plist_id, bool is_enabled, const char *location, bool
+     * start_on_access)
      * }
      */
-    public static MethodHandle H5Pset_mdc_log_options$handle() {
-        return H5Pset_mdc_log_options.HANDLE;
-    }
+    public static MethodHandle H5Pset_mdc_log_options$handle() { return H5Pset_mdc_log_options.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pset_mdc_log_options(hid_t plist_id, bool is_enabled, const char *location, bool start_on_access)
+     * herr_t H5Pset_mdc_log_options(hid_t plist_id, bool is_enabled, const char *location, bool
+     * start_on_access)
      * }
      */
-    public static MemorySegment H5Pset_mdc_log_options$address() {
-        return H5Pset_mdc_log_options.ADDR;
-    }
+    public static MemorySegment H5Pset_mdc_log_options$address() { return H5Pset_mdc_log_options.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pset_mdc_log_options(hid_t plist_id, bool is_enabled, const char *location, bool start_on_access)
+     * herr_t H5Pset_mdc_log_options(hid_t plist_id, bool is_enabled, const char *location, bool
+     * start_on_access)
      * }
      */
-    public static int H5Pset_mdc_log_options(long plist_id, boolean is_enabled, MemorySegment location, boolean start_on_access) {
+    public static int H5Pset_mdc_log_options(long plist_id, boolean is_enabled, MemorySegment location,
+                                             boolean start_on_access)
+    {
         var mh$ = H5Pset_mdc_log_options.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_mdc_log_options", plist_id, is_enabled, location, start_on_access);
             }
             return (int)mh$.invokeExact(plist_id, is_enabled, location, start_on_access);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_meta_block_size {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_meta_block_size");
 
@@ -156,7 +146,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
      * }
      */
-    public static FunctionDescriptor H5Pset_meta_block_size$descriptor() {
+    public static FunctionDescriptor H5Pset_meta_block_size$descriptor()
+    {
         return H5Pset_meta_block_size.DESC;
     }
 
@@ -166,9 +157,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
      * }
      */
-    public static MethodHandle H5Pset_meta_block_size$handle() {
-        return H5Pset_meta_block_size.HANDLE;
-    }
+    public static MethodHandle H5Pset_meta_block_size$handle() { return H5Pset_meta_block_size.HANDLE; }
 
     /**
      * Address for:
@@ -176,33 +165,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
      * }
      */
-    public static MemorySegment H5Pset_meta_block_size$address() {
-        return H5Pset_meta_block_size.ADDR;
-    }
+    public static MemorySegment H5Pset_meta_block_size$address() { return H5Pset_meta_block_size.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
      * }
      */
-    public static int H5Pset_meta_block_size(long fapl_id, long size) {
+    public static int H5Pset_meta_block_size(long fapl_id, long size)
+    {
         var mh$ = H5Pset_meta_block_size.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_meta_block_size", fapl_id, size);
             }
             return (int)mh$.invokeExact(fapl_id, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_metadata_read_attempts {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_metadata_read_attempts");
 
@@ -215,7 +201,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned int attempts)
      * }
      */
-    public static FunctionDescriptor H5Pset_metadata_read_attempts$descriptor() {
+    public static FunctionDescriptor H5Pset_metadata_read_attempts$descriptor()
+    {
         return H5Pset_metadata_read_attempts.DESC;
     }
 
@@ -225,7 +212,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned int attempts)
      * }
      */
-    public static MethodHandle H5Pset_metadata_read_attempts$handle() {
+    public static MethodHandle H5Pset_metadata_read_attempts$handle()
+    {
         return H5Pset_metadata_read_attempts.HANDLE;
     }
 
@@ -235,7 +223,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned int attempts)
      * }
      */
-    public static MemorySegment H5Pset_metadata_read_attempts$address() {
+    public static MemorySegment H5Pset_metadata_read_attempts$address()
+    {
         return H5Pset_metadata_read_attempts.ADDR;
     }
 
@@ -244,24 +233,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned int attempts)
      * }
      */
-    public static int H5Pset_metadata_read_attempts(long plist_id, int attempts) {
+    public static int H5Pset_metadata_read_attempts(long plist_id, int attempts)
+    {
         var mh$ = H5Pset_metadata_read_attempts.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_metadata_read_attempts", plist_id, attempts);
             }
             return (int)mh$.invokeExact(plist_id, attempts);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_multi_type {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_multi_type");
 
@@ -274,9 +262,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
      * }
      */
-    public static FunctionDescriptor H5Pset_multi_type$descriptor() {
-        return H5Pset_multi_type.DESC;
-    }
+    public static FunctionDescriptor H5Pset_multi_type$descriptor() { return H5Pset_multi_type.DESC; }
 
     /**
      * Downcall method handle for:
@@ -284,9 +270,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
      * }
      */
-    public static MethodHandle H5Pset_multi_type$handle() {
-        return H5Pset_multi_type.HANDLE;
-    }
+    public static MethodHandle H5Pset_multi_type$handle() { return H5Pset_multi_type.HANDLE; }
 
     /**
      * Address for:
@@ -294,34 +278,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
      * }
      */
-    public static MemorySegment H5Pset_multi_type$address() {
-        return H5Pset_multi_type.ADDR;
-    }
+    public static MemorySegment H5Pset_multi_type$address() { return H5Pset_multi_type.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
      * }
      */
-    public static int H5Pset_multi_type(long fapl_id, int type) {
+    public static int H5Pset_multi_type(long fapl_id, int type)
+    {
         var mh$ = H5Pset_multi_type.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_multi_type", fapl_id, type);
             }
             return (int)mh$.invokeExact(fapl_id, type);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_object_flush_cb {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_object_flush_cb");
 
@@ -334,7 +314,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata)
      * }
      */
-    public static FunctionDescriptor H5Pset_object_flush_cb$descriptor() {
+    public static FunctionDescriptor H5Pset_object_flush_cb$descriptor()
+    {
         return H5Pset_object_flush_cb.DESC;
     }
 
@@ -344,9 +325,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata)
      * }
      */
-    public static MethodHandle H5Pset_object_flush_cb$handle() {
-        return H5Pset_object_flush_cb.HANDLE;
-    }
+    public static MethodHandle H5Pset_object_flush_cb$handle() { return H5Pset_object_flush_cb.HANDLE; }
 
     /**
      * Address for:
@@ -354,33 +333,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata)
      * }
      */
-    public static MemorySegment H5Pset_object_flush_cb$address() {
-        return H5Pset_object_flush_cb.ADDR;
-    }
+    public static MemorySegment H5Pset_object_flush_cb$address() { return H5Pset_object_flush_cb.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata)
      * }
      */
-    public static int H5Pset_object_flush_cb(long plist_id, MemorySegment func, MemorySegment udata) {
+    public static int H5Pset_object_flush_cb(long plist_id, MemorySegment func, MemorySegment udata)
+    {
         var mh$ = H5Pset_object_flush_cb.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_object_flush_cb", plist_id, func, udata);
             }
             return (int)mh$.invokeExact(plist_id, func, udata);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_sieve_buf_size {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_sieve_buf_size");
 
@@ -393,9 +369,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
      * }
      */
-    public static FunctionDescriptor H5Pset_sieve_buf_size$descriptor() {
-        return H5Pset_sieve_buf_size.DESC;
-    }
+    public static FunctionDescriptor H5Pset_sieve_buf_size$descriptor() { return H5Pset_sieve_buf_size.DESC; }
 
     /**
      * Downcall method handle for:
@@ -403,9 +377,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
      * }
      */
-    public static MethodHandle H5Pset_sieve_buf_size$handle() {
-        return H5Pset_sieve_buf_size.HANDLE;
-    }
+    public static MethodHandle H5Pset_sieve_buf_size$handle() { return H5Pset_sieve_buf_size.HANDLE; }
 
     /**
      * Address for:
@@ -413,33 +385,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
      * }
      */
-    public static MemorySegment H5Pset_sieve_buf_size$address() {
-        return H5Pset_sieve_buf_size.ADDR;
-    }
+    public static MemorySegment H5Pset_sieve_buf_size$address() { return H5Pset_sieve_buf_size.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
      * }
      */
-    public static int H5Pset_sieve_buf_size(long fapl_id, long size) {
+    public static int H5Pset_sieve_buf_size(long fapl_id, long size)
+    {
         var mh$ = H5Pset_sieve_buf_size.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_sieve_buf_size", fapl_id, size);
             }
             return (int)mh$.invokeExact(fapl_id, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_small_data_block_size {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_small_data_block_size");
 
@@ -452,7 +421,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size)
      * }
      */
-    public static FunctionDescriptor H5Pset_small_data_block_size$descriptor() {
+    public static FunctionDescriptor H5Pset_small_data_block_size$descriptor()
+    {
         return H5Pset_small_data_block_size.DESC;
     }
 
@@ -462,7 +432,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size)
      * }
      */
-    public static MethodHandle H5Pset_small_data_block_size$handle() {
+    public static MethodHandle H5Pset_small_data_block_size$handle()
+    {
         return H5Pset_small_data_block_size.HANDLE;
     }
 
@@ -472,7 +443,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size)
      * }
      */
-    public static MemorySegment H5Pset_small_data_block_size$address() {
+    public static MemorySegment H5Pset_small_data_block_size$address()
+    {
         return H5Pset_small_data_block_size.ADDR;
     }
 
@@ -481,25 +453,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size)
      * }
      */
-    public static int H5Pset_small_data_block_size(long fapl_id, long size) {
+    public static int H5Pset_small_data_block_size(long fapl_id, long size)
+    {
         var mh$ = H5Pset_small_data_block_size.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_small_data_block_size", fapl_id, size);
             }
             return (int)mh$.invokeExact(fapl_id, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_vol {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_vol");
 
@@ -512,9 +482,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
      * }
      */
-    public static FunctionDescriptor H5Pset_vol$descriptor() {
-        return H5Pset_vol.DESC;
-    }
+    public static FunctionDescriptor H5Pset_vol$descriptor() { return H5Pset_vol.DESC; }
 
     /**
      * Downcall method handle for:
@@ -522,9 +490,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
      * }
      */
-    public static MethodHandle H5Pset_vol$handle() {
-        return H5Pset_vol.HANDLE;
-    }
+    public static MethodHandle H5Pset_vol$handle() { return H5Pset_vol.HANDLE; }
 
     /**
      * Address for:
@@ -532,33 +498,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
      * }
      */
-    public static MemorySegment H5Pset_vol$address() {
-        return H5Pset_vol.ADDR;
-    }
+    public static MemorySegment H5Pset_vol$address() { return H5Pset_vol.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
      * }
      */
-    public static int H5Pset_vol(long plist_id, long new_vol_id, MemorySegment new_vol_info) {
+    public static int H5Pset_vol(long plist_id, long new_vol_id, MemorySegment new_vol_info)
+    {
         var mh$ = H5Pset_vol.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_vol", plist_id, new_vol_id, new_vol_info);
             }
             return (int)mh$.invokeExact(plist_id, new_vol_id, new_vol_info);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_vol_cap_flags {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_vol_cap_flags");
 
@@ -571,9 +534,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags)
      * }
      */
-    public static FunctionDescriptor H5Pget_vol_cap_flags$descriptor() {
-        return H5Pget_vol_cap_flags.DESC;
-    }
+    public static FunctionDescriptor H5Pget_vol_cap_flags$descriptor() { return H5Pget_vol_cap_flags.DESC; }
 
     /**
      * Downcall method handle for:
@@ -581,9 +542,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags)
      * }
      */
-    public static MethodHandle H5Pget_vol_cap_flags$handle() {
-        return H5Pget_vol_cap_flags.HANDLE;
-    }
+    public static MethodHandle H5Pget_vol_cap_flags$handle() { return H5Pget_vol_cap_flags.HANDLE; }
 
     /**
      * Address for:
@@ -591,33 +550,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags)
      * }
      */
-    public static MemorySegment H5Pget_vol_cap_flags$address() {
-        return H5Pget_vol_cap_flags.ADDR;
-    }
+    public static MemorySegment H5Pget_vol_cap_flags$address() { return H5Pget_vol_cap_flags.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags)
      * }
      */
-    public static int H5Pget_vol_cap_flags(long plist_id, MemorySegment cap_flags) {
+    public static int H5Pget_vol_cap_flags(long plist_id, MemorySegment cap_flags)
+    {
         var mh$ = H5Pget_vol_cap_flags.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_vol_cap_flags", plist_id, cap_flags);
             }
             return (int)mh$.invokeExact(plist_id, cap_flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_mdc_image_config {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_mdc_image_config");
 
@@ -630,7 +586,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
      * }
      */
-    public static FunctionDescriptor H5Pset_mdc_image_config$descriptor() {
+    public static FunctionDescriptor H5Pset_mdc_image_config$descriptor()
+    {
         return H5Pset_mdc_image_config.DESC;
     }
 
@@ -640,9 +597,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
      * }
      */
-    public static MethodHandle H5Pset_mdc_image_config$handle() {
-        return H5Pset_mdc_image_config.HANDLE;
-    }
+    public static MethodHandle H5Pset_mdc_image_config$handle() { return H5Pset_mdc_image_config.HANDLE; }
 
     /**
      * Address for:
@@ -650,35 +605,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
      * }
      */
-    public static MemorySegment H5Pset_mdc_image_config$address() {
-        return H5Pset_mdc_image_config.ADDR;
-    }
+    public static MemorySegment H5Pset_mdc_image_config$address() { return H5Pset_mdc_image_config.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
      * }
      */
-    public static int H5Pset_mdc_image_config(long plist_id, MemorySegment config_ptr) {
+    public static int H5Pset_mdc_image_config(long plist_id, MemorySegment config_ptr)
+    {
         var mh$ = H5Pset_mdc_image_config.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_mdc_image_config", plist_id, config_ptr);
             }
             return (int)mh$.invokeExact(plist_id, config_ptr);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_page_buffer_size {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_page_buffer_size");
 
@@ -688,56 +638,56 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned int min_meta_per, unsigned int min_raw_per)
+     * herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned int min_meta_per, unsigned int
+     * min_raw_per)
      * }
      */
-    public static FunctionDescriptor H5Pset_page_buffer_size$descriptor() {
+    public static FunctionDescriptor H5Pset_page_buffer_size$descriptor()
+    {
         return H5Pset_page_buffer_size.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned int min_meta_per, unsigned int min_raw_per)
+     * herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned int min_meta_per, unsigned int
+     * min_raw_per)
      * }
      */
-    public static MethodHandle H5Pset_page_buffer_size$handle() {
-        return H5Pset_page_buffer_size.HANDLE;
-    }
+    public static MethodHandle H5Pset_page_buffer_size$handle() { return H5Pset_page_buffer_size.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned int min_meta_per, unsigned int min_raw_per)
+     * herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned int min_meta_per, unsigned int
+     * min_raw_per)
      * }
      */
-    public static MemorySegment H5Pset_page_buffer_size$address() {
-        return H5Pset_page_buffer_size.ADDR;
-    }
+    public static MemorySegment H5Pset_page_buffer_size$address() { return H5Pset_page_buffer_size.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned int min_meta_per, unsigned int min_raw_per)
+     * herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned int min_meta_per, unsigned int
+     * min_raw_per)
      * }
      */
-    public static int H5Pset_page_buffer_size(long plist_id, long buf_size, int min_meta_per, int min_raw_per) {
+    public static int H5Pset_page_buffer_size(long plist_id, long buf_size, int min_meta_per, int min_raw_per)
+    {
         var mh$ = H5Pset_page_buffer_size.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_page_buffer_size", plist_id, buf_size, min_meta_per, min_raw_per);
             }
             return (int)mh$.invokeExact(plist_id, buf_size, min_meta_per, min_raw_per);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_relax_file_integrity_checks {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_relax_file_integrity_checks");
 
@@ -750,7 +700,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags)
      * }
      */
-    public static FunctionDescriptor H5Pset_relax_file_integrity_checks$descriptor() {
+    public static FunctionDescriptor H5Pset_relax_file_integrity_checks$descriptor()
+    {
         return H5Pset_relax_file_integrity_checks.DESC;
     }
 
@@ -760,7 +711,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags)
      * }
      */
-    public static MethodHandle H5Pset_relax_file_integrity_checks$handle() {
+    public static MethodHandle H5Pset_relax_file_integrity_checks$handle()
+    {
         return H5Pset_relax_file_integrity_checks.HANDLE;
     }
 
@@ -770,7 +722,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags)
      * }
      */
-    public static MemorySegment H5Pset_relax_file_integrity_checks$address() {
+    public static MemorySegment H5Pset_relax_file_integrity_checks$address()
+    {
         return H5Pset_relax_file_integrity_checks.ADDR;
     }
 
@@ -779,24 +732,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags)
      * }
      */
-    public static int H5Pset_relax_file_integrity_checks(long plist_id, long flags) {
+    public static int H5Pset_relax_file_integrity_checks(long plist_id, long flags)
+    {
         var mh$ = H5Pset_relax_file_integrity_checks.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_relax_file_integrity_checks", plist_id, flags);
             }
             return (int)mh$.invokeExact(plist_id, flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_relax_file_integrity_checks {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_relax_file_integrity_checks");
 
@@ -809,7 +761,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags)
      * }
      */
-    public static FunctionDescriptor H5Pget_relax_file_integrity_checks$descriptor() {
+    public static FunctionDescriptor H5Pget_relax_file_integrity_checks$descriptor()
+    {
         return H5Pget_relax_file_integrity_checks.DESC;
     }
 
@@ -819,7 +772,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags)
      * }
      */
-    public static MethodHandle H5Pget_relax_file_integrity_checks$handle() {
+    public static MethodHandle H5Pget_relax_file_integrity_checks$handle()
+    {
         return H5Pget_relax_file_integrity_checks.HANDLE;
     }
 
@@ -829,7 +783,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags)
      * }
      */
-    public static MemorySegment H5Pget_relax_file_integrity_checks$address() {
+    public static MemorySegment H5Pget_relax_file_integrity_checks$address()
+    {
         return H5Pget_relax_file_integrity_checks.ADDR;
     }
 
@@ -838,24 +793,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags)
      * }
      */
-    public static int H5Pget_relax_file_integrity_checks(long plist_id, MemorySegment flags) {
+    public static int H5Pget_relax_file_integrity_checks(long plist_id, MemorySegment flags)
+    {
         var mh$ = H5Pget_relax_file_integrity_checks.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_relax_file_integrity_checks", plist_id, flags);
             }
             return (int)mh$.invokeExact(plist_id, flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pfill_value_defined {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pfill_value_defined");
 
@@ -868,9 +822,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status)
      * }
      */
-    public static FunctionDescriptor H5Pfill_value_defined$descriptor() {
-        return H5Pfill_value_defined.DESC;
-    }
+    public static FunctionDescriptor H5Pfill_value_defined$descriptor() { return H5Pfill_value_defined.DESC; }
 
     /**
      * Downcall method handle for:
@@ -878,9 +830,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status)
      * }
      */
-    public static MethodHandle H5Pfill_value_defined$handle() {
-        return H5Pfill_value_defined.HANDLE;
-    }
+    public static MethodHandle H5Pfill_value_defined$handle() { return H5Pfill_value_defined.HANDLE; }
 
     /**
      * Address for:
@@ -888,33 +838,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status)
      * }
      */
-    public static MemorySegment H5Pfill_value_defined$address() {
-        return H5Pfill_value_defined.ADDR;
-    }
+    public static MemorySegment H5Pfill_value_defined$address() { return H5Pfill_value_defined.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status)
      * }
      */
-    public static int H5Pfill_value_defined(long plist, MemorySegment status) {
+    public static int H5Pfill_value_defined(long plist, MemorySegment status)
+    {
         var mh$ = H5Pfill_value_defined.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pfill_value_defined", plist, status);
             }
             return (int)mh$.invokeExact(plist, status);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_alloc_time {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_alloc_time");
 
@@ -927,9 +874,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time)
      * }
      */
-    public static FunctionDescriptor H5Pget_alloc_time$descriptor() {
-        return H5Pget_alloc_time.DESC;
-    }
+    public static FunctionDescriptor H5Pget_alloc_time$descriptor() { return H5Pget_alloc_time.DESC; }
 
     /**
      * Downcall method handle for:
@@ -937,9 +882,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time)
      * }
      */
-    public static MethodHandle H5Pget_alloc_time$handle() {
-        return H5Pget_alloc_time.HANDLE;
-    }
+    public static MethodHandle H5Pget_alloc_time$handle() { return H5Pget_alloc_time.HANDLE; }
 
     /**
      * Address for:
@@ -947,34 +890,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time)
      * }
      */
-    public static MemorySegment H5Pget_alloc_time$address() {
-        return H5Pget_alloc_time.ADDR;
-    }
+    public static MemorySegment H5Pget_alloc_time$address() { return H5Pget_alloc_time.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time)
      * }
      */
-    public static int H5Pget_alloc_time(long plist_id, MemorySegment alloc_time) {
+    public static int H5Pget_alloc_time(long plist_id, MemorySegment alloc_time)
+    {
         var mh$ = H5Pget_alloc_time.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_alloc_time", plist_id, alloc_time);
             }
             return (int)mh$.invokeExact(plist_id, alloc_time);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_chunk {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_chunk");
 
@@ -987,9 +926,7 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[])
      * }
      */
-    public static FunctionDescriptor H5Pget_chunk$descriptor() {
-        return H5Pget_chunk.DESC;
-    }
+    public static FunctionDescriptor H5Pget_chunk$descriptor() { return H5Pget_chunk.DESC; }
 
     /**
      * Downcall method handle for:
@@ -997,9 +934,7 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[])
      * }
      */
-    public static MethodHandle H5Pget_chunk$handle() {
-        return H5Pget_chunk.HANDLE;
-    }
+    public static MethodHandle H5Pget_chunk$handle() { return H5Pget_chunk.HANDLE; }
 
     /**
      * Address for:
@@ -1007,33 +942,30 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[])
      * }
      */
-    public static MemorySegment H5Pget_chunk$address() {
-        return H5Pget_chunk.ADDR;
-    }
+    public static MemorySegment H5Pget_chunk$address() { return H5Pget_chunk.ADDR; }
 
     /**
      * {@snippet lang=c :
      * int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[])
      * }
      */
-    public static int H5Pget_chunk(long plist_id, int max_ndims, MemorySegment dim) {
+    public static int H5Pget_chunk(long plist_id, int max_ndims, MemorySegment dim)
+    {
         var mh$ = H5Pget_chunk.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_chunk", plist_id, max_ndims, dim);
             }
             return (int)mh$.invokeExact(plist_id, max_ndims, dim);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_chunk_opts {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_chunk_opts");
 
@@ -1046,9 +978,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned int *opts)
      * }
      */
-    public static FunctionDescriptor H5Pget_chunk_opts$descriptor() {
-        return H5Pget_chunk_opts.DESC;
-    }
+    public static FunctionDescriptor H5Pget_chunk_opts$descriptor() { return H5Pget_chunk_opts.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1056,9 +986,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned int *opts)
      * }
      */
-    public static MethodHandle H5Pget_chunk_opts$handle() {
-        return H5Pget_chunk_opts.HANDLE;
-    }
+    public static MethodHandle H5Pget_chunk_opts$handle() { return H5Pget_chunk_opts.HANDLE; }
 
     /**
      * Address for:
@@ -1066,33 +994,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned int *opts)
      * }
      */
-    public static MemorySegment H5Pget_chunk_opts$address() {
-        return H5Pget_chunk_opts.ADDR;
-    }
+    public static MemorySegment H5Pget_chunk_opts$address() { return H5Pget_chunk_opts.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned int *opts)
      * }
      */
-    public static int H5Pget_chunk_opts(long plist_id, MemorySegment opts) {
+    public static int H5Pget_chunk_opts(long plist_id, MemorySegment opts)
+    {
         var mh$ = H5Pget_chunk_opts.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_chunk_opts", plist_id, opts);
             }
             return (int)mh$.invokeExact(plist_id, opts);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_dset_no_attrs_hint {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_dset_no_attrs_hint");
 
@@ -1105,7 +1030,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize)
      * }
      */
-    public static FunctionDescriptor H5Pget_dset_no_attrs_hint$descriptor() {
+    public static FunctionDescriptor H5Pget_dset_no_attrs_hint$descriptor()
+    {
         return H5Pget_dset_no_attrs_hint.DESC;
     }
 
@@ -1115,9 +1041,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize)
      * }
      */
-    public static MethodHandle H5Pget_dset_no_attrs_hint$handle() {
-        return H5Pget_dset_no_attrs_hint.HANDLE;
-    }
+    public static MethodHandle H5Pget_dset_no_attrs_hint$handle() { return H5Pget_dset_no_attrs_hint.HANDLE; }
 
     /**
      * Address for:
@@ -1125,33 +1049,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize)
      * }
      */
-    public static MemorySegment H5Pget_dset_no_attrs_hint$address() {
-        return H5Pget_dset_no_attrs_hint.ADDR;
-    }
+    public static MemorySegment H5Pget_dset_no_attrs_hint$address() { return H5Pget_dset_no_attrs_hint.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, bool *minimize)
      * }
      */
-    public static int H5Pget_dset_no_attrs_hint(long dcpl_id, MemorySegment minimize) {
+    public static int H5Pget_dset_no_attrs_hint(long dcpl_id, MemorySegment minimize)
+    {
         var mh$ = H5Pget_dset_no_attrs_hint.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_dset_no_attrs_hint", dcpl_id, minimize);
             }
             return (int)mh$.invokeExact(dcpl_id, minimize);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_spatial_tree {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_spatial_tree");
 
@@ -1164,7 +1085,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_spatial_tree(hid_t dcpl_id, bool *use_tree)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_spatial_tree$descriptor() {
+    public static FunctionDescriptor H5Pget_virtual_spatial_tree$descriptor()
+    {
         return H5Pget_virtual_spatial_tree.DESC;
     }
 
@@ -1174,7 +1096,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_spatial_tree(hid_t dcpl_id, bool *use_tree)
      * }
      */
-    public static MethodHandle H5Pget_virtual_spatial_tree$handle() {
+    public static MethodHandle H5Pget_virtual_spatial_tree$handle()
+    {
         return H5Pget_virtual_spatial_tree.HANDLE;
     }
 
@@ -1184,7 +1107,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_spatial_tree(hid_t dcpl_id, bool *use_tree)
      * }
      */
-    public static MemorySegment H5Pget_virtual_spatial_tree$address() {
+    public static MemorySegment H5Pget_virtual_spatial_tree$address()
+    {
         return H5Pget_virtual_spatial_tree.ADDR;
     }
 
@@ -1193,28 +1117,24 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_spatial_tree(hid_t dcpl_id, bool *use_tree)
      * }
      */
-    public static int H5Pget_virtual_spatial_tree(long dcpl_id, MemorySegment use_tree) {
+    public static int H5Pget_virtual_spatial_tree(long dcpl_id, MemorySegment use_tree)
+    {
         var mh$ = H5Pget_virtual_spatial_tree.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_spatial_tree", dcpl_id, use_tree);
             }
             return (int)mh$.invokeExact(dcpl_id, use_tree);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_external {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_external");
 
@@ -1224,55 +1144,53 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pget_external(hid_t plist_id, unsigned int idx, size_t name_size, char *name, HDoff_t *offset, hsize_t *size)
+     * herr_t H5Pget_external(hid_t plist_id, unsigned int idx, size_t name_size, char *name, HDoff_t *offset,
+     * hsize_t *size)
      * }
      */
-    public static FunctionDescriptor H5Pget_external$descriptor() {
-        return H5Pget_external.DESC;
-    }
+    public static FunctionDescriptor H5Pget_external$descriptor() { return H5Pget_external.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pget_external(hid_t plist_id, unsigned int idx, size_t name_size, char *name, HDoff_t *offset, hsize_t *size)
+     * herr_t H5Pget_external(hid_t plist_id, unsigned int idx, size_t name_size, char *name, HDoff_t *offset,
+     * hsize_t *size)
      * }
      */
-    public static MethodHandle H5Pget_external$handle() {
-        return H5Pget_external.HANDLE;
-    }
+    public static MethodHandle H5Pget_external$handle() { return H5Pget_external.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pget_external(hid_t plist_id, unsigned int idx, size_t name_size, char *name, HDoff_t *offset, hsize_t *size)
+     * herr_t H5Pget_external(hid_t plist_id, unsigned int idx, size_t name_size, char *name, HDoff_t *offset,
+     * hsize_t *size)
      * }
      */
-    public static MemorySegment H5Pget_external$address() {
-        return H5Pget_external.ADDR;
-    }
+    public static MemorySegment H5Pget_external$address() { return H5Pget_external.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pget_external(hid_t plist_id, unsigned int idx, size_t name_size, char *name, HDoff_t *offset, hsize_t *size)
+     * herr_t H5Pget_external(hid_t plist_id, unsigned int idx, size_t name_size, char *name, HDoff_t *offset,
+     * hsize_t *size)
      * }
      */
-    public static int H5Pget_external(long plist_id, int idx, long name_size, MemorySegment name, MemorySegment offset, MemorySegment size) {
+    public static int H5Pget_external(long plist_id, int idx, long name_size, MemorySegment name,
+                                      MemorySegment offset, MemorySegment size)
+    {
         var mh$ = H5Pget_external.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_external", plist_id, idx, name_size, name, offset, size);
             }
             return (int)mh$.invokeExact(plist_id, idx, name_size, name, offset, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_external_count {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_external_count");
 
@@ -1285,9 +1203,7 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_external_count(hid_t plist_id)
      * }
      */
-    public static FunctionDescriptor H5Pget_external_count$descriptor() {
-        return H5Pget_external_count.DESC;
-    }
+    public static FunctionDescriptor H5Pget_external_count$descriptor() { return H5Pget_external_count.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1295,9 +1211,7 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_external_count(hid_t plist_id)
      * }
      */
-    public static MethodHandle H5Pget_external_count$handle() {
-        return H5Pget_external_count.HANDLE;
-    }
+    public static MethodHandle H5Pget_external_count$handle() { return H5Pget_external_count.HANDLE; }
 
     /**
      * Address for:
@@ -1305,33 +1219,30 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_external_count(hid_t plist_id)
      * }
      */
-    public static MemorySegment H5Pget_external_count$address() {
-        return H5Pget_external_count.ADDR;
-    }
+    public static MemorySegment H5Pget_external_count$address() { return H5Pget_external_count.ADDR; }
 
     /**
      * {@snippet lang=c :
      * int H5Pget_external_count(hid_t plist_id)
      * }
      */
-    public static int H5Pget_external_count(long plist_id) {
+    public static int H5Pget_external_count(long plist_id)
+    {
         var mh$ = H5Pget_external_count.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_external_count", plist_id);
             }
             return (int)mh$.invokeExact(plist_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_fill_time {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_fill_time");
 
@@ -1344,9 +1255,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time)
      * }
      */
-    public static FunctionDescriptor H5Pget_fill_time$descriptor() {
-        return H5Pget_fill_time.DESC;
-    }
+    public static FunctionDescriptor H5Pget_fill_time$descriptor() { return H5Pget_fill_time.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1354,9 +1263,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time)
      * }
      */
-    public static MethodHandle H5Pget_fill_time$handle() {
-        return H5Pget_fill_time.HANDLE;
-    }
+    public static MethodHandle H5Pget_fill_time$handle() { return H5Pget_fill_time.HANDLE; }
 
     /**
      * Address for:
@@ -1364,34 +1271,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time)
      * }
      */
-    public static MemorySegment H5Pget_fill_time$address() {
-        return H5Pget_fill_time.ADDR;
-    }
+    public static MemorySegment H5Pget_fill_time$address() { return H5Pget_fill_time.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time)
      * }
      */
-    public static int H5Pget_fill_time(long plist_id, MemorySegment fill_time) {
+    public static int H5Pget_fill_time(long plist_id, MemorySegment fill_time)
+    {
         var mh$ = H5Pget_fill_time.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_fill_time", plist_id, fill_time);
             }
             return (int)mh$.invokeExact(plist_id, fill_time);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_fill_value {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_fill_value");
 
@@ -1404,9 +1307,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value)
      * }
      */
-    public static FunctionDescriptor H5Pget_fill_value$descriptor() {
-        return H5Pget_fill_value.DESC;
-    }
+    public static FunctionDescriptor H5Pget_fill_value$descriptor() { return H5Pget_fill_value.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1414,9 +1315,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value)
      * }
      */
-    public static MethodHandle H5Pget_fill_value$handle() {
-        return H5Pget_fill_value.HANDLE;
-    }
+    public static MethodHandle H5Pget_fill_value$handle() { return H5Pget_fill_value.HANDLE; }
 
     /**
      * Address for:
@@ -1424,32 +1323,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value)
      * }
      */
-    public static MemorySegment H5Pget_fill_value$address() {
-        return H5Pget_fill_value.ADDR;
-    }
+    public static MemorySegment H5Pget_fill_value$address() { return H5Pget_fill_value.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value)
      * }
      */
-    public static int H5Pget_fill_value(long plist_id, long type_id, MemorySegment value) {
+    public static int H5Pget_fill_value(long plist_id, long type_id, MemorySegment value)
+    {
         var mh$ = H5Pget_fill_value.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_fill_value", plist_id, type_id, value);
             }
             return (int)mh$.invokeExact(plist_id, type_id, value);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_layout {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_layout");
 
@@ -1462,9 +1358,7 @@ public class hdf5_h extends hdf5_h_1 {
      * H5D_layout_t H5Pget_layout(hid_t plist_id)
      * }
      */
-    public static FunctionDescriptor H5Pget_layout$descriptor() {
-        return H5Pget_layout.DESC;
-    }
+    public static FunctionDescriptor H5Pget_layout$descriptor() { return H5Pget_layout.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1472,9 +1366,7 @@ public class hdf5_h extends hdf5_h_1 {
      * H5D_layout_t H5Pget_layout(hid_t plist_id)
      * }
      */
-    public static MethodHandle H5Pget_layout$handle() {
-        return H5Pget_layout.HANDLE;
-    }
+    public static MethodHandle H5Pget_layout$handle() { return H5Pget_layout.HANDLE; }
 
     /**
      * Address for:
@@ -1482,33 +1374,30 @@ public class hdf5_h extends hdf5_h_1 {
      * H5D_layout_t H5Pget_layout(hid_t plist_id)
      * }
      */
-    public static MemorySegment H5Pget_layout$address() {
-        return H5Pget_layout.ADDR;
-    }
+    public static MemorySegment H5Pget_layout$address() { return H5Pget_layout.ADDR; }
 
     /**
      * {@snippet lang=c :
      * H5D_layout_t H5Pget_layout(hid_t plist_id)
      * }
      */
-    public static int H5Pget_layout(long plist_id) {
+    public static int H5Pget_layout(long plist_id)
+    {
         var mh$ = H5Pget_layout.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_layout", plist_id);
             }
             return (int)mh$.invokeExact(plist_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_count {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_count");
 
@@ -1521,9 +1410,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_count$descriptor() {
-        return H5Pget_virtual_count.DESC;
-    }
+    public static FunctionDescriptor H5Pget_virtual_count$descriptor() { return H5Pget_virtual_count.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1531,9 +1418,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count)
      * }
      */
-    public static MethodHandle H5Pget_virtual_count$handle() {
-        return H5Pget_virtual_count.HANDLE;
-    }
+    public static MethodHandle H5Pget_virtual_count$handle() { return H5Pget_virtual_count.HANDLE; }
 
     /**
      * Address for:
@@ -1541,35 +1426,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count)
      * }
      */
-    public static MemorySegment H5Pget_virtual_count$address() {
-        return H5Pget_virtual_count.ADDR;
-    }
+    public static MemorySegment H5Pget_virtual_count$address() { return H5Pget_virtual_count.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count)
      * }
      */
-    public static int H5Pget_virtual_count(long dcpl_id, MemorySegment count) {
+    public static int H5Pget_virtual_count(long dcpl_id, MemorySegment count)
+    {
         var mh$ = H5Pget_virtual_count.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_count", dcpl_id, count);
             }
             return (int)mh$.invokeExact(dcpl_id, count);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_dsetname {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_dsetname");
 
@@ -1582,7 +1462,8 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name, size_t size)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_dsetname$descriptor() {
+    public static FunctionDescriptor H5Pget_virtual_dsetname$descriptor()
+    {
         return H5Pget_virtual_dsetname.DESC;
     }
 
@@ -1592,9 +1473,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name, size_t size)
      * }
      */
-    public static MethodHandle H5Pget_virtual_dsetname$handle() {
-        return H5Pget_virtual_dsetname.HANDLE;
-    }
+    public static MethodHandle H5Pget_virtual_dsetname$handle() { return H5Pget_virtual_dsetname.HANDLE; }
 
     /**
      * Address for:
@@ -1602,35 +1481,30 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name, size_t size)
      * }
      */
-    public static MemorySegment H5Pget_virtual_dsetname$address() {
-        return H5Pget_virtual_dsetname.ADDR;
-    }
+    public static MemorySegment H5Pget_virtual_dsetname$address() { return H5Pget_virtual_dsetname.ADDR; }
 
     /**
      * {@snippet lang=c :
      * ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name, size_t size)
      * }
      */
-    public static long H5Pget_virtual_dsetname(long dcpl_id, long index, MemorySegment name, long size) {
+    public static long H5Pget_virtual_dsetname(long dcpl_id, long index, MemorySegment name, long size)
+    {
         var mh$ = H5Pget_virtual_dsetname.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_dsetname", dcpl_id, index, name, size);
             }
             return (long)mh$.invokeExact(dcpl_id, index, name, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_filename {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_filename");
 
@@ -1643,7 +1517,8 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name, size_t size)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_filename$descriptor() {
+    public static FunctionDescriptor H5Pget_virtual_filename$descriptor()
+    {
         return H5Pget_virtual_filename.DESC;
     }
 
@@ -1653,9 +1528,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name, size_t size)
      * }
      */
-    public static MethodHandle H5Pget_virtual_filename$handle() {
-        return H5Pget_virtual_filename.HANDLE;
-    }
+    public static MethodHandle H5Pget_virtual_filename$handle() { return H5Pget_virtual_filename.HANDLE; }
 
     /**
      * Address for:
@@ -1663,33 +1536,30 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name, size_t size)
      * }
      */
-    public static MemorySegment H5Pget_virtual_filename$address() {
-        return H5Pget_virtual_filename.ADDR;
-    }
+    public static MemorySegment H5Pget_virtual_filename$address() { return H5Pget_virtual_filename.ADDR; }
 
     /**
      * {@snippet lang=c :
      * ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name, size_t size)
      * }
      */
-    public static long H5Pget_virtual_filename(long dcpl_id, long index, MemorySegment name, long size) {
+    public static long H5Pget_virtual_filename(long dcpl_id, long index, MemorySegment name, long size)
+    {
         var mh$ = H5Pget_virtual_filename.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_filename", dcpl_id, index, name, size);
             }
             return (long)mh$.invokeExact(dcpl_id, index, name, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_srcspace {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_srcspace");
 
@@ -1702,7 +1572,8 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_srcspace$descriptor() {
+    public static FunctionDescriptor H5Pget_virtual_srcspace$descriptor()
+    {
         return H5Pget_virtual_srcspace.DESC;
     }
 
@@ -1712,9 +1583,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
      * }
      */
-    public static MethodHandle H5Pget_virtual_srcspace$handle() {
-        return H5Pget_virtual_srcspace.HANDLE;
-    }
+    public static MethodHandle H5Pget_virtual_srcspace$handle() { return H5Pget_virtual_srcspace.HANDLE; }
 
     /**
      * Address for:
@@ -1722,33 +1591,30 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
      * }
      */
-    public static MemorySegment H5Pget_virtual_srcspace$address() {
-        return H5Pget_virtual_srcspace.ADDR;
-    }
+    public static MemorySegment H5Pget_virtual_srcspace$address() { return H5Pget_virtual_srcspace.ADDR; }
 
     /**
      * {@snippet lang=c :
      * hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
      * }
      */
-    public static long H5Pget_virtual_srcspace(long dcpl_id, long index) {
+    public static long H5Pget_virtual_srcspace(long dcpl_id, long index)
+    {
         var mh$ = H5Pget_virtual_srcspace.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_srcspace", dcpl_id, index);
             }
             return (long)mh$.invokeExact(dcpl_id, index);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_vspace {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_vspace");
 
@@ -1761,9 +1627,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_vspace$descriptor() {
-        return H5Pget_virtual_vspace.DESC;
-    }
+    public static FunctionDescriptor H5Pget_virtual_vspace$descriptor() { return H5Pget_virtual_vspace.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1771,9 +1635,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
      * }
      */
-    public static MethodHandle H5Pget_virtual_vspace$handle() {
-        return H5Pget_virtual_vspace.HANDLE;
-    }
+    public static MethodHandle H5Pget_virtual_vspace$handle() { return H5Pget_virtual_vspace.HANDLE; }
 
     /**
      * Address for:
@@ -1781,33 +1643,30 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
      * }
      */
-    public static MemorySegment H5Pget_virtual_vspace$address() {
-        return H5Pget_virtual_vspace.ADDR;
-    }
+    public static MemorySegment H5Pget_virtual_vspace$address() { return H5Pget_virtual_vspace.ADDR; }
 
     /**
      * {@snippet lang=c :
      * hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
      * }
      */
-    public static long H5Pget_virtual_vspace(long dcpl_id, long index) {
+    public static long H5Pget_virtual_vspace(long dcpl_id, long index)
+    {
         var mh$ = H5Pget_virtual_vspace.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_vspace", dcpl_id, index);
             }
             return (long)mh$.invokeExact(dcpl_id, index);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_alloc_time {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_alloc_time");
 
@@ -1820,9 +1679,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
      * }
      */
-    public static FunctionDescriptor H5Pset_alloc_time$descriptor() {
-        return H5Pset_alloc_time.DESC;
-    }
+    public static FunctionDescriptor H5Pset_alloc_time$descriptor() { return H5Pset_alloc_time.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1830,9 +1687,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
      * }
      */
-    public static MethodHandle H5Pset_alloc_time$handle() {
-        return H5Pset_alloc_time.HANDLE;
-    }
+    public static MethodHandle H5Pset_alloc_time$handle() { return H5Pset_alloc_time.HANDLE; }
 
     /**
      * Address for:
@@ -1840,34 +1695,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
      * }
      */
-    public static MemorySegment H5Pset_alloc_time$address() {
-        return H5Pset_alloc_time.ADDR;
-    }
+    public static MemorySegment H5Pset_alloc_time$address() { return H5Pset_alloc_time.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
      * }
      */
-    public static int H5Pset_alloc_time(long plist_id, int alloc_time) {
+    public static int H5Pset_alloc_time(long plist_id, int alloc_time)
+    {
         var mh$ = H5Pset_alloc_time.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_alloc_time", plist_id, alloc_time);
             }
             return (int)mh$.invokeExact(plist_id, alloc_time);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_chunk {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_chunk");
 
@@ -1880,9 +1731,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[])
      * }
      */
-    public static FunctionDescriptor H5Pset_chunk$descriptor() {
-        return H5Pset_chunk.DESC;
-    }
+    public static FunctionDescriptor H5Pset_chunk$descriptor() { return H5Pset_chunk.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1890,9 +1739,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[])
      * }
      */
-    public static MethodHandle H5Pset_chunk$handle() {
-        return H5Pset_chunk.HANDLE;
-    }
+    public static MethodHandle H5Pset_chunk$handle() { return H5Pset_chunk.HANDLE; }
 
     /**
      * Address for:
@@ -1900,33 +1747,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[])
      * }
      */
-    public static MemorySegment H5Pset_chunk$address() {
-        return H5Pset_chunk.ADDR;
-    }
+    public static MemorySegment H5Pset_chunk$address() { return H5Pset_chunk.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[])
      * }
      */
-    public static int H5Pset_chunk(long plist_id, int ndims, MemorySegment dim) {
+    public static int H5Pset_chunk(long plist_id, int ndims, MemorySegment dim)
+    {
         var mh$ = H5Pset_chunk.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_chunk", plist_id, ndims, dim);
             }
             return (int)mh$.invokeExact(plist_id, ndims, dim);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_chunk_opts {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_chunk_opts");
 
@@ -1939,9 +1783,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned int opts)
      * }
      */
-    public static FunctionDescriptor H5Pset_chunk_opts$descriptor() {
-        return H5Pset_chunk_opts.DESC;
-    }
+    public static FunctionDescriptor H5Pset_chunk_opts$descriptor() { return H5Pset_chunk_opts.DESC; }
 
     /**
      * Downcall method handle for:
@@ -1949,9 +1791,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned int opts)
      * }
      */
-    public static MethodHandle H5Pset_chunk_opts$handle() {
-        return H5Pset_chunk_opts.HANDLE;
-    }
+    public static MethodHandle H5Pset_chunk_opts$handle() { return H5Pset_chunk_opts.HANDLE; }
 
     /**
      * Address for:
@@ -1959,33 +1799,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned int opts)
      * }
      */
-    public static MemorySegment H5Pset_chunk_opts$address() {
-        return H5Pset_chunk_opts.ADDR;
-    }
+    public static MemorySegment H5Pset_chunk_opts$address() { return H5Pset_chunk_opts.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned int opts)
      * }
      */
-    public static int H5Pset_chunk_opts(long plist_id, int opts) {
+    public static int H5Pset_chunk_opts(long plist_id, int opts)
+    {
         var mh$ = H5Pset_chunk_opts.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_chunk_opts", plist_id, opts);
             }
             return (int)mh$.invokeExact(plist_id, opts);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_dset_no_attrs_hint {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_dset_no_attrs_hint");
 
@@ -1998,7 +1835,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize)
      * }
      */
-    public static FunctionDescriptor H5Pset_dset_no_attrs_hint$descriptor() {
+    public static FunctionDescriptor H5Pset_dset_no_attrs_hint$descriptor()
+    {
         return H5Pset_dset_no_attrs_hint.DESC;
     }
 
@@ -2008,9 +1846,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize)
      * }
      */
-    public static MethodHandle H5Pset_dset_no_attrs_hint$handle() {
-        return H5Pset_dset_no_attrs_hint.HANDLE;
-    }
+    public static MethodHandle H5Pset_dset_no_attrs_hint$handle() { return H5Pset_dset_no_attrs_hint.HANDLE; }
 
     /**
      * Address for:
@@ -2018,33 +1854,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize)
      * }
      */
-    public static MemorySegment H5Pset_dset_no_attrs_hint$address() {
-        return H5Pset_dset_no_attrs_hint.ADDR;
-    }
+    public static MemorySegment H5Pset_dset_no_attrs_hint$address() { return H5Pset_dset_no_attrs_hint.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, bool minimize)
      * }
      */
-    public static int H5Pset_dset_no_attrs_hint(long dcpl_id, boolean minimize) {
+    public static int H5Pset_dset_no_attrs_hint(long dcpl_id, boolean minimize)
+    {
         var mh$ = H5Pset_dset_no_attrs_hint.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_dset_no_attrs_hint", dcpl_id, minimize);
             }
             return (int)mh$.invokeExact(dcpl_id, minimize);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_virtual_spatial_tree {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_virtual_spatial_tree");
 
@@ -2057,7 +1890,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_spatial_tree(hid_t dcpl_id, bool use_tree)
      * }
      */
-    public static FunctionDescriptor H5Pset_virtual_spatial_tree$descriptor() {
+    public static FunctionDescriptor H5Pset_virtual_spatial_tree$descriptor()
+    {
         return H5Pset_virtual_spatial_tree.DESC;
     }
 
@@ -2067,7 +1901,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_spatial_tree(hid_t dcpl_id, bool use_tree)
      * }
      */
-    public static MethodHandle H5Pset_virtual_spatial_tree$handle() {
+    public static MethodHandle H5Pset_virtual_spatial_tree$handle()
+    {
         return H5Pset_virtual_spatial_tree.HANDLE;
     }
 
@@ -2077,7 +1912,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_spatial_tree(hid_t dcpl_id, bool use_tree)
      * }
      */
-    public static MemorySegment H5Pset_virtual_spatial_tree$address() {
+    public static MemorySegment H5Pset_virtual_spatial_tree$address()
+    {
         return H5Pset_virtual_spatial_tree.ADDR;
     }
 
@@ -2086,26 +1922,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_spatial_tree(hid_t dcpl_id, bool use_tree)
      * }
      */
-    public static int H5Pset_virtual_spatial_tree(long dcpl_id, boolean use_tree) {
+    public static int H5Pset_virtual_spatial_tree(long dcpl_id, boolean use_tree)
+    {
         var mh$ = H5Pset_virtual_spatial_tree.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_virtual_spatial_tree", dcpl_id, use_tree);
             }
             return (int)mh$.invokeExact(dcpl_id, use_tree);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_external {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_external");
 
@@ -2118,9 +1951,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
      * }
      */
-    public static FunctionDescriptor H5Pset_external$descriptor() {
-        return H5Pset_external.DESC;
-    }
+    public static FunctionDescriptor H5Pset_external$descriptor() { return H5Pset_external.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2128,9 +1959,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
      * }
      */
-    public static MethodHandle H5Pset_external$handle() {
-        return H5Pset_external.HANDLE;
-    }
+    public static MethodHandle H5Pset_external$handle() { return H5Pset_external.HANDLE; }
 
     /**
      * Address for:
@@ -2138,33 +1967,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
      * }
      */
-    public static MemorySegment H5Pset_external$address() {
-        return H5Pset_external.ADDR;
-    }
+    public static MemorySegment H5Pset_external$address() { return H5Pset_external.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
      * }
      */
-    public static int H5Pset_external(long plist_id, MemorySegment name, long offset, long size) {
+    public static int H5Pset_external(long plist_id, MemorySegment name, long offset, long size)
+    {
         var mh$ = H5Pset_external.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_external", plist_id, name, offset, size);
             }
             return (int)mh$.invokeExact(plist_id, name, offset, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_fill_time {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fill_time");
 
@@ -2177,9 +2003,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
      * }
      */
-    public static FunctionDescriptor H5Pset_fill_time$descriptor() {
-        return H5Pset_fill_time.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fill_time$descriptor() { return H5Pset_fill_time.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2187,9 +2011,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
      * }
      */
-    public static MethodHandle H5Pset_fill_time$handle() {
-        return H5Pset_fill_time.HANDLE;
-    }
+    public static MethodHandle H5Pset_fill_time$handle() { return H5Pset_fill_time.HANDLE; }
 
     /**
      * Address for:
@@ -2197,34 +2019,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
      * }
      */
-    public static MemorySegment H5Pset_fill_time$address() {
-        return H5Pset_fill_time.ADDR;
-    }
+    public static MemorySegment H5Pset_fill_time$address() { return H5Pset_fill_time.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
      * }
      */
-    public static int H5Pset_fill_time(long plist_id, int fill_time) {
+    public static int H5Pset_fill_time(long plist_id, int fill_time)
+    {
         var mh$ = H5Pset_fill_time.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fill_time", plist_id, fill_time);
             }
             return (int)mh$.invokeExact(plist_id, fill_time);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_fill_value {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fill_value");
 
@@ -2237,9 +2055,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
      * }
      */
-    public static FunctionDescriptor H5Pset_fill_value$descriptor() {
-        return H5Pset_fill_value.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fill_value$descriptor() { return H5Pset_fill_value.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2247,9 +2063,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
      * }
      */
-    public static MethodHandle H5Pset_fill_value$handle() {
-        return H5Pset_fill_value.HANDLE;
-    }
+    public static MethodHandle H5Pset_fill_value$handle() { return H5Pset_fill_value.HANDLE; }
 
     /**
      * Address for:
@@ -2257,32 +2071,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
      * }
      */
-    public static MemorySegment H5Pset_fill_value$address() {
-        return H5Pset_fill_value.ADDR;
-    }
+    public static MemorySegment H5Pset_fill_value$address() { return H5Pset_fill_value.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
      * }
      */
-    public static int H5Pset_fill_value(long plist_id, long type_id, MemorySegment value) {
+    public static int H5Pset_fill_value(long plist_id, long type_id, MemorySegment value)
+    {
         var mh$ = H5Pset_fill_value.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fill_value", plist_id, type_id, value);
             }
             return (int)mh$.invokeExact(plist_id, type_id, value);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_shuffle {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_shuffle");
 
@@ -2295,9 +2106,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_shuffle(hid_t plist_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_shuffle$descriptor() {
-        return H5Pset_shuffle.DESC;
-    }
+    public static FunctionDescriptor H5Pset_shuffle$descriptor() { return H5Pset_shuffle.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2305,9 +2114,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_shuffle(hid_t plist_id)
      * }
      */
-    public static MethodHandle H5Pset_shuffle$handle() {
-        return H5Pset_shuffle.HANDLE;
-    }
+    public static MethodHandle H5Pset_shuffle$handle() { return H5Pset_shuffle.HANDLE; }
 
     /**
      * Address for:
@@ -2315,33 +2122,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_shuffle(hid_t plist_id)
      * }
      */
-    public static MemorySegment H5Pset_shuffle$address() {
-        return H5Pset_shuffle.ADDR;
-    }
+    public static MemorySegment H5Pset_shuffle$address() { return H5Pset_shuffle.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_shuffle(hid_t plist_id)
      * }
      */
-    public static int H5Pset_shuffle(long plist_id) {
+    public static int H5Pset_shuffle(long plist_id)
+    {
         var mh$ = H5Pset_shuffle.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_shuffle", plist_id);
             }
             return (int)mh$.invokeExact(plist_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_layout {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_layout");
 
@@ -2354,9 +2158,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
      * }
      */
-    public static FunctionDescriptor H5Pset_layout$descriptor() {
-        return H5Pset_layout.DESC;
-    }
+    public static FunctionDescriptor H5Pset_layout$descriptor() { return H5Pset_layout.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2364,9 +2166,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
      * }
      */
-    public static MethodHandle H5Pset_layout$handle() {
-        return H5Pset_layout.HANDLE;
-    }
+    public static MethodHandle H5Pset_layout$handle() { return H5Pset_layout.HANDLE; }
 
     /**
      * Address for:
@@ -2374,32 +2174,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
      * }
      */
-    public static MemorySegment H5Pset_layout$address() {
-        return H5Pset_layout.ADDR;
-    }
+    public static MemorySegment H5Pset_layout$address() { return H5Pset_layout.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
      * }
      */
-    public static int H5Pset_layout(long plist_id, int layout) {
+    public static int H5Pset_layout(long plist_id, int layout)
+    {
         var mh$ = H5Pset_layout.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_layout", plist_id, layout);
             }
             return (int)mh$.invokeExact(plist_id, layout);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_nbit {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_nbit");
 
@@ -2412,9 +2209,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_nbit(hid_t plist_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_nbit$descriptor() {
-        return H5Pset_nbit.DESC;
-    }
+    public static FunctionDescriptor H5Pset_nbit$descriptor() { return H5Pset_nbit.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2422,9 +2217,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_nbit(hid_t plist_id)
      * }
      */
-    public static MethodHandle H5Pset_nbit$handle() {
-        return H5Pset_nbit.HANDLE;
-    }
+    public static MethodHandle H5Pset_nbit$handle() { return H5Pset_nbit.HANDLE; }
 
     /**
      * Address for:
@@ -2432,34 +2225,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_nbit(hid_t plist_id)
      * }
      */
-    public static MemorySegment H5Pset_nbit$address() {
-        return H5Pset_nbit.ADDR;
-    }
+    public static MemorySegment H5Pset_nbit$address() { return H5Pset_nbit.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_nbit(hid_t plist_id)
      * }
      */
-    public static int H5Pset_nbit(long plist_id) {
+    public static int H5Pset_nbit(long plist_id)
+    {
         var mh$ = H5Pset_nbit.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_nbit", plist_id);
             }
             return (int)mh$.invokeExact(plist_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_scaleoffset {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_scaleoffset");
 
@@ -2472,9 +2261,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor)
      * }
      */
-    public static FunctionDescriptor H5Pset_scaleoffset$descriptor() {
-        return H5Pset_scaleoffset.DESC;
-    }
+    public static FunctionDescriptor H5Pset_scaleoffset$descriptor() { return H5Pset_scaleoffset.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2482,9 +2269,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor)
      * }
      */
-    public static MethodHandle H5Pset_scaleoffset$handle() {
-        return H5Pset_scaleoffset.HANDLE;
-    }
+    public static MethodHandle H5Pset_scaleoffset$handle() { return H5Pset_scaleoffset.HANDLE; }
 
     /**
      * Address for:
@@ -2492,34 +2277,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor)
      * }
      */
-    public static MemorySegment H5Pset_scaleoffset$address() {
-        return H5Pset_scaleoffset.ADDR;
-    }
+    public static MemorySegment H5Pset_scaleoffset$address() { return H5Pset_scaleoffset.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor)
      * }
      */
-    public static int H5Pset_scaleoffset(long plist_id, int scale_type, int scale_factor) {
+    public static int H5Pset_scaleoffset(long plist_id, int scale_type, int scale_factor)
+    {
         var mh$ = H5Pset_scaleoffset.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_scaleoffset", plist_id, scale_type, scale_factor);
             }
             return (int)mh$.invokeExact(plist_id, scale_type, scale_factor);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_szip {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_szip");
 
@@ -2532,9 +2313,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_szip(hid_t plist_id, unsigned int options_mask, unsigned int pixels_per_block)
      * }
      */
-    public static FunctionDescriptor H5Pset_szip$descriptor() {
-        return H5Pset_szip.DESC;
-    }
+    public static FunctionDescriptor H5Pset_szip$descriptor() { return H5Pset_szip.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2542,9 +2321,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_szip(hid_t plist_id, unsigned int options_mask, unsigned int pixels_per_block)
      * }
      */
-    public static MethodHandle H5Pset_szip$handle() {
-        return H5Pset_szip.HANDLE;
-    }
+    public static MethodHandle H5Pset_szip$handle() { return H5Pset_szip.HANDLE; }
 
     /**
      * Address for:
@@ -2552,36 +2329,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_szip(hid_t plist_id, unsigned int options_mask, unsigned int pixels_per_block)
      * }
      */
-    public static MemorySegment H5Pset_szip$address() {
-        return H5Pset_szip.ADDR;
-    }
+    public static MemorySegment H5Pset_szip$address() { return H5Pset_szip.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_szip(hid_t plist_id, unsigned int options_mask, unsigned int pixels_per_block)
      * }
      */
-    public static int H5Pset_szip(long plist_id, int options_mask, int pixels_per_block) {
+    public static int H5Pset_szip(long plist_id, int options_mask, int pixels_per_block)
+    {
         var mh$ = H5Pset_szip.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_szip", plist_id, options_mask, pixels_per_block);
             }
             return (int)mh$.invokeExact(plist_id, options_mask, pixels_per_block);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_virtual {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_virtual");
 
@@ -2591,59 +2363,56 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name, hid_t src_space_id)
+     * herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char
+     * *src_dset_name, hid_t src_space_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_virtual$descriptor() {
-        return H5Pset_virtual.DESC;
-    }
+    public static FunctionDescriptor H5Pset_virtual$descriptor() { return H5Pset_virtual.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name, hid_t src_space_id)
+     * herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char
+     * *src_dset_name, hid_t src_space_id)
      * }
      */
-    public static MethodHandle H5Pset_virtual$handle() {
-        return H5Pset_virtual.HANDLE;
-    }
+    public static MethodHandle H5Pset_virtual$handle() { return H5Pset_virtual.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name, hid_t src_space_id)
+     * herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char
+     * *src_dset_name, hid_t src_space_id)
      * }
      */
-    public static MemorySegment H5Pset_virtual$address() {
-        return H5Pset_virtual.ADDR;
-    }
+    public static MemorySegment H5Pset_virtual$address() { return H5Pset_virtual.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name, hid_t src_space_id)
+     * herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char
+     * *src_dset_name, hid_t src_space_id)
      * }
      */
-    public static int H5Pset_virtual(long dcpl_id, long vspace_id, MemorySegment src_file_name, MemorySegment src_dset_name, long src_space_id) {
+    public static int H5Pset_virtual(long dcpl_id, long vspace_id, MemorySegment src_file_name,
+                                     MemorySegment src_dset_name, long src_space_id)
+    {
         var mh$ = H5Pset_virtual.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5Pset_virtual", dcpl_id, vspace_id, src_file_name, src_dset_name, src_space_id);
+                traceDowncall("H5Pset_virtual", dcpl_id, vspace_id, src_file_name, src_dset_name,
+                              src_space_id);
             }
             return (int)mh$.invokeExact(dcpl_id, vspace_id, src_file_name, src_dset_name, src_space_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_append_flush {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_append_flush");
 
@@ -2653,58 +2422,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pget_append_flush(hid_t dapl_id, unsigned int dims, hsize_t boundary[], H5D_append_cb_t *func, void **udata)
+     * herr_t H5Pget_append_flush(hid_t dapl_id, unsigned int dims, hsize_t boundary[], H5D_append_cb_t *func,
+     * void **udata)
      * }
      */
-    public static FunctionDescriptor H5Pget_append_flush$descriptor() {
-        return H5Pget_append_flush.DESC;
-    }
+    public static FunctionDescriptor H5Pget_append_flush$descriptor() { return H5Pget_append_flush.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pget_append_flush(hid_t dapl_id, unsigned int dims, hsize_t boundary[], H5D_append_cb_t *func, void **udata)
+     * herr_t H5Pget_append_flush(hid_t dapl_id, unsigned int dims, hsize_t boundary[], H5D_append_cb_t *func,
+     * void **udata)
      * }
      */
-    public static MethodHandle H5Pget_append_flush$handle() {
-        return H5Pget_append_flush.HANDLE;
-    }
+    public static MethodHandle H5Pget_append_flush$handle() { return H5Pget_append_flush.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pget_append_flush(hid_t dapl_id, unsigned int dims, hsize_t boundary[], H5D_append_cb_t *func, void **udata)
+     * herr_t H5Pget_append_flush(hid_t dapl_id, unsigned int dims, hsize_t boundary[], H5D_append_cb_t *func,
+     * void **udata)
      * }
      */
-    public static MemorySegment H5Pget_append_flush$address() {
-        return H5Pget_append_flush.ADDR;
-    }
+    public static MemorySegment H5Pget_append_flush$address() { return H5Pget_append_flush.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pget_append_flush(hid_t dapl_id, unsigned int dims, hsize_t boundary[], H5D_append_cb_t *func, void **udata)
+     * herr_t H5Pget_append_flush(hid_t dapl_id, unsigned int dims, hsize_t boundary[], H5D_append_cb_t *func,
+     * void **udata)
      * }
      */
-    public static int H5Pget_append_flush(long dapl_id, int dims, MemorySegment boundary, MemorySegment func, MemorySegment udata) {
+    public static int H5Pget_append_flush(long dapl_id, int dims, MemorySegment boundary, MemorySegment func,
+                                          MemorySegment udata)
+    {
         var mh$ = H5Pget_append_flush.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_append_flush", dapl_id, dims, boundary, func, udata);
             }
             return (int)mh$.invokeExact(dapl_id, dims, boundary, func, udata);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_chunk_cache {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_chunk_cache");
 
@@ -2717,9 +2482,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
      * }
      */
-    public static FunctionDescriptor H5Pget_chunk_cache$descriptor() {
-        return H5Pget_chunk_cache.DESC;
-    }
+    public static FunctionDescriptor H5Pget_chunk_cache$descriptor() { return H5Pget_chunk_cache.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2727,9 +2490,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
      * }
      */
-    public static MethodHandle H5Pget_chunk_cache$handle() {
-        return H5Pget_chunk_cache.HANDLE;
-    }
+    public static MethodHandle H5Pget_chunk_cache$handle() { return H5Pget_chunk_cache.HANDLE; }
 
     /**
      * Address for:
@@ -2737,34 +2498,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
      * }
      */
-    public static MemorySegment H5Pget_chunk_cache$address() {
-        return H5Pget_chunk_cache.ADDR;
-    }
+    public static MemorySegment H5Pget_chunk_cache$address() { return H5Pget_chunk_cache.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
      * }
      */
-    public static int H5Pget_chunk_cache(long dapl_id, MemorySegment rdcc_nslots, MemorySegment rdcc_nbytes, MemorySegment rdcc_w0) {
+    public static int H5Pget_chunk_cache(long dapl_id, MemorySegment rdcc_nslots, MemorySegment rdcc_nbytes,
+                                         MemorySegment rdcc_w0)
+    {
         var mh$ = H5Pget_chunk_cache.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_chunk_cache", dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
             }
             return (int)mh$.invokeExact(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_efile_prefix {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_efile_prefix");
 
@@ -2777,9 +2535,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_efile_prefix(hid_t dapl_id, char *prefix, size_t size)
      * }
      */
-    public static FunctionDescriptor H5Pget_efile_prefix$descriptor() {
-        return H5Pget_efile_prefix.DESC;
-    }
+    public static FunctionDescriptor H5Pget_efile_prefix$descriptor() { return H5Pget_efile_prefix.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2787,9 +2543,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_efile_prefix(hid_t dapl_id, char *prefix, size_t size)
      * }
      */
-    public static MethodHandle H5Pget_efile_prefix$handle() {
-        return H5Pget_efile_prefix.HANDLE;
-    }
+    public static MethodHandle H5Pget_efile_prefix$handle() { return H5Pget_efile_prefix.HANDLE; }
 
     /**
      * Address for:
@@ -2797,34 +2551,30 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_efile_prefix(hid_t dapl_id, char *prefix, size_t size)
      * }
      */
-    public static MemorySegment H5Pget_efile_prefix$address() {
-        return H5Pget_efile_prefix.ADDR;
-    }
+    public static MemorySegment H5Pget_efile_prefix$address() { return H5Pget_efile_prefix.ADDR; }
 
     /**
      * {@snippet lang=c :
      * ssize_t H5Pget_efile_prefix(hid_t dapl_id, char *prefix, size_t size)
      * }
      */
-    public static long H5Pget_efile_prefix(long dapl_id, MemorySegment prefix, long size) {
+    public static long H5Pget_efile_prefix(long dapl_id, MemorySegment prefix, long size)
+    {
         var mh$ = H5Pget_efile_prefix.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_efile_prefix", dapl_id, prefix, size);
             }
             return (long)mh$.invokeExact(dapl_id, prefix, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_prefix {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_prefix");
 
@@ -2837,9 +2587,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char *prefix, size_t size)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_prefix$descriptor() {
-        return H5Pget_virtual_prefix.DESC;
-    }
+    public static FunctionDescriptor H5Pget_virtual_prefix$descriptor() { return H5Pget_virtual_prefix.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2847,9 +2595,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char *prefix, size_t size)
      * }
      */
-    public static MethodHandle H5Pget_virtual_prefix$handle() {
-        return H5Pget_virtual_prefix.HANDLE;
-    }
+    public static MethodHandle H5Pget_virtual_prefix$handle() { return H5Pget_virtual_prefix.HANDLE; }
 
     /**
      * Address for:
@@ -2857,33 +2603,30 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char *prefix, size_t size)
      * }
      */
-    public static MemorySegment H5Pget_virtual_prefix$address() {
-        return H5Pget_virtual_prefix.ADDR;
-    }
+    public static MemorySegment H5Pget_virtual_prefix$address() { return H5Pget_virtual_prefix.ADDR; }
 
     /**
      * {@snippet lang=c :
      * ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char *prefix, size_t size)
      * }
      */
-    public static long H5Pget_virtual_prefix(long dapl_id, MemorySegment prefix, long size) {
+    public static long H5Pget_virtual_prefix(long dapl_id, MemorySegment prefix, long size)
+    {
         var mh$ = H5Pget_virtual_prefix.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_prefix", dapl_id, prefix, size);
             }
             return (long)mh$.invokeExact(dapl_id, prefix, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_printf_gap {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_printf_gap");
 
@@ -2896,7 +2639,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_printf_gap(hid_t dapl_id, hsize_t *gap_size)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_printf_gap$descriptor() {
+    public static FunctionDescriptor H5Pget_virtual_printf_gap$descriptor()
+    {
         return H5Pget_virtual_printf_gap.DESC;
     }
 
@@ -2906,9 +2650,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_printf_gap(hid_t dapl_id, hsize_t *gap_size)
      * }
      */
-    public static MethodHandle H5Pget_virtual_printf_gap$handle() {
-        return H5Pget_virtual_printf_gap.HANDLE;
-    }
+    public static MethodHandle H5Pget_virtual_printf_gap$handle() { return H5Pget_virtual_printf_gap.HANDLE; }
 
     /**
      * Address for:
@@ -2916,33 +2658,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_printf_gap(hid_t dapl_id, hsize_t *gap_size)
      * }
      */
-    public static MemorySegment H5Pget_virtual_printf_gap$address() {
-        return H5Pget_virtual_printf_gap.ADDR;
-    }
+    public static MemorySegment H5Pget_virtual_printf_gap$address() { return H5Pget_virtual_printf_gap.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_virtual_printf_gap(hid_t dapl_id, hsize_t *gap_size)
      * }
      */
-    public static int H5Pget_virtual_printf_gap(long dapl_id, MemorySegment gap_size) {
+    public static int H5Pget_virtual_printf_gap(long dapl_id, MemorySegment gap_size)
+    {
         var mh$ = H5Pget_virtual_printf_gap.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_printf_gap", dapl_id, gap_size);
             }
             return (int)mh$.invokeExact(dapl_id, gap_size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_virtual_view {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_virtual_view");
 
@@ -2955,9 +2694,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view)
      * }
      */
-    public static FunctionDescriptor H5Pget_virtual_view$descriptor() {
-        return H5Pget_virtual_view.DESC;
-    }
+    public static FunctionDescriptor H5Pget_virtual_view$descriptor() { return H5Pget_virtual_view.DESC; }
 
     /**
      * Downcall method handle for:
@@ -2965,9 +2702,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view)
      * }
      */
-    public static MethodHandle H5Pget_virtual_view$handle() {
-        return H5Pget_virtual_view.HANDLE;
-    }
+    public static MethodHandle H5Pget_virtual_view$handle() { return H5Pget_virtual_view.HANDLE; }
 
     /**
      * Address for:
@@ -2975,36 +2710,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view)
      * }
      */
-    public static MemorySegment H5Pget_virtual_view$address() {
-        return H5Pget_virtual_view.ADDR;
-    }
+    public static MemorySegment H5Pget_virtual_view$address() { return H5Pget_virtual_view.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view)
      * }
      */
-    public static int H5Pget_virtual_view(long dapl_id, MemorySegment view) {
+    public static int H5Pget_virtual_view(long dapl_id, MemorySegment view)
+    {
         var mh$ = H5Pget_virtual_view.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_virtual_view", dapl_id, view);
             }
             return (int)mh$.invokeExact(dapl_id, view);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_append_flush {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_append_flush");
 
@@ -3014,58 +2744,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pset_append_flush(hid_t dapl_id, unsigned int ndims, const hsize_t boundary[], H5D_append_cb_t func, void *udata)
+     * herr_t H5Pset_append_flush(hid_t dapl_id, unsigned int ndims, const hsize_t boundary[], H5D_append_cb_t
+     * func, void *udata)
      * }
      */
-    public static FunctionDescriptor H5Pset_append_flush$descriptor() {
-        return H5Pset_append_flush.DESC;
-    }
+    public static FunctionDescriptor H5Pset_append_flush$descriptor() { return H5Pset_append_flush.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pset_append_flush(hid_t dapl_id, unsigned int ndims, const hsize_t boundary[], H5D_append_cb_t func, void *udata)
+     * herr_t H5Pset_append_flush(hid_t dapl_id, unsigned int ndims, const hsize_t boundary[], H5D_append_cb_t
+     * func, void *udata)
      * }
      */
-    public static MethodHandle H5Pset_append_flush$handle() {
-        return H5Pset_append_flush.HANDLE;
-    }
+    public static MethodHandle H5Pset_append_flush$handle() { return H5Pset_append_flush.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pset_append_flush(hid_t dapl_id, unsigned int ndims, const hsize_t boundary[], H5D_append_cb_t func, void *udata)
+     * herr_t H5Pset_append_flush(hid_t dapl_id, unsigned int ndims, const hsize_t boundary[], H5D_append_cb_t
+     * func, void *udata)
      * }
      */
-    public static MemorySegment H5Pset_append_flush$address() {
-        return H5Pset_append_flush.ADDR;
-    }
+    public static MemorySegment H5Pset_append_flush$address() { return H5Pset_append_flush.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pset_append_flush(hid_t dapl_id, unsigned int ndims, const hsize_t boundary[], H5D_append_cb_t func, void *udata)
+     * herr_t H5Pset_append_flush(hid_t dapl_id, unsigned int ndims, const hsize_t boundary[], H5D_append_cb_t
+     * func, void *udata)
      * }
      */
-    public static int H5Pset_append_flush(long dapl_id, int ndims, MemorySegment boundary, MemorySegment func, MemorySegment udata) {
+    public static int H5Pset_append_flush(long dapl_id, int ndims, MemorySegment boundary, MemorySegment func,
+                                          MemorySegment udata)
+    {
         var mh$ = H5Pset_append_flush.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_append_flush", dapl_id, ndims, boundary, func, udata);
             }
             return (int)mh$.invokeExact(dapl_id, ndims, boundary, func, udata);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_chunk_cache {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_DOUBLE
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_DOUBLE);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_chunk_cache");
 
@@ -3078,9 +2804,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
      * }
      */
-    public static FunctionDescriptor H5Pset_chunk_cache$descriptor() {
-        return H5Pset_chunk_cache.DESC;
-    }
+    public static FunctionDescriptor H5Pset_chunk_cache$descriptor() { return H5Pset_chunk_cache.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3088,9 +2812,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
      * }
      */
-    public static MethodHandle H5Pset_chunk_cache$handle() {
-        return H5Pset_chunk_cache.HANDLE;
-    }
+    public static MethodHandle H5Pset_chunk_cache$handle() { return H5Pset_chunk_cache.HANDLE; }
 
     /**
      * Address for:
@@ -3098,33 +2820,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
      * }
      */
-    public static MemorySegment H5Pset_chunk_cache$address() {
-        return H5Pset_chunk_cache.ADDR;
-    }
+    public static MemorySegment H5Pset_chunk_cache$address() { return H5Pset_chunk_cache.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
      * }
      */
-    public static int H5Pset_chunk_cache(long dapl_id, long rdcc_nslots, long rdcc_nbytes, double rdcc_w0) {
+    public static int H5Pset_chunk_cache(long dapl_id, long rdcc_nslots, long rdcc_nbytes, double rdcc_w0)
+    {
         var mh$ = H5Pset_chunk_cache.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_chunk_cache", dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
             }
             return (int)mh$.invokeExact(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_efile_prefix {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_efile_prefix");
 
@@ -3137,9 +2856,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_efile_prefix(hid_t dapl_id, const char *prefix)
      * }
      */
-    public static FunctionDescriptor H5Pset_efile_prefix$descriptor() {
-        return H5Pset_efile_prefix.DESC;
-    }
+    public static FunctionDescriptor H5Pset_efile_prefix$descriptor() { return H5Pset_efile_prefix.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3147,9 +2864,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_efile_prefix(hid_t dapl_id, const char *prefix)
      * }
      */
-    public static MethodHandle H5Pset_efile_prefix$handle() {
-        return H5Pset_efile_prefix.HANDLE;
-    }
+    public static MethodHandle H5Pset_efile_prefix$handle() { return H5Pset_efile_prefix.HANDLE; }
 
     /**
      * Address for:
@@ -3157,33 +2872,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_efile_prefix(hid_t dapl_id, const char *prefix)
      * }
      */
-    public static MemorySegment H5Pset_efile_prefix$address() {
-        return H5Pset_efile_prefix.ADDR;
-    }
+    public static MemorySegment H5Pset_efile_prefix$address() { return H5Pset_efile_prefix.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_efile_prefix(hid_t dapl_id, const char *prefix)
      * }
      */
-    public static int H5Pset_efile_prefix(long dapl_id, MemorySegment prefix) {
+    public static int H5Pset_efile_prefix(long dapl_id, MemorySegment prefix)
+    {
         var mh$ = H5Pset_efile_prefix.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_efile_prefix", dapl_id, prefix);
             }
             return (int)mh$.invokeExact(dapl_id, prefix);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_virtual_prefix {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_virtual_prefix");
 
@@ -3196,9 +2908,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char *prefix)
      * }
      */
-    public static FunctionDescriptor H5Pset_virtual_prefix$descriptor() {
-        return H5Pset_virtual_prefix.DESC;
-    }
+    public static FunctionDescriptor H5Pset_virtual_prefix$descriptor() { return H5Pset_virtual_prefix.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3206,9 +2916,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char *prefix)
      * }
      */
-    public static MethodHandle H5Pset_virtual_prefix$handle() {
-        return H5Pset_virtual_prefix.HANDLE;
-    }
+    public static MethodHandle H5Pset_virtual_prefix$handle() { return H5Pset_virtual_prefix.HANDLE; }
 
     /**
      * Address for:
@@ -3216,33 +2924,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char *prefix)
      * }
      */
-    public static MemorySegment H5Pset_virtual_prefix$address() {
-        return H5Pset_virtual_prefix.ADDR;
-    }
+    public static MemorySegment H5Pset_virtual_prefix$address() { return H5Pset_virtual_prefix.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char *prefix)
      * }
      */
-    public static int H5Pset_virtual_prefix(long dapl_id, MemorySegment prefix) {
+    public static int H5Pset_virtual_prefix(long dapl_id, MemorySegment prefix)
+    {
         var mh$ = H5Pset_virtual_prefix.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_virtual_prefix", dapl_id, prefix);
             }
             return (int)mh$.invokeExact(dapl_id, prefix);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_virtual_printf_gap {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_virtual_printf_gap");
 
@@ -3255,7 +2960,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size)
      * }
      */
-    public static FunctionDescriptor H5Pset_virtual_printf_gap$descriptor() {
+    public static FunctionDescriptor H5Pset_virtual_printf_gap$descriptor()
+    {
         return H5Pset_virtual_printf_gap.DESC;
     }
 
@@ -3265,9 +2971,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size)
      * }
      */
-    public static MethodHandle H5Pset_virtual_printf_gap$handle() {
-        return H5Pset_virtual_printf_gap.HANDLE;
-    }
+    public static MethodHandle H5Pset_virtual_printf_gap$handle() { return H5Pset_virtual_printf_gap.HANDLE; }
 
     /**
      * Address for:
@@ -3275,33 +2979,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size)
      * }
      */
-    public static MemorySegment H5Pset_virtual_printf_gap$address() {
-        return H5Pset_virtual_printf_gap.ADDR;
-    }
+    public static MemorySegment H5Pset_virtual_printf_gap$address() { return H5Pset_virtual_printf_gap.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size)
      * }
      */
-    public static int H5Pset_virtual_printf_gap(long dapl_id, long gap_size) {
+    public static int H5Pset_virtual_printf_gap(long dapl_id, long gap_size)
+    {
         var mh$ = H5Pset_virtual_printf_gap.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_virtual_printf_gap", dapl_id, gap_size);
             }
             return (int)mh$.invokeExact(dapl_id, gap_size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_virtual_view {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_virtual_view");
 
@@ -3314,9 +3015,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_view(hid_t dapl_id, H5D_vds_view_t view)
      * }
      */
-    public static FunctionDescriptor H5Pset_virtual_view$descriptor() {
-        return H5Pset_virtual_view.DESC;
-    }
+    public static FunctionDescriptor H5Pset_virtual_view$descriptor() { return H5Pset_virtual_view.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3324,9 +3023,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_view(hid_t dapl_id, H5D_vds_view_t view)
      * }
      */
-    public static MethodHandle H5Pset_virtual_view$handle() {
-        return H5Pset_virtual_view.HANDLE;
-    }
+    public static MethodHandle H5Pset_virtual_view$handle() { return H5Pset_virtual_view.HANDLE; }
 
     /**
      * Address for:
@@ -3334,35 +3031,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_virtual_view(hid_t dapl_id, H5D_vds_view_t view)
      * }
      */
-    public static MemorySegment H5Pset_virtual_view$address() {
-        return H5Pset_virtual_view.ADDR;
-    }
+    public static MemorySegment H5Pset_virtual_view$address() { return H5Pset_virtual_view.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_virtual_view(hid_t dapl_id, H5D_vds_view_t view)
      * }
      */
-    public static int H5Pset_virtual_view(long dapl_id, int view) {
+    public static int H5Pset_virtual_view(long dapl_id, int view)
+    {
         var mh$ = H5Pset_virtual_view.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_virtual_view", dapl_id, view);
             }
             return (int)mh$.invokeExact(dapl_id, view);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_btree_ratios {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_btree_ratios");
 
@@ -3375,9 +3067,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_btree_ratios(hid_t plist_id, double *left, double *middle, double *right)
      * }
      */
-    public static FunctionDescriptor H5Pget_btree_ratios$descriptor() {
-        return H5Pget_btree_ratios.DESC;
-    }
+    public static FunctionDescriptor H5Pget_btree_ratios$descriptor() { return H5Pget_btree_ratios.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3385,9 +3075,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_btree_ratios(hid_t plist_id, double *left, double *middle, double *right)
      * }
      */
-    public static MethodHandle H5Pget_btree_ratios$handle() {
-        return H5Pget_btree_ratios.HANDLE;
-    }
+    public static MethodHandle H5Pget_btree_ratios$handle() { return H5Pget_btree_ratios.HANDLE; }
 
     /**
      * Address for:
@@ -3395,34 +3083,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_btree_ratios(hid_t plist_id, double *left, double *middle, double *right)
      * }
      */
-    public static MemorySegment H5Pget_btree_ratios$address() {
-        return H5Pget_btree_ratios.ADDR;
-    }
+    public static MemorySegment H5Pget_btree_ratios$address() { return H5Pget_btree_ratios.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_btree_ratios(hid_t plist_id, double *left, double *middle, double *right)
      * }
      */
-    public static int H5Pget_btree_ratios(long plist_id, MemorySegment left, MemorySegment middle, MemorySegment right) {
+    public static int H5Pget_btree_ratios(long plist_id, MemorySegment left, MemorySegment middle,
+                                          MemorySegment right)
+    {
         var mh$ = H5Pget_btree_ratios.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_btree_ratios", plist_id, left, middle, right);
             }
             return (int)mh$.invokeExact(plist_id, left, middle, right);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_buffer {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_buffer");
 
@@ -3435,9 +3120,7 @@ public class hdf5_h extends hdf5_h_1 {
      * size_t H5Pget_buffer(hid_t plist_id, void **tconv, void **bkg)
      * }
      */
-    public static FunctionDescriptor H5Pget_buffer$descriptor() {
-        return H5Pget_buffer.DESC;
-    }
+    public static FunctionDescriptor H5Pget_buffer$descriptor() { return H5Pget_buffer.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3445,9 +3128,7 @@ public class hdf5_h extends hdf5_h_1 {
      * size_t H5Pget_buffer(hid_t plist_id, void **tconv, void **bkg)
      * }
      */
-    public static MethodHandle H5Pget_buffer$handle() {
-        return H5Pget_buffer.HANDLE;
-    }
+    public static MethodHandle H5Pget_buffer$handle() { return H5Pget_buffer.HANDLE; }
 
     /**
      * Address for:
@@ -3455,34 +3136,30 @@ public class hdf5_h extends hdf5_h_1 {
      * size_t H5Pget_buffer(hid_t plist_id, void **tconv, void **bkg)
      * }
      */
-    public static MemorySegment H5Pget_buffer$address() {
-        return H5Pget_buffer.ADDR;
-    }
+    public static MemorySegment H5Pget_buffer$address() { return H5Pget_buffer.ADDR; }
 
     /**
      * {@snippet lang=c :
      * size_t H5Pget_buffer(hid_t plist_id, void **tconv, void **bkg)
      * }
      */
-    public static long H5Pget_buffer(long plist_id, MemorySegment tconv, MemorySegment bkg) {
+    public static long H5Pget_buffer(long plist_id, MemorySegment tconv, MemorySegment bkg)
+    {
         var mh$ = H5Pget_buffer.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_buffer", plist_id, tconv, bkg);
             }
             return (long)mh$.invokeExact(plist_id, tconv, bkg);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_data_transform {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_data_transform");
 
@@ -3495,9 +3172,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_data_transform(hid_t plist_id, char *expression, size_t size)
      * }
      */
-    public static FunctionDescriptor H5Pget_data_transform$descriptor() {
-        return H5Pget_data_transform.DESC;
-    }
+    public static FunctionDescriptor H5Pget_data_transform$descriptor() { return H5Pget_data_transform.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3505,9 +3180,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_data_transform(hid_t plist_id, char *expression, size_t size)
      * }
      */
-    public static MethodHandle H5Pget_data_transform$handle() {
-        return H5Pget_data_transform.HANDLE;
-    }
+    public static MethodHandle H5Pget_data_transform$handle() { return H5Pget_data_transform.HANDLE; }
 
     /**
      * Address for:
@@ -3515,32 +3188,29 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_data_transform(hid_t plist_id, char *expression, size_t size)
      * }
      */
-    public static MemorySegment H5Pget_data_transform$address() {
-        return H5Pget_data_transform.ADDR;
-    }
+    public static MemorySegment H5Pget_data_transform$address() { return H5Pget_data_transform.ADDR; }
 
     /**
      * {@snippet lang=c :
      * ssize_t H5Pget_data_transform(hid_t plist_id, char *expression, size_t size)
      * }
      */
-    public static long H5Pget_data_transform(long plist_id, MemorySegment expression, long size) {
+    public static long H5Pget_data_transform(long plist_id, MemorySegment expression, long size)
+    {
         var mh$ = H5Pget_data_transform.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_data_transform", plist_id, expression, size);
             }
             return (long)mh$.invokeExact(plist_id, expression, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_edc_check {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_edc_check");
 
@@ -3553,9 +3223,7 @@ public class hdf5_h extends hdf5_h_1 {
      * H5Z_EDC_t H5Pget_edc_check(hid_t plist_id)
      * }
      */
-    public static FunctionDescriptor H5Pget_edc_check$descriptor() {
-        return H5Pget_edc_check.DESC;
-    }
+    public static FunctionDescriptor H5Pget_edc_check$descriptor() { return H5Pget_edc_check.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3563,9 +3231,7 @@ public class hdf5_h extends hdf5_h_1 {
      * H5Z_EDC_t H5Pget_edc_check(hid_t plist_id)
      * }
      */
-    public static MethodHandle H5Pget_edc_check$handle() {
-        return H5Pget_edc_check.HANDLE;
-    }
+    public static MethodHandle H5Pget_edc_check$handle() { return H5Pget_edc_check.HANDLE; }
 
     /**
      * Address for:
@@ -3573,33 +3239,30 @@ public class hdf5_h extends hdf5_h_1 {
      * H5Z_EDC_t H5Pget_edc_check(hid_t plist_id)
      * }
      */
-    public static MemorySegment H5Pget_edc_check$address() {
-        return H5Pget_edc_check.ADDR;
-    }
+    public static MemorySegment H5Pget_edc_check$address() { return H5Pget_edc_check.ADDR; }
 
     /**
      * {@snippet lang=c :
      * H5Z_EDC_t H5Pget_edc_check(hid_t plist_id)
      * }
      */
-    public static int H5Pget_edc_check(long plist_id) {
+    public static int H5Pget_edc_check(long plist_id)
+    {
         var mh$ = H5Pget_edc_check.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_edc_check", plist_id);
             }
             return (int)mh$.invokeExact(plist_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_hyper_vector_size {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_hyper_vector_size");
 
@@ -3612,7 +3275,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size)
      * }
      */
-    public static FunctionDescriptor H5Pget_hyper_vector_size$descriptor() {
+    public static FunctionDescriptor H5Pget_hyper_vector_size$descriptor()
+    {
         return H5Pget_hyper_vector_size.DESC;
     }
 
@@ -3622,9 +3286,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size)
      * }
      */
-    public static MethodHandle H5Pget_hyper_vector_size$handle() {
-        return H5Pget_hyper_vector_size.HANDLE;
-    }
+    public static MethodHandle H5Pget_hyper_vector_size$handle() { return H5Pget_hyper_vector_size.HANDLE; }
 
     /**
      * Address for:
@@ -3632,32 +3294,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size)
      * }
      */
-    public static MemorySegment H5Pget_hyper_vector_size$address() {
-        return H5Pget_hyper_vector_size.ADDR;
-    }
+    public static MemorySegment H5Pget_hyper_vector_size$address() { return H5Pget_hyper_vector_size.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size)
      * }
      */
-    public static int H5Pget_hyper_vector_size(long fapl_id, MemorySegment size) {
+    public static int H5Pget_hyper_vector_size(long fapl_id, MemorySegment size)
+    {
         var mh$ = H5Pget_hyper_vector_size.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_hyper_vector_size", fapl_id, size);
             }
             return (int)mh$.invokeExact(fapl_id, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_preserve {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_preserve");
 
@@ -3670,9 +3329,7 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_preserve(hid_t plist_id)
      * }
      */
-    public static FunctionDescriptor H5Pget_preserve$descriptor() {
-        return H5Pget_preserve.DESC;
-    }
+    public static FunctionDescriptor H5Pget_preserve$descriptor() { return H5Pget_preserve.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3680,9 +3337,7 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_preserve(hid_t plist_id)
      * }
      */
-    public static MethodHandle H5Pget_preserve$handle() {
-        return H5Pget_preserve.HANDLE;
-    }
+    public static MethodHandle H5Pget_preserve$handle() { return H5Pget_preserve.HANDLE; }
 
     /**
      * Address for:
@@ -3690,34 +3345,30 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5Pget_preserve(hid_t plist_id)
      * }
      */
-    public static MemorySegment H5Pget_preserve$address() {
-        return H5Pget_preserve.ADDR;
-    }
+    public static MemorySegment H5Pget_preserve$address() { return H5Pget_preserve.ADDR; }
 
     /**
      * {@snippet lang=c :
      * int H5Pget_preserve(hid_t plist_id)
      * }
      */
-    public static int H5Pget_preserve(long plist_id) {
+    public static int H5Pget_preserve(long plist_id)
+    {
         var mh$ = H5Pget_preserve.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_preserve", plist_id);
             }
             return (int)mh$.invokeExact(plist_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_type_conv_cb {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_type_conv_cb");
 
@@ -3730,9 +3381,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data)
      * }
      */
-    public static FunctionDescriptor H5Pget_type_conv_cb$descriptor() {
-        return H5Pget_type_conv_cb.DESC;
-    }
+    public static FunctionDescriptor H5Pget_type_conv_cb$descriptor() { return H5Pget_type_conv_cb.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3740,9 +3389,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data)
      * }
      */
-    public static MethodHandle H5Pget_type_conv_cb$handle() {
-        return H5Pget_type_conv_cb.HANDLE;
-    }
+    public static MethodHandle H5Pget_type_conv_cb$handle() { return H5Pget_type_conv_cb.HANDLE; }
 
     /**
      * Address for:
@@ -3750,36 +3397,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data)
      * }
      */
-    public static MemorySegment H5Pget_type_conv_cb$address() {
-        return H5Pget_type_conv_cb.ADDR;
-    }
+    public static MemorySegment H5Pget_type_conv_cb$address() { return H5Pget_type_conv_cb.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data)
      * }
      */
-    public static int H5Pget_type_conv_cb(long dxpl_id, MemorySegment op, MemorySegment operate_data) {
+    public static int H5Pget_type_conv_cb(long dxpl_id, MemorySegment op, MemorySegment operate_data)
+    {
         var mh$ = H5Pget_type_conv_cb.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_type_conv_cb", dxpl_id, op, operate_data);
             }
             return (int)mh$.invokeExact(dxpl_id, op, operate_data);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_vlen_mem_manager {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_vlen_mem_manager");
 
@@ -3789,58 +3431,59 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info, H5MM_free_t *free_func, void **free_info)
+     * herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
+     * H5MM_free_t *free_func, void **free_info)
      * }
      */
-    public static FunctionDescriptor H5Pget_vlen_mem_manager$descriptor() {
+    public static FunctionDescriptor H5Pget_vlen_mem_manager$descriptor()
+    {
         return H5Pget_vlen_mem_manager.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info, H5MM_free_t *free_func, void **free_info)
+     * herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
+     * H5MM_free_t *free_func, void **free_info)
      * }
      */
-    public static MethodHandle H5Pget_vlen_mem_manager$handle() {
-        return H5Pget_vlen_mem_manager.HANDLE;
-    }
+    public static MethodHandle H5Pget_vlen_mem_manager$handle() { return H5Pget_vlen_mem_manager.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info, H5MM_free_t *free_func, void **free_info)
+     * herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
+     * H5MM_free_t *free_func, void **free_info)
      * }
      */
-    public static MemorySegment H5Pget_vlen_mem_manager$address() {
-        return H5Pget_vlen_mem_manager.ADDR;
-    }
+    public static MemorySegment H5Pget_vlen_mem_manager$address() { return H5Pget_vlen_mem_manager.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info, H5MM_free_t *free_func, void **free_info)
+     * herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
+     * H5MM_free_t *free_func, void **free_info)
      * }
      */
-    public static int H5Pget_vlen_mem_manager(long plist_id, MemorySegment alloc_func, MemorySegment alloc_info, MemorySegment free_func, MemorySegment free_info) {
+    public static int H5Pget_vlen_mem_manager(long plist_id, MemorySegment alloc_func,
+                                              MemorySegment alloc_info, MemorySegment free_func,
+                                              MemorySegment free_info)
+    {
         var mh$ = H5Pget_vlen_mem_manager.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5Pget_vlen_mem_manager", plist_id, alloc_func, alloc_info, free_func, free_info);
+                traceDowncall("H5Pget_vlen_mem_manager", plist_id, alloc_func, alloc_info, free_func,
+                              free_info);
             }
             return (int)mh$.invokeExact(plist_id, alloc_func, alloc_info, free_func, free_info);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_btree_ratios {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_DOUBLE,
-            hdf5_h.C_DOUBLE,
-            hdf5_h.C_DOUBLE
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_DOUBLE, hdf5_h.C_DOUBLE, hdf5_h.C_DOUBLE);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_btree_ratios");
 
@@ -3853,9 +3496,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right)
      * }
      */
-    public static FunctionDescriptor H5Pset_btree_ratios$descriptor() {
-        return H5Pset_btree_ratios.DESC;
-    }
+    public static FunctionDescriptor H5Pset_btree_ratios$descriptor() { return H5Pset_btree_ratios.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3863,9 +3504,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right)
      * }
      */
-    public static MethodHandle H5Pset_btree_ratios$handle() {
-        return H5Pset_btree_ratios.HANDLE;
-    }
+    public static MethodHandle H5Pset_btree_ratios$handle() { return H5Pset_btree_ratios.HANDLE; }
 
     /**
      * Address for:
@@ -3873,35 +3512,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right)
      * }
      */
-    public static MemorySegment H5Pset_btree_ratios$address() {
-        return H5Pset_btree_ratios.ADDR;
-    }
+    public static MemorySegment H5Pset_btree_ratios$address() { return H5Pset_btree_ratios.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right)
      * }
      */
-    public static int H5Pset_btree_ratios(long plist_id, double left, double middle, double right) {
+    public static int H5Pset_btree_ratios(long plist_id, double left, double middle, double right)
+    {
         var mh$ = H5Pset_btree_ratios.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_btree_ratios", plist_id, left, middle, right);
             }
             return (int)mh$.invokeExact(plist_id, left, middle, right);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_buffer {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_buffer");
 
@@ -3914,9 +3548,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
      * }
      */
-    public static FunctionDescriptor H5Pset_buffer$descriptor() {
-        return H5Pset_buffer.DESC;
-    }
+    public static FunctionDescriptor H5Pset_buffer$descriptor() { return H5Pset_buffer.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3924,9 +3556,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
      * }
      */
-    public static MethodHandle H5Pset_buffer$handle() {
-        return H5Pset_buffer.HANDLE;
-    }
+    public static MethodHandle H5Pset_buffer$handle() { return H5Pset_buffer.HANDLE; }
 
     /**
      * Address for:
@@ -3934,33 +3564,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
      * }
      */
-    public static MemorySegment H5Pset_buffer$address() {
-        return H5Pset_buffer.ADDR;
-    }
+    public static MemorySegment H5Pset_buffer$address() { return H5Pset_buffer.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
      * }
      */
-    public static int H5Pset_buffer(long plist_id, long size, MemorySegment tconv, MemorySegment bkg) {
+    public static int H5Pset_buffer(long plist_id, long size, MemorySegment tconv, MemorySegment bkg)
+    {
         var mh$ = H5Pset_buffer.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_buffer", plist_id, size, tconv, bkg);
             }
             return (int)mh$.invokeExact(plist_id, size, tconv, bkg);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_data_transform {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_data_transform");
 
@@ -3973,9 +3600,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_data_transform(hid_t plist_id, const char *expression)
      * }
      */
-    public static FunctionDescriptor H5Pset_data_transform$descriptor() {
-        return H5Pset_data_transform.DESC;
-    }
+    public static FunctionDescriptor H5Pset_data_transform$descriptor() { return H5Pset_data_transform.DESC; }
 
     /**
      * Downcall method handle for:
@@ -3983,9 +3608,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_data_transform(hid_t plist_id, const char *expression)
      * }
      */
-    public static MethodHandle H5Pset_data_transform$handle() {
-        return H5Pset_data_transform.HANDLE;
-    }
+    public static MethodHandle H5Pset_data_transform$handle() { return H5Pset_data_transform.HANDLE; }
 
     /**
      * Address for:
@@ -3993,33 +3616,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_data_transform(hid_t plist_id, const char *expression)
      * }
      */
-    public static MemorySegment H5Pset_data_transform$address() {
-        return H5Pset_data_transform.ADDR;
-    }
+    public static MemorySegment H5Pset_data_transform$address() { return H5Pset_data_transform.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_data_transform(hid_t plist_id, const char *expression)
      * }
      */
-    public static int H5Pset_data_transform(long plist_id, MemorySegment expression) {
+    public static int H5Pset_data_transform(long plist_id, MemorySegment expression)
+    {
         var mh$ = H5Pset_data_transform.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_data_transform", plist_id, expression);
             }
             return (int)mh$.invokeExact(plist_id, expression);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_edc_check {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_edc_check");
 
@@ -4032,9 +3652,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
      * }
      */
-    public static FunctionDescriptor H5Pset_edc_check$descriptor() {
-        return H5Pset_edc_check.DESC;
-    }
+    public static FunctionDescriptor H5Pset_edc_check$descriptor() { return H5Pset_edc_check.DESC; }
 
     /**
      * Downcall method handle for:
@@ -4042,9 +3660,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
      * }
      */
-    public static MethodHandle H5Pset_edc_check$handle() {
-        return H5Pset_edc_check.HANDLE;
-    }
+    public static MethodHandle H5Pset_edc_check$handle() { return H5Pset_edc_check.HANDLE; }
 
     /**
      * Address for:
@@ -4052,34 +3668,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
      * }
      */
-    public static MemorySegment H5Pset_edc_check$address() {
-        return H5Pset_edc_check.ADDR;
-    }
+    public static MemorySegment H5Pset_edc_check$address() { return H5Pset_edc_check.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
      * }
      */
-    public static int H5Pset_edc_check(long plist_id, int check) {
+    public static int H5Pset_edc_check(long plist_id, int check)
+    {
         var mh$ = H5Pset_edc_check.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_edc_check", plist_id, check);
             }
             return (int)mh$.invokeExact(plist_id, check);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_filter_callback {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_filter_callback");
 
@@ -4092,7 +3704,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
      * }
      */
-    public static FunctionDescriptor H5Pset_filter_callback$descriptor() {
+    public static FunctionDescriptor H5Pset_filter_callback$descriptor()
+    {
         return H5Pset_filter_callback.DESC;
     }
 
@@ -4102,9 +3715,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
      * }
      */
-    public static MethodHandle H5Pset_filter_callback$handle() {
-        return H5Pset_filter_callback.HANDLE;
-    }
+    public static MethodHandle H5Pset_filter_callback$handle() { return H5Pset_filter_callback.HANDLE; }
 
     /**
      * Address for:
@@ -4112,33 +3723,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
      * }
      */
-    public static MemorySegment H5Pset_filter_callback$address() {
-        return H5Pset_filter_callback.ADDR;
-    }
+    public static MemorySegment H5Pset_filter_callback$address() { return H5Pset_filter_callback.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
      * }
      */
-    public static int H5Pset_filter_callback(long plist_id, MemorySegment func, MemorySegment op_data) {
+    public static int H5Pset_filter_callback(long plist_id, MemorySegment func, MemorySegment op_data)
+    {
         var mh$ = H5Pset_filter_callback.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_filter_callback", plist_id, func, op_data);
             }
             return (int)mh$.invokeExact(plist_id, func, op_data);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_hyper_vector_size {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_hyper_vector_size");
 
@@ -4151,7 +3759,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size)
      * }
      */
-    public static FunctionDescriptor H5Pset_hyper_vector_size$descriptor() {
+    public static FunctionDescriptor H5Pset_hyper_vector_size$descriptor()
+    {
         return H5Pset_hyper_vector_size.DESC;
     }
 
@@ -4161,9 +3770,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size)
      * }
      */
-    public static MethodHandle H5Pset_hyper_vector_size$handle() {
-        return H5Pset_hyper_vector_size.HANDLE;
-    }
+    public static MethodHandle H5Pset_hyper_vector_size$handle() { return H5Pset_hyper_vector_size.HANDLE; }
 
     /**
      * Address for:
@@ -4171,33 +3778,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size)
      * }
      */
-    public static MemorySegment H5Pset_hyper_vector_size$address() {
-        return H5Pset_hyper_vector_size.ADDR;
-    }
+    public static MemorySegment H5Pset_hyper_vector_size$address() { return H5Pset_hyper_vector_size.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size)
      * }
      */
-    public static int H5Pset_hyper_vector_size(long plist_id, long size) {
+    public static int H5Pset_hyper_vector_size(long plist_id, long size)
+    {
         var mh$ = H5Pset_hyper_vector_size.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_hyper_vector_size", plist_id, size);
             }
             return (int)mh$.invokeExact(plist_id, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_preserve {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_preserve");
 
@@ -4210,9 +3814,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_preserve(hid_t plist_id, bool status)
      * }
      */
-    public static FunctionDescriptor H5Pset_preserve$descriptor() {
-        return H5Pset_preserve.DESC;
-    }
+    public static FunctionDescriptor H5Pset_preserve$descriptor() { return H5Pset_preserve.DESC; }
 
     /**
      * Downcall method handle for:
@@ -4220,9 +3822,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_preserve(hid_t plist_id, bool status)
      * }
      */
-    public static MethodHandle H5Pset_preserve$handle() {
-        return H5Pset_preserve.HANDLE;
-    }
+    public static MethodHandle H5Pset_preserve$handle() { return H5Pset_preserve.HANDLE; }
 
     /**
      * Address for:
@@ -4230,34 +3830,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_preserve(hid_t plist_id, bool status)
      * }
      */
-    public static MemorySegment H5Pset_preserve$address() {
-        return H5Pset_preserve.ADDR;
-    }
+    public static MemorySegment H5Pset_preserve$address() { return H5Pset_preserve.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_preserve(hid_t plist_id, bool status)
      * }
      */
-    public static int H5Pset_preserve(long plist_id, boolean status) {
+    public static int H5Pset_preserve(long plist_id, boolean status)
+    {
         var mh$ = H5Pset_preserve.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_preserve", plist_id, status);
             }
             return (int)mh$.invokeExact(plist_id, status);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_type_conv_cb {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_type_conv_cb");
 
@@ -4270,9 +3866,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data)
      * }
      */
-    public static FunctionDescriptor H5Pset_type_conv_cb$descriptor() {
-        return H5Pset_type_conv_cb.DESC;
-    }
+    public static FunctionDescriptor H5Pset_type_conv_cb$descriptor() { return H5Pset_type_conv_cb.DESC; }
 
     /**
      * Downcall method handle for:
@@ -4280,9 +3874,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data)
      * }
      */
-    public static MethodHandle H5Pset_type_conv_cb$handle() {
-        return H5Pset_type_conv_cb.HANDLE;
-    }
+    public static MethodHandle H5Pset_type_conv_cb$handle() { return H5Pset_type_conv_cb.HANDLE; }
 
     /**
      * Address for:
@@ -4290,36 +3882,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data)
      * }
      */
-    public static MemorySegment H5Pset_type_conv_cb$address() {
-        return H5Pset_type_conv_cb.ADDR;
-    }
+    public static MemorySegment H5Pset_type_conv_cb$address() { return H5Pset_type_conv_cb.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data)
      * }
      */
-    public static int H5Pset_type_conv_cb(long dxpl_id, MemorySegment op, MemorySegment operate_data) {
+    public static int H5Pset_type_conv_cb(long dxpl_id, MemorySegment op, MemorySegment operate_data)
+    {
         var mh$ = H5Pset_type_conv_cb.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_type_conv_cb", dxpl_id, op, operate_data);
             }
             return (int)mh$.invokeExact(dxpl_id, op, operate_data);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_vlen_mem_manager {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_vlen_mem_manager");
 
@@ -4329,61 +3916,60 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func, void *free_info)
+     * herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
+     * H5MM_free_t free_func, void *free_info)
      * }
      */
-    public static FunctionDescriptor H5Pset_vlen_mem_manager$descriptor() {
+    public static FunctionDescriptor H5Pset_vlen_mem_manager$descriptor()
+    {
         return H5Pset_vlen_mem_manager.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func, void *free_info)
+     * herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
+     * H5MM_free_t free_func, void *free_info)
      * }
      */
-    public static MethodHandle H5Pset_vlen_mem_manager$handle() {
-        return H5Pset_vlen_mem_manager.HANDLE;
-    }
+    public static MethodHandle H5Pset_vlen_mem_manager$handle() { return H5Pset_vlen_mem_manager.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func, void *free_info)
+     * herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
+     * H5MM_free_t free_func, void *free_info)
      * }
      */
-    public static MemorySegment H5Pset_vlen_mem_manager$address() {
-        return H5Pset_vlen_mem_manager.ADDR;
-    }
+    public static MemorySegment H5Pset_vlen_mem_manager$address() { return H5Pset_vlen_mem_manager.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func, void *free_info)
+     * herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
+     * H5MM_free_t free_func, void *free_info)
      * }
      */
-    public static int H5Pset_vlen_mem_manager(long plist_id, MemorySegment alloc_func, MemorySegment alloc_info, MemorySegment free_func, MemorySegment free_info) {
+    public static int H5Pset_vlen_mem_manager(long plist_id, MemorySegment alloc_func,
+                                              MemorySegment alloc_info, MemorySegment free_func,
+                                              MemorySegment free_info)
+    {
         var mh$ = H5Pset_vlen_mem_manager.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5Pset_vlen_mem_manager", plist_id, alloc_func, alloc_info, free_func, free_info);
+                traceDowncall("H5Pset_vlen_mem_manager", plist_id, alloc_func, alloc_info, free_func,
+                              free_info);
             }
             return (int)mh$.invokeExact(plist_id, alloc_func, alloc_info, free_func, free_info);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_dataset_io_hyperslab_selection {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_INT,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_dataset_io_hyperslab_selection");
 
@@ -4393,56 +3979,65 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned int rank, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])
+     * herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned int rank, H5S_seloper_t op, const
+     * hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])
      * }
      */
-    public static FunctionDescriptor H5Pset_dataset_io_hyperslab_selection$descriptor() {
+    public static FunctionDescriptor H5Pset_dataset_io_hyperslab_selection$descriptor()
+    {
         return H5Pset_dataset_io_hyperslab_selection.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned int rank, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])
+     * herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned int rank, H5S_seloper_t op, const
+     * hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])
      * }
      */
-    public static MethodHandle H5Pset_dataset_io_hyperslab_selection$handle() {
+    public static MethodHandle H5Pset_dataset_io_hyperslab_selection$handle()
+    {
         return H5Pset_dataset_io_hyperslab_selection.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned int rank, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])
+     * herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned int rank, H5S_seloper_t op, const
+     * hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])
      * }
      */
-    public static MemorySegment H5Pset_dataset_io_hyperslab_selection$address() {
+    public static MemorySegment H5Pset_dataset_io_hyperslab_selection$address()
+    {
         return H5Pset_dataset_io_hyperslab_selection.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned int rank, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])
+     * herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned int rank, H5S_seloper_t op, const
+     * hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])
      * }
      */
-    public static int H5Pset_dataset_io_hyperslab_selection(long plist_id, int rank, int op, MemorySegment start, MemorySegment stride, MemorySegment count, MemorySegment block) {
+    public static int H5Pset_dataset_io_hyperslab_selection(long plist_id, int rank, int op,
+                                                            MemorySegment start, MemorySegment stride,
+                                                            MemorySegment count, MemorySegment block)
+    {
         var mh$ = H5Pset_dataset_io_hyperslab_selection.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5Pset_dataset_io_hyperslab_selection", plist_id, rank, op, start, stride, count, block);
+                traceDowncall("H5Pset_dataset_io_hyperslab_selection", plist_id, rank, op, start, stride,
+                              count, block);
             }
             return (int)mh$.invokeExact(plist_id, rank, op, start, stride, count, block);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_selection_io {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_selection_io");
 
@@ -4455,9 +4050,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode)
      * }
      */
-    public static FunctionDescriptor H5Pset_selection_io$descriptor() {
-        return H5Pset_selection_io.DESC;
-    }
+    public static FunctionDescriptor H5Pset_selection_io$descriptor() { return H5Pset_selection_io.DESC; }
 
     /**
      * Downcall method handle for:
@@ -4465,9 +4058,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode)
      * }
      */
-    public static MethodHandle H5Pset_selection_io$handle() {
-        return H5Pset_selection_io.HANDLE;
-    }
+    public static MethodHandle H5Pset_selection_io$handle() { return H5Pset_selection_io.HANDLE; }
 
     /**
      * Address for:
@@ -4475,33 +4066,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode)
      * }
      */
-    public static MemorySegment H5Pset_selection_io$address() {
-        return H5Pset_selection_io.ADDR;
-    }
+    public static MemorySegment H5Pset_selection_io$address() { return H5Pset_selection_io.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode)
      * }
      */
-    public static int H5Pset_selection_io(long plist_id, int selection_io_mode) {
+    public static int H5Pset_selection_io(long plist_id, int selection_io_mode)
+    {
         var mh$ = H5Pset_selection_io.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_selection_io", plist_id, selection_io_mode);
             }
             return (int)mh$.invokeExact(plist_id, selection_io_mode);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_selection_io {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_selection_io");
 
@@ -4514,9 +4102,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode)
      * }
      */
-    public static FunctionDescriptor H5Pget_selection_io$descriptor() {
-        return H5Pget_selection_io.DESC;
-    }
+    public static FunctionDescriptor H5Pget_selection_io$descriptor() { return H5Pget_selection_io.DESC; }
 
     /**
      * Downcall method handle for:
@@ -4524,9 +4110,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode)
      * }
      */
-    public static MethodHandle H5Pget_selection_io$handle() {
-        return H5Pget_selection_io.HANDLE;
-    }
+    public static MethodHandle H5Pget_selection_io$handle() { return H5Pget_selection_io.HANDLE; }
 
     /**
      * Address for:
@@ -4534,33 +4118,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode)
      * }
      */
-    public static MemorySegment H5Pget_selection_io$address() {
-        return H5Pget_selection_io.ADDR;
-    }
+    public static MemorySegment H5Pget_selection_io$address() { return H5Pget_selection_io.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode)
      * }
      */
-    public static int H5Pget_selection_io(long plist_id, MemorySegment selection_io_mode) {
+    public static int H5Pget_selection_io(long plist_id, MemorySegment selection_io_mode)
+    {
         var mh$ = H5Pget_selection_io.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_selection_io", plist_id, selection_io_mode);
             }
             return (int)mh$.invokeExact(plist_id, selection_io_mode);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_no_selection_io_cause {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_no_selection_io_cause");
 
@@ -4573,7 +4154,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause)
      * }
      */
-    public static FunctionDescriptor H5Pget_no_selection_io_cause$descriptor() {
+    public static FunctionDescriptor H5Pget_no_selection_io_cause$descriptor()
+    {
         return H5Pget_no_selection_io_cause.DESC;
     }
 
@@ -4583,7 +4165,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause)
      * }
      */
-    public static MethodHandle H5Pget_no_selection_io_cause$handle() {
+    public static MethodHandle H5Pget_no_selection_io_cause$handle()
+    {
         return H5Pget_no_selection_io_cause.HANDLE;
     }
 
@@ -4593,7 +4176,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause)
      * }
      */
-    public static MemorySegment H5Pget_no_selection_io_cause$address() {
+    public static MemorySegment H5Pget_no_selection_io_cause$address()
+    {
         return H5Pget_no_selection_io_cause.ADDR;
     }
 
@@ -4602,24 +4186,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause)
      * }
      */
-    public static int H5Pget_no_selection_io_cause(long plist_id, MemorySegment no_selection_io_cause) {
+    public static int H5Pget_no_selection_io_cause(long plist_id, MemorySegment no_selection_io_cause)
+    {
         var mh$ = H5Pget_no_selection_io_cause.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_no_selection_io_cause", plist_id, no_selection_io_cause);
             }
             return (int)mh$.invokeExact(plist_id, no_selection_io_cause);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_actual_selection_io_mode {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_actual_selection_io_mode");
 
@@ -4632,7 +4215,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode)
      * }
      */
-    public static FunctionDescriptor H5Pget_actual_selection_io_mode$descriptor() {
+    public static FunctionDescriptor H5Pget_actual_selection_io_mode$descriptor()
+    {
         return H5Pget_actual_selection_io_mode.DESC;
     }
 
@@ -4642,7 +4226,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode)
      * }
      */
-    public static MethodHandle H5Pget_actual_selection_io_mode$handle() {
+    public static MethodHandle H5Pget_actual_selection_io_mode$handle()
+    {
         return H5Pget_actual_selection_io_mode.HANDLE;
     }
 
@@ -4652,7 +4237,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode)
      * }
      */
-    public static MemorySegment H5Pget_actual_selection_io_mode$address() {
+    public static MemorySegment H5Pget_actual_selection_io_mode$address()
+    {
         return H5Pget_actual_selection_io_mode.ADDR;
     }
 
@@ -4661,24 +4247,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode)
      * }
      */
-    public static int H5Pget_actual_selection_io_mode(long plist_id, MemorySegment actual_selection_io_mode) {
+    public static int H5Pget_actual_selection_io_mode(long plist_id, MemorySegment actual_selection_io_mode)
+    {
         var mh$ = H5Pget_actual_selection_io_mode.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_actual_selection_io_mode", plist_id, actual_selection_io_mode);
             }
             return (int)mh$.invokeExact(plist_id, actual_selection_io_mode);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_modify_write_buf {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_modify_write_buf");
 
@@ -4691,7 +4276,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_modify_write_buf(hid_t plist_id, bool modify_write_buf)
      * }
      */
-    public static FunctionDescriptor H5Pset_modify_write_buf$descriptor() {
+    public static FunctionDescriptor H5Pset_modify_write_buf$descriptor()
+    {
         return H5Pset_modify_write_buf.DESC;
     }
 
@@ -4701,9 +4287,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_modify_write_buf(hid_t plist_id, bool modify_write_buf)
      * }
      */
-    public static MethodHandle H5Pset_modify_write_buf$handle() {
-        return H5Pset_modify_write_buf.HANDLE;
-    }
+    public static MethodHandle H5Pset_modify_write_buf$handle() { return H5Pset_modify_write_buf.HANDLE; }
 
     /**
      * Address for:
@@ -4711,33 +4295,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_modify_write_buf(hid_t plist_id, bool modify_write_buf)
      * }
      */
-    public static MemorySegment H5Pset_modify_write_buf$address() {
-        return H5Pset_modify_write_buf.ADDR;
-    }
+    public static MemorySegment H5Pset_modify_write_buf$address() { return H5Pset_modify_write_buf.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_modify_write_buf(hid_t plist_id, bool modify_write_buf)
      * }
      */
-    public static int H5Pset_modify_write_buf(long plist_id, boolean modify_write_buf) {
+    public static int H5Pset_modify_write_buf(long plist_id, boolean modify_write_buf)
+    {
         var mh$ = H5Pset_modify_write_buf.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_modify_write_buf", plist_id, modify_write_buf);
             }
             return (int)mh$.invokeExact(plist_id, modify_write_buf);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_modify_write_buf {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_modify_write_buf");
 
@@ -4750,7 +4331,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf)
      * }
      */
-    public static FunctionDescriptor H5Pget_modify_write_buf$descriptor() {
+    public static FunctionDescriptor H5Pget_modify_write_buf$descriptor()
+    {
         return H5Pget_modify_write_buf.DESC;
     }
 
@@ -4760,9 +4342,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf)
      * }
      */
-    public static MethodHandle H5Pget_modify_write_buf$handle() {
-        return H5Pget_modify_write_buf.HANDLE;
-    }
+    public static MethodHandle H5Pget_modify_write_buf$handle() { return H5Pget_modify_write_buf.HANDLE; }
 
     /**
      * Address for:
@@ -4770,33 +4350,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf)
      * }
      */
-    public static MemorySegment H5Pget_modify_write_buf$address() {
-        return H5Pget_modify_write_buf.ADDR;
-    }
+    public static MemorySegment H5Pget_modify_write_buf$address() { return H5Pget_modify_write_buf.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf)
      * }
      */
-    public static int H5Pget_modify_write_buf(long plist_id, MemorySegment modify_write_buf) {
+    public static int H5Pget_modify_write_buf(long plist_id, MemorySegment modify_write_buf)
+    {
         var mh$ = H5Pget_modify_write_buf.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_modify_write_buf", plist_id, modify_write_buf);
             }
             return (int)mh$.invokeExact(plist_id, modify_write_buf);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_create_intermediate_group {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_create_intermediate_group");
 
@@ -4809,7 +4386,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned int *crt_intmd)
      * }
      */
-    public static FunctionDescriptor H5Pget_create_intermediate_group$descriptor() {
+    public static FunctionDescriptor H5Pget_create_intermediate_group$descriptor()
+    {
         return H5Pget_create_intermediate_group.DESC;
     }
 
@@ -4819,7 +4397,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned int *crt_intmd)
      * }
      */
-    public static MethodHandle H5Pget_create_intermediate_group$handle() {
+    public static MethodHandle H5Pget_create_intermediate_group$handle()
+    {
         return H5Pget_create_intermediate_group.HANDLE;
     }
 
@@ -4829,7 +4408,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned int *crt_intmd)
      * }
      */
-    public static MemorySegment H5Pget_create_intermediate_group$address() {
+    public static MemorySegment H5Pget_create_intermediate_group$address()
+    {
         return H5Pget_create_intermediate_group.ADDR;
     }
 
@@ -4838,24 +4418,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned int *crt_intmd)
      * }
      */
-    public static int H5Pget_create_intermediate_group(long plist_id, MemorySegment crt_intmd) {
+    public static int H5Pget_create_intermediate_group(long plist_id, MemorySegment crt_intmd)
+    {
         var mh$ = H5Pget_create_intermediate_group.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_create_intermediate_group", plist_id, crt_intmd);
             }
             return (int)mh$.invokeExact(plist_id, crt_intmd);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_create_intermediate_group {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_create_intermediate_group");
 
@@ -4868,7 +4447,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned int crt_intmd)
      * }
      */
-    public static FunctionDescriptor H5Pset_create_intermediate_group$descriptor() {
+    public static FunctionDescriptor H5Pset_create_intermediate_group$descriptor()
+    {
         return H5Pset_create_intermediate_group.DESC;
     }
 
@@ -4878,7 +4458,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned int crt_intmd)
      * }
      */
-    public static MethodHandle H5Pset_create_intermediate_group$handle() {
+    public static MethodHandle H5Pset_create_intermediate_group$handle()
+    {
         return H5Pset_create_intermediate_group.HANDLE;
     }
 
@@ -4888,7 +4469,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned int crt_intmd)
      * }
      */
-    public static MemorySegment H5Pset_create_intermediate_group$address() {
+    public static MemorySegment H5Pset_create_intermediate_group$address()
+    {
         return H5Pset_create_intermediate_group.ADDR;
     }
 
@@ -4897,25 +4479,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned int crt_intmd)
      * }
      */
-    public static int H5Pset_create_intermediate_group(long plist_id, int crt_intmd) {
+    public static int H5Pset_create_intermediate_group(long plist_id, int crt_intmd)
+    {
         var mh$ = H5Pset_create_intermediate_group.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_create_intermediate_group", plist_id, crt_intmd);
             }
             return (int)mh$.invokeExact(plist_id, crt_intmd);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_est_link_info {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_est_link_info");
 
@@ -4928,9 +4508,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_est_link_info(hid_t plist_id, unsigned int *est_num_entries, unsigned int *est_name_len)
      * }
      */
-    public static FunctionDescriptor H5Pget_est_link_info$descriptor() {
-        return H5Pget_est_link_info.DESC;
-    }
+    public static FunctionDescriptor H5Pget_est_link_info$descriptor() { return H5Pget_est_link_info.DESC; }
 
     /**
      * Downcall method handle for:
@@ -4938,9 +4516,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_est_link_info(hid_t plist_id, unsigned int *est_num_entries, unsigned int *est_name_len)
      * }
      */
-    public static MethodHandle H5Pget_est_link_info$handle() {
-        return H5Pget_est_link_info.HANDLE;
-    }
+    public static MethodHandle H5Pget_est_link_info$handle() { return H5Pget_est_link_info.HANDLE; }
 
     /**
      * Address for:
@@ -4948,33 +4524,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_est_link_info(hid_t plist_id, unsigned int *est_num_entries, unsigned int *est_name_len)
      * }
      */
-    public static MemorySegment H5Pget_est_link_info$address() {
-        return H5Pget_est_link_info.ADDR;
-    }
+    public static MemorySegment H5Pget_est_link_info$address() { return H5Pget_est_link_info.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_est_link_info(hid_t plist_id, unsigned int *est_num_entries, unsigned int *est_name_len)
      * }
      */
-    public static int H5Pget_est_link_info(long plist_id, MemorySegment est_num_entries, MemorySegment est_name_len) {
+    public static int H5Pget_est_link_info(long plist_id, MemorySegment est_num_entries,
+                                           MemorySegment est_name_len)
+    {
         var mh$ = H5Pget_est_link_info.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_est_link_info", plist_id, est_num_entries, est_name_len);
             }
             return (int)mh$.invokeExact(plist_id, est_num_entries, est_name_len);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_link_creation_order {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_link_creation_order");
 
@@ -4987,7 +4561,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned int *crt_order_flags)
      * }
      */
-    public static FunctionDescriptor H5Pget_link_creation_order$descriptor() {
+    public static FunctionDescriptor H5Pget_link_creation_order$descriptor()
+    {
         return H5Pget_link_creation_order.DESC;
     }
 
@@ -4997,7 +4572,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned int *crt_order_flags)
      * }
      */
-    public static MethodHandle H5Pget_link_creation_order$handle() {
+    public static MethodHandle H5Pget_link_creation_order$handle()
+    {
         return H5Pget_link_creation_order.HANDLE;
     }
 
@@ -5007,7 +4583,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned int *crt_order_flags)
      * }
      */
-    public static MemorySegment H5Pget_link_creation_order$address() {
+    public static MemorySegment H5Pget_link_creation_order$address()
+    {
         return H5Pget_link_creation_order.ADDR;
     }
 
@@ -5016,25 +4593,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned int *crt_order_flags)
      * }
      */
-    public static int H5Pget_link_creation_order(long plist_id, MemorySegment crt_order_flags) {
+    public static int H5Pget_link_creation_order(long plist_id, MemorySegment crt_order_flags)
+    {
         var mh$ = H5Pget_link_creation_order.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_link_creation_order", plist_id, crt_order_flags);
             }
             return (int)mh$.invokeExact(plist_id, crt_order_flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_link_phase_change {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_link_phase_change");
 
@@ -5047,7 +4622,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned int *max_compact, unsigned int *min_dense)
      * }
      */
-    public static FunctionDescriptor H5Pget_link_phase_change$descriptor() {
+    public static FunctionDescriptor H5Pget_link_phase_change$descriptor()
+    {
         return H5Pget_link_phase_change.DESC;
     }
 
@@ -5057,9 +4633,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned int *max_compact, unsigned int *min_dense)
      * }
      */
-    public static MethodHandle H5Pget_link_phase_change$handle() {
-        return H5Pget_link_phase_change.HANDLE;
-    }
+    public static MethodHandle H5Pget_link_phase_change$handle() { return H5Pget_link_phase_change.HANDLE; }
 
     /**
      * Address for:
@@ -5067,33 +4641,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned int *max_compact, unsigned int *min_dense)
      * }
      */
-    public static MemorySegment H5Pget_link_phase_change$address() {
-        return H5Pget_link_phase_change.ADDR;
-    }
+    public static MemorySegment H5Pget_link_phase_change$address() { return H5Pget_link_phase_change.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned int *max_compact, unsigned int *min_dense)
      * }
      */
-    public static int H5Pget_link_phase_change(long plist_id, MemorySegment max_compact, MemorySegment min_dense) {
+    public static int H5Pget_link_phase_change(long plist_id, MemorySegment max_compact,
+                                               MemorySegment min_dense)
+    {
         var mh$ = H5Pget_link_phase_change.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_link_phase_change", plist_id, max_compact, min_dense);
             }
             return (int)mh$.invokeExact(plist_id, max_compact, min_dense);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_local_heap_size_hint {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_local_heap_size_hint");
 
@@ -5106,7 +4678,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint)
      * }
      */
-    public static FunctionDescriptor H5Pget_local_heap_size_hint$descriptor() {
+    public static FunctionDescriptor H5Pget_local_heap_size_hint$descriptor()
+    {
         return H5Pget_local_heap_size_hint.DESC;
     }
 
@@ -5116,7 +4689,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint)
      * }
      */
-    public static MethodHandle H5Pget_local_heap_size_hint$handle() {
+    public static MethodHandle H5Pget_local_heap_size_hint$handle()
+    {
         return H5Pget_local_heap_size_hint.HANDLE;
     }
 
@@ -5126,7 +4700,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint)
      * }
      */
-    public static MemorySegment H5Pget_local_heap_size_hint$address() {
+    public static MemorySegment H5Pget_local_heap_size_hint$address()
+    {
         return H5Pget_local_heap_size_hint.ADDR;
     }
 
@@ -5135,25 +4710,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint)
      * }
      */
-    public static int H5Pget_local_heap_size_hint(long plist_id, MemorySegment size_hint) {
+    public static int H5Pget_local_heap_size_hint(long plist_id, MemorySegment size_hint)
+    {
         var mh$ = H5Pget_local_heap_size_hint.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_local_heap_size_hint", plist_id, size_hint);
             }
             return (int)mh$.invokeExact(plist_id, size_hint);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_est_link_info {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_est_link_info");
 
@@ -5166,9 +4739,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_est_link_info(hid_t plist_id, unsigned int est_num_entries, unsigned int est_name_len)
      * }
      */
-    public static FunctionDescriptor H5Pset_est_link_info$descriptor() {
-        return H5Pset_est_link_info.DESC;
-    }
+    public static FunctionDescriptor H5Pset_est_link_info$descriptor() { return H5Pset_est_link_info.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5176,9 +4747,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_est_link_info(hid_t plist_id, unsigned int est_num_entries, unsigned int est_name_len)
      * }
      */
-    public static MethodHandle H5Pset_est_link_info$handle() {
-        return H5Pset_est_link_info.HANDLE;
-    }
+    public static MethodHandle H5Pset_est_link_info$handle() { return H5Pset_est_link_info.HANDLE; }
 
     /**
      * Address for:
@@ -5186,33 +4755,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_est_link_info(hid_t plist_id, unsigned int est_num_entries, unsigned int est_name_len)
      * }
      */
-    public static MemorySegment H5Pset_est_link_info$address() {
-        return H5Pset_est_link_info.ADDR;
-    }
+    public static MemorySegment H5Pset_est_link_info$address() { return H5Pset_est_link_info.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_est_link_info(hid_t plist_id, unsigned int est_num_entries, unsigned int est_name_len)
      * }
      */
-    public static int H5Pset_est_link_info(long plist_id, int est_num_entries, int est_name_len) {
+    public static int H5Pset_est_link_info(long plist_id, int est_num_entries, int est_name_len)
+    {
         var mh$ = H5Pset_est_link_info.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_est_link_info", plist_id, est_num_entries, est_name_len);
             }
             return (int)mh$.invokeExact(plist_id, est_num_entries, est_name_len);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_link_creation_order {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_link_creation_order");
 
@@ -5225,7 +4791,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned int crt_order_flags)
      * }
      */
-    public static FunctionDescriptor H5Pset_link_creation_order$descriptor() {
+    public static FunctionDescriptor H5Pset_link_creation_order$descriptor()
+    {
         return H5Pset_link_creation_order.DESC;
     }
 
@@ -5235,7 +4802,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned int crt_order_flags)
      * }
      */
-    public static MethodHandle H5Pset_link_creation_order$handle() {
+    public static MethodHandle H5Pset_link_creation_order$handle()
+    {
         return H5Pset_link_creation_order.HANDLE;
     }
 
@@ -5245,7 +4813,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned int crt_order_flags)
      * }
      */
-    public static MemorySegment H5Pset_link_creation_order$address() {
+    public static MemorySegment H5Pset_link_creation_order$address()
+    {
         return H5Pset_link_creation_order.ADDR;
     }
 
@@ -5254,25 +4823,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned int crt_order_flags)
      * }
      */
-    public static int H5Pset_link_creation_order(long plist_id, int crt_order_flags) {
+    public static int H5Pset_link_creation_order(long plist_id, int crt_order_flags)
+    {
         var mh$ = H5Pset_link_creation_order.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_link_creation_order", plist_id, crt_order_flags);
             }
             return (int)mh$.invokeExact(plist_id, crt_order_flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_link_phase_change {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_link_phase_change");
 
@@ -5285,7 +4852,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned int max_compact, unsigned int min_dense)
      * }
      */
-    public static FunctionDescriptor H5Pset_link_phase_change$descriptor() {
+    public static FunctionDescriptor H5Pset_link_phase_change$descriptor()
+    {
         return H5Pset_link_phase_change.DESC;
     }
 
@@ -5295,9 +4863,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned int max_compact, unsigned int min_dense)
      * }
      */
-    public static MethodHandle H5Pset_link_phase_change$handle() {
-        return H5Pset_link_phase_change.HANDLE;
-    }
+    public static MethodHandle H5Pset_link_phase_change$handle() { return H5Pset_link_phase_change.HANDLE; }
 
     /**
      * Address for:
@@ -5305,33 +4871,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned int max_compact, unsigned int min_dense)
      * }
      */
-    public static MemorySegment H5Pset_link_phase_change$address() {
-        return H5Pset_link_phase_change.ADDR;
-    }
+    public static MemorySegment H5Pset_link_phase_change$address() { return H5Pset_link_phase_change.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned int max_compact, unsigned int min_dense)
      * }
      */
-    public static int H5Pset_link_phase_change(long plist_id, int max_compact, int min_dense) {
+    public static int H5Pset_link_phase_change(long plist_id, int max_compact, int min_dense)
+    {
         var mh$ = H5Pset_link_phase_change.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_link_phase_change", plist_id, max_compact, min_dense);
             }
             return (int)mh$.invokeExact(plist_id, max_compact, min_dense);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_local_heap_size_hint {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_local_heap_size_hint");
 
@@ -5344,7 +4907,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint)
      * }
      */
-    public static FunctionDescriptor H5Pset_local_heap_size_hint$descriptor() {
+    public static FunctionDescriptor H5Pset_local_heap_size_hint$descriptor()
+    {
         return H5Pset_local_heap_size_hint.DESC;
     }
 
@@ -5354,7 +4918,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint)
      * }
      */
-    public static MethodHandle H5Pset_local_heap_size_hint$handle() {
+    public static MethodHandle H5Pset_local_heap_size_hint$handle()
+    {
         return H5Pset_local_heap_size_hint.HANDLE;
     }
 
@@ -5364,7 +4929,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint)
      * }
      */
-    public static MemorySegment H5Pset_local_heap_size_hint$address() {
+    public static MemorySegment H5Pset_local_heap_size_hint$address()
+    {
         return H5Pset_local_heap_size_hint.ADDR;
     }
 
@@ -5373,24 +4939,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint)
      * }
      */
-    public static int H5Pset_local_heap_size_hint(long plist_id, long size_hint) {
+    public static int H5Pset_local_heap_size_hint(long plist_id, long size_hint)
+    {
         var mh$ = H5Pset_local_heap_size_hint.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_local_heap_size_hint", plist_id, size_hint);
             }
             return (int)mh$.invokeExact(plist_id, size_hint);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_char_encoding {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_char_encoding");
 
@@ -5403,9 +4968,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding)
      * }
      */
-    public static FunctionDescriptor H5Pget_char_encoding$descriptor() {
-        return H5Pget_char_encoding.DESC;
-    }
+    public static FunctionDescriptor H5Pget_char_encoding$descriptor() { return H5Pget_char_encoding.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5413,9 +4976,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding)
      * }
      */
-    public static MethodHandle H5Pget_char_encoding$handle() {
-        return H5Pget_char_encoding.HANDLE;
-    }
+    public static MethodHandle H5Pget_char_encoding$handle() { return H5Pget_char_encoding.HANDLE; }
 
     /**
      * Address for:
@@ -5423,33 +4984,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding)
      * }
      */
-    public static MemorySegment H5Pget_char_encoding$address() {
-        return H5Pget_char_encoding.ADDR;
-    }
+    public static MemorySegment H5Pget_char_encoding$address() { return H5Pget_char_encoding.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding)
      * }
      */
-    public static int H5Pget_char_encoding(long plist_id, MemorySegment encoding) {
+    public static int H5Pget_char_encoding(long plist_id, MemorySegment encoding)
+    {
         var mh$ = H5Pget_char_encoding.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_char_encoding", plist_id, encoding);
             }
             return (int)mh$.invokeExact(plist_id, encoding);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_char_encoding {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_char_encoding");
 
@@ -5462,9 +5020,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
      * }
      */
-    public static FunctionDescriptor H5Pset_char_encoding$descriptor() {
-        return H5Pset_char_encoding.DESC;
-    }
+    public static FunctionDescriptor H5Pset_char_encoding$descriptor() { return H5Pset_char_encoding.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5472,9 +5028,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
      * }
      */
-    public static MethodHandle H5Pset_char_encoding$handle() {
-        return H5Pset_char_encoding.HANDLE;
-    }
+    public static MethodHandle H5Pset_char_encoding$handle() { return H5Pset_char_encoding.HANDLE; }
 
     /**
      * Address for:
@@ -5482,33 +5036,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
      * }
      */
-    public static MemorySegment H5Pset_char_encoding$address() {
-        return H5Pset_char_encoding.ADDR;
-    }
+    public static MemorySegment H5Pset_char_encoding$address() { return H5Pset_char_encoding.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
      * }
      */
-    public static int H5Pset_char_encoding(long plist_id, int encoding) {
+    public static int H5Pset_char_encoding(long plist_id, int encoding)
+    {
         var mh$ = H5Pset_char_encoding.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_char_encoding", plist_id, encoding);
             }
             return (int)mh$.invokeExact(plist_id, encoding);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_elink_acc_flags {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_elink_acc_flags");
 
@@ -5521,7 +5072,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_elink_acc_flags(hid_t lapl_id, unsigned int *flags)
      * }
      */
-    public static FunctionDescriptor H5Pget_elink_acc_flags$descriptor() {
+    public static FunctionDescriptor H5Pget_elink_acc_flags$descriptor()
+    {
         return H5Pget_elink_acc_flags.DESC;
     }
 
@@ -5531,9 +5083,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_elink_acc_flags(hid_t lapl_id, unsigned int *flags)
      * }
      */
-    public static MethodHandle H5Pget_elink_acc_flags$handle() {
-        return H5Pget_elink_acc_flags.HANDLE;
-    }
+    public static MethodHandle H5Pget_elink_acc_flags$handle() { return H5Pget_elink_acc_flags.HANDLE; }
 
     /**
      * Address for:
@@ -5541,34 +5091,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_elink_acc_flags(hid_t lapl_id, unsigned int *flags)
      * }
      */
-    public static MemorySegment H5Pget_elink_acc_flags$address() {
-        return H5Pget_elink_acc_flags.ADDR;
-    }
+    public static MemorySegment H5Pget_elink_acc_flags$address() { return H5Pget_elink_acc_flags.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_elink_acc_flags(hid_t lapl_id, unsigned int *flags)
      * }
      */
-    public static int H5Pget_elink_acc_flags(long lapl_id, MemorySegment flags) {
+    public static int H5Pget_elink_acc_flags(long lapl_id, MemorySegment flags)
+    {
         var mh$ = H5Pget_elink_acc_flags.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_elink_acc_flags", lapl_id, flags);
             }
             return (int)mh$.invokeExact(lapl_id, flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_elink_cb {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_elink_cb");
 
@@ -5581,9 +5127,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
      * }
      */
-    public static FunctionDescriptor H5Pget_elink_cb$descriptor() {
-        return H5Pget_elink_cb.DESC;
-    }
+    public static FunctionDescriptor H5Pget_elink_cb$descriptor() { return H5Pget_elink_cb.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5591,9 +5135,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
      * }
      */
-    public static MethodHandle H5Pget_elink_cb$handle() {
-        return H5Pget_elink_cb.HANDLE;
-    }
+    public static MethodHandle H5Pget_elink_cb$handle() { return H5Pget_elink_cb.HANDLE; }
 
     /**
      * Address for:
@@ -5601,32 +5143,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
      * }
      */
-    public static MemorySegment H5Pget_elink_cb$address() {
-        return H5Pget_elink_cb.ADDR;
-    }
+    public static MemorySegment H5Pget_elink_cb$address() { return H5Pget_elink_cb.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
      * }
      */
-    public static int H5Pget_elink_cb(long lapl_id, MemorySegment func, MemorySegment op_data) {
+    public static int H5Pget_elink_cb(long lapl_id, MemorySegment func, MemorySegment op_data)
+    {
         var mh$ = H5Pget_elink_cb.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_elink_cb", lapl_id, func, op_data);
             }
             return (int)mh$.invokeExact(lapl_id, func, op_data);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_elink_fapl {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_elink_fapl");
 
@@ -5639,9 +5179,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_elink_fapl(hid_t lapl_id)
      * }
      */
-    public static FunctionDescriptor H5Pget_elink_fapl$descriptor() {
-        return H5Pget_elink_fapl.DESC;
-    }
+    public static FunctionDescriptor H5Pget_elink_fapl$descriptor() { return H5Pget_elink_fapl.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5649,9 +5187,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_elink_fapl(hid_t lapl_id)
      * }
      */
-    public static MethodHandle H5Pget_elink_fapl$handle() {
-        return H5Pget_elink_fapl.HANDLE;
-    }
+    public static MethodHandle H5Pget_elink_fapl$handle() { return H5Pget_elink_fapl.HANDLE; }
 
     /**
      * Address for:
@@ -5659,34 +5195,30 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5Pget_elink_fapl(hid_t lapl_id)
      * }
      */
-    public static MemorySegment H5Pget_elink_fapl$address() {
-        return H5Pget_elink_fapl.ADDR;
-    }
+    public static MemorySegment H5Pget_elink_fapl$address() { return H5Pget_elink_fapl.ADDR; }
 
     /**
      * {@snippet lang=c :
      * hid_t H5Pget_elink_fapl(hid_t lapl_id)
      * }
      */
-    public static long H5Pget_elink_fapl(long lapl_id) {
+    public static long H5Pget_elink_fapl(long lapl_id)
+    {
         var mh$ = H5Pget_elink_fapl.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_elink_fapl", lapl_id);
             }
             return (long)mh$.invokeExact(lapl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_elink_prefix {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_elink_prefix");
 
@@ -5699,9 +5231,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
      * }
      */
-    public static FunctionDescriptor H5Pget_elink_prefix$descriptor() {
-        return H5Pget_elink_prefix.DESC;
-    }
+    public static FunctionDescriptor H5Pget_elink_prefix$descriptor() { return H5Pget_elink_prefix.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5709,9 +5239,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
      * }
      */
-    public static MethodHandle H5Pget_elink_prefix$handle() {
-        return H5Pget_elink_prefix.HANDLE;
-    }
+    public static MethodHandle H5Pget_elink_prefix$handle() { return H5Pget_elink_prefix.HANDLE; }
 
     /**
      * Address for:
@@ -5719,33 +5247,30 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
      * }
      */
-    public static MemorySegment H5Pget_elink_prefix$address() {
-        return H5Pget_elink_prefix.ADDR;
-    }
+    public static MemorySegment H5Pget_elink_prefix$address() { return H5Pget_elink_prefix.ADDR; }
 
     /**
      * {@snippet lang=c :
      * ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
      * }
      */
-    public static long H5Pget_elink_prefix(long plist_id, MemorySegment prefix, long size) {
+    public static long H5Pget_elink_prefix(long plist_id, MemorySegment prefix, long size)
+    {
         var mh$ = H5Pget_elink_prefix.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_elink_prefix", plist_id, prefix, size);
             }
             return (long)mh$.invokeExact(plist_id, prefix, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_nlinks {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_nlinks");
 
@@ -5758,9 +5283,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks)
      * }
      */
-    public static FunctionDescriptor H5Pget_nlinks$descriptor() {
-        return H5Pget_nlinks.DESC;
-    }
+    public static FunctionDescriptor H5Pget_nlinks$descriptor() { return H5Pget_nlinks.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5768,9 +5291,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks)
      * }
      */
-    public static MethodHandle H5Pget_nlinks$handle() {
-        return H5Pget_nlinks.HANDLE;
-    }
+    public static MethodHandle H5Pget_nlinks$handle() { return H5Pget_nlinks.HANDLE; }
 
     /**
      * Address for:
@@ -5778,33 +5299,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks)
      * }
      */
-    public static MemorySegment H5Pget_nlinks$address() {
-        return H5Pget_nlinks.ADDR;
-    }
+    public static MemorySegment H5Pget_nlinks$address() { return H5Pget_nlinks.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks)
      * }
      */
-    public static int H5Pget_nlinks(long plist_id, MemorySegment nlinks) {
+    public static int H5Pget_nlinks(long plist_id, MemorySegment nlinks)
+    {
         var mh$ = H5Pget_nlinks.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_nlinks", plist_id, nlinks);
             }
             return (int)mh$.invokeExact(plist_id, nlinks);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_elink_acc_flags {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_elink_acc_flags");
 
@@ -5817,7 +5335,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned int flags)
      * }
      */
-    public static FunctionDescriptor H5Pset_elink_acc_flags$descriptor() {
+    public static FunctionDescriptor H5Pset_elink_acc_flags$descriptor()
+    {
         return H5Pset_elink_acc_flags.DESC;
     }
 
@@ -5827,9 +5346,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned int flags)
      * }
      */
-    public static MethodHandle H5Pset_elink_acc_flags$handle() {
-        return H5Pset_elink_acc_flags.HANDLE;
-    }
+    public static MethodHandle H5Pset_elink_acc_flags$handle() { return H5Pset_elink_acc_flags.HANDLE; }
 
     /**
      * Address for:
@@ -5837,34 +5354,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned int flags)
      * }
      */
-    public static MemorySegment H5Pset_elink_acc_flags$address() {
-        return H5Pset_elink_acc_flags.ADDR;
-    }
+    public static MemorySegment H5Pset_elink_acc_flags$address() { return H5Pset_elink_acc_flags.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned int flags)
      * }
      */
-    public static int H5Pset_elink_acc_flags(long lapl_id, int flags) {
+    public static int H5Pset_elink_acc_flags(long lapl_id, int flags)
+    {
         var mh$ = H5Pset_elink_acc_flags.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_elink_acc_flags", lapl_id, flags);
             }
             return (int)mh$.invokeExact(lapl_id, flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_elink_cb {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_elink_cb");
 
@@ -5877,9 +5390,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
      * }
      */
-    public static FunctionDescriptor H5Pset_elink_cb$descriptor() {
-        return H5Pset_elink_cb.DESC;
-    }
+    public static FunctionDescriptor H5Pset_elink_cb$descriptor() { return H5Pset_elink_cb.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5887,9 +5398,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
      * }
      */
-    public static MethodHandle H5Pset_elink_cb$handle() {
-        return H5Pset_elink_cb.HANDLE;
-    }
+    public static MethodHandle H5Pset_elink_cb$handle() { return H5Pset_elink_cb.HANDLE; }
 
     /**
      * Address for:
@@ -5897,33 +5406,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
      * }
      */
-    public static MemorySegment H5Pset_elink_cb$address() {
-        return H5Pset_elink_cb.ADDR;
-    }
+    public static MemorySegment H5Pset_elink_cb$address() { return H5Pset_elink_cb.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
      * }
      */
-    public static int H5Pset_elink_cb(long lapl_id, MemorySegment func, MemorySegment op_data) {
+    public static int H5Pset_elink_cb(long lapl_id, MemorySegment func, MemorySegment op_data)
+    {
         var mh$ = H5Pset_elink_cb.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_elink_cb", lapl_id, func, op_data);
             }
             return (int)mh$.invokeExact(lapl_id, func, op_data);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_elink_fapl {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_elink_fapl");
 
@@ -5936,9 +5442,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_elink_fapl$descriptor() {
-        return H5Pset_elink_fapl.DESC;
-    }
+    public static FunctionDescriptor H5Pset_elink_fapl$descriptor() { return H5Pset_elink_fapl.DESC; }
 
     /**
      * Downcall method handle for:
@@ -5946,9 +5450,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
      * }
      */
-    public static MethodHandle H5Pset_elink_fapl$handle() {
-        return H5Pset_elink_fapl.HANDLE;
-    }
+    public static MethodHandle H5Pset_elink_fapl$handle() { return H5Pset_elink_fapl.HANDLE; }
 
     /**
      * Address for:
@@ -5956,33 +5458,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
      * }
      */
-    public static MemorySegment H5Pset_elink_fapl$address() {
-        return H5Pset_elink_fapl.ADDR;
-    }
+    public static MemorySegment H5Pset_elink_fapl$address() { return H5Pset_elink_fapl.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
      * }
      */
-    public static int H5Pset_elink_fapl(long lapl_id, long fapl_id) {
+    public static int H5Pset_elink_fapl(long lapl_id, long fapl_id)
+    {
         var mh$ = H5Pset_elink_fapl.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_elink_fapl", lapl_id, fapl_id);
             }
             return (int)mh$.invokeExact(lapl_id, fapl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_elink_prefix {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_elink_prefix");
 
@@ -5995,9 +5494,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
      * }
      */
-    public static FunctionDescriptor H5Pset_elink_prefix$descriptor() {
-        return H5Pset_elink_prefix.DESC;
-    }
+    public static FunctionDescriptor H5Pset_elink_prefix$descriptor() { return H5Pset_elink_prefix.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6005,9 +5502,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
      * }
      */
-    public static MethodHandle H5Pset_elink_prefix$handle() {
-        return H5Pset_elink_prefix.HANDLE;
-    }
+    public static MethodHandle H5Pset_elink_prefix$handle() { return H5Pset_elink_prefix.HANDLE; }
 
     /**
      * Address for:
@@ -6015,33 +5510,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
      * }
      */
-    public static MemorySegment H5Pset_elink_prefix$address() {
-        return H5Pset_elink_prefix.ADDR;
-    }
+    public static MemorySegment H5Pset_elink_prefix$address() { return H5Pset_elink_prefix.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
      * }
      */
-    public static int H5Pset_elink_prefix(long plist_id, MemorySegment prefix) {
+    public static int H5Pset_elink_prefix(long plist_id, MemorySegment prefix)
+    {
         var mh$ = H5Pset_elink_prefix.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_elink_prefix", plist_id, prefix);
             }
             return (int)mh$.invokeExact(plist_id, prefix);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_nlinks {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_nlinks");
 
@@ -6054,9 +5546,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks)
      * }
      */
-    public static FunctionDescriptor H5Pset_nlinks$descriptor() {
-        return H5Pset_nlinks.DESC;
-    }
+    public static FunctionDescriptor H5Pset_nlinks$descriptor() { return H5Pset_nlinks.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6064,9 +5554,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks)
      * }
      */
-    public static MethodHandle H5Pset_nlinks$handle() {
-        return H5Pset_nlinks.HANDLE;
-    }
+    public static MethodHandle H5Pset_nlinks$handle() { return H5Pset_nlinks.HANDLE; }
 
     /**
      * Address for:
@@ -6074,33 +5562,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks)
      * }
      */
-    public static MemorySegment H5Pset_nlinks$address() {
-        return H5Pset_nlinks.ADDR;
-    }
+    public static MemorySegment H5Pset_nlinks$address() { return H5Pset_nlinks.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks)
      * }
      */
-    public static int H5Pset_nlinks(long plist_id, long nlinks) {
+    public static int H5Pset_nlinks(long plist_id, long nlinks)
+    {
         var mh$ = H5Pset_nlinks.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_nlinks", plist_id, nlinks);
             }
             return (int)mh$.invokeExact(plist_id, nlinks);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Padd_merge_committed_dtype_path {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Padd_merge_committed_dtype_path");
 
@@ -6113,7 +5598,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
      * }
      */
-    public static FunctionDescriptor H5Padd_merge_committed_dtype_path$descriptor() {
+    public static FunctionDescriptor H5Padd_merge_committed_dtype_path$descriptor()
+    {
         return H5Padd_merge_committed_dtype_path.DESC;
     }
 
@@ -6123,7 +5609,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
      * }
      */
-    public static MethodHandle H5Padd_merge_committed_dtype_path$handle() {
+    public static MethodHandle H5Padd_merge_committed_dtype_path$handle()
+    {
         return H5Padd_merge_committed_dtype_path.HANDLE;
     }
 
@@ -6133,7 +5620,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
      * }
      */
-    public static MemorySegment H5Padd_merge_committed_dtype_path$address() {
+    public static MemorySegment H5Padd_merge_committed_dtype_path$address()
+    {
         return H5Padd_merge_committed_dtype_path.ADDR;
     }
 
@@ -6142,23 +5630,22 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
      * }
      */
-    public static int H5Padd_merge_committed_dtype_path(long plist_id, MemorySegment path) {
+    public static int H5Padd_merge_committed_dtype_path(long plist_id, MemorySegment path)
+    {
         var mh$ = H5Padd_merge_committed_dtype_path.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Padd_merge_committed_dtype_path", plist_id, path);
             }
             return (int)mh$.invokeExact(plist_id, path);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pfree_merge_committed_dtype_paths {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pfree_merge_committed_dtype_paths");
 
@@ -6171,7 +5658,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
      * }
      */
-    public static FunctionDescriptor H5Pfree_merge_committed_dtype_paths$descriptor() {
+    public static FunctionDescriptor H5Pfree_merge_committed_dtype_paths$descriptor()
+    {
         return H5Pfree_merge_committed_dtype_paths.DESC;
     }
 
@@ -6181,7 +5669,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
      * }
      */
-    public static MethodHandle H5Pfree_merge_committed_dtype_paths$handle() {
+    public static MethodHandle H5Pfree_merge_committed_dtype_paths$handle()
+    {
         return H5Pfree_merge_committed_dtype_paths.HANDLE;
     }
 
@@ -6191,7 +5680,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
      * }
      */
-    public static MemorySegment H5Pfree_merge_committed_dtype_paths$address() {
+    public static MemorySegment H5Pfree_merge_committed_dtype_paths$address()
+    {
         return H5Pfree_merge_committed_dtype_paths.ADDR;
     }
 
@@ -6200,24 +5690,23 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
      * }
      */
-    public static int H5Pfree_merge_committed_dtype_paths(long plist_id) {
+    public static int H5Pfree_merge_committed_dtype_paths(long plist_id)
+    {
         var mh$ = H5Pfree_merge_committed_dtype_paths.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pfree_merge_committed_dtype_paths", plist_id);
             }
             return (int)mh$.invokeExact(plist_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_copy_object {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_copy_object");
 
@@ -6230,9 +5719,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_copy_object(hid_t plist_id, unsigned int *copy_options)
      * }
      */
-    public static FunctionDescriptor H5Pget_copy_object$descriptor() {
-        return H5Pget_copy_object.DESC;
-    }
+    public static FunctionDescriptor H5Pget_copy_object$descriptor() { return H5Pget_copy_object.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6240,9 +5727,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_copy_object(hid_t plist_id, unsigned int *copy_options)
      * }
      */
-    public static MethodHandle H5Pget_copy_object$handle() {
-        return H5Pget_copy_object.HANDLE;
-    }
+    public static MethodHandle H5Pget_copy_object$handle() { return H5Pget_copy_object.HANDLE; }
 
     /**
      * Address for:
@@ -6250,34 +5735,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_copy_object(hid_t plist_id, unsigned int *copy_options)
      * }
      */
-    public static MemorySegment H5Pget_copy_object$address() {
-        return H5Pget_copy_object.ADDR;
-    }
+    public static MemorySegment H5Pget_copy_object$address() { return H5Pget_copy_object.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_copy_object(hid_t plist_id, unsigned int *copy_options)
      * }
      */
-    public static int H5Pget_copy_object(long plist_id, MemorySegment copy_options) {
+    public static int H5Pget_copy_object(long plist_id, MemorySegment copy_options)
+    {
         var mh$ = H5Pget_copy_object.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_copy_object", plist_id, copy_options);
             }
             return (int)mh$.invokeExact(plist_id, copy_options);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_mcdt_search_cb {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_mcdt_search_cb");
 
@@ -6290,9 +5771,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data)
      * }
      */
-    public static FunctionDescriptor H5Pget_mcdt_search_cb$descriptor() {
-        return H5Pget_mcdt_search_cb.DESC;
-    }
+    public static FunctionDescriptor H5Pget_mcdt_search_cb$descriptor() { return H5Pget_mcdt_search_cb.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6300,9 +5779,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data)
      * }
      */
-    public static MethodHandle H5Pget_mcdt_search_cb$handle() {
-        return H5Pget_mcdt_search_cb.HANDLE;
-    }
+    public static MethodHandle H5Pget_mcdt_search_cb$handle() { return H5Pget_mcdt_search_cb.HANDLE; }
 
     /**
      * Address for:
@@ -6310,33 +5787,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data)
      * }
      */
-    public static MemorySegment H5Pget_mcdt_search_cb$address() {
-        return H5Pget_mcdt_search_cb.ADDR;
-    }
+    public static MemorySegment H5Pget_mcdt_search_cb$address() { return H5Pget_mcdt_search_cb.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data)
      * }
      */
-    public static int H5Pget_mcdt_search_cb(long plist_id, MemorySegment func, MemorySegment op_data) {
+    public static int H5Pget_mcdt_search_cb(long plist_id, MemorySegment func, MemorySegment op_data)
+    {
         var mh$ = H5Pget_mcdt_search_cb.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_mcdt_search_cb", plist_id, func, op_data);
             }
             return (int)mh$.invokeExact(plist_id, func, op_data);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_copy_object {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_copy_object");
 
@@ -6349,9 +5823,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_copy_object(hid_t plist_id, unsigned int copy_options)
      * }
      */
-    public static FunctionDescriptor H5Pset_copy_object$descriptor() {
-        return H5Pset_copy_object.DESC;
-    }
+    public static FunctionDescriptor H5Pset_copy_object$descriptor() { return H5Pset_copy_object.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6359,9 +5831,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_copy_object(hid_t plist_id, unsigned int copy_options)
      * }
      */
-    public static MethodHandle H5Pset_copy_object$handle() {
-        return H5Pset_copy_object.HANDLE;
-    }
+    public static MethodHandle H5Pset_copy_object$handle() { return H5Pset_copy_object.HANDLE; }
 
     /**
      * Address for:
@@ -6369,34 +5839,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_copy_object(hid_t plist_id, unsigned int copy_options)
      * }
      */
-    public static MemorySegment H5Pset_copy_object$address() {
-        return H5Pset_copy_object.ADDR;
-    }
+    public static MemorySegment H5Pset_copy_object$address() { return H5Pset_copy_object.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_copy_object(hid_t plist_id, unsigned int copy_options)
      * }
      */
-    public static int H5Pset_copy_object(long plist_id, int copy_options) {
+    public static int H5Pset_copy_object(long plist_id, int copy_options)
+    {
         var mh$ = H5Pset_copy_object.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_copy_object", plist_id, copy_options);
             }
             return (int)mh$.invokeExact(plist_id, copy_options);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_mcdt_search_cb {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_mcdt_search_cb");
 
@@ -6409,9 +5875,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
      * }
      */
-    public static FunctionDescriptor H5Pset_mcdt_search_cb$descriptor() {
-        return H5Pset_mcdt_search_cb.DESC;
-    }
+    public static FunctionDescriptor H5Pset_mcdt_search_cb$descriptor() { return H5Pset_mcdt_search_cb.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6419,9 +5883,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
      * }
      */
-    public static MethodHandle H5Pset_mcdt_search_cb$handle() {
-        return H5Pset_mcdt_search_cb.HANDLE;
-    }
+    public static MethodHandle H5Pset_mcdt_search_cb$handle() { return H5Pset_mcdt_search_cb.HANDLE; }
 
     /**
      * Address for:
@@ -6429,41 +5891,32 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
      * }
      */
-    public static MemorySegment H5Pset_mcdt_search_cb$address() {
-        return H5Pset_mcdt_search_cb.ADDR;
-    }
+    public static MemorySegment H5Pset_mcdt_search_cb$address() { return H5Pset_mcdt_search_cb.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
      * }
      */
-    public static int H5Pset_mcdt_search_cb(long plist_id, MemorySegment func, MemorySegment op_data) {
+    public static int H5Pset_mcdt_search_cb(long plist_id, MemorySegment func, MemorySegment op_data)
+    {
         var mh$ = H5Pset_mcdt_search_cb.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_mcdt_search_cb", plist_id, func, op_data);
             }
             return (int)mh$.invokeExact(plist_id, func, op_data);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pregister1 {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pregister1");
 
@@ -6473,63 +5926,62 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+     * herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t
+     * prp_create, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del,
+     * H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
      * }
      */
-    public static FunctionDescriptor H5Pregister1$descriptor() {
-        return H5Pregister1.DESC;
-    }
+    public static FunctionDescriptor H5Pregister1$descriptor() { return H5Pregister1.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+     * herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t
+     * prp_create, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del,
+     * H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
      * }
      */
-    public static MethodHandle H5Pregister1$handle() {
-        return H5Pregister1.HANDLE;
-    }
+    public static MethodHandle H5Pregister1$handle() { return H5Pregister1.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+     * herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t
+     * prp_create, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del,
+     * H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
      * }
      */
-    public static MemorySegment H5Pregister1$address() {
-        return H5Pregister1.ADDR;
-    }
+    public static MemorySegment H5Pregister1$address() { return H5Pregister1.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+     * herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t
+     * prp_create, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del,
+     * H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
      * }
      */
-    public static int H5Pregister1(long cls_id, MemorySegment name, long size, MemorySegment def_value, MemorySegment prp_create, MemorySegment prp_set, MemorySegment prp_get, MemorySegment prp_del, MemorySegment prp_copy, MemorySegment prp_close) {
+    public static int H5Pregister1(long cls_id, MemorySegment name, long size, MemorySegment def_value,
+                                   MemorySegment prp_create, MemorySegment prp_set, MemorySegment prp_get,
+                                   MemorySegment prp_del, MemorySegment prp_copy, MemorySegment prp_close)
+    {
         var mh$ = H5Pregister1.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5Pregister1", cls_id, name, size, def_value, prp_create, prp_set, prp_get, prp_del, prp_copy, prp_close);
+                traceDowncall("H5Pregister1", cls_id, name, size, def_value, prp_create, prp_set, prp_get,
+                              prp_del, prp_copy, prp_close);
             }
-            return (int)mh$.invokeExact(cls_id, name, size, def_value, prp_create, prp_set, prp_get, prp_del, prp_copy, prp_close);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(cls_id, name, size, def_value, prp_create, prp_set, prp_get, prp_del,
+                                        prp_copy, prp_close);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pinsert1 {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pinsert1");
 
@@ -6539,57 +5991,61 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+     * herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t
+     * prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
+     * H5P_prp_close_func_t prp_close)
      * }
      */
-    public static FunctionDescriptor H5Pinsert1$descriptor() {
-        return H5Pinsert1.DESC;
-    }
+    public static FunctionDescriptor H5Pinsert1$descriptor() { return H5Pinsert1.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+     * herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t
+     * prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
+     * H5P_prp_close_func_t prp_close)
      * }
      */
-    public static MethodHandle H5Pinsert1$handle() {
-        return H5Pinsert1.HANDLE;
-    }
+    public static MethodHandle H5Pinsert1$handle() { return H5Pinsert1.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+     * herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t
+     * prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
+     * H5P_prp_close_func_t prp_close)
      * }
      */
-    public static MemorySegment H5Pinsert1$address() {
-        return H5Pinsert1.ADDR;
-    }
+    public static MemorySegment H5Pinsert1$address() { return H5Pinsert1.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+     * herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_set_func_t
+     * prp_set, H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
+     * H5P_prp_close_func_t prp_close)
      * }
      */
-    public static int H5Pinsert1(long plist_id, MemorySegment name, long size, MemorySegment value, MemorySegment prp_set, MemorySegment prp_get, MemorySegment prp_delete, MemorySegment prp_copy, MemorySegment prp_close) {
+    public static int H5Pinsert1(long plist_id, MemorySegment name, long size, MemorySegment value,
+                                 MemorySegment prp_set, MemorySegment prp_get, MemorySegment prp_delete,
+                                 MemorySegment prp_copy, MemorySegment prp_close)
+    {
         var mh$ = H5Pinsert1.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5Pinsert1", plist_id, name, size, value, prp_set, prp_get, prp_delete, prp_copy, prp_close);
+                traceDowncall("H5Pinsert1", plist_id, name, size, value, prp_set, prp_get, prp_delete,
+                              prp_copy, prp_close);
             }
-            return (int)mh$.invokeExact(plist_id, name, size, value, prp_set, prp_get, prp_delete, prp_copy, prp_close);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(plist_id, name, size, value, prp_set, prp_get, prp_delete, prp_copy,
+                                        prp_close);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pencode1 {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pencode1");
 
@@ -6602,9 +6058,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc)
      * }
      */
-    public static FunctionDescriptor H5Pencode1$descriptor() {
-        return H5Pencode1.DESC;
-    }
+    public static FunctionDescriptor H5Pencode1$descriptor() { return H5Pencode1.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6612,9 +6066,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc)
      * }
      */
-    public static MethodHandle H5Pencode1$handle() {
-        return H5Pencode1.HANDLE;
-    }
+    public static MethodHandle H5Pencode1$handle() { return H5Pencode1.HANDLE; }
 
     /**
      * Address for:
@@ -6622,38 +6074,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc)
      * }
      */
-    public static MemorySegment H5Pencode1$address() {
-        return H5Pencode1.ADDR;
-    }
+    public static MemorySegment H5Pencode1$address() { return H5Pencode1.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc)
      * }
      */
-    public static int H5Pencode1(long plist_id, MemorySegment buf, MemorySegment nalloc) {
+    public static int H5Pencode1(long plist_id, MemorySegment buf, MemorySegment nalloc)
+    {
         var mh$ = H5Pencode1.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pencode1", plist_id, buf, nalloc);
             }
             return (int)mh$.invokeExact(plist_id, buf, nalloc);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_filter1 {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_filter1");
 
@@ -6663,61 +6108,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned int filter, unsigned int *flags, size_t *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
+     * H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned int filter, unsigned int *flags, size_t
+     * *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
      * }
      */
-    public static FunctionDescriptor H5Pget_filter1$descriptor() {
-        return H5Pget_filter1.DESC;
-    }
+    public static FunctionDescriptor H5Pget_filter1$descriptor() { return H5Pget_filter1.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned int filter, unsigned int *flags, size_t *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
+     * H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned int filter, unsigned int *flags, size_t
+     * *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
      * }
      */
-    public static MethodHandle H5Pget_filter1$handle() {
-        return H5Pget_filter1.HANDLE;
-    }
+    public static MethodHandle H5Pget_filter1$handle() { return H5Pget_filter1.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned int filter, unsigned int *flags, size_t *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
+     * H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned int filter, unsigned int *flags, size_t
+     * *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
      * }
      */
-    public static MemorySegment H5Pget_filter1$address() {
-        return H5Pget_filter1.ADDR;
-    }
+    public static MemorySegment H5Pget_filter1$address() { return H5Pget_filter1.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned int filter, unsigned int *flags, size_t *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
+     * H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned int filter, unsigned int *flags, size_t
+     * *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
      * }
      */
-    public static int H5Pget_filter1(long plist_id, int filter, MemorySegment flags, MemorySegment cd_nelmts, MemorySegment cd_values, long namelen, MemorySegment name) {
+    public static int H5Pget_filter1(long plist_id, int filter, MemorySegment flags, MemorySegment cd_nelmts,
+                                     MemorySegment cd_values, long namelen, MemorySegment name)
+    {
         var mh$ = H5Pget_filter1.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_filter1", plist_id, filter, flags, cd_nelmts, cd_values, namelen, name);
             }
             return (int)mh$.invokeExact(plist_id, filter, flags, cd_nelmts, cd_values, namelen, name);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_filter_by_id1 {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_filter_by_id1");
 
@@ -6727,59 +6166,57 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags, size_t *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
+     * herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags, size_t *cd_nelmts,
+     * unsigned int cd_values[], size_t namelen, char name[])
      * }
      */
-    public static FunctionDescriptor H5Pget_filter_by_id1$descriptor() {
-        return H5Pget_filter_by_id1.DESC;
-    }
+    public static FunctionDescriptor H5Pget_filter_by_id1$descriptor() { return H5Pget_filter_by_id1.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags, size_t *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
+     * herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags, size_t *cd_nelmts,
+     * unsigned int cd_values[], size_t namelen, char name[])
      * }
      */
-    public static MethodHandle H5Pget_filter_by_id1$handle() {
-        return H5Pget_filter_by_id1.HANDLE;
-    }
+    public static MethodHandle H5Pget_filter_by_id1$handle() { return H5Pget_filter_by_id1.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags, size_t *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
+     * herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags, size_t *cd_nelmts,
+     * unsigned int cd_values[], size_t namelen, char name[])
      * }
      */
-    public static MemorySegment H5Pget_filter_by_id1$address() {
-        return H5Pget_filter_by_id1.ADDR;
-    }
+    public static MemorySegment H5Pget_filter_by_id1$address() { return H5Pget_filter_by_id1.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags, size_t *cd_nelmts, unsigned int cd_values[], size_t namelen, char name[])
+     * herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags, size_t *cd_nelmts,
+     * unsigned int cd_values[], size_t namelen, char name[])
      * }
      */
-    public static int H5Pget_filter_by_id1(long plist_id, int id, MemorySegment flags, MemorySegment cd_nelmts, MemorySegment cd_values, long namelen, MemorySegment name) {
+    public static int H5Pget_filter_by_id1(long plist_id, int id, MemorySegment flags,
+                                           MemorySegment cd_nelmts, MemorySegment cd_values, long namelen,
+                                           MemorySegment name)
+    {
         var mh$ = H5Pget_filter_by_id1.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5Pget_filter_by_id1", plist_id, id, flags, cd_nelmts, cd_values, namelen, name);
+                traceDowncall("H5Pget_filter_by_id1", plist_id, id, flags, cd_nelmts, cd_values, namelen,
+                              name);
             }
             return (int)mh$.invokeExact(plist_id, id, flags, cd_nelmts, cd_values, namelen, name);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_version {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_version");
 
@@ -6789,57 +6226,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pget_version(hid_t plist_id, unsigned int *boot, unsigned int *freelist, unsigned int *stab, unsigned int *shhdr)
+     * herr_t H5Pget_version(hid_t plist_id, unsigned int *boot, unsigned int *freelist, unsigned int *stab,
+     * unsigned int *shhdr)
      * }
      */
-    public static FunctionDescriptor H5Pget_version$descriptor() {
-        return H5Pget_version.DESC;
-    }
+    public static FunctionDescriptor H5Pget_version$descriptor() { return H5Pget_version.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pget_version(hid_t plist_id, unsigned int *boot, unsigned int *freelist, unsigned int *stab, unsigned int *shhdr)
+     * herr_t H5Pget_version(hid_t plist_id, unsigned int *boot, unsigned int *freelist, unsigned int *stab,
+     * unsigned int *shhdr)
      * }
      */
-    public static MethodHandle H5Pget_version$handle() {
-        return H5Pget_version.HANDLE;
-    }
+    public static MethodHandle H5Pget_version$handle() { return H5Pget_version.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pget_version(hid_t plist_id, unsigned int *boot, unsigned int *freelist, unsigned int *stab, unsigned int *shhdr)
+     * herr_t H5Pget_version(hid_t plist_id, unsigned int *boot, unsigned int *freelist, unsigned int *stab,
+     * unsigned int *shhdr)
      * }
      */
-    public static MemorySegment H5Pget_version$address() {
-        return H5Pget_version.ADDR;
-    }
+    public static MemorySegment H5Pget_version$address() { return H5Pget_version.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pget_version(hid_t plist_id, unsigned int *boot, unsigned int *freelist, unsigned int *stab, unsigned int *shhdr)
+     * herr_t H5Pget_version(hid_t plist_id, unsigned int *boot, unsigned int *freelist, unsigned int *stab,
+     * unsigned int *shhdr)
      * }
      */
-    public static int H5Pget_version(long plist_id, MemorySegment boot, MemorySegment freelist, MemorySegment stab, MemorySegment shhdr) {
+    public static int H5Pget_version(long plist_id, MemorySegment boot, MemorySegment freelist,
+                                     MemorySegment stab, MemorySegment shhdr)
+    {
         var mh$ = H5Pget_version.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_version", plist_id, boot, freelist, stab, shhdr);
             }
             return (int)mh$.invokeExact(plist_id, boot, freelist, stab, shhdr);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_file_space {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_file_space");
 
@@ -6852,9 +6286,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold)
      * }
      */
-    public static FunctionDescriptor H5Pset_file_space$descriptor() {
-        return H5Pset_file_space.DESC;
-    }
+    public static FunctionDescriptor H5Pset_file_space$descriptor() { return H5Pset_file_space.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6862,9 +6294,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold)
      * }
      */
-    public static MethodHandle H5Pset_file_space$handle() {
-        return H5Pset_file_space.HANDLE;
-    }
+    public static MethodHandle H5Pset_file_space$handle() { return H5Pset_file_space.HANDLE; }
 
     /**
      * Address for:
@@ -6872,34 +6302,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold)
      * }
      */
-    public static MemorySegment H5Pset_file_space$address() {
-        return H5Pset_file_space.ADDR;
-    }
+    public static MemorySegment H5Pset_file_space$address() { return H5Pset_file_space.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold)
      * }
      */
-    public static int H5Pset_file_space(long plist_id, int strategy, long threshold) {
+    public static int H5Pset_file_space(long plist_id, int strategy, long threshold)
+    {
         var mh$ = H5Pset_file_space.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_file_space", plist_id, strategy, threshold);
             }
             return (int)mh$.invokeExact(plist_id, strategy, threshold);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_file_space {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_file_space");
 
@@ -6912,9 +6338,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold)
      * }
      */
-    public static FunctionDescriptor H5Pget_file_space$descriptor() {
-        return H5Pget_file_space.DESC;
-    }
+    public static FunctionDescriptor H5Pget_file_space$descriptor() { return H5Pget_file_space.DESC; }
 
     /**
      * Downcall method handle for:
@@ -6922,9 +6346,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold)
      * }
      */
-    public static MethodHandle H5Pget_file_space$handle() {
-        return H5Pget_file_space.HANDLE;
-    }
+    public static MethodHandle H5Pget_file_space$handle() { return H5Pget_file_space.HANDLE; }
 
     /**
      * Address for:
@@ -6932,24 +6354,24 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold)
      * }
      */
-    public static MemorySegment H5Pget_file_space$address() {
-        return H5Pget_file_space.ADDR;
-    }
+    public static MemorySegment H5Pget_file_space$address() { return H5Pget_file_space.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold)
      * }
      */
-    public static int H5Pget_file_space(long plist_id, MemorySegment strategy, MemorySegment threshold) {
+    public static int H5Pget_file_space(long plist_id, MemorySegment strategy, MemorySegment threshold)
+    {
         var mh$ = H5Pget_file_space.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_file_space", plist_id, strategy, threshold);
             }
             return (int)mh$.invokeExact(plist_id, strategy, threshold);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
     private static final int H5PL_TYPE_ERROR = (int)-1L;
@@ -6958,51 +6380,38 @@ public class hdf5_h extends hdf5_h_1 {
      * enum H5PL_type_t.H5PL_TYPE_ERROR = -1
      * }
      */
-    public static int H5PL_TYPE_ERROR() {
-        return H5PL_TYPE_ERROR;
-    }
+    public static int H5PL_TYPE_ERROR() { return H5PL_TYPE_ERROR; }
     private static final int H5PL_TYPE_FILTER = (int)0L;
     /**
      * {@snippet lang=c :
      * enum H5PL_type_t.H5PL_TYPE_FILTER = 0
      * }
      */
-    public static int H5PL_TYPE_FILTER() {
-        return H5PL_TYPE_FILTER;
-    }
+    public static int H5PL_TYPE_FILTER() { return H5PL_TYPE_FILTER; }
     private static final int H5PL_TYPE_VOL = (int)1L;
     /**
      * {@snippet lang=c :
      * enum H5PL_type_t.H5PL_TYPE_VOL = 1
      * }
      */
-    public static int H5PL_TYPE_VOL() {
-        return H5PL_TYPE_VOL;
-    }
+    public static int H5PL_TYPE_VOL() { return H5PL_TYPE_VOL; }
     private static final int H5PL_TYPE_VFD = (int)2L;
     /**
      * {@snippet lang=c :
      * enum H5PL_type_t.H5PL_TYPE_VFD = 2
      * }
      */
-    public static int H5PL_TYPE_VFD() {
-        return H5PL_TYPE_VFD;
-    }
+    public static int H5PL_TYPE_VFD() { return H5PL_TYPE_VFD; }
     private static final int H5PL_TYPE_NONE = (int)3L;
     /**
      * {@snippet lang=c :
      * enum H5PL_type_t.H5PL_TYPE_NONE = 3
      * }
      */
-    public static int H5PL_TYPE_NONE() {
-        return H5PL_TYPE_NONE;
-    }
+    public static int H5PL_TYPE_NONE() { return H5PL_TYPE_NONE; }
 
     private static class H5PLset_loading_state {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLset_loading_state");
 
@@ -7015,9 +6424,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLset_loading_state(unsigned int plugin_control_mask)
      * }
      */
-    public static FunctionDescriptor H5PLset_loading_state$descriptor() {
-        return H5PLset_loading_state.DESC;
-    }
+    public static FunctionDescriptor H5PLset_loading_state$descriptor() { return H5PLset_loading_state.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7025,9 +6432,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLset_loading_state(unsigned int plugin_control_mask)
      * }
      */
-    public static MethodHandle H5PLset_loading_state$handle() {
-        return H5PLset_loading_state.HANDLE;
-    }
+    public static MethodHandle H5PLset_loading_state$handle() { return H5PLset_loading_state.HANDLE; }
 
     /**
      * Address for:
@@ -7035,32 +6440,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLset_loading_state(unsigned int plugin_control_mask)
      * }
      */
-    public static MemorySegment H5PLset_loading_state$address() {
-        return H5PLset_loading_state.ADDR;
-    }
+    public static MemorySegment H5PLset_loading_state$address() { return H5PLset_loading_state.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5PLset_loading_state(unsigned int plugin_control_mask)
      * }
      */
-    public static int H5PLset_loading_state(int plugin_control_mask) {
+    public static int H5PLset_loading_state(int plugin_control_mask)
+    {
         var mh$ = H5PLset_loading_state.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLset_loading_state", plugin_control_mask);
             }
             return (int)mh$.invokeExact(plugin_control_mask);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5PLget_loading_state {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLget_loading_state");
 
@@ -7073,9 +6475,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLget_loading_state(unsigned int *plugin_control_mask)
      * }
      */
-    public static FunctionDescriptor H5PLget_loading_state$descriptor() {
-        return H5PLget_loading_state.DESC;
-    }
+    public static FunctionDescriptor H5PLget_loading_state$descriptor() { return H5PLget_loading_state.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7083,9 +6483,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLget_loading_state(unsigned int *plugin_control_mask)
      * }
      */
-    public static MethodHandle H5PLget_loading_state$handle() {
-        return H5PLget_loading_state.HANDLE;
-    }
+    public static MethodHandle H5PLget_loading_state$handle() { return H5PLget_loading_state.HANDLE; }
 
     /**
      * Address for:
@@ -7093,32 +6491,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLget_loading_state(unsigned int *plugin_control_mask)
      * }
      */
-    public static MemorySegment H5PLget_loading_state$address() {
-        return H5PLget_loading_state.ADDR;
-    }
+    public static MemorySegment H5PLget_loading_state$address() { return H5PLget_loading_state.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5PLget_loading_state(unsigned int *plugin_control_mask)
      * }
      */
-    public static int H5PLget_loading_state(MemorySegment plugin_control_mask) {
+    public static int H5PLget_loading_state(MemorySegment plugin_control_mask)
+    {
         var mh$ = H5PLget_loading_state.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLget_loading_state", plugin_control_mask);
             }
             return (int)mh$.invokeExact(plugin_control_mask);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5PLappend {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLappend");
 
@@ -7131,9 +6526,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLappend(const char *search_path)
      * }
      */
-    public static FunctionDescriptor H5PLappend$descriptor() {
-        return H5PLappend.DESC;
-    }
+    public static FunctionDescriptor H5PLappend$descriptor() { return H5PLappend.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7141,9 +6534,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLappend(const char *search_path)
      * }
      */
-    public static MethodHandle H5PLappend$handle() {
-        return H5PLappend.HANDLE;
-    }
+    public static MethodHandle H5PLappend$handle() { return H5PLappend.HANDLE; }
 
     /**
      * Address for:
@@ -7151,32 +6542,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLappend(const char *search_path)
      * }
      */
-    public static MemorySegment H5PLappend$address() {
-        return H5PLappend.ADDR;
-    }
+    public static MemorySegment H5PLappend$address() { return H5PLappend.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5PLappend(const char *search_path)
      * }
      */
-    public static int H5PLappend(MemorySegment search_path) {
+    public static int H5PLappend(MemorySegment search_path)
+    {
         var mh$ = H5PLappend.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLappend", search_path);
             }
             return (int)mh$.invokeExact(search_path);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5PLprepend {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLprepend");
 
@@ -7189,9 +6577,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLprepend(const char *search_path)
      * }
      */
-    public static FunctionDescriptor H5PLprepend$descriptor() {
-        return H5PLprepend.DESC;
-    }
+    public static FunctionDescriptor H5PLprepend$descriptor() { return H5PLprepend.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7199,9 +6585,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLprepend(const char *search_path)
      * }
      */
-    public static MethodHandle H5PLprepend$handle() {
-        return H5PLprepend.HANDLE;
-    }
+    public static MethodHandle H5PLprepend$handle() { return H5PLprepend.HANDLE; }
 
     /**
      * Address for:
@@ -7209,33 +6593,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLprepend(const char *search_path)
      * }
      */
-    public static MemorySegment H5PLprepend$address() {
-        return H5PLprepend.ADDR;
-    }
+    public static MemorySegment H5PLprepend$address() { return H5PLprepend.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5PLprepend(const char *search_path)
      * }
      */
-    public static int H5PLprepend(MemorySegment search_path) {
+    public static int H5PLprepend(MemorySegment search_path)
+    {
         var mh$ = H5PLprepend.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLprepend", search_path);
             }
             return (int)mh$.invokeExact(search_path);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5PLreplace {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLreplace");
 
@@ -7248,9 +6629,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLreplace(const char *search_path, unsigned int index)
      * }
      */
-    public static FunctionDescriptor H5PLreplace$descriptor() {
-        return H5PLreplace.DESC;
-    }
+    public static FunctionDescriptor H5PLreplace$descriptor() { return H5PLreplace.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7258,9 +6637,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLreplace(const char *search_path, unsigned int index)
      * }
      */
-    public static MethodHandle H5PLreplace$handle() {
-        return H5PLreplace.HANDLE;
-    }
+    public static MethodHandle H5PLreplace$handle() { return H5PLreplace.HANDLE; }
 
     /**
      * Address for:
@@ -7268,33 +6645,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLreplace(const char *search_path, unsigned int index)
      * }
      */
-    public static MemorySegment H5PLreplace$address() {
-        return H5PLreplace.ADDR;
-    }
+    public static MemorySegment H5PLreplace$address() { return H5PLreplace.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5PLreplace(const char *search_path, unsigned int index)
      * }
      */
-    public static int H5PLreplace(MemorySegment search_path, int index) {
+    public static int H5PLreplace(MemorySegment search_path, int index)
+    {
         var mh$ = H5PLreplace.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLreplace", search_path, index);
             }
             return (int)mh$.invokeExact(search_path, index);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5PLinsert {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLinsert");
 
@@ -7307,9 +6681,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLinsert(const char *search_path, unsigned int index)
      * }
      */
-    public static FunctionDescriptor H5PLinsert$descriptor() {
-        return H5PLinsert.DESC;
-    }
+    public static FunctionDescriptor H5PLinsert$descriptor() { return H5PLinsert.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7317,9 +6689,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLinsert(const char *search_path, unsigned int index)
      * }
      */
-    public static MethodHandle H5PLinsert$handle() {
-        return H5PLinsert.HANDLE;
-    }
+    public static MethodHandle H5PLinsert$handle() { return H5PLinsert.HANDLE; }
 
     /**
      * Address for:
@@ -7327,32 +6697,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLinsert(const char *search_path, unsigned int index)
      * }
      */
-    public static MemorySegment H5PLinsert$address() {
-        return H5PLinsert.ADDR;
-    }
+    public static MemorySegment H5PLinsert$address() { return H5PLinsert.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5PLinsert(const char *search_path, unsigned int index)
      * }
      */
-    public static int H5PLinsert(MemorySegment search_path, int index) {
+    public static int H5PLinsert(MemorySegment search_path, int index)
+    {
         var mh$ = H5PLinsert.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLinsert", search_path, index);
             }
             return (int)mh$.invokeExact(search_path, index);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5PLremove {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLremove");
 
@@ -7365,9 +6732,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLremove(unsigned int index)
      * }
      */
-    public static FunctionDescriptor H5PLremove$descriptor() {
-        return H5PLremove.DESC;
-    }
+    public static FunctionDescriptor H5PLremove$descriptor() { return H5PLremove.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7375,9 +6740,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLremove(unsigned int index)
      * }
      */
-    public static MethodHandle H5PLremove$handle() {
-        return H5PLremove.HANDLE;
-    }
+    public static MethodHandle H5PLremove$handle() { return H5PLremove.HANDLE; }
 
     /**
      * Address for:
@@ -7385,34 +6748,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLremove(unsigned int index)
      * }
      */
-    public static MemorySegment H5PLremove$address() {
-        return H5PLremove.ADDR;
-    }
+    public static MemorySegment H5PLremove$address() { return H5PLremove.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5PLremove(unsigned int index)
      * }
      */
-    public static int H5PLremove(int index) {
+    public static int H5PLremove(int index)
+    {
         var mh$ = H5PLremove.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLremove", index);
             }
             return (int)mh$.invokeExact(index);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5PLget {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLget");
 
@@ -7425,9 +6784,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5PLget(unsigned int index, char *path_buf, size_t buf_size)
      * }
      */
-    public static FunctionDescriptor H5PLget$descriptor() {
-        return H5PLget.DESC;
-    }
+    public static FunctionDescriptor H5PLget$descriptor() { return H5PLget.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7435,9 +6792,7 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5PLget(unsigned int index, char *path_buf, size_t buf_size)
      * }
      */
-    public static MethodHandle H5PLget$handle() {
-        return H5PLget.HANDLE;
-    }
+    public static MethodHandle H5PLget$handle() { return H5PLget.HANDLE; }
 
     /**
      * Address for:
@@ -7445,32 +6800,29 @@ public class hdf5_h extends hdf5_h_1 {
      * ssize_t H5PLget(unsigned int index, char *path_buf, size_t buf_size)
      * }
      */
-    public static MemorySegment H5PLget$address() {
-        return H5PLget.ADDR;
-    }
+    public static MemorySegment H5PLget$address() { return H5PLget.ADDR; }
 
     /**
      * {@snippet lang=c :
      * ssize_t H5PLget(unsigned int index, char *path_buf, size_t buf_size)
      * }
      */
-    public static long H5PLget(int index, MemorySegment path_buf, long buf_size) {
+    public static long H5PLget(int index, MemorySegment path_buf, long buf_size)
+    {
         var mh$ = H5PLget.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLget", index, path_buf, buf_size);
             }
             return (long)mh$.invokeExact(index, path_buf, buf_size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5PLsize {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5PLsize");
 
@@ -7483,9 +6835,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLsize(unsigned int *num_paths)
      * }
      */
-    public static FunctionDescriptor H5PLsize$descriptor() {
-        return H5PLsize.DESC;
-    }
+    public static FunctionDescriptor H5PLsize$descriptor() { return H5PLsize.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7493,9 +6843,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLsize(unsigned int *num_paths)
      * }
      */
-    public static MethodHandle H5PLsize$handle() {
-        return H5PLsize.HANDLE;
-    }
+    public static MethodHandle H5PLsize$handle() { return H5PLsize.HANDLE; }
 
     /**
      * Address for:
@@ -7503,34 +6851,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5PLsize(unsigned int *num_paths)
      * }
      */
-    public static MemorySegment H5PLsize$address() {
-        return H5PLsize.ADDR;
-    }
+    public static MemorySegment H5PLsize$address() { return H5PLsize.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5PLsize(unsigned int *num_paths)
      * }
      */
-    public static int H5PLsize(MemorySegment num_paths) {
+    public static int H5PLsize(MemorySegment num_paths)
+    {
         var mh$ = H5PLsize.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5PLsize", num_paths);
             }
             return (int)mh$.invokeExact(num_paths);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5ESinsert_request {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5ESinsert_request");
 
@@ -7543,9 +6887,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
      * }
      */
-    public static FunctionDescriptor H5ESinsert_request$descriptor() {
-        return H5ESinsert_request.DESC;
-    }
+    public static FunctionDescriptor H5ESinsert_request$descriptor() { return H5ESinsert_request.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7553,9 +6895,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
      * }
      */
-    public static MethodHandle H5ESinsert_request$handle() {
-        return H5ESinsert_request.HANDLE;
-    }
+    public static MethodHandle H5ESinsert_request$handle() { return H5ESinsert_request.HANDLE; }
 
     /**
      * Address for:
@@ -7563,37 +6903,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
      * }
      */
-    public static MemorySegment H5ESinsert_request$address() {
-        return H5ESinsert_request.ADDR;
-    }
+    public static MemorySegment H5ESinsert_request$address() { return H5ESinsert_request.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
      * }
      */
-    public static int H5ESinsert_request(long es_id, long connector_id, MemorySegment request) {
+    public static int H5ESinsert_request(long es_id, long connector_id, MemorySegment request)
+    {
         var mh$ = H5ESinsert_request.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5ESinsert_request", es_id, connector_id, request);
             }
             return (int)mh$.invokeExact(es_id, connector_id, request);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5ESget_requests {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5ESget_requests");
 
@@ -7603,55 +6937,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t array_len, size_t *count)
+     * herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests,
+     * size_t array_len, size_t *count)
      * }
      */
-    public static FunctionDescriptor H5ESget_requests$descriptor() {
-        return H5ESget_requests.DESC;
-    }
+    public static FunctionDescriptor H5ESget_requests$descriptor() { return H5ESget_requests.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t array_len, size_t *count)
+     * herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests,
+     * size_t array_len, size_t *count)
      * }
      */
-    public static MethodHandle H5ESget_requests$handle() {
-        return H5ESget_requests.HANDLE;
-    }
+    public static MethodHandle H5ESget_requests$handle() { return H5ESget_requests.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t array_len, size_t *count)
+     * herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests,
+     * size_t array_len, size_t *count)
      * }
      */
-    public static MemorySegment H5ESget_requests$address() {
-        return H5ESget_requests.ADDR;
-    }
+    public static MemorySegment H5ESget_requests$address() { return H5ESget_requests.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t array_len, size_t *count)
+     * herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests,
+     * size_t array_len, size_t *count)
      * }
      */
-    public static int H5ESget_requests(long es_id, int order, MemorySegment connector_ids, MemorySegment requests, long array_len, MemorySegment count) {
+    public static int H5ESget_requests(long es_id, int order, MemorySegment connector_ids,
+                                       MemorySegment requests, long array_len, MemorySegment count)
+    {
         var mh$ = H5ESget_requests.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5ESget_requests", es_id, order, connector_ids, requests, array_len, count);
             }
             return (int)mh$.invokeExact(es_id, order, connector_ids, requests, array_len, count);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDregister {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDregister");
 
@@ -7664,9 +6997,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5FDregister(const H5FD_class_t *cls)
      * }
      */
-    public static FunctionDescriptor H5FDregister$descriptor() {
-        return H5FDregister.DESC;
-    }
+    public static FunctionDescriptor H5FDregister$descriptor() { return H5FDregister.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7674,9 +7005,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5FDregister(const H5FD_class_t *cls)
      * }
      */
-    public static MethodHandle H5FDregister$handle() {
-        return H5FDregister.HANDLE;
-    }
+    public static MethodHandle H5FDregister$handle() { return H5FDregister.HANDLE; }
 
     /**
      * Address for:
@@ -7684,32 +7013,29 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5FDregister(const H5FD_class_t *cls)
      * }
      */
-    public static MemorySegment H5FDregister$address() {
-        return H5FDregister.ADDR;
-    }
+    public static MemorySegment H5FDregister$address() { return H5FDregister.ADDR; }
 
     /**
      * {@snippet lang=c :
      * hid_t H5FDregister(const H5FD_class_t *cls)
      * }
      */
-    public static long H5FDregister(MemorySegment cls) {
+    public static long H5FDregister(MemorySegment cls)
+    {
         var mh$ = H5FDregister.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDregister", cls);
             }
             return (long)mh$.invokeExact(cls);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDis_driver_registered_by_name {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDis_driver_registered_by_name");
 
@@ -7722,7 +7048,8 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5FDis_driver_registered_by_name(const char *driver_name)
      * }
      */
-    public static FunctionDescriptor H5FDis_driver_registered_by_name$descriptor() {
+    public static FunctionDescriptor H5FDis_driver_registered_by_name$descriptor()
+    {
         return H5FDis_driver_registered_by_name.DESC;
     }
 
@@ -7732,7 +7059,8 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5FDis_driver_registered_by_name(const char *driver_name)
      * }
      */
-    public static MethodHandle H5FDis_driver_registered_by_name$handle() {
+    public static MethodHandle H5FDis_driver_registered_by_name$handle()
+    {
         return H5FDis_driver_registered_by_name.HANDLE;
     }
 
@@ -7742,7 +7070,8 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5FDis_driver_registered_by_name(const char *driver_name)
      * }
      */
-    public static MemorySegment H5FDis_driver_registered_by_name$address() {
+    public static MemorySegment H5FDis_driver_registered_by_name$address()
+    {
         return H5FDis_driver_registered_by_name.ADDR;
     }
 
@@ -7751,23 +7080,22 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5FDis_driver_registered_by_name(const char *driver_name)
      * }
      */
-    public static int H5FDis_driver_registered_by_name(MemorySegment driver_name) {
+    public static int H5FDis_driver_registered_by_name(MemorySegment driver_name)
+    {
         var mh$ = H5FDis_driver_registered_by_name.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDis_driver_registered_by_name", driver_name);
             }
             return (int)mh$.invokeExact(driver_name);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDis_driver_registered_by_value {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDis_driver_registered_by_value");
 
@@ -7780,7 +7108,8 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
      * }
      */
-    public static FunctionDescriptor H5FDis_driver_registered_by_value$descriptor() {
+    public static FunctionDescriptor H5FDis_driver_registered_by_value$descriptor()
+    {
         return H5FDis_driver_registered_by_value.DESC;
     }
 
@@ -7790,7 +7119,8 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
      * }
      */
-    public static MethodHandle H5FDis_driver_registered_by_value$handle() {
+    public static MethodHandle H5FDis_driver_registered_by_value$handle()
+    {
         return H5FDis_driver_registered_by_value.HANDLE;
     }
 
@@ -7800,7 +7130,8 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
      * }
      */
-    public static MemorySegment H5FDis_driver_registered_by_value$address() {
+    public static MemorySegment H5FDis_driver_registered_by_value$address()
+    {
         return H5FDis_driver_registered_by_value.ADDR;
     }
 
@@ -7809,23 +7140,22 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
      * }
      */
-    public static int H5FDis_driver_registered_by_value(int driver_value) {
+    public static int H5FDis_driver_registered_by_value(int driver_value)
+    {
         var mh$ = H5FDis_driver_registered_by_value.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDis_driver_registered_by_value", driver_value);
             }
             return (int)mh$.invokeExact(driver_value);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDunregister {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDunregister");
 
@@ -7838,9 +7168,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDunregister(hid_t driver_id)
      * }
      */
-    public static FunctionDescriptor H5FDunregister$descriptor() {
-        return H5FDunregister.DESC;
-    }
+    public static FunctionDescriptor H5FDunregister$descriptor() { return H5FDunregister.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7848,9 +7176,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDunregister(hid_t driver_id)
      * }
      */
-    public static MethodHandle H5FDunregister$handle() {
-        return H5FDunregister.HANDLE;
-    }
+    public static MethodHandle H5FDunregister$handle() { return H5FDunregister.HANDLE; }
 
     /**
      * Address for:
@@ -7858,35 +7184,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDunregister(hid_t driver_id)
      * }
      */
-    public static MemorySegment H5FDunregister$address() {
-        return H5FDunregister.ADDR;
-    }
+    public static MemorySegment H5FDunregister$address() { return H5FDunregister.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDunregister(hid_t driver_id)
      * }
      */
-    public static int H5FDunregister(long driver_id) {
+    public static int H5FDunregister(long driver_id)
+    {
         var mh$ = H5FDunregister.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDunregister", driver_id);
             }
             return (int)mh$.invokeExact(driver_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDopen");
 
@@ -7899,9 +7220,7 @@ public class hdf5_h extends hdf5_h_1 {
      * H5FD_t *H5FDopen(const char *name, unsigned int flags, hid_t fapl_id, haddr_t maxaddr)
      * }
      */
-    public static FunctionDescriptor H5FDopen$descriptor() {
-        return H5FDopen.DESC;
-    }
+    public static FunctionDescriptor H5FDopen$descriptor() { return H5FDopen.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7909,9 +7228,7 @@ public class hdf5_h extends hdf5_h_1 {
      * H5FD_t *H5FDopen(const char *name, unsigned int flags, hid_t fapl_id, haddr_t maxaddr)
      * }
      */
-    public static MethodHandle H5FDopen$handle() {
-        return H5FDopen.HANDLE;
-    }
+    public static MethodHandle H5FDopen$handle() { return H5FDopen.HANDLE; }
 
     /**
      * Address for:
@@ -7919,32 +7236,29 @@ public class hdf5_h extends hdf5_h_1 {
      * H5FD_t *H5FDopen(const char *name, unsigned int flags, hid_t fapl_id, haddr_t maxaddr)
      * }
      */
-    public static MemorySegment H5FDopen$address() {
-        return H5FDopen.ADDR;
-    }
+    public static MemorySegment H5FDopen$address() { return H5FDopen.ADDR; }
 
     /**
      * {@snippet lang=c :
      * H5FD_t *H5FDopen(const char *name, unsigned int flags, hid_t fapl_id, haddr_t maxaddr)
      * }
      */
-    public static MemorySegment H5FDopen(MemorySegment name, int flags, long fapl_id, long maxaddr) {
+    public static MemorySegment H5FDopen(MemorySegment name, int flags, long fapl_id, long maxaddr)
+    {
         var mh$ = H5FDopen.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDopen", name, flags, fapl_id, maxaddr);
             }
             return (MemorySegment)mh$.invokeExact(name, flags, fapl_id, maxaddr);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDclose {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDclose");
 
@@ -7957,9 +7271,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDclose(H5FD_t *file)
      * }
      */
-    public static FunctionDescriptor H5FDclose$descriptor() {
-        return H5FDclose.DESC;
-    }
+    public static FunctionDescriptor H5FDclose$descriptor() { return H5FDclose.DESC; }
 
     /**
      * Downcall method handle for:
@@ -7967,9 +7279,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDclose(H5FD_t *file)
      * }
      */
-    public static MethodHandle H5FDclose$handle() {
-        return H5FDclose.HANDLE;
-    }
+    public static MethodHandle H5FDclose$handle() { return H5FDclose.HANDLE; }
 
     /**
      * Address for:
@@ -7977,33 +7287,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDclose(H5FD_t *file)
      * }
      */
-    public static MemorySegment H5FDclose$address() {
-        return H5FDclose.ADDR;
-    }
+    public static MemorySegment H5FDclose$address() { return H5FDclose.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDclose(H5FD_t *file)
      * }
      */
-    public static int H5FDclose(MemorySegment file) {
+    public static int H5FDclose(MemorySegment file)
+    {
         var mh$ = H5FDclose.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDclose", file);
             }
             return (int)mh$.invokeExact(file);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDcmp {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDcmp");
 
@@ -8016,9 +7323,7 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
      * }
      */
-    public static FunctionDescriptor H5FDcmp$descriptor() {
-        return H5FDcmp.DESC;
-    }
+    public static FunctionDescriptor H5FDcmp$descriptor() { return H5FDcmp.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8026,9 +7331,7 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
      * }
      */
-    public static MethodHandle H5FDcmp$handle() {
-        return H5FDcmp.HANDLE;
-    }
+    public static MethodHandle H5FDcmp$handle() { return H5FDcmp.HANDLE; }
 
     /**
      * Address for:
@@ -8036,33 +7339,30 @@ public class hdf5_h extends hdf5_h_1 {
      * int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
      * }
      */
-    public static MemorySegment H5FDcmp$address() {
-        return H5FDcmp.ADDR;
-    }
+    public static MemorySegment H5FDcmp$address() { return H5FDcmp.ADDR; }
 
     /**
      * {@snippet lang=c :
      * int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
      * }
      */
-    public static int H5FDcmp(MemorySegment f1, MemorySegment f2) {
+    public static int H5FDcmp(MemorySegment f1, MemorySegment f2)
+    {
         var mh$ = H5FDcmp.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDcmp", f1, f2);
             }
             return (int)mh$.invokeExact(f1, f2);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDquery {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDquery");
 
@@ -8075,9 +7375,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDquery(const H5FD_t *f, unsigned long *flags)
      * }
      */
-    public static FunctionDescriptor H5FDquery$descriptor() {
-        return H5FDquery.DESC;
-    }
+    public static FunctionDescriptor H5FDquery$descriptor() { return H5FDquery.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8085,9 +7383,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDquery(const H5FD_t *f, unsigned long *flags)
      * }
      */
-    public static MethodHandle H5FDquery$handle() {
-        return H5FDquery.HANDLE;
-    }
+    public static MethodHandle H5FDquery$handle() { return H5FDquery.HANDLE; }
 
     /**
      * Address for:
@@ -8095,35 +7391,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDquery(const H5FD_t *f, unsigned long *flags)
      * }
      */
-    public static MemorySegment H5FDquery$address() {
-        return H5FDquery.ADDR;
-    }
+    public static MemorySegment H5FDquery$address() { return H5FDquery.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDquery(const H5FD_t *f, unsigned long *flags)
      * }
      */
-    public static int H5FDquery(MemorySegment f, MemorySegment flags) {
+    public static int H5FDquery(MemorySegment f, MemorySegment flags)
+    {
         var mh$ = H5FDquery.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDquery", f, flags);
             }
             return (int)mh$.invokeExact(f, flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDalloc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDalloc");
 
@@ -8136,9 +7427,7 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
      * }
      */
-    public static FunctionDescriptor H5FDalloc$descriptor() {
-        return H5FDalloc.DESC;
-    }
+    public static FunctionDescriptor H5FDalloc$descriptor() { return H5FDalloc.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8146,9 +7435,7 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
      * }
      */
-    public static MethodHandle H5FDalloc$handle() {
-        return H5FDalloc.HANDLE;
-    }
+    public static MethodHandle H5FDalloc$handle() { return H5FDalloc.HANDLE; }
 
     /**
      * Address for:
@@ -8156,36 +7443,31 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
      * }
      */
-    public static MemorySegment H5FDalloc$address() {
-        return H5FDalloc.ADDR;
-    }
+    public static MemorySegment H5FDalloc$address() { return H5FDalloc.ADDR; }
 
     /**
      * {@snippet lang=c :
      * haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
      * }
      */
-    public static long H5FDalloc(MemorySegment file, int type, long dxpl_id, long size) {
+    public static long H5FDalloc(MemorySegment file, int type, long dxpl_id, long size)
+    {
         var mh$ = H5FDalloc.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDalloc", file, type, dxpl_id, size);
             }
             return (long)mh$.invokeExact(file, type, dxpl_id, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDfree {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDfree");
 
@@ -8198,9 +7480,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
      * }
      */
-    public static FunctionDescriptor H5FDfree$descriptor() {
-        return H5FDfree.DESC;
-    }
+    public static FunctionDescriptor H5FDfree$descriptor() { return H5FDfree.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8208,9 +7488,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
      * }
      */
-    public static MethodHandle H5FDfree$handle() {
-        return H5FDfree.HANDLE;
-    }
+    public static MethodHandle H5FDfree$handle() { return H5FDfree.HANDLE; }
 
     /**
      * Address for:
@@ -8218,33 +7496,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
      * }
      */
-    public static MemorySegment H5FDfree$address() {
-        return H5FDfree.ADDR;
-    }
+    public static MemorySegment H5FDfree$address() { return H5FDfree.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
      * }
      */
-    public static int H5FDfree(MemorySegment file, int type, long dxpl_id, long addr, long size) {
+    public static int H5FDfree(MemorySegment file, int type, long dxpl_id, long addr, long size)
+    {
         var mh$ = H5FDfree.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDfree", file, type, dxpl_id, addr, size);
             }
             return (int)mh$.invokeExact(file, type, dxpl_id, addr, size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDget_eoa {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDget_eoa");
 
@@ -8257,9 +7532,7 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
      * }
      */
-    public static FunctionDescriptor H5FDget_eoa$descriptor() {
-        return H5FDget_eoa.DESC;
-    }
+    public static FunctionDescriptor H5FDget_eoa$descriptor() { return H5FDget_eoa.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8267,9 +7540,7 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
      * }
      */
-    public static MethodHandle H5FDget_eoa$handle() {
-        return H5FDget_eoa.HANDLE;
-    }
+    public static MethodHandle H5FDget_eoa$handle() { return H5FDget_eoa.HANDLE; }
 
     /**
      * Address for:
@@ -8277,34 +7548,30 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
      * }
      */
-    public static MemorySegment H5FDget_eoa$address() {
-        return H5FDget_eoa.ADDR;
-    }
+    public static MemorySegment H5FDget_eoa$address() { return H5FDget_eoa.ADDR; }
 
     /**
      * {@snippet lang=c :
      * haddr_t H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
      * }
      */
-    public static long H5FDget_eoa(MemorySegment file, int type) {
+    public static long H5FDget_eoa(MemorySegment file, int type)
+    {
         var mh$ = H5FDget_eoa.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDget_eoa", file, type);
             }
             return (long)mh$.invokeExact(file, type);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDset_eoa {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDset_eoa");
 
@@ -8317,9 +7584,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t eoa)
      * }
      */
-    public static FunctionDescriptor H5FDset_eoa$descriptor() {
-        return H5FDset_eoa.DESC;
-    }
+    public static FunctionDescriptor H5FDset_eoa$descriptor() { return H5FDset_eoa.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8327,9 +7592,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t eoa)
      * }
      */
-    public static MethodHandle H5FDset_eoa$handle() {
-        return H5FDset_eoa.HANDLE;
-    }
+    public static MethodHandle H5FDset_eoa$handle() { return H5FDset_eoa.HANDLE; }
 
     /**
      * Address for:
@@ -8337,33 +7600,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t eoa)
      * }
      */
-    public static MemorySegment H5FDset_eoa$address() {
-        return H5FDset_eoa.ADDR;
-    }
+    public static MemorySegment H5FDset_eoa$address() { return H5FDset_eoa.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t eoa)
      * }
      */
-    public static int H5FDset_eoa(MemorySegment file, int type, long eoa) {
+    public static int H5FDset_eoa(MemorySegment file, int type, long eoa)
+    {
         var mh$ = H5FDset_eoa.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDset_eoa", file, type, eoa);
             }
             return (int)mh$.invokeExact(file, type, eoa);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDget_eof {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDget_eof");
 
@@ -8376,9 +7636,7 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
      * }
      */
-    public static FunctionDescriptor H5FDget_eof$descriptor() {
-        return H5FDget_eof.DESC;
-    }
+    public static FunctionDescriptor H5FDget_eof$descriptor() { return H5FDget_eof.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8386,9 +7644,7 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
      * }
      */
-    public static MethodHandle H5FDget_eof$handle() {
-        return H5FDget_eof.HANDLE;
-    }
+    public static MethodHandle H5FDget_eof$handle() { return H5FDget_eof.HANDLE; }
 
     /**
      * Address for:
@@ -8396,34 +7652,30 @@ public class hdf5_h extends hdf5_h_1 {
      * haddr_t H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
      * }
      */
-    public static MemorySegment H5FDget_eof$address() {
-        return H5FDget_eof.ADDR;
-    }
+    public static MemorySegment H5FDget_eof$address() { return H5FDget_eof.ADDR; }
 
     /**
      * {@snippet lang=c :
      * haddr_t H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
      * }
      */
-    public static long H5FDget_eof(MemorySegment file, int type) {
+    public static long H5FDget_eof(MemorySegment file, int type)
+    {
         var mh$ = H5FDget_eof.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDget_eof", file, type);
             }
             return (long)mh$.invokeExact(file, type);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDget_vfd_handle {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDget_vfd_handle");
 
@@ -8436,9 +7688,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle)
      * }
      */
-    public static FunctionDescriptor H5FDget_vfd_handle$descriptor() {
-        return H5FDget_vfd_handle.DESC;
-    }
+    public static FunctionDescriptor H5FDget_vfd_handle$descriptor() { return H5FDget_vfd_handle.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8446,9 +7696,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle)
      * }
      */
-    public static MethodHandle H5FDget_vfd_handle$handle() {
-        return H5FDget_vfd_handle.HANDLE;
-    }
+    public static MethodHandle H5FDget_vfd_handle$handle() { return H5FDget_vfd_handle.HANDLE; }
 
     /**
      * Address for:
@@ -8456,37 +7704,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle)
      * }
      */
-    public static MemorySegment H5FDget_vfd_handle$address() {
-        return H5FDget_vfd_handle.ADDR;
-    }
+    public static MemorySegment H5FDget_vfd_handle$address() { return H5FDget_vfd_handle.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle)
      * }
      */
-    public static int H5FDget_vfd_handle(MemorySegment file, long fapl, MemorySegment file_handle) {
+    public static int H5FDget_vfd_handle(MemorySegment file, long fapl, MemorySegment file_handle)
+    {
         var mh$ = H5FDget_vfd_handle.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDget_vfd_handle", file, fapl, file_handle);
             }
             return (int)mh$.invokeExact(file, fapl, file_handle);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDread {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDread");
 
@@ -8499,9 +7741,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf)
      * }
      */
-    public static FunctionDescriptor H5FDread$descriptor() {
-        return H5FDread.DESC;
-    }
+    public static FunctionDescriptor H5FDread$descriptor() { return H5FDread.DESC; }
 
     /**
      * Downcall method handle for:
@@ -8509,9 +7749,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf)
      * }
      */
-    public static MethodHandle H5FDread$handle() {
-        return H5FDread.HANDLE;
-    }
+    public static MethodHandle H5FDread$handle() { return H5FDread.HANDLE; }
 
     /**
      * Address for:
@@ -8519,37 +7757,32 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf)
      * }
      */
-    public static MemorySegment H5FDread$address() {
-        return H5FDread.ADDR;
-    }
+    public static MemorySegment H5FDread$address() { return H5FDread.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf)
      * }
      */
-    public static int H5FDread(MemorySegment file, int type, long dxpl_id, long addr, long size, MemorySegment buf) {
+    public static int H5FDread(MemorySegment file, int type, long dxpl_id, long addr, long size,
+                               MemorySegment buf)
+    {
         var mh$ = H5FDread.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDread", file, type, dxpl_id, addr, size, buf);
             }
             return (int)mh$.invokeExact(file, type, dxpl_id, addr, size, buf);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDwrite {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDwrite");
 
@@ -8559,61 +7792,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
+     * herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void
+     * *buf)
      * }
      */
-    public static FunctionDescriptor H5FDwrite$descriptor() {
-        return H5FDwrite.DESC;
-    }
+    public static FunctionDescriptor H5FDwrite$descriptor() { return H5FDwrite.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
+     * herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void
+     * *buf)
      * }
      */
-    public static MethodHandle H5FDwrite$handle() {
-        return H5FDwrite.HANDLE;
-    }
+    public static MethodHandle H5FDwrite$handle() { return H5FDwrite.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
+     * herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void
+     * *buf)
      * }
      */
-    public static MemorySegment H5FDwrite$address() {
-        return H5FDwrite.ADDR;
-    }
+    public static MemorySegment H5FDwrite$address() { return H5FDwrite.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
+     * herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void
+     * *buf)
      * }
      */
-    public static int H5FDwrite(MemorySegment file, int type, long dxpl_id, long addr, long size, MemorySegment buf) {
+    public static int H5FDwrite(MemorySegment file, int type, long dxpl_id, long addr, long size,
+                                MemorySegment buf)
+    {
         var mh$ = H5FDwrite.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDwrite", file, type, dxpl_id, addr, size, buf);
             }
             return (int)mh$.invokeExact(file, type, dxpl_id, addr, size, buf);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDread_vector {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_INT,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDread_vector");
 
@@ -8623,61 +7850,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], void *bufs[])
+     * herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t
+     * addrs[], size_t sizes[], void *bufs[])
      * }
      */
-    public static FunctionDescriptor H5FDread_vector$descriptor() {
-        return H5FDread_vector.DESC;
-    }
+    public static FunctionDescriptor H5FDread_vector$descriptor() { return H5FDread_vector.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], void *bufs[])
+     * herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t
+     * addrs[], size_t sizes[], void *bufs[])
      * }
      */
-    public static MethodHandle H5FDread_vector$handle() {
-        return H5FDread_vector.HANDLE;
-    }
+    public static MethodHandle H5FDread_vector$handle() { return H5FDread_vector.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], void *bufs[])
+     * herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t
+     * addrs[], size_t sizes[], void *bufs[])
      * }
      */
-    public static MemorySegment H5FDread_vector$address() {
-        return H5FDread_vector.ADDR;
-    }
+    public static MemorySegment H5FDread_vector$address() { return H5FDread_vector.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], void *bufs[])
+     * herr_t H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t
+     * addrs[], size_t sizes[], void *bufs[])
      * }
      */
-    public static int H5FDread_vector(MemorySegment file, long dxpl_id, int count, MemorySegment types, MemorySegment addrs, MemorySegment sizes, MemorySegment bufs) {
+    public static int H5FDread_vector(MemorySegment file, long dxpl_id, int count, MemorySegment types,
+                                      MemorySegment addrs, MemorySegment sizes, MemorySegment bufs)
+    {
         var mh$ = H5FDread_vector.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDread_vector", file, dxpl_id, count, types, addrs, sizes, bufs);
             }
             return (int)mh$.invokeExact(file, dxpl_id, count, types, addrs, sizes, bufs);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDwrite_vector {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_INT,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDwrite_vector");
 
@@ -8687,63 +7908,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], const void *bufs[])
+     * herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t
+     * addrs[], size_t sizes[], const void *bufs[])
      * }
      */
-    public static FunctionDescriptor H5FDwrite_vector$descriptor() {
-        return H5FDwrite_vector.DESC;
-    }
+    public static FunctionDescriptor H5FDwrite_vector$descriptor() { return H5FDwrite_vector.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], const void *bufs[])
+     * herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t
+     * addrs[], size_t sizes[], const void *bufs[])
      * }
      */
-    public static MethodHandle H5FDwrite_vector$handle() {
-        return H5FDwrite_vector.HANDLE;
-    }
+    public static MethodHandle H5FDwrite_vector$handle() { return H5FDwrite_vector.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], const void *bufs[])
+     * herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t
+     * addrs[], size_t sizes[], const void *bufs[])
      * }
      */
-    public static MemorySegment H5FDwrite_vector$address() {
-        return H5FDwrite_vector.ADDR;
-    }
+    public static MemorySegment H5FDwrite_vector$address() { return H5FDwrite_vector.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], const void *bufs[])
+     * herr_t H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t
+     * addrs[], size_t sizes[], const void *bufs[])
      * }
      */
-    public static int H5FDwrite_vector(MemorySegment file, long dxpl_id, int count, MemorySegment types, MemorySegment addrs, MemorySegment sizes, MemorySegment bufs) {
+    public static int H5FDwrite_vector(MemorySegment file, long dxpl_id, int count, MemorySegment types,
+                                       MemorySegment addrs, MemorySegment sizes, MemorySegment bufs)
+    {
         var mh$ = H5FDwrite_vector.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDwrite_vector", file, dxpl_id, count, types, addrs, sizes, bufs);
             }
             return (int)mh$.invokeExact(file, dxpl_id, count, types, addrs, sizes, bufs);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDread_selection {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDread_selection");
 
@@ -8753,63 +7966,59 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static FunctionDescriptor H5FDread_selection$descriptor() {
-        return H5FDread_selection.DESC;
-    }
+    public static FunctionDescriptor H5FDread_selection$descriptor() { return H5FDread_selection.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static MethodHandle H5FDread_selection$handle() {
-        return H5FDread_selection.HANDLE;
-    }
+    public static MethodHandle H5FDread_selection$handle() { return H5FDread_selection.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static MemorySegment H5FDread_selection$address() {
-        return H5FDread_selection.ADDR;
-    }
+    public static MemorySegment H5FDread_selection$address() { return H5FDread_selection.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static int H5FDread_selection(MemorySegment file, int type, long dxpl_id, int count, MemorySegment mem_spaces, MemorySegment file_spaces, MemorySegment offsets, MemorySegment element_sizes, MemorySegment bufs) {
+    public static int H5FDread_selection(MemorySegment file, int type, long dxpl_id, int count,
+                                         MemorySegment mem_spaces, MemorySegment file_spaces,
+                                         MemorySegment offsets, MemorySegment element_sizes,
+                                         MemorySegment bufs)
+    {
         var mh$ = H5FDread_selection.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5FDread_selection", file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
+                traceDowncall("H5FDread_selection", file, type, dxpl_id, count, mem_spaces, file_spaces,
+                              offsets, element_sizes, bufs);
             }
-            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
+                                        element_sizes, bufs);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDwrite_selection {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDwrite_selection");
 
@@ -8819,63 +8028,59 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static FunctionDescriptor H5FDwrite_selection$descriptor() {
-        return H5FDwrite_selection.DESC;
-    }
+    public static FunctionDescriptor H5FDwrite_selection$descriptor() { return H5FDwrite_selection.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static MethodHandle H5FDwrite_selection$handle() {
-        return H5FDwrite_selection.HANDLE;
-    }
+    public static MethodHandle H5FDwrite_selection$handle() { return H5FDwrite_selection.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static MemorySegment H5FDwrite_selection$address() {
-        return H5FDwrite_selection.ADDR;
-    }
+    public static MemorySegment H5FDwrite_selection$address() { return H5FDwrite_selection.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static int H5FDwrite_selection(MemorySegment file, int type, long dxpl_id, int count, MemorySegment mem_spaces, MemorySegment file_spaces, MemorySegment offsets, MemorySegment element_sizes, MemorySegment bufs) {
+    public static int H5FDwrite_selection(MemorySegment file, int type, long dxpl_id, int count,
+                                          MemorySegment mem_spaces, MemorySegment file_spaces,
+                                          MemorySegment offsets, MemorySegment element_sizes,
+                                          MemorySegment bufs)
+    {
         var mh$ = H5FDwrite_selection.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5FDwrite_selection", file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
+                traceDowncall("H5FDwrite_selection", file, type, dxpl_id, count, mem_spaces, file_spaces,
+                              offsets, element_sizes, bufs);
             }
-            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
+                                        element_sizes, bufs);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDread_vector_from_selection {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDread_vector_from_selection");
 
@@ -8885,63 +8090,68 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+     * hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static FunctionDescriptor H5FDread_vector_from_selection$descriptor() {
+    public static FunctionDescriptor H5FDread_vector_from_selection$descriptor()
+    {
         return H5FDread_vector_from_selection.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+     * hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static MethodHandle H5FDread_vector_from_selection$handle() {
+    public static MethodHandle H5FDread_vector_from_selection$handle()
+    {
         return H5FDread_vector_from_selection.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+     * hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static MemorySegment H5FDread_vector_from_selection$address() {
+    public static MemorySegment H5FDread_vector_from_selection$address()
+    {
         return H5FDread_vector_from_selection.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+     * hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static int H5FDread_vector_from_selection(MemorySegment file, int type, long dxpl_id, int count, MemorySegment mem_spaces, MemorySegment file_spaces, MemorySegment offsets, MemorySegment element_sizes, MemorySegment bufs) {
+    public static int H5FDread_vector_from_selection(MemorySegment file, int type, long dxpl_id, int count,
+                                                     MemorySegment mem_spaces, MemorySegment file_spaces,
+                                                     MemorySegment offsets, MemorySegment element_sizes,
+                                                     MemorySegment bufs)
+    {
         var mh$ = H5FDread_vector_from_selection.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5FDread_vector_from_selection", file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
+                traceDowncall("H5FDread_vector_from_selection", file, type, dxpl_id, count, mem_spaces,
+                              file_spaces, offsets, element_sizes, bufs);
             }
-            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
+                                        element_sizes, bufs);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDwrite_vector_from_selection {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDwrite_vector_from_selection");
 
@@ -8951,63 +8161,68 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+     * hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static FunctionDescriptor H5FDwrite_vector_from_selection$descriptor() {
+    public static FunctionDescriptor H5FDwrite_vector_from_selection$descriptor()
+    {
         return H5FDwrite_vector_from_selection.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+     * hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static MethodHandle H5FDwrite_vector_from_selection$handle() {
+    public static MethodHandle H5FDwrite_vector_from_selection$handle()
+    {
         return H5FDwrite_vector_from_selection.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+     * hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static MemorySegment H5FDwrite_vector_from_selection$address() {
+    public static MemorySegment H5FDwrite_vector_from_selection$address()
+    {
         return H5FDwrite_vector_from_selection.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+     * hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static int H5FDwrite_vector_from_selection(MemorySegment file, int type, long dxpl_id, int count, MemorySegment mem_spaces, MemorySegment file_spaces, MemorySegment offsets, MemorySegment element_sizes, MemorySegment bufs) {
+    public static int H5FDwrite_vector_from_selection(MemorySegment file, int type, long dxpl_id, int count,
+                                                      MemorySegment mem_spaces, MemorySegment file_spaces,
+                                                      MemorySegment offsets, MemorySegment element_sizes,
+                                                      MemorySegment bufs)
+    {
         var mh$ = H5FDwrite_vector_from_selection.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5FDwrite_vector_from_selection", file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
+                traceDowncall("H5FDwrite_vector_from_selection", file, type, dxpl_id, count, mem_spaces,
+                              file_spaces, offsets, element_sizes, bufs);
             }
-            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets, element_sizes, bufs);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
+                                        element_sizes, bufs);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDread_from_selection {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDread_from_selection");
 
@@ -9017,63 +8232,62 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static FunctionDescriptor H5FDread_from_selection$descriptor() {
+    public static FunctionDescriptor H5FDread_from_selection$descriptor()
+    {
         return H5FDread_from_selection.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static MethodHandle H5FDread_from_selection$handle() {
-        return H5FDread_from_selection.HANDLE;
-    }
+    public static MethodHandle H5FDread_from_selection$handle() { return H5FDread_from_selection.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static MemorySegment H5FDread_from_selection$address() {
-        return H5FDread_from_selection.ADDR;
-    }
+    public static MemorySegment H5FDread_from_selection$address() { return H5FDread_from_selection.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+     * herr_t H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
      * }
      */
-    public static int H5FDread_from_selection(MemorySegment file, int type, long dxpl_id, int count, MemorySegment mem_space_ids, MemorySegment file_space_ids, MemorySegment offsets, MemorySegment element_sizes, MemorySegment bufs) {
+    public static int H5FDread_from_selection(MemorySegment file, int type, long dxpl_id, int count,
+                                              MemorySegment mem_space_ids, MemorySegment file_space_ids,
+                                              MemorySegment offsets, MemorySegment element_sizes,
+                                              MemorySegment bufs)
+    {
         var mh$ = H5FDread_from_selection.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5FDread_from_selection", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets, element_sizes, bufs);
+                traceDowncall("H5FDread_from_selection", file, type, dxpl_id, count, mem_space_ids,
+                              file_space_ids, offsets, element_sizes, bufs);
             }
-            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets, element_sizes, bufs);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
+                                        element_sizes, bufs);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDwrite_from_selection {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDwrite_from_selection");
 
@@ -9083,57 +8297,61 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static FunctionDescriptor H5FDwrite_from_selection$descriptor() {
+    public static FunctionDescriptor H5FDwrite_from_selection$descriptor()
+    {
         return H5FDwrite_from_selection.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static MethodHandle H5FDwrite_from_selection$handle() {
-        return H5FDwrite_from_selection.HANDLE;
-    }
+    public static MethodHandle H5FDwrite_from_selection$handle() { return H5FDwrite_from_selection.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static MemorySegment H5FDwrite_from_selection$address() {
-        return H5FDwrite_from_selection.ADDR;
-    }
+    public static MemorySegment H5FDwrite_from_selection$address() { return H5FDwrite_from_selection.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+     * herr_t H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t
+     * mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
      * }
      */
-    public static int H5FDwrite_from_selection(MemorySegment file, int type, long dxpl_id, int count, MemorySegment mem_space_ids, MemorySegment file_space_ids, MemorySegment offsets, MemorySegment element_sizes, MemorySegment bufs) {
+    public static int H5FDwrite_from_selection(MemorySegment file, int type, long dxpl_id, int count,
+                                               MemorySegment mem_space_ids, MemorySegment file_space_ids,
+                                               MemorySegment offsets, MemorySegment element_sizes,
+                                               MemorySegment bufs)
+    {
         var mh$ = H5FDwrite_from_selection.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5FDwrite_from_selection", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets, element_sizes, bufs);
+                traceDowncall("H5FDwrite_from_selection", file, type, dxpl_id, count, mem_space_ids,
+                              file_space_ids, offsets, element_sizes, bufs);
             }
-            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets, element_sizes, bufs);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
+                                        element_sizes, bufs);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDflush {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDflush");
 
@@ -9146,9 +8364,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, bool closing)
      * }
      */
-    public static FunctionDescriptor H5FDflush$descriptor() {
-        return H5FDflush.DESC;
-    }
+    public static FunctionDescriptor H5FDflush$descriptor() { return H5FDflush.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9156,9 +8372,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, bool closing)
      * }
      */
-    public static MethodHandle H5FDflush$handle() {
-        return H5FDflush.HANDLE;
-    }
+    public static MethodHandle H5FDflush$handle() { return H5FDflush.HANDLE; }
 
     /**
      * Address for:
@@ -9166,34 +8380,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, bool closing)
      * }
      */
-    public static MemorySegment H5FDflush$address() {
-        return H5FDflush.ADDR;
-    }
+    public static MemorySegment H5FDflush$address() { return H5FDflush.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, bool closing)
      * }
      */
-    public static int H5FDflush(MemorySegment file, long dxpl_id, boolean closing) {
+    public static int H5FDflush(MemorySegment file, long dxpl_id, boolean closing)
+    {
         var mh$ = H5FDflush.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDflush", file, dxpl_id, closing);
             }
             return (int)mh$.invokeExact(file, dxpl_id, closing);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDtruncate {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDtruncate");
 
@@ -9206,9 +8416,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, bool closing)
      * }
      */
-    public static FunctionDescriptor H5FDtruncate$descriptor() {
-        return H5FDtruncate.DESC;
-    }
+    public static FunctionDescriptor H5FDtruncate$descriptor() { return H5FDtruncate.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9216,9 +8424,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, bool closing)
      * }
      */
-    public static MethodHandle H5FDtruncate$handle() {
-        return H5FDtruncate.HANDLE;
-    }
+    public static MethodHandle H5FDtruncate$handle() { return H5FDtruncate.HANDLE; }
 
     /**
      * Address for:
@@ -9226,33 +8432,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, bool closing)
      * }
      */
-    public static MemorySegment H5FDtruncate$address() {
-        return H5FDtruncate.ADDR;
-    }
+    public static MemorySegment H5FDtruncate$address() { return H5FDtruncate.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, bool closing)
      * }
      */
-    public static int H5FDtruncate(MemorySegment file, long dxpl_id, boolean closing) {
+    public static int H5FDtruncate(MemorySegment file, long dxpl_id, boolean closing)
+    {
         var mh$ = H5FDtruncate.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDtruncate", file, dxpl_id, closing);
             }
             return (int)mh$.invokeExact(file, dxpl_id, closing);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDlock {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDlock");
 
@@ -9265,9 +8468,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDlock(H5FD_t *file, bool rw)
      * }
      */
-    public static FunctionDescriptor H5FDlock$descriptor() {
-        return H5FDlock.DESC;
-    }
+    public static FunctionDescriptor H5FDlock$descriptor() { return H5FDlock.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9275,9 +8476,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDlock(H5FD_t *file, bool rw)
      * }
      */
-    public static MethodHandle H5FDlock$handle() {
-        return H5FDlock.HANDLE;
-    }
+    public static MethodHandle H5FDlock$handle() { return H5FDlock.HANDLE; }
 
     /**
      * Address for:
@@ -9285,32 +8484,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDlock(H5FD_t *file, bool rw)
      * }
      */
-    public static MemorySegment H5FDlock$address() {
-        return H5FDlock.ADDR;
-    }
+    public static MemorySegment H5FDlock$address() { return H5FDlock.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDlock(H5FD_t *file, bool rw)
      * }
      */
-    public static int H5FDlock(MemorySegment file, boolean rw) {
+    public static int H5FDlock(MemorySegment file, boolean rw)
+    {
         var mh$ = H5FDlock.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDlock", file, rw);
             }
             return (int)mh$.invokeExact(file, rw);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDunlock {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDunlock");
 
@@ -9323,9 +8519,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDunlock(H5FD_t *file)
      * }
      */
-    public static FunctionDescriptor H5FDunlock$descriptor() {
-        return H5FDunlock.DESC;
-    }
+    public static FunctionDescriptor H5FDunlock$descriptor() { return H5FDunlock.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9333,9 +8527,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDunlock(H5FD_t *file)
      * }
      */
-    public static MethodHandle H5FDunlock$handle() {
-        return H5FDunlock.HANDLE;
-    }
+    public static MethodHandle H5FDunlock$handle() { return H5FDunlock.HANDLE; }
 
     /**
      * Address for:
@@ -9343,33 +8535,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDunlock(H5FD_t *file)
      * }
      */
-    public static MemorySegment H5FDunlock$address() {
-        return H5FDunlock.ADDR;
-    }
+    public static MemorySegment H5FDunlock$address() { return H5FDunlock.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDunlock(H5FD_t *file)
      * }
      */
-    public static int H5FDunlock(MemorySegment file) {
+    public static int H5FDunlock(MemorySegment file)
+    {
         var mh$ = H5FDunlock.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDunlock", file);
             }
             return (int)mh$.invokeExact(file);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDdelete {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDdelete");
 
@@ -9382,9 +8571,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDdelete(const char *name, hid_t fapl_id)
      * }
      */
-    public static FunctionDescriptor H5FDdelete$descriptor() {
-        return H5FDdelete.DESC;
-    }
+    public static FunctionDescriptor H5FDdelete$descriptor() { return H5FDdelete.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9392,9 +8579,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDdelete(const char *name, hid_t fapl_id)
      * }
      */
-    public static MethodHandle H5FDdelete$handle() {
-        return H5FDdelete.HANDLE;
-    }
+    public static MethodHandle H5FDdelete$handle() { return H5FDdelete.HANDLE; }
 
     /**
      * Address for:
@@ -9402,36 +8587,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDdelete(const char *name, hid_t fapl_id)
      * }
      */
-    public static MemorySegment H5FDdelete$address() {
-        return H5FDdelete.ADDR;
-    }
+    public static MemorySegment H5FDdelete$address() { return H5FDdelete.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDdelete(const char *name, hid_t fapl_id)
      * }
      */
-    public static int H5FDdelete(MemorySegment name, long fapl_id) {
+    public static int H5FDdelete(MemorySegment name, long fapl_id)
+    {
         var mh$ = H5FDdelete.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDdelete", name, fapl_id);
             }
             return (int)mh$.invokeExact(name, fapl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDctl {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDctl");
 
@@ -9444,9 +8624,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
      * }
      */
-    public static FunctionDescriptor H5FDctl$descriptor() {
-        return H5FDctl.DESC;
-    }
+    public static FunctionDescriptor H5FDctl$descriptor() { return H5FDctl.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9454,9 +8632,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
      * }
      */
-    public static MethodHandle H5FDctl$handle() {
-        return H5FDctl.HANDLE;
-    }
+    public static MethodHandle H5FDctl$handle() { return H5FDctl.HANDLE; }
 
     /**
      * Address for:
@@ -9464,35 +8640,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
      * }
      */
-    public static MemorySegment H5FDctl$address() {
-        return H5FDctl.ADDR;
-    }
+    public static MemorySegment H5FDctl$address() { return H5FDctl.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
      * }
      */
-    public static int H5FDctl(MemorySegment file, long op_code, long flags, MemorySegment input, MemorySegment output) {
+    public static int H5FDctl(MemorySegment file, long op_code, long flags, MemorySegment input,
+                              MemorySegment output)
+    {
         var mh$ = H5FDctl.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDctl", file, op_code, flags, input, output);
             }
             return (int)mh$.invokeExact(file, op_code, flags, input, output);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Iregister_future {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Iregister_future");
 
@@ -9502,55 +8674,53 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb)
+     * hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb,
+     * H5I_future_discard_func_t discard_cb)
      * }
      */
-    public static FunctionDescriptor H5Iregister_future$descriptor() {
-        return H5Iregister_future.DESC;
-    }
+    public static FunctionDescriptor H5Iregister_future$descriptor() { return H5Iregister_future.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb)
+     * hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb,
+     * H5I_future_discard_func_t discard_cb)
      * }
      */
-    public static MethodHandle H5Iregister_future$handle() {
-        return H5Iregister_future.HANDLE;
-    }
+    public static MethodHandle H5Iregister_future$handle() { return H5Iregister_future.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb)
+     * hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb,
+     * H5I_future_discard_func_t discard_cb)
      * }
      */
-    public static MemorySegment H5Iregister_future$address() {
-        return H5Iregister_future.ADDR;
-    }
+    public static MemorySegment H5Iregister_future$address() { return H5Iregister_future.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb)
+     * hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_realize_func_t realize_cb,
+     * H5I_future_discard_func_t discard_cb)
      * }
      */
-    public static long H5Iregister_future(int type, MemorySegment object, MemorySegment realize_cb, MemorySegment discard_cb) {
+    public static long H5Iregister_future(int type, MemorySegment object, MemorySegment realize_cb,
+                                          MemorySegment discard_cb)
+    {
         var mh$ = H5Iregister_future.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Iregister_future", type, object, realize_cb, discard_cb);
             }
             return (long)mh$.invokeExact(type, object, realize_cb, discard_cb);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Lregister {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Lregister");
 
@@ -9563,9 +8733,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Lregister(const H5L_class_t *cls)
      * }
      */
-    public static FunctionDescriptor H5Lregister$descriptor() {
-        return H5Lregister.DESC;
-    }
+    public static FunctionDescriptor H5Lregister$descriptor() { return H5Lregister.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9573,9 +8741,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Lregister(const H5L_class_t *cls)
      * }
      */
-    public static MethodHandle H5Lregister$handle() {
-        return H5Lregister.HANDLE;
-    }
+    public static MethodHandle H5Lregister$handle() { return H5Lregister.HANDLE; }
 
     /**
      * Address for:
@@ -9583,32 +8749,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Lregister(const H5L_class_t *cls)
      * }
      */
-    public static MemorySegment H5Lregister$address() {
-        return H5Lregister.ADDR;
-    }
+    public static MemorySegment H5Lregister$address() { return H5Lregister.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Lregister(const H5L_class_t *cls)
      * }
      */
-    public static int H5Lregister(MemorySegment cls) {
+    public static int H5Lregister(MemorySegment cls)
+    {
         var mh$ = H5Lregister.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Lregister", cls);
             }
             return (int)mh$.invokeExact(cls);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Lunregister {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Lunregister");
 
@@ -9621,9 +8784,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Lunregister(H5L_type_t id)
      * }
      */
-    public static FunctionDescriptor H5Lunregister$descriptor() {
-        return H5Lunregister.DESC;
-    }
+    public static FunctionDescriptor H5Lunregister$descriptor() { return H5Lunregister.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9631,9 +8792,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Lunregister(H5L_type_t id)
      * }
      */
-    public static MethodHandle H5Lunregister$handle() {
-        return H5Lunregister.HANDLE;
-    }
+    public static MethodHandle H5Lunregister$handle() { return H5Lunregister.HANDLE; }
 
     /**
      * Address for:
@@ -9641,24 +8800,24 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Lunregister(H5L_type_t id)
      * }
      */
-    public static MemorySegment H5Lunregister$address() {
-        return H5Lunregister.ADDR;
-    }
+    public static MemorySegment H5Lunregister$address() { return H5Lunregister.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Lunregister(H5L_type_t id)
      * }
      */
-    public static int H5Lunregister(int id) {
+    public static int H5Lunregister(int id)
+    {
         var mh$ = H5Lunregister.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Lunregister", id);
             }
             return (int)mh$.invokeExact(id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
     private static final int H5T_CONV_INIT = (int)0L;
@@ -9667,91 +8826,68 @@ public class hdf5_h extends hdf5_h_1 {
      * enum H5T_cmd_t.H5T_CONV_INIT = 0
      * }
      */
-    public static int H5T_CONV_INIT() {
-        return H5T_CONV_INIT;
-    }
+    public static int H5T_CONV_INIT() { return H5T_CONV_INIT; }
     private static final int H5T_CONV_CONV = (int)1L;
     /**
      * {@snippet lang=c :
      * enum H5T_cmd_t.H5T_CONV_CONV = 1
      * }
      */
-    public static int H5T_CONV_CONV() {
-        return H5T_CONV_CONV;
-    }
+    public static int H5T_CONV_CONV() { return H5T_CONV_CONV; }
     private static final int H5T_CONV_FREE = (int)2L;
     /**
      * {@snippet lang=c :
      * enum H5T_cmd_t.H5T_CONV_FREE = 2
      * }
      */
-    public static int H5T_CONV_FREE() {
-        return H5T_CONV_FREE;
-    }
+    public static int H5T_CONV_FREE() { return H5T_CONV_FREE; }
     private static final int H5T_BKG_NO = (int)0L;
     /**
      * {@snippet lang=c :
      * enum H5T_bkg_t.H5T_BKG_NO = 0
      * }
      */
-    public static int H5T_BKG_NO() {
-        return H5T_BKG_NO;
-    }
+    public static int H5T_BKG_NO() { return H5T_BKG_NO; }
     private static final int H5T_BKG_TEMP = (int)1L;
     /**
      * {@snippet lang=c :
      * enum H5T_bkg_t.H5T_BKG_TEMP = 1
      * }
      */
-    public static int H5T_BKG_TEMP() {
-        return H5T_BKG_TEMP;
-    }
+    public static int H5T_BKG_TEMP() { return H5T_BKG_TEMP; }
     private static final int H5T_BKG_YES = (int)2L;
     /**
      * {@snippet lang=c :
      * enum H5T_bkg_t.H5T_BKG_YES = 2
      * }
      */
-    public static int H5T_BKG_YES() {
-        return H5T_BKG_YES;
-    }
+    public static int H5T_BKG_YES() { return H5T_BKG_YES; }
     private static final int H5T_PERS_DONTCARE = (int)-1L;
     /**
      * {@snippet lang=c :
      * enum H5T_pers_t.H5T_PERS_DONTCARE = -1
      * }
      */
-    public static int H5T_PERS_DONTCARE() {
-        return H5T_PERS_DONTCARE;
-    }
+    public static int H5T_PERS_DONTCARE() { return H5T_PERS_DONTCARE; }
     private static final int H5T_PERS_HARD = (int)0L;
     /**
      * {@snippet lang=c :
      * enum H5T_pers_t.H5T_PERS_HARD = 0
      * }
      */
-    public static int H5T_PERS_HARD() {
-        return H5T_PERS_HARD;
-    }
+    public static int H5T_PERS_HARD() { return H5T_PERS_HARD; }
     private static final int H5T_PERS_SOFT = (int)1L;
     /**
      * {@snippet lang=c :
      * enum H5T_pers_t.H5T_PERS_SOFT = 1
      * }
      */
-    public static int H5T_PERS_SOFT() {
-        return H5T_PERS_SOFT;
-    }
+    public static int H5T_PERS_SOFT() { return H5T_PERS_SOFT; }
 
     private static class H5Tregister {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Tregister");
 
@@ -9764,9 +8900,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * }
      */
-    public static FunctionDescriptor H5Tregister$descriptor() {
-        return H5Tregister.DESC;
-    }
+    public static FunctionDescriptor H5Tregister$descriptor() { return H5Tregister.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9774,9 +8908,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * }
      */
-    public static MethodHandle H5Tregister$handle() {
-        return H5Tregister.HANDLE;
-    }
+    public static MethodHandle H5Tregister$handle() { return H5Tregister.HANDLE; }
 
     /**
      * Address for:
@@ -9784,36 +8916,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * }
      */
-    public static MemorySegment H5Tregister$address() {
-        return H5Tregister.ADDR;
-    }
+    public static MemorySegment H5Tregister$address() { return H5Tregister.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * }
      */
-    public static int H5Tregister(int pers, MemorySegment name, long src_id, long dst_id, MemorySegment func) {
+    public static int H5Tregister(int pers, MemorySegment name, long src_id, long dst_id, MemorySegment func)
+    {
         var mh$ = H5Tregister.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Tregister", pers, name, src_id, dst_id, func);
             }
             return (int)mh$.invokeExact(pers, name, src_id, dst_id, func);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Tunregister {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Tunregister");
 
@@ -9826,9 +8953,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * }
      */
-    public static FunctionDescriptor H5Tunregister$descriptor() {
-        return H5Tunregister.DESC;
-    }
+    public static FunctionDescriptor H5Tunregister$descriptor() { return H5Tunregister.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9836,9 +8961,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * }
      */
-    public static MethodHandle H5Tunregister$handle() {
-        return H5Tunregister.HANDLE;
-    }
+    public static MethodHandle H5Tunregister$handle() { return H5Tunregister.HANDLE; }
 
     /**
      * Address for:
@@ -9846,34 +8969,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * }
      */
-    public static MemorySegment H5Tunregister$address() {
-        return H5Tunregister.ADDR;
-    }
+    public static MemorySegment H5Tunregister$address() { return H5Tunregister.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * }
      */
-    public static int H5Tunregister(int pers, MemorySegment name, long src_id, long dst_id, MemorySegment func) {
+    public static int H5Tunregister(int pers, MemorySegment name, long src_id, long dst_id,
+                                    MemorySegment func)
+    {
         var mh$ = H5Tunregister.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Tunregister", pers, name, src_id, dst_id, func);
             }
             return (int)mh$.invokeExact(pers, name, src_id, dst_id, func);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Tfind {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Tfind");
 
@@ -9886,9 +9006,7 @@ public class hdf5_h extends hdf5_h_1 {
      * H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
      * }
      */
-    public static FunctionDescriptor H5Tfind$descriptor() {
-        return H5Tfind.DESC;
-    }
+    public static FunctionDescriptor H5Tfind$descriptor() { return H5Tfind.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9896,9 +9014,7 @@ public class hdf5_h extends hdf5_h_1 {
      * H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
      * }
      */
-    public static MethodHandle H5Tfind$handle() {
-        return H5Tfind.HANDLE;
-    }
+    public static MethodHandle H5Tfind$handle() { return H5Tfind.HANDLE; }
 
     /**
      * Address for:
@@ -9906,33 +9022,30 @@ public class hdf5_h extends hdf5_h_1 {
      * H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
      * }
      */
-    public static MemorySegment H5Tfind$address() {
-        return H5Tfind.ADDR;
-    }
+    public static MemorySegment H5Tfind$address() { return H5Tfind.ADDR; }
 
     /**
      * {@snippet lang=c :
      * H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
      * }
      */
-    public static MemorySegment H5Tfind(long src_id, long dst_id, MemorySegment pcdata) {
+    public static MemorySegment H5Tfind(long src_id, long dst_id, MemorySegment pcdata)
+    {
         var mh$ = H5Tfind.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Tfind", src_id, dst_id, pcdata);
             }
             return (MemorySegment)mh$.invokeExact(src_id, dst_id, pcdata);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Tcompiler_conv {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Tcompiler_conv");
 
@@ -9945,9 +9058,7 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
      * }
      */
-    public static FunctionDescriptor H5Tcompiler_conv$descriptor() {
-        return H5Tcompiler_conv.DESC;
-    }
+    public static FunctionDescriptor H5Tcompiler_conv$descriptor() { return H5Tcompiler_conv.DESC; }
 
     /**
      * Downcall method handle for:
@@ -9955,9 +9066,7 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
      * }
      */
-    public static MethodHandle H5Tcompiler_conv$handle() {
-        return H5Tcompiler_conv.HANDLE;
-    }
+    public static MethodHandle H5Tcompiler_conv$handle() { return H5Tcompiler_conv.HANDLE; }
 
     /**
      * Address for:
@@ -9965,33 +9074,30 @@ public class hdf5_h extends hdf5_h_1 {
      * htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
      * }
      */
-    public static MemorySegment H5Tcompiler_conv$address() {
-        return H5Tcompiler_conv.ADDR;
-    }
+    public static MemorySegment H5Tcompiler_conv$address() { return H5Tcompiler_conv.ADDR; }
 
     /**
      * {@snippet lang=c :
      * htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
      * }
      */
-    public static int H5Tcompiler_conv(long src_id, long dst_id) {
+    public static int H5Tcompiler_conv(long src_id, long dst_id)
+    {
         var mh$ = H5Tcompiler_conv.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Tcompiler_conv", src_id, dst_id);
             }
             return (int)mh$.invokeExact(src_id, dst_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5TSmutex_acquire {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5TSmutex_acquire");
 
@@ -10004,9 +9110,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_acquire(unsigned int lock_count, bool *acquired)
      * }
      */
-    public static FunctionDescriptor H5TSmutex_acquire$descriptor() {
-        return H5TSmutex_acquire.DESC;
-    }
+    public static FunctionDescriptor H5TSmutex_acquire$descriptor() { return H5TSmutex_acquire.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10014,9 +9118,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_acquire(unsigned int lock_count, bool *acquired)
      * }
      */
-    public static MethodHandle H5TSmutex_acquire$handle() {
-        return H5TSmutex_acquire.HANDLE;
-    }
+    public static MethodHandle H5TSmutex_acquire$handle() { return H5TSmutex_acquire.HANDLE; }
 
     /**
      * Address for:
@@ -10024,32 +9126,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_acquire(unsigned int lock_count, bool *acquired)
      * }
      */
-    public static MemorySegment H5TSmutex_acquire$address() {
-        return H5TSmutex_acquire.ADDR;
-    }
+    public static MemorySegment H5TSmutex_acquire$address() { return H5TSmutex_acquire.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5TSmutex_acquire(unsigned int lock_count, bool *acquired)
      * }
      */
-    public static int H5TSmutex_acquire(int lock_count, MemorySegment acquired) {
+    public static int H5TSmutex_acquire(int lock_count, MemorySegment acquired)
+    {
         var mh$ = H5TSmutex_acquire.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5TSmutex_acquire", lock_count, acquired);
             }
             return (int)mh$.invokeExact(lock_count, acquired);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5TSmutex_release {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5TSmutex_release");
 
@@ -10062,9 +9161,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_release(unsigned int *lock_count)
      * }
      */
-    public static FunctionDescriptor H5TSmutex_release$descriptor() {
-        return H5TSmutex_release.DESC;
-    }
+    public static FunctionDescriptor H5TSmutex_release$descriptor() { return H5TSmutex_release.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10072,9 +9169,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_release(unsigned int *lock_count)
      * }
      */
-    public static MethodHandle H5TSmutex_release$handle() {
-        return H5TSmutex_release.HANDLE;
-    }
+    public static MethodHandle H5TSmutex_release$handle() { return H5TSmutex_release.HANDLE; }
 
     /**
      * Address for:
@@ -10082,32 +9177,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_release(unsigned int *lock_count)
      * }
      */
-    public static MemorySegment H5TSmutex_release$address() {
-        return H5TSmutex_release.ADDR;
-    }
+    public static MemorySegment H5TSmutex_release$address() { return H5TSmutex_release.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5TSmutex_release(unsigned int *lock_count)
      * }
      */
-    public static int H5TSmutex_release(MemorySegment lock_count) {
+    public static int H5TSmutex_release(MemorySegment lock_count)
+    {
         var mh$ = H5TSmutex_release.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5TSmutex_release", lock_count);
             }
             return (int)mh$.invokeExact(lock_count);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5TSmutex_get_attempt_count {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5TSmutex_get_attempt_count");
 
@@ -10120,7 +9212,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_get_attempt_count(unsigned int *count)
      * }
      */
-    public static FunctionDescriptor H5TSmutex_get_attempt_count$descriptor() {
+    public static FunctionDescriptor H5TSmutex_get_attempt_count$descriptor()
+    {
         return H5TSmutex_get_attempt_count.DESC;
     }
 
@@ -10130,7 +9223,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_get_attempt_count(unsigned int *count)
      * }
      */
-    public static MethodHandle H5TSmutex_get_attempt_count$handle() {
+    public static MethodHandle H5TSmutex_get_attempt_count$handle()
+    {
         return H5TSmutex_get_attempt_count.HANDLE;
     }
 
@@ -10140,7 +9234,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_get_attempt_count(unsigned int *count)
      * }
      */
-    public static MemorySegment H5TSmutex_get_attempt_count$address() {
+    public static MemorySegment H5TSmutex_get_attempt_count$address()
+    {
         return H5TSmutex_get_attempt_count.ADDR;
     }
 
@@ -10149,23 +9244,22 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5TSmutex_get_attempt_count(unsigned int *count)
      * }
      */
-    public static int H5TSmutex_get_attempt_count(MemorySegment count) {
+    public static int H5TSmutex_get_attempt_count(MemorySegment count)
+    {
         var mh$ = H5TSmutex_get_attempt_count.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5TSmutex_get_attempt_count", count);
             }
             return (int)mh$.invokeExact(count);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Zregister {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Zregister");
 
@@ -10178,9 +9272,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Zregister(const void *cls)
      * }
      */
-    public static FunctionDescriptor H5Zregister$descriptor() {
-        return H5Zregister.DESC;
-    }
+    public static FunctionDescriptor H5Zregister$descriptor() { return H5Zregister.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10188,9 +9280,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Zregister(const void *cls)
      * }
      */
-    public static MethodHandle H5Zregister$handle() {
-        return H5Zregister.HANDLE;
-    }
+    public static MethodHandle H5Zregister$handle() { return H5Zregister.HANDLE; }
 
     /**
      * Address for:
@@ -10198,32 +9288,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Zregister(const void *cls)
      * }
      */
-    public static MemorySegment H5Zregister$address() {
-        return H5Zregister.ADDR;
-    }
+    public static MemorySegment H5Zregister$address() { return H5Zregister.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Zregister(const void *cls)
      * }
      */
-    public static int H5Zregister(MemorySegment cls) {
+    public static int H5Zregister(MemorySegment cls)
+    {
         var mh$ = H5Zregister.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Zregister", cls);
             }
             return (int)mh$.invokeExact(cls);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Zunregister {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Zunregister");
 
@@ -10236,9 +9323,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Zunregister(H5Z_filter_t id)
      * }
      */
-    public static FunctionDescriptor H5Zunregister$descriptor() {
-        return H5Zunregister.DESC;
-    }
+    public static FunctionDescriptor H5Zunregister$descriptor() { return H5Zunregister.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10246,9 +9331,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Zunregister(H5Z_filter_t id)
      * }
      */
-    public static MethodHandle H5Zunregister$handle() {
-        return H5Zunregister.HANDLE;
-    }
+    public static MethodHandle H5Zunregister$handle() { return H5Zunregister.HANDLE; }
 
     /**
      * Address for:
@@ -10256,34 +9339,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Zunregister(H5Z_filter_t id)
      * }
      */
-    public static MemorySegment H5Zunregister$address() {
-        return H5Zunregister.ADDR;
-    }
+    public static MemorySegment H5Zunregister$address() { return H5Zunregister.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Zunregister(H5Z_filter_t id)
      * }
      */
-    public static int H5Zunregister(int id) {
+    public static int H5Zunregister(int id)
+    {
         var mh$ = H5Zunregister.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Zunregister", id);
             }
             return (int)mh$.invokeExact(id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLcmp_connector_cls {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLcmp_connector_cls");
 
@@ -10296,9 +9375,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
      * }
      */
-    public static FunctionDescriptor H5VLcmp_connector_cls$descriptor() {
-        return H5VLcmp_connector_cls.DESC;
-    }
+    public static FunctionDescriptor H5VLcmp_connector_cls$descriptor() { return H5VLcmp_connector_cls.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10306,9 +9383,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
      * }
      */
-    public static MethodHandle H5VLcmp_connector_cls$handle() {
-        return H5VLcmp_connector_cls.HANDLE;
-    }
+    public static MethodHandle H5VLcmp_connector_cls$handle() { return H5VLcmp_connector_cls.HANDLE; }
 
     /**
      * Address for:
@@ -10316,33 +9391,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
      * }
      */
-    public static MemorySegment H5VLcmp_connector_cls$address() {
-        return H5VLcmp_connector_cls.ADDR;
-    }
+    public static MemorySegment H5VLcmp_connector_cls$address() { return H5VLcmp_connector_cls.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
      * }
      */
-    public static int H5VLcmp_connector_cls(MemorySegment cmp, long connector_id1, long connector_id2) {
+    public static int H5VLcmp_connector_cls(MemorySegment cmp, long connector_id1, long connector_id2)
+    {
         var mh$ = H5VLcmp_connector_cls.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLcmp_connector_cls", cmp, connector_id1, connector_id2);
             }
             return (int)mh$.invokeExact(cmp, connector_id1, connector_id2);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLwrap_register {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_INT);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLwrap_register");
 
@@ -10355,9 +9427,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5VLwrap_register(void *obj, H5I_type_t type)
      * }
      */
-    public static FunctionDescriptor H5VLwrap_register$descriptor() {
-        return H5VLwrap_register.DESC;
-    }
+    public static FunctionDescriptor H5VLwrap_register$descriptor() { return H5VLwrap_register.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10365,9 +9435,7 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5VLwrap_register(void *obj, H5I_type_t type)
      * }
      */
-    public static MethodHandle H5VLwrap_register$handle() {
-        return H5VLwrap_register.HANDLE;
-    }
+    public static MethodHandle H5VLwrap_register$handle() { return H5VLwrap_register.HANDLE; }
 
     /**
      * Address for:
@@ -10375,32 +9443,29 @@ public class hdf5_h extends hdf5_h_1 {
      * hid_t H5VLwrap_register(void *obj, H5I_type_t type)
      * }
      */
-    public static MemorySegment H5VLwrap_register$address() {
-        return H5VLwrap_register.ADDR;
-    }
+    public static MemorySegment H5VLwrap_register$address() { return H5VLwrap_register.ADDR; }
 
     /**
      * {@snippet lang=c :
      * hid_t H5VLwrap_register(void *obj, H5I_type_t type)
      * }
      */
-    public static long H5VLwrap_register(MemorySegment obj, int type) {
+    public static long H5VLwrap_register(MemorySegment obj, int type)
+    {
         var mh$ = H5VLwrap_register.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLwrap_register", obj, type);
             }
             return (long)mh$.invokeExact(obj, type);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLretrieve_lib_state {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLretrieve_lib_state");
 
@@ -10413,7 +9478,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLretrieve_lib_state(void **state)
      * }
      */
-    public static FunctionDescriptor H5VLretrieve_lib_state$descriptor() {
+    public static FunctionDescriptor H5VLretrieve_lib_state$descriptor()
+    {
         return H5VLretrieve_lib_state.DESC;
     }
 
@@ -10423,9 +9489,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLretrieve_lib_state(void **state)
      * }
      */
-    public static MethodHandle H5VLretrieve_lib_state$handle() {
-        return H5VLretrieve_lib_state.HANDLE;
-    }
+    public static MethodHandle H5VLretrieve_lib_state$handle() { return H5VLretrieve_lib_state.HANDLE; }
 
     /**
      * Address for:
@@ -10433,32 +9497,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLretrieve_lib_state(void **state)
      * }
      */
-    public static MemorySegment H5VLretrieve_lib_state$address() {
-        return H5VLretrieve_lib_state.ADDR;
-    }
+    public static MemorySegment H5VLretrieve_lib_state$address() { return H5VLretrieve_lib_state.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLretrieve_lib_state(void **state)
      * }
      */
-    public static int H5VLretrieve_lib_state(MemorySegment state) {
+    public static int H5VLretrieve_lib_state(MemorySegment state)
+    {
         var mh$ = H5VLretrieve_lib_state.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLretrieve_lib_state", state);
             }
             return (int)mh$.invokeExact(state);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLopen_lib_context {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLopen_lib_context");
 
@@ -10471,9 +9532,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLopen_lib_context(void **context)
      * }
      */
-    public static FunctionDescriptor H5VLopen_lib_context$descriptor() {
-        return H5VLopen_lib_context.DESC;
-    }
+    public static FunctionDescriptor H5VLopen_lib_context$descriptor() { return H5VLopen_lib_context.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10481,9 +9540,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLopen_lib_context(void **context)
      * }
      */
-    public static MethodHandle H5VLopen_lib_context$handle() {
-        return H5VLopen_lib_context.HANDLE;
-    }
+    public static MethodHandle H5VLopen_lib_context$handle() { return H5VLopen_lib_context.HANDLE; }
 
     /**
      * Address for:
@@ -10491,32 +9548,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLopen_lib_context(void **context)
      * }
      */
-    public static MemorySegment H5VLopen_lib_context$address() {
-        return H5VLopen_lib_context.ADDR;
-    }
+    public static MemorySegment H5VLopen_lib_context$address() { return H5VLopen_lib_context.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLopen_lib_context(void **context)
      * }
      */
-    public static int H5VLopen_lib_context(MemorySegment context) {
+    public static int H5VLopen_lib_context(MemorySegment context)
+    {
         var mh$ = H5VLopen_lib_context.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLopen_lib_context", context);
             }
             return (int)mh$.invokeExact(context);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLrestore_lib_state {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLrestore_lib_state");
 
@@ -10529,9 +9583,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrestore_lib_state(const void *state)
      * }
      */
-    public static FunctionDescriptor H5VLrestore_lib_state$descriptor() {
-        return H5VLrestore_lib_state.DESC;
-    }
+    public static FunctionDescriptor H5VLrestore_lib_state$descriptor() { return H5VLrestore_lib_state.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10539,9 +9591,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrestore_lib_state(const void *state)
      * }
      */
-    public static MethodHandle H5VLrestore_lib_state$handle() {
-        return H5VLrestore_lib_state.HANDLE;
-    }
+    public static MethodHandle H5VLrestore_lib_state$handle() { return H5VLrestore_lib_state.HANDLE; }
 
     /**
      * Address for:
@@ -10549,32 +9599,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrestore_lib_state(const void *state)
      * }
      */
-    public static MemorySegment H5VLrestore_lib_state$address() {
-        return H5VLrestore_lib_state.ADDR;
-    }
+    public static MemorySegment H5VLrestore_lib_state$address() { return H5VLrestore_lib_state.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLrestore_lib_state(const void *state)
      * }
      */
-    public static int H5VLrestore_lib_state(MemorySegment state) {
+    public static int H5VLrestore_lib_state(MemorySegment state)
+    {
         var mh$ = H5VLrestore_lib_state.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLrestore_lib_state", state);
             }
             return (int)mh$.invokeExact(state);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLclose_lib_context {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLclose_lib_context");
 
@@ -10587,9 +9634,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLclose_lib_context(void *context)
      * }
      */
-    public static FunctionDescriptor H5VLclose_lib_context$descriptor() {
-        return H5VLclose_lib_context.DESC;
-    }
+    public static FunctionDescriptor H5VLclose_lib_context$descriptor() { return H5VLclose_lib_context.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10597,9 +9642,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLclose_lib_context(void *context)
      * }
      */
-    public static MethodHandle H5VLclose_lib_context$handle() {
-        return H5VLclose_lib_context.HANDLE;
-    }
+    public static MethodHandle H5VLclose_lib_context$handle() { return H5VLclose_lib_context.HANDLE; }
 
     /**
      * Address for:
@@ -10607,32 +9650,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLclose_lib_context(void *context)
      * }
      */
-    public static MemorySegment H5VLclose_lib_context$address() {
-        return H5VLclose_lib_context.ADDR;
-    }
+    public static MemorySegment H5VLclose_lib_context$address() { return H5VLclose_lib_context.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLclose_lib_context(void *context)
      * }
      */
-    public static int H5VLclose_lib_context(MemorySegment context) {
+    public static int H5VLclose_lib_context(MemorySegment context)
+    {
         var mh$ = H5VLclose_lib_context.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLclose_lib_context", context);
             }
             return (int)mh$.invokeExact(context);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfree_lib_state {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfree_lib_state");
 
@@ -10645,9 +9685,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_lib_state(void *state)
      * }
      */
-    public static FunctionDescriptor H5VLfree_lib_state$descriptor() {
-        return H5VLfree_lib_state.DESC;
-    }
+    public static FunctionDescriptor H5VLfree_lib_state$descriptor() { return H5VLfree_lib_state.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10655,9 +9693,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_lib_state(void *state)
      * }
      */
-    public static MethodHandle H5VLfree_lib_state$handle() {
-        return H5VLfree_lib_state.HANDLE;
-    }
+    public static MethodHandle H5VLfree_lib_state$handle() { return H5VLfree_lib_state.HANDLE; }
 
     /**
      * Address for:
@@ -10665,33 +9701,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_lib_state(void *state)
      * }
      */
-    public static MemorySegment H5VLfree_lib_state$address() {
-        return H5VLfree_lib_state.ADDR;
-    }
+    public static MemorySegment H5VLfree_lib_state$address() { return H5VLfree_lib_state.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLfree_lib_state(void *state)
      * }
      */
-    public static int H5VLfree_lib_state(MemorySegment state) {
+    public static int H5VLfree_lib_state(MemorySegment state)
+    {
         var mh$ = H5VLfree_lib_state.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfree_lib_state", state);
             }
             return (int)mh$.invokeExact(state);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLget_object {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLget_object");
 
@@ -10704,9 +9737,7 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLget_object(void *obj, hid_t connector_id)
      * }
      */
-    public static FunctionDescriptor H5VLget_object$descriptor() {
-        return H5VLget_object.DESC;
-    }
+    public static FunctionDescriptor H5VLget_object$descriptor() { return H5VLget_object.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10714,9 +9745,7 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLget_object(void *obj, hid_t connector_id)
      * }
      */
-    public static MethodHandle H5VLget_object$handle() {
-        return H5VLget_object.HANDLE;
-    }
+    public static MethodHandle H5VLget_object$handle() { return H5VLget_object.HANDLE; }
 
     /**
      * Address for:
@@ -10724,34 +9753,30 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLget_object(void *obj, hid_t connector_id)
      * }
      */
-    public static MemorySegment H5VLget_object$address() {
-        return H5VLget_object.ADDR;
-    }
+    public static MemorySegment H5VLget_object$address() { return H5VLget_object.ADDR; }
 
     /**
      * {@snippet lang=c :
      * void *H5VLget_object(void *obj, hid_t connector_id)
      * }
      */
-    public static MemorySegment H5VLget_object(MemorySegment obj, long connector_id) {
+    public static MemorySegment H5VLget_object(MemorySegment obj, long connector_id)
+    {
         var mh$ = H5VLget_object.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLget_object", obj, connector_id);
             }
             return (MemorySegment)mh$.invokeExact(obj, connector_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLget_wrap_ctx {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLget_wrap_ctx");
 
@@ -10764,9 +9789,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx)
      * }
      */
-    public static FunctionDescriptor H5VLget_wrap_ctx$descriptor() {
-        return H5VLget_wrap_ctx.DESC;
-    }
+    public static FunctionDescriptor H5VLget_wrap_ctx$descriptor() { return H5VLget_wrap_ctx.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10774,9 +9797,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx)
      * }
      */
-    public static MethodHandle H5VLget_wrap_ctx$handle() {
-        return H5VLget_wrap_ctx.HANDLE;
-    }
+    public static MethodHandle H5VLget_wrap_ctx$handle() { return H5VLget_wrap_ctx.HANDLE; }
 
     /**
      * Address for:
@@ -10784,35 +9805,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx)
      * }
      */
-    public static MemorySegment H5VLget_wrap_ctx$address() {
-        return H5VLget_wrap_ctx.ADDR;
-    }
+    public static MemorySegment H5VLget_wrap_ctx$address() { return H5VLget_wrap_ctx.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx)
      * }
      */
-    public static int H5VLget_wrap_ctx(MemorySegment obj, long connector_id, MemorySegment wrap_ctx) {
+    public static int H5VLget_wrap_ctx(MemorySegment obj, long connector_id, MemorySegment wrap_ctx)
+    {
         var mh$ = H5VLget_wrap_ctx.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLget_wrap_ctx", obj, connector_id, wrap_ctx);
             }
             return (int)mh$.invokeExact(obj, connector_id, wrap_ctx);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLwrap_object {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLwrap_object");
 
@@ -10825,9 +9841,7 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id, void *wrap_ctx)
      * }
      */
-    public static FunctionDescriptor H5VLwrap_object$descriptor() {
-        return H5VLwrap_object.DESC;
-    }
+    public static FunctionDescriptor H5VLwrap_object$descriptor() { return H5VLwrap_object.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10835,9 +9849,7 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id, void *wrap_ctx)
      * }
      */
-    public static MethodHandle H5VLwrap_object$handle() {
-        return H5VLwrap_object.HANDLE;
-    }
+    public static MethodHandle H5VLwrap_object$handle() { return H5VLwrap_object.HANDLE; }
 
     /**
      * Address for:
@@ -10845,33 +9857,31 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id, void *wrap_ctx)
      * }
      */
-    public static MemorySegment H5VLwrap_object$address() {
-        return H5VLwrap_object.ADDR;
-    }
+    public static MemorySegment H5VLwrap_object$address() { return H5VLwrap_object.ADDR; }
 
     /**
      * {@snippet lang=c :
      * void *H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id, void *wrap_ctx)
      * }
      */
-    public static MemorySegment H5VLwrap_object(MemorySegment obj, int obj_type, long connector_id, MemorySegment wrap_ctx) {
+    public static MemorySegment H5VLwrap_object(MemorySegment obj, int obj_type, long connector_id,
+                                                MemorySegment wrap_ctx)
+    {
         var mh$ = H5VLwrap_object.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLwrap_object", obj, obj_type, connector_id, wrap_ctx);
             }
             return (MemorySegment)mh$.invokeExact(obj, obj_type, connector_id, wrap_ctx);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLunwrap_object {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLunwrap_object");
 
@@ -10884,9 +9894,7 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLunwrap_object(void *obj, hid_t connector_id)
      * }
      */
-    public static FunctionDescriptor H5VLunwrap_object$descriptor() {
-        return H5VLunwrap_object.DESC;
-    }
+    public static FunctionDescriptor H5VLunwrap_object$descriptor() { return H5VLunwrap_object.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10894,9 +9902,7 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLunwrap_object(void *obj, hid_t connector_id)
      * }
      */
-    public static MethodHandle H5VLunwrap_object$handle() {
-        return H5VLunwrap_object.HANDLE;
-    }
+    public static MethodHandle H5VLunwrap_object$handle() { return H5VLunwrap_object.HANDLE; }
 
     /**
      * Address for:
@@ -10904,33 +9910,30 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLunwrap_object(void *obj, hid_t connector_id)
      * }
      */
-    public static MemorySegment H5VLunwrap_object$address() {
-        return H5VLunwrap_object.ADDR;
-    }
+    public static MemorySegment H5VLunwrap_object$address() { return H5VLunwrap_object.ADDR; }
 
     /**
      * {@snippet lang=c :
      * void *H5VLunwrap_object(void *obj, hid_t connector_id)
      * }
      */
-    public static MemorySegment H5VLunwrap_object(MemorySegment obj, long connector_id) {
+    public static MemorySegment H5VLunwrap_object(MemorySegment obj, long connector_id)
+    {
         var mh$ = H5VLunwrap_object.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLunwrap_object", obj, connector_id);
             }
             return (MemorySegment)mh$.invokeExact(obj, connector_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfree_wrap_ctx {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfree_wrap_ctx");
 
@@ -10943,9 +9946,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id)
      * }
      */
-    public static FunctionDescriptor H5VLfree_wrap_ctx$descriptor() {
-        return H5VLfree_wrap_ctx.DESC;
-    }
+    public static FunctionDescriptor H5VLfree_wrap_ctx$descriptor() { return H5VLfree_wrap_ctx.DESC; }
 
     /**
      * Downcall method handle for:
@@ -10953,9 +9954,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id)
      * }
      */
-    public static MethodHandle H5VLfree_wrap_ctx$handle() {
-        return H5VLfree_wrap_ctx.HANDLE;
-    }
+    public static MethodHandle H5VLfree_wrap_ctx$handle() { return H5VLfree_wrap_ctx.HANDLE; }
 
     /**
      * Address for:
@@ -10963,33 +9962,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id)
      * }
      */
-    public static MemorySegment H5VLfree_wrap_ctx$address() {
-        return H5VLfree_wrap_ctx.ADDR;
-    }
+    public static MemorySegment H5VLfree_wrap_ctx$address() { return H5VLfree_wrap_ctx.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id)
      * }
      */
-    public static int H5VLfree_wrap_ctx(MemorySegment wrap_ctx, long connector_id) {
+    public static int H5VLfree_wrap_ctx(MemorySegment wrap_ctx, long connector_id)
+    {
         var mh$ = H5VLfree_wrap_ctx.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfree_wrap_ctx", wrap_ctx, connector_id);
             }
             return (int)mh$.invokeExact(wrap_ctx, connector_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLinitialize {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLinitialize");
 
@@ -11002,9 +9998,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLinitialize(hid_t connector_id, hid_t vipl_id)
      * }
      */
-    public static FunctionDescriptor H5VLinitialize$descriptor() {
-        return H5VLinitialize.DESC;
-    }
+    public static FunctionDescriptor H5VLinitialize$descriptor() { return H5VLinitialize.DESC; }
 
     /**
      * Downcall method handle for:
@@ -11012,9 +10006,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLinitialize(hid_t connector_id, hid_t vipl_id)
      * }
      */
-    public static MethodHandle H5VLinitialize$handle() {
-        return H5VLinitialize.HANDLE;
-    }
+    public static MethodHandle H5VLinitialize$handle() { return H5VLinitialize.HANDLE; }
 
     /**
      * Address for:
@@ -11022,32 +10014,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLinitialize(hid_t connector_id, hid_t vipl_id)
      * }
      */
-    public static MemorySegment H5VLinitialize$address() {
-        return H5VLinitialize.ADDR;
-    }
+    public static MemorySegment H5VLinitialize$address() { return H5VLinitialize.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLinitialize(hid_t connector_id, hid_t vipl_id)
      * }
      */
-    public static int H5VLinitialize(long connector_id, long vipl_id) {
+    public static int H5VLinitialize(long connector_id, long vipl_id)
+    {
         var mh$ = H5VLinitialize.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLinitialize", connector_id, vipl_id);
             }
             return (int)mh$.invokeExact(connector_id, vipl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLterminate {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLterminate");
 
@@ -11060,9 +10049,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLterminate(hid_t connector_id)
      * }
      */
-    public static FunctionDescriptor H5VLterminate$descriptor() {
-        return H5VLterminate.DESC;
-    }
+    public static FunctionDescriptor H5VLterminate$descriptor() { return H5VLterminate.DESC; }
 
     /**
      * Downcall method handle for:
@@ -11070,9 +10057,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLterminate(hid_t connector_id)
      * }
      */
-    public static MethodHandle H5VLterminate$handle() {
-        return H5VLterminate.HANDLE;
-    }
+    public static MethodHandle H5VLterminate$handle() { return H5VLterminate.HANDLE; }
 
     /**
      * Address for:
@@ -11080,33 +10065,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLterminate(hid_t connector_id)
      * }
      */
-    public static MemorySegment H5VLterminate$address() {
-        return H5VLterminate.ADDR;
-    }
+    public static MemorySegment H5VLterminate$address() { return H5VLterminate.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLterminate(hid_t connector_id)
      * }
      */
-    public static int H5VLterminate(long connector_id) {
+    public static int H5VLterminate(long connector_id)
+    {
         var mh$ = H5VLterminate.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLterminate", connector_id);
             }
             return (int)mh$.invokeExact(connector_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLget_cap_flags {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLget_cap_flags");
 
@@ -11119,9 +10101,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_cap_flags(hid_t connector_id, uint64_t *cap_flags)
      * }
      */
-    public static FunctionDescriptor H5VLget_cap_flags$descriptor() {
-        return H5VLget_cap_flags.DESC;
-    }
+    public static FunctionDescriptor H5VLget_cap_flags$descriptor() { return H5VLget_cap_flags.DESC; }
 
     /**
      * Downcall method handle for:
@@ -11129,9 +10109,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_cap_flags(hid_t connector_id, uint64_t *cap_flags)
      * }
      */
-    public static MethodHandle H5VLget_cap_flags$handle() {
-        return H5VLget_cap_flags.HANDLE;
-    }
+    public static MethodHandle H5VLget_cap_flags$handle() { return H5VLget_cap_flags.HANDLE; }
 
     /**
      * Address for:
@@ -11139,33 +10117,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_cap_flags(hid_t connector_id, uint64_t *cap_flags)
      * }
      */
-    public static MemorySegment H5VLget_cap_flags$address() {
-        return H5VLget_cap_flags.ADDR;
-    }
+    public static MemorySegment H5VLget_cap_flags$address() { return H5VLget_cap_flags.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLget_cap_flags(hid_t connector_id, uint64_t *cap_flags)
      * }
      */
-    public static int H5VLget_cap_flags(long connector_id, MemorySegment cap_flags) {
+    public static int H5VLget_cap_flags(long connector_id, MemorySegment cap_flags)
+    {
         var mh$ = H5VLget_cap_flags.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLget_cap_flags", connector_id, cap_flags);
             }
             return (int)mh$.invokeExact(connector_id, cap_flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLget_value {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLget_value");
 
@@ -11178,9 +10153,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_value(hid_t connector_id, H5VL_class_value_t *conn_value)
      * }
      */
-    public static FunctionDescriptor H5VLget_value$descriptor() {
-        return H5VLget_value.DESC;
-    }
+    public static FunctionDescriptor H5VLget_value$descriptor() { return H5VLget_value.DESC; }
 
     /**
      * Downcall method handle for:
@@ -11188,9 +10161,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_value(hid_t connector_id, H5VL_class_value_t *conn_value)
      * }
      */
-    public static MethodHandle H5VLget_value$handle() {
-        return H5VLget_value.HANDLE;
-    }
+    public static MethodHandle H5VLget_value$handle() { return H5VLget_value.HANDLE; }
 
     /**
      * Address for:
@@ -11198,34 +10169,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLget_value(hid_t connector_id, H5VL_class_value_t *conn_value)
      * }
      */
-    public static MemorySegment H5VLget_value$address() {
-        return H5VLget_value.ADDR;
-    }
+    public static MemorySegment H5VLget_value$address() { return H5VLget_value.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLget_value(hid_t connector_id, H5VL_class_value_t *conn_value)
      * }
      */
-    public static int H5VLget_value(long connector_id, MemorySegment conn_value) {
+    public static int H5VLget_value(long connector_id, MemorySegment conn_value)
+    {
         var mh$ = H5VLget_value.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLget_value", connector_id, conn_value);
             }
             return (int)mh$.invokeExact(connector_id, conn_value);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLcopy_connector_info {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLcopy_connector_info");
 
@@ -11238,7 +10205,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcopy_connector_info(hid_t connector_id, void **dst_vol_info, void *src_vol_info)
      * }
      */
-    public static FunctionDescriptor H5VLcopy_connector_info$descriptor() {
+    public static FunctionDescriptor H5VLcopy_connector_info$descriptor()
+    {
         return H5VLcopy_connector_info.DESC;
     }
 
@@ -11248,9 +10216,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcopy_connector_info(hid_t connector_id, void **dst_vol_info, void *src_vol_info)
      * }
      */
-    public static MethodHandle H5VLcopy_connector_info$handle() {
-        return H5VLcopy_connector_info.HANDLE;
-    }
+    public static MethodHandle H5VLcopy_connector_info$handle() { return H5VLcopy_connector_info.HANDLE; }
 
     /**
      * Address for:
@@ -11258,35 +10224,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcopy_connector_info(hid_t connector_id, void **dst_vol_info, void *src_vol_info)
      * }
      */
-    public static MemorySegment H5VLcopy_connector_info$address() {
-        return H5VLcopy_connector_info.ADDR;
-    }
+    public static MemorySegment H5VLcopy_connector_info$address() { return H5VLcopy_connector_info.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLcopy_connector_info(hid_t connector_id, void **dst_vol_info, void *src_vol_info)
      * }
      */
-    public static int H5VLcopy_connector_info(long connector_id, MemorySegment dst_vol_info, MemorySegment src_vol_info) {
+    public static int H5VLcopy_connector_info(long connector_id, MemorySegment dst_vol_info,
+                                              MemorySegment src_vol_info)
+    {
         var mh$ = H5VLcopy_connector_info.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLcopy_connector_info", connector_id, dst_vol_info, src_vol_info);
             }
             return (int)mh$.invokeExact(connector_id, dst_vol_info, src_vol_info);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLcmp_connector_info {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLcmp_connector_info");
 
@@ -11299,7 +10261,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcmp_connector_info(int *cmp, hid_t connector_id, const void *info1, const void *info2)
      * }
      */
-    public static FunctionDescriptor H5VLcmp_connector_info$descriptor() {
+    public static FunctionDescriptor H5VLcmp_connector_info$descriptor()
+    {
         return H5VLcmp_connector_info.DESC;
     }
 
@@ -11309,9 +10272,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcmp_connector_info(int *cmp, hid_t connector_id, const void *info1, const void *info2)
      * }
      */
-    public static MethodHandle H5VLcmp_connector_info$handle() {
-        return H5VLcmp_connector_info.HANDLE;
-    }
+    public static MethodHandle H5VLcmp_connector_info$handle() { return H5VLcmp_connector_info.HANDLE; }
 
     /**
      * Address for:
@@ -11319,33 +10280,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLcmp_connector_info(int *cmp, hid_t connector_id, const void *info1, const void *info2)
      * }
      */
-    public static MemorySegment H5VLcmp_connector_info$address() {
-        return H5VLcmp_connector_info.ADDR;
-    }
+    public static MemorySegment H5VLcmp_connector_info$address() { return H5VLcmp_connector_info.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLcmp_connector_info(int *cmp, hid_t connector_id, const void *info1, const void *info2)
      * }
      */
-    public static int H5VLcmp_connector_info(MemorySegment cmp, long connector_id, MemorySegment info1, MemorySegment info2) {
+    public static int H5VLcmp_connector_info(MemorySegment cmp, long connector_id, MemorySegment info1,
+                                             MemorySegment info2)
+    {
         var mh$ = H5VLcmp_connector_info.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLcmp_connector_info", cmp, connector_id, info1, info2);
             }
             return (int)mh$.invokeExact(cmp, connector_id, info1, info2);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfree_connector_info {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfree_connector_info");
 
@@ -11358,7 +10317,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_connector_info(hid_t connector_id, void *vol_info)
      * }
      */
-    public static FunctionDescriptor H5VLfree_connector_info$descriptor() {
+    public static FunctionDescriptor H5VLfree_connector_info$descriptor()
+    {
         return H5VLfree_connector_info.DESC;
     }
 
@@ -11368,9 +10328,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_connector_info(hid_t connector_id, void *vol_info)
      * }
      */
-    public static MethodHandle H5VLfree_connector_info$handle() {
-        return H5VLfree_connector_info.HANDLE;
-    }
+    public static MethodHandle H5VLfree_connector_info$handle() { return H5VLfree_connector_info.HANDLE; }
 
     /**
      * Address for:
@@ -11378,34 +10336,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfree_connector_info(hid_t connector_id, void *vol_info)
      * }
      */
-    public static MemorySegment H5VLfree_connector_info$address() {
-        return H5VLfree_connector_info.ADDR;
-    }
+    public static MemorySegment H5VLfree_connector_info$address() { return H5VLfree_connector_info.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLfree_connector_info(hid_t connector_id, void *vol_info)
      * }
      */
-    public static int H5VLfree_connector_info(long connector_id, MemorySegment vol_info) {
+    public static int H5VLfree_connector_info(long connector_id, MemorySegment vol_info)
+    {
         var mh$ = H5VLfree_connector_info.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfree_connector_info", connector_id, vol_info);
             }
             return (int)mh$.invokeExact(connector_id, vol_info);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLconnector_info_to_str {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLconnector_info_to_str");
 
@@ -11418,7 +10372,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLconnector_info_to_str(const void *info, hid_t connector_id, char **str)
      * }
      */
-    public static FunctionDescriptor H5VLconnector_info_to_str$descriptor() {
+    public static FunctionDescriptor H5VLconnector_info_to_str$descriptor()
+    {
         return H5VLconnector_info_to_str.DESC;
     }
 
@@ -11428,9 +10383,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLconnector_info_to_str(const void *info, hid_t connector_id, char **str)
      * }
      */
-    public static MethodHandle H5VLconnector_info_to_str$handle() {
-        return H5VLconnector_info_to_str.HANDLE;
-    }
+    public static MethodHandle H5VLconnector_info_to_str$handle() { return H5VLconnector_info_to_str.HANDLE; }
 
     /**
      * Address for:
@@ -11438,34 +10391,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLconnector_info_to_str(const void *info, hid_t connector_id, char **str)
      * }
      */
-    public static MemorySegment H5VLconnector_info_to_str$address() {
-        return H5VLconnector_info_to_str.ADDR;
-    }
+    public static MemorySegment H5VLconnector_info_to_str$address() { return H5VLconnector_info_to_str.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLconnector_info_to_str(const void *info, hid_t connector_id, char **str)
      * }
      */
-    public static int H5VLconnector_info_to_str(MemorySegment info, long connector_id, MemorySegment str) {
+    public static int H5VLconnector_info_to_str(MemorySegment info, long connector_id, MemorySegment str)
+    {
         var mh$ = H5VLconnector_info_to_str.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLconnector_info_to_str", info, connector_id, str);
             }
             return (int)mh$.invokeExact(info, connector_id, str);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLconnector_str_to_info {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLconnector_str_to_info");
 
@@ -11478,7 +10427,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info)
      * }
      */
-    public static FunctionDescriptor H5VLconnector_str_to_info$descriptor() {
+    public static FunctionDescriptor H5VLconnector_str_to_info$descriptor()
+    {
         return H5VLconnector_str_to_info.DESC;
     }
 
@@ -11488,9 +10438,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info)
      * }
      */
-    public static MethodHandle H5VLconnector_str_to_info$handle() {
-        return H5VLconnector_str_to_info.HANDLE;
-    }
+    public static MethodHandle H5VLconnector_str_to_info$handle() { return H5VLconnector_str_to_info.HANDLE; }
 
     /**
      * Address for:
@@ -11498,41 +10446,32 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info)
      * }
      */
-    public static MemorySegment H5VLconnector_str_to_info$address() {
-        return H5VLconnector_str_to_info.ADDR;
-    }
+    public static MemorySegment H5VLconnector_str_to_info$address() { return H5VLconnector_str_to_info.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info)
      * }
      */
-    public static int H5VLconnector_str_to_info(MemorySegment str, long connector_id, MemorySegment info) {
+    public static int H5VLconnector_str_to_info(MemorySegment str, long connector_id, MemorySegment info)
+    {
         var mh$ = H5VLconnector_str_to_info.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLconnector_str_to_info", str, connector_id, info);
             }
             return (int)mh$.invokeExact(str, connector_id, info);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLattr_create {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLattr_create");
 
@@ -11542,61 +10481,59 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLattr_create$descriptor() {
-        return H5VLattr_create.DESC;
-    }
+    public static FunctionDescriptor H5VLattr_create$descriptor() { return H5VLattr_create.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLattr_create$handle() {
-        return H5VLattr_create.HANDLE;
-    }
+    public static MethodHandle H5VLattr_create$handle() { return H5VLattr_create.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLattr_create$address() {
-        return H5VLattr_create.ADDR;
-    }
+    public static MemorySegment H5VLattr_create$address() { return H5VLattr_create.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLattr_create(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment attr_name, long type_id, long space_id, long acpl_id, long aapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLattr_create(MemorySegment obj, MemorySegment loc_params,
+                                                long connector_id, MemorySegment attr_name, long type_id,
+                                                long space_id, long acpl_id, long aapl_id, long dxpl_id,
+                                                MemorySegment req)
+    {
         var mh$ = H5VLattr_create.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLattr_create", obj, loc_params, connector_id, attr_name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req);
+                traceDowncall("H5VLattr_create", obj, loc_params, connector_id, attr_name, type_id, space_id,
+                              acpl_id, aapl_id, dxpl_id, req);
             }
-            return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, attr_name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, attr_name, type_id, space_id,
+                                                  acpl_id, aapl_id, dxpl_id, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLattr_open {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLattr_open");
 
@@ -11606,60 +10543,56 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t aapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t aapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLattr_open$descriptor() {
-        return H5VLattr_open.DESC;
-    }
+    public static FunctionDescriptor H5VLattr_open$descriptor() { return H5VLattr_open.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t aapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t aapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLattr_open$handle() {
-        return H5VLattr_open.HANDLE;
-    }
+    public static MethodHandle H5VLattr_open$handle() { return H5VLattr_open.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t aapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t aapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLattr_open$address() {
-        return H5VLattr_open.ADDR;
-    }
+    public static MemorySegment H5VLattr_open$address() { return H5VLattr_open.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t aapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t aapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLattr_open(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment name, long aapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLattr_open(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                              MemorySegment name, long aapl_id, long dxpl_id,
+                                              MemorySegment req)
+    {
         var mh$ = H5VLattr_open.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLattr_open", obj, loc_params, connector_id, name, aapl_id, dxpl_id, req);
             }
             return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, aapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLattr_read {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLattr_read");
 
@@ -11669,60 +10602,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLattr_read$descriptor() {
-        return H5VLattr_read.DESC;
-    }
+    public static FunctionDescriptor H5VLattr_read$descriptor() { return H5VLattr_read.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLattr_read$handle() {
-        return H5VLattr_read.HANDLE;
-    }
+    public static MethodHandle H5VLattr_read$handle() { return H5VLattr_read.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLattr_read$address() {
-        return H5VLattr_read.ADDR;
-    }
+    public static MemorySegment H5VLattr_read$address() { return H5VLattr_read.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLattr_read(MemorySegment attr, long connector_id, long dtype_id, MemorySegment buf, long dxpl_id, MemorySegment req) {
+    public static int H5VLattr_read(MemorySegment attr, long connector_id, long dtype_id, MemorySegment buf,
+                                    long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLattr_read.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLattr_read", attr, connector_id, dtype_id, buf, dxpl_id, req);
             }
             return (int)mh$.invokeExact(attr, connector_id, dtype_id, buf, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLattr_write {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLattr_write");
 
@@ -11732,59 +10660,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static FunctionDescriptor H5VLattr_write$descriptor() {
-        return H5VLattr_write.DESC;
-    }
+    public static FunctionDescriptor H5VLattr_write$descriptor() { return H5VLattr_write.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MethodHandle H5VLattr_write$handle() {
-        return H5VLattr_write.HANDLE;
-    }
+    public static MethodHandle H5VLattr_write$handle() { return H5VLattr_write.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MemorySegment H5VLattr_write$address() {
-        return H5VLattr_write.ADDR;
-    }
+    public static MemorySegment H5VLattr_write$address() { return H5VLattr_write.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static int H5VLattr_write(MemorySegment attr, long connector_id, long dtype_id, MemorySegment buf, long dxpl_id, MemorySegment req) {
+    public static int H5VLattr_write(MemorySegment attr, long connector_id, long dtype_id, MemorySegment buf,
+                                     long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLattr_write.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLattr_write", attr, connector_id, dtype_id, buf, dxpl_id, req);
             }
             return (int)mh$.invokeExact(attr, connector_id, dtype_id, buf, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLattr_get {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLattr_get");
 
@@ -11794,60 +10718,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLattr_get$descriptor() {
-        return H5VLattr_get.DESC;
-    }
+    public static FunctionDescriptor H5VLattr_get$descriptor() { return H5VLattr_get.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLattr_get$handle() {
-        return H5VLattr_get.HANDLE;
-    }
+    public static MethodHandle H5VLattr_get$handle() { return H5VLattr_get.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLattr_get$address() {
-        return H5VLattr_get.ADDR;
-    }
+    public static MemorySegment H5VLattr_get$address() { return H5VLattr_get.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLattr_get(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLattr_get(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id,
+                                   MemorySegment req)
+    {
         var mh$ = H5VLattr_get.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLattr_get", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLattr_specific {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLattr_specific");
 
@@ -11857,59 +10776,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLattr_specific$descriptor() {
-        return H5VLattr_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLattr_specific$descriptor() { return H5VLattr_specific.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLattr_specific$handle() {
-        return H5VLattr_specific.HANDLE;
-    }
+    public static MethodHandle H5VLattr_specific$handle() { return H5VLattr_specific.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLattr_specific$address() {
-        return H5VLattr_specific.ADDR;
-    }
+    public static MemorySegment H5VLattr_specific$address() { return H5VLattr_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLattr_specific(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLattr_specific(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                        MemorySegment args, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLattr_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLattr_specific", obj, loc_params, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, loc_params, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLattr_optional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLattr_optional");
 
@@ -11919,58 +10834,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLattr_optional$descriptor() {
-        return H5VLattr_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLattr_optional$descriptor() { return H5VLattr_optional.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLattr_optional$handle() {
-        return H5VLattr_optional.HANDLE;
-    }
+    public static MethodHandle H5VLattr_optional$handle() { return H5VLattr_optional.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLattr_optional$address() {
-        return H5VLattr_optional.ADDR;
-    }
+    public static MemorySegment H5VLattr_optional$address() { return H5VLattr_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLattr_optional(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLattr_optional(MemorySegment obj, long connector_id, MemorySegment args,
+                                        long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLattr_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLattr_optional", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLattr_close {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLattr_close");
 
@@ -11983,9 +10894,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLattr_close(void *attr, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLattr_close$descriptor() {
-        return H5VLattr_close.DESC;
-    }
+    public static FunctionDescriptor H5VLattr_close$descriptor() { return H5VLattr_close.DESC; }
 
     /**
      * Downcall method handle for:
@@ -11993,9 +10902,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLattr_close(void *attr, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLattr_close$handle() {
-        return H5VLattr_close.HANDLE;
-    }
+    public static MethodHandle H5VLattr_close$handle() { return H5VLattr_close.HANDLE; }
 
     /**
      * Address for:
@@ -12003,42 +10910,32 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLattr_close(void *attr, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLattr_close$address() {
-        return H5VLattr_close.ADDR;
-    }
+    public static MemorySegment H5VLattr_close$address() { return H5VLattr_close.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLattr_close(void *attr, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLattr_close(MemorySegment attr, long connector_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLattr_close(MemorySegment attr, long connector_id, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLattr_close.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLattr_close", attr, connector_id, dxpl_id, req);
             }
             return (int)mh$.invokeExact(attr, connector_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdataset_create {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdataset_create");
 
@@ -12048,61 +10945,63 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLdataset_create$descriptor() {
-        return H5VLdataset_create.DESC;
-    }
+    public static FunctionDescriptor H5VLdataset_create$descriptor() { return H5VLdataset_create.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLdataset_create$handle() {
-        return H5VLdataset_create.HANDLE;
-    }
+    public static MethodHandle H5VLdataset_create$handle() { return H5VLdataset_create.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLdataset_create$address() {
-        return H5VLdataset_create.ADDR;
-    }
+    public static MemorySegment H5VLdataset_create$address() { return H5VLdataset_create.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLdataset_create(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment name, long lcpl_id, long type_id, long space_id, long dcpl_id, long dapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLdataset_create(MemorySegment obj, MemorySegment loc_params,
+                                                   long connector_id, MemorySegment name, long lcpl_id,
+                                                   long type_id, long space_id, long dcpl_id, long dapl_id,
+                                                   long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLdataset_create.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLdataset_create", obj, loc_params, connector_id, name, lcpl_id, type_id, space_id, dcpl_id, dapl_id, dxpl_id, req);
+                traceDowncall("H5VLdataset_create", obj, loc_params, connector_id, name, lcpl_id, type_id,
+                              space_id, dcpl_id, dapl_id, dxpl_id, req);
             }
-            return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, lcpl_id, type_id, space_id, dcpl_id, dapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, lcpl_id, type_id,
+                                                  space_id, dcpl_id, dapl_id, dxpl_id, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdataset_open {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdataset_open");
 
@@ -12112,63 +11011,56 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t dapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdataset_open$descriptor() {
-        return H5VLdataset_open.DESC;
-    }
+    public static FunctionDescriptor H5VLdataset_open$descriptor() { return H5VLdataset_open.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t dapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLdataset_open$handle() {
-        return H5VLdataset_open.HANDLE;
-    }
+    public static MethodHandle H5VLdataset_open$handle() { return H5VLdataset_open.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t dapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdataset_open$address() {
-        return H5VLdataset_open.ADDR;
-    }
+    public static MemorySegment H5VLdataset_open$address() { return H5VLdataset_open.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t dapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdataset_open(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment name, long dapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLdataset_open(MemorySegment obj, MemorySegment loc_params,
+                                                 long connector_id, MemorySegment name, long dapl_id,
+                                                 long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLdataset_open.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdataset_open", obj, loc_params, connector_id, name, dapl_id, dxpl_id, req);
             }
             return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, dapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdataset_read {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdataset_read");
 
@@ -12178,63 +11070,59 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
+     * herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t
+     * mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdataset_read$descriptor() {
-        return H5VLdataset_read.DESC;
-    }
+    public static FunctionDescriptor H5VLdataset_read$descriptor() { return H5VLdataset_read.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
+     * herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t
+     * mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
      * }
      */
-    public static MethodHandle H5VLdataset_read$handle() {
-        return H5VLdataset_read.HANDLE;
-    }
+    public static MethodHandle H5VLdataset_read$handle() { return H5VLdataset_read.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
+     * herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t
+     * mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
      * }
      */
-    public static MemorySegment H5VLdataset_read$address() {
-        return H5VLdataset_read.ADDR;
-    }
+    public static MemorySegment H5VLdataset_read$address() { return H5VLdataset_read.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
+     * herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t
+     * mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
      * }
      */
-    public static int H5VLdataset_read(long count, MemorySegment dset, long connector_id, MemorySegment mem_type_id, MemorySegment mem_space_id, MemorySegment file_space_id, long plist_id, MemorySegment buf, MemorySegment req) {
+    public static int H5VLdataset_read(long count, MemorySegment dset, long connector_id,
+                                       MemorySegment mem_type_id, MemorySegment mem_space_id,
+                                       MemorySegment file_space_id, long plist_id, MemorySegment buf,
+                                       MemorySegment req)
+    {
         var mh$ = H5VLdataset_read.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLdataset_read", count, dset, connector_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req);
+                traceDowncall("H5VLdataset_read", count, dset, connector_id, mem_type_id, mem_space_id,
+                              file_space_id, plist_id, buf, req);
             }
-            return (int)mh$.invokeExact(count, dset, connector_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(count, dset, connector_id, mem_type_id, mem_space_id, file_space_id,
+                                        plist_id, buf, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdataset_write {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdataset_write");
 
@@ -12244,59 +11132,59 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
+     * herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t
+     * mem_space_id[], hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdataset_write$descriptor() {
-        return H5VLdataset_write.DESC;
-    }
+    public static FunctionDescriptor H5VLdataset_write$descriptor() { return H5VLdataset_write.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
+     * herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t
+     * mem_space_id[], hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
      * }
      */
-    public static MethodHandle H5VLdataset_write$handle() {
-        return H5VLdataset_write.HANDLE;
-    }
+    public static MethodHandle H5VLdataset_write$handle() { return H5VLdataset_write.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
+     * herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t
+     * mem_space_id[], hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
      * }
      */
-    public static MemorySegment H5VLdataset_write$address() {
-        return H5VLdataset_write.ADDR;
-    }
+    public static MemorySegment H5VLdataset_write$address() { return H5VLdataset_write.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
+     * herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[], hid_t
+     * mem_space_id[], hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
      * }
      */
-    public static int H5VLdataset_write(long count, MemorySegment dset, long connector_id, MemorySegment mem_type_id, MemorySegment mem_space_id, MemorySegment file_space_id, long plist_id, MemorySegment buf, MemorySegment req) {
+    public static int H5VLdataset_write(long count, MemorySegment dset, long connector_id,
+                                        MemorySegment mem_type_id, MemorySegment mem_space_id,
+                                        MemorySegment file_space_id, long plist_id, MemorySegment buf,
+                                        MemorySegment req)
+    {
         var mh$ = H5VLdataset_write.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLdataset_write", count, dset, connector_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req);
+                traceDowncall("H5VLdataset_write", count, dset, connector_id, mem_type_id, mem_space_id,
+                              file_space_id, plist_id, buf, req);
             }
-            return (int)mh$.invokeExact(count, dset, connector_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(count, dset, connector_id, mem_type_id, mem_space_id, file_space_id,
+                                        plist_id, buf, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdataset_get {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdataset_get");
 
@@ -12306,59 +11194,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdataset_get$descriptor() {
-        return H5VLdataset_get.DESC;
-    }
+    public static FunctionDescriptor H5VLdataset_get$descriptor() { return H5VLdataset_get.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MethodHandle H5VLdataset_get$handle() {
-        return H5VLdataset_get.HANDLE;
-    }
+    public static MethodHandle H5VLdataset_get$handle() { return H5VLdataset_get.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MemorySegment H5VLdataset_get$address() {
-        return H5VLdataset_get.ADDR;
-    }
+    public static MemorySegment H5VLdataset_get$address() { return H5VLdataset_get.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static int H5VLdataset_get(MemorySegment dset, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLdataset_get(MemorySegment dset, long connector_id, MemorySegment args, long dxpl_id,
+                                      MemorySegment req)
+    {
         var mh$ = H5VLdataset_get.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdataset_get", dset, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(dset, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdataset_specific {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdataset_specific");
 
@@ -12368,59 +11252,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdataset_specific$descriptor() {
-        return H5VLdataset_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLdataset_specific$descriptor() { return H5VLdataset_specific.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLdataset_specific$handle() {
-        return H5VLdataset_specific.HANDLE;
-    }
+    public static MethodHandle H5VLdataset_specific$handle() { return H5VLdataset_specific.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdataset_specific$address() {
-        return H5VLdataset_specific.ADDR;
-    }
+    public static MemorySegment H5VLdataset_specific$address() { return H5VLdataset_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static int H5VLdataset_specific(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLdataset_specific(MemorySegment obj, long connector_id, MemorySegment args,
+                                           long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLdataset_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdataset_specific", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdataset_optional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdataset_optional");
 
@@ -12430,58 +11310,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdataset_optional$descriptor() {
-        return H5VLdataset_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLdataset_optional$descriptor() { return H5VLdataset_optional.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MethodHandle H5VLdataset_optional$handle() {
-        return H5VLdataset_optional.HANDLE;
-    }
+    public static MethodHandle H5VLdataset_optional$handle() { return H5VLdataset_optional.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MemorySegment H5VLdataset_optional$address() {
-        return H5VLdataset_optional.ADDR;
-    }
+    public static MemorySegment H5VLdataset_optional$address() { return H5VLdataset_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static int H5VLdataset_optional(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLdataset_optional(MemorySegment obj, long connector_id, MemorySegment args,
+                                           long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLdataset_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdataset_optional", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdataset_close {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdataset_close");
 
@@ -12494,9 +11370,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLdataset_close(void *dset, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdataset_close$descriptor() {
-        return H5VLdataset_close.DESC;
-    }
+    public static FunctionDescriptor H5VLdataset_close$descriptor() { return H5VLdataset_close.DESC; }
 
     /**
      * Downcall method handle for:
@@ -12504,9 +11378,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLdataset_close(void *dset, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLdataset_close$handle() {
-        return H5VLdataset_close.HANDLE;
-    }
+    public static MethodHandle H5VLdataset_close$handle() { return H5VLdataset_close.HANDLE; }
 
     /**
      * Address for:
@@ -12514,41 +11386,33 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLdataset_close(void *dset, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdataset_close$address() {
-        return H5VLdataset_close.ADDR;
-    }
+    public static MemorySegment H5VLdataset_close$address() { return H5VLdataset_close.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLdataset_close(void *dset, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLdataset_close(MemorySegment dset, long connector_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLdataset_close(MemorySegment dset, long connector_id, long dxpl_id,
+                                        MemorySegment req)
+    {
         var mh$ = H5VLdataset_close.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdataset_close", dset, connector_id, dxpl_id, req);
             }
             return (int)mh$.invokeExact(dset, connector_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdatatype_commit {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdatatype_commit");
 
@@ -12558,61 +11422,59 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const
+     * char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdatatype_commit$descriptor() {
-        return H5VLdatatype_commit.DESC;
-    }
+    public static FunctionDescriptor H5VLdatatype_commit$descriptor() { return H5VLdatatype_commit.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const
+     * char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLdatatype_commit$handle() {
-        return H5VLdatatype_commit.HANDLE;
-    }
+    public static MethodHandle H5VLdatatype_commit$handle() { return H5VLdatatype_commit.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const
+     * char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdatatype_commit$address() {
-        return H5VLdatatype_commit.ADDR;
-    }
+    public static MemorySegment H5VLdatatype_commit$address() { return H5VLdatatype_commit.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const
+     * char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdatatype_commit(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment name, long type_id, long lcpl_id, long tcpl_id, long tapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLdatatype_commit(MemorySegment obj, MemorySegment loc_params,
+                                                    long connector_id, MemorySegment name, long type_id,
+                                                    long lcpl_id, long tcpl_id, long tapl_id, long dxpl_id,
+                                                    MemorySegment req)
+    {
         var mh$ = H5VLdatatype_commit.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLdatatype_commit", obj, loc_params, connector_id, name, type_id, lcpl_id, tcpl_id, tapl_id, dxpl_id, req);
+                traceDowncall("H5VLdatatype_commit", obj, loc_params, connector_id, name, type_id, lcpl_id,
+                              tcpl_id, tapl_id, dxpl_id, req);
             }
-            return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, type_id, lcpl_id, tcpl_id, tapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, type_id, lcpl_id,
+                                                  tcpl_id, tapl_id, dxpl_id, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdatatype_open {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdatatype_open");
 
@@ -12622,59 +11484,57 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t tapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdatatype_open$descriptor() {
-        return H5VLdatatype_open.DESC;
-    }
+    public static FunctionDescriptor H5VLdatatype_open$descriptor() { return H5VLdatatype_open.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t tapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLdatatype_open$handle() {
-        return H5VLdatatype_open.HANDLE;
-    }
+    public static MethodHandle H5VLdatatype_open$handle() { return H5VLdatatype_open.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t tapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdatatype_open$address() {
-        return H5VLdatatype_open.ADDR;
-    }
+    public static MemorySegment H5VLdatatype_open$address() { return H5VLdatatype_open.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t tapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdatatype_open(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment name, long tapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLdatatype_open(MemorySegment obj, MemorySegment loc_params,
+                                                  long connector_id, MemorySegment name, long tapl_id,
+                                                  long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLdatatype_open.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLdatatype_open", obj, loc_params, connector_id, name, tapl_id, dxpl_id, req);
+                traceDowncall("H5VLdatatype_open", obj, loc_params, connector_id, name, tapl_id, dxpl_id,
+                              req);
             }
             return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, tapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdatatype_get {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdatatype_get");
 
@@ -12684,59 +11544,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdatatype_get$descriptor() {
-        return H5VLdatatype_get.DESC;
-    }
+    public static FunctionDescriptor H5VLdatatype_get$descriptor() { return H5VLdatatype_get.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MethodHandle H5VLdatatype_get$handle() {
-        return H5VLdatatype_get.HANDLE;
-    }
+    public static MethodHandle H5VLdatatype_get$handle() { return H5VLdatatype_get.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MemorySegment H5VLdatatype_get$address() {
-        return H5VLdatatype_get.ADDR;
-    }
+    public static MemorySegment H5VLdatatype_get$address() { return H5VLdatatype_get.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static int H5VLdatatype_get(MemorySegment dt, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLdatatype_get(MemorySegment dt, long connector_id, MemorySegment args, long dxpl_id,
+                                       MemorySegment req)
+    {
         var mh$ = H5VLdatatype_get.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdatatype_get", dt, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(dt, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdatatype_specific {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdatatype_specific");
 
@@ -12746,59 +11602,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdatatype_specific$descriptor() {
-        return H5VLdatatype_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLdatatype_specific$descriptor() { return H5VLdatatype_specific.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLdatatype_specific$handle() {
-        return H5VLdatatype_specific.HANDLE;
-    }
+    public static MethodHandle H5VLdatatype_specific$handle() { return H5VLdatatype_specific.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdatatype_specific$address() {
-        return H5VLdatatype_specific.ADDR;
-    }
+    public static MemorySegment H5VLdatatype_specific$address() { return H5VLdatatype_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static int H5VLdatatype_specific(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLdatatype_specific(MemorySegment obj, long connector_id, MemorySegment args,
+                                            long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLdatatype_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdatatype_specific", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdatatype_optional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdatatype_optional");
 
@@ -12808,58 +11660,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdatatype_optional$descriptor() {
-        return H5VLdatatype_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLdatatype_optional$descriptor() { return H5VLdatatype_optional.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MethodHandle H5VLdatatype_optional$handle() {
-        return H5VLdatatype_optional.HANDLE;
-    }
+    public static MethodHandle H5VLdatatype_optional$handle() { return H5VLdatatype_optional.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MemorySegment H5VLdatatype_optional$address() {
-        return H5VLdatatype_optional.ADDR;
-    }
+    public static MemorySegment H5VLdatatype_optional$address() { return H5VLdatatype_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static int H5VLdatatype_optional(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLdatatype_optional(MemorySegment obj, long connector_id, MemorySegment args,
+                                            long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLdatatype_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdatatype_optional", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLdatatype_close {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLdatatype_close");
 
@@ -12872,9 +11720,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLdatatype_close(void *dt, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLdatatype_close$descriptor() {
-        return H5VLdatatype_close.DESC;
-    }
+    public static FunctionDescriptor H5VLdatatype_close$descriptor() { return H5VLdatatype_close.DESC; }
 
     /**
      * Downcall method handle for:
@@ -12882,9 +11728,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLdatatype_close(void *dt, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLdatatype_close$handle() {
-        return H5VLdatatype_close.HANDLE;
-    }
+    public static MethodHandle H5VLdatatype_close$handle() { return H5VLdatatype_close.HANDLE; }
 
     /**
      * Address for:
@@ -12892,37 +11736,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLdatatype_close(void *dt, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLdatatype_close$address() {
-        return H5VLdatatype_close.ADDR;
-    }
+    public static MemorySegment H5VLdatatype_close$address() { return H5VLdatatype_close.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLdatatype_close(void *dt, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLdatatype_close(MemorySegment dt, long connector_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLdatatype_close(MemorySegment dt, long connector_id, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLdatatype_close.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLdatatype_close", dt, connector_id, dxpl_id, req);
             }
             return (int)mh$.invokeExact(dt, connector_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfile_create {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfile_create");
 
@@ -12932,59 +11770,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLfile_create(const char *name, unsigned int flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLfile_create(const char *name, unsigned int flags, hid_t fcpl_id, hid_t fapl_id, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLfile_create$descriptor() {
-        return H5VLfile_create.DESC;
-    }
+    public static FunctionDescriptor H5VLfile_create$descriptor() { return H5VLfile_create.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLfile_create(const char *name, unsigned int flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLfile_create(const char *name, unsigned int flags, hid_t fcpl_id, hid_t fapl_id, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLfile_create$handle() {
-        return H5VLfile_create.HANDLE;
-    }
+    public static MethodHandle H5VLfile_create$handle() { return H5VLfile_create.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLfile_create(const char *name, unsigned int flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLfile_create(const char *name, unsigned int flags, hid_t fcpl_id, hid_t fapl_id, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLfile_create$address() {
-        return H5VLfile_create.ADDR;
-    }
+    public static MemorySegment H5VLfile_create$address() { return H5VLfile_create.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLfile_create(const char *name, unsigned int flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLfile_create(const char *name, unsigned int flags, hid_t fcpl_id, hid_t fapl_id, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLfile_create(MemorySegment name, int flags, long fcpl_id, long fapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLfile_create(MemorySegment name, int flags, long fcpl_id, long fapl_id,
+                                                long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLfile_create.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfile_create", name, flags, fcpl_id, fapl_id, dxpl_id, req);
             }
             return (MemorySegment)mh$.invokeExact(name, flags, fcpl_id, fapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfile_open {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfile_open");
 
@@ -12997,9 +11831,7 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLfile_open(const char *name, unsigned int flags, hid_t fapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLfile_open$descriptor() {
-        return H5VLfile_open.DESC;
-    }
+    public static FunctionDescriptor H5VLfile_open$descriptor() { return H5VLfile_open.DESC; }
 
     /**
      * Downcall method handle for:
@@ -13007,9 +11839,7 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLfile_open(const char *name, unsigned int flags, hid_t fapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLfile_open$handle() {
-        return H5VLfile_open.HANDLE;
-    }
+    public static MethodHandle H5VLfile_open$handle() { return H5VLfile_open.HANDLE; }
 
     /**
      * Address for:
@@ -13017,36 +11847,32 @@ public class hdf5_h extends hdf5_h_1 {
      * void *H5VLfile_open(const char *name, unsigned int flags, hid_t fapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLfile_open$address() {
-        return H5VLfile_open.ADDR;
-    }
+    public static MemorySegment H5VLfile_open$address() { return H5VLfile_open.ADDR; }
 
     /**
      * {@snippet lang=c :
      * void *H5VLfile_open(const char *name, unsigned int flags, hid_t fapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLfile_open(MemorySegment name, int flags, long fapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLfile_open(MemorySegment name, int flags, long fapl_id, long dxpl_id,
+                                              MemorySegment req)
+    {
         var mh$ = H5VLfile_open.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfile_open", name, flags, fapl_id, dxpl_id, req);
             }
             return (MemorySegment)mh$.invokeExact(name, flags, fapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfile_get {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfile_get");
 
@@ -13056,59 +11882,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_get(void *file, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_get(void *file, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLfile_get$descriptor() {
-        return H5VLfile_get.DESC;
-    }
+    public static FunctionDescriptor H5VLfile_get$descriptor() { return H5VLfile_get.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_get(void *file, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_get(void *file, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLfile_get$handle() {
-        return H5VLfile_get.HANDLE;
-    }
+    public static MethodHandle H5VLfile_get$handle() { return H5VLfile_get.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_get(void *file, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_get(void *file, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLfile_get$address() {
-        return H5VLfile_get.ADDR;
-    }
+    public static MemorySegment H5VLfile_get$address() { return H5VLfile_get.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLfile_get(void *file, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_get(void *file, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLfile_get(MemorySegment file, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLfile_get(MemorySegment file, long connector_id, MemorySegment args, long dxpl_id,
+                                   MemorySegment req)
+    {
         var mh$ = H5VLfile_get.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfile_get", file, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(file, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfile_specific {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfile_specific");
 
@@ -13118,59 +11940,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static FunctionDescriptor H5VLfile_specific$descriptor() {
-        return H5VLfile_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLfile_specific$descriptor() { return H5VLfile_specific.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MethodHandle H5VLfile_specific$handle() {
-        return H5VLfile_specific.HANDLE;
-    }
+    public static MethodHandle H5VLfile_specific$handle() { return H5VLfile_specific.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MemorySegment H5VLfile_specific$address() {
-        return H5VLfile_specific.ADDR;
-    }
+    public static MemorySegment H5VLfile_specific$address() { return H5VLfile_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static int H5VLfile_specific(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLfile_specific(MemorySegment obj, long connector_id, MemorySegment args,
+                                        long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLfile_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfile_specific", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfile_optional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfile_optional");
 
@@ -13180,58 +11998,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLfile_optional$descriptor() {
-        return H5VLfile_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLfile_optional$descriptor() { return H5VLfile_optional.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLfile_optional$handle() {
-        return H5VLfile_optional.HANDLE;
-    }
+    public static MethodHandle H5VLfile_optional$handle() { return H5VLfile_optional.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLfile_optional$address() {
-        return H5VLfile_optional.ADDR;
-    }
+    public static MemorySegment H5VLfile_optional$address() { return H5VLfile_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLfile_optional(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLfile_optional(MemorySegment obj, long connector_id, MemorySegment args,
+                                        long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLfile_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfile_optional", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLfile_close {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLfile_close");
 
@@ -13244,9 +12058,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfile_close(void *file, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLfile_close$descriptor() {
-        return H5VLfile_close.DESC;
-    }
+    public static FunctionDescriptor H5VLfile_close$descriptor() { return H5VLfile_close.DESC; }
 
     /**
      * Downcall method handle for:
@@ -13254,9 +12066,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfile_close(void *file, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLfile_close$handle() {
-        return H5VLfile_close.HANDLE;
-    }
+    public static MethodHandle H5VLfile_close$handle() { return H5VLfile_close.HANDLE; }
 
     /**
      * Address for:
@@ -13264,40 +12074,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLfile_close(void *file, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLfile_close$address() {
-        return H5VLfile_close.ADDR;
-    }
+    public static MemorySegment H5VLfile_close$address() { return H5VLfile_close.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLfile_close(void *file, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLfile_close(MemorySegment file, long connector_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLfile_close(MemorySegment file, long connector_id, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLfile_close.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLfile_close", file, connector_id, dxpl_id, req);
             }
             return (int)mh$.invokeExact(file, connector_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLgroup_create {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLgroup_create");
 
@@ -13307,61 +12108,58 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLgroup_create$descriptor() {
-        return H5VLgroup_create.DESC;
-    }
+    public static FunctionDescriptor H5VLgroup_create$descriptor() { return H5VLgroup_create.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLgroup_create$handle() {
-        return H5VLgroup_create.HANDLE;
-    }
+    public static MethodHandle H5VLgroup_create$handle() { return H5VLgroup_create.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLgroup_create$address() {
-        return H5VLgroup_create.ADDR;
-    }
+    public static MemorySegment H5VLgroup_create$address() { return H5VLgroup_create.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLgroup_create(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment name, long lcpl_id, long gcpl_id, long gapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLgroup_create(MemorySegment obj, MemorySegment loc_params,
+                                                 long connector_id, MemorySegment name, long lcpl_id,
+                                                 long gcpl_id, long gapl_id, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLgroup_create.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLgroup_create", obj, loc_params, connector_id, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req);
+                traceDowncall("H5VLgroup_create", obj, loc_params, connector_id, name, lcpl_id, gcpl_id,
+                              gapl_id, dxpl_id, req);
             }
-            return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, lcpl_id, gcpl_id,
+                                                  gapl_id, dxpl_id, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLgroup_open {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLgroup_open");
 
@@ -13371,59 +12169,56 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t gapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLgroup_open$descriptor() {
-        return H5VLgroup_open.DESC;
-    }
+    public static FunctionDescriptor H5VLgroup_open$descriptor() { return H5VLgroup_open.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t gapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLgroup_open$handle() {
-        return H5VLgroup_open.HANDLE;
-    }
+    public static MethodHandle H5VLgroup_open$handle() { return H5VLgroup_open.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t gapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLgroup_open$address() {
-        return H5VLgroup_open.ADDR;
-    }
+    public static MemorySegment H5VLgroup_open$address() { return H5VLgroup_open.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req)
+     * void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char
+     * *name, hid_t gapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLgroup_open(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment name, long gapl_id, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLgroup_open(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                               MemorySegment name, long gapl_id, long dxpl_id,
+                                               MemorySegment req)
+    {
         var mh$ = H5VLgroup_open.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLgroup_open", obj, loc_params, connector_id, name, gapl_id, dxpl_id, req);
             }
             return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, name, gapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLgroup_get {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLgroup_get");
 
@@ -13433,59 +12228,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLgroup_get$descriptor() {
-        return H5VLgroup_get.DESC;
-    }
+    public static FunctionDescriptor H5VLgroup_get$descriptor() { return H5VLgroup_get.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLgroup_get$handle() {
-        return H5VLgroup_get.HANDLE;
-    }
+    public static MethodHandle H5VLgroup_get$handle() { return H5VLgroup_get.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLgroup_get$address() {
-        return H5VLgroup_get.ADDR;
-    }
+    public static MemorySegment H5VLgroup_get$address() { return H5VLgroup_get.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLgroup_get(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLgroup_get(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id,
+                                    MemorySegment req)
+    {
         var mh$ = H5VLgroup_get.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLgroup_get", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLgroup_specific {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLgroup_specific");
 
@@ -13495,59 +12286,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLgroup_specific$descriptor() {
-        return H5VLgroup_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLgroup_specific$descriptor() { return H5VLgroup_specific.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLgroup_specific$handle() {
-        return H5VLgroup_specific.HANDLE;
-    }
+    public static MethodHandle H5VLgroup_specific$handle() { return H5VLgroup_specific.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLgroup_specific$address() {
-        return H5VLgroup_specific.ADDR;
-    }
+    public static MemorySegment H5VLgroup_specific$address() { return H5VLgroup_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t
+     * dxpl_id, void **req)
      * }
      */
-    public static int H5VLgroup_specific(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLgroup_specific(MemorySegment obj, long connector_id, MemorySegment args,
+                                         long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLgroup_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLgroup_specific", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLgroup_optional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLgroup_optional");
 
@@ -13557,58 +12344,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static FunctionDescriptor H5VLgroup_optional$descriptor() {
-        return H5VLgroup_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLgroup_optional$descriptor() { return H5VLgroup_optional.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MethodHandle H5VLgroup_optional$handle() {
-        return H5VLgroup_optional.HANDLE;
-    }
+    public static MethodHandle H5VLgroup_optional$handle() { return H5VLgroup_optional.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static MemorySegment H5VLgroup_optional$address() {
-        return H5VLgroup_optional.ADDR;
-    }
+    public static MemorySegment H5VLgroup_optional$address() { return H5VLgroup_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+     * void **req)
      * }
      */
-    public static int H5VLgroup_optional(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLgroup_optional(MemorySegment obj, long connector_id, MemorySegment args,
+                                         long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLgroup_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLgroup_optional", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLgroup_close {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLgroup_close");
 
@@ -13621,9 +12404,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLgroup_close(void *grp, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLgroup_close$descriptor() {
-        return H5VLgroup_close.DESC;
-    }
+    public static FunctionDescriptor H5VLgroup_close$descriptor() { return H5VLgroup_close.DESC; }
 
     /**
      * Downcall method handle for:
@@ -13631,9 +12412,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLgroup_close(void *grp, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLgroup_close$handle() {
-        return H5VLgroup_close.HANDLE;
-    }
+    public static MethodHandle H5VLgroup_close$handle() { return H5VLgroup_close.HANDLE; }
 
     /**
      * Address for:
@@ -13641,39 +12420,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLgroup_close(void *grp, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLgroup_close$address() {
-        return H5VLgroup_close.ADDR;
-    }
+    public static MemorySegment H5VLgroup_close$address() { return H5VLgroup_close.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLgroup_close(void *grp, hid_t connector_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLgroup_close(MemorySegment grp, long connector_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLgroup_close(MemorySegment grp, long connector_id, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLgroup_close.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLgroup_close", grp, connector_id, dxpl_id, req);
             }
             return (int)mh$.invokeExact(grp, connector_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLlink_create {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLlink_create");
 
@@ -13683,63 +12454,57 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
+     * hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLlink_create$descriptor() {
-        return H5VLlink_create.DESC;
-    }
+    public static FunctionDescriptor H5VLlink_create$descriptor() { return H5VLlink_create.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
+     * hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLlink_create$handle() {
-        return H5VLlink_create.HANDLE;
-    }
+    public static MethodHandle H5VLlink_create$handle() { return H5VLlink_create.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
+     * hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLlink_create$address() {
-        return H5VLlink_create.ADDR;
-    }
+    public static MemorySegment H5VLlink_create$address() { return H5VLlink_create.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
+     * hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLlink_create(MemorySegment args, MemorySegment obj, MemorySegment loc_params, long connector_id, long lcpl_id, long lapl_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLlink_create(MemorySegment args, MemorySegment obj, MemorySegment loc_params,
+                                      long connector_id, long lcpl_id, long lapl_id, long dxpl_id,
+                                      MemorySegment req)
+    {
         var mh$ = H5VLlink_create.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLlink_create", args, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req);
+                traceDowncall("H5VLlink_create", args, obj, loc_params, connector_id, lcpl_id, lapl_id,
+                              dxpl_id, req);
             }
             return (int)mh$.invokeExact(args, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLlink_copy {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLlink_copy");
 
@@ -13749,63 +12514,62 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const
+     * H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLlink_copy$descriptor() {
-        return H5VLlink_copy.DESC;
-    }
+    public static FunctionDescriptor H5VLlink_copy$descriptor() { return H5VLlink_copy.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const
+     * H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLlink_copy$handle() {
-        return H5VLlink_copy.HANDLE;
-    }
+    public static MethodHandle H5VLlink_copy$handle() { return H5VLlink_copy.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const
+     * H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLlink_copy$address() {
-        return H5VLlink_copy.ADDR;
-    }
+    public static MemorySegment H5VLlink_copy$address() { return H5VLlink_copy.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const
+     * H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLlink_copy(MemorySegment src_obj, MemorySegment loc_params1, MemorySegment dst_obj, MemorySegment loc_params2, long connector_id, long lcpl_id, long lapl_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLlink_copy(MemorySegment src_obj, MemorySegment loc_params1, MemorySegment dst_obj,
+                                    MemorySegment loc_params2, long connector_id, long lcpl_id, long lapl_id,
+                                    long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLlink_copy.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLlink_copy", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id, dxpl_id, req);
+                traceDowncall("H5VLlink_copy", src_obj, loc_params1, dst_obj, loc_params2, connector_id,
+                              lcpl_id, lapl_id, dxpl_id, req);
             }
-            return (int)mh$.invokeExact(src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id,
+                                        lapl_id, dxpl_id, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLlink_move {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLlink_move");
 
@@ -13815,60 +12579,62 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const
+     * H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLlink_move$descriptor() {
-        return H5VLlink_move.DESC;
-    }
+    public static FunctionDescriptor H5VLlink_move$descriptor() { return H5VLlink_move.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const
+     * H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLlink_move$handle() {
-        return H5VLlink_move.HANDLE;
-    }
+    public static MethodHandle H5VLlink_move$handle() { return H5VLlink_move.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const
+     * H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLlink_move$address() {
-        return H5VLlink_move.ADDR;
-    }
+    public static MemorySegment H5VLlink_move$address() { return H5VLlink_move.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj, const
+     * H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLlink_move(MemorySegment src_obj, MemorySegment loc_params1, MemorySegment dst_obj, MemorySegment loc_params2, long connector_id, long lcpl_id, long lapl_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLlink_move(MemorySegment src_obj, MemorySegment loc_params1, MemorySegment dst_obj,
+                                    MemorySegment loc_params2, long connector_id, long lcpl_id, long lapl_id,
+                                    long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLlink_move.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLlink_move", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id, dxpl_id, req);
+                traceDowncall("H5VLlink_move", src_obj, loc_params1, dst_obj, loc_params2, connector_id,
+                              lcpl_id, lapl_id, dxpl_id, req);
             }
-            return (int)mh$.invokeExact(src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id,
+                                        lapl_id, dxpl_id, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLlink_get {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLlink_get");
 
@@ -13878,60 +12644,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_link_get_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLlink_get$descriptor() {
-        return H5VLlink_get.DESC;
-    }
+    public static FunctionDescriptor H5VLlink_get$descriptor() { return H5VLlink_get.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_link_get_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLlink_get$handle() {
-        return H5VLlink_get.HANDLE;
-    }
+    public static MethodHandle H5VLlink_get$handle() { return H5VLlink_get.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_link_get_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLlink_get$address() {
-        return H5VLlink_get.ADDR;
-    }
+    public static MemorySegment H5VLlink_get$address() { return H5VLlink_get.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_link_get_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLlink_get(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLlink_get(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                   MemorySegment args, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLlink_get.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLlink_get", obj, loc_params, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, loc_params, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLlink_specific {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLlink_specific");
 
@@ -13941,60 +12702,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLlink_specific$descriptor() {
-        return H5VLlink_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLlink_specific$descriptor() { return H5VLlink_specific.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLlink_specific$handle() {
-        return H5VLlink_specific.HANDLE;
-    }
+    public static MethodHandle H5VLlink_specific$handle() { return H5VLlink_specific.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLlink_specific$address() {
-        return H5VLlink_specific.ADDR;
-    }
+    public static MemorySegment H5VLlink_specific$address() { return H5VLlink_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLlink_specific(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLlink_specific(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                        MemorySegment args, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLlink_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLlink_specific", obj, loc_params, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, loc_params, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLlink_optional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLlink_optional");
 
@@ -14004,60 +12760,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLlink_optional$descriptor() {
-        return H5VLlink_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLlink_optional$descriptor() { return H5VLlink_optional.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLlink_optional$handle() {
-        return H5VLlink_optional.HANDLE;
-    }
+    public static MethodHandle H5VLlink_optional$handle() { return H5VLlink_optional.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLlink_optional$address() {
-        return H5VLlink_optional.ADDR;
-    }
+    public static MemorySegment H5VLlink_optional$address() { return H5VLlink_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLlink_optional(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLlink_optional(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                        MemorySegment args, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLlink_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLlink_optional", obj, loc_params, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, loc_params, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLobject_open {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLobject_open");
 
@@ -14067,65 +12818,57 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void *H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t *opened_type, hid_t dxpl_id, void **req)
+     * void *H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t
+     * *opened_type, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLobject_open$descriptor() {
-        return H5VLobject_open.DESC;
-    }
+    public static FunctionDescriptor H5VLobject_open$descriptor() { return H5VLobject_open.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void *H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t *opened_type, hid_t dxpl_id, void **req)
+     * void *H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t
+     * *opened_type, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLobject_open$handle() {
-        return H5VLobject_open.HANDLE;
-    }
+    public static MethodHandle H5VLobject_open$handle() { return H5VLobject_open.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void *H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t *opened_type, hid_t dxpl_id, void **req)
+     * void *H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t
+     * *opened_type, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLobject_open$address() {
-        return H5VLobject_open.ADDR;
-    }
+    public static MemorySegment H5VLobject_open$address() { return H5VLobject_open.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * void *H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t *opened_type, hid_t dxpl_id, void **req)
+     * void *H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t
+     * *opened_type, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLobject_open(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment opened_type, long dxpl_id, MemorySegment req) {
+    public static MemorySegment H5VLobject_open(MemorySegment obj, MemorySegment loc_params,
+                                                long connector_id, MemorySegment opened_type, long dxpl_id,
+                                                MemorySegment req)
+    {
         var mh$ = H5VLobject_open.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLobject_open", obj, loc_params, connector_id, opened_type, dxpl_id, req);
             }
             return (MemorySegment)mh$.invokeExact(obj, loc_params, connector_id, opened_type, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLobject_copy {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+            hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG,
+            hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLobject_copy");
 
@@ -14135,60 +12878,63 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t connector_id, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void
+     * *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t connector_id, hid_t
+     * ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLobject_copy$descriptor() {
-        return H5VLobject_copy.DESC;
-    }
+    public static FunctionDescriptor H5VLobject_copy$descriptor() { return H5VLobject_copy.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t connector_id, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void
+     * *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t connector_id, hid_t
+     * ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLobject_copy$handle() {
-        return H5VLobject_copy.HANDLE;
-    }
+    public static MethodHandle H5VLobject_copy$handle() { return H5VLobject_copy.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t connector_id, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void
+     * *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t connector_id, hid_t
+     * ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLobject_copy$address() {
-        return H5VLobject_copy.ADDR;
-    }
+    public static MemorySegment H5VLobject_copy$address() { return H5VLobject_copy.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t connector_id, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void
+     * *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t connector_id, hid_t
+     * ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLobject_copy(MemorySegment src_obj, MemorySegment loc_params1, MemorySegment src_name, MemorySegment dst_obj, MemorySegment loc_params2, MemorySegment dst_name, long connector_id, long ocpypl_id, long lcpl_id, long dxpl_id, MemorySegment req) {
+    public static int H5VLobject_copy(MemorySegment src_obj, MemorySegment loc_params1,
+                                      MemorySegment src_name, MemorySegment dst_obj,
+                                      MemorySegment loc_params2, MemorySegment dst_name, long connector_id,
+                                      long ocpypl_id, long lcpl_id, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLobject_copy.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("H5VLobject_copy", src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name, connector_id, ocpypl_id, lcpl_id, dxpl_id, req);
+                traceDowncall("H5VLobject_copy", src_obj, loc_params1, src_name, dst_obj, loc_params2,
+                              dst_name, connector_id, ocpypl_id, lcpl_id, dxpl_id, req);
             }
-            return (int)mh$.invokeExact(src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name, connector_id, ocpypl_id, lcpl_id, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+            return (int)mh$.invokeExact(src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name,
+                                        connector_id, ocpypl_id, lcpl_id, dxpl_id, req);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLobject_get {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLobject_get");
 
@@ -14198,60 +12944,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLobject_get$descriptor() {
-        return H5VLobject_get.DESC;
-    }
+    public static FunctionDescriptor H5VLobject_get$descriptor() { return H5VLobject_get.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLobject_get$handle() {
-        return H5VLobject_get.HANDLE;
-    }
+    public static MethodHandle H5VLobject_get$handle() { return H5VLobject_get.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLobject_get$address() {
-        return H5VLobject_get.ADDR;
-    }
+    public static MemorySegment H5VLobject_get$address() { return H5VLobject_get.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLobject_get(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLobject_get(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                     MemorySegment args, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLobject_get.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLobject_get", obj, loc_params, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, loc_params, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLobject_specific {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLobject_specific");
 
@@ -14261,60 +13002,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLobject_specific$descriptor() {
-        return H5VLobject_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLobject_specific$descriptor() { return H5VLobject_specific.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLobject_specific$handle() {
-        return H5VLobject_specific.HANDLE;
-    }
+    public static MethodHandle H5VLobject_specific$handle() { return H5VLobject_specific.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLobject_specific$address() {
-        return H5VLobject_specific.ADDR;
-    }
+    public static MemorySegment H5VLobject_specific$address() { return H5VLobject_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLobject_specific(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLobject_specific(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                          MemorySegment args, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLobject_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLobject_specific", obj, loc_params, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, loc_params, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLobject_optional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLobject_optional");
 
@@ -14324,58 +13060,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static FunctionDescriptor H5VLobject_optional$descriptor() {
-        return H5VLobject_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLobject_optional$descriptor() { return H5VLobject_optional.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MethodHandle H5VLobject_optional$handle() {
-        return H5VLobject_optional.HANDLE;
-    }
+    public static MethodHandle H5VLobject_optional$handle() { return H5VLobject_optional.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static MemorySegment H5VLobject_optional$address() {
-        return H5VLobject_optional.ADDR;
-    }
+    public static MemorySegment H5VLobject_optional$address() { return H5VLobject_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+     * H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
      * }
      */
-    public static int H5VLobject_optional(MemorySegment obj, MemorySegment loc_params, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLobject_optional(MemorySegment obj, MemorySegment loc_params, long connector_id,
+                                          MemorySegment args, long dxpl_id, MemorySegment req)
+    {
         var mh$ = H5VLobject_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLobject_optional", obj, loc_params, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, loc_params, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLintrospect_get_conn_cls {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLintrospect_get_conn_cls");
 
@@ -14385,57 +13117,63 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl, const H5VL_class_t **conn_cls)
+     * herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl, const
+     * H5VL_class_t **conn_cls)
      * }
      */
-    public static FunctionDescriptor H5VLintrospect_get_conn_cls$descriptor() {
+    public static FunctionDescriptor H5VLintrospect_get_conn_cls$descriptor()
+    {
         return H5VLintrospect_get_conn_cls.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl, const H5VL_class_t **conn_cls)
+     * herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl, const
+     * H5VL_class_t **conn_cls)
      * }
      */
-    public static MethodHandle H5VLintrospect_get_conn_cls$handle() {
+    public static MethodHandle H5VLintrospect_get_conn_cls$handle()
+    {
         return H5VLintrospect_get_conn_cls.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl, const H5VL_class_t **conn_cls)
+     * herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl, const
+     * H5VL_class_t **conn_cls)
      * }
      */
-    public static MemorySegment H5VLintrospect_get_conn_cls$address() {
+    public static MemorySegment H5VLintrospect_get_conn_cls$address()
+    {
         return H5VLintrospect_get_conn_cls.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl, const H5VL_class_t **conn_cls)
+     * herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl, const
+     * H5VL_class_t **conn_cls)
      * }
      */
-    public static int H5VLintrospect_get_conn_cls(MemorySegment obj, long connector_id, int lvl, MemorySegment conn_cls) {
+    public static int H5VLintrospect_get_conn_cls(MemorySegment obj, long connector_id, int lvl,
+                                                  MemorySegment conn_cls)
+    {
         var mh$ = H5VLintrospect_get_conn_cls.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLintrospect_get_conn_cls", obj, connector_id, lvl, conn_cls);
             }
             return (int)mh$.invokeExact(obj, connector_id, lvl, conn_cls);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLintrospect_get_cap_flags {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLintrospect_get_cap_flags");
 
@@ -14448,7 +13186,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, uint64_t *cap_flags)
      * }
      */
-    public static FunctionDescriptor H5VLintrospect_get_cap_flags$descriptor() {
+    public static FunctionDescriptor H5VLintrospect_get_cap_flags$descriptor()
+    {
         return H5VLintrospect_get_cap_flags.DESC;
     }
 
@@ -14458,7 +13197,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, uint64_t *cap_flags)
      * }
      */
-    public static MethodHandle H5VLintrospect_get_cap_flags$handle() {
+    public static MethodHandle H5VLintrospect_get_cap_flags$handle()
+    {
         return H5VLintrospect_get_cap_flags.HANDLE;
     }
 
@@ -14468,7 +13208,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, uint64_t *cap_flags)
      * }
      */
-    public static MemorySegment H5VLintrospect_get_cap_flags$address() {
+    public static MemorySegment H5VLintrospect_get_cap_flags$address()
+    {
         return H5VLintrospect_get_cap_flags.ADDR;
     }
 
@@ -14477,27 +13218,24 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, uint64_t *cap_flags)
      * }
      */
-    public static int H5VLintrospect_get_cap_flags(MemorySegment info, long connector_id, MemorySegment cap_flags) {
+    public static int H5VLintrospect_get_cap_flags(MemorySegment info, long connector_id,
+                                                   MemorySegment cap_flags)
+    {
         var mh$ = H5VLintrospect_get_cap_flags.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLintrospect_get_cap_flags", info, connector_id, cap_flags);
             }
             return (int)mh$.invokeExact(info, connector_id, cap_flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLintrospect_opt_query {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT,
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_INT, hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLintrospect_opt_query");
 
@@ -14507,58 +13245,57 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags)
+     * herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type,
+     * uint64_t *flags)
      * }
      */
-    public static FunctionDescriptor H5VLintrospect_opt_query$descriptor() {
+    public static FunctionDescriptor H5VLintrospect_opt_query$descriptor()
+    {
         return H5VLintrospect_opt_query.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags)
+     * herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type,
+     * uint64_t *flags)
      * }
      */
-    public static MethodHandle H5VLintrospect_opt_query$handle() {
-        return H5VLintrospect_opt_query.HANDLE;
-    }
+    public static MethodHandle H5VLintrospect_opt_query$handle() { return H5VLintrospect_opt_query.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags)
+     * herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type,
+     * uint64_t *flags)
      * }
      */
-    public static MemorySegment H5VLintrospect_opt_query$address() {
-        return H5VLintrospect_opt_query.ADDR;
-    }
+    public static MemorySegment H5VLintrospect_opt_query$address() { return H5VLintrospect_opt_query.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags)
+     * herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type,
+     * uint64_t *flags)
      * }
      */
-    public static int H5VLintrospect_opt_query(MemorySegment obj, long connector_id, int subcls, int opt_type, MemorySegment flags) {
+    public static int H5VLintrospect_opt_query(MemorySegment obj, long connector_id, int subcls, int opt_type,
+                                               MemorySegment flags)
+    {
         var mh$ = H5VLintrospect_opt_query.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLintrospect_opt_query", obj, connector_id, subcls, opt_type, flags);
             }
             return (int)mh$.invokeExact(obj, connector_id, subcls, opt_type, flags);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLrequest_wait {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLrequest_wait");
 
@@ -14571,9 +13308,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5VL_request_status_t *status)
      * }
      */
-    public static FunctionDescriptor H5VLrequest_wait$descriptor() {
-        return H5VLrequest_wait.DESC;
-    }
+    public static FunctionDescriptor H5VLrequest_wait$descriptor() { return H5VLrequest_wait.DESC; }
 
     /**
      * Downcall method handle for:
@@ -14581,9 +13316,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5VL_request_status_t *status)
      * }
      */
-    public static MethodHandle H5VLrequest_wait$handle() {
-        return H5VLrequest_wait.HANDLE;
-    }
+    public static MethodHandle H5VLrequest_wait$handle() { return H5VLrequest_wait.HANDLE; }
 
     /**
      * Address for:
@@ -14591,35 +13324,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5VL_request_status_t *status)
      * }
      */
-    public static MemorySegment H5VLrequest_wait$address() {
-        return H5VLrequest_wait.ADDR;
-    }
+    public static MemorySegment H5VLrequest_wait$address() { return H5VLrequest_wait.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5VL_request_status_t *status)
      * }
      */
-    public static int H5VLrequest_wait(MemorySegment req, long connector_id, long timeout, MemorySegment status) {
+    public static int H5VLrequest_wait(MemorySegment req, long connector_id, long timeout,
+                                       MemorySegment status)
+    {
         var mh$ = H5VLrequest_wait.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLrequest_wait", req, connector_id, timeout, status);
             }
             return (int)mh$.invokeExact(req, connector_id, timeout, status);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLrequest_notify {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLrequest_notify");
 
@@ -14632,9 +13361,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_notify(void *req, hid_t connector_id, H5VL_request_notify_t cb, void *ctx)
      * }
      */
-    public static FunctionDescriptor H5VLrequest_notify$descriptor() {
-        return H5VLrequest_notify.DESC;
-    }
+    public static FunctionDescriptor H5VLrequest_notify$descriptor() { return H5VLrequest_notify.DESC; }
 
     /**
      * Downcall method handle for:
@@ -14642,9 +13369,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_notify(void *req, hid_t connector_id, H5VL_request_notify_t cb, void *ctx)
      * }
      */
-    public static MethodHandle H5VLrequest_notify$handle() {
-        return H5VLrequest_notify.HANDLE;
-    }
+    public static MethodHandle H5VLrequest_notify$handle() { return H5VLrequest_notify.HANDLE; }
 
     /**
      * Address for:
@@ -14652,34 +13377,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_notify(void *req, hid_t connector_id, H5VL_request_notify_t cb, void *ctx)
      * }
      */
-    public static MemorySegment H5VLrequest_notify$address() {
-        return H5VLrequest_notify.ADDR;
-    }
+    public static MemorySegment H5VLrequest_notify$address() { return H5VLrequest_notify.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLrequest_notify(void *req, hid_t connector_id, H5VL_request_notify_t cb, void *ctx)
      * }
      */
-    public static int H5VLrequest_notify(MemorySegment req, long connector_id, MemorySegment cb, MemorySegment ctx) {
+    public static int H5VLrequest_notify(MemorySegment req, long connector_id, MemorySegment cb,
+                                         MemorySegment ctx)
+    {
         var mh$ = H5VLrequest_notify.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLrequest_notify", req, connector_id, cb, ctx);
             }
             return (int)mh$.invokeExact(req, connector_id, cb, ctx);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLrequest_cancel {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLrequest_cancel");
 
@@ -14692,9 +13414,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status)
      * }
      */
-    public static FunctionDescriptor H5VLrequest_cancel$descriptor() {
-        return H5VLrequest_cancel.DESC;
-    }
+    public static FunctionDescriptor H5VLrequest_cancel$descriptor() { return H5VLrequest_cancel.DESC; }
 
     /**
      * Downcall method handle for:
@@ -14702,9 +13422,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status)
      * }
      */
-    public static MethodHandle H5VLrequest_cancel$handle() {
-        return H5VLrequest_cancel.HANDLE;
-    }
+    public static MethodHandle H5VLrequest_cancel$handle() { return H5VLrequest_cancel.HANDLE; }
 
     /**
      * Address for:
@@ -14712,34 +13430,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status)
      * }
      */
-    public static MemorySegment H5VLrequest_cancel$address() {
-        return H5VLrequest_cancel.ADDR;
-    }
+    public static MemorySegment H5VLrequest_cancel$address() { return H5VLrequest_cancel.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status)
      * }
      */
-    public static int H5VLrequest_cancel(MemorySegment req, long connector_id, MemorySegment status) {
+    public static int H5VLrequest_cancel(MemorySegment req, long connector_id, MemorySegment status)
+    {
         var mh$ = H5VLrequest_cancel.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLrequest_cancel", req, connector_id, status);
             }
             return (int)mh$.invokeExact(req, connector_id, status);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLrequest_specific {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLrequest_specific");
 
@@ -14752,9 +13466,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t *args)
      * }
      */
-    public static FunctionDescriptor H5VLrequest_specific$descriptor() {
-        return H5VLrequest_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLrequest_specific$descriptor() { return H5VLrequest_specific.DESC; }
 
     /**
      * Downcall method handle for:
@@ -14762,9 +13474,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t *args)
      * }
      */
-    public static MethodHandle H5VLrequest_specific$handle() {
-        return H5VLrequest_specific.HANDLE;
-    }
+    public static MethodHandle H5VLrequest_specific$handle() { return H5VLrequest_specific.HANDLE; }
 
     /**
      * Address for:
@@ -14772,34 +13482,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t *args)
      * }
      */
-    public static MemorySegment H5VLrequest_specific$address() {
-        return H5VLrequest_specific.ADDR;
-    }
+    public static MemorySegment H5VLrequest_specific$address() { return H5VLrequest_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t *args)
      * }
      */
-    public static int H5VLrequest_specific(MemorySegment req, long connector_id, MemorySegment args) {
+    public static int H5VLrequest_specific(MemorySegment req, long connector_id, MemorySegment args)
+    {
         var mh$ = H5VLrequest_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLrequest_specific", req, connector_id, args);
             }
             return (int)mh$.invokeExact(req, connector_id, args);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLrequest_optional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLrequest_optional");
 
@@ -14812,9 +13518,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_optional(void *req, hid_t connector_id, H5VL_optional_args_t *args)
      * }
      */
-    public static FunctionDescriptor H5VLrequest_optional$descriptor() {
-        return H5VLrequest_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLrequest_optional$descriptor() { return H5VLrequest_optional.DESC; }
 
     /**
      * Downcall method handle for:
@@ -14822,9 +13526,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_optional(void *req, hid_t connector_id, H5VL_optional_args_t *args)
      * }
      */
-    public static MethodHandle H5VLrequest_optional$handle() {
-        return H5VLrequest_optional.HANDLE;
-    }
+    public static MethodHandle H5VLrequest_optional$handle() { return H5VLrequest_optional.HANDLE; }
 
     /**
      * Address for:
@@ -14832,33 +13534,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_optional(void *req, hid_t connector_id, H5VL_optional_args_t *args)
      * }
      */
-    public static MemorySegment H5VLrequest_optional$address() {
-        return H5VLrequest_optional.ADDR;
-    }
+    public static MemorySegment H5VLrequest_optional$address() { return H5VLrequest_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLrequest_optional(void *req, hid_t connector_id, H5VL_optional_args_t *args)
      * }
      */
-    public static int H5VLrequest_optional(MemorySegment req, long connector_id, MemorySegment args) {
+    public static int H5VLrequest_optional(MemorySegment req, long connector_id, MemorySegment args)
+    {
         var mh$ = H5VLrequest_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLrequest_optional", req, connector_id, args);
             }
             return (int)mh$.invokeExact(req, connector_id, args);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLrequest_free {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLrequest_free");
 
@@ -14871,9 +13570,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_free(void *req, hid_t connector_id)
      * }
      */
-    public static FunctionDescriptor H5VLrequest_free$descriptor() {
-        return H5VLrequest_free.DESC;
-    }
+    public static FunctionDescriptor H5VLrequest_free$descriptor() { return H5VLrequest_free.DESC; }
 
     /**
      * Downcall method handle for:
@@ -14881,9 +13578,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_free(void *req, hid_t connector_id)
      * }
      */
-    public static MethodHandle H5VLrequest_free$handle() {
-        return H5VLrequest_free.HANDLE;
-    }
+    public static MethodHandle H5VLrequest_free$handle() { return H5VLrequest_free.HANDLE; }
 
     /**
      * Address for:
@@ -14891,37 +13586,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLrequest_free(void *req, hid_t connector_id)
      * }
      */
-    public static MemorySegment H5VLrequest_free$address() {
-        return H5VLrequest_free.ADDR;
-    }
+    public static MemorySegment H5VLrequest_free$address() { return H5VLrequest_free.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLrequest_free(void *req, hid_t connector_id)
      * }
      */
-    public static int H5VLrequest_free(MemorySegment req, long connector_id) {
+    public static int H5VLrequest_free(MemorySegment req, long connector_id)
+    {
         var mh$ = H5VLrequest_free.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLrequest_free", req, connector_id);
             }
             return (int)mh$.invokeExact(req, connector_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLblob_put {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLblob_put");
 
@@ -14931,60 +13620,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void *ctx)
+     * herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void
+     * *ctx)
      * }
      */
-    public static FunctionDescriptor H5VLblob_put$descriptor() {
-        return H5VLblob_put.DESC;
-    }
+    public static FunctionDescriptor H5VLblob_put$descriptor() { return H5VLblob_put.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void *ctx)
+     * herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void
+     * *ctx)
      * }
      */
-    public static MethodHandle H5VLblob_put$handle() {
-        return H5VLblob_put.HANDLE;
-    }
+    public static MethodHandle H5VLblob_put$handle() { return H5VLblob_put.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void *ctx)
+     * herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void
+     * *ctx)
      * }
      */
-    public static MemorySegment H5VLblob_put$address() {
-        return H5VLblob_put.ADDR;
-    }
+    public static MemorySegment H5VLblob_put$address() { return H5VLblob_put.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void *ctx)
+     * herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void
+     * *ctx)
      * }
      */
-    public static int H5VLblob_put(MemorySegment obj, long connector_id, MemorySegment buf, long size, MemorySegment blob_id, MemorySegment ctx) {
+    public static int H5VLblob_put(MemorySegment obj, long connector_id, MemorySegment buf, long size,
+                                   MemorySegment blob_id, MemorySegment ctx)
+    {
         var mh$ = H5VLblob_put.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLblob_put", obj, connector_id, buf, size, blob_id, ctx);
             }
             return (int)mh$.invokeExact(obj, connector_id, buf, size, blob_id, ctx);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLblob_get {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLblob_get");
 
@@ -14994,58 +13678,54 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t size, void *ctx)
+     * herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t size, void
+     * *ctx)
      * }
      */
-    public static FunctionDescriptor H5VLblob_get$descriptor() {
-        return H5VLblob_get.DESC;
-    }
+    public static FunctionDescriptor H5VLblob_get$descriptor() { return H5VLblob_get.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t size, void *ctx)
+     * herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t size, void
+     * *ctx)
      * }
      */
-    public static MethodHandle H5VLblob_get$handle() {
-        return H5VLblob_get.HANDLE;
-    }
+    public static MethodHandle H5VLblob_get$handle() { return H5VLblob_get.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t size, void *ctx)
+     * herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t size, void
+     * *ctx)
      * }
      */
-    public static MemorySegment H5VLblob_get$address() {
-        return H5VLblob_get.ADDR;
-    }
+    public static MemorySegment H5VLblob_get$address() { return H5VLblob_get.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t size, void *ctx)
+     * herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t size, void
+     * *ctx)
      * }
      */
-    public static int H5VLblob_get(MemorySegment obj, long connector_id, MemorySegment blob_id, MemorySegment buf, long size, MemorySegment ctx) {
+    public static int H5VLblob_get(MemorySegment obj, long connector_id, MemorySegment blob_id,
+                                   MemorySegment buf, long size, MemorySegment ctx)
+    {
         var mh$ = H5VLblob_get.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLblob_get", obj, connector_id, blob_id, buf, size, ctx);
             }
             return (int)mh$.invokeExact(obj, connector_id, blob_id, buf, size, ctx);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLblob_specific {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLblob_specific");
 
@@ -15058,9 +13738,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_args_t *args)
      * }
      */
-    public static FunctionDescriptor H5VLblob_specific$descriptor() {
-        return H5VLblob_specific.DESC;
-    }
+    public static FunctionDescriptor H5VLblob_specific$descriptor() { return H5VLblob_specific.DESC; }
 
     /**
      * Downcall method handle for:
@@ -15068,9 +13746,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_args_t *args)
      * }
      */
-    public static MethodHandle H5VLblob_specific$handle() {
-        return H5VLblob_specific.HANDLE;
-    }
+    public static MethodHandle H5VLblob_specific$handle() { return H5VLblob_specific.HANDLE; }
 
     /**
      * Address for:
@@ -15078,35 +13754,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_args_t *args)
      * }
      */
-    public static MemorySegment H5VLblob_specific$address() {
-        return H5VLblob_specific.ADDR;
-    }
+    public static MemorySegment H5VLblob_specific$address() { return H5VLblob_specific.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_args_t *args)
      * }
      */
-    public static int H5VLblob_specific(MemorySegment obj, long connector_id, MemorySegment blob_id, MemorySegment args) {
+    public static int H5VLblob_specific(MemorySegment obj, long connector_id, MemorySegment blob_id,
+                                        MemorySegment args)
+    {
         var mh$ = H5VLblob_specific.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLblob_specific", obj, connector_id, blob_id, args);
             }
             return (int)mh$.invokeExact(obj, connector_id, blob_id, args);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLblob_optional {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+            hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLblob_optional");
 
@@ -15119,9 +13791,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id, H5VL_optional_args_t *args)
      * }
      */
-    public static FunctionDescriptor H5VLblob_optional$descriptor() {
-        return H5VLblob_optional.DESC;
-    }
+    public static FunctionDescriptor H5VLblob_optional$descriptor() { return H5VLblob_optional.DESC; }
 
     /**
      * Downcall method handle for:
@@ -15129,9 +13799,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id, H5VL_optional_args_t *args)
      * }
      */
-    public static MethodHandle H5VLblob_optional$handle() {
-        return H5VLblob_optional.HANDLE;
-    }
+    public static MethodHandle H5VLblob_optional$handle() { return H5VLblob_optional.HANDLE; }
 
     /**
      * Address for:
@@ -15139,36 +13807,32 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id, H5VL_optional_args_t *args)
      * }
      */
-    public static MemorySegment H5VLblob_optional$address() {
-        return H5VLblob_optional.ADDR;
-    }
+    public static MemorySegment H5VLblob_optional$address() { return H5VLblob_optional.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id, H5VL_optional_args_t *args)
      * }
      */
-    public static int H5VLblob_optional(MemorySegment obj, long connector_id, MemorySegment blob_id, MemorySegment args) {
+    public static int H5VLblob_optional(MemorySegment obj, long connector_id, MemorySegment blob_id,
+                                        MemorySegment args)
+    {
         var mh$ = H5VLblob_optional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLblob_optional", obj, connector_id, blob_id, args);
             }
             return (int)mh$.invokeExact(obj, connector_id, blob_id, args);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLtoken_cmp {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLtoken_cmp");
 
@@ -15178,59 +13842,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value)
+     * herr_t H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1, const H5O_token_t
+     * *token2, int *cmp_value)
      * }
      */
-    public static FunctionDescriptor H5VLtoken_cmp$descriptor() {
-        return H5VLtoken_cmp.DESC;
-    }
+    public static FunctionDescriptor H5VLtoken_cmp$descriptor() { return H5VLtoken_cmp.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value)
+     * herr_t H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1, const H5O_token_t
+     * *token2, int *cmp_value)
      * }
      */
-    public static MethodHandle H5VLtoken_cmp$handle() {
-        return H5VLtoken_cmp.HANDLE;
-    }
+    public static MethodHandle H5VLtoken_cmp$handle() { return H5VLtoken_cmp.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value)
+     * herr_t H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1, const H5O_token_t
+     * *token2, int *cmp_value)
      * }
      */
-    public static MemorySegment H5VLtoken_cmp$address() {
-        return H5VLtoken_cmp.ADDR;
-    }
+    public static MemorySegment H5VLtoken_cmp$address() { return H5VLtoken_cmp.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value)
+     * herr_t H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1, const H5O_token_t
+     * *token2, int *cmp_value)
      * }
      */
-    public static int H5VLtoken_cmp(MemorySegment obj, long connector_id, MemorySegment token1, MemorySegment token2, MemorySegment cmp_value) {
+    public static int H5VLtoken_cmp(MemorySegment obj, long connector_id, MemorySegment token1,
+                                    MemorySegment token2, MemorySegment cmp_value)
+    {
         var mh$ = H5VLtoken_cmp.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLtoken_cmp", obj, connector_id, token1, token2, cmp_value);
             }
             return (int)mh$.invokeExact(obj, connector_id, token1, token2, cmp_value);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLtoken_to_str {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLtoken_to_str");
 
@@ -15240,59 +13900,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const H5O_token_t *token, char **token_str)
+     * herr_t H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const H5O_token_t *token,
+     * char **token_str)
      * }
      */
-    public static FunctionDescriptor H5VLtoken_to_str$descriptor() {
-        return H5VLtoken_to_str.DESC;
-    }
+    public static FunctionDescriptor H5VLtoken_to_str$descriptor() { return H5VLtoken_to_str.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const H5O_token_t *token, char **token_str)
+     * herr_t H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const H5O_token_t *token,
+     * char **token_str)
      * }
      */
-    public static MethodHandle H5VLtoken_to_str$handle() {
-        return H5VLtoken_to_str.HANDLE;
-    }
+    public static MethodHandle H5VLtoken_to_str$handle() { return H5VLtoken_to_str.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const H5O_token_t *token, char **token_str)
+     * herr_t H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const H5O_token_t *token,
+     * char **token_str)
      * }
      */
-    public static MemorySegment H5VLtoken_to_str$address() {
-        return H5VLtoken_to_str.ADDR;
-    }
+    public static MemorySegment H5VLtoken_to_str$address() { return H5VLtoken_to_str.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const H5O_token_t *token, char **token_str)
+     * herr_t H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const H5O_token_t *token,
+     * char **token_str)
      * }
      */
-    public static int H5VLtoken_to_str(MemorySegment obj, int obj_type, long connector_id, MemorySegment token, MemorySegment token_str) {
+    public static int H5VLtoken_to_str(MemorySegment obj, int obj_type, long connector_id,
+                                       MemorySegment token, MemorySegment token_str)
+    {
         var mh$ = H5VLtoken_to_str.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLtoken_to_str", obj, obj_type, connector_id, token, token_str);
             }
             return (int)mh$.invokeExact(obj, obj_type, connector_id, token, token_str);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLtoken_from_str {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_INT, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLtoken_from_str");
 
@@ -15302,59 +13958,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const char *token_str, H5O_token_t *token)
+     * herr_t H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const char *token_str,
+     * H5O_token_t *token)
      * }
      */
-    public static FunctionDescriptor H5VLtoken_from_str$descriptor() {
-        return H5VLtoken_from_str.DESC;
-    }
+    public static FunctionDescriptor H5VLtoken_from_str$descriptor() { return H5VLtoken_from_str.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const char *token_str, H5O_token_t *token)
+     * herr_t H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const char *token_str,
+     * H5O_token_t *token)
      * }
      */
-    public static MethodHandle H5VLtoken_from_str$handle() {
-        return H5VLtoken_from_str.HANDLE;
-    }
+    public static MethodHandle H5VLtoken_from_str$handle() { return H5VLtoken_from_str.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const char *token_str, H5O_token_t *token)
+     * herr_t H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const char *token_str,
+     * H5O_token_t *token)
      * }
      */
-    public static MemorySegment H5VLtoken_from_str$address() {
-        return H5VLtoken_from_str.ADDR;
-    }
+    public static MemorySegment H5VLtoken_from_str$address() { return H5VLtoken_from_str.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const char *token_str, H5O_token_t *token)
+     * herr_t H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id, const char *token_str,
+     * H5O_token_t *token)
      * }
      */
-    public static int H5VLtoken_from_str(MemorySegment obj, int obj_type, long connector_id, MemorySegment token_str, MemorySegment token) {
+    public static int H5VLtoken_from_str(MemorySegment obj, int obj_type, long connector_id,
+                                         MemorySegment token_str, MemorySegment token)
+    {
         var mh$ = H5VLtoken_from_str.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLtoken_from_str", obj, obj_type, connector_id, token_str, token);
             }
             return (int)mh$.invokeExact(obj, obj_type, connector_id, token_str, token);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLoptional {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER,
+                                  hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLoptional");
 
@@ -15364,53 +14016,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static FunctionDescriptor H5VLoptional$descriptor() {
-        return H5VLoptional.DESC;
-    }
+    public static FunctionDescriptor H5VLoptional$descriptor() { return H5VLoptional.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MethodHandle H5VLoptional$handle() {
-        return H5VLoptional.HANDLE;
-    }
+    public static MethodHandle H5VLoptional$handle() { return H5VLoptional.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static MemorySegment H5VLoptional$address() {
-        return H5VLoptional.ADDR;
-    }
+    public static MemorySegment H5VLoptional$address() { return H5VLoptional.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
+     * herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id, void
+     * **req)
      * }
      */
-    public static int H5VLoptional(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id, MemorySegment req) {
+    public static int H5VLoptional(MemorySegment obj, long connector_id, MemorySegment args, long dxpl_id,
+                                   MemorySegment req)
+    {
         var mh$ = H5VLoptional.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLoptional", obj, connector_id, args, dxpl_id, req);
             }
             return (int)mh$.invokeExact(obj, connector_id, args, dxpl_id, req);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VL_NATIVE_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5VL_NATIVE_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5VL_NATIVE_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -15419,9 +14073,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5VL_NATIVE_g
      * }
      */
-    public static OfLong H5VL_NATIVE_g$layout() {
-        return H5VL_NATIVE_g$constants.LAYOUT;
-    }
+    public static OfLong H5VL_NATIVE_g$layout() { return H5VL_NATIVE_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -15429,9 +14081,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5VL_NATIVE_g
      * }
      */
-    public static MemorySegment H5VL_NATIVE_g$segment() {
-        return H5VL_NATIVE_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5VL_NATIVE_g$segment() { return H5VL_NATIVE_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -15439,7 +14089,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5VL_NATIVE_g
      * }
      */
-    public static long H5VL_NATIVE_g() {
+    public static long H5VL_NATIVE_g()
+    {
         return H5VL_NATIVE_g$constants.SEGMENT.get(H5VL_NATIVE_g$constants.LAYOUT, 0L);
     }
 
@@ -15449,17 +14100,14 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5VL_NATIVE_g
      * }
      */
-    public static void H5VL_NATIVE_g(long varValue) {
+    public static void H5VL_NATIVE_g(long varValue)
+    {
         H5VL_NATIVE_g$constants.SEGMENT.set(H5VL_NATIVE_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5VLnative_addr_to_token {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLnative_addr_to_token");
 
@@ -15472,7 +14120,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
      * }
      */
-    public static FunctionDescriptor H5VLnative_addr_to_token$descriptor() {
+    public static FunctionDescriptor H5VLnative_addr_to_token$descriptor()
+    {
         return H5VLnative_addr_to_token.DESC;
     }
 
@@ -15482,9 +14131,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
      * }
      */
-    public static MethodHandle H5VLnative_addr_to_token$handle() {
-        return H5VLnative_addr_to_token.HANDLE;
-    }
+    public static MethodHandle H5VLnative_addr_to_token$handle() { return H5VLnative_addr_to_token.HANDLE; }
 
     /**
      * Address for:
@@ -15492,34 +14139,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
      * }
      */
-    public static MemorySegment H5VLnative_addr_to_token$address() {
-        return H5VLnative_addr_to_token.ADDR;
-    }
+    public static MemorySegment H5VLnative_addr_to_token$address() { return H5VLnative_addr_to_token.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
      * }
      */
-    public static int H5VLnative_addr_to_token(long loc_id, long addr, MemorySegment token) {
+    public static int H5VLnative_addr_to_token(long loc_id, long addr, MemorySegment token)
+    {
         var mh$ = H5VLnative_addr_to_token.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLnative_addr_to_token", loc_id, addr, token);
             }
             return (int)mh$.invokeExact(loc_id, addr, token);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VLnative_token_to_addr {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            H5O_token_t.layout(),
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, H5O_token_t.layout(), hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5VLnative_token_to_addr");
 
@@ -15532,7 +14175,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
      * }
      */
-    public static FunctionDescriptor H5VLnative_token_to_addr$descriptor() {
+    public static FunctionDescriptor H5VLnative_token_to_addr$descriptor()
+    {
         return H5VLnative_token_to_addr.DESC;
     }
 
@@ -15542,9 +14186,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
      * }
      */
-    public static MethodHandle H5VLnative_token_to_addr$handle() {
-        return H5VLnative_token_to_addr.HANDLE;
-    }
+    public static MethodHandle H5VLnative_token_to_addr$handle() { return H5VLnative_token_to_addr.HANDLE; }
 
     /**
      * Address for:
@@ -15552,30 +14194,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
      * }
      */
-    public static MemorySegment H5VLnative_token_to_addr$address() {
-        return H5VLnative_token_to_addr.ADDR;
-    }
+    public static MemorySegment H5VLnative_token_to_addr$address() { return H5VLnative_token_to_addr.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
      * }
      */
-    public static int H5VLnative_token_to_addr(long loc_id, MemorySegment token, MemorySegment addr) {
+    public static int H5VLnative_token_to_addr(long loc_id, MemorySegment token, MemorySegment addr)
+    {
         var mh$ = H5VLnative_token_to_addr.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5VLnative_token_to_addr", loc_id, token, addr);
             }
             return (int)mh$.invokeExact(loc_id, token, addr);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FD_CORE_id_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5FD_CORE_id_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5FD_CORE_id_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -15584,9 +14227,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_CORE_id_g
      * }
      */
-    public static OfLong H5FD_CORE_id_g$layout() {
-        return H5FD_CORE_id_g$constants.LAYOUT;
-    }
+    public static OfLong H5FD_CORE_id_g$layout() { return H5FD_CORE_id_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -15594,9 +14235,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_CORE_id_g
      * }
      */
-    public static MemorySegment H5FD_CORE_id_g$segment() {
-        return H5FD_CORE_id_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5FD_CORE_id_g$segment() { return H5FD_CORE_id_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -15604,7 +14243,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_CORE_id_g
      * }
      */
-    public static long H5FD_CORE_id_g() {
+    public static long H5FD_CORE_id_g()
+    {
         return H5FD_CORE_id_g$constants.SEGMENT.get(H5FD_CORE_id_g$constants.LAYOUT, 0L);
     }
 
@@ -15614,17 +14254,14 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_CORE_id_g
      * }
      */
-    public static void H5FD_CORE_id_g(long varValue) {
+    public static void H5FD_CORE_id_g(long varValue)
+    {
         H5FD_CORE_id_g$constants.SEGMENT.set(H5FD_CORE_id_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5Pset_fapl_core {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_core");
 
@@ -15637,9 +14274,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_core$descriptor() {
-        return H5Pset_fapl_core.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_core$descriptor() { return H5Pset_fapl_core.DESC; }
 
     /**
      * Downcall method handle for:
@@ -15647,9 +14282,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
      * }
      */
-    public static MethodHandle H5Pset_fapl_core$handle() {
-        return H5Pset_fapl_core.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_core$handle() { return H5Pset_fapl_core.HANDLE; }
 
     /**
      * Address for:
@@ -15657,34 +14290,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
      * }
      */
-    public static MemorySegment H5Pset_fapl_core$address() {
-        return H5Pset_fapl_core.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_core$address() { return H5Pset_fapl_core.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
      * }
      */
-    public static int H5Pset_fapl_core(long fapl_id, long increment, boolean backing_store) {
+    public static int H5Pset_fapl_core(long fapl_id, long increment, boolean backing_store)
+    {
         var mh$ = H5Pset_fapl_core.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_core", fapl_id, increment, backing_store);
             }
             return (int)mh$.invokeExact(fapl_id, increment, backing_store);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_fapl_core {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_fapl_core");
 
@@ -15697,9 +14326,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment, bool *backing_store)
      * }
      */
-    public static FunctionDescriptor H5Pget_fapl_core$descriptor() {
-        return H5Pget_fapl_core.DESC;
-    }
+    public static FunctionDescriptor H5Pget_fapl_core$descriptor() { return H5Pget_fapl_core.DESC; }
 
     /**
      * Downcall method handle for:
@@ -15707,9 +14334,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment, bool *backing_store)
      * }
      */
-    public static MethodHandle H5Pget_fapl_core$handle() {
-        return H5Pget_fapl_core.HANDLE;
-    }
+    public static MethodHandle H5Pget_fapl_core$handle() { return H5Pget_fapl_core.HANDLE; }
 
     /**
      * Address for:
@@ -15717,30 +14342,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment, bool *backing_store)
      * }
      */
-    public static MemorySegment H5Pget_fapl_core$address() {
-        return H5Pget_fapl_core.ADDR;
-    }
+    public static MemorySegment H5Pget_fapl_core$address() { return H5Pget_fapl_core.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment, bool *backing_store)
      * }
      */
-    public static int H5Pget_fapl_core(long fapl_id, MemorySegment increment, MemorySegment backing_store) {
+    public static int H5Pget_fapl_core(long fapl_id, MemorySegment increment, MemorySegment backing_store)
+    {
         var mh$ = H5Pget_fapl_core.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_fapl_core", fapl_id, increment, backing_store);
             }
             return (int)mh$.invokeExact(fapl_id, increment, backing_store);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FD_FAMILY_id_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5FD_FAMILY_id_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5FD_FAMILY_id_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -15749,9 +14375,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_FAMILY_id_g
      * }
      */
-    public static OfLong H5FD_FAMILY_id_g$layout() {
-        return H5FD_FAMILY_id_g$constants.LAYOUT;
-    }
+    public static OfLong H5FD_FAMILY_id_g$layout() { return H5FD_FAMILY_id_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -15759,9 +14383,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_FAMILY_id_g
      * }
      */
-    public static MemorySegment H5FD_FAMILY_id_g$segment() {
-        return H5FD_FAMILY_id_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5FD_FAMILY_id_g$segment() { return H5FD_FAMILY_id_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -15769,7 +14391,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_FAMILY_id_g
      * }
      */
-    public static long H5FD_FAMILY_id_g() {
+    public static long H5FD_FAMILY_id_g()
+    {
         return H5FD_FAMILY_id_g$constants.SEGMENT.get(H5FD_FAMILY_id_g$constants.LAYOUT, 0L);
     }
 
@@ -15779,17 +14402,14 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_FAMILY_id_g
      * }
      */
-    public static void H5FD_FAMILY_id_g(long varValue) {
+    public static void H5FD_FAMILY_id_g(long varValue)
+    {
         H5FD_FAMILY_id_g$constants.SEGMENT.set(H5FD_FAMILY_id_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5Pset_fapl_family {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_family");
 
@@ -15802,9 +14422,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_family$descriptor() {
-        return H5Pset_fapl_family.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_family$descriptor() { return H5Pset_fapl_family.DESC; }
 
     /**
      * Downcall method handle for:
@@ -15812,9 +14430,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
      * }
      */
-    public static MethodHandle H5Pset_fapl_family$handle() {
-        return H5Pset_fapl_family.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_family$handle() { return H5Pset_fapl_family.HANDLE; }
 
     /**
      * Address for:
@@ -15822,34 +14438,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
      * }
      */
-    public static MemorySegment H5Pset_fapl_family$address() {
-        return H5Pset_fapl_family.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_family$address() { return H5Pset_fapl_family.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
      * }
      */
-    public static int H5Pset_fapl_family(long fapl_id, long memb_size, long memb_fapl_id) {
+    public static int H5Pset_fapl_family(long fapl_id, long memb_size, long memb_fapl_id)
+    {
         var mh$ = H5Pset_fapl_family.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_family", fapl_id, memb_size, memb_fapl_id);
             }
             return (int)mh$.invokeExact(fapl_id, memb_size, memb_fapl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_fapl_family {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_fapl_family");
 
@@ -15862,9 +14474,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size, hid_t *memb_fapl_id)
      * }
      */
-    public static FunctionDescriptor H5Pget_fapl_family$descriptor() {
-        return H5Pget_fapl_family.DESC;
-    }
+    public static FunctionDescriptor H5Pget_fapl_family$descriptor() { return H5Pget_fapl_family.DESC; }
 
     /**
      * Downcall method handle for:
@@ -15872,9 +14482,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size, hid_t *memb_fapl_id)
      * }
      */
-    public static MethodHandle H5Pget_fapl_family$handle() {
-        return H5Pget_fapl_family.HANDLE;
-    }
+    public static MethodHandle H5Pget_fapl_family$handle() { return H5Pget_fapl_family.HANDLE; }
 
     /**
      * Address for:
@@ -15882,30 +14490,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size, hid_t *memb_fapl_id)
      * }
      */
-    public static MemorySegment H5Pget_fapl_family$address() {
-        return H5Pget_fapl_family.ADDR;
-    }
+    public static MemorySegment H5Pget_fapl_family$address() { return H5Pget_fapl_family.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size, hid_t *memb_fapl_id)
      * }
      */
-    public static int H5Pget_fapl_family(long fapl_id, MemorySegment memb_size, MemorySegment memb_fapl_id) {
+    public static int H5Pget_fapl_family(long fapl_id, MemorySegment memb_size, MemorySegment memb_fapl_id)
+    {
         var mh$ = H5Pget_fapl_family.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_fapl_family", fapl_id, memb_size, memb_fapl_id);
             }
             return (int)mh$.invokeExact(fapl_id, memb_size, memb_fapl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FD_LOG_id_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5FD_LOG_id_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5FD_LOG_id_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -15914,9 +14523,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_LOG_id_g
      * }
      */
-    public static OfLong H5FD_LOG_id_g$layout() {
-        return H5FD_LOG_id_g$constants.LAYOUT;
-    }
+    public static OfLong H5FD_LOG_id_g$layout() { return H5FD_LOG_id_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -15924,9 +14531,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_LOG_id_g
      * }
      */
-    public static MemorySegment H5FD_LOG_id_g$segment() {
-        return H5FD_LOG_id_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5FD_LOG_id_g$segment() { return H5FD_LOG_id_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -15934,7 +14539,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_LOG_id_g
      * }
      */
-    public static long H5FD_LOG_id_g() {
+    public static long H5FD_LOG_id_g()
+    {
         return H5FD_LOG_id_g$constants.SEGMENT.get(H5FD_LOG_id_g$constants.LAYOUT, 0L);
     }
 
@@ -15944,18 +14550,14 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_LOG_id_g
      * }
      */
-    public static void H5FD_LOG_id_g(long varValue) {
+    public static void H5FD_LOG_id_g(long varValue)
+    {
         H5FD_LOG_id_g$constants.SEGMENT.set(H5FD_LOG_id_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5Pset_fapl_log {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_LONG_LONG
-        );
+            hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_log");
 
@@ -15968,9 +14570,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, size_t buf_size)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_log$descriptor() {
-        return H5Pset_fapl_log.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_log$descriptor() { return H5Pset_fapl_log.DESC; }
 
     /**
      * Downcall method handle for:
@@ -15978,9 +14578,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, size_t buf_size)
      * }
      */
-    public static MethodHandle H5Pset_fapl_log$handle() {
-        return H5Pset_fapl_log.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_log$handle() { return H5Pset_fapl_log.HANDLE; }
 
     /**
      * Address for:
@@ -15988,24 +14586,24 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, size_t buf_size)
      * }
      */
-    public static MemorySegment H5Pset_fapl_log$address() {
-        return H5Pset_fapl_log.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_log$address() { return H5Pset_fapl_log.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, size_t buf_size)
      * }
      */
-    public static int H5Pset_fapl_log(long fapl_id, MemorySegment logfile, long flags, long buf_size) {
+    public static int H5Pset_fapl_log(long fapl_id, MemorySegment logfile, long flags, long buf_size)
+    {
         var mh$ = H5Pset_fapl_log.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_log", fapl_id, logfile, flags, buf_size);
             }
             return (int)mh$.invokeExact(fapl_id, logfile, flags, buf_size);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
     private static final int H5FD_MPIO_INDEPENDENT = (int)0L;
@@ -16014,67 +14612,54 @@ public class hdf5_h extends hdf5_h_1 {
      * enum H5FD_mpio_xfer_t.H5FD_MPIO_INDEPENDENT = 0
      * }
      */
-    public static int H5FD_MPIO_INDEPENDENT() {
-        return H5FD_MPIO_INDEPENDENT;
-    }
+    public static int H5FD_MPIO_INDEPENDENT() { return H5FD_MPIO_INDEPENDENT; }
     private static final int H5FD_MPIO_COLLECTIVE = (int)1L;
     /**
      * {@snippet lang=c :
      * enum H5FD_mpio_xfer_t.H5FD_MPIO_COLLECTIVE = 1
      * }
      */
-    public static int H5FD_MPIO_COLLECTIVE() {
-        return H5FD_MPIO_COLLECTIVE;
-    }
+    public static int H5FD_MPIO_COLLECTIVE() { return H5FD_MPIO_COLLECTIVE; }
     private static final int H5FD_MPIO_CHUNK_DEFAULT = (int)0L;
     /**
      * {@snippet lang=c :
      * enum H5FD_mpio_chunk_opt_t.H5FD_MPIO_CHUNK_DEFAULT = 0
      * }
      */
-    public static int H5FD_MPIO_CHUNK_DEFAULT() {
-        return H5FD_MPIO_CHUNK_DEFAULT;
-    }
+    public static int H5FD_MPIO_CHUNK_DEFAULT() { return H5FD_MPIO_CHUNK_DEFAULT; }
     private static final int H5FD_MPIO_CHUNK_ONE_IO = (int)1L;
     /**
      * {@snippet lang=c :
      * enum H5FD_mpio_chunk_opt_t.H5FD_MPIO_CHUNK_ONE_IO = 1
      * }
      */
-    public static int H5FD_MPIO_CHUNK_ONE_IO() {
-        return H5FD_MPIO_CHUNK_ONE_IO;
-    }
+    public static int H5FD_MPIO_CHUNK_ONE_IO() { return H5FD_MPIO_CHUNK_ONE_IO; }
     private static final int H5FD_MPIO_CHUNK_MULTI_IO = (int)2L;
     /**
      * {@snippet lang=c :
      * enum H5FD_mpio_chunk_opt_t.H5FD_MPIO_CHUNK_MULTI_IO = 2
      * }
      */
-    public static int H5FD_MPIO_CHUNK_MULTI_IO() {
-        return H5FD_MPIO_CHUNK_MULTI_IO;
-    }
+    public static int H5FD_MPIO_CHUNK_MULTI_IO() { return H5FD_MPIO_CHUNK_MULTI_IO; }
     private static final int H5FD_MPIO_COLLECTIVE_IO = (int)0L;
     /**
      * {@snippet lang=c :
      * enum H5FD_mpio_collective_opt_t.H5FD_MPIO_COLLECTIVE_IO = 0
      * }
      */
-    public static int H5FD_MPIO_COLLECTIVE_IO() {
-        return H5FD_MPIO_COLLECTIVE_IO;
-    }
+    public static int H5FD_MPIO_COLLECTIVE_IO() { return H5FD_MPIO_COLLECTIVE_IO; }
     private static final int H5FD_MPIO_INDIVIDUAL_IO = (int)1L;
     /**
      * {@snippet lang=c :
      * enum H5FD_mpio_collective_opt_t.H5FD_MPIO_INDIVIDUAL_IO = 1
      * }
      */
-    public static int H5FD_MPIO_INDIVIDUAL_IO() {
-        return H5FD_MPIO_INDIVIDUAL_IO;
-    }
+    public static int H5FD_MPIO_INDIVIDUAL_IO() { return H5FD_MPIO_INDIVIDUAL_IO; }
 
     private static class H5FD_MULTI_id_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5FD_MULTI_id_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5FD_MULTI_id_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -16083,9 +14668,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_MULTI_id_g
      * }
      */
-    public static OfLong H5FD_MULTI_id_g$layout() {
-        return H5FD_MULTI_id_g$constants.LAYOUT;
-    }
+    public static OfLong H5FD_MULTI_id_g$layout() { return H5FD_MULTI_id_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -16093,9 +14676,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_MULTI_id_g
      * }
      */
-    public static MemorySegment H5FD_MULTI_id_g$segment() {
-        return H5FD_MULTI_id_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5FD_MULTI_id_g$segment() { return H5FD_MULTI_id_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -16103,7 +14684,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_MULTI_id_g
      * }
      */
-    public static long H5FD_MULTI_id_g() {
+    public static long H5FD_MULTI_id_g()
+    {
         return H5FD_MULTI_id_g$constants.SEGMENT.get(H5FD_MULTI_id_g$constants.LAYOUT, 0L);
     }
 
@@ -16113,20 +14695,15 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_MULTI_id_g
      * }
      */
-    public static void H5FD_MULTI_id_g(long varValue) {
+    public static void H5FD_MULTI_id_g(long varValue)
+    {
         H5FD_MULTI_id_g$constants.SEGMENT.set(H5FD_MULTI_id_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5Pset_fapl_multi {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_BOOL
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_BOOL);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_multi");
 
@@ -16136,60 +14713,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char *const *memb_name, const haddr_t *memb_addr, bool relax)
+     * herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char
+     * *const *memb_name, const haddr_t *memb_addr, bool relax)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_multi$descriptor() {
-        return H5Pset_fapl_multi.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_multi$descriptor() { return H5Pset_fapl_multi.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char *const *memb_name, const haddr_t *memb_addr, bool relax)
+     * herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char
+     * *const *memb_name, const haddr_t *memb_addr, bool relax)
      * }
      */
-    public static MethodHandle H5Pset_fapl_multi$handle() {
-        return H5Pset_fapl_multi.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_multi$handle() { return H5Pset_fapl_multi.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char *const *memb_name, const haddr_t *memb_addr, bool relax)
+     * herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char
+     * *const *memb_name, const haddr_t *memb_addr, bool relax)
      * }
      */
-    public static MemorySegment H5Pset_fapl_multi$address() {
-        return H5Pset_fapl_multi.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_multi$address() { return H5Pset_fapl_multi.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char *const *memb_name, const haddr_t *memb_addr, bool relax)
+     * herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char
+     * *const *memb_name, const haddr_t *memb_addr, bool relax)
      * }
      */
-    public static int H5Pset_fapl_multi(long fapl_id, MemorySegment memb_map, MemorySegment memb_fapl, MemorySegment memb_name, MemorySegment memb_addr, boolean relax) {
+    public static int H5Pset_fapl_multi(long fapl_id, MemorySegment memb_map, MemorySegment memb_fapl,
+                                        MemorySegment memb_name, MemorySegment memb_addr, boolean relax)
+    {
         var mh$ = H5Pset_fapl_multi.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_multi", fapl_id, memb_map, memb_fapl, memb_name, memb_addr, relax);
             }
             return (int)mh$.invokeExact(fapl_id, memb_map, memb_fapl, memb_name, memb_addr, relax);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_fapl_multi {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER,
+                                  hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_fapl_multi");
 
@@ -16199,59 +14771,55 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map, hid_t *memb_fapl, char **memb_name, haddr_t *memb_addr, bool *relax)
+     * herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map, hid_t *memb_fapl, char **memb_name,
+     * haddr_t *memb_addr, bool *relax)
      * }
      */
-    public static FunctionDescriptor H5Pget_fapl_multi$descriptor() {
-        return H5Pget_fapl_multi.DESC;
-    }
+    public static FunctionDescriptor H5Pget_fapl_multi$descriptor() { return H5Pget_fapl_multi.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map, hid_t *memb_fapl, char **memb_name, haddr_t *memb_addr, bool *relax)
+     * herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map, hid_t *memb_fapl, char **memb_name,
+     * haddr_t *memb_addr, bool *relax)
      * }
      */
-    public static MethodHandle H5Pget_fapl_multi$handle() {
-        return H5Pget_fapl_multi.HANDLE;
-    }
+    public static MethodHandle H5Pget_fapl_multi$handle() { return H5Pget_fapl_multi.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map, hid_t *memb_fapl, char **memb_name, haddr_t *memb_addr, bool *relax)
+     * herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map, hid_t *memb_fapl, char **memb_name,
+     * haddr_t *memb_addr, bool *relax)
      * }
      */
-    public static MemorySegment H5Pget_fapl_multi$address() {
-        return H5Pget_fapl_multi.ADDR;
-    }
+    public static MemorySegment H5Pget_fapl_multi$address() { return H5Pget_fapl_multi.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map, hid_t *memb_fapl, char **memb_name, haddr_t *memb_addr, bool *relax)
+     * herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map, hid_t *memb_fapl, char **memb_name,
+     * haddr_t *memb_addr, bool *relax)
      * }
      */
-    public static int H5Pget_fapl_multi(long fapl_id, MemorySegment memb_map, MemorySegment memb_fapl, MemorySegment memb_name, MemorySegment memb_addr, MemorySegment relax) {
+    public static int H5Pget_fapl_multi(long fapl_id, MemorySegment memb_map, MemorySegment memb_fapl,
+                                        MemorySegment memb_name, MemorySegment memb_addr, MemorySegment relax)
+    {
         var mh$ = H5Pget_fapl_multi.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_fapl_multi", fapl_id, memb_map, memb_fapl, memb_name, memb_addr, relax);
             }
             return (int)mh$.invokeExact(fapl_id, memb_map, memb_fapl, memb_name, memb_addr, relax);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_fapl_split {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG,
+                                  hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_split");
 
@@ -16261,47 +14829,48 @@ public class hdf5_h extends hdf5_h_1 {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext, hid_t raw_plist_id)
+     * herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext,
+     * hid_t raw_plist_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_split$descriptor() {
-        return H5Pset_fapl_split.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_split$descriptor() { return H5Pset_fapl_split.DESC; }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext, hid_t raw_plist_id)
+     * herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext,
+     * hid_t raw_plist_id)
      * }
      */
-    public static MethodHandle H5Pset_fapl_split$handle() {
-        return H5Pset_fapl_split.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_split$handle() { return H5Pset_fapl_split.HANDLE; }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext, hid_t raw_plist_id)
+     * herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext,
+     * hid_t raw_plist_id)
      * }
      */
-    public static MemorySegment H5Pset_fapl_split$address() {
-        return H5Pset_fapl_split.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_split$address() { return H5Pset_fapl_split.ADDR; }
 
     /**
      * {@snippet lang=c :
-     * herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext, hid_t raw_plist_id)
+     * herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext,
+     * hid_t raw_plist_id)
      * }
      */
-    public static int H5Pset_fapl_split(long fapl, MemorySegment meta_ext, long meta_plist_id, MemorySegment raw_ext, long raw_plist_id) {
+    public static int H5Pset_fapl_split(long fapl, MemorySegment meta_ext, long meta_plist_id,
+                                        MemorySegment raw_ext, long raw_plist_id)
+    {
         var mh$ = H5Pset_fapl_split.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_split", fapl, meta_ext, meta_plist_id, raw_ext, raw_plist_id);
             }
             return (int)mh$.invokeExact(fapl, meta_ext, meta_plist_id, raw_ext, raw_plist_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
     private static final int H5FD_ONION_STORE_TARGET_ONION = (int)0L;
@@ -16310,13 +14879,12 @@ public class hdf5_h extends hdf5_h_1 {
      * enum H5FD_onion_target_file_constant_t.H5FD_ONION_STORE_TARGET_ONION = 0
      * }
      */
-    public static int H5FD_ONION_STORE_TARGET_ONION() {
-        return H5FD_ONION_STORE_TARGET_ONION;
-    }
+    public static int H5FD_ONION_STORE_TARGET_ONION() { return H5FD_ONION_STORE_TARGET_ONION; }
 
     private static class H5FD_ONION_id_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5FD_ONION_id_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5FD_ONION_id_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -16325,9 +14893,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_ONION_id_g
      * }
      */
-    public static OfLong H5FD_ONION_id_g$layout() {
-        return H5FD_ONION_id_g$constants.LAYOUT;
-    }
+    public static OfLong H5FD_ONION_id_g$layout() { return H5FD_ONION_id_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -16335,9 +14901,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_ONION_id_g
      * }
      */
-    public static MemorySegment H5FD_ONION_id_g$segment() {
-        return H5FD_ONION_id_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5FD_ONION_id_g$segment() { return H5FD_ONION_id_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -16345,7 +14909,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_ONION_id_g
      * }
      */
-    public static long H5FD_ONION_id_g() {
+    public static long H5FD_ONION_id_g()
+    {
         return H5FD_ONION_id_g$constants.SEGMENT.get(H5FD_ONION_id_g$constants.LAYOUT, 0L);
     }
 
@@ -16355,16 +14920,14 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_ONION_id_g
      * }
      */
-    public static void H5FD_ONION_id_g(long varValue) {
+    public static void H5FD_ONION_id_g(long varValue)
+    {
         H5FD_ONION_id_g$constants.SEGMENT.set(H5FD_ONION_id_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5Pget_fapl_onion {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_fapl_onion");
 
@@ -16377,9 +14940,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
      * }
      */
-    public static FunctionDescriptor H5Pget_fapl_onion$descriptor() {
-        return H5Pget_fapl_onion.DESC;
-    }
+    public static FunctionDescriptor H5Pget_fapl_onion$descriptor() { return H5Pget_fapl_onion.DESC; }
 
     /**
      * Downcall method handle for:
@@ -16387,9 +14948,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
      * }
      */
-    public static MethodHandle H5Pget_fapl_onion$handle() {
-        return H5Pget_fapl_onion.HANDLE;
-    }
+    public static MethodHandle H5Pget_fapl_onion$handle() { return H5Pget_fapl_onion.HANDLE; }
 
     /**
      * Address for:
@@ -16397,33 +14956,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
      * }
      */
-    public static MemorySegment H5Pget_fapl_onion$address() {
-        return H5Pget_fapl_onion.ADDR;
-    }
+    public static MemorySegment H5Pget_fapl_onion$address() { return H5Pget_fapl_onion.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
      * }
      */
-    public static int H5Pget_fapl_onion(long fapl_id, MemorySegment fa_out) {
+    public static int H5Pget_fapl_onion(long fapl_id, MemorySegment fa_out)
+    {
         var mh$ = H5Pget_fapl_onion.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_fapl_onion", fapl_id, fa_out);
             }
             return (int)mh$.invokeExact(fapl_id, fa_out);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_fapl_onion {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_onion");
 
@@ -16436,9 +14992,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_onion$descriptor() {
-        return H5Pset_fapl_onion.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_onion$descriptor() { return H5Pset_fapl_onion.DESC; }
 
     /**
      * Downcall method handle for:
@@ -16446,9 +15000,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
      * }
      */
-    public static MethodHandle H5Pset_fapl_onion$handle() {
-        return H5Pset_fapl_onion.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_onion$handle() { return H5Pset_fapl_onion.HANDLE; }
 
     /**
      * Address for:
@@ -16456,34 +15008,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
      * }
      */
-    public static MemorySegment H5Pset_fapl_onion$address() {
-        return H5Pset_fapl_onion.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_onion$address() { return H5Pset_fapl_onion.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
      * }
      */
-    public static int H5Pset_fapl_onion(long fapl_id, MemorySegment fa) {
+    public static int H5Pset_fapl_onion(long fapl_id, MemorySegment fa)
+    {
         var mh$ = H5Pset_fapl_onion.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_onion", fapl_id, fa);
             }
             return (int)mh$.invokeExact(fapl_id, fa);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FDonion_get_revision_count {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5FDonion_get_revision_count");
 
@@ -16496,7 +15044,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revision_count)
      * }
      */
-    public static FunctionDescriptor H5FDonion_get_revision_count$descriptor() {
+    public static FunctionDescriptor H5FDonion_get_revision_count$descriptor()
+    {
         return H5FDonion_get_revision_count.DESC;
     }
 
@@ -16506,7 +15055,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revision_count)
      * }
      */
-    public static MethodHandle H5FDonion_get_revision_count$handle() {
+    public static MethodHandle H5FDonion_get_revision_count$handle()
+    {
         return H5FDonion_get_revision_count.HANDLE;
     }
 
@@ -16516,7 +15066,8 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revision_count)
      * }
      */
-    public static MemorySegment H5FDonion_get_revision_count$address() {
+    public static MemorySegment H5FDonion_get_revision_count$address()
+    {
         return H5FDonion_get_revision_count.ADDR;
     }
 
@@ -16525,21 +15076,25 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revision_count)
      * }
      */
-    public static int H5FDonion_get_revision_count(MemorySegment filename, long fapl_id, MemorySegment revision_count) {
+    public static int H5FDonion_get_revision_count(MemorySegment filename, long fapl_id,
+                                                   MemorySegment revision_count)
+    {
         var mh$ = H5FDonion_get_revision_count.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5FDonion_get_revision_count", filename, fapl_id, revision_count);
             }
             return (int)mh$.invokeExact(filename, fapl_id, revision_count);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FD_SEC2_id_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5FD_SEC2_id_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5FD_SEC2_id_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -16548,9 +15103,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_SEC2_id_g
      * }
      */
-    public static OfLong H5FD_SEC2_id_g$layout() {
-        return H5FD_SEC2_id_g$constants.LAYOUT;
-    }
+    public static OfLong H5FD_SEC2_id_g$layout() { return H5FD_SEC2_id_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -16558,9 +15111,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_SEC2_id_g
      * }
      */
-    public static MemorySegment H5FD_SEC2_id_g$segment() {
-        return H5FD_SEC2_id_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5FD_SEC2_id_g$segment() { return H5FD_SEC2_id_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -16568,7 +15119,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_SEC2_id_g
      * }
      */
-    public static long H5FD_SEC2_id_g() {
+    public static long H5FD_SEC2_id_g()
+    {
         return H5FD_SEC2_id_g$constants.SEGMENT.get(H5FD_SEC2_id_g$constants.LAYOUT, 0L);
     }
 
@@ -16578,15 +15130,13 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_SEC2_id_g
      * }
      */
-    public static void H5FD_SEC2_id_g(long varValue) {
+    public static void H5FD_SEC2_id_g(long varValue)
+    {
         H5FD_SEC2_id_g$constants.SEGMENT.set(H5FD_SEC2_id_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5Pset_fapl_sec2 {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_sec2");
 
@@ -16599,9 +15149,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_sec2(hid_t fapl_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_sec2$descriptor() {
-        return H5Pset_fapl_sec2.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_sec2$descriptor() { return H5Pset_fapl_sec2.DESC; }
 
     /**
      * Downcall method handle for:
@@ -16609,9 +15157,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_sec2(hid_t fapl_id)
      * }
      */
-    public static MethodHandle H5Pset_fapl_sec2$handle() {
-        return H5Pset_fapl_sec2.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_sec2$handle() { return H5Pset_fapl_sec2.HANDLE; }
 
     /**
      * Address for:
@@ -16619,30 +15165,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_sec2(hid_t fapl_id)
      * }
      */
-    public static MemorySegment H5Pset_fapl_sec2$address() {
-        return H5Pset_fapl_sec2.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_sec2$address() { return H5Pset_fapl_sec2.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fapl_sec2(hid_t fapl_id)
      * }
      */
-    public static int H5Pset_fapl_sec2(long fapl_id) {
+    public static int H5Pset_fapl_sec2(long fapl_id)
+    {
         var mh$ = H5Pset_fapl_sec2.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_sec2", fapl_id);
             }
             return (int)mh$.invokeExact(fapl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FD_SPLITTER_id_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5FD_SPLITTER_id_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5FD_SPLITTER_id_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -16651,9 +15198,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_SPLITTER_id_g
      * }
      */
-    public static OfLong H5FD_SPLITTER_id_g$layout() {
-        return H5FD_SPLITTER_id_g$constants.LAYOUT;
-    }
+    public static OfLong H5FD_SPLITTER_id_g$layout() { return H5FD_SPLITTER_id_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -16661,9 +15206,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_SPLITTER_id_g
      * }
      */
-    public static MemorySegment H5FD_SPLITTER_id_g$segment() {
-        return H5FD_SPLITTER_id_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5FD_SPLITTER_id_g$segment() { return H5FD_SPLITTER_id_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -16671,7 +15214,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_SPLITTER_id_g
      * }
      */
-    public static long H5FD_SPLITTER_id_g() {
+    public static long H5FD_SPLITTER_id_g()
+    {
         return H5FD_SPLITTER_id_g$constants.SEGMENT.get(H5FD_SPLITTER_id_g$constants.LAYOUT, 0L);
     }
 
@@ -16681,16 +15225,14 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_SPLITTER_id_g
      * }
      */
-    public static void H5FD_SPLITTER_id_g(long varValue) {
+    public static void H5FD_SPLITTER_id_g(long varValue)
+    {
         H5FD_SPLITTER_id_g$constants.SEGMENT.set(H5FD_SPLITTER_id_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5Pset_fapl_splitter {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_splitter");
 
@@ -16703,9 +15245,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_splitter$descriptor() {
-        return H5Pset_fapl_splitter.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_splitter$descriptor() { return H5Pset_fapl_splitter.DESC; }
 
     /**
      * Downcall method handle for:
@@ -16713,9 +15253,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr)
      * }
      */
-    public static MethodHandle H5Pset_fapl_splitter$handle() {
-        return H5Pset_fapl_splitter.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_splitter$handle() { return H5Pset_fapl_splitter.HANDLE; }
 
     /**
      * Address for:
@@ -16723,33 +15261,30 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr)
      * }
      */
-    public static MemorySegment H5Pset_fapl_splitter$address() {
-        return H5Pset_fapl_splitter.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_splitter$address() { return H5Pset_fapl_splitter.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr)
      * }
      */
-    public static int H5Pset_fapl_splitter(long fapl_id, MemorySegment config_ptr) {
+    public static int H5Pset_fapl_splitter(long fapl_id, MemorySegment config_ptr)
+    {
         var mh$ = H5Pset_fapl_splitter.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_splitter", fapl_id, config_ptr);
             }
             return (int)mh$.invokeExact(fapl_id, config_ptr);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pget_fapl_splitter {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER
-        );
+        public static final FunctionDescriptor DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pget_fapl_splitter");
 
@@ -16762,9 +15297,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr)
      * }
      */
-    public static FunctionDescriptor H5Pget_fapl_splitter$descriptor() {
-        return H5Pget_fapl_splitter.DESC;
-    }
+    public static FunctionDescriptor H5Pget_fapl_splitter$descriptor() { return H5Pget_fapl_splitter.DESC; }
 
     /**
      * Downcall method handle for:
@@ -16772,9 +15305,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr)
      * }
      */
-    public static MethodHandle H5Pget_fapl_splitter$handle() {
-        return H5Pget_fapl_splitter.HANDLE;
-    }
+    public static MethodHandle H5Pget_fapl_splitter$handle() { return H5Pget_fapl_splitter.HANDLE; }
 
     /**
      * Address for:
@@ -16782,30 +15313,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr)
      * }
      */
-    public static MemorySegment H5Pget_fapl_splitter$address() {
-        return H5Pget_fapl_splitter.ADDR;
-    }
+    public static MemorySegment H5Pget_fapl_splitter$address() { return H5Pget_fapl_splitter.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr)
      * }
      */
-    public static int H5Pget_fapl_splitter(long fapl_id, MemorySegment config_ptr) {
+    public static int H5Pget_fapl_splitter(long fapl_id, MemorySegment config_ptr)
+    {
         var mh$ = H5Pget_fapl_splitter.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pget_fapl_splitter", fapl_id, config_ptr);
             }
             return (int)mh$.invokeExact(fapl_id, config_ptr);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5FD_STDIO_id_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5FD_STDIO_id_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5FD_STDIO_id_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -16814,9 +15346,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_STDIO_id_g
      * }
      */
-    public static OfLong H5FD_STDIO_id_g$layout() {
-        return H5FD_STDIO_id_g$constants.LAYOUT;
-    }
+    public static OfLong H5FD_STDIO_id_g$layout() { return H5FD_STDIO_id_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -16824,9 +15354,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_STDIO_id_g
      * }
      */
-    public static MemorySegment H5FD_STDIO_id_g$segment() {
-        return H5FD_STDIO_id_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5FD_STDIO_id_g$segment() { return H5FD_STDIO_id_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -16834,7 +15362,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_STDIO_id_g
      * }
      */
-    public static long H5FD_STDIO_id_g() {
+    public static long H5FD_STDIO_id_g()
+    {
         return H5FD_STDIO_id_g$constants.SEGMENT.get(H5FD_STDIO_id_g$constants.LAYOUT, 0L);
     }
 
@@ -16844,15 +15373,13 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5FD_STDIO_id_g
      * }
      */
-    public static void H5FD_STDIO_id_g(long varValue) {
+    public static void H5FD_STDIO_id_g(long varValue)
+    {
         H5FD_STDIO_id_g$constants.SEGMENT.set(H5FD_STDIO_id_g$constants.LAYOUT, 0L, varValue);
     }
 
     private static class H5Pset_fapl_stdio {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_stdio");
 
@@ -16865,9 +15392,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_stdio(hid_t fapl_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_stdio$descriptor() {
-        return H5Pset_fapl_stdio.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_stdio$descriptor() { return H5Pset_fapl_stdio.DESC; }
 
     /**
      * Downcall method handle for:
@@ -16875,9 +15400,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_stdio(hid_t fapl_id)
      * }
      */
-    public static MethodHandle H5Pset_fapl_stdio$handle() {
-        return H5Pset_fapl_stdio.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_stdio$handle() { return H5Pset_fapl_stdio.HANDLE; }
 
     /**
      * Address for:
@@ -16885,32 +15408,29 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_stdio(hid_t fapl_id)
      * }
      */
-    public static MemorySegment H5Pset_fapl_stdio$address() {
-        return H5Pset_fapl_stdio.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_stdio$address() { return H5Pset_fapl_stdio.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fapl_stdio(hid_t fapl_id)
      * }
      */
-    public static int H5Pset_fapl_stdio(long fapl_id) {
+    public static int H5Pset_fapl_stdio(long fapl_id)
+    {
         var mh$ = H5Pset_fapl_stdio.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_stdio", fapl_id);
             }
             return (int)mh$.invokeExact(fapl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5Pset_fapl_windows {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_LONG_LONG
-        );
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_LONG_LONG);
 
         public static final MemorySegment ADDR = hdf5_h.findOrThrow("H5Pset_fapl_windows");
 
@@ -16923,9 +15443,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_windows(hid_t fapl_id)
      * }
      */
-    public static FunctionDescriptor H5Pset_fapl_windows$descriptor() {
-        return H5Pset_fapl_windows.DESC;
-    }
+    public static FunctionDescriptor H5Pset_fapl_windows$descriptor() { return H5Pset_fapl_windows.DESC; }
 
     /**
      * Downcall method handle for:
@@ -16933,9 +15451,7 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_windows(hid_t fapl_id)
      * }
      */
-    public static MethodHandle H5Pset_fapl_windows$handle() {
-        return H5Pset_fapl_windows.HANDLE;
-    }
+    public static MethodHandle H5Pset_fapl_windows$handle() { return H5Pset_fapl_windows.HANDLE; }
 
     /**
      * Address for:
@@ -16943,30 +15459,31 @@ public class hdf5_h extends hdf5_h_1 {
      * herr_t H5Pset_fapl_windows(hid_t fapl_id)
      * }
      */
-    public static MemorySegment H5Pset_fapl_windows$address() {
-        return H5Pset_fapl_windows.ADDR;
-    }
+    public static MemorySegment H5Pset_fapl_windows$address() { return H5Pset_fapl_windows.ADDR; }
 
     /**
      * {@snippet lang=c :
      * herr_t H5Pset_fapl_windows(hid_t fapl_id)
      * }
      */
-    public static int H5Pset_fapl_windows(long fapl_id) {
+    public static int H5Pset_fapl_windows(long fapl_id)
+    {
         var mh$ = H5Pset_fapl_windows.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("H5Pset_fapl_windows", fapl_id);
             }
             return (int)mh$.invokeExact(fapl_id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
+        }
+        catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
         }
     }
 
     private static class H5VL_PASSTHRU_g$constants {
         public static final OfLong LAYOUT = hdf5_h.C_LONG_LONG;
-        public static final MemorySegment SEGMENT = hdf5_h.findOrThrow("H5VL_PASSTHRU_g").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT =
+            hdf5_h.findOrThrow("H5VL_PASSTHRU_g").reinterpret(LAYOUT.byteSize());
     }
 
     /**
@@ -16975,9 +15492,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5VL_PASSTHRU_g
      * }
      */
-    public static OfLong H5VL_PASSTHRU_g$layout() {
-        return H5VL_PASSTHRU_g$constants.LAYOUT;
-    }
+    public static OfLong H5VL_PASSTHRU_g$layout() { return H5VL_PASSTHRU_g$constants.LAYOUT; }
 
     /**
      * Segment for variable:
@@ -16985,9 +15500,7 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5VL_PASSTHRU_g
      * }
      */
-    public static MemorySegment H5VL_PASSTHRU_g$segment() {
-        return H5VL_PASSTHRU_g$constants.SEGMENT;
-    }
+    public static MemorySegment H5VL_PASSTHRU_g$segment() { return H5VL_PASSTHRU_g$constants.SEGMENT; }
 
     /**
      * Getter for variable:
@@ -16995,7 +15508,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5VL_PASSTHRU_g
      * }
      */
-    public static long H5VL_PASSTHRU_g() {
+    public static long H5VL_PASSTHRU_g()
+    {
         return H5VL_PASSTHRU_g$constants.SEGMENT.get(H5VL_PASSTHRU_g$constants.LAYOUT, 0L);
     }
 
@@ -17005,7 +15519,8 @@ public class hdf5_h extends hdf5_h_1 {
      * extern hid_t H5VL_PASSTHRU_g
      * }
      */
-    public static void H5VL_PASSTHRU_g(long varValue) {
+    public static void H5VL_PASSTHRU_g(long varValue)
+    {
         H5VL_PASSTHRU_g$constants.SEGMENT.set(H5VL_PASSTHRU_g$constants.LAYOUT, 0L, varValue);
     }
     /**
@@ -17013,10 +15528,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_DEFAULT_PLUGINDIR "D:/a/hdf5/hdf5/install\lib\plugin;%ALLUSERSPROFILE%\hdf5\lib\plugin"
      * }
      */
-    public static MemorySegment H5_DEFAULT_PLUGINDIR() {
+    public static MemorySegment H5_DEFAULT_PLUGINDIR()
+    {
         class Holder {
-            static final MemorySegment H5_DEFAULT_PLUGINDIR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("D:/a/hdf5/hdf5/install\\lib\\plugin;%ALLUSERSPROFILE%\\hdf5\\lib\\plugin");
+            static final MemorySegment H5_DEFAULT_PLUGINDIR = hdf5_h.LIBRARY_ARENA.allocateFrom(
+                "D:/a/hdf5/hdf5/install\\lib\\plugin;%ALLUSERSPROFILE%\\hdf5\\lib\\plugin");
         }
         return Holder.H5_DEFAULT_PLUGINDIR;
     }
@@ -17025,10 +15541,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_PACKAGE "hdf5"
      * }
      */
-    public static MemorySegment H5_PACKAGE() {
+    public static MemorySegment H5_PACKAGE()
+    {
         class Holder {
-            static final MemorySegment H5_PACKAGE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hdf5");
+            static final MemorySegment H5_PACKAGE = hdf5_h.LIBRARY_ARENA.allocateFrom("hdf5");
         }
         return Holder.H5_PACKAGE;
     }
@@ -17037,10 +15553,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_PACKAGE_BUGREPORT "help@hdfgroup.org"
      * }
      */
-    public static MemorySegment H5_PACKAGE_BUGREPORT() {
+    public static MemorySegment H5_PACKAGE_BUGREPORT()
+    {
         class Holder {
-            static final MemorySegment H5_PACKAGE_BUGREPORT
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("help@hdfgroup.org");
+            static final MemorySegment H5_PACKAGE_BUGREPORT =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("help@hdfgroup.org");
         }
         return Holder.H5_PACKAGE_BUGREPORT;
     }
@@ -17049,10 +15566,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_PACKAGE_NAME "HDF5"
      * }
      */
-    public static MemorySegment H5_PACKAGE_NAME() {
+    public static MemorySegment H5_PACKAGE_NAME()
+    {
         class Holder {
-            static final MemorySegment H5_PACKAGE_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5");
+            static final MemorySegment H5_PACKAGE_NAME = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5");
         }
         return Holder.H5_PACKAGE_NAME;
     }
@@ -17061,10 +15578,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_PACKAGE_STRING "HDF5 2.0.0.4"
      * }
      */
-    public static MemorySegment H5_PACKAGE_STRING() {
+    public static MemorySegment H5_PACKAGE_STRING()
+    {
         class Holder {
-            static final MemorySegment H5_PACKAGE_STRING
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5 2.0.0.4");
+            static final MemorySegment H5_PACKAGE_STRING = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5 2.0.0.4");
         }
         return Holder.H5_PACKAGE_STRING;
     }
@@ -17073,10 +15590,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_PACKAGE_TARNAME "hdf5"
      * }
      */
-    public static MemorySegment H5_PACKAGE_TARNAME() {
+    public static MemorySegment H5_PACKAGE_TARNAME()
+    {
         class Holder {
-            static final MemorySegment H5_PACKAGE_TARNAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hdf5");
+            static final MemorySegment H5_PACKAGE_TARNAME = hdf5_h.LIBRARY_ARENA.allocateFrom("hdf5");
         }
         return Holder.H5_PACKAGE_TARNAME;
     }
@@ -17085,10 +15602,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_PACKAGE_URL "https://www.hdfgroup.org"
      * }
      */
-    public static MemorySegment H5_PACKAGE_URL() {
+    public static MemorySegment H5_PACKAGE_URL()
+    {
         class Holder {
-            static final MemorySegment H5_PACKAGE_URL
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("https://www.hdfgroup.org");
+            static final MemorySegment H5_PACKAGE_URL =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("https://www.hdfgroup.org");
         }
         return Holder.H5_PACKAGE_URL;
     }
@@ -17097,10 +15615,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_PACKAGE_VERSION "2.0.0.4"
      * }
      */
-    public static MemorySegment H5_PACKAGE_VERSION() {
+    public static MemorySegment H5_PACKAGE_VERSION()
+    {
         class Holder {
-            static final MemorySegment H5_PACKAGE_VERSION
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("2.0.0.4");
+            static final MemorySegment H5_PACKAGE_VERSION = hdf5_h.LIBRARY_ARENA.allocateFrom("2.0.0.4");
         }
         return Holder.H5_PACKAGE_VERSION;
     }
@@ -17109,10 +15627,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_VERSION "2.0.0.4"
      * }
      */
-    public static MemorySegment H5_VERSION() {
+    public static MemorySegment H5_VERSION()
+    {
         class Holder {
-            static final MemorySegment H5_VERSION
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("2.0.0.4");
+            static final MemorySegment H5_VERSION = hdf5_h.LIBRARY_ARENA.allocateFrom("2.0.0.4");
         }
         return Holder.H5_VERSION;
     }
@@ -17122,54 +15640,44 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _VCRUNTIME_DISABLED_WARNINGS 4514
      * }
      */
-    public static int _VCRUNTIME_DISABLED_WARNINGS() {
-        return _VCRUNTIME_DISABLED_WARNINGS;
-    }
+    public static int _VCRUNTIME_DISABLED_WARNINGS() { return _VCRUNTIME_DISABLED_WARNINGS; }
     private static final MemorySegment NULL = MemorySegment.ofAddress(0L);
     /**
      * {@snippet lang=c :
      * #define NULL (void*) 0
      * }
      */
-    public static MemorySegment NULL() {
-        return NULL;
-    }
+    public static MemorySegment NULL() { return NULL; }
     private static final int _UCRT_DISABLED_WARNINGS = (int)4324L;
     /**
      * {@snippet lang=c :
      * #define _UCRT_DISABLED_WARNINGS 4324
      * }
      */
-    public static int _UCRT_DISABLED_WARNINGS() {
-        return _UCRT_DISABLED_WARNINGS;
-    }
+    public static int _UCRT_DISABLED_WARNINGS() { return _UCRT_DISABLED_WARNINGS; }
     private static final long _TRUNCATE = -1L;
     /**
      * {@snippet lang=c :
      * #define _TRUNCATE -1
      * }
      */
-    public static long _TRUNCATE() {
-        return _TRUNCATE;
-    }
+    public static long _TRUNCATE() { return _TRUNCATE; }
     private static final long _CRT_SIZE_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define _CRT_SIZE_MAX -1
      * }
      */
-    public static long _CRT_SIZE_MAX() {
-        return _CRT_SIZE_MAX;
-    }
+    public static long _CRT_SIZE_MAX() { return _CRT_SIZE_MAX; }
     /**
      * {@snippet lang=c :
      * #define __FILEW__ "j"
      * }
      */
-    public static MemorySegment __FILEW__() {
+    public static MemorySegment __FILEW__()
+    {
         class Holder {
-            static final MemorySegment __FILEW__
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("j");
+            static final MemorySegment __FILEW__ = hdf5_h.LIBRARY_ARENA.allocateFrom("j");
         }
         return Holder.__FILEW__;
     }
@@ -17179,450 +15687,352 @@ public class hdf5_h extends hdf5_h_1 {
      * #define __STDC_SECURE_LIB__ 200411
      * }
      */
-    public static int __STDC_SECURE_LIB__() {
-        return __STDC_SECURE_LIB__;
-    }
+    public static int __STDC_SECURE_LIB__() { return __STDC_SECURE_LIB__; }
     private static final int __GOT_SECURE_LIB__ = (int)200411L;
     /**
      * {@snippet lang=c :
      * #define __GOT_SECURE_LIB__ 200411
      * }
      */
-    public static int __GOT_SECURE_LIB__() {
-        return __GOT_SECURE_LIB__;
-    }
+    public static int __GOT_SECURE_LIB__() { return __GOT_SECURE_LIB__; }
     private static final int INT8_MIN = (int)-128L;
     /**
      * {@snippet lang=c :
      * #define INT8_MIN -128
      * }
      */
-    public static int INT8_MIN() {
-        return INT8_MIN;
-    }
+    public static int INT8_MIN() { return INT8_MIN; }
     private static final int INT16_MIN = (int)-32768L;
     /**
      * {@snippet lang=c :
      * #define INT16_MIN -32768
      * }
      */
-    public static int INT16_MIN() {
-        return INT16_MIN;
-    }
+    public static int INT16_MIN() { return INT16_MIN; }
     private static final int INT32_MIN = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define INT32_MIN -2147483648
      * }
      */
-    public static int INT32_MIN() {
-        return INT32_MIN;
-    }
+    public static int INT32_MIN() { return INT32_MIN; }
     private static final long INT64_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define INT64_MIN -9223372036854775808
      * }
      */
-    public static long INT64_MIN() {
-        return INT64_MIN;
-    }
+    public static long INT64_MIN() { return INT64_MIN; }
     private static final byte INT8_MAX = (byte)127L;
     /**
      * {@snippet lang=c :
      * #define INT8_MAX 127
      * }
      */
-    public static byte INT8_MAX() {
-        return INT8_MAX;
-    }
+    public static byte INT8_MAX() { return INT8_MAX; }
     private static final short INT16_MAX = (short)32767L;
     /**
      * {@snippet lang=c :
      * #define INT16_MAX 32767
      * }
      */
-    public static short INT16_MAX() {
-        return INT16_MAX;
-    }
+    public static short INT16_MAX() { return INT16_MAX; }
     private static final int INT32_MAX = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define INT32_MAX 2147483647
      * }
      */
-    public static int INT32_MAX() {
-        return INT32_MAX;
-    }
+    public static int INT32_MAX() { return INT32_MAX; }
     private static final long INT64_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define INT64_MAX 9223372036854775807
      * }
      */
-    public static long INT64_MAX() {
-        return INT64_MAX;
-    }
+    public static long INT64_MAX() { return INT64_MAX; }
     private static final byte UINT8_MAX = (byte)255L;
     /**
      * {@snippet lang=c :
      * #define UINT8_MAX 255
      * }
      */
-    public static byte UINT8_MAX() {
-        return UINT8_MAX;
-    }
+    public static byte UINT8_MAX() { return UINT8_MAX; }
     private static final short UINT16_MAX = (short)65535L;
     /**
      * {@snippet lang=c :
      * #define UINT16_MAX 65535
      * }
      */
-    public static short UINT16_MAX() {
-        return UINT16_MAX;
-    }
+    public static short UINT16_MAX() { return UINT16_MAX; }
     private static final int UINT32_MAX = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define UINT32_MAX 4294967295
      * }
      */
-    public static int UINT32_MAX() {
-        return UINT32_MAX;
-    }
+    public static int UINT32_MAX() { return UINT32_MAX; }
     private static final long UINT64_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define UINT64_MAX -1
      * }
      */
-    public static long UINT64_MAX() {
-        return UINT64_MAX;
-    }
+    public static long UINT64_MAX() { return UINT64_MAX; }
     private static final int INT_LEAST8_MIN = (int)-128L;
     /**
      * {@snippet lang=c :
      * #define INT_LEAST8_MIN -128
      * }
      */
-    public static int INT_LEAST8_MIN() {
-        return INT_LEAST8_MIN;
-    }
+    public static int INT_LEAST8_MIN() { return INT_LEAST8_MIN; }
     private static final int INT_LEAST16_MIN = (int)-32768L;
     /**
      * {@snippet lang=c :
      * #define INT_LEAST16_MIN -32768
      * }
      */
-    public static int INT_LEAST16_MIN() {
-        return INT_LEAST16_MIN;
-    }
+    public static int INT_LEAST16_MIN() { return INT_LEAST16_MIN; }
     private static final int INT_LEAST32_MIN = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define INT_LEAST32_MIN -2147483648
      * }
      */
-    public static int INT_LEAST32_MIN() {
-        return INT_LEAST32_MIN;
-    }
+    public static int INT_LEAST32_MIN() { return INT_LEAST32_MIN; }
     private static final long INT_LEAST64_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define INT_LEAST64_MIN -9223372036854775808
      * }
      */
-    public static long INT_LEAST64_MIN() {
-        return INT_LEAST64_MIN;
-    }
+    public static long INT_LEAST64_MIN() { return INT_LEAST64_MIN; }
     private static final byte INT_LEAST8_MAX = (byte)127L;
     /**
      * {@snippet lang=c :
      * #define INT_LEAST8_MAX 127
      * }
      */
-    public static byte INT_LEAST8_MAX() {
-        return INT_LEAST8_MAX;
-    }
+    public static byte INT_LEAST8_MAX() { return INT_LEAST8_MAX; }
     private static final short INT_LEAST16_MAX = (short)32767L;
     /**
      * {@snippet lang=c :
      * #define INT_LEAST16_MAX 32767
      * }
      */
-    public static short INT_LEAST16_MAX() {
-        return INT_LEAST16_MAX;
-    }
+    public static short INT_LEAST16_MAX() { return INT_LEAST16_MAX; }
     private static final int INT_LEAST32_MAX = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define INT_LEAST32_MAX 2147483647
      * }
      */
-    public static int INT_LEAST32_MAX() {
-        return INT_LEAST32_MAX;
-    }
+    public static int INT_LEAST32_MAX() { return INT_LEAST32_MAX; }
     private static final long INT_LEAST64_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define INT_LEAST64_MAX 9223372036854775807
      * }
      */
-    public static long INT_LEAST64_MAX() {
-        return INT_LEAST64_MAX;
-    }
+    public static long INT_LEAST64_MAX() { return INT_LEAST64_MAX; }
     private static final byte UINT_LEAST8_MAX = (byte)255L;
     /**
      * {@snippet lang=c :
      * #define UINT_LEAST8_MAX 255
      * }
      */
-    public static byte UINT_LEAST8_MAX() {
-        return UINT_LEAST8_MAX;
-    }
+    public static byte UINT_LEAST8_MAX() { return UINT_LEAST8_MAX; }
     private static final short UINT_LEAST16_MAX = (short)65535L;
     /**
      * {@snippet lang=c :
      * #define UINT_LEAST16_MAX 65535
      * }
      */
-    public static short UINT_LEAST16_MAX() {
-        return UINT_LEAST16_MAX;
-    }
+    public static short UINT_LEAST16_MAX() { return UINT_LEAST16_MAX; }
     private static final int UINT_LEAST32_MAX = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define UINT_LEAST32_MAX 4294967295
      * }
      */
-    public static int UINT_LEAST32_MAX() {
-        return UINT_LEAST32_MAX;
-    }
+    public static int UINT_LEAST32_MAX() { return UINT_LEAST32_MAX; }
     private static final long UINT_LEAST64_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define UINT_LEAST64_MAX -1
      * }
      */
-    public static long UINT_LEAST64_MAX() {
-        return UINT_LEAST64_MAX;
-    }
+    public static long UINT_LEAST64_MAX() { return UINT_LEAST64_MAX; }
     private static final int INT_FAST8_MIN = (int)-128L;
     /**
      * {@snippet lang=c :
      * #define INT_FAST8_MIN -128
      * }
      */
-    public static int INT_FAST8_MIN() {
-        return INT_FAST8_MIN;
-    }
+    public static int INT_FAST8_MIN() { return INT_FAST8_MIN; }
     private static final int INT_FAST16_MIN = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define INT_FAST16_MIN -2147483648
      * }
      */
-    public static int INT_FAST16_MIN() {
-        return INT_FAST16_MIN;
-    }
+    public static int INT_FAST16_MIN() { return INT_FAST16_MIN; }
     private static final int INT_FAST32_MIN = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define INT_FAST32_MIN -2147483648
      * }
      */
-    public static int INT_FAST32_MIN() {
-        return INT_FAST32_MIN;
-    }
+    public static int INT_FAST32_MIN() { return INT_FAST32_MIN; }
     private static final long INT_FAST64_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define INT_FAST64_MIN -9223372036854775808
      * }
      */
-    public static long INT_FAST64_MIN() {
-        return INT_FAST64_MIN;
-    }
+    public static long INT_FAST64_MIN() { return INT_FAST64_MIN; }
     private static final byte INT_FAST8_MAX = (byte)127L;
     /**
      * {@snippet lang=c :
      * #define INT_FAST8_MAX 127
      * }
      */
-    public static byte INT_FAST8_MAX() {
-        return INT_FAST8_MAX;
-    }
+    public static byte INT_FAST8_MAX() { return INT_FAST8_MAX; }
     private static final int INT_FAST16_MAX = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define INT_FAST16_MAX 2147483647
      * }
      */
-    public static int INT_FAST16_MAX() {
-        return INT_FAST16_MAX;
-    }
+    public static int INT_FAST16_MAX() { return INT_FAST16_MAX; }
     private static final int INT_FAST32_MAX = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define INT_FAST32_MAX 2147483647
      * }
      */
-    public static int INT_FAST32_MAX() {
-        return INT_FAST32_MAX;
-    }
+    public static int INT_FAST32_MAX() { return INT_FAST32_MAX; }
     private static final long INT_FAST64_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define INT_FAST64_MAX 9223372036854775807
      * }
      */
-    public static long INT_FAST64_MAX() {
-        return INT_FAST64_MAX;
-    }
+    public static long INT_FAST64_MAX() { return INT_FAST64_MAX; }
     private static final byte UINT_FAST8_MAX = (byte)255L;
     /**
      * {@snippet lang=c :
      * #define UINT_FAST8_MAX 255
      * }
      */
-    public static byte UINT_FAST8_MAX() {
-        return UINT_FAST8_MAX;
-    }
+    public static byte UINT_FAST8_MAX() { return UINT_FAST8_MAX; }
     private static final int UINT_FAST16_MAX = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define UINT_FAST16_MAX 4294967295
      * }
      */
-    public static int UINT_FAST16_MAX() {
-        return UINT_FAST16_MAX;
-    }
+    public static int UINT_FAST16_MAX() { return UINT_FAST16_MAX; }
     private static final int UINT_FAST32_MAX = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define UINT_FAST32_MAX 4294967295
      * }
      */
-    public static int UINT_FAST32_MAX() {
-        return UINT_FAST32_MAX;
-    }
+    public static int UINT_FAST32_MAX() { return UINT_FAST32_MAX; }
     private static final long UINT_FAST64_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define UINT_FAST64_MAX -1
      * }
      */
-    public static long UINT_FAST64_MAX() {
-        return UINT_FAST64_MAX;
-    }
+    public static long UINT_FAST64_MAX() { return UINT_FAST64_MAX; }
     private static final long INTPTR_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define INTPTR_MIN -9223372036854775808
      * }
      */
-    public static long INTPTR_MIN() {
-        return INTPTR_MIN;
-    }
+    public static long INTPTR_MIN() { return INTPTR_MIN; }
     private static final long INTPTR_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define INTPTR_MAX 9223372036854775807
      * }
      */
-    public static long INTPTR_MAX() {
-        return INTPTR_MAX;
-    }
+    public static long INTPTR_MAX() { return INTPTR_MAX; }
     private static final long UINTPTR_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define UINTPTR_MAX -1
      * }
      */
-    public static long UINTPTR_MAX() {
-        return UINTPTR_MAX;
-    }
+    public static long UINTPTR_MAX() { return UINTPTR_MAX; }
     private static final long INTMAX_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define INTMAX_MIN -9223372036854775808
      * }
      */
-    public static long INTMAX_MIN() {
-        return INTMAX_MIN;
-    }
+    public static long INTMAX_MIN() { return INTMAX_MIN; }
     private static final long INTMAX_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define INTMAX_MAX 9223372036854775807
      * }
      */
-    public static long INTMAX_MAX() {
-        return INTMAX_MAX;
-    }
+    public static long INTMAX_MAX() { return INTMAX_MAX; }
     private static final long UINTMAX_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define UINTMAX_MAX -1
      * }
      */
-    public static long UINTMAX_MAX() {
-        return UINTMAX_MAX;
-    }
+    public static long UINTMAX_MAX() { return UINTMAX_MAX; }
     private static final long PTRDIFF_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define PTRDIFF_MIN -9223372036854775808
      * }
      */
-    public static long PTRDIFF_MIN() {
-        return PTRDIFF_MIN;
-    }
+    public static long PTRDIFF_MIN() { return PTRDIFF_MIN; }
     private static final long PTRDIFF_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define PTRDIFF_MAX 9223372036854775807
      * }
      */
-    public static long PTRDIFF_MAX() {
-        return PTRDIFF_MAX;
-    }
+    public static long PTRDIFF_MAX() { return PTRDIFF_MAX; }
     private static final long SIZE_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define SIZE_MAX -1
      * }
      */
-    public static long SIZE_MAX() {
-        return SIZE_MAX;
-    }
+    public static long SIZE_MAX() { return SIZE_MAX; }
     private static final int SIG_ATOMIC_MIN = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define SIG_ATOMIC_MIN -2147483648
      * }
      */
-    public static int SIG_ATOMIC_MIN() {
-        return SIG_ATOMIC_MIN;
-    }
+    public static int SIG_ATOMIC_MIN() { return SIG_ATOMIC_MIN; }
     private static final int SIG_ATOMIC_MAX = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define SIG_ATOMIC_MAX 2147483647
      * }
      */
-    public static int SIG_ATOMIC_MAX() {
-        return SIG_ATOMIC_MAX;
-    }
+    public static int SIG_ATOMIC_MAX() { return SIG_ATOMIC_MAX; }
     /**
      * {@snippet lang=c :
      * #define PRId8 "hhd"
      * }
      */
-    public static MemorySegment PRId8() {
+    public static MemorySegment PRId8()
+    {
         class Holder {
-            static final MemorySegment PRId8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
+            static final MemorySegment PRId8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.PRId8;
     }
@@ -17631,10 +16041,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRId16 "hd"
      * }
      */
-    public static MemorySegment PRId16() {
+    public static MemorySegment PRId16()
+    {
         class Holder {
-            static final MemorySegment PRId16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hd");
+            static final MemorySegment PRId16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hd");
         }
         return Holder.PRId16;
     }
@@ -17643,10 +16053,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRId32 "d"
      * }
      */
-    public static MemorySegment PRId32() {
+    public static MemorySegment PRId32()
+    {
         class Holder {
-            static final MemorySegment PRId32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
+            static final MemorySegment PRId32 = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.PRId32;
     }
@@ -17655,10 +16065,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRId64 "lld"
      * }
      */
-    public static MemorySegment PRId64() {
+    public static MemorySegment PRId64()
+    {
         class Holder {
-            static final MemorySegment PRId64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment PRId64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRId64;
     }
@@ -17667,10 +16077,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdLEAST8 "hhd"
      * }
      */
-    public static MemorySegment PRIdLEAST8() {
+    public static MemorySegment PRIdLEAST8()
+    {
         class Holder {
-            static final MemorySegment PRIdLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
+            static final MemorySegment PRIdLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.PRIdLEAST8;
     }
@@ -17679,10 +16089,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdLEAST16 "hd"
      * }
      */
-    public static MemorySegment PRIdLEAST16() {
+    public static MemorySegment PRIdLEAST16()
+    {
         class Holder {
-            static final MemorySegment PRIdLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hd");
+            static final MemorySegment PRIdLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hd");
         }
         return Holder.PRIdLEAST16;
     }
@@ -17691,10 +16101,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdLEAST32 "d"
      * }
      */
-    public static MemorySegment PRIdLEAST32() {
+    public static MemorySegment PRIdLEAST32()
+    {
         class Holder {
-            static final MemorySegment PRIdLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
+            static final MemorySegment PRIdLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.PRIdLEAST32;
     }
@@ -17703,10 +16113,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdLEAST64 "lld"
      * }
      */
-    public static MemorySegment PRIdLEAST64() {
+    public static MemorySegment PRIdLEAST64()
+    {
         class Holder {
-            static final MemorySegment PRIdLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment PRIdLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdLEAST64;
     }
@@ -17715,10 +16125,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdFAST8 "hhd"
      * }
      */
-    public static MemorySegment PRIdFAST8() {
+    public static MemorySegment PRIdFAST8()
+    {
         class Holder {
-            static final MemorySegment PRIdFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
+            static final MemorySegment PRIdFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.PRIdFAST8;
     }
@@ -17727,10 +16137,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdFAST16 "d"
      * }
      */
-    public static MemorySegment PRIdFAST16() {
+    public static MemorySegment PRIdFAST16()
+    {
         class Holder {
-            static final MemorySegment PRIdFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
+            static final MemorySegment PRIdFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.PRIdFAST16;
     }
@@ -17739,10 +16149,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdFAST32 "d"
      * }
      */
-    public static MemorySegment PRIdFAST32() {
+    public static MemorySegment PRIdFAST32()
+    {
         class Holder {
-            static final MemorySegment PRIdFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
+            static final MemorySegment PRIdFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.PRIdFAST32;
     }
@@ -17751,10 +16161,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdFAST64 "lld"
      * }
      */
-    public static MemorySegment PRIdFAST64() {
+    public static MemorySegment PRIdFAST64()
+    {
         class Holder {
-            static final MemorySegment PRIdFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment PRIdFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdFAST64;
     }
@@ -17763,10 +16173,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdMAX "lld"
      * }
      */
-    public static MemorySegment PRIdMAX() {
+    public static MemorySegment PRIdMAX()
+    {
         class Holder {
-            static final MemorySegment PRIdMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment PRIdMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdMAX;
     }
@@ -17775,10 +16185,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIdPTR "lld"
      * }
      */
-    public static MemorySegment PRIdPTR() {
+    public static MemorySegment PRIdPTR()
+    {
         class Holder {
-            static final MemorySegment PRIdPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment PRIdPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdPTR;
     }
@@ -17787,10 +16197,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIi8 "hhi"
      * }
      */
-    public static MemorySegment PRIi8() {
+    public static MemorySegment PRIi8()
+    {
         class Holder {
-            static final MemorySegment PRIi8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
+            static final MemorySegment PRIi8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.PRIi8;
     }
@@ -17799,10 +16209,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIi16 "hi"
      * }
      */
-    public static MemorySegment PRIi16() {
+    public static MemorySegment PRIi16()
+    {
         class Holder {
-            static final MemorySegment PRIi16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hi");
+            static final MemorySegment PRIi16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hi");
         }
         return Holder.PRIi16;
     }
@@ -17811,10 +16221,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIi32 "i"
      * }
      */
-    public static MemorySegment PRIi32() {
+    public static MemorySegment PRIi32()
+    {
         class Holder {
-            static final MemorySegment PRIi32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
+            static final MemorySegment PRIi32 = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.PRIi32;
     }
@@ -17823,10 +16233,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIi64 "lli"
      * }
      */
-    public static MemorySegment PRIi64() {
+    public static MemorySegment PRIi64()
+    {
         class Holder {
-            static final MemorySegment PRIi64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment PRIi64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIi64;
     }
@@ -17835,10 +16245,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiLEAST8 "hhi"
      * }
      */
-    public static MemorySegment PRIiLEAST8() {
+    public static MemorySegment PRIiLEAST8()
+    {
         class Holder {
-            static final MemorySegment PRIiLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
+            static final MemorySegment PRIiLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.PRIiLEAST8;
     }
@@ -17847,10 +16257,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiLEAST16 "hi"
      * }
      */
-    public static MemorySegment PRIiLEAST16() {
+    public static MemorySegment PRIiLEAST16()
+    {
         class Holder {
-            static final MemorySegment PRIiLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hi");
+            static final MemorySegment PRIiLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hi");
         }
         return Holder.PRIiLEAST16;
     }
@@ -17859,10 +16269,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiLEAST32 "i"
      * }
      */
-    public static MemorySegment PRIiLEAST32() {
+    public static MemorySegment PRIiLEAST32()
+    {
         class Holder {
-            static final MemorySegment PRIiLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
+            static final MemorySegment PRIiLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.PRIiLEAST32;
     }
@@ -17871,10 +16281,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiLEAST64 "lli"
      * }
      */
-    public static MemorySegment PRIiLEAST64() {
+    public static MemorySegment PRIiLEAST64()
+    {
         class Holder {
-            static final MemorySegment PRIiLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment PRIiLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiLEAST64;
     }
@@ -17883,10 +16293,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiFAST8 "hhi"
      * }
      */
-    public static MemorySegment PRIiFAST8() {
+    public static MemorySegment PRIiFAST8()
+    {
         class Holder {
-            static final MemorySegment PRIiFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
+            static final MemorySegment PRIiFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.PRIiFAST8;
     }
@@ -17895,10 +16305,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiFAST16 "i"
      * }
      */
-    public static MemorySegment PRIiFAST16() {
+    public static MemorySegment PRIiFAST16()
+    {
         class Holder {
-            static final MemorySegment PRIiFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
+            static final MemorySegment PRIiFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.PRIiFAST16;
     }
@@ -17907,10 +16317,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiFAST32 "i"
      * }
      */
-    public static MemorySegment PRIiFAST32() {
+    public static MemorySegment PRIiFAST32()
+    {
         class Holder {
-            static final MemorySegment PRIiFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
+            static final MemorySegment PRIiFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.PRIiFAST32;
     }
@@ -17919,10 +16329,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiFAST64 "lli"
      * }
      */
-    public static MemorySegment PRIiFAST64() {
+    public static MemorySegment PRIiFAST64()
+    {
         class Holder {
-            static final MemorySegment PRIiFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment PRIiFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiFAST64;
     }
@@ -17931,10 +16341,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiMAX "lli"
      * }
      */
-    public static MemorySegment PRIiMAX() {
+    public static MemorySegment PRIiMAX()
+    {
         class Holder {
-            static final MemorySegment PRIiMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment PRIiMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiMAX;
     }
@@ -17943,10 +16353,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiPTR "lli"
      * }
      */
-    public static MemorySegment PRIiPTR() {
+    public static MemorySegment PRIiPTR()
+    {
         class Holder {
-            static final MemorySegment PRIiPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment PRIiPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiPTR;
     }
@@ -17955,10 +16365,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIo8 "hho"
      * }
      */
-    public static MemorySegment PRIo8() {
+    public static MemorySegment PRIo8()
+    {
         class Holder {
-            static final MemorySegment PRIo8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
+            static final MemorySegment PRIo8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.PRIo8;
     }
@@ -17967,10 +16377,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIo16 "ho"
      * }
      */
-    public static MemorySegment PRIo16() {
+    public static MemorySegment PRIo16()
+    {
         class Holder {
-            static final MemorySegment PRIo16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("ho");
+            static final MemorySegment PRIo16 = hdf5_h.LIBRARY_ARENA.allocateFrom("ho");
         }
         return Holder.PRIo16;
     }
@@ -17979,10 +16389,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIo32 "o"
      * }
      */
-    public static MemorySegment PRIo32() {
+    public static MemorySegment PRIo32()
+    {
         class Holder {
-            static final MemorySegment PRIo32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
+            static final MemorySegment PRIo32 = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.PRIo32;
     }
@@ -17991,10 +16401,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIo64 "llo"
      * }
      */
-    public static MemorySegment PRIo64() {
+    public static MemorySegment PRIo64()
+    {
         class Holder {
-            static final MemorySegment PRIo64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment PRIo64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIo64;
     }
@@ -18003,10 +16413,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoLEAST8 "hho"
      * }
      */
-    public static MemorySegment PRIoLEAST8() {
+    public static MemorySegment PRIoLEAST8()
+    {
         class Holder {
-            static final MemorySegment PRIoLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
+            static final MemorySegment PRIoLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.PRIoLEAST8;
     }
@@ -18015,10 +16425,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoLEAST16 "ho"
      * }
      */
-    public static MemorySegment PRIoLEAST16() {
+    public static MemorySegment PRIoLEAST16()
+    {
         class Holder {
-            static final MemorySegment PRIoLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("ho");
+            static final MemorySegment PRIoLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("ho");
         }
         return Holder.PRIoLEAST16;
     }
@@ -18027,10 +16437,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoLEAST32 "o"
      * }
      */
-    public static MemorySegment PRIoLEAST32() {
+    public static MemorySegment PRIoLEAST32()
+    {
         class Holder {
-            static final MemorySegment PRIoLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
+            static final MemorySegment PRIoLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.PRIoLEAST32;
     }
@@ -18039,10 +16449,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoLEAST64 "llo"
      * }
      */
-    public static MemorySegment PRIoLEAST64() {
+    public static MemorySegment PRIoLEAST64()
+    {
         class Holder {
-            static final MemorySegment PRIoLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment PRIoLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoLEAST64;
     }
@@ -18051,10 +16461,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoFAST8 "hho"
      * }
      */
-    public static MemorySegment PRIoFAST8() {
+    public static MemorySegment PRIoFAST8()
+    {
         class Holder {
-            static final MemorySegment PRIoFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
+            static final MemorySegment PRIoFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.PRIoFAST8;
     }
@@ -18063,10 +16473,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoFAST16 "o"
      * }
      */
-    public static MemorySegment PRIoFAST16() {
+    public static MemorySegment PRIoFAST16()
+    {
         class Holder {
-            static final MemorySegment PRIoFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
+            static final MemorySegment PRIoFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.PRIoFAST16;
     }
@@ -18075,10 +16485,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoFAST32 "o"
      * }
      */
-    public static MemorySegment PRIoFAST32() {
+    public static MemorySegment PRIoFAST32()
+    {
         class Holder {
-            static final MemorySegment PRIoFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
+            static final MemorySegment PRIoFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.PRIoFAST32;
     }
@@ -18087,10 +16497,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoFAST64 "llo"
      * }
      */
-    public static MemorySegment PRIoFAST64() {
+    public static MemorySegment PRIoFAST64()
+    {
         class Holder {
-            static final MemorySegment PRIoFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment PRIoFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoFAST64;
     }
@@ -18099,10 +16509,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoMAX "llo"
      * }
      */
-    public static MemorySegment PRIoMAX() {
+    public static MemorySegment PRIoMAX()
+    {
         class Holder {
-            static final MemorySegment PRIoMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment PRIoMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoMAX;
     }
@@ -18111,10 +16521,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoPTR "llo"
      * }
      */
-    public static MemorySegment PRIoPTR() {
+    public static MemorySegment PRIoPTR()
+    {
         class Holder {
-            static final MemorySegment PRIoPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment PRIoPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoPTR;
     }
@@ -18123,10 +16533,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIu8 "hhu"
      * }
      */
-    public static MemorySegment PRIu8() {
+    public static MemorySegment PRIu8()
+    {
         class Holder {
-            static final MemorySegment PRIu8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
+            static final MemorySegment PRIu8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.PRIu8;
     }
@@ -18135,10 +16545,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIu16 "hu"
      * }
      */
-    public static MemorySegment PRIu16() {
+    public static MemorySegment PRIu16()
+    {
         class Holder {
-            static final MemorySegment PRIu16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hu");
+            static final MemorySegment PRIu16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hu");
         }
         return Holder.PRIu16;
     }
@@ -18147,10 +16557,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIu32 "u"
      * }
      */
-    public static MemorySegment PRIu32() {
+    public static MemorySegment PRIu32()
+    {
         class Holder {
-            static final MemorySegment PRIu32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
+            static final MemorySegment PRIu32 = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.PRIu32;
     }
@@ -18159,10 +16569,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIu64 "llu"
      * }
      */
-    public static MemorySegment PRIu64() {
+    public static MemorySegment PRIu64()
+    {
         class Holder {
-            static final MemorySegment PRIu64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment PRIu64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIu64;
     }
@@ -18171,10 +16581,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuLEAST8 "hhu"
      * }
      */
-    public static MemorySegment PRIuLEAST8() {
+    public static MemorySegment PRIuLEAST8()
+    {
         class Holder {
-            static final MemorySegment PRIuLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
+            static final MemorySegment PRIuLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.PRIuLEAST8;
     }
@@ -18183,10 +16593,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuLEAST16 "hu"
      * }
      */
-    public static MemorySegment PRIuLEAST16() {
+    public static MemorySegment PRIuLEAST16()
+    {
         class Holder {
-            static final MemorySegment PRIuLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hu");
+            static final MemorySegment PRIuLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hu");
         }
         return Holder.PRIuLEAST16;
     }
@@ -18195,10 +16605,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuLEAST32 "u"
      * }
      */
-    public static MemorySegment PRIuLEAST32() {
+    public static MemorySegment PRIuLEAST32()
+    {
         class Holder {
-            static final MemorySegment PRIuLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
+            static final MemorySegment PRIuLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.PRIuLEAST32;
     }
@@ -18207,10 +16617,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuLEAST64 "llu"
      * }
      */
-    public static MemorySegment PRIuLEAST64() {
+    public static MemorySegment PRIuLEAST64()
+    {
         class Holder {
-            static final MemorySegment PRIuLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment PRIuLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuLEAST64;
     }
@@ -18219,10 +16629,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuFAST8 "hhu"
      * }
      */
-    public static MemorySegment PRIuFAST8() {
+    public static MemorySegment PRIuFAST8()
+    {
         class Holder {
-            static final MemorySegment PRIuFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
+            static final MemorySegment PRIuFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.PRIuFAST8;
     }
@@ -18231,10 +16641,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuFAST16 "u"
      * }
      */
-    public static MemorySegment PRIuFAST16() {
+    public static MemorySegment PRIuFAST16()
+    {
         class Holder {
-            static final MemorySegment PRIuFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
+            static final MemorySegment PRIuFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.PRIuFAST16;
     }
@@ -18243,10 +16653,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuFAST32 "u"
      * }
      */
-    public static MemorySegment PRIuFAST32() {
+    public static MemorySegment PRIuFAST32()
+    {
         class Holder {
-            static final MemorySegment PRIuFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
+            static final MemorySegment PRIuFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.PRIuFAST32;
     }
@@ -18255,10 +16665,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuFAST64 "llu"
      * }
      */
-    public static MemorySegment PRIuFAST64() {
+    public static MemorySegment PRIuFAST64()
+    {
         class Holder {
-            static final MemorySegment PRIuFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment PRIuFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuFAST64;
     }
@@ -18267,10 +16677,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuMAX "llu"
      * }
      */
-    public static MemorySegment PRIuMAX() {
+    public static MemorySegment PRIuMAX()
+    {
         class Holder {
-            static final MemorySegment PRIuMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment PRIuMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuMAX;
     }
@@ -18279,10 +16689,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuPTR "llu"
      * }
      */
-    public static MemorySegment PRIuPTR() {
+    public static MemorySegment PRIuPTR()
+    {
         class Holder {
-            static final MemorySegment PRIuPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment PRIuPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuPTR;
     }
@@ -18291,10 +16701,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIx8 "hhx"
      * }
      */
-    public static MemorySegment PRIx8() {
+    public static MemorySegment PRIx8()
+    {
         class Holder {
-            static final MemorySegment PRIx8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
+            static final MemorySegment PRIx8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.PRIx8;
     }
@@ -18303,10 +16713,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIx16 "hx"
      * }
      */
-    public static MemorySegment PRIx16() {
+    public static MemorySegment PRIx16()
+    {
         class Holder {
-            static final MemorySegment PRIx16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hx");
+            static final MemorySegment PRIx16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hx");
         }
         return Holder.PRIx16;
     }
@@ -18315,10 +16725,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIx32 "x"
      * }
      */
-    public static MemorySegment PRIx32() {
+    public static MemorySegment PRIx32()
+    {
         class Holder {
-            static final MemorySegment PRIx32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
+            static final MemorySegment PRIx32 = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.PRIx32;
     }
@@ -18327,10 +16737,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIx64 "llx"
      * }
      */
-    public static MemorySegment PRIx64() {
+    public static MemorySegment PRIx64()
+    {
         class Holder {
-            static final MemorySegment PRIx64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment PRIx64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIx64;
     }
@@ -18339,10 +16749,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxLEAST8 "hhx"
      * }
      */
-    public static MemorySegment PRIxLEAST8() {
+    public static MemorySegment PRIxLEAST8()
+    {
         class Holder {
-            static final MemorySegment PRIxLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
+            static final MemorySegment PRIxLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.PRIxLEAST8;
     }
@@ -18351,10 +16761,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxLEAST16 "hx"
      * }
      */
-    public static MemorySegment PRIxLEAST16() {
+    public static MemorySegment PRIxLEAST16()
+    {
         class Holder {
-            static final MemorySegment PRIxLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hx");
+            static final MemorySegment PRIxLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hx");
         }
         return Holder.PRIxLEAST16;
     }
@@ -18363,10 +16773,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxLEAST32 "x"
      * }
      */
-    public static MemorySegment PRIxLEAST32() {
+    public static MemorySegment PRIxLEAST32()
+    {
         class Holder {
-            static final MemorySegment PRIxLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
+            static final MemorySegment PRIxLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.PRIxLEAST32;
     }
@@ -18375,10 +16785,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxLEAST64 "llx"
      * }
      */
-    public static MemorySegment PRIxLEAST64() {
+    public static MemorySegment PRIxLEAST64()
+    {
         class Holder {
-            static final MemorySegment PRIxLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment PRIxLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxLEAST64;
     }
@@ -18387,10 +16797,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxFAST8 "hhx"
      * }
      */
-    public static MemorySegment PRIxFAST8() {
+    public static MemorySegment PRIxFAST8()
+    {
         class Holder {
-            static final MemorySegment PRIxFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
+            static final MemorySegment PRIxFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.PRIxFAST8;
     }
@@ -18399,10 +16809,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxFAST16 "x"
      * }
      */
-    public static MemorySegment PRIxFAST16() {
+    public static MemorySegment PRIxFAST16()
+    {
         class Holder {
-            static final MemorySegment PRIxFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
+            static final MemorySegment PRIxFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.PRIxFAST16;
     }
@@ -18411,10 +16821,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxFAST32 "x"
      * }
      */
-    public static MemorySegment PRIxFAST32() {
+    public static MemorySegment PRIxFAST32()
+    {
         class Holder {
-            static final MemorySegment PRIxFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
+            static final MemorySegment PRIxFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.PRIxFAST32;
     }
@@ -18423,10 +16833,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxFAST64 "llx"
      * }
      */
-    public static MemorySegment PRIxFAST64() {
+    public static MemorySegment PRIxFAST64()
+    {
         class Holder {
-            static final MemorySegment PRIxFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment PRIxFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxFAST64;
     }
@@ -18435,10 +16845,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxMAX "llx"
      * }
      */
-    public static MemorySegment PRIxMAX() {
+    public static MemorySegment PRIxMAX()
+    {
         class Holder {
-            static final MemorySegment PRIxMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment PRIxMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxMAX;
     }
@@ -18447,10 +16857,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxPTR "llx"
      * }
      */
-    public static MemorySegment PRIxPTR() {
+    public static MemorySegment PRIxPTR()
+    {
         class Holder {
-            static final MemorySegment PRIxPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment PRIxPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxPTR;
     }
@@ -18459,10 +16869,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIX8 "hhX"
      * }
      */
-    public static MemorySegment PRIX8() {
+    public static MemorySegment PRIX8()
+    {
         class Holder {
-            static final MemorySegment PRIX8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhX");
+            static final MemorySegment PRIX8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhX");
         }
         return Holder.PRIX8;
     }
@@ -18471,10 +16881,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIX16 "hX"
      * }
      */
-    public static MemorySegment PRIX16() {
+    public static MemorySegment PRIX16()
+    {
         class Holder {
-            static final MemorySegment PRIX16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hX");
+            static final MemorySegment PRIX16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hX");
         }
         return Holder.PRIX16;
     }
@@ -18483,10 +16893,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIX32 "X"
      * }
      */
-    public static MemorySegment PRIX32() {
+    public static MemorySegment PRIX32()
+    {
         class Holder {
-            static final MemorySegment PRIX32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("X");
+            static final MemorySegment PRIX32 = hdf5_h.LIBRARY_ARENA.allocateFrom("X");
         }
         return Holder.PRIX32;
     }
@@ -18495,10 +16905,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIX64 "llX"
      * }
      */
-    public static MemorySegment PRIX64() {
+    public static MemorySegment PRIX64()
+    {
         class Holder {
-            static final MemorySegment PRIX64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
+            static final MemorySegment PRIX64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIX64;
     }
@@ -18507,10 +16917,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXLEAST8 "hhX"
      * }
      */
-    public static MemorySegment PRIXLEAST8() {
+    public static MemorySegment PRIXLEAST8()
+    {
         class Holder {
-            static final MemorySegment PRIXLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhX");
+            static final MemorySegment PRIXLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhX");
         }
         return Holder.PRIXLEAST8;
     }
@@ -18519,10 +16929,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXLEAST16 "hX"
      * }
      */
-    public static MemorySegment PRIXLEAST16() {
+    public static MemorySegment PRIXLEAST16()
+    {
         class Holder {
-            static final MemorySegment PRIXLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hX");
+            static final MemorySegment PRIXLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hX");
         }
         return Holder.PRIXLEAST16;
     }
@@ -18531,10 +16941,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXLEAST32 "X"
      * }
      */
-    public static MemorySegment PRIXLEAST32() {
+    public static MemorySegment PRIXLEAST32()
+    {
         class Holder {
-            static final MemorySegment PRIXLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("X");
+            static final MemorySegment PRIXLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("X");
         }
         return Holder.PRIXLEAST32;
     }
@@ -18543,10 +16953,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXLEAST64 "llX"
      * }
      */
-    public static MemorySegment PRIXLEAST64() {
+    public static MemorySegment PRIXLEAST64()
+    {
         class Holder {
-            static final MemorySegment PRIXLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
+            static final MemorySegment PRIXLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXLEAST64;
     }
@@ -18555,10 +16965,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXFAST8 "hhX"
      * }
      */
-    public static MemorySegment PRIXFAST8() {
+    public static MemorySegment PRIXFAST8()
+    {
         class Holder {
-            static final MemorySegment PRIXFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhX");
+            static final MemorySegment PRIXFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhX");
         }
         return Holder.PRIXFAST8;
     }
@@ -18567,10 +16977,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXFAST16 "X"
      * }
      */
-    public static MemorySegment PRIXFAST16() {
+    public static MemorySegment PRIXFAST16()
+    {
         class Holder {
-            static final MemorySegment PRIXFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("X");
+            static final MemorySegment PRIXFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("X");
         }
         return Holder.PRIXFAST16;
     }
@@ -18579,10 +16989,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXFAST32 "X"
      * }
      */
-    public static MemorySegment PRIXFAST32() {
+    public static MemorySegment PRIXFAST32()
+    {
         class Holder {
-            static final MemorySegment PRIXFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("X");
+            static final MemorySegment PRIXFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("X");
         }
         return Holder.PRIXFAST32;
     }
@@ -18591,10 +17001,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXFAST64 "llX"
      * }
      */
-    public static MemorySegment PRIXFAST64() {
+    public static MemorySegment PRIXFAST64()
+    {
         class Holder {
-            static final MemorySegment PRIXFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
+            static final MemorySegment PRIXFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXFAST64;
     }
@@ -18603,10 +17013,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXMAX "llX"
      * }
      */
-    public static MemorySegment PRIXMAX() {
+    public static MemorySegment PRIXMAX()
+    {
         class Holder {
-            static final MemorySegment PRIXMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
+            static final MemorySegment PRIXMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXMAX;
     }
@@ -18615,10 +17025,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXPTR "llX"
      * }
      */
-    public static MemorySegment PRIXPTR() {
+    public static MemorySegment PRIXPTR()
+    {
         class Holder {
-            static final MemorySegment PRIXPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
+            static final MemorySegment PRIXPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXPTR;
     }
@@ -18627,10 +17037,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNd8 "hhd"
      * }
      */
-    public static MemorySegment SCNd8() {
+    public static MemorySegment SCNd8()
+    {
         class Holder {
-            static final MemorySegment SCNd8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
+            static final MemorySegment SCNd8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.SCNd8;
     }
@@ -18639,10 +17049,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNd16 "hd"
      * }
      */
-    public static MemorySegment SCNd16() {
+    public static MemorySegment SCNd16()
+    {
         class Holder {
-            static final MemorySegment SCNd16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hd");
+            static final MemorySegment SCNd16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hd");
         }
         return Holder.SCNd16;
     }
@@ -18651,10 +17061,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNd32 "d"
      * }
      */
-    public static MemorySegment SCNd32() {
+    public static MemorySegment SCNd32()
+    {
         class Holder {
-            static final MemorySegment SCNd32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
+            static final MemorySegment SCNd32 = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.SCNd32;
     }
@@ -18663,10 +17073,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNd64 "lld"
      * }
      */
-    public static MemorySegment SCNd64() {
+    public static MemorySegment SCNd64()
+    {
         class Holder {
-            static final MemorySegment SCNd64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment SCNd64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNd64;
     }
@@ -18675,10 +17085,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdLEAST8 "hhd"
      * }
      */
-    public static MemorySegment SCNdLEAST8() {
+    public static MemorySegment SCNdLEAST8()
+    {
         class Holder {
-            static final MemorySegment SCNdLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
+            static final MemorySegment SCNdLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.SCNdLEAST8;
     }
@@ -18687,10 +17097,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdLEAST16 "hd"
      * }
      */
-    public static MemorySegment SCNdLEAST16() {
+    public static MemorySegment SCNdLEAST16()
+    {
         class Holder {
-            static final MemorySegment SCNdLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hd");
+            static final MemorySegment SCNdLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hd");
         }
         return Holder.SCNdLEAST16;
     }
@@ -18699,10 +17109,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdLEAST32 "d"
      * }
      */
-    public static MemorySegment SCNdLEAST32() {
+    public static MemorySegment SCNdLEAST32()
+    {
         class Holder {
-            static final MemorySegment SCNdLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
+            static final MemorySegment SCNdLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.SCNdLEAST32;
     }
@@ -18711,10 +17121,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdLEAST64 "lld"
      * }
      */
-    public static MemorySegment SCNdLEAST64() {
+    public static MemorySegment SCNdLEAST64()
+    {
         class Holder {
-            static final MemorySegment SCNdLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment SCNdLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNdLEAST64;
     }
@@ -18723,10 +17133,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdFAST8 "hhd"
      * }
      */
-    public static MemorySegment SCNdFAST8() {
+    public static MemorySegment SCNdFAST8()
+    {
         class Holder {
-            static final MemorySegment SCNdFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
+            static final MemorySegment SCNdFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.SCNdFAST8;
     }
@@ -18735,10 +17145,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdFAST16 "d"
      * }
      */
-    public static MemorySegment SCNdFAST16() {
+    public static MemorySegment SCNdFAST16()
+    {
         class Holder {
-            static final MemorySegment SCNdFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
+            static final MemorySegment SCNdFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.SCNdFAST16;
     }
@@ -18747,10 +17157,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdFAST32 "d"
      * }
      */
-    public static MemorySegment SCNdFAST32() {
+    public static MemorySegment SCNdFAST32()
+    {
         class Holder {
-            static final MemorySegment SCNdFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
+            static final MemorySegment SCNdFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.SCNdFAST32;
     }
@@ -18759,10 +17169,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdFAST64 "lld"
      * }
      */
-    public static MemorySegment SCNdFAST64() {
+    public static MemorySegment SCNdFAST64()
+    {
         class Holder {
-            static final MemorySegment SCNdFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment SCNdFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNdFAST64;
     }
@@ -18771,10 +17181,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdMAX "lld"
      * }
      */
-    public static MemorySegment SCNdMAX() {
+    public static MemorySegment SCNdMAX()
+    {
         class Holder {
-            static final MemorySegment SCNdMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment SCNdMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNdMAX;
     }
@@ -18783,10 +17193,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNdPTR "lld"
      * }
      */
-    public static MemorySegment SCNdPTR() {
+    public static MemorySegment SCNdPTR()
+    {
         class Holder {
-            static final MemorySegment SCNdPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment SCNdPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNdPTR;
     }
@@ -18795,10 +17205,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNi8 "hhi"
      * }
      */
-    public static MemorySegment SCNi8() {
+    public static MemorySegment SCNi8()
+    {
         class Holder {
-            static final MemorySegment SCNi8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
+            static final MemorySegment SCNi8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.SCNi8;
     }
@@ -18807,10 +17217,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNi16 "hi"
      * }
      */
-    public static MemorySegment SCNi16() {
+    public static MemorySegment SCNi16()
+    {
         class Holder {
-            static final MemorySegment SCNi16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hi");
+            static final MemorySegment SCNi16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hi");
         }
         return Holder.SCNi16;
     }
@@ -18819,10 +17229,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNi32 "i"
      * }
      */
-    public static MemorySegment SCNi32() {
+    public static MemorySegment SCNi32()
+    {
         class Holder {
-            static final MemorySegment SCNi32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
+            static final MemorySegment SCNi32 = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.SCNi32;
     }
@@ -18831,10 +17241,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNi64 "lli"
      * }
      */
-    public static MemorySegment SCNi64() {
+    public static MemorySegment SCNi64()
+    {
         class Holder {
-            static final MemorySegment SCNi64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment SCNi64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNi64;
     }
@@ -18843,10 +17253,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiLEAST8 "hhi"
      * }
      */
-    public static MemorySegment SCNiLEAST8() {
+    public static MemorySegment SCNiLEAST8()
+    {
         class Holder {
-            static final MemorySegment SCNiLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
+            static final MemorySegment SCNiLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.SCNiLEAST8;
     }
@@ -18855,10 +17265,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiLEAST16 "hi"
      * }
      */
-    public static MemorySegment SCNiLEAST16() {
+    public static MemorySegment SCNiLEAST16()
+    {
         class Holder {
-            static final MemorySegment SCNiLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hi");
+            static final MemorySegment SCNiLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hi");
         }
         return Holder.SCNiLEAST16;
     }
@@ -18867,10 +17277,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiLEAST32 "i"
      * }
      */
-    public static MemorySegment SCNiLEAST32() {
+    public static MemorySegment SCNiLEAST32()
+    {
         class Holder {
-            static final MemorySegment SCNiLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
+            static final MemorySegment SCNiLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.SCNiLEAST32;
     }
@@ -18879,10 +17289,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiLEAST64 "lli"
      * }
      */
-    public static MemorySegment SCNiLEAST64() {
+    public static MemorySegment SCNiLEAST64()
+    {
         class Holder {
-            static final MemorySegment SCNiLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment SCNiLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNiLEAST64;
     }
@@ -18891,10 +17301,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiFAST8 "hhi"
      * }
      */
-    public static MemorySegment SCNiFAST8() {
+    public static MemorySegment SCNiFAST8()
+    {
         class Holder {
-            static final MemorySegment SCNiFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
+            static final MemorySegment SCNiFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.SCNiFAST8;
     }
@@ -18903,10 +17313,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiFAST16 "i"
      * }
      */
-    public static MemorySegment SCNiFAST16() {
+    public static MemorySegment SCNiFAST16()
+    {
         class Holder {
-            static final MemorySegment SCNiFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
+            static final MemorySegment SCNiFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.SCNiFAST16;
     }
@@ -18915,10 +17325,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiFAST32 "i"
      * }
      */
-    public static MemorySegment SCNiFAST32() {
+    public static MemorySegment SCNiFAST32()
+    {
         class Holder {
-            static final MemorySegment SCNiFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
+            static final MemorySegment SCNiFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.SCNiFAST32;
     }
@@ -18927,10 +17337,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiFAST64 "lli"
      * }
      */
-    public static MemorySegment SCNiFAST64() {
+    public static MemorySegment SCNiFAST64()
+    {
         class Holder {
-            static final MemorySegment SCNiFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment SCNiFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNiFAST64;
     }
@@ -18939,10 +17349,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiMAX "lli"
      * }
      */
-    public static MemorySegment SCNiMAX() {
+    public static MemorySegment SCNiMAX()
+    {
         class Holder {
-            static final MemorySegment SCNiMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment SCNiMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNiMAX;
     }
@@ -18951,10 +17361,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNiPTR "lli"
      * }
      */
-    public static MemorySegment SCNiPTR() {
+    public static MemorySegment SCNiPTR()
+    {
         class Holder {
-            static final MemorySegment SCNiPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment SCNiPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNiPTR;
     }
@@ -18963,10 +17373,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNo8 "hho"
      * }
      */
-    public static MemorySegment SCNo8() {
+    public static MemorySegment SCNo8()
+    {
         class Holder {
-            static final MemorySegment SCNo8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
+            static final MemorySegment SCNo8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.SCNo8;
     }
@@ -18975,10 +17385,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNo16 "ho"
      * }
      */
-    public static MemorySegment SCNo16() {
+    public static MemorySegment SCNo16()
+    {
         class Holder {
-            static final MemorySegment SCNo16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("ho");
+            static final MemorySegment SCNo16 = hdf5_h.LIBRARY_ARENA.allocateFrom("ho");
         }
         return Holder.SCNo16;
     }
@@ -18987,10 +17397,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNo32 "o"
      * }
      */
-    public static MemorySegment SCNo32() {
+    public static MemorySegment SCNo32()
+    {
         class Holder {
-            static final MemorySegment SCNo32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
+            static final MemorySegment SCNo32 = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.SCNo32;
     }
@@ -18999,10 +17409,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNo64 "llo"
      * }
      */
-    public static MemorySegment SCNo64() {
+    public static MemorySegment SCNo64()
+    {
         class Holder {
-            static final MemorySegment SCNo64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment SCNo64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNo64;
     }
@@ -19011,10 +17421,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoLEAST8 "hho"
      * }
      */
-    public static MemorySegment SCNoLEAST8() {
+    public static MemorySegment SCNoLEAST8()
+    {
         class Holder {
-            static final MemorySegment SCNoLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
+            static final MemorySegment SCNoLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.SCNoLEAST8;
     }
@@ -19023,10 +17433,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoLEAST16 "ho"
      * }
      */
-    public static MemorySegment SCNoLEAST16() {
+    public static MemorySegment SCNoLEAST16()
+    {
         class Holder {
-            static final MemorySegment SCNoLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("ho");
+            static final MemorySegment SCNoLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("ho");
         }
         return Holder.SCNoLEAST16;
     }
@@ -19035,10 +17445,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoLEAST32 "o"
      * }
      */
-    public static MemorySegment SCNoLEAST32() {
+    public static MemorySegment SCNoLEAST32()
+    {
         class Holder {
-            static final MemorySegment SCNoLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
+            static final MemorySegment SCNoLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.SCNoLEAST32;
     }
@@ -19047,10 +17457,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoLEAST64 "llo"
      * }
      */
-    public static MemorySegment SCNoLEAST64() {
+    public static MemorySegment SCNoLEAST64()
+    {
         class Holder {
-            static final MemorySegment SCNoLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment SCNoLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNoLEAST64;
     }
@@ -19059,10 +17469,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoFAST8 "hho"
      * }
      */
-    public static MemorySegment SCNoFAST8() {
+    public static MemorySegment SCNoFAST8()
+    {
         class Holder {
-            static final MemorySegment SCNoFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
+            static final MemorySegment SCNoFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.SCNoFAST8;
     }
@@ -19071,10 +17481,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoFAST16 "o"
      * }
      */
-    public static MemorySegment SCNoFAST16() {
+    public static MemorySegment SCNoFAST16()
+    {
         class Holder {
-            static final MemorySegment SCNoFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
+            static final MemorySegment SCNoFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.SCNoFAST16;
     }
@@ -19083,10 +17493,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoFAST32 "o"
      * }
      */
-    public static MemorySegment SCNoFAST32() {
+    public static MemorySegment SCNoFAST32()
+    {
         class Holder {
-            static final MemorySegment SCNoFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
+            static final MemorySegment SCNoFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.SCNoFAST32;
     }
@@ -19095,10 +17505,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoFAST64 "llo"
      * }
      */
-    public static MemorySegment SCNoFAST64() {
+    public static MemorySegment SCNoFAST64()
+    {
         class Holder {
-            static final MemorySegment SCNoFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment SCNoFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNoFAST64;
     }
@@ -19107,10 +17517,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoMAX "llo"
      * }
      */
-    public static MemorySegment SCNoMAX() {
+    public static MemorySegment SCNoMAX()
+    {
         class Holder {
-            static final MemorySegment SCNoMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment SCNoMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNoMAX;
     }
@@ -19119,10 +17529,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNoPTR "llo"
      * }
      */
-    public static MemorySegment SCNoPTR() {
+    public static MemorySegment SCNoPTR()
+    {
         class Holder {
-            static final MemorySegment SCNoPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment SCNoPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNoPTR;
     }
@@ -19131,10 +17541,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNu8 "hhu"
      * }
      */
-    public static MemorySegment SCNu8() {
+    public static MemorySegment SCNu8()
+    {
         class Holder {
-            static final MemorySegment SCNu8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
+            static final MemorySegment SCNu8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.SCNu8;
     }
@@ -19143,10 +17553,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNu16 "hu"
      * }
      */
-    public static MemorySegment SCNu16() {
+    public static MemorySegment SCNu16()
+    {
         class Holder {
-            static final MemorySegment SCNu16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hu");
+            static final MemorySegment SCNu16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hu");
         }
         return Holder.SCNu16;
     }
@@ -19155,10 +17565,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNu32 "u"
      * }
      */
-    public static MemorySegment SCNu32() {
+    public static MemorySegment SCNu32()
+    {
         class Holder {
-            static final MemorySegment SCNu32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
+            static final MemorySegment SCNu32 = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.SCNu32;
     }
@@ -19167,10 +17577,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNu64 "llu"
      * }
      */
-    public static MemorySegment SCNu64() {
+    public static MemorySegment SCNu64()
+    {
         class Holder {
-            static final MemorySegment SCNu64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment SCNu64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNu64;
     }
@@ -19179,10 +17589,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuLEAST8 "hhu"
      * }
      */
-    public static MemorySegment SCNuLEAST8() {
+    public static MemorySegment SCNuLEAST8()
+    {
         class Holder {
-            static final MemorySegment SCNuLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
+            static final MemorySegment SCNuLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.SCNuLEAST8;
     }
@@ -19191,10 +17601,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuLEAST16 "hu"
      * }
      */
-    public static MemorySegment SCNuLEAST16() {
+    public static MemorySegment SCNuLEAST16()
+    {
         class Holder {
-            static final MemorySegment SCNuLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hu");
+            static final MemorySegment SCNuLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hu");
         }
         return Holder.SCNuLEAST16;
     }
@@ -19203,10 +17613,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuLEAST32 "u"
      * }
      */
-    public static MemorySegment SCNuLEAST32() {
+    public static MemorySegment SCNuLEAST32()
+    {
         class Holder {
-            static final MemorySegment SCNuLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
+            static final MemorySegment SCNuLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.SCNuLEAST32;
     }
@@ -19215,10 +17625,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuLEAST64 "llu"
      * }
      */
-    public static MemorySegment SCNuLEAST64() {
+    public static MemorySegment SCNuLEAST64()
+    {
         class Holder {
-            static final MemorySegment SCNuLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment SCNuLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNuLEAST64;
     }
@@ -19227,10 +17637,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuFAST8 "hhu"
      * }
      */
-    public static MemorySegment SCNuFAST8() {
+    public static MemorySegment SCNuFAST8()
+    {
         class Holder {
-            static final MemorySegment SCNuFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
+            static final MemorySegment SCNuFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.SCNuFAST8;
     }
@@ -19239,10 +17649,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuFAST16 "u"
      * }
      */
-    public static MemorySegment SCNuFAST16() {
+    public static MemorySegment SCNuFAST16()
+    {
         class Holder {
-            static final MemorySegment SCNuFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
+            static final MemorySegment SCNuFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.SCNuFAST16;
     }
@@ -19251,10 +17661,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuFAST32 "u"
      * }
      */
-    public static MemorySegment SCNuFAST32() {
+    public static MemorySegment SCNuFAST32()
+    {
         class Holder {
-            static final MemorySegment SCNuFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
+            static final MemorySegment SCNuFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.SCNuFAST32;
     }
@@ -19263,10 +17673,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuFAST64 "llu"
      * }
      */
-    public static MemorySegment SCNuFAST64() {
+    public static MemorySegment SCNuFAST64()
+    {
         class Holder {
-            static final MemorySegment SCNuFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment SCNuFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNuFAST64;
     }
@@ -19275,10 +17685,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuMAX "llu"
      * }
      */
-    public static MemorySegment SCNuMAX() {
+    public static MemorySegment SCNuMAX()
+    {
         class Holder {
-            static final MemorySegment SCNuMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment SCNuMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNuMAX;
     }
@@ -19287,10 +17697,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNuPTR "llu"
      * }
      */
-    public static MemorySegment SCNuPTR() {
+    public static MemorySegment SCNuPTR()
+    {
         class Holder {
-            static final MemorySegment SCNuPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment SCNuPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNuPTR;
     }
@@ -19299,10 +17709,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNx8 "hhx"
      * }
      */
-    public static MemorySegment SCNx8() {
+    public static MemorySegment SCNx8()
+    {
         class Holder {
-            static final MemorySegment SCNx8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
+            static final MemorySegment SCNx8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.SCNx8;
     }
@@ -19311,10 +17721,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNx16 "hx"
      * }
      */
-    public static MemorySegment SCNx16() {
+    public static MemorySegment SCNx16()
+    {
         class Holder {
-            static final MemorySegment SCNx16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hx");
+            static final MemorySegment SCNx16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hx");
         }
         return Holder.SCNx16;
     }
@@ -19323,10 +17733,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNx32 "x"
      * }
      */
-    public static MemorySegment SCNx32() {
+    public static MemorySegment SCNx32()
+    {
         class Holder {
-            static final MemorySegment SCNx32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
+            static final MemorySegment SCNx32 = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.SCNx32;
     }
@@ -19335,10 +17745,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNx64 "llx"
      * }
      */
-    public static MemorySegment SCNx64() {
+    public static MemorySegment SCNx64()
+    {
         class Holder {
-            static final MemorySegment SCNx64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment SCNx64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNx64;
     }
@@ -19347,10 +17757,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxLEAST8 "hhx"
      * }
      */
-    public static MemorySegment SCNxLEAST8() {
+    public static MemorySegment SCNxLEAST8()
+    {
         class Holder {
-            static final MemorySegment SCNxLEAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
+            static final MemorySegment SCNxLEAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.SCNxLEAST8;
     }
@@ -19359,10 +17769,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxLEAST16 "hx"
      * }
      */
-    public static MemorySegment SCNxLEAST16() {
+    public static MemorySegment SCNxLEAST16()
+    {
         class Holder {
-            static final MemorySegment SCNxLEAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hx");
+            static final MemorySegment SCNxLEAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("hx");
         }
         return Holder.SCNxLEAST16;
     }
@@ -19371,10 +17781,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxLEAST32 "x"
      * }
      */
-    public static MemorySegment SCNxLEAST32() {
+    public static MemorySegment SCNxLEAST32()
+    {
         class Holder {
-            static final MemorySegment SCNxLEAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
+            static final MemorySegment SCNxLEAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.SCNxLEAST32;
     }
@@ -19383,10 +17793,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxLEAST64 "llx"
      * }
      */
-    public static MemorySegment SCNxLEAST64() {
+    public static MemorySegment SCNxLEAST64()
+    {
         class Holder {
-            static final MemorySegment SCNxLEAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment SCNxLEAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNxLEAST64;
     }
@@ -19395,10 +17805,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxFAST8 "hhx"
      * }
      */
-    public static MemorySegment SCNxFAST8() {
+    public static MemorySegment SCNxFAST8()
+    {
         class Holder {
-            static final MemorySegment SCNxFAST8
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
+            static final MemorySegment SCNxFAST8 = hdf5_h.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.SCNxFAST8;
     }
@@ -19407,10 +17817,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxFAST16 "x"
      * }
      */
-    public static MemorySegment SCNxFAST16() {
+    public static MemorySegment SCNxFAST16()
+    {
         class Holder {
-            static final MemorySegment SCNxFAST16
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
+            static final MemorySegment SCNxFAST16 = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.SCNxFAST16;
     }
@@ -19419,10 +17829,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxFAST32 "x"
      * }
      */
-    public static MemorySegment SCNxFAST32() {
+    public static MemorySegment SCNxFAST32()
+    {
         class Holder {
-            static final MemorySegment SCNxFAST32
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
+            static final MemorySegment SCNxFAST32 = hdf5_h.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.SCNxFAST32;
     }
@@ -19431,10 +17841,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxFAST64 "llx"
      * }
      */
-    public static MemorySegment SCNxFAST64() {
+    public static MemorySegment SCNxFAST64()
+    {
         class Holder {
-            static final MemorySegment SCNxFAST64
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment SCNxFAST64 = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNxFAST64;
     }
@@ -19443,10 +17853,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxMAX "llx"
      * }
      */
-    public static MemorySegment SCNxMAX() {
+    public static MemorySegment SCNxMAX()
+    {
         class Holder {
-            static final MemorySegment SCNxMAX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment SCNxMAX = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNxMAX;
     }
@@ -19455,10 +17865,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCNxPTR "llx"
      * }
      */
-    public static MemorySegment SCNxPTR() {
+    public static MemorySegment SCNxPTR()
+    {
         class Holder {
-            static final MemorySegment SCNxPTR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment SCNxPTR = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNxPTR;
     }
@@ -19468,261 +17878,205 @@ public class hdf5_h extends hdf5_h_1 {
      * #define SCHAR_MIN -128
      * }
      */
-    public static int SCHAR_MIN() {
-        return SCHAR_MIN;
-    }
+    public static int SCHAR_MIN() { return SCHAR_MIN; }
     private static final int CHAR_MIN = (int)-128L;
     /**
      * {@snippet lang=c :
      * #define CHAR_MIN -128
      * }
      */
-    public static int CHAR_MIN() {
-        return CHAR_MIN;
-    }
+    public static int CHAR_MIN() { return CHAR_MIN; }
     private static final int CHAR_MAX = (int)127L;
     /**
      * {@snippet lang=c :
      * #define CHAR_MAX 127
      * }
      */
-    public static int CHAR_MAX() {
-        return CHAR_MAX;
-    }
+    public static int CHAR_MAX() { return CHAR_MAX; }
     private static final int SHRT_MIN = (int)-32768L;
     /**
      * {@snippet lang=c :
      * #define SHRT_MIN -32768
      * }
      */
-    public static int SHRT_MIN() {
-        return SHRT_MIN;
-    }
+    public static int SHRT_MIN() { return SHRT_MIN; }
     private static final int INT_MIN = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define INT_MIN -2147483648
      * }
      */
-    public static int INT_MIN() {
-        return INT_MIN;
-    }
+    public static int INT_MIN() { return INT_MIN; }
     private static final int UINT_MAX = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define UINT_MAX 4294967295
      * }
      */
-    public static int UINT_MAX() {
-        return UINT_MAX;
-    }
+    public static int UINT_MAX() { return UINT_MAX; }
     private static final int LONG_MIN = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define LONG_MIN -2147483648
      * }
      */
-    public static int LONG_MIN() {
-        return LONG_MIN;
-    }
+    public static int LONG_MIN() { return LONG_MIN; }
     private static final int LONG_MAX = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define LONG_MAX 2147483647
      * }
      */
-    public static int LONG_MAX() {
-        return LONG_MAX;
-    }
+    public static int LONG_MAX() { return LONG_MAX; }
     private static final int ULONG_MAX = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define ULONG_MAX 4294967295
      * }
      */
-    public static int ULONG_MAX() {
-        return ULONG_MAX;
-    }
+    public static int ULONG_MAX() { return ULONG_MAX; }
     private static final long LLONG_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define LLONG_MAX 9223372036854775807
      * }
      */
-    public static long LLONG_MAX() {
-        return LLONG_MAX;
-    }
+    public static long LLONG_MAX() { return LLONG_MAX; }
     private static final long LLONG_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define LLONG_MIN -9223372036854775808
      * }
      */
-    public static long LLONG_MIN() {
-        return LLONG_MIN;
-    }
+    public static long LLONG_MIN() { return LLONG_MIN; }
     private static final long ULLONG_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define ULLONG_MAX -1
      * }
      */
-    public static long ULLONG_MAX() {
-        return ULLONG_MAX;
-    }
+    public static long ULLONG_MAX() { return ULLONG_MAX; }
     private static final int _I8_MIN = (int)-128L;
     /**
      * {@snippet lang=c :
      * #define _I8_MIN -128
      * }
      */
-    public static int _I8_MIN() {
-        return _I8_MIN;
-    }
+    public static int _I8_MIN() { return _I8_MIN; }
     private static final byte _I8_MAX = (byte)127L;
     /**
      * {@snippet lang=c :
      * #define _I8_MAX 127
      * }
      */
-    public static byte _I8_MAX() {
-        return _I8_MAX;
-    }
+    public static byte _I8_MAX() { return _I8_MAX; }
     private static final byte _UI8_MAX = (byte)255L;
     /**
      * {@snippet lang=c :
      * #define _UI8_MAX 255
      * }
      */
-    public static byte _UI8_MAX() {
-        return _UI8_MAX;
-    }
+    public static byte _UI8_MAX() { return _UI8_MAX; }
     private static final int _I16_MIN = (int)-32768L;
     /**
      * {@snippet lang=c :
      * #define _I16_MIN -32768
      * }
      */
-    public static int _I16_MIN() {
-        return _I16_MIN;
-    }
+    public static int _I16_MIN() { return _I16_MIN; }
     private static final short _I16_MAX = (short)32767L;
     /**
      * {@snippet lang=c :
      * #define _I16_MAX 32767
      * }
      */
-    public static short _I16_MAX() {
-        return _I16_MAX;
-    }
+    public static short _I16_MAX() { return _I16_MAX; }
     private static final short _UI16_MAX = (short)65535L;
     /**
      * {@snippet lang=c :
      * #define _UI16_MAX 65535
      * }
      */
-    public static short _UI16_MAX() {
-        return _UI16_MAX;
-    }
+    public static short _UI16_MAX() { return _UI16_MAX; }
     private static final int _I32_MIN = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define _I32_MIN -2147483648
      * }
      */
-    public static int _I32_MIN() {
-        return _I32_MIN;
-    }
+    public static int _I32_MIN() { return _I32_MIN; }
     private static final int _I32_MAX = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define _I32_MAX 2147483647
      * }
      */
-    public static int _I32_MAX() {
-        return _I32_MAX;
-    }
+    public static int _I32_MAX() { return _I32_MAX; }
     private static final int _UI32_MAX = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define _UI32_MAX 4294967295
      * }
      */
-    public static int _UI32_MAX() {
-        return _UI32_MAX;
-    }
+    public static int _UI32_MAX() { return _UI32_MAX; }
     private static final long _I64_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define _I64_MIN -9223372036854775808
      * }
      */
-    public static long _I64_MIN() {
-        return _I64_MIN;
-    }
+    public static long _I64_MIN() { return _I64_MIN; }
     private static final long _I64_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define _I64_MAX 9223372036854775807
      * }
      */
-    public static long _I64_MAX() {
-        return _I64_MAX;
-    }
+    public static long _I64_MAX() { return _I64_MAX; }
     private static final long _UI64_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define _UI64_MAX -1
      * }
      */
-    public static long _UI64_MAX() {
-        return _UI64_MAX;
-    }
+    public static long _UI64_MAX() { return _UI64_MAX; }
     private static final long RSIZE_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define RSIZE_MAX 9223372036854775807
      * }
      */
-    public static long RSIZE_MAX() {
-        return RSIZE_MAX;
-    }
+    public static long RSIZE_MAX() { return RSIZE_MAX; }
     private static final long LONG_LONG_MAX = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define LONG_LONG_MAX 9223372036854775807
      * }
      */
-    public static long LONG_LONG_MAX() {
-        return LONG_LONG_MAX;
-    }
+    public static long LONG_LONG_MAX() { return LONG_LONG_MAX; }
     private static final long LONG_LONG_MIN = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define LONG_LONG_MIN -9223372036854775808
      * }
      */
-    public static long LONG_LONG_MIN() {
-        return LONG_LONG_MIN;
-    }
+    public static long LONG_LONG_MIN() { return LONG_LONG_MIN; }
     private static final long ULONG_LONG_MAX = -1L;
     /**
      * {@snippet lang=c :
      * #define ULONG_LONG_MAX -1
      * }
      */
-    public static long ULONG_LONG_MAX() {
-        return ULONG_LONG_MAX;
-    }
+    public static long ULONG_LONG_MAX() { return ULONG_LONG_MAX; }
     /**
      * {@snippet lang=c :
      * #define H5_VERS_SUBRELEASE "4"
      * }
      */
-    public static MemorySegment H5_VERS_SUBRELEASE() {
+    public static MemorySegment H5_VERS_SUBRELEASE()
+    {
         class Holder {
-            static final MemorySegment H5_VERS_SUBRELEASE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("4");
+            static final MemorySegment H5_VERS_SUBRELEASE = hdf5_h.LIBRARY_ARENA.allocateFrom("4");
         }
         return Holder.H5_VERS_SUBRELEASE;
     }
@@ -19731,10 +18085,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_VERS_STR "2.0.0-4"
      * }
      */
-    public static MemorySegment H5_VERS_STR() {
+    public static MemorySegment H5_VERS_STR()
+    {
         class Holder {
-            static final MemorySegment H5_VERS_STR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("2.0.0-4");
+            static final MemorySegment H5_VERS_STR = hdf5_h.LIBRARY_ARENA.allocateFrom("2.0.0-4");
         }
         return Holder.H5_VERS_STR;
     }
@@ -19743,10 +18097,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_VERS_INFO "HDF5 library version: 2.0.0-4"
      * }
      */
-    public static MemorySegment H5_VERS_INFO() {
+    public static MemorySegment H5_VERS_INFO()
+    {
         class Holder {
-            static final MemorySegment H5_VERS_INFO
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5 library version: 2.0.0-4");
+            static final MemorySegment H5_VERS_INFO =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5 library version: 2.0.0-4");
         }
         return Holder.H5_VERS_INFO;
     }
@@ -19755,10 +18110,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HDF5_DRIVER "HDF5_DRIVER"
      * }
      */
-    public static MemorySegment HDF5_DRIVER() {
+    public static MemorySegment HDF5_DRIVER()
+    {
         class Holder {
-            static final MemorySegment HDF5_DRIVER
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_DRIVER");
+            static final MemorySegment HDF5_DRIVER = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_DRIVER");
         }
         return Holder.HDF5_DRIVER;
     }
@@ -19767,10 +18122,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HDF5_DRIVER_CONFIG "HDF5_DRIVER_CONFIG"
      * }
      */
-    public static MemorySegment HDF5_DRIVER_CONFIG() {
+    public static MemorySegment HDF5_DRIVER_CONFIG()
+    {
         class Holder {
-            static final MemorySegment HDF5_DRIVER_CONFIG
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_DRIVER_CONFIG");
+            static final MemorySegment HDF5_DRIVER_CONFIG =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_DRIVER_CONFIG");
         }
         return Holder.HDF5_DRIVER_CONFIG;
     }
@@ -19779,10 +18135,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HDF5_VOL_CONNECTOR "HDF5_VOL_CONNECTOR"
      * }
      */
-    public static MemorySegment HDF5_VOL_CONNECTOR() {
+    public static MemorySegment HDF5_VOL_CONNECTOR()
+    {
         class Holder {
-            static final MemorySegment HDF5_VOL_CONNECTOR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_VOL_CONNECTOR");
+            static final MemorySegment HDF5_VOL_CONNECTOR =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_VOL_CONNECTOR");
         }
         return Holder.HDF5_VOL_CONNECTOR;
     }
@@ -19791,10 +18148,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HDF5_PLUGIN_PATH "HDF5_PLUGIN_PATH"
      * }
      */
-    public static MemorySegment HDF5_PLUGIN_PATH() {
+    public static MemorySegment HDF5_PLUGIN_PATH()
+    {
         class Holder {
-            static final MemorySegment HDF5_PLUGIN_PATH
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_PLUGIN_PATH");
+            static final MemorySegment HDF5_PLUGIN_PATH =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_PLUGIN_PATH");
         }
         return Holder.HDF5_PLUGIN_PATH;
     }
@@ -19803,10 +18161,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HDF5_PLUGIN_PRELOAD "HDF5_PLUGIN_PRELOAD"
      * }
      */
-    public static MemorySegment HDF5_PLUGIN_PRELOAD() {
+    public static MemorySegment HDF5_PLUGIN_PRELOAD()
+    {
         class Holder {
-            static final MemorySegment HDF5_PLUGIN_PRELOAD
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_PLUGIN_PRELOAD");
+            static final MemorySegment HDF5_PLUGIN_PRELOAD =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_PLUGIN_PRELOAD");
         }
         return Holder.HDF5_PLUGIN_PRELOAD;
     }
@@ -19815,10 +18174,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HDF5_USE_FILE_LOCKING "HDF5_USE_FILE_LOCKING"
      * }
      */
-    public static MemorySegment HDF5_USE_FILE_LOCKING() {
+    public static MemorySegment HDF5_USE_FILE_LOCKING()
+    {
         class Holder {
-            static final MemorySegment HDF5_USE_FILE_LOCKING
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_USE_FILE_LOCKING");
+            static final MemorySegment HDF5_USE_FILE_LOCKING =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_USE_FILE_LOCKING");
         }
         return Holder.HDF5_USE_FILE_LOCKING;
     }
@@ -19827,10 +18187,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HDF5_NOCLEANUP "HDF5_NOCLEANUP"
      * }
      */
-    public static MemorySegment HDF5_NOCLEANUP() {
+    public static MemorySegment HDF5_NOCLEANUP()
+    {
         class Holder {
-            static final MemorySegment HDF5_NOCLEANUP
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_NOCLEANUP");
+            static final MemorySegment HDF5_NOCLEANUP = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_NOCLEANUP");
         }
         return Holder.HDF5_NOCLEANUP;
     }
@@ -19839,10 +18199,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HDF5_PREFER_WINDOWS_CODE_PAGE "HDF5_PREFER_WINDOWS_CODE_PAGE"
      * }
      */
-    public static MemorySegment HDF5_PREFER_WINDOWS_CODE_PAGE() {
+    public static MemorySegment HDF5_PREFER_WINDOWS_CODE_PAGE()
+    {
         class Holder {
-            static final MemorySegment HDF5_PREFER_WINDOWS_CODE_PAGE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_PREFER_WINDOWS_CODE_PAGE");
+            static final MemorySegment HDF5_PREFER_WINDOWS_CODE_PAGE =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("HDF5_PREFER_WINDOWS_CODE_PAGE");
         }
         return Holder.HDF5_PREFER_WINDOWS_CODE_PAGE;
     }
@@ -19852,108 +18213,86 @@ public class hdf5_h extends hdf5_h_1 {
      * #define ADDRESS_TAG_BIT 4398046511104
      * }
      */
-    public static long ADDRESS_TAG_BIT() {
-        return ADDRESS_TAG_BIT;
-    }
+    public static long ADDRESS_TAG_BIT() { return ADDRESS_TAG_BIT; }
     private static final long MAXUINT_PTR = -1L;
     /**
      * {@snippet lang=c :
      * #define MAXUINT_PTR -1
      * }
      */
-    public static long MAXUINT_PTR() {
-        return MAXUINT_PTR;
-    }
+    public static long MAXUINT_PTR() { return MAXUINT_PTR; }
     private static final long MAXINT_PTR = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define MAXINT_PTR 9223372036854775807
      * }
      */
-    public static long MAXINT_PTR() {
-        return MAXINT_PTR;
-    }
+    public static long MAXINT_PTR() { return MAXINT_PTR; }
     private static final long MININT_PTR = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define MININT_PTR -9223372036854775808
      * }
      */
-    public static long MININT_PTR() {
-        return MININT_PTR;
-    }
+    public static long MININT_PTR() { return MININT_PTR; }
     private static final long MAXULONG_PTR = -1L;
     /**
      * {@snippet lang=c :
      * #define MAXULONG_PTR -1
      * }
      */
-    public static long MAXULONG_PTR() {
-        return MAXULONG_PTR;
-    }
+    public static long MAXULONG_PTR() { return MAXULONG_PTR; }
     private static final long MAXLONG_PTR = 9223372036854775807L;
     /**
      * {@snippet lang=c :
      * #define MAXLONG_PTR 9223372036854775807
      * }
      */
-    public static long MAXLONG_PTR() {
-        return MAXLONG_PTR;
-    }
+    public static long MAXLONG_PTR() { return MAXLONG_PTR; }
     private static final long MINLONG_PTR = -9223372036854775808L;
     /**
      * {@snippet lang=c :
      * #define MINLONG_PTR -9223372036854775808
      * }
      */
-    public static long MINLONG_PTR() {
-        return MINLONG_PTR;
-    }
+    public static long MINLONG_PTR() { return MINLONG_PTR; }
     private static final int MAXUHALF_PTR = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define MAXUHALF_PTR 4294967295
      * }
      */
-    public static int MAXUHALF_PTR() {
-        return MAXUHALF_PTR;
-    }
+    public static int MAXUHALF_PTR() { return MAXUHALF_PTR; }
     private static final int MAXHALF_PTR = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define MAXHALF_PTR 2147483647
      * }
      */
-    public static int MAXHALF_PTR() {
-        return MAXHALF_PTR;
-    }
+    public static int MAXHALF_PTR() { return MAXHALF_PTR; }
     private static final int MINHALF_PTR = (int)-2147483648L;
     /**
      * {@snippet lang=c :
      * #define MINHALF_PTR -2147483648
      * }
      */
-    public static int MINHALF_PTR() {
-        return MINHALF_PTR;
-    }
+    public static int MINHALF_PTR() { return MINHALF_PTR; }
     private static final int H5_SIZEOF_SSIZE_T = (int)8L;
     /**
      * {@snippet lang=c :
      * #define H5_SIZEOF_SSIZE_T 8
      * }
      */
-    public static int H5_SIZEOF_SSIZE_T() {
-        return H5_SIZEOF_SSIZE_T;
-    }
+    public static int H5_SIZEOF_SSIZE_T() { return H5_SIZEOF_SSIZE_T; }
     /**
      * {@snippet lang=c :
      * #define PRIdHSIZE "lld"
      * }
      */
-    public static MemorySegment PRIdHSIZE() {
+    public static MemorySegment PRIdHSIZE()
+    {
         class Holder {
-            static final MemorySegment PRIdHSIZE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment PRIdHSIZE = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdHSIZE;
     }
@@ -19962,10 +18301,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIiHSIZE "lli"
      * }
      */
-    public static MemorySegment PRIiHSIZE() {
+    public static MemorySegment PRIiHSIZE()
+    {
         class Holder {
-            static final MemorySegment PRIiHSIZE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
+            static final MemorySegment PRIiHSIZE = hdf5_h.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiHSIZE;
     }
@@ -19974,10 +18313,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoHSIZE "llo"
      * }
      */
-    public static MemorySegment PRIoHSIZE() {
+    public static MemorySegment PRIoHSIZE()
+    {
         class Holder {
-            static final MemorySegment PRIoHSIZE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment PRIoHSIZE = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoHSIZE;
     }
@@ -19986,10 +18325,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuHSIZE "llu"
      * }
      */
-    public static MemorySegment PRIuHSIZE() {
+    public static MemorySegment PRIuHSIZE()
+    {
         class Holder {
-            static final MemorySegment PRIuHSIZE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment PRIuHSIZE = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuHSIZE;
     }
@@ -19998,10 +18337,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxHSIZE "llx"
      * }
      */
-    public static MemorySegment PRIxHSIZE() {
+    public static MemorySegment PRIxHSIZE()
+    {
         class Holder {
-            static final MemorySegment PRIxHSIZE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment PRIxHSIZE = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxHSIZE;
     }
@@ -20010,10 +18349,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXHSIZE "llX"
      * }
      */
-    public static MemorySegment PRIXHSIZE() {
+    public static MemorySegment PRIXHSIZE()
+    {
         class Holder {
-            static final MemorySegment PRIXHSIZE
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
+            static final MemorySegment PRIXHSIZE = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXHSIZE;
     }
@@ -20023,18 +18362,16 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HSIZE_UNDEF -1
      * }
      */
-    public static long HSIZE_UNDEF() {
-        return HSIZE_UNDEF;
-    }
+    public static long HSIZE_UNDEF() { return HSIZE_UNDEF; }
     /**
      * {@snippet lang=c :
      * #define PRIdHADDR "lld"
      * }
      */
-    public static MemorySegment PRIdHADDR() {
+    public static MemorySegment PRIdHADDR()
+    {
         class Holder {
-            static final MemorySegment PRIdHADDR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment PRIdHADDR = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdHADDR;
     }
@@ -20043,10 +18380,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoHADDR "llo"
      * }
      */
-    public static MemorySegment PRIoHADDR() {
+    public static MemorySegment PRIoHADDR()
+    {
         class Holder {
-            static final MemorySegment PRIoHADDR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment PRIoHADDR = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoHADDR;
     }
@@ -20055,10 +18392,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIuHADDR "llu"
      * }
      */
-    public static MemorySegment PRIuHADDR() {
+    public static MemorySegment PRIuHADDR()
+    {
         class Holder {
-            static final MemorySegment PRIuHADDR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
+            static final MemorySegment PRIuHADDR = hdf5_h.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuHADDR;
     }
@@ -20067,10 +18404,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxHADDR "llx"
      * }
      */
-    public static MemorySegment PRIxHADDR() {
+    public static MemorySegment PRIxHADDR()
+    {
         class Holder {
-            static final MemorySegment PRIxHADDR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment PRIxHADDR = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxHADDR;
     }
@@ -20079,10 +18416,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXHADDR "llX"
      * }
      */
-    public static MemorySegment PRIXHADDR() {
+    public static MemorySegment PRIXHADDR()
+    {
         class Holder {
-            static final MemorySegment PRIXHADDR
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
+            static final MemorySegment PRIXHADDR = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXHADDR;
     }
@@ -20092,18 +18429,16 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HADDR_UNDEF -1
      * }
      */
-    public static long HADDR_UNDEF() {
-        return HADDR_UNDEF;
-    }
+    public static long HADDR_UNDEF() { return HADDR_UNDEF; }
     /**
      * {@snippet lang=c :
      * #define H5_PRINTF_HADDR_FMT "%llu"
      * }
      */
-    public static MemorySegment H5_PRINTF_HADDR_FMT() {
+    public static MemorySegment H5_PRINTF_HADDR_FMT()
+    {
         class Holder {
-            static final MemorySegment H5_PRINTF_HADDR_FMT
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("%llu");
+            static final MemorySegment H5_PRINTF_HADDR_FMT = hdf5_h.LIBRARY_ARENA.allocateFrom("%llu");
         }
         return Holder.H5_PRINTF_HADDR_FMT;
     }
@@ -20113,54 +18448,44 @@ public class hdf5_h extends hdf5_h_1 {
      * #define HADDR_MAX -2
      * }
      */
-    public static long HADDR_MAX() {
-        return HADDR_MAX;
-    }
+    public static long HADDR_MAX() { return HADDR_MAX; }
     private static final int H5_ITER_ERROR = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5_ITER_ERROR -1
      * }
      */
-    public static int H5_ITER_ERROR() {
-        return H5_ITER_ERROR;
-    }
+    public static int H5_ITER_ERROR() { return H5_ITER_ERROR; }
     private static final int H5_ITER_CONT = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5_ITER_CONT 0
      * }
      */
-    public static int H5_ITER_CONT() {
-        return H5_ITER_CONT;
-    }
+    public static int H5_ITER_CONT() { return H5_ITER_CONT; }
     private static final int H5_ITER_STOP = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5_ITER_STOP 1
      * }
      */
-    public static int H5_ITER_STOP() {
-        return H5_ITER_STOP;
-    }
+    public static int H5_ITER_STOP() { return H5_ITER_STOP; }
     private static final int H5O_MAX_TOKEN_SIZE = (int)16L;
     /**
      * {@snippet lang=c :
      * #define H5O_MAX_TOKEN_SIZE 16
      * }
      */
-    public static int H5O_MAX_TOKEN_SIZE() {
-        return H5O_MAX_TOKEN_SIZE;
-    }
+    public static int H5O_MAX_TOKEN_SIZE() { return H5O_MAX_TOKEN_SIZE; }
     /**
      * {@snippet lang=c :
      * #define PRIdHID "lld"
      * }
      */
-    public static MemorySegment PRIdHID() {
+    public static MemorySegment PRIdHID()
+    {
         class Holder {
-            static final MemorySegment PRIdHID
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
+            static final MemorySegment PRIdHID = hdf5_h.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdHID;
     }
@@ -20169,10 +18494,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIxHID "llx"
      * }
      */
-    public static MemorySegment PRIxHID() {
+    public static MemorySegment PRIxHID()
+    {
         class Holder {
-            static final MemorySegment PRIxHID
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
+            static final MemorySegment PRIxHID = hdf5_h.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxHID;
     }
@@ -20181,10 +18506,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIXHID "llX"
      * }
      */
-    public static MemorySegment PRIXHID() {
+    public static MemorySegment PRIXHID()
+    {
         class Holder {
-            static final MemorySegment PRIXHID
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
+            static final MemorySegment PRIXHID = hdf5_h.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXHID;
     }
@@ -20193,10 +18518,10 @@ public class hdf5_h extends hdf5_h_1 {
      * #define PRIoHID "llo"
      * }
      */
-    public static MemorySegment PRIoHID() {
+    public static MemorySegment PRIoHID()
+    {
         class Holder {
-            static final MemorySegment PRIoHID
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
+            static final MemorySegment PRIoHID = hdf5_h.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoHID;
     }
@@ -20206,268 +18531,211 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5_SIZEOF_HID_T 8
      * }
      */
-    public static int H5_SIZEOF_HID_T() {
-        return H5_SIZEOF_HID_T;
-    }
+    public static int H5_SIZEOF_HID_T() { return H5_SIZEOF_HID_T; }
     private static final int H5I_INVALID_HID = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5I_INVALID_HID -1
      * }
      */
-    public static int H5I_INVALID_HID() {
-        return H5I_INVALID_HID;
-    }
+    public static int H5I_INVALID_HID() { return H5I_INVALID_HID; }
     private static final int H5O_COPY_SHALLOW_HIERARCHY_FLAG = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5O_COPY_SHALLOW_HIERARCHY_FLAG 1
      * }
      */
-    public static int H5O_COPY_SHALLOW_HIERARCHY_FLAG() {
-        return H5O_COPY_SHALLOW_HIERARCHY_FLAG;
-    }
+    public static int H5O_COPY_SHALLOW_HIERARCHY_FLAG() { return H5O_COPY_SHALLOW_HIERARCHY_FLAG; }
     private static final int H5O_COPY_EXPAND_SOFT_LINK_FLAG = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5O_COPY_EXPAND_SOFT_LINK_FLAG 2
      * }
      */
-    public static int H5O_COPY_EXPAND_SOFT_LINK_FLAG() {
-        return H5O_COPY_EXPAND_SOFT_LINK_FLAG;
-    }
+    public static int H5O_COPY_EXPAND_SOFT_LINK_FLAG() { return H5O_COPY_EXPAND_SOFT_LINK_FLAG; }
     private static final int H5O_COPY_EXPAND_EXT_LINK_FLAG = (int)4L;
     /**
      * {@snippet lang=c :
      * #define H5O_COPY_EXPAND_EXT_LINK_FLAG 4
      * }
      */
-    public static int H5O_COPY_EXPAND_EXT_LINK_FLAG() {
-        return H5O_COPY_EXPAND_EXT_LINK_FLAG;
-    }
+    public static int H5O_COPY_EXPAND_EXT_LINK_FLAG() { return H5O_COPY_EXPAND_EXT_LINK_FLAG; }
     private static final int H5O_COPY_EXPAND_REFERENCE_FLAG = (int)8L;
     /**
      * {@snippet lang=c :
      * #define H5O_COPY_EXPAND_REFERENCE_FLAG 8
      * }
      */
-    public static int H5O_COPY_EXPAND_REFERENCE_FLAG() {
-        return H5O_COPY_EXPAND_REFERENCE_FLAG;
-    }
+    public static int H5O_COPY_EXPAND_REFERENCE_FLAG() { return H5O_COPY_EXPAND_REFERENCE_FLAG; }
     private static final int H5O_COPY_WITHOUT_ATTR_FLAG = (int)16L;
     /**
      * {@snippet lang=c :
      * #define H5O_COPY_WITHOUT_ATTR_FLAG 16
      * }
      */
-    public static int H5O_COPY_WITHOUT_ATTR_FLAG() {
-        return H5O_COPY_WITHOUT_ATTR_FLAG;
-    }
+    public static int H5O_COPY_WITHOUT_ATTR_FLAG() { return H5O_COPY_WITHOUT_ATTR_FLAG; }
     private static final int H5O_COPY_PRESERVE_NULL_FLAG = (int)32L;
     /**
      * {@snippet lang=c :
      * #define H5O_COPY_PRESERVE_NULL_FLAG 32
      * }
      */
-    public static int H5O_COPY_PRESERVE_NULL_FLAG() {
-        return H5O_COPY_PRESERVE_NULL_FLAG;
-    }
+    public static int H5O_COPY_PRESERVE_NULL_FLAG() { return H5O_COPY_PRESERVE_NULL_FLAG; }
     private static final int H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG = (int)64L;
     /**
      * {@snippet lang=c :
      * #define H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG 64
      * }
      */
-    public static int H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG() {
-        return H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG;
-    }
+    public static int H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG() { return H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG; }
     private static final int H5O_COPY_ALL = (int)127L;
     /**
      * {@snippet lang=c :
      * #define H5O_COPY_ALL 127
      * }
      */
-    public static int H5O_COPY_ALL() {
-        return H5O_COPY_ALL;
-    }
+    public static int H5O_COPY_ALL() { return H5O_COPY_ALL; }
     private static final int H5O_SHMESG_SDSPACE_FLAG = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5O_SHMESG_SDSPACE_FLAG 2
      * }
      */
-    public static int H5O_SHMESG_SDSPACE_FLAG() {
-        return H5O_SHMESG_SDSPACE_FLAG;
-    }
+    public static int H5O_SHMESG_SDSPACE_FLAG() { return H5O_SHMESG_SDSPACE_FLAG; }
     private static final int H5O_SHMESG_DTYPE_FLAG = (int)8L;
     /**
      * {@snippet lang=c :
      * #define H5O_SHMESG_DTYPE_FLAG 8
      * }
      */
-    public static int H5O_SHMESG_DTYPE_FLAG() {
-        return H5O_SHMESG_DTYPE_FLAG;
-    }
+    public static int H5O_SHMESG_DTYPE_FLAG() { return H5O_SHMESG_DTYPE_FLAG; }
     private static final int H5O_SHMESG_FILL_FLAG = (int)32L;
     /**
      * {@snippet lang=c :
      * #define H5O_SHMESG_FILL_FLAG 32
      * }
      */
-    public static int H5O_SHMESG_FILL_FLAG() {
-        return H5O_SHMESG_FILL_FLAG;
-    }
+    public static int H5O_SHMESG_FILL_FLAG() { return H5O_SHMESG_FILL_FLAG; }
     private static final int H5O_SHMESG_PLINE_FLAG = (int)2048L;
     /**
      * {@snippet lang=c :
      * #define H5O_SHMESG_PLINE_FLAG 2048
      * }
      */
-    public static int H5O_SHMESG_PLINE_FLAG() {
-        return H5O_SHMESG_PLINE_FLAG;
-    }
+    public static int H5O_SHMESG_PLINE_FLAG() { return H5O_SHMESG_PLINE_FLAG; }
     private static final int H5O_SHMESG_ATTR_FLAG = (int)4096L;
     /**
      * {@snippet lang=c :
      * #define H5O_SHMESG_ATTR_FLAG 4096
      * }
      */
-    public static int H5O_SHMESG_ATTR_FLAG() {
-        return H5O_SHMESG_ATTR_FLAG;
-    }
+    public static int H5O_SHMESG_ATTR_FLAG() { return H5O_SHMESG_ATTR_FLAG; }
     private static final int H5O_SHMESG_ALL_FLAG = (int)6186L;
     /**
      * {@snippet lang=c :
      * #define H5O_SHMESG_ALL_FLAG 6186
      * }
      */
-    public static int H5O_SHMESG_ALL_FLAG() {
-        return H5O_SHMESG_ALL_FLAG;
-    }
+    public static int H5O_SHMESG_ALL_FLAG() { return H5O_SHMESG_ALL_FLAG; }
     private static final int H5O_HDR_ALL_FLAGS = (int)63L;
     /**
      * {@snippet lang=c :
      * #define H5O_HDR_ALL_FLAGS 63
      * }
      */
-    public static int H5O_HDR_ALL_FLAGS() {
-        return H5O_HDR_ALL_FLAGS;
-    }
+    public static int H5O_HDR_ALL_FLAGS() { return H5O_HDR_ALL_FLAGS; }
     private static final int H5O_INFO_BASIC = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5O_INFO_BASIC 1
      * }
      */
-    public static int H5O_INFO_BASIC() {
-        return H5O_INFO_BASIC;
-    }
+    public static int H5O_INFO_BASIC() { return H5O_INFO_BASIC; }
     private static final int H5O_INFO_TIME = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5O_INFO_TIME 2
      * }
      */
-    public static int H5O_INFO_TIME() {
-        return H5O_INFO_TIME;
-    }
+    public static int H5O_INFO_TIME() { return H5O_INFO_TIME; }
     private static final int H5O_INFO_NUM_ATTRS = (int)4L;
     /**
      * {@snippet lang=c :
      * #define H5O_INFO_NUM_ATTRS 4
      * }
      */
-    public static int H5O_INFO_NUM_ATTRS() {
-        return H5O_INFO_NUM_ATTRS;
-    }
+    public static int H5O_INFO_NUM_ATTRS() { return H5O_INFO_NUM_ATTRS; }
     private static final int H5O_INFO_ALL = (int)31L;
     /**
      * {@snippet lang=c :
      * #define H5O_INFO_ALL 31
      * }
      */
-    public static int H5O_INFO_ALL() {
-        return H5O_INFO_ALL;
-    }
+    public static int H5O_INFO_ALL() { return H5O_INFO_ALL; }
     private static final int H5O_NATIVE_INFO_HDR = (int)8L;
     /**
      * {@snippet lang=c :
      * #define H5O_NATIVE_INFO_HDR 8
      * }
      */
-    public static int H5O_NATIVE_INFO_HDR() {
-        return H5O_NATIVE_INFO_HDR;
-    }
+    public static int H5O_NATIVE_INFO_HDR() { return H5O_NATIVE_INFO_HDR; }
     private static final int H5O_NATIVE_INFO_META_SIZE = (int)16L;
     /**
      * {@snippet lang=c :
      * #define H5O_NATIVE_INFO_META_SIZE 16
      * }
      */
-    public static int H5O_NATIVE_INFO_META_SIZE() {
-        return H5O_NATIVE_INFO_META_SIZE;
-    }
+    public static int H5O_NATIVE_INFO_META_SIZE() { return H5O_NATIVE_INFO_META_SIZE; }
     private static final int H5O_NATIVE_INFO_ALL = (int)24L;
     /**
      * {@snippet lang=c :
      * #define H5O_NATIVE_INFO_ALL 24
      * }
      */
-    public static int H5O_NATIVE_INFO_ALL() {
-        return H5O_NATIVE_INFO_ALL;
-    }
+    public static int H5O_NATIVE_INFO_ALL() { return H5O_NATIVE_INFO_ALL; }
     private static final int H5O_INFO_HDR = (int)8L;
     /**
      * {@snippet lang=c :
      * #define H5O_INFO_HDR 8
      * }
      */
-    public static int H5O_INFO_HDR() {
-        return H5O_INFO_HDR;
-    }
+    public static int H5O_INFO_HDR() { return H5O_INFO_HDR; }
     private static final int H5O_INFO_META_SIZE = (int)16L;
     /**
      * {@snippet lang=c :
      * #define H5O_INFO_META_SIZE 16
      * }
      */
-    public static int H5O_INFO_META_SIZE() {
-        return H5O_INFO_META_SIZE;
-    }
+    public static int H5O_INFO_META_SIZE() { return H5O_INFO_META_SIZE; }
     private static final int H5T_NCSET = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5T_NCSET 2
      * }
      */
-    public static int H5T_NCSET() {
-        return H5T_NCSET;
-    }
+    public static int H5T_NCSET() { return H5T_NCSET; }
     private static final int H5T_NSTR = (int)3L;
     /**
      * {@snippet lang=c :
      * #define H5T_NSTR 3
      * }
      */
-    public static int H5T_NSTR() {
-        return H5T_NSTR;
-    }
+    public static int H5T_NSTR() { return H5T_NSTR; }
     private static final long H5T_VARIABLE = -1L;
     /**
      * {@snippet lang=c :
      * #define H5T_VARIABLE -1
      * }
      */
-    public static long H5T_VARIABLE() {
-        return H5T_VARIABLE;
-    }
+    public static long H5T_VARIABLE() { return H5T_VARIABLE; }
     private static final int H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE -1
      * }
      */
-    public static int H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE() {
+    public static int H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE()
+    {
         return H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE;
     }
     private static final long H5D_CHUNK_CACHE_NSLOTS_DEFAULT = -1L;
@@ -20476,54 +18744,45 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT -1
      * }
      */
-    public static long H5D_CHUNK_CACHE_NSLOTS_DEFAULT() {
-        return H5D_CHUNK_CACHE_NSLOTS_DEFAULT;
-    }
+    public static long H5D_CHUNK_CACHE_NSLOTS_DEFAULT() { return H5D_CHUNK_CACHE_NSLOTS_DEFAULT; }
     private static final long H5D_CHUNK_CACHE_NBYTES_DEFAULT = -1L;
     /**
      * {@snippet lang=c :
      * #define H5D_CHUNK_CACHE_NBYTES_DEFAULT -1
      * }
      */
-    public static long H5D_CHUNK_CACHE_NBYTES_DEFAULT() {
-        return H5D_CHUNK_CACHE_NBYTES_DEFAULT;
-    }
+    public static long H5D_CHUNK_CACHE_NBYTES_DEFAULT() { return H5D_CHUNK_CACHE_NBYTES_DEFAULT; }
     private static final double H5D_CHUNK_CACHE_W0_DEFAULT = -1.0d;
     /**
      * {@snippet lang=c :
      * #define H5D_CHUNK_CACHE_W0_DEFAULT -1.0
      * }
      */
-    public static double H5D_CHUNK_CACHE_W0_DEFAULT() {
-        return H5D_CHUNK_CACHE_W0_DEFAULT;
-    }
+    public static double H5D_CHUNK_CACHE_W0_DEFAULT() { return H5D_CHUNK_CACHE_W0_DEFAULT; }
     private static final int H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS 2
      * }
      */
-    public static int H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS() {
-        return H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS;
-    }
+    public static int H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS() { return H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS; }
     private static final int H5D_CHUNK_BTREE = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5D_CHUNK_BTREE 0
      * }
      */
-    public static int H5D_CHUNK_BTREE() {
-        return H5D_CHUNK_BTREE;
-    }
+    public static int H5D_CHUNK_BTREE() { return H5D_CHUNK_BTREE; }
     /**
      * {@snippet lang=c :
      * #define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME "direct_chunk_flag"
      * }
      */
-    public static MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME() {
+    public static MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME()
+    {
         class Holder {
-            static final MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_flag");
+            static final MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_flag");
         }
         return Holder.H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME;
     }
@@ -20532,10 +18791,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME "direct_chunk_filters"
      * }
      */
-    public static MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME() {
+    public static MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME()
+    {
         class Holder {
-            static final MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_filters");
+            static final MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_filters");
         }
         return Holder.H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME;
     }
@@ -20544,10 +18804,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME "direct_chunk_offset"
      * }
      */
-    public static MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME() {
+    public static MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME()
+    {
         class Holder {
-            static final MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_offset");
+            static final MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_offset");
         }
         return Holder.H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME;
     }
@@ -20556,10 +18817,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME "direct_chunk_datasize"
      * }
      */
-    public static MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME() {
+    public static MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME()
+    {
         class Holder {
-            static final MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_datasize");
+            static final MemorySegment H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_datasize");
         }
         return Holder.H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME;
     }
@@ -20568,10 +18830,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME "direct_chunk_read_flag"
      * }
      */
-    public static MemorySegment H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME() {
+    public static MemorySegment H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME()
+    {
         class Holder {
-            static final MemorySegment H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_read_flag");
+            static final MemorySegment H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_read_flag");
         }
         return Holder.H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME;
     }
@@ -20580,10 +18843,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME "direct_chunk_read_offset"
      * }
      */
-    public static MemorySegment H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME() {
+    public static MemorySegment H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME()
+    {
         class Holder {
-            static final MemorySegment H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_read_offset");
+            static final MemorySegment H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_read_offset");
         }
         return Holder.H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME;
     }
@@ -20592,10 +18856,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME "direct_chunk_read_filters"
      * }
      */
-    public static MemorySegment H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME() {
+    public static MemorySegment H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME()
+    {
         class Holder {
-            static final MemorySegment H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_read_filters");
+            static final MemorySegment H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("direct_chunk_read_filters");
         }
         return Holder.H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME;
     }
@@ -20604,10 +18869,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_STDIO_SYMBOL_PREFIX ""
      * }
      */
-    public static MemorySegment _CRT_INTERNAL_STDIO_SYMBOL_PREFIX() {
+    public static MemorySegment _CRT_INTERNAL_STDIO_SYMBOL_PREFIX()
+    {
         class Holder {
-            static final MemorySegment _CRT_INTERNAL_STDIO_SYMBOL_PREFIX
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("");
+            static final MemorySegment _CRT_INTERNAL_STDIO_SYMBOL_PREFIX =
+                hdf5_h.LIBRARY_ARENA.allocateFrom("");
         }
         return Holder._CRT_INTERNAL_STDIO_SYMBOL_PREFIX;
     }
@@ -20617,7 +18883,8 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_PRINTF_LEGACY_VSPRINTF_NULL_TERMINATION 1
      * }
      */
-    public static long _CRT_INTERNAL_PRINTF_LEGACY_VSPRINTF_NULL_TERMINATION() {
+    public static long _CRT_INTERNAL_PRINTF_LEGACY_VSPRINTF_NULL_TERMINATION()
+    {
         return _CRT_INTERNAL_PRINTF_LEGACY_VSPRINTF_NULL_TERMINATION;
     }
     private static final long _CRT_INTERNAL_PRINTF_STANDARD_SNPRINTF_BEHAVIOR = 2L;
@@ -20626,7 +18893,8 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_PRINTF_STANDARD_SNPRINTF_BEHAVIOR 2
      * }
      */
-    public static long _CRT_INTERNAL_PRINTF_STANDARD_SNPRINTF_BEHAVIOR() {
+    public static long _CRT_INTERNAL_PRINTF_STANDARD_SNPRINTF_BEHAVIOR()
+    {
         return _CRT_INTERNAL_PRINTF_STANDARD_SNPRINTF_BEHAVIOR;
     }
     private static final long _CRT_INTERNAL_PRINTF_LEGACY_WIDE_SPECIFIERS = 4L;
@@ -20635,7 +18903,8 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_PRINTF_LEGACY_WIDE_SPECIFIERS 4
      * }
      */
-    public static long _CRT_INTERNAL_PRINTF_LEGACY_WIDE_SPECIFIERS() {
+    public static long _CRT_INTERNAL_PRINTF_LEGACY_WIDE_SPECIFIERS()
+    {
         return _CRT_INTERNAL_PRINTF_LEGACY_WIDE_SPECIFIERS;
     }
     private static final long _CRT_INTERNAL_PRINTF_LEGACY_MSVCRT_COMPATIBILITY = 8L;
@@ -20644,7 +18913,8 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_PRINTF_LEGACY_MSVCRT_COMPATIBILITY 8
      * }
      */
-    public static long _CRT_INTERNAL_PRINTF_LEGACY_MSVCRT_COMPATIBILITY() {
+    public static long _CRT_INTERNAL_PRINTF_LEGACY_MSVCRT_COMPATIBILITY()
+    {
         return _CRT_INTERNAL_PRINTF_LEGACY_MSVCRT_COMPATIBILITY;
     }
     private static final long _CRT_INTERNAL_PRINTF_LEGACY_THREE_DIGIT_EXPONENTS = 16L;
@@ -20653,7 +18923,8 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_PRINTF_LEGACY_THREE_DIGIT_EXPONENTS 16
      * }
      */
-    public static long _CRT_INTERNAL_PRINTF_LEGACY_THREE_DIGIT_EXPONENTS() {
+    public static long _CRT_INTERNAL_PRINTF_LEGACY_THREE_DIGIT_EXPONENTS()
+    {
         return _CRT_INTERNAL_PRINTF_LEGACY_THREE_DIGIT_EXPONENTS;
     }
     private static final long _CRT_INTERNAL_PRINTF_STANDARD_ROUNDING = 32L;
@@ -20662,7 +18933,8 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_PRINTF_STANDARD_ROUNDING 32
      * }
      */
-    public static long _CRT_INTERNAL_PRINTF_STANDARD_ROUNDING() {
+    public static long _CRT_INTERNAL_PRINTF_STANDARD_ROUNDING()
+    {
         return _CRT_INTERNAL_PRINTF_STANDARD_ROUNDING;
     }
     private static final long _CRT_INTERNAL_SCANF_SECURECRT = 1L;
@@ -20671,16 +18943,15 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_SCANF_SECURECRT 1
      * }
      */
-    public static long _CRT_INTERNAL_SCANF_SECURECRT() {
-        return _CRT_INTERNAL_SCANF_SECURECRT;
-    }
+    public static long _CRT_INTERNAL_SCANF_SECURECRT() { return _CRT_INTERNAL_SCANF_SECURECRT; }
     private static final long _CRT_INTERNAL_SCANF_LEGACY_WIDE_SPECIFIERS = 2L;
     /**
      * {@snippet lang=c :
      * #define _CRT_INTERNAL_SCANF_LEGACY_WIDE_SPECIFIERS 2
      * }
      */
-    public static long _CRT_INTERNAL_SCANF_LEGACY_WIDE_SPECIFIERS() {
+    public static long _CRT_INTERNAL_SCANF_LEGACY_WIDE_SPECIFIERS()
+    {
         return _CRT_INTERNAL_SCANF_LEGACY_WIDE_SPECIFIERS;
     }
     private static final long _CRT_INTERNAL_SCANF_LEGACY_MSVCRT_COMPATIBILITY = 4L;
@@ -20689,7 +18960,8 @@ public class hdf5_h extends hdf5_h_1 {
      * #define _CRT_INTERNAL_SCANF_LEGACY_MSVCRT_COMPATIBILITY 4
      * }
      */
-    public static long _CRT_INTERNAL_SCANF_LEGACY_MSVCRT_COMPATIBILITY() {
+    public static long _CRT_INTERNAL_SCANF_LEGACY_MSVCRT_COMPATIBILITY()
+    {
         return _CRT_INTERNAL_SCANF_LEGACY_MSVCRT_COMPATIBILITY;
     }
     private static final short WEOF = (short)65535L;
@@ -20698,250 +18970,197 @@ public class hdf5_h extends hdf5_h_1 {
      * #define WEOF 65535
      * }
      */
-    public static short WEOF() {
-        return WEOF;
-    }
+    public static short WEOF() { return WEOF; }
     private static final int _NFILE = (int)512L;
     /**
      * {@snippet lang=c :
      * #define _NFILE 512
      * }
      */
-    public static int _NFILE() {
-        return _NFILE;
-    }
+    public static int _NFILE() { return _NFILE; }
     private static final int EOF = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define EOF -1
      * }
      */
-    public static int EOF() {
-        return EOF;
-    }
+    public static int EOF() { return EOF; }
     private static final int L_tmpnam_s = (int)260L;
     /**
      * {@snippet lang=c :
      * #define L_tmpnam_s 260
      * }
      */
-    public static int L_tmpnam_s() {
-        return L_tmpnam_s;
-    }
+    public static int L_tmpnam_s() { return L_tmpnam_s; }
     private static final int TMP_MAX = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define TMP_MAX 2147483647
      * }
      */
-    public static int TMP_MAX() {
-        return TMP_MAX;
-    }
+    public static int TMP_MAX() { return TMP_MAX; }
     private static final int TMP_MAX_S = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define TMP_MAX_S 2147483647
      * }
      */
-    public static int TMP_MAX_S() {
-        return TMP_MAX_S;
-    }
+    public static int TMP_MAX_S() { return TMP_MAX_S; }
     private static final int _TMP_MAX_S = (int)2147483647L;
     /**
      * {@snippet lang=c :
      * #define _TMP_MAX_S 2147483647
      * }
      */
-    public static int _TMP_MAX_S() {
-        return _TMP_MAX_S;
-    }
+    public static int _TMP_MAX_S() { return _TMP_MAX_S; }
     private static final int SYS_OPEN = (int)20L;
     /**
      * {@snippet lang=c :
      * #define SYS_OPEN 20
      * }
      */
-    public static int SYS_OPEN() {
-        return SYS_OPEN;
-    }
+    public static int SYS_OPEN() { return SYS_OPEN; }
     private static final long H5ES_WAIT_FOREVER = -1L;
     /**
      * {@snippet lang=c :
      * #define H5ES_WAIT_FOREVER -1
      * }
      */
-    public static long H5ES_WAIT_FOREVER() {
-        return H5ES_WAIT_FOREVER;
-    }
+    public static long H5ES_WAIT_FOREVER() { return H5ES_WAIT_FOREVER; }
     private static final int H5ES_WAIT_NONE = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5ES_WAIT_NONE 0
      * }
      */
-    public static int H5ES_WAIT_NONE() {
-        return H5ES_WAIT_NONE;
-    }
+    public static int H5ES_WAIT_NONE() { return H5ES_WAIT_NONE; }
     private static final int H5F_ACC_RDONLY = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_RDONLY 0
      * }
      */
-    public static int H5F_ACC_RDONLY() {
-        return H5F_ACC_RDONLY;
-    }
+    public static int H5F_ACC_RDONLY() { return H5F_ACC_RDONLY; }
     private static final int H5F_ACC_RDWR = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_RDWR 1
      * }
      */
-    public static int H5F_ACC_RDWR() {
-        return H5F_ACC_RDWR;
-    }
+    public static int H5F_ACC_RDWR() { return H5F_ACC_RDWR; }
     private static final int H5F_ACC_TRUNC = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_TRUNC 2
      * }
      */
-    public static int H5F_ACC_TRUNC() {
-        return H5F_ACC_TRUNC;
-    }
+    public static int H5F_ACC_TRUNC() { return H5F_ACC_TRUNC; }
     private static final int H5F_ACC_EXCL = (int)4L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_EXCL 4
      * }
      */
-    public static int H5F_ACC_EXCL() {
-        return H5F_ACC_EXCL;
-    }
+    public static int H5F_ACC_EXCL() { return H5F_ACC_EXCL; }
     private static final int H5F_ACC_CREAT = (int)16L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_CREAT 16
      * }
      */
-    public static int H5F_ACC_CREAT() {
-        return H5F_ACC_CREAT;
-    }
+    public static int H5F_ACC_CREAT() { return H5F_ACC_CREAT; }
     private static final int H5F_ACC_SWMR_WRITE = (int)32L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_SWMR_WRITE 32
      * }
      */
-    public static int H5F_ACC_SWMR_WRITE() {
-        return H5F_ACC_SWMR_WRITE;
-    }
+    public static int H5F_ACC_SWMR_WRITE() { return H5F_ACC_SWMR_WRITE; }
     private static final int H5F_ACC_SWMR_READ = (int)64L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_SWMR_READ 64
      * }
      */
-    public static int H5F_ACC_SWMR_READ() {
-        return H5F_ACC_SWMR_READ;
-    }
+    public static int H5F_ACC_SWMR_READ() { return H5F_ACC_SWMR_READ; }
     private static final int H5F_ACC_DEFAULT = (int)65535L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_DEFAULT 65535
      * }
      */
-    public static int H5F_ACC_DEFAULT() {
-        return H5F_ACC_DEFAULT;
-    }
+    public static int H5F_ACC_DEFAULT() { return H5F_ACC_DEFAULT; }
     private static final int H5F_OBJ_FILE = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5F_OBJ_FILE 1
      * }
      */
-    public static int H5F_OBJ_FILE() {
-        return H5F_OBJ_FILE;
-    }
+    public static int H5F_OBJ_FILE() { return H5F_OBJ_FILE; }
     private static final int H5F_OBJ_DATASET = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5F_OBJ_DATASET 2
      * }
      */
-    public static int H5F_OBJ_DATASET() {
-        return H5F_OBJ_DATASET;
-    }
+    public static int H5F_OBJ_DATASET() { return H5F_OBJ_DATASET; }
     private static final int H5F_OBJ_GROUP = (int)4L;
     /**
      * {@snippet lang=c :
      * #define H5F_OBJ_GROUP 4
      * }
      */
-    public static int H5F_OBJ_GROUP() {
-        return H5F_OBJ_GROUP;
-    }
+    public static int H5F_OBJ_GROUP() { return H5F_OBJ_GROUP; }
     private static final int H5F_OBJ_DATATYPE = (int)8L;
     /**
      * {@snippet lang=c :
      * #define H5F_OBJ_DATATYPE 8
      * }
      */
-    public static int H5F_OBJ_DATATYPE() {
-        return H5F_OBJ_DATATYPE;
-    }
+    public static int H5F_OBJ_DATATYPE() { return H5F_OBJ_DATATYPE; }
     private static final int H5F_OBJ_ATTR = (int)16L;
     /**
      * {@snippet lang=c :
      * #define H5F_OBJ_ATTR 16
      * }
      */
-    public static int H5F_OBJ_ATTR() {
-        return H5F_OBJ_ATTR;
-    }
+    public static int H5F_OBJ_ATTR() { return H5F_OBJ_ATTR; }
     private static final int H5F_OBJ_ALL = (int)31L;
     /**
      * {@snippet lang=c :
      * #define H5F_OBJ_ALL 31
      * }
      */
-    public static int H5F_OBJ_ALL() {
-        return H5F_OBJ_ALL;
-    }
+    public static int H5F_OBJ_ALL() { return H5F_OBJ_ALL; }
     private static final int H5F_OBJ_LOCAL = (int)32L;
     /**
      * {@snippet lang=c :
      * #define H5F_OBJ_LOCAL 32
      * }
      */
-    public static int H5F_OBJ_LOCAL() {
-        return H5F_OBJ_LOCAL;
-    }
+    public static int H5F_OBJ_LOCAL() { return H5F_OBJ_LOCAL; }
     private static final long H5F_PAGE_BUFFER_SIZE_DEFAULT = -1L;
     /**
      * {@snippet lang=c :
      * #define H5F_PAGE_BUFFER_SIZE_DEFAULT -1
      * }
      */
-    public static long H5F_PAGE_BUFFER_SIZE_DEFAULT() {
-        return H5F_PAGE_BUFFER_SIZE_DEFAULT;
-    }
+    public static long H5F_PAGE_BUFFER_SIZE_DEFAULT() { return H5F_PAGE_BUFFER_SIZE_DEFAULT; }
     private static final long H5F_UNLIMITED = -1L;
     /**
      * {@snippet lang=c :
      * #define H5F_UNLIMITED -1
      * }
      */
-    public static long H5F_UNLIMITED() {
-        return H5F_UNLIMITED;
-    }
+    public static long H5F_UNLIMITED() { return H5F_UNLIMITED; }
     private static final int H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS 1
      * }
      */
-    public static int H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS() {
+    public static int H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS()
+    {
         return H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS;
     }
     private static final int H5F_RFIC_ALL = (int)1L;
@@ -20950,439 +19169,344 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5F_RFIC_ALL 1
      * }
      */
-    public static int H5F_RFIC_ALL() {
-        return H5F_RFIC_ALL;
-    }
+    public static int H5F_RFIC_ALL() { return H5F_RFIC_ALL; }
     private static final int H5F_ACC_DEBUG = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5F_ACC_DEBUG 0
      * }
      */
-    public static int H5F_ACC_DEBUG() {
-        return H5F_ACC_DEBUG;
-    }
+    public static int H5F_ACC_DEBUG() { return H5F_ACC_DEBUG; }
     private static final int H5_VFD_INVALID = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_INVALID -1
      * }
      */
-    public static int H5_VFD_INVALID() {
-        return H5_VFD_INVALID;
-    }
+    public static int H5_VFD_INVALID() { return H5_VFD_INVALID; }
     private static final int H5_VFD_SEC2 = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_SEC2 0
      * }
      */
-    public static int H5_VFD_SEC2() {
-        return H5_VFD_SEC2;
-    }
+    public static int H5_VFD_SEC2() { return H5_VFD_SEC2; }
     private static final int H5_VFD_CORE = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_CORE 1
      * }
      */
-    public static int H5_VFD_CORE() {
-        return H5_VFD_CORE;
-    }
+    public static int H5_VFD_CORE() { return H5_VFD_CORE; }
     private static final int H5_VFD_LOG = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_LOG 2
      * }
      */
-    public static int H5_VFD_LOG() {
-        return H5_VFD_LOG;
-    }
+    public static int H5_VFD_LOG() { return H5_VFD_LOG; }
     private static final int H5_VFD_FAMILY = (int)3L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_FAMILY 3
      * }
      */
-    public static int H5_VFD_FAMILY() {
-        return H5_VFD_FAMILY;
-    }
+    public static int H5_VFD_FAMILY() { return H5_VFD_FAMILY; }
     private static final int H5_VFD_MULTI = (int)4L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_MULTI 4
      * }
      */
-    public static int H5_VFD_MULTI() {
-        return H5_VFD_MULTI;
-    }
+    public static int H5_VFD_MULTI() { return H5_VFD_MULTI; }
     private static final int H5_VFD_STDIO = (int)5L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_STDIO 5
      * }
      */
-    public static int H5_VFD_STDIO() {
-        return H5_VFD_STDIO;
-    }
+    public static int H5_VFD_STDIO() { return H5_VFD_STDIO; }
     private static final int H5_VFD_SPLITTER = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_SPLITTER 6
      * }
      */
-    public static int H5_VFD_SPLITTER() {
-        return H5_VFD_SPLITTER;
-    }
+    public static int H5_VFD_SPLITTER() { return H5_VFD_SPLITTER; }
     private static final int H5_VFD_MPIO = (int)7L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_MPIO 7
      * }
      */
-    public static int H5_VFD_MPIO() {
-        return H5_VFD_MPIO;
-    }
+    public static int H5_VFD_MPIO() { return H5_VFD_MPIO; }
     private static final int H5_VFD_DIRECT = (int)8L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_DIRECT 8
      * }
      */
-    public static int H5_VFD_DIRECT() {
-        return H5_VFD_DIRECT;
-    }
+    public static int H5_VFD_DIRECT() { return H5_VFD_DIRECT; }
     private static final int H5_VFD_MIRROR = (int)9L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_MIRROR 9
      * }
      */
-    public static int H5_VFD_MIRROR() {
-        return H5_VFD_MIRROR;
-    }
+    public static int H5_VFD_MIRROR() { return H5_VFD_MIRROR; }
     private static final int H5_VFD_HDFS = (int)10L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_HDFS 10
      * }
      */
-    public static int H5_VFD_HDFS() {
-        return H5_VFD_HDFS;
-    }
+    public static int H5_VFD_HDFS() { return H5_VFD_HDFS; }
     private static final int H5_VFD_ROS3 = (int)11L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_ROS3 11
      * }
      */
-    public static int H5_VFD_ROS3() {
-        return H5_VFD_ROS3;
-    }
+    public static int H5_VFD_ROS3() { return H5_VFD_ROS3; }
     private static final int H5_VFD_SUBFILING = (int)12L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_SUBFILING 12
      * }
      */
-    public static int H5_VFD_SUBFILING() {
-        return H5_VFD_SUBFILING;
-    }
+    public static int H5_VFD_SUBFILING() { return H5_VFD_SUBFILING; }
     private static final int H5_VFD_IOC = (int)13L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_IOC 13
      * }
      */
-    public static int H5_VFD_IOC() {
-        return H5_VFD_IOC;
-    }
+    public static int H5_VFD_IOC() { return H5_VFD_IOC; }
     private static final int H5_VFD_ONION = (int)14L;
     /**
      * {@snippet lang=c :
      * #define H5_VFD_ONION 14
      * }
      */
-    public static int H5_VFD_ONION() {
-        return H5_VFD_ONION;
-    }
+    public static int H5_VFD_ONION() { return H5_VFD_ONION; }
     private static final int H5FD_FEAT_ACCUMULATE_METADATA = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5FD_FEAT_ACCUMULATE_METADATA 6
      * }
      */
-    public static int H5FD_FEAT_ACCUMULATE_METADATA() {
-        return H5FD_FEAT_ACCUMULATE_METADATA;
-    }
+    public static int H5FD_FEAT_ACCUMULATE_METADATA() { return H5FD_FEAT_ACCUMULATE_METADATA; }
     private static final int H5FD_CTL_OPC_EXPER_MIN = (int)512L;
     /**
      * {@snippet lang=c :
      * #define H5FD_CTL_OPC_EXPER_MIN 512
      * }
      */
-    public static int H5FD_CTL_OPC_EXPER_MIN() {
-        return H5FD_CTL_OPC_EXPER_MIN;
-    }
+    public static int H5FD_CTL_OPC_EXPER_MIN() { return H5FD_CTL_OPC_EXPER_MIN; }
     private static final int H5FD_CTL_OPC_EXPER_MAX = (int)1023L;
     /**
      * {@snippet lang=c :
      * #define H5FD_CTL_OPC_EXPER_MAX 1023
      * }
      */
-    public static int H5FD_CTL_OPC_EXPER_MAX() {
-        return H5FD_CTL_OPC_EXPER_MAX;
-    }
+    public static int H5FD_CTL_OPC_EXPER_MAX() { return H5FD_CTL_OPC_EXPER_MAX; }
     private static final int H5L_MAX_LINK_NAME_LEN = (int)4294967295L;
     /**
      * {@snippet lang=c :
      * #define H5L_MAX_LINK_NAME_LEN 4294967295
      * }
      */
-    public static int H5L_MAX_LINK_NAME_LEN() {
-        return H5L_MAX_LINK_NAME_LEN;
-    }
+    public static int H5L_MAX_LINK_NAME_LEN() { return H5L_MAX_LINK_NAME_LEN; }
     private static final int H5L_TYPE_BUILTIN_MAX = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5L_TYPE_BUILTIN_MAX 1
      * }
      */
-    public static int H5L_TYPE_BUILTIN_MAX() {
-        return H5L_TYPE_BUILTIN_MAX;
-    }
+    public static int H5L_TYPE_BUILTIN_MAX() { return H5L_TYPE_BUILTIN_MAX; }
     private static final int H5L_TYPE_UD_MIN = (int)64L;
     /**
      * {@snippet lang=c :
      * #define H5L_TYPE_UD_MIN 64
      * }
      */
-    public static int H5L_TYPE_UD_MIN() {
-        return H5L_TYPE_UD_MIN;
-    }
+    public static int H5L_TYPE_UD_MIN() { return H5L_TYPE_UD_MIN; }
     private static final int H5L_TYPE_UD_MAX = (int)255L;
     /**
      * {@snippet lang=c :
      * #define H5L_TYPE_UD_MAX 255
      * }
      */
-    public static int H5L_TYPE_UD_MAX() {
-        return H5L_TYPE_UD_MAX;
-    }
+    public static int H5L_TYPE_UD_MAX() { return H5L_TYPE_UD_MAX; }
     private static final int H5G_SAME_LOC = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5G_SAME_LOC 0
      * }
      */
-    public static int H5G_SAME_LOC() {
-        return H5G_SAME_LOC;
-    }
+    public static int H5G_SAME_LOC() { return H5G_SAME_LOC; }
     private static final int H5G_LINK_ERROR = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5G_LINK_ERROR -1
      * }
      */
-    public static int H5G_LINK_ERROR() {
-        return H5G_LINK_ERROR;
-    }
+    public static int H5G_LINK_ERROR() { return H5G_LINK_ERROR; }
     private static final int H5G_LINK_HARD = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5G_LINK_HARD 0
      * }
      */
-    public static int H5G_LINK_HARD() {
-        return H5G_LINK_HARD;
-    }
+    public static int H5G_LINK_HARD() { return H5G_LINK_HARD; }
     private static final int H5G_LINK_SOFT = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5G_LINK_SOFT 1
      * }
      */
-    public static int H5G_LINK_SOFT() {
-        return H5G_LINK_SOFT;
-    }
+    public static int H5G_LINK_SOFT() { return H5G_LINK_SOFT; }
     private static final int H5G_NUSERTYPES = (int)248L;
     /**
      * {@snippet lang=c :
      * #define H5G_NUSERTYPES 248
      * }
      */
-    public static int H5G_NUSERTYPES() {
-        return H5G_NUSERTYPES;
-    }
+    public static int H5G_NUSERTYPES() { return H5G_NUSERTYPES; }
     private static final int H5_VOL_INVALID = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5_VOL_INVALID -1
      * }
      */
-    public static int H5_VOL_INVALID() {
-        return H5_VOL_INVALID;
-    }
+    public static int H5_VOL_INVALID() { return H5_VOL_INVALID; }
     private static final int H5VL_CAP_FLAG_SOFT_LINKS = (int)2147483648L;
     /**
      * {@snippet lang=c :
      * #define H5VL_CAP_FLAG_SOFT_LINKS 2147483648
      * }
      */
-    public static int H5VL_CAP_FLAG_SOFT_LINKS() {
-        return H5VL_CAP_FLAG_SOFT_LINKS;
-    }
+    public static int H5VL_CAP_FLAG_SOFT_LINKS() { return H5VL_CAP_FLAG_SOFT_LINKS; }
     private static final long H5VL_CAP_FLAG_UD_LINKS = 4294967296L;
     /**
      * {@snippet lang=c :
      * #define H5VL_CAP_FLAG_UD_LINKS 4294967296
      * }
      */
-    public static long H5VL_CAP_FLAG_UD_LINKS() {
-        return H5VL_CAP_FLAG_UD_LINKS;
-    }
+    public static long H5VL_CAP_FLAG_UD_LINKS() { return H5VL_CAP_FLAG_UD_LINKS; }
     private static final long H5VL_CAP_FLAG_TRACK_TIMES = 8589934592L;
     /**
      * {@snippet lang=c :
      * #define H5VL_CAP_FLAG_TRACK_TIMES 8589934592
      * }
      */
-    public static long H5VL_CAP_FLAG_TRACK_TIMES() {
-        return H5VL_CAP_FLAG_TRACK_TIMES;
-    }
+    public static long H5VL_CAP_FLAG_TRACK_TIMES() { return H5VL_CAP_FLAG_TRACK_TIMES; }
     private static final long H5VL_CAP_FLAG_MOUNT = 17179869184L;
     /**
      * {@snippet lang=c :
      * #define H5VL_CAP_FLAG_MOUNT 17179869184
      * }
      */
-    public static long H5VL_CAP_FLAG_MOUNT() {
-        return H5VL_CAP_FLAG_MOUNT;
-    }
+    public static long H5VL_CAP_FLAG_MOUNT() { return H5VL_CAP_FLAG_MOUNT; }
     private static final long H5VL_CAP_FLAG_FILTERS = 34359738368L;
     /**
      * {@snippet lang=c :
      * #define H5VL_CAP_FLAG_FILTERS 34359738368
      * }
      */
-    public static long H5VL_CAP_FLAG_FILTERS() {
-        return H5VL_CAP_FLAG_FILTERS;
-    }
+    public static long H5VL_CAP_FLAG_FILTERS() { return H5VL_CAP_FLAG_FILTERS; }
     private static final long H5VL_CAP_FLAG_FILL_VALUES = 68719476736L;
     /**
      * {@snippet lang=c :
      * #define H5VL_CAP_FLAG_FILL_VALUES 68719476736
      * }
      */
-    public static long H5VL_CAP_FLAG_FILL_VALUES() {
-        return H5VL_CAP_FLAG_FILL_VALUES;
-    }
+    public static long H5VL_CAP_FLAG_FILL_VALUES() { return H5VL_CAP_FLAG_FILL_VALUES; }
     private static final long H5R_OBJ_REF_BUF_SIZE = 8L;
     /**
      * {@snippet lang=c :
      * #define H5R_OBJ_REF_BUF_SIZE 8
      * }
      */
-    public static long H5R_OBJ_REF_BUF_SIZE() {
-        return H5R_OBJ_REF_BUF_SIZE;
-    }
+    public static long H5R_OBJ_REF_BUF_SIZE() { return H5R_OBJ_REF_BUF_SIZE; }
     private static final long H5R_DSET_REG_REF_BUF_SIZE = 12L;
     /**
      * {@snippet lang=c :
      * #define H5R_DSET_REG_REF_BUF_SIZE 12
      * }
      */
-    public static long H5R_DSET_REG_REF_BUF_SIZE() {
-        return H5R_DSET_REG_REF_BUF_SIZE;
-    }
+    public static long H5R_DSET_REG_REF_BUF_SIZE() { return H5R_DSET_REG_REF_BUF_SIZE; }
     private static final int H5R_REF_BUF_SIZE = (int)64L;
     /**
      * {@snippet lang=c :
      * #define H5R_REF_BUF_SIZE 64
      * }
      */
-    public static int H5R_REF_BUF_SIZE() {
-        return H5R_REF_BUF_SIZE;
-    }
+    public static int H5R_REF_BUF_SIZE() { return H5R_REF_BUF_SIZE; }
     private static final int H5R_OBJECT = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5R_OBJECT 0
      * }
      */
-    public static int H5R_OBJECT() {
-        return H5R_OBJECT;
-    }
+    public static int H5R_OBJECT() { return H5R_OBJECT; }
     private static final int H5R_DATASET_REGION = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5R_DATASET_REGION 1
      * }
      */
-    public static int H5R_DATASET_REGION() {
-        return H5R_DATASET_REGION;
-    }
+    public static int H5R_DATASET_REGION() { return H5R_DATASET_REGION; }
     private static final int H5VL_MAX_BLOB_ID_SIZE = (int)16L;
     /**
      * {@snippet lang=c :
      * #define H5VL_MAX_BLOB_ID_SIZE 16
      * }
      */
-    public static int H5VL_MAX_BLOB_ID_SIZE() {
-        return H5VL_MAX_BLOB_ID_SIZE;
-    }
+    public static int H5VL_MAX_BLOB_ID_SIZE() { return H5VL_MAX_BLOB_ID_SIZE; }
     private static final long H5S_UNLIMITED = -1L;
     /**
      * {@snippet lang=c :
      * #define H5S_UNLIMITED -1
      * }
      */
-    public static long H5S_UNLIMITED() {
-        return H5S_UNLIMITED;
-    }
+    public static long H5S_UNLIMITED() { return H5S_UNLIMITED; }
     private static final int H5Z_FILTER_ERROR = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5Z_FILTER_ERROR -1
      * }
      */
-    public static int H5Z_FILTER_ERROR() {
-        return H5Z_FILTER_ERROR;
-    }
+    public static int H5Z_FILTER_ERROR() { return H5Z_FILTER_ERROR; }
     private static final int H5Z_FILTER_CONFIG_ENCODE_ENABLED = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5Z_FILTER_CONFIG_ENCODE_ENABLED 1
      * }
      */
-    public static int H5Z_FILTER_CONFIG_ENCODE_ENABLED() {
-        return H5Z_FILTER_CONFIG_ENCODE_ENABLED;
-    }
+    public static int H5Z_FILTER_CONFIG_ENCODE_ENABLED() { return H5Z_FILTER_CONFIG_ENCODE_ENABLED; }
     private static final int H5Z_FILTER_CONFIG_DECODE_ENABLED = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5Z_FILTER_CONFIG_DECODE_ENABLED 2
      * }
      */
-    public static int H5Z_FILTER_CONFIG_DECODE_ENABLED() {
-        return H5Z_FILTER_CONFIG_DECODE_ENABLED;
-    }
+    public static int H5Z_FILTER_CONFIG_DECODE_ENABLED() { return H5Z_FILTER_CONFIG_DECODE_ENABLED; }
     private static final int H5D_SEL_IO_DISABLE_BY_API = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5D_SEL_IO_DISABLE_BY_API 1
      * }
      */
-    public static int H5D_SEL_IO_DISABLE_BY_API() {
-        return H5D_SEL_IO_DISABLE_BY_API;
-    }
+    public static int H5D_SEL_IO_DISABLE_BY_API() { return H5D_SEL_IO_DISABLE_BY_API; }
     private static final int H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 2
      * }
      */
-    public static int H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET() {
+    public static int H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET()
+    {
         return H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
     private static final int H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER = (int)4L;
@@ -21391,16 +19515,15 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER 4
      * }
      */
-    public static int H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER() {
-        return H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
-    }
+    public static int H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER() { return H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER; }
     private static final int H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB = (int)8L;
     /**
      * {@snippet lang=c :
      * #define H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB 8
      * }
      */
-    public static int H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB() {
+    public static int H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB()
+    {
         return H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
     }
     private static final int H5D_SEL_IO_PAGE_BUFFER = (int)16L;
@@ -21409,99 +19532,79 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5D_SEL_IO_PAGE_BUFFER 16
      * }
      */
-    public static int H5D_SEL_IO_PAGE_BUFFER() {
-        return H5D_SEL_IO_PAGE_BUFFER;
-    }
+    public static int H5D_SEL_IO_PAGE_BUFFER() { return H5D_SEL_IO_PAGE_BUFFER; }
     private static final int H5D_SEL_IO_DATASET_FILTER = (int)32L;
     /**
      * {@snippet lang=c :
      * #define H5D_SEL_IO_DATASET_FILTER 32
      * }
      */
-    public static int H5D_SEL_IO_DATASET_FILTER() {
-        return H5D_SEL_IO_DATASET_FILTER;
-    }
+    public static int H5D_SEL_IO_DATASET_FILTER() { return H5D_SEL_IO_DATASET_FILTER; }
     private static final int H5D_SEL_IO_CHUNK_CACHE = (int)64L;
     /**
      * {@snippet lang=c :
      * #define H5D_SEL_IO_CHUNK_CACHE 64
      * }
      */
-    public static int H5D_SEL_IO_CHUNK_CACHE() {
-        return H5D_SEL_IO_CHUNK_CACHE;
-    }
+    public static int H5D_SEL_IO_CHUNK_CACHE() { return H5D_SEL_IO_CHUNK_CACHE; }
     private static final int H5D_SEL_IO_TCONV_BUF_TOO_SMALL = (int)128L;
     /**
      * {@snippet lang=c :
      * #define H5D_SEL_IO_TCONV_BUF_TOO_SMALL 128
      * }
      */
-    public static int H5D_SEL_IO_TCONV_BUF_TOO_SMALL() {
-        return H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
-    }
+    public static int H5D_SEL_IO_TCONV_BUF_TOO_SMALL() { return H5D_SEL_IO_TCONV_BUF_TOO_SMALL; }
     private static final int H5D_SEL_IO_BKG_BUF_TOO_SMALL = (int)256L;
     /**
      * {@snippet lang=c :
      * #define H5D_SEL_IO_BKG_BUF_TOO_SMALL 256
      * }
      */
-    public static int H5D_SEL_IO_BKG_BUF_TOO_SMALL() {
-        return H5D_SEL_IO_BKG_BUF_TOO_SMALL;
-    }
+    public static int H5D_SEL_IO_BKG_BUF_TOO_SMALL() { return H5D_SEL_IO_BKG_BUF_TOO_SMALL; }
     private static final int H5D_SEL_IO_DEFAULT_OFF = (int)512L;
     /**
      * {@snippet lang=c :
      * #define H5D_SEL_IO_DEFAULT_OFF 512
      * }
      */
-    public static int H5D_SEL_IO_DEFAULT_OFF() {
-        return H5D_SEL_IO_DEFAULT_OFF;
-    }
+    public static int H5D_SEL_IO_DEFAULT_OFF() { return H5D_SEL_IO_DEFAULT_OFF; }
     private static final int H5D_MPIO_NO_SELECTION_IO_CAUSES = (int)481L;
     /**
      * {@snippet lang=c :
      * #define H5D_MPIO_NO_SELECTION_IO_CAUSES 481
      * }
      */
-    public static int H5D_MPIO_NO_SELECTION_IO_CAUSES() {
-        return H5D_MPIO_NO_SELECTION_IO_CAUSES;
-    }
+    public static int H5D_MPIO_NO_SELECTION_IO_CAUSES() { return H5D_MPIO_NO_SELECTION_IO_CAUSES; }
     private static final int H5D_SCALAR_IO = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5D_SCALAR_IO 1
      * }
      */
-    public static int H5D_SCALAR_IO() {
-        return H5D_SCALAR_IO;
-    }
+    public static int H5D_SCALAR_IO() { return H5D_SCALAR_IO; }
     private static final int H5D_VECTOR_IO = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5D_VECTOR_IO 2
      * }
      */
-    public static int H5D_VECTOR_IO() {
-        return H5D_VECTOR_IO;
-    }
+    public static int H5D_VECTOR_IO() { return H5D_VECTOR_IO; }
     private static final int H5D_SELECTION_IO = (int)4L;
     /**
      * {@snippet lang=c :
      * #define H5D_SELECTION_IO 4
      * }
      */
-    public static int H5D_SELECTION_IO() {
-        return H5D_SELECTION_IO;
-    }
+    public static int H5D_SELECTION_IO() { return H5D_SELECTION_IO; }
     /**
      * {@snippet lang=c :
      * #define H5PL_NO_PLUGIN "::"
      * }
      */
-    public static MemorySegment H5PL_NO_PLUGIN() {
+    public static MemorySegment H5PL_NO_PLUGIN()
+    {
         class Holder {
-            static final MemorySegment H5PL_NO_PLUGIN
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("::");
+            static final MemorySegment H5PL_NO_PLUGIN = hdf5_h.LIBRARY_ARENA.allocateFrom("::");
         }
         return Holder.H5PL_NO_PLUGIN;
     }
@@ -21511,162 +19614,128 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5FD_MEM_FHEAP_HDR 6
      * }
      */
-    public static int H5FD_MEM_FHEAP_HDR() {
-        return H5FD_MEM_FHEAP_HDR;
-    }
+    public static int H5FD_MEM_FHEAP_HDR() { return H5FD_MEM_FHEAP_HDR; }
     private static final int H5FD_MEM_FHEAP_IBLOCK = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_FHEAP_IBLOCK 6
      * }
      */
-    public static int H5FD_MEM_FHEAP_IBLOCK() {
-        return H5FD_MEM_FHEAP_IBLOCK;
-    }
+    public static int H5FD_MEM_FHEAP_IBLOCK() { return H5FD_MEM_FHEAP_IBLOCK; }
     private static final int H5FD_MEM_FHEAP_DBLOCK = (int)5L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_FHEAP_DBLOCK 5
      * }
      */
-    public static int H5FD_MEM_FHEAP_DBLOCK() {
-        return H5FD_MEM_FHEAP_DBLOCK;
-    }
+    public static int H5FD_MEM_FHEAP_DBLOCK() { return H5FD_MEM_FHEAP_DBLOCK; }
     private static final int H5FD_MEM_FHEAP_HUGE_OBJ = (int)3L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_FHEAP_HUGE_OBJ 3
      * }
      */
-    public static int H5FD_MEM_FHEAP_HUGE_OBJ() {
-        return H5FD_MEM_FHEAP_HUGE_OBJ;
-    }
+    public static int H5FD_MEM_FHEAP_HUGE_OBJ() { return H5FD_MEM_FHEAP_HUGE_OBJ; }
     private static final int H5FD_MEM_FSPACE_HDR = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_FSPACE_HDR 6
      * }
      */
-    public static int H5FD_MEM_FSPACE_HDR() {
-        return H5FD_MEM_FSPACE_HDR;
-    }
+    public static int H5FD_MEM_FSPACE_HDR() { return H5FD_MEM_FSPACE_HDR; }
     private static final int H5FD_MEM_FSPACE_SINFO = (int)5L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_FSPACE_SINFO 5
      * }
      */
-    public static int H5FD_MEM_FSPACE_SINFO() {
-        return H5FD_MEM_FSPACE_SINFO;
-    }
+    public static int H5FD_MEM_FSPACE_SINFO() { return H5FD_MEM_FSPACE_SINFO; }
     private static final int H5FD_MEM_SOHM_TABLE = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_SOHM_TABLE 6
      * }
      */
-    public static int H5FD_MEM_SOHM_TABLE() {
-        return H5FD_MEM_SOHM_TABLE;
-    }
+    public static int H5FD_MEM_SOHM_TABLE() { return H5FD_MEM_SOHM_TABLE; }
     private static final int H5FD_MEM_SOHM_INDEX = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_SOHM_INDEX 2
      * }
      */
-    public static int H5FD_MEM_SOHM_INDEX() {
-        return H5FD_MEM_SOHM_INDEX;
-    }
+    public static int H5FD_MEM_SOHM_INDEX() { return H5FD_MEM_SOHM_INDEX; }
     private static final int H5FD_MEM_EARRAY_HDR = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_EARRAY_HDR 6
      * }
      */
-    public static int H5FD_MEM_EARRAY_HDR() {
-        return H5FD_MEM_EARRAY_HDR;
-    }
+    public static int H5FD_MEM_EARRAY_HDR() { return H5FD_MEM_EARRAY_HDR; }
     private static final int H5FD_MEM_EARRAY_IBLOCK = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_EARRAY_IBLOCK 6
      * }
      */
-    public static int H5FD_MEM_EARRAY_IBLOCK() {
-        return H5FD_MEM_EARRAY_IBLOCK;
-    }
+    public static int H5FD_MEM_EARRAY_IBLOCK() { return H5FD_MEM_EARRAY_IBLOCK; }
     private static final int H5FD_MEM_EARRAY_SBLOCK = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_EARRAY_SBLOCK 2
      * }
      */
-    public static int H5FD_MEM_EARRAY_SBLOCK() {
-        return H5FD_MEM_EARRAY_SBLOCK;
-    }
+    public static int H5FD_MEM_EARRAY_SBLOCK() { return H5FD_MEM_EARRAY_SBLOCK; }
     private static final int H5FD_MEM_EARRAY_DBLOCK = (int)5L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_EARRAY_DBLOCK 5
      * }
      */
-    public static int H5FD_MEM_EARRAY_DBLOCK() {
-        return H5FD_MEM_EARRAY_DBLOCK;
-    }
+    public static int H5FD_MEM_EARRAY_DBLOCK() { return H5FD_MEM_EARRAY_DBLOCK; }
     private static final int H5FD_MEM_EARRAY_DBLK_PAGE = (int)5L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_EARRAY_DBLK_PAGE 5
      * }
      */
-    public static int H5FD_MEM_EARRAY_DBLK_PAGE() {
-        return H5FD_MEM_EARRAY_DBLK_PAGE;
-    }
+    public static int H5FD_MEM_EARRAY_DBLK_PAGE() { return H5FD_MEM_EARRAY_DBLK_PAGE; }
     private static final int H5FD_MEM_FARRAY_HDR = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_FARRAY_HDR 6
      * }
      */
-    public static int H5FD_MEM_FARRAY_HDR() {
-        return H5FD_MEM_FARRAY_HDR;
-    }
+    public static int H5FD_MEM_FARRAY_HDR() { return H5FD_MEM_FARRAY_HDR; }
     private static final int H5FD_MEM_FARRAY_DBLOCK = (int)5L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_FARRAY_DBLOCK 5
      * }
      */
-    public static int H5FD_MEM_FARRAY_DBLOCK() {
-        return H5FD_MEM_FARRAY_DBLOCK;
-    }
+    public static int H5FD_MEM_FARRAY_DBLOCK() { return H5FD_MEM_FARRAY_DBLOCK; }
     private static final int H5FD_MEM_FARRAY_DBLK_PAGE = (int)5L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MEM_FARRAY_DBLK_PAGE 5
      * }
      */
-    public static int H5FD_MEM_FARRAY_DBLK_PAGE() {
-        return H5FD_MEM_FARRAY_DBLK_PAGE;
-    }
+    public static int H5FD_MEM_FARRAY_DBLK_PAGE() { return H5FD_MEM_FARRAY_DBLK_PAGE; }
     private static final int H5Z_CLASS_T_VERS = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5Z_CLASS_T_VERS 1
      * }
      */
-    public static int H5Z_CLASS_T_VERS() {
-        return H5Z_CLASS_T_VERS;
-    }
+    public static int H5Z_CLASS_T_VERS() { return H5Z_CLASS_T_VERS; }
     /**
      * {@snippet lang=c :
      * #define H5VL_NATIVE_NAME "native"
      * }
      */
-    public static MemorySegment H5VL_NATIVE_NAME() {
+    public static MemorySegment H5VL_NATIVE_NAME()
+    {
         class Holder {
-            static final MemorySegment H5VL_NATIVE_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("native");
+            static final MemorySegment H5VL_NATIVE_NAME = hdf5_h.LIBRARY_ARENA.allocateFrom("native");
         }
         return Holder.H5VL_NATIVE_NAME;
     }
@@ -21676,160 +19745,127 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5VL_NATIVE_VALUE 0
      * }
      */
-    public static int H5VL_NATIVE_VALUE() {
-        return H5VL_NATIVE_VALUE;
-    }
+    public static int H5VL_NATIVE_VALUE() { return H5VL_NATIVE_VALUE; }
     private static final int H5FD_CORE_VALUE = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_CORE_VALUE 1
      * }
      */
-    public static int H5FD_CORE_VALUE() {
-        return H5FD_CORE_VALUE;
-    }
+    public static int H5FD_CORE_VALUE() { return H5FD_CORE_VALUE; }
     private static final int H5FD_DIRECT = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_DIRECT -1
      * }
      */
-    public static int H5FD_DIRECT() {
-        return H5FD_DIRECT;
-    }
+    public static int H5FD_DIRECT() { return H5FD_DIRECT; }
     private static final int H5FD_DIRECT_VALUE = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_DIRECT_VALUE -1
      * }
      */
-    public static int H5FD_DIRECT_VALUE() {
-        return H5FD_DIRECT_VALUE;
-    }
+    public static int H5FD_DIRECT_VALUE() { return H5FD_DIRECT_VALUE; }
     private static final int CBSIZE_DEF = (int)16777216L;
     /**
      * {@snippet lang=c :
      * #define CBSIZE_DEF 16777216
      * }
      */
-    public static int CBSIZE_DEF() {
-        return CBSIZE_DEF;
-    }
+    public static int CBSIZE_DEF() { return CBSIZE_DEF; }
     private static final int H5FD_FAMILY_VALUE = (int)3L;
     /**
      * {@snippet lang=c :
      * #define H5FD_FAMILY_VALUE 3
      * }
      */
-    public static int H5FD_FAMILY_VALUE() {
-        return H5FD_FAMILY_VALUE;
-    }
+    public static int H5FD_FAMILY_VALUE() { return H5FD_FAMILY_VALUE; }
     private static final int H5FD_HDFS = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_HDFS -1
      * }
      */
-    public static int H5FD_HDFS() {
-        return H5FD_HDFS;
-    }
+    public static int H5FD_HDFS() { return H5FD_HDFS; }
     private static final int H5FD_HDFS_VALUE = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_HDFS_VALUE -1
      * }
      */
-    public static int H5FD_HDFS_VALUE() {
-        return H5FD_HDFS_VALUE;
-    }
+    public static int H5FD_HDFS_VALUE() { return H5FD_HDFS_VALUE; }
     private static final int H5FD_LOG_VALUE = (int)2L;
     /**
      * {@snippet lang=c :
      * #define H5FD_LOG_VALUE 2
      * }
      */
-    public static int H5FD_LOG_VALUE() {
-        return H5FD_LOG_VALUE;
-    }
+    public static int H5FD_LOG_VALUE() { return H5FD_LOG_VALUE; }
     private static final int H5FD_LOG_META_IO = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_LOG_META_IO 1
      * }
      */
-    public static int H5FD_LOG_META_IO() {
-        return H5FD_LOG_META_IO;
-    }
+    public static int H5FD_LOG_META_IO() { return H5FD_LOG_META_IO; }
     private static final int H5FD_LOG_LOC_IO = (int)14L;
     /**
      * {@snippet lang=c :
      * #define H5FD_LOG_LOC_IO 14
      * }
      */
-    public static int H5FD_LOG_LOC_IO() {
-        return H5FD_LOG_LOC_IO;
-    }
+    public static int H5FD_LOG_LOC_IO() { return H5FD_LOG_LOC_IO; }
     private static final int H5FD_LOG_FILE_IO = (int)48L;
     /**
      * {@snippet lang=c :
      * #define H5FD_LOG_FILE_IO 48
      * }
      */
-    public static int H5FD_LOG_FILE_IO() {
-        return H5FD_LOG_FILE_IO;
-    }
+    public static int H5FD_LOG_FILE_IO() { return H5FD_LOG_FILE_IO; }
     private static final int H5FD_LOG_NUM_IO = (int)1920L;
     /**
      * {@snippet lang=c :
      * #define H5FD_LOG_NUM_IO 1920
      * }
      */
-    public static int H5FD_LOG_NUM_IO() {
-        return H5FD_LOG_NUM_IO;
-    }
+    public static int H5FD_LOG_NUM_IO() { return H5FD_LOG_NUM_IO; }
     private static final int H5FD_LOG_TIME_IO = (int)260096L;
     /**
      * {@snippet lang=c :
      * #define H5FD_LOG_TIME_IO 260096
      * }
      */
-    public static int H5FD_LOG_TIME_IO() {
-        return H5FD_LOG_TIME_IO;
-    }
+    public static int H5FD_LOG_TIME_IO() { return H5FD_LOG_TIME_IO; }
     private static final int H5FD_LOG_ALL = (int)1048575L;
     /**
      * {@snippet lang=c :
      * #define H5FD_LOG_ALL 1048575
      * }
      */
-    public static int H5FD_LOG_ALL() {
-        return H5FD_LOG_ALL;
-    }
+    public static int H5FD_LOG_ALL() { return H5FD_LOG_ALL; }
     private static final int H5FD_MPIO = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_MPIO -1
      * }
      */
-    public static int H5FD_MPIO() {
-        return H5FD_MPIO;
-    }
+    public static int H5FD_MPIO() { return H5FD_MPIO; }
     private static final int H5FD_ONION_VALUE = (int)14L;
     /**
      * {@snippet lang=c :
      * #define H5FD_ONION_VALUE 14
      * }
      */
-    public static int H5FD_ONION_VALUE() {
-        return H5FD_ONION_VALUE;
-    }
+    public static int H5FD_ONION_VALUE() { return H5FD_ONION_VALUE; }
     private static final int H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT = (int)1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT 1
      * }
      */
-    public static int H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT() {
+    public static int H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT()
+    {
         return H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT;
     }
     private static final long H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST = -1L;
@@ -21838,7 +19874,8 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST -1
      * }
      */
-    public static long H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST() {
+    public static long H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST()
+    {
         return H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     }
     private static final int H5FD_ROS3 = (int)-1L;
@@ -21847,54 +19884,44 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5FD_ROS3 -1
      * }
      */
-    public static int H5FD_ROS3() {
-        return H5FD_ROS3;
-    }
+    public static int H5FD_ROS3() { return H5FD_ROS3; }
     private static final int H5FD_ROS3_VALUE = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_ROS3_VALUE -1
      * }
      */
-    public static int H5FD_ROS3_VALUE() {
-        return H5FD_ROS3_VALUE;
-    }
+    public static int H5FD_ROS3_VALUE() { return H5FD_ROS3_VALUE; }
     private static final int H5FD_SEC2_VALUE = (int)0L;
     /**
      * {@snippet lang=c :
      * #define H5FD_SEC2_VALUE 0
      * }
      */
-    public static int H5FD_SEC2_VALUE() {
-        return H5FD_SEC2_VALUE;
-    }
+    public static int H5FD_SEC2_VALUE() { return H5FD_SEC2_VALUE; }
     private static final int H5FD_SPLITTER_VALUE = (int)6L;
     /**
      * {@snippet lang=c :
      * #define H5FD_SPLITTER_VALUE 6
      * }
      */
-    public static int H5FD_SPLITTER_VALUE() {
-        return H5FD_SPLITTER_VALUE;
-    }
+    public static int H5FD_SPLITTER_VALUE() { return H5FD_SPLITTER_VALUE; }
     private static final int H5FD_SUBFILING = (int)-1L;
     /**
      * {@snippet lang=c :
      * #define H5FD_SUBFILING -1
      * }
      */
-    public static int H5FD_SUBFILING() {
-        return H5FD_SUBFILING;
-    }
+    public static int H5FD_SUBFILING() { return H5FD_SUBFILING; }
     /**
      * {@snippet lang=c :
      * #define H5FD_SUBFILING_NAME "subfiling"
      * }
      */
-    public static MemorySegment H5FD_SUBFILING_NAME() {
+    public static MemorySegment H5FD_SUBFILING_NAME()
+    {
         class Holder {
-            static final MemorySegment H5FD_SUBFILING_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("subfiling");
+            static final MemorySegment H5FD_SUBFILING_NAME = hdf5_h.LIBRARY_ARENA.allocateFrom("subfiling");
         }
         return Holder.H5FD_SUBFILING_NAME;
     }
@@ -21904,18 +19931,16 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5FD_IOC -1
      * }
      */
-    public static int H5FD_IOC() {
-        return H5FD_IOC;
-    }
+    public static int H5FD_IOC() { return H5FD_IOC; }
     /**
      * {@snippet lang=c :
      * #define H5FD_IOC_NAME "ioc"
      * }
      */
-    public static MemorySegment H5FD_IOC_NAME() {
+    public static MemorySegment H5FD_IOC_NAME()
+    {
         class Holder {
-            static final MemorySegment H5FD_IOC_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("ioc");
+            static final MemorySegment H5FD_IOC_NAME = hdf5_h.LIBRARY_ARENA.allocateFrom("ioc");
         }
         return Holder.H5FD_IOC_NAME;
     }
@@ -21924,12 +19949,11 @@ public class hdf5_h extends hdf5_h_1 {
      * #define H5VL_PASSTHRU_NAME "pass_through"
      * }
      */
-    public static MemorySegment H5VL_PASSTHRU_NAME() {
+    public static MemorySegment H5VL_PASSTHRU_NAME()
+    {
         class Holder {
-            static final MemorySegment H5VL_PASSTHRU_NAME
-                = hdf5_h.LIBRARY_ARENA.allocateFrom("pass_through");
+            static final MemorySegment H5VL_PASSTHRU_NAME = hdf5_h.LIBRARY_ARENA.allocateFrom("pass_through");
         }
         return Holder.H5VL_PASSTHRU_NAME;
     }
 }
-

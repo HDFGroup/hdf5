@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -19,7 +19,8 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5T_conv_t {
 
-    H5T_conv_t() {
+    H5T_conv_t()
+    {
         // Should not be called directly
     }
 
@@ -27,28 +28,18 @@ public class H5T_conv_t {
      * The function pointer signature, expressed as a functional interface
      */
     public interface Function {
-        int apply(long src_id, long dst_id, MemorySegment cdata, long nelmts, long buf_stride, long bkg_stride, MemorySegment buf, MemorySegment bkg, long dset_xfer_plist);
+        int apply(long src_id, long dst_id, MemorySegment cdata, long nelmts, long buf_stride,
+                  long bkg_stride, MemorySegment buf, MemorySegment bkg, long dset_xfer_plist);
     }
 
     private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        hdf5_h.C_INT,
-        hdf5_h.C_LONG,
-        hdf5_h.C_LONG,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_LONG,
-        hdf5_h.C_LONG,
-        hdf5_h.C_LONG,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_LONG
-    );
+        hdf5_h.C_INT, hdf5_h.C_LONG, hdf5_h.C_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_LONG,
+        hdf5_h.C_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG);
 
     /**
      * The descriptor of this function pointer
      */
-    public static FunctionDescriptor descriptor() {
-        return $DESC;
-    }
+    public static FunctionDescriptor descriptor() { return $DESC; }
 
     private static final MethodHandle UP$MH = hdf5_h.upcallHandle(H5T_conv_t.Function.class, "apply", $DESC);
 
@@ -56,7 +47,8 @@ public class H5T_conv_t {
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(H5T_conv_t.Function fi, Arena arena) {
+    public static MemorySegment allocate(H5T_conv_t.Function fi, Arena arena)
+    {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 
@@ -65,12 +57,16 @@ public class H5T_conv_t {
     /**
      * Invoke the upcall stub {@code funcPtr}, with given parameters
      */
-    public static int invoke(MemorySegment funcPtr,long src_id, long dst_id, MemorySegment cdata, long nelmts, long buf_stride, long bkg_stride, MemorySegment buf, MemorySegment bkg, long dset_xfer_plist) {
+    public static int invoke(MemorySegment funcPtr, long src_id, long dst_id, MemorySegment cdata,
+                             long nelmts, long buf_stride, long bkg_stride, MemorySegment buf,
+                             MemorySegment bkg, long dset_xfer_plist)
+    {
         try {
-            return (int) DOWN$MH.invokeExact(funcPtr, src_id, dst_id, cdata, nelmts, buf_stride, bkg_stride, buf, bkg, dset_xfer_plist);
-        } catch (Throwable ex$) {
+            return (int)DOWN$MH.invokeExact(funcPtr, src_id, dst_id, cdata, nelmts, buf_stride, bkg_stride,
+                                            buf, bkg, dset_xfer_plist);
+        }
+        catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
     }
 }
-

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -23,22 +23,21 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class __darwin_pthread_handler_rec {
 
-    __darwin_pthread_handler_rec() {
+    __darwin_pthread_handler_rec()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("__routine"),
-        hdf5_h.C_POINTER.withName("__arg"),
-        hdf5_h.C_POINTER.withName("__next")
-    ).withName("__darwin_pthread_handler_rec");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("__routine"), hdf5_h.C_POINTER.withName("__arg"),
+                          hdf5_h.C_POINTER.withName("__next"))
+            .withName("__darwin_pthread_handler_rec");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     /**
      * {@snippet lang=c :
@@ -47,7 +46,8 @@ public class __darwin_pthread_handler_rec {
      */
     public static class __routine {
 
-        __routine() {
+        __routine()
+        {
             // Should not be called directly
         }
 
@@ -58,24 +58,22 @@ public class __darwin_pthread_handler_rec {
             void apply(MemorySegment _x0);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.ofVoid(
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC = FunctionDescriptor.ofVoid(hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
-        private static final MethodHandle UP$MH = hdf5_h.upcallHandle(__routine.Function.class, "apply", $DESC);
+        private static final MethodHandle UP$MH =
+            hdf5_h.upcallHandle(__routine.Function.class, "apply", $DESC);
 
         /**
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(__routine.Function fi, Arena arena) {
+        public static MemorySegment allocate(__routine.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -84,16 +82,19 @@ public class __darwin_pthread_handler_rec {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static void invoke(MemorySegment funcPtr,MemorySegment _x0) {
+        public static void invoke(MemorySegment funcPtr, MemorySegment _x0)
+        {
             try {
-                 DOWN$MH.invokeExact(funcPtr, _x0);
-            } catch (Throwable ex$) {
+                DOWN$MH.invokeExact(funcPtr, _x0);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
     }
 
-    private static final AddressLayout __routine$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("__routine"));
+    private static final AddressLayout __routine$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("__routine"));
 
     /**
      * Layout for field:
@@ -101,9 +102,7 @@ public class __darwin_pthread_handler_rec {
      * void (*__routine)(void *)
      * }
      */
-    public static final AddressLayout __routine$layout() {
-        return __routine$LAYOUT;
-    }
+    public static final AddressLayout __routine$layout() { return __routine$LAYOUT; }
 
     private static final long __routine$OFFSET = 0;
 
@@ -113,9 +112,7 @@ public class __darwin_pthread_handler_rec {
      * void (*__routine)(void *)
      * }
      */
-    public static final long __routine$offset() {
-        return __routine$OFFSET;
-    }
+    public static final long __routine$offset() { return __routine$OFFSET; }
 
     /**
      * Getter for field:
@@ -123,7 +120,8 @@ public class __darwin_pthread_handler_rec {
      * void (*__routine)(void *)
      * }
      */
-    public static MemorySegment __routine(MemorySegment struct) {
+    public static MemorySegment __routine(MemorySegment struct)
+    {
         return struct.get(__routine$LAYOUT, __routine$OFFSET);
     }
 
@@ -133,7 +131,8 @@ public class __darwin_pthread_handler_rec {
      * void (*__routine)(void *)
      * }
      */
-    public static void __routine(MemorySegment struct, MemorySegment fieldValue) {
+    public static void __routine(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(__routine$LAYOUT, __routine$OFFSET, fieldValue);
     }
 
@@ -145,9 +144,7 @@ public class __darwin_pthread_handler_rec {
      * void *__arg
      * }
      */
-    public static final AddressLayout __arg$layout() {
-        return __arg$LAYOUT;
-    }
+    public static final AddressLayout __arg$layout() { return __arg$LAYOUT; }
 
     private static final long __arg$OFFSET = 8;
 
@@ -157,9 +154,7 @@ public class __darwin_pthread_handler_rec {
      * void *__arg
      * }
      */
-    public static final long __arg$offset() {
-        return __arg$OFFSET;
-    }
+    public static final long __arg$offset() { return __arg$OFFSET; }
 
     /**
      * Getter for field:
@@ -167,9 +162,7 @@ public class __darwin_pthread_handler_rec {
      * void *__arg
      * }
      */
-    public static MemorySegment __arg(MemorySegment struct) {
-        return struct.get(__arg$LAYOUT, __arg$OFFSET);
-    }
+    public static MemorySegment __arg(MemorySegment struct) { return struct.get(__arg$LAYOUT, __arg$OFFSET); }
 
     /**
      * Setter for field:
@@ -177,7 +170,8 @@ public class __darwin_pthread_handler_rec {
      * void *__arg
      * }
      */
-    public static void __arg(MemorySegment struct, MemorySegment fieldValue) {
+    public static void __arg(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(__arg$LAYOUT, __arg$OFFSET, fieldValue);
     }
 
@@ -189,9 +183,7 @@ public class __darwin_pthread_handler_rec {
      * struct __darwin_pthread_handler_rec *__next
      * }
      */
-    public static final AddressLayout __next$layout() {
-        return __next$LAYOUT;
-    }
+    public static final AddressLayout __next$layout() { return __next$LAYOUT; }
 
     private static final long __next$OFFSET = 16;
 
@@ -201,9 +193,7 @@ public class __darwin_pthread_handler_rec {
      * struct __darwin_pthread_handler_rec *__next
      * }
      */
-    public static final long __next$offset() {
-        return __next$OFFSET;
-    }
+    public static final long __next$offset() { return __next$OFFSET; }
 
     /**
      * Getter for field:
@@ -211,7 +201,8 @@ public class __darwin_pthread_handler_rec {
      * struct __darwin_pthread_handler_rec *__next
      * }
      */
-    public static MemorySegment __next(MemorySegment struct) {
+    public static MemorySegment __next(MemorySegment struct)
+    {
         return struct.get(__next$LAYOUT, __next$OFFSET);
     }
 
@@ -221,7 +212,8 @@ public class __darwin_pthread_handler_rec {
      * struct __darwin_pthread_handler_rec *__next
      * }
      */
-    public static void __next(MemorySegment struct, MemorySegment fieldValue) {
+    public static void __next(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(__next$LAYOUT, __next$OFFSET, fieldValue);
     }
 
@@ -229,7 +221,8 @@ public class __darwin_pthread_handler_rec {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -241,15 +234,14 @@ public class __darwin_pthread_handler_rec {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -257,7 +249,8 @@ public class __darwin_pthread_handler_rec {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -265,8 +258,9 @@ public class __darwin_pthread_handler_rec {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

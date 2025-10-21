@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -50,56 +50,40 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5AC_cache_config_t {
 
-    H5AC_cache_config_t() {
+    H5AC_cache_config_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_INT.withName("version"),
-        hdf5_h.C_BOOL.withName("rpt_fcn_enabled"),
-        hdf5_h.C_BOOL.withName("open_trace_file"),
-        hdf5_h.C_BOOL.withName("close_trace_file"),
-        MemoryLayout.sequenceLayout(1025, hdf5_h.C_CHAR).withName("trace_file_name"),
-        hdf5_h.C_BOOL.withName("evictions_enabled"),
-        hdf5_h.C_BOOL.withName("set_initial_size"),
-        MemoryLayout.paddingLayout(6),
-        hdf5_h.C_LONG_LONG.withName("initial_size"),
-        hdf5_h.C_DOUBLE.withName("min_clean_fraction"),
-        hdf5_h.C_LONG_LONG.withName("max_size"),
-        hdf5_h.C_LONG_LONG.withName("min_size"),
-        hdf5_h.C_LONG.withName("epoch_length"),
-        hdf5_h.C_INT.withName("incr_mode"),
-        hdf5_h.C_DOUBLE.withName("lower_hr_threshold"),
-        hdf5_h.C_DOUBLE.withName("increment"),
-        hdf5_h.C_BOOL.withName("apply_max_increment"),
-        MemoryLayout.paddingLayout(7),
-        hdf5_h.C_LONG_LONG.withName("max_increment"),
-        hdf5_h.C_INT.withName("flash_incr_mode"),
-        MemoryLayout.paddingLayout(4),
-        hdf5_h.C_DOUBLE.withName("flash_multiple"),
-        hdf5_h.C_DOUBLE.withName("flash_threshold"),
-        hdf5_h.C_INT.withName("decr_mode"),
-        MemoryLayout.paddingLayout(4),
-        hdf5_h.C_DOUBLE.withName("upper_hr_threshold"),
-        hdf5_h.C_DOUBLE.withName("decrement"),
-        hdf5_h.C_BOOL.withName("apply_max_decrement"),
-        MemoryLayout.paddingLayout(7),
-        hdf5_h.C_LONG_LONG.withName("max_decrement"),
-        hdf5_h.C_INT.withName("epochs_before_eviction"),
-        hdf5_h.C_BOOL.withName("apply_empty_reserve"),
-        MemoryLayout.paddingLayout(3),
-        hdf5_h.C_DOUBLE.withName("empty_reserve"),
-        hdf5_h.C_LONG_LONG.withName("dirty_bytes_threshold"),
-        hdf5_h.C_INT.withName("metadata_write_strategy"),
-        MemoryLayout.paddingLayout(4)
-    ).withName("H5AC_cache_config_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(
+                hdf5_h.C_INT.withName("version"), hdf5_h.C_BOOL.withName("rpt_fcn_enabled"),
+                hdf5_h.C_BOOL.withName("open_trace_file"), hdf5_h.C_BOOL.withName("close_trace_file"),
+                MemoryLayout.sequenceLayout(1025, hdf5_h.C_CHAR).withName("trace_file_name"),
+                hdf5_h.C_BOOL.withName("evictions_enabled"), hdf5_h.C_BOOL.withName("set_initial_size"),
+                MemoryLayout.paddingLayout(6), hdf5_h.C_LONG_LONG.withName("initial_size"),
+                hdf5_h.C_DOUBLE.withName("min_clean_fraction"), hdf5_h.C_LONG_LONG.withName("max_size"),
+                hdf5_h.C_LONG_LONG.withName("min_size"), hdf5_h.C_LONG.withName("epoch_length"),
+                hdf5_h.C_INT.withName("incr_mode"), hdf5_h.C_DOUBLE.withName("lower_hr_threshold"),
+                hdf5_h.C_DOUBLE.withName("increment"), hdf5_h.C_BOOL.withName("apply_max_increment"),
+                MemoryLayout.paddingLayout(7), hdf5_h.C_LONG_LONG.withName("max_increment"),
+                hdf5_h.C_INT.withName("flash_incr_mode"), MemoryLayout.paddingLayout(4),
+                hdf5_h.C_DOUBLE.withName("flash_multiple"), hdf5_h.C_DOUBLE.withName("flash_threshold"),
+                hdf5_h.C_INT.withName("decr_mode"), MemoryLayout.paddingLayout(4),
+                hdf5_h.C_DOUBLE.withName("upper_hr_threshold"), hdf5_h.C_DOUBLE.withName("decrement"),
+                hdf5_h.C_BOOL.withName("apply_max_decrement"), MemoryLayout.paddingLayout(7),
+                hdf5_h.C_LONG_LONG.withName("max_decrement"), hdf5_h.C_INT.withName("epochs_before_eviction"),
+                hdf5_h.C_BOOL.withName("apply_empty_reserve"), MemoryLayout.paddingLayout(3),
+                hdf5_h.C_DOUBLE.withName("empty_reserve"),
+                hdf5_h.C_LONG_LONG.withName("dirty_bytes_threshold"),
+                hdf5_h.C_INT.withName("metadata_write_strategy"), MemoryLayout.paddingLayout(4))
+            .withName("H5AC_cache_config_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfInt version$LAYOUT = (OfInt)$LAYOUT.select(groupElement("version"));
 
@@ -109,9 +93,7 @@ public class H5AC_cache_config_t {
      * int version
      * }
      */
-    public static final OfInt version$layout() {
-        return version$LAYOUT;
-    }
+    public static final OfInt version$layout() { return version$LAYOUT; }
 
     private static final long version$OFFSET = 0;
 
@@ -121,9 +103,7 @@ public class H5AC_cache_config_t {
      * int version
      * }
      */
-    public static final long version$offset() {
-        return version$OFFSET;
-    }
+    public static final long version$offset() { return version$OFFSET; }
 
     /**
      * Getter for field:
@@ -131,9 +111,7 @@ public class H5AC_cache_config_t {
      * int version
      * }
      */
-    public static int version(MemorySegment struct) {
-        return struct.get(version$LAYOUT, version$OFFSET);
-    }
+    public static int version(MemorySegment struct) { return struct.get(version$LAYOUT, version$OFFSET); }
 
     /**
      * Setter for field:
@@ -141,11 +119,13 @@ public class H5AC_cache_config_t {
      * int version
      * }
      */
-    public static void version(MemorySegment struct, int fieldValue) {
+    public static void version(MemorySegment struct, int fieldValue)
+    {
         struct.set(version$LAYOUT, version$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean rpt_fcn_enabled$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("rpt_fcn_enabled"));
+    private static final OfBoolean rpt_fcn_enabled$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("rpt_fcn_enabled"));
 
     /**
      * Layout for field:
@@ -153,9 +133,7 @@ public class H5AC_cache_config_t {
      * bool rpt_fcn_enabled
      * }
      */
-    public static final OfBoolean rpt_fcn_enabled$layout() {
-        return rpt_fcn_enabled$LAYOUT;
-    }
+    public static final OfBoolean rpt_fcn_enabled$layout() { return rpt_fcn_enabled$LAYOUT; }
 
     private static final long rpt_fcn_enabled$OFFSET = 4;
 
@@ -165,9 +143,7 @@ public class H5AC_cache_config_t {
      * bool rpt_fcn_enabled
      * }
      */
-    public static final long rpt_fcn_enabled$offset() {
-        return rpt_fcn_enabled$OFFSET;
-    }
+    public static final long rpt_fcn_enabled$offset() { return rpt_fcn_enabled$OFFSET; }
 
     /**
      * Getter for field:
@@ -175,7 +151,8 @@ public class H5AC_cache_config_t {
      * bool rpt_fcn_enabled
      * }
      */
-    public static boolean rpt_fcn_enabled(MemorySegment struct) {
+    public static boolean rpt_fcn_enabled(MemorySegment struct)
+    {
         return struct.get(rpt_fcn_enabled$LAYOUT, rpt_fcn_enabled$OFFSET);
     }
 
@@ -185,11 +162,13 @@ public class H5AC_cache_config_t {
      * bool rpt_fcn_enabled
      * }
      */
-    public static void rpt_fcn_enabled(MemorySegment struct, boolean fieldValue) {
+    public static void rpt_fcn_enabled(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(rpt_fcn_enabled$LAYOUT, rpt_fcn_enabled$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean open_trace_file$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("open_trace_file"));
+    private static final OfBoolean open_trace_file$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("open_trace_file"));
 
     /**
      * Layout for field:
@@ -197,9 +176,7 @@ public class H5AC_cache_config_t {
      * bool open_trace_file
      * }
      */
-    public static final OfBoolean open_trace_file$layout() {
-        return open_trace_file$LAYOUT;
-    }
+    public static final OfBoolean open_trace_file$layout() { return open_trace_file$LAYOUT; }
 
     private static final long open_trace_file$OFFSET = 5;
 
@@ -209,9 +186,7 @@ public class H5AC_cache_config_t {
      * bool open_trace_file
      * }
      */
-    public static final long open_trace_file$offset() {
-        return open_trace_file$OFFSET;
-    }
+    public static final long open_trace_file$offset() { return open_trace_file$OFFSET; }
 
     /**
      * Getter for field:
@@ -219,7 +194,8 @@ public class H5AC_cache_config_t {
      * bool open_trace_file
      * }
      */
-    public static boolean open_trace_file(MemorySegment struct) {
+    public static boolean open_trace_file(MemorySegment struct)
+    {
         return struct.get(open_trace_file$LAYOUT, open_trace_file$OFFSET);
     }
 
@@ -229,11 +205,13 @@ public class H5AC_cache_config_t {
      * bool open_trace_file
      * }
      */
-    public static void open_trace_file(MemorySegment struct, boolean fieldValue) {
+    public static void open_trace_file(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(open_trace_file$LAYOUT, open_trace_file$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean close_trace_file$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("close_trace_file"));
+    private static final OfBoolean close_trace_file$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("close_trace_file"));
 
     /**
      * Layout for field:
@@ -241,9 +219,7 @@ public class H5AC_cache_config_t {
      * bool close_trace_file
      * }
      */
-    public static final OfBoolean close_trace_file$layout() {
-        return close_trace_file$LAYOUT;
-    }
+    public static final OfBoolean close_trace_file$layout() { return close_trace_file$LAYOUT; }
 
     private static final long close_trace_file$OFFSET = 6;
 
@@ -253,9 +229,7 @@ public class H5AC_cache_config_t {
      * bool close_trace_file
      * }
      */
-    public static final long close_trace_file$offset() {
-        return close_trace_file$OFFSET;
-    }
+    public static final long close_trace_file$offset() { return close_trace_file$OFFSET; }
 
     /**
      * Getter for field:
@@ -263,7 +237,8 @@ public class H5AC_cache_config_t {
      * bool close_trace_file
      * }
      */
-    public static boolean close_trace_file(MemorySegment struct) {
+    public static boolean close_trace_file(MemorySegment struct)
+    {
         return struct.get(close_trace_file$LAYOUT, close_trace_file$OFFSET);
     }
 
@@ -273,11 +248,13 @@ public class H5AC_cache_config_t {
      * bool close_trace_file
      * }
      */
-    public static void close_trace_file(MemorySegment struct, boolean fieldValue) {
+    public static void close_trace_file(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(close_trace_file$LAYOUT, close_trace_file$OFFSET, fieldValue);
     }
 
-    private static final SequenceLayout trace_file_name$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("trace_file_name"));
+    private static final SequenceLayout trace_file_name$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("trace_file_name"));
 
     /**
      * Layout for field:
@@ -285,9 +262,7 @@ public class H5AC_cache_config_t {
      * char trace_file_name[1025]
      * }
      */
-    public static final SequenceLayout trace_file_name$layout() {
-        return trace_file_name$LAYOUT;
-    }
+    public static final SequenceLayout trace_file_name$layout() { return trace_file_name$LAYOUT; }
 
     private static final long trace_file_name$OFFSET = 7;
 
@@ -297,9 +272,7 @@ public class H5AC_cache_config_t {
      * char trace_file_name[1025]
      * }
      */
-    public static final long trace_file_name$offset() {
-        return trace_file_name$OFFSET;
-    }
+    public static final long trace_file_name$offset() { return trace_file_name$OFFSET; }
 
     /**
      * Getter for field:
@@ -307,7 +280,8 @@ public class H5AC_cache_config_t {
      * char trace_file_name[1025]
      * }
      */
-    public static MemorySegment trace_file_name(MemorySegment struct) {
+    public static MemorySegment trace_file_name(MemorySegment struct)
+    {
         return struct.asSlice(trace_file_name$OFFSET, trace_file_name$LAYOUT.byteSize());
     }
 
@@ -317,11 +291,12 @@ public class H5AC_cache_config_t {
      * char trace_file_name[1025]
      * }
      */
-    public static void trace_file_name(MemorySegment struct, MemorySegment fieldValue) {
+    public static void trace_file_name(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, trace_file_name$OFFSET, trace_file_name$LAYOUT.byteSize());
     }
 
-    private static long[] trace_file_name$DIMS = { 1025 };
+    private static long[] trace_file_name$DIMS = {1025};
 
     /**
      * Dimensions for array field:
@@ -329,10 +304,9 @@ public class H5AC_cache_config_t {
      * char trace_file_name[1025]
      * }
      */
-    public static long[] trace_file_name$dimensions() {
-        return trace_file_name$DIMS;
-    }
-    private static final VarHandle trace_file_name$ELEM_HANDLE = trace_file_name$LAYOUT.varHandle(sequenceElement());
+    public static long[] trace_file_name$dimensions() { return trace_file_name$DIMS; }
+    private static final VarHandle trace_file_name$ELEM_HANDLE =
+        trace_file_name$LAYOUT.varHandle(sequenceElement());
 
     /**
      * Indexed getter for field:
@@ -340,7 +314,8 @@ public class H5AC_cache_config_t {
      * char trace_file_name[1025]
      * }
      */
-    public static byte trace_file_name(MemorySegment struct, long index0) {
+    public static byte trace_file_name(MemorySegment struct, long index0)
+    {
         return (byte)trace_file_name$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -350,11 +325,13 @@ public class H5AC_cache_config_t {
      * char trace_file_name[1025]
      * }
      */
-    public static void trace_file_name(MemorySegment struct, long index0, byte fieldValue) {
+    public static void trace_file_name(MemorySegment struct, long index0, byte fieldValue)
+    {
         trace_file_name$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
-    private static final OfBoolean evictions_enabled$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("evictions_enabled"));
+    private static final OfBoolean evictions_enabled$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("evictions_enabled"));
 
     /**
      * Layout for field:
@@ -362,9 +339,7 @@ public class H5AC_cache_config_t {
      * bool evictions_enabled
      * }
      */
-    public static final OfBoolean evictions_enabled$layout() {
-        return evictions_enabled$LAYOUT;
-    }
+    public static final OfBoolean evictions_enabled$layout() { return evictions_enabled$LAYOUT; }
 
     private static final long evictions_enabled$OFFSET = 1032;
 
@@ -374,9 +349,7 @@ public class H5AC_cache_config_t {
      * bool evictions_enabled
      * }
      */
-    public static final long evictions_enabled$offset() {
-        return evictions_enabled$OFFSET;
-    }
+    public static final long evictions_enabled$offset() { return evictions_enabled$OFFSET; }
 
     /**
      * Getter for field:
@@ -384,7 +357,8 @@ public class H5AC_cache_config_t {
      * bool evictions_enabled
      * }
      */
-    public static boolean evictions_enabled(MemorySegment struct) {
+    public static boolean evictions_enabled(MemorySegment struct)
+    {
         return struct.get(evictions_enabled$LAYOUT, evictions_enabled$OFFSET);
     }
 
@@ -394,11 +368,13 @@ public class H5AC_cache_config_t {
      * bool evictions_enabled
      * }
      */
-    public static void evictions_enabled(MemorySegment struct, boolean fieldValue) {
+    public static void evictions_enabled(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(evictions_enabled$LAYOUT, evictions_enabled$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean set_initial_size$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("set_initial_size"));
+    private static final OfBoolean set_initial_size$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("set_initial_size"));
 
     /**
      * Layout for field:
@@ -406,9 +382,7 @@ public class H5AC_cache_config_t {
      * bool set_initial_size
      * }
      */
-    public static final OfBoolean set_initial_size$layout() {
-        return set_initial_size$LAYOUT;
-    }
+    public static final OfBoolean set_initial_size$layout() { return set_initial_size$LAYOUT; }
 
     private static final long set_initial_size$OFFSET = 1033;
 
@@ -418,9 +392,7 @@ public class H5AC_cache_config_t {
      * bool set_initial_size
      * }
      */
-    public static final long set_initial_size$offset() {
-        return set_initial_size$OFFSET;
-    }
+    public static final long set_initial_size$offset() { return set_initial_size$OFFSET; }
 
     /**
      * Getter for field:
@@ -428,7 +400,8 @@ public class H5AC_cache_config_t {
      * bool set_initial_size
      * }
      */
-    public static boolean set_initial_size(MemorySegment struct) {
+    public static boolean set_initial_size(MemorySegment struct)
+    {
         return struct.get(set_initial_size$LAYOUT, set_initial_size$OFFSET);
     }
 
@@ -438,7 +411,8 @@ public class H5AC_cache_config_t {
      * bool set_initial_size
      * }
      */
-    public static void set_initial_size(MemorySegment struct, boolean fieldValue) {
+    public static void set_initial_size(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(set_initial_size$LAYOUT, set_initial_size$OFFSET, fieldValue);
     }
 
@@ -450,9 +424,7 @@ public class H5AC_cache_config_t {
      * size_t initial_size
      * }
      */
-    public static final OfLong initial_size$layout() {
-        return initial_size$LAYOUT;
-    }
+    public static final OfLong initial_size$layout() { return initial_size$LAYOUT; }
 
     private static final long initial_size$OFFSET = 1040;
 
@@ -462,9 +434,7 @@ public class H5AC_cache_config_t {
      * size_t initial_size
      * }
      */
-    public static final long initial_size$offset() {
-        return initial_size$OFFSET;
-    }
+    public static final long initial_size$offset() { return initial_size$OFFSET; }
 
     /**
      * Getter for field:
@@ -472,7 +442,8 @@ public class H5AC_cache_config_t {
      * size_t initial_size
      * }
      */
-    public static long initial_size(MemorySegment struct) {
+    public static long initial_size(MemorySegment struct)
+    {
         return struct.get(initial_size$LAYOUT, initial_size$OFFSET);
     }
 
@@ -482,11 +453,13 @@ public class H5AC_cache_config_t {
      * size_t initial_size
      * }
      */
-    public static void initial_size(MemorySegment struct, long fieldValue) {
+    public static void initial_size(MemorySegment struct, long fieldValue)
+    {
         struct.set(initial_size$LAYOUT, initial_size$OFFSET, fieldValue);
     }
 
-    private static final OfDouble min_clean_fraction$LAYOUT = (OfDouble)$LAYOUT.select(groupElement("min_clean_fraction"));
+    private static final OfDouble min_clean_fraction$LAYOUT =
+        (OfDouble)$LAYOUT.select(groupElement("min_clean_fraction"));
 
     /**
      * Layout for field:
@@ -494,9 +467,7 @@ public class H5AC_cache_config_t {
      * double min_clean_fraction
      * }
      */
-    public static final OfDouble min_clean_fraction$layout() {
-        return min_clean_fraction$LAYOUT;
-    }
+    public static final OfDouble min_clean_fraction$layout() { return min_clean_fraction$LAYOUT; }
 
     private static final long min_clean_fraction$OFFSET = 1048;
 
@@ -506,9 +477,7 @@ public class H5AC_cache_config_t {
      * double min_clean_fraction
      * }
      */
-    public static final long min_clean_fraction$offset() {
-        return min_clean_fraction$OFFSET;
-    }
+    public static final long min_clean_fraction$offset() { return min_clean_fraction$OFFSET; }
 
     /**
      * Getter for field:
@@ -516,7 +485,8 @@ public class H5AC_cache_config_t {
      * double min_clean_fraction
      * }
      */
-    public static double min_clean_fraction(MemorySegment struct) {
+    public static double min_clean_fraction(MemorySegment struct)
+    {
         return struct.get(min_clean_fraction$LAYOUT, min_clean_fraction$OFFSET);
     }
 
@@ -526,7 +496,8 @@ public class H5AC_cache_config_t {
      * double min_clean_fraction
      * }
      */
-    public static void min_clean_fraction(MemorySegment struct, double fieldValue) {
+    public static void min_clean_fraction(MemorySegment struct, double fieldValue)
+    {
         struct.set(min_clean_fraction$LAYOUT, min_clean_fraction$OFFSET, fieldValue);
     }
 
@@ -538,9 +509,7 @@ public class H5AC_cache_config_t {
      * size_t max_size
      * }
      */
-    public static final OfLong max_size$layout() {
-        return max_size$LAYOUT;
-    }
+    public static final OfLong max_size$layout() { return max_size$LAYOUT; }
 
     private static final long max_size$OFFSET = 1056;
 
@@ -550,9 +519,7 @@ public class H5AC_cache_config_t {
      * size_t max_size
      * }
      */
-    public static final long max_size$offset() {
-        return max_size$OFFSET;
-    }
+    public static final long max_size$offset() { return max_size$OFFSET; }
 
     /**
      * Getter for field:
@@ -560,9 +527,7 @@ public class H5AC_cache_config_t {
      * size_t max_size
      * }
      */
-    public static long max_size(MemorySegment struct) {
-        return struct.get(max_size$LAYOUT, max_size$OFFSET);
-    }
+    public static long max_size(MemorySegment struct) { return struct.get(max_size$LAYOUT, max_size$OFFSET); }
 
     /**
      * Setter for field:
@@ -570,7 +535,8 @@ public class H5AC_cache_config_t {
      * size_t max_size
      * }
      */
-    public static void max_size(MemorySegment struct, long fieldValue) {
+    public static void max_size(MemorySegment struct, long fieldValue)
+    {
         struct.set(max_size$LAYOUT, max_size$OFFSET, fieldValue);
     }
 
@@ -582,9 +548,7 @@ public class H5AC_cache_config_t {
      * size_t min_size
      * }
      */
-    public static final OfLong min_size$layout() {
-        return min_size$LAYOUT;
-    }
+    public static final OfLong min_size$layout() { return min_size$LAYOUT; }
 
     private static final long min_size$OFFSET = 1064;
 
@@ -594,9 +558,7 @@ public class H5AC_cache_config_t {
      * size_t min_size
      * }
      */
-    public static final long min_size$offset() {
-        return min_size$OFFSET;
-    }
+    public static final long min_size$offset() { return min_size$OFFSET; }
 
     /**
      * Getter for field:
@@ -604,9 +566,7 @@ public class H5AC_cache_config_t {
      * size_t min_size
      * }
      */
-    public static long min_size(MemorySegment struct) {
-        return struct.get(min_size$LAYOUT, min_size$OFFSET);
-    }
+    public static long min_size(MemorySegment struct) { return struct.get(min_size$LAYOUT, min_size$OFFSET); }
 
     /**
      * Setter for field:
@@ -614,7 +574,8 @@ public class H5AC_cache_config_t {
      * size_t min_size
      * }
      */
-    public static void min_size(MemorySegment struct, long fieldValue) {
+    public static void min_size(MemorySegment struct, long fieldValue)
+    {
         struct.set(min_size$LAYOUT, min_size$OFFSET, fieldValue);
     }
 
@@ -626,9 +587,7 @@ public class H5AC_cache_config_t {
      * long epoch_length
      * }
      */
-    public static final OfInt epoch_length$layout() {
-        return epoch_length$LAYOUT;
-    }
+    public static final OfInt epoch_length$layout() { return epoch_length$LAYOUT; }
 
     private static final long epoch_length$OFFSET = 1072;
 
@@ -638,9 +597,7 @@ public class H5AC_cache_config_t {
      * long epoch_length
      * }
      */
-    public static final long epoch_length$offset() {
-        return epoch_length$OFFSET;
-    }
+    public static final long epoch_length$offset() { return epoch_length$OFFSET; }
 
     /**
      * Getter for field:
@@ -648,7 +605,8 @@ public class H5AC_cache_config_t {
      * long epoch_length
      * }
      */
-    public static int epoch_length(MemorySegment struct) {
+    public static int epoch_length(MemorySegment struct)
+    {
         return struct.get(epoch_length$LAYOUT, epoch_length$OFFSET);
     }
 
@@ -658,7 +616,8 @@ public class H5AC_cache_config_t {
      * long epoch_length
      * }
      */
-    public static void epoch_length(MemorySegment struct, int fieldValue) {
+    public static void epoch_length(MemorySegment struct, int fieldValue)
+    {
         struct.set(epoch_length$LAYOUT, epoch_length$OFFSET, fieldValue);
     }
 
@@ -670,9 +629,7 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_incr_mode incr_mode
      * }
      */
-    public static final OfInt incr_mode$layout() {
-        return incr_mode$LAYOUT;
-    }
+    public static final OfInt incr_mode$layout() { return incr_mode$LAYOUT; }
 
     private static final long incr_mode$OFFSET = 1076;
 
@@ -682,9 +639,7 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_incr_mode incr_mode
      * }
      */
-    public static final long incr_mode$offset() {
-        return incr_mode$OFFSET;
-    }
+    public static final long incr_mode$offset() { return incr_mode$OFFSET; }
 
     /**
      * Getter for field:
@@ -692,7 +647,8 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_incr_mode incr_mode
      * }
      */
-    public static int incr_mode(MemorySegment struct) {
+    public static int incr_mode(MemorySegment struct)
+    {
         return struct.get(incr_mode$LAYOUT, incr_mode$OFFSET);
     }
 
@@ -702,11 +658,13 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_incr_mode incr_mode
      * }
      */
-    public static void incr_mode(MemorySegment struct, int fieldValue) {
+    public static void incr_mode(MemorySegment struct, int fieldValue)
+    {
         struct.set(incr_mode$LAYOUT, incr_mode$OFFSET, fieldValue);
     }
 
-    private static final OfDouble lower_hr_threshold$LAYOUT = (OfDouble)$LAYOUT.select(groupElement("lower_hr_threshold"));
+    private static final OfDouble lower_hr_threshold$LAYOUT =
+        (OfDouble)$LAYOUT.select(groupElement("lower_hr_threshold"));
 
     /**
      * Layout for field:
@@ -714,9 +672,7 @@ public class H5AC_cache_config_t {
      * double lower_hr_threshold
      * }
      */
-    public static final OfDouble lower_hr_threshold$layout() {
-        return lower_hr_threshold$LAYOUT;
-    }
+    public static final OfDouble lower_hr_threshold$layout() { return lower_hr_threshold$LAYOUT; }
 
     private static final long lower_hr_threshold$OFFSET = 1080;
 
@@ -726,9 +682,7 @@ public class H5AC_cache_config_t {
      * double lower_hr_threshold
      * }
      */
-    public static final long lower_hr_threshold$offset() {
-        return lower_hr_threshold$OFFSET;
-    }
+    public static final long lower_hr_threshold$offset() { return lower_hr_threshold$OFFSET; }
 
     /**
      * Getter for field:
@@ -736,7 +690,8 @@ public class H5AC_cache_config_t {
      * double lower_hr_threshold
      * }
      */
-    public static double lower_hr_threshold(MemorySegment struct) {
+    public static double lower_hr_threshold(MemorySegment struct)
+    {
         return struct.get(lower_hr_threshold$LAYOUT, lower_hr_threshold$OFFSET);
     }
 
@@ -746,7 +701,8 @@ public class H5AC_cache_config_t {
      * double lower_hr_threshold
      * }
      */
-    public static void lower_hr_threshold(MemorySegment struct, double fieldValue) {
+    public static void lower_hr_threshold(MemorySegment struct, double fieldValue)
+    {
         struct.set(lower_hr_threshold$LAYOUT, lower_hr_threshold$OFFSET, fieldValue);
     }
 
@@ -758,9 +714,7 @@ public class H5AC_cache_config_t {
      * double increment
      * }
      */
-    public static final OfDouble increment$layout() {
-        return increment$LAYOUT;
-    }
+    public static final OfDouble increment$layout() { return increment$LAYOUT; }
 
     private static final long increment$OFFSET = 1088;
 
@@ -770,9 +724,7 @@ public class H5AC_cache_config_t {
      * double increment
      * }
      */
-    public static final long increment$offset() {
-        return increment$OFFSET;
-    }
+    public static final long increment$offset() { return increment$OFFSET; }
 
     /**
      * Getter for field:
@@ -780,7 +732,8 @@ public class H5AC_cache_config_t {
      * double increment
      * }
      */
-    public static double increment(MemorySegment struct) {
+    public static double increment(MemorySegment struct)
+    {
         return struct.get(increment$LAYOUT, increment$OFFSET);
     }
 
@@ -790,11 +743,13 @@ public class H5AC_cache_config_t {
      * double increment
      * }
      */
-    public static void increment(MemorySegment struct, double fieldValue) {
+    public static void increment(MemorySegment struct, double fieldValue)
+    {
         struct.set(increment$LAYOUT, increment$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean apply_max_increment$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("apply_max_increment"));
+    private static final OfBoolean apply_max_increment$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("apply_max_increment"));
 
     /**
      * Layout for field:
@@ -802,9 +757,7 @@ public class H5AC_cache_config_t {
      * bool apply_max_increment
      * }
      */
-    public static final OfBoolean apply_max_increment$layout() {
-        return apply_max_increment$LAYOUT;
-    }
+    public static final OfBoolean apply_max_increment$layout() { return apply_max_increment$LAYOUT; }
 
     private static final long apply_max_increment$OFFSET = 1096;
 
@@ -814,9 +767,7 @@ public class H5AC_cache_config_t {
      * bool apply_max_increment
      * }
      */
-    public static final long apply_max_increment$offset() {
-        return apply_max_increment$OFFSET;
-    }
+    public static final long apply_max_increment$offset() { return apply_max_increment$OFFSET; }
 
     /**
      * Getter for field:
@@ -824,7 +775,8 @@ public class H5AC_cache_config_t {
      * bool apply_max_increment
      * }
      */
-    public static boolean apply_max_increment(MemorySegment struct) {
+    public static boolean apply_max_increment(MemorySegment struct)
+    {
         return struct.get(apply_max_increment$LAYOUT, apply_max_increment$OFFSET);
     }
 
@@ -834,7 +786,8 @@ public class H5AC_cache_config_t {
      * bool apply_max_increment
      * }
      */
-    public static void apply_max_increment(MemorySegment struct, boolean fieldValue) {
+    public static void apply_max_increment(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(apply_max_increment$LAYOUT, apply_max_increment$OFFSET, fieldValue);
     }
 
@@ -846,9 +799,7 @@ public class H5AC_cache_config_t {
      * size_t max_increment
      * }
      */
-    public static final OfLong max_increment$layout() {
-        return max_increment$LAYOUT;
-    }
+    public static final OfLong max_increment$layout() { return max_increment$LAYOUT; }
 
     private static final long max_increment$OFFSET = 1104;
 
@@ -858,9 +809,7 @@ public class H5AC_cache_config_t {
      * size_t max_increment
      * }
      */
-    public static final long max_increment$offset() {
-        return max_increment$OFFSET;
-    }
+    public static final long max_increment$offset() { return max_increment$OFFSET; }
 
     /**
      * Getter for field:
@@ -868,7 +817,8 @@ public class H5AC_cache_config_t {
      * size_t max_increment
      * }
      */
-    public static long max_increment(MemorySegment struct) {
+    public static long max_increment(MemorySegment struct)
+    {
         return struct.get(max_increment$LAYOUT, max_increment$OFFSET);
     }
 
@@ -878,11 +828,13 @@ public class H5AC_cache_config_t {
      * size_t max_increment
      * }
      */
-    public static void max_increment(MemorySegment struct, long fieldValue) {
+    public static void max_increment(MemorySegment struct, long fieldValue)
+    {
         struct.set(max_increment$LAYOUT, max_increment$OFFSET, fieldValue);
     }
 
-    private static final OfInt flash_incr_mode$LAYOUT = (OfInt)$LAYOUT.select(groupElement("flash_incr_mode"));
+    private static final OfInt flash_incr_mode$LAYOUT =
+        (OfInt)$LAYOUT.select(groupElement("flash_incr_mode"));
 
     /**
      * Layout for field:
@@ -890,9 +842,7 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_flash_incr_mode flash_incr_mode
      * }
      */
-    public static final OfInt flash_incr_mode$layout() {
-        return flash_incr_mode$LAYOUT;
-    }
+    public static final OfInt flash_incr_mode$layout() { return flash_incr_mode$LAYOUT; }
 
     private static final long flash_incr_mode$OFFSET = 1112;
 
@@ -902,9 +852,7 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_flash_incr_mode flash_incr_mode
      * }
      */
-    public static final long flash_incr_mode$offset() {
-        return flash_incr_mode$OFFSET;
-    }
+    public static final long flash_incr_mode$offset() { return flash_incr_mode$OFFSET; }
 
     /**
      * Getter for field:
@@ -912,7 +860,8 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_flash_incr_mode flash_incr_mode
      * }
      */
-    public static int flash_incr_mode(MemorySegment struct) {
+    public static int flash_incr_mode(MemorySegment struct)
+    {
         return struct.get(flash_incr_mode$LAYOUT, flash_incr_mode$OFFSET);
     }
 
@@ -922,11 +871,13 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_flash_incr_mode flash_incr_mode
      * }
      */
-    public static void flash_incr_mode(MemorySegment struct, int fieldValue) {
+    public static void flash_incr_mode(MemorySegment struct, int fieldValue)
+    {
         struct.set(flash_incr_mode$LAYOUT, flash_incr_mode$OFFSET, fieldValue);
     }
 
-    private static final OfDouble flash_multiple$LAYOUT = (OfDouble)$LAYOUT.select(groupElement("flash_multiple"));
+    private static final OfDouble flash_multiple$LAYOUT =
+        (OfDouble)$LAYOUT.select(groupElement("flash_multiple"));
 
     /**
      * Layout for field:
@@ -934,9 +885,7 @@ public class H5AC_cache_config_t {
      * double flash_multiple
      * }
      */
-    public static final OfDouble flash_multiple$layout() {
-        return flash_multiple$LAYOUT;
-    }
+    public static final OfDouble flash_multiple$layout() { return flash_multiple$LAYOUT; }
 
     private static final long flash_multiple$OFFSET = 1120;
 
@@ -946,9 +895,7 @@ public class H5AC_cache_config_t {
      * double flash_multiple
      * }
      */
-    public static final long flash_multiple$offset() {
-        return flash_multiple$OFFSET;
-    }
+    public static final long flash_multiple$offset() { return flash_multiple$OFFSET; }
 
     /**
      * Getter for field:
@@ -956,7 +903,8 @@ public class H5AC_cache_config_t {
      * double flash_multiple
      * }
      */
-    public static double flash_multiple(MemorySegment struct) {
+    public static double flash_multiple(MemorySegment struct)
+    {
         return struct.get(flash_multiple$LAYOUT, flash_multiple$OFFSET);
     }
 
@@ -966,11 +914,13 @@ public class H5AC_cache_config_t {
      * double flash_multiple
      * }
      */
-    public static void flash_multiple(MemorySegment struct, double fieldValue) {
+    public static void flash_multiple(MemorySegment struct, double fieldValue)
+    {
         struct.set(flash_multiple$LAYOUT, flash_multiple$OFFSET, fieldValue);
     }
 
-    private static final OfDouble flash_threshold$LAYOUT = (OfDouble)$LAYOUT.select(groupElement("flash_threshold"));
+    private static final OfDouble flash_threshold$LAYOUT =
+        (OfDouble)$LAYOUT.select(groupElement("flash_threshold"));
 
     /**
      * Layout for field:
@@ -978,9 +928,7 @@ public class H5AC_cache_config_t {
      * double flash_threshold
      * }
      */
-    public static final OfDouble flash_threshold$layout() {
-        return flash_threshold$LAYOUT;
-    }
+    public static final OfDouble flash_threshold$layout() { return flash_threshold$LAYOUT; }
 
     private static final long flash_threshold$OFFSET = 1128;
 
@@ -990,9 +938,7 @@ public class H5AC_cache_config_t {
      * double flash_threshold
      * }
      */
-    public static final long flash_threshold$offset() {
-        return flash_threshold$OFFSET;
-    }
+    public static final long flash_threshold$offset() { return flash_threshold$OFFSET; }
 
     /**
      * Getter for field:
@@ -1000,7 +946,8 @@ public class H5AC_cache_config_t {
      * double flash_threshold
      * }
      */
-    public static double flash_threshold(MemorySegment struct) {
+    public static double flash_threshold(MemorySegment struct)
+    {
         return struct.get(flash_threshold$LAYOUT, flash_threshold$OFFSET);
     }
 
@@ -1010,7 +957,8 @@ public class H5AC_cache_config_t {
      * double flash_threshold
      * }
      */
-    public static void flash_threshold(MemorySegment struct, double fieldValue) {
+    public static void flash_threshold(MemorySegment struct, double fieldValue)
+    {
         struct.set(flash_threshold$LAYOUT, flash_threshold$OFFSET, fieldValue);
     }
 
@@ -1022,9 +970,7 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_decr_mode decr_mode
      * }
      */
-    public static final OfInt decr_mode$layout() {
-        return decr_mode$LAYOUT;
-    }
+    public static final OfInt decr_mode$layout() { return decr_mode$LAYOUT; }
 
     private static final long decr_mode$OFFSET = 1136;
 
@@ -1034,9 +980,7 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_decr_mode decr_mode
      * }
      */
-    public static final long decr_mode$offset() {
-        return decr_mode$OFFSET;
-    }
+    public static final long decr_mode$offset() { return decr_mode$OFFSET; }
 
     /**
      * Getter for field:
@@ -1044,7 +988,8 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_decr_mode decr_mode
      * }
      */
-    public static int decr_mode(MemorySegment struct) {
+    public static int decr_mode(MemorySegment struct)
+    {
         return struct.get(decr_mode$LAYOUT, decr_mode$OFFSET);
     }
 
@@ -1054,11 +999,13 @@ public class H5AC_cache_config_t {
      * enum H5C_cache_decr_mode decr_mode
      * }
      */
-    public static void decr_mode(MemorySegment struct, int fieldValue) {
+    public static void decr_mode(MemorySegment struct, int fieldValue)
+    {
         struct.set(decr_mode$LAYOUT, decr_mode$OFFSET, fieldValue);
     }
 
-    private static final OfDouble upper_hr_threshold$LAYOUT = (OfDouble)$LAYOUT.select(groupElement("upper_hr_threshold"));
+    private static final OfDouble upper_hr_threshold$LAYOUT =
+        (OfDouble)$LAYOUT.select(groupElement("upper_hr_threshold"));
 
     /**
      * Layout for field:
@@ -1066,9 +1013,7 @@ public class H5AC_cache_config_t {
      * double upper_hr_threshold
      * }
      */
-    public static final OfDouble upper_hr_threshold$layout() {
-        return upper_hr_threshold$LAYOUT;
-    }
+    public static final OfDouble upper_hr_threshold$layout() { return upper_hr_threshold$LAYOUT; }
 
     private static final long upper_hr_threshold$OFFSET = 1144;
 
@@ -1078,9 +1023,7 @@ public class H5AC_cache_config_t {
      * double upper_hr_threshold
      * }
      */
-    public static final long upper_hr_threshold$offset() {
-        return upper_hr_threshold$OFFSET;
-    }
+    public static final long upper_hr_threshold$offset() { return upper_hr_threshold$OFFSET; }
 
     /**
      * Getter for field:
@@ -1088,7 +1031,8 @@ public class H5AC_cache_config_t {
      * double upper_hr_threshold
      * }
      */
-    public static double upper_hr_threshold(MemorySegment struct) {
+    public static double upper_hr_threshold(MemorySegment struct)
+    {
         return struct.get(upper_hr_threshold$LAYOUT, upper_hr_threshold$OFFSET);
     }
 
@@ -1098,7 +1042,8 @@ public class H5AC_cache_config_t {
      * double upper_hr_threshold
      * }
      */
-    public static void upper_hr_threshold(MemorySegment struct, double fieldValue) {
+    public static void upper_hr_threshold(MemorySegment struct, double fieldValue)
+    {
         struct.set(upper_hr_threshold$LAYOUT, upper_hr_threshold$OFFSET, fieldValue);
     }
 
@@ -1110,9 +1055,7 @@ public class H5AC_cache_config_t {
      * double decrement
      * }
      */
-    public static final OfDouble decrement$layout() {
-        return decrement$LAYOUT;
-    }
+    public static final OfDouble decrement$layout() { return decrement$LAYOUT; }
 
     private static final long decrement$OFFSET = 1152;
 
@@ -1122,9 +1065,7 @@ public class H5AC_cache_config_t {
      * double decrement
      * }
      */
-    public static final long decrement$offset() {
-        return decrement$OFFSET;
-    }
+    public static final long decrement$offset() { return decrement$OFFSET; }
 
     /**
      * Getter for field:
@@ -1132,7 +1073,8 @@ public class H5AC_cache_config_t {
      * double decrement
      * }
      */
-    public static double decrement(MemorySegment struct) {
+    public static double decrement(MemorySegment struct)
+    {
         return struct.get(decrement$LAYOUT, decrement$OFFSET);
     }
 
@@ -1142,11 +1084,13 @@ public class H5AC_cache_config_t {
      * double decrement
      * }
      */
-    public static void decrement(MemorySegment struct, double fieldValue) {
+    public static void decrement(MemorySegment struct, double fieldValue)
+    {
         struct.set(decrement$LAYOUT, decrement$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean apply_max_decrement$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("apply_max_decrement"));
+    private static final OfBoolean apply_max_decrement$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("apply_max_decrement"));
 
     /**
      * Layout for field:
@@ -1154,9 +1098,7 @@ public class H5AC_cache_config_t {
      * bool apply_max_decrement
      * }
      */
-    public static final OfBoolean apply_max_decrement$layout() {
-        return apply_max_decrement$LAYOUT;
-    }
+    public static final OfBoolean apply_max_decrement$layout() { return apply_max_decrement$LAYOUT; }
 
     private static final long apply_max_decrement$OFFSET = 1160;
 
@@ -1166,9 +1108,7 @@ public class H5AC_cache_config_t {
      * bool apply_max_decrement
      * }
      */
-    public static final long apply_max_decrement$offset() {
-        return apply_max_decrement$OFFSET;
-    }
+    public static final long apply_max_decrement$offset() { return apply_max_decrement$OFFSET; }
 
     /**
      * Getter for field:
@@ -1176,7 +1116,8 @@ public class H5AC_cache_config_t {
      * bool apply_max_decrement
      * }
      */
-    public static boolean apply_max_decrement(MemorySegment struct) {
+    public static boolean apply_max_decrement(MemorySegment struct)
+    {
         return struct.get(apply_max_decrement$LAYOUT, apply_max_decrement$OFFSET);
     }
 
@@ -1186,7 +1127,8 @@ public class H5AC_cache_config_t {
      * bool apply_max_decrement
      * }
      */
-    public static void apply_max_decrement(MemorySegment struct, boolean fieldValue) {
+    public static void apply_max_decrement(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(apply_max_decrement$LAYOUT, apply_max_decrement$OFFSET, fieldValue);
     }
 
@@ -1198,9 +1140,7 @@ public class H5AC_cache_config_t {
      * size_t max_decrement
      * }
      */
-    public static final OfLong max_decrement$layout() {
-        return max_decrement$LAYOUT;
-    }
+    public static final OfLong max_decrement$layout() { return max_decrement$LAYOUT; }
 
     private static final long max_decrement$OFFSET = 1168;
 
@@ -1210,9 +1150,7 @@ public class H5AC_cache_config_t {
      * size_t max_decrement
      * }
      */
-    public static final long max_decrement$offset() {
-        return max_decrement$OFFSET;
-    }
+    public static final long max_decrement$offset() { return max_decrement$OFFSET; }
 
     /**
      * Getter for field:
@@ -1220,7 +1158,8 @@ public class H5AC_cache_config_t {
      * size_t max_decrement
      * }
      */
-    public static long max_decrement(MemorySegment struct) {
+    public static long max_decrement(MemorySegment struct)
+    {
         return struct.get(max_decrement$LAYOUT, max_decrement$OFFSET);
     }
 
@@ -1230,11 +1169,13 @@ public class H5AC_cache_config_t {
      * size_t max_decrement
      * }
      */
-    public static void max_decrement(MemorySegment struct, long fieldValue) {
+    public static void max_decrement(MemorySegment struct, long fieldValue)
+    {
         struct.set(max_decrement$LAYOUT, max_decrement$OFFSET, fieldValue);
     }
 
-    private static final OfInt epochs_before_eviction$LAYOUT = (OfInt)$LAYOUT.select(groupElement("epochs_before_eviction"));
+    private static final OfInt epochs_before_eviction$LAYOUT =
+        (OfInt)$LAYOUT.select(groupElement("epochs_before_eviction"));
 
     /**
      * Layout for field:
@@ -1242,9 +1183,7 @@ public class H5AC_cache_config_t {
      * int epochs_before_eviction
      * }
      */
-    public static final OfInt epochs_before_eviction$layout() {
-        return epochs_before_eviction$LAYOUT;
-    }
+    public static final OfInt epochs_before_eviction$layout() { return epochs_before_eviction$LAYOUT; }
 
     private static final long epochs_before_eviction$OFFSET = 1176;
 
@@ -1254,9 +1193,7 @@ public class H5AC_cache_config_t {
      * int epochs_before_eviction
      * }
      */
-    public static final long epochs_before_eviction$offset() {
-        return epochs_before_eviction$OFFSET;
-    }
+    public static final long epochs_before_eviction$offset() { return epochs_before_eviction$OFFSET; }
 
     /**
      * Getter for field:
@@ -1264,7 +1201,8 @@ public class H5AC_cache_config_t {
      * int epochs_before_eviction
      * }
      */
-    public static int epochs_before_eviction(MemorySegment struct) {
+    public static int epochs_before_eviction(MemorySegment struct)
+    {
         return struct.get(epochs_before_eviction$LAYOUT, epochs_before_eviction$OFFSET);
     }
 
@@ -1274,11 +1212,13 @@ public class H5AC_cache_config_t {
      * int epochs_before_eviction
      * }
      */
-    public static void epochs_before_eviction(MemorySegment struct, int fieldValue) {
+    public static void epochs_before_eviction(MemorySegment struct, int fieldValue)
+    {
         struct.set(epochs_before_eviction$LAYOUT, epochs_before_eviction$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean apply_empty_reserve$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("apply_empty_reserve"));
+    private static final OfBoolean apply_empty_reserve$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("apply_empty_reserve"));
 
     /**
      * Layout for field:
@@ -1286,9 +1226,7 @@ public class H5AC_cache_config_t {
      * bool apply_empty_reserve
      * }
      */
-    public static final OfBoolean apply_empty_reserve$layout() {
-        return apply_empty_reserve$LAYOUT;
-    }
+    public static final OfBoolean apply_empty_reserve$layout() { return apply_empty_reserve$LAYOUT; }
 
     private static final long apply_empty_reserve$OFFSET = 1180;
 
@@ -1298,9 +1236,7 @@ public class H5AC_cache_config_t {
      * bool apply_empty_reserve
      * }
      */
-    public static final long apply_empty_reserve$offset() {
-        return apply_empty_reserve$OFFSET;
-    }
+    public static final long apply_empty_reserve$offset() { return apply_empty_reserve$OFFSET; }
 
     /**
      * Getter for field:
@@ -1308,7 +1244,8 @@ public class H5AC_cache_config_t {
      * bool apply_empty_reserve
      * }
      */
-    public static boolean apply_empty_reserve(MemorySegment struct) {
+    public static boolean apply_empty_reserve(MemorySegment struct)
+    {
         return struct.get(apply_empty_reserve$LAYOUT, apply_empty_reserve$OFFSET);
     }
 
@@ -1318,11 +1255,13 @@ public class H5AC_cache_config_t {
      * bool apply_empty_reserve
      * }
      */
-    public static void apply_empty_reserve(MemorySegment struct, boolean fieldValue) {
+    public static void apply_empty_reserve(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(apply_empty_reserve$LAYOUT, apply_empty_reserve$OFFSET, fieldValue);
     }
 
-    private static final OfDouble empty_reserve$LAYOUT = (OfDouble)$LAYOUT.select(groupElement("empty_reserve"));
+    private static final OfDouble empty_reserve$LAYOUT =
+        (OfDouble)$LAYOUT.select(groupElement("empty_reserve"));
 
     /**
      * Layout for field:
@@ -1330,9 +1269,7 @@ public class H5AC_cache_config_t {
      * double empty_reserve
      * }
      */
-    public static final OfDouble empty_reserve$layout() {
-        return empty_reserve$LAYOUT;
-    }
+    public static final OfDouble empty_reserve$layout() { return empty_reserve$LAYOUT; }
 
     private static final long empty_reserve$OFFSET = 1184;
 
@@ -1342,9 +1279,7 @@ public class H5AC_cache_config_t {
      * double empty_reserve
      * }
      */
-    public static final long empty_reserve$offset() {
-        return empty_reserve$OFFSET;
-    }
+    public static final long empty_reserve$offset() { return empty_reserve$OFFSET; }
 
     /**
      * Getter for field:
@@ -1352,7 +1287,8 @@ public class H5AC_cache_config_t {
      * double empty_reserve
      * }
      */
-    public static double empty_reserve(MemorySegment struct) {
+    public static double empty_reserve(MemorySegment struct)
+    {
         return struct.get(empty_reserve$LAYOUT, empty_reserve$OFFSET);
     }
 
@@ -1362,11 +1298,13 @@ public class H5AC_cache_config_t {
      * double empty_reserve
      * }
      */
-    public static void empty_reserve(MemorySegment struct, double fieldValue) {
+    public static void empty_reserve(MemorySegment struct, double fieldValue)
+    {
         struct.set(empty_reserve$LAYOUT, empty_reserve$OFFSET, fieldValue);
     }
 
-    private static final OfLong dirty_bytes_threshold$LAYOUT = (OfLong)$LAYOUT.select(groupElement("dirty_bytes_threshold"));
+    private static final OfLong dirty_bytes_threshold$LAYOUT =
+        (OfLong)$LAYOUT.select(groupElement("dirty_bytes_threshold"));
 
     /**
      * Layout for field:
@@ -1374,9 +1312,7 @@ public class H5AC_cache_config_t {
      * size_t dirty_bytes_threshold
      * }
      */
-    public static final OfLong dirty_bytes_threshold$layout() {
-        return dirty_bytes_threshold$LAYOUT;
-    }
+    public static final OfLong dirty_bytes_threshold$layout() { return dirty_bytes_threshold$LAYOUT; }
 
     private static final long dirty_bytes_threshold$OFFSET = 1192;
 
@@ -1386,9 +1322,7 @@ public class H5AC_cache_config_t {
      * size_t dirty_bytes_threshold
      * }
      */
-    public static final long dirty_bytes_threshold$offset() {
-        return dirty_bytes_threshold$OFFSET;
-    }
+    public static final long dirty_bytes_threshold$offset() { return dirty_bytes_threshold$OFFSET; }
 
     /**
      * Getter for field:
@@ -1396,7 +1330,8 @@ public class H5AC_cache_config_t {
      * size_t dirty_bytes_threshold
      * }
      */
-    public static long dirty_bytes_threshold(MemorySegment struct) {
+    public static long dirty_bytes_threshold(MemorySegment struct)
+    {
         return struct.get(dirty_bytes_threshold$LAYOUT, dirty_bytes_threshold$OFFSET);
     }
 
@@ -1406,11 +1341,13 @@ public class H5AC_cache_config_t {
      * size_t dirty_bytes_threshold
      * }
      */
-    public static void dirty_bytes_threshold(MemorySegment struct, long fieldValue) {
+    public static void dirty_bytes_threshold(MemorySegment struct, long fieldValue)
+    {
         struct.set(dirty_bytes_threshold$LAYOUT, dirty_bytes_threshold$OFFSET, fieldValue);
     }
 
-    private static final OfInt metadata_write_strategy$LAYOUT = (OfInt)$LAYOUT.select(groupElement("metadata_write_strategy"));
+    private static final OfInt metadata_write_strategy$LAYOUT =
+        (OfInt)$LAYOUT.select(groupElement("metadata_write_strategy"));
 
     /**
      * Layout for field:
@@ -1418,9 +1355,7 @@ public class H5AC_cache_config_t {
      * int metadata_write_strategy
      * }
      */
-    public static final OfInt metadata_write_strategy$layout() {
-        return metadata_write_strategy$LAYOUT;
-    }
+    public static final OfInt metadata_write_strategy$layout() { return metadata_write_strategy$LAYOUT; }
 
     private static final long metadata_write_strategy$OFFSET = 1200;
 
@@ -1430,9 +1365,7 @@ public class H5AC_cache_config_t {
      * int metadata_write_strategy
      * }
      */
-    public static final long metadata_write_strategy$offset() {
-        return metadata_write_strategy$OFFSET;
-    }
+    public static final long metadata_write_strategy$offset() { return metadata_write_strategy$OFFSET; }
 
     /**
      * Getter for field:
@@ -1440,7 +1373,8 @@ public class H5AC_cache_config_t {
      * int metadata_write_strategy
      * }
      */
-    public static int metadata_write_strategy(MemorySegment struct) {
+    public static int metadata_write_strategy(MemorySegment struct)
+    {
         return struct.get(metadata_write_strategy$LAYOUT, metadata_write_strategy$OFFSET);
     }
 
@@ -1450,7 +1384,8 @@ public class H5AC_cache_config_t {
      * int metadata_write_strategy
      * }
      */
-    public static void metadata_write_strategy(MemorySegment struct, int fieldValue) {
+    public static void metadata_write_strategy(MemorySegment struct, int fieldValue)
+    {
         struct.set(metadata_write_strategy$LAYOUT, metadata_write_strategy$OFFSET, fieldValue);
     }
 
@@ -1458,7 +1393,8 @@ public class H5AC_cache_config_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -1470,15 +1406,14 @@ public class H5AC_cache_config_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -1486,7 +1421,8 @@ public class H5AC_cache_config_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -1494,8 +1430,9 @@ public class H5AC_cache_config_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

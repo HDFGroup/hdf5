@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -21,22 +21,22 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class fd_set {
 
-    fd_set() {
+    fd_set()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        MemoryLayout.sequenceLayout(32, hdf5_h.C_INT).withName("fds_bits")
-    ).withName("fd_set");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout.structLayout(MemoryLayout.sequenceLayout(32, hdf5_h.C_INT).withName("fds_bits"))
+            .withName("fd_set");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
-    private static final SequenceLayout fds_bits$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("fds_bits"));
+    private static final SequenceLayout fds_bits$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("fds_bits"));
 
     /**
      * Layout for field:
@@ -44,9 +44,7 @@ public class fd_set {
      * __int32_t fds_bits[32]
      * }
      */
-    public static final SequenceLayout fds_bits$layout() {
-        return fds_bits$LAYOUT;
-    }
+    public static final SequenceLayout fds_bits$layout() { return fds_bits$LAYOUT; }
 
     private static final long fds_bits$OFFSET = 0;
 
@@ -56,9 +54,7 @@ public class fd_set {
      * __int32_t fds_bits[32]
      * }
      */
-    public static final long fds_bits$offset() {
-        return fds_bits$OFFSET;
-    }
+    public static final long fds_bits$offset() { return fds_bits$OFFSET; }
 
     /**
      * Getter for field:
@@ -66,7 +62,8 @@ public class fd_set {
      * __int32_t fds_bits[32]
      * }
      */
-    public static MemorySegment fds_bits(MemorySegment struct) {
+    public static MemorySegment fds_bits(MemorySegment struct)
+    {
         return struct.asSlice(fds_bits$OFFSET, fds_bits$LAYOUT.byteSize());
     }
 
@@ -76,11 +73,12 @@ public class fd_set {
      * __int32_t fds_bits[32]
      * }
      */
-    public static void fds_bits(MemorySegment struct, MemorySegment fieldValue) {
+    public static void fds_bits(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, fds_bits$OFFSET, fds_bits$LAYOUT.byteSize());
     }
 
-    private static long[] fds_bits$DIMS = { 32 };
+    private static long[] fds_bits$DIMS = {32};
 
     /**
      * Dimensions for array field:
@@ -88,9 +86,7 @@ public class fd_set {
      * __int32_t fds_bits[32]
      * }
      */
-    public static long[] fds_bits$dimensions() {
-        return fds_bits$DIMS;
-    }
+    public static long[] fds_bits$dimensions() { return fds_bits$DIMS; }
     private static final VarHandle fds_bits$ELEM_HANDLE = fds_bits$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -99,7 +95,8 @@ public class fd_set {
      * __int32_t fds_bits[32]
      * }
      */
-    public static int fds_bits(MemorySegment struct, long index0) {
+    public static int fds_bits(MemorySegment struct, long index0)
+    {
         return (int)fds_bits$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -109,7 +106,8 @@ public class fd_set {
      * __int32_t fds_bits[32]
      * }
      */
-    public static void fds_bits(MemorySegment struct, long index0, int fieldValue) {
+    public static void fds_bits(MemorySegment struct, long index0, int fieldValue)
+    {
         fds_bits$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -117,7 +115,8 @@ public class fd_set {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -129,15 +128,14 @@ public class fd_set {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -145,7 +143,8 @@ public class fd_set {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -153,8 +152,9 @@ public class fd_set {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

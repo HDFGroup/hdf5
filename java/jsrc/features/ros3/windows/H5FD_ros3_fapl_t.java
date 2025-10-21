@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -25,24 +25,23 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5FD_ros3_fapl_t {
 
-    H5FD_ros3_fapl_t() {
+    H5FD_ros3_fapl_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_INT.withName("version"),
-        hdf5_h.C_BOOL.withName("authenticate"),
-        MemoryLayout.sequenceLayout(33, hdf5_h.C_CHAR).withName("aws_region"),
-        MemoryLayout.sequenceLayout(129, hdf5_h.C_CHAR).withName("secret_id"),
-        MemoryLayout.sequenceLayout(129, hdf5_h.C_CHAR).withName("secret_key")
-    ).withName("H5FD_ros3_fapl_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_INT.withName("version"), hdf5_h.C_BOOL.withName("authenticate"),
+                          MemoryLayout.sequenceLayout(33, hdf5_h.C_CHAR).withName("aws_region"),
+                          MemoryLayout.sequenceLayout(129, hdf5_h.C_CHAR).withName("secret_id"),
+                          MemoryLayout.sequenceLayout(129, hdf5_h.C_CHAR).withName("secret_key"))
+            .withName("H5FD_ros3_fapl_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfInt version$LAYOUT = (OfInt)$LAYOUT.select(groupElement("version"));
 
@@ -52,9 +51,7 @@ public class H5FD_ros3_fapl_t {
      * int32_t version
      * }
      */
-    public static final OfInt version$layout() {
-        return version$LAYOUT;
-    }
+    public static final OfInt version$layout() { return version$LAYOUT; }
 
     private static final long version$OFFSET = 0;
 
@@ -64,9 +61,7 @@ public class H5FD_ros3_fapl_t {
      * int32_t version
      * }
      */
-    public static final long version$offset() {
-        return version$OFFSET;
-    }
+    public static final long version$offset() { return version$OFFSET; }
 
     /**
      * Getter for field:
@@ -74,9 +69,7 @@ public class H5FD_ros3_fapl_t {
      * int32_t version
      * }
      */
-    public static int version(MemorySegment struct) {
-        return struct.get(version$LAYOUT, version$OFFSET);
-    }
+    public static int version(MemorySegment struct) { return struct.get(version$LAYOUT, version$OFFSET); }
 
     /**
      * Setter for field:
@@ -84,11 +77,13 @@ public class H5FD_ros3_fapl_t {
      * int32_t version
      * }
      */
-    public static void version(MemorySegment struct, int fieldValue) {
+    public static void version(MemorySegment struct, int fieldValue)
+    {
         struct.set(version$LAYOUT, version$OFFSET, fieldValue);
     }
 
-    private static final OfBoolean authenticate$LAYOUT = (OfBoolean)$LAYOUT.select(groupElement("authenticate"));
+    private static final OfBoolean authenticate$LAYOUT =
+        (OfBoolean)$LAYOUT.select(groupElement("authenticate"));
 
     /**
      * Layout for field:
@@ -96,9 +91,7 @@ public class H5FD_ros3_fapl_t {
      * bool authenticate
      * }
      */
-    public static final OfBoolean authenticate$layout() {
-        return authenticate$LAYOUT;
-    }
+    public static final OfBoolean authenticate$layout() { return authenticate$LAYOUT; }
 
     private static final long authenticate$OFFSET = 4;
 
@@ -108,9 +101,7 @@ public class H5FD_ros3_fapl_t {
      * bool authenticate
      * }
      */
-    public static final long authenticate$offset() {
-        return authenticate$OFFSET;
-    }
+    public static final long authenticate$offset() { return authenticate$OFFSET; }
 
     /**
      * Getter for field:
@@ -118,7 +109,8 @@ public class H5FD_ros3_fapl_t {
      * bool authenticate
      * }
      */
-    public static boolean authenticate(MemorySegment struct) {
+    public static boolean authenticate(MemorySegment struct)
+    {
         return struct.get(authenticate$LAYOUT, authenticate$OFFSET);
     }
 
@@ -128,11 +120,13 @@ public class H5FD_ros3_fapl_t {
      * bool authenticate
      * }
      */
-    public static void authenticate(MemorySegment struct, boolean fieldValue) {
+    public static void authenticate(MemorySegment struct, boolean fieldValue)
+    {
         struct.set(authenticate$LAYOUT, authenticate$OFFSET, fieldValue);
     }
 
-    private static final SequenceLayout aws_region$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("aws_region"));
+    private static final SequenceLayout aws_region$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("aws_region"));
 
     /**
      * Layout for field:
@@ -140,9 +134,7 @@ public class H5FD_ros3_fapl_t {
      * char aws_region[33]
      * }
      */
-    public static final SequenceLayout aws_region$layout() {
-        return aws_region$LAYOUT;
-    }
+    public static final SequenceLayout aws_region$layout() { return aws_region$LAYOUT; }
 
     private static final long aws_region$OFFSET = 5;
 
@@ -152,9 +144,7 @@ public class H5FD_ros3_fapl_t {
      * char aws_region[33]
      * }
      */
-    public static final long aws_region$offset() {
-        return aws_region$OFFSET;
-    }
+    public static final long aws_region$offset() { return aws_region$OFFSET; }
 
     /**
      * Getter for field:
@@ -162,7 +152,8 @@ public class H5FD_ros3_fapl_t {
      * char aws_region[33]
      * }
      */
-    public static MemorySegment aws_region(MemorySegment struct) {
+    public static MemorySegment aws_region(MemorySegment struct)
+    {
         return struct.asSlice(aws_region$OFFSET, aws_region$LAYOUT.byteSize());
     }
 
@@ -172,11 +163,12 @@ public class H5FD_ros3_fapl_t {
      * char aws_region[33]
      * }
      */
-    public static void aws_region(MemorySegment struct, MemorySegment fieldValue) {
+    public static void aws_region(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, aws_region$OFFSET, aws_region$LAYOUT.byteSize());
     }
 
-    private static long[] aws_region$DIMS = { 33 };
+    private static long[] aws_region$DIMS = {33};
 
     /**
      * Dimensions for array field:
@@ -184,9 +176,7 @@ public class H5FD_ros3_fapl_t {
      * char aws_region[33]
      * }
      */
-    public static long[] aws_region$dimensions() {
-        return aws_region$DIMS;
-    }
+    public static long[] aws_region$dimensions() { return aws_region$DIMS; }
     private static final VarHandle aws_region$ELEM_HANDLE = aws_region$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -195,7 +185,8 @@ public class H5FD_ros3_fapl_t {
      * char aws_region[33]
      * }
      */
-    public static byte aws_region(MemorySegment struct, long index0) {
+    public static byte aws_region(MemorySegment struct, long index0)
+    {
         return (byte)aws_region$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -205,11 +196,13 @@ public class H5FD_ros3_fapl_t {
      * char aws_region[33]
      * }
      */
-    public static void aws_region(MemorySegment struct, long index0, byte fieldValue) {
+    public static void aws_region(MemorySegment struct, long index0, byte fieldValue)
+    {
         aws_region$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
-    private static final SequenceLayout secret_id$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("secret_id"));
+    private static final SequenceLayout secret_id$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("secret_id"));
 
     /**
      * Layout for field:
@@ -217,9 +210,7 @@ public class H5FD_ros3_fapl_t {
      * char secret_id[129]
      * }
      */
-    public static final SequenceLayout secret_id$layout() {
-        return secret_id$LAYOUT;
-    }
+    public static final SequenceLayout secret_id$layout() { return secret_id$LAYOUT; }
 
     private static final long secret_id$OFFSET = 38;
 
@@ -229,9 +220,7 @@ public class H5FD_ros3_fapl_t {
      * char secret_id[129]
      * }
      */
-    public static final long secret_id$offset() {
-        return secret_id$OFFSET;
-    }
+    public static final long secret_id$offset() { return secret_id$OFFSET; }
 
     /**
      * Getter for field:
@@ -239,7 +228,8 @@ public class H5FD_ros3_fapl_t {
      * char secret_id[129]
      * }
      */
-    public static MemorySegment secret_id(MemorySegment struct) {
+    public static MemorySegment secret_id(MemorySegment struct)
+    {
         return struct.asSlice(secret_id$OFFSET, secret_id$LAYOUT.byteSize());
     }
 
@@ -249,11 +239,12 @@ public class H5FD_ros3_fapl_t {
      * char secret_id[129]
      * }
      */
-    public static void secret_id(MemorySegment struct, MemorySegment fieldValue) {
+    public static void secret_id(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, secret_id$OFFSET, secret_id$LAYOUT.byteSize());
     }
 
-    private static long[] secret_id$DIMS = { 129 };
+    private static long[] secret_id$DIMS = {129};
 
     /**
      * Dimensions for array field:
@@ -261,9 +252,7 @@ public class H5FD_ros3_fapl_t {
      * char secret_id[129]
      * }
      */
-    public static long[] secret_id$dimensions() {
-        return secret_id$DIMS;
-    }
+    public static long[] secret_id$dimensions() { return secret_id$DIMS; }
     private static final VarHandle secret_id$ELEM_HANDLE = secret_id$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -272,7 +261,8 @@ public class H5FD_ros3_fapl_t {
      * char secret_id[129]
      * }
      */
-    public static byte secret_id(MemorySegment struct, long index0) {
+    public static byte secret_id(MemorySegment struct, long index0)
+    {
         return (byte)secret_id$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -282,11 +272,13 @@ public class H5FD_ros3_fapl_t {
      * char secret_id[129]
      * }
      */
-    public static void secret_id(MemorySegment struct, long index0, byte fieldValue) {
+    public static void secret_id(MemorySegment struct, long index0, byte fieldValue)
+    {
         secret_id$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
-    private static final SequenceLayout secret_key$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("secret_key"));
+    private static final SequenceLayout secret_key$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("secret_key"));
 
     /**
      * Layout for field:
@@ -294,9 +286,7 @@ public class H5FD_ros3_fapl_t {
      * char secret_key[129]
      * }
      */
-    public static final SequenceLayout secret_key$layout() {
-        return secret_key$LAYOUT;
-    }
+    public static final SequenceLayout secret_key$layout() { return secret_key$LAYOUT; }
 
     private static final long secret_key$OFFSET = 167;
 
@@ -306,9 +296,7 @@ public class H5FD_ros3_fapl_t {
      * char secret_key[129]
      * }
      */
-    public static final long secret_key$offset() {
-        return secret_key$OFFSET;
-    }
+    public static final long secret_key$offset() { return secret_key$OFFSET; }
 
     /**
      * Getter for field:
@@ -316,7 +304,8 @@ public class H5FD_ros3_fapl_t {
      * char secret_key[129]
      * }
      */
-    public static MemorySegment secret_key(MemorySegment struct) {
+    public static MemorySegment secret_key(MemorySegment struct)
+    {
         return struct.asSlice(secret_key$OFFSET, secret_key$LAYOUT.byteSize());
     }
 
@@ -326,11 +315,12 @@ public class H5FD_ros3_fapl_t {
      * char secret_key[129]
      * }
      */
-    public static void secret_key(MemorySegment struct, MemorySegment fieldValue) {
+    public static void secret_key(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, secret_key$OFFSET, secret_key$LAYOUT.byteSize());
     }
 
-    private static long[] secret_key$DIMS = { 129 };
+    private static long[] secret_key$DIMS = {129};
 
     /**
      * Dimensions for array field:
@@ -338,9 +328,7 @@ public class H5FD_ros3_fapl_t {
      * char secret_key[129]
      * }
      */
-    public static long[] secret_key$dimensions() {
-        return secret_key$DIMS;
-    }
+    public static long[] secret_key$dimensions() { return secret_key$DIMS; }
     private static final VarHandle secret_key$ELEM_HANDLE = secret_key$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -349,7 +337,8 @@ public class H5FD_ros3_fapl_t {
      * char secret_key[129]
      * }
      */
-    public static byte secret_key(MemorySegment struct, long index0) {
+    public static byte secret_key(MemorySegment struct, long index0)
+    {
         return (byte)secret_key$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -359,7 +348,8 @@ public class H5FD_ros3_fapl_t {
      * char secret_key[129]
      * }
      */
-    public static void secret_key(MemorySegment struct, long index0, byte fieldValue) {
+    public static void secret_key(MemorySegment struct, long index0, byte fieldValue)
+    {
         secret_key$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -367,7 +357,8 @@ public class H5FD_ros3_fapl_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -379,15 +370,14 @@ public class H5FD_ros3_fapl_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -395,7 +385,8 @@ public class H5FD_ros3_fapl_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -403,8 +394,9 @@ public class H5FD_ros3_fapl_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -40,42 +40,32 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class __sFILE {
 
-    __sFILE() {
+    __sFILE()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_POINTER.withName("_p"),
-        hdf5_h.C_INT.withName("_r"),
-        hdf5_h.C_INT.withName("_w"),
-        hdf5_h.C_SHORT.withName("_flags"),
-        hdf5_h.C_SHORT.withName("_file"),
-        MemoryLayout.paddingLayout(4),
-        __sbuf.layout().withName("_bf"),
-        hdf5_h.C_INT.withName("_lbfsize"),
-        MemoryLayout.paddingLayout(4),
-        hdf5_h.C_POINTER.withName("_cookie"),
-        hdf5_h.C_POINTER.withName("_close"),
-        hdf5_h.C_POINTER.withName("_read"),
-        hdf5_h.C_POINTER.withName("_seek"),
-        hdf5_h.C_POINTER.withName("_write"),
-        __sbuf.layout().withName("_ub"),
-        hdf5_h.C_POINTER.withName("_extra"),
-        hdf5_h.C_INT.withName("_ur"),
-        MemoryLayout.sequenceLayout(3, hdf5_h.C_CHAR).withName("_ubuf"),
-        MemoryLayout.sequenceLayout(1, hdf5_h.C_CHAR).withName("_nbuf"),
-        __sbuf.layout().withName("_lb"),
-        hdf5_h.C_INT.withName("_blksize"),
-        MemoryLayout.paddingLayout(4),
-        hdf5_h.C_LONG_LONG.withName("_offset")
-    ).withName("__sFILE");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_POINTER.withName("_p"), hdf5_h.C_INT.withName("_r"),
+                          hdf5_h.C_INT.withName("_w"), hdf5_h.C_SHORT.withName("_flags"),
+                          hdf5_h.C_SHORT.withName("_file"), MemoryLayout.paddingLayout(4),
+                          __sbuf.layout().withName("_bf"), hdf5_h.C_INT.withName("_lbfsize"),
+                          MemoryLayout.paddingLayout(4), hdf5_h.C_POINTER.withName("_cookie"),
+                          hdf5_h.C_POINTER.withName("_close"), hdf5_h.C_POINTER.withName("_read"),
+                          hdf5_h.C_POINTER.withName("_seek"), hdf5_h.C_POINTER.withName("_write"),
+                          __sbuf.layout().withName("_ub"), hdf5_h.C_POINTER.withName("_extra"),
+                          hdf5_h.C_INT.withName("_ur"),
+                          MemoryLayout.sequenceLayout(3, hdf5_h.C_CHAR).withName("_ubuf"),
+                          MemoryLayout.sequenceLayout(1, hdf5_h.C_CHAR).withName("_nbuf"),
+                          __sbuf.layout().withName("_lb"), hdf5_h.C_INT.withName("_blksize"),
+                          MemoryLayout.paddingLayout(4), hdf5_h.C_LONG_LONG.withName("_offset"))
+            .withName("__sFILE");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final AddressLayout _p$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("_p"));
 
@@ -85,9 +75,7 @@ public class __sFILE {
      * unsigned char *_p
      * }
      */
-    public static final AddressLayout _p$layout() {
-        return _p$LAYOUT;
-    }
+    public static final AddressLayout _p$layout() { return _p$LAYOUT; }
 
     private static final long _p$OFFSET = 0;
 
@@ -97,9 +85,7 @@ public class __sFILE {
      * unsigned char *_p
      * }
      */
-    public static final long _p$offset() {
-        return _p$OFFSET;
-    }
+    public static final long _p$offset() { return _p$OFFSET; }
 
     /**
      * Getter for field:
@@ -107,9 +93,7 @@ public class __sFILE {
      * unsigned char *_p
      * }
      */
-    public static MemorySegment _p(MemorySegment struct) {
-        return struct.get(_p$LAYOUT, _p$OFFSET);
-    }
+    public static MemorySegment _p(MemorySegment struct) { return struct.get(_p$LAYOUT, _p$OFFSET); }
 
     /**
      * Setter for field:
@@ -117,7 +101,8 @@ public class __sFILE {
      * unsigned char *_p
      * }
      */
-    public static void _p(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _p(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(_p$LAYOUT, _p$OFFSET, fieldValue);
     }
 
@@ -129,9 +114,7 @@ public class __sFILE {
      * int _r
      * }
      */
-    public static final OfInt _r$layout() {
-        return _r$LAYOUT;
-    }
+    public static final OfInt _r$layout() { return _r$LAYOUT; }
 
     private static final long _r$OFFSET = 8;
 
@@ -141,9 +124,7 @@ public class __sFILE {
      * int _r
      * }
      */
-    public static final long _r$offset() {
-        return _r$OFFSET;
-    }
+    public static final long _r$offset() { return _r$OFFSET; }
 
     /**
      * Getter for field:
@@ -151,9 +132,7 @@ public class __sFILE {
      * int _r
      * }
      */
-    public static int _r(MemorySegment struct) {
-        return struct.get(_r$LAYOUT, _r$OFFSET);
-    }
+    public static int _r(MemorySegment struct) { return struct.get(_r$LAYOUT, _r$OFFSET); }
 
     /**
      * Setter for field:
@@ -161,7 +140,8 @@ public class __sFILE {
      * int _r
      * }
      */
-    public static void _r(MemorySegment struct, int fieldValue) {
+    public static void _r(MemorySegment struct, int fieldValue)
+    {
         struct.set(_r$LAYOUT, _r$OFFSET, fieldValue);
     }
 
@@ -173,9 +153,7 @@ public class __sFILE {
      * int _w
      * }
      */
-    public static final OfInt _w$layout() {
-        return _w$LAYOUT;
-    }
+    public static final OfInt _w$layout() { return _w$LAYOUT; }
 
     private static final long _w$OFFSET = 12;
 
@@ -185,9 +163,7 @@ public class __sFILE {
      * int _w
      * }
      */
-    public static final long _w$offset() {
-        return _w$OFFSET;
-    }
+    public static final long _w$offset() { return _w$OFFSET; }
 
     /**
      * Getter for field:
@@ -195,9 +171,7 @@ public class __sFILE {
      * int _w
      * }
      */
-    public static int _w(MemorySegment struct) {
-        return struct.get(_w$LAYOUT, _w$OFFSET);
-    }
+    public static int _w(MemorySegment struct) { return struct.get(_w$LAYOUT, _w$OFFSET); }
 
     /**
      * Setter for field:
@@ -205,7 +179,8 @@ public class __sFILE {
      * int _w
      * }
      */
-    public static void _w(MemorySegment struct, int fieldValue) {
+    public static void _w(MemorySegment struct, int fieldValue)
+    {
         struct.set(_w$LAYOUT, _w$OFFSET, fieldValue);
     }
 
@@ -217,9 +192,7 @@ public class __sFILE {
      * short _flags
      * }
      */
-    public static final OfShort _flags$layout() {
-        return _flags$LAYOUT;
-    }
+    public static final OfShort _flags$layout() { return _flags$LAYOUT; }
 
     private static final long _flags$OFFSET = 16;
 
@@ -229,9 +202,7 @@ public class __sFILE {
      * short _flags
      * }
      */
-    public static final long _flags$offset() {
-        return _flags$OFFSET;
-    }
+    public static final long _flags$offset() { return _flags$OFFSET; }
 
     /**
      * Getter for field:
@@ -239,9 +210,7 @@ public class __sFILE {
      * short _flags
      * }
      */
-    public static short _flags(MemorySegment struct) {
-        return struct.get(_flags$LAYOUT, _flags$OFFSET);
-    }
+    public static short _flags(MemorySegment struct) { return struct.get(_flags$LAYOUT, _flags$OFFSET); }
 
     /**
      * Setter for field:
@@ -249,7 +218,8 @@ public class __sFILE {
      * short _flags
      * }
      */
-    public static void _flags(MemorySegment struct, short fieldValue) {
+    public static void _flags(MemorySegment struct, short fieldValue)
+    {
         struct.set(_flags$LAYOUT, _flags$OFFSET, fieldValue);
     }
 
@@ -261,9 +231,7 @@ public class __sFILE {
      * short _file
      * }
      */
-    public static final OfShort _file$layout() {
-        return _file$LAYOUT;
-    }
+    public static final OfShort _file$layout() { return _file$LAYOUT; }
 
     private static final long _file$OFFSET = 18;
 
@@ -273,9 +241,7 @@ public class __sFILE {
      * short _file
      * }
      */
-    public static final long _file$offset() {
-        return _file$OFFSET;
-    }
+    public static final long _file$offset() { return _file$OFFSET; }
 
     /**
      * Getter for field:
@@ -283,9 +249,7 @@ public class __sFILE {
      * short _file
      * }
      */
-    public static short _file(MemorySegment struct) {
-        return struct.get(_file$LAYOUT, _file$OFFSET);
-    }
+    public static short _file(MemorySegment struct) { return struct.get(_file$LAYOUT, _file$OFFSET); }
 
     /**
      * Setter for field:
@@ -293,7 +257,8 @@ public class __sFILE {
      * short _file
      * }
      */
-    public static void _file(MemorySegment struct, short fieldValue) {
+    public static void _file(MemorySegment struct, short fieldValue)
+    {
         struct.set(_file$LAYOUT, _file$OFFSET, fieldValue);
     }
 
@@ -305,9 +270,7 @@ public class __sFILE {
      * struct __sbuf _bf
      * }
      */
-    public static final GroupLayout _bf$layout() {
-        return _bf$LAYOUT;
-    }
+    public static final GroupLayout _bf$layout() { return _bf$LAYOUT; }
 
     private static final long _bf$OFFSET = 24;
 
@@ -317,9 +280,7 @@ public class __sFILE {
      * struct __sbuf _bf
      * }
      */
-    public static final long _bf$offset() {
-        return _bf$OFFSET;
-    }
+    public static final long _bf$offset() { return _bf$OFFSET; }
 
     /**
      * Getter for field:
@@ -327,7 +288,8 @@ public class __sFILE {
      * struct __sbuf _bf
      * }
      */
-    public static MemorySegment _bf(MemorySegment struct) {
+    public static MemorySegment _bf(MemorySegment struct)
+    {
         return struct.asSlice(_bf$OFFSET, _bf$LAYOUT.byteSize());
     }
 
@@ -337,7 +299,8 @@ public class __sFILE {
      * struct __sbuf _bf
      * }
      */
-    public static void _bf(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _bf(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, _bf$OFFSET, _bf$LAYOUT.byteSize());
     }
 
@@ -349,9 +312,7 @@ public class __sFILE {
      * int _lbfsize
      * }
      */
-    public static final OfInt _lbfsize$layout() {
-        return _lbfsize$LAYOUT;
-    }
+    public static final OfInt _lbfsize$layout() { return _lbfsize$LAYOUT; }
 
     private static final long _lbfsize$OFFSET = 40;
 
@@ -361,9 +322,7 @@ public class __sFILE {
      * int _lbfsize
      * }
      */
-    public static final long _lbfsize$offset() {
-        return _lbfsize$OFFSET;
-    }
+    public static final long _lbfsize$offset() { return _lbfsize$OFFSET; }
 
     /**
      * Getter for field:
@@ -371,9 +330,7 @@ public class __sFILE {
      * int _lbfsize
      * }
      */
-    public static int _lbfsize(MemorySegment struct) {
-        return struct.get(_lbfsize$LAYOUT, _lbfsize$OFFSET);
-    }
+    public static int _lbfsize(MemorySegment struct) { return struct.get(_lbfsize$LAYOUT, _lbfsize$OFFSET); }
 
     /**
      * Setter for field:
@@ -381,11 +338,13 @@ public class __sFILE {
      * int _lbfsize
      * }
      */
-    public static void _lbfsize(MemorySegment struct, int fieldValue) {
+    public static void _lbfsize(MemorySegment struct, int fieldValue)
+    {
         struct.set(_lbfsize$LAYOUT, _lbfsize$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout _cookie$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("_cookie"));
+    private static final AddressLayout _cookie$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("_cookie"));
 
     /**
      * Layout for field:
@@ -393,9 +352,7 @@ public class __sFILE {
      * void *_cookie
      * }
      */
-    public static final AddressLayout _cookie$layout() {
-        return _cookie$LAYOUT;
-    }
+    public static final AddressLayout _cookie$layout() { return _cookie$LAYOUT; }
 
     private static final long _cookie$OFFSET = 48;
 
@@ -405,9 +362,7 @@ public class __sFILE {
      * void *_cookie
      * }
      */
-    public static final long _cookie$offset() {
-        return _cookie$OFFSET;
-    }
+    public static final long _cookie$offset() { return _cookie$OFFSET; }
 
     /**
      * Getter for field:
@@ -415,7 +370,8 @@ public class __sFILE {
      * void *_cookie
      * }
      */
-    public static MemorySegment _cookie(MemorySegment struct) {
+    public static MemorySegment _cookie(MemorySegment struct)
+    {
         return struct.get(_cookie$LAYOUT, _cookie$OFFSET);
     }
 
@@ -425,7 +381,8 @@ public class __sFILE {
      * void *_cookie
      * }
      */
-    public static void _cookie(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _cookie(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(_cookie$LAYOUT, _cookie$OFFSET, fieldValue);
     }
 
@@ -436,7 +393,8 @@ public class __sFILE {
      */
     public static class _close {
 
-        _close() {
+        _close()
+        {
             // Should not be called directly
         }
 
@@ -447,17 +405,12 @@ public class __sFILE {
             int apply(MemorySegment _x0);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER
-        );
+        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
         private static final MethodHandle UP$MH = hdf5_h.upcallHandle(_close.Function.class, "apply", $DESC);
 
@@ -465,7 +418,8 @@ public class __sFILE {
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(_close.Function fi, Arena arena) {
+        public static MemorySegment allocate(_close.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -474,10 +428,12 @@ public class __sFILE {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
@@ -491,9 +447,7 @@ public class __sFILE {
      * int (* _Nullable _close)(void *)
      * }
      */
-    public static final AddressLayout _close$layout() {
-        return _close$LAYOUT;
-    }
+    public static final AddressLayout _close$layout() { return _close$LAYOUT; }
 
     private static final long _close$OFFSET = 56;
 
@@ -503,9 +457,7 @@ public class __sFILE {
      * int (* _Nullable _close)(void *)
      * }
      */
-    public static final long _close$offset() {
-        return _close$OFFSET;
-    }
+    public static final long _close$offset() { return _close$OFFSET; }
 
     /**
      * Getter for field:
@@ -513,7 +465,8 @@ public class __sFILE {
      * int (* _Nullable _close)(void *)
      * }
      */
-    public static MemorySegment _close(MemorySegment struct) {
+    public static MemorySegment _close(MemorySegment struct)
+    {
         return struct.get(_close$LAYOUT, _close$OFFSET);
     }
 
@@ -523,7 +476,8 @@ public class __sFILE {
      * int (* _Nullable _close)(void *)
      * }
      */
-    public static void _close(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _close(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(_close$LAYOUT, _close$OFFSET, fieldValue);
     }
 
@@ -534,7 +488,8 @@ public class __sFILE {
      */
     public static class _read {
 
-        _read() {
+        _read()
+        {
             // Should not be called directly
         }
 
@@ -545,19 +500,13 @@ public class __sFILE {
             int apply(MemorySegment _x0, MemorySegment _x1, int _x2);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_INT);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
         private static final MethodHandle UP$MH = hdf5_h.upcallHandle(_read.Function.class, "apply", $DESC);
 
@@ -565,7 +514,8 @@ public class __sFILE {
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(_read.Function fi, Arena arena) {
+        public static MemorySegment allocate(_read.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -574,10 +524,12 @@ public class __sFILE {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, int _x2) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1, int _x2)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
@@ -591,9 +543,7 @@ public class __sFILE {
      * int (* _Nullable _read)(void *, char *, int)
      * }
      */
-    public static final AddressLayout _read$layout() {
-        return _read$LAYOUT;
-    }
+    public static final AddressLayout _read$layout() { return _read$LAYOUT; }
 
     private static final long _read$OFFSET = 64;
 
@@ -603,9 +553,7 @@ public class __sFILE {
      * int (* _Nullable _read)(void *, char *, int)
      * }
      */
-    public static final long _read$offset() {
-        return _read$OFFSET;
-    }
+    public static final long _read$offset() { return _read$OFFSET; }
 
     /**
      * Getter for field:
@@ -613,9 +561,7 @@ public class __sFILE {
      * int (* _Nullable _read)(void *, char *, int)
      * }
      */
-    public static MemorySegment _read(MemorySegment struct) {
-        return struct.get(_read$LAYOUT, _read$OFFSET);
-    }
+    public static MemorySegment _read(MemorySegment struct) { return struct.get(_read$LAYOUT, _read$OFFSET); }
 
     /**
      * Setter for field:
@@ -623,7 +569,8 @@ public class __sFILE {
      * int (* _Nullable _read)(void *, char *, int)
      * }
      */
-    public static void _read(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _read(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(_read$LAYOUT, _read$OFFSET, fieldValue);
     }
 
@@ -634,7 +581,8 @@ public class __sFILE {
      */
     public static class _seek {
 
-        _seek() {
+        _seek()
+        {
             // Should not be called directly
         }
 
@@ -645,19 +593,13 @@ public class __sFILE {
             long apply(MemorySegment _x0, long _x1, int _x2);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_LONG_LONG,
-            hdf5_h.C_INT
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_LONG_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG_LONG, hdf5_h.C_INT);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
         private static final MethodHandle UP$MH = hdf5_h.upcallHandle(_seek.Function.class, "apply", $DESC);
 
@@ -665,7 +607,8 @@ public class __sFILE {
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(_seek.Function fi, Arena arena) {
+        public static MemorySegment allocate(_seek.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -674,10 +617,12 @@ public class __sFILE {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static long invoke(MemorySegment funcPtr,MemorySegment _x0, long _x1, int _x2) {
+        public static long invoke(MemorySegment funcPtr, MemorySegment _x0, long _x1, int _x2)
+        {
             try {
-                return (long) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
-            } catch (Throwable ex$) {
+                return (long)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
@@ -691,9 +636,7 @@ public class __sFILE {
      * fpos_t (* _Nullable _seek)(void *, fpos_t, int)
      * }
      */
-    public static final AddressLayout _seek$layout() {
-        return _seek$LAYOUT;
-    }
+    public static final AddressLayout _seek$layout() { return _seek$LAYOUT; }
 
     private static final long _seek$OFFSET = 72;
 
@@ -703,9 +646,7 @@ public class __sFILE {
      * fpos_t (* _Nullable _seek)(void *, fpos_t, int)
      * }
      */
-    public static final long _seek$offset() {
-        return _seek$OFFSET;
-    }
+    public static final long _seek$offset() { return _seek$OFFSET; }
 
     /**
      * Getter for field:
@@ -713,9 +654,7 @@ public class __sFILE {
      * fpos_t (* _Nullable _seek)(void *, fpos_t, int)
      * }
      */
-    public static MemorySegment _seek(MemorySegment struct) {
-        return struct.get(_seek$LAYOUT, _seek$OFFSET);
-    }
+    public static MemorySegment _seek(MemorySegment struct) { return struct.get(_seek$LAYOUT, _seek$OFFSET); }
 
     /**
      * Setter for field:
@@ -723,7 +662,8 @@ public class __sFILE {
      * fpos_t (* _Nullable _seek)(void *, fpos_t, int)
      * }
      */
-    public static void _seek(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _seek(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(_seek$LAYOUT, _seek$OFFSET, fieldValue);
     }
 
@@ -734,7 +674,8 @@ public class __sFILE {
      */
     public static class _write {
 
-        _write() {
+        _write()
+        {
             // Should not be called directly
         }
 
@@ -745,19 +686,13 @@ public class __sFILE {
             int apply(MemorySegment _x0, MemorySegment _x1, int _x2);
         }
 
-        private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-            hdf5_h.C_INT,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_POINTER,
-            hdf5_h.C_INT
-        );
+        private static final FunctionDescriptor $DESC =
+            FunctionDescriptor.of(hdf5_h.C_INT, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_INT);
 
         /**
          * The descriptor of this function pointer
          */
-        public static FunctionDescriptor descriptor() {
-            return $DESC;
-        }
+        public static FunctionDescriptor descriptor() { return $DESC; }
 
         private static final MethodHandle UP$MH = hdf5_h.upcallHandle(_write.Function.class, "apply", $DESC);
 
@@ -765,7 +700,8 @@ public class __sFILE {
          * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
          * The lifetime of the returned segment is managed by {@code arena}
          */
-        public static MemorySegment allocate(_write.Function fi, Arena arena) {
+        public static MemorySegment allocate(_write.Function fi, Arena arena)
+        {
             return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
         }
 
@@ -774,10 +710,12 @@ public class __sFILE {
         /**
          * Invoke the upcall stub {@code funcPtr}, with given parameters
          */
-        public static int invoke(MemorySegment funcPtr,MemorySegment _x0, MemorySegment _x1, int _x2) {
+        public static int invoke(MemorySegment funcPtr, MemorySegment _x0, MemorySegment _x1, int _x2)
+        {
             try {
-                return (int) DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
-            } catch (Throwable ex$) {
+                return (int)DOWN$MH.invokeExact(funcPtr, _x0, _x1, _x2);
+            }
+            catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
         }
@@ -791,9 +729,7 @@ public class __sFILE {
      * int (* _Nullable _write)(void *, const char *, int)
      * }
      */
-    public static final AddressLayout _write$layout() {
-        return _write$LAYOUT;
-    }
+    public static final AddressLayout _write$layout() { return _write$LAYOUT; }
 
     private static final long _write$OFFSET = 80;
 
@@ -803,9 +739,7 @@ public class __sFILE {
      * int (* _Nullable _write)(void *, const char *, int)
      * }
      */
-    public static final long _write$offset() {
-        return _write$OFFSET;
-    }
+    public static final long _write$offset() { return _write$OFFSET; }
 
     /**
      * Getter for field:
@@ -813,7 +747,8 @@ public class __sFILE {
      * int (* _Nullable _write)(void *, const char *, int)
      * }
      */
-    public static MemorySegment _write(MemorySegment struct) {
+    public static MemorySegment _write(MemorySegment struct)
+    {
         return struct.get(_write$LAYOUT, _write$OFFSET);
     }
 
@@ -823,7 +758,8 @@ public class __sFILE {
      * int (* _Nullable _write)(void *, const char *, int)
      * }
      */
-    public static void _write(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _write(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(_write$LAYOUT, _write$OFFSET, fieldValue);
     }
 
@@ -835,9 +771,7 @@ public class __sFILE {
      * struct __sbuf _ub
      * }
      */
-    public static final GroupLayout _ub$layout() {
-        return _ub$LAYOUT;
-    }
+    public static final GroupLayout _ub$layout() { return _ub$LAYOUT; }
 
     private static final long _ub$OFFSET = 88;
 
@@ -847,9 +781,7 @@ public class __sFILE {
      * struct __sbuf _ub
      * }
      */
-    public static final long _ub$offset() {
-        return _ub$OFFSET;
-    }
+    public static final long _ub$offset() { return _ub$OFFSET; }
 
     /**
      * Getter for field:
@@ -857,7 +789,8 @@ public class __sFILE {
      * struct __sbuf _ub
      * }
      */
-    public static MemorySegment _ub(MemorySegment struct) {
+    public static MemorySegment _ub(MemorySegment struct)
+    {
         return struct.asSlice(_ub$OFFSET, _ub$LAYOUT.byteSize());
     }
 
@@ -867,7 +800,8 @@ public class __sFILE {
      * struct __sbuf _ub
      * }
      */
-    public static void _ub(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _ub(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, _ub$OFFSET, _ub$LAYOUT.byteSize());
     }
 
@@ -879,9 +813,7 @@ public class __sFILE {
      * struct __sFILEX *_extra
      * }
      */
-    public static final AddressLayout _extra$layout() {
-        return _extra$LAYOUT;
-    }
+    public static final AddressLayout _extra$layout() { return _extra$LAYOUT; }
 
     private static final long _extra$OFFSET = 104;
 
@@ -891,9 +823,7 @@ public class __sFILE {
      * struct __sFILEX *_extra
      * }
      */
-    public static final long _extra$offset() {
-        return _extra$OFFSET;
-    }
+    public static final long _extra$offset() { return _extra$OFFSET; }
 
     /**
      * Getter for field:
@@ -901,7 +831,8 @@ public class __sFILE {
      * struct __sFILEX *_extra
      * }
      */
-    public static MemorySegment _extra(MemorySegment struct) {
+    public static MemorySegment _extra(MemorySegment struct)
+    {
         return struct.get(_extra$LAYOUT, _extra$OFFSET);
     }
 
@@ -911,7 +842,8 @@ public class __sFILE {
      * struct __sFILEX *_extra
      * }
      */
-    public static void _extra(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _extra(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(_extra$LAYOUT, _extra$OFFSET, fieldValue);
     }
 
@@ -923,9 +855,7 @@ public class __sFILE {
      * int _ur
      * }
      */
-    public static final OfInt _ur$layout() {
-        return _ur$LAYOUT;
-    }
+    public static final OfInt _ur$layout() { return _ur$LAYOUT; }
 
     private static final long _ur$OFFSET = 112;
 
@@ -935,9 +865,7 @@ public class __sFILE {
      * int _ur
      * }
      */
-    public static final long _ur$offset() {
-        return _ur$OFFSET;
-    }
+    public static final long _ur$offset() { return _ur$OFFSET; }
 
     /**
      * Getter for field:
@@ -945,9 +873,7 @@ public class __sFILE {
      * int _ur
      * }
      */
-    public static int _ur(MemorySegment struct) {
-        return struct.get(_ur$LAYOUT, _ur$OFFSET);
-    }
+    public static int _ur(MemorySegment struct) { return struct.get(_ur$LAYOUT, _ur$OFFSET); }
 
     /**
      * Setter for field:
@@ -955,7 +881,8 @@ public class __sFILE {
      * int _ur
      * }
      */
-    public static void _ur(MemorySegment struct, int fieldValue) {
+    public static void _ur(MemorySegment struct, int fieldValue)
+    {
         struct.set(_ur$LAYOUT, _ur$OFFSET, fieldValue);
     }
 
@@ -967,9 +894,7 @@ public class __sFILE {
      * unsigned char _ubuf[3]
      * }
      */
-    public static final SequenceLayout _ubuf$layout() {
-        return _ubuf$LAYOUT;
-    }
+    public static final SequenceLayout _ubuf$layout() { return _ubuf$LAYOUT; }
 
     private static final long _ubuf$OFFSET = 116;
 
@@ -979,9 +904,7 @@ public class __sFILE {
      * unsigned char _ubuf[3]
      * }
      */
-    public static final long _ubuf$offset() {
-        return _ubuf$OFFSET;
-    }
+    public static final long _ubuf$offset() { return _ubuf$OFFSET; }
 
     /**
      * Getter for field:
@@ -989,7 +912,8 @@ public class __sFILE {
      * unsigned char _ubuf[3]
      * }
      */
-    public static MemorySegment _ubuf(MemorySegment struct) {
+    public static MemorySegment _ubuf(MemorySegment struct)
+    {
         return struct.asSlice(_ubuf$OFFSET, _ubuf$LAYOUT.byteSize());
     }
 
@@ -999,11 +923,12 @@ public class __sFILE {
      * unsigned char _ubuf[3]
      * }
      */
-    public static void _ubuf(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _ubuf(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, _ubuf$OFFSET, _ubuf$LAYOUT.byteSize());
     }
 
-    private static long[] _ubuf$DIMS = { 3 };
+    private static long[] _ubuf$DIMS = {3};
 
     /**
      * Dimensions for array field:
@@ -1011,9 +936,7 @@ public class __sFILE {
      * unsigned char _ubuf[3]
      * }
      */
-    public static long[] _ubuf$dimensions() {
-        return _ubuf$DIMS;
-    }
+    public static long[] _ubuf$dimensions() { return _ubuf$DIMS; }
     private static final VarHandle _ubuf$ELEM_HANDLE = _ubuf$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -1022,7 +945,8 @@ public class __sFILE {
      * unsigned char _ubuf[3]
      * }
      */
-    public static byte _ubuf(MemorySegment struct, long index0) {
+    public static byte _ubuf(MemorySegment struct, long index0)
+    {
         return (byte)_ubuf$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -1032,7 +956,8 @@ public class __sFILE {
      * unsigned char _ubuf[3]
      * }
      */
-    public static void _ubuf(MemorySegment struct, long index0, byte fieldValue) {
+    public static void _ubuf(MemorySegment struct, long index0, byte fieldValue)
+    {
         _ubuf$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -1044,9 +969,7 @@ public class __sFILE {
      * unsigned char _nbuf[1]
      * }
      */
-    public static final SequenceLayout _nbuf$layout() {
-        return _nbuf$LAYOUT;
-    }
+    public static final SequenceLayout _nbuf$layout() { return _nbuf$LAYOUT; }
 
     private static final long _nbuf$OFFSET = 119;
 
@@ -1056,9 +979,7 @@ public class __sFILE {
      * unsigned char _nbuf[1]
      * }
      */
-    public static final long _nbuf$offset() {
-        return _nbuf$OFFSET;
-    }
+    public static final long _nbuf$offset() { return _nbuf$OFFSET; }
 
     /**
      * Getter for field:
@@ -1066,7 +987,8 @@ public class __sFILE {
      * unsigned char _nbuf[1]
      * }
      */
-    public static MemorySegment _nbuf(MemorySegment struct) {
+    public static MemorySegment _nbuf(MemorySegment struct)
+    {
         return struct.asSlice(_nbuf$OFFSET, _nbuf$LAYOUT.byteSize());
     }
 
@@ -1076,11 +998,12 @@ public class __sFILE {
      * unsigned char _nbuf[1]
      * }
      */
-    public static void _nbuf(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _nbuf(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, _nbuf$OFFSET, _nbuf$LAYOUT.byteSize());
     }
 
-    private static long[] _nbuf$DIMS = { 1 };
+    private static long[] _nbuf$DIMS = {1};
 
     /**
      * Dimensions for array field:
@@ -1088,9 +1011,7 @@ public class __sFILE {
      * unsigned char _nbuf[1]
      * }
      */
-    public static long[] _nbuf$dimensions() {
-        return _nbuf$DIMS;
-    }
+    public static long[] _nbuf$dimensions() { return _nbuf$DIMS; }
     private static final VarHandle _nbuf$ELEM_HANDLE = _nbuf$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -1099,7 +1020,8 @@ public class __sFILE {
      * unsigned char _nbuf[1]
      * }
      */
-    public static byte _nbuf(MemorySegment struct, long index0) {
+    public static byte _nbuf(MemorySegment struct, long index0)
+    {
         return (byte)_nbuf$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -1109,7 +1031,8 @@ public class __sFILE {
      * unsigned char _nbuf[1]
      * }
      */
-    public static void _nbuf(MemorySegment struct, long index0, byte fieldValue) {
+    public static void _nbuf(MemorySegment struct, long index0, byte fieldValue)
+    {
         _nbuf$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -1121,9 +1044,7 @@ public class __sFILE {
      * struct __sbuf _lb
      * }
      */
-    public static final GroupLayout _lb$layout() {
-        return _lb$LAYOUT;
-    }
+    public static final GroupLayout _lb$layout() { return _lb$LAYOUT; }
 
     private static final long _lb$OFFSET = 120;
 
@@ -1133,9 +1054,7 @@ public class __sFILE {
      * struct __sbuf _lb
      * }
      */
-    public static final long _lb$offset() {
-        return _lb$OFFSET;
-    }
+    public static final long _lb$offset() { return _lb$OFFSET; }
 
     /**
      * Getter for field:
@@ -1143,7 +1062,8 @@ public class __sFILE {
      * struct __sbuf _lb
      * }
      */
-    public static MemorySegment _lb(MemorySegment struct) {
+    public static MemorySegment _lb(MemorySegment struct)
+    {
         return struct.asSlice(_lb$OFFSET, _lb$LAYOUT.byteSize());
     }
 
@@ -1153,7 +1073,8 @@ public class __sFILE {
      * struct __sbuf _lb
      * }
      */
-    public static void _lb(MemorySegment struct, MemorySegment fieldValue) {
+    public static void _lb(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, _lb$OFFSET, _lb$LAYOUT.byteSize());
     }
 
@@ -1165,9 +1086,7 @@ public class __sFILE {
      * int _blksize
      * }
      */
-    public static final OfInt _blksize$layout() {
-        return _blksize$LAYOUT;
-    }
+    public static final OfInt _blksize$layout() { return _blksize$LAYOUT; }
 
     private static final long _blksize$OFFSET = 136;
 
@@ -1177,9 +1096,7 @@ public class __sFILE {
      * int _blksize
      * }
      */
-    public static final long _blksize$offset() {
-        return _blksize$OFFSET;
-    }
+    public static final long _blksize$offset() { return _blksize$OFFSET; }
 
     /**
      * Getter for field:
@@ -1187,9 +1104,7 @@ public class __sFILE {
      * int _blksize
      * }
      */
-    public static int _blksize(MemorySegment struct) {
-        return struct.get(_blksize$LAYOUT, _blksize$OFFSET);
-    }
+    public static int _blksize(MemorySegment struct) { return struct.get(_blksize$LAYOUT, _blksize$OFFSET); }
 
     /**
      * Setter for field:
@@ -1197,7 +1112,8 @@ public class __sFILE {
      * int _blksize
      * }
      */
-    public static void _blksize(MemorySegment struct, int fieldValue) {
+    public static void _blksize(MemorySegment struct, int fieldValue)
+    {
         struct.set(_blksize$LAYOUT, _blksize$OFFSET, fieldValue);
     }
 
@@ -1209,9 +1125,7 @@ public class __sFILE {
      * fpos_t _offset
      * }
      */
-    public static final OfLong _offset$layout() {
-        return _offset$LAYOUT;
-    }
+    public static final OfLong _offset$layout() { return _offset$LAYOUT; }
 
     private static final long _offset$OFFSET = 144;
 
@@ -1221,9 +1135,7 @@ public class __sFILE {
      * fpos_t _offset
      * }
      */
-    public static final long _offset$offset() {
-        return _offset$OFFSET;
-    }
+    public static final long _offset$offset() { return _offset$OFFSET; }
 
     /**
      * Getter for field:
@@ -1231,9 +1143,7 @@ public class __sFILE {
      * fpos_t _offset
      * }
      */
-    public static long _offset(MemorySegment struct) {
-        return struct.get(_offset$LAYOUT, _offset$OFFSET);
-    }
+    public static long _offset(MemorySegment struct) { return struct.get(_offset$LAYOUT, _offset$OFFSET); }
 
     /**
      * Setter for field:
@@ -1241,7 +1151,8 @@ public class __sFILE {
      * fpos_t _offset
      * }
      */
-    public static void _offset(MemorySegment struct, long fieldValue) {
+    public static void _offset(MemorySegment struct, long fieldValue)
+    {
         struct.set(_offset$LAYOUT, _offset$OFFSET, fieldValue);
     }
 
@@ -1249,7 +1160,8 @@ public class __sFILE {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -1261,15 +1173,14 @@ public class __sFILE {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -1277,7 +1188,8 @@ public class __sFILE {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -1285,8 +1197,9 @@ public class __sFILE {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -23,22 +23,21 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class _opaque_pthread_t {
 
-    _opaque_pthread_t() {
+    _opaque_pthread_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_LONG.withName("__sig"),
-        hdf5_h.C_POINTER.withName("__cleanup_stack"),
-        MemoryLayout.sequenceLayout(8176, hdf5_h.C_CHAR).withName("__opaque")
-    ).withName("_opaque_pthread_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_LONG.withName("__sig"), hdf5_h.C_POINTER.withName("__cleanup_stack"),
+                          MemoryLayout.sequenceLayout(8176, hdf5_h.C_CHAR).withName("__opaque"))
+            .withName("_opaque_pthread_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfLong __sig$LAYOUT = (OfLong)$LAYOUT.select(groupElement("__sig"));
 
@@ -48,9 +47,7 @@ public class _opaque_pthread_t {
      * long __sig
      * }
      */
-    public static final OfLong __sig$layout() {
-        return __sig$LAYOUT;
-    }
+    public static final OfLong __sig$layout() { return __sig$LAYOUT; }
 
     private static final long __sig$OFFSET = 0;
 
@@ -60,9 +57,7 @@ public class _opaque_pthread_t {
      * long __sig
      * }
      */
-    public static final long __sig$offset() {
-        return __sig$OFFSET;
-    }
+    public static final long __sig$offset() { return __sig$OFFSET; }
 
     /**
      * Getter for field:
@@ -70,9 +65,7 @@ public class _opaque_pthread_t {
      * long __sig
      * }
      */
-    public static long __sig(MemorySegment struct) {
-        return struct.get(__sig$LAYOUT, __sig$OFFSET);
-    }
+    public static long __sig(MemorySegment struct) { return struct.get(__sig$LAYOUT, __sig$OFFSET); }
 
     /**
      * Setter for field:
@@ -80,11 +73,13 @@ public class _opaque_pthread_t {
      * long __sig
      * }
      */
-    public static void __sig(MemorySegment struct, long fieldValue) {
+    public static void __sig(MemorySegment struct, long fieldValue)
+    {
         struct.set(__sig$LAYOUT, __sig$OFFSET, fieldValue);
     }
 
-    private static final AddressLayout __cleanup_stack$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("__cleanup_stack"));
+    private static final AddressLayout __cleanup_stack$LAYOUT =
+        (AddressLayout)$LAYOUT.select(groupElement("__cleanup_stack"));
 
     /**
      * Layout for field:
@@ -92,9 +87,7 @@ public class _opaque_pthread_t {
      * struct __darwin_pthread_handler_rec *__cleanup_stack
      * }
      */
-    public static final AddressLayout __cleanup_stack$layout() {
-        return __cleanup_stack$LAYOUT;
-    }
+    public static final AddressLayout __cleanup_stack$layout() { return __cleanup_stack$LAYOUT; }
 
     private static final long __cleanup_stack$OFFSET = 8;
 
@@ -104,9 +97,7 @@ public class _opaque_pthread_t {
      * struct __darwin_pthread_handler_rec *__cleanup_stack
      * }
      */
-    public static final long __cleanup_stack$offset() {
-        return __cleanup_stack$OFFSET;
-    }
+    public static final long __cleanup_stack$offset() { return __cleanup_stack$OFFSET; }
 
     /**
      * Getter for field:
@@ -114,7 +105,8 @@ public class _opaque_pthread_t {
      * struct __darwin_pthread_handler_rec *__cleanup_stack
      * }
      */
-    public static MemorySegment __cleanup_stack(MemorySegment struct) {
+    public static MemorySegment __cleanup_stack(MemorySegment struct)
+    {
         return struct.get(__cleanup_stack$LAYOUT, __cleanup_stack$OFFSET);
     }
 
@@ -124,11 +116,13 @@ public class _opaque_pthread_t {
      * struct __darwin_pthread_handler_rec *__cleanup_stack
      * }
      */
-    public static void __cleanup_stack(MemorySegment struct, MemorySegment fieldValue) {
+    public static void __cleanup_stack(MemorySegment struct, MemorySegment fieldValue)
+    {
         struct.set(__cleanup_stack$LAYOUT, __cleanup_stack$OFFSET, fieldValue);
     }
 
-    private static final SequenceLayout __opaque$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("__opaque"));
+    private static final SequenceLayout __opaque$LAYOUT =
+        (SequenceLayout)$LAYOUT.select(groupElement("__opaque"));
 
     /**
      * Layout for field:
@@ -136,9 +130,7 @@ public class _opaque_pthread_t {
      * char __opaque[8176]
      * }
      */
-    public static final SequenceLayout __opaque$layout() {
-        return __opaque$LAYOUT;
-    }
+    public static final SequenceLayout __opaque$layout() { return __opaque$LAYOUT; }
 
     private static final long __opaque$OFFSET = 16;
 
@@ -148,9 +140,7 @@ public class _opaque_pthread_t {
      * char __opaque[8176]
      * }
      */
-    public static final long __opaque$offset() {
-        return __opaque$OFFSET;
-    }
+    public static final long __opaque$offset() { return __opaque$OFFSET; }
 
     /**
      * Getter for field:
@@ -158,7 +148,8 @@ public class _opaque_pthread_t {
      * char __opaque[8176]
      * }
      */
-    public static MemorySegment __opaque(MemorySegment struct) {
+    public static MemorySegment __opaque(MemorySegment struct)
+    {
         return struct.asSlice(__opaque$OFFSET, __opaque$LAYOUT.byteSize());
     }
 
@@ -168,11 +159,12 @@ public class _opaque_pthread_t {
      * char __opaque[8176]
      * }
      */
-    public static void __opaque(MemorySegment struct, MemorySegment fieldValue) {
+    public static void __opaque(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, __opaque$OFFSET, __opaque$LAYOUT.byteSize());
     }
 
-    private static long[] __opaque$DIMS = { 8176 };
+    private static long[] __opaque$DIMS = {8176};
 
     /**
      * Dimensions for array field:
@@ -180,9 +172,7 @@ public class _opaque_pthread_t {
      * char __opaque[8176]
      * }
      */
-    public static long[] __opaque$dimensions() {
-        return __opaque$DIMS;
-    }
+    public static long[] __opaque$dimensions() { return __opaque$DIMS; }
     private static final VarHandle __opaque$ELEM_HANDLE = __opaque$LAYOUT.varHandle(sequenceElement());
 
     /**
@@ -191,7 +181,8 @@ public class _opaque_pthread_t {
      * char __opaque[8176]
      * }
      */
-    public static byte __opaque(MemorySegment struct, long index0) {
+    public static byte __opaque(MemorySegment struct, long index0)
+    {
         return (byte)__opaque$ELEM_HANDLE.get(struct, 0L, index0);
     }
 
@@ -201,7 +192,8 @@ public class _opaque_pthread_t {
      * char __opaque[8176]
      * }
      */
-    public static void __opaque(MemorySegment struct, long index0, byte fieldValue) {
+    public static void __opaque(MemorySegment struct, long index0, byte fieldValue)
+    {
         __opaque$ELEM_HANDLE.set(struct, 0L, index0, fieldValue);
     }
 
@@ -209,7 +201,8 @@ public class _opaque_pthread_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -221,15 +214,14 @@ public class _opaque_pthread_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -237,7 +229,8 @@ public class _opaque_pthread_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -245,8 +238,9 @@ public class _opaque_pthread_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

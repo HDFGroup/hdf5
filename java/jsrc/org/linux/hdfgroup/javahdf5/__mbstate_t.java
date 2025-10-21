@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -25,21 +25,20 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class __mbstate_t {
 
-    __mbstate_t() {
+    __mbstate_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_INT.withName("__count"),
-        __mbstate_t.__value.layout().withName("__value")
-    ).withName("$anon$13:9");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_INT.withName("__count"), __mbstate_t.__value.layout().withName("__value"))
+            .withName("$anon$13:9");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfInt __count$LAYOUT = (OfInt)$LAYOUT.select(groupElement("__count"));
 
@@ -49,9 +48,7 @@ public class __mbstate_t {
      * int __count
      * }
      */
-    public static final OfInt __count$layout() {
-        return __count$LAYOUT;
-    }
+    public static final OfInt __count$layout() { return __count$LAYOUT; }
 
     private static final long __count$OFFSET = 0;
 
@@ -61,9 +58,7 @@ public class __mbstate_t {
      * int __count
      * }
      */
-    public static final long __count$offset() {
-        return __count$OFFSET;
-    }
+    public static final long __count$offset() { return __count$OFFSET; }
 
     /**
      * Getter for field:
@@ -71,9 +66,7 @@ public class __mbstate_t {
      * int __count
      * }
      */
-    public static int __count(MemorySegment struct) {
-        return struct.get(__count$LAYOUT, __count$OFFSET);
-    }
+    public static int __count(MemorySegment struct) { return struct.get(__count$LAYOUT, __count$OFFSET); }
 
     /**
      * Setter for field:
@@ -81,7 +74,8 @@ public class __mbstate_t {
      * int __count
      * }
      */
-    public static void __count(MemorySegment struct, int fieldValue) {
+    public static void __count(MemorySegment struct, int fieldValue)
+    {
         struct.set(__count$LAYOUT, __count$OFFSET, fieldValue);
     }
 
@@ -95,21 +89,21 @@ public class __mbstate_t {
      */
     public static class __value {
 
-        __value() {
+        __value()
+        {
             // Should not be called directly
         }
 
-        private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
-            hdf5_h.C_INT.withName("__wch"),
-            MemoryLayout.sequenceLayout(4, hdf5_h.C_CHAR).withName("__wchb")
-        ).withName("$anon$16:3");
+        private static final GroupLayout $LAYOUT =
+            MemoryLayout
+                .unionLayout(hdf5_h.C_INT.withName("__wch"),
+                             MemoryLayout.sequenceLayout(4, hdf5_h.C_CHAR).withName("__wchb"))
+                .withName("$anon$16:3");
 
         /**
          * The layout of this union
          */
-        public static final GroupLayout layout() {
-            return $LAYOUT;
-        }
+        public static final GroupLayout layout() { return $LAYOUT; }
 
         private static final OfInt __wch$LAYOUT = (OfInt)$LAYOUT.select(groupElement("__wch"));
 
@@ -119,9 +113,7 @@ public class __mbstate_t {
          * unsigned int __wch
          * }
          */
-        public static final OfInt __wch$layout() {
-            return __wch$LAYOUT;
-        }
+        public static final OfInt __wch$layout() { return __wch$LAYOUT; }
 
         private static final long __wch$OFFSET = 0;
 
@@ -131,9 +123,7 @@ public class __mbstate_t {
          * unsigned int __wch
          * }
          */
-        public static final long __wch$offset() {
-            return __wch$OFFSET;
-        }
+        public static final long __wch$offset() { return __wch$OFFSET; }
 
         /**
          * Getter for field:
@@ -141,9 +131,7 @@ public class __mbstate_t {
          * unsigned int __wch
          * }
          */
-        public static int __wch(MemorySegment union) {
-            return union.get(__wch$LAYOUT, __wch$OFFSET);
-        }
+        public static int __wch(MemorySegment union) { return union.get(__wch$LAYOUT, __wch$OFFSET); }
 
         /**
          * Setter for field:
@@ -151,11 +139,13 @@ public class __mbstate_t {
          * unsigned int __wch
          * }
          */
-        public static void __wch(MemorySegment union, int fieldValue) {
+        public static void __wch(MemorySegment union, int fieldValue)
+        {
             union.set(__wch$LAYOUT, __wch$OFFSET, fieldValue);
         }
 
-        private static final SequenceLayout __wchb$LAYOUT = (SequenceLayout)$LAYOUT.select(groupElement("__wchb"));
+        private static final SequenceLayout __wchb$LAYOUT =
+            (SequenceLayout)$LAYOUT.select(groupElement("__wchb"));
 
         /**
          * Layout for field:
@@ -163,9 +153,7 @@ public class __mbstate_t {
          * char __wchb[4]
          * }
          */
-        public static final SequenceLayout __wchb$layout() {
-            return __wchb$LAYOUT;
-        }
+        public static final SequenceLayout __wchb$layout() { return __wchb$LAYOUT; }
 
         private static final long __wchb$OFFSET = 0;
 
@@ -175,9 +163,7 @@ public class __mbstate_t {
          * char __wchb[4]
          * }
          */
-        public static final long __wchb$offset() {
-            return __wchb$OFFSET;
-        }
+        public static final long __wchb$offset() { return __wchb$OFFSET; }
 
         /**
          * Getter for field:
@@ -185,7 +171,8 @@ public class __mbstate_t {
          * char __wchb[4]
          * }
          */
-        public static MemorySegment __wchb(MemorySegment union) {
+        public static MemorySegment __wchb(MemorySegment union)
+        {
             return union.asSlice(__wchb$OFFSET, __wchb$LAYOUT.byteSize());
         }
 
@@ -195,11 +182,12 @@ public class __mbstate_t {
          * char __wchb[4]
          * }
          */
-        public static void __wchb(MemorySegment union, MemorySegment fieldValue) {
+        public static void __wchb(MemorySegment union, MemorySegment fieldValue)
+        {
             MemorySegment.copy(fieldValue, 0L, union, __wchb$OFFSET, __wchb$LAYOUT.byteSize());
         }
 
-        private static long[] __wchb$DIMS = { 4 };
+        private static long[] __wchb$DIMS = {4};
 
         /**
          * Dimensions for array field:
@@ -207,9 +195,7 @@ public class __mbstate_t {
          * char __wchb[4]
          * }
          */
-        public static long[] __wchb$dimensions() {
-            return __wchb$DIMS;
-        }
+        public static long[] __wchb$dimensions() { return __wchb$DIMS; }
         private static final VarHandle __wchb$ELEM_HANDLE = __wchb$LAYOUT.varHandle(sequenceElement());
 
         /**
@@ -218,7 +204,8 @@ public class __mbstate_t {
          * char __wchb[4]
          * }
          */
-        public static byte __wchb(MemorySegment union, long index0) {
+        public static byte __wchb(MemorySegment union, long index0)
+        {
             return (byte)__wchb$ELEM_HANDLE.get(union, 0L, index0);
         }
 
@@ -228,7 +215,8 @@ public class __mbstate_t {
          * char __wchb[4]
          * }
          */
-        public static void __wchb(MemorySegment union, long index0, byte fieldValue) {
+        public static void __wchb(MemorySegment union, long index0, byte fieldValue)
+        {
             __wchb$ELEM_HANDLE.set(union, 0L, index0, fieldValue);
         }
 
@@ -236,7 +224,8 @@ public class __mbstate_t {
          * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
          * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
          */
-        public static MemorySegment asSlice(MemorySegment array, long index) {
+        public static MemorySegment asSlice(MemorySegment array, long index)
+        {
             return array.asSlice(layout().byteSize() * index);
         }
 
@@ -248,7 +237,8 @@ public class __mbstate_t {
         /**
          * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
          */
-        public static MemorySegment allocate(SegmentAllocator allocator) {
+        public static MemorySegment allocate(SegmentAllocator allocator)
+        {
             return allocator.allocate(layout());
         }
 
@@ -256,7 +246,8 @@ public class __mbstate_t {
          * Allocate an array of size {@code elementCount} using {@code allocator}.
          * The returned segment has size {@code elementCount * layout().byteSize()}.
          */
-        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+        {
             return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
         }
 
@@ -264,7 +255,9 @@ public class __mbstate_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+        public static MemorySegment reinterpret(MemorySegment addr, Arena arena,
+                                                Consumer<MemorySegment> cleanup)
+        {
             return reinterpret(addr, 1, arena, cleanup);
         }
 
@@ -272,7 +265,9 @@ public class __mbstate_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code elementCount * layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                                Consumer<MemorySegment> cleanup)
+        {
             return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
         }
     }
@@ -288,9 +283,7 @@ public class __mbstate_t {
      * } __value
      * }
      */
-    public static final GroupLayout __value$layout() {
-        return __value$LAYOUT;
-    }
+    public static final GroupLayout __value$layout() { return __value$LAYOUT; }
 
     private static final long __value$OFFSET = 4;
 
@@ -303,9 +296,7 @@ public class __mbstate_t {
      * } __value
      * }
      */
-    public static final long __value$offset() {
-        return __value$OFFSET;
-    }
+    public static final long __value$offset() { return __value$OFFSET; }
 
     /**
      * Getter for field:
@@ -316,7 +307,8 @@ public class __mbstate_t {
      * } __value
      * }
      */
-    public static MemorySegment __value(MemorySegment struct) {
+    public static MemorySegment __value(MemorySegment struct)
+    {
         return struct.asSlice(__value$OFFSET, __value$LAYOUT.byteSize());
     }
 
@@ -329,7 +321,8 @@ public class __mbstate_t {
      * } __value
      * }
      */
-    public static void __value(MemorySegment struct, MemorySegment fieldValue) {
+    public static void __value(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, __value$OFFSET, __value$LAYOUT.byteSize());
     }
 
@@ -337,7 +330,8 @@ public class __mbstate_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -349,15 +343,14 @@ public class __mbstate_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -365,7 +358,8 @@ public class __mbstate_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -373,8 +367,9 @@ public class __mbstate_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-
