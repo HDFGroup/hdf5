@@ -13397,7 +13397,8 @@ public class H5 implements java.io.Serializable {
                                                                          config_ptr.min_clean_fraction);
             org.hdfgroup.javahdf5.H5AC_cache_config_t.max_size(config_segment, config_ptr.max_size);
             org.hdfgroup.javahdf5.H5AC_cache_config_t.min_size(config_segment, config_ptr.min_size);
-            org.hdfgroup.javahdf5.H5AC_cache_config_t.epoch_length(config_segment, (int)config_ptr.epoch_length);
+            org.hdfgroup.javahdf5.H5AC_cache_config_t.epoch_length(config_segment,
+                                                                   (int)config_ptr.epoch_length);
             org.hdfgroup.javahdf5.H5AC_cache_config_t.incr_mode(config_segment, config_ptr.incr_mode);
             org.hdfgroup.javahdf5.H5AC_cache_config_t.lower_hr_threshold(config_segment,
                                                                          config_ptr.lower_hr_threshold);
