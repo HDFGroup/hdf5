@@ -116,6 +116,13 @@ H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_DECODE_LENGTH(f, p, mesg->size);
 
+    if (mesg->addr >= (HADDR_UNDEF - mesg->size))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "address plus size overflows");
+    if (mesg->addr == HADDR_UNDEF)
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "address is undefined");
+    if ((mesg->addr + mesg->size) > H5F_get_eoa(f, H5FD_MEM_SUPER))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "address plus size exceeds file eoa");
+
     /* Set return value */
     ret_value = (void *)mesg;
 
