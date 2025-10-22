@@ -35,20 +35,20 @@
 #define RTREE_TEST_CREATE_RANK       8
 #define RTREE_TEST_CREATE_NUM_COUNTS 4
 
-#define RTREE_SRC_FILENAME "vds_src_file.h5"
+static const char *FILENAME[] = {"vds_rtree_src",       /* 0: Source file for VDS mappings */
+                                 "vds_rtree_dapl",      /* 1: DAPL test file */
+                                 "vds_rtree_threshold", /* 2: Threshold test file */
+                                 "vds_rtree_rw",        /* 3: Read/write test file */
+                                 NULL};
 
-#define RTREE_DAPL_FILENAME         "vds_rtree_test.h5"
-#define RTREE_DAPL_SRC_FILENAME     "vds_src_rtree_test.h5"
-#define RTREE_DAPL_VDS_NAME         "vdset"
-#define RTREE_DAPL_SRC_DATASET_NAME "src_dset"
+#define FILENAME_BUF_SIZE 1024
+
+#define RTREE_DAPL_VDS_NAME "vdset"
 
 #define RTREE_DAPL_DATASET_DIM1 10
 #define RTREE_DAPL_DATASET_DIM2 10
 
-#define RTREE_THRESHOLD_FILENAME "vds_rtree_threshold_test.h5"
-#define RTREE_MAX_TEST_MAPPINGS  (H5D_VIRTUAL_TREE_THRESHOLD + 100)
-
-#define RTREE_RW_FILENAME "vds_rtree_rw.h5"
+#define RTREE_MAX_TEST_MAPPINGS (H5D_VIRTUAL_TREE_THRESHOLD + 100)
 
 static const size_t test_counts[RTREE_TEST_CREATE_NUM_COUNTS] = {H5D_VIRTUAL_TREE_THRESHOLD, 100, 1000,
                                                                  10000};
@@ -68,7 +68,7 @@ static herr_t verify_rtree_search(H5RT_result_set_t *result_set, H5RT_leaf_t *le
                                   hsize_t min[], hsize_t max[], int rank);
 
 /* Helper to create and initialize virtual dset in a file */
-static hid_t create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings);
+static hid_t create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings, hid_t src_fapl);
 
 static herr_t
 verify_rtree_search(H5RT_result_set_t *result_set, H5RT_leaf_t *leaves, size_t leaf_count, hsize_t min[],
@@ -444,7 +444,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings)
+create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings, hid_t src_fapl)
 {
     hid_t   vspace_id   = H5I_INVALID_HID;
     hid_t   srcspace_id = H5I_INVALID_HID;
@@ -457,8 +457,14 @@ create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings)
     hsize_t srcdims[1]  = {1};
     hsize_t start[1], count[1];
     char    srcdset_name[256];
+    char    srcfilename[FILENAME_BUF_SIZE];
+    char    srcfilename_map[FILENAME_BUF_SIZE];
     int     wdata;
     int     i;
+
+    /* Generate VFD-specific source filenames */
+    h5_fixname(FILENAME[0], src_fapl, srcfilename, sizeof(srcfilename));
+    h5_fixname_printf(FILENAME[0], src_fapl, srcfilename_map, sizeof(srcfilename_map));
 
     /* Create 1D virtual dataset space */
     if ((vspace_id = H5Screate_simple(1, vdims, NULL)) < 0)
@@ -472,13 +478,13 @@ create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings)
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
 
-    /* Create source file */
-    if ((srcfile_id = H5Fcreate(RTREE_SRC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Create source file - use actual filename, not the mapping version */
+    if ((srcfile_id = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, src_fapl)) < 0)
         goto error;
 
     /* Create multiple source dsets and add virtual mappings */
     for (i = 0; i < num_mappings; i++) {
-        sprintf(srcdset_name, "src_dset_%d", i);
+        sprintf(srcdset_name, "%d_src_dset", i);
 
         /* Create source dataset */
         if ((srcdset_id = H5Dcreate2(srcfile_id, srcdset_name, H5T_NATIVE_INT, srcspace_id, H5P_DEFAULT,
@@ -499,8 +505,8 @@ create_virtual_dataset(hid_t file_id, hid_t dapl_id, int num_mappings)
         if (H5Sselect_hyperslab(vsel_id, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
             goto error;
 
-        /* Add virtual mapping */
-        if (H5Pset_virtual(dcpl_id, vsel_id, RTREE_SRC_FILENAME, srcdset_name, srcspace_id) < 0)
+        /* Add virtual mapping - use the printf-escaped version for VDS mapping */
+        if (H5Pset_virtual(dcpl_id, vsel_id, srcfilename_map, srcdset_name, srcspace_id) < 0)
             goto error;
 
         /* Close source dataset and selection */
@@ -624,7 +630,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_rtree_dapl(bool use_tree, bool read_init)
+test_rtree_dapl(bool use_tree, bool read_init, hid_t vds_fapl, hid_t src_fapl)
 {
     hid_t file_id  = H5I_INVALID_HID;
     hid_t dapl_id  = H5I_INVALID_HID;
@@ -634,6 +640,7 @@ test_rtree_dapl(bool use_tree, bool read_init)
     int  wbuf[RTREE_MAX_TEST_MAPPINGS];
     bool tree_correct = false;
     char test_str[256];
+    char vfilename[FILENAME_BUF_SIZE];
 
     /* Inverse of use_tree for re-open part of test */
     bool use_tree_inverse = !use_tree;
@@ -655,15 +662,18 @@ test_rtree_dapl(bool use_tree, bool read_init)
     memset(rbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
     memset(wbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
 
+    /* Generate VFD-specific filename for VDS file */
+    h5_fixname(FILENAME[1], vds_fapl, vfilename, sizeof(vfilename));
+
     /* One-time setup */
-    if ((file_id = H5Fcreate(RTREE_DAPL_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((file_id = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, vds_fapl)) < 0)
         FAIL_STACK_ERROR;
 
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         FAIL_STACK_ERROR;
 
     /* Create virtual dataset with enough mappings to use tree */
-    if ((vdset_id = create_virtual_dataset(file_id, dapl_id, RTREE_MAX_TEST_MAPPINGS)) < 0)
+    if ((vdset_id = create_virtual_dataset(file_id, dapl_id, RTREE_MAX_TEST_MAPPINGS, src_fapl)) < 0)
         FAIL_STACK_ERROR;
 
     if (H5Dclose(vdset_id) < 0)
@@ -717,7 +727,7 @@ test_rtree_dapl(bool use_tree, bool read_init)
     if (H5Pset_virtual_spatial_tree(dapl_id, use_tree_inverse) < 0)
         FAIL_STACK_ERROR;
 
-    if ((file_id = H5Fopen(RTREE_DAPL_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    if ((file_id = H5Fopen(vfilename, H5F_ACC_RDWR, vds_fapl)) < 0)
         FAIL_STACK_ERROR;
 
     if ((vdset_id = H5Dopen2(file_id, RTREE_DAPL_VDS_NAME, dapl_id)) < 0)
@@ -774,12 +784,13 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_rtree_threshold(bool use_tree)
+test_rtree_threshold(bool use_tree, hid_t vds_fapl, hid_t src_fapl)
 {
     hid_t file_id  = H5I_INVALID_HID;
     hid_t dapl_id  = H5I_INVALID_HID;
     hid_t vdset_id = H5I_INVALID_HID;
     int   rbuf[RTREE_MAX_TEST_MAPPINGS];
+    char  vfilename[FILENAME_BUF_SIZE];
 
     /* Internal values for introspection */
     H5D_t                 *dset    = NULL;
@@ -789,6 +800,9 @@ test_rtree_threshold(bool use_tree)
         use_tree ? "threshold behavior with tree enabled" : "threshold behavior with tree disabled";
 
     TESTING(test_str);
+
+    /* Generate VFD-specific filename for VDS file */
+    h5_fixname(FILENAME[2], vds_fapl, vfilename, sizeof(vfilename));
 
     /* Test cases: below threshold, at threshold, above threshold */
     int test_cases[3] = {H5D_VIRTUAL_TREE_THRESHOLD - 1, H5D_VIRTUAL_TREE_THRESHOLD, RTREE_MAX_TEST_MAPPINGS};
@@ -801,7 +815,7 @@ test_rtree_threshold(bool use_tree)
         /* Tree is created only when: tree_enabled AND num_mappings >= threshold */
         expect_tree = (use_tree && (num_mappings >= H5D_VIRTUAL_TREE_THRESHOLD));
 
-        if ((file_id = H5Fcreate(RTREE_THRESHOLD_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        if ((file_id = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, vds_fapl)) < 0)
             FAIL_STACK_ERROR;
 
         if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
@@ -812,7 +826,7 @@ test_rtree_threshold(bool use_tree)
             FAIL_STACK_ERROR;
 
         /* Create virtual dataset with specified number of mappings */
-        if ((vdset_id = create_virtual_dataset(file_id, dapl_id, num_mappings)) < 0)
+        if ((vdset_id = create_virtual_dataset(file_id, dapl_id, num_mappings, src_fapl)) < 0)
             FAIL_STACK_ERROR;
 
         /* Read the virtual dataset to force initialization */
@@ -904,7 +918,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_rtree_rw(bool use_tree)
+test_rtree_rw(bool use_tree, hid_t vds_fapl, hid_t src_fapl)
 {
     hid_t   file_id  = H5I_INVALID_HID;
     hid_t   dapl_id  = H5I_INVALID_HID;
@@ -914,6 +928,7 @@ test_rtree_rw(bool use_tree)
     int     rbuf[RTREE_MAX_TEST_MAPPINGS];
     int     wbuf[RTREE_MAX_TEST_MAPPINGS];
     int     num_mappings = RTREE_MAX_TEST_MAPPINGS;
+    char    vfilename[FILENAME_BUF_SIZE];
 
     const char *test_str = use_tree ? "R/W behavior with tree enabled" : "R/W behavior with tree disabled";
 
@@ -922,7 +937,10 @@ test_rtree_rw(bool use_tree)
     memset(rbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
     memset(wbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
 
-    if ((file_id = H5Fcreate(RTREE_RW_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Generate VFD-specific filename for VDS file */
+    h5_fixname(FILENAME[3], vds_fapl, vfilename, sizeof(vfilename));
+
+    if ((file_id = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, vds_fapl)) < 0)
         FAIL_STACK_ERROR;
 
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
@@ -933,7 +951,7 @@ test_rtree_rw(bool use_tree)
         FAIL_STACK_ERROR;
 
     /* Create virtual dataset with specified number of mappings */
-    if ((vdset_id = create_virtual_dataset(file_id, dapl_id, num_mappings)) < 0)
+    if ((vdset_id = create_virtual_dataset(file_id, dapl_id, num_mappings, src_fapl)) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify initial read values (each element should equal its index) */
@@ -1013,11 +1031,23 @@ error:
 int
 main(void)
 {
-    int nerrors = 0;
+    int   nerrors  = 0;
+    hid_t vds_fapl = H5I_INVALID_HID;
+    hid_t src_fapl = H5I_INVALID_HID;
+    char  srcfilename[FILENAME_BUF_SIZE];
+    char  vfilename[FILENAME_BUF_SIZE];
+    char  threshfilename[FILENAME_BUF_SIZE];
+    char  rwfilename[FILENAME_BUF_SIZE];
 
     printf("Testing R-tree spatial indexing...\n");
 
     H5open();
+
+    /* Create file access property lists for VDS and source files */
+    if ((vds_fapl = h5_fileaccess()) < 0)
+        TEST_ERROR;
+    if ((src_fapl = h5_fileaccess()) < 0)
+        TEST_ERROR;
 
     /* Run core R-tree tests */
     nerrors += test_rtree_create() < 0 ? 1 : 0;
@@ -1025,34 +1055,52 @@ main(void)
     nerrors += test_rtree_copy() < 0 ? 1 : 0;
 
     /* Test spatial tree with DAPL property enabled */
-    nerrors += test_rtree_dapl(true, true) < 0 ? 1 : 0;
-    nerrors += test_rtree_dapl(true, false) < 0 ? 1 : 0;
-    nerrors += test_rtree_dapl(false, true) < 0 ? 1 : 0;
-    nerrors += test_rtree_dapl(false, false) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(true, true, vds_fapl, src_fapl) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(true, false, vds_fapl, src_fapl) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(false, true, vds_fapl, src_fapl) < 0 ? 1 : 0;
+    nerrors += test_rtree_dapl(false, false, vds_fapl, src_fapl) < 0 ? 1 : 0;
 
     /* Test the mapping count threshold */
-    nerrors += test_rtree_threshold(true) < 0 ? 1 : 0;
+    nerrors += test_rtree_threshold(true, vds_fapl, src_fapl) < 0 ? 1 : 0;
     // TODO - Fix failure
-    nerrors += test_rtree_threshold(false) < 0 ? 1 : 0;
-    nerrors += test_rtree_rw(true) < 0 ? 1 : 0;
-    nerrors += test_rtree_rw(false) < 0 ? 1 : 0;
+    nerrors += test_rtree_threshold(false, vds_fapl, src_fapl) < 0 ? 1 : 0;
+    nerrors += test_rtree_rw(true, vds_fapl, src_fapl) < 0 ? 1 : 0;
+    nerrors += test_rtree_rw(false, vds_fapl, src_fapl) < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;
 
+    /* Generate VFD-specific filenames for cleanup */
+    h5_fixname(FILENAME[0], src_fapl, srcfilename, sizeof(srcfilename));
+    h5_fixname(FILENAME[1], vds_fapl, vfilename, sizeof(vfilename));
+    h5_fixname(FILENAME[2], vds_fapl, threshfilename, sizeof(threshfilename));
+    h5_fixname(FILENAME[3], vds_fapl, rwfilename, sizeof(rwfilename));
+
     H5E_BEGIN_TRY
     {
-        H5Fdelete(RTREE_SRC_FILENAME, H5P_DEFAULT);
-        H5Fdelete(RTREE_DAPL_FILENAME, H5P_DEFAULT);
-        H5Fdelete(RTREE_THRESHOLD_FILENAME, H5P_DEFAULT);
-        H5Fdelete(RTREE_RW_FILENAME, H5P_DEFAULT);
+        H5Fdelete(srcfilename, src_fapl);
+        H5Fdelete(vfilename, vds_fapl);
+        H5Fdelete(threshfilename, vds_fapl);
+        H5Fdelete(rwfilename, vds_fapl);
     }
     H5E_END_TRY;
+
+    if (H5Pclose(vds_fapl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(src_fapl) < 0)
+        TEST_ERROR;
 
     printf("All R-tree tests passed.\n");
     return EXIT_SUCCESS;
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(vds_fapl);
+        H5Pclose(src_fapl);
+    }
+    H5E_END_TRY;
+
     printf("***** R-TREE TESTS FAILED *****\n");
     return EXIT_FAILURE;
 }
