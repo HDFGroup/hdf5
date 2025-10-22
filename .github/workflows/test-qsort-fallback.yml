@@ -1,0 +1,87 @@
+name: Test qsort_r Fallback
+
+# Triggers the workflow on push or pull request or on demand
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test-qsort-fallback:
+    runs-on: ${{ matrix.os }}
+    name: Test qsort_r fallback on ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up build dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake gcc g++ zlib1g-dev
+
+      - name: Set up build dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install cmake
+
+      - name: Set up build dependencies (Windows)
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Configure and build HDF5
+        run: |
+          mkdir build
+          cd build
+          cmake -C ../config/cmake/cacheinit.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DHDF5_TEST_API:BOOL=ON \
+            -DHDF5_TEST_SHELL_SCRIPTS:BOOL=OFF \
+            ..
+          cmake --build . --config Release --parallel 4
+        shell: bash
+
+      - name: Force fallback by disabling H5_HAVE_QSORT_REENTRANT
+        run: |
+          sed -i.bak 's/#define H5_HAVE_QSORT_REENTRANT 1/#define H5_HAVE_QSORT_REENTRANT 0/' build/src/H5pubconf.h
+        shell: bash
+
+      - name: Run tests with fallback implementation
+        run: |
+          cd build
+          ctest --output-on-failure --parallel 4 -C Release
+        shell: bash
