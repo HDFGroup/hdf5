@@ -78,7 +78,7 @@ The functions provided by the HDF5 API are grouped into the following
 </td>
 </tr>
 <tr>
-<th>Virtual File Driver (H5VFD)</th><td>@ref H5VFD "C"</td><td style="white-space: nowrap;">C++</td><td>@ref FH5VFD "Fortran"</td><td>Java</td><td>Manage HDF5 Virtual File Driver.
+<th>Virtual File Driver (H5FD)</th><td>@ref H5VFD "C"</td><td style="white-space: nowrap;">C++</td><td>@ref FH5VFD "Fortran"</td><td>Java</td><td>Manage HDF5 Virtual File Driver.
 </td>
 <tr>
 <th>VOL Connector (H5VL)</th><td>@ref H5VL "C"</td><td style="white-space: nowrap;">C++</td><td>@ref FH5VL "Fortran"</td><td>@ref JH5VL "Java"</td><td>Manage HDF5 VOL connector plugins.

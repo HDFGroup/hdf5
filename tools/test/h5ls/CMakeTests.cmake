@@ -149,78 +149,78 @@ file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST/testfiles")
 
 # copy the list of test files
 foreach (listlsfiles ${LIST_HDF5_TESTLS_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${listlsfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listlsfiles}" "h5ls_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${listlsfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listlsfiles}" "h5ls_files")
 endforeach ()
 if (H5_WORDS_BIGENDIAN)
   foreach (listendlsfiles ${LIST_HDF5_END_TESTLS_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/bigendian/${listendlsfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listendlsfiles}" "h5ls_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/bigendian/${listendlsfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listendlsfiles}" "h5ls_files")
   endforeach ()
 else ()
   foreach (listendlsfiles ${LIST_HDF5_END_TESTLS_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${listendlsfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listendlsfiles}" "h5ls_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${listendlsfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listendlsfiles}" "h5ls_files")
   endforeach ()
 endif ()
 foreach (listfiles ${LIST_HDF5_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listfiles}" "h5ls_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listfiles}" "h5ls_files")
 endforeach ()
 if (H5_WORDS_BIGENDIAN)
   foreach (listendfiles ${LIST_HDF5_END_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/bigendian/${listendfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listendfiles}" "h5ls_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/bigendian/${listendfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listendfiles}" "h5ls_files")
   endforeach ()
 else ()
   foreach (listendfiles ${LIST_HDF5_END_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${listendfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listendfiles}" "h5ls_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${listendfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listendfiles}" "h5ls_files")
   endforeach ()
 endif ()
 foreach (listothers ${LIST_OTHER_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5ls/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5ls_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5ls/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5ls_files")
 endforeach ()
 if (H5_WORDS_BIGENDIAN)
   foreach (listothersendian ${LIST_OTHER_TEST_FILES_END})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5ls/expected/${listothersendian}BE.ls" "${PROJECT_BINARY_DIR}/testfiles/${listothersendian}.ls" "h5ls_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5ls/expected/${listothersendian}BE.ls" "${PROJECT_BINARY_DIR}/testfiles/${listothersendian}.ls" "h5ls_files")
   endforeach ()
 else ()
   foreach (listothersendian ${LIST_OTHER_TEST_FILES_END})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5ls/expected/${listothersendian}.ls" "${PROJECT_BINARY_DIR}/testfiles/${listothersendian}.ls" "h5ls_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5ls/expected/${listothersendian}.ls" "${PROJECT_BINARY_DIR}/testfiles/${listothersendian}.ls" "h5ls_files")
   endforeach ()
 endif ()
 foreach (lists3file ${H5LS_S3PROXY_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${lists3file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${lists3file}" "h5ls_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${lists3file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${lists3file}" "h5ls_files")
 endforeach ()
-add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
+add_custom_target (h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 
 # Generate testfiles for VOL connector(s) through script, if enabled
-set(h5ls_vol_files_list "")
+set (h5ls_vol_files_list "")
 foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
   HDF5_GET_VOL_TGT_INFO(${external_vol_tgt} vol vol_env)
 
   # Setup testfiles directory
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vol}/testfiles" RESULT)
   if (NOT ${RESULT} EQUAL 0)
-    message(FATAL_ERROR "Could not create directory ${PROJECT_BINARY_DIR}/${external_vol_tgt}/testfiles")
-  endif()
+    message (FATAL_ERROR "Could not create directory ${PROJECT_BINARY_DIR}/${external_vol_tgt}/testfiles")
+  endif ()
 
-  add_test(NAME ${external_vol_tgt}-h5lsgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5gentest> --h5ls)
+  add_test (NAME ${external_vol_tgt}-h5lsgentest COMMAND $<TARGET_FILE:h5gentest> --h5ls)
   
-  set_tests_properties(${external_vol_tgt}-h5lsgentest PROPERTIES
-    ENVIRONMENT "${vol_env}"
-    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${vol}/testfiles"
-    FIXTURES_SETUP h5ls_vol_files
+  set_tests_properties (${external_vol_tgt}-h5lsgentest PROPERTIES
+      ENVIRONMENT "${vol_env}"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${vol}/testfiles"
+      FIXTURES_SETUP h5ls_vol_files
   )
 
   foreach (listfiles ${LIST_HDF5_TEST_FILES_ALWAYS_COPY})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/${vol}/testfiles/${listfiles}" "h5ls_vol_files")
-  endforeach()
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/${vol}/testfiles/${listfiles}" "h5ls_vol_files")
+  endforeach ()
 
   # These aren't HDF5 files, just copy them to the VOL's subdirectory
   foreach (listothers ${LIST_OTHER_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}"
-    "${PROJECT_BINARY_DIR}/${vol}/testfiles/${listothers}"
-    "h5ls_vol_files"
+    HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/expected/${listothers}"
+        "${PROJECT_BINARY_DIR}/${vol}/testfiles/${listothers}"
+        "h5ls_vol_files"
     )
   endforeach ()
 endforeach ()
-add_custom_target(h5ls_vol_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_vol_files_list})
+add_custom_target (h5ls_vol_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_vol_files_list})
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -246,11 +246,11 @@ add_custom_target(h5ls_vol_files ALL COMMENT "Copying files needed by h5ls tests
 # SKIP_TEST - Skip this test.
 #
 macro (ADD_H5_TEST testname)
-  cmake_parse_arguments(ARG
-    "WILL_FAIL;SKIP_TEST;NATIVE_ONLY" # flags
-    "RESULT_CODE;RESULT_ERRCHECK" # one-value args
-    "" # multi-value args
-    ${ARGN}
+  cmake_parse_arguments (ARG
+      "WILL_FAIL;SKIP_TEST;NATIVE_ONLY" # flags
+      "RESULT_CODE;RESULT_ERRCHECK" # one-value args
+      "" # multi-value args
+      ${ARGN}
   )
 
   # Validate required parameters
@@ -259,25 +259,25 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   if (${ARG_NATIVE_ONLY})
-    set(num_ext_vols 0)
-  else()
-    list(LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
+    set (num_ext_vols 0)
+  else ()
+    list (LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
   endif ()
 
   # Add a test for the native connector and each external VOL connector
   foreach (vol_idx RANGE 0 ${num_ext_vols})
     # First, populate VOL info to be passed to tests
     if (${vol_idx} EQUAL 0)
-      set(vol "native")
-      set(vol_prefix "")
-      set(vol_workdir "${PROJECT_BINARY_DIR}/testfiles")
+      set (vol "native")
+      set (vol_prefix "")
+      set (vol_workdir "${PROJECT_BINARY_DIR}/testfiles")
     else ()
       # An external VOL connector
-      set(vol_env "")
+      set (vol_env "")
 
-      math(EXPR vol_idx_fixed "${vol_idx} - 1")
-      list(GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
-      HDF5_GET_VOL_TGT_INFO(${ext_vol_tgt} vol vol_env)
+      math (EXPR vol_idx_fixed "${vol_idx} - 1")
+      list (GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
+      HDF5_GET_VOL_TGT_INFO (${ext_vol_tgt} vol vol_env)
 
       set (vol_prefix "HDF5_VOL_${vol}-")
       set (vol_workdir "${PROJECT_BINARY_DIR}/${vol}/testfiles")
@@ -286,17 +286,12 @@ macro (ADD_H5_TEST testname)
 
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME ${vol_prefix}H5LS-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARG_UNPARSED_ARGUMENTS})
-
-      if ("${ARG_RESULT_CODE}" STREQUAL "1")
-        set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES WILL_FAIL "true")
-      endif ()
+      add_test (NAME ${vol_prefix}H5LS-${testname} COMMAND $<TARGET_FILE:h5ls> ${ARG_UNPARSED_ARGUMENTS})
     else ()
       # Remove any output file left over from previous test run
       add_test (
           NAME ${vol_prefix}H5LS-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARG_UNPARSED_ARGUMENTS}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -313,6 +308,7 @@ macro (ADD_H5_TEST testname)
     endif ()
 
     set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${vol_workdir}"
     )
 
@@ -322,16 +318,16 @@ macro (ADD_H5_TEST testname)
 
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES
-        ENVIRONMENT "${vol_env}"
-        FIXTURES_REQUIRED h5ls_vol_files
+          ENVIRONMENT "${vol_env}"
+          FIXTURES_REQUIRED h5ls_vol_files
       )
     endif ()
 
     if (${ARG_SKIP_TEST})
-      set_tests_properties( ${vol_prefix}H5LS-${testname} PROPERTIES DISABLED true)
-    endif()
+      set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES DISABLED true)
+    endif ()
 
-  endforeach() # per-VOL loop
+  endforeach () # per-VOL loop
 endmacro ()
 
 macro (ADD_H5_UD_TEST testname resultcode resultfile)
@@ -339,7 +335,6 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
     add_test (
         NAME H5LS_UD-${testname}-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
             -D "TEST_ARGS=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -352,6 +347,7 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
     if ("H5LS_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -363,10 +359,7 @@ endmacro ()
 macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
-    set_tests_properties (H5LS-${resultfile}_${urlscheme}_${credtype} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST"
-    )
+    add_test (NAME H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
     if ("${resultcode}" STREQUAL "1")
       set_tests_properties (H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -374,7 +367,6 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
     add_test (
         NAME H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
             -D "TEST_ARGS=--enable-error-stack;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
@@ -388,7 +380,7 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   endif ()
   set_tests_properties (H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
       FIXTURES_REQUIRED h5ls_s3_proxy
-      ENVIRONMENT "${h5ls_s3tests_env}"
+      ENVIRONMENT "${h5ls_s3tests_env};${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
   )
   if ("H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -644,10 +636,10 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
   # AWS_PROFILE is set in order to use the correct testing
   # credentials created in CMakeTests.cmake
   set (h5ls_s3tests_env
-    "AWS_ENDPOINT_URL=http://localhost:${h5ls_s3tests_port}"
-    "HDF5_ROS3_VFD_FORCE_PATH_STYLE=1"
-    "AWS_REGION=us-east-2"
-    "AWS_PROFILE=ros3_vfd_test"
+      "AWS_ENDPOINT_URL=http://localhost:${h5ls_s3tests_port}"
+      "HDF5_ROS3_VFD_FORCE_PATH_STYLE=1"
+      "AWS_REGION=us-east-2"
+      "AWS_PROFILE=ros3_vfd_test"
   )
 
   add_test (

@@ -84,6 +84,12 @@ jobs:
             thread_safety: ""
             build_mode: "Debug"
 
+    call-release-cross:
+        name: "Release Cross Compile Workflows"
+        uses: ./.github/workflows/cross-compile.yml
+        with:
+            build_mode: "Release"
+
     call-release-cmake:
         name: "Release Workflows"
         uses: ./.github/workflows/main.yml

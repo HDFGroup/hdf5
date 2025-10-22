@@ -188,17 +188,17 @@ II. Building HDF5 Examples with CMake
             * ... [Win32, x64, ARM, ARM64]
 
         <options> is:
-            * H5EX_BUILD_TESTING:BOOL=ON
+            * H5EXAMPLE_BUILD_TESTING:BOOL=ON
             * BUILD_SHARED_LIBS:BOOL=[ON | OFF]
-            * H5EX_BUILD_FORTRAN:BOOL=[ON | OFF]
-            * H5EX_BUILD_JAVA:BOOL=[ON | OFF]
+            * H5EXAMPLE_BUILD_FORTRAN:BOOL=[ON | OFF]
+            * H5EXAMPLE_BUILD_JAVA:BOOL=[ON | OFF]
 
         if the hdf5 library was built with a namespace (i.e. "hdf5::") add:
             -D HDF5_NAMESPACE:STRING=hdf5::
 
       Example command line on Windows in c:\MyHDFstuff\hdf5ex\build directory:
 
-           cmake -G "Visual Studio 16 2019" -DH5EX_BUILD_TESTING:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON ..
+           cmake -G "Visual Studio 16 2019" -DH5EXAMPLE_BUILD_TESTING:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON ..
 
     C. Build HDF5 examples
 
@@ -249,12 +249,12 @@ III. Defaults in the CMakePresets.json file
 ####        "BUILD_SHARED_LIBS": "ON",
 ####        "USE_SHARED_LIBS": "ON"
 ####        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-####        "H5EX_BUILD_FORTRAN": "ON"
-####        "H5EX_BUILD_CXX": "ON"
-####        "H5EX_BUILD_JAVA": "ON"
+####        "H5EXAMPLE_BUILD_FORTRAN": "ON"
+####        "H5EXAMPLE_BUILD_CXX": "ON"
+####        "H5EXAMPLE_BUILD_JAVA": "ON"
 ####        "HDF5_NAMESPACE": {"type": "STRING", "value": "hdf5::"},
 ####        "HDF5_PACKAGE_NAME": {"type": "STRING", "value": "hdf5"},
-####        "H5EX_BUILD_TESTING": "ON"
+####        "H5EXAMPLE_BUILD_TESTING": "ON"
 
 
 ========================================================================
@@ -263,12 +263,12 @@ IV. Defaults in the HDF5_Examples_options.cmake file
 
 ####  DEFAULT:
 ####         BUILD_SHARED_LIBS:BOOL=OFF
-####         H5EX_BUILD_C:BOOL=ON
-####         H5EX_BUILD_HL:BOOL=OFF
-####         H5EX_BUILD_CXX:BOOL=OFF
-####         H5EX_BUILD_FORTRAN:BOOL=OFF
-####         H5EX_BUILD_JAVA:BOOL=OFF
-####         H5EX_BUILD_FILTERS:BOOL=OFF
-####         H5EX_BUILD_TESTING:BOOL=OFF
-####         H5EX_ENABLE_PARALLEL:BOOL=OFF
+####         H5EXAMPLE_BUILD_C:BOOL=ON
+####         H5EXAMPLE_BUILD_HL:BOOL=OFF
+####         H5EXAMPLE_BUILD_CXX:BOOL=OFF
+####         H5EXAMPLE_BUILD_FORTRAN:BOOL=OFF
+####         H5EXAMPLE_BUILD_JAVA:BOOL=OFF
+####         H5EXAMPLE_BUILD_FILTERS:BOOL=OFF
+####         H5EXAMPLE_BUILD_TESTING:BOOL=OFF
+####         H5EXAMPLE_ENABLE_PARALLEL:BOOL=OFF
 

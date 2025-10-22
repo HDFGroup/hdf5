@@ -89,6 +89,20 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1virtual_1printf_1gap(JNIEnv *
  */
 JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pget_1virtual_1printf_1gap(JNIEnv *, jclass, jlong);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_virtual_spatial_tree
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1virtual_1spatial_1tree(JNIEnv *, jclass, jlong, jboolean);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_virtual_spatial_tree
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Pget_1virtual_1spatial_1tree(JNIEnv *, jclass, jlong);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

@@ -42,6 +42,7 @@ typedef struct H5O_fill_t H5O_fill_t;
 #include "H5Tprivate.h"  /* Datatype functions			*/
 #include "H5VLprivate.h" /* Virtual Object Layer                */
 #include "H5Zprivate.h"  /* I/O pipeline filters		*/
+#include "H5RTprivate.h" /* R-tree for virtual dataspaces      */
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
@@ -603,6 +604,12 @@ typedef struct H5O_storage_virtual_t {
     H5O_storage_virtual_ent_t
         *source_dset_hash_table; /* Hash table of virtual entries sorted by source dataset name. Only the
                                     first occurrence of each source dataset name is stored. */
+    H5RT_t *tree;
+    size_t  not_in_tree_nused;  /* Number of entries in not_in_tree_list */
+    size_t  not_in_tree_nalloc; /* Allocated size of not_in_tree_list (grows by power of 2) */
+    H5O_storage_virtual_ent_t *
+        *not_in_tree_list; /* Array of POINTERS to mappings NOT in tree for quick access
+                            * Some mappings cannot be stored in the tree and must be searched manually */
 } H5O_storage_virtual_t;
 
 typedef struct H5O_storage_t {

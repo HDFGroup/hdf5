@@ -82,13 +82,13 @@ set (HDF5_REFERENCE_TEST_PBITS
 )
 
 foreach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${pbits_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${pbits_h5_file}" "h5dump_pbits_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${pbits_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${pbits_h5_file}" "h5dump_pbits_files")
 endforeach ()
 
 foreach (ddl_pbits ${HDF5_REFERENCE_PBITS})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/pbits/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${ddl_pbits}" "h5dump_pbits_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/pbits/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${ddl_pbits}" "h5dump_pbits_files")
 endforeach ()
-add_custom_target(h5dump_pbits_files ALL COMMENT "Copying files needed by h5dump_pbits tests" DEPENDS ${h5dump_pbits_files_list})
+add_custom_target (h5dump_pbits_files ALL COMMENT "Copying files needed by h5dump_pbits tests" DEPENDS ${h5dump_pbits_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -99,7 +99,7 @@ add_custom_target(h5dump_pbits_files ALL COMMENT "Copying files needed by h5dump
 macro (ADD_H5_PBITS_TEST resultfile resultcode result_errcheck)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+    add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -108,7 +108,6 @@ macro (ADD_H5_PBITS_TEST resultfile resultcode result_errcheck)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/pbits"
@@ -122,7 +121,6 @@ macro (ADD_H5_PBITS_TEST resultfile resultcode result_errcheck)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/pbits"
@@ -134,6 +132,7 @@ macro (ADD_H5_PBITS_TEST resultfile resultcode result_errcheck)
     endif ()
   endif ()
   set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits"
   )
   if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

@@ -1277,7 +1277,8 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
     size_t         actual_header_len;
     size_t         expected_header_len;
     const uint8_t *p;
-    herr_t         ret_value = SUCCEED; /* Return value */
+    const uint8_t *p_end     = *buf + buf_size - 1; /* End of the p buffer */
+    herr_t         ret_value = SUCCEED;             /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1290,7 +1291,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
     p = *buf;
 
     /* Ensure buffer has enough data for signature comparison */
-    if (H5_IS_BUFFER_OVERFLOW(p, H5C__MDCI_BLOCK_SIGNATURE_LEN, *buf + buf_size - 1))
+    if (H5_IS_BUFFER_OVERFLOW(p, H5C__MDCI_BLOCK_SIGNATURE_LEN, p_end))
         HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "Insufficient buffer size for signature");
 
     /* Check signature */
@@ -1299,11 +1300,15 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
     p += H5C__MDCI_BLOCK_SIGNATURE_LEN;
 
     /* Check version */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     version = *p++;
     if (version != (uint8_t)H5C__MDCI_BLOCK_VERSION_0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad metadata cache image version");
 
     /* Decode flags */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     flags = *p++;
     if (flags & H5C__MDCI_HEADER_HAVE_RESIZE_STATUS)
         have_resize_status = true;
@@ -1311,6 +1316,8 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "MDC resize status not yet supported");
 
     /* Read image data length */
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     H5F_DECODE_LENGTH(f, p, cache_ptr->image_data_len);
 
     /* For now -- will become <= eventually */
@@ -1318,6 +1325,8 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad metadata cache image data length");
 
     /* Read num entries */
+    if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+        HGOTO_ERROR(H5E_CACHE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     UINT32DECODE(p, cache_ptr->num_entries_in_image);
     if (cache_ptr->num_entries_in_image == 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad metadata cache entry count");
@@ -2392,11 +2401,10 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     assert(cache_ptr->image_len > 0);
 
     /* Decode metadata cache image header */
-    p         = (uint8_t *)cache_ptr->image_buffer;
-    image_len = cache_ptr->image_len;
-    if (H5C__decode_cache_image_header(f, cache_ptr, &p, image_len + 1) < 0)
+    p = (uint8_t *)cache_ptr->image_buffer;
+    if (H5C__decode_cache_image_header(f, cache_ptr, &p, cache_ptr->image_len + 1) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDECODE, FAIL, "cache image header decode failed");
-    assert((size_t)(p - (uint8_t *)cache_ptr->image_buffer) < image_len);
+    assert((size_t)(p - (uint8_t *)cache_ptr->image_buffer) < cache_ptr->image_len);
 
     /* The image_data_len and # of entries should be defined now */
     assert(cache_ptr->image_data_len > 0);
@@ -2404,6 +2412,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     assert(cache_ptr->num_entries_in_image > 0);
 
     /* Reconstruct entries in image */
+    image_len = cache_ptr->image_len;
     for (u = 0; u < cache_ptr->num_entries_in_image; u++) {
         /* Create the prefetched entry described by the ith
          * entry in cache_ptr->image_entrise.

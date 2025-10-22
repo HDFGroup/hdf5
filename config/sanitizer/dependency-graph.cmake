@@ -79,7 +79,7 @@ function(gen_dep_graph OUTPUT_TYPE)
       set(OUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
     endif()
 
-    add_custom_target(
+    add_custom_target (
       ${TARGET_NAME}
       COMMAND ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}
               --graphviz=${CMAKE_CURRENT_BINARY_DIR}/graphviz/${TARGET_NAME}.dot
@@ -98,7 +98,7 @@ function(gen_dep_graph OUTPUT_TYPE)
 
     if(gen_dep_graph_ADD_TO_DEP_GRAPH)
       if(NOT TARGET dep-graph)
-        add_custom_target(dep-graph)
+        add_custom_target (dep-graph)
       endif()
 
       add_dependencies(dep-graph ${TARGET_NAME})

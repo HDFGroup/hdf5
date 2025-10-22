@@ -8,7 +8,7 @@ include (C_sourcefiles.cmake)
 
 foreach (example_name ${examples})
   add_executable (${EXAMPLE_VARNAME}_tutr_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)
-  target_compile_options(${EXAMPLE_VARNAME}_tutr_${example_name}
+  target_compile_options (${EXAMPLE_VARNAME}_tutr_${example_name}
       PRIVATE
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_16_API}>:-DH5_USE_16_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_18_API}>:-DH5_USE_18_API>"
@@ -20,11 +20,11 @@ foreach (example_name ${examples})
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_tutr_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})
   endif ()
-  target_link_libraries (${EXAMPLE_VARNAME}_tutr_${example_name} ${H5EX_HDF5_LINK_LIBS})
+  target_link_libraries (${EXAMPLE_VARNAME}_tutr_${example_name} ${H5EXAMPLE_HDF5_LINK_LIBS})
 endforeach ()
 
 
-if (H5EX_BUILD_TESTING)
+if (H5EXAMPLE_BUILD_TESTING)
   file (MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/red ${PROJECT_BINARY_DIR}/blue ${PROJECT_BINARY_DIR}/u2w)
 
   set (${EXAMPLE_VARNAME}_tutr_CLEANFILES
@@ -67,7 +67,7 @@ if (H5EX_BUILD_TESTING)
    # Remove any output file left over from previous test run
   add_test (
       NAME ${EXAMPLE_VARNAME}_tutr-clear-objects
-      COMMAND    ${CMAKE_COMMAND} -E remove ${${EXAMPLE_VARNAME}_tutr_CLEANFILES}
+      COMMAND ${CMAKE_COMMAND} -E remove ${${EXAMPLE_VARNAME}_tutr_CLEANFILES}
   )
   set_tests_properties (${EXAMPLE_VARNAME}_tutr-clear-objects PROPERTIES
       FIXTURES_SETUP clear_${EXAMPLE_VARNAME}_tutr
@@ -75,7 +75,7 @@ if (H5EX_BUILD_TESTING)
   )
   add_test (
       NAME ${EXAMPLE_VARNAME}_tutr-clean-objects
-      COMMAND    ${CMAKE_COMMAND} -E remove ${${EXAMPLE_VARNAME}_tutr_CLEANFILES}
+      COMMAND ${CMAKE_COMMAND} -E remove ${${EXAMPLE_VARNAME}_tutr_CLEANFILES}
   )
   set_tests_properties (${EXAMPLE_VARNAME}_tutr-clean-objects PROPERTIES
       FIXTURES_CLEANUP clear_${EXAMPLE_VARNAME}_tutr
@@ -84,12 +84,11 @@ if (H5EX_BUILD_TESTING)
 
   macro (ADD_H5_TEST testname)
     if (HDF5_USING_ANALYSIS_TOOL)
-      add_test (NAME ${EXAMPLE_VARNAME}_tutr_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_tutr_${testname}>)
+      add_test (NAME ${EXAMPLE_VARNAME}_tutr_${testname} COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_tutr_${testname}>)
     else ()
       add_test (
           NAME ${EXAMPLE_VARNAME}_tutr_${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${EXAMPLE_VARNAME}_tutr_${testname}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -97,10 +96,13 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
-    set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_tutr)
+    set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES
+        FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_tutr
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
+    )
     if (last_test)
       set_tests_properties (${EXAMPLE_VARNAME}_tutr_${testname} PROPERTIES DEPENDS ${last_test})
     endif ()
