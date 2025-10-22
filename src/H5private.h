@@ -776,7 +776,8 @@ H5_DLL void HDqsort_fallback(void *base, size_t nel, size_t size,
 #endif
 #ifndef HDqsort_r
 #ifdef H5_HAVE_QSORT_REENTRANT
-#ifdef H5_HAVE_DARWIN
+#if defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14)
+/* Darwin and FreeBSD < 14 use BSD-style qsort_r with different signature/argument order */
 #define HDqsort_r(B, N, S, C, A) HDqsort_context(B, N, S, C, A)
 #else
 #define HDqsort_r(B, N, S, C, A) qsort_r(B, N, S, C, A)
