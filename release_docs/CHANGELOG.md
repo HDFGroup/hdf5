@@ -32,7 +32,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ## Significant Advancements:
 
 - Full [UTF-8](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
-- Introduction of bfloat16 predefined datatypes for efficient machine learning conversions.
+- Introduction of [bfloat16 predefined datatypes](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#added-predefined-datatypes-for-bfloat16-data) for efficient machine learning conversions.
 - First-class support for [complex numbers](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
 
 ## Updated Foundation:
@@ -75,7 +75,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
    The variables used in hdf5-config.cmake to indicate what options were used to build the installed library have been renamed. All `HDF5_BUILD/ENABLE_{feature}` variables are now `HDF5_PROVIDES_{feature}`. This more clearly indicates that these variables reflect whether the feature is supported by the installed library, instead of whether the feature is an option that can be changed when building an application with the library.
 
-   Created MACRO `EXTERNAL_HDF5_STATUS` to convert between the old and new names. The macro is in the config/examples/HDF5SubdirMacros.cmake file and can be copied into a project's CMakeLists.txt file to provide backward compatibility.
+   Created macro `EXTERNAL_HDF5_STATUS` to convert between the old and new names. The macro is in the config/examples/HDF5SubdirMacros.cmake file and can be copied into a project's CMakeLists.txt file to provide backward compatibility.
 
 ### CMake minimum version is now 3.26
 
@@ -187,18 +187,16 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ### Added predefined datatypes for bfloat16 data
 
-   Predefined datatypes have been added for little- and big-endian bfloat16 (https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
+   Predefined datatypes have been added for little- and big-endian [bfloat16](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
 
    The following new macros have been added:
 
-    - H5T_FLOAT_BFLOAT16LE / H5T_FLOAT_BFLOAT16BE
+    - `H5T_FLOAT_BFLOAT16LE` / `H5T_FLOAT_BFLOAT16BE`
 
       These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
 
       Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
 
-### Removed hbool_t from public API calls
-                                  
 ### Removed `hbool_t` from public API calls
                                   
 The `hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
@@ -492,20 +490,19 @@ Simple example programs showing how to use complex number datatypes have been ad
    a new Dataset Access Property List (DAPL) property to control use of the spatial tree.
 
    This property can be set or queried with the new API functions
-   H5Pset_virtual_spatial_tree()/H5Pget_virtual_spatial_tree().
+   `H5Pset_virtual_spatial_tree()`/`H5Pget_virtual_spatial_tree()`.
 
 ## Parallel Library
 
-### Added H5FDsubfiling_get_file_mapping() API function for subfiling VFD
+### Added `H5FDsubfiling_get_file_mapping()` API function for subfiling VFD
 
-Added H5FDsubfiling_get_file_mapping() API function to retrieve the names of all physical subfiles that collectively make up a logical HDF5 file when using the subfiling Virtual File Driver.
+Added `H5FDsubfiling_get_file_mapping()` API function to retrieve the names of all physical subfiles that collectively make up a logical HDF5 file when using the subfiling Virtual File Driver.
 
 ## Fortran Library
 
-### Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for subfiling VFD
+### Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for subfiling VFD
 
-Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file mapping functionality, ensuring complete language binding support.
-
+Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling file mapping functionality, ensuring complete language binding support.
 
 ## C++ Library
 
@@ -515,7 +512,7 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ### Added AWS endpoint command option to allow specifying an alternate endpoint URL when using the ROS3 VFD
 
-   The new option is --endpoint-url, which allows the user to set an alternate endpoint URL other than the standard "protocol://service-code.region-code.amazonaws.com". If "--endpoint-url" is not specified, the ROS3 VFD will first check the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
+   The new option is `--endpoint-url`, which allows the user to set an alternate endpoint URL other than the standard "protocol://service-code.region-code.amazonaws.com". If `--endpoint-url` is not specified, the ROS3 VFD will first check the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL` environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
 
    This option is supported by the following tools:
       `h5dump`, `h5ls`, `h5stat`
@@ -551,7 +548,7 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ### The COPYING file has been renamed to LICENSE
 
-   This is where most people will expect to find license information. The COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5. The licenses are unchanged.
+   This is where most people will expect to find license information. The `COPYING_LBNL_HDF5` file has also been renamed to `LICENSE_LBNL_HDF5`. The licenses are unchanged.
 
 # 🪲 Bug Fixes
 
