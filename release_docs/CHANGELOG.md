@@ -558,64 +558,65 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    Fixed a heap-based buffer overflow in H5F__accum_free caused by an integer overflow when calculating new_accum_size. Added validation in H5O__mdci_decode to detect and reject invalid values early, preventing the overflow condition.
 
-   Fixes GitHub issue #5380
+   Fixes GitHub issue [#5380](https://github.com/HDFGroup/hdf5/issues/5380)
   
 ### Fixed security issue CVE-2025-7068
 
    Failures during the discard process on a metadata cache entry could cause the library to skip calling the callback to free the cache entry. This could result in resource leaks and issues with flushing and closing the metadata cache during file close. This has been fixed by noting errors during the discard process, but attempting to fully free a cache entry before signalling that an error has occurred.
 
-   Fixes GitHub issue #5578
+   Fixes GitHub issue [#5578](https://github.com/HDFGroup/hdf5/issues/5578)
 
 ### Fix bugs in object header operations
 
    In some rare circumstances, such as deleting hard links that point to their own parent group in a file using the new file format, memory corruption could occur due to recursive operations changing data structures being operated on by multiple levels of recursion. Made changes to delay changing the data structure in a dangerous way until recursion is complete.
 
-   Fixes GitHub issue #5854
+   Fixes GitHub issue [#5854](https://github.com/HDFGroup/hdf5/issues/5854)
 
-### Fixed security issues CVE-2025-6816, CVE-2025-6856 and CVE-2025-2923
+### Fixed security issues [CVE-2025-6816](https://nvd.nist.gov/vuln/detail/CVE-2025-6816), [CVE-2025-6856](https://nvd.nist.gov/vuln/detail/CVE-2025-6856) and [CVE-2025-2923](https://nvd.nist.gov/vuln/detail/CVE-2025-2923)
 
    A specially constructed HDF5 file could contain a corrupted object header with a continuation message that points back to itself. This could result in an internal buffer being allocated with too small of a size, leading to a heap buffer overflow. This has been fixed by checking the expected number of object header chunks against the actual value as chunks are being deserialized.
 
-   Fixes GitHub issues #5571, #5574 and #5381
+   Fixes GitHub issues [#5571](https://github.com/HDFGroup/hdf5/issues/5571), [#5574](https://github.com/HDFGroup/hdf5/issues/5574) and [#5381](https://github.com/HDFGroup/hdf5/issues/5381)
 
-### Fixed security issue CVE-2025-6750
+### Fixed security issue [CVE-2025-6750](https://nvd.nist.gov/vuln/detail/CVE-2025-6750)
 
    A heap buffer overflow occurred because an mtime message was not properly decoded, resulting in a buffer of size 0 being passed into the encoder.  This has been fixed by decoding old and new mtime messages which will allow invalid message size to be detected.
 
-   Fixes GitHub issue #5549
+   Fixes GitHub issue [#5549](https://github.com/HDFGroup/hdf5/issues/5549)
 
-### Fixed CVE-2025-6269
+### Fixed [CVE-2025-6269](https://nvd.nist.gov/vuln/detail/CVE-2025-6269)
 
    There were several security vulnerabilities found in the function H5C__reconstruct_cache_entry(), including buffer overflows and memory leaks.  The function has been hardened with bounds checks, input validation, and safe cleanup.
 
-   Fixes GitHub issues #5579 and #5581
+   Fixes GitHub issues [#5579](https://github.com/HDFGroup/hdf5/issues/5579) and [#5581](https://github.com/HDFGroup/hdf5/issues/5581)
 
 ### Fixed a problem with the scale-offset filter
 
    A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
 
-   Fixes GitHub issue #5861
+   Fixes GitHub issue [#5861](https://github.com/HDFGroup/hdf5/issues/5861)
 
-### Fixed security issue CVE-2025-2153
+### Fixed security issue [CVE-2025-2153](https://nvd.nist.gov/vuln/detail/CVE-2025-2153)
 
-   The message flags field could be modified such that a message that is not sharable according to the share_flags field in H5O_msg_class_t can be treated as sharable. An assert has been added in H5O__msg_write_real to make sure messages that are not sharable can't be modified to shared. Additionally, the check in H5O__chunk_deserialize that catches unsharable messages being marked as sharable has been improved.
+   The message flags field could be modified such that a message that is not sharable according to the `share_flags` field in `H5O_msg_class_t` can be treated as sharable. An assert has been added in `H5O__msg_write_real` to make sure messages that are not sharable can't be modified to shared. Additionally, the check in `H5O__chunk_deserialize` that catches unsharable messages being marked as sharable has been improved.
 
-   Fixes GitHub issue #5329
+   Fixes GitHub issue [#5329](https://github.com/HDFGroup/hdf5/issues/5329)
 
-### Fixed security issue CVE-2025-2925
-   Actual_len + H5C_IMAGE_EXTRA_SPACE, which was used by H5MM_realloc as the size input, could equal 0 due to bad inputs. When H5MM_realloc was called, it freed image, but then could get sent to done before new_image could be assigned to image. Because the pointer for image wasn't null, it was freed again in done, causing a double-free vulnerability. H5C__load_entry() now checks for an image buffer length of 0 before calling H5MM_realloc.
+### Fixed security issue [CVE-2025-2925](https://nvd.nist.gov/vuln/detail/CVE-2025-2925)
 
-   Fixes Github issue #5383
+   `Actual_len` + `H5C_IMAGE_EXTRA_SPACE`, which was used by `H5MM_realloc` as the size input, could equal 0 due to bad inputs. When `H5MM_realloc` was called, it freed image, but then could get sent to done before new_image could be assigned to image. Because the pointer for image wasn't null, it was freed again in done, causing a double-free vulnerability. `H5C__load_entry()` now checks for an image buffer length of 0 before calling `H5MM_realloc`.
 
-### Fixed security issue CVE-2025-6857
+   Fixes Github issue [#5383](https://github.com/HDFGroup/hdf5/issues/5383)
+
+### Fixed security issue [CVE-2025-6857](https://nvd.nist.gov/vuln/detail/CVE-2025-6857)
 
    An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.
 
-   Fixes GitHub issue #5575
+   Fixes GitHub issue [#5575](https://github.com/HDFGroup/hdf5/issues/5575)
 
 ### Check for overflow in decoded heap block addresses
 
-   Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in H5HL__fl_deserialize to ensure no overflow can occur.
+   Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in `H5HL__fl_deserialize` to ensure no overflow can occur.
 
    Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
 
@@ -625,12 +626,14 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    On Windows, the library once again assumes that filename strings will be UTF-8 encoded strings and will attempt to convert them to UTF-16 before passing them to Windows API functions. However, if the library fails to convert a filename string to UTF-16, it will now fallback to the equivalent Windows "ANSI" API functions which will interpret the string according to the active Windows code page.
 
-   Support for a new environment variable, HDF5_PREFER_WINDOWS_CODE_PAGE, was added in order to instruct HDF5 to prefer interpreting filenames according to the active Windows code page rather than assuming UTF-8 encoding. If this environment variable is set to "1" or "TRUE" (case-insensitive), the active code page will be preferred. If it is unset or set to "0" or "FALSE" (case-insensitive), UTF-8 will be preferred.
+   Support for a new environment variable, `HDF5_PREFER_WINDOWS_CODE_PAGE`, was added in order to instruct HDF5 to prefer interpreting filenames according to the active Windows code page rather than assuming UTF-8 encoding. If this environment variable is set to "1" or "TRUE" (case-insensitive), the active code page will be preferred. If it is unset or set to "0" or "FALSE" (case-insensitive), UTF-8 will be preferred.
 
 ### Fixed an issue with caching in the ROS3 VFD
+   
    The ROS3 VFD uses a very simple caching mechanism that caches the first 16MiB of a file during file open and serves later reads from that cache if the offset + length falls within the cached range of bytes. Combinations of offset + length that extended exactly to the end of the cached range of bytes (for example, offset=0 and len=16777216) would end up not being served from the cache due to an incorrect range check. This has now been fixed.
 
 ### Fixed an error with `H5Fget_file_image()` with the latest file format
+
    When using `H5Fget_file_image()` on a file created with the latest file format (or any format newer than the earliest), the library failed to recalculate the superblock checksum after changing the access flags in the superblock, causing any subsequent attempt to open the returned file image to fail due to the checksum failing to verify. Fixed `H5Fget_file_image()` to recalculate the checksum.
 
    Fixed GitHub issue [#1915](https://github.com/HDFGroup/hdf5/issues/1915)
@@ -678,8 +681,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
 ### Fixed security issue CVE-2025-2310
 
-   A malformed HDF5 file could have an attribute with a recorded name length of zero.This would lead to an overflow and an invalid memory access. An integrity check
-   has been added to detect this case and safely stop file decoding.
+   A malformed HDF5 file could have an attribute with a recorded name length of zero.This would lead to an overflow and an invalid memory access. An integrity check has been added to detect this case and safely stop file decoding.
 
 ## Java Library
 
@@ -775,7 +777,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
 ### Added skipping of a few parallel tests for OpenMPI 5.0.5
 
-    An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests (mpiodup, props, fapl_preserve) to fail. These tests are now skipped for that release of OpenMPI. The issue has been fixed in the 5.0.6 release of OpenMPI.
+   An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests (mpiodup, props, fapl_preserve) to fail. These tests are now skipped for that release of OpenMPI. The issue has been fixed in the 5.0.6 release of OpenMPI.
 
 # ✨ Support for new platforms and languages
 
@@ -786,7 +788,7 @@ Current test results are available [here](https://my.cdash.org/index.php?project
 
 # ⛔ Known Problems
 
-- When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
+- When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type. See Github issue [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
 
      #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
      major: Datatype
@@ -798,19 +800,19 @@ Current test results are available [here](https://my.cdash.org/index.php?project
 
 - When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur in the following tests:
 
-      H5PLUGIN-filter_plugin <br>
-      H5TEST-flush2<br>
-      H5TEST-testhdf5-base<br>
-      MPI_TEST_t_filters_parallel<br>
+   - H5PLUGIN-filter_plugin
+   - H5TEST-flush2
+   - H5TEST-testhdf5-base
+   - MPI_TEST_t_filters_parallel
 
-  Sporadic failures (even with lower -O levels):<br>
+  Sporadic failures (even with lower -O levels):
 
-      Java JUnit-TestH5Pfapl<br>
-      Java JUnit-TestH5D<br>
+   - Java JUnit-TestH5Pfapl
+   - Java JUnit-TestH5D
 
   Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of 'use of undefined value' when the optimization level is -O2 or higher.
 
-      This is confirmed to be a [bug in the nvc compiler](https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045) that has been fixed as of 23.11. If you are using an affected version of the NVidia compiler, the work-around is to set the optimization level to -O1.
+   This is confirmed to be a [bug in the nvc compiler](https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045) that has been fixed as of 23.11. If you are using an affected version of the NVidia compiler, the work-around is to set the optimization level to -O1.
 
 - CMake files do not behave correctly with paths containing spaces
 
