@@ -235,18 +235,19 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen
+          sudo apt-get install ninja-build doxygen graphviz
 
       - name: Install Dependencies (macOS)
         if: ${{ runner.os == 'macOS' }}
         run: |
-          brew install ninja doxygen
+          brew install ninja doxygen graphviz
 
       - name: Install Dependencies (Windows)
         if: ${{ runner.os == 'Windows' }}
         run: |
           choco install ninja
           choco install doxygen.install
+          choco install graphviz
 
       - name: Enable Developer Command Prompt (Windows)
         if: ${{ runner.os == 'Windows' }}
