@@ -40,6 +40,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Force qsort fallback by modifying ConfigureChecks.cmake
+        run: |
+          sed -i.bak '/CHECK_FUNCTION_EXISTS (qsort_r _HAVE_QSORT_R_TMP)/,/^endif ()$/{
+            /CHECK_FUNCTION_EXISTS (qsort_r _HAVE_QSORT_R_TMP)/c\
+          # Force qsort fallback for testing\
+          set(${HDF_PREFIX}_HAVE_QSORT_REENTRANT 0)
+            /CHECK_FUNCTION_EXISTS (qsort_s _HAVE_QSORT_S_TMP)/d
+            /if (_HAVE_QSORT_R_TMP OR _HAVE_QSORT_S_TMP)/d
+            /set (${HDF_PREFIX}_HAVE_QSORT_REENTRANT 1)/d
+            /^endif ()$/d
+          }' config/ConfigureChecks.cmake
+        shell: bash
+
       - name: Set up build dependencies (Ubuntu)
         if: runner.os == 'Linux'
         run: |
@@ -73,11 +86,6 @@ jobs:
             -DHDF5_TEST_SHELL_SCRIPTS:BOOL=OFF \
             ..
           cmake --build . --config Release --parallel 4
-        shell: bash
-
-      - name: Force fallback by disabling H5_HAVE_QSORT_REENTRANT
-        run: |
-          sed -i.bak 's/#define H5_HAVE_QSORT_REENTRANT 1/#define H5_HAVE_QSORT_REENTRANT 0/' build/src/H5pubconf.h
         shell: bash
 
       - name: Run tests with fallback implementation
