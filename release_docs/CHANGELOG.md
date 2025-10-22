@@ -560,7 +560,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    Fixes GitHub issue [#5380](https://github.com/HDFGroup/hdf5/issues/5380)
   
-### Fixed security issue CVE-2025-7068
+### Fixed security issue [CVE-2025-7068](https://nvd.nist.gov/vuln/detail/CVE-2025-7068)
 
    Failures during the discard process on a metadata cache entry could cause the library to skip calling the callback to free the cache entry. This could result in resource leaks and issues with flushing and closing the metadata cache during file close. This has been fixed by noting errors during the discard process, but attempting to fully free a cache entry before signalling that an error has occurred.
 
