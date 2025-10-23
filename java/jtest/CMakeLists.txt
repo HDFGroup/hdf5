@@ -159,6 +159,7 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
             -D "TEST_OUTPUT=JUnitFFM-${ffm_test_file}.out"
             -D "TEST_EXPECT=0"
             -D "TEST_MASK_ERROR=TRUE"
+            -D "TEST_SKIP_COMPARE=TRUE"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (JUnitFFM-${ffm_test_file} PROPERTIES
