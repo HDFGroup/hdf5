@@ -1024,7 +1024,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
                 /* Insert section in free space manager, unless requested not to */
                 if (!(des_flags & H5FS_DESERIALIZE_NO_ADD))
-                    if (H5FS_sect_add(udata->f, fspace, new_sect, H5FS_ADD_DESERIALIZING, udata) < 0)
+                    if (H5FS_sect_add(udata->f, fspace, new_sect, H5FS_ADD_DESERIALIZING, udata, NULL) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, NULL,
                                     "can't add section to free space manager");
             } /* end for */
