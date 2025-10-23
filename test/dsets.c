@@ -79,6 +79,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "h5s_block",           /* 27 */
                                  "h5s_plist",           /* 28 */
                                  "vds_strings",         /* 29 */
+                                 "chunk_expand2",       /* 30 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -185,6 +186,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define H5Z_FILTER_EXPAND          310
 #define H5Z_FILTER_CAN_APPLY_TEST2 311
 #define H5Z_FILTER_COUNT           312
+#define H5Z_FILTER_EXPAND2         313
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32 0
@@ -260,11 +262,13 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define BYPASS_FILL_VALUE 7
 
 /* Parameters for testing extensible array chunk indices */
-#define EARRAY_MAX_RANK    3
+#define EARRAY_MAX_RANK    2
+#define EARRAY_MAX_RANK_EXHAUST 3
 #define EARRAY_DSET_DIM    15
 #define EARRAY_CHUNK_DIM   3
 #define EARRAY_EXTEND_INCR 15
-#define EARRAY_MAX_EXTEND  75
+#define EARRAY_MAX_EXTEND  30
+#define EARRAY_MAX_EXTEND_EXHAUST 75
 
 /* Parameters for datasets in query storage size tests */
 #define STORAGE_SIZE_DIM1       12
@@ -325,6 +329,8 @@ static size_t filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigne
                              size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_expand(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                             size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_expand2(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                             size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_count(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                            size_t *buf_size, void **buf);
 
@@ -7684,7 +7690,7 @@ test_zero_dims(hid_t file)
         FAIL_STACK_ERROR;
 
     /* Verify index type */
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V110) {
         if (idx_type != H5D_CHUNK_IDX_EARRAY)
             FAIL_PUTS_ERROR("should be using extensible array as index");
     }
@@ -7767,7 +7773,7 @@ test_zero_dims(hid_t file)
         FAIL_STACK_ERROR;
 
     /* Verify index type */
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V110) {
         if (idx_type != H5D_CHUNK_IDX_BT2)
             FAIL_PUTS_ERROR("should be using v2 B-tree as index");
     }
@@ -7933,7 +7939,7 @@ test_missing_chunk(hid_t file)
         TEST_ERROR;
 
     /* Verify index type */
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V110) {
         if (idx_type != H5D_CHUNK_IDX_EARRAY)
             FAIL_PUTS_ERROR("should be using Extensible Array as index");
         if (idx_type2 != H5D_CHUNK_IDX_BT2)
@@ -8252,7 +8258,7 @@ test_random_chunks_real(const char *testname, bool early_alloc, hid_t fapl)
         TEST_ERROR;
 
     /* Verify index type */
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V110) {
         if (early_alloc) {
             if (idx_type != H5D_CHUNK_IDX_NONE)
                 FAIL_PUTS_ERROR("should be using Non-Index as index");
@@ -8335,7 +8341,7 @@ test_random_chunks_real(const char *testname, bool early_alloc, hid_t fapl)
         TEST_ERROR;
 
     /* Verify index type */
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V110) {
         if (early_alloc) {
             if (idx_type != H5D_CHUNK_IDX_NONE)
                 FAIL_PUTS_ERROR("should be using implicit indexing");
@@ -8471,7 +8477,7 @@ test_random_chunks_real(const char *testname, bool early_alloc, hid_t fapl)
         TEST_ERROR;
 
     /* Verify index type */
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V110) {
         if (early_alloc) {
             if (idx_type != H5D_CHUNK_IDX_NONE)
                 FAIL_PUTS_ERROR("should be using Non-Index as index");
@@ -9400,7 +9406,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Chunk index type expected depends on whether we are using the latest version of the format */
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V110) {
         /* Verify index type */
         if (idx_type != H5D_CHUNK_IDX_FARRAY)
             FAIL_PUTS_ERROR("should be using Fixed Array as index");
@@ -9652,14 +9658,22 @@ test_chunk_fast(const char *driver_name, hid_t fapl)
     hid_t        scalar_sid = H5I_INVALID_HID; /* Scalar dataspace ID */
     hid_t        dsid       = H5I_INVALID_HID; /* Dataset ID */
     hsize_t      fill;                         /* Temporary value, for filling arrays */
-    hsize_t      hs_size[EARRAY_MAX_RANK];     /* Hyperslab size */
-    hsize_t      chunk_dim[EARRAY_MAX_RANK];   /* Chunk dimensions */
+    hsize_t      hs_size[EARRAY_MAX_RANK_EXHAUST];     /* Hyperslab size */
+    hsize_t      chunk_dim[EARRAY_MAX_RANK_EXHAUST];   /* Chunk dimensions */
     H5F_libver_t low;                          /* File format low bound */
     unsigned     swmr;                         /* Whether file should be written with SWMR access enabled */
+    unsigned     max_rank;                     /* Maximum rank */
+    int          express_test;                 /* Express test setting */
 
     TESTING("datasets w/extensible array as chunk index");
 
+    assert(EARRAY_MAX_RANK_EXHAUST >= EARRAY_MAX_RANK);
+
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
+
+    /* Set max rank based on express_test setting */
+    express_test = h5_get_testexpress();
+    max_rank = express_test <= H5_TEST_EXPRESS_EXHAUSTIVE ? EARRAY_MAX_RANK_EXHAUST : EARRAY_MAX_RANK;
 
     /* Copy the file access property list */
     if ((my_fapl = H5Pcopy(fapl)) < 0)
@@ -9689,11 +9703,11 @@ test_chunk_fast(const char *driver_name, hid_t fapl)
 
     /* Initialize chunk dimensions */
     fill = EARRAY_CHUNK_DIM;
-    H5VM_array_fill(chunk_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+    H5VM_array_fill(chunk_dim, &fill, sizeof(fill), max_rank);
 
     /* Initialize hyperslab size */
     fill = 1;
-    H5VM_array_fill(hs_size, &fill, sizeof(fill), EARRAY_MAX_RANK);
+    H5VM_array_fill(hs_size, &fill, sizeof(fill), max_rank);
 
     /* Loop over using SWMR access to write */
     for (swmr = 0; swmr <= 1; swmr++) {
@@ -9723,7 +9737,7 @@ test_chunk_fast(const char *driver_name, hid_t fapl)
                 unsigned ndims; /* Current # of dims to test */
 
                 /* Loop over dataspace ranks to test */
-                for (ndims = 1; ndims < (EARRAY_MAX_RANK + 1); ndims++) {
+                for (ndims = 1; ndims < (max_rank + 1); ndims++) {
                     unsigned unlim_dim;
 
                     /* Create dataset creation property list */
@@ -9752,11 +9766,11 @@ test_chunk_fast(const char *driver_name, hid_t fapl)
                     /* Loop over which dimension is unlimited */
                     for (unlim_dim = 0; unlim_dim < ndims; unlim_dim++) {
                         H5D_chunk_index_t idx_type;                             /* Dataset chunk index type */
-                        hsize_t dim[EARRAY_MAX_RANK], max_dim[EARRAY_MAX_RANK]; /* Dataset dimensions */
-                        hsize_t swizzled_dim[EARRAY_MAX_RANK]; /* Dimensions, with unlimited dimension moved
+                        hsize_t dim[EARRAY_MAX_RANK_EXHAUST], max_dim[EARRAY_MAX_RANK_EXHAUST]; /* Dataset dimensions */
+                        hsize_t swizzled_dim[EARRAY_MAX_RANK_EXHAUST]; /* Dimensions, with unlimited dimension moved
                                                                   to rank 0 */
-                        hsize_t  down[EARRAY_MAX_RANK];        /* 'down' sizes, for computing array index */
-                        hsize_t  hs_offset[EARRAY_MAX_RANK];   /* Hyperslab offset */
+                        hsize_t  down[EARRAY_MAX_RANK_EXHAUST];        /* 'down' sizes, for computing array index */
+                        hsize_t  hs_offset[EARRAY_MAX_RANK_EXHAUST];   /* Hyperslab offset */
                         hssize_t snpoints;                     /* # of points in dataspace extent (signed) */
                         hsize_t  npoints;                      /* # of points in dataspace extent */
                         unsigned write_elem, read_elem;        /* Element written/read */
@@ -9769,12 +9783,12 @@ test_chunk_fast(const char *driver_name, hid_t fapl)
 
                         /* Create n-D dataspace */
                         fill = EARRAY_DSET_DIM;
-                        H5VM_array_fill(dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        H5VM_array_fill(dim, &fill, sizeof(fill), max_rank);
                         fill = EARRAY_DSET_DIM;
-                        H5VM_array_fill(max_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        H5VM_array_fill(max_dim, &fill, sizeof(fill), max_rank);
                         max_dim[unlim_dim] = H5S_UNLIMITED;
                         fill               = EARRAY_DSET_DIM;
-                        H5VM_array_fill(swizzled_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        H5VM_array_fill(swizzled_dim, &fill, sizeof(fill), max_rank);
                         if ((sid = H5Screate_simple((int)ndims, dim, max_dim)) < 0)
                             FAIL_STACK_ERROR;
 
@@ -9797,7 +9811,7 @@ test_chunk_fast(const char *driver_name, hid_t fapl)
 
                         /* Chunk index type expected depends on whether we are using the latest version of the
                          * format */
-                        if (low == H5F_LIBVER_LATEST || swmr) {
+                        if (low >= H5F_LIBVER_V110 || swmr) {
                             /* Verify index type */
                             if (idx_type != H5D_CHUNK_IDX_EARRAY)
                                 FAIL_PUTS_ERROR("should be using extensible array as index");
@@ -9847,7 +9861,7 @@ test_chunk_fast(const char *driver_name, hid_t fapl)
                         } /* end for */
 
                         /* Incrementally extend dataset and verify write/reads */
-                        while (dim[unlim_dim] < EARRAY_MAX_EXTEND) {
+                        while (dim[unlim_dim] < (hsize_t)(express_test <= H5_TEST_EXPRESS_EXHAUSTIVE ? EARRAY_MAX_EXTEND_EXHAUST : EARRAY_MAX_EXTEND)) {
                             hssize_t snew_npoints; /* # of points in dataspace extent (signed) */
                             hsize_t  new_npoints;  /* # of points in dataspace extent */
 
@@ -9938,7 +9952,7 @@ test_chunk_fast(const char *driver_name, hid_t fapl)
 
                         /* Chunk index tyepe expected depends on whether we are using the latest version of
                          * the format */
-                        if (low == H5F_LIBVER_LATEST || swmr) {
+                        if (low >= H5F_LIBVER_V110 || swmr) {
                             /* Verify index type */
                             if (idx_type != H5D_CHUNK_IDX_EARRAY)
                                 FAIL_PUTS_ERROR("should be using extensible array as index");
@@ -10423,70 +10437,70 @@ test_chunk_expand(hid_t fapl)
 
     /* Check if we are using the latest version of the format */
     if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
-    if (sizeof(size_t) <= 4 && low != H5F_LIBVER_LATEST) {
+    if (sizeof(size_t) <= 4 && low < H5F_LIBVER_V110) {
         SKIPPED();
         puts("    Current machine can't test for error w/old file format");
     } /* end if */
     else {
         /* Register "expansion" filter */
         if (H5Zregister(H5Z_EXPAND) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Check that the filter was registered */
         if (true != H5Zfilter_avail(H5Z_FILTER_EXPAND))
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Loop over storage allocation time */
         for (alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
 
             /* Create file */
             if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Create dataset creation property list */
             if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Set chunking */
             chunk_dim = chunk_dim2[0] = chunk_dim2[1] = 10;
             if (H5Pset_chunk(dcpl, 1, &chunk_dim) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Pset_chunk(dcpl2, 2, chunk_dim2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Set fill time */
             if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Pset_fill_time(dcpl2, H5D_FILL_TIME_ALLOC) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Set allocation time */
             if (H5Pset_alloc_time(dcpl, alloc_time) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Pset_alloc_time(dcpl2, alloc_time) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Set "expand" filter */
             if (H5Pset_filter(dcpl, H5Z_FILTER_EXPAND, 0, (size_t)0, NULL) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Pset_filter(dcpl2, H5Z_FILTER_EXPAND, 0, (size_t)0, NULL) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Create scalar dataspace */
             if ((scalar_sid = H5Screate(H5S_SCALAR)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Create 1-D and 2-D dataspace */
             dim = dim2[0] = dim2[1] = 100;
             max_dim = max_dim2[0] = max_dim2[1] = H5S_UNLIMITED;
             if ((sid = H5Screate_simple(1, &dim, &max_dim)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((sid2 = H5Screate_simple(2, dim2, max_dim2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Create 1-D & 2-D chunked datasets */
             if (H5D_ALLOC_TIME_EARLY == alloc_time) {
@@ -10513,21 +10527,21 @@ test_chunk_expand(hid_t fapl)
             else {
                 if ((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
                     0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 if ((dsid2 = H5Dcreate2(fid, "dset2", H5T_NATIVE_UINT, sid2, H5P_DEFAULT, dcpl2,
                                         H5P_DEFAULT)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Get the chunk index type */
                 if (H5D__layout_idx_type_test(dsid, &idx_type) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5D__layout_idx_type_test(dsid2, &idx_type2) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Chunk index type expected depends on whether we are using the latest version of the format
                  */
-                if (low == H5F_LIBVER_LATEST) {
+                if (low >= H5F_LIBVER_V110) {
                     /* Verify index type */
                     if (idx_type != H5D_CHUNK_IDX_EARRAY)
                         FAIL_PUTS_ERROR("should be using extensible array as index");
@@ -10550,18 +10564,18 @@ test_chunk_expand(hid_t fapl)
 
                     /* Select a single element in the 1-D dataset */
                     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, &hs_offset, NULL, &hs_size, NULL) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Select a single element in the 2-D dataset; NOT every element is selected */
                     if (H5Sselect_hyperslab(sid2, H5S_SELECT_SET, hs_offset2, NULL, hs_size2, NULL) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Read (unwritten) element from dataset */
                     read_elem = read_elem2 = 1;
                     if (H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Dread(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &read_elem2) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Verify unwritten element is fill value (0) */
                     if (read_elem != 0)
@@ -10575,17 +10589,17 @@ test_chunk_expand(hid_t fapl)
                     /* Write element to the datasets */
                     write_elem = write_elem2 = u;
                     if (H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Dwrite(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &write_elem2) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Read element from the datasets */
                     read_elem  = write_elem + 1;
                     read_elem2 = write_elem2 + 1;
                     if (H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Dread(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &read_elem2) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Verify written element is read in */
                     if (read_elem != write_elem)
@@ -10623,21 +10637,21 @@ test_chunk_expand(hid_t fapl)
                     dim2[0] += 100;
                     dim2[1] += 100;
                     if (H5Dset_extent(dsid, &dim) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Dset_extent(dsid2, dim2) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Close old dataspace */
                     if (H5Sclose(sid) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Sclose(sid2) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Get dataspace for the datasets now */
                     if ((sid = H5Dget_space(dsid)) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if ((sid2 = H5Dget_space(dsid2)) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Fill new elements */
                     hs_size = hs_size2[0] = hs_size2[1] = 1;
@@ -10647,16 +10661,16 @@ test_chunk_expand(hid_t fapl)
                         hs_offset2[0] = (dim2[0] + u) - 100;
                         hs_offset2[1] = (dim2[1] + u) - 100;
                         if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, &hs_offset, NULL, &hs_size, NULL) < 0)
-                            FAIL_STACK_ERROR;
+                            TEST_ERROR;
                         if (H5Sselect_hyperslab(sid2, H5S_SELECT_SET, hs_offset2, NULL, hs_size2, NULL) < 0)
-                            FAIL_STACK_ERROR;
+                            TEST_ERROR;
 
                         /* Read (unwritten) element from the datasets */
                         read_elem = read_elem2 = 1;
                         if (H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0)
-                            FAIL_STACK_ERROR;
+                            TEST_ERROR;
                         if (H5Dread(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &read_elem2) < 0)
-                            FAIL_STACK_ERROR;
+                            TEST_ERROR;
 
                         /* Verify unwritten element is fill value (0) */
                         if (read_elem != 0)
@@ -10670,17 +10684,17 @@ test_chunk_expand(hid_t fapl)
                         /* Write element to the datasets */
                         write_elem = write_elem2 = u;
                         if (H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem) < 0)
-                            FAIL_STACK_ERROR;
+                            TEST_ERROR;
                         if (H5Dwrite(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &write_elem2) < 0)
-                            FAIL_STACK_ERROR;
+                            TEST_ERROR;
 
                         /* Read element from the datasets */
                         read_elem  = write_elem + 1;
                         read_elem2 = write_elem2 + 1;
                         if (H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0)
-                            FAIL_STACK_ERROR;
+                            TEST_ERROR;
                         if (H5Dread(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &read_elem2) < 0)
-                            FAIL_STACK_ERROR;
+                            TEST_ERROR;
 
                         /* Verify written element is read in */
                         if (read_elem != write_elem)
@@ -10717,46 +10731,46 @@ test_chunk_expand(hid_t fapl)
 
                 /* Close the datasets */
                 if (H5Dclose(dsid) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5Dclose(dsid2) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
             } /* end else */
 
             /* Close everything */
             if (H5Sclose(sid) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Sclose(sid2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Sclose(scalar_sid) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Pclose(dcpl) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Pclose(dcpl2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(fid) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* If the dataset was created, do some extra testing */
             if (H5D_ALLOC_TIME_EARLY != alloc_time) {
                 /* Re-open file & datasets */
                 if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Open the datasets */
                 if ((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if ((dsid2 = H5Dopen2(fid, "dset2", H5P_DEFAULT)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Get the chunk index type for the two datasets */
                 if (H5D__layout_idx_type_test(dsid, &idx_type) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5D__layout_idx_type_test(dsid2, &idx_type2) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Chunk index type expected depends on whether we are using the latest version of the format
                  */
-                if (low == H5F_LIBVER_LATEST) {
+                if (low >= H5F_LIBVER_V110) {
                     /* Verify index type */
                     if (idx_type != H5D_CHUNK_IDX_EARRAY)
                         FAIL_PUTS_ERROR("should be using extensible array as index");
@@ -10773,13 +10787,13 @@ test_chunk_expand(hid_t fapl)
 
                 /* Create scalar dataspace */
                 if ((scalar_sid = H5Screate(H5S_SCALAR)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Get dataspace for the datasets now */
                 if ((sid = H5Dget_space(dsid)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if ((sid2 = H5Dget_space(dsid2)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Read elements */
                 hs_size = hs_size2[0] = hs_size2[1] = 1;
@@ -10787,16 +10801,16 @@ test_chunk_expand(hid_t fapl)
                     /* Select a single element in the datasets */
                     hs_offset = hs_offset2[0] = hs_offset2[1] = u;
                     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, &hs_offset, NULL, &hs_size, NULL) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Sselect_hyperslab(sid2, H5S_SELECT_SET, hs_offset2, NULL, hs_size2, NULL) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Read element from the datasets */
                     read_elem = read_elem2 = u + 1;
                     if (H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Dread(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &read_elem2) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Verify unwritten element is proper value */
                     if (read_elem != (u % 100))
@@ -10810,17 +10824,17 @@ test_chunk_expand(hid_t fapl)
                     /* Write element to the datasets */
                     write_elem = write_elem2 = u % 100;
                     if (H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Dwrite(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &write_elem2) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Read element from the datasets */
                     read_elem  = write_elem + 1;
                     read_elem2 = write_elem2 + 1;
                     if (H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
                     if (H5Dread(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &read_elem2) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Verify written element is read in */
                     if (read_elem != write_elem)
@@ -10853,41 +10867,41 @@ test_chunk_expand(hid_t fapl)
 
                 /* Close everything */
                 if (H5Sclose(sid) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5Sclose(sid2) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5Sclose(scalar_sid) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5Dclose(dsid) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5Dclose(dsid2) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5Fclose(fid) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Re-open file */
                 if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Delete the datasets */
                 if (H5Ldelete(fid, "dset", H5P_DEFAULT) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5Ldelete(fid, "dset2", H5P_DEFAULT) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Close everything */
                 if (H5Fclose(fid) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
             } /* end if */
         }     /* end for */
 
         /* Unregister "expansion" filter */
         if (H5Zunregister(H5Z_FILTER_EXPAND) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Check that the filter was unregistered */
         if (false != H5Zfilter_avail(H5Z_FILTER_EXPAND))
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end else */
@@ -10905,10 +10919,427 @@ error:
         H5Sclose(sid2);
         H5Sclose(scalar_sid);
         H5Fclose(fid);
+        H5Zunregister(H5Z_FILTER_EXPAND);
     }
     H5E_END_TRY
     return FAIL;
 } /* end test_chunk_expand() */
+
+/* This message derives from H5Z */
+const H5Z_class2_t H5Z_EXPAND2[1] = {{
+    H5Z_CLASS_T_VERS,  /* H5Z_class_t version */
+    H5Z_FILTER_EXPAND2, /* Filter id number        */
+    1, 1,              /* Encoding and decoding enabled */
+    "expand2",          /* Filter name for debugging    */
+    NULL,              /* The "can apply" callback     */
+    NULL,              /* The "set local" callback     */
+    filter_expand2,     /* The actual filter function    */
+}};
+
+/* "Expansion factor" for filter_expand() routine */
+#define FILTER_EXPAND2_FACTOR (256 * 256)
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_expand2
+ *
+ * Purpose:     For testing library's behavior when a filter expands a chunk
+ *              too much.
+ *
+ * Note:    This filter doesn't actually re-allocate the buffer to be
+ *        larger, it just changes the buffer size to a value that's too
+ *        large.  The library should throw an error before using the
+ *        incorrect buffer information.
+ *
+ * Return:    Success:    Data chunk size
+ *        Failure:    0
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+filter_expand2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+              const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size,
+              void **buf)
+{
+    size_t ret_value = 0;
+
+    if (flags & H5Z_FLAG_REVERSE)
+        /* Shrink nbytes by a factor of FILTER_EXPAND2_FACTOR */
+        ret_value = nbytes / FILTER_EXPAND2_FACTOR;
+    else {
+        void *new_buf = NULL;
+        const size_t new_nbytes = nbytes * FILTER_EXPAND2_FACTOR;
+
+        /* Expand the buffer size beyond what can be encoded. To do this first calloc a new buffer then copy the used bytes over, so we don't get warnings about writing uninitialized bytes to disk */
+        if (*buf_size < new_nbytes) {
+            if (NULL == (new_buf = calloc(new_nbytes, 1)))
+                return 0;
+            memcpy(new_buf, *buf, nbytes);
+            free(*buf);
+            *buf = new_buf;
+            new_buf = NULL;
+            *buf_size = new_nbytes;
+        }
+
+        ret_value = new_nbytes;
+    }
+
+    return ret_value;
+} /* end filter_expand2() */
+
+/*-------------------------------------------------------------------------
+ * Function: test_chunk_expand2
+ *
+ * Purpose: Tests support for proper error handling when a chunk expands
+ *              too much after a filter is applied
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_chunk_expand2(hid_t fapl)
+{
+    char              filename[FILENAME_BUF_SIZE];
+    hid_t             fid  = H5I_INVALID_HID;                          /* File ID */
+    hid_t             dcpl[4] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID}; /* Dataset creation property list IDs */
+    hid_t             sid[4] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID}; /* Dataspace IDs */
+    hid_t             scalar_sid = H5I_INVALID_HID;                    /* Scalar dataspace ID */
+    hid_t             dsid[4] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID}; /* Dataset ID */
+    hsize_t           dim[2], max_dim[2], chunk_dim[2];                         /* Dataset and chunk dimensions */
+    H5D_chunk_index_t idx_type;                             /* Dataset chunk index type */
+    H5F_libver_t      low, high;                                       /* File format bounds */
+    hsize_t           hs_offset[2];                        /* Hyperslab offset */
+    hsize_t           hs_size[2];                            /* Hyperslab size */
+    H5D_alloc_time_t  alloc_time;                                      /* Storage allocation time */
+    unsigned          write_elem, read_elem;                           /* Element written/read */
+    unsigned          i, u;                                            /* Local index variables */
+
+    TESTING("filter expanding chunks too much succeeds with new format");
+
+    h5_fixname(FILENAME[30], fapl, filename, sizeof filename);
+
+    /* Check if we are using the latest version of the format */
+    if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
+        TEST_ERROR;
+    assert(low >= H5F_LIBVER_V200);
+
+    /* Register "expansion 2" filter */
+    if (H5Zregister(H5Z_EXPAND2) < 0)
+        TEST_ERROR;
+
+    /* Check that the filter was registered */
+    if (true != H5Zfilter_avail(H5Z_FILTER_EXPAND2))
+        TEST_ERROR;
+
+    /* Loop over storage allocation time */
+    for (alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+
+        /* Create file */
+        if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR;
+
+        /* Create dataset creation property lists */
+        for (i = 0; i < sizeof(dcpl) / sizeof(dcpl[0]); i++)
+            if ((dcpl[i] = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                TEST_ERROR;
+
+        /* Set chunking */
+        chunk_dim[0] = chunk_dim[1] = 2;
+        for (i = 0; i < sizeof(dcpl) / sizeof(dcpl[0]); i++)
+            if (H5Pset_chunk(dcpl[i], 2, chunk_dim) < 0)
+                TEST_ERROR;
+
+        /* Set fill time */
+        for (i = 0; i < sizeof(dcpl) / sizeof(dcpl[0]); i++)
+            if (H5Pset_fill_time(dcpl[i], H5D_FILL_TIME_ALLOC) < 0)
+                TEST_ERROR;
+
+        /* Set allocation time */
+        for (i = 0; i < sizeof(dcpl) / sizeof(dcpl[0]); i++)
+            if (H5Pset_alloc_time(dcpl[i], alloc_time) < 0)
+                TEST_ERROR;
+
+        /* Set "expand" filter */
+        for (i = 0; i < sizeof(dcpl) / sizeof(dcpl[0]); i++)
+            if (H5Pset_filter(dcpl[i], H5Z_FILTER_EXPAND2, 0, (size_t)0, NULL) < 0)
+                TEST_ERROR;
+
+        /* Create scalar dataspace */
+        if ((scalar_sid = H5Screate(H5S_SCALAR)) < 0)
+            TEST_ERROR;
+
+        /* Create single chunk dataspace */
+        dim[0] = dim[1] = 2;
+        max_dim[0] = max_dim[1] = 2;
+        if ((sid[0] = H5Screate_simple(2, dim, max_dim)) < 0)
+            TEST_ERROR;
+
+        /* Create fixed array dataspace */
+        dim[0] = dim[1] = 4;
+        max_dim[0] = max_dim[1] = 12;
+        if ((sid[1] = H5Screate_simple(2, dim, max_dim)) < 0)
+            TEST_ERROR;
+
+        /* Create extensible array dataspace */
+        max_dim[0] = H5S_UNLIMITED;
+        max_dim[1] = 12;
+        if ((sid[2] = H5Screate_simple(2, dim, max_dim)) < 0)
+            TEST_ERROR;
+
+        /* Create v2 b-tree dataspace */
+        max_dim[0] = H5S_UNLIMITED;
+        max_dim[1] = H5S_UNLIMITED;
+        if ((sid[3] = H5Screate_simple(2, dim, max_dim)) < 0)
+            TEST_ERROR;
+
+        /* Create chunked datasets */
+        for (i = 0; i < sizeof(dsid) / sizeof(dsid[0]); i++) {
+            char dsetname[8];
+
+            snprintf(dsetname, sizeof(dsetname), "dset%u", i);
+            if ((dsid[i] = H5Dcreate2(fid, dsetname, H5T_NATIVE_UINT, sid[i], H5P_DEFAULT, dcpl[i], H5P_DEFAULT)) < 0)
+                TEST_ERROR;
+        }
+
+        /* Verify layout types */
+        if (H5D__layout_idx_type_test(dsid[0], &idx_type) < 0)
+            TEST_ERROR;
+        if (idx_type != H5D_CHUNK_IDX_SINGLE)
+            FAIL_PUTS_ERROR("should be using single chunk as index");
+        if (H5D__layout_idx_type_test(dsid[1], &idx_type) < 0)
+            TEST_ERROR;
+        if (idx_type != H5D_CHUNK_IDX_FARRAY)
+            FAIL_PUTS_ERROR("should be using fixed array as index");
+        if (H5D__layout_idx_type_test(dsid[2], &idx_type) < 0)
+            TEST_ERROR;
+        if (idx_type != H5D_CHUNK_IDX_EARRAY)
+            FAIL_PUTS_ERROR("should be using extensible array as index");
+        if (H5D__layout_idx_type_test(dsid[3], &idx_type) < 0)
+            TEST_ERROR;
+        if (idx_type != H5D_CHUNK_IDX_BT2)
+            FAIL_PUTS_ERROR("should be using v2 B-tree as index");
+
+        /*
+         * Fill elements
+         */
+        hs_size[0] = hs_size[1] = 1;
+
+        /* Iterate over datasets */
+        for (i = 0; i < sizeof(dsid) / sizeof(dsid[0]); i++) {
+            /* Iterate over elements */
+            for (u = 0; u < 4; u++) {
+                /* Don't read past end of single chunk dataset */
+                if (i == 0 && u >= 2)
+                    break;
+
+                hs_offset[0] = hs_offset[1] = u;
+
+                /* Select a single element in the 2-D dataset; NOT every element is selected */
+                if (H5Sselect_hyperslab(sid[i], H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
+                    TEST_ERROR;
+
+                /* Read (unwritten) element from dataset */
+                read_elem = 1;
+                if (H5Dread(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &read_elem) < 0)
+                    TEST_ERROR;
+
+                /* Verify unwritten element is fill value (0) */
+                if (read_elem != 0)
+                    FAIL_PUTS_ERROR("invalid unwritten element read");
+
+                /* Write element to the dataset */
+                write_elem = u;
+                if (H5Dwrite(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &write_elem) < 0)
+                    TEST_ERROR;
+
+                /* Read element from the dataset */
+                read_elem  = write_elem + 1;
+                if (H5Dread(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &read_elem) < 0)
+                    TEST_ERROR;
+
+                /* Verify written element is read in */
+                if (read_elem != write_elem)
+                    FAIL_PUTS_ERROR("invalid written element read");
+            }
+        }
+
+        /* Iterate over datasets. Do not expand single chunk dataset. */
+        for (i = 1; i < sizeof(dsid) / sizeof(dsid[0]); i++) {
+            dim[0] = dim[1] = 4;
+
+            /* Incrementally extend dataset and verify write/reads */
+            while (dim[0] < 12) {
+                /* Extend the datasets */
+                dim[0] += 4;
+                dim[1] += 4;
+                if (H5Dset_extent(dsid[i], dim) < 0)
+                    TEST_ERROR;
+
+                /* Close old dataspace */
+                if (H5Sclose(sid[i]) < 0)
+                    TEST_ERROR;
+
+                /* Get dataspace for the datasets now */
+                if ((sid[i] = H5Dget_space(dsid[i])) < 0)
+                    TEST_ERROR;
+
+                /* Fill new elements */
+                hs_size[0] = hs_size[1] = 1;
+                for (u = 0; u < 4; u++) {
+                    /* Select a single element in the dataset */
+                    hs_offset[0] = (dim[0] + u) - 4;
+                    hs_offset[1] = (dim[1] + u) - 4;
+                    if (H5Sselect_hyperslab(sid[i], H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
+                        TEST_ERROR;
+
+                    /* Read (unwritten) element from the dataset */
+                    read_elem = 1;
+                    if (H5Dread(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &read_elem) < 0)
+                        TEST_ERROR;
+
+                    /* Verify unwritten element is fill value (0) */
+                    if (read_elem != 0)
+                        FAIL_PUTS_ERROR("invalid unwritten element read");
+
+                    /* Write element to the datasets */
+                    write_elem = u;
+                    if (H5Dwrite(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &write_elem) < 0)
+                        TEST_ERROR;
+
+                    /* Read element from the datasets */
+                    read_elem  = write_elem + 1;
+                    if (H5Dread(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &read_elem) < 0)
+                        TEST_ERROR;
+
+                    /* Verify written element is read in */
+                    if (read_elem != write_elem)
+                        FAIL_PUTS_ERROR("invalid written element read");
+                }
+            }
+        }
+
+        /* Close the datasets, dcpls, dataspaces, and file */
+        for (i = 0; i < sizeof(dsid) / sizeof(dsid[0]); i++)
+            if (H5Dclose(dsid[i]) < 0)
+                TEST_ERROR;
+        for (i = 0; i < sizeof(sid) / sizeof(sid[0]); i++)
+            if (H5Sclose(sid[i]) < 0)
+                TEST_ERROR;
+        for (i = 0; i < sizeof(dcpl) / sizeof(dcpl[0]); i++)
+            if (H5Pclose(dcpl[i]) < 0)
+                TEST_ERROR;
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+
+        /* Re-open file */
+        if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
+
+        /* Iterate over datasets */
+        for (i = 0; i < sizeof(dsid) / sizeof(dsid[0]); i++) {
+            char dsetname[8];
+
+            /* Open the dataset */
+            snprintf(dsetname, sizeof(dsetname), "dset%u", i);
+            if ((dsid[i] = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
+                TEST_ERROR;
+
+            /* Get dataspace for the dataset now */
+            if ((sid[i] = H5Dget_space(dsid[i])) < 0)
+                TEST_ERROR;
+
+            /* Read elements */
+            hs_size[0] = hs_size[1] = 1;
+            for (u = 0; u < (i == 0 ? 2 : 12); u++) {
+                /* Select a single element in the datasets */
+                hs_offset[0] = hs_offset[1] = u;
+                if (H5Sselect_hyperslab(sid[i], H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
+                    TEST_ERROR;
+
+                /* Read element from the datasets */
+                read_elem = u + 1;
+                if (H5Dread(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &read_elem) < 0)
+                    TEST_ERROR;
+
+                /* Verify unwritten element is proper value */
+                if (read_elem != (u % 4))
+                    FAIL_PUTS_ERROR("invalid element read");
+
+                /* Write element to the datasets */
+                write_elem = u % 4 + 1;
+                if (H5Dwrite(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &write_elem) < 0)
+                    TEST_ERROR;
+
+                /* Read element from the datasets */
+                read_elem  = write_elem + 1;
+                if (H5Dread(dsid[i], H5T_NATIVE_UINT, scalar_sid, sid[i], H5P_DEFAULT, &read_elem) < 0)
+                    TEST_ERROR;
+
+                /* Verify written element is read in */
+                if (read_elem != write_elem)
+                    FAIL_PUTS_ERROR("invalid written element read");
+            }
+        }
+
+        /* Close everything */
+        for (i = 0; i < sizeof(dsid) / sizeof(dsid[0]); i++)
+            if (H5Dclose(dsid[i]) < 0)
+                TEST_ERROR;
+        for (i = 0; i < sizeof(sid) / sizeof(sid[0]); i++)
+            if (H5Sclose(sid[i]) < 0)
+                TEST_ERROR;
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+        if (H5Sclose(scalar_sid) < 0)
+            TEST_ERROR;
+
+        /* Re-open file */
+        if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
+
+        /* Delete the datasets */
+        for (i = 0; i < sizeof(dsid) / sizeof(dsid[0]); i++) {
+            char dsetname[8];
+
+            snprintf(dsetname, sizeof(dsetname), "dset%u", i);
+            if (H5Ldelete(fid, dsetname, H5P_DEFAULT) < 0)
+                TEST_ERROR;
+        }
+
+        /* Close file */
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+    }
+
+    /* Unregister "expansion 2" filter */
+    if (H5Zunregister(H5Z_FILTER_EXPAND2) < 0)
+        TEST_ERROR;
+
+    /* Check that the filter was unregistered */
+    if (false != H5Zfilter_avail(H5Z_FILTER_EXPAND2))
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        for (i = 0; i < sizeof(dsid) / sizeof(dsid[0]); i++)
+            H5Dclose(dsid[i]);
+        for (i = 0; i < sizeof(sid) / sizeof(sid[0]); i++)
+            H5Sclose(sid[i]);
+        for (i = 0; i < sizeof(dcpl) / sizeof(dcpl[0]); i++)
+            H5Pclose(dcpl[i]);
+        H5Sclose(scalar_sid);
+        H5Fclose(fid);
+        H5Zunregister(H5Z_FILTER_EXPAND2);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_chunk_expand2() */
 
 /*-------------------------------------------------------------------------
  * Function: test_fixed_array
@@ -11121,7 +11552,7 @@ test_fixed_array(hid_t fapl)
                 FAIL_STACK_ERROR;
 
             /* Chunk index type depends on whether we are using the latest version of the format */
-            if (low == H5F_LIBVER_LATEST) {
+            if (low >= H5F_LIBVER_V110) {
                 if (alloc_time == H5D_ALLOC_TIME_EARLY
 #ifdef H5_HAVE_FILTER_DEFLATE
                     && !compress
@@ -11170,7 +11601,7 @@ test_fixed_array(hid_t fapl)
                 FAIL_STACK_ERROR;
 
             /* Chunk index type depends on whether we are using the latest version of the format */
-            if (low == H5F_LIBVER_LATEST) {
+            if (low >= H5F_LIBVER_V110) {
                 if (alloc_time == H5D_ALLOC_TIME_EARLY
 #ifdef H5_HAVE_FILTER_DEFLATE
                     && !compress
@@ -11220,7 +11651,7 @@ test_fixed_array(hid_t fapl)
                 FAIL_STACK_ERROR;
 
             /* Chunk index type depends on whether we are using the latest version of the format */
-            if (low == H5F_LIBVER_LATEST) {
+            if (low >= H5F_LIBVER_V110) {
                 if (alloc_time == H5D_ALLOC_TIME_EARLY
 #ifdef H5_HAVE_FILTER_DEFLATE
                     && !compress
@@ -11599,7 +12030,7 @@ test_single_chunk(hid_t fapl)
                 FAIL_STACK_ERROR;
 
             /* Chunk index type depends on whether we are using the latest version of the format */
-            if (low == H5F_LIBVER_LATEST) {
+            if (low >= H5F_LIBVER_V110) {
                 if (idx_type != H5D_CHUNK_IDX_SINGLE)
                     FAIL_PUTS_ERROR("should be using Single Chunk indexing");
             } /* end if */
@@ -11630,7 +12061,7 @@ test_single_chunk(hid_t fapl)
                 FAIL_STACK_ERROR;
 
             /* Chunk index type depends on whether we are using the latest version of the format */
-            if (low == H5F_LIBVER_LATEST) {
+            if (low >= H5F_LIBVER_V110) {
                 if (idx_type != H5D_CHUNK_IDX_SINGLE)
                     FAIL_PUTS_ERROR("should be using Single Chunk indexing");
             }
@@ -12245,7 +12676,7 @@ test_swmr_non_latest(const char *driver_name, hid_t fapl)
 
     h5_fixname(FILENAME[18], fapl, filename, sizeof filename);
 
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V110) {
         /* Create file with write+latest-format */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR;
@@ -15743,13 +16174,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-#define VLEN_DS_NAME       "test_downsize_vlen_scalar_dataset"
-#define VLEN_DS_DIM        100
-#define VLEN_DS_STRLEN     20
-#define VLEN_DS_STRING     "vlen test string"
-#define VLEN_DS_VALUE      0.12345678901234567890
-#define VLEN_DS_ARRAY_DIM1 3
-#define VLEN_DS_ARRAY_DIM2 5
+#define VLEN_DS_NAME        "test_downsize_vlen_scalar_dataset"
+#define VLEN_DS_DIM         10
+#define VLEN_DS_DIM_EXHAUST 100
+#define VLEN_DS_STRLEN      20
+#define VLEN_DS_STRING      "vlen test string"
+#define VLEN_DS_VALUE       0.12345678901234567890
+#define VLEN_DS_ARRAY_DIM1  3
+#define VLEN_DS_ARRAY_DIM2  5
 
 typedef struct {
     double value;
@@ -15779,13 +16211,19 @@ test_downsize_vlen_scalar_dataset(hid_t file)
     vlen_ds_compound_memory_t *compound_data = NULL;          /* Contents of VLEN data */
     char                       common_string[VLEN_DS_STRLEN]; /* Common string contents */
     hsize_t                    array_dims[2] = {VLEN_DS_ARRAY_DIM1, VLEN_DS_ARRAY_DIM2};
+    int                        ds_dim;        /* Initial dataset size */
+    int                        express_test;  /* Express test setting */
     int                        i, dim1, dim2; /* Local index variables */
 
     TESTING("H5Dwrite() on down-sized VLEN contents");
 
+    /* Set dataset inital size based on express_test setting */
+    express_test = h5_get_testexpress();
+    ds_dim = express_test <= H5_TEST_EXPRESS_EXHAUSTIVE ? VLEN_DS_DIM_EXHAUST : VLEN_DS_DIM;
+
     /* Allocate space for compound data */
     if (NULL == (compound_data =
-                     (vlen_ds_compound_memory_t *)malloc(VLEN_DS_DIM * sizeof(vlen_ds_compound_memory_t))))
+                     (vlen_ds_compound_memory_t *)malloc((size_t)ds_dim * sizeof(vlen_ds_compound_memory_t))))
         TEST_ERROR;
 
     /* Create scalar dataspace */
@@ -15834,7 +16272,7 @@ test_downsize_vlen_scalar_dataset(hid_t file)
      */
     strcpy(common_string, VLEN_DS_STRING);
 
-    for (i = 0; i < VLEN_DS_DIM; ++i) {
+    for (i = 0; i < ds_dim; ++i) {
         compound_data[i].value = VLEN_DS_VALUE;
         for (dim1 = 0; dim1 < VLEN_DS_ARRAY_DIM1; ++dim1) {
             for (dim2 = 0; dim2 < VLEN_DS_ARRAY_DIM2; ++dim2) {
@@ -15850,7 +16288,7 @@ test_downsize_vlen_scalar_dataset(hid_t file)
      * arrays. */
     /* Note: the bug in v1.8.14 is tripped on the second iteration, when 100 elements are over-written
      * with 99. */
-    for (i = VLEN_DS_DIM; i > 0; --i) {
+    for (i = ds_dim; i > 0; --i) {
         vlen_compound_data.len = (size_t)i;
         vlen_compound_data.p   = compound_data;
         if (H5Dwrite(scalar_did, vlen_compound_memory_tid, scalar_sid, scalar_sid, H5P_DEFAULT,
@@ -17136,9 +17574,9 @@ int
 main(void)
 {
     char        filename[FILENAME_BUF_SIZE];
-    hid_t       file, grp, fapl, fapl2;
+    hid_t       file, grp, fapl;
     hid_t       fcpl = H5I_INVALID_HID, fcpl2 = H5I_INVALID_HID;
-    unsigned    new_format;
+    H5F_libver_t low;   /* Low version bound */
     unsigned    paged;
     unsigned    minimized_ohdr;
     int         mdc_nelmts;
@@ -17207,14 +17645,6 @@ main(void)
     if (H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
         goto error;
 
-    /* Copy the file access property list */
-    if ((fapl2 = H5Pcopy(fapl)) < 0)
-        TEST_ERROR;
-
-    /* Set the "use the latest version of the format" bounds for creating objects in the file */
-    if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR;
-
     /* create a file creation property list */
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         TEST_ERROR;
@@ -17237,36 +17667,29 @@ main(void)
 
         for (minimized_ohdr = false; minimized_ohdr <= true; minimized_ohdr++) {
 
-            /* Test with old & new format groups */
-            for (new_format = false; new_format <= true; new_format++) {
-                hid_t my_fapl, my_fcpl;
+            /* Test all different low bounds for file format */
+            for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+                hid_t my_fcpl;
 
-                /* Set the FAPL for the type of format */
-                if (new_format) {
-                    my_fapl = fapl2;
-                    if (paged) {
-                        my_fcpl = fcpl2;
-                        puts("\nTesting with new file format and paged aggregation");
-                    }
-                    else {
-                        my_fcpl = fcpl;
-                        puts("\nTesting with new file format and non-paged aggregation");
-                    }
-                } /* end if */
+                /* Set version bounds */
+                if (H5Pset_libver_bounds(fapl, low, H5F_LIBVER_LATEST) < 0)
+                    TEST_ERROR;
+
+                /* Print partial message about file format */
+                printf("\nTesting with %s file format ", h5_get_version_string(low));
+
+                /* Set the FCPL and print the rest of the message depending on paged aggregation setting */
+                if (paged) {
+                    my_fcpl = fcpl2;
+                    puts("and paged aggregation");
+                }
                 else {
-                    my_fapl = fapl;
-                    if (paged) {
-                        my_fcpl = fcpl2;
-                        puts("Testing with old file format and paged aggregation:");
-                    }
-                    else {
-                        my_fcpl = fcpl;
-                        puts("Testing with old file format and non-paged aggregation:");
-                    }
-                } /* end else */
+                    my_fcpl = fcpl;
+                    puts("and non-paged aggregation");
+                }
 
                 /* Create the file for this test */
-                if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, my_fcpl, my_fapl)) < 0)
+                if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, my_fcpl, fapl)) < 0)
                     goto error;
 
                 if (true == minimized_ohdr) {
@@ -17284,10 +17707,10 @@ main(void)
                     goto error;
 
                 nerrors += (test_create(file) < 0 ? 1 : 0);
-                nerrors += (test_simple_io(driver_name, my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_compact_io(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_max_compact(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_compact_open_close_dirty(my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_simple_io(driver_name, fapl) < 0 ? 1 : 0);
+                nerrors += (test_compact_io(fapl) < 0 ? 1 : 0);
+                nerrors += (test_max_compact(fapl) < 0 ? 1 : 0);
+                nerrors += (test_compact_open_close_dirty(fapl) < 0 ? 1 : 0);
                 nerrors += (test_conv_buffer(file) < 0 ? 1 : 0);
                 nerrors += (test_tconv(file) < 0 ? 1 : 0);
                 nerrors += (test_filters(file) < 0 ? 1 : 0);
@@ -17310,7 +17733,7 @@ main(void)
                 nerrors += (test_multiopen(file) < 0 ? 1 : 0);
                 nerrors += (test_types(file) < 0 ? 1 : 0);
                 nerrors += (test_floattypes(file) < 0 ? 1 : 0);
-                nerrors += (test_userblock_offset(driver_name, my_fapl, new_format) < 0 ? 1 : 0);
+                nerrors += (test_userblock_offset(driver_name, fapl, low >= H5F_LIBVER_V110) < 0 ? 1 : 0);
 
                 if (driver_is_default_compatible) {
                     nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
@@ -17319,10 +17742,10 @@ main(void)
                 nerrors += (test_can_apply(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
                 nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
-                nerrors += (test_set_local(my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_set_local(fapl) < 0 ? 1 : 0);
                 nerrors += (test_can_apply_szip(file) < 0 ? 1 : 0);
                 nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
-                nerrors += (test_copy_dcpl(file, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_copy_dcpl(file, fapl) < 0 ? 1 : 0);
                 nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
 
                 if (driver_is_default_compatible) {
@@ -17331,49 +17754,50 @@ main(void)
 
                 nerrors += (test_zero_dims(file) < 0 ? 1 : 0);
                 nerrors += (test_missing_chunk(file) < 0 ? 1 : 0);
-                nerrors += (test_random_chunks(my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_random_chunks(fapl) < 0 ? 1 : 0);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                 nerrors += (test_deprec(file) < 0 ? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-                nerrors += (test_huge_chunks(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_chunk_cache(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_chunk_fast(driver_name, my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_reopen_chunk_fast(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_chunk_fast_bug1(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_chunk_expand(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_layout_extend(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_fixed_array(my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_huge_chunks(fapl) < 0 ? 1 : 0);
+                nerrors += (test_chunk_cache(fapl) < 0 ? 1 : 0);
+                nerrors += (test_big_chunks_bypass_cache(fapl) < 0 ? 1 : 0);
+                nerrors += (test_chunk_fast(driver_name, fapl) < 0 ? 1 : 0);
+                nerrors += (test_reopen_chunk_fast(fapl) < 0 ? 1 : 0);
+                nerrors += (test_chunk_fast_bug1(fapl) < 0 ? 1 : 0);
+                if (low >= H5F_LIBVER_V200)
+                    nerrors += (test_chunk_expand2(fapl) < 0 ? 1 : 0);
+                else
+                    nerrors += (test_chunk_expand(fapl) < 0 ? 1 : 0);
+                nerrors += (test_layout_extend(fapl) < 0 ? 1 : 0);
+                nerrors += (test_fixed_array(fapl) < 0 ? 1 : 0);
 
                 if (driver_is_default_compatible) {
                     nerrors += (test_idx_compatible() < 0 ? 1 : 0);
                 }
 
-                nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_single_chunk(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_large_chunk_shrink(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_zero_dim_dset(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_storage_size(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_power2up(my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_unfiltered_edge_chunks(fapl) < 0 ? 1 : 0);
+                nerrors += (test_single_chunk(fapl) < 0 ? 1 : 0);
+                nerrors += (test_large_chunk_shrink(fapl) < 0 ? 1 : 0);
+                nerrors += (test_zero_dim_dset(fapl) < 0 ? 1 : 0);
+                nerrors += (test_storage_size(fapl) < 0 ? 1 : 0);
+                nerrors += (test_power2up(fapl) < 0 ? 1 : 0);
 
-                nerrors += (test_swmr_non_latest(driver_name, my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_earray_hdr_fd(driver_name, my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_farray_hdr_fd(driver_name, my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_bt2_hdr_fd(driver_name, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_swmr_non_latest(driver_name, fapl) < 0 ? 1 : 0);
+                nerrors += (test_earray_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
+                nerrors += (test_farray_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
+                nerrors += (test_bt2_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
 
                 nerrors += (test_downsize_vlen_scalar_dataset(file) < 0 ? 1 : 0);
 
                 if (H5Fclose(file) < 0)
                     goto error;
-            } /* end for new_format */
+            } /* end for low */
         }     /* end for minimized_ohdr */
     }         /* end for paged */
 
     /* Close property lists */
-    if (H5Pclose(fapl2) < 0)
-        TEST_ERROR;
     if (H5Pclose(fcpl) < 0)
         TEST_ERROR;
     if (H5Pclose(fcpl2) < 0)

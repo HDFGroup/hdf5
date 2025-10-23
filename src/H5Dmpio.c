@@ -84,8 +84,7 @@
     do {                                                                                                     \
         (index_info).f       = (dset)->oloc.file;                                                            \
         (index_info).pline   = &((dset)->shared->dcpl_cache.pline);                                          \
-        (index_info).layout  = &((dset)->shared->layout.u.chunk);                                            \
-        (index_info).storage = &((dset)->shared->layout.storage.u.chunk);                                    \
+        (index_info).layout  = (dset)->shared->layout;                                                       \
     } while (0)
 
 /******************/
@@ -3035,8 +3034,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
 
                 idx_info.f       = di->dset->oloc.file;
                 idx_info.pline   = &di->dset->shared->dcpl_cache.pline;
-                idx_info.layout  = &di->dset->shared->layout.u.chunk;
-                idx_info.storage = &di->dset->shared->layout.storage.u.chunk;
+                idx_info.layout  = di->dset->shared->layout;
 
                 /*
                  * The dataset's chunk index should be open at this point.
