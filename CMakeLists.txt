@@ -325,6 +325,12 @@ set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
 
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
 
+if (HDF5_USE_PREGEN)
+  set (HDF5_GENERATED_SOURCE_DIR ${HDF5_USE_PREGEN_DIR})
+else ()
+  set (HDF5_GENERATED_SOURCE_DIR ${HDF5_F90_SRC_BINARY_DIR})
+endif ()
+
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
 #-----------------------------------------------------------------------------
@@ -506,8 +512,15 @@ set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
 set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
 set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
-set (H5_LIBVER_DIR       ${H5_VERS_MAJOR}${H5_VERS_MINOR})
-
+if (H5_VERS_MAJOR GREATER 1)
+  if (H5_VERS_MINOR GREATER 9)
+    set (H5_LIBVER_DIR ${H5_VERS_MAJOR}${H5_VERS_MINOR})
+  else ()
+    set (H5_LIBVER_DIR ${H5_VERS_MAJOR}0${H5_VERS_MINOR})
+  endif()
+else ()
+  set (H5_LIBVER_DIR ${H5_VERS_MAJOR}${H5_VERS_MINOR})
+endif()
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------

@@ -616,6 +616,10 @@ encoding for object names.</td>
 <td>#H5Pset_virtual_view/#H5Pget_virtual_view</td>
 <td>Sets/gets the view of the virtual dataset (VDS) to include or exclude missing mapped elements.</td>
 </tr>
+<tr>
+<td>#H5Pset_virtual_spatial_tree/#H5Pget_virtual_spatial_tree</td>
+<td>Sets/gets the flag to use spatial trees when searching many VDS mappings</td>
+</tr>
 </table>
 //! [dapl_table]
  *

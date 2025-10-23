@@ -89,7 +89,7 @@
     {                                                                                                        \
         {HADDR_UNDEF, 0}, 0, NULL, 0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                       \
                                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                      \
-            H5D_VDS_ERROR, HSIZE_UNDEF, -1, -1, false, NULL, NULL                                            \
+            H5D_VDS_ERROR, HSIZE_UNDEF, -1, -1, false, NULL, NULL, NULL, 0, 0, NULL,                         \
     }
 #define H5D_DEF_STORAGE_COMPACT                                                                              \
     {                                                                                                        \
@@ -2213,9 +2213,8 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
     if (H5D_virtual_update_min_dims(&virtual_layout, virtual_layout.storage.u.virt.list_nused) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to update virtual dataset minimum dimensions");
 
-    /* Finish adding entry */
+    /* Finish adding entry to list */
     virtual_layout.storage.u.virt.list_nused++;
-
 done:
     /* Set VDS layout information in property list */
     /* (Even on failure, so there's not a mangled layout struct in the list) */
@@ -2257,7 +2256,6 @@ done:
             virtual_layout.storage.u.virt.list =
                 (H5O_storage_virtual_ent_t *)H5MM_xfree(virtual_layout.storage.u.virt.list);
     } /* end if */
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_virtual() */
 

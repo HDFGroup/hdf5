@@ -10675,6 +10675,59 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Pset_efile_prefix(long dapl_id, String prefix)
         throws HDF5LibraryException, NullPointerException;
 
+    /**
+     * @ingroup JH5P
+     *
+     * H5Pget_virtual_spatial_tree accesses the flag for whether to use/not use a spatial tree
+     * during mapping operations on a Virtual Dataset. The default value is true.
+     *
+     * Use of a spatial tree will accelerate the process of searching through mappings
+     * to determine which contain intersections with the user's selection region.
+     * With the tree disabled, all mappings will simply be iterated through and
+     * checked directly.
+     *
+     * Certain workflows may find that tree creation overhead outweighs the time saved
+     * on reads. In this case, disabling this property will lead to a performance improvement,
+     * though it is expected that almost all cases will benefit from the tree on net.
+     *
+     * @param dapl_id
+     *            IN: Dataset access property list
+     *
+     * @return true if the given dapl is set to use a spatial tree, false if not.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native boolean H5Pget_virtual_spatial_tree(long dapl_id)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5P
+     *
+     * H5Pset_virtual_spatial_tree sets the dapl to use/not use a spatial tree
+     * during mapping operations on a Virtual Dataset. The default value is true.
+     *
+     * Use of a spatial tree will accelerate the process of searching through mappings
+     * to determine which contain intersections with the user's selection region.
+     * With the tree disabled, all mappings will simply be iterated through and
+     * checked directly.
+     *
+     * Certain workflows may find that tree creation overhead outweighs the time saved
+     * on reads. In this case, disabling this property will lead to a performance improvement,
+     * though it is expected that almost all cases will benefit from the tree on net.
+     *
+     * @param dapl_id
+     *            IN: Dataset access property list
+     *
+     * @param use_tree
+     *            IN: the use_tree flag setting
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native void H5Pset_virtual_spatial_tree(long dapl_id, boolean use_tree)
+        throws HDF5LibraryException;
+
     // public synchronized static native void H5Pset_append_flush(long plist_id, int ndims, long[] boundary,
     // H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
 
