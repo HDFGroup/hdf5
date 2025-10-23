@@ -16219,7 +16219,7 @@ test_downsize_vlen_scalar_dataset(hid_t file)
 
     TESTING("H5Dwrite() on down-sized VLEN contents");
 
-    /* Set dataset inital size based on express_test setting */
+    /* Set dataset initial size based on express_test setting */
     express_test = h5_get_testexpress();
     ds_dim = express_test <= H5_TEST_EXPRESS_EXHAUSTIVE ? VLEN_DS_DIM_EXHAUST : VLEN_DS_DIM;
 
