@@ -765,6 +765,14 @@ H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, 
         if ((ltable->lnks = (H5O_link_t *)H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
+        /* Initialize all links to invalid */
+        for (size_t i = 0; i < ltable->nlinks; i++) {
+            ltable->lnks[i].type = H5L_TYPE_ERROR;
+            ltable->lnks[i].name = NULL;
+            ltable->lnks[i].u.soft.name = NULL;
+            ltable->lnks[i].u.ud.udata = NULL;
+        }
+
         /* Set up user data for iteration */
         udata.ltable   = ltable;
         udata.curr_lnk = 0;
