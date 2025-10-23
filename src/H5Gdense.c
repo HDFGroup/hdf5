@@ -768,7 +768,7 @@ H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, 
         /* Initialize all links to invalid. NOTE: If H5O_link_t changes, update this loop. */
         for (size_t i = 0; i < ltable->nlinks; i++) {
             memset(&ltable->lnks[i], 0, sizeof(H5O_link_t));
-            ltable->lnks[i].type        = H5L_TYPE_ERROR;
+            ltable->lnks[i].type = H5L_TYPE_ERROR;
         }
 
         /* Set up user data for iteration */
