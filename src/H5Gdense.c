@@ -767,10 +767,10 @@ H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, 
 
         /* Initialize all links to invalid */
         for (size_t i = 0; i < ltable->nlinks; i++) {
-            ltable->lnks[i].type = H5L_TYPE_ERROR;
-            ltable->lnks[i].name = NULL;
+            ltable->lnks[i].type        = H5L_TYPE_ERROR;
+            ltable->lnks[i].name        = NULL;
             ltable->lnks[i].u.soft.name = NULL;
-            ltable->lnks[i].u.ud.udata = NULL;
+            ltable->lnks[i].u.ud.udata  = NULL;
         }
 
         /* Set up user data for iteration */
