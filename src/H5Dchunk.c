@@ -1142,7 +1142,7 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
         idx_info.f       = dataset->oloc.file;
         idx_info.pline   = &dataset->shared->dcpl_cache.pline;
-        idx_info.layout  = dataset->shared->layout;
+        idx_info.layout  = &dataset->shared->layout;
 
         assert(sc && sc->ops && sc->ops->is_open);
         if (sc->ops->is_open(&idx_info, &index_is_open) < 0)
@@ -6358,7 +6358,7 @@ H5D__chunk_addrmap(const H5D_t *dset, haddr_t chunk_addr[])
     /* Compose chunked index info struct */
     idx_info.f       = dset->oloc.file;
     idx_info.pline   = &dset->shared->dcpl_cache.pline;
-    idx_info.layout  = dset->shared->layout;
+    idx_info.layout  = &dset->shared->layout;
 
     /* Iterate over chunks to build mapping of chunk addresses */
     if ((sc->ops->iterate)(&idx_info, H5D__chunk_addrmap_cb, &udata) < 0)
