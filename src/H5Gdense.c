@@ -765,7 +765,7 @@ H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, 
         if ((ltable->lnks = (H5O_link_t *)H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-        /* Initialize all links to invalid */
+        /* Initialize all links to invalid. NOTE: If H5O_link_t changes, update this loop. */
         for (size_t i = 0; i < ltable->nlinks; i++) {
             ltable->lnks[i].type        = H5L_TYPE_ERROR;
             ltable->lnks[i].name        = NULL;
