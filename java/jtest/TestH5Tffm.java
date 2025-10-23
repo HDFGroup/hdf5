@@ -43,8 +43,7 @@ public class TestH5Tffm {
     public TestName testname = new TestName();
 
     /** Helper to check if running on Windows */
-    private static final boolean IS_WINDOWS =
-        System.getProperty("os.name").toLowerCase().contains("win");
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
     static
     {
