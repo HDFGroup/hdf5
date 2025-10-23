@@ -36,7 +36,6 @@ import org.junit.rules.TestName;
  * This test class uses direct FFM bindings without the hdf.hdf5lib wrapper layer.
  *
  * Note: Some tests are disabled on Windows due to known FFM limitations.
- * See .claude/FFM_WINDOWS_LIMITATIONS.md for details.
  */
 public class TestH5Tffm {
     @Rule
@@ -472,15 +471,12 @@ public class TestH5Tffm {
     @Test
     public void testH5Tvlen_create()
     {
-        // Skip on Windows due to FFM heap corruption issue
-        // See .claude/FFM_WINDOWS_LIMITATIONS.md
-        Assume.assumeFalse("Skipping on Windows - FFM limitation", IS_WINDOWS);
-
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Create variable-length type of integers
-            H5tid = hdf5_h_1.H5Tvlen_create(hdf5_h_1.H5T_NATIVE_INT_g());
+            // Use H5T_STD_I32LE instead of H5T_NATIVE_INT for platform consistency
+            H5tid = hdf5_h_1.H5Tvlen_create(hdf5_h_1.H5T_STD_I32LE_g());
             assertTrue("H5Tvlen_create failed", isValidId(H5tid));
 
             // Verify it's a variable-length type
@@ -491,9 +487,9 @@ public class TestH5Tffm {
             long base_type = hdf5_h_1.H5Tget_super(H5tid);
             assertTrue("H5Tget_super should return valid type", isValidId(base_type));
 
-            // Verify base type is integer
-            int equal = hdf5_h_1.H5Tequal(base_type, hdf5_h_1.H5T_NATIVE_INT_g());
-            assertTrue("Base type should be H5T_NATIVE_INT", equal > 0);
+            // Verify base type is 32-bit integer
+            int equal = hdf5_h_1.H5Tequal(base_type, hdf5_h_1.H5T_STD_I32LE_g());
+            assertTrue("Base type should be H5T_STD_I32LE", equal > 0);
 
             hdf5_h_1.H5Tclose(base_type);
         }
@@ -713,9 +709,6 @@ public class TestH5Tffm {
     @Test
     public void testH5Tfind_conversion_path()
     {
-        // Skip on Windows due to FFM heap corruption issue
-        // See .claude/FFM_WINDOWS_LIMITATIONS.md
-        Assume.assumeFalse("Skipping on Windows - FFM limitation", IS_WINDOWS);
 
         System.out.print(testname.getMethodName());
 
@@ -725,10 +718,10 @@ public class TestH5Tffm {
             pcdata.set(java.lang.foreign.ValueLayout.ADDRESS, 0, MemorySegment.NULL);
 
             MemorySegment convFunc =
-                hdf5_h.H5Tfind(hdf5_h_1.H5T_NATIVE_INT_g(), hdf5_h_1.H5T_NATIVE_FLOAT_g(), pcdata);
+                hdf5_h.H5Tfind(hdf5_h_1.H5T_STD_I32LE_g(), hdf5_h_1.H5T_IEEE_F32LE_g(), pcdata);
 
             // H5Tfind returns function pointer (can be NULL if no conversion exists)
-            // For native types, conversion should exist
+            // For standard types, conversion should exist
             assertFalse("Conversion function should be found", convFunc.equals(MemorySegment.NULL));
         }
     }
@@ -832,15 +825,12 @@ public class TestH5Tffm {
     @Test
     public void testH5Tget_inpad()
     {
-        // Skip on Windows due to FFM heap corruption issue
-        // See .claude/FFM_WINDOWS_LIMITATIONS.md
-        Assume.assumeFalse("Skipping on Windows - FFM limitation", IS_WINDOWS);
 
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Get internal padding type for floating point
-            long floatType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_DOUBLE_g());
+            long floatType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_IEEE_F64LE_g());
             assertTrue("H5Tcopy failed", isValidId(floatType));
 
             int inpad = hdf5_h_1.H5Tget_inpad(floatType);
@@ -1046,24 +1036,21 @@ public class TestH5Tffm {
     @Test
     public void testH5Tget_super_array()
     {
-        // Skip on Windows due to FFM heap corruption issue
-        // See .claude/FFM_WINDOWS_LIMITATIONS.md
-        Assume.assumeFalse("Skipping on Windows - FFM limitation", IS_WINDOWS);
 
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
             // Create array type
             MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 10L);
-            H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_NATIVE_SHORT_g(), 1, dims);
+            H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_STD_I16LE_g(), 1, dims);
 
             // Get the base type
             long superType = hdf5_h_1.H5Tget_super(H5tid);
             assertTrue("H5Tget_super failed", isValidId(superType));
 
             // Verify base type is short
-            int equal = hdf5_h_1.H5Tequal(superType, hdf5_h_1.H5T_NATIVE_SHORT_g());
-            assertTrue("Base type should be H5T_NATIVE_SHORT", equal > 0);
+            int equal = hdf5_h_1.H5Tequal(superType, hdf5_h_1.H5T_STD_I16LE_g());
+            assertTrue("Base type should be H5T_STD_I16LE", equal > 0);
 
             hdf5_h_1.H5Tclose(superType);
         }
@@ -1612,9 +1599,6 @@ public class TestH5Tffm {
     @Test
     public void testH5Tconvert_with_buffer()
     {
-        // Skip on Windows due to FFM heap corruption issue
-        // See .claude/FFM_WINDOWS_LIMITATIONS.md
-        Assume.assumeFalse("Skipping on Windows - FFM limitation", IS_WINDOWS);
 
         System.out.print(testname.getMethodName());
 
@@ -1623,8 +1607,8 @@ public class TestH5Tffm {
             int nelem             = 5;
             MemorySegment intData = arena.allocateFrom(hdf5_h.C_INT, 10, 20, 30, 40, 50);
 
-            long srcType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_INT_g());
-            long dstType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_NATIVE_FLOAT_g());
+            long srcType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_STD_I32LE_g());
+            long dstType = hdf5_h_1.H5Tcopy(hdf5_h_1.H5T_IEEE_F32LE_g());
 
             // Convert in place
             int result = hdf5_h_1.H5Tconvert(srcType, dstType, nelem, intData, MemorySegment.NULL,
@@ -2188,9 +2172,6 @@ public class TestH5Tffm {
     @Test
     public void testH5Tget_native_type_integer()
     {
-        // Skip on Windows due to FFM heap corruption issue
-        // See .claude/FFM_WINDOWS_LIMITATIONS.md
-        Assume.assumeFalse("Skipping on Windows - FFM limitation", IS_WINDOWS);
 
         System.out.print(testname.getMethodName());
 
