@@ -129,7 +129,8 @@ H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->pline->nused == 0); /* Shouldn't have filter defined on entering here */
     assert(idx_info->layout);
     assert(idx_info->layout->u.chunk.max_nchunks);
-    assert(!H5_addr_defined(idx_info->layout->storage.u.chunk.idx_addr)); /* address of data shouldn't be defined */
+    assert(!H5_addr_defined(
+        idx_info->layout->storage.u.chunk.idx_addr)); /* address of data shouldn't be defined */
 
     /* Calculate size of max dataset chunks */
     nbytes = idx_info->layout->u.chunk.max_nchunks * idx_info->layout->u.chunk.size;
@@ -253,11 +254,12 @@ H5D__none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     assert(H5_addr_defined(idx_info->layout->storage.u.chunk.idx_addr));
 
     /* Calculate the index of this chunk */
-    udata->chunk_idx = H5VM_array_offset_pre((idx_info->layout->u.chunk.ndims - 1), idx_info->layout->u.chunk.max_down_chunks,
-                                             udata->common.scaled);
+    udata->chunk_idx = H5VM_array_offset_pre((idx_info->layout->u.chunk.ndims - 1),
+                                             idx_info->layout->u.chunk.max_down_chunks, udata->common.scaled);
 
     /* Calculate the address of the chunk */
-    udata->chunk_block.offset = idx_info->layout->storage.u.chunk.idx_addr + udata->chunk_idx * idx_info->layout->u.chunk.size;
+    udata->chunk_block.offset =
+        idx_info->layout->storage.u.chunk.idx_addr + udata->chunk_idx * idx_info->layout->u.chunk.size;
 
     /* Update the other (constant) information for the chunk */
     udata->chunk_block.length = idx_info->layout->u.chunk.size;
@@ -332,7 +334,8 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t ch
         idx = H5VM_array_offset_pre(ndims, idx_info->layout->u.chunk.max_down_chunks, chunk_rec.scaled);
 
         /* Calculate the address of the chunk */
-        chunk_rec.chunk_addr = idx_info->layout->storage.u.chunk.idx_addr + idx * idx_info->layout->u.chunk.size;
+        chunk_rec.chunk_addr =
+            idx_info->layout->storage.u.chunk.idx_addr + idx * idx_info->layout->u.chunk.size;
 
         /* Make "generic chunk" callback */
         if ((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)

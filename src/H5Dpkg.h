@@ -375,9 +375,9 @@ typedef struct H5D_io_info_wrap_t {
 
 /* Typedef for chunked dataset index operation info */
 typedef struct H5D_chk_idx_info_t {
-    H5F_t               *f;       /* File pointer for operation */
-    const H5O_pline_t   *pline;   /* I/O pipeline info */
-    H5O_layout_t        *layout;  /* Layout description */
+    H5F_t             *f;      /* File pointer for operation */
+    const H5O_pline_t *pline;  /* I/O pipeline info */
+    H5O_layout_t      *layout; /* Layout description */
 } H5D_chk_idx_info_t;
 
 /*
@@ -776,7 +776,9 @@ H5_DLL herr_t H5D__chunk_set_sizes(H5D_t *dset);
 H5_DLL herr_t H5D__chunk_addrmap(const H5D_t *dset, haddr_t chunk_addr[]);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5D__chunk_update_cache(H5D_t *dset);
-H5_DLL herr_t H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout_t *layout_dst, const H5S_extent_t *ds_extent_src, H5T_t *dt_src, const H5O_pline_t *pline_src, H5O_copy_t *cpy_info);
+H5_DLL herr_t H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout_t *layout_dst,
+                              const H5S_extent_t *ds_extent_src, H5T_t *dt_src, const H5O_pline_t *pline_src,
+                              H5O_copy_t *cpy_info);
 H5_DLL herr_t H5D__chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout, hsize_t *btree_size);
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, FILE *stream);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, H5O_t *oh, H5O_layout_t *layout);

@@ -47,24 +47,27 @@
     }
 
 /*
- * Macros to compute the size required for encoding the size of a chunk. For version 4, this is the minimum number of bytes required to encode the size of an unfiltered chunk plus an extra byte, in case the filter makes the chunk larger. For versions after 4, this is simply the size of lengths for the file. For unfiltered chunks, this is 0.
+ * Macros to compute the size required for encoding the size of a chunk. For version 4, this is the minimum
+ * number of bytes required to encode the size of an unfiltered chunk plus an extra byte, in case the filter
+ * makes the chunk larger. For versions after 4, this is simply the size of lengths for the file. For
+ * unfiltered chunks, this is 0.
  */
-#define H5D_FARRAY_FILT_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, f, layout) \
-    do { \
-        if ((layout)->version > H5O_LAYOUT_VERSION_4) \
-                (chunk_size_len) = H5F_SIZEOF_SIZE(f); \
-            else { \
-                (chunk_size_len) = 1 + ((H5VM_log2_gen((uint64_t)(layout)->u.chunk.size) + 8) / 8); \
-                if ((chunk_size_len) > 8) \
-                    (chunk_size_len) = 8; \
-            } \
-    } while(0)
-#define H5D_FARRAY_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, idx_info) \
-    do { \
-        if ((idx_info)->pline->nused > 0) \
-            H5D_FARRAY_FILT_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, (idx_info)->f, (idx_info)->layout); \
-        else \
-            (chunk_size_len) = 0; \
+#define H5D_FARRAY_FILT_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, f, layout)                                    \
+    do {                                                                                                     \
+        if ((layout)->version > H5O_LAYOUT_VERSION_4)                                                        \
+            (chunk_size_len) = H5F_SIZEOF_SIZE(f);                                                           \
+        else {                                                                                               \
+            (chunk_size_len) = 1 + ((H5VM_log2_gen((uint64_t)(layout)->u.chunk.size) + 8) / 8);              \
+            if ((chunk_size_len) > 8)                                                                        \
+                (chunk_size_len) = 8;                                                                        \
+        }                                                                                                    \
+    } while (0)
+#define H5D_FARRAY_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, idx_info)                                          \
+    do {                                                                                                     \
+        if ((idx_info)->pline->nused > 0)                                                                    \
+            H5D_FARRAY_FILT_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, (idx_info)->f, (idx_info)->layout);       \
+        else                                                                                                 \
+            (chunk_size_len) = 0;                                                                            \
     } while (0)
 
 /******************/
@@ -206,17 +209,17 @@ const H5FA_class_t H5FA_CLS_CHUNK[1] = {{
 
 /* Fixed array class callbacks for dataset chunks w/filters */
 const H5FA_class_t H5FA_CLS_FILT_CHUNK[1] = {{
-    H5FA_CLS_FILT_CHUNK_ID,         /* Type of fixed array */
-    "Chunk w/filters",              /* Name of fixed array class */
-    sizeof(H5D_farray_filt_elmt_t), /* Size of native element */
-    H5D__farray_crt_context,        /* Create context */
-    H5D__farray_dst_context,        /* Destroy context */
-    H5D__farray_filt_fill,          /* Fill block of missing elements callback */
-    H5D__farray_filt_encode,        /* Element encoding callback */
-    H5D__farray_filt_decode,        /* Element decoding callback */
-    H5D__farray_filt_debug,         /* Element debugging callback */
+    H5FA_CLS_FILT_CHUNK_ID,           /* Type of fixed array */
+    "Chunk w/filters",                /* Name of fixed array class */
+    sizeof(H5D_farray_filt_elmt_t),   /* Size of native element */
+    H5D__farray_crt_context,          /* Create context */
+    H5D__farray_dst_context,          /* Destroy context */
+    H5D__farray_filt_fill,            /* Fill block of missing elements callback */
+    H5D__farray_filt_encode,          /* Element encoding callback */
+    H5D__farray_filt_decode,          /* Element decoding callback */
+    H5D__farray_filt_debug,           /* Element debugging callback */
     H5D__farray_filt_crt_dbg_context, /* Create debugging context */
-    H5D__farray_dst_dbg_context     /* Destroy debugging context */
+    H5D__farray_dst_dbg_context       /* Destroy debugging context */
 }};
 
 /* Declare a free list to manage the H5D_farray_ctx_t struct */
@@ -253,7 +256,7 @@ H5D__farray_crt_context(void *_udata)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate fixed array client callback context");
 
     /* Initialize the context */
-    ctx->file_addr_len = H5F_SIZEOF_ADDR(udata->f);
+    ctx->file_addr_len  = H5F_SIZEOF_ADDR(udata->f);
     ctx->chunk_size_len = udata->chunk_size_len;
 
     /* Set return value */
@@ -437,8 +440,8 @@ H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void 
 static void *
 H5D__farray_crt_dbg_context(H5F_t *f, haddr_t H5_ATTR_UNUSED obj_addr)
 {
-    H5D_farray_ctx_ud_t *dbg_ctx = NULL;     /* Context for fixed array callback */
-    void                *ret_value = NULL;   /* Return value */
+    H5D_farray_ctx_ud_t *dbg_ctx   = NULL; /* Context for fixed array callback */
+    void                *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -689,7 +692,7 @@ H5D__farray_filt_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
     obj_opened = false;
 
     /* Create user data */
-    dbg_ctx->f          = f;
+    dbg_ctx->f = f;
 
     /* Calculate length of chunk size field */
     H5D_FARRAY_FILT_COMPUTE_CHUNK_SIZE_LEN(dbg_ctx->chunk_size_len, f, &layout);
@@ -816,10 +819,10 @@ H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
 static herr_t
 H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
-    H5FA_create_t       cparam;              /* Fixed array creation parameters */
-    H5D_farray_ctx_ud_t udata;               /* User data for fixed array create call */
-    unsigned            chunk_size_len = 0;  /* Size of encoded chunk size */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    H5FA_create_t       cparam;                   /* Fixed array creation parameters */
+    H5D_farray_ctx_ud_t udata;                    /* User data for fixed array create call */
+    unsigned            chunk_size_len = 0;       /* Size of encoded chunk size */
+    herr_t              ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -847,7 +850,7 @@ H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info)
     cparam.nelmts = idx_info->layout->u.chunk.max_nchunks;
 
     /* Set up the user data */
-    udata.f          = idx_info->f;
+    udata.f              = idx_info->f;
     udata.chunk_size_len = (size_t)chunk_size_len;
 
     /* Create the fixed array for the chunk index */
@@ -855,7 +858,8 @@ H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create fixed array");
 
     /* Get the address of the fixed array in file */
-    if (H5FA_get_addr(idx_info->layout->storage.u.chunk.u.farray.fa, &(idx_info->layout->storage.u.chunk.idx_addr)) < 0)
+    if (H5FA_get_addr(idx_info->layout->storage.u.chunk.u.farray.fa,
+                      &(idx_info->layout->storage.u.chunk.idx_addr)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query fixed array address");
 
     /* Check for SWMR writes to the file */
@@ -904,8 +908,8 @@ H5D__farray_idx_open(const H5D_chk_idx_info_t *idx_info)
     H5D_FARRAY_COMPUTE_CHUNK_SIZE_LEN(udata.chunk_size_len, idx_info);
 
     /* Open the fixed array for the chunk index */
-    if (NULL ==
-        (idx_info->layout->storage.u.chunk.u.farray.fa = H5FA_open(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &udata)))
+    if (NULL == (idx_info->layout->storage.u.chunk.u.farray.fa =
+                     H5FA_open(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &udata)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open fixed array");
 
     /* Check for SWMR writes to the file */
@@ -1098,8 +1102,8 @@ H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     fa = idx_info->layout->storage.u.chunk.u.farray.fa;
 
     /* Calculate the index of this chunk */
-    idx = H5VM_array_offset_pre((idx_info->layout->u.chunk.ndims - 1), idx_info->layout->u.chunk.max_down_chunks,
-                                udata->common.scaled);
+    idx = H5VM_array_offset_pre((idx_info->layout->u.chunk.ndims - 1),
+                                idx_info->layout->u.chunk.max_down_chunks, udata->common.scaled);
 
     udata->chunk_idx = idx;
 
@@ -1343,7 +1347,8 @@ H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     fa = idx_info->layout->storage.u.chunk.u.farray.fa;
 
     /* Calculate the index of this chunk */
-    idx = H5VM_array_offset_pre((idx_info->layout->u.chunk.ndims - 1), idx_info->layout->u.chunk.max_down_chunks, udata->scaled);
+    idx = H5VM_array_offset_pre((idx_info->layout->u.chunk.ndims - 1),
+                                idx_info->layout->u.chunk.max_down_chunks, udata->scaled);
 
     /* Check for filters on chunks */
     if (idx_info->pline->nused > 0) {
@@ -1463,7 +1468,7 @@ H5D__farray_idx_delete(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array");
 
         /* Set up the user data */
-        ctx_udata.f          = idx_info->f;
+        ctx_udata.f = idx_info->f;
 
         /* Compute number of bytes used to encode the chunk size */
         H5D_FARRAY_COMPUTE_CHUNK_SIZE_LEN(ctx_udata.chunk_size_len, idx_info);
