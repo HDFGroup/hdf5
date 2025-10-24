@@ -4117,9 +4117,13 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     hsize_t    dims[1]    = {2};
     char       buf1[2][2] = {"ab", "de"};            /* string, NO NUL fixed length */
     char       buf2[2]    = {1, 2};                  /* bitfield, opaque */
-    s_t        buf3[2]    = {{1, 2}, {3, 4}};        /* compound */
-    hobj_ref_t buf4[2];                              /* reference */
-    hvl_t      buf5[2];                              /* vlen */
+    s_t        buf3[2];                              /* compound */
+    hobj_ref_t buf4[2] = {0};                              /* reference */
+    hvl_t      buf5[2] = {0};                              /* vlen */
+
+    memset(buf3, 0, sizeof(buf3));
+    buf3[0].a = 1; buf3[0].b = 2;
+    buf3[1].a = 3; buf3[1].b = 4;
     hsize_t    dimarray[1] = {3};                    /* array dimension */
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
@@ -4130,27 +4134,35 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     hsize_t    dims2[2]    = {3, 2};
     char       buf12[6][2] = {"ab", "cd", "ef", "gh", "ij", "kl"}; /* string, NO NUL fixed length */
     char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};             /* bitfield, opaque */
-    s_t        buf32[6]    = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}}; /* compound */
-    hobj_ref_t buf42[3][2];                                                       /* reference */
-    hvl_t      buf52[3][2];                                                       /* vlen */
+    s_t        buf32[6];                                           /* compound */
+    hobj_ref_t buf42[3][2] = {0};                                                       /* reference */
+    hvl_t      buf52[3][2] = {0};                                                       /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
     int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                              /* integer */
     float buf82[3][2] = {{1, 2}, {3, 4}, {5, 6}};                            /* float */
     float buf92[6][2] = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}}; /* complex */
+
+    memset(buf32, 0, sizeof(buf32));
+    buf32[0].a = 1; buf32[0].b = 2;
+    buf32[1].a = 3; buf32[1].b = 4;
+    buf32[2].a = 5; buf32[2].b = 6;
+    buf32[3].a = 7; buf32[3].b = 8;
+    buf32[4].a = 9; buf32[4].b = 10;
+    buf32[5].a = 11; buf32[5].b = 12;
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t dims3[3]     = {4, 3, 2};
     char    buf13[24][2] = {
         "ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz", "AB",
         "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
-    char       buf23[4][3][2];                                                /* bitfield, opaque */
-    s_t        buf33[4][3][2];                                                /* compound */
-    hobj_ref_t buf43[4][3][2];                                                /* reference */
-    hvl_t      buf53[4][3][2];                                                /* vlen */
-    int        buf63[24][3];                                                  /* array */
-    int        buf73[4][3][2];                                                /* integer */
-    float      buf83[4][3][2];                                                /* float */
-    float      buf93[24][2];                                                  /* complex */
+    char       buf23[4][3][2] = {0};                                                /* bitfield, opaque */
+    s_t        buf33[4][3][2] = {0};                                          /* compound */
+    hobj_ref_t buf43[4][3][2] = {0};                                                /* reference */
+    hvl_t      buf53[4][3][2] = {0};                                                /* vlen */
+    int        buf63[24][3] = {0};                                                  /* array */
+    int        buf73[4][3][2] = {0};                                                /* integer */
+    float      buf83[4][3][2] = {0};                                                /* float */
+    float      buf93[24][2] = {0};                                                  /* complex */
 
     /*-------------------------------------------------------------------------
      * 1D attributes
@@ -4575,9 +4587,13 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     hsize_t    dims[1]    = {2};
     char       buf1[2][2] = {"ab", "de"};            /* string, NO NUL fixed length */
     char       buf2[2]    = {1, 2};                  /* bitfield, opaque */
-    s_t        buf3[2]    = {{1, 2}, {3, 4}};        /* compound */
-    hobj_ref_t buf4[2];                              /* reference */
-    hvl_t      buf5[2];                              /* vlen */
+    s_t        buf3[2];                              /* compound */
+    hobj_ref_t buf4[2] = {0};                              /* reference */
+    hvl_t      buf5[2] = {0};                              /* vlen */
+
+    memset(buf3, 0, sizeof(buf3));
+    buf3[0].a = 1; buf3[0].b = 2;
+    buf3[1].a = 3; buf3[1].b = 4;
     hsize_t    dimarray[1] = {3};                    /* array dimension */
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
@@ -4588,27 +4604,35 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     hsize_t    dims2[2]    = {3, 2};
     char       buf12[6][2] = {"ab", "cd", "ef", "gh", "ij", "kl"}; /* string, NO NUL fixed length */
     char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};             /* bitfield, opaque */
-    s_t        buf32[6]    = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}}; /* compound */
-    hobj_ref_t buf42[3][2];                                                       /* reference */
-    hvl_t      buf52[3][2];                                                       /* vlen */
+    s_t        buf32[6];                                           /* compound */
+    hobj_ref_t buf42[3][2] = {0};                                                       /* reference */
+    hvl_t      buf52[3][2] = {0};                                                       /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
     int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                              /* integer */
     float buf82[3][2] = {{1, 2}, {3, 4}, {5, 6}};                            /* float */
     float buf92[6][2] = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}}; /* complex */
+
+    memset(buf32, 0, sizeof(buf32));
+    buf32[0].a = 1; buf32[0].b = 2;
+    buf32[1].a = 3; buf32[1].b = 4;
+    buf32[2].a = 5; buf32[2].b = 6;
+    buf32[3].a = 7; buf32[3].b = 8;
+    buf32[4].a = 9; buf32[4].b = 10;
+    buf32[5].a = 11; buf32[5].b = 12;
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t dims3[3]     = {4, 3, 2};
     char    buf13[24][2] = {
         "ab", "cd", "ef", "gh", "ij", "kl", "mn", "pq", "rs", "tu", "vw", "xz", "AB",
         "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
-    char       buf23[4][3][2];                                                /* bitfield, opaque */
-    s_t        buf33[4][3][2];                                                /* compound */
-    hobj_ref_t buf43[4][3][2];                                                /* reference */
-    hvl_t      buf53[4][3][2];                                                /* vlen */
-    int        buf63[24][3];                                                  /* array */
-    int        buf73[4][3][2];                                                /* integer */
-    float      buf83[4][3][2];                                                /* float */
-    float      buf93[24][2];                                                  /* complex */
+    char       buf23[4][3][2] = {0};                                                /* bitfield, opaque */
+    s_t        buf33[4][3][2] = {0};                                          /* compound */
+    hobj_ref_t buf43[4][3][2] = {0};                                                /* reference */
+    hvl_t      buf53[4][3][2] = {0};                                                /* vlen */
+    int        buf63[24][3] = {0};                                                  /* array */
+    int        buf73[4][3][2] = {0};                                                /* integer */
+    float      buf83[4][3][2] = {0};                                                /* float */
+    float      buf93[24][2] = {0};                                                  /* complex */
 
     /*-------------------------------------------------------------------------
      * 1D
