@@ -84,7 +84,7 @@
     do {                                                                                                     \
         (index_info).f       = (dset)->oloc.file;                                                            \
         (index_info).pline   = &((dset)->shared->dcpl_cache.pline);                                          \
-        (index_info).layout  = (dset)->shared->layout;                                                       \
+        (index_info).layout  = &((dset)->shared->layout);                                                    \
     } while (0)
 
 /******************/
@@ -3300,7 +3300,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
         if ((fill_msg->alloc_time != H5D_ALLOC_TIME_INCR) || !curr_dset_info->index_empty)
             chunk_list->all_dset_indices_empty = false;
 
-        if (curr_dset_info->chunk_idx_info.storage->ops->insert)
+        if (curr_dset_info->chunk_idx_info.layout->storage.u.chunk.ops->insert)
             chunk_list->no_dset_index_insert_methods = false;
 
         /*
@@ -5314,8 +5314,8 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
             cached_dset_info = chunk_list->dset_info.single_dset_info;
         assert(cached_dset_info);
 
-        chunk_ud.common.layout  = cached_dset_info->chunk_idx_info.layout;
-        chunk_ud.common.storage = cached_dset_info->chunk_idx_info.storage;
+        chunk_ud.common.layout  = &cached_dset_info->chunk_idx_info.layout->u.chunk;
+        chunk_ud.common.storage = &cached_dset_info->chunk_idx_info.layout->storage.u.chunk.;
         chunk_ud.common.scaled  = scaled_coords;
 
         chunk_ud.chunk_block = coll_entry->chunk_block;
@@ -5323,8 +5323,8 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         chunk_ud.filter_mask = coll_entry->index_info.filter_mask;
 
         /* Calculate scaled coordinates for the chunk */
-        if (cached_dset_info->chunk_idx_info.layout->idx_type == H5D_CHUNK_IDX_EARRAY &&
-            cached_dset_info->chunk_idx_info.layout->u.earray.unlim_dim > 0) {
+        if (cached_dset_info->chunk_idx_info.layout->u.chunk.idx_type == H5D_CHUNK_IDX_EARRAY &&
+            cached_dset_info->chunk_idx_info.layout->u.chunk.u.earray.unlim_dim > 0) {
             /*
              * Extensible arrays where the unlimited dimension is not
              * the slowest-changing dimension "swizzle" the coordinates
@@ -5339,11 +5339,11 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
              *       caller with the scaled coordinates for that chunk.
              */
             H5VM_array_calc_pre(chunk_ud.chunk_idx, cached_dset_info->dset_io_info->dset->shared->ndims,
-                                cached_dset_info->chunk_idx_info.layout->u.earray.swizzled_down_chunks,
+                                cached_dset_info->chunk_idx_info.layout->u.chunk.u.earray.swizzled_down_chunks,
                                 scaled_coords);
 
             H5VM_unswizzle_coords(hsize_t, scaled_coords,
-                                  cached_dset_info->chunk_idx_info.layout->u.earray.unlim_dim);
+                                  cached_dset_info->chunk_idx_info.layout->u.chunk.u.earray.unlim_dim);
         }
         else {
             H5VM_array_calc_pre(chunk_ud.chunk_idx, cached_dset_info->dset_io_info->dset->shared->ndims,
@@ -5386,7 +5386,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         /* Set metadata tagging with dataset oheader addr */
         H5AC_tag(cached_dset_info->dset_io_info->dset->oloc.addr, &prev_tag);
 
-        if ((cached_dset_info->chunk_idx_info.storage->ops->insert)(
+        if ((cached_dset_info->chunk_idx_info.layout->storage.u.chunk.ops->insert)(
                 &cached_dset_info->chunk_idx_info, &chunk_ud, cached_dset_info->dset_io_info->dset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk address into index");
 
