@@ -88,6 +88,7 @@
 #define CONTIGUOUS         "CONTIGUOUS"
 #define COMPACT            "COMPACT"
 #define CHUNKED            "CHUNKED"
+#define STRUCT_CHUNKED     "STRUCTURED CHUNK"
 #define EXTERNAL_FILE      "EXTERNAL_FILE"
 #define FILLVALUE          "FILLVALUE"
 #define FILE_CONTENTS      "FILE_CONTENTS"
