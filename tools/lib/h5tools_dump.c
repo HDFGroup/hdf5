@@ -3198,6 +3198,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     hsize_t          storage_size;
     hsize_t          curr_pos = 0; /* total data element position   */
     h5tools_str_t    buffer;       /* string into which to render   */
+    unsigned         str_chunk_flag; /* type og structired chunk     */
 
     /* setup */
     memset(&buffer, 0, sizeof(h5tools_str_t));
@@ -3224,6 +3225,30 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         stl = H5Pget_layout(dcpl_id);
 
     switch (stl) {
+        case H5D_STRUCT_CHUNK:
+	        ctx->indent_level++;
+            ctx->need_prefix = true;
+
+            h5tools_str_reset(&buffer);
+            h5tools_str_append(&buffer, "%s ", STRUCT_CHUNKED);
+
+            rank = H5Pget_struct_chunk(dcpl_id, (int)NELMTS(chsize), chsize, &str_chunk_flag);
+            h5tools_str_append(&buffer, "%s %" PRIuHSIZE, h5tools_dump_header_format->dataspacedimbegin,
+                               chsize[0]);
+            for (i = 1; i < rank; i++)
+                h5tools_str_append(&buffer, ", %" PRIuHSIZE, chsize[i]);
+            h5tools_str_append(&buffer, " %s", h5tools_dump_header_format->dataspacedimend);
+            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
+                                   (hsize_t)0);
+
+            ctx->need_prefix = true;
+
+            h5tools_str_reset(&buffer); 
+            h5tools_str_append(&buffer, "SIZE %" PRIuHSIZE, storage_size);
+            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
+                                   (hsize_t)0);
+            ctx->indent_level--;
+            break;
         case H5D_CHUNKED:
             ctx->indent_level++;
             ctx->need_prefix = true;
