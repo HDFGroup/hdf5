@@ -11245,7 +11245,7 @@ gent_bitnopaquefields(void)
     uint16_t buf2[F80_DIM32]; /* bitfield, opaque */
     uint32_t buf3[F80_DIM32]; /* bitfield, opaque */
     uint64_t buf4[F80_DIM32]; /* bitfield, opaque */
-    s_t      buf5[F80_DIM32]; /* compound */
+    s_t      buf5[F80_DIM32] = {0}; /* compound */
 
     file_id = H5Fcreate(FILE80, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
