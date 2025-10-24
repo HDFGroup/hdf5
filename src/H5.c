@@ -823,8 +823,8 @@ done:
     "linked with a different version of static or shared HDF5 library.\n"                                    \
     "You should recompile the application or check your shared library related\n"                            \
     "settings such as 'LD_LIBRARY_PATH'.\n"
-#define MINOR_VERSION_MISMATCH_WARNING                                                                             \
-    "Warning! ***HDF5 library minor version mismatched error***\n"                                                 \
+#define MINOR_VERSION_MISMATCH_WARNING                                                                       \
+    "Warning! ***HDF5 library minor version mismatched error***\n"                                           \
     "The HDF5 header files used to compile this application are not compatible with\n"                       \
     "the version used by the HDF5 library to which this application is linked.\n"                            \
     "Data corruption or segmentation faults may occur if the application continues.\n"                       \
@@ -842,7 +842,7 @@ H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     static unsigned int disable_version_check    = 0;     /* Set if the version check should be disabled */
     static const char  *version_mismatch_warning = VERSION_MISMATCH_WARNING;
     static const char  *minor_version_mismatch_warning = MINOR_VERSION_MISMATCH_WARNING;
-    herr_t              ret_value                = SUCCEED; /* Return value */
+    herr_t              ret_value                      = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
