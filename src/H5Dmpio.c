@@ -82,9 +82,9 @@
  */
 #define H5D_MPIO_INIT_CHUNK_IDX_INFO(index_info, dset)                                                       \
     do {                                                                                                     \
-        (index_info).f       = (dset)->oloc.file;                                                            \
-        (index_info).pline   = &((dset)->shared->dcpl_cache.pline);                                          \
-        (index_info).layout  = &((dset)->shared->layout);                                                    \
+        (index_info).f      = (dset)->oloc.file;                                                             \
+        (index_info).pline  = &((dset)->shared->dcpl_cache.pline);                                           \
+        (index_info).layout = &((dset)->shared->layout);                                                     \
     } while (0)
 
 /******************/
@@ -5338,9 +5338,10 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
              *       callback that accepts a chunk index and provides the
              *       caller with the scaled coordinates for that chunk.
              */
-            H5VM_array_calc_pre(chunk_ud.chunk_idx, cached_dset_info->dset_io_info->dset->shared->ndims,
-                                cached_dset_info->chunk_idx_info.layout->u.chunk.u.earray.swizzled_down_chunks,
-                                scaled_coords);
+            H5VM_array_calc_pre(
+                chunk_ud.chunk_idx, cached_dset_info->dset_io_info->dset->shared->ndims,
+                cached_dset_info->chunk_idx_info.layout->u.chunk.u.earray.swizzled_down_chunks,
+                scaled_coords);
 
             H5VM_unswizzle_coords(hsize_t, scaled_coords,
                                   cached_dset_info->chunk_idx_info.layout->u.chunk.u.earray.unlim_dim);
