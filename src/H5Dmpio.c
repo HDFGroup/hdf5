@@ -3034,14 +3034,14 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
 
                 idx_info.f      = di->dset->oloc.file;
                 idx_info.pline  = &di->dset->shared->dcpl_cache.pline;
-                idx_info.layout = di->dset->shared->layout;
+                idx_info.layout = &di->dset->shared->layout;
 
                 /*
                  * The dataset's chunk index should be open at this point.
                  * Otherwise, we will end up reading it in independently,
                  * which may not be desired.
                  */
-                idx_info.storage->ops->is_open(&idx_info, &index_is_open);
+                idx_info.layout->storage.u.chunk.ops->is_open(&idx_info, &index_is_open);
                 assert(index_is_open);
             }
 #endif
