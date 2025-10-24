@@ -14319,6 +14319,10 @@ gent_test_reference_external(void)
     if (H5Dwrite(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_wbuf) < 0)
         return 1;
 
+    /* Destroy references to free allocated memory */
+    for (i = 0; i < SPACE1_DIM1; i++)
+        H5Rdestroy(&ref_wbuf[i]);
+
     /* Close disk dataspace */
     if (H5Sclose(sid) < 0)
         return 1;
