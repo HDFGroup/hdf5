@@ -4165,7 +4165,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         "CD", "EF", "GH", "IJ", "KL", "MN", "PQ", "RS", "TU", "VW", "XZ"}; /* string, NO NUL fixed length */
     char       buf23[4][3][2] = {0};                                          /* bitfield, opaque */
     s_t        buf33[4][3][2] = {0};                                          /* compound */
-    hobj_ref_t buf43[4][3][2] = {0};                                          /* reference */
+    hobj_ref_t buf43[4][3][2] = {HADDR_UNDEF};                                /* reference */
     hvl_t      buf53[4][3][2] = {0};                                          /* vlen */
     int        buf63[24][3]   = {0};                                          /* array */
     int        buf73[4][3][2] = {0};                                          /* integer */
