@@ -57,7 +57,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 3. Be sure to complete all four steps to update so numbers for each deployed lib file in the process described in config/lt_vers.am and check that the .so numbers for lib files in binaries correctly indicate compatibility status with the previous release.  
 4. Move all unresolved Milestone issues to the next release version in GitHub.
 5. Verify that frozen code branch satisfies all existing regression test cases, and give the 'OK' to the release coordinator once all daily test configurations are passing as expected after the date of the code freeze. If there are failing tests after the code freeze date, coordinate with maintainers responsible for the failures to ensure that either the changes causing the failures are corrected or reverted. 
-6. Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to hdf5lib@hdfgroup.org.
+6. Verify released versions (latest) of third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to hdf5lib@hdfgroup.org.
 
 ### 5. Update Interface Version (Release Manager | Product Manager)
 1. Verify interface additions, changes, and removals, and update the shared library interface version number.
@@ -71,9 +71,11 @@ For more information on the HDF5 versioning and backward and forward compatibili
 6. Confirm the necessity of and approve of any interface-breaking changes. If any changes need to be reverted, task the developer who made the change to do so as soon as possible. If a change is reverted, return to the previous step and regenerate the compatibility report after the changes is made. Otherwise, continue to the next step.
 7. Update the .so version numbers in the [config/lt_vers.am][u9] file in the support branch according to [libtool's library interface version](https://www.gnu.org/software/libtool/manual/libtool.html#Versioning) scheme. 
     - See [Updating version info (Libtool)](https://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html#Updating-version-info) for rules to help update library version numbers. 
-8. After the release branch has been created, run `./autogen.sh` to regenerate build system files on the release branch and commit the changes.    
+8. After the release branch has been created, run bin/process_source.sh to regenerate the H5E header files on the release branch, and commit the changes.    
 
-### 6. Prepare Release Branch (Release Manager)
+### 6. Verify that HDF5 library version has been updated from the previous release according to [HDF5 versioning policy][u16], consistent with semantic versioning rules.
+
+### 7. Prepare Release Branch (Release Manager)
 1. Get the release branch ready for pre-release testing and packaging.
 2. For all release preparation operations, the release coordinator will clone and push directly to canonical HDF5:
     - `$ git clone ​https://github.com/HDFGroup/hdf5.git`
@@ -93,16 +95,17 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ bin/h5vers -s X.Y.Z-{SR+1};` 
     - `$ git commit -m "Updated release preparation branch version number to X.Y.Z-{SR+1}"` 
     - `$ git push` 
-7. ** OBSOLETE CURRENTLY **
+7. Remove 'WILL_FAIL "true"' line for minor version check in test/CMakeTests.cmake (currently line 662).  Minor branches are considered incompatible for develop, but not for release branches. 
+8. ** OBSOLETE CURRENTLY **
    Update default configuration mode
     - `$ git checkout hdf5_X_Y_Z;`. 
     - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][u11].
     - (use `git status --ignored` to see the changes and `git add -f` to add all files. First delete any new files not to be committed, notably `src/H5public.h~`.)
     - `$ git push with commit message listing change steps for creating release branch`
     ** END OBSOLETE CURRENTLY **
-8. E-mail hdf5lib@hdfgroup.org to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely.
+9. E-mail hdf5lib@hdfgroup.org to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely.
 
-### 7. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)
+### 8. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)
 1. Verify that source and binary distributions of HDF5 are acceptable on all target operating environments.
 2. Create a page on Confluence as a sub-page of the current release version's project collaboration page (see HDF5 Maintenance Releases) to document release testing results. 
 3. Document the test procedure that will be used for this release on the new sub-page. 
@@ -164,7 +167,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 19. Decide if another cycle of pre-release testing should occur based on the issue reports received and the actions taken during this cycle. If another round of testing is required (i.e. there were significant issues in pre-release testing which resulted in code changes), increment the subrelease version number and go back to step 7.2. If no further testing is required (i.e. no code changes were made and issues were documented as known issues, or code changes were trivial, unit tested, and exhaustive testing is unneeded), then proceed.
 
 
-### 8. Finalize Release Notes (Release Manager)
+### 9. Finalize Release Notes (Release Manager)
 1. Perform a final review of release notes and ensure that any new changes made to the source, any new known issues discovered, and any additional tests run since the code freeze have been reflected in CHANGELOG.md and other appropriate in-source documentation files (INSTALL_*, etc.). (Refer to the sub-steps of step 3 for what to check).
 2. Update the [CHANGELOG.md][u1] in the **support** branch (i.e. hdf5_X_Y) to remove entries in “Bugs fixed” and “New Features” sections and increment the version number for the following release (“Bug fixes since X.Y.Z” - occurs twice).
     - `$ git checkout hdf5_X_Y` 
@@ -173,7 +176,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ git push` 
 3. Update Release Notes in **release** branch (Release Manager)
 
-### 9. Package and Distribute Release (Release Manager)
+### 10. Package and Distribute Release (Release Manager)
 1. h5vers could run genparser, which can change the generated files if certain code files have been changed since the files generated by genparser were committed on the release branch.  This should be checked by running `git status --ignored;`, then running genparser, then repeating `git status --ignored;`. If there are modified files from either git status command, they should be committed (or deleted if there are backup files or an autom4te.cache directory), and at least minimal testing should be done to see that the software is still good with the changes. 
 2. Set version for release, removing the subrelease string, initially `$ bin/h5vers -s X.Y.Z;`. Any subsequent patch releases will need the subrelease number.
 3. Run `bin/release` (similar to 8.2) and commit all the changed files.
@@ -192,9 +195,9 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Press "Run Workflow"
 8. Release hdf5_plugins following the same steps.
 
-### 10. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
+### 11. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
 
-### 11. Conduct Release Retrospective (Release Manager)
+### 12. Conduct Release Retrospective (Release Manager)
 1. Schedule time and solicit comments from retrospective
 2. Identify issues and document them
 
@@ -212,3 +215,4 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u13]: https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
+[u16]: https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy
