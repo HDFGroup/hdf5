@@ -5315,7 +5315,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         assert(cached_dset_info);
 
         chunk_ud.common.layout  = &cached_dset_info->chunk_idx_info.layout->u.chunk;
-        chunk_ud.common.storage = &cached_dset_info->chunk_idx_info.layout->storage.u.chunk.;
+        chunk_ud.common.storage = &cached_dset_info->chunk_idx_info.layout->storage.u.chunk;
         chunk_ud.common.scaled  = scaled_coords;
 
         chunk_ud.chunk_block = coll_entry->chunk_block;
