@@ -6112,11 +6112,17 @@ gent_fvalues(void)
     hsize_t                   dims[1]     = {2};
     int                       buf[2]      = {1, 2};                 /* integer */
     int                       fillval1    = -99;                    /* integer fill value */
-    c_t                       buf2[2]     = {{1, 2}, {3, 4}};       /* compound */
-    c_t                       fillval2[1] = {{1, 2}};               /* compound fill value */
+    c_t                       buf2[2];                              /* compound */
+    c_t                       fillval2[1];                          /* compound fill value */
     hvl_t                     buf3[2];                              /* vlen */
     hvl_t                     fillval3;                             /* vlen fill value */
     hsize_t                   dimarray[1] = {3};                    /* array dimension */
+
+    memset(buf2, 0, sizeof(buf2));
+    buf2[0].a = 1; buf2[0].b = 2;
+    buf2[1].a = 3; buf2[1].b = 4;
+    memset(fillval2, 0, sizeof(fillval2));
+    fillval2[0].a = 1; fillval2[0].b = 2;
     int                       buf4[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int H5_ATTR_NDEBUG_UNUSED ret;
 
