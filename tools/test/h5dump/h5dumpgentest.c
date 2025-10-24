@@ -2554,7 +2554,7 @@ gent_nestcomp(void)
     hsize_t  array_dims[] = {2}; /* Dataspace dimensions */
     unsigned ndims        = 1;   /* Number of dimensions in the array field */
 
-    s2_t  s1[10];
+    s2_t  s1[10] = {0};
     hid_t s2_tid; /* File datatype identifier */
 
     int     i;
