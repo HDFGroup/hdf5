@@ -3196,8 +3196,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     hsize_t          chsize[64];    /* chunk size in elements */
     hsize_t          size;          /* size of external file   */
     hsize_t          storage_size;
-    hsize_t          curr_pos = 0; /* total data element position   */
-    h5tools_str_t    buffer;       /* string into which to render   */
+    hsize_t          curr_pos = 0;   /* total data element position   */
+    h5tools_str_t    buffer;         /* string into which to render   */
     unsigned         str_chunk_flag; /* type og structired chunk     */
 
     /* setup */
@@ -3226,7 +3226,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
     switch (stl) {
         case H5D_STRUCT_CHUNK:
-	        ctx->indent_level++;
+            ctx->indent_level++;
             ctx->need_prefix = true;
 
             h5tools_str_reset(&buffer);
@@ -3243,7 +3243,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
             ctx->need_prefix = true;
 
-            h5tools_str_reset(&buffer); 
+            h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "SIZE %" PRIuHSIZE, storage_size);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
