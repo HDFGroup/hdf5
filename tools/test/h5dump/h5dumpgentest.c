@@ -10225,9 +10225,9 @@ gent_compound_ints(void)
     int m; /* Array init loop vars     */
 
     /* Allocate buffers */
-    Cmpd1 = (Cmpd1Struct *)malloc(sizeof(Cmpd1Struct) * F77_LENGTH);
+    Cmpd1 = (Cmpd1Struct *)calloc(F77_LENGTH, sizeof(Cmpd1Struct));
     assert(Cmpd1);
-    Cmpd2 = (Cmpd2Struct *)malloc(sizeof(Cmpd2Struct) * F77_LENGTH);
+    Cmpd2 = (Cmpd2Struct *)calloc(F77_LENGTH, sizeof(Cmpd2Struct));
     assert(Cmpd2);
 
     /* Initialize the data in the arrays/datastructure                */
