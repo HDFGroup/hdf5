@@ -40,21 +40,25 @@
 #define H5D_BT2_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->layout->storage.u.chunk.u.btree2.bt2)
 
 /*
- * Macro to compute the size required for encoding the size of a chunk. For version 4, this is the minimum number of bytes required to encode the size of an unfiltered chunk plus an extra byte, in case the filter makes the chunk larger. For versions after 4, this is simply the size of lengths for the file. For unfiltered chunks, this is 0.
+ * Macro to compute the size required for encoding the size of a chunk. For version 4, this is the minimum
+ * number of bytes required to encode the size of an unfiltered chunk plus an extra byte, in case the filter
+ * makes the chunk larger. For versions after 4, this is simply the size of lengths for the file. For
+ * unfiltered chunks, this is 0.
  */
-#define H5D_BT2_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, idx_info) \
-    do { \
-        if ((idx_info)->pline->nused > 0) { \
-            if ((idx_info)->layout->version > H5O_LAYOUT_VERSION_4) \
-                (chunk_size_len) = H5F_SIZEOF_SIZE((idx_info)->f); \
-            else { \
-                (chunk_size_len) = 1 + ((H5VM_log2_gen((uint64_t)(idx_info)->layout->u.chunk.size) + 8) / 8); \
-                if ((chunk_size_len) > 8) \
-                    (chunk_size_len) = 8; \
-            } \
-        } \
-        else \
-            (chunk_size_len) = 0; \
+#define H5D_BT2_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, idx_info)                                             \
+    do {                                                                                                     \
+        if ((idx_info)->pline->nused > 0) {                                                                  \
+            if ((idx_info)->layout->version > H5O_LAYOUT_VERSION_4)                                          \
+                (chunk_size_len) = H5F_SIZEOF_SIZE((idx_info)->f);                                           \
+            else {                                                                                           \
+                (chunk_size_len) =                                                                           \
+                    1 + ((H5VM_log2_gen((uint64_t)(idx_info)->layout->u.chunk.size) + 8) / 8);               \
+                if ((chunk_size_len) > 8)                                                                    \
+                    (chunk_size_len) = 8;                                                                    \
+            }                                                                                                \
+        }                                                                                                    \
+        else                                                                                                 \
+            (chunk_size_len) = 0;                                                                            \
     } while (0)
 
 /******************/
@@ -62,11 +66,11 @@
 /******************/
 /* User data for creating callback context */
 typedef struct H5D_bt2_ctx_ud_t {
-    const H5F_t *f;          /* Pointer to file info */
-    uint32_t     chunk_size; /* Size of chunk (bytes; for filtered object) */
-    unsigned     ndims;      /* Number of dimensions */
+    const H5F_t *f;              /* Pointer to file info */
+    uint32_t     chunk_size;     /* Size of chunk (bytes; for filtered object) */
+    unsigned     ndims;          /* Number of dimensions */
     size_t       chunk_size_len; /* Size of chunk sizes in the file (bytes) */
-    uint32_t    *dim;        /* Size of chunk in elements */
+    uint32_t    *dim;            /* Size of chunk in elements */
 } H5D_bt2_ctx_ud_t;
 
 /* The callback context */
@@ -255,10 +259,11 @@ H5D__bt2_crt_context(void *_udata)
     if (NULL == (ctx = H5FL_MALLOC(H5D_bt2_ctx_t)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate callback context");
 
-    /* Determine the size of addresses and set the chunk size, # of dimensions for the dataset, and bytes used to encode the chunk size */
-    ctx->sizeof_addr = H5F_SIZEOF_ADDR(udata->f);
-    ctx->chunk_size  = udata->chunk_size;
-    ctx->ndims       = udata->ndims;
+    /* Determine the size of addresses and set the chunk size, # of dimensions for the dataset, and bytes used
+     * to encode the chunk size */
+    ctx->sizeof_addr    = H5F_SIZEOF_ADDR(udata->f);
+    ctx->chunk_size     = udata->chunk_size;
+    ctx->ndims          = udata->ndims;
     ctx->chunk_size_len = udata->chunk_size_len;
 
     /* Set up the "local" information for this dataset's chunk dimension sizes */
@@ -660,10 +665,10 @@ done:
 static herr_t
 H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
-    H5B2_create_t    bt2_cparam;          /* v2 B-tree creation parameters */
-    H5D_bt2_ctx_ud_t u_ctx;               /* data for context call */
-    unsigned         chunk_size_len = 0; /* Size of encoded chunk size */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5B2_create_t    bt2_cparam;               /* v2 B-tree creation parameters */
+    H5D_bt2_ctx_ud_t u_ctx;                    /* data for context call */
+    unsigned         chunk_size_len = 0;       /* Size of encoded chunk size */
+    herr_t           ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -678,8 +683,9 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     H5D_BT2_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, idx_info);
 
     /* Set up b-tree creation parameters */
-    bt2_cparam.rrec_size = H5F_SIZEOF_ADDR(idx_info->f)         /* Address of chunk */
-                           + (idx_info->layout->u.chunk.ndims - 1) * 8; /* # of dimensions x 64-bit chunk offsets */
+    bt2_cparam.rrec_size =
+        H5F_SIZEOF_ADDR(idx_info->f)                 /* Address of chunk */
+        + (idx_info->layout->u.chunk.ndims - 1) * 8; /* # of dimensions x 64-bit chunk offsets */
 
     /* General parameters */
     if (idx_info->pline->nused > 0) {
@@ -694,18 +700,20 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     bt2_cparam.merge_percent = idx_info->layout->u.chunk.u.btree2.cparam.merge_percent;
 
     /* Set up client context */
-    u_ctx.f          = idx_info->f;
-    u_ctx.ndims      = idx_info->layout->u.chunk.ndims - 1;
-    u_ctx.chunk_size = idx_info->layout->u.chunk.size;
-    u_ctx.dim        = idx_info->layout->u.chunk.dim;
+    u_ctx.f              = idx_info->f;
+    u_ctx.ndims          = idx_info->layout->u.chunk.ndims - 1;
+    u_ctx.chunk_size     = idx_info->layout->u.chunk.size;
+    u_ctx.dim            = idx_info->layout->u.chunk.dim;
     u_ctx.chunk_size_len = (size_t)chunk_size_len;
 
     /* Create the v2 B-tree for the chunked dataset */
-    if (NULL == (idx_info->layout->storage.u.chunk.u.btree2.bt2 = H5B2_create(idx_info->f, &bt2_cparam, &u_ctx)))
+    if (NULL ==
+        (idx_info->layout->storage.u.chunk.u.btree2.bt2 = H5B2_create(idx_info->f, &bt2_cparam, &u_ctx)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking chunked dataset");
 
     /* Retrieve the v2 B-tree's address in the file */
-    if (H5B2_get_addr(idx_info->layout->storage.u.chunk.u.btree2.bt2, &(idx_info->layout->storage.u.chunk.idx_addr)) < 0)
+    if (H5B2_get_addr(idx_info->layout->storage.u.chunk.u.btree2.bt2,
+                      &(idx_info->layout->storage.u.chunk.idx_addr)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                     "can't get v2 B-tree address for tracking chunked dataset");
 
@@ -762,8 +770,8 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     H5D_BT2_COMPUTE_CHUNK_SIZE_LEN(u_ctx.chunk_size_len, idx_info);
 
     /* Open v2 B-tree for the chunk index */
-    if (NULL ==
-        (idx_info->layout->storage.u.chunk.u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &u_ctx)))
+    if (NULL == (idx_info->layout->storage.u.chunk.u.btree2.bt2 =
+                     H5B2_open(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &u_ctx)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset");
 
     /* Check for SWMR writes to the file */
@@ -1340,7 +1348,8 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
         /* Delete the v2 B-tree */
         /*(space in the file for each object is freed in the 'remove' callback) */
-        if (H5B2_delete(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &u_ctx, remove_op, idx_info->f) < 0)
+        if (H5B2_delete(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &u_ctx, remove_op,
+                        idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree");
 
         idx_info->layout->storage.u.chunk.idx_addr = HADDR_UNDEF;

@@ -1080,7 +1080,8 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, bool H5_
                 (cpy_info->shared_fo &&
                  H5D__chunk_is_data_cached((const H5D_shared_t *)cpy_info->shared_fo))) {
                 /* Create chunked layout */
-                if (H5D__chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_space_extent, udata->src_dtype, udata->common.src_pline, cpy_info) < 0)
+                if (H5D__chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_space_extent,
+                                    udata->src_dtype, udata->common.src_pline, cpy_info) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage");
             } /* end if */
             break;

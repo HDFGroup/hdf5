@@ -292,7 +292,8 @@ H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
     assert(f);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    /* This will be downgraded in H5D__layout_set_latest_indexing() if there is no benefit to the newer version */
+    /* This will be downgraded in H5D__layout_set_latest_indexing() if there is no benefit to the newer
+     * version */
     version = MAX(layout->version, H5O_layout_ver_bounds[H5F_LOW_BOUND(f)]);
 
     /* Version bounds check */
@@ -319,7 +320,7 @@ herr_t
 H5D__layout_set_latest_indexing(H5D_t *dset)
 {
     H5O_layout_t *layout;
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -380,7 +381,8 @@ H5D__layout_set_latest_indexing(H5D_t *dset)
                     layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
                         H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
 
-                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve anything */
+                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
+                     * anything */
                     if (!dset->shared->dcpl_cache.pline.nused)
                         layout->version = H5O_LAYOUT_VERSION_4;
                 }
@@ -398,7 +400,8 @@ H5D__layout_set_latest_indexing(H5D_t *dset)
                     layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
                     layout->u.chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
 
-                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve anything */
+                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
+                     * anything */
                     if (!dset->shared->dcpl_cache.pline.nused)
                         layout->version = H5O_LAYOUT_VERSION_4;
                 }
@@ -413,7 +416,8 @@ H5D__layout_set_latest_indexing(H5D_t *dset)
                     /* Downgrade version to 4 since version 5 doesn't improve anything */
                     layout->version = H5O_LAYOUT_VERSION_4;
                 }
-                else if (!dset->shared->dcpl_cache.pline.nused && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
+                else if (!dset->shared->dcpl_cache.pline.nused &&
+                         dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
 
                     /* Set the chunk index type to "none" Index */
                     layout->u.chunk.idx_type         = H5D_CHUNK_IDX_NONE;
@@ -436,7 +440,8 @@ H5D__layout_set_latest_indexing(H5D_t *dset)
                     layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
                         H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
 
-                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve anything */
+                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
+                     * anything */
                     if (!dset->shared->dcpl_cache.pline.nused)
                         layout->version = H5O_LAYOUT_VERSION_4;
                 }

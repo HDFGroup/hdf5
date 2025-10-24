@@ -824,7 +824,8 @@ H5D__btree_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNUS
     idx_info->layout->storage.u.chunk.u.btree.dset_ohdr_addr = dset_ohdr_addr;
 
     /* Allocate the shared structure */
-    if (H5D__btree_shared_create(idx_info->f, &idx_info->layout->storage.u.chunk, &idx_info->layout->u.chunk) < 0)
+    if (H5D__btree_shared_create(idx_info->f, &idx_info->layout->storage.u.chunk,
+                                 &idx_info->layout->u.chunk) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info");
 
 done:
@@ -1246,9 +1247,11 @@ H5D__btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_
     assert(!H5_addr_defined(idx_info_dst->layout->storage.u.chunk.idx_addr));
 
     /* Create shared B-tree info for each file */
-    if (H5D__btree_shared_create(idx_info_src->f, &idx_info_src->layout->storage.u.chunk, &idx_info_src->layout->u.chunk) < 0)
+    if (H5D__btree_shared_create(idx_info_src->f, &idx_info_src->layout->storage.u.chunk,
+                                 &idx_info_src->layout->u.chunk) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for source shared B-tree info");
-    if (H5D__btree_shared_create(idx_info_dst->f, &idx_info_dst->layout->storage.u.chunk, &idx_info_dst->layout->u.chunk) < 0)
+    if (H5D__btree_shared_create(idx_info_dst->f, &idx_info_dst->layout->storage.u.chunk,
+                                 &idx_info_dst->layout->u.chunk) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
                     "can't create wrapper for destination shared B-tree info");
 
@@ -1322,7 +1325,8 @@ H5D__btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     udata.storage = &idx_info->layout->storage.u.chunk;
 
     /* Get metadata information for B-tree */
-    if (H5B_get_info(idx_info->f, H5B_BTREE, idx_info->layout->storage.u.chunk.idx_addr, &bt_info, NULL, &udata) < 0)
+    if (H5B_get_info(idx_info->f, H5B_BTREE, idx_info->layout->storage.u.chunk.idx_addr, &bt_info, NULL,
+                     &udata) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree");
 
     /* Set the size of the B-tree */
