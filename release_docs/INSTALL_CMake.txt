@@ -938,19 +938,26 @@ HDF5_ENABLE_JNI           "Force JNI implementation (default: auto-detect)" OFF
   cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Snapshot version (FFM)
 
   # Minimal build for Java artifacts only (recommended for Maven deployment)
+  # Linux (GCC):
   cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh          # FFM Release
   cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh # FFM Snapshot
   cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh          # JNI Release
   cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI-Snapshot --fresh # JNI Snapshot
 
-  # Multi-platform minimal Maven presets (FFM)
-  cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM --fresh      # Windows FFM
-  cmake --workflow --preset ci-MinShar-Clang-Maven-FFM --fresh     # macOS FFM
+  # Windows (MSVC):
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM --fresh          # FFM Release
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-Snapshot --fresh # FFM Snapshot
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI --fresh          # JNI Release
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI-Snapshot --fresh # JNI Snapshot
 
-  # Multi-platform minimal Maven presets (JNI)
-  cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI --fresh      # Windows JNI
-  cmake --workflow --preset ci-MinShar-Clang-Maven-JNI --fresh     # macOS JNI
+  # macOS (Clang):
+  cmake --workflow --preset ci-MinShar-Clang-Maven-FFM --fresh         # FFM Release
+  cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-Snapshot --fresh # FFM Snapshot
+  cmake --workflow --preset ci-MinShar-Clang-Maven-JNI --fresh         # JNI Release
+  cmake --workflow --preset ci-MinShar-Clang-Maven-JNI-Snapshot --fresh # JNI Snapshot
 
+  Note: Presets are platform-specific. Use 'cmake --list-presets' to see
+        available presets for your current platform.
   Note: Minimal Maven presets skip examples, testing, tools, C++, and Fortran
         builds to optimize for Java artifact generation only.
 
