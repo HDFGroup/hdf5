@@ -719,7 +719,8 @@ jobs:
                 echo "Using classpath: $CLASSPATH"
 
                 # Test compilation
-                if javac -cp "$CLASSPATH" "$EXAMPLE_FILE" 2>&1; then
+                COMPILE_OUTPUT=$(javac -cp "$CLASSPATH" "$EXAMPLE_FILE" 2>&1)
+                if [ $? -eq 0 ]; then
                   echo "✓ Compilation successful for $category/$example_name"
 
                   # Test execution (with cross-platform timeout)
@@ -763,6 +764,8 @@ jobs:
                   fi
                 else
                   echo "✗ Compilation failed for $category/$example_name"
+                  echo "Compilation error output:"
+                  echo "$COMPILE_OUTPUT"
                   FAILED_EXAMPLES="$FAILED_EXAMPLES $category/$example_name"
                 fi
               fi
@@ -990,6 +993,8 @@ jobs:
                   }
                 } else {
                   Write-Host "✗ Compilation failed for $category/$example_name"
+                  Write-Host "Compilation error output:"
+                  Write-Host $compileResult
                   $FAILED_EXAMPLES += "$category/$example_name"
                 }
               }
