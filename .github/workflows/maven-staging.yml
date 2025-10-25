@@ -623,6 +623,15 @@ jobs:
           # Test one representative example from each category
           cd HDF5Examples/JAVA
 
+          # Determine which examples directory to use based on implementation
+          if [ "${{ matrix.implementation }}" = "jni" ]; then
+            EXAMPLES_DIR="compat"
+            echo "Using JNI-compatible examples from compat/ directory"
+          else
+            EXAMPLES_DIR="."
+            echo "Using FFM examples from root directory"
+          fi
+
           # Get absolute path to maven artifacts for this platform
           MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/${{ matrix.artifact-path }})"
           echo "Maven artifacts directory (${{ matrix.platform }}): $MAVEN_ARTIFACTS_DIR"
@@ -696,10 +705,13 @@ jobs:
           TOTAL_EXAMPLES=0
           PASSED_EXAMPLES=0
 
+          # Save current directory (HDF5Examples/JAVA)
+          JAVA_DIR="$(pwd)"
+
           # Test representative examples from each category
           for category in H5D H5T H5G TUTR; do
-            if [ -d "$category" ]; then
-              cd "$category"
+            if [ -d "$EXAMPLES_DIR/$category" ]; then
+              cd "$JAVA_DIR/$EXAMPLES_DIR/$category"
 
               # Find first .java file in category
               EXAMPLE_FILE=$(ls *.java | head -1)
@@ -769,7 +781,6 @@ jobs:
                   FAILED_EXAMPLES="$FAILED_EXAMPLES $category/$example_name"
                 fi
               fi
-              cd ..
             fi
           done
 
@@ -799,6 +810,15 @@ jobs:
 
           # Test one representative example from each category
           Set-Location HDF5Examples/JAVA
+
+          # Determine which examples directory to use based on implementation
+          if ("${{ matrix.implementation }}" -eq "jni") {
+            $EXAMPLES_DIR = "compat"
+            Write-Host "Using JNI-compatible examples from compat/ directory"
+          } else {
+            $EXAMPLES_DIR = "."
+            Write-Host "Using FFM examples from root directory"
+          }
 
           # Get absolute path to maven artifacts for this platform
           $MAVEN_ARTIFACTS_DIR = Resolve-Path "../../maven-artifacts/${{ matrix.artifact-path }}"
@@ -892,10 +912,14 @@ jobs:
           $TOTAL_EXAMPLES = 0
           $PASSED_EXAMPLES = 0
 
+          # Save current directory (HDF5Examples/JAVA)
+          $JAVA_DIR = Get-Location
+
           # Test representative examples from each category
           foreach ($category in @("H5D", "H5T", "H5G", "TUTR")) {
-            if (Test-Path $category) {
-              Set-Location $category
+            $category_path = Join-Path $EXAMPLES_DIR $category
+            if (Test-Path $category_path) {
+              Set-Location (Join-Path $JAVA_DIR $category_path)
 
               # Find first .java file in category
               $EXAMPLE_FILE = Get-ChildItem -Filter "*.java" | Select-Object -First 1
@@ -998,7 +1022,6 @@ jobs:
                   $FAILED_EXAMPLES += "$category/$example_name"
                 }
               }
-              Set-Location ..
             }
           }
 
