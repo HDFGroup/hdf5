@@ -918,8 +918,9 @@ jobs:
           # Test representative examples from each category
           foreach ($category in @("H5D", "H5T", "H5G", "TUTR")) {
             $category_path = Join-Path $EXAMPLES_DIR $category
-            if (Test-Path $category_path) {
-              Set-Location (Join-Path $JAVA_DIR $category_path)
+            $full_category_path = Join-Path $JAVA_DIR $category_path
+            if (Test-Path $full_category_path) {
+              Set-Location $full_category_path
 
               # Find first .java file in category
               $EXAMPLE_FILE = Get-ChildItem -Filter "*.java" | Select-Object -First 1
