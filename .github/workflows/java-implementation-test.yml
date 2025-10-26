@@ -309,4 +309,4 @@ jobs:
           echo "| 11 | ❌ | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| 17 | ❌ | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| 21 | ❌ | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| 24+ | ✅ (default) | ✅ (explicit) |" >> $GITHUB_STEP_SUMMARY
+          echo "| 24+ | ✅ (optional) | ✅ (default) |" >> $GITHUB_STEP_SUMMARY

@@ -41,8 +41,8 @@ declare -A JAVA_VERSIONS=(
     ["11"]="JNI only"
     ["17"]="JNI only"
     ["21"]="JNI only"
-    ["24"]="FFM default, JNI optional"
-    ["25"]="FFM default, JNI optional"
+    ["24"]="JNI default, FFM optional"
+    ["25"]="JNI default, FFM optional"
 )
 
 declare -A TEST_PRESETS_FFM=(
@@ -51,8 +51,8 @@ declare -A TEST_PRESETS_FFM=(
 )
 
 declare -A TEST_PRESETS_JNI=(
-    ["build"]="ci-StdShar-GNUC-Java-JNI"
-    ["maven"]="ci-MinShar-GNUC-Maven-JNI"
+    ["build"]="ci-StdShar-GNUC-Java"
+    ["maven"]="ci-MinShar-GNUC-Maven"
 )
 
 # Validate Java version support
@@ -82,11 +82,8 @@ determine_implementation() {
 
     case "$requested" in
         "auto")
-            if [[ $version -ge 24 ]]; then
-                echo "ffm"
-            else
-                echo "jni"
-            fi
+            # JNI is default for HDF5 2.0, regardless of Java version
+            echo "jni"
             ;;
         "ffm")
             if [[ $version -ge 24 ]]; then
@@ -339,10 +336,10 @@ Arguments:
   test_mode      Test mode (build, maven, full) [default: build]
 
 Examples:
-  $0                          # Test Java 24 with auto implementation (FFM)
-  $0 24 ffm build            # Test Java 24 with FFM, build only
+  $0                          # Test Java 24 with auto implementation (JNI - default)
+  $0 24 ffm build            # Test Java 24 with FFM (optional), build only
   $0 11 jni maven            # Test Java 11 with JNI, Maven artifacts
-  $0 24 auto full            # Test Java 24 with auto selection, full suite
+  $0 24 auto full            # Test Java 24 with auto selection (JNI), full suite
 
 Test Modes:
   build   - Basic build configuration test
