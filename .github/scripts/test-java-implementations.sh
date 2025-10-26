@@ -51,7 +51,7 @@ declare -A TEST_PRESETS_FFM=(
 )
 
 declare -A TEST_PRESETS_JNI=(
-    ["build"]="ci-StdShar-GNUC-Java"
+    ["build"]="ci-StdShar-GNUC-Java-JNI"
     ["maven"]="ci-MinShar-GNUC-Maven"
 )
 
