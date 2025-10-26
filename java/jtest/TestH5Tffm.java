@@ -932,8 +932,10 @@ public class TestH5Tffm {
 
             MemorySegment retrievedDims = arena.allocate(ValueLayout.JAVA_LONG, 2);
             hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
-            assertEquals("First dimension should be 3", 3, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 0));
-            assertEquals("Second dimension should be 4", 4, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 1));
+            assertEquals("First dimension should be 3", 3,
+                         retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 0));
+            assertEquals("Second dimension should be 4", 4,
+                         retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 1));
         }
     }
 
@@ -955,9 +957,12 @@ public class TestH5Tffm {
 
             MemorySegment retrievedDims = arena.allocate(ValueLayout.JAVA_LONG, 3);
             hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
-            assertEquals("First dimension should be 2", 2, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 0));
-            assertEquals("Second dimension should be 3", 3, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 1));
-            assertEquals("Third dimension should be 4", 4, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 2));
+            assertEquals("First dimension should be 2", 2,
+                         retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 0));
+            assertEquals("Second dimension should be 3", 3,
+                         retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 1));
+            assertEquals("Third dimension should be 4", 4,
+                         retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 2));
         }
     }
 
