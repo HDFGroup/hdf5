@@ -105,9 +105,15 @@ Common presets:
     ci-StdShar-GNUC-Java-FFM     Java FFM bindings (GCC)
     ci-StdShar-GNUC-Java-JNI     Java JNI bindings (GCC)
 
-  Maven Deployment:
+  Maven Deployment (JNI default - Java 8+):
+    ci-MinShar-GNUC-Maven-Snapshot               JNI snapshots for Maven
+    ci-MinShar-GNUC-Maven                        JNI release for Maven
+
+  Maven Deployment (FFM optional - Java 24+):
     ci-MinShar-GNUC-Maven-FFM-Snapshot           FFM snapshots for Maven
-    ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot      FFM + ROS3 (S3 support)
+    ci-MinShar-GNUC-Maven-FFM                    FFM release for Maven
+
+  Note: For ROS3 (S3 support), add -DHDF5_ENABLE_ROS3_VFD=ON to any preset
 
 See Section XI for creating custom preset configurations.
 
@@ -911,10 +917,10 @@ HDF5_ENABLE_MAVEN_DEPLOY  "Enable Maven repository deployment"  OFF
 HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
 HDF5_ENABLE_JNI           "Force JNI implementation (default: auto-detect)" OFF
 
-  Java Implementation Selection:
+  Java Implementation Selection (as of HDF5 2.0):
   HDF5 Java bindings support two native interface implementations:
-  - FFM (Foreign Function & Memory): Default for Java 24+, modern native access
-  - JNI (Java Native Interface): Traditional interface, available for all Java versions
+  - JNI (Java Native Interface): Default, works with Java 8+, production-stable
+  - FFM (Foreign Function & Memory): Optional, requires Java 24+, modern native access
 
   Maven Artifacts:
   - org.hdfgroup:hdf5-java-ffm - FFM implementation
@@ -928,33 +934,38 @@ HDF5_ENABLE_JNI           "Force JNI implementation (default: auto-detect)" OFF
   To build Maven snapshot versions for development:
   cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_MAVEN_SNAPSHOT:BOOL=ON ../hdf5
 
-  To force JNI implementation (default is FFM for Java 24+):
-  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_ENABLE_JNI:BOOL=ON ../hdf5
+  To use FFM implementation instead of default JNI:
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_ENABLE_FFM:BOOL=ON ../hdf5
 
-  Or use the Maven-enabled CMake presets:
-
-  # Full build with Maven support (includes all components)
-  cmake --workflow --preset ci-StdShar-GNUC-Maven --fresh          # Release version (FFM)
-  cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh # Snapshot version (FFM)
+  Or use the Maven-enabled CMake presets (recommended):
 
   # Minimal build for Java artifacts only (recommended for Maven deployment)
-  # Linux (GCC):
+  # Linux (GCC) - JNI (default, Java 8+):
+  cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # JNI Release
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # JNI Snapshot
+
+  # Linux (GCC) - FFM (optional, Java 24+):
   cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh          # FFM Release
   cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh # FFM Snapshot
-  cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh          # JNI Release
-  cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI-Snapshot --fresh # JNI Snapshot
 
-  # Windows (MSVC):
+  # Windows (MSVC) - JNI (default):
+  cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # JNI Release
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh # JNI Snapshot
+
+  # Windows (MSVC) - FFM (optional):
   cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM --fresh          # FFM Release
   cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-Snapshot --fresh # FFM Snapshot
-  cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI --fresh          # JNI Release
-  cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI-Snapshot --fresh # JNI Snapshot
 
-  # macOS (Clang):
+  # macOS (Clang) - JNI (default):
+  cmake --workflow --preset ci-MinShar-Clang-Maven --fresh          # JNI Release
+  cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh # JNI Snapshot
+
+  # macOS (Clang) - FFM (optional):
   cmake --workflow --preset ci-MinShar-Clang-Maven-FFM --fresh         # FFM Release
   cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-Snapshot --fresh # FFM Snapshot
-  cmake --workflow --preset ci-MinShar-Clang-Maven-JNI --fresh         # JNI Release
-  cmake --workflow --preset ci-MinShar-Clang-Maven-JNI-Snapshot --fresh # JNI Snapshot
+
+  # ROS3 VFD (S3 cloud storage) - Add to any preset above:
+  cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh -DHDF5_ENABLE_ROS3_VFD=ON
 
   Note: Presets are platform-specific. Use 'cmake --list-presets' to see
         available presets for your current platform.
@@ -1330,19 +1341,21 @@ Then you can change or add options for your specific case.
 
 Maven Deployment Preset Example
 --------------------------------
-For Maven deployment with Java FFM and ROS3 support:
+For Maven deployment with custom repository URL:
 
 {
-  "name": "my-maven-ros3",
-  "inherits": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
+  "name": "my-maven-custom",
+  "inherits": "ci-MinShar-GNUC-Maven-Snapshot",
   "cacheVariables": {
     "MAVEN_REPOSITORY_URL": {"type": "STRING", "value": "https://your-repo.com/maven"},
-    "BUILD_SHARED_LIBS": {"type": "BOOL", "value": "ON"}
+    "HDF5_ENABLE_ROS3_VFD": {"type": "BOOL", "value": "ON"}
   }
 }
 
 Then build with:
-    cmake --workflow --preset my-maven-ros3 --fresh
+    cmake --workflow --preset my-maven-custom --fresh
+
+Note: This example uses JNI (default). For FFM, inherit from ci-MinShar-GNUC-Maven-FFM-Snapshot
 
 Preset File Details
 -------------------
@@ -1517,9 +1530,10 @@ FFM Test Patterns:
   - Return value checking with isSuccess() / isValidId()
   - See java/jtest/FfmTestSupport.java for utility methods
 
-ROS3 Variant Testing:
-  - Tests are compatible with both plain and ROS3 FFM variants
-  - Use ci-MinShar-*-Maven-FFM-ROS3 presets for ROS3 builds
+ROS3 VFD (S3 Cloud Storage):
+  - Tests are compatible with both plain and ROS3-enabled builds
+  - Use -DHDF5_ENABLE_ROS3_VFD=ON with any Maven preset for ROS3 builds
+  - Example: cmake --preset ci-MinShar-GNUC-Maven -DHDF5_ENABLE_ROS3_VFD=ON
   - Same test suite validates both feature sets
 
 Coverage Information:

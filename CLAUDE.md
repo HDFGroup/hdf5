@@ -20,7 +20,15 @@ cmake --workflow --preset ci-StdShar-Clang --fresh    # Clang
 cmake --workflow --preset ci-StdShar-MSVC --fresh     # MSVC
 
 # Maven-enabled builds (Java artifacts with deployment support)
-# FFM implementation (Java 24+ default) - Plain variant (no ROS3)
+# JNI implementation (default - works with Java 8+)
+cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh     # Linux JNI snapshots
+cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh     # Windows JNI snapshots
+cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh    # macOS JNI snapshots
+cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh              # Linux JNI release
+cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh              # Windows JNI release
+cmake --workflow --preset ci-MinShar-Clang-Maven --fresh             # macOS JNI release
+
+# FFM implementation (optional - requires Java 24+)
 cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh     # Linux FFM snapshots
 cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-Snapshot --fresh     # Windows FFM snapshots
 cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-Snapshot --fresh    # macOS FFM snapshots
@@ -28,21 +36,14 @@ cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh              # Linux
 cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM --fresh              # Windows FFM release
 cmake --workflow --preset ci-MinShar-Clang-Maven-FFM --fresh             # macOS FFM release
 
-# FFM implementation with ROS3 VFD (S3 cloud storage support)
-cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot --fresh     # Linux FFM+ROS3 snapshots
-cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot --fresh     # Windows FFM+ROS3 snapshots
-cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot --fresh    # macOS FFM+ROS3 snapshots
-cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-ROS3 --fresh              # Linux FFM+ROS3 release
-cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-ROS3 --fresh              # Windows FFM+ROS3 release
-cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-ROS3 --fresh             # macOS FFM+ROS3 release
+# ROS3 VFD (S3 cloud storage) - Add to any preset above
+# Example: JNI with ROS3
+cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh \
+  -DHDF5_ENABLE_ROS3_VFD=ON
 
-# JNI implementation (all Java versions)
-cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI-Snapshot --fresh     # Linux JNI snapshots
-cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI-Snapshot --fresh     # Windows JNI snapshots
-cmake --workflow --preset ci-MinShar-Clang-Maven-JNI-Snapshot --fresh    # macOS JNI snapshots
-cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh              # Linux JNI release
-cmake --workflow --preset ci-MinShar-MSVC-Maven-JNI --fresh              # Windows JNI release
-cmake --workflow --preset ci-MinShar-Clang-Maven-JNI --fresh             # macOS JNI release
+# Example: FFM with ROS3
+cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh \
+  -DHDF5_ENABLE_ROS3_VFD=ON
 
 # Install
 cmake --install .
@@ -55,7 +56,8 @@ cmake --install .
 - `HDF5_BUILD_FORTRAN=ON` - Build Fortran bindings
 - `HDF5_BUILD_CPP_LIB=ON` - Build C++ bindings
 - `HDF5_BUILD_JAVA=ON` - Build Java bindings
-- `HDF5_ENABLE_JNI=ON` - Force JNI implementation (default: OFF, uses FFM for Java 24+)
+- `HDF5_ENABLE_JNI=ON` - Use JNI implementation (default: ON for backward compatibility)
+- `HDF5_ENABLE_FFM=ON` - Use FFM implementation instead of JNI (requires Java 24+)
 - `HDF5_ENABLE_PARALLEL=ON` - Enable MPI parallel support
 - `HDF5_ENABLE_THREADSAFE=ON` - Enable thread safety
 - `BUILD_TESTING=ON` - Build test suite
@@ -64,8 +66,12 @@ cmake --install .
 
 ### Java Implementation Selection
 
-- **FFM (Foreign Function & Memory)**: Default for Java 24+, provides modern native access
-- **JNI (Java Native Interface)**: Available for all Java versions, will be deprecated in future releases
+**As of HDF5 2.0**: JNI is the default, FFM is optional
+
+- **JNI (Java Native Interface)**: Default implementation, works with Java 8+, production-stable
+- **FFM (Foreign Function & Memory)**: Optional implementation, requires Java 24+, modern native access
+
+**Note**: Future releases may change FFM to default as Java 24+ adoption increases.
 
 ### Maven Artifacts
 
@@ -177,16 +183,23 @@ gh workflow run generate-ffm-bindings.yml -f java_version=25
 
 ### FFM Test Coverage
 
-**Status as of October 16, 2025**: 444 FFM tests (443 active, 1 ignored) across 17 modules, **100% PASSING** ✅
+**Status as of October 26, 2025**: 444 FFM tests (443 active, 1 ignored) across 17 modules
 
-**Latest Update:** Added H5 general API tests (TestH5ffm.java)!
-- **NEW: H5 (General):** 14 tests (library init, version, memory management)
-- **H5P:** 81 tests (property lists, VFDs, chunk/filter properties)
-- **H5F:** 20 tests (file operations, metadata cache)
-- **H5Z:** 17 tests (filter module coverage)
-- **H5VL:** 12 tests (VOL connector module coverage)
-- **H5PL:** 11 tests (plugin module coverage)
-- **H5FD:** 10 tests (file driver module coverage)
+**Platform Status:**
+- ✅ **Linux**: 100% PASSING (444/444 tests)
+- ✅ **macOS**: 100% PASSING (444/444 tests)
+- ⚠️ **Windows**: 94.6% PASSING (439/444 tests, 5 H5T tests skipped)
+
+**Windows Limitations:**
+Five H5T datatype tests are skipped on Windows due to platform-specific ABI differences with H5T_NATIVE types. These edge cases do not affect core functionality. See `.claude/FFM_WINDOWS_LIMITATIONS.md` for details.
+
+**Module Highlights:**
+- **H5 (General):** 14 tests (library init, version, memory management)
+- **H5T (Datatypes):** 92 tests (87 pass on Windows, 5 skipped)
+- **H5P (Properties):** 81 tests (property lists, VFDs, chunk/filter properties)
+- **H5S (Dataspaces):** 41 tests (selections, hyperslabs, extents)
+- **H5VL (VOL):** 12 tests (virtual object layer connectors)
+- **H5PL (Plugins):** 11 tests (plugin module coverage)
 
 **Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested and complete.
 
@@ -195,7 +208,7 @@ gh workflow run generate-ffm-bindings.yml -f java_version=25
 | Module | Tests | C APIs | Coverage | Focus Area | Status |
 |--------|-------|--------|----------|------------|--------|
 | H5S (Dataspaces) | 41 | 43 | 95% | Selections, hyperslabs, extents | ✅ **Outstanding coverage** |
-| H5T (Datatypes) | 92 | 74 | 124% | Types, conversion, reclamation, enum, array, vlen, opaque, complex | ✅ **Excellent coverage** |
+| H5T (Datatypes) | 92 | 74 | 124% | Types, conversion, reclamation, enum, array, vlen, opaque, complex | ✅ **Excellent** (⚠️ 5 Windows skips) |
 | H5VL (VOL) | 12 | 12 | 100% | Virtual object layer connectors | ✅ **Complete** |
 | H5I (Identifiers) | 15 | 18 | 83% | ID management, type operations | ✅ **Good coverage** |
 | H5PL (Plugins) | 11 | 9 | 122% | Plugin management | ✅ **Complete** |

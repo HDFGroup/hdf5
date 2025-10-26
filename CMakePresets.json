@@ -9,29 +9,65 @@
       "hidden": true,
       "inherits": "ci-base",
       "cacheVariables": {
-        "HDF5_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
-        "TGZPATH": {"type": "PATH", "value": "${sourceParentDir}/temp"}
+        "HDF5_ALLOW_EXTERNAL_SUPPORT": {
+          "type": "STRING",
+          "value": "TGZ"
+        },
+        "TGZPATH": {
+          "type": "PATH",
+          "value": "${sourceParentDir}/temp"
+        }
       }
     },
     {
       "name": "ci-CompressionVars",
       "hidden": true,
       "cacheVariables": {
-        "ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"},
-        "ZLIB_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/madler/zlib/releases/download/v1.3.1"},
-        "ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"},
-        "ZLIBNG_PACKAGE_NAME": {"type": "STRING", "value": "zlib-ng"},
-        "ZLIBNG_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags"},
-        "ZLIBNG_TGZ_NAME": {"type": "STRING", "value": "2.2.4.tar.gz"},
-        "LIBAEC_PACKAGE_NAME": {"type": "STRING", "value": "libaec"},
-        "LIBAEC_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"},
-        "LIBAEC_TGZ_NAME": {"type": "STRING", "value": "libaec-1.1.3.tar.gz"}
+        "ZLIB_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "zlib"
+        },
+        "ZLIB_TGZ_ORIGPATH": {
+          "type": "STRING",
+          "value": "https://github.com/madler/zlib/releases/download/v1.3.1"
+        },
+        "ZLIB_TGZ_NAME": {
+          "type": "STRING",
+          "value": "zlib-1.3.1.tar.gz"
+        },
+        "ZLIBNG_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "zlib-ng"
+        },
+        "ZLIBNG_TGZ_ORIGPATH": {
+          "type": "STRING",
+          "value": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags"
+        },
+        "ZLIBNG_TGZ_NAME": {
+          "type": "STRING",
+          "value": "2.2.4.tar.gz"
+        },
+        "LIBAEC_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "libaec"
+        },
+        "LIBAEC_TGZ_ORIGPATH": {
+          "type": "STRING",
+          "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"
+        },
+        "LIBAEC_TGZ_NAME": {
+          "type": "STRING",
+          "value": "libaec-1.1.3.tar.gz"
+        }
       }
     },
     {
       "name": "ci-StdCompression",
       "hidden": true,
-      "inherits": ["ci-base-tgz", "ci-CompressionVars"],
+      "inherits": [
+        "ci-base-tgz",
+        "ci-CompressionVars"
+      ],
       "cacheVariables": {
         "HDF5_PACKAGE_EXTLIBS": "ON",
         "HDF5_USE_ZLIB_NG": "OFF",
@@ -47,35 +83,119 @@
       "name": "ci-base-plugins",
       "hidden": true,
       "cacheVariables": {
-        "BITGROOM_PACKAGE_NAME": {"type": "STRING", "value": "bitgroom"},
-        "BITROUND_PACKAGE_NAME": {"type": "STRING", "value": "bitround"},
-        "BSHUF_TGZ_NAME": {"type": "STRING", "value": "bitshuffle-0.5.2.tar.gz"},
-        "BSHUF_PACKAGE_NAME": {"type": "STRING", "value": "bshuf"},
-        "BLOSC_TGZ_NAME": {"type": "STRING", "value": "c-blosc-1.21.6.tar.gz"},
-        "BLOSC_PACKAGE_NAME": {"type": "STRING", "value": "blosc"},
-        "BLOSC_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"},
-        "BLOSC_ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"},
-        "BLOSC2_TGZ_NAME": {"type": "STRING", "value": "c-blosc2-2.17.1.tar.gz"},
-        "BLOSC2_PACKAGE_NAME": {"type": "STRING", "value": "blosc2"},
-        "BLOSC2_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"},
-        "BLOSC2_ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"},
-        "BZ2_TGZ_NAME": {"type": "STRING", "value": "bzip2-bzip2-1.0.8.tar.gz"},
-        "BZ2_PACKAGE_NAME": {"type": "STRING", "value": "bz2"},
-        "FPZIP_TGZ_NAME": {"type": "STRING", "value": "fpzip-1.3.0.tar.gz"},
-        "FPZIP_PACKAGE_NAME": {"type": "STRING", "value": "fpzip"},
-        "JPEG_TGZ_NAME": {"type": "STRING", "value": "jpegsrc.v9e.tar.gz"},
-        "JPEG_PACKAGE_NAME": {"type": "STRING", "value": "jpeg"},
+        "BITGROOM_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "bitgroom"
+        },
+        "BITROUND_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "bitround"
+        },
+        "BSHUF_TGZ_NAME": {
+          "type": "STRING",
+          "value": "bitshuffle-0.5.2.tar.gz"
+        },
+        "BSHUF_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "bshuf"
+        },
+        "BLOSC_TGZ_NAME": {
+          "type": "STRING",
+          "value": "c-blosc-1.21.6.tar.gz"
+        },
+        "BLOSC_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "blosc"
+        },
+        "BLOSC_ZLIB_TGZ_NAME": {
+          "type": "STRING",
+          "value": "zlib-1.3.1.tar.gz"
+        },
+        "BLOSC_ZLIB_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "zlib"
+        },
+        "BLOSC2_TGZ_NAME": {
+          "type": "STRING",
+          "value": "c-blosc2-2.17.1.tar.gz"
+        },
+        "BLOSC2_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "blosc2"
+        },
+        "BLOSC2_ZLIB_TGZ_NAME": {
+          "type": "STRING",
+          "value": "zlib-1.3.1.tar.gz"
+        },
+        "BLOSC2_ZLIB_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "zlib"
+        },
+        "BZ2_TGZ_NAME": {
+          "type": "STRING",
+          "value": "bzip2-bzip2-1.0.8.tar.gz"
+        },
+        "BZ2_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "bz2"
+        },
+        "FPZIP_TGZ_NAME": {
+          "type": "STRING",
+          "value": "fpzip-1.3.0.tar.gz"
+        },
+        "FPZIP_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "fpzip"
+        },
+        "JPEG_TGZ_NAME": {
+          "type": "STRING",
+          "value": "jpegsrc.v9e.tar.gz"
+        },
+        "JPEG_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "jpeg"
+        },
         "BUILD_LZ4_LIBRARY_SOURCE": "ON",
-        "LZ4_TGZ_NAME": {"type": "STRING", "value": "lz4-1.10.0.tar.gz"},
-        "LZ4_PACKAGE_NAME": {"type": "STRING", "value": "lz4"},
-        "LZF_TGZ_NAME": {"type": "STRING", "value": "liblzf-3.6.tar.gz"},
-        "LZF_PACKAGE_NAME": {"type": "STRING", "value": "lzf"},
-        "SZ_TGZ_NAME": {"type": "STRING", "value": "SZ-2.1.12.5.tar.gz"},
-        "SZ_PACKAGE_NAME": {"type": "STRING", "value": "SZ"},
-        "ZFP_TGZ_NAME": {"type": "STRING", "value": "zfp-1.0.1.tar.gz"},
-        "ZFP_PACKAGE_NAME": {"type": "STRING", "value": "zfp"},
-        "ZSTD_TGZ_NAME": {"type": "STRING", "value": "zstd-1.5.7.tar.gz"},
-        "ZSTD_PACKAGE_NAME": {"type": "STRING", "value": "zstd"}
+        "LZ4_TGZ_NAME": {
+          "type": "STRING",
+          "value": "lz4-1.10.0.tar.gz"
+        },
+        "LZ4_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "lz4"
+        },
+        "LZF_TGZ_NAME": {
+          "type": "STRING",
+          "value": "liblzf-3.6.tar.gz"
+        },
+        "LZF_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "lzf"
+        },
+        "SZ_TGZ_NAME": {
+          "type": "STRING",
+          "value": "SZ-2.1.12.5.tar.gz"
+        },
+        "SZ_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "SZ"
+        },
+        "ZFP_TGZ_NAME": {
+          "type": "STRING",
+          "value": "zfp-1.0.1.tar.gz"
+        },
+        "ZFP_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "zfp"
+        },
+        "ZSTD_TGZ_NAME": {
+          "type": "STRING",
+          "value": "zstd-1.5.7.tar.gz"
+        },
+        "ZSTD_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "zstd"
+        }
       }
     },
     {
@@ -83,16 +203,32 @@
       "hidden": true,
       "cacheVariables": {
         "HDF5_ENABLE_PLUGIN_SUPPORT": "ON",
-        "H5PL_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
-        "PLUGIN_PACKAGE_NAME": {"type": "STRING", "value": "pl"},
-        "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"},
-        "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}
+        "H5PL_ALLOW_EXTERNAL_SUPPORT": {
+          "type": "STRING",
+          "value": "TGZ"
+        },
+        "PLUGIN_PACKAGE_NAME": {
+          "type": "STRING",
+          "value": "pl"
+        },
+        "PLUGIN_TGZ_ORIGPATH": {
+          "type": "STRING",
+          "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"
+        },
+        "PLUGIN_TGZ_NAME": {
+          "type": "STRING",
+          "value": "hdf5_plugins-master.tar.gz"
+        }
       }
     },
     {
       "name": "ci-StdPlugins",
       "hidden": true,
-      "inherits": ["ci-base-plugins", "ci-PluginsVars", "ci-base-tgz"],
+      "inherits": [
+        "ci-base-plugins",
+        "ci-PluginsVars",
+        "ci-base-tgz"
+      ],
       "cacheVariables": {
         "PLUGIN_USE_LOCALCONTENT": "OFF"
       }
@@ -100,7 +236,10 @@
     {
       "name": "ci-StdExamples",
       "hidden": true,
-      "inherits": ["ci-base", "ci-base-tgz"],
+      "inherits": [
+        "ci-base",
+        "ci-base-tgz"
+      ],
       "cacheVariables": {
         "HDF5_PACK_EXAMPLES": "ON",
         "EXAMPLES_DOWNLOAD": "ON"
@@ -156,7 +295,9 @@
     {
       "name": "ci-Maven-Minimal-Snapshot",
       "hidden": true,
-      "inherits": ["ci-Maven-Minimal"],
+      "inherits": [
+        "ci-Maven-Minimal"
+      ],
       "cacheVariables": {
         "HDF5_MAVEN_SNAPSHOT": "ON"
       }
@@ -179,9 +320,16 @@
     {
       "name": "ci-StdShar",
       "hidden": true,
-      "inherits": ["ci-StdCompression", "ci-StdExamples", "ci-StdPlugins"],
+      "inherits": [
+        "ci-StdCompression",
+        "ci-StdExamples",
+        "ci-StdPlugins"
+      ],
       "cacheVariables": {
-        "HDF_PACKAGE_NAMESPACE": {"type": "STRING", "value": "hdf5::"},
+        "HDF_PACKAGE_NAMESPACE": {
+          "type": "STRING",
+          "value": "hdf5::"
+        },
         "HDF5_INSTALL_MOD_FORTRAN": "NO",
         "HDF5_ENABLE_ALL_WARNINGS": "ON",
         "HDF5_MINGW_STATIC_GCC_LIBS": "ON",
@@ -271,32 +419,8 @@
       ]
     },
     {
-      "name": "ci-StdShar-GNUC-Maven",
-      "description": "GNUC Standard Config for x64 with Maven deployment (Release)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-CPP",
-        "ci-Fortran",
-        "ci-Java",
-        "ci-StdShar",
-        "ci-Maven"
-      ]
-    },
-    {
-      "name": "ci-StdShar-GNUC-Maven-Snapshot",
-      "description": "GNUC Standard Config for x64 with Maven snapshot deployment (Release)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-CPP",
-        "ci-Fortran",
-        "ci-Java",
-        "ci-StdShar",
-        "ci-Maven-Snapshot"
-      ]
-    },
-    {
       "name": "ci-MinShar-GNUC-Maven",
-      "description": "GNUC Minimal Config for x64 with Maven deployment (Java artifacts only)",
+      "description": "GNUC Minimal Config for x64 with Maven deployment (JNI - Java 8+)",
       "inherits": [
         "ci-x64-Release-GNUC",
         "ci-Java",
@@ -305,7 +429,7 @@
     },
     {
       "name": "ci-MinShar-GNUC-Maven-Snapshot",
-      "description": "GNUC Minimal Config for x64 with Maven snapshot deployment (Java artifacts only)",
+      "description": "GNUC Minimal Config for x64 with Maven snapshot deployment (JNI - Java 8+)",
       "inherits": [
         "ci-x64-Release-GNUC",
         "ci-Java",
@@ -314,7 +438,7 @@
     },
     {
       "name": "ci-MinShar-MSVC-Maven",
-      "description": "MSVC Minimal Config for x64 with Maven deployment (Java artifacts only)",
+      "description": "MSVC Minimal Config for x64 with Maven deployment (JNI - Java 8+)",
       "inherits": [
         "ci-x64-Release-MSVC",
         "ci-Java",
@@ -323,7 +447,7 @@
     },
     {
       "name": "ci-MinShar-MSVC-Maven-Snapshot",
-      "description": "MSVC Minimal Config for x64 with Maven snapshot deployment (Java artifacts only)",
+      "description": "MSVC Minimal Config for x64 with Maven snapshot deployment (JNI - Java 8+)",
       "inherits": [
         "ci-x64-Release-MSVC",
         "ci-Java",
@@ -332,7 +456,7 @@
     },
     {
       "name": "ci-MinShar-Clang-Maven",
-      "description": "Clang Minimal Config for x64 with Maven deployment (Java artifacts only)",
+      "description": "Clang Minimal Config for x64 with Maven deployment (JNI - Java 8+)",
       "inherits": [
         "ci-x64-Release-Clang",
         "ci-Java",
@@ -341,7 +465,7 @@
     },
     {
       "name": "ci-MinShar-Clang-Maven-Snapshot",
-      "description": "Clang Minimal Config for x64 with Maven snapshot deployment (Java artifacts only)",
+      "description": "Clang Minimal Config for x64 with Maven snapshot deployment (JNI - Java 8+)",
       "inherits": [
         "ci-x64-Release-Clang",
         "ci-Java",
@@ -383,44 +507,6 @@
       ]
     },
     {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
-      "description": "GNUC Minimal Config for x64 with Maven deployment (FFM + ROS3 VFD - Requires Java 24+)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-Java-FFM",
-        "ci-S3",
-        "ci-Maven-Minimal"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
-      "description": "GNUC Minimal Config for x64 with Maven snapshot deployment (FFM + ROS3 VFD - Requires Java 24+)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-Java-FFM",
-        "ci-S3",
-        "ci-Maven-Minimal-Snapshot"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI",
-      "description": "GNUC Minimal Config for x64 with Maven deployment (JNI - Java 11+)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-Java-JNI",
-        "ci-Maven-Minimal"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
-      "description": "GNUC Minimal Config for x64 with Maven snapshot deployment (JNI - Java 11+)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-Java-JNI",
-        "ci-Maven-Minimal-Snapshot"
-      ]
-    },
-    {
       "name": "ci-MinShar-MSVC-Maven-FFM",
       "description": "MSVC Minimal Config for x64 with Maven deployment (FFM - Requires Java 24+)",
       "inherits": [
@@ -439,44 +525,6 @@
       ]
     },
     {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
-      "description": "MSVC Minimal Config for x64 with Maven deployment (FFM + ROS3 VFD - Requires Java 24+)",
-      "inherits": [
-        "ci-x64-Release-MSVC",
-        "ci-Java-FFM",
-        "ci-S3",
-        "ci-Maven-Minimal"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
-      "description": "MSVC Minimal Config for x64 with Maven snapshot deployment (FFM + ROS3 VFD - Requires Java 24+)",
-      "inherits": [
-        "ci-x64-Release-MSVC",
-        "ci-Java-FFM",
-        "ci-S3",
-        "ci-Maven-Minimal-Snapshot"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI",
-      "description": "MSVC Minimal Config for x64 with Maven deployment (JNI - Java 11+)",
-      "inherits": [
-        "ci-x64-Release-MSVC",
-        "ci-Java-JNI",
-        "ci-Maven-Minimal"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
-      "description": "MSVC Minimal Config for x64 with Maven snapshot deployment (JNI - Java 11+)",
-      "inherits": [
-        "ci-x64-Release-MSVC",
-        "ci-Java-JNI",
-        "ci-Maven-Minimal-Snapshot"
-      ]
-    },
-    {
       "name": "ci-MinShar-Clang-Maven-FFM",
       "description": "Clang Minimal Config for x64 with Maven deployment (FFM - Requires Java 24+)",
       "inherits": [
@@ -491,44 +539,6 @@
       "inherits": [
         "ci-x64-Release-Clang",
         "ci-Java-FFM",
-        "ci-Maven-Minimal-Snapshot"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
-      "description": "Clang Minimal Config for x64 with Maven deployment (FFM + ROS3 VFD - Requires Java 24+)",
-      "inherits": [
-        "ci-x64-Release-Clang",
-        "ci-Java-FFM",
-        "ci-S3",
-        "ci-Maven-Minimal"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
-      "description": "Clang Minimal Config for x64 with Maven snapshot deployment (FFM + ROS3 VFD - Requires Java 24+)",
-      "inherits": [
-        "ci-x64-Release-Clang",
-        "ci-Java-FFM",
-        "ci-S3",
-        "ci-Maven-Minimal-Snapshot"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI",
-      "description": "Clang Minimal Config for x64 with Maven deployment (JNI - Java 11+)",
-      "inherits": [
-        "ci-x64-Release-Clang",
-        "ci-Java-JNI",
-        "ci-Maven-Minimal"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
-      "description": "Clang Minimal Config for x64 with Maven snapshot deployment (JNI - Java 11+)",
-      "inherits": [
-        "ci-x64-Release-Clang",
-        "ci-Java-JNI",
         "ci-Maven-Minimal-Snapshot"
       ]
     },
@@ -649,26 +659,8 @@
       ]
     },
     {
-      "name": "ci-StdShar-GNUC-Maven",
-      "description": "GNUC Standard Build for x64 with Maven deployment (Release)",
-      "configurePreset": "ci-StdShar-GNUC-Maven",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
-      "name": "ci-StdShar-GNUC-Maven-Snapshot",
-      "description": "GNUC Standard Build for x64 with Maven snapshot deployment (Release)",
-      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
       "name": "ci-MinShar-GNUC-Maven",
-      "description": "GNUC Minimal Build for x64 with Maven deployment (Java artifacts only)",
+      "description": "GNUC Minimal Build for x64 with Maven deployment (JNI - Java 8+)",
       "configurePreset": "ci-MinShar-GNUC-Maven",
       "verbose": true,
       "inherits": [
@@ -677,7 +669,7 @@
     },
     {
       "name": "ci-MinShar-GNUC-Maven-Snapshot",
-      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (Java artifacts only)",
+      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (JNI - Java 8+)",
       "configurePreset": "ci-MinShar-GNUC-Maven-Snapshot",
       "verbose": true,
       "inherits": [
@@ -686,7 +678,7 @@
     },
     {
       "name": "ci-MinShar-MSVC-Maven",
-      "description": "MSVC Minimal Build for x64 with Maven deployment (Java artifacts only)",
+      "description": "MSVC Minimal Build for x64 with Maven deployment (JNI - Java 8+)",
       "configurePreset": "ci-MinShar-MSVC-Maven",
       "verbose": true,
       "inherits": [
@@ -695,7 +687,7 @@
     },
     {
       "name": "ci-MinShar-MSVC-Maven-Snapshot",
-      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (Java artifacts only)",
+      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (JNI - Java 8+)",
       "configurePreset": "ci-MinShar-MSVC-Maven-Snapshot",
       "verbose": true,
       "inherits": [
@@ -704,7 +696,7 @@
     },
     {
       "name": "ci-MinShar-Clang-Maven",
-      "description": "Clang Minimal Build for x64 with Maven deployment (Java artifacts only)",
+      "description": "Clang Minimal Build for x64 with Maven deployment (JNI - Java 8+)",
       "configurePreset": "ci-MinShar-Clang-Maven",
       "verbose": true,
       "inherits": [
@@ -713,7 +705,7 @@
     },
     {
       "name": "ci-MinShar-Clang-Maven-Snapshot",
-      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (Java artifacts only)",
+      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (JNI - Java 8+)",
       "configurePreset": "ci-MinShar-Clang-Maven-Snapshot",
       "verbose": true,
       "inherits": [
@@ -722,7 +714,7 @@
     },
     {
       "name": "ci-MinShar-GNUC-Maven-FFM",
-      "description": "GNUC Minimal Build for x64 with Maven deployment (FFM)",
+      "description": "GNUC Minimal Build for x64 with Maven deployment (FFM - Requires Java 24+)",
       "configurePreset": "ci-MinShar-GNUC-Maven-FFM",
       "verbose": true,
       "inherits": [
@@ -731,7 +723,7 @@
     },
     {
       "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
-      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (FFM)",
+      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (FFM - Requires Java 24+)",
       "configurePreset": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
       "verbose": true,
       "inherits": [
@@ -739,44 +731,8 @@
       ]
     },
     {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
-      "description": "GNUC Minimal Build for x64 with Maven deployment (FFM with ROS3 VFD)",
-      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
-      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
-      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI",
-      "description": "GNUC Minimal Build for x64 with Maven deployment (JNI)",
-      "configurePreset": "ci-MinShar-GNUC-Maven-JNI",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
-      "description": "GNUC Minimal Build for x64 with Maven snapshot deployment (JNI)",
-      "configurePreset": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
       "name": "ci-MinShar-MSVC-Maven-FFM",
-      "description": "MSVC Minimal Build for x64 with Maven deployment (FFM)",
+      "description": "MSVC Minimal Build for x64 with Maven deployment (FFM - Requires Java 24+)",
       "configurePreset": "ci-MinShar-MSVC-Maven-FFM",
       "verbose": true,
       "inherits": [
@@ -785,7 +741,7 @@
     },
     {
       "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
-      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (FFM)",
+      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (FFM - Requires Java 24+)",
       "configurePreset": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
       "verbose": true,
       "inherits": [
@@ -793,44 +749,8 @@
       ]
     },
     {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
-      "description": "MSVC Minimal Build for x64 with Maven deployment (FFM with ROS3 VFD)",
-      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-MSVC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
-      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
-      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-MSVC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI",
-      "description": "MSVC Minimal Build for x64 with Maven deployment (JNI)",
-      "configurePreset": "ci-MinShar-MSVC-Maven-JNI",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-MSVC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
-      "description": "MSVC Minimal Build for x64 with Maven snapshot deployment (JNI)",
-      "configurePreset": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-MSVC"
-      ]
-    },
-    {
       "name": "ci-MinShar-Clang-Maven-FFM",
-      "description": "Clang Minimal Build for x64 with Maven deployment (FFM)",
+      "description": "Clang Minimal Build for x64 with Maven deployment (FFM - Requires Java 24+)",
       "configurePreset": "ci-MinShar-Clang-Maven-FFM",
       "verbose": true,
       "inherits": [
@@ -839,44 +759,8 @@
     },
     {
       "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
-      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (FFM)",
+      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (FFM - Requires Java 24+)",
       "configurePreset": "ci-MinShar-Clang-Maven-FFM-Snapshot",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-Clang"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
-      "description": "Clang Minimal Build for x64 with Maven deployment (FFM with ROS3 VFD)",
-      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-Clang"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
-      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (FFM with ROS3 VFD)",
-      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-Clang"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI",
-      "description": "Clang Minimal Build for x64 with Maven deployment (JNI)",
-      "configurePreset": "ci-MinShar-Clang-Maven-JNI",
-      "verbose": true,
-      "inherits": [
-        "ci-x64-Release-Clang"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
-      "description": "Clang Minimal Build for x64 with Maven snapshot deployment (JNI)",
-      "configurePreset": "ci-MinShar-Clang-Maven-JNI-Snapshot",
       "verbose": true,
       "inherits": [
         "ci-x64-Release-Clang"
@@ -1005,20 +889,6 @@
       ]
     },
     {
-      "name": "ci-StdShar-GNUC-Maven",
-      "configurePreset": "ci-StdShar-GNUC-Maven",
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
-      "name": "ci-StdShar-GNUC-Maven-Snapshot",
-      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
       "name": "ci-MinShar-GNUC-Maven",
       "configurePreset": "ci-MinShar-GNUC-Maven",
       "inherits": [
@@ -1075,34 +945,6 @@
       ]
     },
     {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
-      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3",
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
-      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI",
-      "configurePreset": "ci-MinShar-GNUC-Maven-JNI",
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
-      "configurePreset": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
-      "inherits": [
-        "ci-x64-Release-GNUC"
-      ]
-    },
-    {
       "name": "ci-MinShar-MSVC-Maven-FFM",
       "configurePreset": "ci-MinShar-MSVC-Maven-FFM",
       "inherits": [
@@ -1117,34 +959,6 @@
       ]
     },
     {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
-      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3",
-      "inherits": [
-        "ci-x64-Release-MSVC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
-      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
-      "inherits": [
-        "ci-x64-Release-MSVC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI",
-      "configurePreset": "ci-MinShar-MSVC-Maven-JNI",
-      "inherits": [
-        "ci-x64-Release-MSVC"
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
-      "configurePreset": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
-      "inherits": [
-        "ci-x64-Release-MSVC"
-      ]
-    },
-    {
       "name": "ci-MinShar-Clang-Maven-FFM",
       "configurePreset": "ci-MinShar-Clang-Maven-FFM",
       "inherits": [
@@ -1154,34 +968,6 @@
     {
       "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
       "configurePreset": "ci-MinShar-Clang-Maven-FFM-Snapshot",
-      "inherits": [
-        "ci-x64-Release-Clang"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
-      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3",
-      "inherits": [
-        "ci-x64-Release-Clang"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
-      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
-      "inherits": [
-        "ci-x64-Release-Clang"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI",
-      "configurePreset": "ci-MinShar-Clang-Maven-JNI",
-      "inherits": [
-        "ci-x64-Release-Clang"
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
-      "configurePreset": "ci-MinShar-Clang-Maven-JNI-Snapshot",
       "inherits": [
         "ci-x64-Release-Clang"
       ]
@@ -1266,16 +1052,6 @@
       "inherits": "ci-x64-Release-Intel"
     },
     {
-      "name": "ci-StdShar-GNUC-Maven",
-      "configurePreset": "ci-StdShar-GNUC-Maven",
-      "inherits": "ci-x64-Release-GNUC"
-    },
-    {
-      "name": "ci-StdShar-GNUC-Maven-Snapshot",
-      "configurePreset": "ci-StdShar-GNUC-Maven-Snapshot",
-      "inherits": "ci-x64-Release-GNUC"
-    },
-    {
       "name": "ci-MinShar-GNUC-Maven",
       "configurePreset": "ci-MinShar-GNUC-Maven",
       "inherits": "ci-x64-Release-GNUC"
@@ -1316,26 +1092,6 @@
       "inherits": "ci-x64-Release-GNUC"
     },
     {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
-      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3",
-      "inherits": "ci-x64-Release-GNUC"
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
-      "configurePreset": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
-      "inherits": "ci-x64-Release-GNUC"
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI",
-      "configurePreset": "ci-MinShar-GNUC-Maven-JNI",
-      "inherits": "ci-x64-Release-GNUC"
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
-      "configurePreset": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
-      "inherits": "ci-x64-Release-GNUC"
-    },
-    {
       "name": "ci-MinShar-MSVC-Maven-FFM",
       "configurePreset": "ci-MinShar-MSVC-Maven-FFM",
       "inherits": "ci-x64-Release-MSVC"
@@ -1343,26 +1099,6 @@
     {
       "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
       "configurePreset": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
-      "inherits": "ci-x64-Release-MSVC"
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
-      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3",
-      "inherits": "ci-x64-Release-MSVC"
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
-      "configurePreset": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
-      "inherits": "ci-x64-Release-MSVC"
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI",
-      "configurePreset": "ci-MinShar-MSVC-Maven-JNI",
-      "inherits": "ci-x64-Release-MSVC"
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
-      "configurePreset": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
       "inherits": "ci-x64-Release-MSVC"
     },
     {
@@ -1374,357 +1110,481 @@
       "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
       "configurePreset": "ci-MinShar-Clang-Maven-FFM-Snapshot",
       "inherits": "ci-x64-Release-Clang"
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
-      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3",
-      "inherits": "ci-x64-Release-Clang"
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
-      "configurePreset": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
-      "inherits": "ci-x64-Release-Clang"
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI",
-      "configurePreset": "ci-MinShar-Clang-Maven-JNI",
-      "inherits": "ci-x64-Release-Clang"
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
-      "configurePreset": "ci-MinShar-Clang-Maven-JNI-Snapshot",
-      "inherits": "ci-x64-Release-Clang"
     }
   ],
   "workflowPresets": [
     {
       "name": "ci-StdShar-MSVC",
       "steps": [
-        {"type": "configure", "name": "ci-StdShar-MSVC"},
-        {"type": "build", "name": "ci-StdShar-MSVC"},
-        {"type": "test", "name": "ci-StdShar-MSVC"},
-        {"type": "package", "name": "ci-StdShar-MSVC"}
+        {
+          "type": "configure",
+          "name": "ci-StdShar-MSVC"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-MSVC"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-MSVC"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-MSVC"
+        }
       ]
     },
     {
       "name": "ci-StdShar-Clang",
       "steps": [
-        {"type": "configure", "name": "ci-StdShar-Clang"},
-        {"type": "build", "name": "ci-StdShar-Clang"},
-        {"type": "test", "name": "ci-StdShar-Clang"},
-        {"type": "package", "name": "ci-StdShar-Clang"}
+        {
+          "type": "configure",
+          "name": "ci-StdShar-Clang"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-Clang"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-Clang"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-Clang"
+        }
       ]
     },
     {
       "name": "ci-StdShar-macos-Clang",
       "steps": [
-        {"type": "configure", "name": "ci-StdShar-macos-Clang"},
-        {"type": "build", "name": "ci-StdShar-macos-Clang"},
-        {"type": "test", "name": "ci-StdShar-macos-Clang"},
-        {"type": "package", "name": "ci-StdShar-macos-Clang"}
+        {
+          "type": "configure",
+          "name": "ci-StdShar-macos-Clang"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-macos-Clang"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-macos-Clang"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-macos-Clang"
+        }
       ]
     },
     {
       "name": "ci-StdShar-GNUC",
       "steps": [
-        {"type": "configure", "name": "ci-StdShar-GNUC"},
-        {"type": "build", "name": "ci-StdShar-GNUC"},
-        {"type": "test", "name": "ci-StdShar-GNUC"},
-        {"type": "package", "name": "ci-StdShar-GNUC"}
+        {
+          "type": "configure",
+          "name": "ci-StdShar-GNUC"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-GNUC"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-GNUC"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-GNUC"
+        }
       ]
     },
     {
       "name": "ci-StdShar-macos-GNUC",
       "steps": [
-        {"type": "configure", "name": "ci-StdShar-macos-GNUC"},
-        {"type": "build", "name": "ci-StdShar-macos-GNUC"},
-        {"type": "test", "name": "ci-StdShar-macos-GNUC"},
-        {"type": "package", "name": "ci-StdShar-macos-GNUC"}
+        {
+          "type": "configure",
+          "name": "ci-StdShar-macos-GNUC"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-macos-GNUC"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-macos-GNUC"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-macos-GNUC"
+        }
       ]
     },
     {
       "name": "ci-StdShar-GNUC-S3",
       "steps": [
-        {"type": "configure", "name": "ci-StdShar-GNUC-S3"},
-        {"type": "build", "name": "ci-StdShar-GNUC-S3"},
-        {"type": "test", "name": "ci-StdShar-GNUC-S3"},
-        {"type": "package", "name": "ci-StdShar-GNUC-S3"}
+        {
+          "type": "configure",
+          "name": "ci-StdShar-GNUC-S3"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-GNUC-S3"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-GNUC-S3"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-GNUC-S3"
+        }
       ]
     },
     {
       "name": "ci-StdShar-Intel",
       "steps": [
-        {"type": "configure", "name": "ci-StdShar-Intel"},
-        {"type": "build", "name": "ci-StdShar-Intel"},
-        {"type": "test", "name": "ci-StdShar-Intel"},
-        {"type": "package", "name": "ci-StdShar-Intel"}
+        {
+          "type": "configure",
+          "name": "ci-StdShar-Intel"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-Intel"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-Intel"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-Intel"
+        }
       ]
     },
     {
       "name": "ci-StdShar-win-Intel",
       "steps": [
-        {"type": "configure", "name": "ci-StdShar-Intel"},
-        {"type": "build", "name": "ci-StdShar-Intel"},
-        {"type": "test", "name": "ci-StdShar-win-Intel"},
-        {"type": "package", "name": "ci-StdShar-Intel"}
-      ]
-    },
-    {
-      "name": "ci-StdShar-GNUC-Maven",
-      "steps": [
-        {"type": "configure", "name": "ci-StdShar-GNUC-Maven"},
-        {"type": "build", "name": "ci-StdShar-GNUC-Maven"},
-        {"type": "test", "name": "ci-StdShar-GNUC-Maven"},
-        {"type": "package", "name": "ci-StdShar-GNUC-Maven"}
-      ]
-    },
-    {
-      "name": "ci-StdShar-GNUC-Maven-Snapshot",
-      "steps": [
-        {"type": "configure", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
-        {"type": "build", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
-        {"type": "test", "name": "ci-StdShar-GNUC-Maven-Snapshot"},
-        {"type": "package", "name": "ci-StdShar-GNUC-Maven-Snapshot"}
+        {
+          "type": "configure",
+          "name": "ci-StdShar-Intel"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-Intel"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-win-Intel"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-Intel"
+        }
       ]
     },
     {
       "name": "ci-MinShar-GNUC-Maven",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-GNUC-Maven"},
-        {"type": "build", "name": "ci-MinShar-GNUC-Maven"},
-        {"type": "package", "name": "ci-MinShar-GNUC-Maven"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-GNUC-Maven"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-GNUC-Maven"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-GNUC-Maven"
+        }
       ]
     },
     {
       "name": "ci-MinShar-GNUC-Maven-Snapshot",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-GNUC-Maven-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-GNUC-Maven-Snapshot"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-GNUC-Maven-Snapshot"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-GNUC-Maven-Snapshot"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-GNUC-Maven-Snapshot"
+        }
       ]
     },
     {
       "name": "ci-MinShar-MSVC-Maven",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-MSVC-Maven"},
-        {"type": "build", "name": "ci-MinShar-MSVC-Maven"},
-        {"type": "package", "name": "ci-MinShar-MSVC-Maven"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-MSVC-Maven"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-MSVC-Maven"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-MSVC-Maven"
+        }
       ]
     },
     {
       "name": "ci-MinShar-MSVC-Maven-Snapshot",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-MSVC-Maven-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-MSVC-Maven-Snapshot"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-MSVC-Maven-Snapshot"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-MSVC-Maven-Snapshot"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-MSVC-Maven-Snapshot"
+        }
       ]
     },
     {
       "name": "ci-MinShar-Clang-Maven",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-Clang-Maven"},
-        {"type": "build", "name": "ci-MinShar-Clang-Maven"},
-        {"type": "package", "name": "ci-MinShar-Clang-Maven"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-Clang-Maven"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-Clang-Maven"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-Clang-Maven"
+        }
       ]
     },
     {
       "name": "ci-MinShar-Clang-Maven-Snapshot",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-Clang-Maven-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-Clang-Maven-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-Clang-Maven-Snapshot"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-Clang-Maven-Snapshot"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-Clang-Maven-Snapshot"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-Clang-Maven-Snapshot"
+        }
       ]
     },
     {
       "name": "ci-MinShar-GNUC-Maven-FFM",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-FFM"},
-        {"type": "build", "name": "ci-MinShar-GNUC-Maven-FFM"},
-        {"type": "package", "name": "ci-MinShar-GNUC-Maven-FFM"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-GNUC-Maven-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-GNUC-Maven-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-GNUC-Maven-FFM"
+        }
       ]
     },
     {
       "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3"},
-        {"type": "build", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3"},
-        {"type": "package", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-GNUC-Maven-FFM-ROS3-Snapshot"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-JNI"},
-        {"type": "build", "name": "ci-MinShar-GNUC-Maven-JNI"},
-        {"type": "package", "name": "ci-MinShar-GNUC-Maven-JNI"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-GNUC-Maven-JNI-Snapshot"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-GNUC-Maven-FFM-Snapshot"
+        }
       ]
     },
     {
       "name": "ci-MinShar-MSVC-Maven-FFM",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-FFM"},
-        {"type": "build", "name": "ci-MinShar-MSVC-Maven-FFM"},
-        {"type": "package", "name": "ci-MinShar-MSVC-Maven-FFM"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-MSVC-Maven-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-MSVC-Maven-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-MSVC-Maven-FFM"
+        }
       ]
     },
     {
       "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3"},
-        {"type": "build", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3"},
-        {"type": "package", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-MSVC-Maven-FFM-ROS3-Snapshot"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-JNI"},
-        {"type": "build", "name": "ci-MinShar-MSVC-Maven-JNI"},
-        {"type": "package", "name": "ci-MinShar-MSVC-Maven-JNI"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-MSVC-Maven-JNI-Snapshot"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-MSVC-Maven-FFM-Snapshot"
+        }
       ]
     },
     {
       "name": "ci-MinShar-Clang-Maven-FFM",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM"},
-        {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM"},
-        {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-Clang-Maven-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-Clang-Maven-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-Clang-Maven-FFM"
+        }
       ]
     },
     {
       "name": "ci-MinShar-Clang-Maven-FFM-Snapshot",
       "steps": [
-        {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM-ROS3"},
-        {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM-ROS3"},
-        {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM-ROS3"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-Clang-Maven-FFM-ROS3-Snapshot"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-Clang-Maven-JNI"},
-        {"type": "build", "name": "ci-MinShar-Clang-Maven-JNI"},
-        {"type": "package", "name": "ci-MinShar-Clang-Maven-JNI"}
-      ]
-    },
-    {
-      "name": "ci-MinShar-Clang-Maven-JNI-Snapshot",
-      "steps": [
-        {"type": "configure", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"},
-        {"type": "build", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"},
-        {"type": "package", "name": "ci-MinShar-Clang-Maven-JNI-Snapshot"}
+        {
+          "type": "configure",
+          "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"
+        },
+        {
+          "type": "build",
+          "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"
+        },
+        {
+          "type": "package",
+          "name": "ci-MinShar-Clang-Maven-FFM-Snapshot"
+        }
       ]
     },
     {
       "name": "ci-Testing-GNUC-FFM",
       "steps": [
-        {"type": "configure", "name": "ci-Testing-GNUC-FFM"},
-        {"type": "build", "name": "ci-Testing-GNUC-FFM"},
-        {"type": "test", "name": "ci-Testing-GNUC-FFM"}
+        {
+          "type": "configure",
+          "name": "ci-Testing-GNUC-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-Testing-GNUC-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-Testing-GNUC-FFM"
+        }
       ]
     },
     {
       "name": "ci-Testing-MSVC-FFM",
       "steps": [
-        {"type": "configure", "name": "ci-Testing-MSVC-FFM"},
-        {"type": "build", "name": "ci-Testing-MSVC-FFM"},
-        {"type": "test", "name": "ci-Testing-MSVC-FFM"}
+        {
+          "type": "configure",
+          "name": "ci-Testing-MSVC-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-Testing-MSVC-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-Testing-MSVC-FFM"
+        }
       ]
     },
     {
       "name": "ci-Testing-Clang-FFM",
       "steps": [
-        {"type": "configure", "name": "ci-Testing-Clang-FFM"},
-        {"type": "build", "name": "ci-Testing-Clang-FFM"},
-        {"type": "test", "name": "ci-Testing-Clang-FFM"}
+        {
+          "type": "configure",
+          "name": "ci-Testing-Clang-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-Testing-Clang-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-Testing-Clang-FFM"
+        }
       ]
     },
     {
       "name": "ci-Testing-GNUC-JNI",
       "steps": [
-        {"type": "configure", "name": "ci-Testing-GNUC-JNI"},
-        {"type": "build", "name": "ci-Testing-GNUC-JNI"},
-        {"type": "test", "name": "ci-Testing-GNUC-JNI"}
+        {
+          "type": "configure",
+          "name": "ci-Testing-GNUC-JNI"
+        },
+        {
+          "type": "build",
+          "name": "ci-Testing-GNUC-JNI"
+        },
+        {
+          "type": "test",
+          "name": "ci-Testing-GNUC-JNI"
+        }
       ]
     },
     {
       "name": "ci-Testing-MSVC-JNI",
       "steps": [
-        {"type": "configure", "name": "ci-Testing-MSVC-JNI"},
-        {"type": "build", "name": "ci-Testing-MSVC-JNI"},
-        {"type": "test", "name": "ci-Testing-MSVC-JNI"}
+        {
+          "type": "configure",
+          "name": "ci-Testing-MSVC-JNI"
+        },
+        {
+          "type": "build",
+          "name": "ci-Testing-MSVC-JNI"
+        },
+        {
+          "type": "test",
+          "name": "ci-Testing-MSVC-JNI"
+        }
       ]
     },
     {
       "name": "ci-Testing-Clang-JNI",
       "steps": [
-        {"type": "configure", "name": "ci-Testing-Clang-JNI"},
-        {"type": "build", "name": "ci-Testing-Clang-JNI"},
-        {"type": "test", "name": "ci-Testing-Clang-JNI"}
+        {
+          "type": "configure",
+          "name": "ci-Testing-Clang-JNI"
+        },
+        {
+          "type": "build",
+          "name": "ci-Testing-Clang-JNI"
+        },
+        {
+          "type": "test",
+          "name": "ci-Testing-Clang-JNI"
+        }
       ]
     }
   ]

@@ -272,11 +272,8 @@ jobs:
             "ffm")
               IMPL_SUFFIX="-FFM"
               ;;
-            "jni")
-              IMPL_SUFFIX="-JNI"
-              ;;
-            "auto"|*)
-              # Use default presets (FFM for Java 24+, JNI for older versions)
+            "jni"|"auto"|*)
+              # JNI and auto use default Maven presets (JNI is default as of HDF5 2.0)
               IMPL_SUFFIX=""
               ;;
           esac
@@ -287,7 +284,8 @@ jobs:
             SNAPSHOT_SUFFIX="-Snapshot"
           fi
 
-          # Build preset name: ci-MinShar-{COMPILER}-Maven{-FFM|-JNI}{-Snapshot}
+          # Build preset name: ci-MinShar-{COMPILER}-Maven{-FFM}{-Snapshot}
+          # Note: Generic Maven presets default to JNI (no suffix needed)
           PRESET_NAME="ci-MinShar-${{ matrix.compiler }}-Maven${IMPL_SUFFIX}${SNAPSHOT_SUFFIX}"
 
           echo "preset=$PRESET_NAME" >> $GITHUB_OUTPUT
