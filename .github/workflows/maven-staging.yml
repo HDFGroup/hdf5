@@ -631,7 +631,7 @@ jobs:
           fi
 
           # Get absolute path to maven artifacts for this platform
-          MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/${{ matrix.artifact-path }})"
+          MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/${{ matrix.platform }})"
           echo "Maven artifacts directory (${{ matrix.platform }}): $MAVEN_ARTIFACTS_DIR"
 
           # Find HDF5 JAR files (not dependencies like slf4j) - use platform-specific artifacts
@@ -819,7 +819,7 @@ jobs:
           }
 
           # Get absolute path to maven artifacts for this platform
-          $MAVEN_ARTIFACTS_DIR = Resolve-Path "../../maven-artifacts/${{ matrix.artifact-path }}"
+          $MAVEN_ARTIFACTS_DIR = Resolve-Path "../../maven-artifacts/${{ matrix.platform }}"
           Write-Host "Maven artifacts directory (Windows): $MAVEN_ARTIFACTS_DIR"
 
           # Find HDF5 JAR files (not dependencies like slf4j)
