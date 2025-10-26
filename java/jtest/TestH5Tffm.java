@@ -921,7 +921,7 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create 2D array of floats [3][4]
-            MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 3, 4);
+            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 3, 4);
 
             H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_IEEE_F32LE_g(), 2, dims);
             assertTrue("H5Tarray_create2 failed", isValidId(H5tid));
@@ -930,10 +930,10 @@ public class TestH5Tffm {
             int ndims = hdf5_h_1.H5Tget_array_ndims(H5tid);
             assertEquals("Should be 2D array", 2, ndims);
 
-            MemorySegment retrievedDims = arena.allocate(hdf5_h.C_LONG, 2);
+            MemorySegment retrievedDims = arena.allocate(ValueLayout.JAVA_LONG, 2);
             hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
-            assertEquals("First dimension should be 3", 3, retrievedDims.getAtIndex(hdf5_h.C_LONG, 0));
-            assertEquals("Second dimension should be 4", 4, retrievedDims.getAtIndex(hdf5_h.C_LONG, 1));
+            assertEquals("First dimension should be 3", 3, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 0));
+            assertEquals("Second dimension should be 4", 4, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 1));
         }
     }
 
@@ -944,7 +944,7 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create 3D array of doubles [2][3][4]
-            MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 2, 3, 4);
+            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 2, 3, 4);
 
             H5tid = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_IEEE_F64LE_g(), 3, dims);
             assertTrue("H5Tarray_create2 failed", isValidId(H5tid));
@@ -953,11 +953,11 @@ public class TestH5Tffm {
             int ndims = hdf5_h_1.H5Tget_array_ndims(H5tid);
             assertEquals("Should be 3D array", 3, ndims);
 
-            MemorySegment retrievedDims = arena.allocate(hdf5_h.C_LONG, 3);
+            MemorySegment retrievedDims = arena.allocate(ValueLayout.JAVA_LONG, 3);
             hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
-            assertEquals("First dimension should be 2", 2, retrievedDims.getAtIndex(hdf5_h.C_LONG, 0));
-            assertEquals("Second dimension should be 3", 3, retrievedDims.getAtIndex(hdf5_h.C_LONG, 1));
-            assertEquals("Third dimension should be 4", 4, retrievedDims.getAtIndex(hdf5_h.C_LONG, 2));
+            assertEquals("First dimension should be 2", 2, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 0));
+            assertEquals("Second dimension should be 3", 3, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 1));
+            assertEquals("Third dimension should be 4", 4, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 2));
         }
     }
 
@@ -991,18 +991,18 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create array with specific dimensions
-            MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 7, 8, 9);
+            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 7, 8, 9);
             H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_STD_I64LE_g(), 3, dims);
 
             // Retrieve dimensions
-            MemorySegment retrievedDims = arena.allocate(hdf5_h.C_LONG, 3);
+            MemorySegment retrievedDims = arena.allocate(ValueLayout.JAVA_LONG, 3);
             int result                  = hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
             assertEquals("H5Tget_array_dims2 should return rank", 3, result);
 
             // Verify each dimension
-            assertEquals("Dim 0 should be 7", 7, retrievedDims.getAtIndex(hdf5_h.C_LONG, 0));
-            assertEquals("Dim 1 should be 8", 8, retrievedDims.getAtIndex(hdf5_h.C_LONG, 1));
-            assertEquals("Dim 2 should be 9", 9, retrievedDims.getAtIndex(hdf5_h.C_LONG, 2));
+            assertEquals("Dim 0 should be 7", 7, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 0));
+            assertEquals("Dim 1 should be 8", 8, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 1));
+            assertEquals("Dim 2 should be 9", 9, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 2));
         }
     }
 
@@ -1070,7 +1070,7 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create array [5][10] of ints (4 bytes each)
-            MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 5, 10);
+            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 5, 10);
             H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_STD_I32LE_g(), 2, dims);
 
             // Get size - should be 5 * 10 * 4 = 200 bytes
@@ -1968,7 +1968,7 @@ public class TestH5Tffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 5, 10);
+            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 5, 10);
 
             long tid1 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_STD_I32LE_g(), 2, dims);
             long tid2 = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_STD_I32LE_g(), 2, dims);
@@ -1981,7 +1981,7 @@ public class TestH5Tffm {
             hdf5_h_1.H5Tclose(tid2);
 
             // Different dimensions should not be equal
-            MemorySegment dims2 = arena.allocateFrom(hdf5_h.C_LONG, 5, 11);
+            MemorySegment dims2 = arena.allocateFrom(ValueLayout.JAVA_LONG, 5, 11);
             long tid3           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_STD_I32LE_g(), 2, dims);
             long tid4           = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_STD_I32LE_g(), 2, dims2);
 
@@ -2000,20 +2000,20 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             // Create 4D array [2][3][4][5]
-            MemorySegment dims = arena.allocateFrom(hdf5_h.C_LONG, 2, 3, 4, 5);
+            MemorySegment dims = arena.allocateFrom(ValueLayout.JAVA_LONG, 2, 3, 4, 5);
             H5tid              = hdf5_h_1.H5Tarray_create2(hdf5_h_1.H5T_IEEE_F64LE_g(), 4, dims);
 
             // Verify rank
             assertEquals("Should be 4D", 4, hdf5_h_1.H5Tget_array_ndims(H5tid));
 
             // Get all dimensions
-            MemorySegment retrievedDims = arena.allocate(hdf5_h.C_LONG, 4);
+            MemorySegment retrievedDims = arena.allocate(ValueLayout.JAVA_LONG, 4);
             hdf5_h_1.H5Tget_array_dims2(H5tid, retrievedDims);
 
-            assertEquals("Dim[0]", 2, retrievedDims.getAtIndex(hdf5_h.C_LONG, 0));
-            assertEquals("Dim[1]", 3, retrievedDims.getAtIndex(hdf5_h.C_LONG, 1));
-            assertEquals("Dim[2]", 4, retrievedDims.getAtIndex(hdf5_h.C_LONG, 2));
-            assertEquals("Dim[3]", 5, retrievedDims.getAtIndex(hdf5_h.C_LONG, 3));
+            assertEquals("Dim[0]", 2, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 0));
+            assertEquals("Dim[1]", 3, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 1));
+            assertEquals("Dim[2]", 4, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 2));
+            assertEquals("Dim[3]", 5, retrievedDims.getAtIndex(ValueLayout.JAVA_LONG, 3));
 
             // Size should be 2*3*4*5*8 = 960 bytes (8 bytes per double)
             assertEquals("Size should be 960", 960, hdf5_h_1.H5Tget_size(H5tid));
@@ -2046,7 +2046,7 @@ public class TestH5Tffm {
 
             // Enum based on long
             long enumLong      = hdf5_h_1.H5Tenum_create(hdf5_h_1.H5T_STD_I64LE_g());
-            MemorySegment val3 = arena.allocate(hdf5_h.C_LONG, 1L);
+            MemorySegment val3 = arena.allocate(ValueLayout.JAVA_LONG, 1L);
             hdf5_h_1.H5Tenum_insert(enumLong, arena.allocateFrom("ONE"), val3);
             assertEquals("Size should be 8", 8, hdf5_h_1.H5Tget_size(enumLong));
             hdf5_h_1.H5Tclose(enumLong);
