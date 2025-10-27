@@ -143,22 +143,25 @@ test_build_config() {
     fi
 
     # Verify implementation detection
-    # Note: Generic Maven presets don't explicitly set implementation (defaults to JNI)
+    # Note: CMake uses HDF5_ENABLE_JNI (not HDF5_ENABLE_FFM)
+    # JNI enabled (ON or not set) = JNI implementation
+    # JNI disabled (OFF) = FFM implementation
     if [ "$impl" = "jni" ]; then
-        # For JNI, accept either explicit "JNI" or absence of "FFM" (default is JNI)
-        if grep -q "Java implementation: FFM" "$BUILD_DIR/CMakeCache.txt"; then
-            log_error "Implementation detection failed - expected JNI but found FFM"
-            cat "$BUILD_DIR/CMakeCache.txt" | grep -i java || true
+        # For JNI, verify it's not explicitly disabled
+        if grep -q "HDF5_ENABLE_JNI:BOOL=OFF" "$BUILD_DIR/CMakeCache.txt"; then
+            log_error "Implementation detection failed - expected JNI but found HDF5_ENABLE_JNI=OFF"
+            cat "$BUILD_DIR/CMakeCache.txt" | grep "HDF5_ENABLE_JNI" || true
             return 1
         fi
-        log_info "JNI implementation verified (generic preset, JNI is default)"
+        log_info "JNI implementation verified (HDF5_ENABLE_JNI not OFF)"
     elif [ "$impl" = "ffm" ]; then
-        # For FFM, must explicitly have "FFM"
-        if ! grep -q "Java implementation: FFM" "$BUILD_DIR/CMakeCache.txt"; then
-            log_error "Implementation detection failed - expected FFM"
-            cat "$BUILD_DIR/CMakeCache.txt" | grep -i java || true
+        # For FFM, verify JNI is explicitly disabled
+        if ! grep -q "HDF5_ENABLE_JNI:BOOL=OFF" "$BUILD_DIR/CMakeCache.txt"; then
+            log_error "Implementation detection failed - expected HDF5_ENABLE_JNI=OFF for FFM"
+            cat "$BUILD_DIR/CMakeCache.txt" | grep "HDF5_ENABLE_JNI" || true
             return 1
         fi
+        log_info "FFM implementation verified (HDF5_ENABLE_JNI=OFF)"
     fi
 
     log_success "Build configuration test passed for $impl"

@@ -56,8 +56,8 @@ cmake --install .
 - `HDF5_BUILD_FORTRAN=ON` - Build Fortran bindings
 - `HDF5_BUILD_CPP_LIB=ON` - Build C++ bindings
 - `HDF5_BUILD_JAVA=ON` - Build Java bindings
-- `HDF5_ENABLE_JNI=ON` - Use JNI implementation (default: ON for backward compatibility)
-- `HDF5_ENABLE_FFM=ON` - Use FFM implementation instead of JNI (requires Java 24+)
+- `HDF5_ENABLE_JNI=OFF` - Auto-select FFM for Java 24+, JNI for older versions (default)
+- `HDF5_ENABLE_JNI=ON` - Force JNI implementation even with Java 24+
 - `HDF5_ENABLE_PARALLEL=ON` - Enable MPI parallel support
 - `HDF5_ENABLE_THREADSAFE=ON` - Enable thread safety
 - `BUILD_TESTING=ON` - Build test suite
