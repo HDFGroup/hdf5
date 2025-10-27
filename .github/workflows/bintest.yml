@@ -35,7 +35,11 @@ jobs:
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v5
         with:
-          java-version: ${{ inputs.java_version }}
+          java-version: |
+            ${{
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
           distribution: 'temurin'
 
       - name: Enable Developer Command Prompt
@@ -113,7 +117,11 @@ jobs:
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v5
         with:
-          java-version: ${{ inputs.java_version }}
+          java-version: |
+            ${{
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
           distribution: 'temurin'
 
       - name: Get published binary (Linux)
@@ -165,7 +173,11 @@ jobs:
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v5
         with:
-          java-version: ${{ inputs.java_version }}
+          java-version: |
+            ${{
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
           distribution: 'temurin'
 
       - name: Get published binary (MacOS_latest)
@@ -228,7 +240,11 @@ jobs:
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v5
         with:
-          java-version: ${{ inputs.java_version }}
+          java-version: |
+            ${{
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
           distribution: 'temurin'
 
       - name: Get published binary (Linux)
