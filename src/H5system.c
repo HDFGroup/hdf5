@@ -1475,15 +1475,27 @@ typedef struct HDqsort_fallback_context_t {
 } HDqsort_fallback_context_t;
 
 #ifdef H5_HAVE_THREADSAFE
-/* Thread-local storage approach for thread-safe builds */
+/* Thread-local storage approach for thread-safe builds
+ *
+ * Note: The functions below use assertions instead of the HDF5 error stack because
+ * qsort and its variants return void, preventing propagation of errors.
+ */
 static H5TS_key_t  HDqsort_fallback_key;
 static H5TS_once_t HDqsort_fallback_key_once = H5TS_ONCE_INITIALIZER;
 
 static void
 HDqsort_fallback_key_init(void)
 {
+    herr_t ret = SUCCEED;
+
     /* Create the thread-local storage key (no destructor needed) */
-    H5TS_key_create(&HDqsort_fallback_key, NULL);
+    ret = H5TS_key_create(&HDqsort_fallback_key, NULL);
+
+    /* Assert that initialization succeeded - cannot propagate errors from here */
+    if (H5_UNLIKELY(ret < 0)) {
+        assert(false && "Failed to create TLS key for qsort fallback");
+        (void)0; /* Ensure non-empty body even when asserts are disabled */
+    }
 }
 
 static int
@@ -1505,20 +1517,33 @@ HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *
                  void *arg)
 {
     HDqsort_fallback_context_t ctx;
+    herr_t                     ret;
 
     /* Ensure the TLS key is initialized */
-    H5TS_once(&HDqsort_fallback_key_once, HDqsort_fallback_key_init);
+    ret = H5TS_once(&HDqsort_fallback_key_once, HDqsort_fallback_key_init);
+    if (H5_UNLIKELY(ret < 0)) {
+        assert(false && "Failed to initialize TLS key for qsort fallback");
+        (void)0; /* Ensure non-empty body even when asserts are disabled */
+    }
 
     ctx.gnu_compar = compar;
     ctx.gnu_arg    = arg;
 
     /* Store context in thread-local storage */
-    H5TS_key_set_value(HDqsort_fallback_key, &ctx);
+    ret = H5TS_key_set_value(HDqsort_fallback_key, &ctx);
+    if (H5_UNLIKELY(ret < 0)) {
+        assert(false && "Failed to set TLS value for qsort fallback");
+        (void)0; /* Ensure non-empty body even when asserts are disabled */
+    }
 
     qsort(base, nel, size, HDqsort_fallback_wrapper);
 
     /* Clear the thread-local storage */
-    H5TS_key_set_value(HDqsort_fallback_key, NULL);
+    ret = H5TS_key_set_value(HDqsort_fallback_key, NULL);
+    if (H5_UNLIKELY(ret < 0)) {
+        assert(false && "Failed to clear TLS value for qsort fallback");
+        (void)0; /* Ensure non-empty body even when asserts are disabled */
+    }
 }
 
 #else
