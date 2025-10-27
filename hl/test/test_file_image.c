@@ -52,12 +52,12 @@
 static int
 test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
 {
-    hid_t  *file_id = NULL; /* Array of file IDs */
-    hid_t  *dset_id = NULL; /* Array of dataset IDs */
-    hid_t   file_space_id = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t   dcpl_id = H5I_INVALID_HID; /* DCPL ID */
-    hid_t   fapl_id = H5I_INVALID_HID; /* FAPL ID */
-    hsize_t dims1[RANK]    = {2, 3};                            /* original dimension of datasets */
+    hid_t  *file_id        = NULL;            /* Array of file IDs */
+    hid_t  *dset_id        = NULL;            /* Array of dataset IDs */
+    hid_t   file_space_id  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   dcpl_id        = H5I_INVALID_HID; /* DCPL ID */
+    hid_t   fapl_id        = H5I_INVALID_HID; /* FAPL ID */
+    hsize_t dims1[RANK]    = {2, 3};          /* original dimension of datasets */
     hsize_t max_dims[RANK] = {H5S_UNLIMITED, H5S_UNLIMITED};
     int     data1[6]       = {1, 2, 3, 4, 5, 6};    /* original contents of dataset */
     int     data2[6]       = {7, 8, 9, 10, 11, 12}; /* "wrong" contents of dataset */
@@ -144,8 +144,8 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             FAIL_PUTS_ERROR("H5Pset_chunk() failed");
 
         /* create and write an integer type dataset named "dset" */
-        if ((dset_id[i] = H5Dcreate2(file_id[i], DSET_NAME, H5T_NATIVE_INT, file_space_id, H5P_DEFAULT, dcpl_id,
-                                     H5P_DEFAULT)) < 0)
+        if ((dset_id[i] = H5Dcreate2(file_id[i], DSET_NAME, H5T_NATIVE_INT, file_space_id, H5P_DEFAULT,
+                                     dcpl_id, H5P_DEFAULT)) < 0)
             FAIL_PUTS_ERROR("H5Dcreate() failed");
 
         /* dataset in open image 1 is written with "wrong" data */
