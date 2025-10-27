@@ -66,7 +66,6 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       snap_name: hdf5-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
-      maven_enabled: ${{ inputs.deploy_maven == true }}
     secrets:
         APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
         APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
