@@ -3252,7 +3252,7 @@ test_cached_stab_info(void)
 
     /* Close fapl */
     ret = H5Pclose(fapl_id);
-    CHECK(ret, FAIL, "H5Fclose");
+    CHECK(ret, FAIL, "H5Pclose");
 } /* end test_cached_stab_info() */
 
 /*
