@@ -161,12 +161,35 @@ jobs:
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
       - name: Run CTest (Windows)
+        id: run-ctest
         env:
           BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
+          ACTIVE_PRESET_BASE="${{ inputs.preset_name }}-MSVC"
+          echo "ACTIVE_PRESET=$ACTIVE_PRESET_BASE" >> $GITHUB_OUTPUT
+
+          if [ "${{ inputs.maven_enabled }}" == "true" ]; then
+            if [ "${{ inputs.use_environ }}" == "release" ]; then
+              echo "Building with Maven release options"
+              MAVEN_SNAPSHOT="OFF"
+            else
+              echo "Building with Maven snapshot options"
+              MAVEN_SNAPSHOT="ON"
+            fi
+            # Configure with Maven options
+            cmake --preset=$ACTIVE_PRESET_BASE \
+              -DHDF5_ENABLE_MAVEN_DEPLOY=ON \
+              -DHDF5_MAVEN_SNAPSHOT=$MAVEN_SNAPSHOT
+            # Build, test, and package
+            cmake --build --preset=$ACTIVE_PRESET_BASE
+            ctest --preset=$ACTIVE_PRESET_BASE
+            cpack --preset=$ACTIVE_PRESET_BASE
+          else
+            echo "Building with standard workflow"
+            cmake --workflow --preset=$ACTIVE_PRESET_BASE --fresh
+          fi
         shell: bash
 
       - name: Sign files with Trusted Signing
@@ -178,7 +201,7 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}
           files-folder-filter: msi
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -191,8 +214,8 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip hdf5
         shell: pwsh
@@ -201,7 +224,7 @@ jobs:
         id: publish-ctest-msi-binary
         run: |
           mkdir "${{ runner.workspace }}/buildmsi"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi -Include *.msi
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi -Include *.msi
         shell: pwsh
 
       - name: List files in the space (Windows)
@@ -224,6 +247,35 @@ jobs:
               name: msi-vs2022_cl-binary
               path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Upload Maven artifacts when Maven deployment is enabled
+      - name: Collect Maven artifacts (Windows)
+        if: ${{ inputs.maven_enabled == true }}
+        run: |
+          echo "Collecting Maven artifacts for deployment..."
+          New-Item -ItemType Directory -Path "${{ runner.workspace }}/maven-artifacts" -Force
+
+          $BUILD_DIR = "${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}"
+          echo "Looking for artifacts in: $BUILD_DIR"
+
+          # Copy JAR files (excluding test and example JARs)
+          Get-ChildItem -Path $BUILD_DIR -Recurse -Filter "*.jar" | Where-Object { $_.Name -notmatch "test" -and $_.Name -notmatch "H5Ex_" } | Copy-Item -Destination "${{ runner.workspace }}/maven-artifacts/"
+
+          # Copy POM files
+          Get-ChildItem -Path $BUILD_DIR -Recurse -Filter "pom.xml" | Copy-Item -Destination "${{ runner.workspace }}/maven-artifacts/"
+
+          # List collected artifacts
+          echo "Collected artifacts:"
+          Get-ChildItem -Path "${{ runner.workspace }}/maven-artifacts"
+        shell: pwsh
+
+      - name: Upload Maven artifacts (Windows)
+        if: ${{ inputs.maven_enabled == true }}
+        uses: actions/upload-artifact@v4
+        with:
+              name: Windows-${{ inputs.preset_name }}-artifacts
+              path: ${{ runner.workspace }}/maven-artifacts/*
+              if-no-files-found: error
 
   build_and_test_linux:
   # Linux (Ubuntu) w/ gcc
@@ -286,20 +338,29 @@ jobs:
         id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          ACTIVE_PRESET_BASE="${{ inputs.preset_name }}-GNUC"
+          echo "ACTIVE_PRESET=$ACTIVE_PRESET_BASE" >> $GITHUB_OUTPUT
+
           if [ "${{ inputs.maven_enabled }}" == "true" ]; then
             if [ "${{ inputs.use_environ }}" == "release" ]; then
-              echo "Building with Maven release preset"
-              ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC-Maven")
+              echo "Building with Maven release options"
+              MAVEN_SNAPSHOT="OFF"
             else
-              echo "Building with Maven snapshot preset"
-              ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC-Maven-Snapshot")
+              echo "Building with Maven snapshot options"
+              MAVEN_SNAPSHOT="ON"
             fi
+            # Configure with Maven options
+            cmake --preset=$ACTIVE_PRESET_BASE \
+              -DHDF5_ENABLE_MAVEN_DEPLOY=ON \
+              -DHDF5_MAVEN_SNAPSHOT=$MAVEN_SNAPSHOT
+            # Build, test, and package
+            cmake --build --preset=$ACTIVE_PRESET_BASE
+            ctest --preset=$ACTIVE_PRESET_BASE
+            cpack --preset=$ACTIVE_PRESET_BASE
           else
-            echo "Building with standard preset"
-            ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC")
+            echo "Building with standard workflow"
+            cmake --workflow --preset=$ACTIVE_PRESET_BASE --fresh
           fi
-          echo "ACTIVE_PRESET=$ACTIVE_PRESET_BASE" >> $GITHUB_OUTPUT
-          cmake --workflow --preset=$ACTIVE_PRESET_BASE --fresh
         shell: bash
 
       - name: Publish binary (Linux)
@@ -498,7 +559,29 @@ jobs:
           SIGNER: ${{ vars.SIGNER }}
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang --fresh
+          ACTIVE_PRESET_BASE="${{ inputs.preset_name }}-macos-Clang"
+          echo "ACTIVE_PRESET=$ACTIVE_PRESET_BASE" >> $GITHUB_OUTPUT
+
+          if [ "${{ inputs.maven_enabled }}" == "true" ]; then
+            if [ "${{ inputs.use_environ }}" == "release" ]; then
+              echo "Building with Maven release options"
+              MAVEN_SNAPSHOT="OFF"
+            else
+              echo "Building with Maven snapshot options"
+              MAVEN_SNAPSHOT="ON"
+            fi
+            # Configure with Maven options
+            cmake --preset=$ACTIVE_PRESET_BASE \
+              -DHDF5_ENABLE_MAVEN_DEPLOY=ON \
+              -DHDF5_MAVEN_SNAPSHOT=$MAVEN_SNAPSHOT
+            # Build, test, and package
+            cmake --build --preset=$ACTIVE_PRESET_BASE
+            ctest --preset=$ACTIVE_PRESET_BASE
+            cpack --preset=$ACTIVE_PRESET_BASE
+          else
+            echo "Building with standard workflow"
+            cmake --workflow --preset=$ACTIVE_PRESET_BASE --fresh
+          fi
         shell: bash
 
       - name: Sign dmg (MacOS_latest)
@@ -535,7 +618,7 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg)
+          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.dmg)
           echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
@@ -582,7 +665,7 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
         continue-on-error: true
@@ -593,8 +676,8 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
         shell: bash
@@ -603,7 +686,7 @@ jobs:
         id: publish-ctest-dmg-binary
         run: |
           mkdir "${{ runner.workspace }}/builddmg"
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
         shell: bash
 
       - name: List files in the space (MacOS_latest)
@@ -625,6 +708,35 @@ jobs:
               name: tgz-macos14_clang-dmg-binary
               path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Upload Maven artifacts when Maven deployment is enabled
+      - name: Collect Maven artifacts (MacOS_latest)
+        if: ${{ inputs.maven_enabled == true }}
+        run: |
+          echo "Collecting Maven artifacts for deployment..."
+          mkdir -p ${{ runner.workspace }}/maven-artifacts
+
+          BUILD_DIR="${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}"
+          echo "Looking for artifacts in: ${BUILD_DIR}"
+
+          # Copy JAR files (excluding test and example JARs)
+          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # Copy POM files
+          find "${BUILD_DIR}" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # List collected artifacts
+          echo "Collected artifacts:"
+          ls -la ${{ runner.workspace }}/maven-artifacts
+        shell: bash
+
+      - name: Upload Maven artifacts (MacOS_latest)
+        if: ${{ inputs.maven_enabled == true }}
+        uses: actions/upload-artifact@v4
+        with:
+              name: MacOS-${{ inputs.preset_name }}-artifacts
+              path: ${{ runner.workspace }}/maven-artifacts/*
+              if-no-files-found: error
 
   build_and_test_S3_linux:
   # Linux S3 (Ubuntu) w/ gcc
