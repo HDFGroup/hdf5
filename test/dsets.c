@@ -10951,7 +10951,7 @@ const H5Z_class2_t H5Z_EXPAND2[1] = {{
  *              chunk by an amount that would be too much for the old file
  *              format.
  *
- * Note:        Unlike filter_expand, this fitler does actually allocate a
+ * Note:        Unlike filter_expand, this filter does actually allocate a
  *              new buffer and is fully functional. Care should be taken
  *              to ensure memory and file usage stays under control.
  *
