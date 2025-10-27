@@ -55,8 +55,13 @@ h5tools_get_little_endian_type(hid_t tid)
             break;
 
         case H5T_FLOAT:
-            if (size == 2)
-                p_type = H5Tcopy(H5T_IEEE_F16LE);
+            if (size == 2) {
+                if (true == H5Tequal(tid, H5T_IEEE_F16LE) || true == H5Tequal(tid, H5T_IEEE_F16BE))
+                    p_type = H5Tcopy(H5T_IEEE_F16LE);
+                else if (true == H5Tequal(tid, H5T_FLOAT_BFLOAT16LE) ||
+                         true == H5Tequal(tid, H5T_FLOAT_BFLOAT16BE))
+                    p_type = H5Tcopy(H5T_FLOAT_BFLOAT16LE);
+            }
             else if (size == 4)
                 p_type = H5Tcopy(H5T_IEEE_F32LE);
             else if (size == 8)
@@ -145,8 +150,13 @@ h5tools_get_big_endian_type(hid_t tid)
             break;
 
         case H5T_FLOAT:
-            if (size == 2)
-                p_type = H5Tcopy(H5T_IEEE_F16BE);
+            if (size == 2) {
+                if (true == H5Tequal(tid, H5T_IEEE_F16LE) || true == H5Tequal(tid, H5T_IEEE_F16BE))
+                    p_type = H5Tcopy(H5T_IEEE_F16BE);
+                else if (true == H5Tequal(tid, H5T_FLOAT_BFLOAT16LE) ||
+                         true == H5Tequal(tid, H5T_FLOAT_BFLOAT16BE))
+                    p_type = H5Tcopy(H5T_FLOAT_BFLOAT16BE);
+            }
             else if (size == 4)
                 p_type = H5Tcopy(H5T_IEEE_F32BE);
             else if (size == 8)

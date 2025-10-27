@@ -10,7 +10,7 @@
 # help@hdfgroup.org.
 #
 
-include(${HDF_CONFIG_DIR}/HDF5Macros.cmake)
+include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
 # System-independent path separator
 if (WIN32)
@@ -345,39 +345,39 @@ endif ()
 # copy test files from source to build dir
 #
 foreach (h5_tstfiles ${LIST_DIFF_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
   if (H5_HAVE_PARALLEL)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
   endif ()
 endforeach ()
 foreach (h5_tstfiles ${LIST_VDS_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
   if (H5_HAVE_PARALLEL)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
   endif ()
 endforeach ()
 foreach (h5_tstfiles ${LIST_HDF5_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
   if (H5_HAVE_PARALLEL)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
   endif ()
 endforeach ()
 foreach (h5_tstfiles ${LIST_OTHER_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
   if (H5_HAVE_PARALLEL)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
   endif ()
 endforeach ()
 # copy second version of tvlstr.h5
-HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/testfiles/tvlstr2.h5" "h5diff_files")
+HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/testfiles/tvlstr2.h5" "h5diff_files")
 if (H5_HAVE_PARALLEL)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/PAR/testfiles/tvlstr2.h5" "h5diff_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/PAR/testfiles/tvlstr2.h5" "h5diff_files")
 endif ()
 
 # create test files for each external VOL connector
-set(h5diff_vol_files_list "")
-foreach(external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
-  HDF5_GET_VOL_TGT_INFO(${external_vol_tgt} ext_vol_dir_name vol_env)
+set (h5diff_vol_files_list "")
+foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
+  HDF5_GET_VOL_TGT_INFO (${external_vol_tgt} ext_vol_dir_name vol_env)
 
   # Setup testfiles directory
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles")
@@ -386,49 +386,49 @@ foreach(external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
   endif ()
 
   # Generate test files
-  add_test(NAME ${external_vol_tgt}-h5diffgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5gentest> -h5diff)
-  set_tests_properties(${external_vol_tgt}-h5diffgentest PROPERTIES
-    ENVIRONMENT "${vol_env}"
-    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles"
-    FIXTURES_SETUP ${ext_vol_dir_name}-files
+  add_test (NAME ${external_vol_tgt}-h5diffgentest COMMAND $<TARGET_FILE:h5gentest> -h5diff)
+  set_tests_properties (${external_vol_tgt}-h5diffgentest PROPERTIES
+      ENVIRONMENT "${vol_env};${CROSSCOMPILING_PATH}"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles"
+      FIXTURES_SETUP ${ext_vol_dir_name}-files
   )
 
   if (H5_HAVE_PARALLEL)
-    add_test(NAME ${external_vol_tgt}-h5diffgentest-PAR COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5gentest> -h5diff)
-    set_tests_properties(${external_vol_tgt}-h5diffgentest-PAR PROPERTIES
-      ENVIRONMENT "${vol_env}"
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/${ext_vol_dir_name}/testfiles"
-      FIXTURES_SETUP ${ext_vol_dir_name}-files
+    add_test (NAME ${external_vol_tgt}-h5diffgentest-PAR COMMAND $<TARGET_FILE:h5gentest> -h5diff)
+    set_tests_properties (${external_vol_tgt}-h5diffgentest-PAR PROPERTIES
+        ENVIRONMENT "${vol_env}"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/${ext_vol_dir_name}/testfiles"
+        FIXTURES_SETUP ${ext_vol_dir_name}-files
     )
   endif ()
 
   # These aren't HDF5 files, just copy them to the VOL's subdirectory
   foreach (listothers ${LIST_OTHER_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}"
-    "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/${listothers}"
-    "h5diff_vol_files"
+    HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/expected/${listothers}"
+        "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/${listothers}"
+        "h5diff_vol_files"
     )
   endforeach ()
 
   if (COPY_WINDOWS_FILES)
-    foreach(h5_tstfiles ${LIST_WIN_TEST_FILES})
-      HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/${h5_tstfiles}.txt" "h5diff_vol_files")
+    foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
+      HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/${h5_tstfiles}.txt" "h5diff_vol_files")
 
       if (H5_HAVE_PARALLEL)
-        HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/PAR/${ext_vol_dir_name}/testfiles/${h5_tstfiles}.txt" "h5diff_vol_files")
+        HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/PAR/${ext_vol_dir_name}/testfiles/${h5_tstfiles}.txt" "h5diff_vol_files")
       endif ()
-    endforeach()
+    endforeach ()
   else ()
-    foreach(h5_tstfiles ${LIST_WIN_TEST_FILES})
-      HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/${h5_tstfiles}.txt" "h5diff_vol_files")
+    foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
+      HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/${h5_tstfiles}.txt" "h5diff_vol_files")
 
       if (H5_HAVE_PARALLEL)
-        HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/PAR/${ext_vol_dir_name}/testfiles/${h5_tstfiles}.txt" "h5diff_vol_files")
+        HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/PAR/${ext_vol_dir_name}/testfiles/${h5_tstfiles}.txt" "h5diff_vol_files")
       endif ()
-    endforeach()
+    endforeach ()
   endif ()
 endforeach () # per-VOL loop
-add_custom_target(h5diff_vol_files ALL COMMENT "Copying files needed by h5diff VOL tests" DEPENDS ${h5diff_vol_files_list})
+add_custom_target (h5diff_vol_files ALL COMMENT "Copying files needed by h5diff VOL tests" DEPENDS ${h5diff_vol_files_list})
 
 #
 # Overwrite system dependent files (Windows) and not VS2015
@@ -443,20 +443,20 @@ if (WIN32 AND MSVC_VERSION LESS 1900)
 endif ()
 if (COPY_WINDOWS_FILES)
   foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}.txt" "h5diff_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}.txt" "h5diff_files")
     if (H5_HAVE_PARALLEL)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}.txt" "h5diff_files")
+      HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}.txt" "h5diff_files")
     endif ()
   endforeach ()
 else ()
   foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}.txt" "h5diff_files")
+    HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}.txt" "h5diff_files")
     if (H5_HAVE_PARALLEL)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}.txt" "h5diff_files")
+      HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}.txt" "h5diff_files")
     endif ()
   endforeach ()
 endif ()
-add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests" DEPENDS ${h5diff_files_list})
+add_custom_target (h5diff_files ALL COMMENT "Copying files needed by h5diff tests" DEPENDS ${h5diff_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -483,21 +483,21 @@ add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests
 #
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
-    "SERIAL_ONLY"
-    "RESULT_CODE;ERROR_REF"
-    ""
-    ${ARGN}
+      "SERIAL_ONLY"
+      "RESULT_CODE;ERROR_REF"
+      ""
+      ${ARGN}
   )
 
   # Validate required parameters
   if (NOT DEFINED ARG_RESULT_CODE)
-    message(FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
+    message (FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
   endif ()
 
   # Set up args to pass to serial/parallel variants
   if (DEFINED ARG_ERROR_REF)
     set(err_ref2 "ERROR_REF" "${ARG_ERROR_REF}")
-  else()
+  else ()
     set (err_ref2 "")
   endif ()
 
@@ -512,53 +512,53 @@ endmacro ()
 
 macro (ADD_SH5_TEST testname)
   cmake_parse_arguments(ARG
-    ""
-    "RESULT_CODE;ERROR_REF"
-    ""
-    ${ARGN}
+      ""
+      "RESULT_CODE;ERROR_REF"
+      ""
+      ${ARGN}
   )
 
   # Validate required parameters
   if (NOT DEFINED ARG_RESULT_CODE)
-    message(FATAL_ERROR "ADD_SH5_TEST: RESULT_CODE is required")
+    message (FATAL_ERROR "ADD_SH5_TEST: RESULT_CODE is required")
   endif ()
 
-  list(LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
+  list (LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
 
   # Add a test for the native connector and each external VOL connector
   foreach (vol_idx RANGE 0 ${num_ext_vols})
-    set(vol_env "")
+    set (vol_env "")
 
     # First, populate VOL info to be passed to tests
     if (${vol_idx} EQUAL 0)
-      set(vol "native")
-      set(vol_prefix "")
+      set (vol "native")
+      set (vol_prefix "")
       set (workdir "${PROJECT_BINARY_DIR}/testfiles")
     else ()
       # An external VOL connector
-      math(EXPR vol_idx_fixed "${vol_idx} - 1")
-      list(GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
-      HDF5_GET_VOL_TGT_INFO(${ext_vol_tgt} vol vol_env)
+      math (EXPR vol_idx_fixed "${vol_idx} - 1")
+      list (GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
+      HDF5_GET_VOL_TGT_INFO (${ext_vol_tgt} vol vol_env)
 
       set (vol_prefix "HDF5_VOL_${vol}-")
 
       set (workdir "${PROJECT_BINARY_DIR}/${vol}/testfiles")
       # Isolate plugin path string
-      string(FIND "${vol_env}" "HDF5_PLUGIN_PATH=" vol_plugin_path_posn)
+      string (FIND "${vol_env}" "HDF5_PLUGIN_PATH=" vol_plugin_path_posn)
 
       if (vol_plugin_path_posn GREATER -1)
         # Grab path string after HDF5_PLUGIN_PATH=
-        string(LENGTH "HDF5_PLUGIN_PATH=" path_prefix_len)
-        math(EXPR vol_plugin_path_posn "${vol_plugin_path_posn} + ${path_prefix_len}")
-        string(SUBSTRING "${vol_env}" ${vol_plugin_path_posn} -1 vol_plugin_path)
+        string (LENGTH "HDF5_PLUGIN_PATH=" path_prefix_len)
+        math (EXPR vol_plugin_path_posn "${vol_plugin_path_posn} + ${path_prefix_len}")
+        string (SUBSTRING "${vol_env}" ${vol_plugin_path_posn} -1 vol_plugin_path)
       else()
-        set(vol_plugin_path "")
-      endif()
+        set (vol_plugin_path "")
+      endif ()
     endif ()
 
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME ${vol_prefix}H5DIFF-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARG_UNPARSED_ARGUMENTS})
+      add_test (NAME ${vol_prefix}H5DIFF-${testname} COMMAND $<TARGET_FILE:h5diff> ${ARG_UNPARSED_ARGUMENTS})
       if (${ARG_RESULT_CODE})
         set_tests_properties (${vol_prefix}H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -566,7 +566,6 @@ macro (ADD_SH5_TEST testname)
       add_test (
           NAME ${vol_prefix}H5DIFF-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
               -D "TEST_ARGS:STRING=${ARG_UNPARSED_ARGUMENTS}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -579,35 +578,33 @@ macro (ADD_SH5_TEST testname)
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
-
     set_tests_properties (${vol_prefix}H5DIFF-${testname} PROPERTIES
         WORKING_DIRECTORY "${workdir}"
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
-
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5DIFF-${testname} PROPERTIES
-        ENVIRONMENT "${vol_env}"
-        FIXTURES_REQUIRED "h5diff_vol_files"
+          ENVIRONMENT "${vol_env}"
+          FIXTURES_REQUIRED "h5diff_vol_files"
       )
     endif ()
-
     if ("${vol_prefix}H5DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (${vol_prefix}H5DIFF-${testname} PROPERTIES DISABLED true)
     endif ()
-  endforeach() # per-VOL loop
+  endforeach () # per-VOL loop
 endmacro ()
 
 macro (ADD_PH5_TEST testname)
   cmake_parse_arguments(ARG
-    ""
-    "RESULT_CODE;ERROR_REF"
-    ""
-    ${ARGN}
+      ""
+      "RESULT_CODE;ERROR_REF"
+      ""
+      ${ARGN}
   )
 
   # Validate required parameters
   if (NOT DEFINED ARG_RESULT_CODE)
-    message(FATAL_ERROR "ADD_PH5_TEST: RESULT_CODE is required")
+    message (FATAL_ERROR "ADD_PH5_TEST: RESULT_CODE is required")
   endif ()
 
   # Handle parallel-exlusive ref file logic
@@ -618,37 +615,37 @@ macro (ADD_PH5_TEST testname)
     set (ref_file "${testname}.txt")
   endif ()
 
-  list(LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
+  list (LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
 
   # Add a test for the native connector and each external VOL connector
   foreach (vol_idx RANGE 0 ${num_ext_vols})
-    set(vol_env "")
+    set (vol_env "")
 
     # First, populate VOL info to be passed to tests
     if (${vol_idx} EQUAL 0)
-      set(vol "native")
-      set(vol_prefix "")
+      set (vol "native")
+      set (vol_prefix "")
       set (workdir "${PROJECT_BINARY_DIR}/PAR/testfiles")
     else ()
       # An external VOL connector
-      math(EXPR vol_idx_fixed "${vol_idx} - 1")
-      list(GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
-      HDF5_GET_VOL_TGT_INFO(${ext_vol_tgt} vol vol_env)
+      math (EXPR vol_idx_fixed "${vol_idx} - 1")
+      list (GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
+      HDF5_GET_VOL_TGT_INFO (${ext_vol_tgt} vol vol_env)
 
       set (vol_prefix "HDF5_VOL_${vol}-")
 
       set (workdir "${PROJECT_BINARY_DIR}/PAR/${vol}/testfiles")
       # Isolate plugin path string
-      string(FIND "${vol_env}" "HDF5_PLUGIN_PATH=" vol_plugin_path_posn)
+      string (FIND "${vol_env}" "HDF5_PLUGIN_PATH=" vol_plugin_path_posn)
 
       if (vol_plugin_path_posn GREATER -1)
         # Grab path string after HDF5_PLUGIN_PATH=
-        string(LENGTH "HDF5_PLUGIN_PATH=" path_prefix_len)
-        math(EXPR vol_plugin_path_posn "${vol_plugin_path_posn} + ${path_prefix_len}")
-        string(SUBSTRING "${vol_env}" ${vol_plugin_path_posn} -1 vol_plugin_path)
-      else()
-        set(vol_plugin_path "")
-      endif()
+        string (LENGTH "HDF5_PLUGIN_PATH=" path_prefix_len)
+        math (EXPR vol_plugin_path_posn "${vol_plugin_path_posn} + ${path_prefix_len}")
+        string (SUBSTRING "${vol_env}" ${vol_plugin_path_posn} -1 vol_plugin_path)
+      else ()
+        set (vol_plugin_path "")
+      endif ()
     endif ()
 
     # If using memchecker add tests without using scripts
@@ -683,15 +680,15 @@ macro (ADD_PH5_TEST testname)
 
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}MPI_TEST_H5DIFF-${testname} PROPERTIES
-        ENVIRONMENT "${vol_env}"
-        FIXTURES_REQUIRED "h5diff_vol_files"
+          ENVIRONMENT "${vol_env}"
+          FIXTURES_REQUIRED "h5diff_vol_files"
       )
     endif ()
 
     if ("${vol_prefix}MPI_TEST_H5DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (${vol_prefix}MPI_TEST_H5DIFF-${testname} PROPERTIES DISABLED true)
     endif ()
-  endforeach() # per-VOL loop
+  endforeach () # per-VOL loop
 endmacro ()
 
 macro (ADD_H5_UD_TEST testname resultcode resultfile)
@@ -707,7 +704,6 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
     add_test (
         NAME ${vol_prefix}H5DIFF_UD-${testname}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -720,7 +716,9 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
-
+    set_tests_properties (${vol_prefix}H5DIFF_UD-${testname} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
+    )
     if ("${vol_prefix}H5DIFF_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (${vol_prefix}H5DIFF_UD-${testname} PROPERTIES DISABLED true)
     endif ()

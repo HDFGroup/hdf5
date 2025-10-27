@@ -9,6 +9,7 @@ if(WIN32)
 else()
   set (CMAKE_C_COMPILER clang)
   set (CMAKE_CXX_COMPILER clang++)
+  #set (CMAKE_Fortran_COMPILER flang)
 endif()
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

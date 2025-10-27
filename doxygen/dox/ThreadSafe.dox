@@ -28,7 +28,7 @@ variable <code>H5_libinit_g</code> is changed to a global structure
 consisting of the variable with its associated lock (locks are explained
 in section \ref subsec_tsafe_impl_locks):
 \code
-    hbool_t  H5_libinit_g = FALSE;
+    bool  H5_libinit_g = FALSE;
 \endcode
 
 becomes
@@ -40,7 +40,7 @@ where <code>H5_api_t</code> is
 \code
     typedef struct H5_api_struct {
       H5_mutex_t init_lock;           // API entrance mutex
-      hbool_t H5_libinit_g;
+      bool       H5_libinit_g;
     } H5_api_t;
 \endcode
 
@@ -60,7 +60,7 @@ no such APIs exist.
 
 It is defined in <code>H5.c</code> as follows:
 \code
-    hbool_t H5_allow_concurrent_g = FALSE;
+    bool H5_allow_concurrent_g = FALSE;
 \endcode
 
 \subsection subsec_tsafe_global_init Global thread initialization variable

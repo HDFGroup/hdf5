@@ -314,7 +314,7 @@ H5_DLL hid_t H5Eget_current_stack(void);
  *
  * \since 1.14.0
  */
-H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
+H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, bool close_source_stack);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -341,7 +341,7 @@ H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t cl
  *
  * \since 1.14.5
  */
-H5_DLL herr_t H5Eis_paused(hid_t stack_id, hbool_t *is_paused);
+H5_DLL herr_t H5Eis_paused(hid_t stack_id, bool *is_paused);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E

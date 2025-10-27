@@ -4013,6 +4013,7 @@ filled according to the value of this property. The padding can be:
  *   <float> ::= H5T_IEEE_F16BE | H5T_IEEE_F16LE |
  *               H5T_IEEE_F32BE | H5T_IEEE_F32LE |
  *               H5T_IEEE_F64BE | H5T_IEEE_F64LE |
+ *               H5T_FLOAT_BFLOAT16BE | H5T_FLOAT_BFLOAT16LE |
  *               H5T_NATIVE_FLOAT16 | H5T_NATIVE_FLOAT |
  *               H5T_NATIVE_DOUBLE | H5T_NATIVE_LDOUBLE
  *
@@ -4187,6 +4188,13 @@ filled according to the value of this property. The padding can be:
  * \details The IEEE floating point types in big- and little-endian byte orders.
  * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_ieee_datatypes_table
+ * </div>
+ *
+ * \defgroup PDTALTFLOAT Alternative Floating Point Datatypes
+ * \ingroup PDT
+ * \details Alternative (non-IEEE) floating point types.
+ * <div>
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_alt_float_datatypes_table
  * </div>
  *
  * \defgroup PDTCOMPLEX Complex Number Datatypes

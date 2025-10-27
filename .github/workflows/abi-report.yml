@@ -46,10 +46,10 @@ jobs:
           FILE_DOTSMAIN=$(echo "${{ inputs.file_ref }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3/")
           echo "HDF5R_DOTSMAIN=$FILE_DOTSMAIN" >> $GITHUB_OUTPUT
 
-      - uses: actions/checkout@v4.1.7
+      - uses: actions/checkout@v5
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
             name: tgz-ubuntu-2404_gcc-binary
             path: ${{ github.workspace }}

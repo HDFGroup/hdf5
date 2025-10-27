@@ -182,7 +182,7 @@ environment variable.
 
 \section sec_filelock_funcset H5Pset_file_locking
 This #H5Pset_file_locking API call can be used to override the configure defaults. It takes
-#hbool_t parameters for both the file locking and "ignore file locks when
+Boolean parameters for both the file locking and "ignore file locks when
 disabled on the file system" parameters. The values set here can be
 overridden by the file locking environment variable.
 

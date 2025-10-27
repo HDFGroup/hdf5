@@ -2305,6 +2305,12 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, bo
             else if (H5Tequal(dtype, H5T_IEEE_F64LE)) {
                 snprintf(dt_str, *slen, "H5T_IEEE_F64LE");
             }
+            else if (H5Tequal(dtype, H5T_FLOAT_BFLOAT16BE)) {
+                snprintf(dt_str, *slen, "H5T_FLOAT_BFLOAT16BE");
+            }
+            else if (H5Tequal(dtype, H5T_FLOAT_BFLOAT16LE)) {
+                snprintf(dt_str, *slen, "H5T_FLOAT_BFLOAT16LE");
+            }
 #ifdef H5_HAVE__FLOAT16
             else if (H5Tequal(dtype, H5T_NATIVE_FLOAT16)) {
                 snprintf(dt_str, *slen, "H5T_NATIVE_FLOAT16");
@@ -3327,7 +3333,7 @@ out:
 }
 
 htri_t
-H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
+H5LTpath_valid(hid_t loc_id, const char *path, bool check_object_valid)
 {
     char      *tmp_path = NULL; /* Temporary copy of the path */
     char      *curr_name;       /* Pointer to current component of path name */

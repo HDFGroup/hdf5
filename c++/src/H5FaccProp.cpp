@@ -207,7 +207,7 @@ FileAccPropList::getFamilyOffset() const
 ///             refer to the H5Pset_fapl_core API in the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
 void
-FileAccPropList::setCore(size_t increment, hbool_t backing_store) const
+FileAccPropList::setCore(size_t increment, bool backing_store) const
 {
     herr_t ret_value = H5Pset_fapl_core(id, increment, backing_store);
     if (ret_value < 0) {
@@ -224,7 +224,7 @@ FileAccPropList::setCore(size_t increment, hbool_t backing_store) const
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
 void
-FileAccPropList::getCore(size_t &increment, hbool_t &backing_store) const
+FileAccPropList::getCore(size_t &increment, bool &backing_store) const
 {
     herr_t ret_value = H5Pget_fapl_core(id, &increment, &backing_store);
     if (ret_value < 0) {
@@ -667,7 +667,7 @@ FileAccPropList::getGcReferences() const
 ///             the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
 void
-FileAccPropList::setFileLocking(hbool_t use_file_locking, hbool_t ignore_when_disabled) const
+FileAccPropList::setFileLocking(bool use_file_locking, bool ignore_when_disabled) const
 {
     herr_t ret_value = H5Pset_file_locking(id, use_file_locking, ignore_when_disabled);
 
@@ -689,7 +689,7 @@ FileAccPropList::setFileLocking(hbool_t use_file_locking, hbool_t ignore_when_di
 ///             the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
 void
-FileAccPropList::getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_disabled) const
+FileAccPropList::getFileLocking(bool &use_file_locking, bool &ignore_when_disabled) const
 {
     herr_t ret_value = H5Pget_file_locking(id, &use_file_locking, &ignore_when_disabled);
 

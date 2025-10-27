@@ -6,7 +6,7 @@ project (HDF5Examples_PYTHON)
 #-----------------------------------------------------------------------------
 include (Py_sourcefiles.cmake)
 
-if (H5EX_BUILD_TESTING)
+if (H5EXAMPLE_BUILD_TESTING)
   set (${EXAMPLE_VARNAME}_PY_CLEANFILES
     compound.h5
     dset.h5
@@ -32,7 +32,7 @@ if (H5EX_BUILD_TESTING)
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   )
 
-  add_custom_target(${EXAMPLE_VARNAME}_PY-copy-objects ALL COMMENT "Copying Python source files")
+  add_custom_target (${EXAMPLE_VARNAME}_PY-copy-objects ALL COMMENT "Copying Python source files")
   foreach (example_name ${examples})
     add_custom_command (
         TARGET     ${EXAMPLE_VARNAME}_PY-copy-objects

@@ -51,6 +51,8 @@ set (HDF5_XML_REFERENCE_TEST_FILES
     tarray6.h5
     tarray7.h5
     tattr.h5
+    tbfloat16.h5
+    tbfloat16_be.h5
     tcompound.h5
     tcompound_complex.h5
     tdatareg.h5
@@ -88,6 +90,8 @@ set (HDF5_XML_REFERENCE_FILES
     tarray6.h5.xml
     tarray7.h5.xml
     tattr.h5.xml
+    tbfloat16.h5.xml
+    tbfloat16_be.h5.xml
     tbitfields_be.h5.xml
     tbitfields_le.h5.xml
     tcompound_complex.h5.xml
@@ -151,17 +155,17 @@ set (HDF5_XML_REFERENCE_FILES
 )
 
 foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_h5_file}" "h5dump_xml_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_h5_file}" "h5dump_xml_files")
 endforeach ()
 
 foreach (tst_xmlonly_h5_file ${HDF5_XML_REFERENCE_ONLY_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "h5dump_xml_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "h5dump_xml_files")
 endforeach ()
 
 foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/xml/${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_other_file}" "h5dump_xml_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/xml/${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_other_file}" "h5dump_xml_files")
 endforeach ()
-add_custom_target(h5dump_xml_files ALL COMMENT "Copying files needed by h5dump_xml tests" DEPENDS ${h5dump_xml_files_list})
+add_custom_target (h5dump_xml_files ALL COMMENT "Copying files needed by h5dump_xml tests" DEPENDS ${h5dump_xml_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -185,7 +189,7 @@ endmacro ()
 
 macro (ADD_XML_H5_TEST resultfile resultcode)
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP_XML-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> --xml ${ARGN})
+    add_test (NAME H5DUMP_XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
     if (${resultcode})
       set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -193,7 +197,6 @@ macro (ADD_XML_H5_TEST resultfile resultcode)
     add_test (
         NAME H5DUMP_XML-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=--xml;${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/xml"
@@ -204,6 +207,7 @@ macro (ADD_XML_H5_TEST resultfile resultcode)
     )
   endif ()
   set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml"
   )
   if ("H5DUMP_XML-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -301,6 +305,10 @@ ADD_XML_H5_TEST (torderattr4.h5 0 -H --sort_by=creation_order --sort_order=desce
 # Add tests for _Float16 type
 ADD_XML_H5_TEST (tfloat16.h5 0 tfloat16.h5)
 ADD_XML_H5_TEST (tfloat16_be.h5 0 tfloat16_be.h5)
+
+# Add tests for bfloat16 type
+ADD_XML_H5_TEST (tbfloat16.h5 0 tbfloat16.h5)
+ADD_XML_H5_TEST (tbfloat16_be.h5 0 tbfloat16_be.h5)
 
 # tests for floating point user defined printf format
 ADD_XML_H5_TEST (tfpformat.h5 0 -u -m %.7f tfpformat.h5)

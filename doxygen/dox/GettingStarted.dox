@@ -36,7 +36,7 @@ Step by step instructions for learning HDF5 that include programming examples
 </tr>
 </table>
 
-\subsection subsec_learn_tutor The HDF Group Tutorials and Examples
+\subsection subsec_learn_tutor The HDF Group Tutorials &amp; Examples
 These tutorials and examples are available for learning about the HDF5 High Level APIs, tools,
 Parallel HDF5, and the VDS and SWMR features:
 <table>

@@ -1,0 +1,4 @@
+HDF5_VERSION=2.0.0
+COMPILER=gfortran
+PLATFORM=x86_64-w64-mingw32
+TOOLCHAIN=mingw64.cmake

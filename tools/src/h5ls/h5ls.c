@@ -569,16 +569,17 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    print_ieee_type
+ * Function:    print_specific_float_type
  *
- * Purpose:     Print the name of an IEEE floating-point data type.
+ * Purpose:     Print the name of an IEEE or alternative floating-point
+ *              data type.
  *
  * Return:      Success: true
  *              Failure: false, nothing printed
  *-------------------------------------------------------------------------
  */
 static bool
-print_ieee_type(h5tools_str_t *buffer, hid_t type, int ind)
+print_specific_float_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
     if (H5Tequal(type, H5T_IEEE_F16BE) == true) {
         h5tools_str_append(buffer, "IEEE 16-bit big-endian float");
@@ -597,6 +598,12 @@ print_ieee_type(h5tools_str_t *buffer, hid_t type, int ind)
     }
     else if (H5Tequal(type, H5T_IEEE_F64LE) == true) {
         h5tools_str_append(buffer, "IEEE 64-bit little-endian float");
+    }
+    else if (H5Tequal(type, H5T_FLOAT_BFLOAT16BE) == true) {
+        h5tools_str_append(buffer, "bfloat16 16-bit big-endian float");
+    }
+    else if (H5Tequal(type, H5T_FLOAT_BFLOAT16LE) == true) {
+        h5tools_str_append(buffer, "bfloat16 16-bit little-endian float");
     }
     else {
         return print_float_type(buffer, type, ind);
@@ -1342,7 +1349,7 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
     } /* end if */
 
     /* Print the type */
-    if (print_native_type(buffer, type, ind) || print_ieee_type(buffer, type, ind) ||
+    if (print_native_type(buffer, type, ind) || print_specific_float_type(buffer, type, ind) ||
         print_complex_type(buffer, type, ind) || print_cmpd_type(buffer, type, ind) ||
         print_enum_type(buffer, type, ind) || print_string_type(buffer, type, ind) ||
         print_reference_type(buffer, type, ind) || print_vlen_type(buffer, type, ind) ||
