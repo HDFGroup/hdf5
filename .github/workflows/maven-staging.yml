@@ -622,7 +622,8 @@ jobs:
           cd HDF5Examples/JAVA
 
           # Determine which examples directory to use based on implementation
-          if [ "${{ matrix.implementation }}" = "jni" ]; then
+          # Note: "auto" defaults to JNI (requires Java 24+ for FFM)
+          if [ "${{ matrix.implementation }}" = "jni" ] || [ "${{ matrix.implementation }}" = "auto" ]; then
             EXAMPLES_DIR="compat"
             echo "Using JNI-compatible examples from compat/ directory"
           else
@@ -729,12 +730,13 @@ jobs:
                 echo "Using classpath: $CLASSPATH"
 
                 # Set compilation flags based on implementation
-                if [ "${{ matrix.implementation }}" != "jni" ]; then
+                # Note: "auto" defaults to JNI (standard Java)
+                if [ "${{ matrix.implementation }}" != "jni" ] && [ "${{ matrix.implementation }}" != "auto" ]; then
                   # FFM requires preview features (Java 24+)
                   JAVAC_FLAGS="--enable-preview --release 24"
                   JAVA_FLAGS="--enable-preview"
                 else
-                  # JNI uses standard Java
+                  # JNI and auto use standard Java
                   JAVAC_FLAGS=""
                   JAVA_FLAGS=""
                 fi
@@ -821,7 +823,8 @@ jobs:
           Set-Location HDF5Examples/JAVA
 
           # Determine which examples directory to use based on implementation
-          if ("${{ matrix.implementation }}" -eq "jni") {
+          # Note: "auto" defaults to JNI (requires Java 24+ for FFM)
+          if (("${{ matrix.implementation }}" -eq "jni") -or ("${{ matrix.implementation }}" -eq "auto")) {
             $EXAMPLES_DIR = "compat"
             Write-Host "Using JNI-compatible examples from compat/ directory"
           } else {
@@ -947,12 +950,13 @@ jobs:
                 Write-Host "Using classpath: $CLASSPATH"
 
                 # Set compilation flags based on implementation
-                if ("${{ matrix.implementation }}" -ne "jni") {
+                # Note: "auto" defaults to JNI (standard Java)
+                if (("${{ matrix.implementation }}" -ne "jni") -and ("${{ matrix.implementation }}" -ne "auto")) {
                   # FFM requires preview features (Java 24+)
                   $JAVAC_FLAGS = @("--enable-preview", "--release", "24")
                   $JAVA_FLAGS = @("--enable-preview")
                 } else {
-                  # JNI uses standard Java
+                  # JNI and auto use standard Java
                   $JAVAC_FLAGS = @()
                   $JAVA_FLAGS = @()
                 }
