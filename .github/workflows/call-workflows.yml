@@ -241,6 +241,7 @@ jobs:
         with:
             build_mode: "Release"
             save_binary: "ffm"
+            java_version: "latest"
 
     call-release-par:
         name: "Parallel Release Workflows"
