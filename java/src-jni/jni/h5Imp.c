@@ -25,8 +25,8 @@ extern "C" {
 
 #include "hdf5.h"
 #include <jni.h>
-#include "../../src-jni/jni/h5jni.h"
-#include "../../src-jni/jni/h5Imp.h"
+#include "h5jni.h"
+#include "h5Imp.h"
 
 /*
  * Pointer to the JNI's Virtual Machine; used for callback functions.

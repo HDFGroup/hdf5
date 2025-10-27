@@ -17,8 +17,8 @@ extern "C" {
 #include "hdf5.h"
 #include <jni.h>
 #include <stdlib.h>
-#include "../../src-jni/jni/h5jni.h"
-#include "../../src-jni/jni/h5rImp.h"
+#include "h5jni.h"
+#include "h5rImp.h"
 
 /* H5R: HDF5 1.12 Reference API Functions */
 

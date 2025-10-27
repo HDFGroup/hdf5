@@ -18,8 +18,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include "hdf5.h"
-#include "../../src-jni/jni/h5fImp.h"
-#include "../../src-jni/jni/h5util.h"
+#include "h5fImp.h"
+#include "h5util.h"
 
 /*
  * Pointer to the JNI's Virtual Machine; used for callback functions.

@@ -17,8 +17,8 @@ extern "C" {
 #include "hdf5.h"
 #include <jni.h>
 #include <stdlib.h>
-#include "../../src-jni/jni/h5jni.h"
-#include "../../src-jni/jni/h5zImp.h"
+#include "h5jni.h"
+#include "h5zImp.h"
 
 /*
  * Class:     hdf_hdf5lib_H5

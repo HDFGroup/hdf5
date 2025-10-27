@@ -35,8 +35,8 @@ extern "C" {
 
 #include <jni.h>
 #include "hdf5.h"
-#include "../../src-jni/jni/h5jni.h"
-#include "../../src-jni/jni/nativeData.h"
+#include "h5jni.h"
+#include "nativeData.h"
 
 /* returns int [] */
 JNIEXPORT jintArray JNICALL

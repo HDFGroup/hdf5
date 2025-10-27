@@ -19,7 +19,7 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 #include "hdf5.h"
-#include "../../src-jni/jni/h5util.h"
+#include "h5util.h"
 
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
 hsize_t H5TOOLS_BUFSIZE    = (32 * 1024 * 1024); /* 32 MB */

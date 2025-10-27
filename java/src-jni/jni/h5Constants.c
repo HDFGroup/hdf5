@@ -17,7 +17,7 @@ extern "C" {
 #include "hdf5.h"
 #include <jni.h>
 #include <stdlib.h>
-#include "../../src-jni/jni/h5jni.h"
+#include "h5jni.h"
 
 H5_WARN_MISSING_PROTOTYPE_OFF
 H5_WARN_UNUSED_PARAMETER_OFF

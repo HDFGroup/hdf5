@@ -13,7 +13,7 @@
 #ifndef H5UTIL_H__
 #define H5UTIL_H__
 
-#include "../../src-jni/jni/h5jni.h"
+#include "h5jni.h"
 
 #ifndef SUCCEED
 #define SUCCEED 0

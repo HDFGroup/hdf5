@@ -17,8 +17,8 @@ extern "C" {
 #include <jni.h>
 #include <stdlib.h>
 #include "hdf5.h"
-#include "../../src-jni/jni/h5jni.h"
-#include "../../src-jni/jni/h5vlImp.h"
+#include "h5jni.h"
+#include "h5vlImp.h"
 #include "H5VLconnector_passthru.h"
 
 /*

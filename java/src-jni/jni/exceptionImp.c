@@ -22,8 +22,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include "jni.h"
-#include "../../src-jni/jni/h5jni.h"
-#include "../../src-jni/jni/exceptionImp.h"
+#include "h5jni.h"
+#include "exceptionImp.h"
 
 extern H5E_auto2_t efunc;
 extern void       *edata;
