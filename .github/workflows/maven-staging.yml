@@ -621,16 +621,6 @@ jobs:
           # Test one representative example from each category
           cd HDF5Examples/JAVA
 
-          # Determine which examples directory to use based on implementation
-          # Note: "auto" defaults to JNI (requires Java 24+ for FFM)
-          if [ "${{ matrix.implementation }}" = "jni" ] || [ "${{ matrix.implementation }}" = "auto" ]; then
-            EXAMPLES_DIR="compat"
-            echo "Using JNI-compatible examples from compat/ directory"
-          else
-            EXAMPLES_DIR="."
-            echo "Using FFM examples from root directory"
-          fi
-
           # Get absolute path to maven artifacts for this platform
           MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/${{ matrix.platform }})"
           echo "Maven artifacts directory (${{ matrix.platform }}): $MAVEN_ARTIFACTS_DIR"
@@ -645,6 +635,26 @@ jobs:
           fi
 
           echo "Using HDF5 JAR file: $HDF5_JAR"
+
+          # Detect JAR type by checking for FFM-specific classes
+          # FFM JARs contain org.hdfgroup.javahdf5 package, JNI JARs contain hdf.hdf5lib
+          if jar tf "$HDF5_JAR" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
+            JAR_TYPE="ffm"
+            echo "Detected FFM JAR (contains org.hdfgroup.javahdf5 package)"
+          else
+            JAR_TYPE="jni"
+            echo "Detected JNI JAR (contains hdf.hdf5lib package)"
+          fi
+
+          # Determine which examples directory to use based on detected JAR type
+          # This ensures we test with examples that match the JAR's implementation
+          if [ "$JAR_TYPE" = "jni" ]; then
+            EXAMPLES_DIR="compat"
+            echo "Using JNI-compatible examples from compat/ directory"
+          else
+            EXAMPLES_DIR="."
+            echo "Using FFM examples from root directory"
+          fi
 
           # Also find any dependency JARs - only include slf4j-api and slf4j-simple, exclude slf4j-nop to avoid conflicts
           DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar")
@@ -729,14 +739,14 @@ jobs:
 
                 echo "Using classpath: $CLASSPATH"
 
-                # Set compilation flags based on implementation
-                # Note: "auto" defaults to JNI (standard Java)
-                if [ "${{ matrix.implementation }}" != "jni" ] && [ "${{ matrix.implementation }}" != "auto" ]; then
+                # Set compilation flags based on detected JAR type
+                # This ensures we use correct flags for the actual JAR implementation
+                if [ "$JAR_TYPE" = "ffm" ]; then
                   # FFM requires preview features (Java 24+)
                   JAVAC_FLAGS="--enable-preview --release 24"
                   JAVA_FLAGS="--enable-preview"
                 else
-                  # JNI and auto use standard Java
+                  # JNI uses standard Java
                   JAVAC_FLAGS=""
                   JAVA_FLAGS=""
                 fi
@@ -822,16 +832,6 @@ jobs:
           # Test one representative example from each category
           Set-Location HDF5Examples/JAVA
 
-          # Determine which examples directory to use based on implementation
-          # Note: "auto" defaults to JNI (requires Java 24+ for FFM)
-          if (("${{ matrix.implementation }}" -eq "jni") -or ("${{ matrix.implementation }}" -eq "auto")) {
-            $EXAMPLES_DIR = "compat"
-            Write-Host "Using JNI-compatible examples from compat/ directory"
-          } else {
-            $EXAMPLES_DIR = "."
-            Write-Host "Using FFM examples from root directory"
-          }
-
           # Get absolute path to maven artifacts for this platform
           $MAVEN_ARTIFACTS_DIR = Resolve-Path "../../maven-artifacts/${{ matrix.platform }}"
           Write-Host "Maven artifacts directory (Windows): $MAVEN_ARTIFACTS_DIR"
@@ -850,6 +850,27 @@ jobs:
           }
 
           Write-Host "Using HDF5 JAR file: $($HDF5_JAR.FullName)"
+
+          # Detect JAR type by checking for FFM-specific classes
+          # FFM JARs contain org.hdfgroup.javahdf5 package, JNI JARs contain hdf.hdf5lib
+          $jar_contents = & jar tf $HDF5_JAR.FullName
+          if ($jar_contents -match "org/hdfgroup/javahdf5/hdf5_h.class") {
+            $JAR_TYPE = "ffm"
+            Write-Host "Detected FFM JAR (contains org.hdfgroup.javahdf5 package)"
+          } else {
+            $JAR_TYPE = "jni"
+            Write-Host "Detected JNI JAR (contains hdf.hdf5lib package)"
+          }
+
+          # Determine which examples directory to use based on detected JAR type
+          # This ensures we test with examples that match the JAR's implementation
+          if ($JAR_TYPE -eq "jni") {
+            $EXAMPLES_DIR = "compat"
+            Write-Host "Using JNI-compatible examples from compat/ directory"
+          } else {
+            $EXAMPLES_DIR = "."
+            Write-Host "Using FFM examples from root directory"
+          }
 
           # Find dependency JARs - only include slf4j-api and slf4j-simple
           $DEP_JARS = @()
@@ -949,14 +970,14 @@ jobs:
 
                 Write-Host "Using classpath: $CLASSPATH"
 
-                # Set compilation flags based on implementation
-                # Note: "auto" defaults to JNI (standard Java)
-                if (("${{ matrix.implementation }}" -ne "jni") -and ("${{ matrix.implementation }}" -ne "auto")) {
+                # Set compilation flags based on detected JAR type
+                # This ensures we use correct flags for the actual JAR implementation
+                if ($JAR_TYPE -eq "ffm") {
                   # FFM requires preview features (Java 24+)
                   $JAVAC_FLAGS = @("--enable-preview", "--release", "24")
                   $JAVA_FLAGS = @("--enable-preview")
                 } else {
-                  # JNI and auto use standard Java
+                  # JNI uses standard Java
                   $JAVAC_FLAGS = @()
                   $JAVA_FLAGS = @()
                 }
