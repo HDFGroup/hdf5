@@ -772,7 +772,7 @@ test_direct(void)
      * 4 currently and the size of the file should be between 3 & 4 file buffer
      * sizes..
      */
-    if (file_size < (FBSIZE * 3) || file_size >= (FBSIZE * 4))
+    if (file_size < FBSIZE || file_size >= (FBSIZE * 2))
         TEST_ERROR;
 
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
