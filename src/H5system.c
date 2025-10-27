@@ -1441,7 +1441,7 @@ HDqsort_context_wrapper_func(void *wrapper_arg, const void *a, const void *b)
     return w->gnu_compar(a, b, w->gnu_arg);
 }
 
-void
+herr_t
 HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
                 void *arg)
 {
@@ -1454,6 +1454,7 @@ HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *,
     /* Old BSD-style: context parameter comes before comparator function */
     qsort_r(base, nel, size, &wrapper, HDqsort_context_wrapper_func);
 #endif
+    return SUCCEED;
 }
 #endif
 
@@ -1477,8 +1478,10 @@ typedef struct HDqsort_fallback_context_t {
 #ifdef H5_HAVE_THREADSAFE
 /* Thread-local storage approach for thread-safe builds
  *
- * Note: The functions below use assertions instead of the HDF5 error stack because
- * qsort and its variants return void, preventing propagation of errors.
+ * Error Handling Note:
+ * HDqsort_fallback_key_init() still uses assertions because it's a callback with void signature.
+ * However, HDqsort_fallback() now returns herr_t and can propagate TLS operation failures
+ * through the normal HDF5 error stack.
  */
 static H5TS_key_t  HDqsort_fallback_key;
 static H5TS_once_t HDqsort_fallback_key_once = H5TS_ONCE_INITIALIZER;
@@ -1489,7 +1492,9 @@ HDqsort_fallback_key_init(void)
     herr_t ret = SUCCEED;
 
     /* Create the thread-local storage key (no destructor needed) */
-    ret = H5TS_key_create(&HDqsort_fallback_key, NULL);
+    /* If this operation fails, it will be detected shortly during
+     * HDqsort_fallback when operations are attempted on the non-existent key */
+    H5TS_key_create(&HDqsort_fallback_key, NULL);
 
     /* Assert that initialization succeeded - cannot propagate errors from here */
     if (H5_UNLIKELY(ret < 0)) {
@@ -1512,38 +1517,34 @@ HDqsort_fallback_wrapper(const void *a, const void *b)
     return ctx->gnu_compar(a, b, ctx->gnu_arg);
 }
 
-void
+herr_t
 HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
                  void *arg)
 {
     HDqsort_fallback_context_t ctx;
-    herr_t                     ret;
+    herr_t                     ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Ensure the TLS key is initialized */
-    ret = H5TS_once(&HDqsort_fallback_key_once, HDqsort_fallback_key_init);
-    if (H5_UNLIKELY(ret < 0)) {
-        assert(false && "Failed to initialize TLS key for qsort fallback");
-        (void)0; /* Ensure non-empty body even when asserts are disabled */
-    }
+    if (H5_UNLIKELY(H5TS_once(&HDqsort_fallback_key_once, HDqsort_fallback_key_init) < 0))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "failed to initialize TLS key for qsort");
 
     ctx.gnu_compar = compar;
     ctx.gnu_arg    = arg;
 
     /* Store context in thread-local storage */
-    ret = H5TS_key_set_value(HDqsort_fallback_key, &ctx);
-    if (H5_UNLIKELY(ret < 0)) {
-        assert(false && "Failed to set TLS value for qsort fallback");
-        (void)0; /* Ensure non-empty body even when asserts are disabled */
-    }
+    if (H5_UNLIKELY(H5TS_key_set_value(HDqsort_fallback_key, &ctx) < 0))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "failed to set TLS context for qsort");
 
     qsort(base, nel, size, HDqsort_fallback_wrapper);
 
     /* Clear the thread-local storage */
-    ret = H5TS_key_set_value(HDqsort_fallback_key, NULL);
-    if (H5_UNLIKELY(ret < 0)) {
-        assert(false && "Failed to clear TLS value for qsort fallback");
-        (void)0; /* Ensure non-empty body even when asserts are disabled */
-    }
+    if (H5_UNLIKELY(H5TS_key_set_value(HDqsort_fallback_key, NULL) < 0))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "failed to clear TLS context for qsort");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 #else
@@ -1557,7 +1558,7 @@ HDqsort_fallback_wrapper(const void *a, const void *b)
     return HDqsort_fallback_global_ctx->gnu_compar(a, b, HDqsort_fallback_global_ctx->gnu_arg);
 }
 
-void
+herr_t
 HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
                  void *arg)
 {
@@ -1573,6 +1574,8 @@ HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *
 
     /* Clear the global pointer */
     HDqsort_fallback_global_ctx = NULL;
+
+    return SUCCEED;
 }
 #endif /* H5_HAVE_THREADSAFE */
 
