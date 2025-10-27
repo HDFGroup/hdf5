@@ -10947,16 +10947,16 @@ const H5Z_class2_t H5Z_EXPAND2[1] = {{
 /*-------------------------------------------------------------------------
  * Function:    filter_expand2
  *
- * Purpose:     For testing library's behavior when a filter expands a chunk
- *              too much.
+ * Purpose:     For testing library's behavior when a filter expands a
+ *              chunk by an amount that would be too much for the old file
+ *              format.
  *
- * Note:    This filter doesn't actually re-allocate the buffer to be
- *        larger, it just changes the buffer size to a value that's too
- *        large.  The library should throw an error before using the
- *        incorrect buffer information.
+ * Note:        Unlike filter_expand, this fitler does actually allocate a
+ *              new buffer and is fully functional. Care should be taken
+ *              to ensure memory and file usage stays under control.
  *
- * Return:    Success:    Data chunk size
- *        Failure:    0
+ * Return:      Success:    Data chunk size
+ *              Failure:    0
  *
  *-------------------------------------------------------------------------
  */
@@ -10992,10 +10992,11 @@ filter_expand2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 } /* end filter_expand2() */
 
 /*-------------------------------------------------------------------------
- * Function: test_chunk_expand2
+ * Function:    test_chunk_expand2
  *
- * Purpose: Tests support for proper error handling when a chunk expands
- *              too much after a filter is applied
+ * Purpose:     Tests that, when using the new file format (2.0+), filters
+ *              can expand a chunk by an amount that would be too much for
+ *              the old file format.
  *
  * Return:      Success: 0
  *              Failure: -1
