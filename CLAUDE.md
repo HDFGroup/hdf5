@@ -82,7 +82,7 @@ Both implementations use the same `hdf.hdf5lib.*` package structure for seamless
 
 ### FFM Feature Variants
 
-**As of October 21, 2025**: FFM bindings are platform-specific and support optional ROS3 (S3 cloud storage) VFD feature selection:
+FFM bindings are platform-specific and support optional ROS3 (S3 cloud storage) VFD feature selection:
 
 **Directory Structure:**
 ```
@@ -119,7 +119,7 @@ java/jsrc/
 
 ### Generating FFM Bindings with jextract
 
-**As of October 20, 2025**: Automated workflow for multi-platform FFM binding generation with ROS3 VFD support
+Automated workflow for multi-platform FFM binding generation with ROS3 VFD support
 
 **Workflow:** `.github/workflows/generate-ffm-bindings.yml`
 
@@ -183,56 +183,35 @@ gh workflow run generate-ffm-bindings.yml -f java_version=25
 
 ### FFM Test Coverage
 
-**Status as of October 26, 2025**: 444 FFM tests (443 active, 1 ignored) across 17 modules
+FFM tests provide comprehensive coverage across all major HDF5 modules, with tests for:
 
-**Platform Status:**
-- ✅ **Linux**: 100% PASSING (444/444 tests)
-- ✅ **macOS**: 100% PASSING (444/444 tests)
-- ⚠️ **Windows**: 94.6% PASSING (439/444 tests, 5 H5T tests skipped)
+**Covered Modules:**
+- **H5 (General):** Library initialization, version queries, memory management
+- **H5T (Datatypes):** Type creation, conversion, reclamation, enum, array, vlen, opaque, complex types
+- **H5P (Properties):** Property lists, VFDs, chunk/filter properties, dataset/file access properties
+- **H5S (Dataspaces):** Selections, hyperslabs, extents, dataspace operations
+- **H5D (Datasets):** Dataset I/O, chunking, compression, flush/refresh operations
+- **H5F (Files):** File operations, VFDs, metadata cache, SWMR
+- **H5G (Groups):** Group operations, hierarchy management, iteration
+- **H5A (Attributes):** Attribute creation, I/O, metadata operations
+- **H5L (Links):** Hard/soft/external links, link iteration
+- **H5O (Objects):** Object operations, visitation, metadata queries
+- **H5E (Errors):** Error handling, error stack operations
+- **H5R (References):** Object, region, and attribute references
+- **H5I (Identifiers):** ID management, type operations
+- **H5VL (VOL):** Virtual object layer connectors
+- **H5PL (Plugins):** Plugin management and discovery
+- **H5FD (File Drivers):** Virtual file driver operations
+- **H5Z (Filters):** Filter operations and pipeline management
 
-**Windows Limitations:**
-Five H5T datatype tests are skipped on Windows due to platform-specific ABI differences with H5T_NATIVE types. These edge cases do not affect core functionality. See `.claude/FFM_WINDOWS_LIMITATIONS.md` for details.
+**Platform Coverage:**
+- ✅ **Linux**: Fully supported
+- ✅ **macOS**: Fully supported
+- ⚠️ **Windows**: Limited platform-specific ABI differences with certain H5T_NATIVE types. See `.claude/FFM_WINDOWS_LIMITATIONS.md` for details.
 
-**Module Highlights:**
-- **H5 (General):** 14 tests (library init, version, memory management)
-- **H5T (Datatypes):** 92 tests (87 pass on Windows, 5 skipped)
-- **H5P (Properties):** 81 tests (property lists, VFDs, chunk/filter properties)
-- **H5S (Dataspaces):** 41 tests (selections, hyperslabs, extents)
-- **H5VL (VOL):** 12 tests (virtual object layer connectors)
-- **H5PL (Plugins):** 11 tests (plugin module coverage)
+**Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested.
 
-**Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested and complete.
-
-**Coverage Target:** 50%+ for all core modules, expanding to advanced modules
-
-| Module | Tests | C APIs | Coverage | Focus Area | Status |
-|--------|-------|--------|----------|------------|--------|
-| H5S (Dataspaces) | 41 | 43 | 95% | Selections, hyperslabs, extents | ✅ **Outstanding coverage** |
-| H5T (Datatypes) | 92 | 74 | 124% | Types, conversion, reclamation, enum, array, vlen, opaque, complex | ✅ **Excellent** (⚠️ 5 Windows skips) |
-| H5VL (VOL) | 12 | 12 | 100% | Virtual object layer connectors | ✅ **Complete** |
-| H5I (Identifiers) | 15 | 18 | 83% | ID management, type operations | ✅ **Good coverage** |
-| H5PL (Plugins) | 11 | 9 | 122% | Plugin management | ✅ **Complete** |
-| H5 (General) | 14 | 14 | 100% | Library init, version, memory | ✅ **NEW - Complete** |
-| H5A (Attributes) | 27 | 55 | 49% | Metadata attributes, storage, iteration | ✅ Active |
-| H5D (Datasets) | 27 | 56 | 48% | Dataset I/O, chunks, flush/refresh | ✅ Active |
-| H5E (Errors) | 14 | 29 | 48% | Error handling, stack operations | ✅ Active |
-| H5R (References) | 13 | 27 | 48% | Object/region/attribute refs | ✅ Active |
-| H5L (Links) | 16 | 38 | 42% | Hard/soft/external links, iteration | ✅ Active |
-| H5G (Groups) | 15 | 37 | 41% | Group operations, queries, comments | ✅ Active |
-| H5P (Properties) | 81 | 223 | 36% | Property lists, VFDs, filters | ✅ Active |
-| H5O (Objects) | 19 | 54 | 35% | Object operations, visitation | ✅ Active |
-| H5F (Files) | 20 | 57 | 35% | Files, VFDs, metadata cache | ✅ Active |
-| H5FD (File Drivers) | 10 | 1 | 1000% | Virtual file driver operations | ✅ **Tests VFD ops** |
-| H5Z (Filters) | 17 | 2 | 850% | Filter operations and pipeline | ✅ **Tests filter ops** |
-| **TOTAL** | **444** | **794** | **56%** | **All modules** | ✅ **All passing** |
-
-**Implementation Priorities:**
-1. **Maintain 50%+ coverage** on all modules ✅ ACHIEVED (56% overall)
-2. **H5O (Objects)**: Expand from 19 to 40 tests (target: 73% coverage) - visitation, metadata operations
-3. **H5P (Properties)**: Continue from 81 to 110+ tests (target: 49% coverage) - Additional DXPL tests, advanced filters
-4. **H5F (Files)**: Expand from 20 to 40 tests (target: 70% coverage) - SWMR, file images, VFD operations
-5. **H5D (Datasets)**: Expand from 27 to 40 tests (target: 71% coverage) - chunk operations, extent modification
-6. **Advanced Modules**: H5ES (Event Sets), H5M (Maps) - excluded from current scope
+**Coverage Goal:** 50%+ coverage for all core modules, with expansion to advanced modules (H5ES Event Sets, H5M Maps) as needed.
 
 **FFM Best Practices:**
 See `.claude/FFM_MEMORY_PATTERNS.md` for comprehensive guide on correct FFM memory allocation patterns, common pitfalls, and test development guidelines.
