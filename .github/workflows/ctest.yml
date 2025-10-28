@@ -107,6 +107,12 @@ jobs:
           which cmake
           cmake --version
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
       - name: Set file base name (Windows)
         id: set-file-base
         run: |
@@ -253,6 +259,12 @@ jobs:
         run: |
           which cmake
           cmake --version
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: Set file base name (Linux)
         id: set-file-base
