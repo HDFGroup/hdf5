@@ -769,7 +769,7 @@ test_direct(void)
         TEST_ERROR;
 
     /* There is no guarantee of the number of metadata allocations, but it's
-     * 4 currently and the size of the file should be between 3 & 4 file buffer
+     * 4 currently and the size of the file should be between 1 & 2 file buffer
      * sizes..
      */
     if (file_size < FBSIZE || file_size >= (FBSIZE * 2))
