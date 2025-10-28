@@ -1461,12 +1461,10 @@ HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *,
 /*
  * HDqsort_fallback - Fallback qsort implementation for platforms without qsort_r/qsort_s
  *
- * For platforms that don't provide any reentrant qsort variant, this fallback uses
- * thread-local storage (when thread-safety is
- * enabled) or a global variable to store the comparator context, then uses standard qsort().
+ * This implementation is not threadsafe, since it uses a global variable to store the
+ * comparator context, then uses standard qsort(). A beta branch of a threadsafe implementation
+ * of these routines may be found in the 'qsort_r_threadsafe' branch of the HDF5 GitHub repository.
  *
- * The threadsafe version uses thread-local storage but does not support recursive sorting (a
- * comparator calling HDqsort_r) as it would overwrite the previous context.
  */
 #ifndef H5_HAVE_QSORT_REENTRANT
 
@@ -1475,71 +1473,6 @@ typedef struct HDqsort_fallback_context_t {
     void *gnu_arg;
 } HDqsort_fallback_context_t;
 
-#ifdef H5_HAVE_THREADSAFE
-/* Thread-local storage approach for thread-safe builds
- *
- * Error Handling Note:
- * HDqsort_fallback_key_init() still uses assertions because it's a callback with void signature.
- * However, HDqsort_fallback() now returns herr_t and can propagate TLS operation failures
- * through the normal HDF5 error stack.
- */
-static H5TS_key_t  HDqsort_fallback_key;
-static H5TS_once_t HDqsort_fallback_key_once = H5TS_ONCE_INITIALIZER;
-
-static void
-HDqsort_fallback_key_init(void)
-{
-    /* Create the thread-local storage key (no destructor needed) */
-    /* If this operation fails, it will be detected shortly during
-     * HDqsort_fallback when operations are attempted on the non-existent key */
-    H5TS_key_create(&HDqsort_fallback_key, NULL);
-}
-
-static int
-HDqsort_fallback_wrapper(const void *a, const void *b)
-{
-    HDqsort_fallback_context_t *ctx = NULL;
-
-    /* Retrieve the context from thread-local storage
-     * This should never fail since we just set it in HDqsort_fallback() */
-    if (H5_UNLIKELY(H5TS_key_get_value(HDqsort_fallback_key, (void **)&ctx) < 0))
-        return 0; /* Should never happen, but return 0 (equal) if it does */
-
-    /* Call the original GNU-style comparator with context */
-    return ctx->gnu_compar(a, b, ctx->gnu_arg);
-}
-
-herr_t
-HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
-                 void *arg)
-{
-    HDqsort_fallback_context_t ctx;
-    herr_t                     ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOERR
-
-    /* Ensure the TLS key is initialized */
-    if (H5_UNLIKELY(H5TS_once(&HDqsort_fallback_key_once, HDqsort_fallback_key_init) < 0))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "failed to initialize TLS key for qsort");
-
-    ctx.gnu_compar = compar;
-    ctx.gnu_arg    = arg;
-
-    /* Store context in thread-local storage */
-    if (H5_UNLIKELY(H5TS_key_set_value(HDqsort_fallback_key, &ctx) < 0))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "failed to set TLS context for qsort");
-
-    qsort(base, nel, size, HDqsort_fallback_wrapper);
-
-    /* Clear the thread-local storage */
-    if (H5_UNLIKELY(H5TS_key_set_value(HDqsort_fallback_key, NULL) < 0))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "failed to clear TLS context for qsort");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-#else
 /* Non-threadsafe: use global variable */
 static HDqsort_fallback_context_t *HDqsort_fallback_global_ctx = NULL;
 
@@ -1569,6 +1502,5 @@ HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *
 
     return SUCCEED;
 }
-#endif /* H5_HAVE_THREADSAFE */
 
 #endif /* !H5_HAVE_QSORT_REENTRANT */

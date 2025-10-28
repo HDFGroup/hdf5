@@ -461,6 +461,11 @@ done:
  *              On success, the R-tree takes ownership of the caller-allocated
  *               leaves array.
  *
+ *              NOTE: This routine uses a global variable internally, and
+ *                is therefore not thread-safe. See the 'qsort_r_threadsafe'
+ *                branch of the HDF5 GitHub repository for a beta
+ *                implementation that is threadsafe.
+ *
  * Return:      A valid pointer to the new R-tree on success/NULL on failure
  *
  *-------------------------------------------------------------------------
