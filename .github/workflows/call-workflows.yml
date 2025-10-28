@@ -233,6 +233,7 @@ jobs:
         with:
             build_mode: "Release"
             save_binary: "std"
+            java_version: "21"
 
     call-release-ffm-bintest:
         name: "Test FFM Release Binaries"
