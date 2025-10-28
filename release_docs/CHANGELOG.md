@@ -185,6 +185,10 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ## Library
 
+### Updated default file format to 1.8
+
+   By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. This behavior can be overridden with `H5Pset_libver_bounds()`.
+
 ### Added predefined datatypes for bfloat16 data
 
    Predefined datatypes have been added for little- and big-endian bfloat16 (https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
