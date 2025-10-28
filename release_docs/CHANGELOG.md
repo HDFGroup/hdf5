@@ -49,6 +49,10 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 - Improved [ROS3 VFD](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
 
+## Acknowledgements: 
+
+We would like to thank the many HDF5 community members that contributed to HDF5 2.0.
+
 # ⚠️ Breaking Changes
 
 ### Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
@@ -554,7 +558,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
 ## Library
 
-### Fixed security issue CVE-2025-2915 and OSV-2024-381
+### Fixed security issue [CVE-2025-2915](https://nvd.nist.gov/vuln/detail/CVE-2025-2915) and [OSV-2024-381](https://osv.dev/vulnerability/OSV-2024-381)
 
    Fixed a heap-based buffer overflow in H5F__accum_free caused by an integer overflow when calculating new_accum_size. Added validation in H5O__mdci_decode to detect and reject invalid values early, preventing the overflow condition.
 
@@ -679,7 +683,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    Fixed GitHub issue [#4952](https://github.com/HDFGroup/hdf5/issues/4952)
 
-### Fixed security issue CVE-2025-2310
+### Fixed security issue [CVE-2025-2310](https://nvd.nist.gov/vuln/detail/CVE-2025-2310)
 
    A malformed HDF5 file could have an attribute with a recorded name length of zero.This would lead to an overflow and an invalid memory access. An integrity check has been added to detect this case and safely stop file decoding.
 
