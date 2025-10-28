@@ -1489,18 +1489,10 @@ static H5TS_once_t HDqsort_fallback_key_once = H5TS_ONCE_INITIALIZER;
 static void
 HDqsort_fallback_key_init(void)
 {
-    herr_t ret = SUCCEED;
-
     /* Create the thread-local storage key (no destructor needed) */
     /* If this operation fails, it will be detected shortly during
      * HDqsort_fallback when operations are attempted on the non-existent key */
     H5TS_key_create(&HDqsort_fallback_key, NULL);
-
-    /* Assert that initialization succeeded - cannot propagate errors from here */
-    if (H5_UNLIKELY(ret < 0)) {
-        assert(false && "Failed to create TLS key for qsort fallback");
-        (void)0; /* Ensure non-empty body even when asserts are disabled */
-    }
 }
 
 static int
