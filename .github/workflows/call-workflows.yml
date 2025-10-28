@@ -30,27 +30,29 @@ jobs:
       name: "Special Workflows"
       uses: ./.github/workflows/main-spc.yml
 
-    call-workflow-ros3-cmake:
-      name: "ROS3 VFD Workflows"
-      uses: ./.github/workflows/vfd-ros3.yml
+    # Build aws-c-s3 library for ROS3 workflows
+    build-aws-c-s3-release:
+      name: "Build aws-c-s3 (Release)"
+      uses: ./.github/workflows/build-aws-c-s3.yml
       with:
         build_mode: "Release"
-        build_aws_c_s3_only: false
-        aws_c_s3_build_type: "package"
-        # Use latest release for building from source on Ubuntu
-        # until a package is available to install 
         aws_c_s3_tag: "v0.8.0"
 
-    call-workflow-ros3-ffm-cmake:
+    call-workflow-ros3-cmake:
       name: "ROS3 VFD Workflows"
+      needs: build-aws-c-s3-release
       uses: ./.github/workflows/vfd-ros3.yml
       with:
         build_mode: "Release"
-        build_aws_c_s3_only: false
         aws_c_s3_build_type: "package"
-        # Use latest release for building from source on Ubuntu
-        # until a package is available to install 
-        aws_c_s3_tag: "v0.8.0"
+
+    call-workflow-ros3-ffm-cmake:
+      name: "ROS3 VFD FFM Workflows"
+      needs: build-aws-c-s3-release
+      uses: ./.github/workflows/vfd-ros3.yml
+      with:
+        build_mode: "Release"
+        aws_c_s3_build_type: "package"
         save_binary: "ffm"
         java_version: "latest"
         force_java_implementation: "ffm"
