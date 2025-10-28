@@ -766,7 +766,7 @@ These five steps are described in detail below.
    12. Parallel versus serial library
         The HDF5 library can be configured to use MPI and MPI-IO for
         parallelism on a distributed multi-processor system.  Read the
-        file INSTALL_parallel for detailed information.
+        file README_HPC for additional information.
             HDF5_ENABLE_PARALLEL:BOOL=ON
 
         The threadsafe, C++ and Java interfaces are not compatible
