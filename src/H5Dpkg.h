@@ -263,6 +263,7 @@ typedef struct {
 
 typedef struct {
     void *buf;   /* Buffer for compact dataset */
+    size_t size; /* Size of buffer in bytes */
     bool *dirty; /* Pointer to dirty flag to mark */
 } H5D_compact_storage_t;
 
