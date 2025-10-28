@@ -207,14 +207,11 @@ FFM tests provide comprehensive coverage across all major HDF5 modules, with tes
 **Platform Coverage:**
 - ✅ **Linux**: Fully supported
 - ✅ **macOS**: Fully supported
-- ⚠️ **Windows**: Limited platform-specific ABI differences with certain H5T_NATIVE types. See `.claude/FFM_WINDOWS_LIMITATIONS.md` for details.
+- ⚠️ **Windows**: Limited platform-specific ABI differences with certain H5T_NATIVE types.
 
 **Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested.
 
 **Coverage Goal:** 50%+ coverage for all core modules, with expansion to advanced modules (H5ES Event Sets, H5M Maps) as needed.
-
-**FFM Best Practices:**
-See `.claude/FFM_MEMORY_PATTERNS.md` for comprehensive guide on correct FFM memory allocation patterns, common pitfalls, and test development guidelines.
 
 **Run FFM tests**:
 ```bash
@@ -237,27 +234,12 @@ HDF5 Java examples (62 examples) are available as a Maven artifact:
 </dependency>
 ```
 
-### Example Categories
-- **H5D/** - Dataset operations (25 examples) - ✅ 100% FFM complete
-- **H5T/** - Datatype operations (20 examples) - ✅ 100% FFM complete
-- **H5G/** - Group operations (8 examples) - ✅ 100% FFM complete (callbacks implemented)
-- **TUTR/** - Tutorial examples (9 examples) - ✅ 100% FFM complete
-- **Total:** 62 examples - **✅ 100% FFM complete (62/62)**
-
 ### Building Java Examples with Maven
 ```bash
 cd HDF5Examples/JAVA
 mvn compile -f pom-examples.xml
 mvn test -Prun-examples -f pom-examples.xml
 ```
-
-### Java Examples Testing in CI
-- **Staging Integration**: Examples tested in `maven-staging.yml`
-- **Multi-Platform Testing**: All platforms tested in parallel (Linux, Windows, macOS x86_64, macOS aarch64)
-- **Representative Testing**: 4 examples (1 per category) per platform for quick validation
-- **Full Testing**: Available via `java-examples-maven-test.yml` (62 examples)
-- **Platform-Specific Artifacts**: Each platform tests against its own Maven artifacts
-- **Output Validation**: Pattern-based success/failure detection with native library error handling
 
 ## Testing
 

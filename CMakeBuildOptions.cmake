@@ -79,7 +79,7 @@ option (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
 option (HDF5_BUILD_CPP_LIB "Build HDF5 C++ Library" OFF)
 
 option (HDF5_BUILD_JAVA "Build Java HDF5 Library" OFF)
-option (HDF5_ENABLE_JNI "Force JNI implementation instead of FFM for Java bindings when Java 24+ is available" OFF)
+option (HDF5_ENABLE_JNI "Force JNI implementation instead of FFM for Java bindings when Java 24+ is available" ON)
 mark_as_advanced (HDF5_ENABLE_JNI)
 option (HDF5_ENABLE_MAVEN_DEPLOY "Enable Maven repository deployment support" OFF)
 mark_as_advanced (HDF5_ENABLE_MAVEN_DEPLOY)
