@@ -72,8 +72,13 @@ bool H5_PKG_INIT_VAR = false;
 /* Library Private Variables */
 /*****************************/
 
-/* Library incompatible minor versions, develop releases are incompatible by design */
-static const unsigned VERS_MINOR_EXCEPTIONS[]    = {0};
+/* Library known incompatible minor versions; develop releases are incompatible
+ * by design. 999 is entered for testing an exception as a minor version that 
+ * will never occur.  Any released minor version found to be truly incompatible
+ * (this should never happen) should be added to the list with 999.  999 alone
+ * in the list indicates that there are no incompatible minor versions. */
+static const unsigned VERS_MINOR_EXCEPTIONS[]    = {999};
+/* The size should be set to the number of minor version exceptions in the list. */
 static const unsigned VERS_MINOR_EXCEPTIONS_SIZE = 1;
 
 /* Library init / term status (global) */
@@ -832,6 +837,15 @@ done:
     "linked with an incompatible version of static or shared HDF5 library.\n"                                \
     "You should recompile the application or check your shared library related\n"                            \
     "settings such as 'LD_LIBRARY_PATH'.\n"
+#define MINOR_VERSION_FORWARD_COMPATIBLE_WARNING                                                             \
+    "Warning! ***HDF5 library minor version forward compatibility error***\n"                                \
+    "The HDF5 header files used to compile this application are from a newer\n"                              \
+    "version of the HDF5 library than the one to which this application is linked.\n"                        \
+    "Data corruption or segmentation faults may occur if the application continues.\n"                       \
+    "This can happen when an application was compiled by a newer version of HDF5 but\n"                      \
+    "linked with an older version of static or shared HDF5 library.\n"                                       \
+    "You should recompile the application or check your shared library related\n"                            \
+    "settings such as 'LD_LIBRARY_PATH'.\n"
 
 static herr_t
 H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum)
@@ -842,6 +856,7 @@ H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     static unsigned int disable_version_check    = 0;     /* Set if the version check should be disabled */
     static const char  *version_mismatch_warning = VERSION_MISMATCH_WARNING;
     static const char  *minor_version_mismatch_warning = MINOR_VERSION_MISMATCH_WARNING;
+    static const char  *minor_version_forward_compatible_warning = MINOR_VERSION_FORWARD_COMPATIBLE_WARNING;
     herr_t              ret_value                      = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -937,6 +952,40 @@ H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             } /* end if */
 
         } /* end for */
+
+        /* Check for forward compatibilty usage. */
+        if (H5_VERS_MINOR > minnum) {
+            switch (disable_version_check) {
+                case 0:
+                    fprintf(stderr, "%s%s", minor_version_forward_compatible_warning,
+                            "You can, at your own risk, disable this warning by setting the environment\n"
+                            "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+                            "Setting it to 2 or higher will suppress the warning messages totally.\n");
+                    /* Mention the versions we are referring to */
+                    fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
+                            (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+
+                    /* Bail out now. */
+                    fputs("Bye...\n", stderr);
+                    abort();
+                case 1:
+                    /* continue with a warning */
+                    /* Note that the warning message is embedded in the format string.*/
+                    fprintf(stderr,
+                            "%s'HDF5_DISABLE_VERSION_CHECK' "
+                            "environment variable is set to %d, application will\n"
+                            "continue at your own risk.\n",
+                            minor_version_forward_compatible_warning, disable_version_check);
+                    /* Mention the versions we are referring to */
+                    fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
+                            (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+                    break;
+                default:
+                    /* 2 or higher: continue silently */
+                    break;
+            } /* end switch */
+
+        }
 
     } /* end if (H5_VERS_MINOR != minnum) */
 

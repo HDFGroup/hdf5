@@ -70,7 +70,7 @@ parse(int ac, char **av)
                             major++;
                             break;
                         case 'm':
-                            minor++;
+                            minor = 999;
                             break;
                         case 'r':
                             release++;
