@@ -1280,6 +1280,11 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
 endif ()
 
 #-----------------------------------------------------------------------------
+# Generate the H5pubconf.h file containing user settings needed by compilation
+#-----------------------------------------------------------------------------
+configure_file (${HDF5_SRC_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
+
+#-----------------------------------------------------------------------------
 # Option to build HDF5 Java Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
@@ -1294,11 +1299,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
     endif ()
   endif ()
 endif ()
-
-#-----------------------------------------------------------------------------
-# Generate the H5pubconf.h file containing user settings needed by compilation
-#-----------------------------------------------------------------------------
-configure_file (${HDF5_SRC_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
 
 #-----------------------------------------------------------------------------
 # Option to build examples

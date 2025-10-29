@@ -21,7 +21,7 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h_1;
+import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -56,7 +56,7 @@ public class TestH5FDffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment filename = stringToSegment(arena, H5_FILE);
-            H5fid = hdf5_h_1.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(), H5fapl_id);
+            H5fid = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(), H5fapl_id);
             assertTrue("H5Fcreate failed", isValidId(H5fid));
         }
     }
@@ -65,7 +65,7 @@ public class TestH5FDffm {
     public void deleteH5file()
     {
         if (isValidId(H5fid)) {
-            closeQuietly(H5fid, hdf5_h_1::H5Fclose);
+            closeQuietly(H5fid, hdf5_h::H5Fclose);
             H5fid = hdf5_h.H5I_INVALID_HID();
         }
         if (isValidId(H5fapl_id)) {
@@ -177,7 +177,7 @@ public class TestH5FDffm {
 
             // Query driver flags
             MemorySegment flagsSeg = arena.allocate(ValueLayout.JAVA_LONG);
-            int result             = hdf5_h_1.H5FDdriver_query(driver_id, flagsSeg);
+            int result             = hdf5_h.H5FDdriver_query(driver_id, flagsSeg);
             assertEquals("H5FDdriver_query should succeed", 0, result);
 
             long flags = flagsSeg.get(ValueLayout.JAVA_LONG, 0);

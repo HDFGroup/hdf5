@@ -9,7 +9,7 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h_1;
+import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -593,12 +593,12 @@ public class TestH5Pffm {
             MemorySegment fillSegment = allocateInt(arena);
             setInt(fillSegment, fillValue);
 
-            int result = hdf5_h.H5Pset_fill_value(dcpl, hdf5_h_1.H5T_NATIVE_INT_g(), fillSegment);
+            int result = hdf5_h.H5Pset_fill_value(dcpl, hdf5_h.H5T_NATIVE_INT_g(), fillSegment);
             assertTrue("H5Pset_fill_value failed", isSuccess(result));
 
             // Get fill value back
             MemorySegment outFillSegment = allocateInt(arena);
-            result = hdf5_h.H5Pget_fill_value(dcpl, hdf5_h_1.H5T_NATIVE_INT_g(), outFillSegment);
+            result = hdf5_h.H5Pget_fill_value(dcpl, hdf5_h.H5T_NATIVE_INT_g(), outFillSegment);
             assertTrue("H5Pget_fill_value failed", isSuccess(result));
 
             int retrieved = getInt(outFillSegment);
@@ -1912,14 +1912,14 @@ public class TestH5Pffm {
             long[] vdimsArray   = {10, 20};
             MemorySegment vdims = allocateLongArray(arena, 2);
             copyToSegment(vdims, vdimsArray);
-            long vspace = hdf5_h_1.H5Screate_simple(2, vdims, MemorySegment.NULL);
+            long vspace = hdf5_h.H5Screate_simple(2, vdims, MemorySegment.NULL);
             assertTrue("H5Screate_simple vspace failed", isValidId(vspace));
 
             // Create source dataspace (10x20)
             long[] sdimsArray   = {10, 20};
             MemorySegment sdims = allocateLongArray(arena, 2);
             copyToSegment(sdims, sdimsArray);
-            long srcspace = hdf5_h_1.H5Screate_simple(2, sdims, MemorySegment.NULL);
+            long srcspace = hdf5_h.H5Screate_simple(2, sdims, MemorySegment.NULL);
             assertTrue("H5Screate_simple srcspace failed", isValidId(srcspace));
 
             // Set virtual mapping
@@ -1954,8 +1954,8 @@ public class TestH5Pffm {
             long[] dimsArray   = {100};
             MemorySegment dims = allocateLongArray(arena, 1);
             copyToSegment(dims, dimsArray);
-            long vspace   = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
-            long srcspace = hdf5_h_1.H5Screate_simple(1, dims, MemorySegment.NULL);
+            long vspace   = hdf5_h.H5Screate_simple(1, dims, MemorySegment.NULL);
+            long srcspace = hdf5_h.H5Screate_simple(1, dims, MemorySegment.NULL);
 
             // Set virtual mapping with specific filename
             String expectedFilename = "virtual_source_file.h5";
@@ -1995,8 +1995,8 @@ public class TestH5Pffm {
             long[] dimsArray   = {50, 100};
             MemorySegment dims = allocateLongArray(arena, 2);
             copyToSegment(dims, dimsArray);
-            long vspace   = hdf5_h_1.H5Screate_simple(2, dims, MemorySegment.NULL);
-            long srcspace = hdf5_h_1.H5Screate_simple(2, dims, MemorySegment.NULL);
+            long vspace   = hdf5_h.H5Screate_simple(2, dims, MemorySegment.NULL);
+            long srcspace = hdf5_h.H5Screate_simple(2, dims, MemorySegment.NULL);
 
             // Set virtual mapping with specific dataset name
             String expectedDsetName = "/group/virtual_dataset";
@@ -2036,13 +2036,13 @@ public class TestH5Pffm {
             long[] vdimsArray   = {30, 40};
             MemorySegment vdims = allocateLongArray(arena, 2);
             copyToSegment(vdims, vdimsArray);
-            long vspace = hdf5_h_1.H5Screate_simple(2, vdims, MemorySegment.NULL);
+            long vspace = hdf5_h.H5Screate_simple(2, vdims, MemorySegment.NULL);
 
             // Create source dataspace with different dimensions
             long[] sdimsArray   = {30, 40};
             MemorySegment sdims = allocateLongArray(arena, 2);
             copyToSegment(sdims, sdimsArray);
-            long srcspace = hdf5_h_1.H5Screate_simple(2, sdims, MemorySegment.NULL);
+            long srcspace = hdf5_h.H5Screate_simple(2, sdims, MemorySegment.NULL);
 
             // Set virtual mapping
             hdf5_h.H5Pset_virtual(dcpl, vspace, stringToSegment(arena, "src.h5"),
@@ -2054,7 +2054,7 @@ public class TestH5Pffm {
 
             // Verify virtual dataspace dimensions
             MemorySegment retrieved_vdims = allocateLongArray(arena, 2);
-            hdf5_h_1.H5Sget_simple_extent_dims(retrieved_vspace, retrieved_vdims, MemorySegment.NULL);
+            hdf5_h.H5Sget_simple_extent_dims(retrieved_vspace, retrieved_vdims, MemorySegment.NULL);
             assertEquals("Virtual dim 0 should match", 30L, retrieved_vdims.get(ValueLayout.JAVA_LONG, 0));
             assertEquals("Virtual dim 1 should match", 40L, retrieved_vdims.get(ValueLayout.JAVA_LONG, 8));
 
@@ -2064,7 +2064,7 @@ public class TestH5Pffm {
 
             // Verify source dataspace dimensions
             MemorySegment retrieved_sdims = allocateLongArray(arena, 2);
-            hdf5_h_1.H5Sget_simple_extent_dims(retrieved_srcspace, retrieved_sdims, MemorySegment.NULL);
+            hdf5_h.H5Sget_simple_extent_dims(retrieved_srcspace, retrieved_sdims, MemorySegment.NULL);
             assertEquals("Source dim 0 should match", 30L, retrieved_sdims.get(ValueLayout.JAVA_LONG, 0));
             assertEquals("Source dim 1 should match", 40L, retrieved_sdims.get(ValueLayout.JAVA_LONG, 8));
 
@@ -2088,22 +2088,22 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate dapl failed", isValidId(dapl));
 
             // Set virtual view to FIRST_MISSING
-            int result = hdf5_h.H5Pset_virtual_view(dapl, hdf5_h_1.H5D_VDS_FIRST_MISSING());
+            int result = hdf5_h.H5Pset_virtual_view(dapl, hdf5_h.H5D_VDS_FIRST_MISSING());
             assertTrue("H5Pset_virtual_view failed", isSuccess(result));
 
             // Get virtual view back
             MemorySegment view = allocateIntArray(arena, 1);
             result             = hdf5_h.H5Pget_virtual_view(dapl, view);
             assertTrue("H5Pget_virtual_view failed", isSuccess(result));
-            assertEquals("View should be FIRST_MISSING", hdf5_h_1.H5D_VDS_FIRST_MISSING(), getInt(view));
+            assertEquals("View should be FIRST_MISSING", hdf5_h.H5D_VDS_FIRST_MISSING(), getInt(view));
 
             // Change to LAST_AVAILABLE
-            result = hdf5_h.H5Pset_virtual_view(dapl, hdf5_h_1.H5D_VDS_LAST_AVAILABLE());
+            result = hdf5_h.H5Pset_virtual_view(dapl, hdf5_h.H5D_VDS_LAST_AVAILABLE());
             assertTrue("H5Pset_virtual_view (LAST_AVAILABLE) failed", isSuccess(result));
 
             result = hdf5_h.H5Pget_virtual_view(dapl, view);
             assertTrue("H5Pget_virtual_view (2nd call) failed", isSuccess(result));
-            assertEquals("View should be LAST_AVAILABLE", hdf5_h_1.H5D_VDS_LAST_AVAILABLE(), getInt(view));
+            assertEquals("View should be LAST_AVAILABLE", hdf5_h.H5D_VDS_LAST_AVAILABLE(), getInt(view));
 
             hdf5_h.H5Pclose(dapl);
         }
@@ -2571,8 +2571,8 @@ public class TestH5Pffm {
 
             long[] dims           = {5, 10};
             MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
-            long vspace           = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
-            long srcspace         = hdf5_h_1.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+            long vspace           = hdf5_h.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
+            long srcspace         = hdf5_h.H5Screate_simple(2, dimsSeg, MemorySegment.NULL);
 
             MemorySegment srcFileName = stringToSegment(arena, "test_source.h5");
             MemorySegment srcDsetName = stringToSegment(arena, "/data");
@@ -2594,10 +2594,10 @@ public class TestH5Pffm {
             assertTrue("H5Pget_virtual_srcspace should succeed", isValidId(retrieved_srcspace));
 
             // Cleanup
-            hdf5_h_1.H5Sclose(retrieved_vspace);
-            hdf5_h_1.H5Sclose(retrieved_srcspace);
-            hdf5_h_1.H5Sclose(vspace);
-            hdf5_h_1.H5Sclose(srcspace);
+            hdf5_h.H5Sclose(retrieved_vspace);
+            hdf5_h.H5Sclose(retrieved_srcspace);
+            hdf5_h.H5Sclose(vspace);
+            hdf5_h.H5Sclose(srcspace);
             hdf5_h.H5Pclose(dcpl);
         }
     }

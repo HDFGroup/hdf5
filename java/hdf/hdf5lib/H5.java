@@ -457,7 +457,7 @@ public class H5 implements java.io.Serializable {
     public static int H5check_version(int majnum, int minnum, int relnum)
     {
 
-        return org.hdfgroup.javahdf5.hdf5_h_2.H5check_version(majnum, minnum, relnum);
+        return org.hdfgroup.javahdf5.hdf5_h.H5check_version(majnum, minnum, relnum);
     }
 
     /**
@@ -473,7 +473,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5close() throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5close();
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5close();
         if (retVal < 0)
             h5libraryError();
         return retVal;
@@ -493,7 +493,7 @@ public class H5 implements java.io.Serializable {
     {
         int retVal = -1;
 
-        if ((retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5open()) < 0)
+        if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5open()) < 0)
             h5libraryError();
 
         return retVal;
@@ -517,7 +517,7 @@ public class H5 implements java.io.Serializable {
     {
         int retVal = -1;
 
-        if ((retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5dont_atexit()) < 0)
+        if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5dont_atexit()) < 0)
             h5libraryError();
 
         return retVal;
@@ -534,10 +534,10 @@ public class H5 implements java.io.Serializable {
     public static int H5error_off()
     {
         // TODO: Implement error handling callbacks
-        //         if (org.hdfgroup.javahdf5.hdf5_h_1.H5Eget_auto2(H5E_DEFAULT(), errorFunc, errorData) < 0)
+        //         if (org.hdfgroup.javahdf5.hdf5_h.H5Eget_auto2(H5E_DEFAULT(), errorFunc, errorData) < 0)
         //             return -1;
         //
-        //         if (org.hdfgroup.javahdf5.hdf5_h_1.H5Eset_auto2(H5E_DEFAULT(), MemorySegment.NULL,
+        //         if (org.hdfgroup.javahdf5.hdf5_h.H5Eset_auto2(H5E_DEFAULT(), MemorySegment.NULL,
         //         MemorySegment.NULL) < 0)
         //             return -1;
 
@@ -552,7 +552,7 @@ public class H5 implements java.io.Serializable {
      */
     public static void H5error_on()
     {
-        org.hdfgroup.javahdf5.hdf5_h_1.H5Eset_auto2(H5E_DEFAULT(), errorFunc, errorData);
+        org.hdfgroup.javahdf5.hdf5_h.H5Eset_auto2(H5E_DEFAULT(), errorFunc, errorData);
     }
 
     /**
@@ -569,7 +569,7 @@ public class H5 implements java.io.Serializable {
     {
         int retVal = -1;
 
-        if ((retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5garbage_collect()) < 0)
+        if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5garbage_collect()) < 0)
             h5libraryError();
 
         return retVal;
@@ -609,7 +609,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment majnum_segment = arena.allocateFrom(ValueLayout.JAVA_INT, libversion[0]);
             MemorySegment minnum_segment = arena.allocateFrom(ValueLayout.JAVA_INT, libversion[1]);
             MemorySegment relnum_segment = arena.allocateFrom(ValueLayout.JAVA_INT, libversion[2]);
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5get_libversion(majnum_segment, minnum_segment,
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5get_libversion(majnum_segment, minnum_segment,
                                                                           relnum_segment)) < 0)
                 h5libraryError();
 
@@ -658,7 +658,7 @@ public class H5 implements java.io.Serializable {
         throws HDF5LibraryException
     {
         int retVal = -1;
-        if ((retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5set_free_list_limits(
+        if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5set_free_list_limits(
                  reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim)) <
             0)
             h5libraryError();
@@ -733,7 +733,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the boolean value
             MemorySegment is_ts_segment = arena.allocate(ValueLayout.JAVA_BOOLEAN);
             // Call the native function to check if the library is thread-safe
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5is_library_threadsafe(is_ts_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5is_library_threadsafe(is_ts_segment) < 0)
                 h5libraryError();
 
             // Read the boolean value from the segment
@@ -745,11 +745,11 @@ public class H5 implements java.io.Serializable {
 
     // /////// unimplemented ////////
     //  herr_t H5free_memory(void *mem);
-    //  SEE  int org.hdfgroup.javahdf5.hdf5_h_2.H5free_memory(MemorySegment mem)
+    //  SEE  int org.hdfgroup.javahdf5.hdf5_h.H5free_memory(MemorySegment mem)
     //  void *H5allocate_memory(size_t size, hbool_t clear);
-    //  SEE  MemorySegment org.hdfgroup.javahdf5.hdf5_h_2.H5allocate_memory(long size, boolean clear)
+    //  SEE  MemorySegment org.hdfgroup.javahdf5.hdf5_h.H5allocate_memory(long size, boolean clear)
     //  void *H5resize_memory(void *mem, size_t size);
-    //  SEE  MemorySegment org.hdfgroup.javahdf5.hdf5_h_2.H5resize_memory(MemorySegment mem, long size)
+    //  SEE  MemorySegment org.hdfgroup.javahdf5.hdf5_h.H5resize_memory(MemorySegment mem, long size)
 
     // ////////////////////////////////////////////////////////////
     // //
@@ -782,7 +782,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: H5Aclose remove {}", attr_id);
         OPEN_IDS.remove(attr_id);
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Aclose(attr_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Aclose(attr_id);
         return retVal;
     }
 
@@ -809,7 +809,7 @@ public class H5 implements java.io.Serializable {
         }
         throw new HDF5LibraryException("H5Acopy not implemented yet");
         // This is a stub implementation, as the actual implementation is not provided in the original code.
-        // int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Acopy(src_aid, dst_aid);
+        // int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Acopy(src_aid, dst_aid);
         // if (retVal < 0) {
         //            h5libraryError();
         //}
@@ -909,7 +909,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment obj_name_segment  = arena.allocateFrom(obj_name);
             MemorySegment attr_name_segment = arena.allocateFrom(attr_name);
-            attr_id                         = org.hdfgroup.javahdf5.hdf5_h_1.H5Acreate_by_name(
+            attr_id                         = org.hdfgroup.javahdf5.hdf5_h.H5Acreate_by_name(
                 loc_id, obj_name_segment, attr_name_segment, type_id, space_id, acpl_id, aapl_id, lapl_id);
         }
         if (attr_id > 0) {
@@ -950,7 +950,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
-            retVal                     = org.hdfgroup.javahdf5.hdf5_h_1.H5Adelete(loc_id, name_segment);
+            retVal                     = org.hdfgroup.javahdf5.hdf5_h.H5Adelete(loc_id, name_segment);
         }
 
         if (retVal < 0) {
@@ -995,7 +995,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment obj_name_segment = arena.allocateFrom(obj_name);
-            retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Adelete_by_idx(loc_id, obj_name_segment, idx_type,
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Adelete_by_idx(loc_id, obj_name_segment, idx_type,
                                                                      order, n, lapl_id);
         }
 
@@ -1039,7 +1039,7 @@ public class H5 implements java.io.Serializable {
             // Allocate MemorySegments to hold the string bytes
             MemorySegment obj_name_segment  = arena.allocateFrom(obj_name);
             MemorySegment attr_name_segment = arena.allocateFrom(attr_name);
-            retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Adelete_by_name(loc_id, obj_name_segment,
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Adelete_by_name(loc_id, obj_name_segment,
                                                                       attr_name_segment, lapl_id);
         }
 
@@ -1080,7 +1080,7 @@ public class H5 implements java.io.Serializable {
 
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment attr_name_segment = arena.allocateFrom(attr_name);
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Aexists(obj_id, attr_name_segment)) < 0)
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Aexists(obj_id, attr_name_segment)) < 0)
                 h5libraryError();
             if (retVal > 0)
                 exists = true;
@@ -1127,7 +1127,7 @@ public class H5 implements java.io.Serializable {
             // Allocate MemorySegments to hold the string bytes
             MemorySegment obj_name_segment  = arena.allocateFrom(obj_name);
             MemorySegment attr_name_segment = arena.allocateFrom(attr_name);
-            retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Aexists_by_name(loc_id, obj_name_segment,
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Aexists_by_name(loc_id, obj_name_segment,
                                                                       attr_name_segment, lapl_id);
         }
         if (retVal < 0) {
@@ -1161,7 +1161,7 @@ public class H5 implements java.io.Serializable {
         hdf.hdf5lib.structs.H5A_info_t info = null;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ainfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5A_info_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_info(attr_id, ainfo_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Aget_info(attr_id, ainfo_segment) < 0)
                 h5libraryError();
 
             // Unpack the H5A_info_t from the MemorySegment
@@ -1212,7 +1212,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment ainfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5A_info_t.sizeof());
             // Allocate MemorySegments to hold the string bytes
             MemorySegment obj_name_segment = arena.allocateFrom(obj_name);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_info_by_idx(loc_id, obj_name_segment, idx_type, order,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Aget_info_by_idx(loc_id, obj_name_segment, idx_type, order,
                                                                   n, ainfo_segment, lapl_id) < 0)
                 h5libraryError();
 
@@ -1262,7 +1262,7 @@ public class H5 implements java.io.Serializable {
             // Allocate MemorySegments to hold the string bytes
             MemorySegment obj_name_segment  = arena.allocateFrom(obj_name);
             MemorySegment attr_name_segment = arena.allocateFrom(attr_name);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_info_by_name(
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Aget_info_by_name(
                     loc_id, obj_name_segment, attr_name_segment, ainfo_segment, lapl_id) < 0)
                 h5libraryError();
 
@@ -1294,7 +1294,7 @@ public class H5 implements java.io.Serializable {
     {
         long buf_size = -1;
 
-        if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_name(attr_id, 0, MemorySegment.NULL)) < 0)
+        if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Aget_name(attr_id, 0, MemorySegment.NULL)) < 0)
             h5libraryError();
 
         String ret_name = null;
@@ -1302,7 +1302,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocate(buf_size + 1);
             /* Get the attribute name */
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_name(attr_id, buf_size + 1, name_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Aget_name(attr_id, buf_size + 1, name_segment) < 0)
                 h5libraryError();
 
             ret_name = name_segment.getString(0, StandardCharsets.UTF_8);
@@ -1347,7 +1347,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment obj_name_segment = arena.allocateFrom(obj_name);
-            if ((status_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_name_by_idx(
+            if ((status_size = org.hdfgroup.javahdf5.hdf5_h.H5Aget_name_by_idx(
                      attr_id, obj_name_segment, idx_type, order, n, MemorySegment.NULL, 0, lapl_id)) < 0)
                 h5libraryError();
         }
@@ -1359,7 +1359,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocate(status_size + 1);
             /* Get the attribute name */
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_name_by_idx(attr_id, obj_name_segment, idx_type, order,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Aget_name_by_idx(attr_id, obj_name_segment, idx_type, order,
                                                                   n, name_segment, status_size + 1,
                                                                   lapl_id) < 0)
                 h5libraryError();
@@ -1384,7 +1384,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Aget_space(long attr_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_space(attr_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Aget_space(attr_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Aget_space add {}", id);
             OPEN_IDS.add(id);
@@ -1412,7 +1412,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Aget_storage_size(long attr_id) throws HDF5LibraryException
     {
-        long size = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_storage_size(attr_id);
+        long size = org.hdfgroup.javahdf5.hdf5_h.H5Aget_storage_size(attr_id);
         if (size == 0) {
             h5libraryError();
         }
@@ -1435,7 +1435,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Aget_type(long attr_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_type(attr_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Aget_type(attr_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Aget_type add {}", id);
             OPEN_IDS.add(id);
@@ -1477,7 +1477,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(attr_name);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aopen(obj_id, name_segment, aapl_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Aopen(obj_id, name_segment, aapl_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Aopen add {}", id);
@@ -1529,7 +1529,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(obj_name);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aopen_by_idx(loc_id, name_segment, idx_type, order, n,
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Aopen_by_idx(loc_id, name_segment, idx_type, order, n,
                                                                aapl_id, lapl_id);
         }
         if (id > 0) {
@@ -1577,7 +1577,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment obj_name_segment  = arena.allocateFrom(obj_name);
             MemorySegment attr_name_segment = arena.allocateFrom(attr_name);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aopen_by_name(loc_id, obj_name_segment, attr_name_segment,
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Aopen_by_name(loc_id, obj_name_segment, attr_name_segment,
                                                                 aapl_id, lapl_id);
         }
         if (id > 0) {
@@ -1626,7 +1626,7 @@ public class H5 implements java.io.Serializable {
             if (isCriticalPinning) {
                 obj_segment.copyFrom(MemorySegment.ofArray(obj));
             }
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, obj_segment)) < 0)
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, obj_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(obj_segment, ValueLayout.JAVA_BYTE, 0L, obj, 0, obj.length);
         }
@@ -1821,7 +1821,7 @@ public class H5 implements java.io.Serializable {
             if (isCriticalPinning) {
                 buf_segment.copyFrom(MemorySegment.ofArray(buf));
             }
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(buf_segment, ValueLayout.JAVA_DOUBLE, 0L, buf, 0, buf.length);
         }
@@ -1887,7 +1887,7 @@ public class H5 implements java.io.Serializable {
             if (isCriticalPinning) {
                 buf_segment.copyFrom(MemorySegment.ofArray(buf));
             }
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(buf_segment, ValueLayout.JAVA_FLOAT, 0L, buf, 0, buf.length);
         }
@@ -1955,7 +1955,7 @@ public class H5 implements java.io.Serializable {
             if (isCriticalPinning) {
                 buf_segment.copyFrom(MemorySegment.ofArray(buf));
             }
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(buf_segment, ValueLayout.JAVA_INT, 0L, buf, 0, buf.length);
         }
@@ -2023,7 +2023,7 @@ public class H5 implements java.io.Serializable {
             if (isCriticalPinning) {
                 buf_segment.copyFrom(MemorySegment.ofArray(buf));
             }
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(buf_segment, ValueLayout.JAVA_LONG, 0L, buf, 0, buf.length);
         }
@@ -2117,7 +2117,7 @@ public class H5 implements java.io.Serializable {
             if (isCriticalPinning) {
                 buf_segment.copyFrom(MemorySegment.ofArray(buf));
             }
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, buf_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(buf_segment, ValueLayout.JAVA_SHORT, 0L, buf, 0, buf.length);
         }
@@ -2208,7 +2208,7 @@ public class H5 implements java.io.Serializable {
                 MemorySegment stringArray = arena.allocate(ValueLayout.ADDRESS, buf.length);
 
                 // Call native H5Aread to read string pointers
-                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, stringArray);
+                status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, stringArray);
 
                 if (status >= 0) {
                     // Convert string pointer array back to ArrayList array
@@ -2237,7 +2237,7 @@ public class H5 implements java.io.Serializable {
                 MemorySegment hvlArray = hvl_t.allocateArray(buf.length, arena);
 
                 // Call native H5Aread
-                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, hvlArray);
+                status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, hvlArray);
 
                 if (status >= 0) {
                     // Convert hvl_t data back to ArrayList array IMMEDIATELY while memory is valid
@@ -2249,16 +2249,16 @@ public class H5 implements java.io.Serializable {
                     // Reclaim VL memory allocated by HDF5 only if VL data is detected (JNI pattern)
                     try {
                         // Get dataspace for H5Treclaim
-                        space_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_space(attr_id);
+                        space_id = org.hdfgroup.javahdf5.hdf5_h.H5Aget_space(attr_id);
                         if ((status >= 0) && vl_data_class) {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(
-                                mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(),
+                            org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
+                                mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(),
                                 hvlArray);
                         }
                     }
                     finally {
                         if (space_id >= 0) {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_id);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Sclose(space_id);
                         }
                     }
 
@@ -2386,7 +2386,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment old_attr_name_segment = arena.allocateFrom(old_attr_name);
             MemorySegment new_attr_name_segment = arena.allocateFrom(new_attr_name);
 
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Arename(loc_id, old_attr_name_segment,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Arename(loc_id, old_attr_name_segment,
                                                               new_attr_name_segment);
         }
         if (status < 0) {
@@ -2435,7 +2435,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment old_attr_name_segment = arena.allocateFrom(old_attr_name);
             MemorySegment new_attr_name_segment = arena.allocateFrom(new_attr_name);
 
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Arename_by_name(
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Arename_by_name(
                 loc_id, obj_name_segment, old_attr_name_segment, new_attr_name_segment, lapl_id);
         }
         if (status < 0) {
@@ -2480,7 +2480,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_BYTE, buf.length);
             buf_segment.copyFrom(MemorySegment.ofArray(buf));
 
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, buf_segment);
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Awrite(attr_id, mem_type_id, buf_segment);
             if (status < 0) {
                 h5libraryError();
             }
@@ -2944,22 +2944,22 @@ public class H5 implements java.io.Serializable {
             if (typeClass == HDF5Constants.H5T_COMPOUND) {
                 // For compound datatypes, convert ArrayList array to packed compound structures
                 arrayBuffer = VLDataConverter.convertCompoundDatatype(arrayData, mem_type_id, arena);
-                status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, arrayBuffer);
+                status      = org.hdfgroup.javahdf5.hdf5_h.H5Awrite(attr_id, mem_type_id, arrayBuffer);
             }
             else if (typeClass == HDF5Constants.H5T_ARRAY) {
                 // For array datatypes, convert to packed array elements (not hvl_t)
                 arrayBuffer = VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
-                status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, arrayBuffer);
+                status      = org.hdfgroup.javahdf5.hdf5_h.H5Awrite(attr_id, mem_type_id, arrayBuffer);
             }
             else if (typeClass == HDF5Constants.H5T_STRING && H5Tis_variable_str(mem_type_id)) {
                 // For variable-length string datatypes, convert to string pointers
                 stringArray = VLDataConverter.convertVLStrings(arrayData, arena);
-                status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, stringArray);
+                status      = org.hdfgroup.javahdf5.hdf5_h.H5Awrite(attr_id, mem_type_id, stringArray);
             }
             else {
                 // For VL datatypes, convert to hvl_t structures
                 hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
-                status   = org.hdfgroup.javahdf5.hdf5_h_1.H5Awrite(attr_id, mem_type_id, hvlArray);
+                status   = org.hdfgroup.javahdf5.hdf5_h.H5Awrite(attr_id, mem_type_id, hvlArray);
             }
 
             if (status < 0) {
@@ -2978,9 +2978,9 @@ public class H5 implements java.io.Serializable {
             if ((status >= 0) && vl_data_class && hvlArray != null) {
                 try {
                     // Get dataspace for H5Treclaim
-                    space_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_space(attr_id);
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(
-                        mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(), hvlArray);
+                    space_id = org.hdfgroup.javahdf5.hdf5_h.H5Aget_space(attr_id);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
+                        mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(), hvlArray);
                 }
                 catch (Exception reclaimEx) {
                     // Log but don't fail if reclaim has issues
@@ -2989,7 +2989,7 @@ public class H5 implements java.io.Serializable {
                 finally {
                     if (space_id >= 0) {
                         try {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_id);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Sclose(space_id);
                         }
                         catch (Exception ex) {
                             // Ignore close errors
@@ -3046,7 +3046,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Aget_create_plist(long attr_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_create_plist(attr_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Aget_create_plist(attr_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Aget_create_plist add {}", id);
             OPEN_IDS.add(id);
@@ -3116,7 +3116,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_data_segment =
                 Linker.nativeLinker().upcallStub(H5Aiterate2$handle(), H5Aiterate2$descriptor(), arena);
 
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aiterate2(
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Aiterate2(
                      loc_id, idx_type, order, start_idx_segment, op_segment, op_data_segment)) < 0)
                 h5libraryError();
         }
@@ -3188,7 +3188,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_data_segment = Linker.nativeLinker().upcallStub(
                 H5Aiterate_by_name$handle(), H5Aiterate_by_name$descriptor(), arena);
 
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aiterate_by_name(
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Aiterate_by_name(
                      loc_id, name_segment, idx_type, order, start_idx_segment, op_segment, op_data_segment,
                      lapl_id)) < 0)
                 h5libraryError();
@@ -3279,7 +3279,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: H5Dclose remove {}", dataset_id);
         OPEN_IDS.remove(dataset_id);
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Dclose(dataset_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Dclose(dataset_id);
         if (retVal < 0)
             retVal = 0;
         return retVal;
@@ -3360,7 +3360,7 @@ public class H5 implements java.io.Serializable {
     public static long H5Dcreate_anon(long loc_id, long type_id, long space_id, long dcpl_id, long dapl_id)
         throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Dcreate_anon(loc_id, type_id, space_id, dcpl_id, dapl_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Dcreate_anon(loc_id, type_id, space_id, dcpl_id, dapl_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Dcreate_anon add {}", id);
             OPEN_IDS.add(id);
@@ -3416,7 +3416,7 @@ public class H5 implements java.io.Serializable {
                 buf_segment.set(ValueLayout.JAVA_BYTE, i, buf[i]);
             }
 
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dfill(fill_segment, fill_type, buf_segment,
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Dfill(fill_segment, fill_type, buf_segment,
                                                                  buf_type, space_id)) < 0)
                 h5libraryError();
 
@@ -3441,7 +3441,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Dget_access_plist(long dataset_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_access_plist(dataset_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Dget_access_plist(dataset_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Dget_access_plist add {}", id);
             OPEN_IDS.add(id);
@@ -3468,7 +3468,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Dget_create_plist(long dataset_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_create_plist(dataset_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Dget_create_plist(dataset_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Dget_create_plist add {}", id);
             OPEN_IDS.add(id);
@@ -3495,7 +3495,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Dget_offset(long dataset_id) throws HDF5LibraryException
     {
-        long offset = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_offset(dataset_id);
+        long offset = org.hdfgroup.javahdf5.hdf5_h.H5Dget_offset(dataset_id);
         if (offset < 0) {
             h5libraryError();
         }
@@ -3517,7 +3517,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Dget_space(long dataset_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_space(dataset_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Dget_space(dataset_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Dget_space add {}", id);
             OPEN_IDS.add(id);
@@ -3549,7 +3549,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment int_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
-            int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_space_status(dataset_id, int_segment);
+            int status = org.hdfgroup.javahdf5.hdf5_h.H5Dget_space_status(dataset_id, int_segment);
             if (status < 0)
                 h5libraryError();
             space_status = int_segment.get(ValueLayout.JAVA_INT, 0);
@@ -3573,7 +3573,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Dget_storage_size(long dataset_id) throws HDF5LibraryException
     {
-        long size = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_storage_size(dataset_id);
+        long size = org.hdfgroup.javahdf5.hdf5_h.H5Dget_storage_size(dataset_id);
         if (size == 0)
             h5libraryError();
 
@@ -3595,7 +3595,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Dget_type(long dataset_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_type(dataset_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Dget_type(dataset_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Dget_type add {}", id);
             OPEN_IDS.add(id);
@@ -3651,7 +3651,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_data_segment =
                 Linker.nativeLinker().upcallStub(H5Diterate$handle(), H5Diterate$descriptor(), arena);
 
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Diterate(buf_segment, buf_type, space_id,
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Diterate(buf_segment, buf_type, space_id,
                                                                     op_segment, op_data_segment)) < 0)
                 h5libraryError();
         }
@@ -3755,7 +3755,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment obj_segment = arena.allocate(ValueLayout.JAVA_BYTE, obj.length);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                             file_space_id, xfer_plist_id, obj_segment);
             if (status < 0)
                 h5libraryError();
@@ -3816,7 +3816,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment obj_segment = arena.allocate(ValueLayout.JAVA_BYTE, buf.length);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                             file_space_id, xfer_plist_id, obj_segment);
             if (status < 0)
                 h5libraryError();
@@ -4013,7 +4013,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_DOUBLE, buf.length);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                             file_space_id, xfer_plist_id, buf_segment);
             if (status < 0)
                 h5libraryError();
@@ -4093,7 +4093,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_FLOAT, buf.length);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                             file_space_id, xfer_plist_id, buf_segment);
             if (status < 0)
                 h5libraryError();
@@ -4173,7 +4173,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_INT, buf.length);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                             file_space_id, xfer_plist_id, buf_segment);
             if (status < 0)
                 h5libraryError();
@@ -4253,7 +4253,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_LONG, buf.length);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                             file_space_id, xfer_plist_id, buf_segment);
             if (status < 0)
                 h5libraryError();
@@ -4366,7 +4366,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_SHORT, buf.length);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                             file_space_id, xfer_plist_id, buf_segment);
             if (status < 0)
                 h5libraryError();
@@ -4474,7 +4474,7 @@ public class H5 implements java.io.Serializable {
                 MemorySegment stringArray = arena.allocate(ValueLayout.ADDRESS, buf.length);
 
                 // Call native H5Dread to read string pointers
-                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                                 file_space_id, xfer_plist_id, stringArray);
 
                 if (status >= 0) {
@@ -4504,7 +4504,7 @@ public class H5 implements java.io.Serializable {
                 MemorySegment hvlArray = hvl_t.allocateArray(buf.length, arena);
 
                 // Call native H5Dread
-                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                                 file_space_id, xfer_plist_id, hvlArray);
 
                 if (status >= 0) {
@@ -4512,13 +4512,13 @@ public class H5 implements java.io.Serializable {
                     ArrayList[] result = VLDataConverter.convertFromHVL(hvlArray, buf.length, mem_type_id);
 
                     // Get dataspace for H5Treclaim
-                    long space_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_space(dataset_id);
+                    long space_id = org.hdfgroup.javahdf5.hdf5_h.H5Dget_space(dataset_id);
 
                     // Reclaim VL memory allocated by HDF5 only if VL data is detected (JNI pattern)
                     try {
                         if ((status >= 0) && vl_data_class) {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(
-                                mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(),
+                            org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
+                                mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(),
                                 hvlArray);
                         }
                     }
@@ -4529,7 +4529,7 @@ public class H5 implements java.io.Serializable {
                     }
                     finally {
                         if (space_id >= 0) {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_id);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Sclose(space_id);
                         }
                     }
 
@@ -4638,7 +4638,7 @@ public class H5 implements java.io.Serializable {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment size_segment = arena.allocateFrom(ValueLayout.JAVA_LONG, size);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Dset_extent(dset_id, size_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dset_extent(dset_id, size_segment) < 0)
                 h5libraryError();
         }
     }
@@ -4671,7 +4671,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment sizeSegment = arena.allocate(ValueLayout.JAVA_LONG);
             // Call the native method to get the buffer size for VL data
             int status =
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Dvlen_get_buf_size(dset_id, type_id, space_id, sizeSegment);
+                org.hdfgroup.javahdf5.hdf5_h.H5Dvlen_get_buf_size(dset_id, type_id, space_id, sizeSegment);
             if (status < 0) {
                 h5libraryError();
             }
@@ -4753,7 +4753,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_BYTE, buf.length);
             buf_segment.copyFrom(MemorySegment.ofArray(buf));
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                              file_space_id, xfer_plist_id, buf_segment);
             if (status < 0) {
                 h5libraryError();
@@ -5328,25 +5328,25 @@ public class H5 implements java.io.Serializable {
             if (typeClass == HDF5Constants.H5T_COMPOUND) {
                 // For compound datatypes, convert ArrayList array to packed compound structures
                 arrayBuffer = VLDataConverter.convertCompoundDatatype(arrayData, mem_type_id, arena);
-                status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                status      = org.hdfgroup.javahdf5.hdf5_h.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                       file_space_id, xfer_plist_id, arrayBuffer);
             }
             else if (typeClass == HDF5Constants.H5T_ARRAY) {
                 // For array datatypes, convert to packed array elements (not hvl_t)
                 arrayBuffer = VLDataConverter.convertArrayDatatype(arrayData, mem_type_id, arena);
-                status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                status      = org.hdfgroup.javahdf5.hdf5_h.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                       file_space_id, xfer_plist_id, arrayBuffer);
             }
             else if (typeClass == HDF5Constants.H5T_STRING && H5Tis_variable_str(mem_type_id)) {
                 // For variable-length string datatypes, convert to string pointers
                 stringArray = VLDataConverter.convertVLStrings(arrayData, arena);
-                status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                status      = org.hdfgroup.javahdf5.hdf5_h.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                       file_space_id, xfer_plist_id, stringArray);
             }
             else {
                 // For VL datatypes, convert to hvl_t structures
                 hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
-                status   = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+                status   = org.hdfgroup.javahdf5.hdf5_h.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                    file_space_id, xfer_plist_id, hvlArray);
             }
 
@@ -5369,11 +5369,11 @@ public class H5 implements java.io.Serializable {
                 try {
                     // If mem_space_id is H5S_ALL, we need to get the actual dataspace
                     if (mem_space_id == HDF5Constants.H5S_ALL) {
-                        space_for_reclaim = org.hdfgroup.javahdf5.hdf5_h_1.H5Dget_space(dataset_id);
+                        space_for_reclaim = org.hdfgroup.javahdf5.hdf5_h.H5Dget_space(dataset_id);
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(mem_type_id, space_for_reclaim,
-                                                              org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(),
+                    org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(mem_type_id, space_for_reclaim,
+                                                              org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(),
                                                               hvlArray);
                 }
                 catch (Exception reclaimEx) {
@@ -5384,7 +5384,7 @@ public class H5 implements java.io.Serializable {
                     // Close the space if we opened it
                     if (space_for_reclaim != mem_space_id && space_for_reclaim >= 0) {
                         try {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_for_reclaim);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Sclose(space_for_reclaim);
                         }
                         catch (Exception closeEx) {
                             // Ignore close errors
@@ -5449,7 +5449,7 @@ public class H5 implements java.io.Serializable {
 
             // Use VLDataConverter to convert VL strings to hvl_t
             MemorySegment hvlArray = VLDataConverter.convertToHVL(vlStringArray, arena);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                              file_space_id, xfer_plist_id, hvlArray);
 
             if (status < 0) {
@@ -5477,7 +5477,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Dflush(long dataset_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Dflush(dataset_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Dflush(dataset_id) < 0) {
             h5libraryError();
         }
     }
@@ -5498,7 +5498,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Drefresh(long dataset_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Drefresh(dataset_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Drefresh(dataset_id) < 0) {
             h5libraryError();
         }
     }
@@ -5550,7 +5550,7 @@ public class H5 implements java.io.Serializable {
             // Allocate MemorySegment for the int
             MemorySegment int_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
             // Call the native method to check the error stack type
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Eauto_is_v2(stack_id, int_segment) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Eauto_is_v2(stack_id, int_segment) < 0) {
                 h5libraryError();
             }
             // Read the result from the MemorySegment
@@ -5605,7 +5605,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Eclear2(long stack_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Eclear2(stack_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Eclear2(stack_id) < 0) {
             h5libraryError();
         }
     }
@@ -5623,7 +5623,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Eclose_msg(long err_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Eclose_msg(err_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Eclose_msg(err_id) < 0) {
             h5libraryError();
         }
     }
@@ -5641,7 +5641,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Eclose_stack(long stack_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Eclose_stack(stack_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Eclose_stack(stack_id) < 0) {
             h5libraryError();
         }
     }
@@ -5675,7 +5675,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate MemorySegment for the msg
             MemorySegment msg_segment = arena.allocateFrom(msg);
-            msg_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Ecreate_msg(cls_id, msg_type, msg_segment);
+            msg_id = org.hdfgroup.javahdf5.hdf5_h.H5Ecreate_msg(cls_id, msg_type, msg_segment);
             if (msg_id < 0)
                 h5libraryError();
         }
@@ -5694,7 +5694,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Ecreate_stack() throws HDF5LibraryException
     {
-        long stack_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Ecreate_stack();
+        long stack_id = org.hdfgroup.javahdf5.hdf5_h.H5Ecreate_stack();
         if (stack_id < 0) {
             h5libraryError();
         }
@@ -5718,14 +5718,14 @@ public class H5 implements java.io.Serializable {
     {
         String className = null;
         long buf_size    = -1;
-        if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Eget_class_name(class_id, MemorySegment.NULL, 0)) <
+        if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Eget_class_name(class_id, MemorySegment.NULL, 0)) <
             0)
             h5libraryError();
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocate(buf_size + 1);
             // Call the native method to get the error class name
-            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Eget_class_name(class_id, name_segment,
+            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Eget_class_name(class_id, name_segment,
                                                                              buf_size + 1)) < 0)
                 h5libraryError();
             className = name_segment.getString(0, StandardCharsets.UTF_8);
@@ -5746,7 +5746,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Eget_current_stack() throws HDF5LibraryException
     {
-        long stack_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Eget_current_stack();
+        long stack_id = org.hdfgroup.javahdf5.hdf5_h.H5Eget_current_stack();
         if (stack_id < 0) {
             h5libraryError();
         }
@@ -5767,7 +5767,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Eset_current_stack(long stack_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Eset_current_stack(stack_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Eset_current_stack(stack_id) < 0)
             h5libraryError();
     }
 
@@ -5796,7 +5796,7 @@ public class H5 implements java.io.Serializable {
         }
         String msg    = null;
         long buf_size = -1;
-        if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Eget_msg(msg_id, MemorySegment.NULL,
+        if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Eget_msg(msg_id, MemorySegment.NULL,
                                                                   MemorySegment.NULL, 0L)) < 0) {
             h5libraryError();
         }
@@ -5806,7 +5806,7 @@ public class H5 implements java.io.Serializable {
                 MemorySegment msg_segment       = arena.allocate(buf_size + 1);
                 MemorySegment type_list_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
                 // Call the native method to get the error message
-                if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Eget_msg(msg_id, type_list_segment,
+                if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Eget_msg(msg_id, type_list_segment,
                                                                           msg_segment, buf_size + 1)) < 0)
                     h5libraryError();
                 msg          = msg_segment.getString(0);
@@ -5833,7 +5833,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Eget_num(long stack_id) throws HDF5LibraryException, NullPointerException
     {
-        long num = org.hdfgroup.javahdf5.hdf5_h_1.H5Eget_num(stack_id);
+        long num = org.hdfgroup.javahdf5.hdf5_h.H5Eget_num(stack_id);
         if (num < 0) {
             h5libraryError();
         }
@@ -5862,7 +5862,7 @@ public class H5 implements java.io.Serializable {
         if (stack_id < 0)
             throw new HDF5FunctionArgumentException("Invalid error stack identifier: " + stack_id);
         // TODO need to add FILE* stream parameter handling
-        org.hdfgroup.javahdf5.hdf5_h_1.H5Eprint2(stack_id, MemorySegment.NULL);
+        org.hdfgroup.javahdf5.hdf5_h.H5Eprint2(stack_id, MemorySegment.NULL);
     }
 
     /**
@@ -5881,7 +5881,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Epop(long stack_id, long count) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Epop(stack_id, count) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Epop(stack_id, count) < 0) {
             h5libraryError();
         }
     }
@@ -5969,7 +5969,7 @@ public class H5 implements java.io.Serializable {
 
             // Create a variadic invoker with no additional arguments
             // The message string is treated as a format string with no format arguments
-            var invoker = org.hdfgroup.javahdf5.hdf5_h_1.H5Epush2.makeInvoker();
+            var invoker = org.hdfgroup.javahdf5.hdf5_h.H5Epush2.makeInvoker();
 
             // Call the native method with empty variadic args
             if ((retVal = invoker.apply(stack_id, file_segment, func_segment, line, cls_id, maj_id, min_id,
@@ -6013,7 +6013,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment version_segment = arena.allocateFrom(version);
             // Call the native method to register the error class
             class_id =
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Eregister_class(name_segment, lib_segment, version_segment);
+                org.hdfgroup.javahdf5.hdf5_h.H5Eregister_class(name_segment, lib_segment, version_segment);
             if (class_id < 0) {
                 h5libraryError();
             }
@@ -6034,7 +6034,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Eunregister_class(long class_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Eunregister_class(class_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Eunregister_class(class_id) < 0) {
             h5libraryError();
         }
     }
@@ -6097,7 +6097,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment func_segment = H5E_walk2_t.allocate(func, arena);
             MemorySegment client_data_segment =
                 Linker.nativeLinker().upcallStub(H5Ewalk2$handle(), H5Ewalk2$descriptor(), arena);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Ewalk2(stack_id, (int)direction, func_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Ewalk2(stack_id, (int)direction, func_segment,
                                                         client_data_segment) < 0)
                 h5libraryError();
         }
@@ -6188,7 +6188,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: H5Fclose remove {}", file_id);
         OPEN_IDS.remove(file_id);
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Fclose(file_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Fclose(file_id);
         if (retVal < 0)
             retVal = 0;
         return retVal;
@@ -6224,7 +6224,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Fopen(name_segment, flags, access_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Fopen(name_segment, flags, access_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Fopen add {}", id);
@@ -6252,7 +6252,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Freopen(long file_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Freopen(file_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Freopen(file_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Freopen add {}", id);
             OPEN_IDS.add(id);
@@ -6313,7 +6313,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Fcreate(name_segment, flags, create_id, access_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Fcreate(name_segment, flags, create_id, access_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Fcreate add {}", id);
@@ -6353,7 +6353,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Fflush(long object_id, int scope) throws HDF5LibraryException
     {
-        int ret = org.hdfgroup.javahdf5.hdf5_h_1.H5Fflush(object_id, scope);
+        int ret = org.hdfgroup.javahdf5.hdf5_h.H5Fflush(object_id, scope);
         if (ret < 0) {
             h5libraryError();
         }
@@ -6375,7 +6375,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Fget_access_plist(long file_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_access_plist(file_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Fget_access_plist(file_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Fget_access_plist add {}", id);
             OPEN_IDS.add(id);
@@ -6403,7 +6403,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Fget_create_plist(long file_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_create_plist(file_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Fget_create_plist(file_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Fget_create_plist add {}", id);
             OPEN_IDS.add(id);
@@ -6436,7 +6436,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a buffer for the size
             MemorySegment sizeSegment = arena.allocate(ValueLayout.JAVA_LONG);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_filesize(file_id, sizeSegment) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Fget_filesize(file_id, sizeSegment) < 0) {
                 h5libraryError();
             }
             filesize = sizeSegment.get(ValueLayout.JAVA_LONG, 0);
@@ -6459,7 +6459,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Fget_freespace(long file_id) throws HDF5LibraryException
     {
-        long freespace = org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_freespace(file_id);
+        long freespace = org.hdfgroup.javahdf5.hdf5_h.H5Fget_freespace(file_id);
         if (freespace < 0) {
             h5libraryError();
         }
@@ -6486,7 +6486,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the intent value
             MemorySegment intentSegment = arena.allocate(ValueLayout.JAVA_INT);
             // Call the native method to get the intent
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_intent(file_id, intentSegment) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Fget_intent(file_id, intentSegment) < 0) {
                 h5libraryError();
             }
             intent = intentSegment.get(ValueLayout.JAVA_INT, 0);
@@ -6514,7 +6514,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a buffer for the size
             MemorySegment filenoSegment = arena.allocate(ValueLayout.JAVA_LONG);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_fileno(file_id, filenoSegment) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Fget_fileno(file_id, filenoSegment) < 0) {
                 h5libraryError();
             }
             fileno = filenoSegment.get(ValueLayout.JAVA_LONG, 0);
@@ -6543,7 +6543,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a buffer for the size
             MemorySegment hit_rateSegment = arena.allocate(ValueLayout.JAVA_DOUBLE);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_mdc_hit_rate(file_id, hit_rateSegment) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Fget_mdc_hit_rate(file_id, hit_rateSegment) < 0) {
                 h5libraryError();
             }
             hit_rate = hit_rateSegment.get(ValueLayout.JAVA_DOUBLE, 0);
@@ -6592,7 +6592,7 @@ public class H5 implements java.io.Serializable {
                 arena.allocateFrom(ValueLayout.JAVA_LONG, metadata_cache[1]);
             MemorySegment cur_size_segment = arena.allocateFrom(ValueLayout.JAVA_LONG, metadata_cache[2]);
             MemorySegment cur_num_entries_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_mdc_size(file_id, max_size_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Fget_mdc_size(file_id, max_size_segment,
                                                                min_clean_size_segment, cur_size_segment,
                                                                cur_num_entries_segment) < 0)
                 h5libraryError();
@@ -6623,7 +6623,7 @@ public class H5 implements java.io.Serializable {
     public static String H5Fget_name(long obj_id) throws HDF5LibraryException
     {
         long name_size = -1;
-        if ((name_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_name(obj_id, MemorySegment.NULL, 0)) < 0)
+        if ((name_size = org.hdfgroup.javahdf5.hdf5_h.H5Fget_name(obj_id, MemorySegment.NULL, 0)) < 0)
             h5libraryError();
 
         String ret_name = null;
@@ -6631,7 +6631,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocate(name_size + 1);
             /* Get the attribute name */
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_name(obj_id, name_segment, name_size + 1) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Fget_name(obj_id, name_segment, name_size + 1) < 0)
                 h5libraryError();
 
             ret_name = name_segment.getString(0, StandardCharsets.UTF_8);
@@ -6666,7 +6666,7 @@ public class H5 implements java.io.Serializable {
     public static long H5Fget_obj_count(long file_id, int types) throws HDF5LibraryException
     {
         long count_size = -1;
-        if ((count_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_obj_count(file_id, types)) < 0)
+        if ((count_size = org.hdfgroup.javahdf5.hdf5_h.H5Fget_obj_count(file_id, types)) < 0)
             h5libraryError();
 
         return count_size;
@@ -6705,7 +6705,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the array bytes
             MemorySegment obj_id_list_segment = arena.allocate(ValueLayout.JAVA_LONG, max_objs);
-            if ((retCount = org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_obj_ids(file_id, types, max_objs,
+            if ((retCount = org.hdfgroup.javahdf5.hdf5_h.H5Fget_obj_ids(file_id, types, max_objs,
                                                                           obj_id_list_segment)) < 0)
                 h5libraryError();
             // Read the data from the memory segment
@@ -6744,7 +6744,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
             // Call the native method to check the file type
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Fis_hdf5(name_segment)) < 0) {
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Fis_hdf5(name_segment)) < 0) {
                 h5libraryError();
             }
             if (retVal > 0)
@@ -6783,7 +6783,7 @@ public class H5 implements java.io.Serializable {
             int retVal = -1;
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Fis_accessible(name_segment, fapl_id)) < 0)
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Fis_accessible(name_segment, fapl_id)) < 0)
                 h5libraryError();
             if (retVal > 0)
                 isAccessible = true;
@@ -6827,7 +6827,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
 
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Fmount(loc_id, name_segment, child_id, plist_id)) <
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Fmount(loc_id, name_segment, child_id, plist_id)) <
                 0)
                 h5libraryError();
         }
@@ -6862,7 +6862,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
 
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Funmount(loc_id, name_segment)) < 0)
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Funmount(loc_id, name_segment)) < 0)
                 h5libraryError();
         }
 
@@ -6883,7 +6883,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Freset_mdc_hit_rate_stats(long file_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Freset_mdc_hit_rate_stats(file_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Freset_mdc_hit_rate_stats(file_id) < 0)
             h5libraryError();
     }
 
@@ -6929,7 +6929,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Fclear_elink_file_cache(long file_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fclear_elink_file_cache(file_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Fclear_elink_file_cache(file_id) < 0)
             h5libraryError();
     }
 
@@ -6947,7 +6947,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Fstart_swmr_write(long file_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fstart_swmr_write(file_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Fstart_swmr_write(file_id) < 0)
             h5libraryError();
     }
 
@@ -6964,7 +6964,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Fstart_mdc_logging(long file_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fstart_mdc_logging(file_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Fstart_mdc_logging(file_id) < 0)
             h5libraryError();
     }
 
@@ -6982,7 +6982,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Fstop_mdc_logging(long file_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fstop_mdc_logging(file_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Fstop_mdc_logging(file_id) < 0)
             h5libraryError();
     }
 
@@ -7013,7 +7013,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment is_enabled_segment           = arena.allocate(ValueLayout.JAVA_BOOLEAN.byteSize());
             MemorySegment is_currently_logging_segment = arena.allocate(ValueLayout.JAVA_BOOLEAN.byteSize());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_mdc_logging_status(file_id, is_enabled_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Fget_mdc_logging_status(file_id, is_enabled_segment,
                                                                          is_currently_logging_segment) < 0)
                 h5libraryError();
             mdc_logging_status[0] = is_enabled_segment.get(ValueLayout.JAVA_BOOLEAN, 0);
@@ -7041,7 +7041,7 @@ public class H5 implements java.io.Serializable {
             // Allocate MemorySegment for the int
             MemorySegment minimize_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
             // Call the native method to check the error stack type
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fget_dset_no_attrs_hint(file_id, minimize_segment) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Fget_dset_no_attrs_hint(file_id, minimize_segment) < 0) {
                 h5libraryError();
             }
             // Read the result from the MemorySegment
@@ -7065,7 +7065,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Fset_dset_no_attrs_hint(long file_id, boolean minimize) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fset_dset_no_attrs_hint(file_id, minimize) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Fset_dset_no_attrs_hint(file_id, minimize) < 0)
             h5libraryError();
     }
 
@@ -7089,7 +7089,7 @@ public class H5 implements java.io.Serializable {
         if (low < 0 || high < 0) {
             throw new HDF5FunctionArgumentException("low and high must be non-negative");
         }
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Fset_libver_bounds(file_id, low, high) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Fset_libver_bounds(file_id, low, high) < 0)
             h5libraryError();
     }
 
@@ -7222,7 +7222,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: H5Gclose remove {}", group_id);
         OPEN_IDS.remove(group_id);
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Gclose(group_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Gclose(group_id);
         if (retVal < 0)
             retVal = 0;
         return retVal;
@@ -7262,7 +7262,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Gcreate2(loc_id, name_segment, lcpl_id, gcpl_id, gapl_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Gcreate2(loc_id, name_segment, lcpl_id, gcpl_id, gapl_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Gcreate add {}", id);
@@ -7295,7 +7295,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Gcreate_anon(long loc_id, long gcpl_id, long gapl_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Gcreate_anon(loc_id, gcpl_id, gapl_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Gcreate_anon(loc_id, gcpl_id, gapl_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Gcreate_anon add {}", id);
             OPEN_IDS.add(id);
@@ -7323,7 +7323,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Gget_create_plist(long group_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Gget_create_plist(group_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Gget_create_plist(group_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Dget_create_plist add {}", id);
             OPEN_IDS.add(id);
@@ -7354,7 +7354,7 @@ public class H5 implements java.io.Serializable {
         hdf.hdf5lib.structs.H5G_info_t info = null;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ginfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5G_info_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Gget_info(group_id, ginfo_segment) < 0) {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Gget_info(group_id, ginfo_segment) < 0) {
                 h5libraryError();
             }
             // Unpack the H5G_info_t from the MemorySegment
@@ -7406,7 +7406,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(group_name);
             MemorySegment ginfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5G_info_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Gget_info_by_idx(group_id, name_segment, idx_type, order, n,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Gget_info_by_idx(group_id, name_segment, idx_type, order, n,
                                                                   ginfo_segment, lapl_id) < 0) {
                 h5libraryError();
             }
@@ -7453,7 +7453,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(name);
             MemorySegment ginfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5G_info_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Gget_info_by_name(group_id, name_segment, ginfo_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Gget_info_by_name(group_id, name_segment, ginfo_segment,
                                                                    lapl_id) < 0) {
                 h5libraryError();
             }
@@ -7708,14 +7708,14 @@ public class H5 implements java.io.Serializable {
                     int ltype = (int)H5L_info2_t.type(info);
                     ltypeHandle.set(op_data, DATA_OFFSET, (long)count, ltype);
 
-                    int retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5Oexists_by_name(loc_id, name,
+                    int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Oexists_by_name(loc_id, name,
                                                                                   HDF5Constants.H5P_DEFAULT);
                     if (retVal < 0) {
                         h5libraryError();
                     }
                     else if (retVal > 0) {
                         MemorySegment info_segment = arena.allocate(H5O_info2_t.sizeof());
-                        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_info_by_name3(
+                        if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_info_by_name3(
                                 loc_id, name, info_segment, HDF5Constants.H5O_INFO_ALL,
                                 HDF5Constants.H5P_DEFAULT) < 0)
                             h5libraryError();
@@ -7746,7 +7746,7 @@ public class H5 implements java.io.Serializable {
 
             MemorySegment op_segment = H5L_iterate2_t.allocate(obj_info_all, arena);
             // Call H5Literate2
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Literate2(gid, indx_type, indx_order, MemorySegment.NULL,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Literate2(gid, indx_type, indx_order, MemorySegment.NULL,
                                                            op_segment, info) < 0) {
                 /*
                  * Reset info stats; most importantly, reset the count.
@@ -7755,7 +7755,7 @@ public class H5 implements java.io.Serializable {
                 countHandle.set(info, 0, 0);  // count
 
                 /* Iteration failed, try normal alphabetical order */
-                if (org.hdfgroup.javahdf5.hdf5_h_1.H5Literate2(gid, HDF5Constants.H5_INDEX_NAME,
+                if (org.hdfgroup.javahdf5.hdf5_h.H5Literate2(gid, HDF5Constants.H5_INDEX_NAME,
                                                                HDF5Constants.H5_ITER_INC, MemorySegment.NULL,
                                                                op_segment, info) < 0) {
                     h5libraryError();
@@ -7977,7 +7977,7 @@ public class H5 implements java.io.Serializable {
                     ltypeHandle.set(op_data, DATA_OFFSET, (long)count, ltype);
 
                     MemorySegment info_segment = arena.allocate(H5O_info2_t.sizeof());
-                    if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_info3(loc_id, info_segment,
+                    if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_info3(loc_id, info_segment,
                                                                     HDF5Constants.H5O_INFO_ALL) < 0)
                         h5libraryError();
                     int otype = (int)H5O_info2_t.type(info_segment);
@@ -8003,7 +8003,7 @@ public class H5 implements java.io.Serializable {
 
             MemorySegment op_segment = H5L_iterate2_t.allocate(obj_info_all, arena);
             // Call H5Literate2
-            if ((ret = org.hdfgroup.javahdf5.hdf5_h_1.H5Lvisit2(
+            if ((ret = org.hdfgroup.javahdf5.hdf5_h.H5Lvisit2(
                      loc_id, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC, op_segment, info)) < 0) {
                 h5libraryError();
             }
@@ -8143,7 +8143,7 @@ public class H5 implements java.io.Serializable {
     public static void H5Gflush(long group_id) throws HDF5LibraryException
     {
         log.trace("H5Gflush: group_id={}", group_id);
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Gflush(group_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Gflush(group_id) < 0)
             h5libraryError();
     }
 
@@ -8164,7 +8164,7 @@ public class H5 implements java.io.Serializable {
     public static void H5Grefresh(long group_id) throws HDF5LibraryException
     {
         log.trace("H5Grefresh: group_id={}", group_id);
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Grefresh(group_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Grefresh(group_id) < 0)
             h5libraryError();
     }
 
@@ -8220,7 +8220,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Iget_file_id(long obj_id) throws HDF5LibraryException
     {
-        long file_id = org.hdfgroup.javahdf5.hdf5_h_2.H5Iget_file_id(obj_id);
+        long file_id = org.hdfgroup.javahdf5.hdf5_h.H5Iget_file_id(obj_id);
         log.trace("H5Iget_file_id: obj_id={}, file_id={}", obj_id, file_id);
         return file_id;
     }
@@ -8271,7 +8271,7 @@ public class H5 implements java.io.Serializable {
     public static String H5Iget_name(long obj_id) throws HDF5LibraryException
     {
         long name_size = -1;
-        if ((name_size = org.hdfgroup.javahdf5.hdf5_h_2.H5Iget_name(obj_id, MemorySegment.NULL, 0)) < 0)
+        if ((name_size = org.hdfgroup.javahdf5.hdf5_h.H5Iget_name(obj_id, MemorySegment.NULL, 0)) < 0)
             h5libraryError();
 
         String ret_name = null;
@@ -8279,7 +8279,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocate(name_size + 1);
             /* Get the attribute name */
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Iget_name(obj_id, name_segment, name_size + 1) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Iget_name(obj_id, name_segment, name_size + 1) < 0)
                 h5libraryError();
 
             ret_name = name_segment.getString(0, StandardCharsets.UTF_8);
@@ -8302,7 +8302,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Iget_ref(long obj_id) throws HDF5LibraryException
     {
-        int ref_count = org.hdfgroup.javahdf5.hdf5_h_2.H5Iget_ref(obj_id);
+        int ref_count = org.hdfgroup.javahdf5.hdf5_h.H5Iget_ref(obj_id);
         if (ref_count < 0) {
             h5libraryError();
         }
@@ -8326,7 +8326,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Idec_ref(long obj_id) throws HDF5LibraryException
     {
-        int ref_count = org.hdfgroup.javahdf5.hdf5_h_2.H5Idec_ref(obj_id);
+        int ref_count = org.hdfgroup.javahdf5.hdf5_h.H5Idec_ref(obj_id);
         if (ref_count < 0) {
             h5libraryError();
         }
@@ -8349,7 +8349,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Iinc_ref(long obj_id) throws HDF5LibraryException
     {
-        int ref_count = org.hdfgroup.javahdf5.hdf5_h_2.H5Iinc_ref(obj_id);
+        int ref_count = org.hdfgroup.javahdf5.hdf5_h.H5Iinc_ref(obj_id);
         if (ref_count < 0) {
             h5libraryError();
         }
@@ -8372,7 +8372,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Iget_type(long obj_id) throws HDF5LibraryException
     {
-        int type = org.hdfgroup.javahdf5.hdf5_h_2.H5Iget_type(obj_id);
+        int type = org.hdfgroup.javahdf5.hdf5_h.H5Iget_type(obj_id);
         if (type < 0) {
             h5libraryError();
         }
@@ -8396,7 +8396,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Iget_type_ref(int type_id) throws HDF5LibraryException
     {
-        int ref_count = org.hdfgroup.javahdf5.hdf5_h_2.H5Iget_type_ref(type_id);
+        int ref_count = org.hdfgroup.javahdf5.hdf5_h.H5Iget_type_ref(type_id);
         if (ref_count < 0) {
             h5libraryError();
         }
@@ -8421,7 +8421,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Idec_type_ref(int type_id) throws HDF5LibraryException
     {
-        int ref_count = org.hdfgroup.javahdf5.hdf5_h_2.H5Idec_type_ref(type_id);
+        int ref_count = org.hdfgroup.javahdf5.hdf5_h.H5Idec_type_ref(type_id);
         if (ref_count < 0) {
             h5libraryError();
         }
@@ -8445,7 +8445,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Iinc_type_ref(int type_id) throws HDF5LibraryException
     {
-        int ref_count = org.hdfgroup.javahdf5.hdf5_h_2.H5Iinc_type_ref(type_id);
+        int ref_count = org.hdfgroup.javahdf5.hdf5_h.H5Iinc_type_ref(type_id);
         if (ref_count < 0) {
             h5libraryError();
         }
@@ -8471,7 +8471,7 @@ public class H5 implements java.io.Serializable {
         int n_members = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment int_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Inmembers(type_id, int_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Inmembers(type_id, int_segment) < 0)
                 h5libraryError();
             n_members = int_segment.get(ValueLayout.JAVA_INT, 0);
         }
@@ -8496,7 +8496,7 @@ public class H5 implements java.io.Serializable {
     {
         boolean is_valid = false;
         int retVal       = -1;
-        if ((retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5Iis_valid(obj_id)) < 0) {
+        if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Iis_valid(obj_id)) < 0) {
             h5libraryError();
         }
         if (retVal == 0) {
@@ -8526,7 +8526,7 @@ public class H5 implements java.io.Serializable {
     {
         boolean exists = false;
         int retVal     = -1;
-        if ((retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5Itype_exists(type_id)) < 0) {
+        if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Itype_exists(type_id)) < 0) {
             h5libraryError();
         }
         if (retVal == 0) {
@@ -8554,7 +8554,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Iclear_type(int type_id, boolean force) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Iclear_type(type_id, force) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Iclear_type(type_id, force) < 0) {
             h5libraryError();
         }
     }
@@ -8573,7 +8573,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Idestroy_type(int type_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Idestroy_type(type_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Idestroy_type(type_id) < 0) {
             h5libraryError();
         }
     }
@@ -8643,7 +8643,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment src_name_segment = arena.allocateFrom(src_name);
             MemorySegment dst_name_segment = arena.allocateFrom(dst_name);
 
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lcopy(src_loc, src_name_segment, dst_loc, dst_name_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lcopy(src_loc, src_name_segment, dst_loc, dst_name_segment,
                                                        lcpl_id, lapl_id) < 0)
                 h5libraryError();
         }
@@ -8687,7 +8687,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment obj_name_segment  = arena.allocateFrom(obj_name);
             MemorySegment link_name_segment = arena.allocateFrom(link_name);
             // Call the native method to create the external link
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lcreate_external(file_name_segment, obj_name_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lcreate_external(file_name_segment, obj_name_segment,
                                                                   link_loc_id, link_name_segment, lcpl_id,
                                                                   lapl_id) < 0)
                 h5libraryError();
@@ -8730,7 +8730,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment cur_name_segment = arena.allocateFrom(cur_name);
             MemorySegment dst_name_segment = arena.allocateFrom(dst_name);
             // Call the native method to create the hard link
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lcreate_hard(cur_loc, cur_name_segment, dst_loc,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lcreate_hard(cur_loc, cur_name_segment, dst_loc,
                                                               dst_name_segment, lcpl_id, lapl_id) < 0)
                 h5libraryError();
         }
@@ -8769,7 +8769,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment link_target_segment = arena.allocateFrom(link_target);
             MemorySegment link_name_segment   = arena.allocateFrom(link_name);
             // Call the native method to create the soft link
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lcreate_soft(link_target_segment, link_loc_id,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lcreate_soft(link_target_segment, link_loc_id,
                                                               link_name_segment, lcpl_id, lapl_id) < 0)
                 h5libraryError();
         }
@@ -8803,7 +8803,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
             // Call the native method to delete the link
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Ldelete(loc_id, name_segment, lapl_id) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Ldelete(loc_id, name_segment, lapl_id) < 0)
                 h5libraryError();
         }
     }
@@ -8843,7 +8843,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(group_name);
             // Call the native method to delete the link by index
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Ldelete_by_idx(loc_id, name_segment, idx_type, order, n,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Ldelete_by_idx(loc_id, name_segment, idx_type, order, n,
                                                                 lapl_id) < 0)
                 h5libraryError();
         }
@@ -8881,7 +8881,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
             // Call the native method to check if the link exists
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Lexists(loc_id, name_segment, lapl_id)) < 0) {
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Lexists(loc_id, name_segment, lapl_id)) < 0) {
                 h5libraryError();
             }
             if (retVal == 0)
@@ -8923,7 +8923,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(name);
             MemorySegment linfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5L_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) <
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) <
                 0) {
                 h5libraryError();
             }
@@ -8975,7 +8975,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(group_name);
             MemorySegment linfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5L_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n,
                                                                    linfo_segment, lapl_id) < 0) {
                 h5libraryError();
             }
@@ -9028,12 +9028,12 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(group_name);
             /* Get the length of the link name */
-            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_name_by_idx(
+            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Lget_name_by_idx(
                      loc_id, name_segment, idx_type, order, n, MemorySegment.NULL, 0, lapl_id)) < 0)
                 h5libraryError();
             MemorySegment link_segment = arena.allocate(buf_size + 1); // Allocate space for the link name
             /* Get the link name */
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_name_by_idx(loc_id, name_segment, idx_type, order, n,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lget_name_by_idx(loc_id, name_segment, idx_type, order, n,
                                                                   link_segment, buf_size + 1, lapl_id) < 0) {
                 h5libraryError();
             }
@@ -9079,7 +9079,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(name);
             MemorySegment linfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5L_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) <
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lget_info2(loc_id, name_segment, linfo_segment, lapl_id) <
                 0) {
                 h5libraryError();
             }
@@ -9097,14 +9097,14 @@ public class H5 implements java.io.Serializable {
                 arena.allocate(val_size + 1); // Allocate space for the link path
 
             // Call the native method to get the link value
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_val(loc_id, name_segment, link_value_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lget_val(loc_id, name_segment, link_value_segment,
                                                           val_size + 1, lapl_id) < 0) {
                 h5libraryError();
             }
             if (link_type == H5L_TYPE_EXTERNAL()) {
                 MemorySegment file_name_segment = arena.allocate(val_size + 1);
                 MemorySegment obj_name_segment  = arena.allocate(val_size + 1);
-                if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lunpack_elink_val(link_value_segment, val_size + 1,
+                if (org.hdfgroup.javahdf5.hdf5_h.H5Lunpack_elink_val(link_value_segment, val_size + 1,
                                                                        MemorySegment.NULL, file_name_segment,
                                                                        obj_name_segment) < 0)
                     h5libraryError();
@@ -9173,7 +9173,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment  = arena.allocateFrom(group_name);
             MemorySegment linfo_segment = arena.allocate(org.hdfgroup.javahdf5.H5L_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lget_info_by_idx2(loc_id, name_segment, idx_type, order, n,
                                                                    linfo_segment, lapl_id) < 0) {
                 h5libraryError();
             }
@@ -9191,7 +9191,7 @@ public class H5 implements java.io.Serializable {
                 arena.allocate(val_size + 1); // Allocate space for the link path
 
             // Call the native method to get the link value
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lget_val_by_idx(loc_id, name_segment, idx_type, order, n,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lget_val_by_idx(loc_id, name_segment, idx_type, order, n,
                                                                  link_value_segment, val_size + 1,
                                                                  lapl_id) < 0) {
                 h5libraryError();
@@ -9199,7 +9199,7 @@ public class H5 implements java.io.Serializable {
             if (link_type == H5L_TYPE_EXTERNAL()) {
                 MemorySegment file_name_segment = arena.allocate(val_size + 1);
                 MemorySegment obj_name_segment  = arena.allocate(val_size + 1);
-                if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lunpack_elink_val(link_value_segment, val_size + 1,
+                if (org.hdfgroup.javahdf5.hdf5_h.H5Lunpack_elink_val(link_value_segment, val_size + 1,
                                                                        MemorySegment.NULL, file_name_segment,
                                                                        obj_name_segment) < 0)
                     h5libraryError();
@@ -9269,7 +9269,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_data_segment =
                 Linker.nativeLinker().upcallStub(H5Literate2$handle(), H5Literate2$descriptor(), arena);
 
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Literate2(
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Literate2(
                      grp_id, idx_type, order, start_idx_segment, op_segment, op_data_segment)) < 0)
                 h5libraryError();
         }
@@ -9332,7 +9332,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_data_segment = Linker.nativeLinker().upcallStub(
                 H5Literate_by_name2$handle(), H5Literate_by_name2$descriptor(), arena);
             // Call the native method to visit the links
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Literate_by_name2(
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Literate_by_name2(
                      loc_id, name_segment, idx_type, order, start_idx_segment, op_segment, op_data_segment,
                      lapl_id)) < 0)
                 h5libraryError();
@@ -9381,7 +9381,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment src_name_segment = arena.allocateFrom(src_name);
             MemorySegment dst_name_segment = arena.allocateFrom(dst_name);
             // Call the native method to move the link
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Lmove(src_loc, src_name_segment, dst_loc, dst_name_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Lmove(src_loc, src_name_segment, dst_loc, dst_name_segment,
                                                        lcpl_id, lapl_id) < 0)
                 h5libraryError();
         }
@@ -9425,7 +9425,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_segment = H5L_iterate2_t.allocate(op, arena);
             MemorySegment op_data_segment =
                 Linker.nativeLinker().upcallStub(H5Lvisit2$handle(), H5Lvisit2$descriptor(), arena);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Lvisit2(grp_id, idx_type, order, op_segment,
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Lvisit2(grp_id, idx_type, order, op_segment,
                                                                    op_data_segment)) < 0)
                 h5libraryError();
         }
@@ -9483,7 +9483,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_data_segment =
                 Linker.nativeLinker().upcallStub(H5Lvisit2$handle(), H5Lvisit2$descriptor(), arena);
             // Call the native method to visit the links
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Lvisit_by_name2(
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Lvisit_by_name2(
                      loc_id, name_segment, idx_type, order, op_segment, op_data_segment, lapl_id)) < 0)
                 h5libraryError();
         }
@@ -9509,7 +9509,7 @@ public class H5 implements java.io.Serializable {
     public static int H5Lis_registered(int link_cls_id) throws HDF5LibraryException
     {
         int status = -1;
-        if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Lis_registered(link_cls_id)) < 0) {
+        if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Lis_registered(link_cls_id)) < 0) {
             h5libraryError();
         }
         return status;
@@ -9587,7 +9587,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: H5Oclose remove {}", object_id);
         OPEN_IDS.remove(object_id);
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Oclose(object_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Oclose(object_id);
         if (retVal < 0)
             retVal = 0;
         return retVal;
@@ -9628,7 +9628,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment src_name_segment = arena.allocateFrom(src_name);
             MemorySegment dst_name_segment = arena.allocateFrom(dst_name);
             // Call the native method to copy the object
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Ocopy(src_loc_id, src_name_segment, dst_loc_id,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Ocopy(src_loc_id, src_name_segment, dst_loc_id,
                                                        dst_name_segment, ocpypl_id, lcpl_id) < 0)
                 h5libraryError();
         }
@@ -9652,14 +9652,14 @@ public class H5 implements java.io.Serializable {
     {
         long buf_size = -1;
 
-        if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_comment(obj_id, MemorySegment.NULL, 0)) < 0)
+        if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Oget_comment(obj_id, MemorySegment.NULL, 0)) < 0)
             h5libraryError();
 
         String comment = null;
         if (buf_size > 0) {
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment comment_segment = arena.allocate(buf_size + 1);
-                if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_comment(obj_id, comment_segment, buf_size + 1) < 0)
+                if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_comment(obj_id, comment_segment, buf_size + 1) < 0)
                     h5libraryError();
                 if (comment_segment != MemorySegment.NULL)
                     comment = comment_segment.getString(0, StandardCharsets.UTF_8);
@@ -9693,7 +9693,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment comment_segment = MemorySegment.NULL;
             if (comment != null)
                 comment_segment = arena.allocateFrom(comment);
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oset_comment(obj_id, comment_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oset_comment(obj_id, comment_segment) < 0)
                 h5libraryError();
         }
     }
@@ -9728,7 +9728,7 @@ public class H5 implements java.io.Serializable {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(name);
-            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_comment_by_name(
+            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Oget_comment_by_name(
                      loc_id, name_segment, MemorySegment.NULL, 0, lapl_id)) < 0)
                 h5libraryError();
         }
@@ -9738,7 +9738,7 @@ public class H5 implements java.io.Serializable {
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment name_segment    = arena.allocateFrom(name);
                 MemorySegment comment_segment = arena.allocate(buf_size + 1);
-                if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_comment_by_name(
+                if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_comment_by_name(
                         loc_id, name_segment, comment_segment, buf_size + 1, lapl_id) < 0)
                     h5libraryError();
                 if (comment_segment != MemorySegment.NULL)
@@ -9782,7 +9782,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment comment_segment = MemorySegment.NULL;
             if (comment != null)
                 comment_segment = arena.allocateFrom(comment);
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oset_comment_by_name(loc_id, name_segment, comment_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oset_comment_by_name(loc_id, name_segment, comment_segment,
                                                                       lapl_id) < 0)
                 h5libraryError();
         }
@@ -9827,7 +9827,7 @@ public class H5 implements java.io.Serializable {
         hdf.hdf5lib.structs.H5O_info_t info = null;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment info_segment = arena.allocate(H5O_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_info3(loc_id, info_segment, fields) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_info3(loc_id, info_segment, fields) < 0)
                 h5libraryError();
             // Unpack the H5O_info_t from the MemorySegment
             hdf.hdf5lib.structs.H5O_token_t token = new hdf.hdf5lib.structs.H5O_token_t(
@@ -9916,7 +9916,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(group_name);
             MemorySegment info_segment = arena.allocate(H5O_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_info_by_idx3(loc_id, name_segment, idx_type, order, n,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_info_by_idx3(loc_id, name_segment, idx_type, order, n,
                                                                    info_segment, fields, lapl_id) < 0)
                 h5libraryError();
             // Unpack the H5O_info_t from the MemorySegment
@@ -9993,7 +9993,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(name);
             MemorySegment info_segment = arena.allocate(H5O_info2_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_info_by_name3(loc_id, name_segment, info_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_info_by_name3(loc_id, name_segment, info_segment,
                                                                     fields, lapl_id) < 0)
                 h5libraryError();
             // Unpack the H5O_info_t from the MemorySegment
@@ -10038,7 +10038,7 @@ public class H5 implements java.io.Serializable {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(new_name);
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Olink(obj_id, new_loc_id, name_segment, lcpl_id, lapl_id) <
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Olink(obj_id, new_loc_id, name_segment, lcpl_id, lapl_id) <
                 0)
                 h5libraryError();
         }
@@ -10074,7 +10074,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(name);
-            id = org.hdfgroup.javahdf5.hdf5_h_2.H5Oopen(loc_id, name_segment, lapl_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Oopen(loc_id, name_segment, lapl_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Oopen add {}", id);
@@ -10163,7 +10163,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_segment = H5O_iterate2_t.allocate(op, arena);
             MemorySegment op_data_segment =
                 Linker.nativeLinker().upcallStub(H5Ovisit3$handle(), H5Ovisit3$descriptor(), arena);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Ovisit3(obj_id, idx_type, order, op_segment,
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Ovisit3(obj_id, idx_type, order, op_segment,
                                                                    op_data_segment, fields)) < 0)
                 h5libraryError();
         }
@@ -10260,7 +10260,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment op_segment      = H5O_iterate2_t.allocate(op, arena);
             MemorySegment op_data_segment = Linker.nativeLinker().upcallStub(
                 H5Ovisit_by_name3$handle(), H5Ovisit_by_name3$descriptor(), arena);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_2.H5Ovisit_by_name3(loc_id, name_segment, idx_type,
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Ovisit_by_name3(loc_id, name_segment, idx_type,
                                                                            order, op_segment, op_data_segment,
                                                                            fields, lapl_id)) < 0)
                 h5libraryError();
@@ -10300,7 +10300,7 @@ public class H5 implements java.io.Serializable {
         boolean exists = false;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(obj_name);
-            retVal = org.hdfgroup.javahdf5.hdf5_h_2.H5Oexists_by_name(loc_id, name_segment, lapl_id);
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Oexists_by_name(loc_id, name_segment, lapl_id);
         }
         if (retVal < 0) {
             h5libraryError();
@@ -10327,7 +10327,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Odecr_refcount(long object_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Odecr_refcount(object_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Odecr_refcount(object_id) < 0)
             h5libraryError();
     }
 
@@ -10344,7 +10344,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Oincr_refcount(long object_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oincr_refcount(object_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Oincr_refcount(object_id) < 0)
             h5libraryError();
     }
 
@@ -10374,7 +10374,7 @@ public class H5 implements java.io.Serializable {
         }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment token_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, token.data);
-            id = org.hdfgroup.javahdf5.hdf5_h_2.H5Oopen_by_token(loc_id, token_segment);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Oopen_by_token(loc_id, token_segment);
         }
 
         if (id > 0) {
@@ -10423,7 +10423,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment name_segment = arena.allocateFrom(group_name);
-            id = org.hdfgroup.javahdf5.hdf5_h_2.H5Oopen_by_idx(loc_id, name_segment, idx_type, order, n,
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Oopen_by_idx(loc_id, name_segment, idx_type, order, n,
                                                                lapl_id);
         }
         if (id > 0) {
@@ -10452,7 +10452,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Oflush(long object_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oflush(object_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Oflush(object_id) < 0)
             h5libraryError();
     }
 
@@ -10473,7 +10473,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Orefresh(long object_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Orefresh(object_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Orefresh(object_id) < 0)
             h5libraryError();
     }
 
@@ -10488,7 +10488,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Odisable_mdc_flushes(long object_id)
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Odisable_mdc_flushes(object_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Odisable_mdc_flushes(object_id) < 0)
             h5libraryError();
     }
 
@@ -10504,7 +10504,7 @@ public class H5 implements java.io.Serializable {
     public static void H5Oenable_mdc_flushes(long object_id)
     {
         // Call the native function to enable metadata cache flushes
-        if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oenable_mdc_flushes(object_id) < 0)
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Oenable_mdc_flushes(object_id) < 0)
             h5libraryError();
     }
 
@@ -10527,7 +10527,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the boolean value
             MemorySegment are_mdc_flushes_disabled_segment = arena.allocate(ValueLayout.JAVA_BOOLEAN, 1);
             // Call the native function to check if the library is thread-safe
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oare_mdc_flushes_disabled(
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oare_mdc_flushes_disabled(
                     object_id, are_mdc_flushes_disabled_segment) < 0)
                 h5libraryError();
 
@@ -10560,7 +10560,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment info_segment = arena.allocate(org.hdfgroup.javahdf5.H5O_native_info_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_native_info(loc_id, info_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_native_info(loc_id, info_segment,
                                                                   HDF5Constants.H5O_NATIVE_INFO_ALL) < 0)
                 h5libraryError();
             // Unpack the H5O_native_info_t from the MemorySegment
@@ -10617,7 +10617,7 @@ public class H5 implements java.io.Serializable {
         hdf.hdf5lib.structs.H5O_native_info_t info = null;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment info_segment = arena.allocate(org.hdfgroup.javahdf5.H5O_native_info_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_native_info(loc_id, info_segment, fields) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_native_info(loc_id, info_segment, fields) < 0)
                 h5libraryError();
             // Unpack the H5O_native_info_t from the MemorySegment
             MemorySegment hdr_segment       = org.hdfgroup.javahdf5.H5O_native_info_t.hdr(info_segment);
@@ -10728,7 +10728,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(group_name);
             MemorySegment info_segment = arena.allocate(org.hdfgroup.javahdf5.H5O_native_info_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_native_info_by_idx(
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_native_info_by_idx(
                     loc_id, name_segment, idx_type, order, n, info_segment, fields, lapl_id) < 0)
                 h5libraryError();
             // Unpack the H5O_native_info_t from the MemorySegment
@@ -10827,7 +10827,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(name);
             MemorySegment info_segment = arena.allocate(org.hdfgroup.javahdf5.H5O_native_info_t.sizeof());
-            if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_native_info_by_name(loc_id, name_segment, info_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Oget_native_info_by_name(loc_id, name_segment, info_segment,
                                                                           fields, lapl_id) < 0)
                 h5libraryError();
             // Unpack the H5O_native_info_t from the MemorySegment
@@ -10906,7 +10906,7 @@ public class H5 implements java.io.Serializable {
             if (class_segment == null)
                 h5libraryError();
             ret_name = class_segment.reinterpret(Long.MAX_VALUE).getString(0L);
-            org.hdfgroup.javahdf5.hdf5_h_2.H5free_memory(class_segment);
+            org.hdfgroup.javahdf5.hdf5_h.H5free_memory(class_segment);
         }
         return ret_name;
     }
@@ -18404,7 +18404,7 @@ public class H5 implements java.io.Serializable {
         long id = H5I_INVALID_HID();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ref_ptr_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, ref_ptr);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Ropen_object(ref_ptr_segment, rapl_id, oapl_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Ropen_object(ref_ptr_segment, rapl_id, oapl_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Ropen_object add {}", id);
@@ -18454,7 +18454,7 @@ public class H5 implements java.io.Serializable {
         long id = H5I_INVALID_HID();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ref_ptr_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, ref_ptr);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Ropen_region(ref_ptr_segment, rapl_id, oapl_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Ropen_region(ref_ptr_segment, rapl_id, oapl_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Ropen_region add {}", id);
@@ -18503,7 +18503,7 @@ public class H5 implements java.io.Serializable {
         long id = H5I_INVALID_HID();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ref_ptr_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, ref_ptr);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Ropen_attr(ref_ptr_segment, rapl_id, aapl_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Ropen_attr(ref_ptr_segment, rapl_id, aapl_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Ropen_attr add {}", id);
@@ -18547,7 +18547,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ref_ptr_segment  = arena.allocateFrom(ValueLayout.JAVA_BYTE, ref_ptr);
             MemorySegment obj_type_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Rget_obj_type3(ref_ptr_segment, rapl_id, obj_type_segment) <
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Rget_obj_type3(ref_ptr_segment, rapl_id, obj_type_segment) <
                 0)
                 h5libraryError();
             obj_type = obj_type_segment.get(ValueLayout.JAVA_INT, 0);
@@ -18582,12 +18582,12 @@ public class H5 implements java.io.Serializable {
         long buf_size   = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ref_ptr_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, ref_ptr);
-            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Rget_file_name(ref_ptr_segment,
+            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Rget_file_name(ref_ptr_segment,
                                                                             MemorySegment.NULL, 0)) < 0)
                 h5libraryError();
 
             MemorySegment name_segment = arena.allocate(buf_size + 1); // +1 for null terminator
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Rget_file_name(ref_ptr_segment, name_segment, buf_size + 1) <
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Rget_file_name(ref_ptr_segment, name_segment, buf_size + 1) <
                 0)
                 h5libraryError();
             // Read the data from the memory segment
@@ -18627,12 +18627,12 @@ public class H5 implements java.io.Serializable {
         long buf_size  = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ref_ptr_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, ref_ptr);
-            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Rget_obj_name(ref_ptr_segment, rapl_id,
+            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Rget_obj_name(ref_ptr_segment, rapl_id,
                                                                            MemorySegment.NULL, 0)) < 0)
                 h5libraryError();
 
             MemorySegment name_segment = arena.allocate(buf_size + 1); // +1 for null terminator
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Rget_obj_name(ref_ptr_segment, rapl_id, name_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Rget_obj_name(ref_ptr_segment, rapl_id, name_segment,
                                                                buf_size + 1) < 0)
                 h5libraryError();
             // Read the data from the memory segment
@@ -18668,12 +18668,12 @@ public class H5 implements java.io.Serializable {
         long buf_size   = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment ref_ptr_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, ref_ptr);
-            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h_1.H5Rget_attr_name(ref_ptr_segment,
+            if ((buf_size = org.hdfgroup.javahdf5.hdf5_h.H5Rget_attr_name(ref_ptr_segment,
                                                                             MemorySegment.NULL, 0)) < 0)
                 h5libraryError();
 
             MemorySegment name_segment = arena.allocate(buf_size + 1); // +1 for null terminator
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Rget_attr_name(ref_ptr_segment, name_segment, buf_size + 1) <
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Rget_attr_name(ref_ptr_segment, name_segment, buf_size + 1) <
                 0)
                 h5libraryError();
             // Read the data from the memory segment
@@ -18716,7 +18716,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Screate(int type) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Screate(type);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Screate(type);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Screate add {}", id);
             OPEN_IDS.add(id);
@@ -18768,7 +18768,7 @@ public class H5 implements java.io.Serializable {
                 maxdims_segment = arena.allocate(ValueLayout.JAVA_LONG, rank);
                 MemorySegment.copy((Object)maxdims, 0, maxdims_segment, ValueLayout.JAVA_LONG, 0, rank);
             }
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Screate_simple(rank, dims_segment, maxdims_segment);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Screate_simple(rank, dims_segment, maxdims_segment);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Screate_simple add {}", id);
@@ -18865,7 +18865,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Scopy(long space_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Scopy(space_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Scopy(space_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Scopy add {}", id);
             OPEN_IDS.add(id);
@@ -18892,7 +18892,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: H5Sclose remove {}", space_id);
         OPEN_IDS.remove(space_id);
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Sclose(space_id);
         if (retVal < 0)
             retVal = 0;
         return retVal;
@@ -18917,12 +18917,12 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a buffer for the size
             MemorySegment nalloc_segment = arena.allocate(ValueLayout.JAVA_LONG);
-            org.hdfgroup.javahdf5.hdf5_h_1.H5Sencode2(obj_id, MemorySegment.NULL, nalloc_segment,
+            org.hdfgroup.javahdf5.hdf5_h.H5Sencode2(obj_id, MemorySegment.NULL, nalloc_segment,
                                                       H5P_DEFAULT());
             long buf_size = nalloc_segment.get(ValueLayout.JAVA_LONG, 0);
 
             MemorySegment buf_segment = arena.allocate(buf_size);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Sencode2(obj_id, buf_segment, nalloc_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Sencode2(obj_id, buf_segment, nalloc_segment,
                                                           H5P_DEFAULT()) < 0)
                 h5libraryError();
             buf = buf_segment.toArray(ValueLayout.JAVA_BYTE);
@@ -18956,7 +18956,7 @@ public class H5 implements java.io.Serializable {
         long id = H5I_INVALID_HID();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, buf);
-            id                        = org.hdfgroup.javahdf5.hdf5_h_1.H5Sdecode(buf_segment);
+            id                        = org.hdfgroup.javahdf5.hdf5_h.H5Sdecode(buf_segment);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Sdecode add {}", id);
@@ -18984,7 +18984,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Sget_simple_extent_npoints(long space_id) throws HDF5LibraryException
     {
-        long npoints = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_simple_extent_npoints(space_id);
+        long npoints = org.hdfgroup.javahdf5.hdf5_h.H5Sget_simple_extent_npoints(space_id);
         if (npoints < 0) {
             h5libraryError();
         }
@@ -19006,7 +19006,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Sget_simple_extent_ndims(long space_id) throws HDF5LibraryException
     {
-        int ndims = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_simple_extent_ndims(space_id);
+        int ndims = org.hdfgroup.javahdf5.hdf5_h.H5Sget_simple_extent_ndims(space_id);
         if (ndims < 0) {
             h5libraryError();
         }
@@ -19050,7 +19050,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment maxdims_segment = MemorySegment.NULL;
             if (maxdims != null)
                 maxdims_segment = arena.allocateFrom(ValueLayout.JAVA_LONG, maxdims);
-            if ((ndims = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_simple_extent_dims(space_id, dims_segment,
+            if ((ndims = org.hdfgroup.javahdf5.hdf5_h.H5Sget_simple_extent_dims(space_id, dims_segment,
                                                                                   maxdims_segment)) < 0)
                 h5libraryError();
         }
@@ -19074,7 +19074,7 @@ public class H5 implements java.io.Serializable {
     public static boolean H5Sis_simple(long space_id) throws HDF5LibraryException
     {
         boolean isSimple = false;
-        int status       = org.hdfgroup.javahdf5.hdf5_h_1.H5Sis_simple(space_id);
+        int status       = org.hdfgroup.javahdf5.hdf5_h.H5Sis_simple(space_id);
         if (status < 0) {
             h5libraryError();
         }
@@ -19097,7 +19097,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Sget_simple_extent_type(long space_id) throws HDF5LibraryException
     {
-        int type = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_simple_extent_type(space_id);
+        int type = org.hdfgroup.javahdf5.hdf5_h.H5Sget_simple_extent_type(space_id);
         if (type < 0) {
             h5libraryError();
         }
@@ -19144,7 +19144,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Sextent_copy(long dest_space_id, long source_space_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Sextent_copy(dest_space_id, source_space_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Sextent_copy(dest_space_id, source_space_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -19171,7 +19171,7 @@ public class H5 implements java.io.Serializable {
         throws HDF5LibraryException
     {
         boolean isEqual = false;
-        int status      = org.hdfgroup.javahdf5.hdf5_h_1.H5Sextent_equal(first_space_id, second_space_id);
+        int status      = org.hdfgroup.javahdf5.hdf5_h.H5Sextent_equal(first_space_id, second_space_id);
         if (status < 0) {
             h5libraryError();
         }
@@ -19196,7 +19196,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Sget_select_type(long space_id) throws HDF5LibraryException
     {
-        int type = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_select_type(space_id);
+        int type = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_type(space_id);
         if (type < 0) {
             h5libraryError();
         }
@@ -19218,7 +19218,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Sget_select_npoints(long space_id) throws HDF5LibraryException
     {
-        long npoints = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_select_npoints(space_id);
+        long npoints = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_npoints(space_id);
         if (npoints < 0) {
             h5libraryError();
         }
@@ -19241,7 +19241,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Sselect_copy(long dst_id, long src_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_copy(dst_id, src_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Sselect_copy(dst_id, src_id) < 0) {
             h5libraryError();
         }
     }
@@ -19311,7 +19311,7 @@ public class H5 implements java.io.Serializable {
                     row_segment.set(ValueLayout.JAVA_LONG, j * Long.BYTES, offset[i][j]);
                 }
             }
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_adjust(space_id, offset_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Sselect_adjust(space_id, offset_segment) < 0)
                 h5libraryError();
         }
     }
@@ -19351,7 +19351,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment start_segment = arena.allocate(ValueLayout.JAVA_LONG, start.length);
             MemorySegment end_segment   = arena.allocate(ValueLayout.JAVA_LONG, end.length);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_select_bounds(space_id, start_segment,
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_bounds(space_id, start_segment,
                                                                               end_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(start_segment, ValueLayout.JAVA_LONG, 0L, start, 0, start.length);
@@ -19381,7 +19381,7 @@ public class H5 implements java.io.Serializable {
     public static boolean H5Sselect_shape_same(long space1_id, long space2_id) throws HDF5LibraryException
     {
         boolean isSame = false;
-        int status     = org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_shape_same(space1_id, space2_id);
+        int status     = org.hdfgroup.javahdf5.hdf5_h.H5Sselect_shape_same(space1_id, space2_id);
         if (status < 0) {
             h5libraryError();
         }
@@ -19425,7 +19425,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment start_segment = arena.allocateFrom(ValueLayout.JAVA_LONG, start);
             MemorySegment end_segment   = arena.allocateFrom(ValueLayout.JAVA_LONG, end);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_intersect_block(space_id, start_segment,
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Sselect_intersect_block(space_id, start_segment,
                                                                                    end_segment)) < 0)
                 h5libraryError();
         }
@@ -19462,7 +19462,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment offset_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, offset);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Soffset_simple(space_id, offset_segment)) < 0)
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Soffset_simple(space_id, offset_segment)) < 0)
                 h5libraryError();
         }
 
@@ -19517,7 +19517,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Sselect_all(long space_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_all(space_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Sselect_all(space_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -19539,7 +19539,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Sselect_none(long space_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_none(space_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Sselect_none(space_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -19578,7 +19578,7 @@ public class H5 implements java.io.Serializable {
         }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment coord_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, coord);
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_elements(space_id, op, (long)num_elements,
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Sselect_elements(space_id, op, (long)num_elements,
                                                                             coord_segment)) < 0)
                 h5libraryError();
         }
@@ -19658,7 +19658,7 @@ public class H5 implements java.io.Serializable {
         if (spaceid < 0) {
             throw new HDF5FunctionArgumentException("Negative ID");
         }
-        long npoints = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_select_elem_npoints(spaceid);
+        long npoints = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_elem_npoints(spaceid);
         if (npoints < 0) {
             h5libraryError();
         }
@@ -19711,7 +19711,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_LONG, numpoints * rank);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_select_elem_pointlist(
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_elem_pointlist(
                      spaceid, startpoint, numpoints, buf_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(buf_segment, ValueLayout.JAVA_LONG, 0L, buf, 0, (int)numpoints * rank);
@@ -19816,7 +19816,7 @@ public class H5 implements java.io.Serializable {
             if (block != null) {
                 block_segment = arena.allocateFrom(ValueLayout.JAVA_LONG, block);
             }
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_hyperslab(
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Sselect_hyperslab(
                      space_id, op, start_segment, stride_segment, count_segment, block_segment)) < 0)
                 h5libraryError();
         }
@@ -19882,7 +19882,7 @@ public class H5 implements java.io.Serializable {
             if (block != null) {
                 block_segment = arena.allocateFrom(ValueLayout.JAVA_LONG, block);
             }
-            retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Scombine_hyperslab(
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Scombine_hyperslab(
                 space_id, op, start_segment, stride_segment, count_segment, block_segment);
             if (retVal < 0) {
                 h5libraryError();
@@ -19910,7 +19910,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Smodify_select(long space1_id, int op, long space2_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Smodify_select(space1_id, op, space2_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Smodify_select(space1_id, op, space2_id) < 0) {
             h5libraryError();
         }
     }
@@ -19936,7 +19936,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Scombine_select(long space1_id, int op, long space2_id) throws HDF5LibraryException
     {
-        long retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Scombine_select(space1_id, op, space2_id);
+        long retVal = org.hdfgroup.javahdf5.hdf5_h.H5Scombine_select(space1_id, op, space2_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -19960,7 +19960,7 @@ public class H5 implements java.io.Serializable {
     public static boolean H5Sis_regular_hyperslab(long space_id) throws HDF5LibraryException
     {
         boolean isRegular = false;
-        int status        = org.hdfgroup.javahdf5.hdf5_h_1.H5Sis_regular_hyperslab(space_id);
+        int status        = org.hdfgroup.javahdf5.hdf5_h.H5Sis_regular_hyperslab(space_id);
         if (status < 0) {
             h5libraryError();
         }
@@ -20014,7 +20014,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment block_segment = MemorySegment.NULL;
             if (block != null)
                 block_segment = arena.allocate(ValueLayout.JAVA_LONG, rank);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_regular_hyperslab(
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Sget_regular_hyperslab(
                     space_id, start_segment, stride_segment, count_segment, block_segment) < 0)
                 h5libraryError();
             MemorySegment.copy(start_segment, ValueLayout.JAVA_LONG, 0L, start, 0, start.length);
@@ -20042,7 +20042,7 @@ public class H5 implements java.io.Serializable {
         if (spaceid < 0) {
             throw new HDF5FunctionArgumentException("Negative ID");
         }
-        long nblocks = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_select_hyper_nblocks(spaceid);
+        long nblocks = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_hyper_nblocks(spaceid);
         if (nblocks < 0) {
             h5libraryError();
         }
@@ -20104,7 +20104,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocate(ValueLayout.JAVA_LONG, numblocks * rank * 2);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Sget_select_hyper_blocklist(
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_hyper_blocklist(
                      spaceid, startblock, numblocks, buf_segment)) < 0)
                 h5libraryError();
             MemorySegment.copy(buf_segment, ValueLayout.JAVA_LONG, 0L, buf, 0, (int)numblocks * rank * 2);
@@ -20136,7 +20136,7 @@ public class H5 implements java.io.Serializable {
     public static long H5Sselect_project_intersection(long src_space_id, long dst_space_id,
                                                       long src_intersect_space_id) throws HDF5LibraryException
     {
-        long retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Sselect_project_intersection(
+        long retVal = org.hdfgroup.javahdf5.hdf5_h.H5Sselect_project_intersection(
             src_space_id, dst_space_id, src_intersect_space_id);
         if (retVal < 0) {
             h5libraryError();
@@ -20200,7 +20200,7 @@ public class H5 implements java.io.Serializable {
         long id = HDF5Constants.H5I_INVALID_HID;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dim_segment = arena.allocateFrom(ValueLayout.JAVA_LONG, dim);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tarray_create2(base_id, ndims, dim_segment);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Tarray_create2(base_id, ndims, dim_segment);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tarray_create add {}", id);
@@ -20228,7 +20228,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: H5Tclose remove {}", type_id);
         OPEN_IDS.remove(type_id);
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(type_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tclose(type_id);
         if (retVal < 0)
             retVal = 0;
         return retVal;
@@ -20265,7 +20265,7 @@ public class H5 implements java.io.Serializable {
         }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(name);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Tcommit2(loc_id, name_segment, type_id, lcpl_id, tcpl_id,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tcommit2(loc_id, name_segment, type_id, lcpl_id, tcpl_id,
                                                           tapl_id) < 0)
                 h5libraryError();
         }
@@ -20292,7 +20292,7 @@ public class H5 implements java.io.Serializable {
     public static void H5Tcommit_anon(long loc_id, long type_id, long tcpl_id, long tapl_id)
         throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Tcommit_anon(loc_id, type_id, tcpl_id, tapl_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Tcommit_anon(loc_id, type_id, tcpl_id, tapl_id) < 0) {
             h5libraryError();
         }
     }
@@ -20314,7 +20314,7 @@ public class H5 implements java.io.Serializable {
     public static boolean H5Tcommitted(long type_id) throws HDF5LibraryException
     {
         boolean isCommitted = false;
-        int result          = org.hdfgroup.javahdf5.hdf5_h_1.H5Tcommitted(type_id);
+        int result          = org.hdfgroup.javahdf5.hdf5_h.H5Tcommitted(type_id);
         if (result < 0) {
             h5libraryError();
         }
@@ -20373,7 +20373,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tcomplex_create(long base_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tcomplex_create(base_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tcomplex_create(base_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tcomplex_create add {}", id);
             OPEN_IDS.add(id);
@@ -20419,7 +20419,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment background_segment = MemorySegment.NULL;
             if (background != null)
                 background_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, background);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Tconvert(src_id, dst_id, nelmts, buf_segment,
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tconvert(src_id, dst_id, nelmts, buf_segment,
                                                           background_segment, plist_id) < 0)
                 h5libraryError();
             for (int i = 0; i < buf.length; i++) {
@@ -20446,7 +20446,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tcopy(long type_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tcopy(type_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tcopy(type_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tcopy add {}", id);
             OPEN_IDS.add(id);
@@ -20475,7 +20475,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tcreate(int tclass, long size) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tcreate(tclass, size);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tcreate(tclass, size);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tcreate add {}", id);
             OPEN_IDS.add(id);
@@ -20513,7 +20513,7 @@ public class H5 implements java.io.Serializable {
         }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, buf);
-            id                        = org.hdfgroup.javahdf5.hdf5_h_1.H5Tdecode2(buf_segment, buf_size);
+            id                        = org.hdfgroup.javahdf5.hdf5_h.H5Tdecode2(buf_segment, buf_size);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tdecode add {}", id);
@@ -20545,7 +20545,7 @@ public class H5 implements java.io.Serializable {
     public static boolean H5Tdetect_class(long type_id, int cls) throws HDF5LibraryException
     {
         boolean isClass = false;
-        int result      = org.hdfgroup.javahdf5.hdf5_h_1.H5Tdetect_class(type_id, cls);
+        int result      = org.hdfgroup.javahdf5.hdf5_h.H5Tdetect_class(type_id, cls);
         if (result < 0) {
             h5libraryError();
         }
@@ -20588,10 +20588,10 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a buffer for the size
             MemorySegment nalloc_segment = arena.allocate(ValueLayout.JAVA_LONG);
-            org.hdfgroup.javahdf5.hdf5_h_1.H5Tencode(obj_id, MemorySegment.NULL, nalloc_segment);
+            org.hdfgroup.javahdf5.hdf5_h.H5Tencode(obj_id, MemorySegment.NULL, nalloc_segment);
 
             MemorySegment buf_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, buf);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tencode(obj_id, buf_segment, nalloc_segment)) < 0)
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Tencode(obj_id, buf_segment, nalloc_segment)) < 0)
                 h5libraryError();
             nalloc = nalloc_segment.get(ValueLayout.JAVA_LONG, 0);
         }
@@ -20630,7 +20630,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tenum_create(long base_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tenum_create(base_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tenum_create(base_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tenum_create add {}", id);
             OPEN_IDS.add(id);
@@ -20674,7 +20674,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment  = arena.allocateFrom(name);
             MemorySegment value_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, value);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Tenum_insert(type, name_segment, value_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tenum_insert(type, name_segment, value_segment) < 0)
                 h5libraryError();
         }
     }
@@ -20792,7 +20792,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment  = arena.allocate(size + 1);
             MemorySegment value_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, value);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Tenum_nameof(type, value_segment, name_segment, size) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tenum_nameof(type, value_segment, name_segment, size) < 0)
                 h5libraryError();
             name = name_segment.getString(0, StandardCharsets.UTF_8);
         }
@@ -20837,7 +20837,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment  = arena.allocate(size + 1);
             MemorySegment value_segment = arena.allocateFrom(ValueLayout.JAVA_INT, value);
-            if ((status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tenum_nameof(type, value_segment, name_segment,
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Tenum_nameof(type, value_segment, name_segment,
                                                                         size)) < 0)
                 h5libraryError();
             name[0] = name_segment.getString(0, StandardCharsets.UTF_8);
@@ -20882,7 +20882,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment  = arena.allocateFrom(name);
             MemorySegment value_segment = arena.allocate(ValueLayout.JAVA_BYTE, value.length);
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Tenum_valueof(type, name_segment, value_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tenum_valueof(type, name_segment, value_segment) < 0)
                 h5libraryError();
             MemorySegment.copy(value_segment, ValueLayout.JAVA_BYTE, 0L, value, 0, value.length);
         }
@@ -20959,7 +20959,7 @@ public class H5 implements java.io.Serializable {
             throw new HDF5FunctionArgumentException("Negative type id value");
         }
         boolean isEqual = false;
-        int result      = org.hdfgroup.javahdf5.hdf5_h_1.H5Tequal(type_id1, type_id2);
+        int result      = org.hdfgroup.javahdf5.hdf5_h.H5Tequal(type_id1, type_id2);
         if (result < 0) {
             h5libraryError();
         }
@@ -21021,7 +21021,7 @@ public class H5 implements java.io.Serializable {
         int ndims = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment dims_segment = arena.allocate(ValueLayout.JAVA_LONG, dims.length);
-            ndims = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_array_dims2(type_id, dims_segment);
+            ndims = org.hdfgroup.javahdf5.hdf5_h.H5Tget_array_dims2(type_id, dims_segment);
             if (ndims < 0)
                 h5libraryError();
             for (int i = 0; i < ndims; i++)
@@ -21045,7 +21045,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_array_ndims(long type_id) throws HDF5LibraryException
     {
-        int ndims = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_array_ndims(type_id);
+        int ndims = org.hdfgroup.javahdf5.hdf5_h.H5Tget_array_ndims(type_id);
         if (ndims < 0) {
             h5libraryError();
         }
@@ -21067,7 +21067,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_class(long type_id) throws HDF5LibraryException
     {
-        int class_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(type_id);
+        int class_id = org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(type_id);
         if (class_id < 0) {
             h5libraryError();
         }
@@ -21134,7 +21134,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tget_create_plist(long type_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_create_plist(type_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tget_create_plist(type_id);
         if (id > 0) {
             log.trace("OPEN_IDS: _H5Tget_create_plist add {}", id);
             OPEN_IDS.add(id);
@@ -21161,7 +21161,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_cset(long type_id) throws HDF5LibraryException
     {
-        int cset = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_cset(type_id);
+        int cset = org.hdfgroup.javahdf5.hdf5_h.H5Tget_cset(type_id);
         if (cset < 0) {
             h5libraryError();
         }
@@ -21188,7 +21188,7 @@ public class H5 implements java.io.Serializable {
         if (cset < 0) {
             throw new HDF5FunctionArgumentException("Negative character set value");
         }
-        int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_cset(type_id, cset);
+        int status = org.hdfgroup.javahdf5.hdf5_h.H5Tset_cset(type_id, cset);
         if (status < 0) {
             h5libraryError();
         }
@@ -21231,7 +21231,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tset_ebias(long type_id, int ebias) throws HDF5LibraryException
     {
-        int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_ebias(type_id, (long)ebias);
+        int status = org.hdfgroup.javahdf5.hdf5_h.H5Tset_ebias(type_id, (long)ebias);
         if (status < 0) {
             h5libraryError();
         }
@@ -21253,7 +21253,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tget_ebias_long(long type_id) throws HDF5LibraryException
     {
-        long ebias = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_ebias(type_id);
+        long ebias = org.hdfgroup.javahdf5.hdf5_h.H5Tget_ebias(type_id);
         if (ebias == 0) {
             h5libraryError();
         }
@@ -21275,7 +21275,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Tset_ebias(long type_id, long ebias) throws HDF5LibraryException
     {
-        int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_ebias(type_id, ebias);
+        int status = org.hdfgroup.javahdf5.hdf5_h.H5Tset_ebias(type_id, ebias);
         if (status < 0) {
             h5libraryError();
         }
@@ -21322,7 +21322,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment esize_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
             MemorySegment mpos_segment  = arena.allocate(ValueLayout.JAVA_LONG, 1);
             MemorySegment msize_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
-            int status                  = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_fields(
+            int status                  = org.hdfgroup.javahdf5.hdf5_h.H5Tget_fields(
                 type_id, spos_segment, epos_segment, esize_segment, mpos_segment, msize_segment);
             if (status < 0)
                 h5libraryError();
@@ -21385,7 +21385,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment esize_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
             MemorySegment mpos_segment  = arena.allocate(ValueLayout.JAVA_INT, 1);
             MemorySegment msize_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_fields(type_id, spos_segment, epos_segment,
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Tget_fields(type_id, spos_segment, epos_segment,
                                                                   esize_segment, mpos_segment, msize_segment);
             if (status < 0)
                 h5libraryError();
@@ -21422,7 +21422,7 @@ public class H5 implements java.io.Serializable {
     public static void H5Tset_fields(long type_id, long spos, long epos, long esize, long mpos, long msize)
         throws HDF5LibraryException
     {
-        int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_fields(type_id, spos, epos, esize, mpos, msize);
+        int status = org.hdfgroup.javahdf5.hdf5_h.H5Tset_fields(type_id, spos, epos, esize, mpos, msize);
         if (status < 0) {
             h5libraryError();
         }
@@ -21473,7 +21473,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_inpad(long type_id) throws HDF5LibraryException
     {
-        int inpad = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_inpad(type_id);
+        int inpad = org.hdfgroup.javahdf5.hdf5_h.H5Tget_inpad(type_id);
         if (inpad < 0) {
             h5libraryError();
         }
@@ -21499,7 +21499,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tset_inpad(long type_id, int inpad) throws HDF5LibraryException
     {
-        int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_inpad(type_id, inpad);
+        int status = org.hdfgroup.javahdf5.hdf5_h.H5Tset_inpad(type_id, inpad);
         if (status < 0) {
             h5libraryError();
         }
@@ -21523,7 +21523,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_member_class(long type_id, int membno) throws HDF5LibraryException
     {
-        int classId = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_class(type_id, membno);
+        int classId = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_class(type_id, membno);
         if (classId < 0) {
             h5libraryError();
         }
@@ -21554,7 +21554,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment field_name_segment = arena.allocateFrom(field_name);
-            index = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_index(type_id, field_name_segment);
+            index = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_index(type_id, field_name_segment);
         }
         if (index < 0) {
             h5libraryError();
@@ -21583,7 +21583,7 @@ public class H5 implements java.io.Serializable {
         String name = null;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment =
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_name(type_id, field_idx);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_name(type_id, field_idx);
             if (name_segment == null)
                 h5libraryError();
             name = name_segment.getString(0, StandardCharsets.UTF_8);
@@ -21607,7 +21607,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tget_member_offset(long type_id, int membno)
     {
-        long offset = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_offset(type_id, membno);
+        long offset = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_offset(type_id, membno);
         if (offset < 0) {
             h5libraryError();
         }
@@ -21631,7 +21631,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tget_member_type(long type_id, int field_idx) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_type(type_id, field_idx);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_type(type_id, field_idx);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tget_member_type add {}", id);
             OPEN_IDS.add(id);
@@ -21672,7 +21672,7 @@ public class H5 implements java.io.Serializable {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment value_segment = arena.allocate(value.length * ValueLayout.JAVA_BYTE.byteSize());
-            if (org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_value(type_id, membno, value_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_value(type_id, membno, value_segment) < 0)
                 h5libraryError();
             for (int i = 0; i < value.length; i++) {
                 value[i] = value_segment.get(ValueLayout.JAVA_BYTE, i);
@@ -21718,7 +21718,7 @@ public class H5 implements java.io.Serializable {
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment value_segment = arena.allocate(ValueLayout.JAVA_INT, value.length);
-            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_value(type_id, membno, value_segment);
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_value(type_id, membno, value_segment);
             if (status < 0)
                 h5libraryError();
             for (int i = 0; i < value.length; i++) {
@@ -21764,7 +21764,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tget_native_type(long type_id, int direction) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_native_type(type_id, direction);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tget_native_type(type_id, direction);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tget_native_type add {}", id);
             OPEN_IDS.add(id);
@@ -21791,7 +21791,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_nmembers(long type_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_nmembers(type_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_nmembers(type_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -21813,7 +21813,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_norm(long type_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_norm(type_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_norm(type_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -21837,7 +21837,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tset_norm(long type_id, int norm) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_norm(type_id, norm);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tset_norm(type_id, norm);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -21859,7 +21859,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_offset(long type_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_offset(type_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_offset(type_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -21902,7 +21902,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Tset_offset(long type_id, long offset) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_offset(type_id, offset);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tset_offset(type_id, offset);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -21923,7 +21923,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_order(long type_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_order(type_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_order(type_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -21947,7 +21947,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tset_order(long type_id, int order) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_order(type_id, order);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tset_order(type_id, order);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -21986,7 +21986,7 @@ public class H5 implements java.io.Serializable {
             // Allocate a MemorySegment to hold the string bytes
             MemorySegment lsb_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
             MemorySegment msb_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
-            if ((retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_pad(type_id, lsb_segment, msb_segment)) < 0)
+            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_pad(type_id, lsb_segment, msb_segment)) < 0)
                 h5libraryError();
             pad[0] = lsb_segment.get(ValueLayout.JAVA_INT, 0);
             pad[1] = msb_segment.get(ValueLayout.JAVA_INT, 0);
@@ -22013,7 +22013,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tset_pad(long type_id, int lsb, int msb) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_pad(type_id, lsb, msb);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tset_pad(type_id, lsb, msb);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -22075,7 +22075,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tget_precision_long(long type_id) throws HDF5LibraryException
     {
-        long retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_precision(type_id);
+        long retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_precision(type_id);
         if (retVal == 0) {
             h5libraryError();
         }
@@ -22100,7 +22100,7 @@ public class H5 implements java.io.Serializable {
         if (precision < 0) {
             throw new HDF5FunctionArgumentException("Negative precision value");
         }
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_precision(type_id, precision);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tset_precision(type_id, precision);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -22121,7 +22121,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_sign(long type_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_sign(type_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_sign(type_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -22145,7 +22145,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tset_sign(long type_id, int sign) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_sign(type_id, sign);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tset_sign(type_id, sign);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -22167,7 +22167,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tget_size(long type_id) throws HDF5FunctionArgumentException
     {
-        long retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(type_id);
+        long retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(type_id);
         if (retVal == 0) {
             h5libraryError();
         }
@@ -22192,7 +22192,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tset_size(long type_id, long size) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_size(type_id, size);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tset_size(type_id, size);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -22214,7 +22214,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tget_strpad(long type_id) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_strpad(type_id);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tget_strpad(type_id);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -22238,7 +22238,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tset_strpad(long type_id, int strpad) throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_strpad(type_id, strpad);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tset_strpad(type_id, strpad);
         if (retVal < 0) {
             h5libraryError();
         }
@@ -22260,7 +22260,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tget_super(long type) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_super(type);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(type);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tget_super add {}", id);
             OPEN_IDS.add(id);
@@ -22292,7 +22292,7 @@ public class H5 implements java.io.Serializable {
         }
         String tag = null;
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment tag_segment = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_tag(type);
+            MemorySegment tag_segment = org.hdfgroup.javahdf5.hdf5_h.H5Tget_tag(type);
             if (tag_segment != null) {
                 tag = tag_segment.getString(0, StandardCharsets.UTF_8);
             }
@@ -22329,7 +22329,7 @@ public class H5 implements java.io.Serializable {
         int retVal = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment tag_segment = arena.allocateFrom(tag);
-            retVal                    = org.hdfgroup.javahdf5.hdf5_h_1.H5Tset_tag(type, tag_segment);
+            retVal                    = org.hdfgroup.javahdf5.hdf5_h.H5Tset_tag(type, tag_segment);
         }
         if (retVal < 0) {
             h5libraryError();
@@ -22367,7 +22367,7 @@ public class H5 implements java.io.Serializable {
         int retVal = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(name);
-            retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Tinsert(type_id, name_segment, offset, field_id);
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tinsert(type_id, name_segment, offset, field_id);
         }
         if (retVal < 0) {
             h5libraryError();
@@ -22416,7 +22416,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tlock(long type_id) throws HDF5LibraryException
     {
-        int ret = org.hdfgroup.javahdf5.hdf5_h_1.H5Tlock(type_id);
+        int ret = org.hdfgroup.javahdf5.hdf5_h.H5Tlock(type_id);
         if (ret < 0) {
             h5libraryError();
         }
@@ -22452,7 +22452,7 @@ public class H5 implements java.io.Serializable {
         long id = H5I_INVALID_HID();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment name_segment = arena.allocateFrom(name);
-            id = org.hdfgroup.javahdf5.hdf5_h_1.H5Topen2(loc_id, name_segment, tapl_id);
+            id = org.hdfgroup.javahdf5.hdf5_h.H5Topen2(loc_id, name_segment, tapl_id);
         }
         if (id > 0) {
             log.trace("OPEN_IDS: H5Topen add {}", id);
@@ -22482,7 +22482,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Tpack(long type_id) throws HDF5LibraryException
     {
-        int ret = org.hdfgroup.javahdf5.hdf5_h_1.H5Tpack(type_id);
+        int ret = org.hdfgroup.javahdf5.hdf5_h.H5Tpack(type_id);
         if (ret < 0) {
             h5libraryError();
         }
@@ -22517,7 +22517,7 @@ public class H5 implements java.io.Serializable {
         int retVal = -1;
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf_segment = arena.allocateFrom(ValueLayout.JAVA_BYTE, buf);
-            retVal = org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(type_id, space_id, xfer_plist_id, buf_segment);
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(type_id, space_id, xfer_plist_id, buf_segment);
         }
         if (retVal < 0) {
             h5libraryError();
@@ -22539,7 +22539,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static long H5Tvlen_create(long base_id) throws HDF5LibraryException
     {
-        long id = org.hdfgroup.javahdf5.hdf5_h_1.H5Tvlen_create(base_id);
+        long id = org.hdfgroup.javahdf5.hdf5_h.H5Tvlen_create(base_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tvlen_create add {}", id);
             OPEN_IDS.add(id);
@@ -22565,7 +22565,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Tflush(long dtype_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Tflush(dtype_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Tflush(dtype_id) < 0) {
             h5libraryError();
         }
     }
@@ -22586,7 +22586,7 @@ public class H5 implements java.io.Serializable {
      **/
     public static void H5Trefresh(long dtype_id) throws HDF5LibraryException
     {
-        if (org.hdfgroup.javahdf5.hdf5_h_1.H5Trefresh(dtype_id) < 0) {
+        if (org.hdfgroup.javahdf5.hdf5_h.H5Trefresh(dtype_id) < 0) {
             h5libraryError();
         }
     }

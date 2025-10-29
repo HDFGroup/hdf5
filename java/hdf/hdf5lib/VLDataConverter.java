@@ -348,29 +348,29 @@ public class VLDataConverter {
     {
         try {
             // Get the array type information
-            long baseTypeId = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_super(mem_type_id);
+            long baseTypeId = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(mem_type_id);
             if (baseTypeId < 0) {
                 throw new HDF5JavaException("Failed to get array base type");
             }
 
             // Get array dimensions
-            int ndims = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_array_ndims(mem_type_id);
+            int ndims = org.hdfgroup.javahdf5.hdf5_h.H5Tget_array_ndims(mem_type_id);
             if (ndims != 1) {
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 throw new HDF5JavaException("Only 1D arrays are supported, got " + ndims + "D");
             }
 
             // Get the array size (number of elements per array)
             MemorySegment dims = arena.allocate(ValueLayout.JAVA_LONG, 1);
-            int result         = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_array_dims2(mem_type_id, dims);
+            int result         = org.hdfgroup.javahdf5.hdf5_h.H5Tget_array_dims2(mem_type_id, dims);
             if (result < 0) {
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 throw new HDF5JavaException("Failed to get array dimensions");
             }
             int arraySize = (int)dims.get(ValueLayout.JAVA_LONG, 0);
 
             // Check if the base type is variable-length string
-            int isVLStringResult = org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(baseTypeId);
+            int isVLStringResult = org.hdfgroup.javahdf5.hdf5_h.H5Tis_variable_str(baseTypeId);
             boolean isVLString   = isVLStringResult > 0;
 
             if (isVLString) {
@@ -381,7 +381,7 @@ public class VLDataConverter {
                 for (int i = 0; i < data.length; i++) {
                     ArrayList<String> stringArray = (ArrayList<String>)data[i];
                     if (stringArray.size() != arraySize) {
-                        org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Array element " + i + " has " + stringArray.size() +
                                                     " elements, expected " + arraySize);
                     }
@@ -399,12 +399,12 @@ public class VLDataConverter {
                     }
                 }
 
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 return buffer;
             }
             else {
                 // Check for other supported base types
-                int baseTypeClass = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(baseTypeId);
+                int baseTypeClass = org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(baseTypeId);
 
                 if (baseTypeClass == HDF5Constants.H5T_INTEGER) {
                     // Support integer arrays
@@ -413,7 +413,7 @@ public class VLDataConverter {
                     for (int i = 0; i < data.length; i++) {
                         ArrayList<Integer> intArray = (ArrayList<Integer>)data[i];
                         if (intArray.size() != arraySize) {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                             throw new HDF5JavaException("Array element " + i + " has " + intArray.size() +
                                                         " elements, expected " + arraySize);
                         }
@@ -424,7 +424,7 @@ public class VLDataConverter {
                         }
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     return buffer;
                 }
                 else if (baseTypeClass == HDF5Constants.H5T_FLOAT) {
@@ -434,7 +434,7 @@ public class VLDataConverter {
                     for (int i = 0; i < data.length; i++) {
                         ArrayList<Double> doubleArray = (ArrayList<Double>)data[i];
                         if (doubleArray.size() != arraySize) {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                             throw new HDF5JavaException("Array element " + i + " has " + doubleArray.size() +
                                                         " elements, expected " + arraySize);
                         }
@@ -446,7 +446,7 @@ public class VLDataConverter {
                         }
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     return buffer;
                 }
                 else if (baseTypeClass == HDF5Constants.H5T_ENUM) {
@@ -456,7 +456,7 @@ public class VLDataConverter {
                     for (int i = 0; i < data.length; i++) {
                         ArrayList<Integer> enumArray = (ArrayList<Integer>)data[i];
                         if (enumArray.size() != arraySize) {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                             throw new HDF5JavaException("Array element " + i + " has " + enumArray.size() +
                                                         " elements, expected " + arraySize);
                         }
@@ -467,11 +467,11 @@ public class VLDataConverter {
                         }
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     return buffer;
                 }
                 else {
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     throw new HDF5JavaException("Unsupported array base type for FFM conversion: " +
                                                 baseTypeClass);
                 }
@@ -494,29 +494,29 @@ public class VLDataConverter {
     {
         try {
             // Get the array type information
-            long baseTypeId = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_super(mem_type_id);
+            long baseTypeId = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(mem_type_id);
             if (baseTypeId < 0) {
                 throw new HDF5JavaException("Failed to get array base type");
             }
 
             // Get array dimensions
-            int ndims = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_array_ndims(mem_type_id);
+            int ndims = org.hdfgroup.javahdf5.hdf5_h.H5Tget_array_ndims(mem_type_id);
             if (ndims != 1) {
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 throw new HDF5JavaException("Only 1D arrays are supported, got " + ndims + "D");
             }
 
             // Get the array size (number of elements per array)
             MemorySegment dims = arena.allocate(ValueLayout.JAVA_LONG, 1);
-            int result         = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_array_dims2(mem_type_id, dims);
+            int result         = org.hdfgroup.javahdf5.hdf5_h.H5Tget_array_dims2(mem_type_id, dims);
             if (result < 0) {
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 throw new HDF5JavaException("Failed to get array dimensions");
             }
             int arraySize = (int)dims.get(ValueLayout.JAVA_LONG, 0);
 
             // Check if the base type is variable-length string
-            int isVLStringResult = org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(baseTypeId);
+            int isVLStringResult = org.hdfgroup.javahdf5.hdf5_h.H5Tis_variable_str(baseTypeId);
             boolean isVLString   = isVLStringResult > 0;
 
             if (isVLString) {
@@ -524,9 +524,9 @@ public class VLDataConverter {
                 MemorySegment buffer = arena.allocate(ValueLayout.ADDRESS, count * arraySize);
 
                 // Read data from HDF5
-                int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buffer);
+                int status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, buffer);
                 if (status < 0) {
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     throw new HDF5JavaException("Failed to read VL string array data");
                 }
 
@@ -553,18 +553,18 @@ public class VLDataConverter {
                 }
 
                 // Clean up VL string memory AFTER copying
-                long space_id = org.hdfgroup.javahdf5.hdf5_h_1.H5Aget_space(attr_id);
+                long space_id = org.hdfgroup.javahdf5.hdf5_h.H5Aget_space(attr_id);
                 if (space_id >= 0) {
                     try {
                         // Reclaim memory
-                        int reclaim_status = org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(
+                        int reclaim_status = org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
                             mem_type_id, space_id, HDF5Constants.H5P_DEFAULT, buffer);
                         if (reclaim_status < 0) {
                             System.err.println("Warning: Failed to reclaim VL string memory");
                         }
                     }
                     finally {
-                        org.hdfgroup.javahdf5.hdf5_h_1.H5Sclose(space_id);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Sclose(space_id);
                     }
                 }
 
@@ -578,21 +578,21 @@ public class VLDataConverter {
                     resultArray[i] = stringArray;
                 }
 
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 return resultArray;
             }
             else {
                 // Check for other supported base types
-                int baseTypeClass = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(baseTypeId);
+                int baseTypeClass = org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(baseTypeId);
 
                 if (baseTypeClass == HDF5Constants.H5T_INTEGER) {
                     // Support integer arrays
                     MemorySegment buffer = arena.allocate(ValueLayout.JAVA_INT, count * arraySize);
 
                     // Read data from HDF5
-                    int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buffer);
+                    int status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, buffer);
                     if (status < 0) {
-                        org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Failed to read array data");
                     }
 
@@ -607,7 +607,7 @@ public class VLDataConverter {
                         resultArray[i] = intArray;
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     return resultArray;
                 }
                 else if (baseTypeClass == HDF5Constants.H5T_FLOAT) {
@@ -615,9 +615,9 @@ public class VLDataConverter {
                     MemorySegment buffer = arena.allocate(ValueLayout.JAVA_DOUBLE, count * arraySize);
 
                     // Read data from HDF5
-                    int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, buffer);
+                    int status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, buffer);
                     if (status < 0) {
-                        org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Failed to read array data");
                     }
 
@@ -632,11 +632,11 @@ public class VLDataConverter {
                         resultArray[i] = doubleArray;
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     return resultArray;
                 }
                 else {
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     throw new HDF5JavaException("Unsupported array base type for FFM reading: " +
                                                 baseTypeClass);
                 }
@@ -661,29 +661,29 @@ public class VLDataConverter {
     {
         try {
             // Get the array type information
-            long baseTypeId = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_super(mem_type_id);
+            long baseTypeId = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(mem_type_id);
             if (baseTypeId < 0) {
                 throw new HDF5JavaException("Failed to get array base type");
             }
 
             // Get array dimensions
-            int ndims = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_array_ndims(mem_type_id);
+            int ndims = org.hdfgroup.javahdf5.hdf5_h.H5Tget_array_ndims(mem_type_id);
             if (ndims != 1) {
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 throw new HDF5JavaException("Only 1D arrays are supported, got " + ndims + "D");
             }
 
             // Get the array size (number of elements per array)
             MemorySegment dims = arena.allocate(ValueLayout.JAVA_LONG, 1);
-            int result         = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_array_dims2(mem_type_id, dims);
+            int result         = org.hdfgroup.javahdf5.hdf5_h.H5Tget_array_dims2(mem_type_id, dims);
             if (result < 0) {
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 throw new HDF5JavaException("Failed to get array dimensions");
             }
             int arraySize = (int)dims.get(ValueLayout.JAVA_LONG, 0);
 
             // Check if the base type is variable-length string
-            int isVLStringResult = org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(baseTypeId);
+            int isVLStringResult = org.hdfgroup.javahdf5.hdf5_h.H5Tis_variable_str(baseTypeId);
             boolean isVLString   = isVLStringResult > 0;
 
             if (isVLString) {
@@ -691,10 +691,10 @@ public class VLDataConverter {
                 MemorySegment buffer = arena.allocate(ValueLayout.ADDRESS, count * arraySize);
 
                 // Read data from HDF5
-                int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                                     file_space_id, xfer_plist_id, buffer);
                 if (status < 0) {
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     throw new HDF5JavaException("Failed to read array data");
                 }
 
@@ -718,8 +718,8 @@ public class VLDataConverter {
                 // Clean up VL string memory AFTER copying
                 long space_id = (mem_space_id >= 0) ? mem_space_id : file_space_id;
                 try {
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Treclaim(
-                        mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h_1.H5P_DEFAULT(), buffer);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
+                        mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(), buffer);
                 }
                 finally {
                     // space_id is parameter, don't close it
@@ -735,22 +735,22 @@ public class VLDataConverter {
                     resultArray[i] = stringArray;
                 }
 
-                org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                 return resultArray;
             }
             else {
                 // Check for other supported base types
-                int baseTypeClass = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(baseTypeId);
+                int baseTypeClass = org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(baseTypeId);
 
                 if (baseTypeClass == HDF5Constants.H5T_INTEGER) {
                     // Support integer arrays
                     MemorySegment buffer = arena.allocate(ValueLayout.JAVA_INT, count * arraySize);
 
                     // Read data from HDF5
-                    int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                    int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                                         file_space_id, xfer_plist_id, buffer);
                     if (status < 0) {
-                        org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Failed to read array data");
                     }
 
@@ -765,7 +765,7 @@ public class VLDataConverter {
                         resultArray[i] = intArray;
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     return resultArray;
                 }
                 else if (baseTypeClass == HDF5Constants.H5T_FLOAT) {
@@ -773,10 +773,10 @@ public class VLDataConverter {
                     MemorySegment buffer = arena.allocate(ValueLayout.JAVA_DOUBLE, count * arraySize);
 
                     // Read data from HDF5
-                    int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                    int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                                         file_space_id, xfer_plist_id, buffer);
                     if (status < 0) {
-                        org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Failed to read array data");
                     }
 
@@ -791,7 +791,7 @@ public class VLDataConverter {
                         resultArray[i] = doubleArray;
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     return resultArray;
                 }
                 else if (baseTypeClass == HDF5Constants.H5T_ENUM) {
@@ -799,10 +799,10 @@ public class VLDataConverter {
                     MemorySegment buffer = arena.allocate(ValueLayout.JAVA_INT, count * arraySize);
 
                     // Read data from HDF5
-                    int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                    int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                                         file_space_id, xfer_plist_id, buffer);
                     if (status < 0) {
-                        org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Failed to read array data");
                     }
 
@@ -817,11 +817,11 @@ public class VLDataConverter {
                         resultArray[i] = enumArray;
                     }
 
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     return resultArray;
                 }
                 else {
-                    org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseTypeId);
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     throw new HDF5JavaException("Unsupported array base type for FFM reading: " +
                                                 baseTypeClass);
                 }
@@ -873,7 +873,7 @@ public class VLDataConverter {
             boolean needToCloseBaseType = false;
             try {
                 if (hdf.hdf5lib.H5.H5Tdetect_class(elementType, hdf.hdf5lib.HDF5Constants.H5T_VLEN)) {
-                    baseType            = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_super(elementType);
+                    baseType            = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(elementType);
                     needToCloseBaseType = true; // Mark that we need to close this type ID
                 }
             }
@@ -883,7 +883,7 @@ public class VLDataConverter {
 
             try {
                 // Get the actual element size from HDF5
-                long elementSize = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(baseType);
+                long elementSize = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(baseType);
                 long totalSize   = (long)len * elementSize;
 
                 // Check for zero element size - fall back to conservative approach
@@ -904,7 +904,7 @@ public class VLDataConverter {
                 // CRITICAL: Close the base type if we created it to prevent memory leaks
                 if (needToCloseBaseType && baseType != elementType) {
                     try {
-                        org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(baseType);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseType);
                     }
                     catch (Exception ex) {
                         // Log but don't fail - we've already done the main work
@@ -1857,7 +1857,7 @@ public class VLDataConverter {
                     byte[] strBytes = str.getBytes(java.nio.charset.StandardCharsets.UTF_8);
                     // Allocate with extra byte for null terminator
                     MemorySegment hdf5StringMem =
-                        org.hdfgroup.javahdf5.hdf5_h_2.H5allocate_memory(strBytes.length + 1, false);
+                        org.hdfgroup.javahdf5.hdf5_h.H5allocate_memory(strBytes.length + 1, false);
                     if (hdf5StringMem == null || hdf5StringMem.equals(MemorySegment.NULL)) {
                         throw new HDF5JavaException("Failed to allocate HDF5 memory for string: " + str);
                     }
@@ -1898,7 +1898,7 @@ public class VLDataConverter {
 
         try {
             // Call native H5Dread to read string pointers
-            int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+            int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
                                                                 file_space_id, xfer_plist_id, stringArray);
             if (status < 0) {
                 throw new HDF5JavaException("H5Dread failed for VL strings");
@@ -1953,7 +1953,7 @@ public class VLDataConverter {
 
         try {
             // Call native H5Aread to read string pointers
-            int status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_id, mem_type_id, stringArray);
+            int status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, stringArray);
             if (status < 0) {
                 throw new HDF5JavaException("H5Aread failed for VL strings");
             }
@@ -2003,13 +2003,13 @@ public class VLDataConverter {
     {
         try {
             // Get compound type information
-            int nmembers = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_nmembers(mem_type_id);
+            int nmembers = org.hdfgroup.javahdf5.hdf5_h.H5Tget_nmembers(mem_type_id);
             if (nmembers < 0) {
                 throw new HDF5JavaException("Failed to get number of compound members");
             }
 
             // Get total compound structure size
-            long compoundSize = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(mem_type_id);
+            long compoundSize = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(mem_type_id);
             if (compoundSize < 0) {
                 throw new HDF5JavaException("Failed to get compound size");
             }
@@ -2025,12 +2025,12 @@ public class VLDataConverter {
             boolean[] isVLStrings = new boolean[nmembers];
 
             for (int i = 0; i < nmembers; i++) {
-                memberTypeIds[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_type(mem_type_id, i);
-                memberClasses[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(memberTypeIds[i]);
-                memberOffsets[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_offset(mem_type_id, i);
-                memberSizes[i]   = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(memberTypeIds[i]);
+                memberTypeIds[i] = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_type(mem_type_id, i);
+                memberClasses[i] = org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(memberTypeIds[i]);
+                memberOffsets[i] = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_offset(mem_type_id, i);
+                memberSizes[i]   = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(memberTypeIds[i]);
                 isVLStrings[i]   = (memberClasses[i] == HDF5Constants.H5T_STRING &&
-                                  org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(memberTypeIds[i]) > 0);
+                                  org.hdfgroup.javahdf5.hdf5_h.H5Tis_variable_str(memberTypeIds[i]) > 0);
             }
 
             try {
@@ -2082,7 +2082,7 @@ public class VLDataConverter {
 
                                 // Allocate with HDF5's memory allocator for VL strings
                                 MemorySegment hdf5StringMem =
-                                    org.hdfgroup.javahdf5.hdf5_h_2.H5allocate_memory(strBytes.length + 1,
+                                    org.hdfgroup.javahdf5.hdf5_h.H5allocate_memory(strBytes.length + 1,
                                                                                      false);
                                 if (hdf5StringMem == null || hdf5StringMem.equals(MemorySegment.NULL)) {
                                     throw new HDF5JavaException(
@@ -2125,7 +2125,7 @@ public class VLDataConverter {
                 for (int i = 0; i < nmembers; i++) {
                     if (memberTypeIds[i] >= 0) {
                         try {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(memberTypeIds[i]);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Tclose(memberTypeIds[i]);
                         }
                         catch (Exception e) {
                             // Ignore close errors
@@ -2166,13 +2166,13 @@ public class VLDataConverter {
     {
         try {
             // Get compound type information
-            int nmembers = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_nmembers(mem_type_id);
+            int nmembers = org.hdfgroup.javahdf5.hdf5_h.H5Tget_nmembers(mem_type_id);
             if (nmembers < 0) {
                 throw new HDF5JavaException("Failed to get number of compound members");
             }
 
             // Get total compound structure size
-            long compoundSize = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(mem_type_id);
+            long compoundSize = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(mem_type_id);
             if (compoundSize < 0) {
                 throw new HDF5JavaException("Failed to get compound size");
             }
@@ -2185,12 +2185,12 @@ public class VLDataConverter {
             boolean[] isVLStrings = new boolean[nmembers];
 
             for (int i = 0; i < nmembers; i++) {
-                memberTypeIds[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_type(mem_type_id, i);
-                memberClasses[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_class(memberTypeIds[i]);
-                memberOffsets[i] = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_member_offset(mem_type_id, i);
-                memberSizes[i]   = org.hdfgroup.javahdf5.hdf5_h_1.H5Tget_size(memberTypeIds[i]);
+                memberTypeIds[i] = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_type(mem_type_id, i);
+                memberClasses[i] = org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(memberTypeIds[i]);
+                memberOffsets[i] = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_offset(mem_type_id, i);
+                memberSizes[i]   = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(memberTypeIds[i]);
                 isVLStrings[i]   = (memberClasses[i] == HDF5Constants.H5T_STRING &&
-                                  org.hdfgroup.javahdf5.hdf5_h_1.H5Tis_variable_str(memberTypeIds[i]) > 0);
+                                  org.hdfgroup.javahdf5.hdf5_h.H5Tis_variable_str(memberTypeIds[i]) > 0);
             }
 
             // Allocate buffer for all compound structures
@@ -2199,11 +2199,11 @@ public class VLDataConverter {
             // Read data from HDF5
             int status;
             if (isDataset) {
-                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(attr_or_dataset_id, mem_type_id, mem_space_id,
+                status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(attr_or_dataset_id, mem_type_id, mem_space_id,
                                                                 file_space_id, xfer_plist_id, buffer);
             }
             else {
-                status = org.hdfgroup.javahdf5.hdf5_h_1.H5Aread(attr_or_dataset_id, mem_type_id, buffer);
+                status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_or_dataset_id, mem_type_id, buffer);
             }
 
             if (status < 0) {
@@ -2291,7 +2291,7 @@ public class VLDataConverter {
                 for (int i = 0; i < nmembers; i++) {
                     if (memberTypeIds[i] >= 0) {
                         try {
-                            org.hdfgroup.javahdf5.hdf5_h_1.H5Tclose(memberTypeIds[i]);
+                            org.hdfgroup.javahdf5.hdf5_h.H5Tclose(memberTypeIds[i]);
                         }
                         catch (Exception e) {
                             // Ignore close errors

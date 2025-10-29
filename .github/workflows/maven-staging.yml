@@ -253,14 +253,20 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
-      - name: Set up JDK
+      - name: Set up JDK (Java 24+ for FFM builds)
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
+          distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup jextract (FFM builds only)
+        if: ${{ matrix.implementation == 'ffm' }}
+        uses: ./.github/actions/setup-jextract
+        with:
+          java-version: '25'
 
       - name: Set preset name
         id: set-preset
@@ -582,11 +588,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK (Java 24+ for FFM builds)
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
+          distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Install timeout command on macOS
         if: ${{ startsWith(matrix.platform, 'macOS') }}

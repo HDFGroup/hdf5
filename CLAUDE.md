@@ -144,67 +144,52 @@ java/jsrc/
 - **Plain**: ~82,000 lines per platform, standard HDF5 VFD support
 - **ROS3**: ~83,000 lines per platform, includes H5FD_ros3_* APIs for S3 cloud storage
 
-### Generating FFM Bindings with jextract
+### FFM Bindings Generation
 
-Automated workflow for multi-platform FFM binding generation with ROS3 VFD support
+**As of HDF5 2.0**: FFM bindings are generated automatically at CMake configure time using jextract-25.
 
-**Workflow:** `.github/workflows/generate-ffm-bindings.yml`
+**Requirements:**
+- Java 24+ (tested with Java 25)
+- jextract tool installed and accessible via `JEXTRACT_HOME` or `JAVA_HOME`
 
-**Purpose:** Generates FFM bindings using jextract across all platforms (Linux, Windows, macOS) with both plain and ROS3 variants, validates platform consistency, and creates a unified artifact for manual review.
+**Configure-Time Generation:**
+FFM bindings are automatically generated when:
+1. Java 24+ is detected by CMake
+2. `HDF5_ENABLE_JNI=OFF` (FFM is selected)
+3. jextract is found in `$JEXTRACT_HOME/bin` or `$JAVA_HOME/bin`
 
-**ROS3 VFD Dependencies** (platform-specific strategies):
-- **Ubuntu**: Builds aws-c-s3 from source with caching (~15-20 min first run, ~1 min cached)
-- **Windows**: Uses vcpkg package manager
-- **macOS**: Uses Homebrew package manager
+The CMake build system (java/CMakeLists.txt:36-52) automatically:
+- Detects Java version
+- Finds jextract executable
+- Generates FFM bindings to `build/java/jsrc/`
+- Configures the build to use generated bindings
 
-**Triggers:**
+**CI/CD Integration:**
+Workflows automatically install jextract-25 for FFM builds:
+- `.github/actions/setup-jextract/` - Reusable jextract setup action
+- `.github/workflows/maven-staging.yml` - Maven artifact builds (FFM + JNI)
+- `.github/workflows/release.yml` - Release builds with FFM support
+
+**Local Development:**
 ```bash
-# Manual trigger (on-demand)
-# Via GitHub Actions UI
-Go to Actions → "Generate FFM Bindings (jextract)" → Run workflow
-Select Java version (24, 25, or latest)
+# Install jextract-25 (one-time setup)
+# Download from https://jdk.java.net/jextract/
+# Extract and set JEXTRACT_HOME
 
-# Via GitHub CLI
-gh workflow run generate-ffm-bindings.yml -f java_version=25
+export JEXTRACT_HOME=/path/to/jextract
+export PATH=$JEXTRACT_HOME/bin:$PATH
 
-# Automatic (daily builds)
-# Integrated into daily-build.yml workflow
-# Runs automatically when HDF5 C API changes detected
+# Build with FFM (Java 25+)
+cmake --workflow --preset ci-StdShar-GNUC-FFM --fresh
+
+# FFM bindings generated automatically during configure step
 ```
 
-**Process:**
-1. Builds HDF5 (minimal configuration) on each platform
-2. Runs jextract to generate FFM bindings
-3. Validates platform-independent code is identical
-4. Merges into unified structure:
-   - `features/plain/` - Linux/macOS (no ROS3)
-   - `features/wplain/` - Windows (no ROS3)
-   - `features/ros3/` - ROS3 VFD (all platforms)
-   - `org/hdfgroup/javahdf5/` - Platform-independent code
-
-**Artifacts:**
-- `ffm-bindings-merged` - Final merged bindings (30 days retention)
-- `validation-report` - Platform consistency validation (30 days retention)
-- Individual platform outputs (7 days retention)
-
-**Scripts:**
-- `bin/jextract-generate.sh` - Linux/macOS jextract wrapper
-- `bin/jextract-generate.bat` - Windows jextract wrapper
-- `bin/merge-ffm-bindings.py` - Merge and validate bindings
-
-**Manual Review Process:**
-1. Download `ffm-bindings-merged` artifact
-2. Review `validation-report` for platform consistency
-3. Inspect generated Java files
-4. If validation passed, replace `java/jsrc/features/` and `java/jsrc/org/`
-5. Commit changes with workflow run ID reference
-
-**Daily Build Integration:**
-- ✅ Automatically runs in `daily-build.yml` when changes detected
-- Bindings generated as part of daily snapshot builds
-- Artifacts available for review after each daily build
-
-**Future:** Automatic PR creation for generated bindings
+**Benefits of Configure-Time Generation:**
+- No separate workflow needed to generate bindings
+- Bindings always match the current HDF5 C API
+- Faster CI/CD (no separate generation job)
+- Simplified development workflow
 
 ### FFM Test Coverage
 

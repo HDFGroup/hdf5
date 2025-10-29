@@ -21,8 +21,8 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h_1;
-import org.hdfgroup.javahdf5.hdf5_h_2;
+import org.hdfgroup.javahdf5.hdf5_h;
+import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class TestH5Sffm {
     @After
     public void cleanup()
     {
-        closeQuietly(H5sid, hdf5_h_1::H5Sclose);
+        closeQuietly(H5sid, hdf5_h::H5Sclose);
         H5sid = hdf5_h.H5I_INVALID_HID();
         System.out.println();
     }
@@ -61,7 +61,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
         }
     }
@@ -80,7 +80,7 @@ public class TestH5Sffm {
             copyToSegment(dimsSegment, dims);
             copyToSegment(maxdimsSegment, maxdims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, maxdimsSegment);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, maxdimsSegment);
             assertTrue("H5Screate_simple with maxdims failed", isValidId(H5sid));
         }
     }
@@ -90,7 +90,7 @@ public class TestH5Sffm {
     {
         System.out.print(testname.getMethodName());
 
-        H5sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SIMPLE());
+        H5sid = hdf5_h.H5Screate(hdf5_h.H5S_SIMPLE());
         assertTrue("H5Screate failed", isValidId(H5sid));
     }
 
@@ -99,11 +99,11 @@ public class TestH5Sffm {
     {
         System.out.print(testname.getMethodName());
 
-        H5sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+        H5sid = hdf5_h.H5Screate(hdf5_h.H5S_SCALAR());
         assertTrue("H5Screate scalar failed", isValidId(H5sid));
 
         // Verify it's a scalar
-        int ndims = hdf5_h_1.H5Sget_simple_extent_ndims(H5sid);
+        int ndims = hdf5_h.H5Sget_simple_extent_ndims(H5sid);
         assertEquals("Scalar should have 0 dimensions", 0, ndims);
     }
 
@@ -119,16 +119,16 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Copy dataspace
-            sid_copy = hdf5_h_1.H5Scopy(H5sid);
+            sid_copy = hdf5_h.H5Scopy(H5sid);
             assertTrue("H5Scopy failed", isValidId(sid_copy));
 
             // Verify dimensions match
             MemorySegment copyDimsSegment = allocateLongArray(arena, RANK);
-            int ndims = hdf5_h_1.H5Sget_simple_extent_dims(sid_copy, copyDimsSegment, MemorySegment.NULL);
+            int ndims = hdf5_h.H5Sget_simple_extent_dims(sid_copy, copyDimsSegment, MemorySegment.NULL);
             assertEquals("Rank should match", RANK, ndims);
 
             long[] copyDims = new long[RANK];
@@ -136,7 +136,7 @@ public class TestH5Sffm {
             assertArrayEquals("Dimensions should match", dims, copyDims);
         }
         finally {
-            closeQuietly(sid_copy, hdf5_h_1::H5Sclose);
+            closeQuietly(sid_copy, hdf5_h::H5Sclose);
         }
     }
 
@@ -150,10 +150,10 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
-            int ndims = hdf5_h_1.H5Sget_simple_extent_ndims(H5sid);
+            int ndims = hdf5_h.H5Sget_simple_extent_ndims(H5sid);
             assertEquals("Rank should match", RANK, ndims);
         }
     }
@@ -168,10 +168,10 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
-            long npoints = hdf5_h_1.H5Sget_simple_extent_npoints(H5sid);
+            long npoints = hdf5_h.H5Sget_simple_extent_npoints(H5sid);
             assertEquals("Number of points should be DIM_X * DIM_Y", DIM_X * DIM_Y, npoints);
         }
     }
@@ -186,10 +186,10 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
-            int spaceType = hdf5_h_1.H5Sget_simple_extent_type(H5sid);
+            int spaceType = hdf5_h.H5Sget_simple_extent_type(H5sid);
             assertEquals("Space type should be hdf5_h.H5S_SIMPLE()", hdf5_h.H5S_SIMPLE(), spaceType);
         }
     }
@@ -200,7 +200,7 @@ public class TestH5Sffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            H5sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SIMPLE());
+            H5sid = hdf5_h.H5Screate(hdf5_h.H5S_SIMPLE());
             assertTrue("H5Screate failed", isValidId(H5sid));
 
             long[] dims               = {DIM_X, DIM_Y};
@@ -211,7 +211,7 @@ public class TestH5Sffm {
             assertTrue("H5Sset_extent_simple failed", isSuccess(result));
 
             // Verify dimensions were set
-            int ndims = hdf5_h_1.H5Sget_simple_extent_ndims(H5sid);
+            int ndims = hdf5_h.H5Sget_simple_extent_ndims(H5sid);
             assertEquals("Rank should match", RANK, ndims);
         }
     }
@@ -226,7 +226,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a 2x3 hyperslab starting at (1,1)
@@ -238,12 +238,12 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
                                                       MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Verify selection
-            long npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            long npoints = hdf5_h.H5Sget_select_npoints(H5sid);
             assertEquals("Selected points should be 2*3", 6, npoints);
         }
     }
@@ -258,7 +258,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select 3 specific points
@@ -271,11 +271,11 @@ public class TestH5Sffm {
             MemorySegment coordsSegment = allocateLongArray(arena, coords.length);
             copyToSegment(coordsSegment, coords);
 
-            int result = hdf5_h_1.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(), 3, coordsSegment);
+            int result = hdf5_h.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(), 3, coordsSegment);
             assertTrue("H5Sselect_elements failed", isSuccess(result));
 
             // Verify selection
-            long npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            long npoints = hdf5_h.H5Sget_select_npoints(H5sid);
             assertEquals("Selected points should be 3", 3, npoints);
         }
     }
@@ -290,14 +290,14 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
-            int result = hdf5_h_1.H5Sselect_all(H5sid);
+            int result = hdf5_h.H5Sselect_all(H5sid);
             assertTrue("H5Sselect_all failed", isSuccess(result));
 
             // Verify selection
-            long npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            long npoints = hdf5_h.H5Sget_select_npoints(H5sid);
             assertEquals("All points should be selected", DIM_X * DIM_Y, npoints);
         }
     }
@@ -312,14 +312,14 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
-            int result = hdf5_h_1.H5Sselect_none(H5sid);
+            int result = hdf5_h.H5Sselect_none(H5sid);
             assertTrue("H5Sselect_none failed", isSuccess(result));
 
             // Verify selection
-            long npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            long npoints = hdf5_h.H5Sget_select_npoints(H5sid);
             assertEquals("No points should be selected", 0, npoints);
         }
     }
@@ -338,7 +338,7 @@ public class TestH5Sffm {
             copyToSegment(dimsSegment, expectedDims);
             copyToSegment(maxdimsSegment, expectedMaxDims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, maxdimsSegment);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, maxdimsSegment);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Get dimensions back
@@ -346,7 +346,7 @@ public class TestH5Sffm {
             MemorySegment returnedMaxDimsSegment = allocateLongArray(arena, RANK);
 
             int ndims =
-                hdf5_h_1.H5Sget_simple_extent_dims(H5sid, returnedDimsSegment, returnedMaxDimsSegment);
+                hdf5_h.H5Sget_simple_extent_dims(H5sid, returnedDimsSegment, returnedMaxDimsSegment);
             assertEquals("Rank should match", RANK, ndims);
 
             long[] returnedDims    = new long[RANK];
@@ -369,11 +369,11 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Default selection type should be H5S_SEL_ALL
-            int selType = hdf5_h_1.H5Sget_select_type(H5sid);
+            int selType = hdf5_h.H5Sget_select_type(H5sid);
             assertEquals("Default selection should be ALL", hdf5_h.H5S_SEL_ALL(), selType);
 
             // Select hyperslab
@@ -384,15 +384,15 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
+            hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
                                          countSegment, MemorySegment.NULL);
 
-            selType = hdf5_h_1.H5Sget_select_type(H5sid);
+            selType = hdf5_h.H5Sget_select_type(H5sid);
             assertEquals("Selection type should be HYPERSLABS", hdf5_h.H5S_SEL_HYPERSLABS(), selType);
 
             // Select none
-            hdf5_h_1.H5Sselect_none(H5sid);
-            selType = hdf5_h_1.H5Sget_select_type(H5sid);
+            hdf5_h.H5Sselect_none(H5sid);
+            selType = hdf5_h.H5Sget_select_type(H5sid);
             assertEquals("Selection type should be NONE", hdf5_h.H5S_SEL_NONE(), selType);
         }
     }
@@ -407,7 +407,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a hyperslab from (1,2) with count (2,3)
@@ -418,14 +418,14 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
+            hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
                                          countSegment, MemorySegment.NULL);
 
             // Get selection bounds
             MemorySegment boundsStartSegment = allocateLongArray(arena, RANK);
             MemorySegment boundsEndSegment   = allocateLongArray(arena, RANK);
 
-            int result = hdf5_h_1.H5Sget_select_bounds(H5sid, boundsStartSegment, boundsEndSegment);
+            int result = hdf5_h.H5Sget_select_bounds(H5sid, boundsStartSegment, boundsEndSegment);
             assertTrue("H5Sget_select_bounds failed", isSuccess(result));
 
             long[] boundsStart = new long[RANK];
@@ -454,20 +454,20 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Create destination dataspace (initially scalar)
-            sid_dest = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            sid_dest = hdf5_h.H5Screate(hdf5_h.H5S_SCALAR());
             assertTrue("H5Screate scalar failed", isValidId(sid_dest));
 
             // Copy extent from source to destination
-            int result = hdf5_h_1.H5Sextent_copy(sid_dest, H5sid);
+            int result = hdf5_h.H5Sextent_copy(sid_dest, H5sid);
             assertTrue("H5Sextent_copy failed", isSuccess(result));
 
             // Verify destination now has same dimensions as source
             MemorySegment destDimsSegment = allocateLongArray(arena, RANK);
-            int ndims = hdf5_h_1.H5Sget_simple_extent_dims(sid_dest, destDimsSegment, MemorySegment.NULL);
+            int ndims = hdf5_h.H5Sget_simple_extent_dims(sid_dest, destDimsSegment, MemorySegment.NULL);
             assertEquals("Rank should match", RANK, ndims);
 
             long[] destDims = new long[RANK];
@@ -475,7 +475,7 @@ public class TestH5Sffm {
             assertArrayEquals("Dimensions should match", dims, destDims);
         }
         finally {
-            closeQuietly(sid_dest, hdf5_h_1::H5Sclose);
+            closeQuietly(sid_dest, hdf5_h::H5Sclose);
         }
     }
 
@@ -492,11 +492,11 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Create second dataspace with same dimensions
-            sid2 = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            sid2 = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(sid2));
 
             // Create third dataspace with different dimensions
@@ -504,19 +504,19 @@ public class TestH5Sffm {
             MemorySegment diffDimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(diffDimsSegment, diffDims);
 
-            sid3 = hdf5_h_1.H5Screate_simple(RANK, diffDimsSegment, MemorySegment.NULL);
+            sid3 = hdf5_h.H5Screate_simple(RANK, diffDimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(sid3));
 
             // Test equality
-            int result = hdf5_h_1.H5Sextent_equal(H5sid, sid2);
+            int result = hdf5_h.H5Sextent_equal(H5sid, sid2);
             assertTrue("Extents should be equal", result > 0);
 
-            result = hdf5_h_1.H5Sextent_equal(H5sid, sid3);
+            result = hdf5_h.H5Sextent_equal(H5sid, sid3);
             assertFalse("Extents should not be equal", result > 0);
         }
         finally {
-            closeQuietly(sid2, hdf5_h_1::H5Sclose);
-            closeQuietly(sid3, hdf5_h_1::H5Sclose);
+            closeQuietly(sid2, hdf5_h::H5Sclose);
+            closeQuietly(sid3, hdf5_h::H5Sclose);
         }
     }
 
@@ -530,7 +530,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select first hyperslab
@@ -541,7 +541,7 @@ public class TestH5Sffm {
             copyToSegment(start1Segment, start1);
             copyToSegment(count1Segment, count1);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment, MemorySegment.NULL,
+            hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment, MemorySegment.NULL,
                                          count1Segment, MemorySegment.NULL);
 
             // Add second hyperslab (OR operation)
@@ -552,11 +552,11 @@ public class TestH5Sffm {
             copyToSegment(start2Segment, start2);
             copyToSegment(count2Segment, count2);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_OR(), start2Segment, MemorySegment.NULL,
+            hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_OR(), start2Segment, MemorySegment.NULL,
                                          count2Segment, MemorySegment.NULL);
 
             // Get number of blocks
-            long nblocks = hdf5_h_1.H5Sget_select_hyper_nblocks(H5sid);
+            long nblocks = hdf5_h.H5Sget_select_hyper_nblocks(H5sid);
             assertEquals("Should have 2 hyperslab blocks", 2, nblocks);
         }
     }
@@ -572,7 +572,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a hyperslab
@@ -583,13 +583,13 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
+            hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
                                          countSegment, MemorySegment.NULL);
 
             // Get encoded size
             MemorySegment nalloc_segment = allocateLong(arena);
             int result =
-                hdf5_h_1.H5Sencode2(H5sid, MemorySegment.NULL, nalloc_segment, hdf5_h_1.H5P_DEFAULT());
+                hdf5_h.H5Sencode2(H5sid, MemorySegment.NULL, nalloc_segment, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Sencode2 (get size) failed", isSuccess(result));
 
             long nalloc = getLong(nalloc_segment);
@@ -597,19 +597,19 @@ public class TestH5Sffm {
 
             // Encode dataspace
             MemorySegment buf = arena.allocate(nalloc);
-            result            = hdf5_h_1.H5Sencode2(H5sid, buf, nalloc_segment, hdf5_h_1.H5P_DEFAULT());
+            result            = hdf5_h.H5Sencode2(H5sid, buf, nalloc_segment, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Sencode2 failed", isSuccess(result));
 
             // Decode dataspace
-            long decoded_sid = hdf5_h_1.H5Sdecode(buf);
+            long decoded_sid = hdf5_h.H5Sdecode(buf);
             assertTrue("H5Sdecode failed", isValidId(decoded_sid));
 
             // Verify decoded dataspace has same selection
-            long npoints_orig    = hdf5_h_1.H5Sget_select_npoints(H5sid);
-            long npoints_decoded = hdf5_h_1.H5Sget_select_npoints(decoded_sid);
+            long npoints_orig    = hdf5_h.H5Sget_select_npoints(H5sid);
+            long npoints_decoded = hdf5_h.H5Sget_select_npoints(decoded_sid);
             assertEquals("Selected points should match", npoints_orig, npoints_decoded);
 
-            closeQuietly(decoded_sid, hdf5_h_1::H5Sclose);
+            closeQuietly(decoded_sid, hdf5_h::H5Sclose);
         }
     }
 
@@ -623,10 +623,10 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
-            int result = hdf5_h_1.H5Sclose(H5sid);
+            int result = hdf5_h.H5Sclose(H5sid);
             assertTrue("H5Sclose failed", isSuccess(result));
             H5sid = hdf5_h.H5I_INVALID_HID();
         }
@@ -642,14 +642,14 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select all - should have DIM_X * DIM_Y points
-            int result = hdf5_h_1.H5Sselect_all(H5sid);
+            int result = hdf5_h.H5Sselect_all(H5sid);
             assertTrue("H5Sselect_all failed", isSuccess(result));
 
-            long npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            long npoints = hdf5_h.H5Sget_select_npoints(H5sid);
             assertEquals("Should have DIM_X * DIM_Y points", DIM_X * DIM_Y, npoints);
 
             // Select hyperslab - 2x3 = 6 points
@@ -660,11 +660,11 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+            result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
                                                   MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
-            npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            npoints = hdf5_h.H5Sget_select_npoints(H5sid);
             assertEquals("Should have 6 points in hyperslab", 6L, npoints);
         }
     }
@@ -679,7 +679,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a valid hyperslab
@@ -690,7 +690,7 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
                                                       MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
@@ -710,7 +710,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select a single hyperslab block from [1,1] to [2,3]
@@ -727,12 +727,12 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
             copyToSegment(blockSegment, block);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
                                                       strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get number of blocks (should be 1)
-            long nblocks = hdf5_h_1.H5Sget_select_hyper_nblocks(H5sid);
+            long nblocks = hdf5_h.H5Sget_select_hyper_nblocks(H5sid);
             assertEquals("Should have 1 block", 1L, nblocks);
 
             // Get blocklist (start and end coordinates)
@@ -740,7 +740,7 @@ public class TestH5Sffm {
             long blocklistSize      = nblocks * RANK * 2;
             MemorySegment blocklist = allocateLongArray(arena, (int)blocklistSize);
 
-            result = hdf5_h_1.H5Sget_select_hyper_blocklist(H5sid, 0, nblocks, blocklist);
+            result = hdf5_h.H5Sget_select_hyper_blocklist(H5sid, 0, nblocks, blocklist);
             assertTrue("H5Sget_select_hyper_blocklist failed", isSuccess(result));
 
             // Verify block coordinates
@@ -762,7 +762,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select hyperslab from [2,2] with count [2,2]
@@ -773,14 +773,14 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
                                                       MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get original bounds
             MemorySegment startBounds1 = allocateLongArray(arena, RANK);
             MemorySegment endBounds1   = allocateLongArray(arena, RANK);
-            result                     = hdf5_h_1.H5Sget_select_bounds(H5sid, startBounds1, endBounds1);
+            result                     = hdf5_h.H5Sget_select_bounds(H5sid, startBounds1, endBounds1);
             assertTrue("H5Sget_select_bounds failed", isSuccess(result));
 
             long[] origStart = new long[RANK];
@@ -791,13 +791,13 @@ public class TestH5Sffm {
             MemorySegment offsetSegment = allocateLongArray(arena, RANK);
             copyToSegment(offsetSegment, offset);
 
-            result = hdf5_h_1.H5Sselect_adjust(H5sid, offsetSegment);
+            result = hdf5_h.H5Sselect_adjust(H5sid, offsetSegment);
             assertTrue("H5Sselect_adjust failed", isSuccess(result));
 
             // Get bounds after adjustment
             MemorySegment startBounds2 = allocateLongArray(arena, RANK);
             MemorySegment endBounds2   = allocateLongArray(arena, RANK);
-            result                     = hdf5_h_1.H5Sget_select_bounds(H5sid, startBounds2, endBounds2);
+            result                     = hdf5_h.H5Sget_select_bounds(H5sid, startBounds2, endBounds2);
             assertTrue("H5Sget_select_bounds failed", isSuccess(result));
 
             long[] newStart = new long[RANK];
@@ -819,7 +819,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select 3 specific points
@@ -834,16 +834,16 @@ public class TestH5Sffm {
             copyToSegment(coordsSegment, coords);
 
             int result =
-                hdf5_h_1.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(), numPoints, coordsSegment);
+                hdf5_h.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(), numPoints, coordsSegment);
             assertTrue("H5Sselect_elements failed", isSuccess(result));
 
             // Get number of element points
-            long npoints = hdf5_h_1.H5Sget_select_elem_npoints(H5sid);
+            long npoints = hdf5_h.H5Sget_select_elem_npoints(H5sid);
             assertEquals("Should have 3 element points", 3L, npoints);
 
             // Get the point list back
             MemorySegment pointlist = allocateLongArray(arena, (int)(npoints * RANK));
-            result                  = hdf5_h_1.H5Sget_select_elem_pointlist(H5sid, 0, npoints, pointlist);
+            result                  = hdf5_h.H5Sget_select_elem_pointlist(H5sid, 0, npoints, pointlist);
             assertTrue("H5Sget_select_elem_pointlist failed", isSuccess(result));
 
             // Verify the coordinates
@@ -865,19 +865,19 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
-            int isSimple = hdf5_h_1.H5Sis_simple(H5sid);
+            int isSimple = hdf5_h.H5Sis_simple(H5sid);
             assertTrue("Dataspace should be simple", isSimple > 0);
 
-            hdf5_h_1.H5Sclose(H5sid);
+            hdf5_h.H5Sclose(H5sid);
 
             // Test scalar dataspace (also simple)
-            H5sid = hdf5_h_1.H5Screate(hdf5_h.H5S_SCALAR());
+            H5sid = hdf5_h.H5Screate(hdf5_h.H5S_SCALAR());
             assertTrue("H5Screate scalar failed", isValidId(H5sid));
 
-            isSimple = hdf5_h_1.H5Sis_simple(H5sid);
+            isSimple = hdf5_h.H5Sis_simple(H5sid);
             assertTrue("Scalar dataspace should be simple", isSimple > 0);
         }
     }
@@ -893,11 +893,11 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Verify it's simple
-            int type = hdf5_h_1.H5Sget_simple_extent_type(H5sid);
+            int type = hdf5_h.H5Sget_simple_extent_type(H5sid);
             assertEquals("Should be H5S_SIMPLE", hdf5_h.H5S_SIMPLE(), type);
 
             // Set extent to none (null dataspace)
@@ -905,7 +905,7 @@ public class TestH5Sffm {
             assertTrue("H5Sset_extent_none failed", isSuccess(result));
 
             // Verify it's now null
-            type = hdf5_h_1.H5Sget_simple_extent_type(H5sid);
+            type = hdf5_h.H5Sget_simple_extent_type(H5sid);
             assertEquals("Should be H5S_NULL", hdf5_h.H5S_NULL(), type);
         }
     }
@@ -922,11 +922,11 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Create destination dataspace
-            H5sid2 = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid2 = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple for dest failed", isValidId(H5sid2));
 
             // Select hyperslab in source
@@ -937,24 +937,24 @@ public class TestH5Sffm {
             copyToSegment(startSegment, start);
             copyToSegment(countSegment, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
                                                       MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get original selection npoints
-            long npoints1 = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            long npoints1 = hdf5_h.H5Sget_select_npoints(H5sid);
             assertEquals("Should have 6 points", 6L, npoints1);
 
             // Copy selection from source to destination
-            result = hdf5_h_1.H5Sselect_copy(H5sid2, H5sid);
+            result = hdf5_h.H5Sselect_copy(H5sid2, H5sid);
             assertTrue("H5Sselect_copy failed", isSuccess(result));
 
             // Verify destination has same selection
-            long npoints2 = hdf5_h_1.H5Sget_select_npoints(H5sid2);
+            long npoints2 = hdf5_h.H5Sget_select_npoints(H5sid2);
             assertEquals("Destination should have same npoints", npoints1, npoints2);
         }
         finally {
-            closeQuietly(H5sid2, hdf5_h_1::H5Sclose);
+            closeQuietly(H5sid2, hdf5_h::H5Sclose);
         }
     }
 
@@ -970,7 +970,7 @@ public class TestH5Sffm {
             MemorySegment dims1Segment = allocateLongArray(arena, RANK);
             copyToSegment(dims1Segment, dims1);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dims1Segment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dims1Segment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Create second dataspace with different dims but same selection shape
@@ -978,7 +978,7 @@ public class TestH5Sffm {
             MemorySegment dims2Segment = allocateLongArray(arena, RANK);
             copyToSegment(dims2Segment, dims2);
 
-            H5sid2 = hdf5_h_1.H5Screate_simple(RANK, dims2Segment, MemorySegment.NULL);
+            H5sid2 = hdf5_h.H5Screate_simple(RANK, dims2Segment, MemorySegment.NULL);
             assertTrue("H5Screate_simple for sid2 failed", isValidId(H5sid2));
 
             // Select same shaped hyperslab in both (2x3 block)
@@ -989,7 +989,7 @@ public class TestH5Sffm {
             copyToSegment(start1Segment, start1);
             copyToSegment(count1Segment, count1);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment,
                                                       MemorySegment.NULL, count1Segment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab for sid1 failed", isSuccess(result));
 
@@ -1000,16 +1000,16 @@ public class TestH5Sffm {
             copyToSegment(start2Segment, start2);
             copyToSegment(count2Segment, count2);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(H5sid2, hdf5_h.H5S_SELECT_SET(), start2Segment,
+            result = hdf5_h.H5Sselect_hyperslab(H5sid2, hdf5_h.H5S_SELECT_SET(), start2Segment,
                                                   MemorySegment.NULL, count2Segment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab for sid2 failed", isSuccess(result));
 
             // Check if selections have same shape
-            int same = hdf5_h_1.H5Sselect_shape_same(H5sid, H5sid2);
+            int same = hdf5_h.H5Sselect_shape_same(H5sid, H5sid2);
             assertTrue("Selections should have same shape", same > 0);
         }
         finally {
-            closeQuietly(H5sid2, hdf5_h_1::H5Sclose);
+            closeQuietly(H5sid2, hdf5_h::H5Sclose);
         }
     }
 
@@ -1023,7 +1023,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select regular hyperslab (single block)
@@ -1040,12 +1040,12 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
             copyToSegment(blockSegment, block);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
                                                       strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Check if it's regular
-            int regular = hdf5_h_1.H5Sis_regular_hyperslab(H5sid);
+            int regular = hdf5_h.H5Sis_regular_hyperslab(H5sid);
             assertTrue("Should be regular hyperslab", regular > 0);
         }
     }
@@ -1060,7 +1060,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select regular hyperslab
@@ -1077,7 +1077,7 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
             copyToSegment(blockSegment, block);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
                                                       strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
@@ -1087,7 +1087,7 @@ public class TestH5Sffm {
             MemorySegment outCount  = allocateLongArray(arena, RANK);
             MemorySegment outBlock  = allocateLongArray(arena, RANK);
 
-            result = hdf5_h_1.H5Sget_regular_hyperslab(H5sid, outStart, outStride, outCount, outBlock);
+            result = hdf5_h.H5Sget_regular_hyperslab(H5sid, outStart, outStride, outCount, outBlock);
             assertTrue("H5Sget_regular_hyperslab failed", isSuccess(result));
 
             // Verify parameters match
@@ -1116,7 +1116,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // First selection: [1,1] to [2,2] (2x2 block)
@@ -1127,7 +1127,7 @@ public class TestH5Sffm {
             copyToSegment(start1s, start1);
             copyToSegment(count1s, count1);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1s,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1s,
                                                       MemorySegment.NULL, count1s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
@@ -1140,19 +1140,19 @@ public class TestH5Sffm {
             copyToSegment(count2s, count2);
 
             // Combine creates a new dataspace
-            long combined_sid = hdf5_h_1.H5Scombine_hyperslab(
+            long combined_sid = hdf5_h.H5Scombine_hyperslab(
                 H5sid, hdf5_h.H5S_SELECT_OR(), start2s, MemorySegment.NULL, count2s, MemorySegment.NULL);
             assertTrue("H5Scombine_hyperslab failed", isValidId(combined_sid));
 
             // Verify combined selection has more points than original
-            long original_npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
-            long combined_npoints = hdf5_h_1.H5Sget_select_npoints(combined_sid);
+            long original_npoints = hdf5_h.H5Sget_select_npoints(H5sid);
+            long combined_npoints = hdf5_h.H5Sget_select_npoints(combined_sid);
             assertTrue("Combined selection should have more points", combined_npoints > original_npoints);
 
             // Original: 2x2 = 4 points, Combined: should be larger due to OR
             assertEquals("Original should have 4 points", 4L, original_npoints);
 
-            hdf5_h_1.H5Sclose(combined_sid);
+            hdf5_h.H5Sclose(combined_sid);
         }
     }
 
@@ -1167,7 +1167,7 @@ public class TestH5Sffm {
             copyToSegment(dimsSegment, dims);
 
             // Create first dataspace with selection
-            long space1_id = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            long space1_id = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple space1 failed", isValidId(space1_id));
 
             long[] start1         = {0, 0};
@@ -1177,12 +1177,12 @@ public class TestH5Sffm {
             copyToSegment(start1s, start1);
             copyToSegment(count1s, count1);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(space1_id, hdf5_h.H5S_SELECT_SET(), start1s,
+            int result = hdf5_h.H5Sselect_hyperslab(space1_id, hdf5_h.H5S_SELECT_SET(), start1s,
                                                       MemorySegment.NULL, count1s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab space1 failed", isSuccess(result));
 
             // Create second dataspace with different selection
-            long space2_id = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            long space2_id = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple space2 failed", isValidId(space2_id));
 
             long[] start2         = {1, 1};
@@ -1192,27 +1192,27 @@ public class TestH5Sffm {
             copyToSegment(start2s, start2);
             copyToSegment(count2s, count2);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(space2_id, hdf5_h.H5S_SELECT_SET(), start2s,
+            result = hdf5_h.H5Sselect_hyperslab(space2_id, hdf5_h.H5S_SELECT_SET(), start2s,
                                                   MemorySegment.NULL, count2s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab space2 failed", isSuccess(result));
 
             // Combine selections with OR operation
-            long combined_sid = hdf5_h_1.H5Scombine_select(space1_id, hdf5_h.H5S_SELECT_OR(), space2_id);
+            long combined_sid = hdf5_h.H5Scombine_select(space1_id, hdf5_h.H5S_SELECT_OR(), space2_id);
             assertTrue("H5Scombine_select failed", isValidId(combined_sid));
 
             // Verify combined selection has expected points
-            long space1_npoints   = hdf5_h_1.H5Sget_select_npoints(space1_id);
-            long space2_npoints   = hdf5_h_1.H5Sget_select_npoints(space2_id);
-            long combined_npoints = hdf5_h_1.H5Sget_select_npoints(combined_sid);
+            long space1_npoints   = hdf5_h.H5Sget_select_npoints(space1_id);
+            long space2_npoints   = hdf5_h.H5Sget_select_npoints(space2_id);
+            long combined_npoints = hdf5_h.H5Sget_select_npoints(combined_sid);
 
             assertEquals("Space1 should have 6 points", 6L, space1_npoints);
             assertEquals("Space2 should have 6 points", 6L, space2_npoints);
             // Combined with OR will be at least the larger of the two
             assertTrue("Combined selection should have points", combined_npoints > 0);
 
-            hdf5_h_1.H5Sclose(space1_id);
-            hdf5_h_1.H5Sclose(space2_id);
-            hdf5_h_1.H5Sclose(combined_sid);
+            hdf5_h.H5Sclose(space1_id);
+            hdf5_h.H5Sclose(space2_id);
+            hdf5_h.H5Sclose(combined_sid);
         }
     }
 
@@ -1227,7 +1227,7 @@ public class TestH5Sffm {
             copyToSegment(dimsSegment, dims);
 
             // Create first dataspace with selection
-            long space1_id = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            long space1_id = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple space1 failed", isValidId(space1_id));
 
             long[] start1         = {0, 0};
@@ -1237,15 +1237,15 @@ public class TestH5Sffm {
             copyToSegment(start1s, start1);
             copyToSegment(count1s, count1);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(space1_id, hdf5_h.H5S_SELECT_SET(), start1s,
+            int result = hdf5_h.H5Sselect_hyperslab(space1_id, hdf5_h.H5S_SELECT_SET(), start1s,
                                                       MemorySegment.NULL, count1s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab space1 failed", isSuccess(result));
 
-            long original_npoints = hdf5_h_1.H5Sget_select_npoints(space1_id);
+            long original_npoints = hdf5_h.H5Sget_select_npoints(space1_id);
             assertEquals("Original should have 4 points", 4L, original_npoints);
 
             // Create second dataspace with different selection
-            long space2_id = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            long space2_id = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple space2 failed", isValidId(space2_id));
 
             long[] start2         = {1, 1};
@@ -1255,21 +1255,21 @@ public class TestH5Sffm {
             copyToSegment(start2s, start2);
             copyToSegment(count2s, count2);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(space2_id, hdf5_h.H5S_SELECT_SET(), start2s,
+            result = hdf5_h.H5Sselect_hyperslab(space2_id, hdf5_h.H5S_SELECT_SET(), start2s,
                                                   MemorySegment.NULL, count2s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab space2 failed", isSuccess(result));
 
             // Modify space1's selection by combining with space2 using OR
-            result = hdf5_h_1.H5Smodify_select(space1_id, hdf5_h.H5S_SELECT_OR(), space2_id);
+            result = hdf5_h.H5Smodify_select(space1_id, hdf5_h.H5S_SELECT_OR(), space2_id);
             assertTrue("H5Smodify_select failed", isSuccess(result));
 
             // Verify modified selection has more points
-            long modified_npoints = hdf5_h_1.H5Sget_select_npoints(space1_id);
+            long modified_npoints = hdf5_h.H5Sget_select_npoints(space1_id);
             assertTrue("Modified selection should have more points than original",
                        modified_npoints > original_npoints);
 
-            hdf5_h_1.H5Sclose(space1_id);
-            hdf5_h_1.H5Sclose(space2_id);
+            hdf5_h.H5Sclose(space1_id);
+            hdf5_h.H5Sclose(space2_id);
         }
     }
 
@@ -1283,7 +1283,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Create selection: [1,1] to [2,2]
@@ -1294,7 +1294,7 @@ public class TestH5Sffm {
             copyToSegment(starts, start);
             copyToSegment(counts, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
                                                       MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
@@ -1306,7 +1306,7 @@ public class TestH5Sffm {
             copyToSegment(bstart, block_start);
             copyToSegment(bend, block_end);
 
-            result = hdf5_h_1.H5Sselect_intersect_block(H5sid, bstart, bend);
+            result = hdf5_h.H5Sselect_intersect_block(H5sid, bstart, bend);
             assertTrue("Block [1,1]-[2,2] should intersect with selection [1,1]-[2,2]", result > 0);
 
             // Test non-intersecting block [0,0] to [0,0]
@@ -1317,7 +1317,7 @@ public class TestH5Sffm {
             copyToSegment(bstart2, block_start2);
             copyToSegment(bend2, block_end2);
 
-            result = hdf5_h_1.H5Sselect_intersect_block(H5sid, bstart2, bend2);
+            result = hdf5_h.H5Sselect_intersect_block(H5sid, bstart2, bend2);
             assertEquals("Block [0,0]-[0,0] should not intersect with selection [1,1]-[2,2]", 0, result);
         }
     }
@@ -1334,7 +1334,7 @@ public class TestH5Sffm {
             MemorySegment srcDimsSeg = allocateLongArray(arena, src_rank);
             copyToSegment(srcDimsSeg, src_dims);
 
-            long src_sid = hdf5_h_1.H5Screate_simple(src_rank, srcDimsSeg, MemorySegment.NULL);
+            long src_sid = hdf5_h.H5Screate_simple(src_rank, srcDimsSeg, MemorySegment.NULL);
             assertTrue("H5Screate_simple src failed", isValidId(src_sid));
 
             // Select region in source [0,1,1] count [1,2,2] (4 points)
@@ -1345,12 +1345,12 @@ public class TestH5Sffm {
             copyToSegment(srcStarts, src_start);
             copyToSegment(srcCounts, src_count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(src_sid, hdf5_h.H5S_SELECT_SET(), srcStarts,
+            int result = hdf5_h.H5Sselect_hyperslab(src_sid, hdf5_h.H5S_SELECT_SET(), srcStarts,
                                                       MemorySegment.NULL, srcCounts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab src failed", isSuccess(result));
 
             // Create 3D destination dataspace (same rank as source)
-            long dst_sid = hdf5_h_1.H5Screate_simple(src_rank, srcDimsSeg, MemorySegment.NULL);
+            long dst_sid = hdf5_h.H5Screate_simple(src_rank, srcDimsSeg, MemorySegment.NULL);
             assertTrue("H5Screate_simple dst failed", isValidId(dst_sid));
 
             // Select matching region in destination [0,0,0] count [1,3,3] (9 points, overlaps with src)
@@ -1361,7 +1361,7 @@ public class TestH5Sffm {
             copyToSegment(dstStarts, dst_start);
             copyToSegment(dstCounts, dst_count);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(dst_sid, hdf5_h.H5S_SELECT_SET(), dstStarts,
+            result = hdf5_h.H5Sselect_hyperslab(dst_sid, hdf5_h.H5S_SELECT_SET(), dstStarts,
                                                   MemorySegment.NULL, dstCounts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab dst failed", isSuccess(result));
 
@@ -1371,23 +1371,23 @@ public class TestH5Sffm {
             MemorySegment projDimsSeg = allocateLongArray(arena, proj_rank);
             copyToSegment(projDimsSeg, proj_dims);
 
-            long proj_space = hdf5_h_1.H5Screate_simple(proj_rank, projDimsSeg, MemorySegment.NULL);
+            long proj_space = hdf5_h.H5Screate_simple(proj_rank, projDimsSeg, MemorySegment.NULL);
             assertTrue("H5Screate_simple proj failed", isValidId(proj_space));
 
             // Project intersection - projects src selection onto dst, creating result in proj_space
             // This tests the function exists and can be called (may fail due to complex requirements)
-            long proj_sid = hdf5_h_1.H5Sselect_project_intersection(src_sid, dst_sid, proj_space);
+            long proj_sid = hdf5_h.H5Sselect_project_intersection(src_sid, dst_sid, proj_space);
 
             // Only verify if valid ID returned (function is complex and may have strict requirements)
             if (isValidId(proj_sid)) {
-                long proj_npoints = hdf5_h_1.H5Sget_select_npoints(proj_sid);
+                long proj_npoints = hdf5_h.H5Sget_select_npoints(proj_sid);
                 assertTrue("Projected selection should have points", proj_npoints > 0);
-                hdf5_h_1.H5Sclose(proj_sid);
+                hdf5_h.H5Sclose(proj_sid);
             }
 
-            hdf5_h_1.H5Sclose(src_sid);
-            hdf5_h_1.H5Sclose(dst_sid);
-            hdf5_h_1.H5Sclose(proj_space);
+            hdf5_h.H5Sclose(src_sid);
+            hdf5_h.H5Sclose(dst_sid);
+            hdf5_h.H5Sclose(proj_space);
         }
     }
 
@@ -1405,11 +1405,11 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Initially no selection (NONE), which is valid
-            int result = hdf5_h_1.H5Sselect_none(H5sid);
+            int result = hdf5_h.H5Sselect_none(H5sid);
             assertTrue("H5Sselect_none failed", isSuccess(result));
 
             result = hdf5_h.H5Sselect_valid(H5sid);
@@ -1423,7 +1423,7 @@ public class TestH5Sffm {
             copyToSegment(starts, start);
             copyToSegment(counts, count);
 
-            result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts, MemorySegment.NULL,
+            result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts, MemorySegment.NULL,
                                                   counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
@@ -1431,7 +1431,7 @@ public class TestH5Sffm {
             assertTrue("Valid hyperslab selection should be valid", result > 0);
 
             // Select ALL
-            result = hdf5_h_1.H5Sselect_all(H5sid);
+            result = hdf5_h.H5Sselect_all(H5sid);
             assertTrue("H5Sselect_all failed", isSuccess(result));
 
             result = hdf5_h.H5Sselect_valid(H5sid);
@@ -1449,7 +1449,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Create selection [1,1] to [2,2]
@@ -1460,7 +1460,7 @@ public class TestH5Sffm {
             copyToSegment(starts, start);
             copyToSegment(counts, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
                                                       MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
@@ -1469,7 +1469,7 @@ public class TestH5Sffm {
             MemorySegment offsetSeg = allocateLongArray(arena, RANK);
             copyToSegment(offsetSeg, offset);
 
-            result = hdf5_h_1.H5Soffset_simple(H5sid, offsetSeg);
+            result = hdf5_h.H5Soffset_simple(H5sid, offsetSeg);
             assertTrue("H5Soffset_simple failed", isSuccess(result));
 
             // After offset, selection should be shifted to [2,2] to [3,3]
@@ -1477,7 +1477,7 @@ public class TestH5Sffm {
             MemorySegment startBounds = allocateLongArray(arena, RANK);
             MemorySegment endBounds   = allocateLongArray(arena, RANK);
 
-            result = hdf5_h_1.H5Sget_select_bounds(H5sid, startBounds, endBounds);
+            result = hdf5_h.H5Sget_select_bounds(H5sid, startBounds, endBounds);
             assertTrue("H5Sget_select_bounds failed", isSuccess(result));
 
             long[] outStart = new long[RANK];
@@ -1507,7 +1507,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Add a selection to make it more interesting
@@ -1518,17 +1518,17 @@ public class TestH5Sffm {
             copyToSegment(starts, start);
             copyToSegment(counts, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
                                                       MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get original npoints
-            long orig_npoints = hdf5_h_1.H5Sget_select_npoints(H5sid);
+            long orig_npoints = hdf5_h.H5Sget_select_npoints(H5sid);
             assertEquals("Original should have 6 points", 6L, orig_npoints);
 
             // Encode with H5Sencode2 (first get size)
             MemorySegment sizePtr = allocateLong(arena);
-            result = hdf5_h_1.H5Sencode2(H5sid, MemorySegment.NULL, sizePtr, hdf5_h.H5P_DEFAULT());
+            result = hdf5_h.H5Sencode2(H5sid, MemorySegment.NULL, sizePtr, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Sencode2 size query failed", isSuccess(result));
 
             long size = getLong(sizePtr);
@@ -1536,22 +1536,22 @@ public class TestH5Sffm {
 
             // Allocate buffer and encode
             MemorySegment buffer = arena.allocate(size);
-            result               = hdf5_h_1.H5Sencode2(H5sid, buffer, sizePtr, hdf5_h.H5P_DEFAULT());
+            result               = hdf5_h.H5Sencode2(H5sid, buffer, sizePtr, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Sencode2 failed", isSuccess(result));
 
             // Decode back
-            long decoded_sid = hdf5_h_1.H5Sdecode(buffer);
+            long decoded_sid = hdf5_h.H5Sdecode(buffer);
             assertTrue("H5Sdecode failed", isValidId(decoded_sid));
 
             // Verify decoded dataspace matches original
-            long decoded_npoints = hdf5_h_1.H5Sget_select_npoints(decoded_sid);
+            long decoded_npoints = hdf5_h.H5Sget_select_npoints(decoded_sid);
             assertEquals("Decoded dataspace should have same npoints as original", orig_npoints,
                          decoded_npoints);
 
-            int decoded_ndims = hdf5_h_1.H5Sget_simple_extent_ndims(decoded_sid);
+            int decoded_ndims = hdf5_h.H5Sget_simple_extent_ndims(decoded_sid);
             assertEquals("Decoded dataspace should have same rank", RANK, decoded_ndims);
 
-            hdf5_h_1.H5Sclose(decoded_sid);
+            hdf5_h.H5Sclose(decoded_sid);
         }
     }
 
@@ -1565,7 +1565,7 @@ public class TestH5Sffm {
             MemorySegment dimsSegment = allocateLongArray(arena, RANK);
             copyToSegment(dimsSegment, dims);
 
-            H5sid = hdf5_h_1.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
+            H5sid = hdf5_h.H5Screate_simple(RANK, dimsSegment, MemorySegment.NULL);
             assertTrue("H5Screate_simple failed", isValidId(H5sid));
 
             // Select some elements
@@ -1576,13 +1576,13 @@ public class TestH5Sffm {
             copyToSegment(starts, start);
             copyToSegment(counts, count);
 
-            int result = hdf5_h_1.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
+            int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
                                                       MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Create selection iterator
             long elmt_size = 4; // 4 bytes for int
-            long iter_id   = hdf5_h_1.H5Ssel_iter_create(H5sid, elmt_size, 0);
+            long iter_id   = hdf5_h.H5Ssel_iter_create(H5sid, elmt_size, 0);
             assertTrue("H5Ssel_iter_create failed", isValidId(iter_id));
 
             // Get sequence list
@@ -1593,7 +1593,7 @@ public class TestH5Sffm {
             MemorySegment offArray = allocateLongArray(arena, (int)maxseq);
             MemorySegment lenArray = allocateLongArray(arena, (int)maxseq);
 
-            result = hdf5_h_1.H5Ssel_iter_get_seq_list(iter_id, maxseq, maxelmts, nseqPtr, neltsPtr, offArray,
+            result = hdf5_h.H5Ssel_iter_get_seq_list(iter_id, maxseq, maxelmts, nseqPtr, neltsPtr, offArray,
                                                        lenArray);
             assertTrue("H5Ssel_iter_get_seq_list failed", isSuccess(result));
 
@@ -1603,11 +1603,11 @@ public class TestH5Sffm {
             assertTrue("Should have at least one element", nelts > 0);
 
             // Reset iterator
-            result = hdf5_h_1.H5Ssel_iter_reset(iter_id, H5sid);
+            result = hdf5_h.H5Ssel_iter_reset(iter_id, H5sid);
             assertTrue("H5Ssel_iter_reset failed", isSuccess(result));
 
             // Close iterator
-            result = hdf5_h_1.H5Ssel_iter_close(iter_id);
+            result = hdf5_h.H5Ssel_iter_close(iter_id);
             assertTrue("H5Ssel_iter_close failed", isSuccess(result));
         }
     }

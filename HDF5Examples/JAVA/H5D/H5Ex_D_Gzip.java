@@ -21,8 +21,6 @@
  ************************************************************/
 
 import static org.hdfgroup.javahdf5.hdf5_h.*;
-import static org.hdfgroup.javahdf5.hdf5_h_1.*;
-import static org.hdfgroup.javahdf5.hdf5_h_2.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;

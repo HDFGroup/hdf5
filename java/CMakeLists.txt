@@ -31,6 +31,25 @@ if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
     set (HDF5_JAVA_USE_FFM TRUE)
     set (HDF5_ENABLE_COMPAT TRUE)
     message (STATUS "Building HDF5 Java with FFM implementation (Java ${Java_VERSION_STRING})")
+
+    # Find the jextract tool using the JAVA_HOME environment variable
+    find_program (JEXTRACT_EXECUTABLE jextract PATHS "$ENV{JAVA_HOME}/bin" "$ENV{JEXTRACT_HOME}/bin" REQUIRED)
+
+    # Define variables for paths
+    set (JEXTRACT_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/jsrc)
+
+    # Generate Java bindings
+      execute_process (
+          COMMAND
+              ${JEXTRACT_EXECUTABLE}
+              --include-dir ${HDF5_SRC_DIR}
+              --include-dir ${HDF5_SRC_BINARY_DIR}
+              --include-dir ${H5FD_SUBFILING_DIR}
+              --output ${JEXTRACT_OUTPUT_DIR}
+              --target-package org.hdfgroup.javahdf5
+              --library hdf5
+              ${HDF5_SRC_DIR}/hdf5.h
+      )
   endif ()
 else ()
   set (HDF5_JAVA_USE_FFM FALSE)
