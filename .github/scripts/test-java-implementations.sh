@@ -46,12 +46,12 @@ declare -A JAVA_VERSIONS=(
 )
 
 declare -A TEST_PRESETS_FFM=(
-    ["build"]="ci-StdShar-GNUC-Java-FFM"
+    ["build"]="ci-StdShar-GNUC-FFM"
     ["maven"]="ci-MinShar-GNUC-Maven-FFM"
 )
 
 declare -A TEST_PRESETS_JNI=(
-    ["build"]="ci-StdShar-GNUC-Java-JNI"
+    ["build"]="ci-StdShar-GNUC"
     ["maven"]="ci-MinShar-GNUC-Maven"
 )
 
