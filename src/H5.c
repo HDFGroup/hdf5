@@ -953,7 +953,7 @@ H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
         } /* end for */
 
-        /* Check for forward compatibilty usage. */
+        /* Check for forward compatibility usage. */
         if (H5_VERS_MINOR > minnum) {
             switch (disable_version_check) {
                 case 0:
