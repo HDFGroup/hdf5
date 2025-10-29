@@ -115,7 +115,8 @@ H5_DLL ssize_t H5VM_opvv(size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_l
                          size_t src_len_arr[], hsize_t src_off_arr[], H5VM_opvv_func_t op, void *op_data);
 H5_DLL ssize_t H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],
                              hsize_t dst_off_arr[], const void *_src, size_t src_max_nseq,
-                             size_t *src_curr_seq, size_t src_len_arr[], hsize_t src_off_arr[]);
+                             size_t *src_curr_seq, size_t src_len_arr[], hsize_t src_off_arr[],
+                             size_t src_alloc_size);
 
 /*-------------------------------------------------------------------------
  * Function:    H5VM_vector_reduce_product

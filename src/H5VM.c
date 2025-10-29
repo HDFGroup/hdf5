@@ -1327,7 +1327,7 @@ done:
 ssize_t
 H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],
               hsize_t dst_off_arr[], const void *_src, size_t src_max_nseq, size_t *src_curr_seq,
-              size_t src_len_arr[], hsize_t src_off_arr[])
+              size_t src_len_arr[], hsize_t src_off_arr[], size_t src_alloc_size)
 {
     unsigned char       *dst;                   /* Destination buffer pointer */
     const unsigned char *src;                   /* Source buffer pointer */
@@ -1339,7 +1339,7 @@ H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_
     size_t   acc_len;                           /* Accumulated length of sequences */
     ssize_t  ret_value = 0;                     /* Return value (Total size of sequence in bytes) */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     assert(_dst);
@@ -1370,6 +1370,12 @@ H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_
     /* Compute buffer offsets */
     dst = (unsigned char *)_dst + *dst_off_ptr;
     src = (const unsigned char *)_src + *src_off_ptr;
+
+    /* Check if src buffer size is less than expected */
+    if (src_alloc_size > 0) {
+        if (src_alloc_size < tmp_src_len)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTOPERATE, FAIL, "src buffer size is less than expected");
+    }
 
     /* Work through the sequences */
     /* (Choose smallest sequence available initially) */
@@ -1507,5 +1513,6 @@ finished:
     *dst_curr_seq = (size_t)(dst_off_ptr - dst_off_arr);
     *src_curr_seq = (size_t)(src_off_ptr - src_off_arr);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VM_memcpyvv() */

@@ -388,18 +388,10 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
     }
     else {
-        size_t *src_len_ptr;
-        src_len_ptr = dset_size_arr + *dset_curr_seq;
-        if (dset_info->store->compact.size > 0) {
-            if (dset_info->store->compact.size < *src_len_ptr)
-                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
-                            "attempting to read more data than allocated compact storage");
-        }
-
         /* Use the vectorized memory copy routine to do actual work */
         if ((ret_value = H5VM_memcpyvv(dset_info->buf.vp, mem_max_nseq, mem_curr_seq, mem_size_arr,
                                        mem_offset_arr, dset_info->store->compact.buf, dset_max_nseq,
-                                       dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
+                                       dset_curr_seq, dset_size_arr, dset_offset_arr, dset_info->store->compact.size)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
     }
 
@@ -457,7 +449,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dse
         /* Use the vectorized memory copy routine to do actual work */
         if ((ret_value = H5VM_memcpyvv(dset_info->store->compact.buf, dset_max_nseq, dset_curr_seq,
                                        dset_size_arr, dset_offset_arr, dset_info->buf.cvp, mem_max_nseq,
-                                       mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
+                                       mem_curr_seq, mem_size_arr, mem_offset_arr, 0)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
     }
 
