@@ -124,11 +124,17 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Java ${{ matrix.java-version }}
+      - name: Set up Java ${{ matrix.java-version }} (${{ matrix.implementation }})
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java-version }}
+          distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
+          java-version: ${{ matrix.implementation == 'ffm' && '25' || matrix.java-version }}
+
+      - name: Setup jextract (FFM builds only)
+        if: ${{ matrix.implementation == 'ffm' }}
+        uses: ./.github/actions/setup-jextract
+        with:
+          java-version: '25'
 
       - name: Setup Build Environment (Linux)
         if: runner.os == 'Linux'

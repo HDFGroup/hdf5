@@ -169,19 +169,20 @@ jobs:
           which cmake
           cmake --version
 
-      - name: Set up Java (if specified)
-        if: inputs.java_version != 'auto'
+      - name: Set up Java (if specified or FFM required)
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
           java-version: |
             ${{
+              inputs.force_java_implementation == 'ffm' && '25' ||
               inputs.java_version == 'latest' && '24' ||
               inputs.java_version
             }}
 
       - name: Verify Java Setup
-        if: inputs.java_version != 'auto'
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
         run: |
           java -version
           echo "JAVA_HOME=$JAVA_HOME"
@@ -197,6 +198,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v5
+
+      - name: Setup jextract (FFM builds only)
+        if: ${{ inputs.force_java_implementation == 'ffm' }}
+        uses: ./.github/actions/setup-jextract
+        with:
+          java-version: '25'
 
       # CONFIGURE
       - name: Configure
