@@ -347,6 +347,16 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-FFM",
+      "description": "MSVC Standard Config for x64 with Java FFM (Requires Java 24+) (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-CPP",
+        "ci-Java-FFM",
+        "ci-StdShar"
+      ]
+    },
+    {
       "name": "ci-StdShar-MSVC-Fortran",
       "description": "MSVC Standard Config for x64 (Release)",
       "inherits": [
@@ -354,6 +364,17 @@
         "ci-CPP",
         "ci-Fortran",
         "ci-Java",
+        "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-MSVC-Fortran-FFM",
+      "description": "MSVC Standard Config for x64 with Java FFM (Requires Java 24+) (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java-FFM",
         "ci-StdShar"
       ]
     },
@@ -369,12 +390,33 @@
       ]
     },
     {
+      "name": "ci-StdShar-Clang-FFM",
+      "description": "Clang Standard Config for x64 with Java FFM (Requires Java 24+) (Release)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java-FFM",
+        "ci-StdShar"
+      ]
+    },
+    {
       "name": "ci-StdShar-macos-Clang",
       "description": "Clang Standard Config for macos (Release)",
       "inherits": [
         "ci-macos-Release-Clang",
         "ci-CPP",
         "ci-Java",
+        "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-Clang-FFM",
+      "description": "Clang Standard Config for macos for x64 with Java FFM (Requires Java 24+) (Release)",
+      "inherits": [
+        "ci-macos-Release-Clang",
+        "ci-CPP",
+        "ci-Java-FFM",
         "ci-StdShar"
       ]
     },
@@ -389,13 +431,34 @@
       ]
     },
     {
+      "name": "ci-StdShar-macos-GNUC-FFM",
+      "description": "GNUC Standard Config for macos for x64 with Java FFM (Requires Java 24+) (Release)",
+      "inherits": [
+        "ci-macos-Release-GNUC",
+        "ci-CPP",
+        "ci-Java-FFM",
+        "ci-StdShar"
+      ]
+    },
+    {
       "name": "ci-StdShar-GNUC",
-      "description": "GNUC Standard Config for x64 (Release)",
+      "description": "GNUC Standard Config for x64 with Java JNI (Java 11+)",
       "inherits": [
         "ci-x64-Release-GNUC",
         "ci-CPP",
         "ci-Fortran",
         "ci-Java",
+        "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-FFM",
+      "description": "GNUC Standard Config for x64 with Java FFM (Requires Java 24+)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java-FFM",
         "ci-StdShar"
       ]
     },
@@ -415,6 +478,17 @@
         "ci-CPP",
         "ci-Fortran",
         "ci-Java",
+        "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Intel-FFM",
+      "description": "Intel Standard Config for x64 with Java FFM (Requires Java 24+) (Release)",
+      "inherits": [
+        "ci-x64-Release-Intel",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java-FFM",
         "ci-StdShar"
       ]
     },
@@ -470,22 +544,6 @@
         "ci-x64-Release-Clang",
         "ci-Java",
         "ci-Maven-Minimal-Snapshot"
-      ]
-    },
-    {
-      "name": "ci-StdShar-GNUC-Java-FFM",
-      "description": "GNUC Standard Config for x64 with Java FFM (Requires Java 24+)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-Java-FFM"
-      ]
-    },
-    {
-      "name": "ci-StdShar-GNUC-Java-JNI",
-      "description": "GNUC Standard Config for x64 with Java JNI (Java 11+)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-Java-JNI"
       ]
     },
     {
@@ -574,7 +632,7 @@
       "description": "GNUC Test-Enabled Config for JNI (Java 11+) - For debugging JNI issues",
       "inherits": [
         "ci-x64-Release-GNUC",
-        "ci-Java-JNI",
+        "ci-Java",
         "ci-Maven-Testing"
       ]
     },
@@ -583,7 +641,7 @@
       "description": "MSVC Test-Enabled Config for JNI (Java 11+) - For debugging Windows JNI issues",
       "inherits": [
         "ci-x64-Release-MSVC",
-        "ci-Java-JNI",
+        "ci-Java",
         "ci-Maven-Testing"
       ]
     },
@@ -592,7 +650,7 @@
       "description": "Clang Test-Enabled Config for JNI (Java 11+) - For debugging macOS JNI issues",
       "inherits": [
         "ci-x64-Release-Clang",
-        "ci-Java-JNI",
+        "ci-Java",
         "ci-Maven-Testing"
       ]
     }
@@ -607,9 +665,25 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-FFM",
+      "description": "MSVC Standard Build for x64 with Java FFM (Requires Java 24+) (Release)",
+      "configurePreset": "ci-StdShar-MSVC-FFM",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-StdShar-Clang",
       "description": "Clang Standard Build for x64 (Release)",
       "configurePreset": "ci-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang-FFM",
+      "description": "Clang Standard Build for x64 with Java FFM (Requires Java 24+) (Release)",
+      "configurePreset": "ci-StdShar-Clang-FFM",
       "inherits": [
         "ci-x64-Release-Clang"
       ]
@@ -623,8 +697,25 @@
       ]
     },
     {
-      "name": "ci-StdShar-macos-GNUC",
+      "name": "ci-StdShar-macos-Clang-FFM",
+      "description": "Clang Standard Build for macos with Java FFM (Requires Java 24+) (Release)",
+      "configurePreset": "ci-StdShar-macos-Clang-FFM",
+      "inherits": [
+        "ci-macos-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-GNUC-FFM",
       "description": "GNUC Standard Build for macos (Release)",
+      "configurePreset": "ci-StdShar-macos-GNUC-FFM",
+      "verbose": true,
+      "inherits": [
+        "ci-macos-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-GNUC",
+      "description": "GNUC Standard Build for macos with Java FFM (Requires Java 24+) (Release)",
       "configurePreset": "ci-StdShar-macos-GNUC",
       "verbose": true,
       "inherits": [
@@ -635,6 +726,15 @@
       "name": "ci-StdShar-GNUC",
       "description": "GNUC Standard Build for x64 (Release)",
       "configurePreset": "ci-StdShar-GNUC",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-FFM",
+      "description": "GNUC Standard Build for x64 with Java FFM (Requires Java 24+) (Release)",
+      "configurePreset": "ci-StdShar-GNUC-FFM",
       "verbose": true,
       "inherits": [
         "ci-x64-Release-GNUC"
@@ -653,6 +753,15 @@
       "name": "ci-StdShar-Intel",
       "description": "Intel Standard Build for x64 (Release)",
       "configurePreset": "ci-StdShar-Intel",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Intel-FFM",
+      "description": "Intel Standard Build for x64 with Java FFM (Requires Java 24+) (Release)",
+      "configurePreset": "ci-StdShar-Intel-FFM",
       "verbose": true,
       "inherits": [
         "ci-x64-Release-Intel"
@@ -830,8 +939,22 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-FFM",
+      "configurePreset": "ci-StdShar-MSVC-FFM",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-StdShar-Clang",
       "configurePreset": "ci-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang-FFM",
+      "configurePreset": "ci-StdShar-Clang-FFM",
       "inherits": [
         "ci-x64-Release-Clang"
       ]
@@ -849,6 +972,18 @@
       }
     },
     {
+      "name": "ci-StdShar-macos-Clang-FFM",
+      "configurePreset": "ci-StdShar-macos-Clang-FFM",
+      "inherits": [
+        "ci-macos-Release-Clang"
+      ],
+      "execution": {
+        "noTestsAction": "error",
+        "timeout": 180,
+        "jobs": 2
+      }
+    },
+    {
       "name": "ci-StdShar-macos-GNUC",
       "configurePreset": "ci-StdShar-macos-GNUC",
       "inherits": [
@@ -856,8 +991,22 @@
       ]
     },
     {
+      "name": "ci-StdShar-macos-GNUC-FFM",
+      "configurePreset": "ci-StdShar-macos-GNUC-FFM",
+      "inherits": [
+        "ci-macos-Release-GNUC"
+      ]
+    },
+    {
       "name": "ci-StdShar-GNUC",
       "configurePreset": "ci-StdShar-GNUC",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-FFM",
+      "configurePreset": "ci-StdShar-GNUC-FFM",
       "inherits": [
         "ci-x64-Release-GNUC"
       ]
@@ -882,8 +1031,27 @@
       }
     },
     {
+      "name": "ci-StdShar-win-Intel-FFM",
+      "configurePreset": "ci-StdShar-Intel-FFM",
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
       "name": "ci-StdShar-Intel",
       "configurePreset": "ci-StdShar-Intel",
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Intel-FFM",
+      "configurePreset": "ci-StdShar-Intel-FFM",
       "inherits": [
         "ci-x64-Release-Intel"
       ]
@@ -1022,8 +1190,18 @@
       "inherits": "ci-x64-Release-MSVC"
     },
     {
+      "name": "ci-StdShar-MSVC-FFM",
+      "configurePreset": "ci-StdShar-MSVC-FFM",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
       "name": "ci-StdShar-Clang",
       "configurePreset": "ci-StdShar-Clang",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-StdShar-Clang-FFM",
+      "configurePreset": "ci-StdShar-Clang-FFM",
       "inherits": "ci-x64-Release-Clang"
     },
     {
@@ -1032,13 +1210,28 @@
       "inherits": "ci-macos-Release-Clang"
     },
     {
+      "name": "ci-StdShar-macos-Clang-FFM",
+      "configurePreset": "ci-StdShar-macos-Clang-FFM",
+      "inherits": "ci-macos-Release-Clang"
+    },
+    {
       "name": "ci-StdShar-macos-GNUC",
       "configurePreset": "ci-StdShar-macos-GNUC",
       "inherits": "ci-macos-Release-GNUC"
     },
     {
+      "name": "ci-StdShar-macos-GNUC-FFM",
+      "configurePreset": "ci-StdShar-macos-GNUC-FFM",
+      "inherits": "ci-macos-Release-GNUC"
+    },
+    {
       "name": "ci-StdShar-GNUC",
       "configurePreset": "ci-StdShar-GNUC",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-StdShar-GNUC-FFM",
+      "configurePreset": "ci-StdShar-GNUC-FFM",
       "inherits": "ci-x64-Release-GNUC"
     },
     {
@@ -1049,6 +1242,11 @@
     {
       "name": "ci-StdShar-Intel",
       "configurePreset": "ci-StdShar-Intel",
+      "inherits": "ci-x64-Release-Intel"
+    },
+    {
+      "name": "ci-StdShar-Intel-FFM",
+      "configurePreset": "ci-StdShar-Intel-FFM",
       "inherits": "ci-x64-Release-Intel"
     },
     {
@@ -1134,6 +1332,27 @@
         }
       ]
     },
+   {
+      "name": "ci-StdShar-MSVC-FFM",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-MSVC-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-MSVC-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-MSVC-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-MSVC-FFM"
+        }
+      ]
+    },
     {
       "name": "ci-StdShar-Clang",
       "steps": [
@@ -1152,6 +1371,27 @@
         {
           "type": "package",
           "name": "ci-StdShar-Clang"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang-FFM",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-Clang-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-Clang-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-Clang-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-Clang-FFM"
         }
       ]
     },
@@ -1177,23 +1417,23 @@
       ]
     },
     {
-      "name": "ci-StdShar-GNUC",
+      "name": "ci-StdShar-macos-Clang-FFM",
       "steps": [
         {
           "type": "configure",
-          "name": "ci-StdShar-GNUC"
+          "name": "ci-StdShar-macos-Clang-FFM"
         },
         {
           "type": "build",
-          "name": "ci-StdShar-GNUC"
+          "name": "ci-StdShar-macos-Clang-FFM"
         },
         {
           "type": "test",
-          "name": "ci-StdShar-GNUC"
+          "name": "ci-StdShar-macos-Clang-FFM"
         },
         {
           "type": "package",
-          "name": "ci-StdShar-GNUC"
+          "name": "ci-StdShar-macos-Clang-FFM"
         }
       ]
     },
@@ -1215,6 +1455,69 @@
         {
           "type": "package",
           "name": "ci-StdShar-macos-GNUC"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-GNUC-FFM",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-macos-GNUC-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-macos-GNUC-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-macos-GNUC-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-macos-GNUC-FFM"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-GNUC"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-GNUC"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-GNUC"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-GNUC"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-FFM",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-GNUC-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-GNUC-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-GNUC-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-GNUC-FFM"
         }
       ]
     },
@@ -1261,6 +1564,27 @@
       ]
     },
     {
+      "name": "ci-StdShar-Intel-FFM",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-Intel-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-Intel-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-Intel-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-Intel-FFM"
+        }
+      ]
+    },
+    {
       "name": "ci-StdShar-win-Intel",
       "steps": [
         {
@@ -1278,6 +1602,27 @@
         {
           "type": "package",
           "name": "ci-StdShar-Intel"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-win-Intel-FFM",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-Intel-FFM"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-Intel-FFM"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-win-Intel-FFM"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-Intel-FFM"
         }
       ]
     },

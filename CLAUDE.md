@@ -64,6 +64,33 @@ cmake --install .
 - `HDF5_ENABLE_MAVEN_DEPLOY=ON` - Enable Maven repository deployment
 - `HDF5_MAVEN_SNAPSHOT=ON` - Build Maven snapshot versions (-SNAPSHOT suffix)
 
+### Preset Naming Convention
+
+HDF5 CMake presets follow a consistent naming pattern:
+
+**Standard Builds** (with Java JNI - default):
+- Format: `ci-StdShar-{COMPILER}`
+- Examples: `ci-StdShar-GNUC`, `ci-StdShar-MSVC`, `ci-StdShar-Clang`, `ci-StdShar-Intel`
+- Description: Full-featured builds with C++, Fortran, Java (JNI), tools, examples, and tests
+
+**FFM Builds** (with Java FFM - requires Java 24+):
+- Format: `ci-StdShar-{COMPILER}-FFM`
+- Examples: `ci-StdShar-GNUC-FFM`, `ci-StdShar-MSVC-FFM`, `ci-StdShar-Clang-FFM`
+- Description: Same as standard builds but with FFM instead of JNI
+
+**Maven Builds** (minimal Java-only builds for Maven artifacts):
+- JNI Format: `ci-MinShar-{COMPILER}-Maven[-Snapshot]`
+- FFM Format: `ci-MinShar-{COMPILER}-Maven-FFM[-Snapshot]`
+- Examples: `ci-MinShar-GNUC-Maven`, `ci-MinShar-GNUC-Maven-FFM-Snapshot`
+- Description: Minimal builds (Java only, no C++/Fortran/tools/tests) for Maven deployment
+
+**Testing Builds** (for debugging FFM/JNI issues):
+- Format: `ci-Testing-{COMPILER}-(FFM|JNI)`
+- Examples: `ci-Testing-GNUC-FFM`, `ci-Testing-MSVC-JNI`
+- Description: Builds with testing enabled for debugging Java implementation issues
+
+**Supported Compilers**: `GNUC` (GCC), `MSVC` (Microsoft Visual C++), `Clang`, `Intel`
+
 ### Java Implementation Selection
 
 **As of HDF5 2.0**: JNI is the default, FFM is optional
@@ -165,8 +192,6 @@ gh workflow run generate-ffm-bindings.yml -f java_version=25
 - `bin/jextract-generate.bat` - Windows jextract wrapper
 - `bin/merge-ffm-bindings.py` - Merge and validate bindings
 
-**Documentation:** `.claude/FFM_BINDINGS_GENERATION_WORKFLOW.md`
-
 **Manual Review Process:**
 1. Download `ffm-bindings-merged` artifact
 2. Review `validation-report` for platform consistency
@@ -204,14 +229,7 @@ FFM tests provide comprehensive coverage across all major HDF5 modules, with tes
 - **H5FD (File Drivers):** Virtual file driver operations
 - **H5Z (Filters):** Filter operations and pipeline management
 
-**Platform Coverage:**
-- ✅ **Linux**: Fully supported
-- ✅ **macOS**: Fully supported
-- ⚠️ **Windows**: Limited platform-specific ABI differences with certain H5T_NATIVE types.
-
 **Note:** FFM tests focus on direct C API bindings via Foreign Function & Memory API. The legacy H5 wrapper class (for JNI compatibility) is separately tested.
-
-**Coverage Goal:** 50%+ coverage for all core modules, with expansion to advanced modules (H5ES Event Sets, H5M Maps) as needed.
 
 **Run FFM tests**:
 ```bash
@@ -343,17 +361,17 @@ ctest -E "MPI|SWMR"         # Exclude parallel/SWMR tests
 
 4. **Java FFM/JNI specific builds:**
    ```bash
-   # Java FFM (default for Java 24+)
-   cmake --workflow --preset ci-StdShar-GNUC-Java-FFM --fresh
+   # Java FFM (requires Java 24+)
+   cmake --workflow --preset ci-StdShar-GNUC-FFM --fresh
 
-   # Java JNI (explicit selection)
-   cmake --workflow --preset ci-StdShar-GNUC-Java-JNI --fresh
+   # Java JNI (default - works with Java 11+)
+   cmake --workflow --preset ci-StdShar-GNUC --fresh
 
    # Maven deployment with FFM
    cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh
 
-   # Maven deployment with JNI
-   cmake --workflow --preset ci-MinShar-GNUC-Maven-JNI --fresh
+   # Maven deployment with JNI (default)
+   cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh
    ```
 
 5. **Maven artifact testing:**
