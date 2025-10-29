@@ -20,7 +20,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,8 +52,8 @@ public class TestH5Rffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create file
             MemorySegment filename = stringToSegment(arena, H5_FILE);
-            H5fid = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                       hdf5_h.H5P_DEFAULT());
+            H5fid                  = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
+                                                      hdf5_h.H5P_DEFAULT());
             assertTrue("H5Fcreate failed", isValidId(H5fid));
 
             // Create dataspace
@@ -68,13 +67,13 @@ public class TestH5Rffm {
             // Create group
             MemorySegment groupname = stringToSegment(arena, "Group1");
             H5gid = hdf5_h.H5Gcreate2(H5fid, groupname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                        hdf5_h.H5P_DEFAULT());
+                                      hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(H5gid));
 
             // Create dataset
             MemorySegment dsetname = stringToSegment(arena, "dset");
-            H5did                  = hdf5_h.H5Dcreate2(H5fid, dsetname, hdf5_h.H5T_STD_I32BE_g(), H5dsid,
-                                                         hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            H5did = hdf5_h.H5Dcreate2(H5fid, dsetname, hdf5_h.H5T_STD_I32BE_g(), H5dsid, hdf5_h.H5P_DEFAULT(),
+                                      hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(H5did));
 
             // Write some data
@@ -88,8 +87,8 @@ public class TestH5Rffm {
                 for (int j = 0; j < DIM_Y; j++)
                     dataBuffer.setAtIndex(java.lang.foreign.ValueLayout.JAVA_INT, i * DIM_Y + j, data[i][j]);
 
-            int result = hdf5_h.H5Dwrite(H5did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                           hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), dataBuffer);
+            int result = hdf5_h.H5Dwrite(H5did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(), hdf5_h.H5S_ALL(),
+                                         hdf5_h.H5P_DEFAULT(), dataBuffer);
             assertTrue("H5Dwrite failed", isSuccess(result));
 
             // Flush file
@@ -134,7 +133,7 @@ public class TestH5Rffm {
 
             // Create object reference to dataset
             MemorySegment dsetname = stringToSegment(arena, "dset");
-            int result = hdf5_h.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
+            int result             = hdf5_h.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), ref_ptr);
             assertTrue("H5Rcreate_object failed", isSuccess(result));
 
             // Get reference type
@@ -194,7 +193,7 @@ public class TestH5Rffm {
             copyToSegment(counts, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(region_sid, hdf5_h.H5S_SELECT_SET(), starts,
-                                                      MemorySegment.NULL, counts, MemorySegment.NULL);
+                                                    MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Create region reference
@@ -230,7 +229,7 @@ public class TestH5Rffm {
             copyToSegment(counts, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(region_sid, hdf5_h.H5S_SELECT_SET(), starts,
-                                                      MemorySegment.NULL, counts, MemorySegment.NULL);
+                                                    MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Create region reference
@@ -267,8 +266,8 @@ public class TestH5Rffm {
             // Create attribute on dataset
             MemorySegment attrname = stringToSegment(arena, "test_attr");
             long attr_sid          = hdf5_h.H5Screate(hdf5_h.H5S_SCALAR());
-            long aid = hdf5_h.H5Acreate2(H5did, attrname, hdf5_h.H5T_NATIVE_INT_g(), attr_sid,
-                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            long aid               = hdf5_h.H5Acreate2(H5did, attrname, hdf5_h.H5T_NATIVE_INT_g(), attr_sid,
+                                                       hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Acreate2 failed", isValidId(aid));
 
             // Write attribute value
@@ -319,8 +318,8 @@ public class TestH5Rffm {
             // Create attribute
             MemorySegment attrname = stringToSegment(arena, "my_attribute");
             long attr_sid          = hdf5_h.H5Screate(hdf5_h.H5S_SCALAR());
-            long aid = hdf5_h.H5Acreate2(H5did, attrname, hdf5_h.H5T_NATIVE_INT_g(), attr_sid,
-                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            long aid               = hdf5_h.H5Acreate2(H5did, attrname, hdf5_h.H5T_NATIVE_INT_g(), attr_sid,
+                                                       hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Acreate2 failed", isValidId(aid));
             hdf5_h.H5Aclose(aid);
             hdf5_h.H5Sclose(attr_sid);
@@ -426,7 +425,7 @@ public class TestH5Rffm {
             // 1. Create object reference
             MemorySegment obj_ref  = arena.allocate(hdf5_h.H5R_REF_BUF_SIZE());
             MemorySegment dsetname = stringToSegment(arena, "dset");
-            int result = hdf5_h.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), obj_ref);
+            int result             = hdf5_h.H5Rcreate_object(H5fid, dsetname, hdf5_h.H5P_DEFAULT(), obj_ref);
             assertTrue("Create object reference failed", isSuccess(result));
 
             // 2. Verify type

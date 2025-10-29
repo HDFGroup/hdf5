@@ -23,8 +23,6 @@ import java.lang.foreign.ValueLayout;
 import org.hdfgroup.javahdf5.H5I_free_t;
 import org.hdfgroup.javahdf5.H5I_iterate_func_t;
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,13 +48,13 @@ public class TestH5Iffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment filename = stringToSegment(arena, H5_FILE);
-            H5fid = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                       hdf5_h.H5P_DEFAULT());
+            H5fid                  = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
+                                                      hdf5_h.H5P_DEFAULT());
             assertTrue("H5Fcreate failed", isValidId(H5fid));
 
             MemorySegment groupname = stringToSegment(arena, "Group1");
             H5gid = hdf5_h.H5Gcreate2(H5fid, groupname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                        hdf5_h.H5P_DEFAULT());
+                                      hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(H5gid));
         }
     }

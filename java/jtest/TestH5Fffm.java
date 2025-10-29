@@ -24,8 +24,6 @@ import java.lang.foreign.ValueLayout;
 import org.hdfgroup.javahdf5.H5AC_cache_config_t;
 import org.hdfgroup.javahdf5.H5F_info2_t;
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -67,7 +65,7 @@ public class TestH5Fffm {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE);
             H5fid = hdf5_h.H5Fcreate(fileNameSegment, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                       hdf5_h.H5P_DEFAULT());
+                                     hdf5_h.H5P_DEFAULT());
             assertTrue("H5Fcreate failed", isValidId(H5fid));
 
             int flushResult = hdf5_h.H5Fflush(H5fid, hdf5_h.H5F_SCOPE_LOCAL());
@@ -226,7 +224,7 @@ public class TestH5Fffm {
 
             // Check if file is accessible
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE);
-            int result = hdf5_h.H5Fis_accessible(fileNameSegment, hdf5_h.H5P_DEFAULT());
+            int result                    = hdf5_h.H5Fis_accessible(fileNameSegment, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Fis_accessible should return true", result > 0);
 
             // Check non-existent file
@@ -251,7 +249,7 @@ public class TestH5Fffm {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE2);
             fid = hdf5_h.H5Fcreate(fileNameSegment, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                     hdf5_h.H5P_DEFAULT());
+                                   hdf5_h.H5P_DEFAULT());
             assertTrue("H5Fcreate failed", isValidId(fid));
 
             int result = hdf5_h.H5Fclose(fid);
@@ -526,7 +524,7 @@ public class TestH5Fffm {
             long space            = hdf5_h.H5Screate_simple(1, dimsSeg, MemorySegment.NULL);
 
             long dset = hdf5_h.H5Dcreate2(H5fid, dsetNameSeg, hdf5_h.H5T_NATIVE_INT_g(), space,
-                                            hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                                          hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
 
             if (isValidId(dset)) {
                 MemorySegment minimize = arena.allocate(ValueLayout.JAVA_BOOLEAN);

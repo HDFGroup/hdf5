@@ -21,7 +21,6 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

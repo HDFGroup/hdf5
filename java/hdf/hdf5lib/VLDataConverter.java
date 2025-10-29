@@ -692,7 +692,7 @@ public class VLDataConverter {
 
                 // Read data from HDF5
                 int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
-                                                                    file_space_id, xfer_plist_id, buffer);
+                                                                  file_space_id, xfer_plist_id, buffer);
                 if (status < 0) {
                     org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                     throw new HDF5JavaException("Failed to read array data");
@@ -748,7 +748,7 @@ public class VLDataConverter {
 
                     // Read data from HDF5
                     int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
-                                                                        file_space_id, xfer_plist_id, buffer);
+                                                                      file_space_id, xfer_plist_id, buffer);
                     if (status < 0) {
                         org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Failed to read array data");
@@ -774,7 +774,7 @@ public class VLDataConverter {
 
                     // Read data from HDF5
                     int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
-                                                                        file_space_id, xfer_plist_id, buffer);
+                                                                      file_space_id, xfer_plist_id, buffer);
                     if (status < 0) {
                         org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Failed to read array data");
@@ -800,7 +800,7 @@ public class VLDataConverter {
 
                     // Read data from HDF5
                     int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
-                                                                        file_space_id, xfer_plist_id, buffer);
+                                                                      file_space_id, xfer_plist_id, buffer);
                     if (status < 0) {
                         org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseTypeId);
                         throw new HDF5JavaException("Failed to read array data");
@@ -1899,7 +1899,7 @@ public class VLDataConverter {
         try {
             // Call native H5Dread to read string pointers
             int status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
-                                                                file_space_id, xfer_plist_id, stringArray);
+                                                              file_space_id, xfer_plist_id, stringArray);
             if (status < 0) {
                 throw new HDF5JavaException("H5Dread failed for VL strings");
             }
@@ -2081,9 +2081,8 @@ public class VLDataConverter {
                                 byte[] strBytes = strValue.getBytes(StandardCharsets.UTF_8);
 
                                 // Allocate with HDF5's memory allocator for VL strings
-                                MemorySegment hdf5StringMem =
-                                    org.hdfgroup.javahdf5.hdf5_h.H5allocate_memory(strBytes.length + 1,
-                                                                                     false);
+                                MemorySegment hdf5StringMem = org.hdfgroup.javahdf5.hdf5_h.H5allocate_memory(
+                                    strBytes.length + 1, false);
                                 if (hdf5StringMem == null || hdf5StringMem.equals(MemorySegment.NULL)) {
                                     throw new HDF5JavaException(
                                         "Failed to allocate HDF5 memory for string: " + strValue);
@@ -2200,7 +2199,7 @@ public class VLDataConverter {
             int status;
             if (isDataset) {
                 status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(attr_or_dataset_id, mem_type_id, mem_space_id,
-                                                                file_space_id, xfer_plist_id, buffer);
+                                                              file_space_id, xfer_plist_id, buffer);
             }
             else {
                 status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_or_dataset_id, mem_type_id, buffer);

@@ -21,7 +21,6 @@ import java.lang.foreign.MemorySegment;
 
 import org.hdfgroup.javahdf5.H5G_info_t;
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,14 +49,14 @@ public class TestH5Gffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create file
             MemorySegment filename = stringToSegment(arena, H5_FILE);
-            H5fid = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                       hdf5_h.H5P_DEFAULT());
+            H5fid                  = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
+                                                      hdf5_h.H5P_DEFAULT());
             assertTrue("H5Fcreate failed", isValidId(H5fid));
 
             // Create root group for testing
             MemorySegment groupname = stringToSegment(arena, "TestGroup");
             H5gid = hdf5_h.H5Gcreate2(H5fid, groupname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                        hdf5_h.H5P_DEFAULT());
+                                      hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(H5gid));
         }
     }
@@ -87,7 +86,7 @@ public class TestH5Gffm {
             // Create a group
             MemorySegment groupname = stringToSegment(arena, "Group1");
             long gid = hdf5_h.H5Gcreate2(H5fid, groupname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Verify it's a group
@@ -107,7 +106,7 @@ public class TestH5Gffm {
             // Create a group
             MemorySegment groupname = stringToSegment(arena, "GroupToOpen");
             long gid1 = hdf5_h.H5Gcreate2(H5fid, groupname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                            hdf5_h.H5P_DEFAULT());
+                                          hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid1));
             hdf5_h.H5Gclose(gid1);
 
@@ -156,7 +155,7 @@ public class TestH5Gffm {
             for (int i = 0; i < 3; i++) {
                 MemorySegment subname = stringToSegment(arena, "SubGroup" + i);
                 long sub_gid = hdf5_h.H5Gcreate2(H5gid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                                   hdf5_h.H5P_DEFAULT());
+                                                 hdf5_h.H5P_DEFAULT());
                 assertTrue("H5Gcreate2 subgroup failed", isValidId(sub_gid));
                 hdf5_h.H5Gclose(sub_gid);
             }
@@ -183,7 +182,7 @@ public class TestH5Gffm {
             // Create a subgroup
             MemorySegment subname = stringToSegment(arena, "InfoTestGroup");
             long sub_gid = hdf5_h.H5Gcreate2(H5fid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                               hdf5_h.H5P_DEFAULT());
+                                             hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(sub_gid));
             hdf5_h.H5Gclose(sub_gid);
 
@@ -206,7 +205,7 @@ public class TestH5Gffm {
             for (int i = 0; i < 3; i++) {
                 MemorySegment subname = stringToSegment(arena, "IdxGroup" + i);
                 long sub_gid = hdf5_h.H5Gcreate2(H5fid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                                   hdf5_h.H5P_DEFAULT());
+                                                 hdf5_h.H5P_DEFAULT());
                 assertTrue("H5Gcreate2 failed", isValidId(sub_gid));
                 hdf5_h.H5Gclose(sub_gid);
             }
@@ -215,7 +214,7 @@ public class TestH5Gffm {
             MemorySegment ginfo   = H5G_info_t.allocate(arena);
             MemorySegment dotname = stringToSegment(arena, ".");
             int result            = hdf5_h.H5Gget_info_by_idx(H5fid, dotname, hdf5_h.H5_INDEX_NAME(),
-                                                                hdf5_h.H5_ITER_INC(), 1, ginfo, hdf5_h.H5P_DEFAULT());
+                                                              hdf5_h.H5_ITER_INC(), 1, ginfo, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gget_info_by_idx failed", isSuccess(result));
 
             // Verify storage type is valid
@@ -235,7 +234,7 @@ public class TestH5Gffm {
             // Create group with default GCPL
             MemorySegment groupname = stringToSegment(arena, "GroupWithGCPL");
             long gid = hdf5_h.H5Gcreate2(H5fid, groupname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Get GCPL back
@@ -263,7 +262,7 @@ public class TestH5Gffm {
             // Create a subgroup
             MemorySegment subname = stringToSegment(arena, "FlushGroup");
             long gid = hdf5_h.H5Gcreate2(H5gid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Flush group
@@ -281,7 +280,7 @@ public class TestH5Gffm {
             // Create a subgroup
             MemorySegment subname = stringToSegment(arena, "RefreshGroup");
             long gid = hdf5_h.H5Gcreate2(H5gid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Flush first
@@ -307,14 +306,14 @@ public class TestH5Gffm {
             // 1. Create group
             MemorySegment groupname = stringToSegment(arena, "WorkflowGroup");
             long gid = hdf5_h.H5Gcreate2(H5fid, groupname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("Create group failed", isValidId(gid));
 
             // 2. Create subgroups
             for (int i = 0; i < 3; i++) {
                 MemorySegment subname = stringToSegment(arena, "Sub" + i);
                 long sub_gid = hdf5_h.H5Gcreate2(gid, subname, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                                   hdf5_h.H5P_DEFAULT());
+                                                 hdf5_h.H5P_DEFAULT());
                 assertTrue("Create subgroup failed", isValidId(sub_gid));
                 hdf5_h.H5Gclose(sub_gid);
             }
@@ -362,14 +361,14 @@ public class TestH5Gffm {
             // Create group with subgroups
             MemorySegment groupName = stringToSegment(arena, "/test_obj_info");
             long gid = hdf5_h.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Create subgroups
             for (int i = 0; i < 3; i++) {
                 MemorySegment subName = stringToSegment(arena, "sub" + i);
                 long subGid = hdf5_h.H5Gcreate2(gid, subName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                                  hdf5_h.H5P_DEFAULT());
+                                                hdf5_h.H5P_DEFAULT());
                 assertTrue("Create sub" + i + " failed", isValidId(subGid));
                 hdf5_h.H5Gclose(subGid);
             }
@@ -393,13 +392,13 @@ public class TestH5Gffm {
             // Create group with named subgroups
             MemorySegment groupName = stringToSegment(arena, "/test_objname_idx");
             long gid = hdf5_h.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Create subgroup
             MemorySegment subName = stringToSegment(arena, "mysubgroup");
             long subGid = hdf5_h.H5Gcreate2(gid, subName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                              hdf5_h.H5P_DEFAULT());
+                                            hdf5_h.H5P_DEFAULT());
             assertTrue("Create subgroup failed", isValidId(subGid));
             hdf5_h.H5Gclose(subGid);
 
@@ -427,13 +426,13 @@ public class TestH5Gffm {
             // Create group
             MemorySegment groupName = stringToSegment(arena, "/test_objtype_idx");
             long gid = hdf5_h.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Create subgroup
             MemorySegment subName = stringToSegment(arena, "subgroup");
             long subGid = hdf5_h.H5Gcreate2(gid, subName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                              hdf5_h.H5P_DEFAULT());
+                                            hdf5_h.H5P_DEFAULT());
             assertTrue("Create subgroup failed", isValidId(subGid));
             hdf5_h.H5Gclose(subGid);
 
@@ -454,7 +453,7 @@ public class TestH5Gffm {
             // Create group
             MemorySegment groupName = stringToSegment(arena, "/test_comment");
             long gid = hdf5_h.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Set comment
@@ -464,8 +463,7 @@ public class TestH5Gffm {
             assertTrue("H5Gset_comment failed", isSuccess(result));
 
             // Get comment size
-            long commentSize =
-                hdf5_h.H5Gget_comment(gid, stringToSegment(arena, "."), 0, MemorySegment.NULL);
+            long commentSize = hdf5_h.H5Gget_comment(gid, stringToSegment(arena, "."), 0, MemorySegment.NULL);
             assertTrue("Comment size should be > 0", commentSize > 0);
 
             // Get comment
@@ -490,7 +488,7 @@ public class TestH5Gffm {
             // Create group
             MemorySegment groupName = stringToSegment(arena, "/test_linkval");
             long gid = hdf5_h.H5Gcreate2(H5fid, groupName, hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT());
             assertTrue("H5Gcreate2 failed", isValidId(gid));
 
             // Create soft link

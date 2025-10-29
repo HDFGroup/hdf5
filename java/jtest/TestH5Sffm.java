@@ -21,8 +21,6 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -239,7 +237,7 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                      MemorySegment.NULL, countSegment, MemorySegment.NULL);
+                                                    MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Verify selection
@@ -345,8 +343,7 @@ public class TestH5Sffm {
             MemorySegment returnedDimsSegment    = allocateLongArray(arena, RANK);
             MemorySegment returnedMaxDimsSegment = allocateLongArray(arena, RANK);
 
-            int ndims =
-                hdf5_h.H5Sget_simple_extent_dims(H5sid, returnedDimsSegment, returnedMaxDimsSegment);
+            int ndims = hdf5_h.H5Sget_simple_extent_dims(H5sid, returnedDimsSegment, returnedMaxDimsSegment);
             assertEquals("Rank should match", RANK, ndims);
 
             long[] returnedDims    = new long[RANK];
@@ -385,7 +382,7 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
 
             hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
-                                         countSegment, MemorySegment.NULL);
+                                       countSegment, MemorySegment.NULL);
 
             selType = hdf5_h.H5Sget_select_type(H5sid);
             assertEquals("Selection type should be HYPERSLABS", hdf5_h.H5S_SEL_HYPERSLABS(), selType);
@@ -419,7 +416,7 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
 
             hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
-                                         countSegment, MemorySegment.NULL);
+                                       countSegment, MemorySegment.NULL);
 
             // Get selection bounds
             MemorySegment boundsStartSegment = allocateLongArray(arena, RANK);
@@ -542,7 +539,7 @@ public class TestH5Sffm {
             copyToSegment(count1Segment, count1);
 
             hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment, MemorySegment.NULL,
-                                         count1Segment, MemorySegment.NULL);
+                                       count1Segment, MemorySegment.NULL);
 
             // Add second hyperslab (OR operation)
             long[] start2               = {2, 2};
@@ -553,7 +550,7 @@ public class TestH5Sffm {
             copyToSegment(count2Segment, count2);
 
             hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_OR(), start2Segment, MemorySegment.NULL,
-                                         count2Segment, MemorySegment.NULL);
+                                       count2Segment, MemorySegment.NULL);
 
             // Get number of blocks
             long nblocks = hdf5_h.H5Sget_select_hyper_nblocks(H5sid);
@@ -584,12 +581,11 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
 
             hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment, MemorySegment.NULL,
-                                         countSegment, MemorySegment.NULL);
+                                       countSegment, MemorySegment.NULL);
 
             // Get encoded size
             MemorySegment nalloc_segment = allocateLong(arena);
-            int result =
-                hdf5_h.H5Sencode2(H5sid, MemorySegment.NULL, nalloc_segment, hdf5_h.H5P_DEFAULT());
+            int result = hdf5_h.H5Sencode2(H5sid, MemorySegment.NULL, nalloc_segment, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Sencode2 (get size) failed", isSuccess(result));
 
             long nalloc = getLong(nalloc_segment);
@@ -661,7 +657,7 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
 
             result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                  MemorySegment.NULL, countSegment, MemorySegment.NULL);
+                                                MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             npoints = hdf5_h.H5Sget_select_npoints(H5sid);
@@ -691,7 +687,7 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                      MemorySegment.NULL, countSegment, MemorySegment.NULL);
+                                                    MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Verify selection is valid
@@ -728,7 +724,7 @@ public class TestH5Sffm {
             copyToSegment(blockSegment, block);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                      strideSegment, countSegment, blockSegment);
+                                                    strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get number of blocks (should be 1)
@@ -774,7 +770,7 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                      MemorySegment.NULL, countSegment, MemorySegment.NULL);
+                                                    MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get original bounds
@@ -833,8 +829,7 @@ public class TestH5Sffm {
             MemorySegment coordsSegment = allocateLongArray(arena, coords.length);
             copyToSegment(coordsSegment, coords);
 
-            int result =
-                hdf5_h.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(), numPoints, coordsSegment);
+            int result = hdf5_h.H5Sselect_elements(H5sid, hdf5_h.H5S_SELECT_SET(), numPoints, coordsSegment);
             assertTrue("H5Sselect_elements failed", isSuccess(result));
 
             // Get number of element points
@@ -938,7 +933,7 @@ public class TestH5Sffm {
             copyToSegment(countSegment, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                      MemorySegment.NULL, countSegment, MemorySegment.NULL);
+                                                    MemorySegment.NULL, countSegment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get original selection npoints
@@ -990,7 +985,7 @@ public class TestH5Sffm {
             copyToSegment(count1Segment, count1);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1Segment,
-                                                      MemorySegment.NULL, count1Segment, MemorySegment.NULL);
+                                                    MemorySegment.NULL, count1Segment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab for sid1 failed", isSuccess(result));
 
             long[] start2               = {2, 3}; // Different position
@@ -1001,7 +996,7 @@ public class TestH5Sffm {
             copyToSegment(count2Segment, count2);
 
             result = hdf5_h.H5Sselect_hyperslab(H5sid2, hdf5_h.H5S_SELECT_SET(), start2Segment,
-                                                  MemorySegment.NULL, count2Segment, MemorySegment.NULL);
+                                                MemorySegment.NULL, count2Segment, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab for sid2 failed", isSuccess(result));
 
             // Check if selections have same shape
@@ -1041,7 +1036,7 @@ public class TestH5Sffm {
             copyToSegment(blockSegment, block);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                      strideSegment, countSegment, blockSegment);
+                                                    strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Check if it's regular
@@ -1078,7 +1073,7 @@ public class TestH5Sffm {
             copyToSegment(blockSegment, block);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), startSegment,
-                                                      strideSegment, countSegment, blockSegment);
+                                                    strideSegment, countSegment, blockSegment);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get regular hyperslab info
@@ -1128,7 +1123,7 @@ public class TestH5Sffm {
             copyToSegment(count1s, count1);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), start1s,
-                                                      MemorySegment.NULL, count1s, MemorySegment.NULL);
+                                                    MemorySegment.NULL, count1s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Combine with second selection: [2,2] to [3,3] (2x2 block) using OR
@@ -1140,8 +1135,8 @@ public class TestH5Sffm {
             copyToSegment(count2s, count2);
 
             // Combine creates a new dataspace
-            long combined_sid = hdf5_h.H5Scombine_hyperslab(
-                H5sid, hdf5_h.H5S_SELECT_OR(), start2s, MemorySegment.NULL, count2s, MemorySegment.NULL);
+            long combined_sid = hdf5_h.H5Scombine_hyperslab(H5sid, hdf5_h.H5S_SELECT_OR(), start2s,
+                                                            MemorySegment.NULL, count2s, MemorySegment.NULL);
             assertTrue("H5Scombine_hyperslab failed", isValidId(combined_sid));
 
             // Verify combined selection has more points than original
@@ -1178,7 +1173,7 @@ public class TestH5Sffm {
             copyToSegment(count1s, count1);
 
             int result = hdf5_h.H5Sselect_hyperslab(space1_id, hdf5_h.H5S_SELECT_SET(), start1s,
-                                                      MemorySegment.NULL, count1s, MemorySegment.NULL);
+                                                    MemorySegment.NULL, count1s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab space1 failed", isSuccess(result));
 
             // Create second dataspace with different selection
@@ -1193,7 +1188,7 @@ public class TestH5Sffm {
             copyToSegment(count2s, count2);
 
             result = hdf5_h.H5Sselect_hyperslab(space2_id, hdf5_h.H5S_SELECT_SET(), start2s,
-                                                  MemorySegment.NULL, count2s, MemorySegment.NULL);
+                                                MemorySegment.NULL, count2s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab space2 failed", isSuccess(result));
 
             // Combine selections with OR operation
@@ -1238,7 +1233,7 @@ public class TestH5Sffm {
             copyToSegment(count1s, count1);
 
             int result = hdf5_h.H5Sselect_hyperslab(space1_id, hdf5_h.H5S_SELECT_SET(), start1s,
-                                                      MemorySegment.NULL, count1s, MemorySegment.NULL);
+                                                    MemorySegment.NULL, count1s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab space1 failed", isSuccess(result));
 
             long original_npoints = hdf5_h.H5Sget_select_npoints(space1_id);
@@ -1256,7 +1251,7 @@ public class TestH5Sffm {
             copyToSegment(count2s, count2);
 
             result = hdf5_h.H5Sselect_hyperslab(space2_id, hdf5_h.H5S_SELECT_SET(), start2s,
-                                                  MemorySegment.NULL, count2s, MemorySegment.NULL);
+                                                MemorySegment.NULL, count2s, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab space2 failed", isSuccess(result));
 
             // Modify space1's selection by combining with space2 using OR
@@ -1295,7 +1290,7 @@ public class TestH5Sffm {
             copyToSegment(counts, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
-                                                      MemorySegment.NULL, counts, MemorySegment.NULL);
+                                                    MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Test intersection with overlapping block [1,1] to [2,2]
@@ -1346,7 +1341,7 @@ public class TestH5Sffm {
             copyToSegment(srcCounts, src_count);
 
             int result = hdf5_h.H5Sselect_hyperslab(src_sid, hdf5_h.H5S_SELECT_SET(), srcStarts,
-                                                      MemorySegment.NULL, srcCounts, MemorySegment.NULL);
+                                                    MemorySegment.NULL, srcCounts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab src failed", isSuccess(result));
 
             // Create 3D destination dataspace (same rank as source)
@@ -1362,7 +1357,7 @@ public class TestH5Sffm {
             copyToSegment(dstCounts, dst_count);
 
             result = hdf5_h.H5Sselect_hyperslab(dst_sid, hdf5_h.H5S_SELECT_SET(), dstStarts,
-                                                  MemorySegment.NULL, dstCounts, MemorySegment.NULL);
+                                                MemorySegment.NULL, dstCounts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab dst failed", isSuccess(result));
 
             // Create 2D projection space
@@ -1424,7 +1419,7 @@ public class TestH5Sffm {
             copyToSegment(counts, count);
 
             result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts, MemorySegment.NULL,
-                                                  counts, MemorySegment.NULL);
+                                                counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             result = hdf5_h.H5Sselect_valid(H5sid);
@@ -1461,7 +1456,7 @@ public class TestH5Sffm {
             copyToSegment(counts, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
-                                                      MemorySegment.NULL, counts, MemorySegment.NULL);
+                                                    MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Apply offset [1, 1]
@@ -1519,7 +1514,7 @@ public class TestH5Sffm {
             copyToSegment(counts, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
-                                                      MemorySegment.NULL, counts, MemorySegment.NULL);
+                                                    MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Get original npoints
@@ -1577,7 +1572,7 @@ public class TestH5Sffm {
             copyToSegment(counts, count);
 
             int result = hdf5_h.H5Sselect_hyperslab(H5sid, hdf5_h.H5S_SELECT_SET(), starts,
-                                                      MemorySegment.NULL, counts, MemorySegment.NULL);
+                                                    MemorySegment.NULL, counts, MemorySegment.NULL);
             assertTrue("H5Sselect_hyperslab failed", isSuccess(result));
 
             // Create selection iterator
@@ -1594,7 +1589,7 @@ public class TestH5Sffm {
             MemorySegment lenArray = allocateLongArray(arena, (int)maxseq);
 
             result = hdf5_h.H5Ssel_iter_get_seq_list(iter_id, maxseq, maxelmts, nseqPtr, neltsPtr, offArray,
-                                                       lenArray);
+                                                     lenArray);
             assertTrue("H5Ssel_iter_get_seq_list failed", isSuccess(result));
 
             long nseq  = getLong(nseqPtr);

@@ -21,8 +21,6 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,8 +48,8 @@ public class TestH5VLffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment filename = stringToSegment(arena, H5_FILE);
-            H5fid = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                       hdf5_h.H5P_DEFAULT());
+            H5fid                  = hdf5_h.H5Fcreate(filename, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
+                                                      hdf5_h.H5P_DEFAULT());
             assertTrue("H5Fcreate failed", isValidId(H5fid));
         }
     }
@@ -257,8 +255,8 @@ public class TestH5VLffm {
             long sid               = hdf5_h.H5Screate(hdf5_h.H5S_SCALAR());
             assertTrue("H5Screate failed", isValidId(sid));
 
-            dset_id = hdf5_h.H5Dcreate2(H5fid, dsetname, hdf5_h.H5T_NATIVE_INT_g(), sid,
-                                          hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            dset_id = hdf5_h.H5Dcreate2(H5fid, dsetname, hdf5_h.H5T_NATIVE_INT_g(), sid, hdf5_h.H5P_DEFAULT(),
+                                        hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(dset_id));
 
             closeQuietly(sid, hdf5_h::H5Sclose);

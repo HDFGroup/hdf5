@@ -21,8 +21,6 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Ignore;
@@ -401,7 +399,7 @@ public class TestH5Tffm {
             // Test H5Tenum_valueof - get value from name
             MemorySegment lookupNameSegment = stringToSegment(arena, "BLUE");
             MemorySegment valueSegment      = allocateInt(arena);
-            result = hdf5_h.H5Tenum_valueof(H5tid, lookupNameSegment, valueSegment);
+            result                          = hdf5_h.H5Tenum_valueof(H5tid, lookupNameSegment, valueSegment);
             assertTrue("H5Tenum_valueof failed", isSuccess(result));
 
             int value = getInt(valueSegment);
@@ -632,7 +630,7 @@ public class TestH5Tffm {
             long srcType = hdf5_h.H5T_STD_I32LE_g();
             long dstType = hdf5_h.H5T_IEEE_F64LE_g();
             int result   = hdf5_h.H5Tconvert(srcType, dstType, numElements, buffer, MemorySegment.NULL,
-                                               hdf5_h.H5P_DEFAULT());
+                                             hdf5_h.H5P_DEFAULT());
             assertTrue("H5Tconvert failed", isSuccess(result));
 
             // Verify first converted value
@@ -658,8 +656,8 @@ public class TestH5Tffm {
             }
 
             // Convert int to float in-place
-            int result = hdf5_h.H5Tconvert(hdf5_h.H5T_STD_I32LE_g(), hdf5_h.H5T_IEEE_F32LE_g(),
-                                             numElements, buffer, MemorySegment.NULL, hdf5_h.H5P_DEFAULT());
+            int result = hdf5_h.H5Tconvert(hdf5_h.H5T_STD_I32LE_g(), hdf5_h.H5T_IEEE_F32LE_g(), numElements,
+                                           buffer, MemorySegment.NULL, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Tconvert failed", isSuccess(result));
 
             // Verify converted values
@@ -1625,8 +1623,8 @@ public class TestH5Tffm {
             long dstType = hdf5_h.H5Tcopy(hdf5_h.H5T_IEEE_F32LE_g());
 
             // Convert in place
-            int result = hdf5_h.H5Tconvert(srcType, dstType, nelem, intData, MemorySegment.NULL,
-                                             hdf5_h.H5P_DEFAULT());
+            int result =
+                hdf5_h.H5Tconvert(srcType, dstType, nelem, intData, MemorySegment.NULL, hdf5_h.H5P_DEFAULT());
             assertEquals("H5Tconvert failed", 0, result);
 
             // Data should now be floats (we can't easily verify values due to overlay)
@@ -1685,7 +1683,7 @@ public class TestH5Tffm {
         try (Arena arena = Arena.ofConfined()) {
             // Create a test file
             long file_id = hdf5_h.H5Fcreate(arena.allocateFrom("test_commit.h5"), hdf5_h.H5F_ACC_TRUNC(),
-                                              hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                                            hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("File creation failed", isValidId(file_id));
 
             // Create compound type
@@ -1695,9 +1693,8 @@ public class TestH5Tffm {
             hdf5_h.H5Tinsert(H5tid, arena.allocateFrom("c"), 8, hdf5_h.H5T_STD_I32LE_g());
 
             // Commit the type
-            int result =
-                hdf5_h.H5Tcommit2(file_id, arena.allocateFrom("mytype"), H5tid, hdf5_h.H5P_DEFAULT(),
-                                    hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            int result = hdf5_h.H5Tcommit2(file_id, arena.allocateFrom("mytype"), H5tid, hdf5_h.H5P_DEFAULT(),
+                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertEquals("H5Tcommit2 failed", 0, result);
 
             // Verify it's committed
@@ -1714,9 +1711,8 @@ public class TestH5Tffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long file_id =
-                hdf5_h.H5Fcreate(arena.allocateFrom("test_commit_anon.h5"), hdf5_h.H5F_ACC_TRUNC(),
-                                   hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            long file_id = hdf5_h.H5Fcreate(arena.allocateFrom("test_commit_anon.h5"), hdf5_h.H5F_ACC_TRUNC(),
+                                            hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
 
             // Create enum type
             H5tid             = hdf5_h.H5Tenum_create(hdf5_h.H5T_STD_I32LE_g());
@@ -1741,12 +1737,12 @@ public class TestH5Tffm {
 
         try (Arena arena = Arena.ofConfined()) {
             long file_id = hdf5_h.H5Fcreate(arena.allocateFrom("test_open.h5"), hdf5_h.H5F_ACC_TRUNC(),
-                                              hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                                            hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
 
             // Create and commit a type
             long tid1 = hdf5_h.H5Tcopy(hdf5_h.H5T_IEEE_F64LE_g());
             hdf5_h.H5Tcommit2(file_id, arena.allocateFrom("double_type"), tid1, hdf5_h.H5P_DEFAULT(),
-                                hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                              hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             hdf5_h.H5Tclose(tid1);
 
             // Open the committed type
@@ -1770,9 +1766,8 @@ public class TestH5Tffm {
         System.out.print(testname.getMethodName());
 
         try (Arena arena = Arena.ofConfined()) {
-            long file_id =
-                hdf5_h.H5Fcreate(arena.allocateFrom("test_get_cplist.h5"), hdf5_h.H5F_ACC_TRUNC(),
-                                   hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            long file_id = hdf5_h.H5Fcreate(arena.allocateFrom("test_get_cplist.h5"), hdf5_h.H5F_ACC_TRUNC(),
+                                            hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
 
             // Create type with custom creation properties
             long tcpl = hdf5_h.H5Pcreate(hdf5_h.H5P_CLS_DATATYPE_CREATE_ID_g());
@@ -1780,7 +1775,7 @@ public class TestH5Tffm {
 
             H5tid = hdf5_h.H5Tcopy(hdf5_h.H5T_STD_I32LE_g());
             hdf5_h.H5Tcommit2(file_id, arena.allocateFrom("int_type"), H5tid, hdf5_h.H5P_DEFAULT(), tcpl,
-                                hdf5_h.H5P_DEFAULT());
+                              hdf5_h.H5P_DEFAULT());
 
             // Get creation property list
             long retrieved_tcpl = hdf5_h.H5Tget_create_plist(H5tid);

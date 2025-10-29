@@ -20,7 +20,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -154,7 +153,7 @@ public class TestH5Effm {
         try (Arena arena = Arena.ofConfined()) {
             // Trigger an error to get real error numbers
             MemorySegment filename = stringToSegment(arena, "nonexistent_for_error_test.h5");
-            long file_id = hdf5_h.H5Fopen(filename, hdf5_h.H5F_ACC_RDONLY(), hdf5_h.H5P_DEFAULT());
+            long file_id           = hdf5_h.H5Fopen(filename, hdf5_h.H5F_ACC_RDONLY(), hdf5_h.H5P_DEFAULT());
             if (isValidId(file_id)) {
                 hdf5_h.H5Fclose(file_id);
             }
@@ -226,7 +225,7 @@ public class TestH5Effm {
         // Trigger an error by trying to open non-existent file
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment filename = stringToSegment(arena, "nonexistent_file_for_test.h5");
-            long file_id = hdf5_h.H5Fopen(filename, hdf5_h.H5F_ACC_RDONLY(), hdf5_h.H5P_DEFAULT());
+            long file_id           = hdf5_h.H5Fopen(filename, hdf5_h.H5F_ACC_RDONLY(), hdf5_h.H5P_DEFAULT());
             // File open will fail, but that's expected
             if (isValidId(file_id)) {
                 hdf5_h.H5Fclose(file_id);

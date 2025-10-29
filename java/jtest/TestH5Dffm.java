@@ -22,8 +22,6 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
-import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -71,7 +69,7 @@ public class TestH5Dffm {
             // Create file
             MemorySegment fileNameSegment = stringToSegment(arena, H5_FILE);
             H5fid = hdf5_h.H5Fcreate(fileNameSegment, hdf5_h.H5F_ACC_TRUNC(), hdf5_h.H5P_DEFAULT(),
-                                       hdf5_h.H5P_DEFAULT());
+                                     hdf5_h.H5P_DEFAULT());
             assertTrue("H5Fcreate failed", isValidId(H5fid));
 
             // Create dataspace
@@ -84,9 +82,8 @@ public class TestH5Dffm {
 
             // Create dataset
             MemorySegment dsetNameSegment = stringToSegment(arena, DATASET_NAME);
-            H5did =
-                hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), H5dsid,
-                                    hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            H5did = hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), H5dsid,
+                                      hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(H5did));
 
             int flushResult = hdf5_h.H5Fflush(H5fid, hdf5_h.H5F_SCOPE_LOCAL());
@@ -210,7 +207,7 @@ public class TestH5Dffm {
 
             // Write data
             int writeResult = hdf5_h.H5Dwrite(H5did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                                hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+                                              hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite failed", isSuccess(writeResult));
 
             // Allocate memory for read
@@ -218,7 +215,7 @@ public class TestH5Dffm {
 
             // Read data
             int readResult = hdf5_h.H5Dread(H5did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                              hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), readSegment);
+                                            hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), readSegment);
             assertTrue("H5Dread failed", isSuccess(readResult));
 
             // Copy back to Java array
@@ -243,7 +240,7 @@ public class TestH5Dffm {
             copyToSegment(writeSegment, writeData);
 
             int writeResult = hdf5_h.H5Dwrite(H5did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                                hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+                                              hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite failed", isSuccess(writeResult));
 
             // Flush to ensure storage is allocated
@@ -262,8 +259,8 @@ public class TestH5Dffm {
 
         try {
             // Create anonymous dataset
-            anon_did = hdf5_h.H5Dcreate_anon(H5fid, hdf5_h.H5T_NATIVE_INT_g(), H5dsid,
-                                               hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            anon_did = hdf5_h.H5Dcreate_anon(H5fid, hdf5_h.H5T_NATIVE_INT_g(), H5dsid, hdf5_h.H5P_DEFAULT(),
+                                             hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate_anon failed", isValidId(anon_did));
 
             // Write some data to verify it works
@@ -273,7 +270,7 @@ public class TestH5Dffm {
                 copyToSegment(writeSegment, writeData);
 
                 int writeResult = hdf5_h.H5Dwrite(anon_did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                                    hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+                                                  hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
                 assertTrue("H5Dwrite to anonymous dataset failed", isSuccess(writeResult));
             }
         }
@@ -296,7 +293,7 @@ public class TestH5Dffm {
             copyToSegment(writeSegment, writeData);
 
             int writeResult = hdf5_h.H5Dwrite(H5did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                                hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+                                              hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite failed", isSuccess(writeResult));
 
             // Flush to ensure storage is allocated
@@ -333,8 +330,8 @@ public class TestH5Dffm {
             assertTrue("H5Tinsert int field failed", isSuccess(result));
 
             MemorySegment doubleNameSegment = stringToSegment(arena, "double_field");
-            result = hdf5_h.H5Tinsert(compound_tid, doubleNameSegment, doubleOffset,
-                                        hdf5_h.H5T_NATIVE_DOUBLE_g());
+            result =
+                hdf5_h.H5Tinsert(compound_tid, doubleNameSegment, doubleOffset, hdf5_h.H5T_NATIVE_DOUBLE_g());
             assertTrue("H5Tinsert double field failed", isSuccess(result));
 
             // Create dataspace for 4 compound elements
@@ -350,7 +347,7 @@ public class TestH5Dffm {
             MemorySegment compoundDsetSegment = stringToSegment(arena, "compound_dset");
             compound_did =
                 hdf5_h.H5Dcreate2(H5fid, compoundDsetSegment, compound_tid, compound_sid,
-                                    hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                                  hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 compound dataset failed", isValidId(compound_did));
 
             // Write compound data with proper 8-byte alignment
@@ -361,14 +358,14 @@ public class TestH5Dffm {
                 writeSegment.set(ValueLayout.JAVA_DOUBLE, offset + doubleOffset, i * 1.5);
             }
 
-            int writeResult = hdf5_h.H5Dwrite(compound_did, compound_tid, hdf5_h.H5S_ALL(),
-                                                hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+            int writeResult = hdf5_h.H5Dwrite(compound_did, compound_tid, hdf5_h.H5S_ALL(), hdf5_h.H5S_ALL(),
+                                              hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite compound failed", isSuccess(writeResult));
 
             // Read compound data
             MemorySegment readSegment = arena.allocate(compoundSize * nElements, 8); // 8-byte aligned
-            int readResult            = hdf5_h.H5Dread(compound_did, compound_tid, hdf5_h.H5S_ALL(),
-                                                         hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), readSegment);
+            int readResult = hdf5_h.H5Dread(compound_did, compound_tid, hdf5_h.H5S_ALL(), hdf5_h.H5S_ALL(),
+                                            hdf5_h.H5P_DEFAULT(), readSegment);
             assertTrue("H5Dread compound failed", isSuccess(readResult));
 
             // Verify data
@@ -416,9 +413,8 @@ public class TestH5Dffm {
 
             // Create dataset
             MemorySegment arrayDsetSegment = stringToSegment(arena, "array_dset");
-            array_did =
-                hdf5_h.H5Dcreate2(H5fid, arrayDsetSegment, array_tid, array_sid, hdf5_h.H5P_DEFAULT(),
-                                    hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            array_did = hdf5_h.H5Dcreate2(H5fid, arrayDsetSegment, array_tid, array_sid, hdf5_h.H5P_DEFAULT(),
+                                          hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 array dataset failed", isValidId(array_did));
 
             // Write array data: 2 elements, each is int[3][2]
@@ -433,7 +429,7 @@ public class TestH5Dffm {
             copyToSegment(writeSegment, writeData);
 
             int writeResult = hdf5_h.H5Dwrite(array_did, array_tid, hdf5_h.H5S_ALL(), hdf5_h.H5S_ALL(),
-                                                hdf5_h.H5P_DEFAULT(), writeSegment);
+                                              hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite array failed", isSuccess(writeResult));
 
             // Read array data
@@ -441,7 +437,7 @@ public class TestH5Dffm {
             MemorySegment readSegment = allocateIntArray(arena, totalSize);
 
             int readResult = hdf5_h.H5Dread(array_did, array_tid, hdf5_h.H5S_ALL(), hdf5_h.H5S_ALL(),
-                                              hdf5_h.H5P_DEFAULT(), readSegment);
+                                            hdf5_h.H5P_DEFAULT(), readSegment);
             assertTrue("H5Dread array failed", isSuccess(readResult));
 
             copyFromSegment(readSegment, readData);
@@ -480,7 +476,7 @@ public class TestH5Dffm {
             // Create dataset
             MemorySegment vlenDsetSegment = stringToSegment(arena, "vlen_dset");
             vlen_did = hdf5_h.H5Dcreate2(H5fid, vlenDsetSegment, vlen_tid, vlen_sid, hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 vlen dataset failed", isValidId(vlen_did));
 
             // Note: Full VL write/read requires hvl_t struct manipulation which is complex in FFM
@@ -551,9 +547,8 @@ public class TestH5Dffm {
 
             // Create chunked dataset
             MemorySegment dsetNameSegment = stringToSegment(arena, "chunked_dset");
-            chunked_did =
-                hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
-                                    hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
+            chunked_did = hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
+                                            hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(chunked_did));
 
             // Write data to create chunks
@@ -565,12 +560,12 @@ public class TestH5Dffm {
             copyToSegment(writeSegment, writeData);
 
             result = hdf5_h.H5Dwrite(chunked_did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                       hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+                                     hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite failed", isSuccess(result));
 
             // Get number of chunks (should be 4 chunks: (4/2) * (6/3) = 2 * 2 = 4)
             MemorySegment nchunksSegment = allocateLong(arena);
-            result = hdf5_h.H5Dget_num_chunks(chunked_did, chunked_sid, nchunksSegment);
+            result                       = hdf5_h.H5Dget_num_chunks(chunked_did, chunked_sid, nchunksSegment);
             assertTrue("H5Dget_num_chunks failed", isSuccess(result));
 
             long nchunks = getLong(nchunksSegment);
@@ -614,9 +609,8 @@ public class TestH5Dffm {
 
             // Create chunked dataset
             MemorySegment dsetNameSegment = stringToSegment(arena, "chunked_dset2");
-            chunked_did =
-                hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
-                                    hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
+            chunked_did = hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
+                                            hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(chunked_did));
 
             // Write data to fill first chunk
@@ -628,7 +622,7 @@ public class TestH5Dffm {
             copyToSegment(writeSegment, writeData);
 
             result = hdf5_h.H5Dwrite(chunked_did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                       hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+                                     hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite failed", isSuccess(result));
 
             // Get chunk storage size for first chunk (offset [0,0])
@@ -684,9 +678,8 @@ public class TestH5Dffm {
 
             // Create extensible chunked dataset
             MemorySegment dsetNameSegment = stringToSegment(arena, "extensible_dset");
-            chunked_did =
-                hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
-                                    hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
+            chunked_did = hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
+                                            hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(chunked_did));
 
             // Extend dataset to 8x12
@@ -769,9 +762,8 @@ public class TestH5Dffm {
 
             // Create dataset
             MemorySegment arrayEnumDsetSegment = stringToSegment(arena, "array_enum_dset");
-            array_did =
-                hdf5_h.H5Dcreate2(H5fid, arrayEnumDsetSegment, array_tid, array_sid, hdf5_h.H5P_DEFAULT(),
-                                    hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+            array_did = hdf5_h.H5Dcreate2(H5fid, arrayEnumDsetSegment, array_tid, array_sid,
+                                          hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 array enum failed", isValidId(array_did));
 
             // Write array of enum data: [[0,1,2], [2,1,0]]
@@ -780,7 +772,7 @@ public class TestH5Dffm {
             copyToSegment(writeSegment, writeData);
 
             result = hdf5_h.H5Dwrite(array_did, array_tid, hdf5_h.H5S_ALL(), hdf5_h.H5S_ALL(),
-                                       hdf5_h.H5P_DEFAULT(), writeSegment);
+                                     hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite array enum failed", isSuccess(result));
 
             // Read array of enum data
@@ -788,7 +780,7 @@ public class TestH5Dffm {
             MemorySegment readSegment = allocateIntArray(arena, readData.length);
 
             result = hdf5_h.H5Dread(array_did, array_tid, hdf5_h.H5S_ALL(), hdf5_h.H5S_ALL(),
-                                      hdf5_h.H5P_DEFAULT(), readSegment);
+                                    hdf5_h.H5P_DEFAULT(), readSegment);
             assertTrue("H5Dread array enum failed", isSuccess(result));
 
             copyFromSegment(readSegment, readData);
@@ -816,7 +808,7 @@ public class TestH5Dffm {
             MemorySegment bufferSegment = allocateIntArray(arena, DIM_X * DIM_Y);
 
             int result = hdf5_h.H5Dfill(fillSegment, hdf5_h.H5T_NATIVE_INT_g(), bufferSegment,
-                                          hdf5_h.H5T_NATIVE_INT_g(), H5dsid);
+                                        hdf5_h.H5T_NATIVE_INT_g(), H5dsid);
             assertTrue("H5Dfill failed", isSuccess(result));
 
             // Verify buffer is filled
@@ -860,9 +852,8 @@ public class TestH5Dffm {
 
             // Create chunked dataset
             MemorySegment dsetNameSegment = stringToSegment(arena, "chunked_info");
-            chunked_did =
-                hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
-                                    hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
+            chunked_did = hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
+                                            hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(chunked_did));
 
             // Write data to create chunks
@@ -874,7 +865,7 @@ public class TestH5Dffm {
             copyToSegment(writeSegment, writeData);
 
             result = hdf5_h.H5Dwrite(chunked_did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                       hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+                                     hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite failed", isSuccess(result));
 
             // Get chunk info for first chunk (index 0)
@@ -884,7 +875,7 @@ public class TestH5Dffm {
             MemorySegment sizeSegment       = allocateLong(arena);
 
             result = hdf5_h.H5Dget_chunk_info(chunked_did, chunked_sid, 0, offsetSegment, filterMaskSegment,
-                                                addrSegment, sizeSegment);
+                                              addrSegment, sizeSegment);
             assertTrue("H5Dget_chunk_info failed", isSuccess(result));
 
             // Verify we got valid chunk information
@@ -935,9 +926,8 @@ public class TestH5Dffm {
 
             // Create chunked dataset
             MemorySegment dsetNameSegment = stringToSegment(arena, "chunked_by_coord");
-            chunked_did =
-                hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
-                                    hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
+            chunked_did = hdf5_h.H5Dcreate2(H5fid, dsetNameSegment, hdf5_h.H5T_NATIVE_INT_g(), chunked_sid,
+                                            hdf5_h.H5P_DEFAULT(), chunked_dcpl, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(chunked_did));
 
             // Write data to create chunks
@@ -949,7 +939,7 @@ public class TestH5Dffm {
             copyToSegment(writeSegment, writeData);
 
             result = hdf5_h.H5Dwrite(chunked_did, hdf5_h.H5T_NATIVE_INT_g(), hdf5_h.H5S_ALL(),
-                                       hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
+                                     hdf5_h.H5S_ALL(), hdf5_h.H5P_DEFAULT(), writeSegment);
             assertTrue("H5Dwrite failed", isSuccess(result));
 
             // Get chunk info for chunk at coordinates [2, 3]
@@ -962,7 +952,7 @@ public class TestH5Dffm {
             MemorySegment sizeSegment       = allocateLong(arena);
 
             result = hdf5_h.H5Dget_chunk_info_by_coord(chunked_did, offsetSegment, filterMaskSegment,
-                                                         addrSegment, sizeSegment);
+                                                       addrSegment, sizeSegment);
             assertTrue("H5Dget_chunk_info_by_coord failed", isSuccess(result));
 
             // Verify we got valid chunk information
@@ -1017,7 +1007,7 @@ public class TestH5Dffm {
             // Create dataset
             MemorySegment dsetName = stringToSegment(arena, "vlen_bufsize");
             vlen_did = hdf5_h.H5Dcreate2(H5fid, dsetName, vlen_tid, vlen_sid, hdf5_h.H5P_DEFAULT(),
-                                           hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
+                                         hdf5_h.H5P_DEFAULT(), hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(vlen_did));
 
             // Note: In FFM, we can test that the function exists and returns successfully
@@ -1103,7 +1093,7 @@ public class TestH5Dffm {
 
             MemorySegment dsetname = stringToSegment(arena, "/chunked_ds");
             long did               = hdf5_h.H5Dcreate2(H5fid, dsetname, hdf5_h.H5T_NATIVE_INT_g(), sid,
-                                                         hdf5_h.H5P_DEFAULT(), dcpl, hdf5_h.H5P_DEFAULT());
+                                                       hdf5_h.H5P_DEFAULT(), dcpl, hdf5_h.H5P_DEFAULT());
             assertTrue("H5Dcreate2 failed", isValidId(did));
 
             // Get chunk index type
