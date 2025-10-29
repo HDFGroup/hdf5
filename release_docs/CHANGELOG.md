@@ -51,6 +51,10 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 # ⚠️ Breaking Changes
 
+### Updated default file format to 1.8
+
+   By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. However, HDF5 library versions 1.6 and earlier will not be able to read files created with the default settings. The previous behavior can be restored using `H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST)`.
+
 ### Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
 
    The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.
