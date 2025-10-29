@@ -557,11 +557,11 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ## Library
 
-### Fixed security issue CVE-2025-2926
+### Fixed security issue CVE-2025-7067
 
-   An image size was corrupted and decoded as 0 resulting in a NULL image buffer, which caused a NULL pointer dereference when the image was being copied to the buffer.  This has been fixed with additional image size check.
+   Fixed a heap buffer overflow in H5FS__sinfo_serialize_node_cb() by discarding file free space sections from the file free space manager when they are found to be invalid. Specifically crafted HDF5 files can result in an attempt to insert duplicate or overlapping file free space sections into a file free space manager, later resulting in a buffer overflow when the same free space section is serialized to the file multiple times.
 
-   Fixes GitHub issue #5384
+   Fixes GitHub issue #5577
 
 ### Fixed security issue CVE-2025-2915 and OSV-2024-381
 
@@ -627,6 +627,12 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
    Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in H5HL__fl_deserialize to ensure no overflow can occur.
 
    Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
+
+### Fixed security issues CVE-2025-2913 and CVE-2025-2926
+
+   The size of a continuation message was decoded as 0, causing multiple vulnerabilities.  An error check was added to return failure to prevent further processing of invalid data.
+
+   Fixes GitHub issue #5376 and #5384
 
 ### Revised handling of Unicode filenames on Windows<a name="utf-8">
 

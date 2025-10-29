@@ -598,17 +598,17 @@ H5O__cache_chk_get_initial_load_size(void *_udata, size_t *image_len)
     const H5O_chk_cache_ud_t *udata     = (const H5O_chk_cache_ud_t *)_udata; /* User data for callback */
     herr_t                    ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     assert(udata);
     assert(udata->oh);
     assert(image_len);
     assert(udata->size);
 
+    /* Set the image length size */
     *image_len = udata->size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__cache_chk_get_initial_load_size() */
 
 /*-------------------------------------------------------------------------
