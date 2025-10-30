@@ -16863,26 +16863,37 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Pget_fapl_direct(long fapl_id, long[] info) throws HDF5LibraryException
     {
-        throw new HDF5LibraryException("H5Pget_fapl_direct not implemented yet");
-        //        if (info == null || info.length < 2) {
-        //            throw new NullPointerException("info is null or has insufficient length");
-        //        }
-        //
-        //        int retVal = -1;
-        //        try (Arena arena = Arena.ofConfined()) {
-        //            MemorySegment alignment_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
-        //            MemorySegment block_size_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
-        //            MemorySegment cbuf_size_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
-        //            if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pget_fapl_direct(fapl_id,
-        //            alignment_segment,
-        //                                                                       block_size_segment,
-        //                                                                       cbuf_size_segment)) < 0)
-        //                h5libraryError();
-        //            info[0] = alignment_segment.get(ValueLayout.JAVA_LONG, 0);
-        //            info[1] = block_size_segment.get(ValueLayout.JAVA_LONG, 0);
-        //            info[2] = cbuf_size_segment.get(ValueLayout.JAVA_LONG, 0);
-        //        }
-        //        return retVal;
+        if (info == null || info.length < 3) {
+            throw new NullPointerException("info is null or has insufficient length (needs 3 elements)");
+        }
+
+        try {
+            // Use reflection to check if H5Pget_fapl_direct exists
+            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod(
+                "H5Pget_fapl_direct", long.class, MemorySegment.class, MemorySegment.class,
+                MemorySegment.class);
+
+            int retVal = -1;
+            try (Arena arena = Arena.ofConfined()) {
+                MemorySegment alignment_segment  = arena.allocate(ValueLayout.JAVA_LONG, 1);
+                MemorySegment block_size_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
+                MemorySegment cbuf_size_segment  = arena.allocate(ValueLayout.JAVA_LONG, 1);
+                if ((retVal = (int)method.invoke(null, fapl_id, alignment_segment, block_size_segment,
+                                                  cbuf_size_segment)) < 0)
+                    h5libraryError();
+                info[0] = alignment_segment.get(ValueLayout.JAVA_LONG, 0);
+                info[1] = block_size_segment.get(ValueLayout.JAVA_LONG, 0);
+                info[2] = cbuf_size_segment.get(ValueLayout.JAVA_LONG, 0);
+            }
+            return retVal;
+        }
+        catch (NoSuchMethodException e) {
+            throw new HDF5LibraryException(
+                "H5Pget_fapl_direct not available (Direct VFD not enabled in this build)");
+        }
+        catch (Exception e) {
+            throw new HDF5LibraryException("H5Pget_fapl_direct failed: " + e.getMessage());
+        }
     }
 
     /**
@@ -16908,17 +16919,29 @@ public class H5 implements java.io.Serializable {
     public static int H5Pset_fapl_direct(long fapl_id, long alignment, long block_size, long cbuf_size)
         throws HDF5LibraryException
     {
-        throw new HDF5LibraryException("H5Pset_fapl_direct not implemented yet");
-        //        if (alignment < 0 || block_size < 0 || cbuf_size < 0) {
-        //            throw new HDF5FunctionArgumentException("alignment, block_size, and cbuf_size must be
-        //            non-negative");
-        //        }
-        //
-        //        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pset_fapl_direct(fapl_id, alignment, block_size,
-        //        cbuf_size); if (retVal < 0) {
-        //            h5libraryError();
-        //        }
-        //        return retVal;
+        if (alignment < 0 || block_size < 0 || cbuf_size < 0) {
+            throw new HDF5FunctionArgumentException(
+                "alignment, block_size, and cbuf_size must be non-negative");
+        }
+
+        try {
+            // Use reflection to check if H5Pset_fapl_direct exists
+            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod(
+                "H5Pset_fapl_direct", long.class, long.class, long.class, long.class);
+
+            int retVal = (int)method.invoke(null, fapl_id, alignment, block_size, cbuf_size);
+            if (retVal < 0) {
+                h5libraryError();
+            }
+            return retVal;
+        }
+        catch (NoSuchMethodException e) {
+            throw new HDF5LibraryException(
+                "H5Pset_fapl_direct not available (Direct VFD not enabled in this build)");
+        }
+        catch (Exception e) {
+            throw new HDF5LibraryException("H5Pset_fapl_direct failed: " + e.getMessage());
+        }
     }
 
     /**
@@ -17008,7 +17031,19 @@ public class H5 implements java.io.Serializable {
     public static int H5Pset_fapl_hdfs(long fapl_id, Object fapl_conf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Pset_fapl_hdfs not implemented yet");
+        try {
+            // Check if H5Pset_fapl_hdfs exists using reflection
+            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod(
+                "H5Pset_fapl_hdfs", long.class, MemorySegment.class);
+
+            // Method exists, but struct conversion not yet implemented
+            throw new HDF5LibraryException(
+                "H5Pset_fapl_hdfs struct conversion not yet implemented for FFM");
+        }
+        catch (NoSuchMethodException e) {
+            throw new HDF5LibraryException(
+                "H5Pset_fapl_hdfs not available (HDFS VFD not enabled in this build)");
+        }
     }
 
     /**
@@ -17027,7 +17062,19 @@ public class H5 implements java.io.Serializable {
      **/
     public static Object H5Pget_fapl_hdfs(long fapl_id) throws HDF5LibraryException
     {
-        throw new HDF5LibraryException("H5Pget_fapl_hdfs not implemented yet");
+        try {
+            // Check if H5Pget_fapl_hdfs exists using reflection
+            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod(
+                "H5Pget_fapl_hdfs", long.class, MemorySegment.class);
+
+            // Method exists, but struct conversion not yet implemented
+            throw new HDF5LibraryException(
+                "H5Pget_fapl_hdfs struct conversion not yet implemented for FFM");
+        }
+        catch (NoSuchMethodException e) {
+            throw new HDF5LibraryException(
+                "H5Pget_fapl_hdfs not available (HDFS VFD not enabled in this build)");
+        }
     }
 
     /**
@@ -17311,7 +17358,24 @@ public class H5 implements java.io.Serializable {
      **/
     public static int H5Pset_fapl_windows(long fapl_id) throws HDF5LibraryException
     {
-        throw new HDF5LibraryException("H5Pset_fapl_windows not implemented yet");
+        try {
+            // Use reflection to check if H5Pset_fapl_windows exists
+            java.lang.reflect.Method method =
+                org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5Pset_fapl_windows", long.class);
+
+            int retVal = (int)method.invoke(null, fapl_id);
+            if (retVal < 0) {
+                h5libraryError();
+            }
+            return retVal;
+        }
+        catch (NoSuchMethodException e) {
+            throw new HDF5LibraryException(
+                "H5Pset_fapl_windows not available (Windows VFD not enabled in this build)");
+        }
+        catch (Exception e) {
+            throw new HDF5LibraryException("H5Pset_fapl_windows failed: " + e.getMessage());
+        }
     }
 
     /**
