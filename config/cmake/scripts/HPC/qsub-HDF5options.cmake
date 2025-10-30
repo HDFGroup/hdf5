@@ -21,11 +21,6 @@ endif()
 ### options to run test scripts in batch commands
 set (LOCAL_BATCH_SCRIPT_NAME "ctest.qsub")
 set (LOCAL_BATCH_SCRIPT_PARALLEL_NAME "ctest.qsub")
-if (DEFINED KNL)
-  ### some additions and alternatives to cross compile on haswell for knl
-  set (COMPUTENODE_HWCOMPILE_MODULE "craype-mic-knl")
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/crayle.cmake")
-endif ()
 set (LOCAL_BATCH_SCRIPT_COMMAND "qsub")
 set (LOCAL_BATCH_TEST "TRUE")
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLOCAL_BATCH_TEST:BOOL=ON")

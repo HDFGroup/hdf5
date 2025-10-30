@@ -44,9 +44,7 @@ When building on HPC systems:
    - CMake version 3.26 or greater
    - MPI implementation module
 
-3. **Unload problematic modules** (e.g., `craype-hugepages2M` on Cray systems)
-
-4. **For Cray systems,** set compiler environment variables AFTER loading modules:
+3. **For Cray and other systems with recommend compiler wrappers,** set compiler environment variables AFTER loading modules:
 
    ```bash
    export CC=cc
@@ -202,7 +200,6 @@ Add after `HDF5config.cmake,` separated by commas:
 | `HPC=bsub` | Use LSF batch system |
 | `HPC=raybsub` | Use Ray LSF variant |
 | `MPI=true` | Enable parallel (disables C++, Java, threadsafe) |
-| `KNL=true` | Cross-compile for KNL compute nodes (Cray XC40) |
 | `LOCAL_BATCH_SCRIPT_ARGS="--account=<acct>"` | Supply batch job account information |
 
 #### Examples
@@ -211,13 +208,6 @@ Add after `HDF5config.cmake,` separated by commas:
 
 ```bash
 ctest -S HDF5config.cmake,HPC=sbatch,MPI=true \
-      -C Release -V -O hdf5.log
-```
-
-**Knight's Landing nodes on Cray XC40:**
-
-```bash
-ctest -S HDF5config.cmake,HPC=sbatch,MPI=true,KNL=true \
       -C Release -V -O hdf5.log
 ```
 
@@ -287,66 +277,26 @@ cmake --install . --prefix /install/path
 
 ### 6.1. Overview
 
-Cross-compiling is necessary when the login node architecture differs from
-compute node architecture (e.g., compiling on Haswell nodes for KNL nodes).
+Cross-compiling is the process of building software on one system architecture (like a login node) to be run on a different architecture (like a compute node). This section provides a historical overview of how this was done on systems that are no longer in service.
 
-### 6.2. Cross-Compiling for KNL on Cray XC40
+### 6.2. Historical Example: Knights Landing (KNL) on Cray XC40
 
-To cross-compile for Knight's Landing nodes, add `KNL=true` to ctest command:
+A common historical use case was compiling for Intel Knights Landing (KNL) nodes on Cray XC40 systems, such as the retired Mutrino and Cori machines. These supercomputers had login nodes with a standard CPU architecture (e.g., Haswell) but used the different KNL architecture for their compute nodes.
 
-```bash
-ctest -S HDF5config.cmake,HPC=sbatch,MPI=true,KNL=true \
-      -C Release -V -O hdf5.log
-```
+To build software for KNL, a "module swapping" technique was required. The build process involved:
+1. Loading the compiler module for the login node architecture (e.g., `craype-haswell`) to configure the project.
 
-This sets the following from `config/cmake/scripts/HPC/sbatch-HDF5options.cmake`:
+2. Switching to the compiler module for the compute node architecture (e.g., `craype-mic-knl`) before starting the actual compilation.
 
-| Variable | Value |
-|----------|-------|
-| `COMPILENODE_HWCOMPILE_MODULE` | `craype-haswell` |
-| `COMPUTENODE_HWCOMPILE_MODULE` | `craype-mic-knl` |
-| `LOCAL_BATCH_SCRIPT_NAME` | `knl_ctestS.sl` |
-| `LOCAL_BATCH_SCRIPT_PARALLEL_NAME` | `knl_ctestP.sl` |
-| `CMAKE_TOOLCHAIN_FILE` | `config/toolchain/crayle.cmake` |
+This process was managed by special CMake toolchain files and custom batch scripts, which were often automated within the `ctest` framework.
 
-CMake loads `craype-haswell` for configuration, then swaps to `craype-mic-knl`
-before compilation.
+### 6.3. Cross-Compilation on Current Systems
 
-### 6.3. Manual Cross-Compile
+The specific hardware (Cray XC40, KNL) and the build procedures described above are historical and no longer in use.
 
-For manual cross-compiling on Cray XC40:
+While cross-compilation is less common on many modern, homogeneous HPC clusters, it is still a necessary technique for advanced architectures, such as systems with different processor types or accelerators (e.g., GPUs).
 
-1. Load `craype-haswell` module
-
-2. Run cmake configure command (see section 5.2), adding:
-   ```bash
-   -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/crayle.cmake \
-   -DLOCAL_BATCH_SCRIPT_NAME:STRING=knl_ctestS.sl \
-   -DLOCAL_BATCH_SCRIPT_PARALLEL_NAME:STRING=knl_ctestP.sl
-   ```
-
-3. Switch to `craype-mic-knl` module:
-   ```bash
-   module swap craype-haswell craype-mic-knl
-   ```
-
-4. Build:
-   ```bash
-   cmake --build . --config Release
-   ```
-
-### 6.4. Machine-Specific Batch Scripts
-
-Batch script arguments for KNL may differ between systems:
-
-| System | SBATCH Arguments |
-|--------|------------------|
-| Mutrino | `#SBATCH -p knl -C quad,cache` |
-| Cori | `#SBATCH -C knl,quad,cache` |
-
-Edit batch scripts in `hdf5-<version>/bin/batch/` or modify
-`LOCAL_BATCH_SCRIPT_NAME` and `LOCAL_BATCH_SCRIPT_PARALLEL_NAME` in
-`config/cmake/scripts/HPC/sbatch-HDF5options.cmake` accordingly.
+**If you need assistance with cross-compiling for a current HPC system, please contact the facility administrators or The HDF Group (Section 1.3).**
 
 ---
 
@@ -405,8 +355,8 @@ Default is 1200 seconds (20 minutes). Modify in CMake with:
 **For SLURM systems:**
 
 ```bash
-sbatch -p knl -C quad,cache build/bin/batch/ctestS.sl    # Serial tests
-sbatch -p knl -C quad,cache build/bin/batch/ctestP.sl    # Parallel tests
+sbatch -C quad,cache build/bin/batch/ctestS.sl    # Serial tests
+sbatch -C quad,cache build/bin/batch/ctestP.sl    # Parallel tests
 ```
 
 **For LSF systems:**
@@ -447,7 +397,7 @@ This is available on Linux kernels 2.4 and greater.
 ### 8.2. Cray Systems
 
 - Use `CC=cc`, `FC=ftn`, `CXX=CC` after loading compiler modules
-- Unload `craype-hugepages2M` if loaded
+- Unload `craype-hugepages2M` if loaded (**Note**: This is situational advice and is not a universal rule, but it may be a valid troubleshooting step if you encounter memory-related performance issues or allocation errors.)
 - Disable shared libraries if encountering linking issues:
   ```bash
   -DBUILD_SHARED_LIBS=OFF
