@@ -573,6 +573,12 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member EOAs. This could cause a failure when an address overflowed the calculated eoa. The driver would also add the user block size when returning the EOF. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first X bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisiting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
 
+### Fixed security issue CVE-2025-7067
+
+   Fixed a heap buffer overflow in H5FS__sinfo_serialize_node_cb() by discarding file free space sections from the file free space manager when they are found to be invalid. Specifically crafted HDF5 files can result in an attempt to insert duplicate or overlapping file free space sections into a file free space manager, later resulting in a buffer overflow when the same free space section is serialized to the file multiple times.
+
+   Fixes GitHub issue #5577
+
 ### Fixed security issue CVE-2025-2915 and OSV-2024-381
 
    Fixed a heap-based buffer overflow in H5F__accum_free caused by an integer overflow when calculating new_accum_size. Added validation in H5O__mdci_decode to detect and reject invalid values early, preventing the overflow condition.

@@ -1206,6 +1206,9 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         unsigned           minval_size  = 0;
 
         minbits = 0;
+        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5, (unsigned char *)*buf + *buf_size - 1))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
         for (i = 0; i < 4; i++) {
             minbits_mask = ((unsigned char *)*buf)[i];
             minbits_mask <<= i * 8;
@@ -1221,6 +1224,9 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         minval_size = sizeof(unsigned long long) <= ((unsigned char *)*buf)[4] ? sizeof(unsigned long long)
                                                                                : ((unsigned char *)*buf)[4];
         minval      = 0;
+        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5 + minval_size,
+                                  (unsigned char *)*buf + *buf_size - 1))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
         for (i = 0; i < minval_size; i++) {
             minval_mask = ((unsigned char *)*buf)[5 + i];
             minval_mask <<= i * 8;
