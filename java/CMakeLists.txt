@@ -35,21 +35,45 @@ if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
     # Find the jextract tool using the JAVA_HOME environment variable
     find_program (JEXTRACT_EXECUTABLE jextract PATHS "$ENV{JAVA_HOME}/bin" "$ENV{JEXTRACT_HOME}/bin" REQUIRED)
 
-    # Define variables for paths
+    # jextract will output to the jsrc binary directory
+    # When jsrc/CMakeLists.txt runs, HDF5_JAVA_JSRC_BINARY_DIR will be set to this location by CMake
     set (JEXTRACT_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/jsrc)
 
-    # Generate Java bindings
-      execute_process (
-          COMMAND
-              ${JEXTRACT_EXECUTABLE}
-              --include-dir ${HDF5_SRC_DIR}
-              --include-dir ${HDF5_SRC_BINARY_DIR}
-              --include-dir ${H5FD_SUBFILING_DIR}
-              --output ${JEXTRACT_OUTPUT_DIR}
-              --target-package org.hdfgroup.javahdf5
-              --library hdf5
-              ${HDF5_SRC_DIR}/hdf5.h
-      )
+    # Display jextract configuration
+    message (STATUS "jextract executable: ${JEXTRACT_EXECUTABLE}")
+    message (STATUS "jextract output directory: ${JEXTRACT_OUTPUT_DIR}")
+    message (STATUS "HDF5 source directory: ${HDF5_SRC_DIR}")
+
+    # Generate Java bindings with error handling
+    execute_process (
+        COMMAND
+            ${JEXTRACT_EXECUTABLE}
+            --include-dir ${HDF5_SRC_DIR}
+            --include-dir ${HDF5_SRC_BINARY_DIR}
+            --include-dir ${H5FD_SUBFILING_DIR}
+            --output ${JEXTRACT_OUTPUT_DIR}
+            --target-package org.hdfgroup.javahdf5
+            --library hdf5
+            ${HDF5_SRC_DIR}/hdf5.h
+        RESULT_VARIABLE JEXTRACT_RESULT
+        OUTPUT_VARIABLE JEXTRACT_OUTPUT
+        ERROR_VARIABLE JEXTRACT_ERROR
+        ECHO_OUTPUT_VARIABLE
+        ECHO_ERROR_VARIABLE
+    )
+
+    # Check if jextract succeeded
+    if (NOT JEXTRACT_RESULT EQUAL 0)
+        message (FATAL_ERROR "jextract failed with exit code ${JEXTRACT_RESULT}\nOutput: ${JEXTRACT_OUTPUT}\nError: ${JEXTRACT_ERROR}")
+    endif ()
+
+    # Verify that key FFM binding files were generated
+    set (EXPECTED_FFM_FILE "${JEXTRACT_OUTPUT_DIR}/org/hdfgroup/javahdf5/hdf5_h.java")
+    if (NOT EXISTS "${EXPECTED_FFM_FILE}")
+        message (FATAL_ERROR "jextract did not generate expected file: ${EXPECTED_FFM_FILE}")
+    endif ()
+
+    message (STATUS "FFM bindings generated successfully at ${JEXTRACT_OUTPUT_DIR}")
   endif ()
 else ()
   set (HDF5_JAVA_USE_FFM FALSE)
