@@ -29,9 +29,16 @@ main(void)
     hsize_t    size;
 
     /*
+     * Set file access property list to use the earliest file format.
+     * This will force the library to create original format groups.
+     */
+    fapl   = H5Pcreate(H5P_FILE_ACCESS);
+    status = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+
+    /*
      * Create file 1.  This file will use original format groups.
      */
-    file  = H5Fcreate(FILENAME1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file  = H5Fcreate(FILENAME1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     group = H5Gcreate(file, GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -72,16 +79,16 @@ main(void)
     status = H5Fclose(file);
 
     /*
-     * Set file access property list to allow the latest file format.
-     * This will allow the library to create new compact format groups.
+     * Now use the default file access property list to allow the latest file
+     * format. This will allow the library to create new compact format groups.
+     * Since HDF5 2.0, the default is to use the 1.8 file format as the low
+     * bound, which includes compact groups.
      */
-    fapl   = H5Pcreate(H5P_FILE_ACCESS);
-    status = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
 
     /*
-     * Create file 2 using the new file access property list.
+     * Create file 2 using the default access property list.
      */
-    file  = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    file  = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     group = H5Gcreate(file, GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
