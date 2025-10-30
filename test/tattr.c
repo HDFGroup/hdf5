@@ -4010,7 +4010,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     u = 2;
     snprintf(attrname, sizeof(attrname), "attr %02u", u);
 
-    if (vol_is_native && low != H5F_LIBVER_LATEST) {
+    if (vol_is_native && low < H5F_LIBVER_V18) {
         H5E_BEGIN_TRY
         {
             attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT, H5P_DEFAULT);
@@ -4019,7 +4019,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     }
     else
         attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT, H5P_DEFAULT);
-    if (low == H5F_LIBVER_LATEST) {
+    if (low >= H5F_LIBVER_V18) {
         CHECK(attr, FAIL, "H5Acreate2");
 
         /* Close attribute */
@@ -11939,10 +11939,12 @@ test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
 void
 test_attr(void H5_ATTR_UNUSED *params)
 {
-    hid_t    fapl = (H5I_INVALID_HID), fapl2 = (H5I_INVALID_HID); /* File access property lists */
+    hid_t fapl = (H5I_INVALID_HID), fapl2 = (H5I_INVALID_HID),
+          fapl3   = (H5I_INVALID_HID);                            /* File access property lists */
     hid_t    fcpl = (H5I_INVALID_HID), fcpl2 = (H5I_INVALID_HID); /* File creation property lists */
     hid_t    dcpl = H5I_INVALID_HID;                              /* Dataset creation property list */
-    unsigned new_format;                                          /* Whether to use the new format or not */
+    unsigned fapl_no;                                             /* Which fapl to use */
+    bool     new_format;                                          /* Whether to use the new format or not */
     unsigned use_shared;       /* Whether to use shared attributes or not */
     unsigned minimize_dset_oh; /* Whether to use minimized dataset object headers */
     herr_t   ret;              /* Generic return value */
@@ -11952,10 +11954,16 @@ test_attr(void H5_ATTR_UNUSED *params)
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
-    /* fapl2 uses "latest version of the format" for creating objects in the file */
+    /* fapl2 uses "earliest version of the format" for creating objects in the file */
     fapl2 = H5Pcopy(fapl);
     CHECK(fapl2, FAIL, "H5Pcopy");
-    ret = H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    ret = H5Pset_libver_bounds(fapl2, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* fapl3 uses "latest version of the format" for creating objects in the file */
+    fapl3 = H5Pcopy(fapl);
+    CHECK(fapl3, FAIL, "H5Pcopy");
+    ret = H5Pset_libver_bounds(fapl3, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     fcpl = H5Pcreate(H5P_FILE_CREATE);
@@ -11984,17 +11992,28 @@ test_attr(void H5_ATTR_UNUSED *params)
             dcpl_g = dcpl;
         }
 
-        for (new_format = false; new_format <= true; new_format++) {
+        for (fapl_no = 1; fapl_no <= 3; fapl_no++) {
             hid_t my_fapl;
 
             /* Set the FAPL for the type of format */
-            if (new_format) {
-                MESSAGE(7, ("testing with new file format\n"));
-                my_fapl = fapl2;
-            }
-            else {
-                MESSAGE(7, ("testing with old file format\n"));
-                my_fapl = fapl;
+            switch (fapl_no) {
+                case 1:
+                    MESSAGE(7, ("testing with default file format\n"));
+                    my_fapl    = fapl;
+                    new_format = true;
+                    break;
+                case 2:
+                    MESSAGE(7, ("testing with old file format\n"));
+                    my_fapl    = fapl2;
+                    new_format = false;
+                    break;
+                case 3:
+                    MESSAGE(7, ("testing with new file format\n"));
+                    my_fapl    = fapl3;
+                    new_format = true;
+                    break;
+                default:
+                    assert(0 && "unhandled case in switch statement");
             }
 
             /* These next two tests use the same file information */
@@ -12153,6 +12172,8 @@ test_attr(void H5_ATTR_UNUSED *params)
     ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
     ret = H5Pclose(fapl2);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(fapl3);
     CHECK(ret, FAIL, "H5Pclose");
 } /* test_attr() */
 

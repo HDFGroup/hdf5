@@ -23535,9 +23535,14 @@ main(void)
     if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
         TEST_ERROR;
 
-    /* fapl2 uses "latest version bounds" */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
         TEST_ERROR;
+
+    /* fapl uses "earliest version bounds" */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    /* fapl2 uses "latest version bounds" */
     if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 

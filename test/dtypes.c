@@ -10008,9 +10008,15 @@ test_latest(void)
     if (H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0)
         FAIL_STACK_ERROR;
 
-    /* Create file using default FAPL */
-    h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
-    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Set the 'use the earliest format' bounds in the FAPL */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create file using earliest version of the file format */
+    h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR;
 
     /* Make a copy of the datatype, to commit */
@@ -10063,8 +10069,6 @@ test_latest(void)
         FAIL_STACK_ERROR;
 
     /* Set the 'use the latest format' bounds in the FAPL */
-    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         FAIL_STACK_ERROR;
 

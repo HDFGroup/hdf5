@@ -51,6 +51,10 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 # ⚠️ Breaking Changes
 
+### Updated default file format to 1.8
+
+   By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. However, HDF5 library versions 1.6 and earlier will not be able to read files created with the default settings. The previous behavior can be restored using `H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST)`.
+
 ### Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
 
    The option has been renamed to `HDF5_ENABLE_ZLIB_SUPPORT` to be consistent with the naming of other options. Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.
@@ -58,6 +62,10 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ### Autotools support was removed from HDF5<a name="cmake">
 
    CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
+
+### Fixed problems with family driver and user block
+
+   When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member EOAs. This could cause a failure when an address overflowed the calculated eoa. The driver would also add the user block size when returning the EOF. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first X bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
 
 # 🚀 New Features & Improvements
 
@@ -184,6 +192,10 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
    The standard for building the library is now C11. We have updated the build files to set the C standard to C11, though some platforms use gnu11 to get some GNU things to work.
 
 ## Library
+
+### Updated default file format to 1.8
+
+   By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. This behavior can be overridden with `H5Pset_libver_bounds()`.
 
 ### Added predefined datatypes for bfloat16 data
 
@@ -556,6 +568,10 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed problems with family driver and user block
+
+   When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member EOAs. This could cause a failure when an address overflowed the calculated eoa. The driver would also add the user block size when returning the EOF. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first X bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
 
 ### Fixed security issue CVE-2025-7067
 
