@@ -86,7 +86,7 @@
 #define H5F_ACS_META_CACHE_INIT_CONFIG_CMP  H5P__facc_cache_config_cmp
 /* Definitions for size of raw data chunk cache(slots) */
 #define H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF  521
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF  8191
 #define H5F_ACS_DATA_CACHE_NUM_SLOTS_ENC  H5P__encode_size_t
 #define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC  H5P__decode_size_t
 /* Definition for size of raw data chunk cache(bytes) */
