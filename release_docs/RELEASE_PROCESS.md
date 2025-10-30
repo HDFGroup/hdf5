@@ -85,25 +85,24 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - or create the new branch in GitHub GUI.
 4. Check that required CMake files point to the specific versions of the third-party software (szip, zlib and plugins) that they depend on.
     - Update as needed.
-5. Change the **support** branch to X.Y.{Z+1}-1 using the [bin/h5vers][u10] script: 
+5. Change the **support** branch to X.Y.{Z+1}-1 (<dash>1) using the [bin/h5vers][u10] script: 
     - `$ git checkout hdf5_X_Y`
     - `$ bin/h5vers -s X.Y.{Z+1}-1;`
     - `$ git commit -m "Updated support branch version number to X.Y.{Z+1}-1"`
     - `$ git push`
-6. Change the **release preparation branch**'s version number to X.Y.Z-{SR+1} using the [bin/h5vers][u10]/bin/h5vers script: 
+6. Change the **release preparation branch**'s version number to X.Y.Z.1 using the [bin/h5vers][u10]/bin/h5vers script: 
     - `$ git checkout hdf5_X_Y_Z;` 
-    - `$ bin/h5vers -s X.Y.Z-{SR+1};` 
-    - `$ git commit -m "Updated release preparation branch version number to X.Y.Z-{SR+1}"` 
+    - `$ bin/h5vers -s X.Y.Z.1;` 
+    - `$ git commit -m "Updated release preparation branch version number to X.Y.Z.1"` 
     - `$ git push` 
-7. Remove 'WILL_FAIL "true"' line for minor version check in test/CMakeTests.cmake (currently line 662).  Minor branches are considered incompatible for develop, but not for release branches. 
-8. ** OBSOLETE CURRENTLY **
+7. ** OBSOLETE CURRENTLY **
    Update default configuration mode
     - `$ git checkout hdf5_X_Y_Z;`. 
     - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][u11].
     - (use `git status --ignored` to see the changes and `git add -f` to add all files. First delete any new files not to be committed, notably `src/H5public.h~`.)
     - `$ git push with commit message listing change steps for creating release branch`
     ** END OBSOLETE CURRENTLY **
-9. E-mail hdf5lib@hdfgroup.org to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely.
+8. E-mail hdf5lib@hdfgroup.org to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely.
 
 ### 8. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)
 1. Verify that source and binary distributions of HDF5 are acceptable on all target operating environments.
@@ -113,9 +112,10 @@ For more information on the HDF5 versioning and backward and forward compatibili
 5. Schedule and enable daily automated regression testing of the release preparation branch (i.e. hdf5_X_Y_Z). Give the 'OK' to proceed once all required tests have verified that HDF5 is functioning as intended on all target operating environments. 
 6. Select release build from workflow.
 7. Choose the release branch
-8. Change ‘Release version tag’ name to 'hdf5_X.Y.Z.P'
-    - P is some pre-release number.
-9. Send a message to the HDF forum indicating that a pre-release source package is available for testing at <e.g., <github.com releases URL>/{hdf5-X.Y.Z-P}> and that feedback from the user community on their test results is being accepted.
+8. Change ‘Release version tag’ name to 'X.Y.Z.P'
+    - P is a pre-release number, starting at 1 for first pre-release.
+    This will create a new tag 'vX.Y.Z.P'.  The tag for the final release will be 'vX.Y.Z'
+9. Send a message to the HDF forum indicating that a pre-release source package is available for testing at <e.g., <github.com releases URL>/{hdf5-X.Y.Z.P}> and that feedback from the user community on their test results is being accepted.
 10. Contact paying clients who are interested in testing the pre-release source package and inform them that it is available for testing and that feedback on their test results of the pre-release is appreciated.
 11. This should be automated and currently github binaries are not signed.
     - Follow the [How to sign binaries with digital certificates(this is missing)]() work instructions to sign each Windows and Mac binary package with a digital certificate.
@@ -210,7 +210,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u8]: https://github.com/HDFGroup/hdf5/blob/develop/.github/workflows/release.yml
 [u9]: https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am
 [u10]: https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers
-[u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
+[u11]: https://github.com/HDFGroup/hdf5/blob/desvelop/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
 [u13]: https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
