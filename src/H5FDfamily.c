@@ -1016,15 +1016,14 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         } /* end if */
 
         /* Set the EOA marker for the member */
-        /* (Note compensating for base address addition in internal routine) */
         H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
         if (addr > (haddr_t)file->memb_size) {
-            if (H5FD_set_eoa(file->memb[u], type, ((haddr_t)file->memb_size - file->pub.base_addr)) < 0)
+            if (H5FD_set_eoa(file->memb[u], type, (haddr_t)file->memb_size) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to set file eoa");
             addr -= file->memb_size;
         } /* end if */
         else {
-            if (H5FD_set_eoa(file->memb[u], type, (addr - file->pub.base_addr)) < 0)
+            if (H5FD_set_eoa(file->memb[u], type, addr) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to set file eoa");
             addr = 0;
         } /* end else */
@@ -1076,9 +1075,6 @@ H5FD__family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
         if (0 == i)
             break;
     } /* end for */
-
-    /* Adjust for base address for file */
-    eof += file->pub.base_addr;
 
     /*
      * The file size is the number of members before the i'th member plus the

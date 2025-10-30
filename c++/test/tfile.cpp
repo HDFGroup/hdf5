@@ -80,7 +80,7 @@ test_file_create()
     H5File *file1 = NULL;
     try {
         // Create file FILE1
-        file1 = new H5File(FILE1, H5F_ACC_EXCL);
+        file1 = new H5File(FILE1, H5F_ACC_TRUNC);
 
         // Try to create the same file with H5F_ACC_TRUNC. This should fail
         // because file1 is the same file and is currently open.
