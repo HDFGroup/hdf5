@@ -595,7 +595,7 @@ done:
 static herr_t
 H5O__cache_chk_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const H5O_chk_cache_ud_t *udata     = (const H5O_chk_cache_ud_t *)_udata; /* User data for callback */
+    const H5O_chk_cache_ud_t *udata = (const H5O_chk_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_PACKAGE_NOERR
 
