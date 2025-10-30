@@ -66,14 +66,6 @@ jobs:
       use_tag: snapshot
       use_environ: snapshots
 
-  call-workflow-generate-ffm-bindings:
-    needs: [get-old-names, call-workflow-tarball]
-    name: "Generate FFM Bindings"
-    uses: ./.github/workflows/generate-ffm-bindings.yml
-    with:
-      java_version: '25'
-    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
-
   call-aws-c-s3-build:
     needs: call-workflow-tarball
     name: "Build aws-c-s3 library"

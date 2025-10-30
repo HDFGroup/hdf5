@@ -318,16 +318,16 @@ jobs:
 
           # Search patterns in order of preference
           if [ -z "$POM_FILE" ]; then
-            POM_FILE=$(find "$BUILD_ROOT" -name "pom.xml" -path "*/java/*" | head -1)
+            POM_FILE=$(find "$BUILD_ROOT" -name "pom.xml" -path "*/java/*" 2>/dev/null | head -1)
           fi
 
           if [ -z "$POM_FILE" ]; then
-            POM_FILE=$(find "$BUILD_ROOT" -name "pom.xml" | head -1)
+            POM_FILE=$(find "$BUILD_ROOT" -name "pom.xml" 2>/dev/null | head -1)
           fi
 
           # Try Maven artifacts directory if build structure differs
           if [ -z "$POM_FILE" ] && [ -d "${{ runner.workspace }}/maven-artifacts" ]; then
-            POM_FILE=$(find "${{ runner.workspace }}/maven-artifacts" -name "pom.xml" | head -1)
+            POM_FILE=$(find "${{ runner.workspace }}/maven-artifacts" -name "pom.xml" 2>/dev/null | head -1)
           fi
 
           if [ -n "$POM_FILE" ] && [ -f "$POM_FILE" ]; then
@@ -371,19 +371,19 @@ jobs:
           find "$BUILD_ROOT" -maxdepth 3 -type d 2>/dev/null | head -20 || echo "Directory listing completed"
 
           # Find build directory (try multiple patterns)
-          BUILD_DIR=$(find "$BUILD_ROOT" -name "*Maven*" -type d | head -1)
+          BUILD_DIR=$(find "$BUILD_ROOT" -name "*Maven*" -type d 2>/dev/null | head -1)
 
           if [ -z "$BUILD_DIR" ]; then
             # Try looking for java directory as fallback (more specific patterns)
-            BUILD_DIR=$(find "$BUILD_ROOT" -path "*/java/*" -type d | head -1)
+            BUILD_DIR=$(find "$BUILD_ROOT" -path "*/java/*" -type d 2>/dev/null | head -1)
             if [ -z "$BUILD_DIR" ]; then
-              BUILD_DIR=$(find "$BUILD_ROOT" -name "java" -type d | head -1)
+              BUILD_DIR=$(find "$BUILD_ROOT" -name "java" -type d 2>/dev/null | head -1)
             fi
           fi
 
           if [ -z "$BUILD_DIR" ]; then
             # Try looking for any directory with JAR files
-            JAR_FILE=$(find "$BUILD_ROOT" -name "*.jar" -type f | head -1)
+            JAR_FILE=$(find "$BUILD_ROOT" -name "*.jar" -type f 2>/dev/null | head -1)
             if [ -n "$JAR_FILE" ]; then
               BUILD_DIR=$(dirname "$JAR_FILE")
               echo "Found JAR file in: $BUILD_DIR"
@@ -409,7 +409,7 @@ jobs:
 
           # Debug: Show all JAR files in build directory
           echo "All JAR files in build directory:"
-          find "$BUILD_DIR" -name "*.jar" -type f | head -20
+          find "$BUILD_DIR" -name "*.jar" -type f 2>/dev/null | head -20 || true
 
           # Debug: Show specifically what we're looking for
           echo "SLF4J JAR files in build directory:"
@@ -436,7 +436,7 @@ jobs:
           for repo_path in "${MAVEN_REPO_PATHS[@]}"; do
             if [ -d "$repo_path" ]; then
               echo "Checking Maven repository: $repo_path"
-              find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" | head -2 | while read jar_file; do
+              find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" 2>/dev/null | head -2 | while read jar_file; do
                 if [ -f "$jar_file" ]; then
                   echo "Found dependency: $jar_file"
                   cp "$jar_file" "${{ runner.workspace }}/maven-artifacts/"
@@ -511,7 +511,7 @@ jobs:
           echo "=== Maven Deployment Test (Dry Run) ==="
 
           # Extract version from first available POM file
-          POM_FILE=$(find ./artifacts -name "pom.xml" | head -1)
+          POM_FILE=$(find ./artifacts -name "pom.xml" 2>/dev/null | head -1)
           if [ -n "$POM_FILE" ]; then
             VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
             echo "Version: $VERSION"
@@ -632,7 +632,7 @@ jobs:
           echo "Maven artifacts directory (${{ matrix.platform }}): $MAVEN_ARTIFACTS_DIR"
 
           # Find HDF5 JAR files (not dependencies like slf4j) - use platform-specific artifacts
-          HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
+          HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" 2>/dev/null | head -1)
           if [ -z "$HDF5_JAR" ]; then
             echo "❌ No HDF5 JAR files found for testing"
             echo "Available JAR files:"

@@ -286,7 +286,7 @@ ls build/java/jsrc/org/hdfgroup/javahdf5/hdf5_h.java
 
 #### Migration from Pre-Generated Bindings
 
-**Old approach (deprecated):**
+**Old approach (removed in HDF5 2.0):**
 - Workflow: `generate-ffm-bindings.yml` generated bindings separately
 - Pre-generated files committed to: `java/jsrc/features/` and `java/jsrc/org/`
 - Required manual merge and commit of generated files
@@ -296,8 +296,6 @@ ls build/java/jsrc/org/hdfgroup/javahdf5/hdf5_h.java
 - Files generated at configure time to `build/java/jsrc/`
 - Never committed to repository
 - Always fresh for each build
-
-**Note:** The `generate-ffm-bindings.yml` workflow is maintained for now but will be deprecated once configure-time generation is fully validated.
 
 #### See Also
 
