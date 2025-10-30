@@ -1667,12 +1667,13 @@ public class HDF5Constants {
      *
      * @return the H5FD_ROS3 VFD identifier, or H5I_INVALID_HID if not available
      */
-    private static long getH5FD_ROS3() {
+    private static long getH5FD_ROS3()
+    {
         try {
             // Use reflection to call H5FD_ROS3_id_g() if it exists
             // This method only exists if ROS3 VFD support is enabled (H5_HAVE_ROS3_VFD)
             java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_ROS3_id_g");
-            return (long) method.invoke(null);
+            return (long)method.invoke(null);
         }
         catch (NoSuchMethodException e) {
             // Method doesn't exist - ROS3 VFD not available
@@ -1690,12 +1691,13 @@ public class HDF5Constants {
      *
      * @return the H5FD_HDFS VFD identifier, or H5I_INVALID_HID if not available
      */
-    private static long getH5FD_HDFS() {
+    private static long getH5FD_HDFS()
+    {
         try {
             // Use reflection to call H5FD_HDFS_id_g() if it exists
             // This method only exists if HDFS support is enabled (H5_HAVE_LIBHDFS)
             java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_HDFS_id_g");
-            return (long) method.invoke(null);
+            return (long)method.invoke(null);
         }
         catch (NoSuchMethodException e) {
             // Method doesn't exist - HDFS VFD not available
@@ -1713,12 +1715,14 @@ public class HDF5Constants {
      *
      * @return the H5FD_MIRROR VFD identifier, or H5I_INVALID_HID if not available
      */
-    private static long getH5FD_MIRROR() {
+    private static long getH5FD_MIRROR()
+    {
         try {
             // Use reflection to call H5FD_MIRROR_id_g() if it exists
             // This method only exists if Mirror VFD support is enabled (H5_HAVE_MIRROR_VFD)
-            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_MIRROR_id_g");
-            return (long) method.invoke(null);
+            java.lang.reflect.Method method =
+                org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_MIRROR_id_g");
+            return (long)method.invoke(null);
         }
         catch (NoSuchMethodException e) {
             // Method doesn't exist - Mirror VFD not available
