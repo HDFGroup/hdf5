@@ -127,19 +127,45 @@ validate_jar_file() {
         return 1
     fi
 
-    # Check for essential HDF5 classes
-    local required_classes=(
-        "hdf/hdf5lib/H5.class"
-        "hdf/hdf5lib/HDF5Constants.class"
-        "hdf/hdf5lib/HDFArray.class"
-        "hdf/hdf5lib/HDFNativeData.class"
-    )
+    # Check for essential HDF5 classes based on JAR type
+    # FFM builds have two separate JARs:
+    #   - javahdf5-*.jar: FFM bindings (org/hdfgroup/javahdf5/*)
+    #   - jarhdf5-*.jar: Wrapper classes (hdf/hdf5lib/*)
+    # JNI builds have single JAR with hdf/hdf5lib/* classes
 
-    for class_file in "${required_classes[@]}"; do
-        if [[ ! -f "${temp_dir}/${class_file}" ]]; then
-            add_error "Missing required class in JAR: ${class_file}"
+    if [[ "${jar_basename}" == *"javahdf5"* ]]; then
+        # This is the FFM bindings JAR - check for FFM classes
+        local ffm_classes=(
+            "org/hdfgroup/javahdf5/hdf5_h.class"
+        )
+
+        local has_ffm=false
+        for class_file in "${ffm_classes[@]}"; do
+            if [[ -f "${temp_dir}/${class_file}" ]]; then
+                has_ffm=true
+                log_info "Found FFM binding class: ${class_file}"
+                break
+            fi
+        done
+
+        if [[ "${has_ffm}" == "false" ]]; then
+            add_error "FFM bindings JAR missing required FFM classes (expected org/hdfgroup/javahdf5/hdf5_h.class)"
         fi
-    done
+    else
+        # This is a wrapper/JNI JAR - check for hdf.hdf5lib classes
+        local required_classes=(
+            "hdf/hdf5lib/H5.class"
+            "hdf/hdf5lib/HDF5Constants.class"
+            "hdf/hdf5lib/HDFArray.class"
+            "hdf/hdf5lib/HDFNativeData.class"
+        )
+
+        for class_file in "${required_classes[@]}"; do
+            if [[ ! -f "${temp_dir}/${class_file}" ]]; then
+                add_error "Missing required class in JAR: ${class_file}"
+            fi
+        done
+    fi
 
     # Check manifest
     if [[ -f "${temp_dir}/META-INF/MANIFEST.MF" ]]; then
