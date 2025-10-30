@@ -1,18 +1,5 @@
 # Installation Instructions for Parallel HDF5
 
-## 0. Use Build Scripts
-
-The HDF Group maintains build scripts for building parallel HDF5 on various
-platforms (Cray, IBM, SGI, etc.). These scripts are continuously updated for
-current and future systems. The reader is strongly encouraged to consult:
-
-**<https://github.com/HDFGroup/build_hdf5>**
-
-All contributions, additions, and fixes to the repository are welcomed and
-encouraged.
-
----
-
 ## 1. Overview
 
 This file contains instructions for installing parallel HDF5 (PHDF5) using
@@ -31,7 +18,7 @@ CMake. The document covers:
 
 PHDF5 requires:
 
-- CMake version 3.18 or greater (3.25+ recommended for presets)
+- CMake version 3.26 or greater
 - An MPI compiler with MPI-IO support
 - A POSIX compliant parallel file system (see References)
 
@@ -54,7 +41,7 @@ When building on HPC systems:
 
 2. **Load required modules:**
    - Desired compiler modules (and set CC, FC, CXX if needed)
-   - CMake version 3.18 or greater
+   - CMake version 3.26 or greater
    - MPI implementation module
 
 3. **Unload problematic modules** (e.g., `craype-hugepages2M` on Cray systems)
@@ -75,7 +62,7 @@ For installation help, post questions to the HDF Forum or HDF Support:
 - **HDF Support:** <https://support.hdfgroup.org/>
 
 Include the output of `uname -a` and the contents of `CMakeCache.txt` and
-`CMakeError.log` from your build directory.
+`CMakeError.log` from your build directory, and the loaded modules if applicable.
 
 ---
 
@@ -102,7 +89,7 @@ For release or snapshot tar files, extract them to your working directory.
 
 ### 3.1. Using CMake Presets (Recommended for General Builds)
 
-For building with CMake 3.25 or greater using presets:
+For building with CMake 3.26 or greater using presets:
 
 ```bash
 cd hdf5
@@ -176,7 +163,7 @@ workflow for HPC systems with batch schedulers.
 
 ### 4.1. Setup Steps
 
-1. Rename source directory to `hdf5-<version>` (e.g., `hdf5-1.14.5`)
+1. Rename source directory to `hdf5-<version>` (e.g., `hdf5-2.0.0`)
 
 2. Copy or link these CMake scripts to your working directory:
    - `hdf5-<version>/config/cmake/scripts/HDF5config.cmake`
