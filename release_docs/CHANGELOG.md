@@ -65,7 +65,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ### Fixed problems with family driver and user block
 
-   When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member eoas. This could cause a failure when an addresse overflowed the calculated eoa. The driver would also add the user block size when returning the eof. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first x bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisiting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
+   When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member EOAs. This could cause a failure when an address overflowed the calculated eoa. The driver would also add the user block size when returning the EOF. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first X bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisiting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
 
 # 🚀 New Features & Improvements
 
@@ -571,7 +571,7 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ### Fixed problems with family driver and user block
 
-   When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member eoas. This could cause a failure when an addresse overflowed the calculated eoa. The driver would also add the user block size when returning the eof. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first x bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisiting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
+   When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member EOAs. This could cause a failure when an address overflowed the calculated eoa. The driver would also add the user block size when returning the EOF. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first X bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisiting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
 
 ### Fixed security issue CVE-2025-2915 and OSV-2024-381
 
