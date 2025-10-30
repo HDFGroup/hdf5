@@ -253,6 +253,8 @@ The Virtual Dataset Global Heap Block format has been updated to version 1 to su
 
 Use of the shared strings option for Virtual Datasets reduces memory overhead and optimizes dataset close operations.
 
+The chunked dataset file format has been updated to always use 64 bits to encode the size of filtered chunks. This will allow data filters that expand the chunks by a large amount to still work. Chunk sizes are still limited to `2^32 - 1`. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
+
 ### The `H5Dread_chunk()` signature has changed
 
 A new parameter, `nalloc`, has been added to `H5Dread_chunk()`. This parameter contains a pointer to a variable that holds the size of the buffer buf. If *nalloc is not large enough to hold the entire chunk being read, no data is read. On exit, the value of this variable is set to the buffer size needed to read the chunk.
