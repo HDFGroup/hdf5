@@ -7,7 +7,7 @@ GROUP "/" {
          STORAGE_LAYOUT {
             CONTIGUOUS
             SIZE 8
-            OFFSET 2432
+            OFFSET 2048
          }
          FILTERS {
             NONE

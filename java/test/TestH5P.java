@@ -1038,7 +1038,7 @@ public class TestH5P {
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 2);
             assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
             assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_userblock(fcpl_id, size);
@@ -1074,7 +1074,7 @@ public class TestH5P {
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 2);
             assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
             assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_sizes(fcpl_id, size);
@@ -1111,7 +1111,7 @@ public class TestH5P {
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 2);
             assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
             assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_sym_k(fcpl_id, size);
@@ -1148,7 +1148,7 @@ public class TestH5P {
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 1);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 2);
             assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
             assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_istore_k(fcpl_id, size);
