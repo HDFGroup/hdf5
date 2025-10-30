@@ -16879,7 +16879,7 @@ public class H5 implements java.io.Serializable {
                 MemorySegment block_size_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
                 MemorySegment cbuf_size_segment  = arena.allocate(ValueLayout.JAVA_LONG, 1);
                 if ((retVal = (int)method.invoke(null, fapl_id, alignment_segment, block_size_segment,
-                                                  cbuf_size_segment)) < 0)
+                                                 cbuf_size_segment)) < 0)
                     h5libraryError();
                 info[0] = alignment_segment.get(ValueLayout.JAVA_LONG, 0);
                 info[1] = block_size_segment.get(ValueLayout.JAVA_LONG, 0);
@@ -17037,8 +17037,7 @@ public class H5 implements java.io.Serializable {
                 "H5Pset_fapl_hdfs", long.class, MemorySegment.class);
 
             // Method exists, but struct conversion not yet implemented
-            throw new HDF5LibraryException(
-                "H5Pset_fapl_hdfs struct conversion not yet implemented for FFM");
+            throw new HDF5LibraryException("H5Pset_fapl_hdfs struct conversion not yet implemented for FFM");
         }
         catch (NoSuchMethodException e) {
             throw new HDF5LibraryException(
@@ -17068,8 +17067,7 @@ public class H5 implements java.io.Serializable {
                 "H5Pget_fapl_hdfs", long.class, MemorySegment.class);
 
             // Method exists, but struct conversion not yet implemented
-            throw new HDF5LibraryException(
-                "H5Pget_fapl_hdfs struct conversion not yet implemented for FFM");
+            throw new HDF5LibraryException("H5Pget_fapl_hdfs struct conversion not yet implemented for FFM");
         }
         catch (NoSuchMethodException e) {
             throw new HDF5LibraryException(
