@@ -414,9 +414,9 @@ public class TestH5Pfapl {
             fail("H5Pget_libver_bounds: " + err);
         }
         assertTrue("testH5Pget_libver_bounds", ret_val >= 0);
-        // Check the Earliest Version if the library
+        // Check the Earliest Version of the library
         assertEquals(HDF5Constants.H5F_LIBVER_V18, libver[0]);
-        // Check the Latest Version if the library
+        // Check the Latest Version of the library
         assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[1]);
     }
 
@@ -438,9 +438,9 @@ public class TestH5Pfapl {
             fail("H5Pset_libver_bounds: " + err);
         }
         assertTrue("testH5Pset_libver_bounds", ret_val >= 0);
-        // Check the Earliest Version if the library
+        // Check the Earliest Version of the library
         assertEquals(HDF5Constants.H5F_LIBVER_EARLIEST, libver[0]);
-        // Check the Latest Version if the library
+        // Check the Latest Version of the library
         assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[1]);
     }
 
