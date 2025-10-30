@@ -9141,6 +9141,10 @@ main(void)
 
     fapl = h5_fileaccess();
 
+    /* These tests assume fapl indicates to use the earliest file format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
     /* Push API context */
     if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;

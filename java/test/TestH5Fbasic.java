@@ -293,7 +293,7 @@ public class TestH5Fbasic {
         catch (Throwable err) {
             fail("H5.H5Fget_mdc_size: " + err);
         }
-        assertTrue("H5.H5Fget_mdc_size #:" + nentries, nentries == 4);
+        assertTrue("H5.H5Fget_mdc_size #:" + nentries, nentries == 2);
     }
 
     // TODO: test more cases of different cache sizes.

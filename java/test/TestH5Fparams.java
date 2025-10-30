@@ -210,7 +210,7 @@ public class TestH5Fparams {
 
             try {
                 H5F_info2_t finfo = H5.H5Fget_info(fid);
-                assertEquals(finfo.super_version, 0);
+                assertEquals(finfo.super_version, 2);
                 assertEquals(finfo.free_version, 0);
                 assertEquals(finfo.sohm_version, 0);
             }

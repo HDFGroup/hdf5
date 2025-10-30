@@ -412,7 +412,7 @@ public class TestH5Pfapl {
         }
         assertTrue("testH5Pget_libver_bounds", ret_val >= 0);
         // Check the Earliest Version if the library
-        assertEquals(HDF5Constants.H5F_LIBVER_EARLIEST, libver[0]);
+        assertEquals(HDF5Constants.H5F_LIBVER_V18, libver[0]);
         // Check the Latest Version if the library
         assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[1]);
     }
