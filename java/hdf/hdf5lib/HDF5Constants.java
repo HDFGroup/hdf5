@@ -640,9 +640,11 @@ public class HDF5Constants {
     /** */
     public static final long H5FD_WINDOWS = H5FD_SEC2_id_g();
     /** */
-    public static final long H5FD_ROS3 = H5I_INVALID_HID();
+    public static final long H5FD_ROS3 = getH5FD_ROS3();
     /** */
-    public static final long H5FD_HDFS = H5I_INVALID_HID();
+    public static final long H5FD_HDFS = getH5FD_HDFS();
+    /** */
+    public static final long H5FD_MIRROR = getH5FD_MIRROR();
     /** */
     public static final int H5FD_LOG_LOC_READ = H5FD_LOG_LOC_READ();
     /** */
@@ -1651,6 +1653,75 @@ public class HDF5Constants {
         }
         catch (NoSuchMethodException e) {
             // Method doesn't exist - MPIO VFD not available (parallel not enabled)
+            return H5I_INVALID_HID();
+        }
+        catch (Exception e) {
+            // Other error (shouldn't happen)
+            return H5I_INVALID_HID();
+        }
+    }
+
+    /**
+     * Helper method to get H5FD_ROS3 VFD identifier using reflection.
+     * Returns H5I_INVALID_HID if ROS3 VFD is not available (e.g., when HDF5_ENABLE_ROS3_VFD is not enabled).
+     *
+     * @return the H5FD_ROS3 VFD identifier, or H5I_INVALID_HID if not available
+     */
+    private static long getH5FD_ROS3() {
+        try {
+            // Use reflection to call H5FD_ROS3_id_g() if it exists
+            // This method only exists if ROS3 VFD support is enabled (H5_HAVE_ROS3_VFD)
+            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_ROS3_id_g");
+            return (long) method.invoke(null);
+        }
+        catch (NoSuchMethodException e) {
+            // Method doesn't exist - ROS3 VFD not available
+            return H5I_INVALID_HID();
+        }
+        catch (Exception e) {
+            // Other error (shouldn't happen)
+            return H5I_INVALID_HID();
+        }
+    }
+
+    /**
+     * Helper method to get H5FD_HDFS VFD identifier using reflection.
+     * Returns H5I_INVALID_HID if HDFS VFD is not available (e.g., when H5_HAVE_LIBHDFS is not defined).
+     *
+     * @return the H5FD_HDFS VFD identifier, or H5I_INVALID_HID if not available
+     */
+    private static long getH5FD_HDFS() {
+        try {
+            // Use reflection to call H5FD_HDFS_id_g() if it exists
+            // This method only exists if HDFS support is enabled (H5_HAVE_LIBHDFS)
+            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_HDFS_id_g");
+            return (long) method.invoke(null);
+        }
+        catch (NoSuchMethodException e) {
+            // Method doesn't exist - HDFS VFD not available
+            return H5I_INVALID_HID();
+        }
+        catch (Exception e) {
+            // Other error (shouldn't happen)
+            return H5I_INVALID_HID();
+        }
+    }
+
+    /**
+     * Helper method to get H5FD_MIRROR VFD identifier using reflection.
+     * Returns H5I_INVALID_HID if Mirror VFD is not available (e.g., when H5_HAVE_MIRROR_VFD is not defined).
+     *
+     * @return the H5FD_MIRROR VFD identifier, or H5I_INVALID_HID if not available
+     */
+    private static long getH5FD_MIRROR() {
+        try {
+            // Use reflection to call H5FD_MIRROR_id_g() if it exists
+            // This method only exists if Mirror VFD support is enabled (H5_HAVE_MIRROR_VFD)
+            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_MIRROR_id_g");
+            return (long) method.invoke(null);
+        }
+        catch (NoSuchMethodException e) {
+            // Method doesn't exist - Mirror VFD not available
             return H5I_INVALID_HID();
         }
         catch (Exception e) {
