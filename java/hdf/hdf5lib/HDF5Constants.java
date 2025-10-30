@@ -1611,16 +1611,19 @@ public class HDF5Constants {
 
     /**
      * Helper method to get H5FD_DIRECT VFD identifier using reflection.
-     * Returns H5I_INVALID_HID if Direct VFD is not available (e.g., on Windows or when H5_HAVE_DIRECT is not defined).
+     * Returns H5I_INVALID_HID if Direct VFD is not available (e.g., on Windows or when H5_HAVE_DIRECT is not
+     * defined).
      *
      * @return the H5FD_DIRECT VFD identifier, or H5I_INVALID_HID if not available
      */
-    private static long getH5FD_DIRECT() {
+    private static long getH5FD_DIRECT()
+    {
         try {
             // Use reflection to call H5FD_DIRECT_id_g() if it exists
             // This method only exists if H5_HAVE_DIRECT is defined (Linux with Direct I/O)
-            java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_DIRECT_id_g");
-            return (long) method.invoke(null);
+            java.lang.reflect.Method method =
+                org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_DIRECT_id_g");
+            return (long)method.invoke(null);
         }
         catch (NoSuchMethodException e) {
             // Method doesn't exist - Direct VFD not available on this platform
@@ -1638,12 +1641,13 @@ public class HDF5Constants {
      *
      * @return the H5FD_MPIO VFD identifier, or H5I_INVALID_HID if not available
      */
-    private static long getH5FD_MPIO() {
+    private static long getH5FD_MPIO()
+    {
         try {
             // Use reflection to call H5FD_MPIO_id_g() if it exists
             // This method only exists if parallel/MPI support is enabled
             java.lang.reflect.Method method = org.hdfgroup.javahdf5.hdf5_h.class.getMethod("H5FD_MPIO_id_g");
-            return (long) method.invoke(null);
+            return (long)method.invoke(null);
         }
         catch (NoSuchMethodException e) {
             // Method doesn't exist - MPIO VFD not available (parallel not enabled)
