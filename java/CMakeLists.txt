@@ -32,8 +32,30 @@ if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
     set (HDF5_ENABLE_COMPAT TRUE)
     message (STATUS "Building HDF5 Java with FFM implementation (Java ${Java_VERSION_STRING})")
 
-    # Find the jextract tool using the JAVA_HOME environment variable
-    find_program (JEXTRACT_EXECUTABLE jextract PATHS "$ENV{JAVA_HOME}/bin" "$ENV{JEXTRACT_HOME}/bin" REQUIRED)
+    # Find the jextract tool using the JEXTRACT_HOME or JAVA_HOME environment variable
+    # On Windows, jextract uses .bat extension
+    if (WIN32)
+        find_program (JEXTRACT_EXECUTABLE
+            NAMES jextract.bat jextract
+            PATHS "$ENV{JEXTRACT_HOME}/bin" "$ENV{JAVA_HOME}/bin"
+            REQUIRED
+            NO_DEFAULT_PATH
+        )
+    else ()
+        find_program (JEXTRACT_EXECUTABLE
+            NAMES jextract
+            PATHS "$ENV{JEXTRACT_HOME}/bin" "$ENV{JAVA_HOME}/bin"
+            REQUIRED
+            NO_DEFAULT_PATH
+        )
+    endif ()
+
+    if (NOT JEXTRACT_EXECUTABLE)
+        message (FATAL_ERROR "Could not find jextract executable. "
+                             "Please set JEXTRACT_HOME or ensure jextract is in JAVA_HOME/bin\n"
+                             "JEXTRACT_HOME=$ENV{JEXTRACT_HOME}\n"
+                             "JAVA_HOME=$ENV{JAVA_HOME}")
+    endif ()
 
     # jextract will output to the jsrc binary directory
     # When jsrc/CMakeLists.txt runs, HDF5_JAVA_JSRC_BINARY_DIR will be set to this location by CMake
@@ -44,7 +66,29 @@ if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
     message (STATUS "jextract output directory: ${JEXTRACT_OUTPUT_DIR}")
     message (STATUS "HDF5 source directory: ${HDF5_SRC_DIR}")
 
+    # Test if jextract executable exists and is runnable
+    if (NOT EXISTS "${JEXTRACT_EXECUTABLE}")
+        message (FATAL_ERROR "jextract executable does not exist at: ${JEXTRACT_EXECUTABLE}")
+    endif ()
+
+    # Try to run jextract --version as a test
+    message (STATUS "Testing jextract executable...")
+    execute_process (
+        COMMAND ${JEXTRACT_EXECUTABLE} --version
+        RESULT_VARIABLE JEXTRACT_VERSION_RESULT
+        OUTPUT_VARIABLE JEXTRACT_VERSION_OUTPUT
+        ERROR_VARIABLE JEXTRACT_VERSION_ERROR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_STRIP_TRAILING_WHITESPACE
+    )
+    message (STATUS "jextract version test result: ${JEXTRACT_VERSION_RESULT}")
+    message (STATUS "jextract version output: ${JEXTRACT_VERSION_OUTPUT}")
+    if (NOT "${JEXTRACT_VERSION_ERROR}" STREQUAL "")
+        message (STATUS "jextract version error: ${JEXTRACT_VERSION_ERROR}")
+    endif ()
+
     # Generate Java bindings with error handling
+    message (STATUS "Running jextract to generate FFM bindings...")
     execute_process (
         COMMAND
             ${JEXTRACT_EXECUTABLE}
@@ -60,11 +104,19 @@ if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0")
         ERROR_VARIABLE JEXTRACT_ERROR
         ECHO_OUTPUT_VARIABLE
         ECHO_ERROR_VARIABLE
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 
     # Check if jextract succeeded
+    message (STATUS "jextract exit code: ${JEXTRACT_RESULT}")
     if (NOT JEXTRACT_RESULT EQUAL 0)
-        message (FATAL_ERROR "jextract failed with exit code ${JEXTRACT_RESULT}\nOutput: ${JEXTRACT_OUTPUT}\nError: ${JEXTRACT_ERROR}")
+        message (STATUS "jextract output length: ${JEXTRACT_OUTPUT}")
+        message (STATUS "jextract error length: ${JEXTRACT_ERROR}")
+        message (FATAL_ERROR "jextract failed with exit code ${JEXTRACT_RESULT}\n"
+                             "Executable: ${JEXTRACT_EXECUTABLE}\n"
+                             "Working dir: ${CMAKE_CURRENT_BINARY_DIR}\n"
+                             "Output: ${JEXTRACT_OUTPUT}\n"
+                             "Error: ${JEXTRACT_ERROR}")
     endif ()
 
     # Verify that key FFM binding files were generated

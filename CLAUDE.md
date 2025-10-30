@@ -146,50 +146,165 @@ java/jsrc/
 
 ### FFM Bindings Generation
 
-**As of HDF5 2.0**: FFM bindings are generated automatically at CMake configure time using jextract-25.
+**As of HDF5 2.0**: FFM bindings are **generated automatically at CMake configure time** using jextract.
 
-**Requirements:**
-- Java 24+ (tested with Java 25)
-- jextract tool installed and accessible via `JEXTRACT_HOME` or `JAVA_HOME`
+This replaces the previous approach of pre-generating bindings in a separate workflow. Bindings are now generated fresh for each build, ensuring they always match the current HDF5 C API.
 
-**Configure-Time Generation:**
-FFM bindings are automatically generated when:
-1. Java 24+ is detected by CMake
-2. `HDF5_ENABLE_JNI=OFF` (FFM is selected)
-3. jextract is found in `$JEXTRACT_HOME/bin` or `$JAVA_HOME/bin`
+#### Requirements
 
-The CMake build system (java/CMakeLists.txt:36-52) automatically:
-- Detects Java version
-- Finds jextract executable
-- Generates FFM bindings to `build/java/jsrc/`
-- Configures the build to use generated bindings
+- **Java 24+** (tested with Java 25 - Oracle distribution recommended)
+- **jextract tool** installed and accessible via `JEXTRACT_HOME` or `JAVA_HOME`
+  - Download from https://jdk.java.net/jextract/
+  - Tested with jextract 22+6-47
 
-**CI/CD Integration:**
-Workflows automatically install jextract-25 for FFM builds:
-- `.github/actions/setup-jextract/` - Reusable jextract setup action
-- `.github/workflows/maven-staging.yml` - Maven artifact builds (FFM + JNI)
-- `.github/workflows/release.yml` - Release builds with FFM support
+#### How It Works
 
-**Local Development:**
-```bash
-# Install jextract-25 (one-time setup)
-# Download from https://jdk.java.net/jextract/
-# Extract and set JEXTRACT_HOME
+**Automatic Selection:**
+When you build with Java 24+, CMake automatically:
+1. Detects Java version ≥ 24
+2. Checks `HDF5_ENABLE_JNI` setting:
+   - If `OFF` or unset → Uses **FFM** (default for Java 24+)
+   - If `ON` → Forces **JNI** (even with Java 24+)
+3. Searches for jextract in `$JEXTRACT_HOME/bin` or `$JAVA_HOME/bin`
+4. Generates FFM bindings to `build/java/jsrc/` during configure
+5. Compiles generated bindings into Maven artifacts
 
-export JEXTRACT_HOME=/path/to/jextract
-export PATH=$JEXTRACT_HOME/bin:$PATH
+**File Location:**
+```cmake
+# java/CMakeLists.txt configures generation
+set (JEXTRACT_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/jsrc)
 
-# Build with FFM (Java 25+)
-cmake --workflow --preset ci-StdShar-GNUC-FFM --fresh
-
-# FFM bindings generated automatically during configure step
+# jextract generates to:
+build/java/jsrc/org/hdfgroup/javahdf5/
+  ├── hdf5_h.java        # Main FFM entry point
+  ├── hdf5_h_1.java      # Package-private (jextract 25)
+  ├── hdf5_h_2.java      # Package-private (jextract 25)
+  └── [other types...]   # Platform-specific types
 ```
 
-**Benefits of Configure-Time Generation:**
-- No separate workflow needed to generate bindings
-- Bindings always match the current HDF5 C API
-- Faster CI/CD (no separate generation job)
-- Simplified development workflow
+#### Local Development Setup
+
+**One-time jextract installation:**
+```bash
+# 1. Download jextract from https://jdk.java.net/jextract/
+wget https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_linux-x64_bin.tar.gz
+
+# 2. Extract
+tar -xzf openjdk-22-jextract+6-47_linux-x64_bin.tar.gz -C ~/tools/
+
+# 3. Set environment (add to ~/.bashrc or ~/.zshrc)
+export JEXTRACT_HOME=$HOME/tools/jextract-22
+export PATH=$JEXTRACT_HOME/bin:$PATH
+
+# 4. Verify
+jextract --version
+```
+
+**Building with FFM:**
+```bash
+# Standard FFM build (Java 25+ auto-selects FFM)
+cmake --workflow --preset ci-StdShar-GNUC-FFM --fresh
+
+# Maven FFM build (minimal, for artifacts)
+cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh
+
+# Force JNI even with Java 25+ (if needed)
+cmake -DHDF5_ENABLE_JNI=ON ...
+
+# Bindings are generated automatically during configure
+# Look for: "FFM bindings generated successfully"
+```
+
+#### CI/CD Integration
+
+Workflows automatically install jextract for FFM builds:
+
+**Composite Action:** `.github/actions/setup-jextract/`
+- Installs jextract-25 on Linux, Windows, macOS
+- Sets `JEXTRACT_HOME` environment variable
+- Adds jextract to PATH
+
+**Workflows using FFM:**
+- `maven-staging.yml` - Maven artifact builds (both FFM and JNI)
+- `main.yml` - Main CI builds (when `force_java_implementation=ffm`)
+- `vfd-ros3.yml` - ROS3 VFD testing (when `force_java_implementation=ffm`)
+- `java-implementation-test.yml` - FFM vs JNI comparison testing
+
+**Example workflow usage:**
+```yaml
+- name: Set up Java 25 for FFM
+  uses: actions/setup-java@v4
+  with:
+    java-version: '25'
+    distribution: 'oracle'
+
+- name: Setup jextract
+  uses: ./.github/actions/setup-jextract
+  with:
+    java-version: '25'
+
+- name: Configure (jextract runs here)
+  run: cmake --preset ci-StdShar-GNUC-FFM
+```
+
+#### Troubleshooting
+
+**"Could not find JEXTRACT_EXECUTABLE"**
+```bash
+# Check environment
+echo $JEXTRACT_HOME
+echo $JAVA_HOME
+
+# Verify jextract exists
+ls -la $JEXTRACT_HOME/bin/jextract
+
+# Test manually
+$JEXTRACT_HOME/bin/jextract --version
+```
+
+**"jextract failed with exit code X"**
+- Check CMake logs for jextract error messages
+- Verify jextract can find HDF5 headers
+- See `.claude/DEBUG_WINDOWS_FFM.md` for Windows-specific debugging
+
+**Generated files not found:**
+```bash
+# Check if bindings were generated
+ls build/java/jsrc/org/hdfgroup/javahdf5/hdf5_h.java
+
+# Check CMake configure output for:
+# "FFM bindings generated successfully at ..."
+```
+
+#### Benefits of Configure-Time Generation
+
+✅ **Always up-to-date** - Bindings match current C API exactly
+✅ **Simplified workflow** - No separate generation step needed
+✅ **Faster CI/CD** - Parallel configure instead of sequential jobs
+✅ **Less maintenance** - No pre-generated files to commit/update
+✅ **Cross-platform** - Same process on Linux, Windows, macOS
+
+#### Migration from Pre-Generated Bindings
+
+**Old approach (deprecated):**
+- Workflow: `generate-ffm-bindings.yml` generated bindings separately
+- Pre-generated files committed to: `java/jsrc/features/` and `java/jsrc/org/`
+- Required manual merge and commit of generated files
+
+**New approach (current):**
+- No separate workflow needed
+- Files generated at configure time to `build/java/jsrc/`
+- Never committed to repository
+- Always fresh for each build
+
+**Note:** The `generate-ffm-bindings.yml` workflow is maintained for now but will be deprecated once configure-time generation is fully validated.
+
+#### See Also
+
+- `.claude/JEXTRACT_SETUP.md` - Detailed jextract setup guide
+- `.claude/CMAKE_FFM_FIXES.md` - CMake error handling details
+- `.claude/FFM_COMPAT_FIXES.md` - Compatibility layer fixes
+- `.claude/DEBUG_WINDOWS_FFM.md` - Windows debugging guide
 
 ### FFM Test Coverage
 

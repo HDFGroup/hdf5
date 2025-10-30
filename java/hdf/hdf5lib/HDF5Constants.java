@@ -620,13 +620,13 @@ public class HDF5Constants {
     /** */
     public static final long H5FD_CORE = H5FD_CORE_id_g();
     /** */
-    public static final long H5FD_DIRECT = H5FD_DIRECT();
+    public static final long H5FD_DIRECT = H5FD_DIRECT_id_g();
     /** */
     public static final long H5FD_FAMILY = H5FD_FAMILY_id_g();
     /** */
     public static final long H5FD_LOG = H5FD_LOG_id_g();
     /** */
-    public static final long H5FD_MPIO = H5FD_MPIO();
+    public static final long H5FD_MPIO = H5FD_MPIO_id_g();
     /** */
     public static final long H5FD_MULTI = H5FD_MULTI_id_g();
     /** */
