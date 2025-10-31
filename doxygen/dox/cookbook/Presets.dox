@@ -43,8 +43,7 @@ I want to build the HDF5 library statically and include the tools.
 
 \par Solution
 Static libraries can be built with zlib and libaec - but cannot be
-built with plugins. Java JNI bindings require shared libraries, while
-Java FFM bindings may work with static libraries.
+built with plugins. Java JNI bindings require shared libraries.
 
 Create a CMakeUserPresets.json file with the following content:
 \code
