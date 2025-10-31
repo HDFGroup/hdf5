@@ -176,7 +176,7 @@ java -cp ".:../../../maven-artifacts/*" H5Ex_D_ReadWrite
 ### Expected Output Files
 
 Expected outputs for validation are stored in version control:
-- `expected-outputs/H5Ex_D_ReadWrite.out`
+- `tfiles/min_hdf_version/H5Ex_D_ReadWrite.txt`
 - Pattern-based validation for flexibility
 - Platform-specific outputs handled automatically
 
