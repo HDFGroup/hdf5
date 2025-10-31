@@ -169,8 +169,8 @@ jobs:
 
           # Additional validation for FFM
           if [[ "${{ matrix.implementation }}" == "ffm" ]]; then
-            if [[ ${{ matrix.java-version }} -lt 24 ]]; then
-              echo "::error::FFM implementation requires Java 24+, got Java ${{ matrix.java-version }}"
+            if [[ ${{ matrix.java-version }} -lt 25 ]]; then
+              echo "::error::FFM implementation requires Java 25, got Java ${{ matrix.java-version }}"
               exit 1
             fi
             echo "FFM implementation validated for Java ${{ matrix.java-version }}"

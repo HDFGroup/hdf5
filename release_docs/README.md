@@ -111,7 +111,7 @@ complete example applications that work with HDF5 Java library Maven artifacts:
 HDF5 provides two Java implementation artifacts:
 
 * **`org.hdfgroup:hdf5-java-ffm`** - FFM (Foreign Function & Memory) implementation
-  - Default for Java 24+, modern native access via Project Panama
+  - Default for Java 25+, modern native access via Project Panama
   - Platform-specific JARs: linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64
 
 * **`org.hdfgroup:hdf5-java-jni`** - JNI (Java Native Interface) implementation
@@ -158,7 +158,7 @@ ctest -R "JUnit-TestH5Tffm" -V   # Datatype tests
 
 ### GitHub Packages Deployment
 
-Using FFM implementation (Java 24+):
+Using FFM implementation (Java 25+):
 ```xml
 <dependency>
     <groupId>org.hdfgroup</groupId>

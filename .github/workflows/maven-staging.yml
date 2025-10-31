@@ -253,7 +253,7 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
-      - name: Set up JDK (Java 24+ for FFM builds)
+      - name: Set up JDK (Java 25 for FFM builds)
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
@@ -588,7 +588,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK (Java 24+ for FFM builds)
+      - name: Set up JDK (Java 25 for FFM builds)
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
@@ -748,8 +748,8 @@ jobs:
                 # Set compilation flags based on detected JAR type
                 # This ensures we use correct flags for the actual JAR implementation
                 if [ "$JAR_TYPE" = "ffm" ]; then
-                  # FFM requires preview features (Java 24+)
-                  JAVAC_FLAGS="--enable-preview --release 24"
+                  # FFM requires preview features (Java 25)
+                  JAVAC_FLAGS="--enable-preview --release 25"
                   JAVA_FLAGS="--enable-preview"
                 else
                   # JNI uses standard Java
@@ -979,8 +979,8 @@ jobs:
                 # Set compilation flags based on detected JAR type
                 # This ensures we use correct flags for the actual JAR implementation
                 if ($JAR_TYPE -eq "ffm") {
-                  # FFM requires preview features (Java 24+)
-                  $JAVAC_FLAGS = @("--enable-preview", "--release", "24")
+                  # FFM requires preview features (Java 25)
+                  $JAVAC_FLAGS = @("--enable-preview", "--release", "25")
                   $JAVA_FLAGS = @("--enable-preview")
                 } else {
                   # JNI uses standard Java

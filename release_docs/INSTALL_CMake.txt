@@ -109,7 +109,7 @@ Common presets:
     ci-MinShar-GNUC-Maven-Snapshot               JNI snapshots for Maven
     ci-MinShar-GNUC-Maven                        JNI release for Maven
 
-  Maven Deployment (FFM optional - Java 24+):
+  Maven Deployment (FFM optional - Java 25+):
     ci-MinShar-GNUC-Maven-FFM-Snapshot           FFM snapshots for Maven
     ci-MinShar-GNUC-Maven-FFM                    FFM release for Maven
 
@@ -918,7 +918,7 @@ HDF5_ENABLE_JNI           "Force JNI implementation (default: auto-detect)" OFF
   Java Implementation Selection (as of HDF5 2.0):
   HDF5 Java bindings support two native interface implementations:
   - JNI (Java Native Interface): Default, works with Java 8+, production-stable
-  - FFM (Foreign Function & Memory): Optional, requires Java 24+, modern native access
+  - FFM (Foreign Function & Memory): Optional, requires Java 25+, modern native access
 
   Maven Artifacts:
   - org.hdfgroup:hdf5-java-ffm - FFM implementation
@@ -932,8 +932,8 @@ HDF5_ENABLE_JNI           "Force JNI implementation (default: auto-detect)" OFF
   To build Maven snapshot versions for development:
   cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_MAVEN_SNAPSHOT:BOOL=ON ../hdf5
 
-  Note: FFM is auto-selected for Java 24+, JNI for older versions.
-  To force JNI even with Java 24+:
+  Note: FFM is auto-selected for Java 25+, JNI for older versions.
+  To force JNI even with Java 25+:
   cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_ENABLE_JNI:BOOL=ON ../hdf5
 
   Or use the Maven-enabled CMake presets (recommended):
@@ -943,7 +943,7 @@ HDF5_ENABLE_JNI           "Force JNI implementation (default: auto-detect)" OFF
   cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # JNI Release
   cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # JNI Snapshot
 
-  # Linux (GCC) - FFM (optional, Java 24+):
+  # Linux (GCC) - FFM (optional, Java 25+):
   cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh          # FFM Release
   cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh # FFM Snapshot
 
@@ -1479,7 +1479,7 @@ XIV. Java FFM Testing
 ========================================================================
 
 HDF5 2.0 includes comprehensive Foreign Function & Memory (FFM) API tests
-for Java 24+. As of October 2025, the test suite provides 56% coverage of
+for Java 25+. As of October 2025, the test suite provides 56% coverage of
 the HDF5 C API surface with 444 tests across 17 modules.
 
 FFM Test Organization
@@ -1518,7 +1518,7 @@ To run specific module tests:
     ctest -R "JUnit-TestH5Sffm" -V    # Dataspaces
 
 Test Requirements:
-  - Java 24+ with --enable-native-access=ALL-UNNAMED
+  - Java 25+ with --enable-native-access=ALL-UNNAMED
   - FFM bindings JAR (javahdf5-*.jar)
   - JUnit 4.x test framework
   - HDF5 native libraries in LD_LIBRARY_PATH

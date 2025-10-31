@@ -879,7 +879,7 @@ set (HDF5_SRC_INCLUDE_DIRS
     ${H5FD_SUBFILING_DIR}
 )
 
-cmake_dependent_option(HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF "HDF5_ENABLE_PARALLEL;NOT WIN32" OFF)
+cmake_dependent_option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF "HDF5_ENABLE_PARALLEL;NOT WIN32" OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
   # Make sure we found MPI_Comm_split_type previously
   if (NOT H5_HAVE_MPI_Comm_split_type)

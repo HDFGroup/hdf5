@@ -66,8 +66,8 @@ validate_java_version() {
         return 1
     fi
 
-    if [[ $version -lt 24 && "$impl" == "ffm" ]]; then
-        log_error "FFM implementation requires Java 24+, got Java $version"
+    if [[ $version -lt 25 && "$impl" == "ffm" ]]; then
+        log_error "FFM implementation requires Java 25, got Java $version"
         return 1
     fi
 
@@ -351,10 +351,10 @@ Arguments:
   test_mode      Test mode (build, maven, full) [default: build]
 
 Examples:
-  $0                          # Test Java 24 with auto implementation (JNI - default)
-  $0 24 ffm build            # Test Java 24 with FFM (optional), build only
+  $0                          # Test Java 25 with auto implementation (JNI - default)
+  $0 25 ffm build            # Test Java 25 with FFM (optional), build only
   $0 11 jni maven            # Test Java 11 with JNI, Maven artifacts
-  $0 24 auto full            # Test Java 24 with auto selection (JNI), full suite
+  $0 25 auto full            # Test Java 25 with auto selection (JNI), full suite
 
 Test Modes:
   build   - Basic build configuration test

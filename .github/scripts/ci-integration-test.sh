@@ -99,9 +99,9 @@ test_basic_build() {
     log_info "Testing basic build configuration..."
     local start_time=$(date +%s)
 
-    # Test both implementations if Java 24+, otherwise just JNI
+    # Test both implementations if Java 5, otherwise just JNI
     local implementations=("jni")
-    if [[ $JAVA_VERSION -ge 24 ]]; then
+    if [[ $JAVA_VERSION -ge 25 ]]; then
         implementations+=("ffm")
     fi
 
@@ -135,9 +135,9 @@ test_maven_artifacts() {
     log_info "Testing Maven artifact generation..."
     local start_time=$(date +%s)
 
-    # Test both implementations if Java 24+, otherwise just JNI
+    # Test both implementations if Java 25, otherwise just JNI
     local implementations=("jni")
-    if [[ $JAVA_VERSION -ge 24 ]]; then
+    if [[ $JAVA_VERSION -ge 25 ]]; then
         implementations+=("ffm")
     fi
 
@@ -410,8 +410,8 @@ Test Scenarios:
   full    - All tests including differentiation
 
 Examples:
-  $0                                    # Full test on Ubuntu with Java 24
-  $0 ubuntu-latest 24 quick            # Quick test on Ubuntu with Java 24
+  $0                                    # Full test on Ubuntu with Java 25
+  $0 ubuntu-latest 25 quick            # Quick test on Ubuntu with Java 25
   $0 windows-latest 11 build           # Build test on Windows with Java 11
 
 EOF
