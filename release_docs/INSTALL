@@ -7,10 +7,6 @@ Instructions for the Installation of HDF5 Software
 
 This file provides instructions for installing the HDF5 software.
 
-IMPORTANT: HDF5 2.0 and later requires CMake 3.26+ for building.
-           Autotools support was removed in March 2025.
-           See INSTALL_CMake.txt for complete build instructions using CMake Presets.
-
 For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
 
    HDF Forum:     https://forum.hdfgroup.org/

@@ -204,7 +204,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Enter the 'HDF5 Release file name base' as 'hdf5-X.Y.Z'
     - Enter the 'HDF5 target bucket directory' as 'vX_Y/vX_Y_Z'
     - Press "Run Workflow"
-8. Release hdf5_plugins following the same steps.
+9. Release hdf5_plugins following the same steps.
 
 ### 10. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
 
