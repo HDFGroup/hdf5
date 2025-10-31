@@ -55,14 +55,10 @@ public class VLDataConverter {
      */
     public static MemorySegment convertToHVL(ArrayList[] javaData, Arena arena) throws HDF5JavaException
     {
-
         if (javaData == null || javaData.length == 0) {
             throw new HDF5JavaException("Input data array is null or empty");
         }
 
-        // Converting ArrayList elements to hvl_t
-
-        // Allocate hvl_t array
         MemorySegment hvlArray = hvl_t.allocateArray(javaData.length, arena);
 
         for (int i = 0; i < javaData.length; i++) {
@@ -74,11 +70,9 @@ public class VLDataConverter {
     }
 
     /**
-     * Convert HDF5 hvl_t MemorySegment array back to Java ArrayList array
-     *
-     * CRITICAL: This method IMMEDIATELY extracts ALL raw data from HDF5-managed memory
-     * in a single pass, then processes the copied data. This prevents any access to
-     * HDF5-managed memory after H5Treclaim.
+     * Convert HDF5 hvl_t MemorySegment array back to Java ArrayList array.
+     * Uses two-phase approach: immediately extract all raw data from HDF5 memory,
+     * then process the copied data to prevent access after H5Treclaim.
      *
      * @param hvlArray MemorySegment containing hvl_t array
      * @param arrayLength Number of elements in the array
@@ -94,54 +88,34 @@ public class VLDataConverter {
             throw new HDF5JavaException("Input hvl_t array is null");
         }
 
-        // CRITICAL TWO-PHASE APPROACH:
-        // Phase 1: Copy ALL raw data from HDF5-managed memory to Java-managed memory
-        // Phase 2: Process the copied data without any access to HDF5 memory
-
         ArrayList[] result = new ArrayList[arrayLength];
-
-        // Phase 1: Extract all raw data immediately - NO processing, just copying
         RawVLData[] rawDataArray = new RawVLData[arrayLength];
-
-        // Check if this is string data to use special string copying
-        // For VL-of-strings, we need to check the base type
         boolean isStringType = isStringType(elementType) || isVLOfStrings(elementType);
 
         for (int i = 0; i < arrayLength; i++) {
             MemorySegment hvlElement = hvl_t.asSlice(hvlArray, i);
-
-            // Extract hvl_t fields immediately
             long len              = hvl_t.len(hvlElement);
             MemorySegment dataPtr = hvl_t.p(hvlElement);
 
-            // Check if we're getting valid data from hvl_t
             if (len == 0 || dataPtr == null || dataPtr.equals(MemorySegment.NULL)) {
-                // Empty VL element - create empty raw data
                 rawDataArray[i] = new RawVLData(new byte[0], 0);
             }
             else {
-                // Copy raw data immediately before any H5Treclaim
                 if (isStringType) {
-                    // For variable-length strings in hvl_t:
-                    // Based on HDF5 source analysis:
-                    // - H5T__vlen_mem_str_getlen: H5MM_memcpy(&s, _vl, sizeof(char *)); *len = strlen(s);
-                    // - H5T__vlen_mem_str_getptr: H5MM_memcpy(&s, _vl, sizeof(char *)); return s;
-                    // This means hvl_t.p contains a char*, and we should ignore the len field for VL strings
+                    // For VL strings, hvl_t.p contains a char* directly
                     try {
                         ArrayList<String> directResult = new ArrayList<>(1);
                         if (dataPtr == null || dataPtr.equals(MemorySegment.NULL)) {
-                            directResult.add(""); // Empty string for null data
+                            directResult.add("");
                         }
                         else {
-                            // For VL strings, hvl_t.p directly contains the char* pointer
                             String str = dataPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
                             directResult.add(str);
                         }
                         result[i]       = directResult;
-                        rawDataArray[i] = null; // Mark as already processed
+                        rawDataArray[i] = null;
                     }
                     catch (Exception e) {
-                        // Fallback to copying if direct conversion fails
                         rawDataArray[i] = copyStringVLDataImmediately(dataPtr, (int)len);
                     }
                 }
@@ -151,37 +125,30 @@ public class VLDataConverter {
             }
         }
 
-        // Phase 2: Process copied data (no HDF5 memory access)
-        // CRITICAL FIX: For VL data, we need to get the base type for proper conversion
         long baseElementType        = elementType;
         boolean needToCloseBaseType = false;
         try {
             if (isVLType(elementType)) {
                 baseElementType     = getVLBaseType(elementType);
-                needToCloseBaseType = true; // We got a new type ID that needs closing
+                needToCloseBaseType = true;
             }
         }
         catch (Exception e) {
-            // If we can't get the base type, use original elementType
         }
 
         try {
             for (int i = 0; i < arrayLength; i++) {
-                // Skip elements that were already processed with direct conversion
                 if (rawDataArray[i] != null) {
                     result[i] = convertRawDataToArrayList(rawDataArray[i], baseElementType);
                 }
-                // Elements with rawDataArray[i] == null were already processed and result[i] is set
             }
         }
         finally {
-            // CRITICAL: Close the base type if we created it to prevent memory leaks
             if (needToCloseBaseType && baseElementType != elementType) {
                 try {
                     H5.H5Tclose(baseElementType);
                 }
                 catch (Exception e) {
-                    // Log but don't fail - we've already done the main work
                 }
             }
         }
@@ -211,11 +178,8 @@ public class VLDataConverter {
             return;
         }
 
-        // Detect element type using reflection
         Object firstElement  = list.get(0);
         Class<?> elementType = firstElement.getClass();
-
-        // Converting ArrayList of type: " + elementType.getSimpleName() + " with " + size + " elements"
 
         if (elementType == Integer.class) {
             MemorySegment dataArray = convertIntegerVL(list, arena);
@@ -853,9 +817,7 @@ public class VLDataConverter {
     }
 
     /**
-     * Copy all raw bytes from HDF5-managed memory to Java-managed memory.
-     * This is the critical first phase that prevents any SIGSEGV.
-     * For strings, we need special handling to extract the actual content immediately.
+     * Copy raw bytes from HDF5-managed memory to Java-managed memory immediately.
      */
     private static RawVLData copyRawVLData(MemorySegment dataPtr, int len, long elementType)
         throws HDF5JavaException
@@ -865,58 +827,44 @@ public class VLDataConverter {
         }
 
         try {
-            // CRITICAL FIX: Use actual HDF5 datatype size instead of guessing
-            // Get the base element type for VL data
             long baseType = elementType;
-
-            // For VL types, get the base type
             boolean needToCloseBaseType = false;
+
             try {
                 if (hdf.hdf5lib.H5.H5Tdetect_class(elementType, hdf.hdf5lib.HDF5Constants.H5T_VLEN)) {
                     baseType            = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(elementType);
-                    needToCloseBaseType = true; // Mark that we need to close this type ID
+                    needToCloseBaseType = true;
                 }
             }
             catch (Exception e) {
-                // If we can't get the base type, continue with original elementType
             }
 
             try {
-                // Get the actual element size from HDF5
                 long elementSize = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(baseType);
                 long totalSize   = (long)len * elementSize;
 
-                // Check for zero element size - fall back to conservative approach
                 if (elementSize == 0) {
                     throw new RuntimeException("Zero element size - trigger fallback");
                 }
 
-                // Use the correct element size for data copying
                 byte[] rawData = copyWithReinterpret(dataPtr, totalSize, len);
                 if (rawData.length > 0) {
                     return new RawVLData(rawData, len);
                 }
 
-                // If copying fails, return empty data (preserving length info)
                 return new RawVLData(new byte[0], len);
             }
             finally {
-                // CRITICAL: Close the base type if we created it to prevent memory leaks
                 if (needToCloseBaseType && baseType != elementType) {
                     try {
                         org.hdfgroup.javahdf5.hdf5_h.H5Tclose(baseType);
                     }
                     catch (Exception ex) {
-                        // Log but don't fail - we've already done the main work
-                        System.err.println("Warning: Failed to close base type in extractRawVLData: " +
-                                           ex.getMessage());
                     }
                 }
             }
         }
         catch (Exception e) {
-            // If we can't determine the size, fall back to conservative approach
-            // Try common element sizes: 8-byte first (double/pointer), then 4-byte (int)
             try {
                 byte[] rawData = copyWithReinterpret(dataPtr, (long)len * 8, len);
                 if (rawData.length > 0) {
@@ -928,38 +876,31 @@ public class VLDataConverter {
                 }
             }
             catch (Exception fallbackEx) {
-                // Ignore fallback exceptions
             }
             return new RawVLData(new byte[0], len);
         }
     }
 
     /**
-     * Helper method to copy data using FFM reinterpret with proper sizing
+     * Copy data using FFM reinterpret with proper sizing.
      */
     private static byte[] copyWithReinterpret(MemorySegment dataPtr, long totalSize, int len)
     {
         try {
-            // Reinterpret the pointer with the calculated size using global arena
             MemorySegment reinterpretedSegment = dataPtr.reinterpret(totalSize, Arena.global(), null);
-
-            // Now copy the data
             byte[] rawData = new byte[(int)totalSize];
             for (int i = 0; i < totalSize; i++) {
                 rawData[i] = reinterpretedSegment.get(ValueLayout.JAVA_BYTE, i);
             }
-
             return rawData;
         }
         catch (Exception e) {
-            // If reinterpret fails, return empty array
             return new byte[0];
         }
     }
 
     /**
-     * Special method to copy string VL data immediately
-     * For string data, we need to extract the actual string content, not just pointers
+     * Copy string VL data immediately, extracting actual string content.
      */
     private static RawVLData copyStringVLDataImmediately(MemorySegment dataPtr, int len)
         throws HDF5JavaException
@@ -969,75 +910,56 @@ public class VLDataConverter {
         }
 
         try {
-            // For variable-length strings (H5T_STRING + H5T_VARIABLE), dataPtr points directly to string data
-            // For other VL string types, dataPtr might point to an array of string pointers
-
-            // Create a list to collect all string bytes
             java.util.List<Byte> allStringBytes = new java.util.ArrayList<>();
-
-            // Add length information at the beginning
             allStringBytes.add((byte)(len & 0xFF));
             allStringBytes.add((byte)((len >> 8) & 0xFF));
             allStringBytes.add((byte)((len >> 16) & 0xFF));
             allStringBytes.add((byte)((len >> 24) & 0xFF));
 
-            // CRITICAL FIX: Handle both direct string data and string pointer arrays
             try {
-                // First, try to read as direct string data (H5T_STRING + H5T_VARIABLE case)
                 String str      = dataPtr.getString(0, StandardCharsets.UTF_8);
                 byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
 
-                // For direct string data, we have 1 string, so update the count
-                // Replace the length with count = 1
-                allStringBytes.set(0, (byte)1); // count = 1
+                allStringBytes.set(0, (byte)1);
                 allStringBytes.set(1, (byte)0);
                 allStringBytes.set(2, (byte)0);
                 allStringBytes.set(3, (byte)0);
 
-                // Add string length
                 int strLen = strBytes.length;
                 allStringBytes.add((byte)(strLen & 0xFF));
                 allStringBytes.add((byte)((strLen >> 8) & 0xFF));
                 allStringBytes.add((byte)((strLen >> 16) & 0xFF));
                 allStringBytes.add((byte)((strLen >> 24) & 0xFF));
 
-                // Add string content
                 for (byte b : strBytes) {
                     allStringBytes.add(b);
                 }
             }
             catch (Exception directStringEx) {
-                // If direct string reading fails, try as an array of string pointers
                 try {
-                    // For string VL data, we have an array of string pointers
-                    long pointerArraySize = (long)len * 8; // 8 bytes per pointer on 64-bit systems
+                    long pointerArraySize = (long)len * 8;
                     MemorySegment reinterpretedArray =
                         dataPtr.reinterpret(pointerArraySize, Arena.global(), null);
 
                     for (int i = 0; i < len; i++) {
                         try {
-                            // Get the string pointer from the reinterpreted array
                             MemorySegment stringPtr = reinterpretedArray.getAtIndex(ValueLayout.ADDRESS, i);
 
                             if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
-                                // Extract the string content immediately
                                 String str      = stringPtr.getString(0, StandardCharsets.UTF_8);
                                 byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
 
-                                // Add string length
                                 int strLen = strBytes.length;
                                 allStringBytes.add((byte)(strLen & 0xFF));
                                 allStringBytes.add((byte)((strLen >> 8) & 0xFF));
                                 allStringBytes.add((byte)((strLen >> 16) & 0xFF));
                                 allStringBytes.add((byte)((strLen >> 24) & 0xFF));
 
-                                // Add string content
                                 for (byte b : strBytes) {
                                     allStringBytes.add(b);
                                 }
                             }
                             else {
-                                // Null string - add zero length
                                 allStringBytes.add((byte)0);
                                 allStringBytes.add((byte)0);
                                 allStringBytes.add((byte)0);
@@ -1045,7 +967,6 @@ public class VLDataConverter {
                             }
                         }
                         catch (Exception e) {
-                            // If we can't read this string, add empty placeholder
                             allStringBytes.add((byte)0);
                             allStringBytes.add((byte)0);
                             allStringBytes.add((byte)0);
@@ -1054,7 +975,6 @@ public class VLDataConverter {
                     }
                 }
                 catch (Exception reinterpretEx) {
-                    // If both methods fail, fall back to empty data
                     allStringBytes.add((byte)0);
                     allStringBytes.add((byte)0);
                     allStringBytes.add((byte)0);
@@ -1062,13 +982,11 @@ public class VLDataConverter {
                 }
             }
 
-            // Convert list to array
             byte[] result = new byte[allStringBytes.size()];
             for (int i = 0; i < result.length; i++) {
                 result[i] = allStringBytes.get(i);
             }
 
-            // For string data, return 1 as the length (1 ArrayList element expected)
             return new RawVLData(result, 1);
         }
         catch (Exception e) {
@@ -1077,21 +995,16 @@ public class VLDataConverter {
     }
 
     /**
-     * Convert copied raw data to ArrayList without accessing HDF5 memory.
-     * This is the safe second phase that works on Java-managed memory only.
+     * Convert copied raw data to ArrayList using Java-managed memory only.
      */
     private static ArrayList<?> convertRawDataToArrayList(RawVLData rawData, long elementType)
         throws HDF5JavaException
     {
-
-        // If the hvl_t indicated 0 length, return empty ArrayList
         if (rawData.length == 0) {
             return new ArrayList<>();
         }
 
-        // If we have a non-zero length but no raw data, something went wrong
         if (rawData.data.length == 0 && rawData.length > 0) {
-            // This indicates a data extraction problem - create ArrayList with correct size but null elements
             ArrayList<Object> fallback = new ArrayList<>(rawData.length);
             for (int i = 0; i < rawData.length; i++) {
                 fallback.add(null);
@@ -1099,7 +1012,6 @@ public class VLDataConverter {
             return fallback;
         }
 
-        // Type detection based on HDF5 datatype
         try {
             if (isIntegerType(elementType)) {
                 return convertRawDataToIntegerList(rawData);
@@ -1114,16 +1026,13 @@ public class VLDataConverter {
                 return convertRawDataToByteArrayList(rawData);
             }
             else if (isVLType(elementType)) {
-                // For nested VL, we need to process hvl_t structures from raw data
                 return convertRawDataToNestedVLList(rawData, elementType);
             }
             else {
-                // For unknown types, try to detect content from raw data
                 return detectAndConvertUnknownType(rawData, elementType);
             }
         }
         catch (Exception e) {
-            // Fallback: return empty list to prevent crashes
             ArrayList<Object> fallback = new ArrayList<>();
             for (int i = 0; i < rawData.length; i++) {
                 fallback.add(null);
@@ -1184,15 +1093,13 @@ public class VLDataConverter {
     }
 
     /**
-     * Convert raw bytes to String ArrayList
-     * For string data copied with copyStringVLDataImmediately, decode the packed format
+     * Convert raw bytes to String ArrayList, decoding packed format.
      */
     private static ArrayList<String> convertRawDataToStringList(RawVLData rawData)
     {
         ArrayList<String> result = new ArrayList<>();
 
         if (rawData.length == 0 || rawData.data.length < 4) {
-            // Create empty strings to match expected length
             for (int i = 0; i < rawData.length; i++) {
                 result.add("");
             }
@@ -1202,18 +1109,14 @@ public class VLDataConverter {
         byte[] data = rawData.data;
 
         try {
-            // Check if this looks like packed string data (starts with length)
             if (data.length >= 4) {
-                // Read the number of strings from the first 4 bytes
                 int numStrings =
                     (data[0] & 0xFF) | ((data[1] & 0xFF) << 8) | ((data[2] & 0xFF) << 16) | (data[3] << 24);
 
                 if (numStrings == rawData.length && numStrings > 0) {
-                    // This looks like our packed format, decode it
-                    int offset = 4; // Skip the count
+                    int offset = 4;
 
                     for (int i = 0; i < numStrings && offset + 4 <= data.length; i++) {
-                        // Read string length
                         int strLen = (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) |
                                      ((data[offset + 2] & 0xFF) << 16) | (data[offset + 3] << 24);
                         offset += 4;
@@ -1222,7 +1125,6 @@ public class VLDataConverter {
                             result.add("");
                         }
                         else if (offset + strLen <= data.length) {
-                            // Extract string bytes
                             byte[] strBytes = new byte[strLen];
                             System.arraycopy(data, offset, strBytes, 0, strLen);
                             String str = new String(strBytes, StandardCharsets.UTF_8);
@@ -1230,19 +1132,17 @@ public class VLDataConverter {
                             offset += strLen;
                         }
                         else {
-                            result.add(""); // Truncated string
+                            result.add("");
                         }
                     }
                 }
             }
 
-            // If we didn't get the expected number of strings, pad with empty strings
             while (result.size() < rawData.length) {
                 result.add("");
             }
         }
         catch (Exception e) {
-            // If decoding fails, create empty strings to prevent crashes
             result.clear();
             for (int i = 0; i < rawData.length; i++) {
                 result.add("");
@@ -1253,7 +1153,7 @@ public class VLDataConverter {
     }
 
     /**
-     * Convert raw bytes to byte array ArrayList (for HDF5 references)
+     * Convert raw bytes to byte array ArrayList (for HDF5 references).
      */
     private static ArrayList<byte[]> convertRawDataToByteArrayList(RawVLData rawData)
     {
@@ -1266,23 +1166,18 @@ public class VLDataConverter {
         byte[] data = rawData.data;
 
         try {
-            // For reference data, we expect a simple packed format:
-            // - First 4 bytes: number of references
-            // - Then for each reference: 4 bytes length + reference data
             if (data.length >= 4) {
                 int numRefs =
                     (data[0] & 0xFF) | ((data[1] & 0xFF) << 8) | ((data[2] & 0xFF) << 16) | (data[3] << 24);
 
                 if (numRefs == rawData.length && numRefs > 0) {
-                    int offset = 4; // Skip the count
+                    int offset = 4;
 
                     for (int i = 0; i < numRefs && offset + 4 <= data.length; i++) {
-                        // Read reference length
                         int refLen = (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) |
                                      ((data[offset + 2] & 0xFF) << 16) | (data[offset + 3] << 24);
                         offset += 4;
 
-                        // Extract reference data
                         if (offset + refLen <= data.length) {
                             byte[] refData = new byte[refLen];
                             System.arraycopy(data, offset, refData, 0, refLen);
@@ -1290,24 +1185,19 @@ public class VLDataConverter {
                             offset += refLen;
                         }
                         else {
-                            // Invalid data, add empty byte array
                             result.add(new byte[0]);
                         }
                     }
                 }
                 else {
-                    // If count doesn't match or is invalid, treat as single large byte array
-                    // This handles cases where the data wasn't packed by our convertByteArrayVL method
                     result.add(data.clone());
                 }
             }
             else {
-                // Too small for packed format, treat as single byte array
                 result.add(data.clone());
             }
         }
         catch (Exception e) {
-            // Fallback: treat entire raw data as single byte array
             result.clear();
             result.add(data.clone());
         }
@@ -1316,7 +1206,7 @@ public class VLDataConverter {
     }
 
     /**
-     * Convert raw bytes to nested VL ArrayList (placeholder implementation)
+     * Convert raw bytes to nested VL ArrayList.
      */
     private static ArrayList<ArrayList<?>> convertRawDataToNestedVLList(RawVLData rawData, long elementType)
         throws HDF5JavaException
@@ -1328,34 +1218,23 @@ public class VLDataConverter {
         }
 
         try {
-            // CRITICAL FIX: For nested VL data, we need to reconstruct the hvl_t array structure
-            // from the raw data and use the existing immediate conversion logic
-
-            // Allocate memory segment from raw data
-            Arena tempArena = Arena.global(); // Use global arena to match other VL operations
-
-            // The raw data contains hvl_t structures - reconstruct them
+            Arena tempArena = Arena.global();
             byte[] data       = rawData.data;
-            int hvlSize       = 16; // hvl_t structure size on 64-bit systems
+            int hvlSize       = 16;
             int maxStructs    = data.length / hvlSize;
             int actualStructs = Math.min(maxStructs, rawData.length);
 
             if (actualStructs > 0) {
-                // Create memory segment from raw data
                 MemorySegment reconstructedHvlArray = tempArena.allocate(data.length);
                 reconstructedHvlArray.copyFrom(MemorySegment.ofArray(data));
-
-                // Use the existing convertNestedVLImmediately method which handles the conversion properly
                 result = convertNestedVLImmediately(reconstructedHvlArray, actualStructs, elementType);
             }
 
-            // Ensure we have the expected number of elements
             while (result.size() < rawData.length) {
                 result.add(new ArrayList<>());
             }
         }
         catch (Exception e) {
-            // Fallback: create empty nested lists to prevent IndexOutOfBounds
             result.clear();
             for (int i = 0; i < rawData.length; i++) {
                 result.add(new ArrayList<>());
@@ -1614,33 +1493,24 @@ public class VLDataConverter {
         }
 
         try {
-            // HYPOTHESIS: For VL strings, what we think is 'len' is actually a string pointer
-            // Try to create a MemorySegment from the 'len' value if it looks like an address
-            if (len > 0x1000000) { // Looks like a memory address
+            // For VL strings, check if 'len' might be a string pointer address
+            if (len > 0x1000000) {
                 try {
                     MemorySegment stringPtr =
                         MemorySegment.ofAddress(len).reinterpret(100, Arena.global(), null);
                     String str = stringPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
-                    System.out.println("DEBUG: convertStringVLFromHVL read from len-as-pointer: \"" + str +
-                                       "\"");
                     result.add(str);
                     return result;
                 }
                 catch (Exception addrException) {
-                    System.out.println("DEBUG: Failed to read from len-as-pointer: " +
-                                       addrException.getMessage());
+                    // Fall through to direct read
                 }
             }
 
-            // Fallback: Read the string directly from dataPtr
             String str = dataPtr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
-            System.out.println("DEBUG: convertStringVLFromHVL read from dataPtr: \"" + str +
-                               "\" (len=" + len + ")");
             result.add(str);
         }
         catch (Exception e) {
-            // If string reading fails, add empty string
-            System.out.println("DEBUG: convertStringVLFromHVL failed with exception: " + e.getMessage());
             result.add("");
         }
 
@@ -1648,25 +1518,18 @@ public class VLDataConverter {
     }
 
     /**
-     * IMMEDIATE nested VL conversion - extracts ALL nested data before any potential H5Treclaim
+     * Extract nested VL data immediately before H5Treclaim.
      */
     private static ArrayList<ArrayList<?>> convertNestedVLImmediately(MemorySegment dataPtr, int len,
                                                                       long elementType)
         throws HDF5JavaException
     {
-
         ArrayList<ArrayList<?>> result = new ArrayList<>(len);
-
-        // Get the base type for nested elements
         long baseType = getVLBaseType(elementType);
 
         try {
-            // CRITICAL: For nested VL data, extract ALL nested hvl_t data IMMEDIATELY
-            // This prevents access to freed memory after H5Treclaim
             for (int i = 0; i < len; i++) {
                 MemorySegment nestedHvlElement = hvl_t.asSlice(dataPtr, i);
-
-                // Extract hvl_t fields immediately - this is the critical step
                 long nestedLen              = hvl_t.len(nestedHvlElement);
                 MemorySegment nestedDataPtr = hvl_t.p(nestedHvlElement);
 
@@ -1675,19 +1538,16 @@ public class VLDataConverter {
                     continue;
                 }
 
-                // Immediately convert the nested element data
                 ArrayList<?> nestedList =
                     convertSingleElementImmediately(nestedDataPtr, (int)nestedLen, baseType);
                 result.add(nestedList);
             }
         }
         finally {
-            // CRITICAL: Close the base type to prevent memory leaks
             try {
                 H5.H5Tclose(baseType);
             }
             catch (Exception e) {
-                // Log but don't fail - we've already done the main work
             }
         }
 
