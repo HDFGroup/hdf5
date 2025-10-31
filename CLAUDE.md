@@ -28,7 +28,7 @@ cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh              # Linux JNI
 cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh              # Windows JNI release
 cmake --workflow --preset ci-MinShar-Clang-Maven --fresh             # macOS JNI release
 
-# FFM implementation (optional - requires Java 24+)
+# FFM implementation (optional - requires Java 25+)
 cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh     # Linux FFM snapshots
 cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-Snapshot --fresh     # Windows FFM snapshots
 cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-Snapshot --fresh    # macOS FFM snapshots
@@ -56,8 +56,8 @@ cmake --install .
 - `HDF5_BUILD_FORTRAN=ON` - Build Fortran bindings
 - `HDF5_BUILD_CPP_LIB=ON` - Build C++ bindings
 - `HDF5_BUILD_JAVA=ON` - Build Java bindings
-- `HDF5_ENABLE_JNI=OFF` - Auto-select FFM for Java 24+, JNI for older versions (default)
-- `HDF5_ENABLE_JNI=ON` - Force JNI implementation even with Java 24+
+- `HDF5_ENABLE_JNI=OFF` - Auto-select FFM for Java 25+, JNI for older versions (default)
+- `HDF5_ENABLE_JNI=ON` - Force JNI implementation even with Java 25+
 - `HDF5_ENABLE_PARALLEL=ON` - Enable MPI parallel support
 - `HDF5_ENABLE_THREADSAFE=ON` - Enable thread safety
 - `BUILD_TESTING=ON` - Build test suite
@@ -73,7 +73,7 @@ HDF5 CMake presets follow a consistent naming pattern:
 - Examples: `ci-StdShar-GNUC`, `ci-StdShar-MSVC`, `ci-StdShar-Clang`, `ci-StdShar-Intel`
 - Description: Full-featured builds with C++, Fortran, Java (JNI), tools, examples, and tests
 
-**FFM Builds** (with Java FFM - requires Java 24+):
+**FFM Builds** (with Java FFM - requires Java 25+):
 - Format: `ci-StdShar-{COMPILER}-FFM`
 - Examples: `ci-StdShar-GNUC-FFM`, `ci-StdShar-MSVC-FFM`, `ci-StdShar-Clang-FFM`
 - Description: Same as standard builds but with FFM instead of JNI
@@ -96,9 +96,9 @@ HDF5 CMake presets follow a consistent naming pattern:
 **As of HDF5 2.0**: JNI is the default, FFM is optional
 
 - **JNI (Java Native Interface)**: Default implementation, works with Java 8+, production-stable
-- **FFM (Foreign Function & Memory)**: Optional implementation, requires Java 24+, modern native access
+- **FFM (Foreign Function & Memory)**: Optional implementation, requires Java 25+, modern native access
 
-**Note**: Future releases may change FFM to default as Java 24+ adoption increases.
+**Note**: Future releases may change FFM to default as Java 25+ adoption increases.
 
 ### Maven Artifacts
 
@@ -152,7 +152,7 @@ This replaces the previous approach of pre-generating bindings in a separate wor
 
 #### Requirements
 
-- **Java 24+** (tested with Java 25 - Oracle distribution recommended)
+- **Java 25+** (tested with Java 25 - Oracle distribution recommended)
 - **jextract tool** installed and accessible via `JEXTRACT_HOME` or `JAVA_HOME`
   - Download from https://jdk.java.net/jextract/
   - Tested with jextract 22+6-47
@@ -160,11 +160,11 @@ This replaces the previous approach of pre-generating bindings in a separate wor
 #### How It Works
 
 **Automatic Selection:**
-When you build with Java 24+, CMake automatically:
-1. Detects Java version ≥ 24
+When you build with Java 25+, CMake automatically:
+1. Detects Java version ≥ 25
 2. Checks `HDF5_ENABLE_JNI` setting:
-   - If `OFF` or unset → Uses **FFM** (default for Java 24+)
-   - If `ON` → Forces **JNI** (even with Java 24+)
+   - If `OFF` or unset → Uses **FFM** (default for Java 25+)
+   - If `ON` → Forces **JNI** (even with Java 25+)
 3. Searches for jextract in `$JEXTRACT_HOME/bin` or `$JAVA_HOME/bin`
 4. Generates FFM bindings to `build/java/jsrc/` during configure
 5. Compiles generated bindings into Maven artifacts
@@ -459,7 +459,7 @@ ctest -E "MPI|SWMR"         # Exclude parallel/SWMR tests
 
 4. **Java FFM/JNI specific builds:**
    ```bash
-   # Java FFM (requires Java 24+)
+   # Java FFM (requires Java 25+)
    cmake --workflow --preset ci-StdShar-GNUC-FFM --fresh
 
    # Java JNI (default - works with Java 11+)

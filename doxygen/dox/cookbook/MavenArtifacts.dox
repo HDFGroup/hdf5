@@ -27,7 +27,7 @@ HDF5 provides three main Maven artifacts:
 </tr>
 <tr>
   <td><strong>hdf5-java-ffm</strong></td>
-  <td>Java 24+</td>
+  <td>Java 25+</td>
   <td>FFM implementation (future default)</td>
   <td>Production-ready</td>
 </tr>
@@ -84,7 +84,7 @@ public class MyHDF5App {
 }
 \endcode
 
-\subsection subsec_maven_ffm Using FFM Implementation (Java 24+)
+\subsection subsec_maven_ffm Using FFM Implementation (Java 25+)
 
 \par Basic Usage
 Add the following dependency to your <code>pom.xml</code>:
@@ -203,7 +203,7 @@ Future releases will be available on Maven Central, which does not require authe
 If you see <code>java.lang.UnsatisfiedLinkError</code>:
 \li Verify you're using the correct platform classifier
 \li Ensure only ONE HDF5 artifact (JNI or FFM) is on classpath
-\li Check Java version matches implementation (Java 24+ for FFM)
+\li Check Java version matches implementation (Java 25+ for FFM)
 
 \par Native Access Error (FFM only)
 If you see <code>IllegalCallerException</code> with FFM:
