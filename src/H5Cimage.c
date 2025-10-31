@@ -2394,8 +2394,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__check_for_duplicates(H5F_t *f, H5C_cache_entry_t *pf_entry_ptr,
-                          H5C_recon_entry_t **recon_table_ptr)
+H5C__check_for_duplicates(H5F_t *f, H5C_cache_entry_t *pf_entry_ptr, H5C_recon_entry_t **recon_table_ptr)
 {
     haddr_t            addr        = pf_entry_ptr->addr;
     herr_t             ret_value   = SUCCEED; /* Return value */
@@ -2490,7 +2489,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
             if (pf_entry_ptr->fd_parent_count > 0 && pf_entry_ptr->fd_parent_addrs)
                 H5MM_xfree(pf_entry_ptr->fd_parent_addrs);
             pf_entry_ptr = H5FL_FREE(H5C_cache_entry_t, pf_entry_ptr);
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate addresses in cache");
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate addresses in cache");
         }
 
         /* Note that we make no checks on available cache space before
