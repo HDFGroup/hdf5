@@ -130,7 +130,7 @@ else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
 endif ()
 
-if (Java_VERSION_STRING VERSION_LESS "24.0.0" OR HDF5_ENABLE_JNI)
+if (Java_VERSION_STRING VERSION_LESS "25.0.0" OR HDF5_ENABLE_JNI)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 endif ()
