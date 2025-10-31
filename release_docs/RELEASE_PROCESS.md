@@ -49,6 +49,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 7. Review and update all INSTALL_* files in [release_docs][u4], if needed.
     - [INSTALL][u5] should be general info and not require extensive changes
     - [INSTALL_CMake.txt][u7] are the instructions for building under CMake.
+8. Verify that [API Compatibility Macros][u13] are up to date for the release version.
 
 ### 4. Freeze Code (Release Manager | Test Automation Team)
 1. Transition from performing maintenance on software to preparing for its delivery.
