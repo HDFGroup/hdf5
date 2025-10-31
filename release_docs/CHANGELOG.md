@@ -776,6 +776,9 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ## Fortran API
 
+   Added missing parameters H5F_ACC_SWMR_READ_F and H5F_ACC_SWMR_WRITE_F
+   Fixed GitHub issue [#5959](https://github.com/HDFGroup/hdf5/issues/5959)
+
 ## High-Level Library
 
 ### Fixed an issue with H5TB functions
