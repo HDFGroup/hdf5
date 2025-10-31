@@ -1541,9 +1541,6 @@ Coverage Information:
   - Active expansion: H5P, H5F, H5O, H5D modules
   - Target: 50%+ coverage maintained across all modules
 
-For FFM test development guidelines and memory patterns, see:
-  .claude/FFM_MEMORY_PATTERNS.md in the source tree
-
 
 ========================================================================
 For further assistance, send email to help@hdfgroup.org

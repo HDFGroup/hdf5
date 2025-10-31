@@ -146,8 +146,6 @@ ctest -R "JUnit-TestH5Tffm" -V   # Datatype tests
 
 **Test Location:** `java/jtest/TestH5*ffm.java`
 
-**For Developers:** See `.claude/FFM_MEMORY_PATTERNS.md` for FFM test development guidelines and memory allocation patterns.
-
 ### Features
 * **Dual Implementation Support:** Choose FFM for modern Java or JNI for compatibility
 * **Cross-Platform CI/CD:** Automated testing across all supported platforms

@@ -112,13 +112,6 @@ try {
 }
 ```
 
-## Documentation
-
-- **FFM patterns:** `.claude/FFM_MEMORY_PATTERNS.md`
-- **Test coverage:** `.claude/COMPLETE_API_COVERAGE_ANALYSIS_2025-10-15.md`
-- **Development plan:** `.claude/DEVELOPMENT_SUMMARY_2025-10-15.md`
-- **Main guide:** `CLAUDE.md` (repository root)
-
 ## Future Work
 
 **Test expansion priorities (Phase 2):**
