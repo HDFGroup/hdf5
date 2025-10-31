@@ -220,9 +220,9 @@ test_artifact_validation() {
 
 # Test scenario: Implementation differentiation
 test_implementation_differentiation() {
-    if [[ $JAVA_VERSION -lt 24 ]]; then
-        log_info "Skipping implementation differentiation test (Java < 24)"
-        record_scenario "implementation_differentiation" "skipped" "0s" "Java version < 24, only JNI available"
+    if [[ $JAVA_VERSION -lt 25 ]]; then
+        log_info "Skipping implementation differentiation test (Java < 25)"
+        record_scenario "implementation_differentiation" "skipped" "0s" "Java version < 25, only JNI available"
         return 0
     fi
 
@@ -291,7 +291,7 @@ test_cmake_presets() {
 
     # Test implementation-specific presets
     local implementations=("jni")
-    if [[ $JAVA_VERSION -ge 24 ]]; then
+    if [[ $JAVA_VERSION -ge 25 ]]; then
         implementations+=("ffm")
     fi
 
@@ -400,7 +400,7 @@ Usage: $0 [platform] [java_version] [test_scenario]
 
 Arguments:
   platform       Target platform (ubuntu-latest, windows-latest, macos-latest) [default: ubuntu-latest]
-  java_version   Java version to test (11, 17, 21, 24, 25) [default: 24]
+  java_version   Java version to test (11, 17, 21, 24, 25) [default: 24] (25+ required for FFM)
   test_scenario  Test scenario (quick, build, maven, full) [default: full]
 
 Test Scenarios:

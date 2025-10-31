@@ -86,10 +86,10 @@ determine_implementation() {
             echo "jni"
             ;;
         "ffm")
-            if [[ $version -ge 24 ]]; then
+            if [[ $version -ge 25 ]]; then
                 echo "ffm"
             else
-                log_error "FFM not available for Java $version"
+                log_error "FFM requires Java 25+, got Java $version"
                 return 1
             fi
             ;;
@@ -346,7 +346,7 @@ Java Implementation Test Suite
 Usage: $0 [java_version] [implementation] [test_mode]
 
 Arguments:
-  java_version    Java version to test (11, 17, 21, 24, 25) [default: 24]
+  java_version    Java version to test (11, 17, 21, 24, 25) [default: 24] (25+ required for FFM)
   implementation  Implementation to test (auto, ffm, jni) [default: auto]
   test_mode      Test mode (build, maven, full) [default: build]
 
