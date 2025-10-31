@@ -193,6 +193,10 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ## Library
 
+### Changed default chunk cache hash table size to 8191
+
+   In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
+     
 ### Updated default file format to 1.8
 
    By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. This behavior can be overridden with `H5Pset_libver_bounds()`.
