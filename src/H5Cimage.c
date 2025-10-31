@@ -138,6 +138,8 @@ typedef struct H5C_recon_entry_t {
 /* Helper routines */
 static size_t H5C__cache_image_block_entry_header_size(const H5F_t *f);
 static size_t H5C__cache_image_block_header_size(const H5F_t *f);
+static herr_t H5C__check_for_duplicates(H5F_t *f, H5C_cache_entry_t *pf_entry_ptr,
+                                        H5C_recon_entry_t **recon_table_ptr);
 static herr_t H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **buf,
                                              size_t buf_size);
 #ifndef NDEBUG /* only used in assertions */
@@ -2381,6 +2383,52 @@ done:
 } /* H5C__prep_for_file_close__scan_entries() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C__check_for_duplicates()
+ *
+ * Purpose:     Detects two entries with the same address.  When the
+ *      duplicate occurs, expunge the entry from the cache.  Leave the
+ *      half-processed entry for the caller to clean up as with other failures.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C__check_for_duplicates(H5F_t *f, H5C_cache_entry_t *pf_entry_ptr,
+                          H5C_recon_entry_t **recon_table_ptr)
+{
+    haddr_t            addr        = pf_entry_ptr->addr;
+    herr_t             ret_value   = SUCCEED; /* Return value */
+    H5C_recon_entry_t *recon_entry = NULL;    /* Points to an entry in the temp table */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check whether the address is duplicated */
+    HASH_FIND(hh, *recon_table_ptr, &addr, sizeof(haddr_t), recon_entry);
+
+    /* Duplicate found, remove the duplicated entry */
+    if (recon_entry) {
+        H5C_cache_entry_t *entry_ptr = recon_entry->entry_ptr;
+
+        /* Only touch entries from the image reconstruction */
+        if (entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID)
+            H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, addr, H5AC__NO_FLAGS_SET);
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate addresses found");
+    }
+    else {
+        /* Insert address into the hash table for checking against later */
+        if (NULL == (recon_entry = (H5C_recon_entry_t *)H5MM_malloc(sizeof(H5C_recon_entry_t))))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for address entry");
+        recon_entry->addr      = addr;
+        recon_entry->entry_ptr = pf_entry_ptr;
+        HASH_ADD(hh, *recon_table_ptr, addr, sizeof(haddr_t), recon_entry);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__check_for_duplicates() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5C__reconstruct_cache_contents()
  *
  * Purpose:     Scan the image buffer, and create a prefetched
@@ -2406,7 +2454,6 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     /* Declare a uthash table to detect duplicate addresses.  It will be destroyed
        after decoding the cache contents */
     H5C_recon_entry_t *recon_table = NULL; /* Hash table head */
-    H5C_recon_entry_t *recon_entry = NULL; /* Points to an address struct */
 
     FUNC_ENTER_PACKAGE
 
@@ -2432,27 +2479,22 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
 
     /* Reconstruct entries in image */
     for (u = 0; u < cache_ptr->num_entries_in_image; u++) {
-        haddr_t addr; /* temporary var */
 
         /* Create the prefetched entry described by the ith
          * entry in cache_ptr->image_entrise.
          */
         if (NULL == (pf_entry_ptr = H5C__reconstruct_cache_entry(f, cache_ptr, &image_len, &p)))
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "reconstruction of cache entry failed");
-        addr = pf_entry_ptr->addr;
 
-        /* Make sure the address is not duplicated */
-        HASH_FIND(hh, recon_table, &addr, sizeof(haddr_t), recon_entry);
-        if (recon_entry)
-            /* Duplicate found */
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate addresses in cache");
-        else {
-            /* Insert address into the hash table */
-            if (NULL == (recon_entry = (H5C_recon_entry_t *)H5MM_malloc(sizeof(H5C_recon_entry_t))))
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for address entry");
-            recon_entry->addr      = addr;
-            recon_entry->entry_ptr = pf_entry_ptr;
-            HASH_ADD(hh, recon_table, addr, sizeof(haddr_t), recon_entry);
+        /* Make sure different entries don't have the same address */
+        if (H5C__check_for_duplicates(f, pf_entry_ptr, &recon_table) < 0) {
+            /* Free the half-processed entry */
+            if (pf_entry_ptr->image_ptr)
+                H5MM_xfree(pf_entry_ptr->image_ptr);
+            if (pf_entry_ptr->fd_parent_count > 0 && pf_entry_ptr->fd_parent_addrs)
+                H5MM_xfree(pf_entry_ptr->fd_parent_addrs);
+            pf_entry_ptr = H5FL_FREE(H5C_cache_entry_t, pf_entry_ptr);
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate addresses in cache");
         }
 
         /* Note that we make no checks on available cache space before
@@ -2591,37 +2633,33 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
 
 done:
     if (FAIL == ret_value && pf_entry_ptr) {
-#ifndef NDEBUG
+
         /* If we failed during reconstruction, remove reconstructed entries */
         H5C_recon_entry_t *recon_entry, *tmp;
 
         HASH_ITER(hh, recon_table, recon_entry, tmp)
         {
             H5C_cache_entry_t *entry_ptr = recon_entry->entry_ptr;
+            haddr_t            addr      = entry_ptr->addr;
 
-            /* Only touch entries from the image reconstruction */
-            if (entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID) {
-                /*                 if (!entry_ptr->is_pinned && !entry_ptr->is_protected)
-                 */
-                H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, recon_entry->addr, H5AC__NO_FLAGS_SET);
+            /* If the entry is protected, unprotect it */
+            if (entry_ptr->is_protected)
+                if (H5C_unprotect(f, addr, (void *)entry_ptr, H5C__DELETED_FLAG) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't unprotect entry");
 
-                if (entry_ptr->image_ptr)
-                    H5MM_xfree(entry_ptr->image_ptr);
-            }
+            /* If the entry is pinned, unpin it */
+            if (entry_ptr->is_pinned)
+                if (H5C_unpin_entry((void *)entry_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin entry");
 
+            /* Remove the unpinned and unprotected entry */
+            if (H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, addr, H5AC__NO_FLAGS_SET) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block");
             HASH_DEL(recon_table, recon_entry);
             H5MM_xfree(recon_entry);
         }
         /* The temporary hash table should be empty */
         assert(recon_table == NULL);
-#endif /* NDEBUG */
-
-        /* Free the half-processed entry */
-        if (pf_entry_ptr->image_ptr)
-            H5MM_xfree(pf_entry_ptr->image_ptr);
-        if (pf_entry_ptr->fd_parent_count > 0 && pf_entry_ptr->fd_parent_addrs)
-            H5MM_xfree(pf_entry_ptr->fd_parent_addrs);
-        pf_entry_ptr = H5FL_FREE(H5C_cache_entry_t, pf_entry_ptr);
     }
     /* No failure, only cleanup the temporary hash table */
     else if (recon_table) {
