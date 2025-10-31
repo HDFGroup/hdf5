@@ -2408,11 +2408,7 @@ H5C__check_for_duplicates(H5F_t *f, H5C_cache_entry_t *pf_entry_ptr,
 
     /* Duplicate found, remove the duplicated entry */
     if (recon_entry) {
-        H5C_cache_entry_t *entry_ptr = recon_entry->entry_ptr;
-
-        /* Only touch entries from the image reconstruction */
-        if (entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID)
-            H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, addr, H5AC__NO_FLAGS_SET);
+        H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, addr, H5AC__NO_FLAGS_SET);
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate addresses found");
     }
     else {
