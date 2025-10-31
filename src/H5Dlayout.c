@@ -48,7 +48,7 @@ const unsigned H5O_layout_ver_bounds[] = {
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V110 */
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V112 */
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V114 */
-    H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V200 */
+    H5O_LAYOUT_VERSION_5,     /* H5F_LIBVER_V200 */
     H5O_LAYOUT_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -277,7 +277,7 @@ done:
  * Purpose:     Set the version to encode a layout with.
  *
  * Return:      Non-negative on success/Negative on failure
- *
+ *-------------------------------------------------------------------------
  */
 herr_t
 H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
@@ -292,6 +292,8 @@ H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
     assert(f);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
+    /* This will be downgraded in H5D__layout_set_latest_indexing() if there is no benefit to the newer
+     * version */
     version = MAX(layout->version, H5O_layout_ver_bounds[H5F_LOW_BOUND(f)]);
 
     /* Version bounds check */
@@ -315,16 +317,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache)
+H5D__layout_set_latest_indexing(H5D_t *dset)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5O_layout_t *layout;
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    assert(layout);
-    assert(space);
-    assert(dcpl_cache);
+    assert(dset);
+    assert(dset->shared);
+    assert(dset->shared->space);
+
+    /* Set convenience pointer */
+    layout = &dset->shared->layout;
 
     /* The indexing methods only apply to chunked datasets (currently) */
     if (layout->type == H5D_CHUNKED) {
@@ -332,7 +338,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
         unsigned ndims;  /* Rank of dataspace */
 
         /* Query the dimensionality of the dataspace */
-        if ((sndims = H5S_GET_EXTENT_NDIMS(space)) < 0)
+        if ((sndims = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "invalid dataspace rank");
         ndims = (unsigned)sndims;
 
@@ -345,7 +351,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
             unsigned u;                          /* Local index variable */
 
             /* Query the dataspace's dimensions */
-            if (H5S_get_simple_extent_dims(space, cur_dims, max_dims) < 0)
+            if (H5S_get_simple_extent_dims(dset->shared->space, cur_dims, max_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions");
 
             /* Spin through the max. dimensions, looking for unlimited dimensions */
@@ -354,7 +360,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                     unlim_count++;
                 if (cur_dims[u] != max_dims[u] || cur_dims[u] != layout->u.chunk.dim[u])
                     single = false;
-            } /* end for */
+            }
 
             /* Chunked datasets with unlimited dimension(s) */
             if (unlim_count) {          /* dataset with unlimited dimension(s) must be chunked */
@@ -374,7 +380,12 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                     layout->u.chunk.u.earray.cparam.data_blk_min_elmts    = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
                     layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
                         H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
-                }      /* end if */
+
+                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
+                     * anything */
+                    if (!dset->shared->dcpl_cache.pline.nused)
+                        layout->version = H5O_LAYOUT_VERSION_4;
+                }
                 else { /* Chunked dataset with > 1 unlimited dimensions */
                     /* Set the chunk index type to v2 B-tree */
                     layout->u.chunk.idx_type         = H5D_CHUNK_IDX_BT2;
@@ -388,22 +399,34 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                     layout->u.chunk.u.btree2.cparam.node_size     = H5D_BT2_NODE_SIZE;
                     layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
                     layout->u.chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
-                }  /* end else */
-            }      /* end if */
+
+                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
+                     * anything */
+                    if (!dset->shared->dcpl_cache.pline.nused)
+                        layout->version = H5O_LAYOUT_VERSION_4;
+                }
+            }
             else { /* Chunked dataset with fixed dimensions */
                 /* Check for correct condition for using "single chunk" chunk index */
                 if (single) {
                     layout->u.chunk.idx_type         = H5D_CHUNK_IDX_SINGLE;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
                     layout->storage.u.chunk.ops      = H5D_COPS_SINGLE;
-                } /* end if */
-                else if (!dcpl_cache->pline.nused && dcpl_cache->fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
+
+                    /* Downgrade version to 4 since version 5 doesn't improve anything */
+                    layout->version = H5O_LAYOUT_VERSION_4;
+                }
+                else if (!dset->shared->dcpl_cache.pline.nused &&
+                         dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
 
                     /* Set the chunk index type to "none" Index */
                     layout->u.chunk.idx_type         = H5D_CHUNK_IDX_NONE;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
                     layout->storage.u.chunk.ops      = H5D_COPS_NONE;
-                } /* end else-if */
+
+                    /* Downgrade version to 4 since version 5 doesn't improve anything */
+                    layout->version = H5O_LAYOUT_VERSION_4;
+                }
                 else {
                     /* Set the chunk index type to Fixed Array */
                     layout->u.chunk.idx_type         = H5D_CHUNK_IDX_FARRAY;
@@ -416,10 +439,18 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                      */
                     layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
                         H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
-                } /* end else */
-            }     /* end else */
-        }         /* end if */
-    }             /* end if */
+
+                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
+                     * anything */
+                    if (!dset->shared->dcpl_cache.pline.nused)
+                        layout->version = H5O_LAYOUT_VERSION_4;
+                }
+            }
+        }
+        else
+            /* Rank 0 -> v1 b-tree. Downgrade version to 4 since version 5 doesn't improve anything */
+            layout->version = H5O_LAYOUT_VERSION_4;
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

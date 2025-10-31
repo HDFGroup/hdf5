@@ -51,7 +51,7 @@ Several more files are located within the [release_docs/][u4] directory with spe
 details for several common platforms and configurations.
 - INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
 - INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
-- INSTALL_parallel - instructions for building and configuring Parallel HDF5
+- README_HPC.md - instructions for building and configuring Parallel HDF5 on HPC systems
 - INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
 - USING_HDF5_CMake - Build and Install HDF5 Applications with CMake
 - USING_CMake_Examples - Build and Test HDF5 Examples with CMake

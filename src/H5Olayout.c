@@ -100,7 +100,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     mesg->version = *p++;
 
-    if (mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_4)
+    if (mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_LATEST)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad version number for layout message");
 
     if (mesg->version < H5O_LAYOUT_VERSION_3) {
@@ -946,7 +946,7 @@ H5O__layout_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
 
         case H5D_CHUNKED: /* Chunked blocks on disk */
             /* Free the file space for the index & chunk raw data */
-            if (H5D__chunk_delete(f, open_oh, &mesg->storage) < 0)
+            if (H5D__chunk_delete(f, open_oh, mesg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data");
             break;
 
@@ -1080,9 +1080,8 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, bool H5_
                 (cpy_info->shared_fo &&
                  H5D__chunk_is_data_cached((const H5D_shared_t *)cpy_info->shared_fo))) {
                 /* Create chunked layout */
-                if (H5D__chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst,
-                                    &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype,
-                                    udata->common.src_pline, cpy_info) < 0)
+                if (H5D__chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_space_extent,
+                                    udata->src_dtype, udata->common.src_pline, cpy_info) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage");
             } /* end if */
             break;

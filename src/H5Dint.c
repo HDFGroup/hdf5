@@ -1332,8 +1332,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
 
     if (new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
         /* Use latest indexing type for layout message version >= 4 */
-        if (H5D__layout_set_latest_indexing(&new_dset->shared->layout, new_dset->shared->space,
-                                            &new_dset->shared->dcpl_cache) < 0)
+        if (H5D__layout_set_latest_indexing(new_dset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest indexing");
     } /* end if */
 
@@ -3376,10 +3375,9 @@ H5D__format_convert(H5D_t *dataset)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate buffer");
 
             /* Set up the current index info */
-            idx_info.f       = dataset->oloc.file;
-            idx_info.pline   = &dataset->shared->dcpl_cache.pline;
-            idx_info.layout  = &dataset->shared->layout.u.chunk;
-            idx_info.storage = &dataset->shared->layout.storage.u.chunk;
+            idx_info.f      = dataset->oloc.file;
+            idx_info.pline  = &dataset->shared->dcpl_cache.pline;
+            idx_info.layout = &dataset->shared->layout;
 
             /* Copy the current layout info to the new layout */
             H5MM_memcpy(newlayout, &dataset->shared->layout, sizeof(H5O_layout_t));
@@ -3392,23 +3390,22 @@ H5D__format_convert(H5D_t *dataset)
             newlayout->storage.u.chunk.u.btree.shared = NULL;
 
             /* Set up the index info to version 1 B-tree */
-            new_idx_info.f       = dataset->oloc.file;
-            new_idx_info.pline   = &dataset->shared->dcpl_cache.pline;
-            new_idx_info.layout  = &(newlayout->u).chunk;
-            new_idx_info.storage = &(newlayout->storage).u.chunk;
+            new_idx_info.f      = dataset->oloc.file;
+            new_idx_info.pline  = &dataset->shared->dcpl_cache.pline;
+            new_idx_info.layout = newlayout;
 
             /* Initialize version 1 B-tree */
-            if (new_idx_info.storage->ops->init &&
-                (new_idx_info.storage->ops->init)(&new_idx_info, dataset->shared->space, dataset->oloc.addr) <
-                    0)
+            if (new_idx_info.layout->storage.u.chunk.ops->init &&
+                (new_idx_info.layout->storage.u.chunk.ops->init)(&new_idx_info, dataset->shared->space,
+                                                                 dataset->oloc.addr) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information");
             init_new_index = true;
 
             /* If the current chunk index exists */
-            if (H5_addr_defined(idx_info.storage->idx_addr)) {
+            if (H5_addr_defined(idx_info.layout->storage.u.chunk.idx_addr)) {
 
                 /* Create v1 B-tree chunk index */
-                if ((new_idx_info.storage->ops->create)(&new_idx_info) < 0)
+                if ((new_idx_info.layout->storage.u.chunk.ops->create)(&new_idx_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create chunk index");
 
                 /* Iterate over the chunks in the current index and insert the chunk addresses
@@ -3431,7 +3428,8 @@ H5D__format_convert(H5D_t *dataset)
             add_new_layout = true;
 
             /* Release the old (current) chunk index */
-            if (idx_info.storage->ops->dest && (idx_info.storage->ops->dest)(&idx_info) < 0)
+            if (idx_info.layout->storage.u.chunk.ops->dest &&
+                (idx_info.layout->storage.u.chunk.ops->dest)(&idx_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info");
 
             /* Copy the new layout to the dataset's layout */
@@ -3474,7 +3472,7 @@ done:
 
         /* Clean up v1 b-tree chunk index */
         if (init_new_index) {
-            if (H5_addr_defined(new_idx_info.storage->idx_addr)) {
+            if (H5_addr_defined(new_idx_info.layout->storage.u.chunk.idx_addr)) {
                 /* Check for valid address i.e. tag */
                 if (!H5_addr_defined(dataset->oloc.addr))
                     HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "address undefined");
@@ -3486,7 +3484,8 @@ done:
             } /* end if */
 
             /* Delete v1 B-tree chunk index */
-            if (new_idx_info.storage->ops->dest && (new_idx_info.storage->ops->dest)(&new_idx_info) < 0)
+            if (new_idx_info.layout->storage.u.chunk.ops->dest &&
+                (new_idx_info.layout->storage.u.chunk.ops->dest)(&new_idx_info) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info");
         } /* end if */
     }     /* end if */

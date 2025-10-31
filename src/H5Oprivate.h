@@ -441,12 +441,18 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_VERSION_4 4
 
+/* This version uses a "size of lengths" size field to encode the sizes of
+ * filtered dataset chunks. This has a small file space penalty but prevents
+ * errors when a filter grows a dataset chunk.
+ */
+#define H5O_LAYOUT_VERSION_5 5
+
 /* The default version of the format.  (Earlier versions had bugs) */
 #define H5O_LAYOUT_VERSION_DEFAULT H5O_LAYOUT_VERSION_3
 
 /* The latest version of the format.  Look through the 'encode'
  *      and 'size' callbacks for places to change when updating this. */
-#define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_4
+#define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_5
 
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t; /* Defined in H5Dpkg.h               */
