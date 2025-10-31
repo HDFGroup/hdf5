@@ -88,14 +88,14 @@ public class VLDataConverter {
             throw new HDF5JavaException("Input hvl_t array is null");
         }
 
-        ArrayList[] result = new ArrayList[arrayLength];
+        ArrayList[] result       = new ArrayList[arrayLength];
         RawVLData[] rawDataArray = new RawVLData[arrayLength];
-        boolean isStringType = isStringType(elementType) || isVLOfStrings(elementType);
+        boolean isStringType     = isStringType(elementType) || isVLOfStrings(elementType);
 
         for (int i = 0; i < arrayLength; i++) {
             MemorySegment hvlElement = hvl_t.asSlice(hvlArray, i);
-            long len              = hvl_t.len(hvlElement);
-            MemorySegment dataPtr = hvl_t.p(hvlElement);
+            long len                 = hvl_t.len(hvlElement);
+            MemorySegment dataPtr    = hvl_t.p(hvlElement);
 
             if (len == 0 || dataPtr == null || dataPtr.equals(MemorySegment.NULL)) {
                 rawDataArray[i] = new RawVLData(new byte[0], 0);
@@ -827,7 +827,7 @@ public class VLDataConverter {
         }
 
         try {
-            long baseType = elementType;
+            long baseType               = elementType;
             boolean needToCloseBaseType = false;
 
             try {
@@ -888,7 +888,7 @@ public class VLDataConverter {
     {
         try {
             MemorySegment reinterpretedSegment = dataPtr.reinterpret(totalSize, Arena.global(), null);
-            byte[] rawData = new byte[(int)totalSize];
+            byte[] rawData                     = new byte[(int)totalSize];
             for (int i = 0; i < totalSize; i++) {
                 rawData[i] = reinterpretedSegment.get(ValueLayout.JAVA_BYTE, i);
             }
@@ -1218,7 +1218,7 @@ public class VLDataConverter {
         }
 
         try {
-            Arena tempArena = Arena.global();
+            Arena tempArena   = Arena.global();
             byte[] data       = rawData.data;
             int hvlSize       = 16;
             int maxStructs    = data.length / hvlSize;
@@ -1525,13 +1525,13 @@ public class VLDataConverter {
         throws HDF5JavaException
     {
         ArrayList<ArrayList<?>> result = new ArrayList<>(len);
-        long baseType = getVLBaseType(elementType);
+        long baseType                  = getVLBaseType(elementType);
 
         try {
             for (int i = 0; i < len; i++) {
                 MemorySegment nestedHvlElement = hvl_t.asSlice(dataPtr, i);
-                long nestedLen              = hvl_t.len(nestedHvlElement);
-                MemorySegment nestedDataPtr = hvl_t.p(nestedHvlElement);
+                long nestedLen                 = hvl_t.len(nestedHvlElement);
+                MemorySegment nestedDataPtr    = hvl_t.p(nestedHvlElement);
 
                 if (nestedLen == 0 || nestedDataPtr == null || nestedDataPtr.equals(MemorySegment.NULL)) {
                     result.add(new ArrayList<>());
