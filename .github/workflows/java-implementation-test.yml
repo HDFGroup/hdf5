@@ -68,7 +68,7 @@ jobs:
         id: generate-matrix
         run: |
           # Parse inputs
-          JAVA_VERSIONS="${{ inputs.java_versions || '11,17,21,24' }}"
+          JAVA_VERSIONS="${{ inputs.java_versions || '11,17,21,25' }}"
           PLATFORMS="${{ inputs.platforms || 'ubuntu-latest' }}"
 
           # Expand platforms if needed
@@ -83,7 +83,7 @@ jobs:
           for platform in $(echo "$PLATFORMS" | tr ',' ' '); do
             for java_version in $(echo "$JAVA_VERSIONS" | tr ',' ' '); do
               # Determine available implementations
-              if [[ $java_version -ge 24 ]]; then
+              if [[ $java_version -ge 25 ]]; then
                 implementations="ffm jni"
               else
                 implementations="jni"
@@ -125,7 +125,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Java ${{ matrix.java-version }} (${{ matrix.implementation }})
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
           java-version: ${{ matrix.implementation == 'ffm' && '25' || matrix.java-version }}
@@ -288,7 +288,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### Test Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "- **Java Versions**: ${{ inputs.java_versions || '11,17,21,24' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Java Versions**: ${{ inputs.java_versions || '11,17,21,25' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Test Mode**: ${{ inputs.test_mode || 'build' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Platforms**: ${{ inputs.platforms || 'ubuntu-latest' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
