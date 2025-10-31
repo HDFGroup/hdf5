@@ -9,7 +9,7 @@ project (HDF5_JAVA_JTEST Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_JSRC_SOURCE_DIR};${HDF5_JAVA_JSRC_BINARY_DIR};${HDF5_JAVA_JSRC_LIB_DIR};${HDF5_JAVA_LIB_DIR}")
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_JSRC_SOURCE_DIR};${HDF5_JAVA_JSRC_BINARY_DIR};${HDF5_JAVA_LIB_DIR}")
 
 #-----------------------------------------------------------------------------
 # Build FFM-only tests (no hdf.hdf5lib dependencies)
