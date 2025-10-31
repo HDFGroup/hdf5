@@ -211,7 +211,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u8]: https://github.com/HDFGroup/hdf5/blob/develop/.github/workflows/release.yml
 [u9]: https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am
 [u10]: https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers
-[u11]: https://github.com/HDFGroup/hdf5/blob/desvelop/src/CMakeLists.txt
+[u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
 [u13]: https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
