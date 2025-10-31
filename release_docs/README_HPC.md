@@ -198,7 +198,6 @@ Add after `HDF5config.cmake,` separated by commas:
 |--------|-------------|
 | `HPC=sbatch` | Use SLURM batch system |
 | `HPC=bsub` | Use LSF batch system |
-| `HPC=raybsub` | Use Ray LSF variant |
 | `MPI=true` | Enable parallel (disables C++, Java, threadsafe) |
 | `LOCAL_BATCH_SCRIPT_ARGS="--account=<acct>"` | Supply batch job account information |
 
