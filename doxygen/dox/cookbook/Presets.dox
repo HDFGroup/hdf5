@@ -539,7 +539,7 @@ and are always fresh for each build.
 <tr><th>Feature</th><th>JNI (Default)</th><th>FFM (Future Default)</th></tr>
 <tr><td>Java Version</td><td>Java 8+</td><td>Java 25+</td></tr>
 <tr><td>Build Requirements</td><td>Java JDK only</td><td>Java JDK + jextract tool</td></tr>
-<tr><td>Library Type</td><td>Shared only</td><td>Shared (static may work)</td></tr>
+<tr><td>Library Type</td><td>Shared only</td><td>Shared</td></tr>
 <tr><td>Generation</td><td>Pre-compiled native code</td><td>Auto-generated at configure time</td></tr>
 <tr><td>Performance</td><td>Mature, optimized</td><td>Modern, Project Panama</td></tr>
 <tr><td>API Compatibility</td><td colspan="2">Identical - same hdf.hdf5lib.* package</td></tr>
