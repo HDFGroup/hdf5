@@ -4527,7 +4527,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
             /* Check if the chunk exists on disk */
             if (H5_addr_defined(chunk_addr)) {
-                
+
                 /* Unfiltered data should not be smaller on disk as in memory */
                 if ((udata->new_unfilt_chunk ? old_pline : pline) &&
                     !(udata->new_unfilt_chunk ? old_pline : pline)->nused && chunk_size > chunk_alloc)
