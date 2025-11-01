@@ -5,7 +5,7 @@ var searchData=
   ['page_20template_2',['Reference Manual (RM) Page Template',['../_r_m_t.html',1,'']]],
   ['palette_20specification_20version_201_202_3',['HDF5 Image and Palette Specification Version 1.2',['../_i_m_g.html',1,'']]],
   ['parallel_20compression_4',['HDF5 Parallel Compression',['../_par_compr.html',1,'']]],
-  ['parallel_20hdf5_5',['A Brief Introduction to Parallel HDF5',['../_intro_par_h_d_f5.html',1,'']]],
+  ['parallel_20hdf5_5',['Parallel HDF5',['../_intro_par_h_d_f5.html',1,'A Brief Introduction to Parallel HDF5'],['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html',1,'Installation Instructions for Parallel HDF5']]],
   ['parallel_20hdf5_20applications_6',['Collective Calling Requirements in Parallel HDF5 Applications',['../collective_calls.html',1,'']]],
   ['parameter_20that_20may_20generate_20metadata_20reads_7',['Functions with No Access Property List Parameter that May Generate Metadata Reads',['../maybe_metadata_reads.html',1,'']]],
   ['partial_20i_20o_8',['Dataspaces and Partial I/O',['../_h5_s__u_g.html',1,'']]],

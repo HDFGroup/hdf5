@@ -11,5 +11,8 @@ var searchData=
   ['keys_8',['File Keys',['../_v_f_l_t_n.html#subsec_vfl_imp_key',1,'']]],
   ['keytable_9',['keytable',['../h5import_8h.html#af5e77ec8b8517673c92ade6e80ba2950',1,'h5import.h']]],
   ['keywords_10',['KEYWORDS',['../_h5_t_o_o_l__i_m__u_g.html#subsubsec_cltools_h5import_config_opt',1,'Optional KEYWORDS'],['../_h5_t_o_o_l__i_m__u_g.html#subsubsec_cltools_h5import_config_req',1,'Required KEYWORDS']]],
-  ['keywords_11',['Values for keywords',['../_h5_t_o_o_l__i_m__u_g.html#subsubsec_cltools_h5import_config_val',1,'']]]
+  ['keywords_11',['Values for keywords',['../_h5_t_o_o_l__i_m__u_g.html#subsubsec_cltools_h5import_config_val',1,'']]],
+  ['knights_20landing_20knl_20on_20cray_20xc40_12',['6.2. Historical Example: Knights Landing (KNL) on Cray XC40',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md207',1,'']]],
+  ['knl_20on_20cray_20xc40_13',['6.2. Historical Example: Knights Landing (KNL) on Cray XC40',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md207',1,'']]],
+  ['known_20platform_20notes_14',['8. Known Platform Notes',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md220',1,'']]]
 ];

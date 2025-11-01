@@ -24,11 +24,13 @@ var searchData=
   ['information_20for_20hdf5_201_2014_21',['Release Specific Information for HDF5 1.14',['../rel_spec_114.html',1,'']]],
   ['information_20for_20hdf5_201_208_22',['Release Specific Information for HDF5 1.8',['../rel_spec_18.html',1,'']]],
   ['initialization_20and_20shutdown_23',['HDF5 Library initialization and shutdown',['../_init_shut.html',1,'']]],
-  ['installations_24',['&lt;img src=&quot;Cmake_logo.svg&quot; alt=&quot;Cmake logo&quot; width=24&gt; CMake Installations',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
-  ['interface_25',['HDF5 Java H5Callbacks Interface',['../_c_a_l_l_b_a_c_k_s.html',1,'']]],
-  ['introduction_20to_20hdf5_26',['Introduction to HDF5',['../_intro_h_d_f5.html',1,'']]],
-  ['introduction_20to_20parallel_20hdf5_27',['A Brief Introduction to Parallel HDF5',['../_intro_par_h_d_f5.html',1,'']]],
-  ['introduction_20to_20single_20writer_20multiple_20reader_20swmr_28',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]],
-  ['introduction_20to_20the_20virtual_20dataset_20vds_29',['Introduction to the Virtual Dataset - VDS',['../_v_d_s_t_n.html',1,'']]],
-  ['issues_30',['Issues',['../hdf5_chunk_issues.html',1,'Dataset Chunking Issues'],['../_l_b_prog.html',1,'Programming Issues']]]
+  ['installation_20instructions_20for_20parallel_20hdf5_24',['Installation Instructions for Parallel HDF5',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html',1,'']]],
+  ['installations_25',['&lt;img src=&quot;Cmake_logo.svg&quot; alt=&quot;Cmake logo&quot; width=24&gt; CMake Installations',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
+  ['instructions_20for_20parallel_20hdf5_26',['Installation Instructions for Parallel HDF5',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html',1,'']]],
+  ['interface_27',['HDF5 Java H5Callbacks Interface',['../_c_a_l_l_b_a_c_k_s.html',1,'']]],
+  ['introduction_20to_20hdf5_28',['Introduction to HDF5',['../_intro_h_d_f5.html',1,'']]],
+  ['introduction_20to_20parallel_20hdf5_29',['A Brief Introduction to Parallel HDF5',['../_intro_par_h_d_f5.html',1,'']]],
+  ['introduction_20to_20single_20writer_20multiple_20reader_20swmr_30',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]],
+  ['introduction_20to_20the_20virtual_20dataset_20vds_31',['Introduction to the Virtual Dataset - VDS',['../_v_d_s_t_n.html',1,'']]],
+  ['issues_32',['Issues',['../hdf5_chunk_issues.html',1,'Dataset Chunking Issues'],['../_l_b_prog.html',1,'Programming Issues']]]
 ];

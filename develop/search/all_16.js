@@ -36,5 +36,5 @@ var searchData=
   ['json_20settings_33',['Default CMakePresets.json Settings',['../cmake-presets.html#subsec_cmake_presets_files_json_details',1,'']]],
   ['june_202010_34',['Release 1.8.5 versus Release 1.8.4, June 2010',['../rel_spec_18.html#subsec_rel_spec_18_change_5',1,'']]],
   ['june_202017_20versus_20release_201_208_2018_35',['Release 1.8.19 of June 2017 versus Release 1.8.18',['../rel_spec_18.html#subsec_rel_spec_18_change_19',1,'']]],
-  ['just_20below_20the_20introductory_20lines_20at_20the_20top_20of_20the_20history_20file_36',['10. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the &lt;strong&gt;support&lt;/strong&gt; branch, just below the introductory lines at the top of the HISTORY file.',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md193',1,'']]]
+  ['just_20below_20the_20introductory_20lines_20at_20the_20top_20of_20the_20history_20file_36',['10. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the &lt;strong&gt;support&lt;/strong&gt; branch, just below the introductory lines at the top of the HISTORY file.',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md246',1,'']]]
 ];
