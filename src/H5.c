@@ -954,7 +954,7 @@ H5_check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         } /* end for */
 
         /* Check for forward compatibility usage. */
-        if (H5_VERS_MINOR > minnum) {
+        if (minnum < H5_VERSION_MINOR) {
             switch (disable_version_check) {
                 case 0:
                     fprintf(stderr, "%s%s", minor_version_forward_compatible_warning,
