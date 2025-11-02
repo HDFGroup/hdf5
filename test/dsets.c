@@ -16537,8 +16537,8 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
     hid_t type_id  = H5I_INVALID_HID;
     hid_t dcpl_id  = H5I_INVALID_HID;
 
-    H5O_layout_t *layout;
-    H5O_layout_t *default_layout;
+    H5O_layout_t *layout = NULL;
+    H5O_layout_t *default_layout = NULL;
 
     H5D_t          *dset_int         = NULL;
     H5P_genplist_t *dcpl_int         = NULL;
