@@ -714,8 +714,8 @@ test_scalar_io(hid_t fapl)
 {
     char  filename[FILENAME_BUF_SIZE];
     hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, space = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
-    int     rdata = 0;
-    int     wdata = 1;
+    int   rdata = 0;
+    int   wdata = 1;
 
     TESTING("scalar datasets");
 
@@ -730,7 +730,8 @@ test_scalar_io(hid_t fapl)
         TEST_ERROR;
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate2(file, DSET_SCALAR_IO_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, DSET_SCALAR_IO_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -766,7 +767,8 @@ test_scalar_io(hid_t fapl)
         TEST_ERROR;
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate2(file, DSET_SCALAR_IO_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, DSET_SCALAR_IO_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -1128,7 +1130,8 @@ test_compact_io(hid_t fapl)
                     TEST_ERROR;
             }
             else {
-                /* We no longer upgrade the layout for compact datasets past version 3 since there is no benefit to doing so */
+                /* We no longer upgrade the layout for compact datasets past version 3 since there is no
+                 * benefit to doing so */
                 if (dsetp->shared->layout.version > H5O_layout_ver_bounds[fp->shared->low_bound])
                     TEST_ERROR;
                 if (dsetp->shared->dcpl_cache.fill.version != H5O_fill_ver_bounds[fp->shared->low_bound])
@@ -9001,12 +9004,12 @@ test_huge_chunks(hid_t fapl, H5F_libver_t low)
 {
     char    filename[FILENAME_BUF_SIZE];
     hid_t   fail_fapl = H5I_INVALID_HID; /* File creation property list ID */
-    hid_t   fid  = H5I_INVALID_HID; /* File ID */
-    hid_t   dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
-    hid_t   sid  = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t   dsid = H5I_INVALID_HID; /* Dataset ID */
-    hsize_t dim, chunk_dim;         /* Dataset and chunk dimensions */
-    hsize_t dim2[3], chunk_dim2[3]; /* Dataset and chunk dimensions */
+    hid_t   fid       = H5I_INVALID_HID; /* File ID */
+    hid_t   dcpl      = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   sid       = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   dsid      = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t dim, chunk_dim;              /* Dataset and chunk dimensions */
+    hsize_t dim2[3], chunk_dim2[3];      /* Dataset and chunk dimensions */
 
     TESTING("creating dataset with >4GB chunks");
 
@@ -9083,7 +9086,8 @@ test_huge_chunks(hid_t fapl, H5F_libver_t low)
 
     /* Only check for failure if the low bounds is less than 2.0 */
     if (low < H5F_LIBVER_V200) {
-        /* Create a FAPL that will force huge chunk dataset creation to fail by setting a high bound of 1.14 */
+        /* Create a FAPL that will force huge chunk dataset creation to fail by setting a high bound of 1.14
+         */
         if ((fail_fapl = H5Pcopy(fapl)) < 0)
             TEST_ERROR;
         if (H5Pset_libver_bounds(fail_fapl, low, H5F_LIBVER_V114) < 0)

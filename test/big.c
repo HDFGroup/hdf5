@@ -300,20 +300,21 @@ done:
 static int
 writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n, dset_layout_t layout)
 {
-    hsize_t size1[4] = {8, 1024, 1024, 1024};
-    hsize_t size1_max[4] = {8, 1024, 1024, 1024};
+    hsize_t size1[4]      = {8, 1024, 1024, 1024};
+    hsize_t size1_max[4]  = {8, 1024, 1024, 1024};
     hsize_t chunk_dim1[4] = {8, 1024, 1024, 1024};
-    hsize_t size2[2] = {8LL * 1024LL * 1024LL * 1024LL, 0};
-    hsize_t size2_max[2] = {8LL * 1024LL * 1024LL * 1024LL, 0};
+    hsize_t size2[2]      = {8LL * 1024LL * 1024LL * 1024LL, 0};
+    hsize_t size2_max[2]  = {8LL * 1024LL * 1024LL * 1024LL, 0};
     hsize_t chunk_dim2[2] = {8LL * 1024LL * 1024LL * 1024LL, 0};
-    int     rank2 = 1;
-    hsize_t hs_start[2] = {0, 0};
-    hsize_t hs_size[2] = {WRT_SIZE, 1};;
-    hid_t   file = H5I_INVALID_HID, space1 = H5I_INVALID_HID, space2 = H5I_INVALID_HID,
+    int     rank2         = 1;
+    hsize_t hs_start[2]   = {0, 0};
+    hsize_t hs_size[2]    = {WRT_SIZE, 1};
+    ;
+    hid_t file = H5I_INVALID_HID, space1 = H5I_INVALID_HID, space2 = H5I_INVALID_HID,
           mem_space = H5I_INVALID_HID, d1 = H5I_INVALID_HID, d2 = H5I_INVALID_HID;
     int  *buf = (int *)malloc(sizeof(int) * WRT_SIZE);
     int   i, j;
-    FILE *out = fopen(DNAME, "w");
+    FILE *out   = fopen(DNAME, "w");
     hid_t dcpl1 = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID;
 
     switch (testsize) {
@@ -393,11 +394,11 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n, dset_layout_t l
             else if (layout == BTREE2) {
                 size1_max[0] = H5S_UNLIMITED;
                 size1_max[1] = H5S_UNLIMITED;
-                rank2 = 2;
+                rank2        = 2;
                 chunk_dim2[0] /= 2;
                 chunk_dim2[1] = 2;
                 size2[0] /= 2;
-                size2[1] = 2;
+                size2[1]     = 2;
                 size2_max[0] = H5S_UNLIMITED;
                 size2_max[1] = H5S_UNLIMITED;
             }
@@ -497,8 +498,8 @@ reader(char *filename, hid_t fapl)
     hid_t   file = H5I_INVALID_HID, mspace = H5I_INVALID_HID, fspace = H5I_INVALID_HID, d2 = H5I_INVALID_HID;
     char    ln[128], *s;
     hsize_t hs_offset[2] = {0, 0};
-    hsize_t hs_size[2] = {WRT_SIZE, 1};
-    int    *buf        = (int *)malloc(sizeof(int) * WRT_SIZE);
+    hsize_t hs_size[2]   = {WRT_SIZE, 1};
+    int    *buf          = (int *)malloc(sizeof(int) * WRT_SIZE);
     int     rank;
     int     i, j, zero, wrong, nerrors = 0;
 

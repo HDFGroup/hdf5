@@ -150,7 +150,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D__compact_construct
  *
- * Purpose:	Constructs new compact layout information for dataset and upgrade layout version if appropriate
+ * Purpose:	Constructs new compact layout information for dataset and upgrade layout version if
+ *appropriate
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -197,9 +198,11 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                     "compact dataset size is bigger than header message maximum size");
 
-    /* If the layout is below version 3, upgrade to version 3 if allowed. Do not upgrade past version 3 since there is no benefit. */
+    /* If the layout is below version 3, upgrade to version 3 if allowed. Do not upgrade past version 3 since
+     * there is no benefit. */
     if (dset->shared->layout.version < H5O_LAYOUT_VERSION_3) {
-        version = MAX(dset->shared->layout.version, MIN(H5O_layout_ver_bounds[H5F_LOW_BOUND(f)], H5O_LAYOUT_VERSION_3));
+        version = MAX(dset->shared->layout.version,
+                      MIN(H5O_layout_ver_bounds[H5F_LOW_BOUND(f)], H5O_LAYOUT_VERSION_3));
 
         /* Version bounds check */
         if (version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)])
@@ -223,7 +226,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compact_init(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id, bool H5_ATTR_UNUSED open)
+H5D__compact_init(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id,
+                  bool H5_ATTR_UNUSED open)
 {
     hssize_t snelmts;             /* Temporary holder for number of elements in dataspace */
     hsize_t  nelmts;              /* Number of elements in dataspace */

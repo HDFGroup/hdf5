@@ -75,11 +75,11 @@ typedef struct H5D_bt2_ctx_ud_t {
 
 /* The callback context */
 typedef struct H5D_bt2_ctx_t {
-    hsize_t   chunk_size;     /* Size of chunk (bytes; constant for unfiltered object) */
-    size_t    sizeof_addr;    /* Size of file addresses in the file (bytes) */
-    size_t    chunk_size_len; /* Size of chunk sizes in the file (bytes) */
-    unsigned  ndims;          /* Number of dimensions in chunk */
-    hsize_t  *dim;            /* Size of chunk in elements */
+    hsize_t  chunk_size;     /* Size of chunk (bytes; constant for unfiltered object) */
+    size_t   sizeof_addr;    /* Size of file addresses in the file (bytes) */
+    size_t   chunk_size_len; /* Size of chunk sizes in the file (bytes) */
+    unsigned ndims;          /* Number of dimensions in chunk */
+    hsize_t *dim;            /* Size of chunk in elements */
 } H5D_bt2_ctx_t;
 
 /* Callback info for iteration over chunks in v2 B-tree */
@@ -953,7 +953,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     bt2_udata.ndims          = idx_info->layout->u.chunk.ndims - 1;
     bt2_udata.rec.chunk_addr = udata->chunk_block.offset;
     if (idx_info->pline->nused > 0) { /* filtered chunk */
-        bt2_udata.rec.nbytes = udata->chunk_block.length;
+        bt2_udata.rec.nbytes      = udata->chunk_block.length;
         bt2_udata.rec.filter_mask = udata->filter_mask;
     }      /* end if */
     else { /* non-filtered chunk */

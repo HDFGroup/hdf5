@@ -89,34 +89,43 @@
                (H5D_CHUNK_IDX_NONE == (storage)->idx_type && H5D_COPS_NONE == (storage)->ops));              \
     } while (0)
 
-/* Macro to Check for chunk size being too big to encode. Early versions were simply limited to 32 bits. Version 4, except for the single chunk index, was limited using a formula described below. Version 5 uses 64 bits, as does the single chunk index (with all versions). We additionally impose the restriction that version 4 cannot encode more than 32 bits, even though it is not precluded by the file format, because those versions of the library cannot handle chunks larger than 32 bits internally. */
-#define H5D_CHUNK_ENCODE_SIZE_CHECK(layout, length, err) \
-    do { \
-        if ((layout)->version <= H5O_LAYOUT_VERSION_4) { \
-            if ((length) > UINT32_MAX) \
-                HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, err, "chunk size is greater than UINT32_MAX and can't be encoded with this file format version - see H5Pset_libver_bounds()"); \
-\
-            if ((layout)->version == H5O_LAYOUT_VERSION_4 && \
-                (layout)->storage.u.chunk.idx_type != H5D_CHUNK_IDX_SINGLE) { \
-                unsigned allow_chunk_size_len; /* Allowed size of encoded chunk size */ \
-                unsigned new_chunk_size_len;   /* Size of encoded chunk size */ \
-\
-                /* Compute the size required for encoding the size of a chunk, allowing */ \
-                /* for an extra byte, in case the filter makes the chunk larger. */ \
-                allow_chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)((layout)->u.chunk.size)) + 8) / 8); \
-                if (allow_chunk_size_len > 8) \
-                    allow_chunk_size_len = 8; \
-\
-                /* Compute encoded size of chunk */ \
-                new_chunk_size_len = (H5VM_log2_gen((uint64_t)(length)) + 8) / 8; \
-                if (new_chunk_size_len > 8) \
-                    HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, err, "encoded chunk size is more than 8 bytes?!?"); \
-\
-                /* Check if the chunk became too large to be encoded */ \
-                if (new_chunk_size_len > allow_chunk_size_len) \
-                    HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "filter increased chunk size by too much and it cannot be encoded with this file format version - see H5Pset_libver_bounds()"); \
-            } \
-        } \
+/* Macro to Check for chunk size being too big to encode. Early versions were simply limited to 32 bits.
+ * Version 4, except for the single chunk index, was limited using a formula described below. Version 5 uses
+ * 64 bits, as does the single chunk index (with all versions). We additionally impose the restriction that
+ * version 4 cannot encode more than 32 bits, even though it is not precluded by the file format, because
+ * those versions of the library cannot handle chunks larger than 32 bits internally. */
+#define H5D_CHUNK_ENCODE_SIZE_CHECK(layout, length, err)                                                     \
+    do {                                                                                                     \
+        if ((layout)->version <= H5O_LAYOUT_VERSION_4) {                                                     \
+            if ((length) > UINT32_MAX)                                                                       \
+                HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, err,                                                  \
+                            "chunk size is greater than UINT32_MAX and can't be encoded with this file "     \
+                            "format version - see H5Pset_libver_bounds()");                                  \
+                                                                                                             \
+            if ((layout)->version == H5O_LAYOUT_VERSION_4 &&                                                 \
+                (layout)->storage.u.chunk.idx_type != H5D_CHUNK_IDX_SINGLE) {                                \
+                unsigned allow_chunk_size_len; /* Allowed size of encoded chunk size */                      \
+                unsigned new_chunk_size_len;   /* Size of encoded chunk size */                              \
+                                                                                                             \
+                /* Compute the size required for encoding the size of a chunk, allowing */                   \
+                /* for an extra byte, in case the filter makes the chunk larger. */                          \
+                allow_chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)((layout)->u.chunk.size)) + 8) / 8);    \
+                if (allow_chunk_size_len > 8)                                                                \
+                    allow_chunk_size_len = 8;                                                                \
+                                                                                                             \
+                /* Compute encoded size of chunk */                                                          \
+                new_chunk_size_len = (H5VM_log2_gen((uint64_t)(length)) + 8) / 8;                            \
+                if (new_chunk_size_len > 8)                                                                  \
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, err,                                              \
+                                "encoded chunk size is more than 8 bytes?!?");                               \
+                                                                                                             \
+                /* Check if the chunk became too large to be encoded */                                      \
+                if (new_chunk_size_len > allow_chunk_size_len)                                               \
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL,                                             \
+                                "filter increased chunk size by too much and it cannot be encoded with "     \
+                                "this file format version - see H5Pset_libver_bounds()");                    \
+            }                                                                                                \
+        }                                                                                                    \
     } while (0)
 
 /*
@@ -236,10 +245,10 @@ typedef struct H5D_chunk_it_ud3_t {
 
 /* Callback info for iteration to dump index */
 typedef struct H5D_chunk_it_ud4_t {
-    FILE     *stream;           /* Output stream    */
-    bool      header_displayed; /* Node's header is displayed? */
-    unsigned  ndims;            /* Number of dimensions for chunk/dataset */
-    hsize_t  *chunk_dim;        /* Chunk dimensions */
+    FILE    *stream;           /* Output stream    */
+    bool     header_displayed; /* Node's header is displayed? */
+    unsigned ndims;            /* Number of dimensions for chunk/dataset */
+    hsize_t *chunk_dim;        /* Chunk dimensions */
 } H5D_chunk_it_ud4_t;
 
 /* Callback info for iteration to format convert chunks */
@@ -811,14 +820,18 @@ H5D__chunk_set_sizes(H5D_t *dset)
     assert(dset);
     assert(dset->shared->layout.u.chunk.ndims > 0);
 
-    /* In this function, some of these sizes may have already been set since they are sometimes stored in the file. If this is the case, verify the calculated sizes match the stored sizes. */
+    /* In this function, some of these sizes may have already been set since they are sometimes stored in the
+     * file. If this is the case, verify the calculated sizes match the stored sizes. */
     /* Set the last dimension of the chunk size to the size of the datatype */
     if (dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1]) {
-        if (dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] != (hsize_t)H5T_GET_SIZE(dset->shared->type))
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "stored datatype size in chunk layout does not match datatype description");
+        if (dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] !=
+            (hsize_t)H5T_GET_SIZE(dset->shared->type))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                        "stored datatype size in chunk layout does not match datatype description");
     }
     else
-        dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = (hsize_t)H5T_GET_SIZE(dset->shared->type);
+        dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] =
+            (hsize_t)H5T_GET_SIZE(dset->shared->type);
 
     /* Compute number of bytes to use for encoding chunk dimensions */
     max_enc_bytes_per_dim = 0;
@@ -837,7 +850,9 @@ H5D__chunk_set_sizes(H5D_t *dset)
     /* Set encoding length in layout */
     if (dset->shared->layout.u.chunk.enc_bytes_per_dim) {
         if (dset->shared->layout.u.chunk.enc_bytes_per_dim != max_enc_bytes_per_dim)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "stored chunk dimension encoding length does not match value calculated from chunk dimensions");
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                        "stored chunk dimension encoding length does not match value calculated from chunk "
+                        "dimensions");
     }
     else
         dset->shared->layout.u.chunk.enc_bytes_per_dim = max_enc_bytes_per_dim;
@@ -872,10 +887,10 @@ static herr_t
 H5D__chunk_construct(H5F_t *f, H5D_t *dset)
 {
     H5O_layout_t *layout;
-    unsigned version_req = H5O_LAYOUT_VERSION_1; /* Required layout version */
+    unsigned      version_req = H5O_LAYOUT_VERSION_1; /* Required layout version */
     unsigned version_perf = H5O_LAYOUT_VERSION_1; /* Version we would like to upgrade to for performance */
-    unsigned u;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
+    unsigned u;                                   /* Local index variable */
+    herr_t   ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -908,26 +923,31 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
     /* Always prefer at least version 4 for performance due to new indexes */
     version_perf = H5O_LAYOUT_VERSION_4;
 
-    /* First check for chunk larger than can be represented in 32-bits - this requires layout version 5. While it could be encoded as version 4, those versions of the library would not be able to read it. */
+    /* First check for chunk larger than can be represented in 32-bits - this requires layout version 5. While
+     * it could be encoded as version 4, those versions of the library would not be able to read it. */
     if (layout->u.chunk.size > (hsize_t)0xffffffff) {
         if (H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)] < H5O_LAYOUT_VERSION_5)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size > 4GB requires H5F_LIBVER_V200 or later format version - see H5Pset_libver_bounds()");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                        "chunk size > 4GB requires H5F_LIBVER_V200 or later format version - see "
+                        "H5Pset_libver_bounds()");
 
         /* Set required version */
         version_req = MAX(version_req, H5O_LAYOUT_VERSION_5);
     }
 #ifndef NDEBUG
     else {
-        /* Make sure no individual chunk dimension is greater than 32 bits. Should be impossible since the chunk size is less than 32 bits. */
+        /* Make sure no individual chunk dimension is greater than 32 bits. Should be impossible since the
+         * chunk size is less than 32 bits. */
         for (u = 0; u < dset->shared->ndims; u++)
             assert(layout->u.chunk.dim[u] <= (hsize_t)0xffffffff);
     }
 #endif /* NDEBUG */
 
     /* Now check if we can or must upgrade to version or above - if so set the new indexing */
-    if ((H5O_layout_ver_bounds[H5F_LOW_BOUND(f)] >= H5O_LAYOUT_VERSION_4) || (version_req >= H5O_LAYOUT_VERSION_4)) {
-        unsigned unlim_count = 0;            /* Count of unlimited max. dimensions */
-        bool     single      = true;         /* Fulfill single chunk indexing */
+    if ((H5O_layout_ver_bounds[H5F_LOW_BOUND(f)] >= H5O_LAYOUT_VERSION_4) ||
+        (version_req >= H5O_LAYOUT_VERSION_4)) {
+        unsigned unlim_count = 0;    /* Count of unlimited max. dimensions */
+        bool     single      = true; /* Fulfill single chunk indexing */
 
         /* It should be impossible to create a chunked dataset with a scalar/null dataspace */
         assert(dset->shared->ndims > 0);
@@ -936,7 +956,8 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
         for (u = 0; u < dset->shared->ndims; u++) {
             if (dset->shared->max_dims[u] == H5S_UNLIMITED)
                 unlim_count++;
-            if (dset->shared->curr_dims[u] != dset->shared->max_dims[u] || dset->shared->curr_dims[u] != layout->u.chunk.dim[u])
+            if (dset->shared->curr_dims[u] != dset->shared->max_dims[u] ||
+                dset->shared->curr_dims[u] != layout->u.chunk.dim[u])
                 single = false;
         }
 
@@ -959,7 +980,8 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
                 layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
                     H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
 
-                /* If there are filters, we prefer version 5 since that version can handle greatly expanding filters */
+                /* If there are filters, we prefer version 5 since that version can handle greatly expanding
+                 * filters */
                 if (dset->shared->dcpl_cache.pline.nused)
                     version_perf = H5O_LAYOUT_VERSION_5;
             }
@@ -977,7 +999,8 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
                 layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
                 layout->u.chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
 
-                /* If there are filters, we prefer version 5 since that version can handle greatly expanding filters */
+                /* If there are filters, we prefer version 5 since that version can handle greatly expanding
+                 * filters */
                 if (dset->shared->dcpl_cache.pline.nused)
                     version_perf = H5O_LAYOUT_VERSION_5;
             }
@@ -1014,15 +1037,20 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
                 layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
                     H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
 
-                /* If there are filters, we prefer version 5 since that version can handle greatly expanding filters */
+                /* If there are filters, we prefer version 5 since that version can handle greatly expanding
+                 * filters */
                 if (dset->shared->dcpl_cache.pline.nused)
                     version_perf = H5O_LAYOUT_VERSION_5;
             }
         }
     }
 
-    /* Calculate final version - choose the maximum of the current version, the required version, and the minimum of the low bound and the version we would like to upgrade to for performance. This ensures that we are never below the current version or the required version, and that we always upgrade to at least the low bound when useful, but never farther unless required otherwise. */
-    layout->version = MAX3(layout->version, version_req, MIN(H5O_layout_ver_bounds[H5F_LOW_BOUND(f)], version_perf));
+    /* Calculate final version - choose the maximum of the current version, the required version, and the
+     * minimum of the low bound and the version we would like to upgrade to for performance. This ensures that
+     * we are never below the current version or the required version, and that we always upgrade to at least
+     * the low bound when useful, but never farther unless required otherwise. */
+    layout->version =
+        MAX3(layout->version, version_req, MIN(H5O_layout_ver_bounds[H5F_LOW_BOUND(f)], version_perf));
 
     /* The logic above should guarantee the calculated layout version is not above the high bound */
     assert(layout->version <= H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)]);
@@ -1067,7 +1095,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_init(H5F_t *f, H5D_t * dset, hid_t dapl_id, bool open)
+H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open)
 {
     H5D_chk_idx_info_t idx_info;                            /* Chunked index info */
     H5D_rdcc_t        *rdcc = &(dset->shared->cache.chunk); /* Convenience pointer to dataset's chunk cache */
@@ -1156,10 +1184,13 @@ H5D__chunk_init(H5F_t *f, H5D_t * dset, hid_t dapl_id, bool open)
 
     /* Set chunk sizes if not done already (during a create operation the contruct callback does this) */
     if (open && (H5D__chunk_set_sizes(dset) < 0))
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
 
-    /* Check for chunk larger than can be represented in 32-bits encoded as v1 b-tree. We don't allow creation of files with layout version < 5 with 64 bit chunks but we'll try to open them if they exist because they're not disallowed by the file format. */
-    if (dset->shared->layout.u.chunk.size > (hsize_t)0xffffffff && dset->shared->layout.u.chunk.idx_type == H5D_CHUNK_IDX_BTREE)
+    /* Check for chunk larger than can be represented in 32-bits encoded as v1 b-tree. We don't allow creation
+     * of files with layout version < 5 with 64 bit chunks but we'll try to open them if they exist because
+     * they're not disallowed by the file format. */
+    if (dset->shared->layout.u.chunk.size > (hsize_t)0xffffffff &&
+        dset->shared->layout.u.chunk.idx_type == H5D_CHUNK_IDX_BTREE)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be < 4GB with v1 b-tree index");
 
 done:
@@ -3105,7 +3136,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
                     /* Compute # of bytes accessed in chunk */
                     H5_CHECK_OVERFLOW(dset_info->type_info.src_type_size, /*From:*/ size_t, /*To:*/ hsize_t);
-                    src_accessed_bytes = chunk_info->piece_points * (hsize_t)dset_info->type_info.src_type_size;
+                    src_accessed_bytes =
+                        chunk_info->piece_points * (hsize_t)dset_info->type_info.src_type_size;
 
                     /* Lock the chunk into the cache */
                     if (NULL == (chunk = H5D__chunk_lock(io_info, dset_info, &udata, false, false)))
@@ -3794,8 +3826,8 @@ H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *ud
 
     /* Stored the information to cache */
     H5MM_memcpy(last->scaled, udata->common.scaled, sizeof(hsize_t) * udata->common.layout->ndims);
-    last->addr = udata->chunk_block.offset;
-    last->nbytes = udata->chunk_block.length;
+    last->addr        = udata->chunk_block.offset;
+    last->nbytes      = udata->chunk_block.length;
     last->chunk_idx   = udata->chunk_idx;
     last->filter_mask = udata->filter_mask;
 
@@ -6859,8 +6891,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         size_t       reclaim_buf_size = udata->reclaim_buf_size;
 
         /* Convert from source file to memory */
-        if (H5T_convert(tpath_src_mem, dt_src, dt_mem, udata->nelmts, (size_t)0, (size_t)0, buf,
-                        bkg) < 0)
+        if (H5T_convert(tpath_src_mem, dt_src, dt_mem, udata->nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, H5_ITER_ERROR, "datatype conversion failed");
 
         /* Copy into another buffer, to reclaim memory later */
@@ -8271,9 +8302,8 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB_NOERR(FAIL)
         {
-            ret_value =
-                (data->op)(offset, (unsigned)chunk_rec->filter_mask, data->base_addr + chunk_rec->chunk_addr,
-                           chunk_rec->nbytes, data->op_data);
+            ret_value = (data->op)(offset, (unsigned)chunk_rec->filter_mask,
+                                   data->base_addr + chunk_rec->chunk_addr, chunk_rec->nbytes, data->op_data);
         }
     H5_AFTER_USER_CB_NOERR(FAIL)
 

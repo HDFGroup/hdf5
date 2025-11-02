@@ -636,8 +636,8 @@ H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const 
 
     /* Print element */
     snprintf(temp_str, sizeof(temp_str), "Element #%" PRIuHSIZE ":", idx);
-    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %0x}\n", indent, "", fwidth, temp_str, elmt->addr,
-            elmt->nbytes, elmt->filter_mask);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %0x}\n", indent, "", fwidth, temp_str,
+            elmt->addr, elmt->nbytes, elmt->filter_mask);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__farray_filt_debug() */
@@ -1043,8 +1043,8 @@ H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     if (idx_info->pline->nused > 0) {
         H5D_farray_filt_elmt_t elmt; /* Fixed array element */
 
-        elmt.addr = udata->chunk_block.offset;
-        elmt.nbytes = udata->chunk_block.length;
+        elmt.addr        = udata->chunk_block.offset;
+        elmt.nbytes      = udata->chunk_block.length;
         elmt.filter_mask = udata->filter_mask;
 
         /* Set the info for the chunk */

@@ -107,7 +107,7 @@ H5_DLL herr_t  H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *do
 H5_DLL herr_t  H5VM_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *coords);
 H5_DLL hsize_t H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const hsize_t *chunk,
                                 const hsize_t *down_nchunks);
-H5_DLL void H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const hsize_t *chunk, hsize_t *scaled);
+H5_DLL void    H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const hsize_t *chunk, hsize_t *scaled);
 H5_DLL hsize_t H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord, const hsize_t *chunk,
                                        const hsize_t *down_nchunks, hsize_t *scaled);
 H5_DLL ssize_t H5VM_opvv(size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],

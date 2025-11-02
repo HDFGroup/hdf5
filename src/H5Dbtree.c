@@ -1077,9 +1077,9 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, const void *_lt_key, haddr_t 
 
     /* Compose generic chunk record for callback */
     H5MM_memcpy(&(chunk_rec.scaled), &(lt_key->scaled), sizeof(lt_key->scaled));
-    chunk_rec.nbytes = (hsize_t)lt_key->nbytes;
+    chunk_rec.nbytes      = (hsize_t)lt_key->nbytes;
     chunk_rec.filter_mask = (uint32_t)lt_key->filter_mask;
-    chunk_rec.chunk_addr = addr;
+    chunk_rec.chunk_addr  = addr;
 
     /* Make "generic chunk" callback */
     if ((ret_value = (udata->cb)(&chunk_rec, udata->udata)) < 0)

@@ -2653,7 +2653,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_construct
  *
- * Purpose:     Constructs new virtual layout information for dataset and upgrade layout version if appropriate
+ * Purpose:     Constructs new virtual layout information for dataset and upgrade layout version if
+ *appropriate
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2673,7 +2674,8 @@ H5D__virtual_construct(H5F_t *f, H5D_t *dset)
     assert(dset->shared);
 
     /* Currently only handles layout version */
-    /* If the layout is below version 4, upgrade to version 4 if allowed. If not allowed throw an error, since virtual datasets require layout version 4. Do not upgrade past version 3 since there is no benefit. */
+    /* If the layout is below version 4, upgrade to version 4 if allowed. If not allowed throw an error, since
+     * virtual datasets require layout version 4. Do not upgrade past version 3 since there is no benefit. */
     if (dset->shared->layout.version < H5O_LAYOUT_VERSION_4) {
         version = MAX(dset->shared->layout.version, H5O_LAYOUT_VERSION_4);
 
