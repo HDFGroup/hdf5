@@ -1186,7 +1186,7 @@ H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open)
     if (H5D__chunk_set_info(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set # of chunks for dataset");
 
-    /* Set chunk sizes if not done already (during a create operation the contruct callback does this) */
+    /* Set chunk sizes if not done already (during a create operation the construct callback does this) */
     if (open && (H5D__chunk_set_sizes(dset) < 0))
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
 

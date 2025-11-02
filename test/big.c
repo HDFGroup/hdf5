@@ -379,7 +379,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n, dset_layout_t l
 
     /* Set up chunking  */
     if (layout != CONTIG) {
-        /* If we're not using the single chunk index, set the chunk dimesions so there are 2 chunks */
+        /* If we're not using the single chunk index, set the chunk dimensions so there are 2 chunks */
         if (layout != SINGLE_CHUNK) {
             chunk_dim1[0] /= 2;
             chunk_dim2[0] /= 2;
