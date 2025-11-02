@@ -1494,7 +1494,6 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     H5VL_object_t                      *vol_obj;       /* Dataset for this operation   */
     H5VL_optional_args_t                vol_cb_args;   /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args; /* Arguments for optional operation */
-    uint32_t                            data_size_32;  /* Chunk data size (limited to 32-bits currently) */
     herr_t                              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1509,11 +1508,6 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     if (0 == data_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data_size cannot be zero");
 
-    /* Make sure data size is less than 4 GiB */
-    data_size_32 = (uint32_t)data_size;
-    if (data_size != (size_t)data_size_32)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid data_size - chunks cannot be > 4 GiB");
-
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
@@ -1523,7 +1517,7 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     /* Set up VOL callback arguments */
     dset_opt_args.chunk_write.offset  = offset;
     dset_opt_args.chunk_write.filters = filters;
-    dset_opt_args.chunk_write.size    = data_size_32;
+    dset_opt_args.chunk_write.size    = data_size;
     dset_opt_args.chunk_write.buf     = buf;
     vol_cb_args.op_type               = H5VL_NATIVE_DATASET_CHUNK_WRITE;
     vol_cb_args.args                  = &dset_opt_args;

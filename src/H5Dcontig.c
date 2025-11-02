@@ -84,7 +84,7 @@ typedef struct H5D_contig_writevv_ud_t {
 
 /* Layout operation callbacks */
 static herr_t  H5D__contig_construct(H5F_t *f, H5D_t *dset);
-static herr_t  H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
+static herr_t  H5D__contig_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open);
 static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__contig_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dinfo,
@@ -418,7 +418,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D__contig_construct
  *
- * Purpose:	Constructs new contiguous layout information for dataset
+ * Purpose:	Constructs new contiguous layout information for dataset and upgrade layout version if appropriate
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -432,6 +432,7 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
     size_t   dt_size;             /* Size of datatype */
     hsize_t  tmp_size;            /* Temporary holder for raw data size */
     size_t   tmp_sieve_buf_size;  /* Temporary holder for sieve buffer size */
+    unsigned version;             /* Message version */
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -440,6 +441,7 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
     /* Sanity checks */
     assert(f);
     assert(dset);
+    assert(dset->shared);
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
@@ -482,6 +484,17 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
     else
         dset->shared->cache.contig.sieve_buf_size = tmp_sieve_buf_size;
 
+    /* If the layout is below version 3, upgrade to version 3 if allowed. Do not upgrade past version 3 since there is no benefit. */
+    if (dset->shared->layout.version < H5O_LAYOUT_VERSION_3) {
+        version = MAX(dset->shared->layout.version, MIN(H5O_layout_ver_bounds[H5F_LOW_BOUND(f)], H5O_LAYOUT_VERSION_3));
+
+        /* Version bounds check */
+        if (version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)])
+            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "layout version out of bounds");
+
+        dset->shared->layout.version = version;
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_construct() */
@@ -497,7 +510,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id)
+H5D__contig_init(H5F_t *f, H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id, bool H5_ATTR_UNUSED open)
 {
     size_t tmp_sieve_buf_size;  /* Temporary holder for sieve buffer size */
     herr_t ret_value = SUCCEED; /* Return value */
