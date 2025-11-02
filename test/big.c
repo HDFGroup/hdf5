@@ -301,11 +301,11 @@ static int
 writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n, dset_layout_t layout)
 {
     hsize_t size1[4]      = {8, 1024, 1024, 1024};
-    hsize_t size1_max[4]  = {8, 1024, 1024, 1024};
-    hsize_t chunk_dim1[4] = {8, 1024, 1024, 1024};
+    hsize_t size1_max[4];
+    hsize_t chunk_dim1[4];
     hsize_t size2[2]      = {8LL * 1024LL * 1024LL * 1024LL, 0};
-    hsize_t size2_max[2]  = {8LL * 1024LL * 1024LL * 1024LL, 0};
-    hsize_t chunk_dim2[2] = {8LL * 1024LL * 1024LL * 1024LL, 0};
+    hsize_t size2_max[2];
+    hsize_t chunk_dim2[2];
     int     rank2         = 1;
     hsize_t hs_start[2]   = {0, 0};
     hsize_t hs_size[2]    = {WRT_SIZE, 1};
@@ -354,6 +354,12 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n, dset_layout_t l
             goto error;
             break;
     }
+
+    /* Initialize other arrays */
+    memcpy(size1_max, size1, sizeof(size1));
+    memcpy(chunk_dim1, size1, sizeof(size1));
+    memcpy(size2_max, size2, sizeof(size2));
+    memcpy(chunk_dim2, size2, sizeof(size2));
 
     /*
      * We might be on a machine that has 32-bit files, so create an HDF5 file
