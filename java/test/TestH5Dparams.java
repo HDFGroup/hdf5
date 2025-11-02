@@ -40,11 +40,10 @@ public class TestH5Dparams {
         System.out.println();
     }
 
-    @Test
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Dclose_invalid() throws Throwable
     {
         long did = H5.H5Dclose(-1);
-        assertTrue(did == 0);
     }
 
     @Test(expected = NullPointerException.class)

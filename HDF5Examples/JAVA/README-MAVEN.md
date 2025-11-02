@@ -1,15 +1,15 @@
 # HDF5 Java Examples Maven Integration
 
-This directory contains 62 Java examples demonstrating the usage of HDF5 Java bindings, organized into categories and deployable as a Maven artifact.
+This directory contains Java examples demonstrating the usage of HDF5 Java bindings, organized into categories and deployable as a Maven artifact.
 
 ## Directory Structure
 
 ```
 HDF5Examples/JAVA/
-├── H5D/          # Dataset operations examples (25 examples)
-├── H5T/          # Datatype operations examples (16 examples)
-├── H5G/          # Group operations examples (8 examples)
-├── TUTR/         # Tutorial examples (13 examples)
+├── H5D/          # Dataset operations examples
+├── H5T/          # Datatype operations examples
+├── H5G/          # Group operations examples
+├── TUTR/         # Tutorial examples
 ├── pom-examples.xml.in    # Maven POM template for examples
 ├── CMakeLists.txt         # CMake configuration
 └── README-MAVEN.md        # This file
@@ -93,14 +93,14 @@ This creates:
 
 ## Example Categories
 
-### H5D - Dataset Operations (25 examples)
+### H5D - Dataset Operations
 - Basic read/write operations
 - Chunking and compression
 - External storage
 - Fill values and allocation
 - Filters (gzip, checksum, nbit, etc.)
 
-### H5T - Datatype Operations (16 examples)
+### H5T - Datatype Operations
 - Array datatypes
 - Compound datatypes
 - Enumerated datatypes
@@ -108,13 +108,13 @@ This creates:
 - String handling
 - Variable-length datatypes
 
-### H5G - Group Operations (8 examples)
+### H5G - Group Operations
 - Creating and managing groups
 - Group iteration
 - Intermediate group creation
 - Group hierarchy traversal
 
-### TUTR - Tutorial Examples (13 examples)
+### TUTR - Tutorial Examples
 - Step-by-step learning examples
 - Basic concepts demonstration
 - Progressive complexity
@@ -123,7 +123,7 @@ This creates:
 
 The examples are automatically tested in CI:
 
-1. **Compilation Testing**: All 62 examples must compile successfully
+1. **Compilation Testing**: All examples must compile successfully
 2. **Execution Testing**: Examples are run and output validated
 3. **Cross-Platform Testing**: Tested on Linux, Windows, and macOS
 4. **Maven Integration Testing**: Tests against staging Maven artifacts

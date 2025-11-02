@@ -12,8 +12,8 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 ### Core CMake Structure
 
 #### Main Configuration Files
-- `CMakeLists.txt` - Root build configuration (1,266 lines, highly comprehensive)
-- `CMakeBuildOptions.cmake` - Centralized build option definitions (~80 major options, including Maven deployment)
+- `CMakeLists.txt` - Root build configuration
+- `CMakeBuildOptions.cmake` - Centralized build option definitions
 - `CMakeFilters.cmake` - Compression filter support (zlib, szip, libaec)
 - `CMakeTests.cmake` - Testing infrastructure configuration
 - `CMakeInstallation.cmake` - Installation and packaging setup
@@ -104,7 +104,7 @@ cmake --workflow --preset ci-MinShar-Clang-Maven --fresh         # macOS Maven
 - **Parallel testing**: Separate test infrastructure for MPI builds
 
 ### Test Categories
-- **Core tests**: `test/` - Library unit tests (~150 test programs)
+- **Core tests**: `test/` - Library unit tests
 - **API tests**: `test/API/` - Comprehensive API validation
 - **Parallel tests**: `testpar/` - MPI-specific functionality
 - **Tool tests**: `tools/test/` - Command-line utility validation
@@ -131,7 +131,7 @@ ctest -R "H5_api_test"
 ## CI/CD Pipeline Architecture
 
 ### GitHub Actions Matrix
-- **50+ workflow files**: Comprehensive testing across platforms/compilers
+- Comprehensive testing across platforms/compilers
 - **Multi-dimensional matrix**:
   - Platforms: Windows (MSVC), Ubuntu (GCC), macOS (Clang)
   - Features: Serial, Parallel, Thread-safe, Various language bindings

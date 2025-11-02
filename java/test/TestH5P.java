@@ -1256,7 +1256,7 @@ public class TestH5P {
             assertTrue("fill_value_status: " + fill_value_status[0],
                        fill_value_status[0] == HDF5Constants.H5D_FILL_VALUE_DEFAULT);
             H5.H5Pget_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
-            // assertTrue("fill_value: " + fill_value[0], fill_value[0] == 0);
+            assertTrue("fill_value: " + fill_value[0], fill_value[0] == -1);
             fill_value[0] = 255;
             H5.H5Pset_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
             H5.H5Pget_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);

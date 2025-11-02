@@ -133,11 +133,9 @@ Maven artifacts for Java bindings and examples are available at:
 
 Java Examples Maven Integration:
    - **org.hdfgroup:hdf5-java** - HDF5 Java bindings with platform-specific JARs (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
-   - **org.hdfgroup:hdf5-java-examples** - Complete collection of 62 Java examples (platform-independent)
+   - **org.hdfgroup:hdf5-java-examples** - Complete collection of Java examples (platform-independent)
    - Cross-platform CI/CD testing and deployment
    - Comprehensive Maven integration with automated testing
-   - **Deployment Status**: ✅ Production ready with snapshot versioning support
-   - **Testing Status**: Successfully resolved HTTP 409 conflicts using snapshot deployment
    - See HDF5Examples/JAVA/README-MAVEN.md for complete usage instructions
 
 Development code is available at our Github location:

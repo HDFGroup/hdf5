@@ -41,11 +41,10 @@ public class TestH5Tparams {
         System.out.println();
     }
 
-    @Test
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Tclose_invalid() throws Throwable
     {
         long tid = H5.H5Tclose(-1);
-        assertTrue(tid == 0);
     }
 
     @Test(expected = HDF5FunctionArgumentException.class)

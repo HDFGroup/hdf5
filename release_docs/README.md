@@ -127,15 +127,6 @@ Both implementations use the same `hdf.hdf5lib.*` package structure for seamless
 
 ### FFM Test Suite
 
-The FFM implementation includes a comprehensive test suite with **444 tests** covering **56% of the HDF5 C API** across 17 modules. Tests follow FFM best practices using `Arena.ofConfined()` for memory management.
-
-**Test Coverage Highlights:**
-- **H5S (Dataspaces):** 95% - Outstanding coverage
-- **H5VL (VOL):** 100% - Complete coverage
-- **H5I (Identifiers):** 83% - Excellent coverage
-- **H5T (Datatypes):** 92 tests - Comprehensive type testing
-- **H5P (Properties):** 81 tests - Property list operations
-
 **Running FFM Tests:**
 ```bash
 ctest -R "JUnitFFM" -V           # All FFM tests

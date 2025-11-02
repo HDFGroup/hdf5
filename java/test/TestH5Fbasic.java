@@ -213,6 +213,29 @@ public class TestH5Fbasic {
         }
     }
 
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Fclose_twice() throws Throwable
+    {
+        long fid = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fopen: " + err);
+        }
+
+        try {
+            H5.H5Fclose(fid);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fclose: " + err);
+        }
+
+        // it should fail since the file was closed.
+        H5.H5Fclose(fid);
+    }
+
     @Test
     public void testH5Fget_freespace()
     {

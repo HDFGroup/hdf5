@@ -3279,7 +3279,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
         int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Dclose(dataset_id);
         if (retVal < 0)
-            retVal = 0;
+            h5libraryError();
         return retVal;
     }
 
@@ -6185,7 +6185,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
         int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Fclose(file_id);
         if (retVal < 0)
-            retVal = 0;
+            h5libraryError();
         return retVal;
     }
 
@@ -7219,7 +7219,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
         int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Gclose(group_id);
         if (retVal < 0)
-            retVal = 0;
+            h5libraryError();
         return retVal;
     }
 
@@ -9582,7 +9582,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
         int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Oclose(object_id);
         if (retVal < 0)
-            retVal = 0;
+            h5libraryError();
         return retVal;
     }
 
@@ -11392,7 +11392,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
         int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pclose(plist);
         if (retVal < 0)
-            retVal = 0;
+            h5libraryError();
         return retVal;
     }
 
@@ -18947,7 +18947,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
         int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Sclose(space_id);
         if (retVal < 0)
-            retVal = 0;
+            h5libraryError();
         return retVal;
     }
 
@@ -20283,7 +20283,7 @@ public class H5 implements java.io.Serializable {
         log.trace("OPEN_IDS: {}", OPEN_IDS.size());
         int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Tclose(type_id);
         if (retVal < 0)
-            retVal = 0;
+            h5libraryError();
         return retVal;
     }
 

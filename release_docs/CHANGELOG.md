@@ -51,7 +51,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Java Enhancements:
 
-- Full compound datatype support for Java FFM bindings, enabling read/write of complex heterogeneous structures (integers, strings, floats) in both attributes and datasets.
+- Java FFM bindings generated for the C library if Java 25+ available and JNI option is FALSE.
 - Enhanced Maven artifact deployment with comprehensive multi-platform support (Linux, Windows, macOS x86_64, macOS aarch64).
 - Complete Java examples Maven integration (`org.hdfgroup:hdf5-java-examples`) with cross-platform CI/CD testing.
 
@@ -116,15 +116,6 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
    - **Multi-artifact deployment**: Enhanced deployment workflow to handle both `hdf5-java` (platform-specific) and `hdf5-java-examples` (platform-independent) artifacts
    - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
    - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
-
- - **Java FFM Test Suite**: Comprehensive test coverage with 444 tests across 17 modules (H5, H5A, H5D, H5E, H5F, H5FD, H5G, H5I, H5L, H5O, H5P, H5PL, H5R, H5S, H5T, H5VL, H5Z)
-   - **API Coverage**: 56% of HDF5 C API tested via FFM bindings
-   - **Memory Management**: All tests follow `Arena.ofConfined()` pattern for proper resource cleanup
-   - **ROS3 Compatibility**: Tests validated against both plain and ROS3 FFM variants
-   - **Test Organization**: Module-specific test files (TestH5*ffm.java) in java/jtest/
-   - **Coverage Highlights**: H5S (95%), H5VL (100%), H5I (83%), H5T (92 tests), H5P (81 tests)
-   - **Test Execution**: `ctest -R "JUnitFFM" -V` for all FFM tests, or module-specific patterns
-   - **Documentation**: See Section XIII in INSTALL_CMake.txt for complete testing guide
 
  - Reorganized the files in the config/cmake folder into the config folder structure
 
