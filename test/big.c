@@ -300,15 +300,15 @@ done:
 static int
 writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n, dset_layout_t layout)
 {
-    hsize_t size1[4]      = {8, 1024, 1024, 1024};
+    hsize_t size1[4] = {8, 1024, 1024, 1024};
     hsize_t size1_max[4];
     hsize_t chunk_dim1[4];
-    hsize_t size2[2]      = {8LL * 1024LL * 1024LL * 1024LL, 0};
+    hsize_t size2[2] = {8LL * 1024LL * 1024LL * 1024LL, 0};
     hsize_t size2_max[2];
     hsize_t chunk_dim2[2];
-    int     rank2         = 1;
-    hsize_t hs_start[2]   = {0, 0};
-    hsize_t hs_size[2]    = {WRT_SIZE, 1};
+    int     rank2       = 1;
+    hsize_t hs_start[2] = {0, 0};
+    hsize_t hs_size[2]  = {WRT_SIZE, 1};
     hid_t   file = H5I_INVALID_HID, space1 = H5I_INVALID_HID, space2 = H5I_INVALID_HID,
           mem_space = H5I_INVALID_HID, d1 = H5I_INVALID_HID, d2 = H5I_INVALID_HID;
     int  *buf = (int *)malloc(sizeof(int) * WRT_SIZE);
