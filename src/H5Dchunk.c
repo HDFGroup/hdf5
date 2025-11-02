@@ -1012,7 +1012,11 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
                 layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
                 layout->storage.u.chunk.ops      = H5D_COPS_SINGLE;
 
-                /* No need to upgrade to version 5 since version 4 handles greatly expanding filters fine */
+                /* If there are filters, we prefer version 5 since that version can handle greatly expanding
+                 * filters (>4 GiB) (technically allowed by the v4 format but disallowed by library since
+                 * older library version can't handle >4 GiB chunks even if the format can) */
+                if (dset->shared->dcpl_cache.pline.nused)
+                    version_perf = H5O_LAYOUT_VERSION_5;
             }
             else if (!dset->shared->dcpl_cache.pline.nused &&
                      dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
