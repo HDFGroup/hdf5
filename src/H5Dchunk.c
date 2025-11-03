@@ -5303,6 +5303,8 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
             if (H5Z_pipeline(pline, 0, &filter_mask, err_detect, filter_cb, &orig_chunk_size, &buf_size,
                              &fb_info.fill_buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed");
+
+            H5D_CHUNK_ENCODE_SIZE_CHECK(&dset->shared->layout, orig_chunk_size, FAIL);
         } /* end if */
 
         /* Set chunk size */
