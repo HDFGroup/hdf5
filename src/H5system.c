@@ -1441,7 +1441,7 @@ HDqsort_context_wrapper_func(void *wrapper_arg, const void *a, const void *b)
     return w->gnu_compar(a, b, w->gnu_arg);
 }
 
-void
+herr_t
 HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
                 void *arg)
 {
@@ -1454,5 +1454,53 @@ HDqsort_context(void *base, size_t nel, size_t size, int (*compar)(const void *,
     /* Old BSD-style: context parameter comes before comparator function */
     qsort_r(base, nel, size, &wrapper, HDqsort_context_wrapper_func);
 #endif
+    return SUCCEED;
 }
 #endif
+
+/*
+ * HDqsort_fallback - Fallback qsort implementation for platforms without qsort_r/qsort_s
+ *
+ * This implementation is not threadsafe, since it uses a global variable to store the
+ * comparator context, then uses standard qsort(). A beta branch of a threadsafe implementation
+ * of these routines may be found in the 'qsort_r_threadsafe' branch of the HDF5 GitHub repository.
+ *
+ */
+#ifndef H5_HAVE_QSORT_REENTRANT
+
+typedef struct HDqsort_fallback_context_t {
+    int (*gnu_compar)(const void *, const void *, void *);
+    void *gnu_arg;
+} HDqsort_fallback_context_t;
+
+/* Non-threadsafe: use global variable */
+static HDqsort_fallback_context_t *HDqsort_fallback_global_ctx = NULL;
+
+static int
+HDqsort_fallback_wrapper(const void *a, const void *b)
+{
+    /* Call the original GNU-style comparator with context from global */
+    return HDqsort_fallback_global_ctx->gnu_compar(a, b, HDqsort_fallback_global_ctx->gnu_arg);
+}
+
+herr_t
+HDqsort_fallback(void *base, size_t nel, size_t size, int (*compar)(const void *, const void *, void *),
+                 void *arg)
+{
+    HDqsort_fallback_context_t ctx;
+
+    ctx.gnu_compar = compar;
+    ctx.gnu_arg    = arg;
+
+    /* Store context in global variable */
+    HDqsort_fallback_global_ctx = &ctx;
+
+    qsort(base, nel, size, HDqsort_fallback_wrapper);
+
+    /* Clear the global pointer */
+    HDqsort_fallback_global_ctx = NULL;
+
+    return SUCCEED;
+}
+
+#endif /* !H5_HAVE_QSORT_REENTRANT */
