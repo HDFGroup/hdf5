@@ -5434,7 +5434,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
             udata.common.scaled      = scaled;
             udata.chunk_block.offset = HADDR_UNDEF;
             udata.chunk_block.length = chunk_size;
-            udata.filter_mask = filter_mask;
+            udata.filter_mask        = filter_mask;
 
             /* Allocate the chunk (with all processes) */
             if (H5D__chunk_file_alloc(&idx_info, NULL, &udata.chunk_block, &need_insert, scaled) < 0)
@@ -5469,7 +5469,8 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
 
                     /* Store info about the chunk for later */
                     chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].addr = udata.chunk_block.offset;
-                    H5_CHECKED_ASSIGN(chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].chunk_size, size_t, chunk_size, hsize_t);
+                    H5_CHECKED_ASSIGN(chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].chunk_size,
+                                      size_t, chunk_size, hsize_t);
                     chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].unfiltered_partial_chunk =
                         (*fill_buf == unfilt_fill_buf);
                     chunk_fill_info.num_chunks++;
@@ -5510,7 +5511,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                             assert(
                                 !H5D__chunk_is_partial_edge_chunk(space_ndims, chunk_dim, scaled, space_dim));
                             assert(orig_chunk_size);
-                            fill_buf   = &fb_info.fill_buf;
+                            fill_buf = &fb_info.fill_buf;
                             H5_CHECKED_ASSIGN(chunk_size, hsize_t, orig_chunk_size, size_t);
                         } /* end if */
                     }     /* end if */
