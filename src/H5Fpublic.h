@@ -32,15 +32,15 @@
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
 #define H5F_ACC_CREAT (0x0010u) /**< Create non-existing files \since 1.4.0    */
 #define H5F_ACC_SWMR_WRITE                                                                                   \
-    (0x0020u) /**< Indicates that this file is open for writing in a
-               *   single-writer/multi-reader (SWMR)  scenario.
-               *   Note that the process(es) opening the file for reading
-               *   must open the file with #H5F_ACC_RDONLY and use the
+    (0x0020u) /**< Indicates that this file is open for writing in a                                         \
+               *   single-writer/multi-reader (SWMR)  scenario.                                              \
+               *   Note that the process(es) opening the file for reading                                    \
+               *   must open the file with #H5F_ACC_RDONLY and use the                                       \
                *   #H5F_ACC_SWMR_READ access flag. \since 1.10.0 */
 #define H5F_ACC_SWMR_READ                                                                                    \
-    (0x0040u) /**< Indicates that this file is open for reading in a
-               * single-writer/multi-reader (SWMR) scenario. Note that
-               * the process(es) opening the file for SWMR reading must also
+    (0x0040u) /**< Indicates that this file is open for reading in a                                         \
+               * single-writer/multi-reader (SWMR) scenario. Note that                                       \
+               * the process(es) opening the file for SWMR reading must also                                 \
                * open the file with the #H5F_ACC_RDONLY flag. \since 1.10.0    */
 
 /**
