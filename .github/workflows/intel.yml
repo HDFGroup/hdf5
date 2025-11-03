@@ -9,6 +9,10 @@ on:
         required: true
         type: string
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 
@@ -32,7 +36,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2025.0'
+          version: '2025.2'
 
       - name: Configure (Linux)
         shell: bash
