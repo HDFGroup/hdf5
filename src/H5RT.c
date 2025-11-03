@@ -394,7 +394,9 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
         if (prev_sort_dim != rank - 1) {
             assert(prev_sort_dim < rank - 1);
             sort_dim = prev_sort_dim + 1;
-            HDqsort_r((void *)leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare, (void *)&sort_dim);
+            if (H5_UNLIKELY(HDqsort_r((void *)leaves, count, sizeof(H5RT_leaf_t), H5RT__leaf_compare,
+                                      (void *)&sort_dim) < 0))
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSORT, FAIL, "failed to sort R-tree leaves");
         }
         else {
             sort_dim = prev_sort_dim;
@@ -458,6 +460,11 @@ done:
  *
  *              On success, the R-tree takes ownership of the caller-allocated
  *               leaves array.
+ *
+ *              NOTE: This routine uses a global variable internally, and
+ *                is therefore not thread-safe. See the 'qsort_r_threadsafe'
+ *                branch of the HDF5 GitHub repository for a beta
+ *                implementation that is threadsafe.
  *
  * Return:      A valid pointer to the new R-tree on success/NULL on failure
  *

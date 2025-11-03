@@ -74,7 +74,7 @@ jobs:
 
       - name: Install libaws-c-s3 (Ubuntu) (Cached installation)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: libaws-c-s3-${{ inputs.build_mode }}
 
@@ -126,7 +126,7 @@ jobs:
           echo "CC=cl.exe" >> $GITHUB_ENV
 
       - name: Get HDF5 sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
 
       - name: Setup jextract (FFM builds only)
         if: ${{ inputs.force_java_implementation == 'ffm' }}
@@ -288,7 +288,7 @@ jobs:
           echo "CC=cl.exe" >> $GITHUB_ENV
 
       - name: Get HDF5 sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
 
       - name: Setup jextract (FFM builds only)
         if: ${{ inputs.force_java_implementation == 'ffm' }}
