@@ -138,7 +138,7 @@ typedef struct H5C_recon_entry_t {
 /* Helper routines */
 static size_t H5C__cache_image_block_entry_header_size(const H5F_t *f);
 static size_t H5C__cache_image_block_header_size(const H5F_t *f);
-static herr_t H5C__check_for_duplicates(H5F_t *f, H5C_cache_entry_t *pf_entry_ptr,
+static herr_t H5C__check_for_duplicates(H5C_cache_entry_t *pf_entry_ptr,
                                         H5C_recon_entry_t **recon_table_ptr);
 static herr_t H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **buf,
                                              size_t buf_size);
@@ -2394,7 +2394,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__check_for_duplicates(H5F_t *f, H5C_cache_entry_t *pf_entry_ptr, H5C_recon_entry_t **recon_table_ptr)
+H5C__check_for_duplicates(H5C_cache_entry_t *pf_entry_ptr, H5C_recon_entry_t **recon_table_ptr)
 {
     haddr_t            addr        = pf_entry_ptr->addr;
     herr_t             ret_value   = SUCCEED; /* Return value */
@@ -2406,10 +2406,8 @@ H5C__check_for_duplicates(H5F_t *f, H5C_cache_entry_t *pf_entry_ptr, H5C_recon_e
     HASH_FIND(hh, *recon_table_ptr, &addr, sizeof(haddr_t), recon_entry);
 
     /* Duplicate found, remove the duplicated entry */
-    if (recon_entry) {
-        H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, addr, H5AC__NO_FLAGS_SET);
+    if (recon_entry)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate addresses found");
-    }
     else {
         /* Insert address into the hash table for checking against later */
         if (NULL == (recon_entry = (H5C_recon_entry_t *)H5MM_malloc(sizeof(H5C_recon_entry_t))))
@@ -2482,7 +2480,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "reconstruction of cache entry failed");
 
         /* Make sure different entries don't have the same address */
-        if (H5C__check_for_duplicates(f, pf_entry_ptr, &recon_table) < 0) {
+        if (H5C__check_for_duplicates(pf_entry_ptr, &recon_table) < 0) {
             /* Free the half-processed entry */
             if (pf_entry_ptr->image_ptr)
                 H5MM_xfree(pf_entry_ptr->image_ptr);
@@ -2627,7 +2625,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     } /* end if */
 
 done:
-    if (FAIL == ret_value && pf_entry_ptr) {
+    if (FAIL == ret_value) {
 
         /* If we failed during reconstruction, remove reconstructed entries */
         H5C_recon_entry_t *recon_entry, *tmp;
@@ -2640,16 +2638,23 @@ done:
             /* If the entry is protected, unprotect it */
             if (entry_ptr->is_protected)
                 if (H5C_unprotect(f, addr, (void *)entry_ptr, H5C__DELETED_FLAG) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't unprotect entry");
+                    HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't unprotect entry");
 
             /* If the entry is pinned, unpin it */
             if (entry_ptr->is_pinned)
                 if (H5C_unpin_entry((void *)entry_ptr) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin entry");
+                    HDONE_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin entry");
 
             /* Remove the unpinned and unprotected entry */
-            if (H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, addr, H5AC__NO_FLAGS_SET) < 0)
+            if (H5AC_expunge_entry(f, H5AC_PREFETCHED_ENTRY, addr, H5AC__NO_FLAGS_SET) < 0) {
+                if (entry_ptr->image_ptr)
+                    H5MM_xfree(entry_ptr->image_ptr);
+                if (entry_ptr->fd_parent_count > 0 && entry_ptr->fd_parent_addrs)
+                    H5MM_xfree(entry_ptr->fd_parent_addrs);
+                entry_ptr = H5FL_FREE(H5C_cache_entry_t, entry_ptr);
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block");
+}
+
             HASH_DEL(recon_table, recon_entry);
             H5MM_xfree(recon_entry);
         }
