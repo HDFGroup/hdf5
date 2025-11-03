@@ -52,7 +52,7 @@ jobs:
     steps:
       - name: Get aws-c-s3 sources (main)
         if: inputs.aws_c_s3_tag == ''
-        uses: actions/checkout@5.0.0
+        uses: actions/checkout@v5.0.0
         with:
           repository: awslabs/aws-c-s3
           path: aws-c-s3
