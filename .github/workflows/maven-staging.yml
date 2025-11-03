@@ -82,7 +82,7 @@ jobs:
       should-test: ${{ steps.should-test.outputs.result }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
 
@@ -260,7 +260,7 @@ jobs:
           distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
 
       - name: Setup jextract (FFM builds only)
         if: ${{ matrix.implementation == 'ffm' }}
@@ -481,7 +481,7 @@ jobs:
           fi
 
       - name: Upload Maven artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
           path: ${{ runner.workspace }}/maven-artifacts
@@ -500,7 +500,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Download all Maven artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           pattern: maven-staging-artifacts-*
           path: ./artifacts
@@ -586,7 +586,7 @@ jobs:
       matrix: ${{ fromJson(needs.determine-matrix.outputs.matrix) }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
 
       - name: Set up JDK (Java 25 for FFM builds)
         uses: actions/setup-java@v5
@@ -602,7 +602,7 @@ jobs:
           echo "Installed gtimeout: $(which gtimeout)"
 
       - name: Download Maven artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
           path: ./maven-artifacts/${{ matrix.platform }}
@@ -1099,7 +1099,7 @@ jobs:
 
       - name: Upload failure artifacts (Java Examples)
         if: steps.test-examples-unix.outputs.test-status == 'FAILED' || steps.test-examples-windows.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: java-examples-staging-failure-${{ matrix.platform }}-${{ github.run_id }}
           path: |

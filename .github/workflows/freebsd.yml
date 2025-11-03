@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
 
       - name: Build and test on FreeBSD
         uses: vmactions/freebsd-vm@v1

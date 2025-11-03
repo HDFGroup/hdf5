@@ -400,7 +400,7 @@ jobs:
 
       - name: Upload Maven artifacts (Linux)
         if: ${{ inputs.maven_enabled == true }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
               name: Linux-${{ inputs.preset_name }}-artifacts
               path: ${{ runner.workspace }}/maven-artifacts

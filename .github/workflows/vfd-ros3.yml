@@ -230,7 +230,7 @@ jobs:
       # Linux: Download aws-c-s3 artifact from build-aws-c-s3 workflow
       - name: Install libaws-c-s3 (Ubuntu) (Cached installation)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: libaws-c-s3-${{ inputs.build_mode }}
 
@@ -373,7 +373,7 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Windows)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
               name: zip-vs2022_cl-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
@@ -381,7 +381,7 @@ jobs:
         if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (linux)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
               name: tgz-ubuntu-2404_gcc-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
@@ -389,7 +389,7 @@ jobs:
         if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (Mac_latest)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
               name: tgz-macos14_clang-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
