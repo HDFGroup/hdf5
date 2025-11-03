@@ -5117,8 +5117,8 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
     hsize_t max_unalloc[H5O_LAYOUT_NDIMS]; /* Last chunk in each dimension that is unallocated (in scaled
                                               coordinates) */
     hsize_t           scaled[H5O_LAYOUT_NDIMS]; /* Offset of current chunk (in scaled coordinates) */
-    size_t            orig_chunk_size;          /* Original size of chunk in bytes */
-    size_t            chunk_size;               /* Actual size of chunk in bytes, possibly filtered */
+    size_t            orig_chunk_size = 0;      /* Original size of chunk in bytes */
+    hsize_t           chunk_size;               /* Actual size of chunk in bytes, possibly filtered */
     unsigned          filter_mask = 0;          /* Filter mask for chunks that have them */
     H5O_layout_t     *layout      = &(dset->shared->layout);           /* Dataset layout */
     H5O_pline_t      *pline       = &(dset->shared->dcpl_cache.pline); /* I/O pipeline info */
@@ -5209,9 +5209,6 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
             unfilt_edge_chunk_dim[op_dim] = false;
     } /* end for */
 
-    /* Get original chunk size */
-    H5_CHECKED_ASSIGN(orig_chunk_size, size_t, layout->u.chunk.size, hsize_t);
-
     /* Check the dataset's fill-value status */
     if (H5P_is_fill_value_defined(fill, &fill_status) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
@@ -5230,6 +5227,13 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
 
     /* Check if fill values should be written to chunks */
     if (should_fill) {
+        /* Get original chunk size */
+        orig_chunk_size = (size_t)layout->u.chunk.size;
+
+        /* Check for overflow */
+        if ((hsize_t)orig_chunk_size != layout->u.chunk.size)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size too big to fit in size_t");
+
         /* Initialize the fill value buffer */
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         if (H5D__fill_init(&fb_info, NULL, H5D__chunk_mem_alloc, pline, H5D__chunk_mem_free, pline,
@@ -5272,7 +5276,13 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                              &fb_info.fill_buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed");
         } /* end if */
-    }     /* end if */
+
+        /* Set chunk size */
+        H5_CHECKED_ASSIGN(chunk_size, hsize_t, orig_chunk_size, size_t);
+    } /* end if */
+    else
+        /* Set chunk size */
+        chunk_size = layout->u.chunk.size;
 
     /* Compose chunked index info struct */
     idx_info.f      = dset->oloc.file;
@@ -5300,7 +5310,6 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
      * Note that min_unalloc & max_unalloc are in scaled coordinates.
      *
      */
-    chunk_size = orig_chunk_size;
     for (op_dim = 0; op_dim < space_ndims; op_dim++) {
         H5D_chunk_ud_t udata; /* User data for querying chunk info */
         unsigned       u;     /* Local index variable */
@@ -5325,6 +5334,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                 if (should_fill && !fb_info.has_vlen_fill_type) {
                     assert(fb_info_init);
                     assert(unfilt_fill_buf);
+                    assert(orig_chunk_size);
                     if (nunfilt_edge_chunk_dims) {
                         fill_buf   = &unfilt_fill_buf;
                         chunk_size = layout->u.chunk.size;
@@ -5332,6 +5342,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                     else {
                         fill_buf   = &fb_info.fill_buf;
                         chunk_size = orig_chunk_size;
+                        assert(chunk_size == (size_t)orig_chunk_size);
                     } /* end else */
                 }     /* end if */
             }         /* end if */
@@ -5370,6 +5381,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                 /* Sanity check */
                 assert(should_fill);
                 assert(!unfilt_fill_buf);
+                assert(orig_chunk_size);
 #ifdef H5_HAVE_PARALLEL
                 assert(!using_mpi); /* Can't write VL datatypes in parallel currently */
 #endif
@@ -5408,7 +5420,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                         HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed");
 
                     /* Keep the number of bytes the chunk turned in to */
-                    chunk_size = nbytes;
+                    H5_CHECKED_ASSIGN(chunk_size, hsize_t, nbytes, size_t);
                 } /* end if */
                 else
                     chunk_size = layout->u.chunk.size;
@@ -5421,7 +5433,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
             udata.common.storage     = sc;
             udata.common.scaled      = scaled;
             udata.chunk_block.offset = HADDR_UNDEF;
-            H5_CHECKED_ASSIGN(udata.chunk_block.length, hsize_t, chunk_size, size_t);
+            udata.chunk_block.length = chunk_size;
             udata.filter_mask = filter_mask;
 
             /* Allocate the chunk (with all processes) */
@@ -5457,7 +5469,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
 
                     /* Store info about the chunk for later */
                     chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].addr = udata.chunk_block.offset;
-                    chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].chunk_size = chunk_size;
+                    H5_CHECKED_ASSIGN(chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].chunk_size, size_t, chunk_size, hsize_t);
                     chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].unfiltered_partial_chunk =
                         (*fill_buf == unfilt_fill_buf);
                     chunk_fill_info.num_chunks++;
@@ -5465,15 +5477,15 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                     /* Indicate that blocks will be written */
                     blocks_written = true;
                 } /* end if */
-                else {
+                else
 #endif /* H5_HAVE_PARALLEL */
+                {
+                    H5_CHECK_OVERFLOW(chunk_size, hsize_t, size_t);
                     if (H5F_shared_block_write(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW,
-                                               udata.chunk_block.offset, chunk_size, *fill_buf) < 0)
+                                               udata.chunk_block.offset, (size_t)chunk_size, *fill_buf) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
-#ifdef H5_HAVE_PARALLEL
-                } /* end else */
-#endif            /* H5_HAVE_PARALLEL */
-            }     /* end if */
+                }
+            } /* end if */
 
             /* Insert the chunk record into the index */
             if (need_insert && ops->insert)
@@ -5497,8 +5509,9 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                         if (should_fill && nunfilt_edge_chunk_dims == 0 && !fb_info.has_vlen_fill_type) {
                             assert(
                                 !H5D__chunk_is_partial_edge_chunk(space_ndims, chunk_dim, scaled, space_dim));
+                            assert(orig_chunk_size);
                             fill_buf   = &fb_info.fill_buf;
-                            chunk_size = orig_chunk_size;
+                            H5_CHECKED_ASSIGN(chunk_size, hsize_t, orig_chunk_size, size_t);
                         } /* end if */
                     }     /* end if */
                 }         /* end if */
