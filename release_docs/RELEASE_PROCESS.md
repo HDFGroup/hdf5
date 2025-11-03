@@ -72,7 +72,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 6. Confirm the necessity of and approve of any interface-breaking changes. If any changes need to be reverted, task the developer who made the change to do so as soon as possible. If a change is reverted, return to the previous step and regenerate the compatibility report after the changes is made. Otherwise, continue to the next step.
 7. Update the .so version numbers in the [config/lt_vers.am][u9] file in the support branch according to [libtool's library interface version](https://www.gnu.org/software/libtool/manual/libtool.html#Versioning) scheme. 
     - See [Updating version info (Libtool)](https://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html#Updating-version-info) for rules to help update library version numbers. 
-8. After the release branch has been created, run bin/process_source.sh to regenerate the H5E header files on the release branch, and commit the changes.    
+8. After the release branch has been created, run bin/process_source.sh on the release branch to regenerate/update the H5E header files, H5ARG_TRACE macros, API version macros, and macros for detecting overflows for type conversion, then commit the changes.    
 
 ### 6. Verify that HDF5 library version has been updated from the previous release according to [HDF5 versioning policy][u16], consistent with semantic versioning rules.
 
