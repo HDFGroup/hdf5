@@ -51,7 +51,7 @@ jobs:
 
     # Get files created by release script
     - name: Get tgz-tarball (Linux_coverage)
-      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
       with:
         name: tgz-tarball
         path: ${{ github.workspace }}
@@ -113,7 +113,7 @@ jobs:
 
     # Save log files created by CTest script
     - name: Save log (Linux_coverage)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: clang-coverage-log
         path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -131,7 +131,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.7
+        uses: KyleMayes/install-llvm-action@v2.0.8
         id: setup-clang
         with:
           env: true
@@ -152,7 +152,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_Leak)
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: tgz-tarball
           path: ${{ github.workspace }}
@@ -214,7 +214,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_Leak)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: leak-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -232,7 +232,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.7
+        uses: KyleMayes/install-llvm-action@v2.0.8
         id: setup-clang
         with:
           env: true
@@ -253,7 +253,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_Address)
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: tgz-tarball
           path: ${{ github.workspace }}
@@ -315,7 +315,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_Address)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: address-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -333,7 +333,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.7
+        uses: KyleMayes/install-llvm-action@v2.0.8
         id: setup-clang
         with:
           env: true
@@ -354,7 +354,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_UndefinedBehavior)
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: tgz-tarball
           path: ${{ github.workspace }}
@@ -416,7 +416,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_UndefinedBehavior)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: undefined-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
