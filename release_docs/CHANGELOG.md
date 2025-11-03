@@ -209,9 +209,24 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
     - H5T_FLOAT_BFLOAT16LE / H5T_FLOAT_BFLOAT16BE
 
-      These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
+   These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
 
-      Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+   Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+### Added predefined datatypes for FP8 data
+
+   Predefined datatypes have been added for FP8 data in E4M3 and E5M2 formats (https://arxiv.org/abs/2209.05433).
+
+   The following new macros have been added:
+
+    - H5T_FLOAT_F8E4M3
+    - H5T_FLOAT_F8E5M2
+
+   These macros map to IDs of HDF5 datatypes representing an 8-bit floating-point datatype with 1 sign bit and either 4 exponent bits and 3 mantissa bits (E4M3 format) or 5 exponent bits and 2 mantissa bits (E5M2 format).
+
+   Note that support for a native FP8 datatype has not been added yet. This means that any datatype conversions to/from the new FP8 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP8 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches one of the above floating-point formats. In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
 
 ### Removed hbool_t from public API calls
                                   
@@ -825,6 +840,15 @@ A table of platforms tested can be seen on the [wiki](https://github.com/HDFGrou
 Current test results are available [here](https://my.cdash.org/index.php?project=HDF5).
 
 # ⛔ Known Problems
+
+- When performing implicit datatype conversion on specific non-IEEE floating-point format data, HDF5 may improperly convert some data values:
+
+   When performing I/O operations using a non-IEEE floating-point format datatype, HDF5 may improperly convert some data values due to incomplete handling of non-IEEE types. Such types include the following pre-defined datatypes:
+
+    H5T_FLOAT_F8E4M3
+    H5T_FLOAT_F8E5M2
+
+   If possible, an application should perform I/O with these datatypes using an in-memory type that matches the specific floating-point format and perform explicit data conversion outside of HDF5, if necessary. Otherwise, read/written values should be verified to be correct.
 
 - When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
 
