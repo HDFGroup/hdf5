@@ -50,7 +50,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Get Sources
-        uses: actions/checkout@v5  # Updated to latest stable
+        uses: actions/checkout@v5.0.0  # Updated to latest stable
         with:
           fetch-depth: 0
           ref: '${{ github.head_ref || github.ref_name }}'

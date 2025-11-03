@@ -2735,6 +2735,10 @@ check_dataset_write_tags(void)
     if ((H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data)) < 0)
         TEST_ERROR;
 
+    /* Flush dataset so all index nodes are created */
+    if (H5Dflush(did) < 0)
+        TEST_ERROR;
+
         /* =================================== */
         /* Verification of Metadata Tag Values */
         /* =================================== */
@@ -2745,8 +2749,8 @@ check_dataset_write_tags(void)
         dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
 
-    /* Verify 10 b-tree nodes belonging to dataset  */
-    for (i = 0; i < 10; i++)
+    /* Verify 19 b-tree nodes belonging to dataset  */
+    for (i = 0; i < 19; i++)
         if (verify_tag(fid, H5AC_BT_ID, d_tag) < 0)
             TEST_ERROR;
 

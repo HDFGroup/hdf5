@@ -13,7 +13,7 @@ jobs:
     if: github.repository_owner == 'HDFGROUP'
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v5.0.0
         
     - name: Set up Python
       uses: actions/setup-python@v6

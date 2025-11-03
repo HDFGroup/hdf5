@@ -52,7 +52,7 @@ jobs:
           git config --global core.autocrlf input
 
       - name: Get Sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
 
       - name: Configure
         run: |

@@ -197,6 +197,10 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
    The library now supports arbitrarily large chunks (64 bit sizes). Using chunks with size >= 4 GiB will upgrade the file format and prevent the dataset from being opened with earlier versions of the library. 32 bit systems will not be able to use these chunks in all circumstances, such as with data filters or a fill value.
 
+### Changed default chunk cache hash table size to 8191
+
+   In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
+     
 ### Updated default file format to 1.8
 
    By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. This behavior can be overridden with `H5Pset_libver_bounds()`.
@@ -650,6 +654,12 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
 
+### Fixed security issues CVE-2025-2913 and CVE-2025-2926
+
+   The size of a continuation message was decoded as 0, causing multiple vulnerabilities.  An error check was added to return failure to prevent further processing of invalid data.
+
+   Fixes GitHub issue #5376 and #5384
+
 ### Revised handling of Unicode filenames on Windows<a name="utf-8">
 
    In the HDF5 1.14.4 release, a change was made to address some issues with the library's handling of code pages and file paths on Windows.  This change introduced other issues with the handling of UTF-8 file names that caused breakage for software using the 1.14.4 and 1.14.5 releases of HDF5. That change was reverted for the 1.14.6 release and the behavior has been slightly modified for this release.
@@ -779,6 +789,9 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 ## Performance
 
 ## Fortran API
+
+   Added missing parameters H5F_ACC_SWMR_READ_F and H5F_ACC_SWMR_WRITE_F
+   Fixed GitHub issue [#5959](https://github.com/HDFGroup/hdf5/issues/5959)
 
 ## High-Level Library
 

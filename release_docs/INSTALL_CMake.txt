@@ -65,9 +65,9 @@ from the HDF5 source code package using the CMake tools. This procedure
 will use the default settings in the config/cmake/cacheinit.cmake file.
 The HDF Group recommends using the presets process to build HDF5.
 
-NOTE: if you are using CMake 3.25 or later, you can use the presets process.
-    The CMakePresets.json file in the source directory will configure, build, test,
-    and package HDF5 with the same options that are set in the cacheinit.cmake file.
+NOTE: When using the presets process, the CMakePresets.json file in the source
+    directory will configure, build, test, and package HDF5 with the same options
+    that are set in the cacheinit.cmake file.
     In addition, it will get the optional files listed below that are needed, from
     the appropriate repositories.
     See Section X: Using CMakePresets.json for compiling
@@ -299,9 +299,7 @@ IV. Further Considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake from the Kitware
-      web site. The HDF5 2."X"."Y" product requires a minimum CMake version 3.18.
-      If you are using VS2022, the CMake minimum version is 3.21. CMakePresets
-      requires CMake 3.25.
+      web site. The HDF5 2."X"."Y" product requires a minimum CMake version 3.26.
 
    2. If you plan to use Zlib or Szip (aka libaec):
       A. Download the binary packages and install them in a central location.
@@ -766,7 +764,7 @@ These five steps are described in detail below.
    12. Parallel versus serial library
         The HDF5 library can be configured to use MPI and MPI-IO for
         parallelism on a distributed multi-processor system.  Read the
-        file INSTALL_parallel for detailed information.
+        file README_HPC.md for detailed information.
             HDF5_ENABLE_PARALLEL:BOOL=ON
 
         The threadsafe, C++ and Java interfaces are not compatible
