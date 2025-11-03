@@ -6447,9 +6447,9 @@ H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time);
  *       example, a dataset consisting of a 5x4 fixed-size array cannot be
  *       defined with 10x10 chunks.
  *
- * \note As of HDF5 version 2.0.0, creation of datasets with arbitrarily large
- *       chunks is supported. However doing so will upgrade the file format and
- *       prevent earlier versions of the library from being able to open the
+ * \note With HDF5 version 2.0.0, creation of datasets with chunks larger than
+ *       4 GiB is now supported. However, doing so will upgrade the file format
+ *       and prevent earlier versions of the library from being able to open the
  *       dataset. Users must also be aware that some operations will require the
  *       entire chunk be brought into memory, such as when there is a fill value
  *       or data filter set. These operations will not work on 32 bit systems
@@ -6458,7 +6458,8 @@ H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time);
  *       which is equal to 4,294,967,295. If a filter grows a chunk from below
  *       this value to above it, the write may fail since the file format was
  *       not automatically upgraded. To fix this, users can call
- *       H5Pset_libver_bounds() with #H5F_LIBVER_V200 as the low bound.
+ *       H5Pset_libver_bounds() with #H5F_LIBVER_V200 as the low bound. With the
+ *       new file format, chunk sizes are now limited to 2<sup>64</sup>-1.
  *
  * \see H5Pset_layout(), H5Dwrite()
  *

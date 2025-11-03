@@ -195,7 +195,7 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ### Added support for large chunks
 
-   The library now supports arbitrarily large chunks (64 bit sizes). Using chunks with size >= 4 GiB will upgrade the file format and prevent the dataset from being opened with earlier versions of the library. 32 bit systems will not be able to use these chunks in all circumstances, such as with data filters or a fill value.
+   The library now supports chunks larger than 4 GiB using 64 bit addressing. Creating chunks with size >= 4 GiB will upgrade the file format and prevent the dataset from being opened with earlier versions of the library. 32 bit systems will not be able to use these chunks in all circumstances, such as with data filters or a fill value.
 
 ### Changed default chunk cache hash table size to 8191
 
