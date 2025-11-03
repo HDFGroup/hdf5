@@ -64,17 +64,17 @@ typedef union H5VL_native_attr_optional_args_t {
 /* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
  *      routine must be updated.
  */
-#define H5VL_NATIVE_DATASET_FORMAT_CONVERT          0  /* H5Dformat_convert (internal) */
-#define H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE    1  /* H5Dget_chunk_index_type      */
-#define H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE  2  /* H5Dget_chunk_storage_size    */
-#define H5VL_NATIVE_DATASET_GET_NUM_CHUNKS          3  /* H5Dget_num_chunks            */
-#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX   4  /* H5Dget_chunk_info            */
-#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD 5  /* H5Dget_chunk_info_by_coord   */
-#define H5VL_NATIVE_DATASET_CHUNK_READ              6  /* H5Dchunk_read                */
-#define H5VL_NATIVE_DATASET_CHUNK_WRITE             7  /* H5Dchunk_write               */
-#define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8  /* H5Dvlen_get_buf_size         */
-#define H5VL_NATIVE_DATASET_GET_OFFSET              9  /* H5Dget_offset                */
-#define H5VL_NATIVE_DATASET_CHUNK_ITER              10 /* H5Dchunk_iter                */
+#define H5VL_NATIVE_DATASET_FORMAT_CONVERT          0  /**< H5Dformat_convert (internal) \since 1.12.0 */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE    1  /**< H5Dget_chunk_index_type \since 1.12.0      */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE  2  /**< H5Dget_chunk_storage_size \since 1.12.0    */
+#define H5VL_NATIVE_DATASET_GET_NUM_CHUNKS          3  /**< H5Dget_num_chunks \since 1.12.0            */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX   4  /**< H5Dget_chunk_info \since 1.12.0            */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD 5  /**< H5Dget_chunk_info_by_coord \since 1.12.0   */
+#define H5VL_NATIVE_DATASET_CHUNK_READ              6  /**< H5Dchunk_read \since 1.12.0                */
+#define H5VL_NATIVE_DATASET_CHUNK_WRITE             7  /**< H5Dchunk_write \since 1.12.0               */
+#define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8  /**< H5Dvlen_get_buf_size \since 1.12.0         */
+#define H5VL_NATIVE_DATASET_GET_OFFSET              9  /**< H5Dget_offset \since 1.12.0                */
+#define H5VL_NATIVE_DATASET_CHUNK_ITER              10 /**< H5Dchunk_iter \since 1.12.3                */
 /* NOTE: If values over 1023 are added, the H5VL_RESERVED_NATIVE_OPTIONAL macro
  *      must be updated.
  */
@@ -180,37 +180,40 @@ typedef union H5VL_native_dataset_optional_args_t {
 /* NOTE: If new values are added here, the H5VL__native_introspect_opt_query
  *      routine must be updated.
  */
-#define H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE            0  /* H5Fclear_elink_file_cache            */
-#define H5VL_NATIVE_FILE_GET_FILE_IMAGE               1  /* H5Fget_file_image                    */
-#define H5VL_NATIVE_FILE_GET_FREE_SECTIONS            2  /* H5Fget_free_sections                 */
-#define H5VL_NATIVE_FILE_GET_FREE_SPACE               3  /* H5Fget_freespace                     */
-#define H5VL_NATIVE_FILE_GET_INFO                     4  /* H5Fget_info1/2                       */
-#define H5VL_NATIVE_FILE_GET_MDC_CONF                 5  /* H5Fget_mdc_config                    */
-#define H5VL_NATIVE_FILE_GET_MDC_HR                   6  /* H5Fget_mdc_hit_rate                  */
-#define H5VL_NATIVE_FILE_GET_MDC_SIZE                 7  /* H5Fget_mdc_size                      */
-#define H5VL_NATIVE_FILE_GET_SIZE                     8  /* H5Fget_filesize                      */
-#define H5VL_NATIVE_FILE_GET_VFD_HANDLE               9  /* H5Fget_vfd_handle                    */
-#define H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE           10 /* H5Freset_mdc_hit_rate_stats          */
-#define H5VL_NATIVE_FILE_SET_MDC_CONFIG               11 /* H5Fset_mdc_config                    */
-#define H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO 12 /* H5Fget_metadata_read_retry_info      */
-#define H5VL_NATIVE_FILE_START_SWMR_WRITE             13 /* H5Fstart_swmr_write                  */
-#define H5VL_NATIVE_FILE_START_MDC_LOGGING            14 /* H5Fstart_mdc_logging                 */
-#define H5VL_NATIVE_FILE_STOP_MDC_LOGGING             15 /* H5Fstop_mdc_logging                  */
-#define H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS       16 /* H5Fget_mdc_logging_status            */
-#define H5VL_NATIVE_FILE_FORMAT_CONVERT               17 /* H5Fformat_convert                    */
-#define H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS   18 /* H5Freset_page_buffering_stats        */
-#define H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS     19 /* H5Fget_page_buffering_stats          */
-#define H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO           20 /* H5Fget_mdc_image_info                */
-#define H5VL_NATIVE_FILE_GET_EOA                      21 /* H5Fget_eoa                           */
-#define H5VL_NATIVE_FILE_INCR_FILESIZE                22 /* H5Fincrement_filesize                */
-#define H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS            23 /* H5Fset_latest_format/libver_bounds   */
-#define H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG       24 /* H5Fget_dset_no_attrs_hint            */
-#define H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG       25 /* H5Fset_dset_no_attrs_hint            */
+#define H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE  0  /**< H5Fclear_elink_file_cache \since 1.12.0            */
+#define H5VL_NATIVE_FILE_GET_FILE_IMAGE     1  /**< H5Fget_file_image \since 1.12.0                    */
+#define H5VL_NATIVE_FILE_GET_FREE_SECTIONS  2  /**< H5Fget_free_sections \since 1.12.0                 */
+#define H5VL_NATIVE_FILE_GET_FREE_SPACE     3  /**< H5Fget_freespace \since 1.12.0                     */
+#define H5VL_NATIVE_FILE_GET_INFO           4  /**< H5Fget_info1/2 \since 1.12.0                       */
+#define H5VL_NATIVE_FILE_GET_MDC_CONF       5  /**< H5Fget_mdc_config \since 1.12.0                    */
+#define H5VL_NATIVE_FILE_GET_MDC_HR         6  /**< H5Fget_mdc_hit_rate \since 1.12.0                  */
+#define H5VL_NATIVE_FILE_GET_MDC_SIZE       7  /**< H5Fget_mdc_size \since 1.12.0                      */
+#define H5VL_NATIVE_FILE_GET_SIZE           8  /**< H5Fget_filesize \since 1.12.0                      */
+#define H5VL_NATIVE_FILE_GET_VFD_HANDLE     9  /**< H5Fget_vfd_handle \since 1.12.0                    */
+#define H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE 10 /**< H5Freset_mdc_hit_rate_stats \since 1.12.0          */
+#define H5VL_NATIVE_FILE_SET_MDC_CONFIG     11 /**< H5Fset_mdc_config \since 1.12.0                    */
+#define H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO                                                        \
+    12                                             /**< H5Fget_metadata_read_retry_info \since 1.12.0      */
+#define H5VL_NATIVE_FILE_START_SWMR_WRITE       13 /**< H5Fstart_swmr_write \since 1.12.0                  */
+#define H5VL_NATIVE_FILE_START_MDC_LOGGING      14 /**< H5Fstart_mdc_logging \since 1.12.0                 */
+#define H5VL_NATIVE_FILE_STOP_MDC_LOGGING       15 /**< H5Fstop_mdc_logging \since 1.12.0                  */
+#define H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS 16 /**< H5Fget_mdc_logging_status \since 1.12.0 */
+#define H5VL_NATIVE_FILE_FORMAT_CONVERT         17 /**< H5Fformat_convert \since 1.12.0                    */
+#define H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS                                                          \
+    18 /**< H5Freset_page_buffering_stats \since 1.12.0        */
+#define H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS                                                            \
+    19                                             /**< H5Fget_page_buffering_stats \since 1.12.0          */
+#define H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO     20 /**< H5Fget_mdc_image_info \since 1.12.0                */
+#define H5VL_NATIVE_FILE_GET_EOA                21 /**< H5Fget_eoa \since 1.12.0                           */
+#define H5VL_NATIVE_FILE_INCR_FILESIZE          22 /**< H5Fincrement_filesize \since 1.12.0                */
+#define H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS      23 /**< H5Fset_latest_format/libver_bounds \since 1.12.0   */
+#define H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG 24 /**< H5Fget_dset_no_attrs_hint \since 1.12.0 */
+#define H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG 25 /**< H5Fset_dset_no_attrs_hint \since 1.12.0 */
 #ifdef H5_HAVE_PARALLEL
-#define H5VL_NATIVE_FILE_GET_MPI_ATOMICITY 26 /* H5Fget_mpi_atomicity                 */
-#define H5VL_NATIVE_FILE_SET_MPI_ATOMICITY 27 /* H5Fset_mpi_atomicity                 */
+#define H5VL_NATIVE_FILE_GET_MPI_ATOMICITY 26 /**< H5Fget_mpi_atomicity \since 1.12.0                 */
+#define H5VL_NATIVE_FILE_SET_MPI_ATOMICITY 27 /**< H5Fset_mpi_atomicity \since 1.12.0                 */
 #endif
-#define H5VL_NATIVE_FILE_POST_OPEN 28 /* Adjust file after open, with wrapping context */
+#define H5VL_NATIVE_FILE_POST_OPEN 28 /**< Adjust file after open, with wrapping context \since 1.12.0 */
 /* NOTE: If values over 1023 are added, the H5VL_RESERVED_NATIVE_OPTIONAL macro
  *      must be updated.
  */

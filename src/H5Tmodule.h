@@ -4014,6 +4014,7 @@ filled according to the value of this property. The padding can be:
  *               H5T_IEEE_F32BE | H5T_IEEE_F32LE |
  *               H5T_IEEE_F64BE | H5T_IEEE_F64LE |
  *               H5T_FLOAT_BFLOAT16BE | H5T_FLOAT_BFLOAT16LE |
+ *               H5T_FLOAT_F8E4M3 | H5T_FLOAT_F8E5M2 |
  *               H5T_NATIVE_FLOAT16 | H5T_NATIVE_FLOAT |
  *               H5T_NATIVE_DOUBLE | H5T_NATIVE_LDOUBLE
  *
