@@ -2797,8 +2797,11 @@ H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dse
                          (fill_status == H5D_FILL_VALUE_USER_DEFINED ||
                           fill_status == H5D_FILL_VALUE_DEFAULT))) {
                         /* Check for size_t overflow */
-                        if (H5_UNLIKELY((hsize_t)((size_t)dataset->shared->layout.u.chunk.size) != dataset->shared->layout.u.chunk.size))
-                            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "must fill chunk but it is too big to fit in size_t - try using early allocation");
+                        if (H5_UNLIKELY((hsize_t)((size_t)dataset->shared->layout.u.chunk.size) !=
+                                        dataset->shared->layout.u.chunk.size))
+                            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL,
+                                        "must fill chunk but it is too big to fit in size_t - try using "
+                                        "early allocation");
                         ret_value = true;
                     }
                     else
@@ -3049,7 +3052,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                  * usually does not use strip mining (H5D__scatgath_write), and instead allocates buffers
                  * large enough for the entire I/O.  Set request_nelmts to be large enough for all selected
                  * elements in this chunk because it must be at least that large */
-                H5_CHECKED_ASSIGN(nonexistent_dset_info.type_info.request_nelmts, size_t, nonexistent_dset_info.nelmts, hsize_t);
+                H5_CHECKED_ASSIGN(nonexistent_dset_info.type_info.request_nelmts, size_t,
+                                  nonexistent_dset_info.nelmts, hsize_t);
 
                 /* Perform the actual read operation from the nonexistent chunk
                  */
@@ -3378,7 +3382,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                  * usually does not use strip mining (H5D__scatgath_write), and instead allocates buffers
                  * large enough for the entire I/O.  Set request_nelmts to be large enough for all selected
                  * elements in this chunk because it must be at least that large */
-                H5_CHECKED_ASSIGN(cpt_dset_info.type_info.request_nelmts, size_t, cpt_dset_info.nelmts, hsize_t);
+                H5_CHECKED_ASSIGN(cpt_dset_info.type_info.request_nelmts, size_t, cpt_dset_info.nelmts,
+                                  hsize_t);
 
                 /* Perform the actual write operation */
                 if ((dset_info->io_ops.single_write)(&cpt_io_info, &cpt_dset_info) < 0)
@@ -4196,10 +4201,10 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool reset)
 
         /* Should the chunk be filtered before writing it to disk? */
         if (dset->shared->dcpl_cache.pline.nused && !(ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)) {
-            H5Z_EDC_t err_detect;                       /* Error detection info */
-            H5Z_cb_t  filter_cb;                        /* I/O filter callback function */
-            size_t    alloc;                            /* Bytes allocated for BUF    */
-            size_t    nbytes;                           /* Chunk size (in bytes) */
+            H5Z_EDC_t err_detect; /* Error detection info */
+            H5Z_cb_t  filter_cb;  /* I/O filter callback function */
+            size_t    alloc;      /* Bytes allocated for BUF    */
+            size_t    nbytes;     /* Chunk size (in bytes) */
 
             /* Assign alloc and check for overflow */
             H5_CHECKED_ASSIGN(alloc, size_t, udata.chunk_block.length, hsize_t);

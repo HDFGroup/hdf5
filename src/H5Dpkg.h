@@ -105,15 +105,17 @@
         }                                                                                                    \
                                                                                                              \
         /* If we're not using in-place type conversion, add this piece to global type conversion buffer      \
-         * size.  This will only be used if we must allocate a type conversion buffer for the entire I/O. Make sure to check for overflow and disable selection I/O if it happens. */ \
+         * size.  This will only be used if we must allocate a type conversion buffer for the entire I/O.    \
+         * Make sure to check for overflow and disable selection I/O if it happens. */                       \
         if (!(PIECE_INFO)->in_place_tconv) {                                                                 \
-            hsize_t tconv_buf_hsize; \
-            H5_CHECKED_ASSIGN(tconv_buf_hsize, hsize_t, (IO_INFO)->tconv_buf_size, size_t); \
-            tconv_buf_hsize += (PIECE_INFO)->piece_points * MAX((DINFO)->type_info.src_type_size, (DINFO)->type_info.dst_type_size); \
-            (IO_INFO)->tconv_buf_size = (size_t)tconv_buf_hsize; \
-            if (H5_UNLIKELY((hsize_t)(IO_INFO)->tconv_buf_size != tconv_buf_hsize)) \
-                (IO_INFO)->tconv_buf_overflow = true; \
-        } \
+            hsize_t tconv_buf_hsize;                                                                         \
+            H5_CHECKED_ASSIGN(tconv_buf_hsize, hsize_t, (IO_INFO)->tconv_buf_size, size_t);                  \
+            tconv_buf_hsize += (PIECE_INFO)->piece_points *                                                  \
+                               MAX((DINFO)->type_info.src_type_size, (DINFO)->type_info.dst_type_size);      \
+            (IO_INFO)->tconv_buf_size = (size_t)tconv_buf_hsize;                                             \
+            if (H5_UNLIKELY((hsize_t)(IO_INFO)->tconv_buf_size != tconv_buf_hsize))                          \
+                (IO_INFO)->tconv_buf_overflow = true;                                                        \
+        }                                                                                                    \
     }
 
 /* Macro to add a virtual dataset source file or dataset name to a hash table for storing these names */
