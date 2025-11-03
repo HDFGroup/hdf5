@@ -193,6 +193,10 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ## Library
 
+### Added support for large chunks
+
+   The library now supports arbitrarily large chunks (64 bit sizes). Using chunks with size >= 4 GiB will upgrade the file format and prevent the dataset from being opened with earlier versions of the library. 32 bit systems will not be able to use these chunks in all circumstances, such as with data filters or a fill value.
+
 ### Updated default file format to 1.8
 
    By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. This behavior can be overridden with `H5Pset_libver_bounds()`.
