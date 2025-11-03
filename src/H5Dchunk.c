@@ -571,7 +571,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
            (!H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
     /* Check for size_t overflow */
-    if ((hsize_t)((size_t)udata.chunk_block.length) != udata.chunk_block.length)
+    if (H5_UNLIKELY((hsize_t)((size_t)udata.chunk_block.length) != udata.chunk_block.length))
         HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size does not fit in size_t");
 
     /* Check if the requested chunk exists in the chunk cache */
@@ -615,7 +615,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
 
     /* Return the size of the chunk block in *nalloc if nalloc is provided */
     if (nalloc)
-        *nalloc = udata.chunk_block.length;
+        *nalloc = (size_t)udata.chunk_block.length;
 
     /* Return the filter mask */
     *filters = udata.filter_mask;
@@ -2795,8 +2795,12 @@ H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dse
                     if (fill->fill_time == H5D_FILL_TIME_ALLOC ||
                         (fill->fill_time == H5D_FILL_TIME_IFSET &&
                          (fill_status == H5D_FILL_VALUE_USER_DEFINED ||
-                          fill_status == H5D_FILL_VALUE_DEFAULT)))
+                          fill_status == H5D_FILL_VALUE_DEFAULT))) {
+                        /* Check for size_t overflow */
+                        if (H5_UNLIKELY((hsize_t)((size_t)dataset->shared->layout.u.chunk.size) != dataset->shared->layout.u.chunk.size))
+                            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "must fill chunk but it is too big to fit in size_t - try using early allocation");
                         ret_value = true;
+                    }
                     else
                         ret_value = false;
                 }
@@ -3045,7 +3049,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                  * usually does not use strip mining (H5D__scatgath_write), and instead allocates buffers
                  * large enough for the entire I/O.  Set request_nelmts to be large enough for all selected
                  * elements in this chunk because it must be at least that large */
-                nonexistent_dset_info.type_info.request_nelmts = nonexistent_dset_info.nelmts;
+                H5_CHECKED_ASSIGN(nonexistent_dset_info.type_info.request_nelmts, size_t, nonexistent_dset_info.nelmts, hsize_t);
 
                 /* Perform the actual read operation from the nonexistent chunk
                  */
@@ -3374,7 +3378,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                  * usually does not use strip mining (H5D__scatgath_write), and instead allocates buffers
                  * large enough for the entire I/O.  Set request_nelmts to be large enough for all selected
                  * elements in this chunk because it must be at least that large */
-                cpt_dset_info.type_info.request_nelmts = cpt_dset_info.nelmts;
+                H5_CHECKED_ASSIGN(cpt_dset_info.type_info.request_nelmts, size_t, cpt_dset_info.nelmts, hsize_t);
 
                 /* Perform the actual write operation */
                 if ((dset_info->io_ops.single_write)(&cpt_io_info, &cpt_dset_info) < 0)
@@ -4194,8 +4198,11 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool reset)
         if (dset->shared->dcpl_cache.pline.nused && !(ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)) {
             H5Z_EDC_t err_detect;                       /* Error detection info */
             H5Z_cb_t  filter_cb;                        /* I/O filter callback function */
-            size_t    alloc = udata.chunk_block.length; /* Bytes allocated for BUF    */
+            size_t    alloc;                            /* Bytes allocated for BUF    */
             size_t    nbytes;                           /* Chunk size (in bytes) */
+
+            /* Assign alloc and check for overflow */
+            H5_CHECKED_ASSIGN(alloc, size_t, udata.chunk_block.length, hsize_t);
 
             /* Retrieve filter settings from API context */
             if (H5CX_get_err_detect(&err_detect) < 0)
@@ -4399,7 +4406,7 @@ H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool flush)
     /* Remove from cache */
     assert(rdcc->slot[ent->idx] != ent);
     ent->idx = UINT_MAX;
-    rdcc->nbytes_used -= dset->shared->layout.u.chunk.size;
+    rdcc->nbytes_used -= (size_t)dset->shared->layout.u.chunk.size;
     --rdcc->nused;
 
     /* Free */
@@ -4577,7 +4584,9 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
     /* Get the chunk's size */
     assert(layout->u.chunk.size > 0);
-    H5_CHECKED_ASSIGN(chunk_size, size_t, layout->u.chunk.size, hsize_t);
+    if (H5_UNLIKELY((hsize_t)((size_t)layout->u.chunk.size) != layout->u.chunk.size))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, NULL, "chunk too big to fit in size_t");
+    chunk_size = (size_t)layout->u.chunk.size;
 
     /* Check if the chunk is in the cache */
     if (UINT_MAX != udata->idx_hint) {
@@ -4744,8 +4753,12 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
             /* Check if the chunk exists on disk */
             if (H5_addr_defined(chunk_addr)) {
-                size_t my_chunk_alloc = chunk_alloc; /* Allocated buffer size */
-                size_t buf_alloc      = chunk_alloc; /* [Re-]allocated buffer size */
+                size_t my_chunk_alloc; /* Allocated buffer size */
+                size_t buf_alloc;      /* [Re-]allocated buffer size */
+
+                /* Assign above variables and check for overflow */
+                H5_CHECKED_ASSIGN(my_chunk_alloc, size_t, chunk_alloc, hsize_t);
+                H5_CHECKED_ASSIGN(buf_alloc, size_t, chunk_alloc, hsize_t);
 
                 /* Chunk size on disk isn't [likely] the same size as the final chunk
                  * size in memory, so allocate memory big enough. */
@@ -5241,7 +5254,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
         orig_chunk_size = (size_t)layout->u.chunk.size;
 
         /* Check for overflow */
-        if ((hsize_t)orig_chunk_size != layout->u.chunk.size)
+        if (H5_UNLIKELY((hsize_t)orig_chunk_size != layout->u.chunk.size))
             HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size too big to fit in size_t");
 
         /* Initialize the fill value buffer */
@@ -6064,7 +6077,8 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk selection iterator");
 
     /* Create a selection iterator for scattering the elements to memory buffer */
-    if (H5S_select_iter_init(chunk_iter, udata->chunk_space, layout->u.chunk.dim[rank], 0) < 0)
+    H5_CHECK_OVERFLOW(layout->u.chunk.dim[rank], hsize_t, size_t);
+    if (H5S_select_iter_init(chunk_iter, udata->chunk_space, (size_t)layout->u.chunk.dim[rank], 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunk selection information");
     chunk_iter_init = true;
 

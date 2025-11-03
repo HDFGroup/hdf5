@@ -148,12 +148,12 @@ done:
 } /* end H5D__compact_fill() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__compact_construct
+ * Function:    H5D__compact_construct
  *
- * Purpose:	Constructs new compact layout information for dataset and upgrade layout version if
- *appropriate
+ * Purpose:     Constructs new compact layout information for dataset and
+ *              upgrades layout version if appropriate
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */

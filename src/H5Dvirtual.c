@@ -2653,8 +2653,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_construct
  *
- * Purpose:     Constructs new virtual layout information for dataset and upgrade layout version if
- *appropriate
+ * Purpose:     Constructs new virtual layout information for dataset and
+ *              upgrades layout version if appropriate
  *
  * Return:      Non-negative on success/Negative on failure
  *

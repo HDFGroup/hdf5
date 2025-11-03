@@ -416,12 +416,12 @@ done:
 } /* end H5D__contig_check() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__contig_construct
+ * Function:    H5D__contig_construct
  *
- * Purpose:	Constructs new contiguous layout information for dataset and upgrade layout version if
- *appropriate
+ * Purpose:     Constructs new contiguous layout information for dataset
+ *              and upgrades layout version if appropriate
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
