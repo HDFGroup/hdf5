@@ -610,7 +610,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     if (udata.chunk_block.length > 0 && buf && (!nalloc || *nalloc >= udata.chunk_block.length))
         /* Read the chunk data into the supplied buffer */
         if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset,
-                                  udata.chunk_block.length, buf) < 0)
+                                  (size_t)udata.chunk_block.length, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
 
     /* Return the size of the chunk block in *nalloc if nalloc is provided */
