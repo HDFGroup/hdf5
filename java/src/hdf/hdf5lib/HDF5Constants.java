@@ -1125,6 +1125,10 @@ public class HDF5Constants {
     /** */
     public static final long H5T_FLOAT_BFLOAT16LE = H5T_FLOAT_BFLOAT16LE();
     /** */
+    public static final long H5T_FLOAT_F8E4M3 = H5T_FLOAT_F8E4M3();
+    /** */
+    public static final long H5T_FLOAT_F8E5M2 = H5T_FLOAT_F8E5M2();
+    /** */
     public static final int H5T_INTEGER = H5T_INTEGER();
     /** */
     public static final long H5T_INTEL_B16 = H5T_INTEL_B16();
@@ -2639,6 +2643,10 @@ public class HDF5Constants {
     private static native final long H5T_FLOAT_BFLOAT16BE();
 
     private static native final long H5T_FLOAT_BFLOAT16LE();
+
+    private static native final long H5T_FLOAT_F8E4M3();
+
+    private static native final long H5T_FLOAT_F8E5M2();
 
     private static native final int H5T_INTEGER();
 
