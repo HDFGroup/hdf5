@@ -650,6 +650,12 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
 
+### Fixed security issues CVE-2025-2913 and CVE-2025-2926
+
+   The size of a continuation message was decoded as 0, causing multiple vulnerabilities.  An error check was added to return failure to prevent further processing of invalid data.
+
+   Fixes GitHub issue #5376 and #5384
+
 ### Revised handling of Unicode filenames on Windows<a name="utf-8">
 
    In the HDF5 1.14.4 release, a change was made to address some issues with the library's handling of code pages and file paths on Windows.  This change introduced other issues with the handling of UTF-8 file names that caused breakage for software using the 1.14.4 and 1.14.5 releases of HDF5. That change was reverted for the 1.14.6 release and the behavior has been slightly modified for this release.
