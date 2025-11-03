@@ -570,6 +570,10 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     assert((H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
            (!H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
+    /* Check for size_t overflow */
+    if ((hsize_t)((size_t)udata.chunk_block.length) != udata.chunk_block.length)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size does not fit in size_t");
+
     /* Check if the requested chunk exists in the chunk cache */
     if (UINT_MAX != udata.idx_hint) {
         H5D_rdcc_ent_t *ent = rdcc->slot[udata.idx_hint];
@@ -2773,8 +2777,8 @@ H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dse
              * need to write the fill value, then don't load the chunk into the
              * cache, just write the data to it directly.
              */
-            H5_CHECK_OVERFLOW(dataset->shared->layout.u.chunk.size, hsize_t, size_t);
-            if ((size_t)dataset->shared->layout.u.chunk.size > dataset->shared->cache.chunk.nbytes_max) {
+            /* If the chunk is too big to fit in size_t, assume it is too big to fit in cache */
+            if (!(((hsize_t)((size_t)dataset->shared->layout.u.chunk.size) == dataset->shared->layout.u.chunk.size) && ((size_t)dataset->shared->layout.u.chunk.size <= dataset->shared->cache.chunk.nbytes_max))) {
                 if (write_op && !H5_addr_defined(caddr)) {
                     const H5O_fill_t *fill = &(dataset->shared->dcpl_cache.fill); /* Fill value info */
                     H5D_fill_value_t  fill_status;                                /* Fill value status */
@@ -2861,8 +2865,8 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
             if (!(io_info->using_mpi_vfd && (H5F_ACC_RDWR & H5F_INTENT(dataset->oloc.file)))) {
 #endif /* H5_HAVE_PARALLEL */
                 /* Check if the chunk is too large to keep in the cache */
-                H5_CHECK_OVERFLOW(dataset->shared->layout.u.chunk.size, hsize_t, size_t);
-                if ((size_t)dataset->shared->layout.u.chunk.size <= dataset->shared->cache.chunk.nbytes_max) {
+                /* If the chunk is too big to fit in size_t, assume it is too big to fit in cache */
+                if (((hsize_t)((size_t)dataset->shared->layout.u.chunk.size) == dataset->shared->layout.u.chunk.size) && ((size_t)dataset->shared->layout.u.chunk.size <= dataset->shared->cache.chunk.nbytes_max)) {
                     io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
                     io_info->no_selection_io_cause |= H5D_SEL_IO_CHUNK_CACHE;
                 }
