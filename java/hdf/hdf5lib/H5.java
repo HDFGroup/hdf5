@@ -2303,27 +2303,162 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5A
      *
-     * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
-     * mem_type_id. The entire attribute is read into buffer of variable-lenght strings from the file.
+     * H5Aread_VLStrings reads an attribute, specified with attr_id. The attribute's memory datatype is
+     * specified with mem_type_id. The entire attribute is read into buffer of variable-length strings from the file.
      *
      * @param attr_id
      *            IN: Identifier of an attribute to read.
      * @param mem_type_id
-     *            IN: Identifier of the attribute datatype (in memory).
+     *            IN: Identifier of the attribute datatype (in memory, must be variable-length string type).
      * @param buf
-     *            Buffer of variable-lenght strings to store data read from the file.
+     *            OUT: Buffer of variable-length strings to store data read from the file.
+     *                 Must be pre-allocated with sufficient size.
      *
      * @return a non-negative value if successful
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      * @exception NullPointerException
-     *             data buffer is null.
+     *            data buffer is null.
+     * @exception IllegalArgumentException
+     *            buf is too small or type is not variable-length string.
+     *
+     * @note Uses Arena.global() for memory management
+     * @note H5Treclaim is called automatically to free HDF5-managed VL memory
+     * @note Buffer must be pre-allocated with size matching attribute dataspace
+     *
+     * @example
+     * <pre>
+     * // Create variable-length string type
+     * long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+     * H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+     *
+     * // Determine buffer size from attribute dataspace
+     * long space_id = H5.H5Aget_space(attr_id);
+     * long[] dims = new long[1];
+     * H5.H5Sget_simple_extent_dims(space_id, dims, null);
+     *
+     * // Read VL strings
+     * String[] buffer = new String[(int)dims[0]];
+     * H5.H5Aread_VLStrings(attr_id, strType, buffer);
+     *
+     * // Clean up
+     * H5.H5Sclose(space_id);
+     * H5.H5Tclose(strType);
+     * </pre>
      **/
     public static int H5Aread_VLStrings(long attr_id, long mem_type_id, Object[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Aread_VLStrings not implemented yet");
+        // Input validation
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+
+        // Type validation - ensure it's a variable-length string type
+        if (!H5.H5Tis_variable_str(mem_type_id)) {
+            throw new HDF5LibraryException("Type is not a variable-length string");
+        }
+
+        if (log.isTraceEnabled()) {
+            log.trace("H5Aread_VLStrings: attr_id={}, mem_type_id={}, buffer size={}", attr_id, mem_type_id,
+                      buf.length);
+        }
+
+        // Get attribute dataspace to determine size
+        long space_id = HDF5Constants.H5I_INVALID_HID;
+        long[] dims   = new long[1];
+        int status    = -1;
+
+        try {
+            space_id = H5.H5Aget_space(attr_id);
+            if (space_id < 0) {
+                throw new HDF5LibraryException("Failed to get attribute dataspace");
+            }
+
+            int rank = H5.H5Sget_simple_extent_ndims(space_id);
+            if (rank > 0) {
+                long[] fullDims = new long[rank];
+                H5.H5Sget_simple_extent_dims(space_id, fullDims, null);
+
+                // Calculate total size
+                long totalSize = 1;
+                for (long dim : fullDims) {
+                    totalSize *= dim;
+                }
+
+                // Buffer size validation
+                if (buf.length < totalSize) {
+                    throw new IllegalArgumentException(
+                        "Buffer too small: " + buf.length + " < " + totalSize);
+                }
+                dims[0] = totalSize;
+            }
+            else {
+                // Scalar attribute
+                dims[0] = 1;
+            }
+
+            if (log.isTraceEnabled()) {
+                log.trace("H5Aread_VLStrings: reading {} elements", dims[0]);
+            }
+
+            // Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
+            Arena arena = Arena.global();
+
+            // Allocate hvl_t array for reading
+            MemorySegment hvlArray = org.hdfgroup.javahdf5.hvl_t.allocateArray((int)dims[0], arena);
+
+            // Read from HDF5
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Aread(attr_id, mem_type_id, hvlArray);
+
+            if (status < 0) {
+                h5libraryError();
+            }
+
+            // Convert from hvl_t to Java ArrayList[]
+            ArrayList[] vlResult = VLDataConverter.convertFromHVL(hvlArray, (int)dims[0], mem_type_id);
+
+            // Extract strings from ArrayList[] to String[]
+            for (int i = 0; i < dims[0] && i < buf.length; i++) {
+                if (vlResult[i] != null && !vlResult[i].isEmpty()) {
+                    buf[i] = (String)vlResult[i].get(0);
+                }
+                else {
+                    buf[i] = "";
+                }
+            }
+
+            if (log.isTraceEnabled()) {
+                log.trace("H5Aread_VLStrings: successfully read {} strings, status={}", dims[0], status);
+            }
+
+            // CRITICAL: Reclaim VL memory managed by HDF5
+            // This must be called to prevent memory leaks
+            int reclaim_status = org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
+                mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(), hvlArray);
+            if (reclaim_status < 0 && log.isTraceEnabled()) {
+                log.trace("H5Aread_VLStrings: H5Treclaim returned {}", reclaim_status);
+            }
+        }
+        catch (HDF5JavaException ex) {
+            throw new HDF5LibraryException("VL string read failed: " + ex.getMessage());
+        }
+        finally {
+            // Clean up dataspace
+            if (space_id >= 0) {
+                try {
+                    H5.H5Sclose(space_id);
+                }
+                catch (Exception ex) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("H5Aread_VLStrings: H5Sclose failed: {}", ex.getMessage());
+                    }
+                }
+            }
+        }
+
+        return status;
     }
 
     /**
@@ -3003,30 +3138,133 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5A
      *
-     * H5Awrite_VLStrings writes a variable length String dataset, specified by its identifier attr_id, from
-     * the application memory buffer buffer of variable-lenght strings into the file.
+     * H5Awrite_VLStrings writes a variable length String attribute, specified by its identifier attr_id, from
+     * the application memory buffer buffer of variable-length strings into the file.
      *
      * ---- contributed by Rosetta Biosoftware
      *
      * @param attr_id
-     *            Identifier of the attribute read from.
+     *            Identifier of the attribute to write to.
      * @param mem_type_id
-     *            Identifier of the memory datatype.
+     *            Identifier of the memory datatype (must be variable-length string type).
      * @param buf
-     *            Buffer of variable-lenght strings with data to be written to the file.
+     *            Buffer of variable-length strings with data to be written to the file.
      *
      * @return a non-negative value if successful
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      * @exception NullPointerException
-     *            name is null.
+     *            buf is null.
+     * @exception IllegalArgumentException
+     *            buf is empty or type is not variable-length string.
+     *
+     * @note Uses Arena.global() for memory management
+     * @note Null strings in input are converted to empty strings
+     * @note Memory is automatically reclaimed by HDF5
+     *
+     * @example
+     * <pre>
+     * // Create variable-length string type
+     * long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+     * H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+     *
+     * // Write VL strings to attribute
+     * String[] data = {"Hello", "World", "VL Strings"};
+     * H5.H5Awrite_VLStrings(attr_id, strType, data);
+     *
+     * // Clean up
+     * H5.H5Tclose(strType);
+     * </pre>
      **/
 
     public static int H5Awrite_VLStrings(long attr_id, long mem_type_id, Object[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Awrite_VLStrings not implemented yet");
+        // Input validation
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+        if (buf.length == 0) {
+            throw new IllegalArgumentException("Buffer cannot be empty");
+        }
+
+        // Type validation - ensure it's a variable-length string type
+        if (!H5.H5Tis_variable_str(mem_type_id)) {
+            throw new HDF5LibraryException("Type is not a variable-length string");
+        }
+
+        // Validate buffer elements are Strings
+        for (int i = 0; i < buf.length; i++) {
+            if (buf[i] != null && !(buf[i] instanceof String)) {
+                throw new IllegalArgumentException(
+                    "Buffer element " + i + " is not a String: " + buf[i].getClass().getName());
+            }
+        }
+
+        if (log.isTraceEnabled()) {
+            log.trace("H5Awrite_VLStrings: attr_id={}, mem_type_id={}, writing {} strings", attr_id,
+                      mem_type_id, buf.length);
+        }
+
+        int status = -1;
+        // Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
+        Arena arena = Arena.global();
+
+        try {
+            // Convert String array to VL format for HDF5
+            String[] stringArray = (String[])buf;
+
+            // Handle null strings - convert to empty strings
+            for (int i = 0; i < stringArray.length; i++) {
+                if (stringArray[i] == null) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("H5Awrite_VLStrings: converting null at index {} to empty string", i);
+                    }
+                    stringArray[i] = "";
+                }
+            }
+
+            // For VL strings, we need to manually create hvl_t structures
+            // VLDataConverter is for array types, not VL string types
+            MemorySegment hvlArray = org.hdfgroup.javahdf5.hvl_t.allocateArray(stringArray.length, arena);
+
+            for (int i = 0; i < stringArray.length; i++) {
+                MemorySegment hvlElement = org.hdfgroup.javahdf5.hvl_t.asSlice(hvlArray, i);
+                String str = stringArray[i];
+
+                if (str == null || str.isEmpty()) {
+                    // Empty string: set length to 1 (for null terminator) and allocate single byte
+                    org.hdfgroup.javahdf5.hvl_t.len(hvlElement, 1);
+                    MemorySegment emptyStr = arena.allocate(1);
+                    emptyStr.set(ValueLayout.JAVA_BYTE, 0, (byte)0);
+                    org.hdfgroup.javahdf5.hvl_t.p(hvlElement, emptyStr);
+                }
+                else {
+                    // Convert string to null-terminated C string
+                    MemorySegment stringSegment = arena.allocateFrom(str, StandardCharsets.UTF_8);
+                    // Set length to string length + 1 for null terminator
+                    org.hdfgroup.javahdf5.hvl_t.len(hvlElement, str.length() + 1);
+                    org.hdfgroup.javahdf5.hvl_t.p(hvlElement, stringSegment);
+                }
+            }
+
+            // Call H5Awrite (not H5Dwrite) - attributes don't use space parameters
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Awrite(attr_id, mem_type_id, hvlArray);
+
+            if (status < 0) {
+                h5libraryError();
+            }
+
+            if (log.isTraceEnabled()) {
+                log.trace("H5Awrite_VLStrings: successfully wrote {} strings, status={}", buf.length, status);
+            }
+        }
+        catch (HDF5JavaException ex) {
+            throw new HDF5LibraryException("VL string write failed: " + ex.getMessage());
+        }
+
+        return status;
     }
 
     /**
@@ -4580,21 +4818,22 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5D
      *
-     * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
-     * application memory buffer of variable-lenght strings.
+     * H5Dread_VLStrings reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
+     * application memory buffer of variable-length strings.
      *
      * @param dataset_id
      *            Identifier of the dataset read from.
      * @param mem_type_id
-     *            Identifier of the memory datatype.
+     *            Identifier of the memory datatype (must be variable-length string type).
      * @param mem_space_id
-     *            Identifier of the memory dataspace.
+     *            Identifier of the memory dataspace (use H5S_ALL for entire dataset).
      * @param file_space_id
-     *            Identifier of the dataset's dataspace in the file.
+     *            Identifier of the dataset's dataspace in the file (use H5S_ALL for entire dataset).
      * @param xfer_plist_id
      *            Identifier of a transfer property list for this I/O operation.
      * @param buf
-     *            Buffer of variable-lenght strings to store data read from the file.
+     *            OUT: Buffer of variable-length strings to store data read from the file.
+     *                 Must be pre-allocated with sufficient size.
      *
      * @return a non-negative value if successful
      *
@@ -4602,12 +4841,156 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      * @exception NullPointerException
      *            data buffer is null.
+     * @exception IllegalArgumentException
+     *            buf is too small or type is not variable-length string.
+     *
+     * @note Uses Arena.global() for memory management
+     * @note H5Treclaim is called automatically to free HDF5-managed VL memory
+     * @note Buffer must be pre-allocated with size matching memory dataspace
+     *
+     * @example
+     * <pre>
+     * // Create variable-length string type
+     * long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+     * H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+     *
+     * // Determine buffer size from dataset dataspace
+     * long space_id = H5.H5Dget_space(dataset_id);
+     * long[] dims = new long[1];
+     * H5.H5Sget_simple_extent_dims(space_id, dims, null);
+     *
+     * // Read VL strings
+     * String[] buffer = new String[(int)dims[0]];
+     * H5.H5Dread_VLStrings(dataset_id, strType, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+     *
+     * // Clean up
+     * H5.H5Sclose(space_id);
+     * H5.H5Tclose(strType);
+     * </pre>
      **/
     public static int H5Dread_VLStrings(long dataset_id, long mem_type_id, long mem_space_id,
                                         long file_space_id, long xfer_plist_id, Object[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Dread_VLStrings not implemented yet");
+        // Input validation
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+
+        // Type validation - ensure it's a variable-length string type
+        if (!H5.H5Tis_variable_str(mem_type_id)) {
+            throw new HDF5LibraryException("Type is not a variable-length string");
+        }
+
+        if (log.isTraceEnabled()) {
+            log.trace(
+                "H5Dread_VLStrings: dataset_id={}, mem_type_id={}, mem_space_id={}, file_space_id={}, buffer size={}",
+                dataset_id, mem_type_id, mem_space_id, file_space_id, buf.length);
+        }
+
+        // Determine buffer size from memory space (or dataset space if H5S_ALL)
+        long space_id    = mem_space_id;
+        boolean closeSpace = false;
+        long[] dims      = new long[1];
+        int status       = -1;
+
+        try {
+            // If mem_space_id is H5S_ALL, get the dataset's dataspace
+            if (mem_space_id == HDF5Constants.H5S_ALL) {
+                space_id   = H5.H5Dget_space(dataset_id);
+                closeSpace = true;
+                if (space_id < 0) {
+                    throw new HDF5LibraryException("Failed to get dataset dataspace");
+                }
+            }
+
+            if (space_id < 0 || space_id == HDF5Constants.H5S_ALL) {
+                throw new HDF5LibraryException("Invalid dataspace");
+            }
+
+            int rank = H5.H5Sget_simple_extent_ndims(space_id);
+            if (rank > 0) {
+                long[] fullDims = new long[rank];
+                H5.H5Sget_simple_extent_dims(space_id, fullDims, null);
+
+                // Calculate total size
+                long totalSize = 1;
+                for (long dim : fullDims) {
+                    totalSize *= dim;
+                }
+
+                // Buffer size validation
+                if (buf.length < totalSize) {
+                    throw new IllegalArgumentException("Buffer too small: " + buf.length + " < " + totalSize);
+                }
+                dims[0] = totalSize;
+            }
+            else {
+                // Scalar dataset
+                dims[0] = 1;
+            }
+
+            if (log.isTraceEnabled()) {
+                log.trace("H5Dread_VLStrings: reading {} elements", dims[0]);
+            }
+
+            // Use global Arena to prevent automatic cleanup conflicts with HDF5 VL memory
+            Arena arena = Arena.global();
+
+            // Allocate hvl_t array for reading
+            MemorySegment hvlArray = org.hdfgroup.javahdf5.hvl_t.allocateArray((int)dims[0], arena);
+
+            // Read from HDF5
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+                                                          xfer_plist_id, hvlArray);
+
+            if (status < 0) {
+                h5libraryError();
+            }
+
+            // Convert from hvl_t to Java ArrayList[]
+            ArrayList[] vlResult = VLDataConverter.convertFromHVL(hvlArray, (int)dims[0], mem_type_id);
+
+            // Extract strings from ArrayList[] to String[]
+            for (int i = 0; i < dims[0] && i < buf.length; i++) {
+                if (vlResult[i] != null && !vlResult[i].isEmpty()) {
+                    buf[i] = (String)vlResult[i].get(0);
+                }
+                else {
+                    buf[i] = "";
+                }
+            }
+
+            if (log.isTraceEnabled()) {
+                log.trace("H5Dread_VLStrings: successfully read {} strings, status={}", dims[0], status);
+            }
+
+            // CRITICAL: Reclaim VL memory managed by HDF5
+            // This must be called to prevent memory leaks
+            int reclaim_status = org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
+                mem_type_id, space_id, org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(), hvlArray);
+            if (reclaim_status < 0 && log.isTraceEnabled()) {
+                log.trace("H5Dread_VLStrings: H5Treclaim returned {}", reclaim_status);
+            }
+        }
+        catch (HDF5JavaException ex) {
+            throw new HDF5LibraryException("VL string read failed: " + ex.getMessage());
+        }
+        finally {
+            // Clean up dataspace if we allocated it
+            if (closeSpace && space_id >= 0) {
+                try {
+                    H5.H5Sclose(space_id);
+                }
+                catch (Exception ex) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("H5Dread_VLStrings: H5Sclose failed: {}", ex.getMessage());
+                    }
+                }
+            }
+        }
+
+        return status;
     }
 
     /**
@@ -5436,15 +5819,39 @@ public class H5 implements java.io.Serializable {
 
         try {
             // Convert String array to VL format for HDF5
-            String[] stringArray      = (String[])buf;
-            ArrayList[] vlStringArray = new ArrayList[stringArray.length];
+            String[] stringArray = (String[])buf;
+
+            // Handle null strings - convert to empty strings
             for (int i = 0; i < stringArray.length; i++) {
-                vlStringArray[i] = new ArrayList<>();
-                vlStringArray[i].add(stringArray[i]);
+                if (stringArray[i] == null) {
+                    stringArray[i] = "";
+                }
             }
 
-            // Use VLDataConverter to convert VL strings to hvl_t
-            MemorySegment hvlArray = VLDataConverter.convertToHVL(vlStringArray, arena);
+            // For VL strings, we need to manually create hvl_t structures
+            // VLDataConverter is for array types, not VL string types
+            MemorySegment hvlArray = org.hdfgroup.javahdf5.hvl_t.allocateArray(stringArray.length, arena);
+
+            for (int i = 0; i < stringArray.length; i++) {
+                MemorySegment hvlElement = org.hdfgroup.javahdf5.hvl_t.asSlice(hvlArray, i);
+                String str = stringArray[i];
+
+                if (str == null || str.isEmpty()) {
+                    // Empty string: set length to 1 (for null terminator) and allocate single byte
+                    org.hdfgroup.javahdf5.hvl_t.len(hvlElement, 1);
+                    MemorySegment emptyStr = arena.allocate(1);
+                    emptyStr.set(ValueLayout.JAVA_BYTE, 0, (byte)0);
+                    org.hdfgroup.javahdf5.hvl_t.p(hvlElement, emptyStr);
+                }
+                else {
+                    // Convert string to null-terminated C string
+                    MemorySegment stringSegment = arena.allocateFrom(str, StandardCharsets.UTF_8);
+                    // Set length to string length + 1 for null terminator
+                    org.hdfgroup.javahdf5.hvl_t.len(hvlElement, str.length() + 1);
+                    org.hdfgroup.javahdf5.hvl_t.p(hvlElement, stringSegment);
+                }
+            }
+
             status = org.hdfgroup.javahdf5.hdf5_h.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                            file_space_id, xfer_plist_id, hvlArray);
 

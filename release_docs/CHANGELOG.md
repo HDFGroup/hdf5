@@ -553,17 +553,6 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ## Java Library
 
-### Added compound datatype support for Java FFM bindings
-
-   Implemented full read and write support for HDF5 compound datatypes in the Java Foreign Function & Memory (FFM) API:
-   - **Read implementation**: `VLDataConverter.readCompoundDatatype()` method handles heterogeneous field structures (INTEGER, FLOAT, STRING types)
-   - **Write implementation**: `VLDataConverter.convertCompoundDatatype()` method converts ArrayList arrays to packed native compound structures
-   - **API integration**: Updated `H5AreadVL()`, `H5DreadVL()`, `H5AwriteVL()`, and `H5DwriteVL()` to automatically detect and process H5T_COMPOUND types
-   - **Test coverage**: Added comprehensive unit tests (`TestH5A.testH5Awrite_readCompound()`, `TestH5D.testH5Dwrite_readCompound()`)
-   - **Example compatibility**: H5Ex_T_Compound and H5Ex_T_CompoundAttribute examples now work correctly
-   - Supports fixed-length and variable-length string fields within compound structures
-   - Handles unaligned field access with byte-level precision for cross-platform compatibility
-
 ## Tools
 
 ### Added AWS endpoint command option to allow specifying an alternate endpoint URL when using the ROS3 VFD

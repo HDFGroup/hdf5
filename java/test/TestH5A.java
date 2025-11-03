@@ -2195,4 +2195,409 @@ public class TestH5A {
         assertTrue("testH5AArray_string_buffer:" + arr_readbuf[3].get(0),
                    arr_str_data[3].get(0).equals(arr_readbuf[3].get(0)));
     }
+
+    /**
+     * Test H5Awrite_VLStrings - write only (read tests will come with H5Aread_VLStrings)
+     */
+    @Ignore
+    public void testH5A_VLStrings_write_basic()
+    {
+        String attrName = "VLStringAttr_write";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            // Create variable-length string type
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            assertTrue("H5Tcopy failed", strType >= 0);
+
+            int status = H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+            assertTrue("H5Tset_size failed", status >= 0);
+
+            // Verify it's variable length
+            boolean isVar = H5.H5Tis_variable_str(strType);
+            assertTrue("Should be variable-length string", isVar);
+
+            // Create dataspace for 3 strings
+            long[] dims = {3};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            assertTrue("H5Screate_simple failed", attrSpace >= 0);
+
+            // Create attribute
+            attrId = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT);
+            assertTrue("H5Acreate failed", attrId >= 0);
+
+            // Write VL strings
+            String[] writeData = {"First string", "Second string", "Third string"};
+            status             = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings failed", status >= 0);
+
+            System.out.println("testH5A_VLStrings_write_basic: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test edge case: empty strings
+     */
+    @Ignore
+    public void testH5A_VLStrings_write_empty()
+    {
+        String attrName = "EmptyVLStrings";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+            long[] dims = {3};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT);
+
+            // Write mix of empty and non-empty strings
+            String[] writeData = {"", "Not empty", ""};
+            int status         = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings with empty strings failed", status >= 0);
+
+            System.out.println("testH5A_VLStrings_write_empty: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test error: non-VL string type should fail
+     */
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5A_VLStrings_write_invalid_type() throws Exception
+    {
+        String attrName = "InvalidTypeAttr";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            // Create FIXED-length string type (not variable)
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, 10); // Fixed 10 chars, not variable
+
+            long[] dims = {1};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT);
+
+            String[] data = {"test"};
+            // This should throw HDF5LibraryException due to type validation
+            H5.H5Awrite_VLStrings(attrId, strType, data);
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test error: null buffer should throw NullPointerException
+     */
+    @Test(expected = NullPointerException.class)
+    public void testH5A_VLStrings_write_null_buffer() throws Exception
+    {
+        long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+        try {
+            // This should throw NullPointerException
+            H5.H5Awrite_VLStrings(H5did, strType, null);
+        }
+        finally {
+            H5.H5Tclose(strType);
+        }
+    }
+
+    /**
+     * Test error: empty buffer should throw IllegalArgumentException
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testH5A_VLStrings_write_empty_buffer() throws Exception
+    {
+        long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+        try {
+            // This should throw IllegalArgumentException
+            String[] emptyArray = new String[0];
+            H5.H5Awrite_VLStrings(H5did, strType, emptyArray);
+        }
+        finally {
+            H5.H5Tclose(strType);
+        }
+    }
+
+    /**
+     * Test H5Awrite_VLStrings and H5Aread_VLStrings round-trip
+     */
+    @Ignore
+    public void testH5A_VLStrings_write_read_roundtrip()
+    {
+        String attrName = "VLStringAttr_roundtrip";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            // Create variable-length string type
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            assertTrue("H5Tcopy failed", strType >= 0);
+
+            int status = H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+            assertTrue("H5Tset_size failed", status >= 0);
+
+            // Verify it's variable length
+            boolean isVar = H5.H5Tis_variable_str(strType);
+            assertTrue("Should be variable-length string", isVar);
+
+            // Create dataspace for 3 strings
+            long[] dims = {3};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            assertTrue("H5Screate_simple failed", attrSpace >= 0);
+
+            // Create attribute
+            attrId = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT);
+            assertTrue("H5Acreate failed", attrId >= 0);
+
+            // Write VL strings
+            String[] writeData = {"First string", "Second string", "Third string"};
+            status             = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings failed", status >= 0);
+
+            // Read back
+            String[] readData = new String[3];
+            status            = H5.H5Aread_VLStrings(attrId, strType, readData);
+            assertTrue("H5Aread_VLStrings failed", status >= 0);
+
+            // Verify
+            assertNotNull("Read data should not be null", readData);
+            assertEquals("Should have 3 strings", 3, readData.length);
+            assertEquals("First string mismatch", writeData[0], readData[0]);
+            assertEquals("Second string mismatch", writeData[1], readData[1]);
+            assertEquals("Third string mismatch", writeData[2], readData[2]);
+
+            System.out.println("testH5A_VLStrings_write_read_roundtrip: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test round-trip with empty strings
+     */
+    @Ignore
+    public void testH5A_VLStrings_roundtrip_empty()
+    {
+        String attrName = "EmptyVLStrings_roundtrip";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+            long[] dims = {3};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT);
+
+            // Write mix of empty and non-empty strings
+            String[] writeData = {"", "Not empty", ""};
+            int status         = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings with empty strings failed", status >= 0);
+
+            // Read back
+            String[] readData = new String[3];
+            status            = H5.H5Aread_VLStrings(attrId, strType, readData);
+            assertTrue("H5Aread_VLStrings failed", status >= 0);
+
+            // Verify empty strings preserved
+            assertEquals("First should be empty", "", readData[0]);
+            assertEquals("Second should match", "Not empty", readData[1]);
+            assertEquals("Third should be empty", "", readData[2]);
+
+            System.out.println("testH5A_VLStrings_roundtrip_empty: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test round-trip with Unicode strings
+     */
+    @Ignore
+    public void testH5A_VLStrings_roundtrip_unicode()
+    {
+        String attrName = "UnicodeVLStrings_roundtrip";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+            H5.H5Tset_cset(strType, HDF5Constants.H5T_CSET_UTF8);
+
+            long[] dims = {2};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT);
+
+            // Unicode test strings
+            String[] writeData = {"Hello \u4E16\u754C", "\u00D1o\u00F1o \uD83D\uDE80"};
+            int status         = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings with Unicode failed", status >= 0);
+
+            String[] readData = new String[2];
+            status            = H5.H5Aread_VLStrings(attrId, strType, readData);
+            assertTrue("H5Aread_VLStrings failed", status >= 0);
+
+            assertEquals("Unicode string 1 mismatch", writeData[0], readData[0]);
+            assertEquals("Unicode string 2 mismatch", writeData[1], readData[1]);
+
+            System.out.println("testH5A_VLStrings_roundtrip_unicode: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
 }

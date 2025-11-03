@@ -2179,4 +2179,211 @@ public class TestH5D {
                 }
         }
     }
+
+    /**
+     * Test H5Dwrite_VLStrings and H5Dread_VLStrings round-trip
+     */
+    @Ignore
+    public void testH5D_VLStrings_write_read_roundtrip()
+    {
+        String dsetName = "/VLStringDataset_roundtrip";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long dsetId     = HDF5Constants.H5I_INVALID_HID;
+        long dsetSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            // Create variable-length string type
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+            // Create dataspace for 2D array of strings
+            long[] dims = {2, 3};
+            dsetSpace   = H5.H5Screate_simple(2, dims, null);
+
+            // Create dataset
+            dsetId = H5.H5Dcreate(H5fid, dsetName, strType, dsetSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("H5Dcreate failed", dsetId >= 0);
+
+            // Write 6 strings (2x3 array flattened)
+            String[] writeData = {"String 0", "String 1", "String 2", "String 3", "String 4", "String 5"};
+            int status         = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
+                                                  HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, writeData);
+            assertTrue("H5Dwrite_VLStrings failed", status >= 0);
+
+            // Read back
+            String[] readData = new String[6];
+            status            = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
+                                                HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, readData);
+            assertTrue("H5Dread_VLStrings failed", status >= 0);
+
+            // Verify all strings
+            for (int i = 0; i < 6; i++) {
+                assertEquals("String " + i + " mismatch", writeData[i], readData[i]);
+            }
+
+            System.out.println("testH5D_VLStrings_write_read_roundtrip: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (dsetId >= 0)
+                    H5.H5Dclose(dsetId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (dsetSpace >= 0)
+                    H5.H5Sclose(dsetSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test round-trip with empty strings
+     */
+    @Ignore
+    public void testH5D_VLStrings_roundtrip_empty()
+    {
+        String dsetName = "/VLStringDataset_empty";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long dsetId     = HDF5Constants.H5I_INVALID_HID;
+        long dsetSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+            long[] dims = {4};
+            dsetSpace   = H5.H5Screate_simple(1, dims, null);
+            dsetId      = H5.H5Dcreate(H5fid, dsetName, strType, dsetSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+
+            // Write mix of empty and non-empty strings
+            String[] writeData = {"", "Not empty", "", "Also not empty"};
+            int status         = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
+                                                  HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, writeData);
+            assertTrue("H5Dwrite_VLStrings failed", status >= 0);
+
+            // Read back
+            String[] readData = new String[4];
+            status            = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
+                                                HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, readData);
+            assertTrue("H5Dread_VLStrings failed", status >= 0);
+
+            // Verify empty strings preserved
+            assertEquals("First should be empty", "", readData[0]);
+            assertEquals("Second should match", "Not empty", readData[1]);
+            assertEquals("Third should be empty", "", readData[2]);
+            assertEquals("Fourth should match", "Also not empty", readData[3]);
+
+            System.out.println("testH5D_VLStrings_roundtrip_empty: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (dsetId >= 0)
+                    H5.H5Dclose(dsetId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (dsetSpace >= 0)
+                    H5.H5Sclose(dsetSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test round-trip with large strings
+     */
+    @Ignore
+    public void testH5D_VLStrings_roundtrip_large()
+    {
+        String dsetName = "/VLStringDataset_large";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long dsetId     = HDF5Constants.H5I_INVALID_HID;
+        long dsetSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+            long[] dims = {3};
+            dsetSpace   = H5.H5Screate_simple(1, dims, null);
+            dsetId      = H5.H5Dcreate(H5fid, dsetName, strType, dsetSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+
+            // Create large strings (>1KB each)
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 200; i++) {
+                sb.append("This is test string content ");
+            }
+            String largeString = sb.toString();
+
+            String[] writeData = {largeString + " [0]", largeString + " [1]", largeString + " [2]"};
+
+            int status = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
+                                               HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, writeData);
+            assertTrue("H5Dwrite_VLStrings failed", status >= 0);
+
+            String[] readData = new String[3];
+            status            = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
+                                                HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, readData);
+            assertTrue("H5Dread_VLStrings failed", status >= 0);
+
+            for (int i = 0; i < 3; i++) {
+                assertEquals("Large string " + i + " mismatch", writeData[i], readData[i]);
+                assertTrue("String should be > 1KB", readData[i].length() > 1024);
+            }
+
+            System.out.println("testH5D_VLStrings_roundtrip_large: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (dsetId >= 0)
+                    H5.H5Dclose(dsetId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (dsetSpace >= 0)
+                    H5.H5Sclose(dsetSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
 }

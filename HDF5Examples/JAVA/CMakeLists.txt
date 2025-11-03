@@ -13,7 +13,7 @@ if (NOT HDF5_PROVIDES_JNI AND ${H5_LIBVER_DIR} GREATER 114)
   add_subdirectory (TUTR)
 endif ()
 
-if (HDF5_PROVIDES_COMPAT OR HDF5_PROVIDES_JNI)
+if (HDF5_PROVIDES_JAVA_COMPAT OR HDF5_PROVIDES_JNI)
   message (STATUS "HDF5 Java examples compat support")
   add_subdirectory (compat)
 endif ()
