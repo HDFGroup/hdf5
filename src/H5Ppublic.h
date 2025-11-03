@@ -4241,7 +4241,7 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *                        that can fit in \p rdcc_nbytes bytes. For
  *                        maximum performance, this value should be set
  *                        approximately 100 times that number of chunks.
- *                        The default value is 521.
+ *                        The default value is 8191.
  * \param[in] rdcc_nbytes Total size of the raw data chunk cache in bytes.
  *                        The default size is 8 MiB per dataset.
  * \param[in] rdcc_w0     The chunk preemption policy for all datasets.
@@ -7552,7 +7552,7 @@ H5_DLL herr_t H5Pset_append_flush(hid_t dapl_id, unsigned ndims, const hsize_t b
  *                        that can fit in \p rdcc_nbytes bytes. For maximum
  *                        performance, this value should be set
  *                        approximately 100 times that number of chunks.
- *                        The default value is 521. If the value passed is
+ *                        The default value is 8191. If the value passed is
  *                        #H5D_CHUNK_CACHE_NSLOTS_DEFAULT, then the
  *                        property will not be set on \p dapl_id and the
  *                        parameter will come from the file access

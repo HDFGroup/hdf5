@@ -1930,6 +1930,7 @@ test_misc11(void)
 {
     hid_t                 file;      /* File IDs for old & new files */
     hid_t                 fcpl;      /* File creation property list */
+    hid_t                 fapl;      /* File access property list */
     hsize_t               userblock; /* Userblock size retrieved from FCPL */
     size_t                off_size;  /* Size of offsets in the file */
     size_t                len_size;  /* Size of lengths in the file */
@@ -1947,12 +1948,18 @@ test_misc11(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing file creation properties retrieved correctly\n"));
 
-    /* Creating a file with the default file creation property list should
-     * create a version 0 superblock
+    /* Creating a file with the default file creation property list and libver
+     * bounds (earliest, latest) should create a version 0 superblock
      */
 
+    /* Set up FAPL for earliest format */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
     /* Create file with default file creation property list */
-    file = H5Fcreate(MISC11_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(MISC11_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
     /* Check if native VOL is being used */
@@ -2015,7 +2022,7 @@ test_misc11(void)
      */
 
     /* Create file with custom file creation property list */
-    file = H5Fcreate(MISC11_FILE, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
+    file = H5Fcreate(MISC11_FILE, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
     /* Check if native VOL is being used */
@@ -2093,6 +2100,10 @@ test_misc11(void)
 
     /* Close FCPL */
     ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close FAPL */
+    ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
 } /* end test_misc11() */
 
@@ -3078,6 +3089,7 @@ static void
 test_misc18(void)
 {
     hid_t fid;        /* File ID */
+    hid_t fapl;       /* File access property list */
     hid_t sid;        /* 'Space ID */
     hid_t did1, did2; /* Dataset IDs */
     hid_t aid;        /* Attribute ID */
@@ -3091,8 +3103,14 @@ test_misc18(void)
     bool              vol_is_native;
     herr_t            ret; /* Generic return value */
 
+    /* Set earliest file format on FAPL */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
     /* Create the file */
-    fid = H5Fcreate(MISC18_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(MISC18_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Check if native VOL is being used */
@@ -3244,6 +3262,9 @@ test_misc18(void)
 
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 } /* end test_misc18() */
 
 /****************************************************************
@@ -6429,6 +6450,10 @@ test_misc38(void)
         /* Create a file access property list */
         fapl = H5Pcreate(H5P_FILE_ACCESS);
         CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+
+        /* Default to earliest version of the file format, without checksummed object headers */
+        ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+        CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
         if (1 == u) {
             /* Set property to allow unusual datatypes to be opened */

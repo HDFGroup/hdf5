@@ -1397,7 +1397,11 @@ main(void)
     if ((fapl2 = H5Pcopy(fapl)) < 0)
         TEST_ERROR;
 
-    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    /* Set the "use the earliest version of the format" bounds on fapl for creating objects in the file */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    /* Set the "use the latest version of the format" bounds on fapl2 for creating objects in the file */
     if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 

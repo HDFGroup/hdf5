@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install build-essential libtool libtool-bin
 
       - name: Get MPICH source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
         with:
           repository: 'pmodels/mpich'
           path: 'mpich'
@@ -88,7 +88,7 @@ jobs:
         run: tar -cvf mpich.tar -C ${{ runner.workspace }} mpich
 
       - name: Save MPICH installation artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: mpich
           path: mpich.tar

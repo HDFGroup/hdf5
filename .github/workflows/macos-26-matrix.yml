@@ -187,7 +187,7 @@ jobs:
 
 
     - name: Get Sources
-      uses: actions/checkout@v5
+      uses: actions/checkout@v5.0.0
 
     - name: Configure
       run: |
@@ -268,7 +268,7 @@ jobs:
         CTEST_TIMEOUT: 3600
 
     - name: Upload Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: always()
       with:
         name: test-results-${{ matrix.name }}

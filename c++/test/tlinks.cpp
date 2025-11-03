@@ -666,7 +666,7 @@ test_visit(hid_t fapl_id, bool new_format)
         delete file;
 
         // Reopen the file and group in the file.
-        file  = new H5File(filename, H5F_ACC_RDWR);
+        file  = new H5File(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
         group = new Group(file->openGroup("Data"));
 
         // Open the group

@@ -1578,11 +1578,12 @@ error:
 static int
 test_start_swmr_write(hid_t in_fapl, bool new_format)
 {
-    hid_t   fid       = H5I_INVALID_HID; /* File ID */
-    hid_t   fapl      = H5I_INVALID_HID; /* File access property */
-    hid_t   gid       = H5I_INVALID_HID; /* Group ID */
-    hid_t   dcpl      = H5I_INVALID_HID; /* Dataset creation property */
-    hid_t   file_fapl = H5I_INVALID_HID; /* File access property for the file */
+    hid_t   fid           = H5I_INVALID_HID; /* File ID */
+    hid_t   fapl          = H5I_INVALID_HID; /* File access property */
+    hid_t   earliest_fapl = H5I_INVALID_HID; /* FAPL with earliest format */
+    hid_t   gid           = H5I_INVALID_HID; /* Group ID */
+    hid_t   dcpl          = H5I_INVALID_HID; /* Dataset creation property */
+    hid_t   file_fapl     = H5I_INVALID_HID; /* File access property for the file */
     hid_t   did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID, did3 = H5I_INVALID_HID; /* Dataset IDs */
     hid_t   did1_a = H5I_INVALID_HID, did1_b = H5I_INVALID_HID;
     hid_t   sid1 = H5I_INVALID_HID, sid2 = H5I_INVALID_HID, sid3 = H5I_INVALID_HID; /* Dataspace IDs */
@@ -1611,8 +1612,19 @@ test_start_swmr_write(hid_t in_fapl, bool new_format)
             FAIL_STACK_ERROR;
     }
     else {
-        TESTING("H5Fstart_swmr_write() when creating/opening a file without latest format");
+        TESTING("H5Fstart_swmr_write() when creating/opening a file with earliest format");
+
+        /* Set to use the latest library format */
+        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+            FAIL_STACK_ERROR;
     } /* end if */
+
+    /* Set up FAPL with earliest file format */
+    if ((earliest_fapl = H5Pcopy(fapl)) < 0)
+        FAIL_STACK_ERROR;
+    if (new_format)
+        if (H5Pset_libver_bounds(earliest_fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+            FAIL_STACK_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -1717,7 +1729,7 @@ test_start_swmr_write(hid_t in_fapl, bool new_format)
      */
 
     /* Open the file again with write + non-latest-format (earliest, latest) */
-    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, earliest_fapl)) < 0)
         FAIL_STACK_ERROR;
 
     /* Get the file's access_property list */
@@ -1858,6 +1870,10 @@ test_start_swmr_write(hid_t in_fapl, bool new_format)
     if (H5Dclose(did1) < 0)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(earliest_fapl) < 0)
         TEST_ERROR;
 
     PASSED();

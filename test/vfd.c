@@ -769,10 +769,10 @@ test_direct(void)
         TEST_ERROR;
 
     /* There is no guarantee of the number of metadata allocations, but it's
-     * 4 currently and the size of the file should be between 3 & 4 file buffer
+     * 4 currently and the size of the file should be between 1 & 2 file buffer
      * sizes..
      */
-    if (file_size < (FBSIZE * 3) || file_size >= (FBSIZE * 4))
+    if (file_size < FBSIZE || file_size >= (FBSIZE * 2))
         TEST_ERROR;
 
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
@@ -1025,6 +1025,10 @@ test_family(void)
     if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+
+    /* Set earliest file format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
@@ -1478,6 +1482,10 @@ test_multi(void)
 
     /* Set file access property list for MULTI driver */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set earliest file format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 
     memset(memb_map, 0, sizeof(memb_map));
