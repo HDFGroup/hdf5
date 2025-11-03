@@ -138,8 +138,7 @@ typedef struct H5C_recon_entry_t {
 /* Helper routines */
 static size_t H5C__cache_image_block_entry_header_size(const H5F_t *f);
 static size_t H5C__cache_image_block_header_size(const H5F_t *f);
-static herr_t H5C__check_for_duplicates(H5C_cache_entry_t *pf_entry_ptr,
-                                        H5C_recon_entry_t **recon_table_ptr);
+static herr_t H5C__check_for_duplicates(H5C_cache_entry_t *pf_entry_ptr, H5C_recon_entry_t **recon_table_ptr);
 static herr_t H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **buf,
                                              size_t buf_size);
 #ifndef NDEBUG /* only used in assertions */
@@ -2653,7 +2652,7 @@ done:
                     H5MM_xfree(entry_ptr->fd_parent_addrs);
                 entry_ptr = H5FL_FREE(H5C_cache_entry_t, entry_ptr);
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block");
-}
+            }
 
             HASH_DEL(recon_table, recon_entry);
             H5MM_xfree(recon_entry);
