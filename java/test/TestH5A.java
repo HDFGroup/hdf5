@@ -2280,7 +2280,7 @@ public class TestH5A {
             long[] dims = {3};
             attrSpace   = H5.H5Screate_simple(1, dims, null);
             attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
-                                  HDF5Constants.H5P_DEFAULT);
+                                       HDF5Constants.H5P_DEFAULT);
 
             // Write mix of empty and non-empty strings
             String[] writeData = {"", "Not empty", ""};
@@ -2334,7 +2334,7 @@ public class TestH5A {
             long[] dims = {1};
             attrSpace   = H5.H5Screate_simple(1, dims, null);
             attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
-                                  HDF5Constants.H5P_DEFAULT);
+                                       HDF5Constants.H5P_DEFAULT);
 
             String[] data = {"test"};
             // This should throw HDF5LibraryException due to type validation
@@ -2495,7 +2495,7 @@ public class TestH5A {
             long[] dims = {3};
             attrSpace   = H5.H5Screate_simple(1, dims, null);
             attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
-                                  HDF5Constants.H5P_DEFAULT);
+                                       HDF5Constants.H5P_DEFAULT);
 
             // Write mix of empty and non-empty strings
             String[] writeData = {"", "Not empty", ""};
@@ -2559,7 +2559,7 @@ public class TestH5A {
             long[] dims = {2};
             attrSpace   = H5.H5Screate_simple(1, dims, null);
             attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
-                                  HDF5Constants.H5P_DEFAULT);
+                                       HDF5Constants.H5P_DEFAULT);
 
             // Unicode test strings
             String[] writeData = {"Hello \u4E16\u754C", "\u00D1o\u00F1o \uD83D\uDE80"};

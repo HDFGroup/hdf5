@@ -2207,14 +2207,14 @@ public class TestH5D {
 
             // Write 6 strings (2x3 array flattened)
             String[] writeData = {"String 0", "String 1", "String 2", "String 3", "String 4", "String 5"};
-            int status         = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
-                                                  HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, writeData);
+            int status = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                                               HDF5Constants.H5P_DEFAULT, writeData);
             assertTrue("H5Dwrite_VLStrings failed", status >= 0);
 
             // Read back
             String[] readData = new String[6];
-            status            = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
-                                                HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, readData);
+            status = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                                          HDF5Constants.H5P_DEFAULT, readData);
             assertTrue("H5Dread_VLStrings failed", status >= 0);
 
             // Verify all strings
@@ -2268,18 +2268,18 @@ public class TestH5D {
             long[] dims = {4};
             dsetSpace   = H5.H5Screate_simple(1, dims, null);
             dsetId      = H5.H5Dcreate(H5fid, dsetName, strType, dsetSpace, HDF5Constants.H5P_DEFAULT,
-                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                       HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
             // Write mix of empty and non-empty strings
             String[] writeData = {"", "Not empty", "", "Also not empty"};
-            int status         = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
-                                                  HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, writeData);
+            int status = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                                               HDF5Constants.H5P_DEFAULT, writeData);
             assertTrue("H5Dwrite_VLStrings failed", status >= 0);
 
             // Read back
             String[] readData = new String[4];
-            status            = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
-                                                HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, readData);
+            status = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                                          HDF5Constants.H5P_DEFAULT, readData);
             assertTrue("H5Dread_VLStrings failed", status >= 0);
 
             // Verify empty strings preserved
@@ -2334,7 +2334,7 @@ public class TestH5D {
             long[] dims = {3};
             dsetSpace   = H5.H5Screate_simple(1, dims, null);
             dsetId      = H5.H5Dcreate(H5fid, dsetName, strType, dsetSpace, HDF5Constants.H5P_DEFAULT,
-                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                       HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
             // Create large strings (>1KB each)
             StringBuilder sb = new StringBuilder();
@@ -2345,13 +2345,13 @@ public class TestH5D {
 
             String[] writeData = {largeString + " [0]", largeString + " [1]", largeString + " [2]"};
 
-            int status = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
-                                               HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, writeData);
+            int status = H5.H5Dwrite_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                                               HDF5Constants.H5P_DEFAULT, writeData);
             assertTrue("H5Dwrite_VLStrings failed", status >= 0);
 
             String[] readData = new String[3];
-            status            = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL,
-                                                HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, readData);
+            status = H5.H5Dread_VLStrings(dsetId, strType, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                                          HDF5Constants.H5P_DEFAULT, readData);
             assertTrue("H5Dread_VLStrings failed", status >= 0);
 
             for (int i = 0; i < 3; i++) {

@@ -2304,7 +2304,8 @@ public class H5 implements java.io.Serializable {
      * @ingroup JH5A
      *
      * H5Aread_VLStrings reads an attribute, specified with attr_id. The attribute's memory datatype is
-     * specified with mem_type_id. The entire attribute is read into buffer of variable-length strings from the file.
+     * specified with mem_type_id. The entire attribute is read into buffer of variable-length strings from
+     *the file.
      *
      * @param attr_id
      *            IN: Identifier of an attribute to read.
@@ -2389,8 +2390,7 @@ public class H5 implements java.io.Serializable {
 
                 // Buffer size validation
                 if (buf.length < totalSize) {
-                    throw new IllegalArgumentException(
-                        "Buffer too small: " + buf.length + " < " + totalSize);
+                    throw new IllegalArgumentException("Buffer too small: " + buf.length + " < " + totalSize);
                 }
                 dims[0] = totalSize;
             }
@@ -3197,8 +3197,8 @@ public class H5 implements java.io.Serializable {
         // Validate buffer elements are Strings
         for (int i = 0; i < buf.length; i++) {
             if (buf[i] != null && !(buf[i] instanceof String)) {
-                throw new IllegalArgumentException(
-                    "Buffer element " + i + " is not a String: " + buf[i].getClass().getName());
+                throw new IllegalArgumentException("Buffer element " + i +
+                                                   " is not a String: " + buf[i].getClass().getName());
             }
         }
 
@@ -3231,7 +3231,7 @@ public class H5 implements java.io.Serializable {
 
             for (int i = 0; i < stringArray.length; i++) {
                 MemorySegment hvlElement = org.hdfgroup.javahdf5.hvl_t.asSlice(hvlArray, i);
-                String str = stringArray[i];
+                String str               = stringArray[i];
 
                 if (str == null || str.isEmpty()) {
                     // Empty string: set length to 1 (for null terminator) and allocate single byte
@@ -4818,8 +4818,8 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5D
      *
-     * H5Dread_VLStrings reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
-     * application memory buffer of variable-length strings.
+     * H5Dread_VLStrings reads a (partial) dataset, specified by its identifier dataset_id, from the file into
+     *the application memory buffer of variable-length strings.
      *
      * @param dataset_id
      *            Identifier of the dataset read from.
@@ -4889,10 +4889,10 @@ public class H5 implements java.io.Serializable {
         }
 
         // Determine buffer size from memory space (or dataset space if H5S_ALL)
-        long space_id    = mem_space_id;
+        long space_id      = mem_space_id;
         boolean closeSpace = false;
-        long[] dims      = new long[1];
-        int status       = -1;
+        long[] dims        = new long[1];
+        int status         = -1;
 
         try {
             // If mem_space_id is H5S_ALL, get the dataset's dataspace
@@ -4941,8 +4941,8 @@ public class H5 implements java.io.Serializable {
             MemorySegment hvlArray = org.hdfgroup.javahdf5.hvl_t.allocateArray((int)dims[0], arena);
 
             // Read from HDF5
-            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-                                                          xfer_plist_id, hvlArray);
+            status = org.hdfgroup.javahdf5.hdf5_h.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                          file_space_id, xfer_plist_id, hvlArray);
 
             if (status < 0) {
                 h5libraryError();
@@ -5834,7 +5834,7 @@ public class H5 implements java.io.Serializable {
 
             for (int i = 0; i < stringArray.length; i++) {
                 MemorySegment hvlElement = org.hdfgroup.javahdf5.hvl_t.asSlice(hvlArray, i);
-                String str = stringArray[i];
+                String str               = stringArray[i];
 
                 if (str == null || str.isEmpty()) {
                     // Empty string: set length to 1 (for null terminator) and allocate single byte
