@@ -720,7 +720,7 @@ public class TestH5Pfapl {
         double[] rdcc_w0   = {0};
         try {
             H5.H5Pget_cache(fapl_id, null, rdcc_nelmts, rdcc_nbytes, rdcc_w0);
-            assertTrue("H5P_cache default", rdcc_nelmts[0] == 521);
+            assertTrue("H5P_cache default", rdcc_nelmts[0] == 8191);
             assertTrue("H5P_cache default", rdcc_nbytes[0] == (8 * 1024 * 1024));
             assertTrue("H5P_cache default", rdcc_w0[0] == 0.75);
         }
@@ -748,7 +748,7 @@ public class TestH5Pfapl {
         double[] rdcc_w0   = {0};
         try {
             H5.H5Pget_chunk_cache(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
-            assertTrue("H5P_chunk_cache default", rdcc_nslots[0] == 521);
+            assertTrue("H5P_chunk_cache default", rdcc_nslots[0] == 8191);
             assertTrue("H5P_chunk_cache default", rdcc_nbytes[0] == (8 * 1024 * 1024));
             assertTrue("H5P_chunk_cache default", rdcc_w0[0] == 0.75);
         }

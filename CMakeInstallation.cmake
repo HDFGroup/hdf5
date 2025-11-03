@@ -251,7 +251,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
       if (HDF5_ENABLE_PARALLEL)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel
+            ${HDF5_SOURCE_DIR}/release_docs/README_HPC.md
         )
       endif ()
     endif ()

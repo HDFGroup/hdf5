@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install build-essential libtool libtool-bin
 
       - name: Get OpenMPI source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
         with:
           repository: 'open-mpi/ompi'
           path: 'ompi'
@@ -81,7 +81,7 @@ jobs:
         run: tar -cvf openmpi.tar -C ${{ runner.workspace }} openmpi
 
       - name: Save OpenMPI installation artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: openmpi
           path: openmpi.tar
