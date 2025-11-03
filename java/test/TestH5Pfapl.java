@@ -412,7 +412,7 @@ public class TestH5Pfapl {
         }
         assertTrue("testH5Pget_libver_bounds", ret_val >= 0);
         // Check the Earliest Version if the library
-        assertEquals(HDF5Constants.H5F_LIBVER_EARLIEST, libver[0]);
+        assertEquals(HDF5Constants.H5F_LIBVER_V18, libver[0]);
         // Check the Latest Version if the library
         assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[1]);
     }
@@ -720,7 +720,7 @@ public class TestH5Pfapl {
         double[] rdcc_w0   = {0};
         try {
             H5.H5Pget_cache(fapl_id, null, rdcc_nelmts, rdcc_nbytes, rdcc_w0);
-            assertTrue("H5P_cache default", rdcc_nelmts[0] == 521);
+            assertTrue("H5P_cache default", rdcc_nelmts[0] == 8191);
             assertTrue("H5P_cache default", rdcc_nbytes[0] == (8 * 1024 * 1024));
             assertTrue("H5P_cache default", rdcc_w0[0] == 0.75);
         }
@@ -748,7 +748,7 @@ public class TestH5Pfapl {
         double[] rdcc_w0   = {0};
         try {
             H5.H5Pget_chunk_cache(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
-            assertTrue("H5P_chunk_cache default", rdcc_nslots[0] == 521);
+            assertTrue("H5P_chunk_cache default", rdcc_nslots[0] == 8191);
             assertTrue("H5P_chunk_cache default", rdcc_nbytes[0] == (8 * 1024 * 1024));
             assertTrue("H5P_chunk_cache default", rdcc_w0[0] == 0.75);
         }

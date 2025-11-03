@@ -443,6 +443,13 @@ CHECK_FUNCTION_EXISTS (asprintf          ${HDF_PREFIX}_HAVE_ASPRINTF)
 CHECK_FUNCTION_EXISTS (vasprintf         ${HDF_PREFIX}_HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS (waitpid           ${HDF_PREFIX}_HAVE_WAITPID)
 
+# Check for reentrant qsort variants (qsort_r on Unix/BSD, qsort_s on Windows)
+CHECK_FUNCTION_EXISTS (qsort_r _HAVE_QSORT_R_TMP)
+CHECK_FUNCTION_EXISTS (qsort_s _HAVE_QSORT_S_TMP)
+if (_HAVE_QSORT_R_TMP OR _HAVE_QSORT_S_TMP)
+  set (${HDF_PREFIX}_HAVE_QSORT_REENTRANT 1)
+endif ()
+
 #-----------------------------------------------------------------------------
 # sigsetjmp is special; may actually be a macro
 #-----------------------------------------------------------------------------

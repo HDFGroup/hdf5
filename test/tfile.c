@@ -3202,6 +3202,7 @@ static void
 test_cached_stab_info(void)
 {
     hid_t  file_id;
+    hid_t  fapl_id;
     hid_t  group_id;
     bool   vol_is_native;
     herr_t ret; /* Generic return value */
@@ -3209,8 +3210,14 @@ test_cached_stab_info(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing cached symbol table information\n"));
 
+    /* Setup earliest file format */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl_id, FAIL, "H5Pcreate");
+    ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
     /* Create file */
-    file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     CHECK(file_id, FAIL, "H5Fcreate");
 
     /* Check if native VOL is being used */
@@ -3242,6 +3249,10 @@ test_cached_stab_info(void)
     /* Close file */
     ret = H5Fclose(file_id);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
 } /* end test_cached_stab_info() */
 
 /*
@@ -4592,7 +4603,11 @@ test_file_freespace(const char *driver_name)
     new_fapl = H5Pcopy(fapl);
     CHECK(new_fapl, FAIL, "H5Pcopy");
 
-    /* Set the "use the latest version of the format" bounds */
+    /* Set the "use the earliest version of the format" bounds on fapl */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Set the "use the latest version of the format" bounds on new_fapl */
     ret = H5Pset_libver_bounds(new_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
@@ -8107,7 +8122,6 @@ test_deprec(const char *driver_name)
     hid_t       file; /* File IDs for old & new files */
     hid_t       fcpl; /* File creation property list */
     hid_t       fapl; /* File creation property list */
-    hid_t       new_fapl;
     hsize_t     align;
     unsigned    super;    /* Superblock version # */
     unsigned    freelist; /* Free list version # */
@@ -8120,12 +8134,16 @@ test_deprec(const char *driver_name)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing deprecated routines\n"));
 
-    /* Creating a file with the default file creation property list should
-     * create a version 0 superblock
+    /* Creating a file with the default file creation property list no longer
+     * creates a version 0 superblock.  Set up earliest file format on fapl.
      */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* Create file with default file creation property list */
-    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
     /* Check if native VOL is being used */
@@ -8174,6 +8192,9 @@ test_deprec(const char *driver_name)
 
     /* Only run this part of the test with the sec2/default driver */
     if (h5_using_default_driver(driver_name)) {
+        hid_t tmp_fapl;
+        hid_t new_fapl;
+
         /* Create a file creation property list */
         fcpl = H5Pcreate(H5P_FILE_CREATE);
         CHECK(fcpl, FAIL, "H5Pcreate");
@@ -8183,8 +8204,8 @@ test_deprec(const char *driver_name)
         ret = H5Pset_file_space_page_size(fcpl, (hsize_t)512);
         CHECK(ret, FAIL, "H5Pset_file_space_strategy");
 
-        fapl = H5Pcreate(H5P_FILE_ACCESS);
-        ret  = H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)1024);
+        tmp_fapl = H5Pcopy(fapl);
+        ret      = H5Pset_alignment(tmp_fapl, (hsize_t)1, (hsize_t)1024);
         CHECK(ret, FAIL, "H5Pset_alignment");
 
         /* Creating a file with the non-default file creation property list should
@@ -8192,7 +8213,7 @@ test_deprec(const char *driver_name)
          */
 
         /* Create file with custom file creation property list */
-        file = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
+        file = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, tmp_fapl);
         CHECK(file, FAIL, "H5Fcreate");
 
         new_fapl = H5Fget_access_plist(file);
@@ -8231,7 +8252,7 @@ test_deprec(const char *driver_name)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Re-open the file */
-        file = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+        file = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
         CHECK(file, FAIL, "H5Fcreate");
 
         /* Get the file's version information */
@@ -8261,6 +8282,12 @@ test_deprec(const char *driver_name)
         /* Close file */
         ret = H5Fclose(file);
         CHECK(ret, FAIL, "H5Fclose");
+
+        /* Close temp FAPLs */
+        ret = H5Pclose(tmp_fapl);
+        CHECK(ret, FAIL, "H5Pclose");
+        ret = H5Pclose(new_fapl);
+        CHECK(ret, FAIL, "H5Pclose");
 
         { /* Test deprecated H5Pget/set_file_space() */
 
@@ -8296,7 +8323,7 @@ test_deprec(const char *driver_name)
             VERIFY(old_threshold, 3, "H5Pget_file_space");
 
             /* Create a file */
-            fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
+            fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
             CHECK(file, FAIL, "H5Fcreate");
 
             old_strategy  = H5F_FILE_SPACE_DEFAULT;
@@ -8318,7 +8345,7 @@ test_deprec(const char *driver_name)
             CHECK(ret, FAIL, "H5Pclose");
 
             /* Reopen the file */
-            fid = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+            fid = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
             CHECK(fid, FAIL, "H5Fcreate");
 
             old_strategy  = H5F_FILE_SPACE_DEFAULT;
@@ -8336,6 +8363,10 @@ test_deprec(const char *driver_name)
             CHECK(ret, FAIL, "H5Fclose");
         }
     }
+
+    /* Close FAPL */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
 } /* test_deprec */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

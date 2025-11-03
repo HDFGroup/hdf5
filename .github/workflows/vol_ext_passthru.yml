@@ -22,12 +22,12 @@ jobs:
           sudo apt-get install libopenmpi-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
         with:
           path: hdf5
 
       - name: Checkout vol-external-passthrough
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
         with:
           repository: hpc-io/vol-external-passthrough
           path: vol-external-passthrough
