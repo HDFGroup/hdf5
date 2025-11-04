@@ -469,11 +469,8 @@ H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, hsize_t *offset, size_t d
     udata.chunk_block.length = data_size;
 
     /* Check for hsize_t overflow */
-    if ((size_t)udata.chunk_block.length != data_size)
+    if (H5_UNLIKELY((size_t)udata.chunk_block.length != data_size))
         HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size too big to fit in hsize_t");
-
-    /* Check for chunk size overflowing format limitations */
-    H5D_CHUNK_ENCODE_SIZE_CHECK(idx_info.layout, data_size, FAIL);
 
     if (0 == idx_info.pline->nused && H5_addr_defined(old_chunk.offset))
         /* If there are no filters and we are overwriting the chunk we can just set values */
