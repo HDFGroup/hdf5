@@ -58,7 +58,7 @@ typedef struct H5D_compact_iovv_memmanage_ud_t {
 
 /* Layout operation callbacks */
 static herr_t  H5D__compact_construct(H5F_t *f, H5D_t *dset);
-static herr_t  H5D__compact_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open);
+static herr_t  H5D__compact_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open_op);
 static bool    H5D__compact_is_space_alloc(const H5O_storage_t *storage);
 static herr_t  H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata);
@@ -227,7 +227,7 @@ done:
  */
 static herr_t
 H5D__compact_init(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id,
-                  bool H5_ATTR_UNUSED open)
+                  bool H5_ATTR_UNUSED open_op)
 {
     hssize_t snelmts;             /* Temporary holder for number of elements in dataspace */
     hsize_t  nelmts;              /* Number of elements in dataspace */

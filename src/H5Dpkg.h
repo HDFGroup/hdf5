@@ -188,7 +188,7 @@ typedef struct H5D_shared_t H5D_shared_t;
 
 /* Function pointers for I/O on particular types of dataset layouts */
 typedef herr_t (*H5D_layout_construct_func_t)(H5F_t *f, H5D_t *dset);
-typedef herr_t (*H5D_layout_init_func_t)(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open);
+typedef herr_t (*H5D_layout_init_func_t)(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open_op);
 typedef bool (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage);
 typedef bool (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
 typedef herr_t (*H5D_layout_io_init_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);

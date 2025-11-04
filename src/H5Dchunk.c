@@ -302,7 +302,7 @@ typedef struct H5D_chunk_iter_ud_t {
 
 /* Chunked layout operation callbacks */
 static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
-static herr_t H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open);
+static herr_t H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open_op);
 static herr_t H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t H5D__chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
@@ -1100,7 +1100,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open)
+H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open_op)
 {
     H5D_chk_idx_info_t idx_info;                            /* Chunked index info */
     H5D_rdcc_t        *rdcc = &(dset->shared->cache.chunk); /* Convenience pointer to dataset's chunk cache */
@@ -1188,7 +1188,7 @@ H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set # of chunks for dataset");
 
     /* Set chunk sizes if not done already (during a create operation the construct callback does this) */
-    if (open && (H5D__chunk_set_sizes(dset) < 0))
+    if (open_op && (H5D__chunk_set_sizes(dset) < 0))
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
 
     /* Check for chunk larger than can be represented in 32-bits encoded as v1 b-tree. We don't allow creation
@@ -7679,6 +7679,8 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
         assert(idx_info->layout->storage.u.chunk.idx_type != H5D_CHUNK_IDX_NONE);
 
         /* Check for chunk size overflowing format limitations */
+        /* Only needed for filtered datasets because the unfiltered chunk size
+         * was already checked in H5D__chunk_construct() */
         H5D_CHUNK_ENCODE_SIZE_CHECK(idx_info->layout, new_chunk->length, FAIL);
 
         if (old_chunk && H5_addr_defined(old_chunk->offset)) {

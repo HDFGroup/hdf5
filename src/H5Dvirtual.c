@@ -99,7 +99,7 @@
 
 /* Layout operation callbacks */
 static herr_t H5D__virtual_construct(H5F_t *f, H5D_t *dset);
-static herr_t H5D__virtual_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open);
+static herr_t H5D__virtual_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open_op);
 static bool   H5D__virtual_is_space_alloc(const H5O_storage_t *storage);
 static bool   H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset);
 static herr_t H5D__virtual_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
@@ -2701,7 +2701,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool H5_ATTR_UNUSED open)
+H5D__virtual_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool H5_ATTR_UNUSED open_op)
 {
     H5O_storage_virtual_t *storage;                      /* Convenience pointer */
     H5P_genplist_t        *dapl;                         /* Data access property list object pointer */
