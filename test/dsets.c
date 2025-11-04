@@ -80,6 +80,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "h5s_plist",           /* 28 */
                                  "vds_strings",         /* 29 */
                                  "chunk_expand2",       /* 30 */
+                                 "scalar_datasets",     /* 31 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -96,6 +97,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define DSET_CHUNKED_NAME      "chunked"
 #define DSET_COMPACT_NAME      "compact"
 #define DSET_SIMPLE_IO_NAME    "simple_io"
+#define DSET_SCALAR_IO_NAME    "scalar_io"
 #define DSET_USERBLOCK_IO_NAME "userblock_io"
 #define DSET_COMPACT_IO_NAME   "compact_io"
 #define DSET_COMPACT_MAX_NAME  "max_compact"
@@ -699,6 +701,118 @@ error:
 } /* end test_simple_io() */
 
 /*-------------------------------------------------------------------------
+ * Function:   test_scalar_io
+ *
+ * Purpose:    Tests scalar datasets
+ *
+ * Return:    Success:    0
+ *            Failure:    -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_scalar_io(hid_t fapl)
+{
+    char  filename[FILENAME_BUF_SIZE];
+    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, space = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
+    int   rdata = 0;
+    int   wdata = 1;
+
+    TESTING("scalar datasets");
+
+    h5_fixname(FILENAME[31], fapl, filename, sizeof filename);
+
+    /* Create the data space */
+    if ((space = H5Screate(H5S_SCALAR)) < 0)
+        TEST_ERROR;
+
+    /* Create the file */
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate2(file, DSET_SCALAR_IO_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+        TEST_ERROR;
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
+        TEST_ERROR;
+
+    /* Check that the value read is the same as the value written */
+    if (rdata != wdata)
+        TEST_ERROR;
+
+    /* Close */
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    dataset = -1;
+    if (H5Fclose(file) < 0)
+        goto error;
+    file = -1;
+
+    /*
+     * Now test with a compact dataset
+     */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(dcpl, H5D_COMPACT) < 0)
+        TEST_ERROR;
+
+    /* Create the file */
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate2(file, DSET_SCALAR_IO_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+        TEST_ERROR;
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
+        TEST_ERROR;
+
+    /* Check that the value read is the same as the value written */
+    if (rdata != wdata)
+        TEST_ERROR;
+
+    /* Close */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = -1;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = -1;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = -1;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    space = -1;
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space);
+        H5Pclose(dcpl);
+        H5Dclose(dataset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+} /* end test_scalar_io() */
+
+/*-------------------------------------------------------------------------
  * Function:  test_userblock_offset
  *
  * Purpose:   Tests H5Dget_offset when user block exists.
@@ -1016,7 +1130,9 @@ test_compact_io(hid_t fapl)
                     TEST_ERROR;
             }
             else {
-                if (dsetp->shared->layout.version != H5O_layout_ver_bounds[fp->shared->low_bound])
+                /* We no longer upgrade the layout for compact datasets past version 3 since there is no
+                 * benefit to doing so */
+                if (dsetp->shared->layout.version > H5O_layout_ver_bounds[fp->shared->low_bound])
                     TEST_ERROR;
                 if (dsetp->shared->dcpl_cache.fill.version != H5O_fill_ver_bounds[fp->shared->low_bound])
                     TEST_ERROR;
@@ -8874,9 +8990,9 @@ error:
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /*-------------------------------------------------------------------------
- * Function: test_huge_chunks
+ * Function:    test_huge_chunks
  *
- * Purpose: Tests that datasets with chunks >4GB can't be created.
+ * Purpose:     Tests that datasets with chunks >4GB can't be created, unless we're using the 2.0 file format.
  *
  * Return:      Success: 0
  *              Failure: -1
@@ -8884,106 +9000,163 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_huge_chunks(hid_t fapl)
+test_huge_chunks(hid_t fapl, H5F_libver_t low)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid  = H5I_INVALID_HID; /* File ID */
-    hid_t   dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
-    hid_t   sid  = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t   dsid = H5I_INVALID_HID; /* Dataset ID */
-    hsize_t dim, chunk_dim;         /* Dataset and chunk dimensions */
-    hsize_t dim2[3], chunk_dim2[3]; /* Dataset and chunk dimensions */
-    herr_t  ret;                    /* Generic return value */
+    hid_t   fail_fapl = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t   fid       = H5I_INVALID_HID; /* File ID */
+    hid_t   dcpl      = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   sid       = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   dsid      = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t dim, chunk_dim;              /* Dataset and chunk dimensions */
+    hsize_t dim2[3], chunk_dim2[3];      /* Dataset and chunk dimensions */
 
     TESTING("creating dataset with >4GB chunks");
 
+    /* Set high bound of 1.14 so huge chunk dataset creation fails */
     h5_fixname(FILENAME[7], fapl, filename, sizeof filename);
-
-    /* Create file */
-    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
 
     /* Create dataset creation property list */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
-    /* Try to set too large of a chunk for 1-D dataset (# of elements) */
+    /* Set a very large chunk size for 1-D dataset (# of elements) */
     chunk_dim = TOO_HUGE_CHUNK_DIM;
-    H5E_BEGIN_TRY
-    {
-        ret = H5Pset_chunk(dcpl, 1, &chunk_dim);
-    }
-    H5E_END_TRY
-    if (ret >= 0)
-        FAIL_PUTS_ERROR("    Set chunk size with too large of chunk dimensions.");
+    if (H5Pset_chunk(dcpl, 1, &chunk_dim) < 0)
+        TEST_ERROR;
 
-    /* Try to set too large of a chunk for n-D dataset (# of elements) */
+    /* Set a very large chunk size for n-D dataset (# of elements) */
     chunk_dim2[0] = TOO_HUGE_CHUNK_DIM2_0;
     chunk_dim2[1] = TOO_HUGE_CHUNK_DIM2_1;
     chunk_dim2[2] = TOO_HUGE_CHUNK_DIM2_2;
-    H5E_BEGIN_TRY
-    {
-        ret = H5Pset_chunk(dcpl, 3, chunk_dim2);
-    }
-    H5E_END_TRY
-    if (ret >= 0)
-        FAIL_PUTS_ERROR("    Set chunk size with too large of chunk dimensions.");
+    if (H5Pset_chunk(dcpl, 3, chunk_dim2) < 0)
+        TEST_ERROR;
+
+    /* Create file */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
 
     /* Set 1-D chunk size */
     chunk_dim = HUGE_CHUNK_DIM;
     if (H5Pset_chunk(dcpl, 1, &chunk_dim) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create 1-D dataspace */
     dim = HUGE_DIM;
     if ((sid = H5Screate_simple(1, &dim, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
-    /* Try to create dataset */
-    H5E_BEGIN_TRY
-    {
-        dsid = H5Dcreate2(fid, HUGE_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    }
-    H5E_END_TRY
-    if (dsid >= 0)
-        FAIL_PUTS_ERROR("    1-D Dataset with too large of chunk dimensions created.");
+    /* Create dataset */
+    if ((dsid = H5Dcreate2(fid, HUGE_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-    /* Close 1-D dataspace */
+    /* Close dataset and 1-D dataspace */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set n-D chunk size */
     chunk_dim2[0] = HUGE_CHUNK_DIM2_0;
     chunk_dim2[1] = HUGE_CHUNK_DIM2_1;
     chunk_dim2[2] = HUGE_CHUNK_DIM2_2;
     if (H5Pset_chunk(dcpl, 3, chunk_dim2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create n-D dataspace */
     dim2[0] = HUGE_DIM2_0;
     dim2[1] = HUGE_DIM2_1;
     dim2[2] = HUGE_DIM2_2;
     if ((sid = H5Screate_simple(3, dim2, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
-    /* Try to create dataset */
-    H5E_BEGIN_TRY
-    {
-        dsid = H5Dcreate2(fid, HUGE_DATASET2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    }
-    H5E_END_TRY
-    if (dsid >= 0)
-        FAIL_PUTS_ERROR("    n-D Dataset with too large of chunk dimensions created.");
+    /* Create dataset */
+    if ((dsid = H5Dcreate2(fid, HUGE_DATASET2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-    /* Close n-D dataspace */
+    /* Close dataset and n-D dataspace */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
-    /* Close everything else */
-    if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+    /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
+
+    /* Only check for failure if the low bounds is less than 2.0 */
+    if (low < H5F_LIBVER_V200) {
+        /* Create a FAPL that will force huge chunk dataset creation to fail by setting a high bound of 1.14
+         */
+        if ((fail_fapl = H5Pcopy(fapl)) < 0)
+            TEST_ERROR;
+        if (H5Pset_libver_bounds(fail_fapl, low, H5F_LIBVER_V114) < 0)
+            TEST_ERROR;
+
+        /* Create file */
+        if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fail_fapl)) < 0)
+            TEST_ERROR;
+
+        /* Set 1-D chunk size */
+        chunk_dim = HUGE_CHUNK_DIM;
+        if (H5Pset_chunk(dcpl, 1, &chunk_dim) < 0)
+            TEST_ERROR;
+
+        /* Create 1-D dataspace */
+        dim = HUGE_DIM;
+        if ((sid = H5Screate_simple(1, &dim, NULL)) < 0)
+            TEST_ERROR;
+
+        /* Try to create dataset */
+        H5E_BEGIN_TRY
+        {
+            dsid = H5Dcreate2(fid, HUGE_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        }
+        H5E_END_TRY
+        if (dsid >= 0)
+            FAIL_PUTS_ERROR("    1-D Dataset with too large of chunk dimensions created.");
+
+        /* Close 1-D dataspace */
+        if (H5Sclose(sid) < 0)
+            TEST_ERROR;
+
+        /* Set n-D chunk size */
+        chunk_dim2[0] = HUGE_CHUNK_DIM2_0;
+        chunk_dim2[1] = HUGE_CHUNK_DIM2_1;
+        chunk_dim2[2] = HUGE_CHUNK_DIM2_2;
+        if (H5Pset_chunk(dcpl, 3, chunk_dim2) < 0)
+            TEST_ERROR;
+
+        /* Create n-D dataspace */
+        dim2[0] = HUGE_DIM2_0;
+        dim2[1] = HUGE_DIM2_1;
+        dim2[2] = HUGE_DIM2_2;
+        if ((sid = H5Screate_simple(3, dim2, NULL)) < 0)
+            TEST_ERROR;
+
+        /* Try to create dataset */
+        H5E_BEGIN_TRY
+        {
+            dsid = H5Dcreate2(fid, HUGE_DATASET2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        }
+        H5E_END_TRY
+        if (dsid >= 0)
+            FAIL_PUTS_ERROR("    n-D Dataset with too large of chunk dimensions created.");
+
+        /* Close n-D dataspace */
+        if (H5Sclose(sid) < 0)
+            TEST_ERROR;
+
+        /* Close file and FAPL */
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+        if (H5Pclose(fail_fapl) < 0)
+            TEST_ERROR;
+    }
+
+    /* Close DCPL */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -8995,6 +9168,7 @@ error:
         H5Dclose(dsid);
         H5Sclose(sid);
         H5Fclose(fid);
+        H5Pclose(fail_fapl);
     }
     H5E_END_TRY
     return FAIL;
@@ -16363,8 +16537,8 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
     hid_t type_id  = H5I_INVALID_HID;
     hid_t dcpl_id  = H5I_INVALID_HID;
 
-    H5O_layout_t layout;
-    H5O_layout_t default_layout;
+    H5O_layout_t *layout         = NULL;
+    H5O_layout_t *default_layout = NULL;
 
     H5D_t          *dset_int         = NULL;
     H5P_genplist_t *dcpl_int         = NULL;
@@ -16401,6 +16575,11 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
 
     snprintf(test_str, sizeof(test_str), "delayed DCPL layout copy for %s", layout_msg);
     TESTING(test_str);
+
+    if (NULL == (layout = (H5O_layout_t *)malloc(sizeof(H5O_layout_t))))
+        TEST_ERROR;
+    if (NULL == (default_layout = (H5O_layout_t *)malloc(sizeof(H5O_layout_t))))
+        TEST_ERROR;
 
     if ((file_id = H5Fcreate(DCPL_LAYOUT_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
@@ -16520,23 +16699,23 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
     if ((dcpl_int = H5P_object_verify(dset_int->shared->dcpl_id, H5P_DATASET_CREATE, false)) == NULL)
         TEST_ERROR;
 
-    if (H5P_peek(dcpl_int, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if (H5P_peek(dcpl_int, H5D_CRT_LAYOUT_NAME, layout) < 0)
         TEST_ERROR;
 
     if ((default_dcpl_int = H5P_object_verify(H5P_DATASET_CREATE_DEFAULT, H5P_DATASET_CREATE, true)) == NULL)
         TEST_ERROR;
 
-    if (H5P_peek(default_dcpl_int, H5D_CRT_LAYOUT_NAME, &default_layout) < 0)
+    if (H5P_peek(default_dcpl_int, H5D_CRT_LAYOUT_NAME, default_layout) < 0)
         TEST_ERROR;
 
 #ifdef NDEBUG
     /* When NDEBUG is enabled, layout stored on internal DCPL should be equivalent to the default DCPL layout
      */
-    if (memcmp(&layout, &default_layout, sizeof(H5O_layout_t)) != 0)
+    if (memcmp(layout, default_layout, sizeof(H5O_layout_t)) != 0)
         TEST_ERROR;
 #else  /* NDEBUG disabled */
     /* When NDEBUG is disabled, the internal layout should have an invalid layout to detect bad accesses */
-    if (layout.type != H5D_LAYOUT_ERROR)
+    if (layout->type != H5D_LAYOUT_ERROR)
         TEST_ERROR;
 #endif /* NDEBUG */
 
@@ -16550,10 +16729,10 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
     if ((dcpl_int = H5P_object_verify(dset_int->shared->dcpl_id, H5P_DATASET_CREATE, false)) == NULL)
         TEST_ERROR;
 
-    if (H5P_peek(dcpl_int, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if (H5P_peek(dcpl_int, H5D_CRT_LAYOUT_NAME, layout) < 0)
         TEST_ERROR;
 
-    if (layout.type != layout_type)
+    if (layout->type != layout_type)
         TEST_ERROR;
 
     /* Clean up */
@@ -16576,6 +16755,8 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
                 TEST_ERROR;
         }
     }
+    free(layout);
+    free(default_layout);
     PASSED();
     return 0;
 
@@ -16593,6 +16774,8 @@ error:
                 H5Dclose(src_dsets[i]);
             }
         }
+        free(layout);
+        free(default_layout);
     }
     H5E_END_TRY;
 
@@ -17716,6 +17899,7 @@ main(void)
 
                 nerrors += (test_create(file) < 0 ? 1 : 0);
                 nerrors += (test_simple_io(driver_name, fapl) < 0 ? 1 : 0);
+                nerrors += (test_scalar_io(fapl) < 0 ? 1 : 0);
                 nerrors += (test_compact_io(fapl) < 0 ? 1 : 0);
                 nerrors += (test_max_compact(fapl) < 0 ? 1 : 0);
                 nerrors += (test_compact_open_close_dirty(fapl) < 0 ? 1 : 0);
@@ -17768,7 +17952,7 @@ main(void)
                 nerrors += (test_deprec(file) < 0 ? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-                nerrors += (test_huge_chunks(fapl) < 0 ? 1 : 0);
+                nerrors += (test_huge_chunks(fapl, low) < 0 ? 1 : 0);
                 nerrors += (test_chunk_cache(fapl) < 0 ? 1 : 0);
                 nerrors += (test_big_chunks_bypass_cache(fapl) < 0 ? 1 : 0);
                 nerrors += (test_chunk_fast(driver_name, fapl) < 0 ? 1 : 0);

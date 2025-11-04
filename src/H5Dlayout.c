@@ -272,191 +272,6 @@ done:
 } /* end H5D__layout_meta_size() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__layout_set_version
- *
- * Purpose:     Set the version to encode a layout with.
- *
- * Return:      Non-negative on success/Negative on failure
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
-{
-    unsigned version;             /* Message version */
-    herr_t   ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    assert(layout);
-    assert(f);
-
-    /* Upgrade to the version indicated by the file's low bound if higher */
-    /* This will be downgraded in H5D__layout_set_latest_indexing() if there is no benefit to the newer
-     * version */
-    version = MAX(layout->version, H5O_layout_ver_bounds[H5F_LOW_BOUND(f)]);
-
-    /* Version bounds check */
-    if (version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)])
-        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "layout version out of bounds");
-
-    /* Set the message version */
-    layout->version = version;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__layout_set_version() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__layout_set_latest_indexing
- *
- * Purpose:     Set the latest indexing type for a layout message
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__layout_set_latest_indexing(H5D_t *dset)
-{
-    H5O_layout_t *layout;
-    herr_t        ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    assert(dset);
-    assert(dset->shared);
-    assert(dset->shared->space);
-
-    /* Set convenience pointer */
-    layout = &dset->shared->layout;
-
-    /* The indexing methods only apply to chunked datasets (currently) */
-    if (layout->type == H5D_CHUNKED) {
-        int      sndims; /* Rank of dataspace */
-        unsigned ndims;  /* Rank of dataspace */
-
-        /* Query the dimensionality of the dataspace */
-        if ((sndims = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "invalid dataspace rank");
-        ndims = (unsigned)sndims;
-
-        /* Avoid scalar/null dataspace */
-        if (ndims > 0) {
-            hsize_t  max_dims[H5O_LAYOUT_NDIMS]; /* Maximum dimension sizes */
-            hsize_t  cur_dims[H5O_LAYOUT_NDIMS]; /* Current dimension sizes */
-            unsigned unlim_count = 0;            /* Count of unlimited max. dimensions */
-            bool     single      = true;         /* Fulfill single chunk indexing */
-            unsigned u;                          /* Local index variable */
-
-            /* Query the dataspace's dimensions */
-            if (H5S_get_simple_extent_dims(dset->shared->space, cur_dims, max_dims) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions");
-
-            /* Spin through the max. dimensions, looking for unlimited dimensions */
-            for (u = 0; u < ndims; u++) {
-                if (max_dims[u] == H5S_UNLIMITED)
-                    unlim_count++;
-                if (cur_dims[u] != max_dims[u] || cur_dims[u] != layout->u.chunk.dim[u])
-                    single = false;
-            }
-
-            /* Chunked datasets with unlimited dimension(s) */
-            if (unlim_count) {          /* dataset with unlimited dimension(s) must be chunked */
-                if (1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
-                    /* Set the chunk index type to an extensible array */
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_EARRAY;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-                    layout->storage.u.chunk.ops      = H5D_COPS_EARRAY;
-
-                    /* Set the extensible array creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.chunk.u.earray.cparam.max_nelmts_bits       = H5D_EARRAY_MAX_NELMTS_BITS;
-                    layout->u.chunk.u.earray.cparam.idx_blk_elmts         = H5D_EARRAY_IDX_BLK_ELMTS;
-                    layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs = H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
-                    layout->u.chunk.u.earray.cparam.data_blk_min_elmts    = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
-                    layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
-                        H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
-
-                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
-                     * anything */
-                    if (!dset->shared->dcpl_cache.pline.nused)
-                        layout->version = H5O_LAYOUT_VERSION_4;
-                }
-                else { /* Chunked dataset with > 1 unlimited dimensions */
-                    /* Set the chunk index type to v2 B-tree */
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_BT2;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
-                    layout->storage.u.chunk.ops      = H5D_COPS_BT2;
-
-                    /* Set the v2 B-tree creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.chunk.u.btree2.cparam.node_size     = H5D_BT2_NODE_SIZE;
-                    layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
-                    layout->u.chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
-
-                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
-                     * anything */
-                    if (!dset->shared->dcpl_cache.pline.nused)
-                        layout->version = H5O_LAYOUT_VERSION_4;
-                }
-            }
-            else { /* Chunked dataset with fixed dimensions */
-                /* Check for correct condition for using "single chunk" chunk index */
-                if (single) {
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_SINGLE;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
-                    layout->storage.u.chunk.ops      = H5D_COPS_SINGLE;
-
-                    /* Downgrade version to 4 since version 5 doesn't improve anything */
-                    layout->version = H5O_LAYOUT_VERSION_4;
-                }
-                else if (!dset->shared->dcpl_cache.pline.nused &&
-                         dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
-
-                    /* Set the chunk index type to "none" Index */
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_NONE;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
-                    layout->storage.u.chunk.ops      = H5D_COPS_NONE;
-
-                    /* Downgrade version to 4 since version 5 doesn't improve anything */
-                    layout->version = H5O_LAYOUT_VERSION_4;
-                }
-                else {
-                    /* Set the chunk index type to Fixed Array */
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_FARRAY;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
-                    layout->storage.u.chunk.ops      = H5D_COPS_FARRAY;
-
-                    /* Set the fixed array creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
-                        H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
-
-                    /* If there are no filters, downgrade version to 4 since version 5 doesn't improve
-                     * anything */
-                    if (!dset->shared->dcpl_cache.pline.nused)
-                        layout->version = H5O_LAYOUT_VERSION_4;
-                }
-            }
-        }
-        else
-            /* Rank 0 -> v1 b-tree. Downgrade version to 4 since version 5 doesn't improve anything */
-            layout->version = H5O_LAYOUT_VERSION_4;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__layout_set_latest_indexing() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5D__layout_oh_create
  *
  * Purpose:     Create layout/pline/efl information for dataset
@@ -497,7 +312,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     } /* end if */
 
     /* Initialize the layout information for the new dataset */
-    if (dset->shared->layout.ops->init && (dset->shared->layout.ops->init)(file, dset, dapl_id) < 0)
+    if (dset->shared->layout.ops->init && (dset->shared->layout.ops->init)(file, dset, dapl_id, false) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information");
 
     /* Indicate that the layout information was initialized */
@@ -658,7 +473,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
 
     /* Initialize the layout information for the dataset */
     if (dataset->shared->layout.ops->init &&
-        (dataset->shared->layout.ops->init)(dataset->oloc.file, dataset, dapl_id) < 0)
+        (dataset->shared->layout.ops->init)(dataset->oloc.file, dataset, dapl_id, true) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information");
 
 #ifndef NDEBUG
@@ -672,11 +487,6 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     if (H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &error_layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to setup placeholder layout");
 #endif
-
-    /* Set chunk sizes */
-    if (H5D_CHUNKED == dataset->shared->layout.type)
-        if (H5D__chunk_set_sizes(dataset) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
 
 done:
     if (ret_value < 0) {
