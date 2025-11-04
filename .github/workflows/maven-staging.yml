@@ -172,10 +172,10 @@ jobs:
               PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}, {"name": "Windows", "os": "windows-latest", "compiler": "MSVC", "arch": "x86_64"}]'
               ;;
             "linux-macos")
-              PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}, {"name": "macOS-x86_64", "os": "macos-13", "compiler": "Clang", "arch": "x86_64"}, {"name": "macOS-aarch64", "os": "macos-latest", "compiler": "Clang", "arch": "aarch64"}]'
+              PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}, {"name": "macOS-x86_64", "os": "macos-14", "compiler": "Clang", "arch": "x86_64"}, {"name": "macOS-aarch64", "os": "macos-latest", "compiler": "Clang", "arch": "aarch64"}]'
               ;;
             "all-platforms"|*)
-              PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}, {"name": "Windows", "os": "windows-latest", "compiler": "MSVC", "arch": "x86_64"}, {"name": "macOS-x86_64", "os": "macos-13", "compiler": "Clang", "arch": "x86_64"}, {"name": "macOS-aarch64", "os": "macos-latest", "compiler": "Clang", "arch": "aarch64"}]'
+              PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}, {"name": "Windows", "os": "windows-latest", "compiler": "MSVC", "arch": "x86_64"}, {"name": "macOS-x86_64", "os": "macos-14", "compiler": "Clang", "arch": "x86_64"}, {"name": "macOS-aarch64", "os": "macos-latest", "compiler": "Clang", "arch": "aarch64"}]'
               ;;
           esac
 
