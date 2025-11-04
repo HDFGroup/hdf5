@@ -12,7 +12,6 @@
 
 package test;
 
-import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -29,7 +28,6 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.exceptions.HDF5PropertyListInterfaceException;
 import hdf.hdf5lib.structs.H5AC_cache_config_t;
 
-import org.hdfgroup.javahdf5.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

@@ -32,7 +32,7 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 **Language Bindings:**
 - `HDF5_BUILD_CPP_LIB=OFF` - C++ bindings
 - `HDF5_BUILD_FORTRAN=OFF` - Fortran bindings
-- `HDF5_BUILD_JAVA=OFF` - Java JNI bindings
+- `HDF5_BUILD_JAVA=OFF` - Java bindings
 - `HDF5_ENABLE_MAVEN_DEPLOY=OFF` - Maven repository deployment support
 - `HDF5_MAVEN_SNAPSHOT=OFF` - Build Maven snapshot versions with -SNAPSHOT suffix
 

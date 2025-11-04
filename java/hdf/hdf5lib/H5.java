@@ -21,6 +21,7 @@ import java.lang.foreign.Linker;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
 import java.lang.foreign.SequenceLayout;
 import java.lang.foreign.StructLayout;
 import java.lang.foreign.SymbolLookup;
@@ -741,6 +742,73 @@ public class H5 implements java.io.Serializable {
         }
 
         return is_ts;
+    }
+
+    /**
+     * Helper method to copy a Java String into a fixed-size char array in a MemorySegment.
+     * The string is null-terminated and truncated if it exceeds maxLen-1 characters.
+     *
+     * @param arena
+     *            Arena for temporary allocations
+     * @param str
+     *            Java String to copy (null is treated as empty string)
+     * @param dest
+     *            Destination MemorySegment (fixed-size char array)
+     * @param maxLen
+     *            Maximum length of the char array (including null terminator)
+     */
+    private static void copyStringToCharArray(Arena arena, String str, MemorySegment dest, int maxLen)
+    {
+        // Handle null or empty strings
+        if (str == null || str.isEmpty()) {
+            // Write null terminator at position 0
+            dest.set(ValueLayout.JAVA_BYTE, 0, (byte)0);
+            return;
+        }
+
+        // Convert string to null-terminated C string
+        MemorySegment srcSegment = arena.allocateFrom(str, StandardCharsets.UTF_8);
+        long srcLen              = srcSegment.byteSize();
+
+        // Calculate copy length (leave room for null terminator)
+        long copyLen = Math.min(srcLen, maxLen - 1);
+
+        // Copy string bytes
+        MemorySegment.copy(srcSegment, 0, dest, 0, copyLen);
+
+        // Ensure null terminator
+        if (copyLen < maxLen) {
+            dest.set(ValueLayout.JAVA_BYTE, copyLen, (byte)0);
+        }
+    }
+
+    /**
+     * Helper method to extract a Java String from a fixed-size null-terminated char array in a
+     * MemorySegment.
+     *
+     * @param charArray
+     *            Source MemorySegment containing null-terminated char array
+     * @return Java String extracted from the char array
+     */
+    private static String extractStringFromCharArray(MemorySegment charArray)
+    {
+        // Find null terminator
+        long length = 0;
+        long maxLen = charArray.byteSize();
+        while (length < maxLen && charArray.get(ValueLayout.JAVA_BYTE, length) != 0) {
+            length++;
+        }
+
+        if (length == 0) {
+            return "";
+        }
+
+        // Extract bytes up to null terminator
+        byte[] bytes = new byte[(int)length];
+        MemorySegment.copy(charArray, ValueLayout.JAVA_BYTE, 0, bytes, 0, (int)length);
+
+        // Convert to Java String
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     // /////// unimplemented ////////
@@ -17790,7 +17858,7 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
-     * @param config_ptr
+     * @param fapl_conf
      *            IN: the properties of the ros3 driver
      *
      * @return a non-negative value if successful; otherwise returns a negative value.
@@ -17799,14 +17867,72 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      *
      **/
-    public static int H5Pset_fapl_ros3(long fapl_id, hdf.hdf5lib.structs.H5FD_ros3_fapl_t config_ptr)
+    public static int H5Pset_fapl_ros3(long fapl_id, hdf.hdf5lib.structs.H5FD_ros3_fapl_t fapl_conf)
         throws HDF5LibraryException, NullPointerException
     {
-        int retVal = -1;
-        if (config_ptr == null) {
-            throw new NullPointerException("config_ptr is null");
+        if (fapl_conf == null) {
+            throw new NullPointerException("fapl_conf is null");
         }
-        throw new HDF5LibraryException("H5Pset_fapl_ros3 not implemented");
+
+        try {
+            // Use reflection to access FFM ROS3 classes (they may not exist if ROS3 disabled)
+            Class<?> ros3Class      = Class.forName("org.hdfgroup.javahdf5.H5FD_ros3_fapl_t");
+            Class<?> hdf5Class      = org.hdfgroup.javahdf5.hdf5_h.class;
+
+            // Get method handles via reflection
+            java.lang.reflect.Method h5psetMethod = hdf5Class.getMethod("H5Pset_fapl_ros3", long.class,
+                                                                          MemorySegment.class);
+            java.lang.reflect.Method allocateMethod     = ros3Class.getMethod("allocate", SegmentAllocator.class);
+            java.lang.reflect.Method versionMethod      = ros3Class.getMethod("version", MemorySegment.class, int.class);
+            java.lang.reflect.Method authenticateMethod = ros3Class.getMethod("authenticate", MemorySegment.class, boolean.class);
+            java.lang.reflect.Method awsRegionMethod    = ros3Class.getMethod("aws_region", MemorySegment.class);
+            java.lang.reflect.Method secretIdMethod     = ros3Class.getMethod("secret_id", MemorySegment.class);
+            java.lang.reflect.Method secretKeyMethod    = ros3Class.getMethod("secret_key", MemorySegment.class);
+
+            int retVal = -1;
+            try (Arena arena = Arena.ofConfined()) {
+                // Allocate FFM struct using reflection
+                MemorySegment ffmConfig = (MemorySegment)allocateMethod.invoke(null, arena);
+
+                // Set version and authenticate fields
+                versionMethod.invoke(null, ffmConfig, fapl_conf.version);
+                authenticateMethod.invoke(null, ffmConfig, fapl_conf.authenticate);
+
+                // Get char array segments and copy strings
+                MemorySegment awsRegionSeg = (MemorySegment)awsRegionMethod.invoke(null, ffmConfig);
+                MemorySegment secretIdSeg  = (MemorySegment)secretIdMethod.invoke(null, ffmConfig);
+                MemorySegment secretKeySeg = (MemorySegment)secretKeyMethod.invoke(null, ffmConfig);
+
+                copyStringToCharArray(arena, fapl_conf.aws_region, awsRegionSeg, 33);
+                copyStringToCharArray(arena, fapl_conf.secret_id, secretIdSeg, 129);
+                copyStringToCharArray(arena, fapl_conf.secret_key, secretKeySeg, 129);
+
+                // Call native H5Pset_fapl_ros3
+                retVal = (int)h5psetMethod.invoke(null, fapl_id, ffmConfig);
+                if (retVal < 0) {
+                    h5libraryError();
+                }
+            }
+            return retVal;
+        }
+        catch (ClassNotFoundException e) {
+            throw new HDF5LibraryException(
+                "H5Pset_fapl_ros3 not available (ros3 VFD not enabled in this build)");
+        }
+        catch (NoSuchMethodException e) {
+            throw new HDF5LibraryException(
+                "H5Pset_fapl_ros3 not available (ros3 VFD not enabled in this build)");
+        }
+        catch (java.lang.reflect.InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof HDF5LibraryException) {
+                throw (HDF5LibraryException)cause;
+            }
+            throw new HDF5LibraryException("H5Pset_fapl_ros3 failed: " + e.getMessage());
+        }
+        catch (Exception e) {
+            throw new HDF5LibraryException("H5Pset_fapl_ros3 failed: " + e.getMessage());
+        }
     }
 
     /**
@@ -17826,7 +17952,65 @@ public class H5 implements java.io.Serializable {
     public static hdf.hdf5lib.structs.H5FD_ros3_fapl_t H5Pget_fapl_ros3(long fapl_id)
         throws HDF5LibraryException, NullPointerException
     {
-        throw new HDF5LibraryException("H5Pget_fapl_ros3 not implemented");
+        try {
+            // Use reflection to access FFM ROS3 classes (they may not exist if ROS3 disabled)
+            Class<?> ros3Class = Class.forName("org.hdfgroup.javahdf5.H5FD_ros3_fapl_t");
+            Class<?> hdf5Class = org.hdfgroup.javahdf5.hdf5_h.class;
+
+            // Get method handles via reflection
+            java.lang.reflect.Method h5pgetMethod = hdf5Class.getMethod("H5Pget_fapl_ros3", long.class,
+                                                                         MemorySegment.class);
+            java.lang.reflect.Method allocateMethod        = ros3Class.getMethod("allocate", SegmentAllocator.class);
+            java.lang.reflect.Method versionGetMethod      = ros3Class.getMethod("version", MemorySegment.class);
+            java.lang.reflect.Method authenticateGetMethod = ros3Class.getMethod("authenticate", MemorySegment.class);
+            java.lang.reflect.Method awsRegionMethod       = ros3Class.getMethod("aws_region", MemorySegment.class);
+            java.lang.reflect.Method secretIdMethod        = ros3Class.getMethod("secret_id", MemorySegment.class);
+            java.lang.reflect.Method secretKeyMethod       = ros3Class.getMethod("secret_key", MemorySegment.class);
+
+            hdf.hdf5lib.structs.H5FD_ros3_fapl_t faplConfig = new hdf.hdf5lib.structs.H5FD_ros3_fapl_t();
+            try (Arena arena = Arena.ofConfined()) {
+                // Allocate FFM struct using reflection
+                MemorySegment ffmConfig = (MemorySegment)allocateMethod.invoke(null, arena);
+
+                // Call native H5Pget_fapl_ros3
+                int status = (int)h5pgetMethod.invoke(null, fapl_id, ffmConfig);
+                if (status < 0) {
+                    h5libraryError();
+                }
+
+                // Extract version and authenticate fields
+                faplConfig.version      = (int)versionGetMethod.invoke(null, ffmConfig);
+                faplConfig.authenticate = (boolean)authenticateGetMethod.invoke(null, ffmConfig);
+
+                // Get char array segments and extract strings
+                MemorySegment awsRegionSeg = (MemorySegment)awsRegionMethod.invoke(null, ffmConfig);
+                MemorySegment secretIdSeg  = (MemorySegment)secretIdMethod.invoke(null, ffmConfig);
+                MemorySegment secretKeySeg = (MemorySegment)secretKeyMethod.invoke(null, ffmConfig);
+
+                faplConfig.aws_region = extractStringFromCharArray(awsRegionSeg);
+                faplConfig.secret_id  = extractStringFromCharArray(secretIdSeg);
+                faplConfig.secret_key = extractStringFromCharArray(secretKeySeg);
+            }
+            return faplConfig;
+        }
+        catch (ClassNotFoundException e) {
+            throw new HDF5LibraryException(
+                "H5Pget_fapl_ros3 not available (ros3 VFD not enabled in this build)");
+        }
+        catch (NoSuchMethodException e) {
+            throw new HDF5LibraryException(
+                "H5Pget_fapl_ros3 not available (ros3 VFD not enabled in this build)");
+        }
+        catch (java.lang.reflect.InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof HDF5LibraryException) {
+                throw (HDF5LibraryException)cause;
+            }
+            throw new HDF5LibraryException("H5Pget_fapl_ros3 failed: " + e.getMessage());
+        }
+        catch (Exception e) {
+            throw new HDF5LibraryException("H5Pget_fapl_ros3 failed: " + e.getMessage());
+        }
     }
 
     // /////// unimplemented ////////
