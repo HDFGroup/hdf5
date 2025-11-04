@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-03</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-04</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -406,8 +406,8 @@ External References</h3>
 <div class="ttc" id="agroup___h5_f_html_gae64b51ee9ac0781bc4ccc599d98387f4"><div class="ttname"><a href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a></div><div class="ttdeci">hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)</div><div class="ttdoc">Creates an HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga2b53128a39c8f104c1c9c2a91590fcc1"><div class="ttname"><a href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1">H5Sclose</a></div><div class="ttdeci">herr_t H5Sclose(hid_t space_id)</div><div class="ttdoc">Releases and terminates access to a dataspace.</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:829</div></div>
-<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga342d286867f160739f9f5359303759cc"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga342d286867f160739f9f5359303759cc">H5T_STD_REF</a></div><div class="ttdeci">#define H5T_STD_REF</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:477</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:863</div></div>
+<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga342d286867f160739f9f5359303759cc"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga342d286867f160739f9f5359303759cc">H5T_STD_REF</a></div><div class="ttdeci">#define H5T_STD_REF</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:511</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_reference_example_old"></a>
 Backward Compatibility and New API</h3>
 <p>The example below illustrates the use of the new API with a file that was written using the old-style reference API, showing how one can take advantage of the automatic type conversion from old reference type to new reference type. </p><div class="fragment"><div class="line"><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
@@ -477,7 +477,7 @@ Backward Compatibility and New API</h3>
 <div class="line">     <span class="keywordflow">return</span> 0;</div>
 <div class="line"> }</div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a01eab13dccc91afd6909d74dccb780ba"><div class="ttname"><a href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a></div><div class="ttdeci">#define H5I_INVALID_HID</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:75</div></div>
-<div class="ttc" id="agroup___p_d_t_s_t_d_html_gadc17e0960dc7ef08e029bf17201670e1"><div class="ttname"><a href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a></div><div class="ttdeci">#define H5T_STD_REF_OBJ</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:467</div></div>
+<div class="ttc" id="agroup___p_d_t_s_t_d_html_gadc17e0960dc7ef08e029bf17201670e1"><div class="ttname"><a href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a></div><div class="ttdeci">#define H5T_STD_REF_OBJ</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:501</div></div>
 </div><!-- fragment --><p>Previous Chapter <a class="el" href="_h5_m__u_g.html#sec_map">HDF5 Map Object</a> - Next Chapter <a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a></p>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>

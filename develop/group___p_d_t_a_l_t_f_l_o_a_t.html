@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-03</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-04</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -151,6 +151,10 @@ $(function(){initNavTree('group___p_d_t_a_l_t_f_l_o_a_t.html',''); initResizable
 <td><a class="el" href="#ga4dd1e86cccbdcf1c22fddbf6ad88057e">H5T_FLOAT_BFLOAT16BE</a> </td><td>16-bit big-endian bfloat16 floating point  </td></tr>
 <tr>
 <td><a class="el" href="#ga8fb1cbb4415c84c04663040597ffc009">H5T_FLOAT_BFLOAT16LE</a> </td><td>16-bit little-endian bfloat16 floating point  </td></tr>
+<tr>
+<td><a class="el" href="#ga8cfa202d0101ec59d2f270d0d5645c58">H5T_FLOAT_F8E4M3</a> </td><td>8-bit FP8 E4M3 (4 exponent bits, 3 mantissa bits) floating point  </td></tr>
+<tr>
+<td><a class="el" href="#gaf2e1617cdd3d211350dd9414af1ff00f">H5T_FLOAT_F8E5M2</a> </td><td>8-bit FP8 E5M2 (5 exponent bits, 2 mantissa bits) floating point  </td></tr>
 </table>
 </div><div></div> <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
@@ -159,6 +163,10 @@ Macros</h2></td></tr>
 <tr class="separator:ga4dd1e86cccbdcf1c22fddbf6ad88057e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8fb1cbb4415c84c04663040597ffc009" id="r_ga8fb1cbb4415c84c04663040597ffc009"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8fb1cbb4415c84c04663040597ffc009">H5T_FLOAT_BFLOAT16LE</a>&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> <a class="el" href="_h5_tpublic_8h.html#a68eeea92766f887d658fc9a9d45cadf8">H5T_FLOAT_BFLOAT16LE_g</a>)</td></tr>
 <tr class="separator:ga8fb1cbb4415c84c04663040597ffc009"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8cfa202d0101ec59d2f270d0d5645c58" id="r_ga8cfa202d0101ec59d2f270d0d5645c58"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8cfa202d0101ec59d2f270d0d5645c58">H5T_FLOAT_F8E4M3</a>&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> <a class="el" href="_h5_tpublic_8h.html#a7dd55e6caa054f89a44f9537245e1e0e">H5T_FLOAT_F8E4M3_g</a>)</td></tr>
+<tr class="separator:ga8cfa202d0101ec59d2f270d0d5645c58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf2e1617cdd3d211350dd9414af1ff00f" id="r_gaf2e1617cdd3d211350dd9414af1ff00f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaf2e1617cdd3d211350dd9414af1ff00f">H5T_FLOAT_F8E5M2</a>&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> <a class="el" href="_h5_tpublic_8h.html#ab168a974c0a3fe09ac5a0a1d0a01ce43">H5T_FLOAT_F8E5M2_g</a>)</td></tr>
+<tr class="separator:gaf2e1617cdd3d211350dd9414af1ff00f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="ga4dd1e86cccbdcf1c22fddbf6ad88057e" name="ga4dd1e86cccbdcf1c22fddbf6ad88057e"></a>
@@ -188,6 +196,38 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>16-bit little-endian bfloat16 floating-point numbers </p>
+
+</div>
+</div>
+<a id="ga8cfa202d0101ec59d2f270d0d5645c58" name="ga8cfa202d0101ec59d2f270d0d5645c58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8cfa202d0101ec59d2f270d0d5645c58">&#9670;&#160;</a></span>H5T_FLOAT_F8E4M3</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5T_FLOAT_F8E4M3&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> <a class="el" href="_h5_tpublic_8h.html#a7dd55e6caa054f89a44f9537245e1e0e">H5T_FLOAT_F8E4M3_g</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>8-bit FP8 E4M3 (4 exponent bits, 3 mantissa bits) floating-point numbers</p>
+<dl class="section attention"><dt>Attention</dt><dd>Implicit datatype conversion should currently be avoided when using this datatype for I/O operations. Incomplete handling of non-IEEE floating-point formats in HDF5 can cause certain FP8 E4M3 values to be improperly converted to Infinities or NaN values. If possible, an application should perform I/O with this datatype using an in-memory type that matches the FP8 E4M3 format and perform explicit data conversion outside of HDF5, if necessary. Otherwise, read/written values should be verified to be correct. </dd></dl>
+
+</div>
+</div>
+<a id="gaf2e1617cdd3d211350dd9414af1ff00f" name="gaf2e1617cdd3d211350dd9414af1ff00f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf2e1617cdd3d211350dd9414af1ff00f">&#9670;&#160;</a></span>H5T_FLOAT_F8E5M2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5T_FLOAT_F8E5M2&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> <a class="el" href="_h5_tpublic_8h.html#ab168a974c0a3fe09ac5a0a1d0a01ce43">H5T_FLOAT_F8E5M2_g</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>8-bit FP8 E5M2 (5 exponent bits, 2 mantissa bits) floating-point numbers</p>
+<dl class="section attention"><dt>Attention</dt><dd>Implicit datatype conversion should currently be avoided when using this datatype for I/O operations. Incomplete handling of non-IEEE floating-point formats in HDF5 can cause certain FP8 E5M2 values to be improperly converted to Infinities or NaN values. If possible, an application should perform I/O with this datatype using an in-memory type that matches the FP8 E5M2 format and perform explicit data conversion outside of HDF5, if necessary. Otherwise, read/written values should be verified to be correct. </dd></dl>
 
 </div>
 </div>
