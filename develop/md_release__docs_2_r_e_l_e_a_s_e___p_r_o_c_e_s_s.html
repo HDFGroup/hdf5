@@ -200,6 +200,7 @@ Tasks:</h1>
 <li><a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> are the instructions for building under CMake.</li>
 </ul>
 </li>
+<li>Verify that <a href="https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html">API Compatibility Macros</a> are up to date for the release version.</li>
 </ol>
 <h2><a class="anchor" id="autotoc_md240"></a>
 4. Freeze Code (Release Manager | Test Automation Team)</h2>
@@ -214,7 +215,7 @@ Tasks:</h1>
 </li>
 <li>Move all unresolved Milestone issues to the next release version in GitHub.</li>
 <li>Verify that frozen code branch satisfies all existing regression test cases, and give the 'OK' to the release coordinator once all daily test configurations are passing as expected after the date of the code freeze. If there are failing tests after the code freeze date, coordinate with maintainers responsible for the failures to ensure that either the changes causing the failures are corrected or reverted.</li>
-<li>Verify release branches for third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to <a href="#" onclick="location.href='mai'+'lto:'+'hdf'+'5l'+'ib@'+'hd'+'fgr'+'ou'+'p.o'+'rg'; return false;">hdf5l<span class="obfuscator">.nosp@m.</span>ib@h<span class="obfuscator">.nosp@m.</span>dfgro<span class="obfuscator">.nosp@m.</span>up.o<span class="obfuscator">.nosp@m.</span>rg</a>.</li>
+<li>Verify released versions (latest) of third-party software used: SZIP, ZLIB, and Plugins; and announce release versions to <a href="#" onclick="location.href='mai'+'lto:'+'hdf'+'5l'+'ib@'+'hd'+'fgr'+'ou'+'p.o'+'rg'; return false;">hdf5l<span class="obfuscator">.nosp@m.</span>ib@h<span class="obfuscator">.nosp@m.</span>dfgro<span class="obfuscator">.nosp@m.</span>up.o<span class="obfuscator">.nosp@m.</span>rg</a>.</li>
 </ol>
 <h2><a class="anchor" id="autotoc_md241"></a>
 5. Update Interface Version (Release Manager | Product Manager)</h2>
@@ -238,11 +239,13 @@ Tasks:</h1>
 <li>See <a href="https://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html#Updating-version-info">Updating version info (Libtool)</a> for rules to help update library version numbers.</li>
 </ul>
 </li>
-<li>After the release branch has been created, run <code>./autogen.sh</code> to regenerate build system files on the release branch and commit the changes. <br  />
+<li>After the release branch has been created, run bin/process_source.sh on the release branch to regenerate/update the H5E header files, H5ARG_TRACE macros, API version macros, and macros for detecting overflows for type conversion, then commit the changes. <br  />
 </li>
 </ol>
 <h2><a class="anchor" id="autotoc_md242"></a>
-6. Prepare Release Branch (Release Manager)</h2>
+6. Verify that HDF5 library version has been updated from the previous release according to <a href="https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy">HDF5 versioning policy</a>, consistent with semantic versioning rules.</h2>
+<h2><a class="anchor" id="autotoc_md243"></a>
+7. Prepare Release Branch (Release Manager)</h2>
 <ol type="1">
 <li>Get the release branch ready for pre-release testing and packaging.</li>
 <li>For all release preparation operations, the release coordinator will clone and push directly to canonical HDF5:<ul>
@@ -259,17 +262,17 @@ Tasks:</h1>
 <li>Update as needed.</li>
 </ul>
 </li>
-<li>Change the <b>support</b> branch to X.Y.{Z+1}-1 using the <a href="https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers">bin/h5vers</a> script:<ul>
+<li>Change the <b>support</b> branch to X.Y.{Z+1}-1 (&lt;dash&gt;1) using the <a href="https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers">bin/h5vers</a> script:<ul>
 <li><code>$ git checkout hdf5_X_Y</code></li>
 <li><code>$ bin/h5vers -s X.Y.{Z+1}-1;</code></li>
 <li><code>$ git commit -m "Updated support branch version number to X.Y.{Z+1}-1"</code></li>
 <li><code>$ git push</code></li>
 </ul>
 </li>
-<li>Change the <b>release preparation branch</b>'s version number to X.Y.Z-{SR+1} using the <a href="https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers">bin/h5vers</a>/bin/h5vers script:<ul>
+<li>Change the <b>release preparation branch</b>'s version number to X.Y.Z.1 using the <a href="https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers">bin/h5vers</a>/bin/h5vers script:<ul>
 <li><code>$ git checkout hdf5_X_Y_Z;</code></li>
-<li><code>$ bin/h5vers -s X.Y.Z-{SR+1};</code></li>
-<li><code>$ git commit -m "Updated release preparation branch version number to X.Y.Z-{SR+1}"</code></li>
+<li><code>$ bin/h5vers -s X.Y.Z.1;</code></li>
+<li><code>$ git commit -m "Updated release preparation branch version number to X.Y.Z.1"</code></li>
 <li><code>$ git push</code></li>
 </ul>
 </li>
@@ -282,8 +285,8 @@ Tasks:</h1>
 </li>
 <li>E-mail <a href="#" onclick="location.href='mai'+'lto:'+'hdf'+'5l'+'ib@'+'hd'+'fgr'+'ou'+'p.o'+'rg'; return false;">hdf5l<span class="obfuscator">.nosp@m.</span>ib@h<span class="obfuscator">.nosp@m.</span>dfgro<span class="obfuscator">.nosp@m.</span>up.o<span class="obfuscator">.nosp@m.</span>rg</a> to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md243"></a>
-7. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)</h2>
+<h2><a class="anchor" id="autotoc_md244"></a>
+8. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)</h2>
 <ol type="1">
 <li>Verify that source and binary distributions of HDF5 are acceptable on all target operating environments.</li>
 <li>Create a page on Confluence as a sub-page of the current release version's project collaboration page (see HDF5 Maintenance Releases) to document release testing results.</li>
@@ -292,11 +295,11 @@ Tasks:</h1>
 <li>Schedule and enable daily automated regression testing of the release preparation branch (i.e. hdf5_X_Y_Z). Give the 'OK' to proceed once all required tests have verified that HDF5 is functioning as intended on all target operating environments.</li>
 <li>Select release build from workflow.</li>
 <li>Choose the release branch</li>
-<li>Change ‘Release version tag’ name to 'hdf5_X.Y.Z.P'<ul>
-<li>P is some pre-release number.</li>
+<li>Change ‘Release version tag’ name to 'X.Y.Z.P'<ul>
+<li>P is a pre-release number, starting at 1 for first pre-release. This will create a new tag 'vX.Y.Z.P'. The tag for the final release will be 'vX.Y.Z'</li>
 </ul>
 </li>
-<li>Send a message to the HDF forum indicating that a pre-release source package is available for testing at &lt;e.g., &lt;github.com releases URL&gt;/{hdf5-X.Y.Z-P}&gt; and that feedback from the user community on their test results is being accepted.</li>
+<li>Send a message to the HDF forum indicating that a pre-release source package is available for testing at &lt;e.g., &lt;github.com releases URL&gt;/{hdf5-X.Y.Z.P}&gt; and that feedback from the user community on their test results is being accepted.</li>
 <li>Contact paying clients who are interested in testing the pre-release source package and inform them that it is available for testing and that feedback on their test results of the pre-release is appreciated.</li>
 <li>This should be automated and currently github binaries are not signed.<ul>
 <li>Follow the [How to sign binaries with digital certificates(this is missing)]() work instructions to sign each Windows and Mac binary package with a digital certificate.</li>
@@ -358,8 +361,8 @@ Tasks:</h1>
 </li>
 <li>Decide if another cycle of pre-release testing should occur based on the issue reports received and the actions taken during this cycle. If another round of testing is required (i.e. there were significant issues in pre-release testing which resulted in code changes), increment the subrelease version number and go back to step 7.2. If no further testing is required (i.e. no code changes were made and issues were documented as known issues, or code changes were trivial, unit tested, and exhaustive testing is unneeded), then proceed.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md244"></a>
-8. Finalize Release Notes (Release Manager)</h2>
+<h2><a class="anchor" id="autotoc_md245"></a>
+9. Finalize Release Notes (Release Manager)</h2>
 <ol type="1">
 <li>Perform a final review of release notes and ensure that any new changes made to the source, any new known issues discovered, and any additional tests run since the code freeze have been reflected in CHANGELOG.md and other appropriate in-source documentation files (INSTALL_*, etc.). (Refer to the sub-steps of step 3 for what to check).</li>
 <li>Update the <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md">CHANGELOG.md</a> in the <b>support</b> branch (i.e. hdf5_X_Y) to remove entries in “Bugs fixed” and “New Features” sections and increment the version number for the following release (“Bug fixes since X.Y.Z” - occurs twice).<ul>
@@ -371,8 +374,8 @@ Tasks:</h1>
 </li>
 <li>Update Release Notes in <b>release</b> branch (Release Manager)</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md245"></a>
-9. Package and Distribute Release (Release Manager)</h2>
+<h2><a class="anchor" id="autotoc_md246"></a>
+10. Package and Distribute Release (Release Manager)</h2>
 <ol type="1">
 <li>h5vers could run genparser, which can change the generated files if certain code files have been changed since the files generated by genparser were committed on the release branch. This should be checked by running <code>git status --ignored;</code>, then running genparser, then repeating <code>git status --ignored;</code>. If there are modified files from either git status command, they should be committed (or deleted if there are backup files or an autom4te.cache directory), and at least minimal testing should be done to see that the software is still good with the changes.</li>
 <li>Set version for release, removing the subrelease string, initially <code>$ bin/h5vers -s X.Y.Z;</code>. Any subsequent patch releases will need the subrelease number.</li>
@@ -398,10 +401,10 @@ Tasks:</h1>
 </li>
 <li>Release hdf5_plugins following the same steps.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md246"></a>
-10. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the <b>support</b> branch, just below the introductory lines at the top of the HISTORY file.</h2>
 <h2><a class="anchor" id="autotoc_md247"></a>
-11. Conduct Release Retrospective (Release Manager)</h2>
+11. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the <b>support</b> branch, just below the introductory lines at the top of the HISTORY file.</h2>
+<h2><a class="anchor" id="autotoc_md248"></a>
+12. Conduct Release Retrospective (Release Manager)</h2>
 <ol type="1">
 <li>Schedule time and solicit comments from retrospective</li>
 <li>Identify issues and document them </li>

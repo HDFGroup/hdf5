@@ -6,7 +6,7 @@ var searchData=
   ['7_203_20running_20tests_20on_20batch_20systems_3',['7.3. Running Tests on Batch Systems',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md217',1,'']]],
   ['7_204_20running_20specific_20test_20categories_4',['7.4. Running Specific Test Categories',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md218',1,'']]],
   ['7_20of_20may_202011_20versus_20release_201_208_206_5',['Release 1.8.7 of May 2011 versus Release 1.8.6',['../rel_spec_18.html#subsec_rel_spec_18_change_7',1,'']]],
-  ['7_20perform_20release_20testing_20test_20automation_20team_20release_20manager_20project_20leads_6',['7. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md243',1,'']]],
+  ['7_20prepare_20release_20branch_20release_20manager_6',['7. Prepare Release Branch (Release Manager)',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md243',1,'']]],
   ['7_20running_20parallel_20tests_7',['7. Running Parallel Tests',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md210',1,'']]],
   ['7_20versus_201_2010_206_8',['Release 1.10.7 versus 1.10.6',['../rel_spec_110_change.html#subsec_rel_spec_110_change_7versus6',1,'']]]
 ];
