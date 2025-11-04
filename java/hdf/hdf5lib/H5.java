@@ -3231,19 +3231,6 @@ public class H5 implements java.io.Serializable {
      * @note Null strings in input are converted to empty strings
      * @note Memory is automatically reclaimed by HDF5
      *
-     * @example
-     * <pre>
-     * // Create variable-length string type
-     * long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-     * H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
-     *
-     * // Write VL strings to attribute
-     * String[] data = {"Hello", "World", "VL Strings"};
-     * H5.H5Awrite_VLStrings(attr_id, strType, data);
-     *
-     * // Clean up
-     * H5.H5Tclose(strType);
-     * </pre>
      **/
 
     public static int H5Awrite_VLStrings(long attr_id, long mem_type_id, Object[] buf)
@@ -4916,25 +4903,6 @@ public class H5 implements java.io.Serializable {
      * @note H5Treclaim is called automatically to free HDF5-managed VL memory
      * @note Buffer must be pre-allocated with size matching memory dataspace
      *
-     * @example
-     * <pre>
-     * // Create variable-length string type
-     * long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-     * H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
-     *
-     * // Determine buffer size from dataset dataspace
-     * long space_id = H5.H5Dget_space(dataset_id);
-     * long[] dims = new long[1];
-     * H5.H5Sget_simple_extent_dims(space_id, dims, null);
-     *
-     * // Read VL strings
-     * String[] buffer = new String[(int)dims[0]];
-     * H5.H5Dread_VLStrings(dataset_id, strType, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
-     *
-     * // Clean up
-     * H5.H5Sclose(space_id);
-     * H5.H5Tclose(strType);
-     * </pre>
      **/
     public static int H5Dread_VLStrings(long dataset_id, long mem_type_id, long mem_space_id,
                                         long file_space_id, long xfer_plist_id, Object[] buf)
