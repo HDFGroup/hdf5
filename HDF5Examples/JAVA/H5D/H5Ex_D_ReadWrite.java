@@ -13,14 +13,24 @@
 /************************************************************
 
   This example shows how to read and write data to a
-  dataset.  The program first writes integers to a dataset
-  with dataspace dimensions of DIM_XxDIM_Y, then closes the
-  file.  Next, it reopens the file, reads back the data, and
-  outputs it to the screen.
+  dataset using the FFM (Foreign Function & Memory) API.
+  The program first writes integers to a dataset with
+  dataspace dimensions of DIM_XxDIM_Y, then closes the
+  file.  Next, it reopens the file, reads back the data,
+  and outputs it to the screen.
+
+  This is a pure FFM example showing:
+  - Arena-based memory management
+  - MemorySegment for strings and arrays
+  - Direct FFM API calls (no H5 wrapper)
+
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
 public class H5Ex_D_ReadWrite {
     private static String FILENAME    = "H5Ex_D_ReadWrite.h5";
@@ -29,11 +39,11 @@ public class H5Ex_D_ReadWrite {
     private static final int DIM_Y    = 7;
     private static final int RANK     = 2;
 
-    private static void WriteDataset()
+    private static void WriteDataset(Arena arena)
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long filespace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         long[] dims       = {DIM_X, DIM_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
@@ -44,8 +54,8 @@ public class H5Ex_D_ReadWrite {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            MemorySegment filename = arena.allocateFrom(FILENAME);
+            file_id                = H5Fcreate(filename, H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -54,7 +64,8 @@ public class H5Ex_D_ReadWrite {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            filespace_id = H5.H5Screate_simple(RANK, dims, null);
+            MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+            filespace_id          = H5Screate_simple(RANK, dimsSeg, MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -62,20 +73,36 @@ public class H5Ex_D_ReadWrite {
 
         // Create the dataset. We will use all default properties for this example.
         try {
-            if ((file_id >= 0) && (filespace_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, filespace_id,
-                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                          HDF5Constants.H5P_DEFAULT);
+            if ((file_id >= 0) && (filespace_id >= 0)) {
+                MemorySegment datasetname = arena.allocateFrom(DATASETNAME);
+                dataset_id = H5Dcreate2(file_id, datasetname, H5T_STD_I32LE_g(), filespace_id, H5P_DEFAULT(),
+                                        H5P_DEFAULT(), H5P_DEFAULT());
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
         // Write the data to the dataset.
+        // FFM requires explicit conversion of 2D array to MemorySegment.
         try {
-            if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+            if (dataset_id >= 0) {
+                // Flatten 2D array to 1D for MemorySegment
+                int[] flatData = new int[DIM_X * DIM_Y];
+                for (int i = 0; i < DIM_X; i++) {
+                    for (int j = 0; j < DIM_Y; j++) {
+                        flatData[i * DIM_Y + j] = dset_data[i][j];
+                    }
+                }
+
+                // Copy flattened data to MemorySegment
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, flatData.length);
+                for (int i = 0; i < flatData.length; i++) {
+                    dataSeg.setAtIndex(ValueLayout.JAVA_INT, i, flatData[i]);
+                }
+
+                H5Dwrite(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -84,7 +111,7 @@ public class H5Ex_D_ReadWrite {
         // End access to the dataset and release resources used by it.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -92,7 +119,7 @@ public class H5Ex_D_ReadWrite {
 
         try {
             if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
+                H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -101,22 +128,23 @@ public class H5Ex_D_ReadWrite {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void ReadDataset()
+    private static void ReadDataset(Arena arena)
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open file using the default properties.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            MemorySegment filename = arena.allocateFrom(FILENAME);
+            file_id                = H5Fopen(filename, H5F_ACC_RDWR(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -124,18 +152,31 @@ public class H5Ex_D_ReadWrite {
 
         // Open dataset using the default properties.
         try {
-            if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+            if (file_id >= 0) {
+                MemorySegment datasetname = arena.allocateFrom(DATASETNAME);
+                dataset_id                = H5Dopen2(file_id, datasetname, H5P_DEFAULT());
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
         // Read the data using the default properties.
+        // FFM requires explicit conversion from MemorySegment to 2D array.
         try {
-            if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+            if (dataset_id >= 0) {
+                // Allocate MemorySegment for reading
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_INT, DIM_X * DIM_Y);
+
+                H5Dread(dataset_id, H5T_NATIVE_INT_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+
+                // Copy from MemorySegment and unflatten to 2D array
+                for (int i = 0; i < DIM_X; i++) {
+                    for (int j = 0; j < DIM_Y; j++) {
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_INT, i * DIM_Y + j);
+                    }
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -154,7 +195,7 @@ public class H5Ex_D_ReadWrite {
         // Close the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +204,7 @@ public class H5Ex_D_ReadWrite {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -172,7 +213,11 @@ public class H5Ex_D_ReadWrite {
 
     public static void main(String[] args)
     {
-        H5Ex_D_ReadWrite.WriteDataset();
-        H5Ex_D_ReadWrite.ReadDataset();
+        // Arena manages all native memory allocations
+        // All allocations are automatically freed when arena closes
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_D_ReadWrite.WriteDataset(arena);
+            H5Ex_D_ReadWrite.ReadDataset(arena);
+        }
     }
 }

@@ -22,6 +22,7 @@ import java.io.File;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
+import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5F_info2_t;
 
 import org.junit.After;
@@ -104,12 +105,11 @@ public class TestH5Fparams {
         }
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Fclose_negative() throws Throwable
     {
         // cannot close a file with negative id.
         int fid = H5.H5Fclose(-1);
-        assertTrue(fid == 0);
     }
 
     @Test

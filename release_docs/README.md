@@ -100,3 +100,72 @@ platforms.
 
 These files document how to build HDF5 applications with an installed HDF5
 library.
+
+## Java Examples Maven Integration
+
+The HDF5 Java examples are now integrated with Maven deployment to provide
+complete example applications that work with HDF5 Java library Maven artifacts:
+
+### Maven Artifacts
+
+HDF5 provides two Java implementation artifacts:
+
+* **`org.hdfgroup:hdf5-java-ffm`** - FFM (Foreign Function & Memory) implementation
+  - Default for Java 25+, modern native access via Project Panama
+  - Platform-specific JARs: linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64
+
+* **`org.hdfgroup:hdf5-java-jni`** - JNI (Java Native Interface) implementation
+  - Available for all Java versions (11+)
+  - Platform-specific JARs: linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64
+
+* **`org.hdfgroup:hdf5-java-examples`** - Complete collection of 62 Java examples
+  - Platform-independent JAR with educational examples
+  - Covers all major HDF5 functionality: datasets, datatypes, groups, tutorials
+  - Compatible with both FFM and JNI implementations
+
+Both implementations use the same `hdf.hdf5lib.*` package structure for seamless migration.
+
+### FFM Test Suite
+
+**Running FFM Tests:**
+```bash
+ctest -R "JUnitFFM" -V           # All FFM tests
+ctest -R "JUnit-TestH5Affm" -V   # Attribute tests
+ctest -R "JUnit-TestH5Pffm" -V   # Property tests
+ctest -R "JUnit-TestH5Tffm" -V   # Datatype tests
+```
+
+**Test Location:** `java/jtest/TestH5*ffm.java`
+
+### Features
+* **Dual Implementation Support:** Choose FFM for modern Java or JNI for compatibility
+* **Cross-Platform CI/CD:** Automated testing across all supported platforms
+* **Fork-Based Testing:** Complete validation framework for testing on repository forks
+* **Dynamic Repository Support:** Workflows adapt automatically to any GitHub repository
+* **Maven Integration:** Seamless integration with standard Maven dependency management
+* **Documentation:** See `HDF5Examples/JAVA/README-MAVEN.md` for complete usage instructions
+
+### GitHub Packages Deployment
+
+Using FFM implementation (Java 25+):
+```xml
+<dependency>
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java-ffm</artifactId>
+    <version>2.0.0-3</version>
+    <classifier>linux-x86_64</classifier>
+</dependency>
+```
+
+Using JNI implementation (Java 11+):
+```xml
+<dependency>
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java-jni</artifactId>
+    <version>2.0.0-3</version>
+    <classifier>linux-x86_64</classifier>
+</dependency>
+```
+
+The Java examples demonstrate proper usage of HDF5 Java bindings in real-world
+scenarios and serve as templates for developing HDF5-based Java applications.

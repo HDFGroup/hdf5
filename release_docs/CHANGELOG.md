@@ -49,6 +49,12 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 - Improved [ROS3 VFD](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
 
+## Java Enhancements:
+
+- Java FFM bindings generated for the C library if Java 25+ available and JNI option is FALSE.
+- Enhanced Maven artifact deployment with comprehensive multi-platform support (Linux, Windows, macOS x86_64, macOS aarch64).
+- Complete Java examples Maven integration (`org.hdfgroup:hdf5-java-examples`) with cross-platform CI/CD testing.
+
 # ⚠️ Breaking Changes
 
 ### Updated default file format to 1.8
@@ -92,6 +98,24 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ### Removed `HDF5_ENABLE_THREADS` option
 
    The `HDF5_ENABLE_THREADS` option has been removed, as it no longer functions as a proper build option. The library will always check for thread support and set the internal status variable, `HDF5_THREADS_ENABLED`. The `HDF5_ENABLE_THREADSAFE` option is still available to build with thread-safe API calls.
+
+- Enhanced Maven repository deployment support
+
+   Added comprehensive Maven integration with optimized workflows for Java artifact deployment:
+   - **New CMake options**: `HDF5_ENABLE_MAVEN_DEPLOY` and `HDF5_MAVEN_SNAPSHOT` for Maven repository deployment
+   - **Minimal build presets**: Added `ci-MinShar-*-Maven*` presets for efficient Java-only artifact generation
+   - **Multi-platform support**: Automated generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+   - **CI/CD integration**: Enhanced GitHub Actions workflows (`maven-staging.yml`, `maven-deploy.yml`) with cross-platform build matrix
+   - **Artifact validation**: Comprehensive validation framework for Maven artifacts before deployment
+   - **Deployment targets**: Support for GitHub Packages and Maven Central staging repositories
+   - **Java Examples Maven Integration**: Added complete Maven artifact for Java examples (`org.hdfgroup:hdf5-java-examples`) with cross-platform compatibility
+   - **Multi-platform testing**: Comprehensive CI/CD testing of Java examples across all supported platforms (Linux, Windows, macOS x86_64, macOS aarch64)
+   - **Native library error handling**: Enhanced validation logic for Maven-only environments to properly handle expected native library loading errors
+   - **Dynamic repository support**: Enhanced workflows to use `github.repository` variable for seamless testing on forks before canonical deployment
+   - **Fork-based testing**: Complete testing framework allowing validation on repository forks (e.g., fork-name/hdf5) before merging to HDFGroup/hdf5
+   - **Multi-artifact deployment**: Enhanced deployment workflow to handle both `hdf5-java` (platform-specific) and `hdf5-java-examples` (platform-independent) artifacts
+   - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
+   - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
 
  - Reorganized the files in the config/cmake folder into the config folder structure
 
@@ -235,7 +259,7 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 ### Removed hbool_t from public API calls
                                   
 ### Removed `hbool_t` from public API calls
-                                  
+
 The `hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
 
 It had been previously purged from the bulk of the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.

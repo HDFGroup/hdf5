@@ -1,0 +1,187 @@
+name: 'Setup jextract'
+description: 'Install jextract for FFM binding generation across all platforms'
+inputs:
+  java-version:
+    description: 'Java version for jextract (24, 25, latest)'
+    required: false
+    default: '25'
+
+outputs:
+  jextract-home:
+    description: 'Path to jextract installation'
+    value: ${{ steps.setup-jextract.outputs.jextract-home }}
+  jextract-version:
+    description: 'Version of jextract installed'
+    value: ${{ steps.setup-jextract.outputs.jextract-version }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup jextract (Linux/macOS)
+      id: setup-jextract-unix
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        echo "Installing jextract for $RUNNER_OS..."
+
+        # Determine platform
+        if [[ "$RUNNER_OS" == "macOS" ]]; then
+          PLATFORM="macos-x64"
+        else
+          PLATFORM="linux-x64"
+        fi
+
+        # Try different jextract versions (from latest to older)
+        # Check https://jdk.java.net/jextract/ for available builds
+        JEXTRACT_URLS=(
+          "https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_${PLATFORM}_bin.tar.gz"
+          "https://download.java.net/java/early_access/jextract/21/5/openjdk-21-jextract+5-31_${PLATFORM}_bin.tar.gz"
+          "https://download.java.net/java/early_access/jextract/20/1/openjdk-20-jextract+1-2_${PLATFORM}_bin.tar.gz"
+        )
+
+        mkdir -p $HOME/jextract
+        cd $HOME/jextract
+
+        SUCCESS=false
+        for URL in "${JEXTRACT_URLS[@]}"; do
+          echo "Trying to download from: $URL"
+          if curl -L -f -o jextract.tar.gz "$URL" 2>/dev/null; then
+            echo "✓ Download successful from $URL"
+            tar -xzf jextract.tar.gz --strip-components=1
+            rm jextract.tar.gz
+            SUCCESS=true
+            break
+          else
+            echo "✗ Failed to download from $URL, trying next..."
+          fi
+        done
+
+        if [ "$SUCCESS" = false ]; then
+          echo "ERROR: Failed to download jextract from any known source"
+          echo "Please check https://jdk.java.net/jextract/ for available builds"
+          exit 1
+        fi
+
+        # Set outputs
+        echo "jextract-home=$HOME/jextract" >> $GITHUB_OUTPUT
+
+        # Verify installation
+        if $HOME/jextract/bin/jextract --version 2>&1; then
+          VERSION=$($HOME/jextract/bin/jextract --version 2>&1 | head -1 || echo "unknown")
+          echo "jextract-version=$VERSION" >> $GITHUB_OUTPUT
+          echo "✓ jextract installed successfully: $VERSION"
+        else
+          echo "jextract-version=unknown" >> $GITHUB_OUTPUT
+          echo "✓ jextract installed (version check not supported)"
+        fi
+
+    - name: Setup jextract (Windows)
+      id: setup-jextract-windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Write-Host "Installing jextract for Windows..."
+
+        # Try multiple jextract versions (latest to older)
+        # Windows now uses .tar.gz format
+        $JextractUrls = @(
+          "https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_windows-x64_bin.tar.gz",
+          "https://download.java.net/java/early_access/jextract/21/5/openjdk-21-jextract+5-31_windows-x64_bin.tar.gz",
+          "https://download.java.net/java/early_access/jextract/20/1/openjdk-20-jextract+1-2_windows-x64_bin.tar.gz"
+        )
+
+        $JextractHome = "$env:USERPROFILE\jextract"
+        New-Item -ItemType Directory -Force -Path $JextractHome | Out-Null
+
+        $Success = $false
+        foreach ($Url in $JextractUrls) {
+          Write-Host "Trying to download from: $Url"
+          $TarPath = "$JextractHome\jextract.tar.gz"
+
+          try {
+            Invoke-WebRequest -Uri $Url -OutFile $TarPath -ErrorAction Stop
+            Write-Host "✓ Download successful from $Url"
+
+            # Extract using tar (available in Windows 10+)
+            $TempExtract = "$JextractHome\temp"
+            New-Item -ItemType Directory -Force -Path $TempExtract | Out-Null
+            tar -xzf "$TarPath" -C "$TempExtract" 2>&1 | Out-Null
+
+            # Find jextract.bat
+            $JextractBat = Get-ChildItem -Path $TempExtract -Filter "jextract.bat" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+
+            if ($JextractBat) {
+              Write-Host "Found jextract.bat at: $($JextractBat.FullName)"
+
+              # Move contents to JextractHome
+              $JextractRoot = $JextractBat.Directory.Parent.FullName
+              Get-ChildItem -Path $JextractRoot | ForEach-Object {
+                Move-Item -Path $_.FullName -Destination $JextractHome -Force
+              }
+
+              # Clean up
+              Remove-Item -Path $TempExtract -Recurse -Force
+              Remove-Item -Path $TarPath -Force
+
+              # Verify
+              if (Test-Path "$JextractHome\bin\jextract.bat") {
+                Write-Host "✓ jextract extracted successfully to $JextractHome"
+                $Success = $true
+                break
+              }
+            } else {
+              Write-Host "✗ Could not find jextract.bat in extracted files"
+              Remove-Item -Path $TempExtract -Recurse -Force -ErrorAction SilentlyContinue
+            }
+          }
+          catch {
+            Write-Host "✗ Failed to download or extract from $Url"
+            Write-Host "Error: $_"
+          }
+        }
+
+        if (-not $Success) {
+          Write-Host "ERROR: Failed to download jextract from any known source"
+          Write-Host "Please check https://jdk.java.net/jextract/ for available builds"
+          exit 1
+        }
+
+        # Set outputs
+        echo "jextract-home=$JextractHome" >> $env:GITHUB_OUTPUT
+
+        # Verify installation
+        try {
+          $Version = & "$JextractHome\bin\jextract.bat" --version 2>&1 | Select-Object -First 1
+          echo "jextract-version=$Version" >> $env:GITHUB_OUTPUT
+          Write-Host "✓ jextract installed successfully: $Version"
+        } catch {
+          echo "jextract-version=unknown" >> $env:GITHUB_OUTPUT
+          Write-Host "✓ jextract installed (version check not supported)"
+        }
+
+    - name: Set environment variables
+      id: setup-jextract
+      shell: bash
+      run: |
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          JEXTRACT_HOME="${{ steps.setup-jextract-windows.outputs.jextract-home }}"
+          JEXTRACT_VERSION="${{ steps.setup-jextract-windows.outputs.jextract-version }}"
+        else
+          JEXTRACT_HOME="${{ steps.setup-jextract-unix.outputs.jextract-home }}"
+          JEXTRACT_VERSION="${{ steps.setup-jextract-unix.outputs.jextract-version }}"
+        fi
+
+        echo "JEXTRACT_HOME=$JEXTRACT_HOME" >> $GITHUB_ENV
+        echo "jextract-home=$JEXTRACT_HOME" >> $GITHUB_OUTPUT
+        echo "jextract-version=$JEXTRACT_VERSION" >> $GITHUB_OUTPUT
+
+        # Add to PATH
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          echo "$JEXTRACT_HOME\bin" >> $GITHUB_PATH
+        else
+          echo "$JEXTRACT_HOME/bin" >> $GITHUB_PATH
+        fi
+
+        echo "✓ jextract setup complete"
+        echo "  JEXTRACT_HOME=$JEXTRACT_HOME"
+        echo "  Version: $JEXTRACT_VERSION"

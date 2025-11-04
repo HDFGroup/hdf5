@@ -18,8 +18,11 @@
   outputs it to the screen.
  ************************************************************/
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
 public class H5Ex_T_StringAttribute {
     private static String FILENAME      = "H5Ex_T_StringAttribute.h5";
@@ -29,14 +32,14 @@ public class H5Ex_T_StringAttribute {
     private static final int SDIM       = 8;
     private static final int RANK       = 1;
 
-    private static void CreateDataset()
+    private static void CreateDataset(Arena arena)
     {
-        long file_id            = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id         = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id        = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id         = HDF5Constants.H5I_INVALID_HID;
-        long attribute_id       = HDF5Constants.H5I_INVALID_HID;
+        long file_id            = H5I_INVALID_HID();
+        long memtype_id         = H5I_INVALID_HID();
+        long filetype_id        = H5I_INVALID_HID();
+        long dataspace_id       = H5I_INVALID_HID();
+        long dataset_id         = H5I_INVALID_HID();
+        long attribute_id       = H5I_INVALID_HID();
         long[] dims             = {DIM0};
         byte[][] dset_data      = new byte[DIM0][SDIM];
         StringBuffer[] str_data = {new StringBuffer("Parting"), new StringBuffer("is such"),
@@ -44,8 +47,7 @@ public class H5Ex_T_StringAttribute {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -55,17 +57,17 @@ public class H5Ex_T_StringAttribute {
         // the strings as FORTRAN strings, therefore they do not need space
         // for the null terminator in the file.
         try {
-            filetype_id = H5.H5Tcopy(HDF5Constants.H5T_FORTRAN_S1);
+            filetype_id = H5Tcopy(H5T_FORTRAN_S1_g());
             if (filetype_id >= 0)
-                H5.H5Tset_size(filetype_id, SDIM - 1);
+                H5Tset_size(filetype_id, SDIM - 1);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
-            memtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            memtype_id = H5Tcopy(H5T_C_S1_g());
             if (memtype_id >= 0)
-                H5.H5Tset_size(memtype_id, SDIM);
+                H5Tset_size(memtype_id, SDIM);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -73,13 +75,12 @@ public class H5Ex_T_StringAttribute {
 
         // Create dataset with a scalar dataspace.
         try {
-            dataspace_id = H5.H5Screate(HDF5Constants.H5S_SCALAR);
+            dataspace_id = H5Screate(H5S_SCALAR());
             if (dataspace_id >= 0) {
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, dataspace_id,
-                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                          HDF5Constants.H5P_DEFAULT);
-                H5.H5Sclose(dataspace_id);
-                dataspace_id = HDF5Constants.H5I_INVALID_HID;
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_STD_I32LE_g(),
+                                        dataspace_id, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
+                H5Sclose(dataspace_id);
+                dataspace_id = H5I_INVALID_HID();
             }
         }
         catch (Exception e) {
@@ -89,7 +90,8 @@ public class H5Ex_T_StringAttribute {
         // Create dataspace. Setting maximum size to NULL sets the maximum
         // size to be the current size.
         try {
-            dataspace_id = H5.H5Screate_simple(RANK, dims, null);
+            dataspace_id =
+                H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -98,8 +100,8 @@ public class H5Ex_T_StringAttribute {
         // Create the attribute.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                attribute_id = H5.H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                attribute_id = H5Acreate2(dataset_id, arena.allocateFrom(ATTRIBUTENAME), filetype_id,
+                                          dataspace_id, H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -115,8 +117,17 @@ public class H5Ex_T_StringAttribute {
                         dset_data[indx][jndx] = 0;
                 }
             }
-            if ((attribute_id >= 0) && (memtype_id >= 0))
-                H5.H5Awrite(attribute_id, memtype_id, dset_data);
+            if ((attribute_id >= 0) && (memtype_id >= 0)) {
+                // Flatten 2D byte array to 1D for MemorySegment
+                byte[] flatData = new byte[DIM0 * SDIM];
+                for (int i = 0; i < DIM0; i++) {
+                    for (int j = 0; j < SDIM; j++) {
+                        flatData[i * SDIM + j] = dset_data[i][j];
+                    }
+                }
+                MemorySegment dataSeg = arena.allocateFrom(ValueLayout.JAVA_BYTE, flatData);
+                H5Awrite(attribute_id, memtype_id, dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +136,7 @@ public class H5Ex_T_StringAttribute {
         // End access to the dataset and release resources used by it.
         try {
             if (attribute_id >= 0)
-                H5.H5Aclose(attribute_id);
+                H5Aclose(attribute_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -133,7 +144,7 @@ public class H5Ex_T_StringAttribute {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -142,7 +153,7 @@ public class H5Ex_T_StringAttribute {
         // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -151,7 +162,7 @@ public class H5Ex_T_StringAttribute {
         // Terminate access to the file type.
         try {
             if (filetype_id >= 0)
-                H5.H5Tclose(filetype_id);
+                H5Tclose(filetype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -160,7 +171,7 @@ public class H5Ex_T_StringAttribute {
         // Terminate access to the mem type.
         try {
             if (memtype_id >= 0)
-                H5.H5Tclose(memtype_id);
+                H5Tclose(memtype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -169,21 +180,21 @@ public class H5Ex_T_StringAttribute {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void ReadDataset()
+    private static void ReadDataset(Arena arena)
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id  = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id   = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long attribute_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long filetype_id  = H5I_INVALID_HID();
+        long memtype_id   = H5I_INVALID_HID();
+        long dataspace_id = H5I_INVALID_HID();
+        long dataset_id   = H5I_INVALID_HID();
+        long attribute_id = H5I_INVALID_HID();
         long sdim         = 0;
         long[] dims       = {DIM0};
         byte[][] dset_data;
@@ -191,7 +202,7 @@ public class H5Ex_T_StringAttribute {
 
         // Open an existing file.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -200,7 +211,7 @@ public class H5Ex_T_StringAttribute {
         // Open an existing dataset.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -208,8 +219,9 @@ public class H5Ex_T_StringAttribute {
 
         try {
             if (dataset_id >= 0)
-                attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                                                  HDF5Constants.H5P_DEFAULT);
+                attribute_id =
+                    H5Aopen_by_name(dataset_id, arena.allocateFrom("."), arena.allocateFrom(ATTRIBUTENAME),
+                                    H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -218,9 +230,9 @@ public class H5Ex_T_StringAttribute {
         // Get the datatype and its size.
         try {
             if (attribute_id >= 0)
-                filetype_id = H5.H5Aget_type(attribute_id);
+                filetype_id = H5Aget_type(attribute_id);
             if (filetype_id >= 0) {
-                sdim = H5.H5Tget_size(filetype_id);
+                sdim = H5Tget_size(filetype_id);
                 sdim++; // Make room for null terminator
             }
         }
@@ -231,15 +243,21 @@ public class H5Ex_T_StringAttribute {
         // Get dataspace and allocate memory for read buffer.
         try {
             if (attribute_id >= 0)
-                dataspace_id = H5.H5Aget_space(attribute_id);
+                dataspace_id = H5Aget_space(attribute_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
-            if (dataspace_id >= 0)
-                H5.H5Sget_simple_extent_dims(dataspace_id, dims, null);
+            if (dataspace_id >= 0) {
+                MemorySegment dimsSeg = arena.allocateFrom(ValueLayout.JAVA_LONG, dims);
+                H5Sget_simple_extent_dims(dataspace_id, dimsSeg, MemorySegment.NULL);
+                // Read back the dimensions
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = dimsSeg.getAtIndex(ValueLayout.JAVA_LONG, i);
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -251,9 +269,9 @@ public class H5Ex_T_StringAttribute {
 
         // Create the memory datatype.
         try {
-            memtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            memtype_id = H5Tcopy(H5T_C_S1_g());
             if (memtype_id >= 0)
-                H5.H5Tset_size(memtype_id, sdim);
+                H5Tset_size(memtype_id, sdim);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -261,8 +279,17 @@ public class H5Ex_T_StringAttribute {
 
         // Read data.
         try {
-            if ((attribute_id >= 0) && (memtype_id >= 0))
-                H5.H5Aread(attribute_id, memtype_id, dset_data);
+            if ((attribute_id >= 0) && (memtype_id >= 0)) {
+                int totalSize         = (int)dims[0] * (int)sdim;
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_BYTE, totalSize);
+                H5Aread(attribute_id, memtype_id, dataSeg);
+                // Unflatten 1D MemorySegment to 2D byte array
+                for (int i = 0; i < (int)dims[0]; i++) {
+                    for (int j = 0; j < sdim; j++) {
+                        dset_data[i][j] = dataSeg.get(ValueLayout.JAVA_BYTE, i * sdim + j);
+                    }
+                }
+            }
             byte[] tempbuf = new byte[(int)sdim];
             for (int indx = 0; indx < (int)dims[0]; indx++) {
                 for (int jndx = 0; jndx < sdim; jndx++) {
@@ -284,7 +311,7 @@ public class H5Ex_T_StringAttribute {
         // End access to the dataset and release resources used by it.
         try {
             if (attribute_id >= 0)
-                H5.H5Aclose(attribute_id);
+                H5Aclose(attribute_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -292,7 +319,7 @@ public class H5Ex_T_StringAttribute {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -301,7 +328,7 @@ public class H5Ex_T_StringAttribute {
         // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
+                H5Sclose(dataspace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -310,7 +337,7 @@ public class H5Ex_T_StringAttribute {
         // Terminate access to the file type.
         try {
             if (filetype_id >= 0)
-                H5.H5Tclose(filetype_id);
+                H5Tclose(filetype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -319,7 +346,7 @@ public class H5Ex_T_StringAttribute {
         // Terminate access to the mem type.
         try {
             if (memtype_id >= 0)
-                H5.H5Tclose(memtype_id);
+                H5Tclose(memtype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -328,7 +355,7 @@ public class H5Ex_T_StringAttribute {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -337,11 +364,10 @@ public class H5Ex_T_StringAttribute {
 
     public static void main(String[] args)
     {
-        H5Ex_T_StringAttribute.CreateDataset();
-        // Now we begin the read section of this example. Here we assume
-        // the dataset and array have the same name and rank, but can have
-        // any size. Therefore we must allocate a new array to read in
-        // data using malloc().
-        H5Ex_T_StringAttribute.ReadDataset();
+
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_T_StringAttribute.CreateDataset(arena);
+            H5Ex_T_StringAttribute.ReadDataset(arena);
+        }
     }
 }

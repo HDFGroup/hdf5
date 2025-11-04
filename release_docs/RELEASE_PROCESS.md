@@ -183,18 +183,32 @@ For more information on the HDF5 versioning and backward and forward compatibili
 3. Run `bin/release` (similar to 8.2) and commit all the changed files.
 4. Select the actions tab and the release build workflow, then click the 'Run workflow' drop-down.
     - Choose the release branch
-    - Enter the ‘Release version tag’ name as 'X.Y.Z'
+    - Enter the 'Release version tag' name as 'X.Y.Z'
+    - **Maven Deployment (Optional):** Set 'deploy_maven' to true if Maven deployment is desired
+    - **Maven Repository:** Choose between 'github-packages' or 'maven-central-staging' for deployment target
     - Press "Run Workflow"
-5. Review the release files in Github
-6. Edit the Github Release and change status to Release
+5. **Maven Artifact Deployment (If Enabled):**
+    - **Prerequisites:** Ensure Maven deployment permissions are configured (see `MAVEN_DEPLOYMENT_PERMISSIONS.md`)
+    - **Testing Phase:** The workflow starts with `dry_run: true` to test permissions without actual deployment
+    - **Multi-Platform Artifacts:** The staging workflow generates artifacts for Linux, Windows, macOS x86_64, and macOS aarch64
+    - **Java Examples Testing:** Comprehensive validation of Java examples (org.hdfgroup:hdf5-java-examples) across all platforms with Maven artifacts
+    - **Deployment Process:**
+      - `maven-staging.yml` workflow generates artifacts for all platforms
+      - `maven-deploy.yml` workflow deploys filtered main HDF5 JARs (jarhdf5-*.jar) only
+      - Monitor both workflows for successful completion
+    - **Troubleshooting:** Check debug output in workflow logs for permission or authentication issues
+    - **Go-Live:** After successful dry run testing, set `dry_run: false` in `.github/workflows/release.yml`
+    - Verify artifacts are properly uploaded to GitHub Packages or Maven Central staging
+6. Review the release files in Github
+7. Edit the Github Release and change status to Release
     - Change status from Pre-release to Release
-7. Select publish-release build from workflow, then click the 'Run workflow' drop-down.
+8. Select publish-release build from workflow, then click the 'Run workflow' drop-down.
     - Choose the release branch
     - Enter the ‘HDF5 Release version tag’ name as 'X.Y.Z'
     - Enter the 'HDF5 Release file name base' as 'hdf5-X.Y.Z'
     - Enter the 'HDF5 target bucket directory' as 'vX_Y/vX_Y_Z'
     - Press "Run Workflow"
-8. Release hdf5_plugins following the same steps.
+9. Release hdf5_plugins following the same steps.
 
 ### 11. Add the contents of the CHANGELOG.md file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
 

@@ -1,0 +1,251 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Java hdf.hdf5lib package
+# This file sets up the build, packaging, and installation rules for the HDF5 Java hdf.hdf5lib package.
+# It handles Java source grouping, JAR creation, JNI dependencies, and formatting for the HDF5 Java bindings.
+#-----------------------------------------------------------------------------
+cmake_minimum_required (VERSION 3.26)
+project (HDF5_JAVA_SRCJNI_HDF_HDF5 Java)
+
+set (CMAKE_VERBOSE_MAKEFILE 1)
+
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_HDF_HDF5_SOURCE_DIR};${HDF5_JAVA_HDF_HDF5_BINARY_DIR};${HDF5_JAVA_LIB_DIR};${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${HDF5_JAVA_HDF5_LIB_CORENAME}.dir/hdf/hdf5lib")
+
+SET_GLOBAL_VARIABLE (HDF5_JAVA_SOURCE_PACKAGES
+    "${HDF5_JAVA_SOURCE_PACKAGES};hdf.hdf5lib.callbacks;hdf.hdf5lib.exceptions;hdf.hdf5lib.structs;hdf.hdf5lib"
+)
+
+set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
+    callbacks/H5Callbacks.java
+    callbacks/H5A_iterate_cb.java
+    callbacks/H5A_iterate_t.java
+    callbacks/H5D_append_cb.java
+    callbacks/H5D_append_t.java
+    callbacks/H5D_iterate_cb.java
+    callbacks/H5D_iterate_t.java
+    callbacks/H5E_walk_cb.java
+    callbacks/H5E_walk_t.java
+    callbacks/H5L_iterate_t.java
+    callbacks/H5L_iterate_opdata_t.java
+    callbacks/H5O_iterate_t.java
+    callbacks/H5O_iterate_opdata_t.java
+    callbacks/H5P_cls_close_func_cb.java
+    callbacks/H5P_cls_close_func_t.java
+    callbacks/H5P_cls_copy_func_cb.java
+    callbacks/H5P_cls_copy_func_t.java
+    callbacks/H5P_cls_create_func_cb.java
+    callbacks/H5P_cls_create_func_t.java
+    callbacks/H5P_prp_close_func_cb.java
+    callbacks/H5P_prp_compare_func_cb.java
+    callbacks/H5P_prp_copy_func_cb.java
+    callbacks/H5P_prp_create_func_cb.java
+    callbacks/H5P_prp_delete_func_cb.java
+    callbacks/H5P_prp_get_func_cb.java
+    callbacks/H5P_prp_set_func_cb.java
+    callbacks/H5P_iterate_cb.java
+    callbacks/H5P_iterate_t.java
+)
+
+set (HDF5_JAVADOC_HDF_HDF5_CALLBACKS_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
+    callbacks/package-info.java
+)
+
+set (HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES
+    exceptions/HDF5Exception.java
+    exceptions/HDF5IdException.java
+    exceptions/HDF5AttributeException.java
+    exceptions/HDF5BtreeException.java
+    exceptions/HDF5DataFiltersException.java
+    exceptions/HDF5DatasetInterfaceException.java
+    exceptions/HDF5DataspaceInterfaceException.java
+    exceptions/HDF5DataStorageException.java
+    exceptions/HDF5DatatypeInterfaceException.java
+    exceptions/HDF5ExternalFileListException.java
+    exceptions/HDF5FileInterfaceException.java
+    exceptions/HDF5FunctionArgumentException.java
+    exceptions/HDF5FunctionEntryExitException.java
+    exceptions/HDF5HeapException.java
+    exceptions/HDF5InternalErrorException.java
+    exceptions/HDF5JavaException.java
+    exceptions/HDF5LibraryException.java
+    exceptions/HDF5LowLevelIOException.java
+    exceptions/HDF5MetaDataCacheException.java
+    exceptions/HDF5ObjectHeaderException.java
+    exceptions/HDF5PropertyListInterfaceException.java
+    exceptions/HDF5ReferenceException.java
+    exceptions/HDF5ResourceUnavailableException.java
+    exceptions/HDF5SymbolTableException.java
+)
+
+set (HDF5_JAVADOC_HDF_HDF5_EXCEPTIONS_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES}
+    exceptions/package-info.java
+)
+
+set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
+    structs/H5_ih_info_t.java
+    structs/H5A_info_t.java
+    structs/H5AC_cache_config_t.java
+    structs/H5E_error2_t.java
+    structs/H5F_info2_t.java
+    structs/H5FD_ros3_fapl_t.java
+    structs/H5FD_hdfs_fapl_t.java
+    structs/H5G_info_t.java
+    structs/H5L_info_t.java
+    structs/H5O_hdr_info_t.java
+    structs/H5O_info_t.java
+    structs/H5O_native_info_t.java
+    structs/H5O_token_t.java
+)
+
+set (HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
+    structs/package-info.java
+)
+
+set (HDF5_JAVA_HDF_HDF5_SOURCES
+    HDFArray.java
+    HDF5Constants.java
+    HDFNativeData.java
+    H5.java
+)
+
+set (HDF5_JAVADOC_HDF_HDF5_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_SOURCES}
+    package-info.java
+)
+
+set (CMAKE_JNI_TARGET TRUE)
+
+file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
+"Enable-Native-Access: ALL-UNNAMED
+"
+)
+
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR}")
+
+# Create main JAR with platform classifier if Maven deployment is enabled
+if (HDF5_ENABLE_MAVEN_DEPLOY)
+  # Determine platform and architecture for Maven classifiers
+  if (WIN32)
+    set (HDF5_MAVEN_PLATFORM "windows")
+  elseif (APPLE)
+    set (HDF5_MAVEN_PLATFORM "macos")
+  else ()
+    set (HDF5_MAVEN_PLATFORM "linux")
+  endif ()
+
+  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+      set (HDF5_MAVEN_ARCHITECTURE "aarch64")
+    else ()
+      set (HDF5_MAVEN_ARCHITECTURE "x86_64")
+    endif ()
+  else ()
+    set (HDF5_MAVEN_ARCHITECTURE "x86")
+  endif ()
+
+  # Set version suffix for snapshots vs releases
+  if (HDF5_MAVEN_SNAPSHOT)
+    set (HDF5_MAVEN_VERSION_SUFFIX "-SNAPSHOT")
+  else ()
+    set (HDF5_MAVEN_VERSION_SUFFIX "")
+  endif ()
+
+  # Build JAR once with platform classifier - this is the primary JAR
+  set (HDF5_JAR_CLASSIFIER "${HDF5_MAVEN_PLATFORM}-${HDF5_MAVEN_ARCHITECTURE}")
+  add_jar (${HDF5_JAVA_HDF5_LIB_TARGET}
+    OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}"
+    MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt
+    ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_SOURCES}
+  )
+
+  # Get the JAR file path for the platform-specific JAR
+  get_target_property (HDF5_JAVA_PLATFORM_JAR_FILE ${HDF5_JAVA_HDF5_LIB_TARGET} JAR_FILE)
+
+  # Define the universal JAR name and path (without classifier)
+  set (HDF5_JAVA_UNIVERSAL_JAR_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}.jar")
+  set (HDF5_JAVA_UNIVERSAL_JAR_FILE "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_JAVA_UNIVERSAL_JAR_NAME}")
+
+  # Create universal JAR by copying the platform-specific JAR
+  set (HDF5_JAVA_UNIVERSAL_TARGET "${HDF5_JAVA_HDF5_LIB_TARGET}-universal")
+  add_custom_command (
+    OUTPUT ${HDF5_JAVA_UNIVERSAL_JAR_FILE}
+    COMMAND ${CMAKE_COMMAND} -E copy ${HDF5_JAVA_PLATFORM_JAR_FILE} ${HDF5_JAVA_UNIVERSAL_JAR_FILE}
+    DEPENDS ${HDF5_JAVA_HDF5_LIB_TARGET}
+    COMMENT "Creating universal JAR ${HDF5_JAVA_UNIVERSAL_JAR_NAME} from platform-specific JAR"
+  )
+
+  # Create a target for the universal JAR
+  add_custom_target (${HDF5_JAVA_UNIVERSAL_TARGET} ALL
+    DEPENDS ${HDF5_JAVA_UNIVERSAL_JAR_FILE}
+  )
+  set_target_properties (${HDF5_JAVA_UNIVERSAL_TARGET} PROPERTIES FOLDER libraries/java)
+
+  # Install both JARs
+  install_jar (${HDF5_JAVA_HDF5_LIB_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT maven)
+  install (FILES ${HDF5_JAVA_UNIVERSAL_JAR_FILE} DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT libraries)
+
+  # Update global variables for both JARs
+  # Use universal JAR for examples/tests (for compatibility)
+  SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS "${HDF5_JAVA_JARS};${HDF5_JAVA_UNIVERSAL_JAR_FILE}")
+  # Export both JARs for installation
+  SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS_TO_EXPORT "${HDF5_JAVA_JARS_TO_EXPORT};${HDF5_JAVA_UNIVERSAL_JAR_FILE}")
+  SET_GLOBAL_VARIABLE (HDF5_MAVEN_PLATFORM_JAR_FILE "${HDF5_JAVA_PLATFORM_JAR_FILE}")
+else ()
+  # Standard JAR creation without Maven classifiers
+  add_jar (${HDF5_JAVA_HDF5_LIB_TARGET} OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}" MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
+  install_jar (${HDF5_JAVA_HDF5_LIB_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT libraries)
+  # For non-Maven builds, use the standard JAR
+  get_target_property (${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE ${HDF5_JAVA_HDF5_LIB_TARGET} JAR_FILE)
+  SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS "${HDF5_JAVA_JARS};${${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE}")
+  SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS_TO_EXPORT "${HDF5_JAVA_JARS_TO_EXPORT};${${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE}")
+endif ()
+
+# Always export the platform-specific JAR for reference (used by Maven deployment)
+get_target_property (${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE ${HDF5_JAVA_HDF5_LIB_TARGET} JAR_FILE)
+SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS_TO_EXPORT "${HDF5_JAVA_JARS_TO_EXPORT};${${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE}")
+
+message (STATUS "HDF5 JNI java lib: ${HDF5_JAVA_JNI_LIB_TARGET} jar: ${HDF5_JAVA_HDF5_LIB_TARGET}")
+add_dependencies (${HDF5_JAVA_HDF5_LIB_TARGET} ${HDF5_JAVA_JNI_LIB_TARGET})
+set_target_properties (${HDF5_JAVA_HDF5_LIB_TARGET} PROPERTIES FOLDER libraries/java)
+
+# Set HDF5_JAVA_LIBRARY for examples to depend on
+SET_GLOBAL_VARIABLE (HDF5_JAVA_LIBRARY ${HDF5_JAVA_HDF5_LIB_TARGET})
+
+#-----------------------------------------------------------------------------
+# Maven POM Generation
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_MAVEN_DEPLOY)
+  # Configure timestamp for build metadata
+  string (TIMESTAMP CMAKE_CONFIGURE_DATE "%Y-%m-%d %H:%M:%S UTC" UTC)
+
+  # Generate POM file from template
+  configure_file (
+    ${CMAKE_CURRENT_SOURCE_DIR}/pom.xml.in
+    ${CMAKE_CURRENT_BINARY_DIR}/pom.xml
+    @ONLY
+  )
+
+  # Install POM file for deployment
+  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/pom.xml
+    DESTINATION ${HDF5_INSTALL_JAR_DIR}
+    COMPONENT maven
+  )
+
+  # Add Maven deployment information to global variables
+  SET_GLOBAL_VARIABLE (HDF5_MAVEN_POM_FILE "${CMAKE_CURRENT_BINARY_DIR}/pom.xml")
+  SET_GLOBAL_VARIABLE (HDF5_MAVEN_PLATFORM_CLASSIFIER "${HDF5_MAVEN_PLATFORM}-${HDF5_MAVEN_ARCHITECTURE}")
+
+  message (STATUS "Maven POM configured: ${HDF5_MAVEN_PLATFORM}-${HDF5_MAVEN_ARCHITECTURE}")
+endif ()
+
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_JAVA_SRC_FORMAT ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
+endif ()
+
+set (CMAKE_JAVA_INCLUDE_PATH "")
+

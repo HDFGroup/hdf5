@@ -17,6 +17,7 @@ Section IX:   Considerations for Cross-Compiling
 Section X:    Using CMakePresets.json for Compiling
 Section XI:   Using the Library
 Section XII:  Using CMake Regex Options for Testing
+Section XIII: Java FFM Testing
 
 ************************************************************************
 
@@ -56,9 +57,100 @@ Note:
    logging levels:
        https://cmake.org/cmake/help/latest/variable/CMAKE_MESSAGE_LOG_LEVEL.html
 
+
 ========================================================================
-II. Quick Step Building HDF5 Libraries with CMake Script Mode
+II. RECOMMENDED: Quick Start with CMake Presets
 ========================================================================
+
+⭐ This is the RECOMMENDED method for building HDF5 2.0 and later.
+
+Prerequisites
+-------------
+  - CMake 3.26 or later (required for HDF5 2.0)
+  - Ninja build system (recommended, should be downloaded if not available)
+  - Compiler: GCC, MSVC, or Clang
+
+Quick Start (3 steps)
+---------------------
+1. Change to the HDF5 source directory:
+       cd /path/to/hdf5-2.x.y
+
+2. Execute a workflow preset:
+       cmake --workflow --preset ci-StdShar-GNUC --fresh       # Linux/Mac with GCC
+       cmake --workflow --preset ci-StdShar-MSVC --fresh       # Windows with MSVC
+       cmake --workflow --preset ci-StdShar-Clang --fresh      # Linux/Mac with Clang
+
+3. Find your build artifacts in:
+       ../build/ci-StdShar-<compiler>/
+
+That's it! The workflow preset automatically:
+  - Configures the build
+  - Compiles libraries and tools
+  - Runs tests
+  - Creates installation packages
+
+Available Presets
+-----------------
+View all available presets:
+    cmake --list-presets
+
+Common presets:
+  Standard Builds:
+    ci-StdShar-GNUC        Standard shared libraries (GCC)
+    ci-StdShar-MSVC        Standard shared libraries (MSVC)
+    ci-StdShar-Clang       Standard shared libraries (Clang)
+    ci-MinShar-GNUC        Minimal shared libraries (GCC)
+
+  Java Builds:
+    ci-StdShar-GNUC-Java-FFM     Java FFM bindings (GCC)
+    ci-StdShar-GNUC-Java-JNI     Java JNI bindings (GCC)
+
+  Maven Deployment (JNI default - Java 8+):
+    ci-MinShar-GNUC-Maven-Snapshot               JNI snapshots for Maven
+    ci-MinShar-GNUC-Maven                        JNI release for Maven
+
+  Maven Deployment (FFM optional - Java 25+):
+    ci-MinShar-GNUC-Maven-FFM-Snapshot           FFM snapshots for Maven
+    ci-MinShar-GNUC-Maven-FFM                    FFM release for Maven
+
+  Note: For ROS3 (S3 support), add -DHDF5_ENABLE_ROS3_VFD=ON to any preset
+
+See Section XI for creating custom preset configurations.
+
+Why Use Presets?
+----------------
+✅ Simpler - No external files to download
+✅ Faster - Optimized settings included
+✅ Consistent - Same settings across platforms
+✅ Modern - CMake 3.26 best practices
+✅ Flexible - Easy to customize via CMakeUserPresets.json
+
+Individual Preset Commands (Advanced)
+--------------------------------------
+If you prefer to run preset steps individually (where <compiler-type> is GNUC, MSVC, or Clang):
+
+    cd /path/to/hdf5-source
+    cmake --preset ci-StdShar-<compiler-type>        # Configure
+    cmake --build --preset ci-StdShar-<compiler-type> # Build
+    ctest --preset ci-StdShar-<compiler-type>        # Test
+    cpack --preset ci-StdShar-<compiler-type>        # Package
+
+The workflow preset (shown in Quick Start above) runs all these steps automatically.
+
+Advanced Build Methods
+---------------------
+If you cannot use presets or need more control, see:
+  - Section III: Building with CMake Script Mode (requires external files, for automation/CI)
+  - Section IV: Building with CMake Command Mode (manual configuration, for advanced users)
+
+
+========================================================================
+III. Advanced: Building HDF5 Libraries with CMake Script Mode
+========================================================================
+
+NOTE: Most users should use Section II (CMake Presets) instead.
+      This method is provided for advanced users and automated builds.
+
 This short set of instructions is written for users who want to quickly
 build the HDF5 C, C++ and Fortran shared libraries and tools
 from the HDF5 source code package using the CMake tools. This procedure
@@ -70,7 +162,7 @@ NOTE: When using the presets process, the CMakePresets.json file in the source
     that are set in the cacheinit.cmake file.
     In addition, it will get the optional files listed below that are needed, from
     the appropriate repositories.
-    See Section X: Using CMakePresets.json for compiling
+    See Section II: RECOMMENDED Quick Start with CMake Presets
 
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
@@ -208,8 +300,12 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
 
 ========================================================================
-III. Quick Step Building HDF5 C Static Libraries and Tools with CMake
+IV. Advanced: Building HDF5 Libraries with CMake Command Mode
 ========================================================================
+
+NOTE: Most users should use Section II (CMake Presets) instead.
+      This method is provided for advanced users who need manual control.
+
 Notes: This short set of instructions is written for users who want to
        quickly build just the HDF5 C static library and tools from
        the HDF5 source code package using the CMake command line tools.
@@ -814,6 +910,81 @@ HDF5_BUILD_TOOLS          "Build HDF5 Tools"                    ON
 HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools"           OFF
 HDF5_BUILD_STATIC_TOOLS   "Build Static Tools Not Shared Tools" OFF
 
+----------------- HDF5 Maven Integration Options ----------------------------
+HDF5_ENABLE_MAVEN_DEPLOY  "Enable Maven repository deployment"  OFF
+HDF5_MAVEN_SNAPSHOT       "Build Maven snapshot versions"       OFF
+HDF5_ENABLE_JNI           "Force JNI implementation (default: auto-detect)" ON
+
+  Java Implementation Selection (as of HDF5 2.0):
+  HDF5 Java bindings support two native interface implementations:
+  - JNI (Java Native Interface): Default, works with Java 8+, production-stable
+  - FFM (Foreign Function & Memory): Optional, requires Java 25+, modern native access
+
+  Maven Artifacts:
+  - org.hdfgroup:hdf5-java-ffm - FFM implementation
+  - org.hdfgroup:hdf5-java-jni - JNI implementation
+
+  Both implementations use the same hdf.hdf5lib.* package structure for seamless migration.
+
+  To build HDF5 with Maven deployment support:
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON ../hdf5
+
+  To build Maven snapshot versions for development:
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_MAVEN_SNAPSHOT:BOOL=ON ../hdf5
+
+  Note: FFM is selected for Java 25+ if HDF5_ENABLE_JNI is OFF, JNI for older versions.
+  To force JNI even with Java 25+:
+  cmake -DHDF5_BUILD_JAVA:BOOL=ON -DHDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON -DHDF5_ENABLE_JNI:BOOL=ON ../hdf5
+
+  Or use the Maven-enabled CMake presets (recommended):
+
+  # Minimal build for Java artifacts only (recommended for Maven deployment)
+  # Linux (GCC) - JNI (default, Java 8+):
+  cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh          # JNI Release
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh # JNI Snapshot
+
+  # Linux (GCC) - FFM (optional, Java 25+):
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh          # FFM Release
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM-Snapshot --fresh # FFM Snapshot
+
+  # Windows (MSVC) - JNI (default):
+  cmake --workflow --preset ci-MinShar-MSVC-Maven --fresh          # JNI Release
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-Snapshot --fresh # JNI Snapshot
+
+  # Windows (MSVC) - FFM (optional):
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM --fresh          # FFM Release
+  cmake --workflow --preset ci-MinShar-MSVC-Maven-FFM-Snapshot --fresh # FFM Snapshot
+
+  # macOS (Clang) - JNI (default):
+  cmake --workflow --preset ci-MinShar-Clang-Maven --fresh          # JNI Release
+  cmake --workflow --preset ci-MinShar-Clang-Maven-Snapshot --fresh # JNI Snapshot
+
+  # macOS (Clang) - FFM (optional):
+  cmake --workflow --preset ci-MinShar-Clang-Maven-FFM --fresh         # FFM Release
+  cmake --workflow --preset ci-MinShar-Clang-Maven-FFM-Snapshot --fresh # FFM Snapshot
+
+  # ROS3 VFD (S3 cloud storage) - Add to any preset above:
+  cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh -DHDF5_ENABLE_ROS3_VFD=ON
+
+  Note: Presets are platform-specific. Use 'cmake --list-presets' to see
+        available presets for your current platform.
+  Note: Minimal Maven presets skip examples, testing, tools, C++, and Fortran
+        builds to optimize for Java artifact generation only.
+
+  Java Examples Maven Integration:
+  The HDF5 Java examples are available as a separate Maven artifact:
+  - org.hdfgroup:hdf5-java-examples
+  - Platform-specific dependencies ensure compatibility with HDF5 Java library
+  - Complete examples with documentation for all HDF5 Java functionality
+  - See HDF5Examples/JAVA/README-MAVEN.md for usage instructions
+
+  Testing Java Examples with Maven Artifacts:
+  - Maven staging workflow validates examples against artifacts
+  - Cross-platform testing ensures compatibility on all supported platforms
+  - Native library error handling validates JAR structure in Maven-only environments
+  - Fork-based testing allows validation on repository forks before canonical deployment
+  - Dynamic repository workflows adapt to any GitHub repository automatically
+
 ---------------- HDF5 Folder Build Options ---------------------------------
 Defaults relative to $<INSTALL_PREFIX>
 HDF5_INSTALL_BIN_DIR      "bin"
@@ -1104,119 +1275,107 @@ References:
     https://developer.android.com/ndk/guides/cmake
 
 
+
 ========================================================================
-X:    Using CMakePresets.json for Compiling
+XI. Creating Custom Preset Configurations
 ========================================================================
-Quick Start Presets
-    You want to build HDF5 with CMake, but there are so many options to consider.
 
-Solution
--------------------------------
-    CMake introduced presets in version 3.19. HDF Group provides a file in the source,
-    CMakePresets.json, that will build HDF5 with the
-    options for building a typical shared library with the common languages for a
-    platform. The features include building the tools, examples, plugins, and the
-    shared and static libraries.
+The quickest way to customize your build is to create a CMakeUserPresets.json file
+in the HDF5 source directory.
 
-    The CMakePresets.json file is located in the root directory of the HDF5 source.
-    It is from here you will execute the cmake command to build HDF5. The following
-    example shows how to build HDF5 with the CMakePresets.json file:
-        change directory to the hdf5 source folder
-        execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
-            where "<compiler-type>" is  GNUC or MSVC or Clang
+Basic Customization Steps
+--------------------------
+1. Copy CMakePresets.json to CMakeUserPresets.json:
+       cp CMakePresets.json CMakeUserPresets.json
 
-    The above example will create a "build" folder in the source parent directory, which
-    will contain the results of the build, including installation package files.
+2. Edit CMakeUserPresets.json:
+   - Change configuration names from ci-* to my-*
+   - Modify the "inherits" field in "configurePresets" for alternate options
+   - Update "configurePreset" fields in "buildPresets", "testPresets", "packagePresets"
+   - Update names in "workflowPresets" steps from ci-* to my-*
 
-Discussion
--------------------------------
-    One problem that CMake users often face is sharing settings with other people for common
-    ways to configure a project. This may be done to support CI builds, or for users who
-    frequently use the same build. CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
-    that allow users to specify common configure options and share them with others. CMake also supports
-    files included with the include field.
+Example: Using Local Support Files
+-----------------------------------
+To change external support files to use a local directory:
 
-    CMakePresets.json and CMakeUserPresets.json live in the project's root directory. They
-    both have exactly the same format, and both are optional (though at least one must be
-    present if --preset is specified). CMakePresets.json is meant to specify project-wide build
-    details, while CMakeUserPresets.json is meant for developers to specify their own local build details.
+{
+  "name": "my-base-tgz",
+  "hidden": true,
+  "inherits": "ci-base",
+  "cacheVariables": {
+    "HDF5_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
+    "TGZPATH": {"type": "PATH", "value": "${sourceParentDir}/temp"}
+  }
+},
+{
+  "name": "my-StdCompression",
+  "hidden": true,
+  "inherits": "my-base-tgz",
+  "cacheVariables": {
+    ...
+  }
+},
+{
+  "name": "my-StdShar",
+  "hidden": true,
+  "inherits": "my-StdCompression",
+  "cacheVariables": {
+    ...
+  }
+},
+{
+  "name": "my-StdShar-GNUC",
+  "description": "My Custom GNUC Standard Config for x64 (Release)",
+  "inherits": [
+    "ci-x64-Release-GNUC",
+    "ci-CPP",
+    "ci-Fortran",
+    "ci-Java",
+    "my-StdShar",
+    "my-StdExamples"
+  ]
+}
 
-    The CMakePresets.json files created by HDF Group are intended to be used with the Ninja build system,
-    which may need to be installed separately on some platforms.
+Then you can change or add options for your specific case.
 
-    See CMake documentation for details: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
-
-HDF-provided CMakePresets.json
--------------------------------
-    The CMakePresets.json provided by HDF requires CMake version 3.25, which supports package
-    and workflow presets, and ninja build system. The top-level configuration group is intended to be
-    a standard set of options to produce a package of shared and static libraries and tools. Other configurations
-    used for inheriting settings are in the included json file in "config/cmake-presets/hidden-presets.json".
-
-    Available configurations presets can be displayed by executing:
-        cmake -S <path-to-source> --list-presets
-
-    Using individual command presets (where <compiler-type> is  GNUC or MSVC or Clang):
-        change directory to the hdf5 source folder
-        cmake --preset ci-StdShar-<compiler-type>
-        cmake --build --preset ci-StdShar-<compiler-type>
-        ctest --preset ci-StdShar-<compiler-type>
-        cpack --preset ci-StdShar-<compiler-type>
-
-    Using the workflow preset to configure, build, test and package the standard configuration:
-        change directory to the hdf5 source folder
-        execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
-              where <compiler-type> is  GNUC or MSVC or Clang
-
-Creating your own configurations
+Maven Deployment Preset Example
 --------------------------------
-    The quickest way is to copy CMakePresets.json to CMakeUserPresets.json and
-    edit CMakeUserPresets.json configuration names from ci-* to my-*. Change the
-    "configurePresets" section "inherits" field only for those that you have alternate
-    options. Then change the "configurePreset" field entries in the "buildPresets",
-    "testPresets", "packagePresets" sections to match your my-StdShar-<compiler-type>.
-    And finally the names settings in the "workflowPresets" steps will also need the ci-* to my-* change.
+For Maven deployment with custom repository URL:
 
-    For instance, to change the support files to use a local directory, edit CMakeUserPresets.json:
-    {
-      "name": "my-base-tgz",
-      "hidden": true,
-      "inherits": "ci-base",
-      "cacheVariables": {
-        "HDF5_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
-        "TGZPATH": {"type": "PATH", "value": "${sourceParentDir}/temp"}
-      }
-    },
-    {
-      "name": "my-StdCompression",
-      "hidden": true,
-      "inherits": "my-base-tgz",
-      "cacheVariables": {
-......
-   {
-      "name": "my-StdShar",
-      "hidden": true,
-      "inherits": "my-StdCompression",
-      "cacheVariables": {
-......
-    {
-      "name": "my-StdShar-GNUC",
-      "description": "GNUC Standard Config for x64 (Release)",
-      "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-CPP",
-        "ci-Fortran",
-        "ci-Java",
-        "my-StdShar",
-        "my-StdExamples"
-      ]
-    }
+{
+  "name": "my-maven-custom",
+  "inherits": "ci-MinShar-GNUC-Maven-Snapshot",
+  "cacheVariables": {
+    "MAVEN_REPOSITORY_URL": {"type": "STRING", "value": "https://your-repo.com/maven"},
+    "HDF5_ENABLE_ROS3_VFD": {"type": "BOOL", "value": "ON"}
+  }
+}
 
-    Then you can change or add options for your specific case.
+Then build with:
+    cmake --workflow --preset my-maven-custom --fresh
+
+Note: This example uses JNI (default). For FFM, inherit from ci-MinShar-GNUC-Maven-FFM-Snapshot
+
+Preset File Details
+-------------------
+CMakePresets.json and CMakeUserPresets.json:
+  - Live in the project's root directory
+  - Both have the same format
+  - CMakePresets.json: Project-wide build details (don't modify)
+  - CMakeUserPresets.json: Your local build customizations
+
+The HDF Group presets require CMake 3.26 and use the Ninja build system.
+Ninja may need to be installed separately on some platforms.
+
+Hidden presets (marked "hidden": true) are used for inheritance and
+cannot be used directly. They are defined in config/cmake-presets/hidden-presets.json.
+
+For more information:
+    https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
 
 
 ========================================================================
-XI. Using the Library
+XII. Using the Library
 ========================================================================
     For information on using HDF5 see the documentation, tutorials and examples
     found here:
@@ -1257,8 +1416,9 @@ XI. Using the Library
       components are: shared, static, C, CXX, Fortran, HL, Java, Tools, and VOL.
 
 
+
 ========================================================================
-XII. Using the CMake Regex Options for Testing
+XIII. Using CMake Regex Options for Testing
 ========================================================================
    CMake provides a way to use regular expressions to control which tests are
    executed. The HDF5 CMake build system provides labels for each test that
@@ -1311,6 +1471,68 @@ XII. Using the CMake Regex Options for Testing
     For more information on using regular expressions with ctest,
     see the CMake documentation:
         https://cmake.org/cmake/help/latest/manual/ctest.1.html#regular-expressions
+
+
+
+========================================================================
+XIV. Java FFM Testing
+========================================================================
+
+HDF5 2.0 includes comprehensive Foreign Function & Memory (FFM) API tests
+for Java 25+.
+
+FFM Test Organization
+---------------------
+Tests are organized by HDF5 module in java/jtest/:
+
+Module Test Files:
+  - TestH5ffm.java     - General library operations
+                         H5open, H5close, memory management, version info
+  - TestH5Affm.java    - Attribute operations
+  - TestH5Dffm.java    - Dataset operations
+  - TestH5Effm.java    - Error handling
+  - TestH5Fffm.java    - File operations
+  - TestH5FDffm.java   - File drivers
+  - TestH5Gffm.java    - Group operations
+  - TestH5Iffm.java    - Identifier management
+  - TestH5Lffm.java    - Link operations
+  - TestH5Offm.java    - Object operations
+  - TestH5Pffm.java    - Property lists
+  - TestH5PLffm.java   - Plugin management
+  - TestH5Rffm.java    - References
+  - TestH5Sffm.java    - Dataspace operations
+  - TestH5Tffm.java    - Datatype operations
+  - TestH5VLffm.java   - VOL connector
+  - TestH5Zffm.java    - Filter operations
+
+Running FFM Tests
+-----------------
+To run all FFM tests:
+    ctest -R "JUnitFFM" -V
+
+To run specific module tests:
+    ctest -R "JUnit-TestH5Affm" -V    # Attributes
+    ctest -R "JUnit-TestH5Pffm" -V    # Properties
+    ctest -R "JUnit-TestH5Tffm" -V    # Datatypes
+    ctest -R "JUnit-TestH5Sffm" -V    # Dataspaces
+
+Test Requirements:
+  - Java 25+ with --enable-native-access=ALL-UNNAMED
+  - FFM bindings JAR (javahdf5-*.jar)
+  - JUnit 4.x test framework
+  - HDF5 native libraries in LD_LIBRARY_PATH
+
+FFM Test Patterns:
+  - All tests use Arena.ofConfined() for memory management
+  - Proper cleanup in try-with-resources blocks
+  - Return value checking with isSuccess() / isValidId()
+  - See java/jtest/FfmTestSupport.java for utility methods
+
+ROS3 VFD (S3 Cloud Storage):
+  - Tests are compatible with both plain and ROS3-enabled builds
+  - Use -DHDF5_ENABLE_ROS3_VFD=ON with any Maven preset for ROS3 builds
+  - Example: cmake --preset ci-MinShar-GNUC-Maven -DHDF5_ENABLE_ROS3_VFD=ON
+  - Same test suite validates both feature sets
 
 
 ========================================================================

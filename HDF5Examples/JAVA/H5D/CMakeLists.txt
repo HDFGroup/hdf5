@@ -18,7 +18,6 @@ set (CMAKE_JAVA_INCLUDE_PATH ".")
 foreach (CMAKE_JINCLUDE_PATH ${HDF5_JAVA_INCLUDE_DIRS})
   set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_JINCLUDE_PATH}")
 endforeach ()
-set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${H5EXAMPLE_JAVA_LIBRARY}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
 set (CMAKE_JAVA_CLASSPATH ".")
 foreach (CMAKE_INCLUDE_PATH ${HDF5_JAVA_INCLUDE_DIRS})
@@ -43,7 +42,9 @@ Class-Path: ${HDFJAVA_CLASSJARS}
   )
   get_target_property (${EXAMPLE_VARNAME}J_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}J_${example_name} JAR_FILE)
   get_target_property (${EXAMPLE_VARNAME}J_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}J_${example_name} CLASSDIR)
-  add_dependencies (${EXAMPLE_VARNAME}J_${example_name} ${H5EXAMPLE_JAVA_LIBRARIES})
+  if (H5EXAMPLE_JAVA_LIBRARIES)
+    add_dependencies (${EXAMPLE_VARNAME}J_${example_name} ${H5EXAMPLE_JAVA_LIBRARIES})
+  endif ()
 endforeach ()
 
 if (H5EXAMPLE_BUILD_TESTING)

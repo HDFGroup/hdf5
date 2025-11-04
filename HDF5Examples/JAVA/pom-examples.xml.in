@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java-examples</artifactId>
+    <version>@HDF5_PACKAGE_VERSION@@HDF5_MAVEN_VERSION_SUFFIX@</version>
+    <packaging>jar</packaging>
+
+    <name>HDF5 Java Examples</name>
+    <description>Example programs demonstrating usage of HDF5 Java bindings</description>
+    <url>https://github.com/HDFGroup/hdf5</url>
+
+    <licenses>
+        <license>
+            <name>BSD-style License</name>
+            <url>https://github.com/HDFGroup/hdf5/blob/develop/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <organization>The HDF Group</organization>
+            <organizationUrl>https://www.hdfgroup.org</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/HDFGroup/hdf5.git</connection>
+        <developerConnection>scm:git:git@github.com:HDFGroup/hdf5.git</developerConnection>
+        <url>https://github.com/HDFGroup/hdf5</url>
+        <tag>@HDF5_PACKAGE_VERSION@</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/HDFGroup/hdf5/issues</url>
+    </issueManagement>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hdf5.version>@HDF5_PACKAGE_VERSION@</hdf5.version>
+        <hdf5.platform>@HDF5_MAVEN_PLATFORM@</hdf5.platform>
+        <hdf5.architecture>@HDF5_MAVEN_ARCHITECTURE@</hdf5.architecture>
+    </properties>
+
+    <dependencies>
+        <!-- HDF5 Java Library - platform-specific -->
+        <dependency>
+            <groupId>org.hdfgroup</groupId>
+            <artifactId>hdf5-java</artifactId>
+            <version>${hdf5.version}@HDF5_MAVEN_VERSION_SUFFIX@</version>
+            <classifier>${hdf5.platform}-${hdf5.architecture}</classifier>
+        </dependency>
+
+        <!-- SLF4J API for logging (inherited from hdf5-java, but explicit for examples) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.16</version>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+
+        <!-- Include Java source files as resources for educational use -->
+        <resources>
+            <resource>
+                <directory>H5D</directory>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+                <targetPath>examples/H5D</targetPath>
+            </resource>
+            <resource>
+                <directory>H5T</directory>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+                <targetPath>examples/H5T</targetPath>
+            </resource>
+            <resource>
+                <directory>H5G</directory>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+                <targetPath>examples/H5G</targetPath>
+            </resource>
+            <resource>
+                <directory>TUTR</directory>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+                <targetPath>examples/TUTR</targetPath>
+            </resource>
+            <resource>
+                <directory>.</directory>
+                <includes>
+                    <include>README*</include>
+                    <include>*.md</include>
+                    <include>test-pc.sh</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <!-- Compile all example categories -->
+                    <execution>
+                        <id>compile-h5d-examples</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${basedir}/H5D</compileSourceRoot>
+                            </compileSourceRoots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-h5t-examples</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${basedir}/H5T</compileSourceRoot>
+                            </compileSourceRoots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-h5g-examples</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${basedir}/H5G</compileSourceRoot>
+                            </compileSourceRoots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-tutr-examples</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${basedir}/TUTR</compileSourceRoot>
+                            </compileSourceRoots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <HDF5-Version>${hdf5.version}</HDF5-Version>
+                            <HDF5-Platform>${hdf5.platform}</HDF5-Platform>
+                            <HDF5-Architecture>${hdf5.architecture}</HDF5-Architecture>
+                            <Examples-Count>62</Examples-Count>
+                            <Build-Time>@CMAKE_CONFIGURE_DATE@</Build-Time>
+                            <Main-Class>H5Ex_D_ReadWrite</Main-Class>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+                <executions>
+                    <!-- Create both regular JAR and sources JAR -->
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <source>11</source>
+                    <failOnError>false</failOnError>
+                    <quiet>true</quiet>
+                    <windowTitle>HDF5 Java Examples</windowTitle>
+                    <doctitle>HDF5 Java Examples - ${project.version}</doctitle>
+                    <header>HDF5 Java Examples</header>
+                    <bottom>Copyright © 2025 The HDF Group. All rights reserved.</bottom>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Exec Plugin for running examples -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>H5Ex_D_ReadWrite</mainClass>
+                    <classpathScope>compile</classpathScope>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Platform-specific profiles for testing -->
+        <profile>
+            <id>linux-x86_64</id>
+            <activation>
+                <property>
+                    <name>hdf5.platform</name>
+                    <value>linux-x86_64</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier>linux-x86_64</classifier>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>windows-x86_64</id>
+            <activation>
+                <property>
+                    <name>hdf5.platform</name>
+                    <value>windows-x86_64</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier>windows-x86_64</classifier>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>macos-x86_64</id>
+            <activation>
+                <property>
+                    <name>hdf5.platform</name>
+                    <value>macos-x86_64</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier>macos-x86_64</classifier>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>macos-aarch64</id>
+            <activation>
+                <property>
+                    <name>hdf5.platform</name>
+                    <value>macos-aarch64</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier>macos-aarch64</classifier>
+            </properties>
+        </profile>
+
+        <!-- Development snapshot profile -->
+        <profile>
+            <id>snapshot</id>
+            <activation>
+                <property>
+                    <name>maven.deploy.snapshot</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <hdf5.version.suffix>-SNAPSHOT</hdf5.version.suffix>
+            </properties>
+        </profile>
+
+        <!-- Testing profile with example execution -->
+        <profile>
+            <id>run-examples</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <!-- Run representative examples from each category -->
+                            <execution>
+                                <id>run-h5d-example</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>H5Ex_D_ReadWrite</mainClass>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-h5t-example</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>H5Ex_T_Array</mainClass>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-h5g-example</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>H5Ex_G_Create</mainClass>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

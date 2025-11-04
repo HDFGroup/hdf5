@@ -301,7 +301,7 @@ macro (HDF5_SUPPORT)
           endif ()
         endif ()
 
-        if (H5EXAMPLE_BUILD_JAVA AND HDF5_Java_FOUND)
+        if (H5EXAMPLE_BUILD_JAVA)
           if (${HDF5_PROVIDES_JAVA})
             set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH};${HDF5_JAVA_INCLUDE_DIRS}")
             if (HDF5_PROVIDES_JNI AND HDF5_Java_FOUND)

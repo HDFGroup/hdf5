@@ -15,12 +15,16 @@
   H5Gget_obj_info_all.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
 import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.structs.H5O_token_t;
 
 public class H5Ex_G_Iterate {
@@ -50,13 +54,13 @@ public class H5Ex_G_Iterate {
         public static H5O_type get(int code) { return lookup.get(code); }
     }
 
-    private static void do_iterate()
+    private static void do_iterate(Arena arena)
     {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id = H5I_INVALID_HID();
 
         // Open a file using default properties.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -71,8 +75,7 @@ public class H5Ex_G_Iterate {
                 int[] otype           = new int[count];
                 int[] ltype           = new int[count];
                 H5O_token_t[] otokens = new H5O_token_t[count];
-                H5.H5Gget_obj_info_all(file_id, DATASETNAME, oname, otype, ltype, otokens,
-                                       HDF5Constants.H5_INDEX_NAME);
+                H5.H5Gget_obj_info_all(file_id, DATASETNAME, oname, otype, ltype, otokens, H5_INDEX_NAME());
 
                 // Get type of the object and display its name and type.
                 for (int indx = 0; indx < otype.length; indx++) {
@@ -99,12 +102,17 @@ public class H5Ex_G_Iterate {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) { H5Ex_G_Iterate.do_iterate(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_G_Iterate.do_iterate(arena);
+        }
+    }
 }

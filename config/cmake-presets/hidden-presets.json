@@ -126,9 +126,20 @@
     },
     {
       "name": "ci-Java",
+      "description": "Java JNI Configuration - Works with Java 11 or later",
       "hidden": true,
       "cacheVariables": {
-        "HDF5_BUILD_JAVA": "ON"
+        "HDF5_BUILD_JAVA": "ON",
+        "HDF5_ENABLE_JNI": "ON"
+      }
+    },
+    {
+      "name": "ci-Java-FFM",
+      "description": "Java FFM Configuration - REQUIRES Java 25 or later. Build will fail with Java < 25. Use ci-Java for older Java versions.",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_JAVA": "ON",
+        "HDF5_ENABLE_JNI": "OFF"
       }
     },
     {

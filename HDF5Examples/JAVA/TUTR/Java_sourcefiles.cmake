@@ -10,13 +10,5 @@ set (HDF_JAVA_EXAMPLES
     HDF5GroupDatasetCreate.java
     HDF5SubsetSelect.java
     HDF5GroupAbsoluteRelativeCreate.java
+    HDF5FileStructure.java
 )
-if (H5_LIBVER_DIR EQUAL 110)
-  set (HDF_JAVA_EXAMPLES ${HDF_JAVA_EXAMPLES}
-      110/HDF5FileStructure.java
-  )
-else ()
-  set (HDF_JAVA_EXAMPLES ${HDF_JAVA_EXAMPLES}
-      HDF5FileStructure.java
-  )
-endif ()

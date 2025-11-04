@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>@HDF5_JAVA_ARTIFACT_ID@</artifactId>
+    <version>@HDF5_PACKAGE_VERSION@@HDF5_MAVEN_VERSION_SUFFIX@</version>
+    <packaging>jar</packaging>
+
+    <name>HDF5 Java Bindings</name>
+    <description>Java bindings for the HDF5 scientific data format library</description>
+    <url>https://github.com/HDFGroup/hdf5</url>
+
+    <licenses>
+        <license>
+            <name>BSD-style License</name>
+            <url>https://github.com/HDFGroup/hdf5/blob/develop/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <organization>The HDF Group</organization>
+            <organizationUrl>https://www.hdfgroup.org</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/HDFGroup/hdf5.git</connection>
+        <developerConnection>scm:git:git@github.com:HDFGroup/hdf5.git</developerConnection>
+        <url>https://github.com/HDFGroup/hdf5</url>
+        <tag>@HDF5_PACKAGE_VERSION@</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/HDFGroup/hdf5/issues</url>
+    </issueManagement>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hdf5.version>@HDF5_PACKAGE_VERSION@</hdf5.version>
+        <hdf5.platform>@HDF5_MAVEN_PLATFORM@</hdf5.platform>
+        <hdf5.architecture>@HDF5_MAVEN_ARCHITECTURE@</hdf5.architecture>
+    </properties>
+
+    <dependencies>
+        <!-- SLF4J API for logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.16</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+                            <HDF5-Version>${hdf5.version}</HDF5-Version>
+                            <HDF5-Platform>${hdf5.platform}</HDF5-Platform>
+                            <HDF5-Architecture>${hdf5.architecture}</HDF5-Architecture>
+                            <Build-Time>@CMAKE_CONFIGURE_DATE@</Build-Time>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <source>11</source>
+                    <failOnError>false</failOnError>
+                    <quiet>true</quiet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Platform-specific profiles for native library inclusion -->
+        <profile>
+            <id>linux-x86_64</id>
+            <activation>
+                <property>
+                    <name>hdf5.platform</name>
+                    <value>linux-x86_64</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier>linux-x86_64</classifier>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>windows-x86_64</id>
+            <activation>
+                <property>
+                    <name>hdf5.platform</name>
+                    <value>windows-x86_64</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier>windows-x86_64</classifier>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>macos-x86_64</id>
+            <activation>
+                <property>
+                    <name>hdf5.platform</name>
+                    <value>macos-x86_64</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier>macos-x86_64</classifier>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>macos-aarch64</id>
+            <activation>
+                <property>
+                    <name>hdf5.platform</name>
+                    <value>macos-aarch64</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier>macos-aarch64</classifier>
+            </properties>
+        </profile>
+
+        <!-- Development snapshot profile -->
+        <profile>
+            <id>snapshot</id>
+            <activation>
+                <property>
+                    <name>maven.deploy.snapshot</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <hdf5.version.suffix>-SNAPSHOT</hdf5.version.suffix>
+            </properties>
+        </profile>
+    </profiles>
+</project>

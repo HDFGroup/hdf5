@@ -41,11 +41,10 @@ public class TestH5Oparams {
         System.out.println();
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Oclose_invalid() throws Throwable
     {
         long oid = H5.H5Oclose(-1);
-        assertTrue(oid == 0);
     }
 
     @Test(expected = NullPointerException.class)
