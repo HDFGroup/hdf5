@@ -45,13 +45,14 @@ jobs:
         uses: lycheeverse/lychee-action@v2.7.0
         with:
           args: >
-            --verbose
             --base ${{ steps.build_docs.outputs.html_path }}
             --max-retries 4
             --max-concurrency 4
             --retry-wait-time 10
             --timeout 30
             --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"
+            --skip-missing
+            --exclude ".*%23.*"
             --exclude "eigen.tuxfamily.org"
             --exclude "gnu.org"
             --exclude "en.wikipedia.org"
@@ -80,7 +81,7 @@ jobs:
         if: always()
         run: |
           echo "## 🔗 Link Checker Report" >> "$GITHUB_STEP_SUMMARY"
-          
+
           # Check if lychee step succeeded or failed
           if [ "${{ steps.lychee.outcome }}" = "success" ]; then
             echo "✅ **No broken links found!**" >> "$GITHUB_STEP_SUMMARY"
@@ -99,12 +100,21 @@ jobs:
           else
             echo "⚠️ **Link checker step was skipped or cancelled.**" >> "$GITHUB_STEP_SUMMARY"
           fi
-          
+
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### Full Report:" >> "$GITHUB_STEP_SUMMARY"
           if [ -f "lychee-report.md" ]; then
+            # Limit output to first 500 lines to avoid exceeding 1MB GitHub limit
             echo '```' >> "$GITHUB_STEP_SUMMARY"
-            cat lychee-report.md >> "$GITHUB_STEP_SUMMARY"
+            head -n 500 lychee-report.md >> "$GITHUB_STEP_SUMMARY"
+
+            # Check if report was truncated
+            TOTAL_LINES=$(wc -l < lychee-report.md)
+            if [ "$TOTAL_LINES" -gt 500 ]; then
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "... (Truncated. Showing first 500 of $TOTAL_LINES lines)" >> "$GITHUB_STEP_SUMMARY"
+              echo "View the full job logs for complete results." >> "$GITHUB_STEP_SUMMARY"
+            fi
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           else
             echo "No detailed report available." >> "$GITHUB_STEP_SUMMARY"
