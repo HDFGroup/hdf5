@@ -6445,14 +6445,21 @@ H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time);
  *
  * \note Chunk size cannot exceed the size of a fixed-size dataset. For
  *       example, a dataset consisting of a 5x4 fixed-size array cannot be
- *       defined with 10x10 chunks. Chunk maximums:
- *       - The maximum number of elements in a chunk is 2<sup>32</sup>-1 which
- *         is equal to 4,294,967,295. If the number of elements in a chunk is
- *         set via H5Pset_chunk() to a value greater than 2<sup>32</sup>-1,
- *         then H5Pset_chunk() will fail.
- *       - The maximum size for any chunk is 4GB. If a chunk that is larger
- *         than 4GB attempts to be written with H5Dwrite(), then H5Dwrite()
- *         will fail.
+ *       defined with 10x10 chunks.
+ *
+ * \note With HDF5 version 2.0.0, creation of datasets with chunks larger than
+ *       4 GiB is now supported. However, doing so will upgrade the file format
+ *       and prevent earlier versions of the library from being able to open the
+ *       dataset. Users must also be aware that some operations will require the
+ *       entire chunk be brought into memory, such as when there is a fill value
+ *       or data filter set. These operations will not work on 32 bit systems
+ *       when using chunks with size >= 4 GiB. The file format will be upgraded
+ *       when the size of an unfiltered chunk is greater than 2<sup>32</sup>-1
+ *       which is equal to 4,294,967,295. If a filter grows a chunk from below
+ *       this value to above it, the write may fail since the file format was
+ *       not automatically upgraded. To fix this, users can call
+ *       H5Pset_libver_bounds() with #H5F_LIBVER_V200 as the low bound. With the
+ *       new file format, chunk sizes are now limited to 2<sup>64</sup>-1.
  *
  * \see H5Pset_layout(), H5Dwrite()
  *

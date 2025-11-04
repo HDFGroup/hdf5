@@ -187,7 +187,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 if (mesg->u.chunk.dim[u] == 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
                                 "bad chunk dimension value when parsing layout message - chunk dimension "
-                                "must be positive: mesg->u.chunk.dim[%u] = %u",
+                                "must be positive: mesg->u.chunk.dim[%u] = %" PRIuHSIZE,
                                 u, mesg->u.chunk.dim[u]);
             }
 
@@ -299,7 +299,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         if (mesg->u.chunk.dim[u] == 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
                                         "bad chunk dimension value when parsing layout message - chunk "
-                                        "dimension must be positive: mesg->u.chunk.dim[%u] = %u",
+                                        "dimension must be positive: mesg->u.chunk.dim[%u] = %" PRIuHSIZE,
                                         u, mesg->u.chunk.dim[u]);
                     }
 
@@ -360,7 +360,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         if (mesg->u.chunk.dim[u] == 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
                                         "bad chunk dimension value when parsing layout message - chunk "
-                                        "dimension must be positive: mesg->u.chunk.dim[%u] = %u",
+                                        "dimension must be positive: mesg->u.chunk.dim[%u] = %" PRIuHSIZE,
                                         u, mesg->u.chunk.dim[u]);
                     }
 
@@ -1144,7 +1144,7 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
                     "Number of dimensions:", (unsigned long)(mesg->u.chunk.ndims));
             fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Size:");
             for (u = 0; u < (size_t)mesg->u.chunk.ndims; u++)
-                fprintf(stream, "%s%lu", u ? ", " : "", (unsigned long)(mesg->u.chunk.dim[u]));
+                fprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", mesg->u.chunk.dim[u]);
             fprintf(stream, "}\n");
 
             /* Index information */

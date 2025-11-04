@@ -3267,7 +3267,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
 
             assert(di[dset_idx].dset->shared->ndims == di[dset_idx].dset->shared->layout.u.chunk.ndims - 1);
             for (size_t dim_idx = 0; dim_idx < di[dset_idx].dset->shared->layout.u.chunk.ndims - 1; dim_idx++)
-                chunk_dims[dim_idx] = (hsize_t)di[dset_idx].dset->shared->layout.u.chunk.dim[dim_idx];
+                chunk_dims[dim_idx] = di[dset_idx].dset->shared->layout.u.chunk.dim[dim_idx];
 
             /* Get a dataspace for filling chunk memory buffers */
             if (NULL == (curr_dset_info->fill_space = H5S_create_simple(

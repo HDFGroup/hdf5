@@ -3851,19 +3851,9 @@ test_misc20(void)
         return;
     }
 
-    /* Verify that chunks with dimensions that are too large get rejected */
-
     /* Create a dataset creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl, FAIL, "H5Pcreate");
-
-    /* Try to use chunked storage for this dataset */
-    H5E_BEGIN_TRY
-    {
-        ret = H5Pset_chunk(dcpl, rank, big_dims);
-    }
-    H5E_END_TRY
-    VERIFY(ret, FAIL, "H5Pset_chunk");
 
     /* Verify that the storage for the dataset is the correct size and hasn't
      * been truncated.
