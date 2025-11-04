@@ -109,12 +109,15 @@
          * Make sure to check for overflow and disable selection I/O if it happens. */                       \
         if (!(PIECE_INFO)->in_place_tconv) {                                                                 \
             hsize_t tconv_buf_hsize;                                                                         \
+            hsize_t old_size;                                                                                \
             H5_CHECKED_ASSIGN(tconv_buf_hsize, hsize_t, (IO_INFO)->tconv_buf_size, size_t);                  \
+            old_size = tconv_buf_hsize;                                                                      \
             tconv_buf_hsize += (PIECE_INFO)->piece_points *                                                  \
                                MAX((DINFO)->type_info.src_type_size, (DINFO)->type_info.dst_type_size);      \
-            (IO_INFO)->tconv_buf_size = (size_t)tconv_buf_hsize;                                             \
-            if (H5_UNLIKELY((hsize_t)(IO_INFO)->tconv_buf_size != tconv_buf_hsize))                          \
+            if (H5_UNLIKELY(tconv_buf_hsize < old_size || tconv_buf_hsize > SIZE_MAX))                       \
                 (IO_INFO)->tconv_buf_overflow = true;                                                        \
+            else                                                                                             \
+                (IO_INFO)->tconv_buf_size = (size_t)tconv_buf_hsize;                                         \
         }                                                                                                    \
     }
 
