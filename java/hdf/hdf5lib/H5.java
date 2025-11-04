@@ -17876,18 +17876,20 @@ public class H5 implements java.io.Serializable {
 
         try {
             // Use reflection to access FFM ROS3 classes (they may not exist if ROS3 disabled)
-            Class<?> ros3Class      = Class.forName("org.hdfgroup.javahdf5.H5FD_ros3_fapl_t");
-            Class<?> hdf5Class      = org.hdfgroup.javahdf5.hdf5_h.class;
+            Class<?> ros3Class = Class.forName("org.hdfgroup.javahdf5.H5FD_ros3_fapl_t");
+            Class<?> hdf5Class = org.hdfgroup.javahdf5.hdf5_h.class;
 
             // Get method handles via reflection
-            java.lang.reflect.Method h5psetMethod = hdf5Class.getMethod("H5Pset_fapl_ros3", long.class,
-                                                                          MemorySegment.class);
-            java.lang.reflect.Method allocateMethod     = ros3Class.getMethod("allocate", SegmentAllocator.class);
-            java.lang.reflect.Method versionMethod      = ros3Class.getMethod("version", MemorySegment.class, int.class);
-            java.lang.reflect.Method authenticateMethod = ros3Class.getMethod("authenticate", MemorySegment.class, boolean.class);
-            java.lang.reflect.Method awsRegionMethod    = ros3Class.getMethod("aws_region", MemorySegment.class);
-            java.lang.reflect.Method secretIdMethod     = ros3Class.getMethod("secret_id", MemorySegment.class);
-            java.lang.reflect.Method secretKeyMethod    = ros3Class.getMethod("secret_key", MemorySegment.class);
+            java.lang.reflect.Method h5psetMethod =
+                hdf5Class.getMethod("H5Pset_fapl_ros3", long.class, MemorySegment.class);
+            java.lang.reflect.Method allocateMethod = ros3Class.getMethod("allocate", SegmentAllocator.class);
+            java.lang.reflect.Method versionMethod =
+                ros3Class.getMethod("version", MemorySegment.class, int.class);
+            java.lang.reflect.Method authenticateMethod =
+                ros3Class.getMethod("authenticate", MemorySegment.class, boolean.class);
+            java.lang.reflect.Method awsRegionMethod = ros3Class.getMethod("aws_region", MemorySegment.class);
+            java.lang.reflect.Method secretIdMethod  = ros3Class.getMethod("secret_id", MemorySegment.class);
+            java.lang.reflect.Method secretKeyMethod = ros3Class.getMethod("secret_key", MemorySegment.class);
 
             int retVal = -1;
             try (Arena arena = Arena.ofConfined()) {
@@ -17958,14 +17960,15 @@ public class H5 implements java.io.Serializable {
             Class<?> hdf5Class = org.hdfgroup.javahdf5.hdf5_h.class;
 
             // Get method handles via reflection
-            java.lang.reflect.Method h5pgetMethod = hdf5Class.getMethod("H5Pget_fapl_ros3", long.class,
-                                                                         MemorySegment.class);
-            java.lang.reflect.Method allocateMethod        = ros3Class.getMethod("allocate", SegmentAllocator.class);
-            java.lang.reflect.Method versionGetMethod      = ros3Class.getMethod("version", MemorySegment.class);
-            java.lang.reflect.Method authenticateGetMethod = ros3Class.getMethod("authenticate", MemorySegment.class);
-            java.lang.reflect.Method awsRegionMethod       = ros3Class.getMethod("aws_region", MemorySegment.class);
-            java.lang.reflect.Method secretIdMethod        = ros3Class.getMethod("secret_id", MemorySegment.class);
-            java.lang.reflect.Method secretKeyMethod       = ros3Class.getMethod("secret_key", MemorySegment.class);
+            java.lang.reflect.Method h5pgetMethod =
+                hdf5Class.getMethod("H5Pget_fapl_ros3", long.class, MemorySegment.class);
+            java.lang.reflect.Method allocateMethod = ros3Class.getMethod("allocate", SegmentAllocator.class);
+            java.lang.reflect.Method versionGetMethod = ros3Class.getMethod("version", MemorySegment.class);
+            java.lang.reflect.Method authenticateGetMethod =
+                ros3Class.getMethod("authenticate", MemorySegment.class);
+            java.lang.reflect.Method awsRegionMethod = ros3Class.getMethod("aws_region", MemorySegment.class);
+            java.lang.reflect.Method secretIdMethod  = ros3Class.getMethod("secret_id", MemorySegment.class);
+            java.lang.reflect.Method secretKeyMethod = ros3Class.getMethod("secret_key", MemorySegment.class);
 
             hdf.hdf5lib.structs.H5FD_ros3_fapl_t faplConfig = new hdf.hdf5lib.structs.H5FD_ros3_fapl_t();
             try (Arena arena = Arena.ofConfined()) {
