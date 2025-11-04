@@ -43,7 +43,7 @@ I want to build the HDF5 library statically and include the tools.
 
 \par Solution
 Static libraries can be built with zlib and libaec - but cannot be
-built with plugins or Java.
+built with plugins. Java JNI bindings require shared libraries.
 
 Create a CMakeUserPresets.json file with the following content:
 \code
@@ -497,6 +497,94 @@ from here you execute:
 \par See Also
 \ref subsec_cmake_presets_files_json_details for details on the default settings for the
 StdShar presets.
+
+\subsection subsec_cmake_presets_build_java CMake Presets Use Case: Java Bindings
+
+\par Problem
+I want to build HDF5 with Java bindings for use in Java applications.
+
+\par Solution
+HDF5 provides two Java implementation options with the same API:
+\li <strong>JNI (Java Native Interface)</strong> - Default, works with Java 8+, production-stable
+\li <strong>FFM (Foreign Function & Memory)</strong> - Optional, requires Java 25+, modern native access
+
+<em>Note: FFM will become the default in the next major HDF5 release as Java 25+ adoption increases.</em>
+
+\par JNI Build (Default - Java 8+)
+The standard presets automatically include JNI bindings when Java is detected:
+\code
+cmake --workflow --preset ci-StdShar-GNUC --fresh
+\endcode
+
+This builds shared libraries with C++, Fortran, and Java JNI bindings. Java JNI requires
+shared libraries and cannot be built with static libraries.
+
+\par FFM Build (Java 25+)
+For Java 25+ with FFM bindings, you need:
+\li Java 25 or later (tested with Java 25 - Oracle distribution recommended)
+\li jextract tool installed (download from https://jdk.java.net/jextract/)
+\li Set JEXTRACT_HOME environment variable: <code>export JEXTRACT_HOME=$HOME/tools/jextract-25</code>
+
+\code
+cmake --workflow --preset ci-StdShar-GNUC-FFM --fresh
+\endcode
+
+FFM bindings are generated automatically at CMake configure time and placed in
+the <code>build/java/jsrc/</code> directory. They are never committed to the repository
+and are always fresh for each build.
+
+\par JNI vs FFM Comparison
+<table>
+<tr><th>Feature</th><th>JNI (Default)</th><th>FFM (Future Default)</th></tr>
+<tr><td>Java Version</td><td>Java 8+</td><td>Java 25+</td></tr>
+<tr><td>Build Requirements</td><td>Java JDK only</td><td>Java JDK + jextract tool</td></tr>
+<tr><td>Library Type</td><td>Shared only</td><td>Shared</td></tr>
+<tr><td>Generation</td><td>Pre-compiled native code</td><td>Auto-generated at configure time</td></tr>
+<tr><td>Performance</td><td>Mature, optimized</td><td>Modern, Project Panama</td></tr>
+<tr><td>API Compatibility</td><td colspan="2">Identical - same hdf.hdf5lib.* package</td></tr>
+</table>
+
+\par Maven Artifacts
+To build platform-specific Maven artifacts for deployment:
+\code
+# JNI artifacts (default) - minimal build for artifacts only
+cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh
+
+# FFM artifacts (Java 25+) - minimal build for artifacts only
+cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh
+
+# Snapshot versions for development (adds -SNAPSHOT suffix)
+cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh
+\endcode
+
+Maven artifacts are deployed to:
+\li GitHub Packages: https://maven.pkg.github.com/HDFGroup/hdf5
+\li Maven Central (coming soon)
+
+\par Platform Support
+Both JNI and FFM implementations support:
+\li Linux x86_64
+\li Windows x86_64
+\li macOS x86_64
+\li macOS aarch64 (Apple Silicon)
+
+Each platform requires a separate build with platform-specific classifiers in Maven artifacts.
+
+\par Testing Java Bindings
+After building, test the Java bindings:
+\code
+# All Java tests (JNI or FFM depending on build)
+ctest -R "Java" -V
+
+# FFM-specific tests (if FFM build)
+ctest -R "JUnitFFM" -V
+\endcode
+
+\par See Also
+\li \ref subsec_maven_artifacts for using pre-built Maven artifacts
+\li release_docs/INSTALL_CMake.txt Section XIII for Java FFM testing details
+\li release_docs/README.md for comprehensive Java documentation
+\li HDF5Examples/JAVA for Java example programs
 
 \section sec_cmake_presets_files CMake Presets
 Presets are a way to store a set of

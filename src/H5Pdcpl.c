@@ -142,16 +142,19 @@
 
 /* ========  Dataset creation properties ======== */
 /* Definitions for storage layout property */
-#define H5D_CRT_LAYOUT_SIZE  sizeof(H5O_layout_t)
-#define H5D_CRT_LAYOUT_DEF   H5D_DEF_LAYOUT_CONTIG
-#define H5D_CRT_LAYOUT_SET   H5P__dcrt_layout_set
-#define H5D_CRT_LAYOUT_GET   H5P__dcrt_layout_get
-#define H5D_CRT_LAYOUT_ENC   H5P__dcrt_layout_enc
-#define H5D_CRT_LAYOUT_DEC   H5P__dcrt_layout_dec
-#define H5D_CRT_LAYOUT_DEL   H5P__dcrt_layout_del
-#define H5D_CRT_LAYOUT_COPY  H5P__dcrt_layout_copy
-#define H5D_CRT_LAYOUT_CMP   H5P__dcrt_layout_cmp
-#define H5D_CRT_LAYOUT_CLOSE H5P__dcrt_layout_close
+#define H5D_CRT_LAYOUT_SIZE       sizeof(H5O_layout_t)
+#define H5D_CRT_LAYOUT_DEF        H5D_DEF_LAYOUT_CONTIG
+#define H5D_CRT_LAYOUT_SET        H5P__dcrt_layout_set
+#define H5D_CRT_LAYOUT_GET        H5P__dcrt_layout_get
+#define H5D_CRT_LAYOUT_ENC        H5P__dcrt_layout_enc
+#define H5D_CRT_LAYOUT_DEC        H5P__dcrt_layout_dec
+#define H5D_CRT_LAYOUT_DEL        H5P__dcrt_layout_del
+#define H5D_CRT_LAYOUT_COPY       H5P__dcrt_layout_copy
+#define H5D_CRT_LAYOUT_CMP        H5P__dcrt_layout_cmp
+#define H5D_CRT_LAYOUT_CLOSE      H5P__dcrt_layout_close
+#define H5D_CRT_LAYOUT_VERSION_0  0
+#define H5D_CRT_LAYOUT_VERSION_1  1
+#define H5D_CRT_LAYOUT_MAGIC_TYPE (uint8_t)0xff
 /* Definitions for fill value.  size=0 means fill value will be 0 as
  * library default; size=-1 means fill value is undefined. */
 #define H5D_CRT_FILL_VALUE_SIZE sizeof(H5O_fill_t)
@@ -425,6 +428,9 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
     uint8_t           **pp     = (uint8_t **)_pp;
     uint8_t            *tmp_p;
     size_t              tmp_size;
+    unsigned            version = H5D_CRT_LAYOUT_VERSION_0;
+    H5F_libver_t        low_bound;
+    H5F_libver_t        high_bound;
     size_t              u;                   /* Local index variable */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -434,7 +440,29 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
     assert(layout);
     assert(size);
 
+    /* Get the file's low_bound and high_bound */
+    if (H5CX_get_libver_bounds(&low_bound, &high_bound) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get low/high bounds from API context");
+
+    /* Determine version - only upgrade for chunked datasets that have a dimension size >32 bits */
+    if (H5D_CHUNKED == layout->type)
+        for (u = 0; u < (size_t)layout->u.chunk.ndims; u++)
+            if (layout->u.chunk.dim[u] > (hsize_t)0xffffffff) {
+                if (high_bound < H5F_LIBVER_V200)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL,
+                                "can't encode chunk dimensions >= 2^32 with old encoding format - see "
+                                "H5Pset_libver_bounds()");
+                version = H5D_CRT_LAYOUT_VERSION_1;
+            }
+
     if (NULL != *pp) {
+        /* If using version 1 or above, encode a magic value (0xff) instead of the type, then encode the
+         * version */
+        if (version > H5D_CRT_LAYOUT_VERSION_0) {
+            *(*pp)++ = H5D_CRT_LAYOUT_MAGIC_TYPE;
+            *(*pp)++ = (uint8_t)version;
+        }
+
         /* Encode layout type */
         *(*pp)++ = (uint8_t)layout->type;
         *size += sizeof(uint8_t);
@@ -446,12 +474,18 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             *size += sizeof(uint8_t);
 
             /* Encode chunk dims */
-            HDcompile_assert(sizeof(uint32_t) == sizeof(layout->u.chunk.dim[0]));
-            for (u = 0; u < (size_t)layout->u.chunk.ndims; u++) {
-                UINT32ENCODE(*pp, layout->u.chunk.dim[u]);
-                *size += sizeof(uint32_t);
-            } /* end for */
-        }     /* end if */
+            if (version >= H5D_CRT_LAYOUT_VERSION_1) {
+                for (u = 0; u < (size_t)layout->u.chunk.ndims; u++) {
+                    UINT64ENCODE(*pp, (uint64_t)layout->u.chunk.dim[u]);
+                    *size += sizeof(uint64_t);
+                } /* end for */
+            }
+            else
+                for (u = 0; u < (size_t)layout->u.chunk.ndims; u++) {
+                    UINT32ENCODE(*pp, (uint32_t)layout->u.chunk.dim[u]);
+                    *size += sizeof(uint32_t);
+                } /* end for */
+        }         /* end if */
         else if (H5D_VIRTUAL == layout->type) {
             uint64_t nentries = (uint64_t)layout->storage.u.virt.list_nused;
 
@@ -499,7 +533,8 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
         /* If layout is chunked, calculate chunking structure */
         if (H5D_CHUNKED == layout->type) {
             *size += sizeof(uint8_t);
-            *size += layout->u.chunk.ndims * sizeof(uint32_t);
+            *size += layout->u.chunk.ndims *
+                     ((version >= H5D_CRT_LAYOUT_VERSION_1) ? sizeof(uint64_t) : sizeof(uint32_t));
         } /* end if */
         else if (H5D_VIRTUAL == layout->type) {
             /* Calculate size of virtual layout info */
@@ -553,9 +588,10 @@ done:
 static herr_t
 H5P__dcrt_layout_dec(const void **_pp, void *value)
 {
-    const H5O_layout_t *layout;     /* Storage layout */
-    H5O_layout_t        tmp_layout; /* Temporary local layout structure */
-    H5D_layout_t        type;       /* Layout type */
+    const H5O_layout_t *layout;                               /* Storage layout */
+    H5O_layout_t        tmp_layout;                           /* Temporary local layout structure */
+    H5D_layout_t        type;                                 /* Layout type */
+    unsigned            version   = H5D_CRT_LAYOUT_VERSION_0; /* Version of this property list encoding */
     const uint8_t     **pp        = (const uint8_t **)_pp;
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -568,6 +604,12 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
 
     /* Decode layout type */
     type = (H5D_layout_t) * (*pp)++;
+
+    /* Check if the version was encoded, and decode the version and the real type if so */
+    if (type == H5D_CRT_LAYOUT_MAGIC_TYPE) {
+        version = (unsigned)*(*pp)++;
+        type    = (H5D_layout_t) * (*pp)++;
+    }
 
     /* set default layout in case the type is compact or contiguous, otherwise
      * decode the chunked structure and set chunked layout */
@@ -595,10 +637,23 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                 /* Initialize to default values */
                 tmp_layout = H5D_def_layout_chunk_g;
 
-                /* Set rank & dimensions */
+                /* Set rank */
                 tmp_layout.u.chunk.ndims = (unsigned)ndims;
-                for (u = 0; u < ndims; u++)
-                    UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u]);
+
+                /* Decode dimensions */
+                if (version >= H5D_CRT_LAYOUT_VERSION_1) {
+                    for (u = 0; u < ndims; u++) {
+                        uint64_t dim64;
+                        UINT64DECODE(*pp, dim64);
+                        tmp_layout.u.chunk.dim[u] = (hsize_t)dim64;
+                        if ((uint64_t)tmp_layout.u.chunk.dim[u] != dim64)
+                            HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL,
+                                        "chunk dimension too big to fit in hsize_t");
+                    }
+                }
+                else
+                    for (u = 0; u < ndims; u++)
+                        UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u]);
 
                 /* Point at the newly set up struct */
                 layout = &tmp_layout;
@@ -1952,7 +2007,6 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     H5O_layout_t    chunk_layout;        /* Layout information for setting chunk info */
-    uint64_t        chunk_nelmts;        /* Number of elements in chunk */
     unsigned        u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
@@ -1969,17 +2023,11 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
     /* Verify & initialize property's chunk dims */
     H5MM_memcpy(&chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));
     memset(&chunk_layout.u.chunk.dim, 0, sizeof(chunk_layout.u.chunk.dim));
-    chunk_nelmts = 1;
     for (u = 0; u < (unsigned)ndims; u++) {
         if (dim[u] == 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be positive");
-        if (dim[u] != (dim[u] & 0xffffffff))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be less than 2^32");
-        chunk_nelmts *= dim[u];
-        if (chunk_nelmts > (uint64_t)0xffffffff)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of elements in chunk must be < 4GB");
-        chunk_layout.u.chunk.dim[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
-    }                                                   /* end for */
+        chunk_layout.u.chunk.dim[u] = dim[u]; /* Store user's chunk dimensions */
+    }                                         /* end for */
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE, false)))

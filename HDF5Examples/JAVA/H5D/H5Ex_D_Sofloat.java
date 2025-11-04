@@ -20,15 +20,17 @@
   and the maximum value in the dataset to the screen.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Sofloat {
 
@@ -43,16 +45,16 @@ public class H5Ex_D_Sofloat {
 
     // Values for the status of space allocation
     enum H5Z_filter {
-        H5Z_FILTER_ERROR(HDF5Constants.H5Z_FILTER_ERROR),
-        H5Z_FILTER_NONE(HDF5Constants.H5Z_FILTER_NONE),
-        H5Z_FILTER_DEFLATE(HDF5Constants.H5Z_FILTER_DEFLATE),
-        H5Z_FILTER_SHUFFLE(HDF5Constants.H5Z_FILTER_SHUFFLE),
-        H5Z_FILTER_FLETCHER32(HDF5Constants.H5Z_FILTER_FLETCHER32),
-        H5Z_FILTER_SZIP(HDF5Constants.H5Z_FILTER_SZIP),
-        H5Z_FILTER_NBIT(HDF5Constants.H5Z_FILTER_NBIT),
-        H5Z_FILTER_SCALEOFFSET(HDF5Constants.H5Z_FILTER_SCALEOFFSET),
-        H5Z_FILTER_RESERVED(HDF5Constants.H5Z_FILTER_RESERVED),
-        H5Z_FILTER_MAX(HDF5Constants.H5Z_FILTER_MAX);
+        H5Z_FILTER_ERROR(H5Z_FILTER_ERROR()),
+        H5Z_FILTER_NONE(H5Z_FILTER_NONE()),
+        H5Z_FILTER_DEFLATE(H5Z_FILTER_DEFLATE()),
+        H5Z_FILTER_SHUFFLE(H5Z_FILTER_SHUFFLE()),
+        H5Z_FILTER_FLETCHER32(H5Z_FILTER_FLETCHER32()),
+        H5Z_FILTER_SZIP(H5Z_FILTER_SZIP()),
+        H5Z_FILTER_NBIT(H5Z_FILTER_NBIT()),
+        H5Z_FILTER_SCALEOFFSET(H5Z_FILTER_SCALEOFFSET()),
+        H5Z_FILTER_RESERVED(H5Z_FILTER_RESERVED()),
+        H5Z_FILTER_MAX(H5Z_FILTER_MAX());
         private static final Map<Integer, H5Z_filter> lookup = new HashMap<Integer, H5Z_filter>();
 
         static
@@ -73,7 +75,7 @@ public class H5Ex_D_Sofloat {
     private static boolean checkScaleoffsetFilter()
     {
         try {
-            int available = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_SCALEOFFSET);
+            int available = H5Zfilter_avail(H5Z_FILTER_SCALEOFFSET());
             if (available == 0) {
                 System.out.println("Scale-Offset filter not available.");
                 return false;
@@ -84,11 +86,15 @@ public class H5Ex_D_Sofloat {
         }
 
         try {
-            int filter_info = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_SCALEOFFSET);
-            if (((filter_info & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
-                ((filter_info & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0)) {
-                System.out.println("Scale-Offset filter not available for encoding and decoding.");
-                return false;
+            try (Arena arena = Arena.ofConfined()) {
+                MemorySegment filterInfoSeg = arena.allocate(ValueLayout.JAVA_INT);
+                H5Zget_filter_info(H5Z_FILTER_SCALEOFFSET(), filterInfoSeg);
+                int filter_info = filterInfoSeg.get(ValueLayout.JAVA_INT, 0);
+                if (((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED()) == 0) ||
+                    ((filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED()) == 0)) {
+                    System.out.println("Scale-Offset filter not available for encoding and decoding.");
+                    return false;
+                }
             }
         }
         catch (Exception e) {
@@ -97,12 +103,12 @@ public class H5Ex_D_Sofloat {
         return true;
     }
 
-    private static void writeData()
+    private static void writeData(Arena arena)
     {
-        long file_id         = HDF5Constants.H5I_INVALID_HID;
-        long filespace_id    = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id      = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id         = HDF5Constants.H5I_INVALID_HID;
+        long file_id         = H5I_INVALID_HID();
+        long filespace_id    = H5I_INVALID_HID();
+        long dataset_id      = H5I_INVALID_HID();
+        long dcpl_id         = H5I_INVALID_HID();
         long[] dims          = {DIM_X, DIM_Y};
         long[] chunk_dims    = {CHUNK_X, CHUNK_Y};
         double[][] dset_data = new double[DIM_X][DIM_Y];
@@ -133,8 +139,7 @@ public class H5Ex_D_Sofloat {
 
         // Create a new file using the default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -142,7 +147,8 @@ public class H5Ex_D_Sofloat {
 
         // Create dataspace. Setting maximum size to NULL sets the maximum size to be the current size.
         try {
-            filespace_id = H5.H5Screate_simple(RANK, dims, null);
+            filespace_id =
+                H5Screate_simple(RANK, arena.allocateFrom(ValueLayout.JAVA_LONG, dims), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -151,10 +157,10 @@ public class H5Ex_D_Sofloat {
         // Create the dataset creation property list, add the Scale-Offset
         // filter and set the chunk size.
         try {
-            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            dcpl_id = H5Pcreate(H5P_CLS_DATASET_CREATE_ID_g());
             if (dcpl_id >= 0) {
-                H5.H5Pset_scaleoffset(dcpl_id, HDF5Constants.H5Z_SO_FLOAT_DSCALE, 2);
-                H5.H5Pset_chunk(dcpl_id, NDIMS, chunk_dims);
+                H5Pset_scaleoffset(dcpl_id, H5Z_SO_FLOAT_DSCALE(), 2);
+                H5Pset_chunk(dcpl_id, NDIMS, arena.allocateFrom(ValueLayout.JAVA_LONG, chunk_dims));
             }
         }
         catch (Exception e) {
@@ -164,8 +170,8 @@ public class H5Ex_D_Sofloat {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_IEEE_F64LE, filespace_id,
-                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dcreate2(file_id, arena.allocateFrom(DATASETNAME), H5T_IEEE_F64LE_g(),
+                                        filespace_id, H5P_DEFAULT(), dcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -173,9 +179,28 @@ public class H5Ex_D_Sofloat {
 
         // Write the data to the dataset.
         try {
-            if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+            if (dataset_id >= 0) {
+                // Flatten 2D array for FFM
+
+                double[] flatData = new double[DIM_X * DIM_Y];
+
+                for (int i = 0; i < DIM_X; i++) {
+
+                    for (int j = 0; j < DIM_Y; j++) {
+
+                        flatData[i * DIM_Y + j] = dset_data[i][j];
+                    }
+                }
+
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_DOUBLE, flatData.length);
+
+                for (int i = 0; i < flatData.length; i++) {
+
+                    dataSeg.setAtIndex(ValueLayout.JAVA_DOUBLE, i, flatData[i]);
+                }
+
+                H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -184,7 +209,7 @@ public class H5Ex_D_Sofloat {
         // Close and release resources.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -192,7 +217,7 @@ public class H5Ex_D_Sofloat {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -200,7 +225,7 @@ public class H5Ex_D_Sofloat {
 
         try {
             if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
+                H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -209,23 +234,23 @@ public class H5Ex_D_Sofloat {
         // Close file
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void readData()
+    private static void readData(Arena arena)
     {
-        long file_id         = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id      = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id         = HDF5Constants.H5I_INVALID_HID;
+        long file_id         = H5I_INVALID_HID();
+        long dataset_id      = H5I_INVALID_HID();
+        long dcpl_id         = H5I_INVALID_HID();
         double[][] dset_data = new double[DIM_X][DIM_Y];
 
         // Open file using the default properties.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -233,7 +258,7 @@ public class H5Ex_D_Sofloat {
         // Open dataset using the default properties.
         try {
             if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dopen2(file_id, arena.allocateFrom(DATASETNAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -242,7 +267,7 @@ public class H5Ex_D_Sofloat {
         // Retrieve dataset creation property list.
         try {
             if (dataset_id >= 0)
-                dcpl_id = H5.H5Dget_create_plist(dataset_id);
+                dcpl_id = H5Dget_create_plist(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -252,16 +277,15 @@ public class H5Ex_D_Sofloat {
         // first filter because we know that we only added one filter.
         try {
             if (dcpl_id >= 0) {
-                // Java lib requires a valid filter_name object and cd_values
-                int[] flags          = {0};
-                long[] cd_nelmts     = {1};
-                int[] cd_values      = {0};
-                String[] filter_name = {""};
-                int[] filter_config  = {0};
-                int filter_type      = -1;
-
-                filter_type = H5.H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name,
-                                               filter_config);
+                // FFM requires MemorySegment parameters
+                MemorySegment flagsSeg   = arena.allocate(ValueLayout.JAVA_INT);
+                MemorySegment cdNeltsSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                cdNeltsSeg.set(ValueLayout.JAVA_LONG, 0, 10L);
+                MemorySegment cdValuesSeg     = arena.allocate(ValueLayout.JAVA_INT, 10);
+                MemorySegment nameSegment     = arena.allocate(256);
+                MemorySegment filterConfigSeg = arena.allocate(ValueLayout.JAVA_INT);
+                int filter_type = H5Pget_filter2(dcpl_id, 0, flagsSeg, cdNeltsSeg, cdValuesSeg, 256,
+                                                 nameSegment, filterConfigSeg);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -294,9 +318,21 @@ public class H5Ex_D_Sofloat {
 
         // Read the data using the default properties.
         try {
-            if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
+            if (dataset_id >= 0) {
+                MemorySegment dataSeg = arena.allocate(ValueLayout.JAVA_DOUBLE, DIM_X * DIM_Y);
+
+                H5Dread(dataset_id, H5T_NATIVE_DOUBLE_g(), H5S_ALL(), H5S_ALL(), H5P_DEFAULT(), dataSeg);
+
+                // Unflatten to 2D array
+
+                for (int i = 0; i < DIM_X; i++) {
+
+                    for (int j = 0; j < DIM_Y; j++) {
+
+                        dset_data[i][j] = dataSeg.getAtIndex(ValueLayout.JAVA_DOUBLE, i * DIM_Y + j);
+                    }
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -321,7 +357,7 @@ public class H5Ex_D_Sofloat {
         // End access to the dataset and release resources used by it.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pclose(dcpl_id);
+                H5Pclose(dcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -329,7 +365,7 @@ public class H5Ex_D_Sofloat {
 
         try {
             if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
+                H5Dclose(dataset_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -338,7 +374,7 @@ public class H5Ex_D_Sofloat {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -347,15 +383,11 @@ public class H5Ex_D_Sofloat {
 
     public static void main(String[] args)
     {
-
-        // Check if Scale-Offset compression is available and can be used
-        // for both compression and decompression. Normally we do not
-        // perform error checking in these examples for the sake of
-        // clarity, but in this case we will make an exception because this
-        // filter is an optional part of the hdf5 library.
-        if (H5Ex_D_Sofloat.checkScaleoffsetFilter()) {
-            H5Ex_D_Sofloat.writeData();
-            H5Ex_D_Sofloat.readData();
+        try (Arena arena = Arena.ofConfined()) {
+            if (H5Ex_D_Sofloat.checkScaleoffsetFilter()) {
+                H5Ex_D_Sofloat.writeData(arena);
+                H5Ex_D_Sofloat.readData(arena);
+            }
         }
     }
 }

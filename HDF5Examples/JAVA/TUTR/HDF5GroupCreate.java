@@ -11,8 +11,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
 /**
  * <p>
@@ -37,17 +40,16 @@ import hdf.hdf5lib.HDF5Constants;
 public class HDF5GroupCreate {
     private static String fname = "HDF5GroupCreate.h5";
 
-    private static void CreateGroup()
+    private static void CreateGroup(Arena arena)
     {
-        long file_id     = HDF5Constants.H5I_INVALID_HID;
-        long subgroup_id = HDF5Constants.H5I_INVALID_HID;
-        long group_id1   = HDF5Constants.H5I_INVALID_HID;
-        long group_id2   = HDF5Constants.H5I_INVALID_HID;
+        long file_id     = H5I_INVALID_HID();
+        long subgroup_id = H5I_INVALID_HID();
+        long group_id1   = H5I_INVALID_HID();
+        long group_id2   = H5I_INVALID_HID();
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(arena.allocateFrom(fname), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -58,45 +60,45 @@ public class HDF5GroupCreate {
         // Create a group in the file.
         try {
             if (file_id >= 0) {
-                group_id1 = H5.H5Gcreate(file_id, "g1", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                         HDF5Constants.H5P_DEFAULT);
+                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("g1"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                       H5P_DEFAULT());
                 if (group_id1 >= 0) {
-                    subgroup_id = H5.H5Gcreate(group_id1, "g11", HDF5Constants.H5P_DEFAULT,
-                                               HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    subgroup_id = H5Gcreate2(group_id1, arena.allocateFrom("g11"), H5P_DEFAULT(),
+                                             H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
-                            H5.H5Gclose(subgroup_id);
+                            H5Gclose(subgroup_id);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    subgroup_id = H5.H5Gcreate(group_id1, "g12", HDF5Constants.H5P_DEFAULT,
-                                               HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    subgroup_id = H5Gcreate2(group_id1, arena.allocateFrom("g12"), H5P_DEFAULT(),
+                                             H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
-                            H5.H5Gclose(subgroup_id);
+                            H5Gclose(subgroup_id);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-                group_id2 = H5.H5Gcreate(file_id, "g2", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                         HDF5Constants.H5P_DEFAULT);
+                group_id2 = H5Gcreate2(file_id, arena.allocateFrom("g2"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                       H5P_DEFAULT());
                 if (group_id2 >= 0) {
-                    subgroup_id = H5.H5Gcreate(group_id2, "g21", HDF5Constants.H5P_DEFAULT,
-                                               HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    subgroup_id = H5Gcreate2(group_id2, arena.allocateFrom("g21"), H5P_DEFAULT(),
+                                             H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
-                            H5.H5Gclose(subgroup_id);
+                            H5Gclose(subgroup_id);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    subgroup_id = H5.H5Gcreate(group_id2, "g22", HDF5Constants.H5P_DEFAULT,
-                                               HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    subgroup_id = H5Gcreate2(group_id2, arena.allocateFrom("g22"), H5P_DEFAULT(),
+                                             H5P_DEFAULT(), H5P_DEFAULT());
                     try {
                         if (subgroup_id >= 0)
-                            H5.H5Gclose(subgroup_id);
+                            H5Gclose(subgroup_id);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -111,14 +113,14 @@ public class HDF5GroupCreate {
         // Close the groups.
         try {
             if (group_id2 >= 0)
-                H5.H5Gclose(group_id2);
+                H5Gclose(group_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (group_id1 >= 0)
-                H5.H5Gclose(group_id1);
+                H5Gclose(group_id1);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -127,12 +129,17 @@ public class HDF5GroupCreate {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) { HDF5GroupCreate.CreateGroup(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5GroupCreate.CreateGroup(arena);
+        }
+    }
 }

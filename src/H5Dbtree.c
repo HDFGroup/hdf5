@@ -1072,16 +1072,14 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, const void *_lt_key, haddr_t 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check for memcpy() */
-    HDcompile_assert(offsetof(H5D_chunk_rec_t, nbytes) == offsetof(H5D_btree_key_t, nbytes));
-    HDcompile_assert(sizeof(chunk_rec.nbytes) == sizeof(lt_key->nbytes));
     HDcompile_assert(offsetof(H5D_chunk_rec_t, scaled) == offsetof(H5D_btree_key_t, scaled));
     HDcompile_assert(sizeof(chunk_rec.scaled) == sizeof(lt_key->scaled));
-    HDcompile_assert(offsetof(H5D_chunk_rec_t, filter_mask) == offsetof(H5D_btree_key_t, filter_mask));
-    HDcompile_assert(sizeof(chunk_rec.filter_mask) == sizeof(lt_key->filter_mask));
 
     /* Compose generic chunk record for callback */
-    H5MM_memcpy(&chunk_rec, lt_key, sizeof(*lt_key));
-    chunk_rec.chunk_addr = addr;
+    H5MM_memcpy(&(chunk_rec.scaled), &(lt_key->scaled), sizeof(lt_key->scaled));
+    chunk_rec.nbytes      = (hsize_t)lt_key->nbytes;
+    chunk_rec.filter_mask = (uint32_t)lt_key->filter_mask;
+    chunk_rec.chunk_addr  = addr;
 
     /* Make "generic chunk" callback */
     if ((ret_value = (udata->cb)(&chunk_rec, udata->udata)) < 0)

@@ -49,6 +49,12 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 - Improved [ROS3 VFD](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
 
+## Java Enhancements:
+
+- Java FFM bindings generated for the C library if Java 25+ available and JNI option is FALSE.
+- Enhanced Maven artifact deployment with comprehensive multi-platform support (Linux, Windows, macOS x86_64, macOS aarch64).
+- Complete Java examples Maven integration (`org.hdfgroup:hdf5-java-examples`) with cross-platform CI/CD testing.
+  
 ## Acknowledgements: 
 
 We would like to thank the many HDF5 community members that contributed to HDF5 2.0.
@@ -96,6 +102,24 @@ We would like to thank the many HDF5 community members that contributed to HDF5 
 ### Removed `HDF5_ENABLE_THREADS` option
 
    The `HDF5_ENABLE_THREADS` option has been removed, as it no longer functions as a proper build option. The library will always check for thread support and set the internal status variable, `HDF5_THREADS_ENABLED`. The `HDF5_ENABLE_THREADSAFE` option is still available to build with thread-safe API calls.
+
+- Enhanced Maven repository deployment support
+
+   Added comprehensive Maven integration with optimized workflows for Java artifact deployment:
+   - **New CMake options**: `HDF5_ENABLE_MAVEN_DEPLOY` and `HDF5_MAVEN_SNAPSHOT` for Maven repository deployment
+   - **Minimal build presets**: Added `ci-MinShar-*-Maven*` presets for efficient Java-only artifact generation
+   - **Multi-platform support**: Automated generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+   - **CI/CD integration**: Enhanced GitHub Actions workflows (`maven-staging.yml`, `maven-deploy.yml`) with cross-platform build matrix
+   - **Artifact validation**: Comprehensive validation framework for Maven artifacts before deployment
+   - **Deployment targets**: Support for GitHub Packages and Maven Central staging repositories
+   - **Java Examples Maven Integration**: Added complete Maven artifact for Java examples (`org.hdfgroup:hdf5-java-examples`) with cross-platform compatibility
+   - **Multi-platform testing**: Comprehensive CI/CD testing of Java examples across all supported platforms (Linux, Windows, macOS x86_64, macOS aarch64)
+   - **Native library error handling**: Enhanced validation logic for Maven-only environments to properly handle expected native library loading errors
+   - **Dynamic repository support**: Enhanced workflows to use `github.repository` variable for seamless testing on forks before canonical deployment
+   - **Fork-based testing**: Complete testing framework allowing validation on repository forks (e.g., fork-name/hdf5) before merging to HDFGroup/hdf5
+   - **Multi-artifact deployment**: Enhanced deployment workflow to handle both `hdf5-java` (platform-specific) and `hdf5-java-examples` (platform-independent) artifacts
+   - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
+   - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
 
  - Reorganized the files in the config/cmake folder into the config folder structure
 
@@ -209,6 +233,10 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ## Library
 
+### Added support for large chunks
+
+   The library now supports chunks larger than 4 GiB using 64 bit addressing. Creating chunks with size >= 4 GiB will upgrade the file format and prevent the dataset from being opened with earlier versions of the library. 32 bit systems will not be able to use these chunks in all circumstances, such as with data filters or a fill value.
+
 ### Changed default chunk cache hash table size to 8191
 
    In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
@@ -225,12 +253,27 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
     - `H5T_FLOAT_BFLOAT16LE` / `H5T_FLOAT_BFLOAT16BE`
 
-      These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
+   These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
 
-      Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+   Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+### Added predefined datatypes for FP8 data
+
+   Predefined datatypes have been added for FP8 data in E4M3 and E5M2 formats (https://arxiv.org/abs/2209.05433).
+
+   The following new macros have been added:
+
+    - H5T_FLOAT_F8E4M3
+    - H5T_FLOAT_F8E5M2
+
+   These macros map to IDs of HDF5 datatypes representing an 8-bit floating-point datatype with 1 sign bit and either 4 exponent bits and 3 mantissa bits (E4M3 format) or 5 exponent bits and 2 mantissa bits (E5M2 format).
+
+   Note that support for a native FP8 datatype has not been added yet. This means that any datatype conversions to/from the new FP8 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP8 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches one of the above floating-point formats. In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
 
 ### Removed `hbool_t` from public API calls
-                                  
+
 The `hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
 
 It had been previously purged from the bulk of the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
@@ -652,6 +695,12 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
 
+### Fixed security issues CVE-2025-2913 and CVE-2025-2926
+
+   The size of a continuation message was decoded as 0, causing multiple vulnerabilities.  An error check was added to return failure to prevent further processing of invalid data.
+
+   Fixes GitHub issue #5376 and #5384
+
 ### Revised handling of Unicode filenames on Windows<a name="utf-8">
 
    In the HDF5 1.14.4 release, a change was made to address some issues with the library's handling of code pages and file paths on Windows.  This change introduced other issues with the handling of UTF-8 file names that caused breakage for software using the 1.14.4 and 1.14.5 releases of HDF5. That change was reverted for the 1.14.6 release and the behavior has been slightly modified for this release.
@@ -823,7 +872,16 @@ Current test results are available [here](https://my.cdash.org/index.php?project
 
 # ⛔ Known Problems
 
-- When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type. See Github issue [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
+- When performing implicit datatype conversion on specific non-IEEE floating-point format data, HDF5 may improperly convert some data values:
+
+   When performing I/O operations using a non-IEEE floating-point format datatype, HDF5 may improperly convert some data values due to incomplete handling of non-IEEE types. Such types include the following pre-defined datatypes:
+
+    H5T_FLOAT_F8E4M3
+    H5T_FLOAT_F8E5M2
+
+   If possible, an application should perform I/O with these datatypes using an in-memory type that matches the specific floating-point format and perform explicit data conversion outside of HDF5, if necessary. Otherwise, read/written values should be verified to be correct.
+
+- When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
 
      #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
      major: Datatype

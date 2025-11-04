@@ -1326,16 +1326,6 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     if (H5O_fill_set_version(file, &new_dset->shared->dcpl_cache.fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value");
 
-    /* Set the latest version for the layout message */
-    if (H5D__layout_set_version(file, &new_dset->shared->layout) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of layout");
-
-    if (new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
-        /* Use latest indexing type for layout message version >= 4 */
-        if (H5D__layout_set_latest_indexing(new_dset) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest indexing");
-    } /* end if */
-
     /* Check if the file driver would like to force early space allocation */
     if (H5F_HAS_FEATURE(file, H5FD_FEAT_ALLOCATE_EARLY))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
@@ -1357,6 +1347,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     if (new_dset->shared->layout.ops->construct &&
         (new_dset->shared->layout.ops->construct)(file, new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to construct layout information");
+
+    /* Check if the layout version is above the high bound for the file */
+    if (new_dset->shared->layout.version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(file)])
+        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, NULL, "layout version out of bounds");
 
     /* Update the dataset's object header info. */
     if (H5D__update_oh_info(file, new_dset, new_dset->shared->dapl_id) < 0)

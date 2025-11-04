@@ -25,6 +25,16 @@ on:
         required: false
         default: "skip"
         type: string
+      java_version:
+        description: "Java version for testing (11, 17, 21, 24, latest, auto)"
+        required: false
+        default: "auto"
+        type: string
+      force_java_implementation:
+        description: "Force specific Java implementation (auto, ffm, jni)"
+        required: false
+        default: "jni"
+        type: string
 
 permissions:
   contents: read
@@ -159,6 +169,25 @@ jobs:
           which cmake
           cmake --version
 
+      - name: Set up Java (if specified or FFM required)
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        uses: actions/setup-java@v5
+        with:
+          distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
+          java-version: |
+            ${{
+              inputs.force_java_implementation == 'ffm' && '25' ||
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+
+      - name: Verify Java Setup
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+
       - name: Set environment for MSVC (Windows)
         run: |
           # Set these environment variables so CMake picks the correct compiler
@@ -169,6 +198,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v5.0.0
+
+      - name: Setup jextract (FFM builds only)
+        if: ${{ inputs.force_java_implementation == 'ffm' }}
+        uses: ./.github/actions/setup-jextract
+        with:
+          java-version: '25'
 
       # CONFIGURE
       - name: Configure
@@ -199,6 +234,7 @@ jobs:
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
@@ -288,7 +324,7 @@ jobs:
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@v5
         with:
-              name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
@@ -296,7 +332,7 @@ jobs:
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v5
         with:
-              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
@@ -304,183 +340,7 @@ jobs:
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v5
         with:
-              name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
+              name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.ostype == 'macos') && ( inputs.save_binary != 'skip') }}
-
-
-  # A workflow that builds the library and runs all the tests
-  Static_build_and_test:
-    strategy:
-      # The current matrix has one dimensions:
-      #
-      # * config name
-      #
-      # Most configuration information is added via the 'include' mechanism,
-      # which will append the key-value pairs in the configuration where the
-      # names match.
-      matrix:
-        name:
-          - "Windows Static MSVC"
-          - "Ubuntu Static gcc"
-          - "MacOS Static Clang"
-
-        # This is where we list the bulk of the options for each configuration.
-        # The key-value pair values are usually appropriate for being CMake
-        # configure values, so be aware of that.
-
-        include:
-
-          - name: "Windows Static MSVC"
-            ostype: windows
-            os: windows-latest
-            shared: OFF
-            cpp: ON
-            fortran: OFF
-            java: OFF
-            docs: OFF
-            libaecfc: ON
-            localaec: OFF
-            zlibfc: ON
-            localzlib: OFF
-            parallel: OFF
-            mirror_vfd: OFF
-            direct_vfd: OFF
-            ros3_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
-            run_tests: true
-
-          - name: "Ubuntu Static gcc"
-            ostype: ubuntu
-            os: ubuntu-latest
-            shared: OFF
-            cpp: ON
-            fortran: ON
-            java: OFF
-            docs: OFF
-            libaecfc: ON
-            localaec: OFF
-            zlibfc: ON
-            localzlib: OFF
-            parallel: OFF
-            mirror_vfd: ON
-            direct_vfd: ON
-            ros3_vfd: OFF
-            generator: "-G Ninja"
-            run_tests: true
-
-          - name: "MacOS Static Clang"
-            ostype: macos
-            os: macos-latest
-            shared: OFF
-            cpp: ON
-            fortran: OFF
-            java: OFF
-            docs: OFF
-            libaecfc: ON
-            localaec: OFF
-            zlibfc: ON
-            localzlib: OFF
-            parallel: OFF
-            mirror_vfd: ON
-            direct_vfd: OFF
-            ros3_vfd: OFF
-            generator: "-G Ninja"
-            run_tests: true
-
-    if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
-    # Sets the job's name from the properties
-    name: "${{ matrix.name }}-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
-
-    # The type of runner that the job will run on
-    runs-on: ${{ matrix.os }}
-
-  # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      #Useful for debugging
-      - name: Dump matrix context
-        run: echo '${{ toJSON(matrix) }}'
-
-      - name: Install Dependencies (Linux)
-        run: |
-           sudo apt-get update
-           sudo apt-get install ninja-build graphviz
-           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-        if: matrix.ostype == 'ubuntu'
-
-      # CMake gets libaec from fetchcontent
-
-      - name: Install Dependencies (macOS)
-        run: brew install ninja curl
-        if: ${{ matrix.ostype == 'macos' }}
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
-        with:
-          version: "1.13.2"
-
-      - name: Install CMake
-        uses: lukka/get-cmake@latest
-        with:
-            cmakeVersion: ${{ inputs.cmake_version }}
-            ninjaVersion: latest
-
-      - name: Check CMake Version
-        shell: bash
-        run: |
-          which cmake
-          cmake --version
-
-      - name: Set environment for MSVC (Windows)
-        run: |
-          # Set these environment variables so CMake picks the correct compiler
-          echo "CXX=cl.exe" >> $GITHUB_ENV
-          echo "CC=cl.exe" >> $GITHUB_ENV
-        if:  matrix.ostype == 'windows'
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@v5.0.0
-
-      # CONFIGURE
-      - name: Configure
-        run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
-            ${{ matrix.generator }} \
-            --log-level=VERBOSE \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DBUILD_SHARED_LIBS:BOOL=OFF \
-            -DBUILD_STATIC_LIBS:BOOL=ON \
-            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
-            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
-            -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
-            -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }} \
-            -DHDF5_BUILD_JAVA:BOOL=OFF \
-            -DHDF5_BUILD_DOC:BOOL=OFF \
-            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
-            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
-            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
-            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
-            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
-            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
-            -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
-            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
-            $GITHUB_WORKSPACE
-        shell: bash
-
-      # BUILD
-      - name: Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
-        working-directory: ${{ runner.workspace }}/build
-
-      # RUN TESTS
-      - name: Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
-        working-directory: ${{ runner.workspace }}/build
-        if: ${{ matrix.run_tests }}
-

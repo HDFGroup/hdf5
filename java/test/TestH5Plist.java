@@ -18,6 +18,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.lang.foreign.MemorySegment;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -26,21 +28,21 @@ import java.util.ArrayList;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
-import hdf.hdf5lib.callbacks.H5P_cls_close_func_cb;
-import hdf.hdf5lib.callbacks.H5P_cls_close_func_t;
-import hdf.hdf5lib.callbacks.H5P_cls_copy_func_cb;
-import hdf.hdf5lib.callbacks.H5P_cls_copy_func_t;
-import hdf.hdf5lib.callbacks.H5P_cls_create_func_cb;
-import hdf.hdf5lib.callbacks.H5P_cls_create_func_t;
+// import hdf.hdf5lib.callbacks.H5P_cls_close_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_cls_close_func_t;
+// import hdf.hdf5lib.callbacks.H5P_cls_copy_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_cls_copy_func_t;
+// import hdf.hdf5lib.callbacks.H5P_cls_create_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_cls_create_func_t;
 import hdf.hdf5lib.callbacks.H5P_iterate_cb;
 import hdf.hdf5lib.callbacks.H5P_iterate_t;
-import hdf.hdf5lib.callbacks.H5P_prp_close_func_cb;
-import hdf.hdf5lib.callbacks.H5P_prp_compare_func_cb;
-import hdf.hdf5lib.callbacks.H5P_prp_copy_func_cb;
-import hdf.hdf5lib.callbacks.H5P_prp_create_func_cb;
-import hdf.hdf5lib.callbacks.H5P_prp_delete_func_cb;
-import hdf.hdf5lib.callbacks.H5P_prp_get_func_cb;
-import hdf.hdf5lib.callbacks.H5P_prp_set_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_prp_close_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_prp_compare_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_prp_copy_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_prp_create_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_prp_delete_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_prp_get_func_cb;
+// import hdf.hdf5lib.callbacks.H5P_prp_set_func_cb;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5AC_cache_config_t;
@@ -327,7 +329,7 @@ public class TestH5Plist {
 
         // Insert first property into class (with no callbacks)
         try {
-            byte[] prop_value = HDFNativeData.intToByte(prop1_def);
+            byte[] prop_value = ByteBuffer.allocate(Integer.BYTES).putInt(prop1_def).array();
 
             H5.H5Pregister2_nocb(plist_class_id, PROP1_NAME, PROP1_SIZE, prop_value);
         }
@@ -338,7 +340,7 @@ public class TestH5Plist {
 
         // Try to insert the first property again (should fail)
         try {
-            byte[] prop_value = HDFNativeData.intToByte(prop1_def);
+            byte[] prop_value = ByteBuffer.allocate(Integer.BYTES).putInt(prop1_def).array();
 
             H5.H5Pregister2_nocb(plist_class_id, PROP1_NAME, PROP1_SIZE, prop_value);
             fail("H5Pregister2 plist_class_id: " + PROP1_NAME);
@@ -378,7 +380,7 @@ public class TestH5Plist {
 
         // Insert second property into class (with no callbacks)
         try {
-            byte[] prop_value = HDFNativeData.floatToByte(prop2_def);
+            byte[] prop_value = ByteBuffer.allocate(Float.BYTES).putFloat(prop2_def).array();
 
             H5.H5Pregister2_nocb(plist_class_id, PROP2_NAME, PROP2_SIZE, prop_value);
         }
@@ -389,7 +391,7 @@ public class TestH5Plist {
 
         // Try to insert the second property again (should fail)
         try {
-            byte[] prop_value = HDFNativeData.floatToByte(prop2_def);
+            byte[] prop_value = ByteBuffer.allocate(Float.BYTES).putFloat(prop2_def).array();
 
             H5.H5Pregister2_nocb(plist_class_id, PROP2_NAME, PROP2_SIZE, prop_value);
             fail("H5Pregister2 plist_class_id: " + PROP2_NAME);
@@ -548,15 +550,14 @@ public class TestH5Plist {
             }
         }
         class H5P_iter_data implements H5P_iterate_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
         }
         H5P_iterate_t iter_data = new H5P_iter_data();
-
         class H5P_iter_callback implements H5P_iterate_cb {
-            public int callback(long list_id, String name, H5P_iterate_t op_data)
+            public int apply(long list_id, MemorySegment name, MemorySegment op_data)
             {
-                idata id = ((H5P_iter_data)op_data).iterdata.get(0);
-                return name.compareTo(id.iter_names[id.iter_count++]);
+                idata id = ((idata)((H5P_iter_data)iter_data).iterdata.get(0));
+                return name.getString(0).compareTo(id.iter_names[id.iter_count++]);
             }
         }
         H5P_iterate_cb iter_cb = new H5P_iter_callback();
@@ -567,7 +568,7 @@ public class TestH5Plist {
 
         // Insert first property into class (with no callbacks) */
         try {
-            byte[] prop_value = HDFNativeData.intToByte(prop1_def);
+            byte[] prop_value = ByteBuffer.allocate(Integer.BYTES).putInt(prop1_def).array();
 
             H5.H5Pregister2_nocb(plist_class_id, PROP1_NAME, PROP1_SIZE, prop_value);
         }
@@ -578,7 +579,7 @@ public class TestH5Plist {
 
         // Insert second property into class (with no callbacks) */
         try {
-            byte[] prop_value = HDFNativeData.floatToByte(prop2_def);
+            byte[] prop_value = ByteBuffer.allocate(Float.BYTES).putFloat(prop2_def).array();
 
             H5.H5Pregister2_nocb(plist_class_id, PROP2_NAME, PROP2_SIZE, prop_value);
         }
@@ -600,7 +601,7 @@ public class TestH5Plist {
 
         // Insert fourth property into class (with no callbacks) */
         try {
-            byte[] prop_value = HDFNativeData.doubleToByte(prop4_def);
+            byte[] prop_value = ByteBuffer.allocate(Double.BYTES).putDouble(prop4_def).array();
 
             H5.H5Pregister2_nocb(plist_class_id, PROP4_NAME, PROP4_SIZE, prop_value);
         }
@@ -669,7 +670,7 @@ public class TestH5Plist {
 
             // Insert first property into class (with no callbacks)
             try {
-                byte[] prop_value = HDFNativeData.intToByte(prop1_def);
+                byte[] prop_value = ByteBuffer.allocate(Integer.BYTES).putInt(prop1_def).array();
 
                 H5.H5Pregister2_nocb(plist_class_id, PROP1_NAME, PROP1_SIZE, prop_value);
             }
@@ -680,7 +681,7 @@ public class TestH5Plist {
 
             // Insert second property into class (with no callbacks)
             try {
-                byte[] prop_value = HDFNativeData.floatToByte(prop2_def);
+                byte[] prop_value = ByteBuffer.allocate(Float.BYTES).putFloat(prop2_def).array();
 
                 H5.H5Pregister2_nocb(plist_class_id, PROP2_NAME, PROP2_SIZE, prop_value);
             }
@@ -723,7 +724,7 @@ public class TestH5Plist {
 
             // Insert second temporary property into list (with no callbacks)
             try {
-                byte[] prop_value = HDFNativeData.doubleToByte(prop4_def);
+                byte[] prop_value = ByteBuffer.allocate(Double.BYTES).putDouble(prop4_def).array();
 
                 H5.H5Pinsert2_nocb(lid1, PROP4_NAME, PROP4_SIZE, prop_value);
             }
@@ -798,12 +799,16 @@ public class TestH5Plist {
     //            }
     //        }
     //        class H5P_cls_create_data implements H5P_cls_create_func_t {
-    //            public ArrayList<cdata> clsdata = new ArrayList<cdata>();
+    //            static public ArrayList<cdata> clsdata = new ArrayList<cdata>();
+    //            static void add_iter_data(cdata id)
+    //            {
+    //                clsdata.add(id);
+    //            }
     //        }
     //        H5P_cls_create_func_t cls_create_data = new H5P_cls_create_data();
     //
     //        class H5P_cls_create_callback implements H5P_cls_create_func_cb {
-    //            public int callback(long list_id, H5P_cls_create_func_t cls_data) {
+    //            public int apply(long list_id, H5P_cls_create_func_t cls_data) {
     //                System.err.println("H5P_cls_create_callback enter");
     //                cdata cd = ((H5P_cls_create_data)cls_create_data).clsdata.get(0);
     //                cd.cls_count++;
@@ -819,7 +824,7 @@ public class TestH5Plist {
     //        H5P_cls_copy_func_t cls_copy_data = new H5P_cls_copy_data();
     //
     //        class H5P_cls_copy_callback implements H5P_cls_copy_func_cb {
-    //            public int callback(long list_id1, long list_id2, H5P_cls_copy_func_t cls_data) {
+    //            public int apply(long list_id1, long list_id2, H5P_cls_copy_func_t cls_data) {
     //                cdata cd = ((H5P_cls_copy_data)cls_copy_data).clsdata.get(0);
     //                cd.cls_count++;
     //                cd.cls_id = list_id1;
@@ -834,7 +839,7 @@ public class TestH5Plist {
     //        H5P_cls_close_func_t cls_close_data = new H5P_cls_close_data();
     //
     //        class H5P_cls_close_callback implements H5P_cls_close_func_cb {
-    //            public int callback(long list_id, H5P_cls_close_func_t cls_data) {
+    //            public int apply(long list_id, H5P_cls_close_func_t cls_data) {
     //                cdata cd = ((H5P_cls_close_data)cls_close_data).clsdata.get(0);
     //                cd.cls_count++;
     //                cd.cls_id = list_id;
@@ -864,7 +869,7 @@ public class TestH5Plist {
     //
     //            // Insert first property into class (with no callbacks)
     //            try {
-    //                byte[] prop_value = HDFNativeData.intToByte(prop1_def);
+    //                byte[] prop_value = ByteBuffer.allocate(Integer.BYTES).putInt(prop1_def).array();
     //
     //                H5.H5Pregister2(cid1, PROP1_NAME, PROP1_SIZE, prop_value, null, null, null, null, null,
     //                null, null);
@@ -876,7 +881,7 @@ public class TestH5Plist {
     //
     //            // Insert second property into class (with no callbacks)
     //            try {
-    //                byte[] prop_value = HDFNativeData.floatToByte(prop2_def);
+    //                byte[] prop_value = ByteBuffer.allocate(Float.BYTES).putFloat(prop2_def).array();
     //
     //                H5.H5Pregister2(cid1, PROP2_NAME, PROP2_SIZE, prop_value, null, null, null, null, null,
     //                null, null);

@@ -281,8 +281,7 @@ H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     idx_info->layout->storage.u.chunk.idx_addr = udata->chunk_block.offset;
 
     if (idx_info->pline->nused > 0) {
-        H5_CHECKED_ASSIGN(idx_info->layout->storage.u.chunk.u.single.nbytes, uint32_t,
-                          udata->chunk_block.length, hsize_t);
+        idx_info->layout->storage.u.chunk.u.single.nbytes      = udata->chunk_block.length;
         idx_info->layout->storage.u.chunk.u.single.filter_mask = udata->filter_mask;
     } /* end if */
 

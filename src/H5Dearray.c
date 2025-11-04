@@ -100,7 +100,7 @@ typedef struct H5D_earray_it_ud_t {
 /* Native extensible array element for chunks w/filters */
 typedef struct H5D_earray_filt_elmt_t {
     haddr_t  addr;        /* Address of chunk */
-    uint32_t nbytes;      /* Size of chunk (in file) */
+    hsize_t  nbytes;      /* Size of chunk (in file) */
     uint32_t filter_mask; /* Excluded filters for chunk */
 } H5D_earray_filt_elmt_t;
 
@@ -567,8 +567,8 @@ H5D__earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const 
 
     /* Print element */
     snprintf(temp_str, sizeof(temp_str), "Element #%" PRIuHSIZE ":", idx);
-    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %u, %0x}\n", indent, "", fwidth, temp_str, elmt->addr,
-            elmt->nbytes, elmt->filter_mask);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %0x}\n", indent, "", fwidth, temp_str,
+            elmt->addr, elmt->nbytes, elmt->filter_mask);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__earray_filt_debug() */
@@ -1096,8 +1096,8 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     if (idx_info->pline->nused > 0) {
         H5D_earray_filt_elmt_t elmt; /* Extensible array element */
 
-        elmt.addr = udata->chunk_block.offset;
-        H5_CHECKED_ASSIGN(elmt.nbytes, uint32_t, udata->chunk_block.length, hsize_t);
+        elmt.addr        = udata->chunk_block.offset;
+        elmt.nbytes      = udata->chunk_block.length;
         elmt.filter_mask = udata->filter_mask;
 
         /* Set the info for the chunk */
@@ -1279,7 +1279,7 @@ H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
 
         /* Get the swizzled chunk dimensions */
         H5MM_memcpy(layout->u.earray.swizzled_dim, layout->dim, (layout->ndims - 1) * sizeof(layout->dim[0]));
-        H5VM_swizzle_coords(uint32_t, layout->u.earray.swizzled_dim, layout->u.earray.unlim_dim);
+        H5VM_swizzle_coords(hsize_t, layout->u.earray.swizzled_dim, layout->u.earray.unlim_dim);
 
         /* Get the swizzled number of chunks in each dimension */
         H5MM_memcpy(swizzled_chunks, layout->chunks, (layout->ndims - 1) * sizeof(swizzled_chunks[0]));
@@ -1496,11 +1496,9 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
 
         /* Remove raw data chunk from file if not doing SWMR writes */
         assert(H5_addr_defined(elmt.addr));
-        if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
-            H5_CHECK_OVERFLOW(elmt.nbytes, /*From: */ uint32_t, /*To: */ hsize_t);
-            if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, elmt.addr, (hsize_t)elmt.nbytes) < 0)
+        if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE))
+            if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, elmt.addr, elmt.nbytes) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
-        } /* end if */
 
         /* Reset the info about the chunk for the index */
         elmt.addr        = HADDR_UNDEF;
@@ -1518,11 +1516,9 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
 
         /* Remove raw data chunk from file if not doing SWMR writes */
         assert(H5_addr_defined(addr));
-        if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
-            H5_CHECK_OVERFLOW(idx_info->layout->u.chunk.size, /*From: */ uint32_t, /*To: */ hsize_t);
-            if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, addr, (hsize_t)idx_info->layout->u.chunk.size) < 0)
+        if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE))
+            if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, addr, idx_info->layout->u.chunk.size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
-        } /* end if */
 
         /* Reset the address of the chunk for the index */
         addr = HADDR_UNDEF;
@@ -1559,8 +1555,7 @@ H5D__earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     assert(f);
 
     /* Remove raw data chunk from file */
-    H5_CHECK_OVERFLOW(chunk_rec->nbytes, /*From: */ uint32_t, /*To: */ hsize_t);
-    if (H5MF_xfree(f, H5FD_MEM_DRAW, chunk_rec->chunk_addr, (hsize_t)chunk_rec->nbytes) < 0)
+    if (H5MF_xfree(f, H5FD_MEM_DRAW, chunk_rec->chunk_addr, chunk_rec->nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free chunk");
 
 done:
