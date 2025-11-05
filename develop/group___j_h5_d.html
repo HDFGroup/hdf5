@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-04</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -175,7 +175,7 @@ Functions</h2></td></tr>
 <tr class="separator:gabb165ae96cd8ce57a5f029658f53ceb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacd5f2a5425193c6db8e051ddcda6775e" id="r_gacd5f2a5425193c6db8e051ddcda6775e"><td class="memItemLeft" align="right" valign="top">static long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gacd5f2a5425193c6db8e051ddcda6775e">H5Dget_type</a> (long dataset_id)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>     </td></tr>
 <tr class="separator:gacd5f2a5425193c6db8e051ddcda6775e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad947f4f8952193b1e8ba1ebb13488c23" id="r_gad947f4f8952193b1e8ba1ebb13488c23"><td class="memItemLeft" align="right" valign="top">static synchronized native int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad947f4f8952193b1e8ba1ebb13488c23">H5Diterate</a> (byte[] buf, long buf_type, long space_id, <a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__cb.html">H5D_iterate_cb</a> op, <a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__t.html">H5D_iterate_t</a> op_data)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException</td></tr>
+<tr class="memitem:gad947f4f8952193b1e8ba1ebb13488c23" id="r_gad947f4f8952193b1e8ba1ebb13488c23"><td class="memItemLeft" align="right" valign="top">static synchronized native int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad947f4f8952193b1e8ba1ebb13488c23">H5Diterate</a> (byte[] buf, long buf_type, long space_id, H5D_iterate_cb op, H5D_iterate_t op_data)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException</td></tr>
 <tr class="separator:gad947f4f8952193b1e8ba1ebb13488c23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3e5fea19063dbd157e54cb6a65d79500" id="r_ga3e5fea19063dbd157e54cb6a65d79500"><td class="memItemLeft" align="right" valign="top">static long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3e5fea19063dbd157e54cb6a65d79500">H5Dopen</a> (long loc_id, String name, long dapl_id)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException     </td></tr>
 <tr class="separator:ga3e5fea19063dbd157e54cb6a65d79500"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -879,12 +879,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__cb.html">H5D_iterate_cb</a></td>          <td class="paramname"><span class="paramname"><em>op</em></span>, </td>
+          <td class="paramtype">H5D_iterate_cb</td>          <td class="paramname"><span class="paramname"><em>op</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__t.html">H5D_iterate_t</a></td>          <td class="paramname"><span class="paramname"><em>op_data</em></span>&#160;) throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException</td>
+          <td class="paramtype">H5D_iterate_t</td>          <td class="paramname"><span class="paramname"><em>op_data</em></span>&#160;) throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException</td>
         </tr>
       </table>
   </td>

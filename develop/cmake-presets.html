@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-04</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -159,7 +159,7 @@ The above example will create a "build" folder in the source parent directory, w
 <h2><a class="anchor" id="subsec_cmake_presets_build_static"></a>
 CMake Presets Use Case: Static Library and Tools</h2>
 <dl class="section user"><dt>Problem</dt><dd>I want to build the HDF5 library statically and include the tools.</dd></dl>
-<dl class="section user"><dt>Solution</dt><dd>Static libraries can be built with zlib and libaec - but cannot be built with plugins or Java.</dd></dl>
+<dl class="section user"><dt>Solution</dt><dd>Static libraries can be built with zlib and libaec - but cannot be built with plugins. Java JNI bindings require shared libraries.</dd></dl>
 <p>Create a CMakeUserPresets.json file with the following content: </p><div class="fragment"><div class="line">{</div>
 <div class="line">  <span class="stringliteral">&quot;version&quot;</span>: 6,</div>
 <div class="line">  <span class="stringliteral">&quot;cmakeMinimumRequired&quot;</span>: {</div>
@@ -576,6 +576,75 @@ CMake Presets Use Case: Parallel Library</h2>
 </ul>
 </dd></dl>
 <dl class="section user"><dt>See Also</dt><dd><a class="el" href="#subsec_cmake_presets_files_json_details">Default CMakePresets.json Settings</a> for details on the default settings for the StdShar presets.</dd></dl>
+<h2><a class="anchor" id="subsec_cmake_presets_build_java"></a>
+CMake Presets Use Case: Java Bindings</h2>
+<dl class="section user"><dt>Problem</dt><dd>I want to build HDF5 with Java bindings for use in Java applications.</dd></dl>
+<dl class="section user"><dt>Solution</dt><dd>HDF5 provides two Java implementation options with the same API: <ul>
+<li><b>JNI (Java Native Interface)</b> - Default, works with Java 8+, production-stable </li>
+<li><b>FFM (Foreign Function &amp; Memory)</b> - Optional, requires Java 25+, modern native access</li>
+</ul>
+<em>Note: FFM will become the default in the next major HDF5 release as Java 25+ adoption increases.</em></dd></dl>
+<dl class="section user"><dt>JNI Build (Default - Java 8+)</dt><dd>The standard presets automatically include JNI bindings when Java is detected: <div class="fragment"><div class="line">cmake --workflow --preset ci-StdShar-GNUC --fresh</div>
+</div><!-- fragment --></dd></dl>
+<p>This builds shared libraries with C++, Fortran, and Java JNI bindings. Java JNI requires shared libraries and cannot be built with static libraries.</p>
+<dl class="section user"><dt>FFM Build (Java 25+)</dt><dd>For Java 25+ with FFM bindings, you need: <ul>
+<li>Java 25 or later (tested with Java 25 - Oracle distribution recommended) </li>
+<li>jextract tool installed (download from <a href="https://jdk.java.net/jextract/">https://jdk.java.net/jextract/</a>) </li>
+<li>Set JEXTRACT_HOME environment variable: <code>export JEXTRACT_HOME=$HOME/tools/jextract-25</code></li>
+</ul>
+<div class="fragment"><div class="line">cmake --workflow --preset ci-StdShar-GNUC-FFM --fresh</div>
+</div><!-- fragment --></dd></dl>
+<p>FFM bindings are generated automatically at CMake configure time and placed in the <code>build/java/jsrc/</code> directory. They are never committed to the repository and are always fresh for each build.</p>
+<dl class="section user"><dt>JNI vs FFM Comparison</dt><dd><table class="doxtable">
+<tr>
+<th>Feature</th><th>JNI (Default)</th><th>FFM (Future Default) </th></tr>
+<tr>
+<td>Java Version</td><td>Java 8+</td><td>Java 25+ </td></tr>
+<tr>
+<td>Build Requirements</td><td>Java JDK only</td><td>Java JDK + jextract tool </td></tr>
+<tr>
+<td>Library Type</td><td>Shared only</td><td>Shared </td></tr>
+<tr>
+<td>Generation</td><td>Pre-compiled native code</td><td>Auto-generated at configure time </td></tr>
+<tr>
+<td>Performance</td><td>Mature, optimized</td><td>Modern, Project Panama </td></tr>
+<tr>
+<td>API Compatibility</td><td colspan="2">Identical - same <a class="el" href="namespacehdf_1_1hdf5lib.html">hdf.hdf5lib</a>.* package </td></tr>
+</table>
+</dd></dl>
+<dl class="section user"><dt>Maven Artifacts</dt><dd>To build platform-specific Maven artifacts for deployment: <div class="fragment"><div class="line"><span class="preprocessor"># JNI artifacts (default) - minimal build for artifacts only</span></div>
+<div class="line">cmake --workflow --preset ci-MinShar-GNUC-Maven --fresh</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># FFM artifacts (Java 25+) - minimal build for artifacts only</span></div>
+<div class="line">cmake --workflow --preset ci-MinShar-GNUC-Maven-FFM --fresh</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Snapshot versions for development (adds -SNAPSHOT suffix)</span></div>
+<div class="line">cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh</div>
+</div><!-- fragment --></dd></dl>
+<p>Maven artifacts are deployed to: </p><ul>
+<li>GitHub Packages: <a href="https://maven.pkg.github.com/HDFGroup/hdf5">https://maven.pkg.github.com/HDFGroup/hdf5</a> </li>
+<li>Maven Central (coming soon)</li>
+</ul>
+<dl class="section user"><dt>Platform Support</dt><dd>Both JNI and FFM implementations support: <ul>
+<li>Linux x86_64 </li>
+<li>Windows x86_64 </li>
+<li>macOS x86_64 </li>
+<li>macOS aarch64 (Apple Silicon)</li>
+</ul>
+Each platform requires a separate build with platform-specific classifiers in Maven artifacts.</dd></dl>
+<dl class="section user"><dt>Testing Java Bindings</dt><dd>After building, test the Java bindings: <div class="fragment"><div class="line"><span class="preprocessor"># All Java tests (JNI or FFM depending on build)</span></div>
+<div class="line">ctest -R <span class="stringliteral">&quot;Java&quot;</span> -V</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># FFM-specific tests (if FFM build)</span></div>
+<div class="line">ctest -R <span class="stringliteral">&quot;JUnitFFM&quot;</span> -V</div>
+</div><!-- fragment --></dd></dl>
+<dl class="section user"><dt>See Also</dt><dd><ul>
+<li><a class="el" href="_c_b__maven_artifacts.html#subsec_maven_artifacts">Maven Artifact Selection</a> for using pre-built Maven artifacts </li>
+<li>release_docs/INSTALL_CMake.txt Section XIII for Java FFM testing details </li>
+<li><a class="el" href="release__docs_2_r_e_a_d_m_e_8md.html">release_docs/README.md</a> for comprehensive Java documentation </li>
+<li>HDF5Examples/JAVA for Java example programs</li>
+</ul>
+</dd></dl>
 <h1><a class="anchor" id="sec_cmake_presets_files"></a>
 CMake Presets</h1>
 <p>Presets are a way to store a set of CMake cache variables in a file. This allows you to save and load a set of variables that you use frequently. Presets can be used to save the configuration of a project for different build configurations, such as Debug and Release.</p>

@@ -9,12 +9,13 @@ var searchData=
   ['bnf_20through_20hdf5_201_2010_6',['DDL in BNF through HDF5 1.10',['../_d_d_l_b_n_f110.html',1,'']]],
   ['branching_20model_20explained_7',['HDF5 Git Branching Model Explained',['../_b_r_a_n_c_h_e_x_p_l.html',1,'']]],
   ['brief_20introduction_20to_20parallel_20hdf5_8',['A Brief Introduction to Parallel HDF5',['../_intro_par_h_d_f5.html',1,'']]],
-  ['building_20and_20testing_20hdf5_20vol_20connectors_20with_20cmake_20fetchcontent_9',['HDF5 Building and testing HDF5 VOL connectors with CMake FetchContent',['../_c_make_vols.html',1,'']]],
-  ['building_20with_20cmake_20presets_10',['Building with CMake Presets',['../cmake-presets.html',1,'']]],
-  ['by_20api_11',['Examples by API',['../_ex_a_p_i.html',1,'']]],
-  ['by_20chunk_12',['Writing by Chunk',['../_intro_par_chunk.html',1,'IntroParHDF5']]],
-  ['by_20contiguous_20hyperslab_13',['Writing by Contiguous Hyperslab',['../_intro_par_cont_hyperslab.html',1,'IntroParHDF5']]],
-  ['by_20pattern_14',['Writing by Pattern',['../_intro_par_pattern.html',1,'IntroParHDF5']]],
-  ['by_20regularly_20spaced_20data_15',['Writing by Regularly Spaced Data',['../_intro_par_regular_spaced.html',1,'IntroParHDF5']]],
-  ['by_20the_20hdf5_20library_16',['Freeing Memory Allocated by the HDF5 Library',['../freeing_memory.html',1,'']]]
+  ['build_20system_20summary_9',['HDF5 Build System Summary',['../md_release__docs_2_build_system_notes.html',1,'']]],
+  ['building_20and_20testing_20hdf5_20vol_20connectors_20with_20cmake_20fetchcontent_10',['HDF5 Building and testing HDF5 VOL connectors with CMake FetchContent',['../_c_make_vols.html',1,'']]],
+  ['building_20with_20cmake_20presets_11',['Building with CMake Presets',['../cmake-presets.html',1,'']]],
+  ['by_20api_12',['Examples by API',['../_ex_a_p_i.html',1,'']]],
+  ['by_20chunk_13',['Writing by Chunk',['../_intro_par_chunk.html',1,'IntroParHDF5']]],
+  ['by_20contiguous_20hyperslab_14',['Writing by Contiguous Hyperslab',['../_intro_par_cont_hyperslab.html',1,'IntroParHDF5']]],
+  ['by_20pattern_15',['Writing by Pattern',['../_intro_par_pattern.html',1,'IntroParHDF5']]],
+  ['by_20regularly_20spaced_20data_16',['Writing by Regularly Spaced Data',['../_intro_par_regular_spaced.html',1,'IntroParHDF5']]],
+  ['by_20the_20hdf5_20library_17',['Freeing Memory Allocated by the HDF5 Library',['../freeing_memory.html',1,'']]]
 ];

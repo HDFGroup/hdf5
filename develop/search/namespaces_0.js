@@ -29,7 +29,5 @@ var searchData=
   ['h5z_26',['h5z',['../namespaceh5z.html',1,'']]],
   ['hdf5_27',['hdf5',['../namespacehdf5.html',1,'']]],
   ['hdf_3a_3ahdf5lib_28',['hdf5lib',['../namespacehdf_1_1hdf5lib.html',1,'hdf']]],
-  ['hdf_3a_3ahdf5lib_3a_3acallbacks_29',['callbacks',['../namespacehdf_1_1hdf5lib_1_1callbacks.html',1,'hdf::hdf5lib']]],
-  ['hdf_3a_3ahdf5lib_3a_3aexceptions_30',['exceptions',['../namespacehdf_1_1hdf5lib_1_1exceptions.html',1,'hdf::hdf5lib']]],
-  ['hdf_3a_3ahdf5lib_3a_3astructs_31',['structs',['../namespacehdf_1_1hdf5lib_1_1structs.html',1,'hdf::hdf5lib']]]
+  ['hdf_3a_3ahdf5lib_3a_3aexceptions_29',['exceptions',['../namespacehdf_1_1hdf5lib_1_1exceptions.html',1,'hdf::hdf5lib']]]
 ];

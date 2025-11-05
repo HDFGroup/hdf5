@@ -28,6 +28,8 @@ var searchData=
   ['storage_20layout_25',['Dataset Storage Layout',['../_l_b_dset_layout.html',1,'LearnBasics']]],
   ['structure_26',['HDF5 Data Model and File Structure',['../_h5_d_m__u_g.html',1,'']]],
   ['subset_20of_20a_20dataset_27',['Reading From or Writing To a Subset of a Dataset',['../_l_b_dset_sub_r_w.html',1,'LearnBasics']]],
-  ['svg_20alt_20cmake_20logo_20width_2024_20cmake_20installations_28',['&lt;img src=&quot;Cmake_logo.svg&quot; alt=&quot;Cmake logo&quot; width=24&gt; CMake Installations',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
-  ['swmr_29',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]]
+  ['summary_28',['HDF5 Build System Summary',['../md_release__docs_2_build_system_notes.html',1,'']]],
+  ['svg_20alt_20cmake_20logo_20width_2024_20cmake_20installations_29',['&lt;img src=&quot;Cmake_logo.svg&quot; alt=&quot;Cmake logo&quot; width=24&gt; CMake Installations',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
+  ['swmr_30',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]],
+  ['system_20summary_31',['HDF5 Build System Summary',['../md_release__docs_2_build_system_notes.html',1,'']]]
 ];

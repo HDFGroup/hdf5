@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-04</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -1253,11 +1253,9 @@ See <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5
 <p>The <code class="param">ndims</code> parameter currently must be the same size as the rank of the dataset.</p>
 <p>The values of the <code class="param">dim</code> array define the size of the chunks to store the dataset's raw data. The unit of measure for <code class="param">dim</code> values is dataset elements.</p>
 <p>As a side-effect of this function, the layout of the dataset is changed to <a class="el" href="_h5_dpublic_8h.html#a57e163d4c263b585ca2d904996f5e06eadc846667d1f23d573964d22549e5f262">H5D_CHUNKED</a>, if it is not already so set.</p>
-<dl class="section note"><dt>Note</dt><dd>Chunk size cannot exceed the size of a fixed-size dataset. For example, a dataset consisting of a 5x4 fixed-size array cannot be defined with 10x10 chunks. Chunk maximums:<ul>
-<li>The maximum number of elements in a chunk is 2<sup>32</sup>-1 which is equal to 4,294,967,295. If the number of elements in a chunk is set via <a class="el" href="#ga3584d592e377da3604b7604e266dcf5b" title="Sets the size of the chunks used to store a chunked layout dataset.">H5Pset_chunk()</a> to a value greater than 2<sup>32</sup>-1, then <a class="el" href="#ga3584d592e377da3604b7604e266dcf5b" title="Sets the size of the chunks used to store a chunked layout dataset.">H5Pset_chunk()</a> will fail.</li>
-<li>The maximum size for any chunk is 4GB. If a chunk that is larger than 4GB attempts to be written with <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite()</a>, then <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite()</a> will fail.</li>
-</ul>
-</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Chunk size cannot exceed the size of a fixed-size dataset. For example, a dataset consisting of a 5x4 fixed-size array cannot be defined with 10x10 chunks.</dd>
+<dd>
+With HDF5 version 2.0.0, creation of datasets with chunks larger than 4 GiB is now supported. However, doing so will upgrade the file format and prevent earlier versions of the library from being able to open the dataset. Users must also be aware that some operations will require the entire chunk be brought into memory, such as when there is a fill value or data filter set. These operations will not work on 32 bit systems when using chunks with size &gt;= 4 GiB. The file format will be upgraded when the size of an unfiltered chunk is greater than 2<sup>32</sup>-1 which is equal to 4,294,967,295. If a filter grows a chunk from below this value to above it, the write may fail since the file format was not automatically upgraded. To fix this, users can call <a class="el" href="group___f_a_p_l.html#gacbe1724e7f70cd17ed687417a1d2a910" title="Controls the range of library release versions used when creating objects in a file.">H5Pset_libver_bounds()</a> with <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a7e8e06822de9c57c31c7dd404520974d">H5F_LIBVER_V200</a> as the low bound. With the new file format, chunk sizes are now limited to 2<sup>64</sup>-1.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#ga75d80991a8f467e0d454c53a383ae7f9" title="Sets the type of storage used to store the raw data for a dataset.">H5Pset_layout()</a>, <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite()</a></dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
