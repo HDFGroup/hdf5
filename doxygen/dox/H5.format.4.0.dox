@@ -2011,7 +2011,21 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 <tr>
   <td>Chunk Size</td>
-  <td>This field is the size of the dataset chunk in bytes.</td>
+  <td>This field is the size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Layout Message Version</th>
+        <th align="left">Chunk Size Encoding Length</th>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code> or above</td>
+        <td>The size specified in the &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Filter Mask</td>
@@ -7947,7 +7961,7 @@ information for the virtual layout class as well as indexing information for the
       </tr>
       <tr>
         <td align="center"><code>4</code></td>
-        <td>Used by version 1.10.0 and later of the library to store properties for each layout class and indexing information for the chunked layout</td>
+        <td>Used by version 1.10.0 and later of the library to store properties for each layout class and indexing information for the chunked layout.</td>
       </tr>
       <tr>
         <td align="center"><code>5</code></td>
@@ -11073,7 +11087,21 @@ types are described below.<br />
 </tr>
 <tr>
   <td>Chunk Size</td>
-  <td>The size of the dataset chunk in bytes.</td>
+  <td>The size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Layout Message Version</th>
+        <th align="left">Chunk Size Encoding Length</th>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code> or above</td>
+        <td>The size specified in the &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Filter Mask</td>
@@ -11703,7 +11731,21 @@ blocks/pages in a chunk index varies as they are allocated as needed and the fir
 </tr>
 <tr>
   <td>Chunk Size</td>
-  <td>The size of the dataset chunk in bytes.</td>
+  <td>The size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Layout Message Version</th>
+        <th align="left">Chunk Size Encoding Length</th>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code> or above</td>
+        <td>The size specified in the &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Filter Mask</td>
