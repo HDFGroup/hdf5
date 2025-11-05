@@ -34,10 +34,12 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 - Full [UTF-8](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
 - Introduction of [bfloat16 predefined datatypes](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#added-predefined-datatypes-for-bfloat16-data) for efficient machine learning conversions.
 - First-class support for [complex numbers](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
+- [New chunk size limit](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#added-support-for-large-chunks) of 16,384 PiB (replacing the old 4GiB chunk size limit), enabling efficient storage and I/O for massive, high-resolution datasets common in fields like genomics and climate modeling.
 
 ## Updated Foundation:
 
 - New [file format](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) version (4.0) and compliance with the C11 standard.
+- Adopted [semantic versioning](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy) to clearly convey changes between versions.
 
 > [!IMPORTANT]
 >
