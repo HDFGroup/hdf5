@@ -7951,7 +7951,7 @@ information for the virtual layout class as well as indexing information for the
       </tr>
       <tr>
         <td align="center"><code>5</code></td>
-        <td>Used by version 2.0.0 and later of the library and is identical to version 4, except the encoding of filtered chunk records for Fixed Array, Extensible Array, and v2 B-Tree indices has been changed to allow for filters than expand chunks up to 2<sup>64</sup>-1 bytes. The Library will also not allow creation of datatsets with chunk size greater than 2<sup>32</sup>-1 bytes (4 GiB - 1) with layout version 4 or below (including unfiltered chunks), because versions of the library that don't understand layout version 5 cannot process these large chunks. However, such large chunks are not precluded by the version 4 layout encoding per se.</td>
+        <td>Used by version 2.0.0 and later of the library and is identical to version 4, except the encoding of filtered chunk records for Fixed Array, Extensible Array, and v2 B-Tree indices has been changed to allow for filters that expand chunks up to 2<sup>64</sup>-1 bytes. The Library will also not allow creation of datasets with chunk size greater than 2<sup>32</sup>-1 bytes (4 GiB - 1) with layout version 4 or below (including unfiltered chunks), because versions of the library that don't understand layout version 5 cannot process these large chunks. However, such large chunks are not precluded by the version 4 layout encoding per se.</td>
       </tr>
       </table></td>
 </tr>
