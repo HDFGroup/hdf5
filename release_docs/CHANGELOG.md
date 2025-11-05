@@ -659,7 +659,13 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    Fixes GitHub issue [#5549](https://github.com/HDFGroup/hdf5/issues/5549)
 
-### Fixed [CVE-2025-6269](https://nvd.nist.gov/vuln/detail/CVE-2025-6269)
+### Fixed [CVE-2025-7069](https://nvd.nist.gov/vuln/detail/CVE-2025-7069)
+
+   An invalid page size in file space info was decoded, which caused a heap buffer overflow when reading certain compromised data files.  The invalid value has been detected for a graceful failure.
+
+   Fixes GitHub issues [#5550](https://github.com/HDFGroup/hdf5/issues/5550) and OSS issues [OSV-2024-379](https://osv.dev/vulnerability/OSV-2024-379), [OSV-2024-575](https://osv.dev/vulnerability/OSV-2024-575), and [OSV-2024-772](https://osv.dev/vulnerability/OSV-2024-772)
+
+### Fixed [CVE-2025-6269](https://nvd.nist.gov/vuln/detail/CVE-2025-6269) and [CVE-2025-6516](https://nvd.nist.gov/vuln/detail/CVE-2025-6516)
 
    There were several security vulnerabilities found in the function H5C__reconstruct_cache_entry(), including buffer overflows and memory leaks.  The function has been hardened with bounds checks, input validation, and safe cleanup.
 
@@ -675,7 +681,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    The message flags field could be modified such that a message that is not sharable according to the `share_flags` field in `H5O_msg_class_t` can be treated as sharable. An assert has been added in `H5O__msg_write_real` to make sure messages that are not sharable can't be modified to shared. Additionally, the check in `H5O__chunk_deserialize` that catches unsharable messages being marked as sharable has been improved.
 
-   Fixes GitHub issue [#5329](https://github.com/HDFGroup/hdf5/issues/5329)
+   Fixes GitHub issue [#5329](https://github.com/HDFGroup/hdf5/issues/5329) and [OSV-2023-76](https://osv.dev/vulnerability/OSV-2023-76)
 
 ### Fixed security issue [CVE-2025-2925](https://nvd.nist.gov/vuln/detail/CVE-2025-2925)
 
@@ -695,11 +701,11 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
 
-### Fixed security issues CVE-2025-2913 and CVE-2025-2926
+### Fixed security issues [CVE-2025-2913](https://nvd.nist.gov/vuln/detail/CVE-2025-2913), [CVE-2025-2926](https://nvd.nist.gov/vuln/detail/CVE-2025-2926), [CVE-2025-6817](https://nvd.nist.gov/vuln/detail/CVE-2025-6817), and [CVE-2025-6858](https://nvd.nist.gov/vuln/detail/CVE-2025-6858)
 
    The size of a continuation message was decoded as 0, causing multiple vulnerabilities.  An error check was added to return failure to prevent further processing of invalid data.
 
-   Fixes GitHub issue #5376 and #5384
+   Fixes GitHub issue [#5376](https://github.com/HDFGroup/hdf5/issues/5376), [#5384](https://github.com/HDFGroup/hdf5/issues/5384), [#5572](https://github.com/HDFGroup/hdf5/issues/5572), and [#5576](https://github.com/HDFGroup/hdf5/issues/5576)
 
 ### Revised handling of Unicode filenames on Windows<a name="utf-8">
 
