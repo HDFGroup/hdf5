@@ -17,8 +17,8 @@
 # and build it.  The HDF5 options should be set after the FetchContent_Declare command and before
 # the add_subdirectory command..
 macro (EXTERNAL_HDF5_LIBRARY compress_type)
-  set (HDF5_VERSION "2.0.0")
-  set (HDF5_VERSEXT "-4")
+  set (HDF5_VERSION "2.0.1")
+  set (HDF5_VERSEXT "")
   set (HDF5_VERSION_MAJOR "2.0")
   set (HDF5LIB_TGZ_NAME "hdf5.tar.gz" CACHE STRING "Use HDF5LIB from compressed file" FORCE)
   set (HDF5LIB_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5/releases/download/snapshot" CACHE STRING "Use HDF5LIB from original location" FORCE)
