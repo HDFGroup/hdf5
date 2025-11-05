@@ -50,6 +50,7 @@ jobs:
             --max-concurrency 4
             --retry-wait-time 10
             --timeout 30
+            --accept 200..=299,429
             --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"
             --skip-missing
             --exclude ".*%23.*"
@@ -74,6 +75,7 @@ jobs:
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
           output: lychee-report.md
           format: markdown
+          jobSummary: false
           # Let the action fail naturally - we'll handle it in the summary step
           fail: true
 
@@ -104,17 +106,8 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### Full Report:" >> "$GITHUB_STEP_SUMMARY"
           if [ -f "lychee-report.md" ]; then
-            # Limit output to first 500 lines to avoid exceeding 1MB GitHub limit
             echo '```' >> "$GITHUB_STEP_SUMMARY"
-            head -n 500 lychee-report.md >> "$GITHUB_STEP_SUMMARY"
-
-            # Check if report was truncated
-            TOTAL_LINES=$(wc -l < lychee-report.md)
-            if [ "$TOTAL_LINES" -gt 500 ]; then
-              echo "" >> "$GITHUB_STEP_SUMMARY"
-              echo "... (Truncated. Showing first 500 of $TOTAL_LINES lines)" >> "$GITHUB_STEP_SUMMARY"
-              echo "View the full job logs for complete results." >> "$GITHUB_STEP_SUMMARY"
-            fi
+            cat lychee-report.md >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           else
             echo "No detailed report available." >> "$GITHUB_STEP_SUMMARY"
