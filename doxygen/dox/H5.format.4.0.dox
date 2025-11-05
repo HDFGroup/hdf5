@@ -1966,7 +1966,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 \li This encoding is used when this B-Tree is used as an index for a dataset with layout message version 4.
 
 <table>
-<caption>\anchor FMT4V2BtType11 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</strong></caption>
+<caption>Type11 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
