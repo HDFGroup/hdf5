@@ -71,7 +71,7 @@ We would like to thank the many HDF5 community members that contributed to HDF5 
 
 ### Autotools support was removed from HDF5<a name="cmake">
 
-   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
+   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the [AutotoolsToCMakeOptions.md](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/AutotoolsToCMakeOptions.md) file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
 
 ### Fixed problems with family driver and user block
 
