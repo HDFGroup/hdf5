@@ -835,6 +835,14 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
    Added missing parameters H5F_ACC_SWMR_READ_F and H5F_ACC_SWMR_WRITE_F
    Fixed GitHub issue [#5959](https://github.com/HDFGroup/hdf5/issues/5959)
 
+### Added Fortran wrappers for SWMR functionality
+
+   Added four new Fortran wrappers that provide direct access to SWMR (Single Writer Multiple Reader) C APIs:
+   - `h5fstart_swmr_write_f` - Enables SWMR writing mode for a file
+   - `h5dflush_f`            - Flushes dataset buffers to disk
+   - `h5pset_append_flush_f` - Sets append flush property values including optional callback function
+   - `h5pget_append_flush_f` - Retrieves append flush property values including callback function
+
 ## High-Level Library
 
 ### Fixed an issue with H5TB functions

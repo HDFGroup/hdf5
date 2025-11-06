@@ -100,6 +100,10 @@ PROGRAM fortranlibtest
   CALL test_get_file_image(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing get file image ', total_error)
 
+  ret_total_error = 0
+  CALL test_swmr_wrappers(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' SWMR wrapper test', total_error)
+
 !
 !      '========================================='
 !      'Testing DATASET Interface                '
