@@ -104,7 +104,7 @@ CONTAINS
     ! Variables for callback invocation test
     INTEGER(C_INT) :: callback_ret
     INTEGER(HID_T) :: dummy_dset_id
-    TYPE(C_PTR) :: dummy_dims
+    TYPE(C_PTR) :: dummy_dims, f_ptr
 
     ! Initialize
     filename = "swmr_test.h5"
@@ -272,7 +272,8 @@ CONTAINS
     dummy_dims = C_NULL_PTR  ! Dummy dimensions pointer (not used in callback)
 
     ! Invoke the callback with our counter as user data
-    callback_ret = test_append_flush_callback(dummy_dset_id, dummy_dims, C_LOC(callback_counter))
+    f_ptr = C_LOC(callback_counter)
+    callback_ret = test_append_flush_callback(dummy_dset_id, dummy_dims, f_ptr)
 
     ! Verify callback returned success
     CALL verify("callback test: return value", INT(callback_ret), 0, total_error)
