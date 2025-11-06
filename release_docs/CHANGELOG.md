@@ -59,7 +59,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
   
 ## Acknowledgements: 
 
-We would like to thank the many HDF5 community members that contributed to HDF5 2.0.
+We would like to thank the many HDF5 community members who contributed to HDF5 2.0.
 
 # ⚠️ Breaking Changes
 
@@ -105,7 +105,7 @@ We would like to thank the many HDF5 community members that contributed to HDF5 
 
    The `HDF5_ENABLE_THREADS` option has been removed, as it no longer functions as a proper build option. The library will always check for thread support and set the internal status variable, `HDF5_THREADS_ENABLED`. The `HDF5_ENABLE_THREADSAFE` option is still available to build with thread-safe API calls.
 
-- Enhanced Maven repository deployment support
+### Enhanced Maven repository deployment support
 
    Added comprehensive Maven integration with optimized workflows for Java artifact deployment:
    - **New CMake options**: `HDF5_ENABLE_MAVEN_DEPLOY` and `HDF5_MAVEN_SNAPSHOT` for Maven repository deployment
@@ -123,7 +123,7 @@ We would like to thank the many HDF5 community members that contributed to HDF5 
    - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
    - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
 
- - Reorganized the files in the config/cmake folder into the config folder structure
+### Reorganized the files in the config/cmake folder into the config folder structure
 
    The config folder CMake files have been reorganized to make it easier to maintain and add new features. This includes the following changes:
    - The files in the config folder are the macros and templates for the build process.
