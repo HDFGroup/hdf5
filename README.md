@@ -1,4 +1,4 @@
-HDF5 version 2.0.0-4 currently under development
+HDF5 version 2.0.1 currently under development
 
 > [!WARNING]
 > **Heads Up: HDF5 Dropped Autotools March 10th**

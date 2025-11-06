@@ -256,7 +256,7 @@ import org.slf4j.LoggerFactory;
  * which prints out the HDF5 error stack, as described in the HDF5 C API <i><b>@ref H5Eprint()</b>.</i> This
  * may be used by Java exception handlers to print out the HDF5 error stack. <hr>
  *
- * @version HDF5 2.0.0 <BR>
+ * @version HDF5 2.0.1 <BR>
  *          <b>See also: </b>
  *          @ref HDFARRAY hdf.hdf5lib.HDFArray<br />
  *          @ref HDF5CONST hdf.hdf5lib.HDF5Constants<br />
@@ -298,7 +298,7 @@ public class H5 implements java.io.Serializable {
      * </ul>
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = {2, 0, 0};
+    public final static int LIB_VERSION[] = {2, 0, 1};
 
     private final static LinkedHashSet<Long> OPEN_IDS = new LinkedHashSet<Long>();
     private static boolean isLibraryLoaded            = false;
