@@ -4421,8 +4421,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param ndims      Number of elements in boundary array
 !! \param boundary   Array of dimension sizes for boundary
 !! \param hdferr     \fortran_error
-!! \param func       \fortran_approved{Optional} User-defined callback function
-!! \param udata      \fortran_approved{Optional} User-defined input data for callback
+!! \param func       User-defined callback function
+!! \param udata      User-defined input data for callback
 !!
 !! See C API: @ref H5Pset_append_flush()
 !!
