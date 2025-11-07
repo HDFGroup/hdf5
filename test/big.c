@@ -61,6 +61,7 @@
  * NO_FILE stands for "no file" to be tested.
  */
 typedef enum fsizes_t { SFILE, LFILE, XLFILE, HUGEFILE, NO_FILE } fsizes_t;
+typedef enum dset_layout_t { CONTIG, SINGLE_CHUNK, FARRAY, EARRAY, BTREE2 } dset_layout_t;
 fsizes_t file_size = NO_FILE;
 
 const char *FILENAME[]      = {"big", "sec2", "stdio", NULL};
@@ -297,18 +298,23 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
+writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n, dset_layout_t layout)
 {
     hsize_t size1[4] = {8, 1024, 1024, 1024};
-    hsize_t size2[1] = {8LL * 1024LL * 1024LL * 1024LL};
-    hsize_t hs_start[1];
-    hsize_t hs_size[1];
+    hsize_t size1_max[4];
+    hsize_t chunk_dim1[4];
+    hsize_t size2[2] = {8LL * 1024LL * 1024LL * 1024LL, 0};
+    hsize_t size2_max[2];
+    hsize_t chunk_dim2[2];
+    int     rank2       = 1;
+    hsize_t hs_start[2] = {0, 0};
+    hsize_t hs_size[2]  = {WRT_SIZE, 1};
     hid_t   file = H5I_INVALID_HID, space1 = H5I_INVALID_HID, space2 = H5I_INVALID_HID,
           mem_space = H5I_INVALID_HID, d1 = H5I_INVALID_HID, d2 = H5I_INVALID_HID;
     int  *buf = (int *)malloc(sizeof(int) * WRT_SIZE);
     int   i, j;
-    FILE *out = fopen(DNAME, "w");
-    hid_t dcpl;
+    FILE *out   = fopen(DNAME, "w");
+    hid_t dcpl1 = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID;
 
     switch (testsize) {
         case LFILE:
@@ -349,6 +355,12 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
             break;
     }
 
+    /* Initialize other arrays */
+    memcpy(size1_max, size1, sizeof(size1));
+    memcpy(chunk_dim1, size1, sizeof(size1));
+    memcpy(size2_max, size2, sizeof(size2));
+    memcpy(chunk_dim2, size2, sizeof(size2));
+
     /*
      * We might be on a machine that has 32-bit files, so create an HDF5 file
      * which is a family of files.  Each member of the family will be 1GB
@@ -357,13 +369,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
         goto error;
     }
 
-    /* Create simple data spaces according to the size specified above. */
-    if ((space1 = H5Screate_simple(4, size1, size1)) < 0 ||
-        (space2 = H5Screate_simple(1, size2, size2)) < 0) {
-        goto error;
-    }
-
-    /* Create the datasets */
+    /* Create DCPLs */
     /*
      *  The fix below is provided for bug#921
      *  H5Dcreate with H5P_DEFAULT creation properties
@@ -372,17 +378,58 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
      *  We should create a dataset allocating space late and never writing fill values.
      *  EIP 4/8/03
      */
-    dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
-    H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
-    if ((d1 = H5Dcreate2(file, "d1", H5T_NATIVE_INT, space1, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0 ||
-        (d2 = H5Dcreate2(file, "d2", H5T_NATIVE_INT, space2, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+    dcpl1 = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_alloc_time(dcpl1, H5D_ALLOC_TIME_LATE);
+    H5Pset_fill_time(dcpl1, H5D_FILL_TIME_NEVER);
+    dcpl2 = H5Pcopy(dcpl1);
+
+    /* Set up chunking  */
+    if (layout != CONTIG) {
+        /* If we're not using the single chunk index, set the chunk dimensions so there are 2 chunks */
+        if (layout != SINGLE_CHUNK) {
+            chunk_dim1[0] /= 2;
+            chunk_dim2[0] /= 2;
+
+            /* If we're using the earray index, use one unlimited dimension */
+            if (layout == EARRAY) {
+                size1_max[0] = H5S_UNLIMITED;
+                size2_max[0] = H5S_UNLIMITED;
+            }
+            /* If we're using the btree2 index, use two unlimited dimensions and convert dataset 2 to 2-D */
+            else if (layout == BTREE2) {
+                size1_max[0] = H5S_UNLIMITED;
+                size1_max[1] = H5S_UNLIMITED;
+                rank2        = 2;
+                chunk_dim2[0] /= 2;
+                chunk_dim2[1] = 2;
+                size2[0] /= 2;
+                size2[1]     = 2;
+                size2_max[0] = H5S_UNLIMITED;
+                size2_max[1] = H5S_UNLIMITED;
+            }
+        }
+
+        /* Set chunk dimensions */
+        if (H5Pset_chunk(dcpl1, 4, size1) < 0)
+            goto error;
+        if (H5Pset_chunk(dcpl2, rank2, size2) < 0)
+            goto error;
+    }
+
+    /* Create simple data spaces according to the size specified above. */
+    if ((space1 = H5Screate_simple(4, size1, size1_max)) < 0 ||
+        (space2 = H5Screate_simple(rank2, size2, size2_max)) < 0) {
+        goto error;
+    }
+
+    /* Create the datasets */
+    if ((d1 = H5Dcreate2(file, "d1", H5T_NATIVE_INT, space1, H5P_DEFAULT, dcpl1, H5P_DEFAULT)) < 0 ||
+        (d2 = H5Dcreate2(file, "d2", H5T_NATIVE_INT, space2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0) {
         goto error;
     }
 
     /* Write some things to them randomly */
-    hs_size[0] = WRT_SIZE;
-    if ((mem_space = H5Screate_simple(1, hs_size, hs_size)) < 0)
+    if ((mem_space = H5Screate_simple(rank2, hs_size, hs_size)) < 0)
         goto error;
     for (i = 0; i < wrt_n; i++) {
         /* start position must be at least hs_size from the end */
@@ -400,6 +447,10 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     if (H5Dclose(d1) < 0)
         goto error;
     if (H5Dclose(d2) < 0)
+        goto error;
+    if (H5Pclose(dcpl1) < 0)
+        goto error;
+    if (H5Pclose(dcpl2) < 0)
         goto error;
     if (H5Sclose(mem_space) < 0)
         goto error;
@@ -419,6 +470,8 @@ error:
     {
         H5Dclose(d1);
         H5Dclose(d2);
+        H5Pclose(dcpl1);
+        H5Pclose(dcpl2);
         H5Sclose(space1);
         H5Sclose(space2);
         H5Sclose(mem_space);
@@ -449,9 +502,10 @@ reader(char *filename, hid_t fapl)
     FILE   *script = NULL;
     hid_t   file = H5I_INVALID_HID, mspace = H5I_INVALID_HID, fspace = H5I_INVALID_HID, d2 = H5I_INVALID_HID;
     char    ln[128], *s;
-    hsize_t hs_offset[1];
-    hsize_t hs_size[1] = {WRT_SIZE};
-    int    *buf        = (int *)malloc(sizeof(int) * WRT_SIZE);
+    hsize_t hs_offset[2] = {0, 0};
+    hsize_t hs_size[2]   = {WRT_SIZE, 1};
+    int    *buf          = (int *)malloc(sizeof(int) * WRT_SIZE);
+    int     rank;
     int     i, j, zero, wrong, nerrors = 0;
 
     /* Open script file */
@@ -459,17 +513,21 @@ reader(char *filename, hid_t fapl)
 
     /* Open HDF5 file */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset */
     if ((d2 = H5Dopen2(file, "d2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((fspace = H5Dget_space(d2)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
+
+    /* Get rank of dataset */
+    if ((rank = H5Sget_simple_extent_ndims(fspace)) < 0)
+        TEST_ERROR;
 
     /* Describe `buf' */
-    if ((mspace = H5Screate_simple(1, hs_size, hs_size)) < 0)
-        FAIL_STACK_ERROR;
+    if ((mspace = H5Screate_simple(rank, hs_size, hs_size)) < 0)
+        TEST_ERROR;
 
     /* Read each region */
     while (fgets(ln, (int)sizeof(ln), script)) {
@@ -483,7 +541,7 @@ reader(char *filename, hid_t fapl)
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
             FAIL_STACK_ERROR;
         if (H5Dread(d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Check */
         for (j = zero = wrong = 0; j < WRT_SIZE; j++) {
@@ -507,13 +565,13 @@ reader(char *filename, hid_t fapl)
     }
 
     if (H5Dclose(d2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(mspace) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(fspace) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     free(buf);
     fclose(script);
 
@@ -562,6 +620,48 @@ usage(void)
 }
 
 static int
+run_tests(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
+{
+    if (writer(filename, fapl, testsize, wrt_n, CONTIG))
+        goto error;
+    if (reader(filename, fapl))
+        goto error;
+    puts("  Test passed with contiguous datasets.");
+
+    if (writer(filename, fapl, testsize, wrt_n, SINGLE_CHUNK))
+        goto error;
+    if (reader(filename, fapl))
+        goto error;
+    puts("  Test passed with single chunk index.");
+
+    if (writer(filename, fapl, testsize, wrt_n, FARRAY))
+        goto error;
+    if (reader(filename, fapl))
+        goto error;
+    puts("  Test passed with fixed array chunk index.");
+
+    if (writer(filename, fapl, testsize, wrt_n, EARRAY))
+        goto error;
+    if (reader(filename, fapl))
+        goto error;
+    puts("  Test passed with extensible array chunk index.");
+
+    if (writer(filename, fapl, testsize, wrt_n, BTREE2))
+        goto error;
+    if (reader(filename, fapl))
+        goto error;
+    puts("  Test passed with v2 b-tree chunk index.");
+
+    /* Clean up */
+    h5_delete_all_test_files(FILENAME, fapl);
+    HDremove(DNAME);
+    return 0;
+
+error:
+    return 1;
+}
+
+static int
 test_sec2(hid_t fapl)
 {
     char     filename[1024];
@@ -573,23 +673,16 @@ test_sec2(hid_t fapl)
         goto quit;
     }
     /* Test big file with the SEC2 driver */
-    puts("Testing big file with the SEC2 Driver ");
+    puts("Testing big file with the SEC2 Driver:");
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
-    if (writer(filename, fapl, testsize, WRT_N))
+    if (run_tests(filename, fapl, testsize, WRT_N))
         goto error;
-    if (reader(filename, fapl))
-        goto error;
-
-    puts("Test passed with the SEC2 Driver.");
 
 quit:
     /* End with normal return code */
-    /* Clean up the test file */
-    h5_delete_all_test_files(FILENAME, fapl);
     H5Pclose(fapl);
-    HDremove(DNAME);
     return 0;
 
 error:
@@ -612,11 +705,8 @@ test_stdio(hid_t fapl)
 
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
-    if (writer(filename, fapl, testsize, WRT_N))
+    if (run_tests(filename, fapl, testsize, WRT_N))
         goto error;
-    if (reader(filename, fapl))
-        goto error;
-    puts("Test passed with the STDIO Driver.");
 
     /* Flush stdout at the end of this test routine to ensure later
      * output to stderr will not come out before it.
@@ -625,9 +715,7 @@ test_stdio(hid_t fapl)
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    h5_delete_all_test_files(FILENAME, fapl);
     H5Pclose(fapl);
-    HDremove(DNAME);
     fflush(stdout);
     return 0;
 
@@ -671,19 +759,13 @@ test_family(hid_t fapl)
     /* Do the test with the Family Driver */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    if (writer(filename, fapl, HUGEFILE, WRT_N))
+    if (run_tests(filename, fapl, HUGEFILE, WRT_N))
         goto error;
-    if (reader(filename, fapl))
-        goto error;
-
-    puts("Test passed with the Family Driver.");
 
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    h5_delete_all_test_files(FILENAME, fapl);
     H5Pclose(fapl);
-    HDremove(DNAME);
     return 0;
 
 error:
@@ -758,6 +840,7 @@ main(int ac, char **av)
 #endif
     srand((unsigned)seed);
 
+    /* Loop over dataset configuration */
     /* run VFD-specific test */
     if (H5FD_SEC2 == driver) {
         if (test_sec2(fapl) != 0)

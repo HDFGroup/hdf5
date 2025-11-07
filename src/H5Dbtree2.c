@@ -67,19 +67,19 @@
 /* User data for creating callback context */
 typedef struct H5D_bt2_ctx_ud_t {
     const H5F_t *f;              /* Pointer to file info */
-    uint32_t     chunk_size;     /* Size of chunk (bytes; for filtered object) */
+    hsize_t      chunk_size;     /* Size of chunk (bytes; for filtered object) */
     unsigned     ndims;          /* Number of dimensions */
     size_t       chunk_size_len; /* Size of chunk sizes in the file (bytes) */
-    uint32_t    *dim;            /* Size of chunk in elements */
+    hsize_t     *dim;            /* Size of chunk in elements */
 } H5D_bt2_ctx_ud_t;
 
 /* The callback context */
 typedef struct H5D_bt2_ctx_t {
-    uint32_t  chunk_size;     /* Size of chunk (bytes; constant for unfiltered object) */
-    size_t    sizeof_addr;    /* Size of file addresses in the file (bytes) */
-    size_t    chunk_size_len; /* Size of chunk sizes in the file (bytes) */
-    unsigned  ndims;          /* Number of dimensions in chunk */
-    uint32_t *dim;            /* Size of chunk in elements */
+    hsize_t  chunk_size;     /* Size of chunk (bytes; constant for unfiltered object) */
+    size_t   sizeof_addr;    /* Size of file addresses in the file (bytes) */
+    size_t   chunk_size_len; /* Size of chunk sizes in the file (bytes) */
+    unsigned ndims;          /* Number of dimensions in chunk */
+    hsize_t *dim;            /* Size of chunk in elements */
 } H5D_bt2_ctx_t;
 
 /* Callback info for iteration over chunks in v2 B-tree */
@@ -228,7 +228,7 @@ const H5B2_class_t H5D_BT2_FILT[1] = {{
 H5FL_DEFINE_STATIC(H5D_bt2_ctx_t);
 
 /* Declare a free list to manage the page elements */
-H5FL_ARR_DEFINE_STATIC(uint32_t, H5O_LAYOUT_NDIMS);
+H5FL_ARR_DEFINE_STATIC(hsize_t, H5O_LAYOUT_NDIMS);
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__bt2_crt_context
@@ -245,7 +245,7 @@ H5D__bt2_crt_context(void *_udata)
 {
     H5D_bt2_ctx_ud_t *udata = (H5D_bt2_ctx_ud_t *)_udata; /* User data for building callback context */
     H5D_bt2_ctx_t    *ctx;                                /* Callback context structure */
-    uint32_t         *my_dim    = NULL;                   /* Pointer to copy of chunk dimension size */
+    hsize_t          *my_dim    = NULL;                   /* Pointer to copy of chunk dimension size */
     void             *ret_value = NULL;                   /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -267,9 +267,9 @@ H5D__bt2_crt_context(void *_udata)
     ctx->chunk_size_len = udata->chunk_size_len;
 
     /* Set up the "local" information for this dataset's chunk dimension sizes */
-    if (NULL == (my_dim = (uint32_t *)H5FL_ARR_MALLOC(uint32_t, H5O_LAYOUT_NDIMS)))
+    if (NULL == (my_dim = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, H5O_LAYOUT_NDIMS)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate chunk dims");
-    H5MM_memcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
+    H5MM_memcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(hsize_t));
     ctx->dim = my_dim;
 
     /* Set return value */
@@ -301,7 +301,7 @@ H5D__bt2_dst_context(void *_ctx)
 
     /* Free array for chunk dimension sizes */
     if (ctx->dim)
-        H5FL_ARR_FREE(uint32_t, ctx->dim);
+        H5FL_ARR_FREE(hsize_t, ctx->dim);
     /* Release callback context */
     ctx = H5FL_FREE(H5D_bt2_ctx_t, ctx);
 
@@ -561,7 +561,7 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth, const void *_record, c
     assert(0 != record->nbytes);
 
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Chunk address:", record->chunk_addr);
-    fprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth, "Chunk size:", (unsigned)record->nbytes);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " bytes\n", indent, "", fwidth, "Chunk size:", record->nbytes);
     fprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "Filter mask:", record->filter_mask);
 
     fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
@@ -953,7 +953,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     bt2_udata.ndims          = idx_info->layout->u.chunk.ndims - 1;
     bt2_udata.rec.chunk_addr = udata->chunk_block.offset;
     if (idx_info->pline->nused > 0) { /* filtered chunk */
-        H5_CHECKED_ASSIGN(bt2_udata.rec.nbytes, uint32_t, udata->chunk_block.length, hsize_t);
+        bt2_udata.rec.nbytes      = udata->chunk_block.length;
         bt2_udata.rec.filter_mask = udata->filter_mask;
     }      /* end if */
     else { /* non-filtered chunk */
@@ -1237,8 +1237,7 @@ H5D__bt2_remove_cb(const void *_record, void *_udata)
     assert(f);
 
     /* Free the space in the file for the object being removed */
-    H5_CHECK_OVERFLOW(record->nbytes, uint32_t, hsize_t);
-    if (H5MF_xfree(f, H5FD_MEM_DRAW, record->chunk_addr, (hsize_t)record->nbytes) < 0)
+    if (H5MF_xfree(f, H5FD_MEM_DRAW, record->chunk_addr, record->nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
 
 done:

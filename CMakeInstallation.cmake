@@ -80,6 +80,22 @@ set (HDF5_INCLUDES_BUILD_TIME
 )
 
 #-----------------------------------------------------------------------------
+# Set Java JAR names for config file (with Maven SNAPSHOT suffix if enabled)
+#-----------------------------------------------------------------------------
+if (HDF5_BUILD_JAVA)
+  if (HDF5_ENABLE_MAVEN_DEPLOY AND HDF5_MAVEN_SNAPSHOT)
+    set (HDF5_JARHDF5_JAR_NAME "jarhdf5-${HDF5_PACKAGE_VERSION}-SNAPSHOT.jar")
+    set (HDF5_JAVAHDF5_JAR_NAME "javahdf5-${HDF5_PACKAGE_VERSION}-SNAPSHOT.jar")
+  else ()
+    set (HDF5_JARHDF5_JAR_NAME "jarhdf5-${HDF5_PACKAGE_VERSION}.jar")
+    set (HDF5_JAVAHDF5_JAR_NAME "javahdf5-${HDF5_PACKAGE_VERSION}.jar")
+  endif ()
+  # slf4j JAR names (these are dependencies, version shouldn't change with SNAPSHOT)
+  set (HDF5_SLF4J_API_JAR_NAME "slf4j-api-2.0.16.jar")
+  set (HDF5_SLF4J_NOP_JAR_NAME "slf4j-nop-2.0.16.jar")
+endif ()
+
+#-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the build directory
 #-----------------------------------------------------------------------------
 set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})

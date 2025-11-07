@@ -13,6 +13,7 @@ JUnit version 4.13.2
 .testH5Adelete_by_name
 .testH5AVLwrVL
 .testH5Aopen_by_name
+.testH5Awrite_readCompound
 .testH5Aget_info
 .testH5Aget_name
 .testH5Aexists
@@ -21,6 +22,8 @@ JUnit version 4.13.2
 .testH5Adelete_by_idx_name1
 .testH5Adelete_by_idx_name2
 .testH5Adelete_by_idx_order
+.testH5A_VLStrings_write_empty_buffer
+.testH5A_VLStrings_write_null_buffer
 .testH5Arename_by_name
 .testH5Acreate2_invalidobject
 .testH5AArraywr
@@ -30,9 +33,10 @@ JUnit version 4.13.2
 .testH5Adelete_by_idx_invalidobject
 .testH5Awrite_readVL
 .testH5AArray_string_buffer
+.testH5A_VLStrings_write_invalid_type
 .testH5Aget_info1
 
 Time:  XXXX
 
-OK (32 tests)
+OK (36 tests)
 

@@ -66,6 +66,7 @@ public class TestH5Dplist {
 
     private final void _createPDataset(long fid, long dsid, String name, long dcpl_val)
     {
+        assertTrue("TestH5Dplist._createPDataset: " + H5dcpl_id, dcpl_val > 0);
         try {
             H5dcpl_id = H5.H5Pcreate(dcpl_val);
         }

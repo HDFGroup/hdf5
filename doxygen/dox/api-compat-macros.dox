@@ -699,11 +699,11 @@ Navigate back: \ref index "Main" / \ref TN
   <tr>
   <td rowspan="2">H5Ewalk()</td>
   <td>\TText{DH5Ewalk_vers=1}</td>
-  <td>H5Ewalk1() <br/> with callback \ref H5E_walk1_t <br/> and struct \ref H5E_error1_t</td>
+  <td>H5Ewalk1() <br/> with callback H5E_walk1_t <br/> and struct @ref H5E_error1_t</td>
   </tr>
   <tr>
   <td>\TText{DH5Ewalk_vers=2}</td>
-  <td>H5Ewalk2() <br/> with callback \ref H5E_walk2_t <br/> and struct \ref H5E_error2_t</td>
+  <td>H5Ewalk2() <br/> with callback H5E_walk2_t <br/> and struct @ref H5E_error2_t</td>
   </tr>
   <tr>
   <td rowspan="2">H5Gcreate()</td>

@@ -231,7 +231,7 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
             break;
 
         case H5C_NOTIFY_ACTION_BEFORE_EVICT:
-            for (u = 0; u < entry_ptr->flush_dep_nparents; u++) {
+            for (u = entry_ptr->flush_dep_nparents - 1; u < entry_ptr->flush_dep_nparents; u--) {
                 H5C_cache_entry_t *parent_ptr;
 
                 /* Sanity checks */

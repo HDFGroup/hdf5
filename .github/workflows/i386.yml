@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
 
       - name: setup alpine
         uses: jirutka/setup-alpine@v1

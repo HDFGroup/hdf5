@@ -654,6 +654,8 @@ set_tests_properties (H5TEST-tcheck_version-major PROPERTIES
 if ("H5TEST-tcheck_version-major" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (H5TEST-tcheck_version-major PROPERTIES DISABLED true)
 endif ()
+# The minor version test will test version 999 and always fail because it's listed in
+# VERS_MINOR_EXCEPTIONS.  With WILL_FAIL "true" the failing test passes.
 add_test (NAME H5TEST-tcheck_version-minor COMMAND $<TARGET_FILE:tcheck_version> "-tm")
 set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
@@ -663,13 +665,12 @@ set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
 if ("H5TEST-tcheck_version-minor" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES DISABLED true)
 endif ()
-# release + 1 should pass on non-develop branches
+# release + 1 should always pass (not checked)
 add_test (NAME H5TEST-tcheck_version-release COMMAND $<TARGET_FILE:tcheck_version> "-tr")
 set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     ENVIRONMENT "${CROSSCOMPILING_PATH}"
-    WILL_FAIL "true"
-)
+) 
 if ("H5TEST-tcheck_version-release" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (H5TEST-tcheck_version-release PROPERTIES DISABLED true)
 endif ()

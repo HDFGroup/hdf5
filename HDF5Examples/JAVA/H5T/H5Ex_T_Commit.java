@@ -19,12 +19,14 @@
   screen.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_T_Commit {
     private static String FILENAME           = "H5Ex_T_Commit.h5";
@@ -35,20 +37,20 @@ public class H5Ex_T_Commit {
 
     // Values for the various classes of datatypes
     enum H5T_class {
-        H5T_NO_CLASS(HDF5Constants.H5T_NO_CLASS),   // error
-        H5T_INTEGER(HDF5Constants.H5T_INTEGER),     // integer types
-        H5T_FLOAT(HDF5Constants.H5T_FLOAT),         // floating-point types
-        H5T_TIME(HDF5Constants.H5T_TIME),           // date and time types
-        H5T_STRING(HDF5Constants.H5T_STRING),       // character string types
-        H5T_BITFIELD(HDF5Constants.H5T_BITFIELD),   // bit field types
-        H5T_OPAQUE(HDF5Constants.H5T_OPAQUE),       // opaque types
-        H5T_COMPOUND(HDF5Constants.H5T_COMPOUND),   // compound types
-        H5T_REFERENCE(HDF5Constants.H5T_REFERENCE), // reference types
-        H5T_ENUM(HDF5Constants.H5T_ENUM),           // enumeration types
-        H5T_VLEN(HDF5Constants.H5T_VLEN),           // Variable-Length types
-        H5T_ARRAY(HDF5Constants.H5T_ARRAY),         // Array types
-        H5T_COMPLEX(HDF5Constants.H5T_COMPLEX),     // Complex number types
-        H5T_NCLASSES(12);                           // this must be last
+        H5T_NO_CLASS(H5T_NO_CLASS()),   // error
+        H5T_INTEGER(H5T_INTEGER()),     // integer types
+        H5T_FLOAT(H5T_FLOAT()),         // floating-point types
+        H5T_TIME(H5T_TIME()),           // date and time types
+        H5T_STRING(H5T_STRING()),       // character string types
+        H5T_BITFIELD(H5T_BITFIELD()),   // bit field types
+        H5T_OPAQUE(H5T_OPAQUE()),       // opaque types
+        H5T_COMPOUND(H5T_COMPOUND()),   // compound types
+        H5T_REFERENCE(H5T_REFERENCE()), // reference types
+        H5T_ENUM(H5T_ENUM()),           // enumeration types
+        H5T_VLEN(H5T_VLEN()),           // Variable-Length types
+        H5T_ARRAY(H5T_ARRAY()),         // Array types
+        H5T_COMPLEX(H5T_COMPLEX()),     // Complex number types
+        H5T_NCLASSES(12);               // this must be last
 
         private static final Map<Long, H5T_class> lookup = new HashMap<Long, H5T_class>();
 
@@ -72,9 +74,8 @@ public class H5Ex_T_Commit {
         static int numberMembers = 4;
         static int[] memberDims  = {1, 1, 1, 1};
 
-        String[] memberNames       = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
-        long[] memberFileTypes     = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
-                                      HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
+        String[] memberNames   = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
+        long[] memberFileTypes = {H5T_STD_I32BE_g(), H5T_C_S1_g(), H5T_IEEE_F64BE_g(), H5T_IEEE_F64BE_g()};
         static int[] memberStorage = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
 
         // Data size is the storage size for the members not the object.
@@ -95,16 +96,15 @@ public class H5Ex_T_Commit {
         }
     }
 
-    private static void CreateDataType()
+    private static void CreateDataType(Arena arena)
     {
-        long file_id              = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id           = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id          = HDF5Constants.H5I_INVALID_HID;
+        long file_id              = H5I_INVALID_HID();
+        long strtype_id           = H5I_INVALID_HID();
+        long filetype_id          = H5I_INVALID_HID();
         Sensor_Datatype datatypes = new Sensor_Datatype();
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -112,9 +112,9 @@ public class H5Ex_T_Commit {
 
         // Create string datatype.
         try {
-            strtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            strtype_id = H5Tcopy(H5T_C_S1_g());
             if (strtype_id >= 0)
-                H5.H5Tset_size(strtype_id, MAXSTRINGSIZE);
+                H5Tset_size(strtype_id, MAXSTRINGSIZE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -125,14 +125,14 @@ public class H5Ex_T_Commit {
         // the corresponding native types, we must manually calculate the
         // offset of each member.
         try {
-            filetype_id = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, Sensor_Datatype.getDataSize());
+            filetype_id = H5Tcreate(H5T_COMPOUND(), Sensor_Datatype.getDataSize());
             if (filetype_id >= 0) {
                 for (int indx = 0; indx < Sensor_Datatype.numberMembers; indx++) {
                     long type_id = datatypes.memberFileTypes[indx];
-                    if (type_id == HDF5Constants.H5T_C_S1)
+                    if (type_id == H5T_C_S1_g())
                         type_id = strtype_id;
-                    H5.H5Tinsert(filetype_id, datatypes.memberNames[indx], Sensor_Datatype.getOffset(indx),
-                                 type_id);
+                    H5Tinsert(filetype_id, arena.allocateFrom(datatypes.memberNames[indx]),
+                              Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -143,8 +143,8 @@ public class H5Ex_T_Commit {
         // Commit the compound datatype to the file, creating a named datatype.
         try {
             if ((file_id >= 0) && (filetype_id >= 0))
-                H5.H5Tcommit(file_id, DATATYPENAME, filetype_id, HDF5Constants.H5P_DEFAULT,
-                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                H5Tcommit2(file_id, arena.allocateFrom(DATATYPENAME), filetype_id, H5P_DEFAULT(),
+                           H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -153,7 +153,7 @@ public class H5Ex_T_Commit {
         // Terminate access to the file type.
         try {
             if (filetype_id >= 0)
-                H5.H5Tclose(filetype_id);
+                H5Tclose(filetype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -162,7 +162,7 @@ public class H5Ex_T_Commit {
         // Terminate access to the str type.
         try {
             if (strtype_id >= 0)
-                H5.H5Tclose(strtype_id);
+                H5Tclose(strtype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -171,22 +171,22 @@ public class H5Ex_T_Commit {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void ReadDataType()
+    private static void ReadDataType(Arena arena)
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long typeclass_id = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id  = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = H5I_INVALID_HID();
+        long typeclass_id = H5I_INVALID_HID();
+        long filetype_id  = H5I_INVALID_HID();
 
         // Open an existing file.
         try {
-            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(arena.allocateFrom(FILENAME), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -195,7 +195,7 @@ public class H5Ex_T_Commit {
         // Open named datatype.
         try {
             if (file_id >= 0)
-                filetype_id = H5.H5Topen(file_id, DATATYPENAME, HDF5Constants.H5P_DEFAULT);
+                filetype_id = H5Topen2(file_id, arena.allocateFrom(DATATYPENAME), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -207,7 +207,7 @@ public class H5Ex_T_Commit {
         // Get datatype class. If it isn't compound, we won't print anything.
         try {
             if (filetype_id >= 0)
-                typeclass_id = H5.H5Tget_class(filetype_id);
+                typeclass_id = H5Tget_class(filetype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -216,10 +216,11 @@ public class H5Ex_T_Commit {
         try {
             if (H5T_class.get(typeclass_id) == H5T_class.H5T_COMPOUND) {
                 System.out.println("   Class: H5T_COMPOUND");
-                int nmembs = H5.H5Tget_nmembers(filetype_id);
+                int nmembs = H5Tget_nmembers(filetype_id);
                 // Iterate over compound datatype members.
                 for (int indx = 0; indx < nmembs; indx++) {
-                    String member_name = H5.H5Tget_member_name(filetype_id, indx);
+                    MemorySegment nameSeg = H5Tget_member_name(filetype_id, indx);
+                    String member_name    = nameSeg.getString(0);
                     System.out.println("    " + member_name);
                 }
             }
@@ -231,7 +232,7 @@ public class H5Ex_T_Commit {
         // Terminate access to the mem type.
         try {
             if (filetype_id >= 0)
-                H5.H5Tclose(filetype_id);
+                H5Tclose(filetype_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -240,7 +241,7 @@ public class H5Ex_T_Commit {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -249,11 +250,10 @@ public class H5Ex_T_Commit {
 
     public static void main(String[] args)
     {
-        H5Ex_T_Commit.CreateDataType();
-        // Now we begin the read section of this example. Here we assume
-        // the dataset and array have the same name and rank, but can have
-        // any size. Therefore we must allocate a new array to read in
-        // data using malloc().
-        H5Ex_T_Commit.ReadDataType();
+
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_T_Commit.CreateDataType(arena);
+            H5Ex_T_Commit.ReadDataType(arena);
+        }
     }
 }
