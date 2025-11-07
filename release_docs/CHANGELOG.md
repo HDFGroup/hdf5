@@ -701,6 +701,12 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
 
+### Fixed a segfault with a corrupted file based on netCDF-4
+
+   When the internal function H5G__dense_iterate failed early, allocated structures were never populated, causing cleanup code to read uninitialized values and attempt to free invalid pointers.  The structures are now initialized with proper values and NULL pointers immediately after allocation.
+
+   Fixes GitHub issue [#5375](https://github.com/HDFGroup/hdf5/issues/5375)
+
 ### Fixed security issues [CVE-2025-2913](https://nvd.nist.gov/vuln/detail/CVE-2025-2913), [CVE-2025-2926](https://nvd.nist.gov/vuln/detail/CVE-2025-2926), [CVE-2025-6817](https://nvd.nist.gov/vuln/detail/CVE-2025-6817), and [CVE-2025-6858](https://nvd.nist.gov/vuln/detail/CVE-2025-6858)
 
    The size of a continuation message was decoded as 0, causing multiple vulnerabilities.  An error check was added to return failure to prevent further processing of invalid data.
