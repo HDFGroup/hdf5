@@ -710,15 +710,6 @@ jobs:
 
           echo "🎉 Dry run deployment test passed!"
 
-  # NOTE: test-uploaded-packages removed from here
-  # Reason: maven-staging.yml only BUILDS artifacts, doesn't DEPLOY them
-  # Actual deployment happens in release.yml
-  # Package testing after deployment is in release.yml -> test-deployed-maven-packages
-  #
-  # For testing during staging, use test-java-examples-maven job below which tests
-  # the built artifacts directly (not from a repository)
->>>>>>> 9970e95 Work on fixing maven workflows
-
   test-java-examples-maven:
     name: "Test Java Examples with Maven Artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})"
     runs-on: ${{ matrix.os }}
