@@ -34,7 +34,7 @@ HDF5 provides three main Maven artifacts:
 <tr>
   <td><strong>hdf5-java-examples</strong></td>
   <td>Java 8+</td>
-  <td>62 example programs</td>
+  <td>example programs</td>
   <td>Platform-independent</td>
 </tr>
 </table>
@@ -50,7 +50,7 @@ Add the following dependency to your <code>pom.xml</code>:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-jni</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>linux-x86_64</classifier>
 </dependency>
 \endcode
@@ -93,7 +93,7 @@ Add the following dependency to your <code>pom.xml</code>:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-ffm</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>linux-x86_64</classifier>
 </dependency>
 \endcode
@@ -131,7 +131,7 @@ import hdf.hdf5lib.HDF5Constants;
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-examples</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
 </dependency>
 \endcode
 
@@ -145,10 +145,10 @@ The examples artifact contains 62 educational examples covering:
 \par Running Examples
 \code
 # List available examples
-java -cp hdf5-java-examples-2.0.0-3.jar examples.intro.H5_CreateFile
+java -cp hdf5-java-examples-2.0.0.jar examples.intro.H5_CreateFile
 
 # Run a specific example
-java -cp "hdf5-java-jni-2.0.0-3-linux-x86_64.jar:hdf5-java-examples-2.0.0-3.jar" \
+java -cp "hdf5-java-jni-2.0.0-linux-x86_64.jar:hdf5-java-examples-2.0.0.jar" \
      examples.intro.H5_CreateFile
 \endcode
 
