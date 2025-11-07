@@ -602,6 +602,7 @@ H5O__cache_chk_get_initial_load_size(void *_udata, size_t *image_len)
     assert(udata);
     assert(udata->oh);
     assert(image_len);
+    assert(udata->size);
 
     /* Set the image length size */
     *image_len = udata->size;

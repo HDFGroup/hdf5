@@ -731,7 +731,39 @@ H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *str
 
     H5_WARN_DUPLICATED_BRANCHES_OFF
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
-        if (size <= 2) {
+        if (size == 1) {
+#ifdef H5_HAVE__FLOAT16
+            /*
+             * When _Float16 support is available, map specific types to
+             * the native _Float16 type and all other types of this size
+             * group without a specific carve-out to the native float type.
+             */
+            H5T_t *f8_e4m3_dt = NULL; /* Datatype for FP8 E4M3 */
+            H5T_t *f8_e5m2_dt = NULL; /* Datatype for FP8 E5M2 */
+
+            if (NULL == (f8_e4m3_dt = H5I_object(H5T_FLOAT_F8E4M3)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f8_e5m2_dt = H5I_object(H5T_FLOAT_F8E5M2)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+            if (0 == H5T_cmp(dtype, f8_e4m3_dt, false) || 0 == H5T_cmp(dtype, f8_e5m2_dt, false)) {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+                native_size = sizeof(H5__Float16);
+            }
+            else {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                native_size = sizeof(float);
+            }
+#else
+            /* When _Float16 support is not available, just map all types of
+             * this size group without a specific carve-out to the native
+             * float type.
+             */
+            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+            native_size = sizeof(float);
+#endif
+        }
+        else if (size == 2) {
 #ifdef H5_HAVE__FLOAT16
             /*
              * When _Float16 support is available, map _Float16-like types
@@ -795,7 +827,7 @@ H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *str
                 match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
                 native_size = sizeof(float);
             }
-            else {
+            else if (size > 1) {
                 /*
                  * When _Float16 support is available, map _Float16-like types
                  * to the native type and all other types of this size group
@@ -810,6 +842,29 @@ H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *str
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
                 if (0 == H5T_cmp(dtype, f16_le_dt, false) || 0 == H5T_cmp(dtype, f16_be_dt, false)) {
+                    match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+                    native_size = sizeof(H5__Float16);
+                }
+                else {
+                    match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                    native_size = sizeof(float);
+                }
+            }
+            else {
+                /*
+                 * When _Float16 support is available, map specific types to
+                 * the native _Float16 type and all other types of this size
+                 * group without a specific carve-out to the native float type.
+                 */
+                H5T_t *f8_e4m3_dt = NULL; /* Datatype for FP8 E4M3 */
+                H5T_t *f8_e5m2_dt = NULL; /* Datatype for FP8 E5M2 */
+
+                if (NULL == (f8_e4m3_dt = H5I_object(H5T_FLOAT_F8E4M3)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f8_e5m2_dt = H5I_object(H5T_FLOAT_F8E5M2)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+                if (0 == H5T_cmp(dtype, f8_e4m3_dt, false) || 0 == H5T_cmp(dtype, f8_e5m2_dt, false)) {
                     match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
                     native_size = sizeof(H5__Float16);
                 }

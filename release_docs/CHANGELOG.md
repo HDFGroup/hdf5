@@ -1,4 +1,4 @@
-HDF5 version 2.0.0-4 currently under development
+HDF5 version 2.0.1 currently under development
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -13,7 +13,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdf5#help-and-support)
 
 ## 📖 Contents
-* [Executive Summary](CHANGELOG.md#-executive-summary-hdf5-version-200)
+* [Executive Summary](CHANGELOG.md#execsummary)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](CHANGELOG.md#-bug-fixes)
@@ -21,7 +21,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.0.0
+# 🔆 Executive Summary: HDF5 Version 2.0.1
 
 ## Performance Enhancements:
 
@@ -32,7 +32,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ## Significant Advancements:
 
 - Full [UTF-8](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
-- Introduction of bfloat16 predefined datatypes for efficient machine learning conversions.
+- Introduction of [bfloat16 predefined datatypes](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#added-predefined-datatypes-for-bfloat16-data) for efficient machine learning conversions.
 - First-class support for [complex numbers](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
 
 ## Updated Foundation:
@@ -49,7 +49,21 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 - Improved [ROS3 VFD](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
 
+## Java Enhancements:
+
+- Java FFM bindings generated for the C library if Java 25+ available and JNI option is FALSE.
+- Enhanced Maven artifact deployment with comprehensive multi-platform support (Linux, Windows, macOS x86_64, macOS aarch64).
+- Complete Java examples Maven integration (`org.hdfgroup:hdf5-java-examples`) with cross-platform CI/CD testing.
+  
+## Acknowledgements: 
+
+We would like to thank the many HDF5 community members that contributed to HDF5 2.0.
+
 # ⚠️ Breaking Changes
+
+### Updated default file format to 1.8
+
+   By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. However, HDF5 library versions 1.6 and earlier will not be able to read files created with the default settings. The previous behavior can be restored using `H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST)`.
 
 ### Renamed the option: `HDF5_ENABLE_Z_LIB_SUPPORT`
 
@@ -58,6 +72,10 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ### Autotools support was removed from HDF5<a name="cmake">
 
    CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
+
+### Fixed problems with family driver and user block
+
+   When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member EOAs. This could cause a failure when an address overflowed the calculated eoa. The driver would also add the user block size when returning the EOF. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first X bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
 
 # 🚀 New Features & Improvements
 
@@ -75,7 +93,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
    The variables used in hdf5-config.cmake to indicate what options were used to build the installed library have been renamed. All `HDF5_BUILD/ENABLE_{feature}` variables are now `HDF5_PROVIDES_{feature}`. This more clearly indicates that these variables reflect whether the feature is supported by the installed library, instead of whether the feature is an option that can be changed when building an application with the library.
 
-   Created MACRO `EXTERNAL_HDF5_STATUS` to convert between the old and new names. The macro is in the config/examples/HDF5SubdirMacros.cmake file and can be copied into a project's CMakeLists.txt file to provide backward compatibility.
+   Created macro `EXTERNAL_HDF5_STATUS` to convert between the old and new names. The macro is in the config/examples/HDF5SubdirMacros.cmake file and can be copied into a project's CMakeLists.txt file to provide backward compatibility.
 
 ### CMake minimum version is now 3.26
 
@@ -84,6 +102,24 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ### Removed `HDF5_ENABLE_THREADS` option
 
    The `HDF5_ENABLE_THREADS` option has been removed, as it no longer functions as a proper build option. The library will always check for thread support and set the internal status variable, `HDF5_THREADS_ENABLED`. The `HDF5_ENABLE_THREADSAFE` option is still available to build with thread-safe API calls.
+
+- Enhanced Maven repository deployment support
+
+   Added comprehensive Maven integration with optimized workflows for Java artifact deployment:
+   - **New CMake options**: `HDF5_ENABLE_MAVEN_DEPLOY` and `HDF5_MAVEN_SNAPSHOT` for Maven repository deployment
+   - **Minimal build presets**: Added `ci-MinShar-*-Maven*` presets for efficient Java-only artifact generation
+   - **Multi-platform support**: Automated generation of platform-specific JARs with classifiers (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+   - **CI/CD integration**: Enhanced GitHub Actions workflows (`maven-staging.yml`, `maven-deploy.yml`) with cross-platform build matrix
+   - **Artifact validation**: Comprehensive validation framework for Maven artifacts before deployment
+   - **Deployment targets**: Support for GitHub Packages and Maven Central staging repositories
+   - **Java Examples Maven Integration**: Added complete Maven artifact for Java examples (`org.hdfgroup:hdf5-java-examples`) with cross-platform compatibility
+   - **Multi-platform testing**: Comprehensive CI/CD testing of Java examples across all supported platforms (Linux, Windows, macOS x86_64, macOS aarch64)
+   - **Native library error handling**: Enhanced validation logic for Maven-only environments to properly handle expected native library loading errors
+   - **Dynamic repository support**: Enhanced workflows to use `github.repository` variable for seamless testing on forks before canonical deployment
+   - **Fork-based testing**: Complete testing framework allowing validation on repository forks (e.g., fork-name/hdf5) before merging to HDFGroup/hdf5
+   - **Multi-artifact deployment**: Enhanced deployment workflow to handle both `hdf5-java` (platform-specific) and `hdf5-java-examples` (platform-independent) artifacts
+   - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
+   - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
 
  - Reorganized the files in the config/cmake folder into the config folder structure
 
@@ -103,6 +139,18 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
    | `HDF5_H5CC_Fortran_COMPILER` | for the Fortran compiler |
 
    These default to the currently used compiler, preserving the current behavior. However, they can be overridden by users who need to use a different compiler at runtime, for example, when they build via cache.
+
+### Aligned the CMake compiler wrappers with the old Autotools versions
+
+The versions of `h5cc`, `h5fc`, `h5c++`, etc. generated by CMake were missing several options and features from the Autotools counterparts. Some of these options and features have now been implemented in the CMake versions, while some of them have not:
+- The missing `--help`/`-h`, `-c`, `-echo`, and `-shlib`/`-noshlib` options have been implemented.
+- The `-prefix` option was not implemented, as it didn't appear to function in the Autotools wrappers and is generally covered by pkg-config in the CMake wrappers.
+- A new `-nohl` option has been added to avoid building and linking against the high-level HDF5 libraries if desired.
+- Similar to the Autotools wrappers, the CMake wrappers now add the HDF5 installation library directory to the rpath of the resulting executable/library by default when linking against shared HDF5 libraries. This behavior can be avoided by specifying the new `-norpath` option.
+- Parsing of the `HDF5_USE_SHLIB` environment variable has been added to determine whether to link against shared or static HDF5 libraries. Precedence is still given to the `-shlib`/`-noshlib` options.
+- Parsing of the `HDF5_PKG_CONFIG_ARGS` environment variable has been added to separate pkg-config-specific options from compiler-specific options and prevent conflicts between them.
+
+Several issues were also fixed in the pkg-config files that are generated by CMake.
 
 ### Added `CMAKE_INSTALL_PREFIX` to the default plugin path
 
@@ -185,22 +233,47 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 
 ## Library
 
+### Added support for large chunks
+
+   The library now supports chunks larger than 4 GiB using 64 bit addressing. Creating chunks with size >= 4 GiB will upgrade the file format and prevent the dataset from being opened with earlier versions of the library. 32 bit systems will not be able to use these chunks in all circumstances, such as with data filters or a fill value.
+
+### Changed default chunk cache hash table size to 8191
+
+   In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
+     
+### Updated default file format to 1.8
+
+   By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. This behavior can be overridden with `H5Pset_libver_bounds()`.
+
 ### Added predefined datatypes for bfloat16 data
 
-   Predefined datatypes have been added for little- and big-endian bfloat16 (https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
+   Predefined datatypes have been added for little- and big-endian [bfloat16](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
 
    The following new macros have been added:
 
-    - H5T_FLOAT_BFLOAT16LE / H5T_FLOAT_BFLOAT16BE
+    - `H5T_FLOAT_BFLOAT16LE` / `H5T_FLOAT_BFLOAT16BE`
 
-      These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
+   These macros map to IDs of HDF5 datatypes representing a little- or big-endian 16-bit floating-point datatype with 1 sign bit, 8 exponent bits and 7 fraction bits.
 
-      Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+   Note that support for a native bfloat16 datatype has not been added yet. This means that any datatype conversions to/from the new bfloat16 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native bfloat16 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format (such as the __bf16 type). In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
 
-### Removed hbool_t from public API calls
-                                  
+### Added predefined datatypes for FP8 data
+
+   Predefined datatypes have been added for FP8 data in E4M3 and E5M2 formats (https://arxiv.org/abs/2209.05433).
+
+   The following new macros have been added:
+
+    - H5T_FLOAT_F8E4M3
+    - H5T_FLOAT_F8E5M2
+
+   These macros map to IDs of HDF5 datatypes representing an 8-bit floating-point datatype with 1 sign bit and either 4 exponent bits and 3 mantissa bits (E4M3 format) or 5 exponent bits and 2 mantissa bits (E5M2 format).
+
+   Note that support for a native FP8 datatype has not been added yet. This means that any datatype conversions to/from the new FP8 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP8 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches one of the above floating-point formats. In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
+
 ### Removed `hbool_t` from public API calls
-                                  
+
 The `hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.
 
 It had been previously purged from the bulk of the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
@@ -215,18 +288,6 @@ The `hbool_t` typedef remains in H5public.h so existing code does not need to be
 
    When opening a virtual dataset, the library would previously decode the mappings in the object header package, then copy them to the dataset struct, then copy them to the internal dataset creation property list. Copying the VDS mappings could be very expensive if there were many mappings. Changed this to delay decoding the mappings until the dataset code, and delay copying the layout to the DCPL until it is needed. This results in only the decoding and no copies in most use cases, as opposed to the decoding and two copies with the previous code.
 
-### Aligned the CMake compiler wrappers with the old Autotools versions
-
-The versions of `h5cc`, `h5fc`, `h5c++`, etc. generated by CMake were missing several options and features from the Autotools counterparts. Some of these options and features have now been implemented in the CMake versions, while some of them have not:
-- The missing `--help`/`-h`, `-c`, `-echo`, and `-shlib`/`-noshlib` options have been implemented.
-- The `-prefix` option was not implemented, as it didn't appear to function in the Autotools wrappers and is generally covered by pkg-config in the CMake wrappers.
-- A new `-nohl` option has been added to avoid building and linking against the high-level HDF5 libraries if desired.
-- Similar to the Autotools wrappers, the CMake wrappers now add the HDF5 installation library directory to the rpath of the resulting executable/library by default when linking against shared HDF5 libraries. This behavior can be avoided by specifying the new `-norpath` option.
-- Parsing of the `HDF5_USE_SHLIB` environment variable has been added to determine whether to link against shared or static HDF5 libraries. Precedence is still given to the `-shlib`/`-noshlib` options.
-- Parsing of the `HDF5_PKG_CONFIG_ARGS` environment variable has been added to separate pkg-config-specific options from compiler-specific options and prevent conflicts between them.
-
-Several issues were also fixed in the pkg-config files that are generated by CMake.
-
 ### Changed the default page buffer size for the ROS3 driver
 
 Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer size in the FAPL to 64 MiB if it was not previously set. This will only have an effect if the file uses paged allocation. Also added the `H5F_PAGE_BUFFER_SIZE_DEFAULT` to allow the user to unset the page buffer size in an FAPL so it can be similarly overridden.
@@ -240,6 +301,8 @@ Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer 
 The Virtual Dataset Global Heap Block format has been updated to version 1 to support shared string storage for source filenames and dataset names, reducing file size when multiple mappings reference the same sources. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
 
 Use of the shared strings option for Virtual Datasets reduces memory overhead and optimizes dataset close operations.
+
+The chunked dataset file format has been updated to always use 64 bits to encode the size of filtered chunks. This will allow data filters that expand the chunks by a large amount to still work. Chunk sizes are still limited to `2^32 - 1`. This new format is only used when the HDF5 library version bounds lower bound is set to 2.0 or later.
 
 ### The `H5Dread_chunk()` signature has changed
 
@@ -492,20 +555,19 @@ Simple example programs showing how to use complex number datatypes have been ad
    a new Dataset Access Property List (DAPL) property to control use of the spatial tree.
 
    This property can be set or queried with the new API functions
-   H5Pset_virtual_spatial_tree()/H5Pget_virtual_spatial_tree().
+   `H5Pset_virtual_spatial_tree()`/`H5Pget_virtual_spatial_tree()`.
 
 ## Parallel Library
 
-### Added H5FDsubfiling_get_file_mapping() API function for subfiling VFD
+### Added `H5FDsubfiling_get_file_mapping()` API function for subfiling VFD
 
-Added H5FDsubfiling_get_file_mapping() API function to retrieve the names of all physical subfiles that collectively make up a logical HDF5 file when using the subfiling Virtual File Driver.
+Added `H5FDsubfiling_get_file_mapping()` API function to retrieve the names of all physical subfiles that collectively make up a logical HDF5 file when using the subfiling Virtual File Driver.
 
 ## Fortran Library
 
-### Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for subfiling VFD
+### Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for subfiling VFD
 
-Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file mapping functionality, ensuring complete language binding support.
-
+Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling file mapping functionality, ensuring complete language binding support.
 
 ## C++ Library
 
@@ -515,7 +577,7 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ### Added AWS endpoint command option to allow specifying an alternate endpoint URL when using the ROS3 VFD
 
-   The new option is --endpoint-url, which allows the user to set an alternate endpoint URL other than the standard "protocol://service-code.region-code.amazonaws.com". If "--endpoint-url" is not specified, the ROS3 VFD will first check the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
+   The new option is `--endpoint-url`, which allows the user to set an alternate endpoint URL other than the standard "protocol://service-code.region-code.amazonaws.com". If `--endpoint-url` is not specified, the ROS3 VFD will first check the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL` environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
 
    This option is supported by the following tools:
       `h5dump`, `h5ls`, `h5stat`
@@ -551,11 +613,15 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ### The COPYING file has been renamed to LICENSE
 
-   This is where most people will expect to find license information. The COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5. The licenses are unchanged.
+   This is where most people will expect to find license information. The `COPYING_LBNL_HDF5` file has also been renamed to `LICENSE_LBNL_HDF5`. The licenses are unchanged.
 
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed problems with the family driver and user block
+
+   When using a user block with the family driver, the driver would inappropriately subtract the user block size for each member file when calculating member EOAs. This could cause a failure when an address overflowed the calculated eoa. The driver would also add the user block size when returning the EOF. Modified the family driver to not consider the user block, as it is handled by the H5FD layer. The user block now spans the first X bytes of the family array, for example a 4 KiB user block with 3 KiB member size will take up the entire first member and the first 1 KiB of the second. This may cause compatibility issues with preexisting family files with user blocks, though the way it worked before was inconsistent if it worked at all.
 
 ### Fixed security issue CVE-2025-7067
 
@@ -563,70 +629,77 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    Fixes GitHub issue #5577
 
-### Fixed security issue CVE-2025-2915 and OSV-2024-381
+### Fixed security issue [CVE-2025-2915](https://nvd.nist.gov/vuln/detail/CVE-2025-2915) and [OSV-2024-381](https://osv.dev/vulnerability/OSV-2024-381)
 
    Fixed a heap-based buffer overflow in H5F__accum_free caused by an integer overflow when calculating new_accum_size. Added validation in H5O__mdci_decode to detect and reject invalid values early, preventing the overflow condition.
 
-   Fixes GitHub issue #5380
+   Fixes GitHub issue [#5380](https://github.com/HDFGroup/hdf5/issues/5380)
   
-### Fixed security issue CVE-2025-7068
+### Fixed security issue [CVE-2025-7068](https://nvd.nist.gov/vuln/detail/CVE-2025-7068)
 
    Failures during the discard process on a metadata cache entry could cause the library to skip calling the callback to free the cache entry. This could result in resource leaks and issues with flushing and closing the metadata cache during file close. This has been fixed by noting errors during the discard process, but attempting to fully free a cache entry before signalling that an error has occurred.
 
-   Fixes GitHub issue #5578
+   Fixes GitHub issue [#5578](https://github.com/HDFGroup/hdf5/issues/5578)
 
 ### Fix bugs in object header operations
 
    In some rare circumstances, such as deleting hard links that point to their own parent group in a file using the new file format, memory corruption could occur due to recursive operations changing data structures being operated on by multiple levels of recursion. Made changes to delay changing the data structure in a dangerous way until recursion is complete.
 
-   Fixes GitHub issue #5854
+   Fixes GitHub issue [#5854](https://github.com/HDFGroup/hdf5/issues/5854)
 
-### Fixed security issues CVE-2025-6816, CVE-2025-6856 and CVE-2025-2923
+### Fixed security issues [CVE-2025-6816](https://nvd.nist.gov/vuln/detail/CVE-2025-6816), [CVE-2025-6818](https://nvd.nist.gov/vuln/detail/CVE-2025-6818), [CVE-2025-6856](https://nvd.nist.gov/vuln/detail/CVE-2025-6856) and [CVE-2025-2923](https://nvd.nist.gov/vuln/detail/CVE-2025-2923)
 
    A specially constructed HDF5 file could contain a corrupted object header with a continuation message that points back to itself. This could result in an internal buffer being allocated with too small of a size, leading to a heap buffer overflow. This has been fixed by checking the expected number of object header chunks against the actual value as chunks are being deserialized.
 
-   Fixes GitHub issues #5571, #5574 and #5381
+   Fixes GitHub issues [#5571](https://github.com/HDFGroup/hdf5/issues/5571), [#5573](https://github.com/HDFGroup/hdf5/issues/5573), [#5574](https://github.com/HDFGroup/hdf5/issues/5574) and [#5381](https://github.com/HDFGroup/hdf5/issues/5381)
 
-### Fixed security issue CVE-2025-6750
+### Fixed security issue [CVE-2025-6750](https://nvd.nist.gov/vuln/detail/CVE-2025-6750)
 
    A heap buffer overflow occurred because an mtime message was not properly decoded, resulting in a buffer of size 0 being passed into the encoder.  This has been fixed by decoding old and new mtime messages which will allow invalid message size to be detected.
 
-   Fixes GitHub issue #5549
+   Fixes GitHub issue [#5549](https://github.com/HDFGroup/hdf5/issues/5549)
 
-### Fixed CVE-2025-6269
+### Fixed [CVE-2025-6269](https://nvd.nist.gov/vuln/detail/CVE-2025-6269)
 
    There were several security vulnerabilities found in the function H5C__reconstruct_cache_entry(), including buffer overflows and memory leaks.  The function has been hardened with bounds checks, input validation, and safe cleanup.
 
-   Fixes GitHub issues #5579 and #5581
+   Fixes GitHub issues [#5579](https://github.com/HDFGroup/hdf5/issues/5579) and [#5581](https://github.com/HDFGroup/hdf5/issues/5581)
 
 ### Fixed a problem with the scale-offset filter
 
    A security fix added to 1.14.6 introduced a regression where certain data values could trigger a library error (not a crash or segfault).
 
-   Fixes GitHub issue #5861
+   Fixes GitHub issue [#5861](https://github.com/HDFGroup/hdf5/issues/5861)
 
-### Fixed security issue CVE-2025-2153
+### Fixed security issue [CVE-2025-2153](https://nvd.nist.gov/vuln/detail/CVE-2025-2153)
 
-   The message flags field could be modified such that a message that is not sharable according to the share_flags field in H5O_msg_class_t can be treated as sharable. An assert has been added in H5O__msg_write_real to make sure messages that are not sharable can't be modified to shared. Additionally, the check in H5O__chunk_deserialize that catches unsharable messages being marked as sharable has been improved.
+   The message flags field could be modified such that a message that is not sharable according to the `share_flags` field in `H5O_msg_class_t` can be treated as sharable. An assert has been added in `H5O__msg_write_real` to make sure messages that are not sharable can't be modified to shared. Additionally, the check in `H5O__chunk_deserialize` that catches unsharable messages being marked as sharable has been improved.
 
-   Fixes GitHub issue #5329
+   Fixes GitHub issue [#5329](https://github.com/HDFGroup/hdf5/issues/5329)
 
-### Fixed security issue CVE-2025-2925
-   Actual_len + H5C_IMAGE_EXTRA_SPACE, which was used by H5MM_realloc as the size input, could equal 0 due to bad inputs. When H5MM_realloc was called, it freed image, but then could get sent to done before new_image could be assigned to image. Because the pointer for image wasn't null, it was freed again in done, causing a double-free vulnerability. H5C__load_entry() now checks for an image buffer length of 0 before calling H5MM_realloc.
+### Fixed security issue [CVE-2025-2925](https://nvd.nist.gov/vuln/detail/CVE-2025-2925)
 
-   Fixes Github issue #5383
+   `Actual_len` + `H5C_IMAGE_EXTRA_SPACE`, which was used by `H5MM_realloc` as the size input, could equal 0 due to bad inputs. When `H5MM_realloc` was called, it freed image, but then could get sent to done before new_image could be assigned to image. Because the pointer for image wasn't null, it was freed again in done, causing a double-free vulnerability. `H5C__load_entry()` now checks for an image buffer length of 0 before calling `H5MM_realloc`.
 
-### Fixed security issue CVE-2025-6857
+   Fixes GitHub issue [#5383](https://github.com/HDFGroup/hdf5/issues/5383)
+
+### Fixed security issue [CVE-2025-6857](https://nvd.nist.gov/vuln/detail/CVE-2025-6857)
 
    An HDF5 file had a corrupted v1 B-tree that would result in a stack overflow when performing a lookup on it. This has been fixed with additional integrity checks.
 
-   Fixes GitHub issue #5575
+   Fixes GitHub issue [#5575](https://github.com/HDFGroup/hdf5/issues/5575)
 
 ### Check for overflow in decoded heap block addresses
 
-   Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in H5HL__fl_deserialize to ensure no overflow can occur.
+   Currently, we do not check for overflow when decoding addresses from the heap, which can cause overflow problems. We've added a check in `H5HL__fl_deserialize` to ensure no overflow can occur.
 
    Fixes GitHub issue [#5382](https://github.com/HDFGroup/hdf5/issues/5382)
+
+### Fixed security issues CVE-2025-2913 and CVE-2025-2926
+
+   The size of a continuation message was decoded as 0, causing multiple vulnerabilities.  An error check was added to return failure to prevent further processing of invalid data.
+
+   Fixes GitHub issue #5376 and #5384
 
 ### Revised handling of Unicode filenames on Windows<a name="utf-8">
 
@@ -634,12 +707,14 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    On Windows, the library once again assumes that filename strings will be UTF-8 encoded strings and will attempt to convert them to UTF-16 before passing them to Windows API functions. However, if the library fails to convert a filename string to UTF-16, it will now fallback to the equivalent Windows "ANSI" API functions which will interpret the string according to the active Windows code page.
 
-   Support for a new environment variable, HDF5_PREFER_WINDOWS_CODE_PAGE, was added in order to instruct HDF5 to prefer interpreting filenames according to the active Windows code page rather than assuming UTF-8 encoding. If this environment variable is set to "1" or "TRUE" (case-insensitive), the active code page will be preferred. If it is unset or set to "0" or "FALSE" (case-insensitive), UTF-8 will be preferred.
+   Support for a new environment variable, `HDF5_PREFER_WINDOWS_CODE_PAGE`, was added in order to instruct HDF5 to prefer interpreting filenames according to the active Windows code page rather than assuming UTF-8 encoding. If this environment variable is set to "1" or "TRUE" (case-insensitive), the active code page will be preferred. If it is unset or set to "0" or "FALSE" (case-insensitive), UTF-8 will be preferred.
 
 ### Fixed an issue with caching in the ROS3 VFD
+   
    The ROS3 VFD uses a very simple caching mechanism that caches the first 16MiB of a file during file open and serves later reads from that cache if the offset + length falls within the cached range of bytes. Combinations of offset + length that extended exactly to the end of the cached range of bytes (for example, offset=0 and len=16777216) would end up not being served from the cache due to an incorrect range check. This has now been fixed.
 
 ### Fixed an error with `H5Fget_file_image()` with the latest file format
+
    When using `H5Fget_file_image()` on a file created with the latest file format (or any format newer than the earliest), the library failed to recalculate the superblock checksum after changing the access flags in the superblock, causing any subsequent attempt to open the returned file image to fail due to the checksum failing to verify. Fixed `H5Fget_file_image()` to recalculate the checksum.
 
    Fixed GitHub issue [#1915](https://github.com/HDFGroup/hdf5/issues/1915)
@@ -685,10 +760,9 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
    Fixed GitHub issue [#4952](https://github.com/HDFGroup/hdf5/issues/4952)
 
-### Fixed security issue CVE-2025-2310
+### Fixed security issue [CVE-2025-2310](https://nvd.nist.gov/vuln/detail/CVE-2025-2310)
 
-   A malformed HDF5 file could have an attribute with a recorded name length of zero.This would lead to an overflow and an invalid memory access. An integrity check
-   has been added to detect this case and safely stop file decoding.
+   A malformed HDF5 file could have an attribute with a recorded name length of zero.This would lead to an overflow and an invalid memory access. An integrity check has been added to detect this case and safely stop file decoding.
 
 ## Java Library
 
@@ -758,6 +832,9 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ## Fortran API
 
+   Added missing parameters H5F_ACC_SWMR_READ_F and H5F_ACC_SWMR_WRITE_F
+   Fixed GitHub issue [#5959](https://github.com/HDFGroup/hdf5/issues/5959)
+
 ## High-Level Library
 
 ### Fixed an issue with H5TB functions
@@ -784,7 +861,7 @@ Added Fortran wrapper h5fdsubfiling_get_file_mapping_f() for the subfiling file 
 
 ### Added skipping of a few parallel tests for OpenMPI 5.0.5
 
-    An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests (mpiodup, props, fapl_preserve) to fail. These tests are now skipped for that release of OpenMPI. The issue has been fixed in the 5.0.6 release of OpenMPI.
+   An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests (mpiodup, props, fapl_preserve) to fail. These tests are now skipped for that release of OpenMPI. The issue has been fixed in the 5.0.6 release of OpenMPI.
 
 # ✨ Support for new platforms and languages
 
@@ -794,6 +871,15 @@ A table of platforms tested can be seen on the [wiki](https://github.com/HDFGrou
 Current test results are available [here](https://my.cdash.org/index.php?project=HDF5).
 
 # ⛔ Known Problems
+
+- When performing implicit datatype conversion on specific non-IEEE floating-point format data, HDF5 may improperly convert some data values:
+
+   When performing I/O operations using a non-IEEE floating-point format datatype, HDF5 may improperly convert some data values due to incomplete handling of non-IEEE types. Such types include the following pre-defined datatypes:
+
+    H5T_FLOAT_F8E4M3
+    H5T_FLOAT_F8E5M2
+
+   If possible, an application should perform I/O with these datatypes using an in-memory type that matches the specific floating-point format and perform explicit data conversion outside of HDF5, if necessary. Otherwise, read/written values should be verified to be correct.
 
 - When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
 
@@ -807,19 +893,19 @@ Current test results are available [here](https://my.cdash.org/index.php?project
 
 - When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur in the following tests:
 
-      H5PLUGIN-filter_plugin <br>
-      H5TEST-flush2<br>
-      H5TEST-testhdf5-base<br>
-      MPI_TEST_t_filters_parallel<br>
+   - H5PLUGIN-filter_plugin
+   - H5TEST-flush2
+   - H5TEST-testhdf5-base
+   - MPI_TEST_t_filters_parallel
 
-  Sporadic failures (even with lower -O levels):<br>
+  Sporadic failures (even with lower -O levels):
 
-      Java JUnit-TestH5Pfapl<br>
-      Java JUnit-TestH5D<br>
+   - Java JUnit-TestH5Pfapl
+   - Java JUnit-TestH5D
 
   Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of 'use of undefined value' when the optimization level is -O2 or higher.
 
-      This is confirmed to be a [bug in the nvc compiler](https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045) that has been fixed as of 23.11. If you are using an affected version of the NVidia compiler, the work-around is to set the optimization level to -O1.
+   This is confirmed to be a [bug in the nvc compiler](https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045) that has been fixed as of 23.11. If you are using an affected version of the NVidia compiler, the work-around is to set the optimization level to -O1.
 
 - CMake files do not behave correctly with paths containing spaces
 

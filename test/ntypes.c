@@ -3213,6 +3213,89 @@ error:
     return -1;
 }
 
+static herr_t
+test_fp8(void)
+{
+    hid_t native_type = H5I_INVALID_HID;
+
+    TESTING("fp8 datatypes");
+
+    /*
+     * Just ensure that the fp8 types are currently promoted
+     * to either float16 or float, depending on whether float16
+     * support is enabled. Until native support is added for a
+     * fp8 type, conversion from fp8 to float16 should be fine.
+     */
+    if ((native_type = H5Tget_native_type(H5T_FLOAT_F8E4M3, H5T_DIR_ASCEND)) < 0)
+        TEST_ERROR;
+
+#ifdef H5_HAVE__FLOAT16
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT16))
+        TEST_ERROR;
+#else
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT))
+        TEST_ERROR;
+#endif
+
+    if (H5Tclose(native_type) < 0)
+        TEST_ERROR;
+
+    if ((native_type = H5Tget_native_type(H5T_FLOAT_F8E4M3, H5T_DIR_DESCEND)) < 0)
+        TEST_ERROR;
+
+#ifdef H5_HAVE__FLOAT16
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT16))
+        TEST_ERROR;
+#else
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT))
+        TEST_ERROR;
+#endif
+
+    if (H5Tclose(native_type) < 0)
+        TEST_ERROR;
+
+    if ((native_type = H5Tget_native_type(H5T_FLOAT_F8E5M2, H5T_DIR_ASCEND)) < 0)
+        TEST_ERROR;
+
+#ifdef H5_HAVE__FLOAT16
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT16))
+        TEST_ERROR;
+#else
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT))
+        TEST_ERROR;
+#endif
+
+    if (H5Tclose(native_type) < 0)
+        TEST_ERROR;
+
+    if ((native_type = H5Tget_native_type(H5T_FLOAT_F8E5M2, H5T_DIR_DESCEND)) < 0)
+        TEST_ERROR;
+
+#ifdef H5_HAVE__FLOAT16
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT16))
+        TEST_ERROR;
+#else
+    if (true != H5Tequal(native_type, H5T_NATIVE_FLOAT))
+        TEST_ERROR;
+#endif
+
+    if (H5Tclose(native_type) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(native_type);
+    }
+    H5E_END_TRY
+
+    return -1;
+}
+
 #ifdef H5_HAVE_COMPLEX_NUMBERS
 static herr_t
 test_complex(hid_t file)
@@ -3392,6 +3475,7 @@ main(void)
 #endif
 
     nerrors += test_bfloat16() < 0 ? 1 : 0;
+    nerrors += test_fp8() < 0 ? 1 : 0;
 
 #ifdef H5_HAVE_COMPLEX_NUMBERS
     nerrors += test_complex(file) < 0 ? 1 : 0;

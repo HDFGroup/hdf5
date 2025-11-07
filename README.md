@@ -1,4 +1,4 @@
-HDF5 version 2.0.0-4 currently under development
+HDF5 version 2.0.1 currently under development
 
 > [!WARNING]
 > **Heads Up: HDF5 Dropped Autotools March 10th**
@@ -51,7 +51,7 @@ Several more files are located within the [release_docs/][u4] directory with spe
 details for several common platforms and configurations.
 - INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
 - INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
-- INSTALL_parallel - instructions for building and configuring Parallel HDF5
+- README_HPC.md - instructions for building and configuring Parallel HDF5 on HPC systems
 - INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
 - USING_HDF5_CMake - Build and Install HDF5 Applications with CMake
 - USING_CMake_Examples - Build and Test HDF5 Examples with CMake
@@ -122,6 +122,21 @@ Source packages for current and previous releases are located at:
 
    Archived releases:
    https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
+
+Maven artifacts for Java bindings and examples are available at:
+
+   GitHub Packages:
+   https://maven.pkg.github.com/HDFGroup/hdf5
+
+   Maven Central (coming soon):
+   https://central.sonatype.com/artifact/org.hdfgroup/hdf5-java
+
+Java Examples Maven Integration:
+   - **org.hdfgroup:hdf5-java** - HDF5 Java bindings with platform-specific JARs (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
+   - **org.hdfgroup:hdf5-java-examples** - Complete collection of Java examples (platform-independent)
+   - Cross-platform CI/CD testing and deployment
+   - Comprehensive Maven integration with automated testing
+   - See HDF5Examples/JAVA/README-MAVEN.md for complete usage instructions
 
 Development code is available at our Github location:
 

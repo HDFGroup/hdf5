@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Sources (Linux)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
 
       - name: Install Dependencies (Linux)
         shell: bash
@@ -32,7 +32,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2025.0'
+          version: '2025.2'
 
       - name: Configure (Linux)
         shell: bash
@@ -71,7 +71,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Get Sources (Windows)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v5.0.0
 
       - name: Install Dependencies (Windows)
         run: choco install ninja
@@ -81,7 +81,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2025.0'
+          version: '2025.2'
 
       - name: Configure (Windows)
         shell: pwsh

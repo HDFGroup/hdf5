@@ -33,10 +33,9 @@ JUnit version 4.13.2
 .testH5P_fapl_core
 .testH5P_fapl_muti
 .testH5P_fapl_split
-.testH5Pset_fapl_windows
 .testH5P_fclose_degree
 
 Time:  XXXX
 
-OK (36 tests)
+OK (35 tests)
 

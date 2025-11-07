@@ -14,13 +14,16 @@
     Creating a file and print the storage layout.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.structs.H5G_info_t;
+import org.hdfgroup.javahdf5.H5G_info_t;
 
 public class H5Ex_G_Compact {
 
@@ -51,18 +54,17 @@ public class H5Ex_G_Compact {
         public static H5G_storage get(int code) { return lookup.get(code); }
     }
 
-    public static void CreateGroup()
+    public static void CreateGroup(Arena arena)
     {
-        long file_id  = HDF5Constants.H5I_INVALID_HID;
-        long group_id = HDF5Constants.H5I_INVALID_HID;
-        long fapl_id  = HDF5Constants.H5I_INVALID_HID;
-        H5G_info_t ginfo;
+        long file_id        = H5I_INVALID_HID();
+        long group_id       = H5I_INVALID_HID();
+        long fapl_id        = H5I_INVALID_HID();
+        MemorySegment ginfo = H5G_info_t.allocate(arena);
         long size;
 
         // Create file 1. This file will use original format groups.
         try {
-            file_id = H5.H5Fcreate(FILE1, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(arena.allocateFrom(FILE1), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -70,8 +72,8 @@ public class H5Ex_G_Compact {
         // Create a group in the file1.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gcreate(file_id, GROUP, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                        HDF5Constants.H5P_DEFAULT);
+                group_id = H5Gcreate2(file_id, arena.allocateFrom(GROUP), H5P_DEFAULT(), H5P_DEFAULT(),
+                                      H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -80,9 +82,9 @@ public class H5Ex_G_Compact {
         // Obtain the group info and print the group storage type.
         try {
             if (group_id >= 0) {
-                ginfo = H5.H5Gget_info(group_id);
+                H5Gget_info(group_id, ginfo);
                 System.out.print("Group storage type for " + FILE1 + " is: ");
-                switch (H5G_storage.get(ginfo.storage_type)) {
+                switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                 case H5G_STORAGE_TYPE_COMPACT:
                     System.out.println("H5G_STORAGE_TYPE_COMPACT"); // New compact format
                     break;
@@ -108,7 +110,7 @@ public class H5Ex_G_Compact {
         // Close the group.
         try {
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -117,7 +119,7 @@ public class H5Ex_G_Compact {
         // close the file 1.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +127,7 @@ public class H5Ex_G_Compact {
 
         // Re-open file 1. Need to get the correct file size.
         try {
-            file_id = H5.H5Fopen(FILE1, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fopen(arena.allocateFrom(FILE1), H5F_ACC_RDONLY(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -134,7 +136,9 @@ public class H5Ex_G_Compact {
         // Obtain and print the file size.
         try {
             if (file_id >= 0) {
-                size = H5.H5Fget_filesize(file_id);
+                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                H5Fget_filesize(file_id, sizeSeg);
+                size = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
                 System.out.println("File size for " + FILE1 + " is: " + size + " bytes");
             }
         }
@@ -145,7 +149,7 @@ public class H5Ex_G_Compact {
         // Close FILE1.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -154,10 +158,9 @@ public class H5Ex_G_Compact {
         // Set file access property list to allow the latest file format.
         // This will allow the library to create new compact format groups.
         try {
-            fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+            fapl_id = H5Pcreate(H5P_CLS_FILE_ACCESS_ID_g());
             if (fapl_id >= 0)
-                H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST,
-                                        HDF5Constants.H5F_LIBVER_LATEST);
+                H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST(), H5F_LIBVER_LATEST());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -165,7 +168,7 @@ public class H5Ex_G_Compact {
         System.out.println();
         // Create file 2 using the new file access property list.
         try {
-            file_id = H5.H5Fcreate(FILE2, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, fapl_id);
+            file_id = H5Fcreate(arena.allocateFrom(FILE2), H5F_ACC_TRUNC(), H5P_DEFAULT(), fapl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -173,8 +176,8 @@ public class H5Ex_G_Compact {
         // Create group in file2.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gcreate(file_id, GROUP, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                        HDF5Constants.H5P_DEFAULT);
+                group_id = H5Gcreate2(file_id, arena.allocateFrom(GROUP), H5P_DEFAULT(), H5P_DEFAULT(),
+                                      H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -183,9 +186,9 @@ public class H5Ex_G_Compact {
         // Obtain the group info and print the group storage type.
         try {
             if (group_id >= 0) {
-                ginfo = H5.H5Gget_info(group_id);
+                H5Gget_info(group_id, ginfo);
                 System.out.print("Group storage type for " + FILE2 + " is: ");
-                switch (H5G_storage.get(ginfo.storage_type)) {
+                switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                 case H5G_STORAGE_TYPE_COMPACT:
                     System.out.println("H5G_STORAGE_TYPE_COMPACT"); // New compact format
                     break;
@@ -211,7 +214,7 @@ public class H5Ex_G_Compact {
         // Close the group.
         try {
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -220,7 +223,7 @@ public class H5Ex_G_Compact {
         // close the file 2.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -228,7 +231,7 @@ public class H5Ex_G_Compact {
 
         // Re-open file 2. Needed to get the correct file size.
         try {
-            file_id = H5.H5Fopen(FILE2, HDF5Constants.H5F_ACC_RDONLY, fapl_id);
+            file_id = H5Fopen(arena.allocateFrom(FILE2), H5F_ACC_RDONLY(), fapl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -237,7 +240,9 @@ public class H5Ex_G_Compact {
         // Obtain and print the file size.
         try {
             if (file_id >= 0) {
-                size = H5.H5Fget_filesize(file_id);
+                MemorySegment sizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+                H5Fget_filesize(file_id, sizeSeg);
+                size = sizeSeg.get(ValueLayout.JAVA_LONG, 0);
                 System.out.println("File size for " + FILE2 + " is: " + size + " bytes");
             }
         }
@@ -248,12 +253,17 @@ public class H5Ex_G_Compact {
         // Close FILE2.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) { H5Ex_G_Compact.CreateGroup(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_G_Compact.CreateGroup(arena);
+        }
+    }
 }

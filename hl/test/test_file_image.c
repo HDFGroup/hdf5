@@ -52,8 +52,12 @@
 static int
 test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
 {
-    hid_t  *file_id = NULL, *dset_id = NULL, file_space, plist; /* HDF5 ids */
-    hsize_t dims1[RANK]    = {2, 3};                            /* original dimension of datasets */
+    hid_t  *file_id        = NULL;            /* Array of file IDs */
+    hid_t  *dset_id        = NULL;            /* Array of dataset IDs */
+    hid_t   file_space_id  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   dcpl_id        = H5I_INVALID_HID; /* DCPL ID */
+    hid_t   fapl_id        = H5I_INVALID_HID; /* FAPL ID */
+    hsize_t dims1[RANK]    = {2, 3};          /* original dimension of datasets */
     hsize_t max_dims[RANK] = {H5S_UNLIMITED, H5S_UNLIMITED};
     int     data1[6]       = {1, 2, 3, 4, 5, 6};    /* original contents of dataset */
     int     data2[6]       = {7, 8, 9, 10, 11, 12}; /* "wrong" contents of dataset */
@@ -99,6 +103,13 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
     if (NULL == (dset_id = (hid_t *)malloc(sizeof(hid_t) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
+    /* Create FAPL and set earliest format */
+    /* TODO: run this test with all different formats */
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_PUTS_ERROR("H5Pcreate() failed");
+    if (H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_PUTS_ERROR("H5Pset_libver_bounds() failed");
+
     HL_TESTING2("get file images");
 
     /* create several file images */
@@ -117,24 +128,24 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
         snprintf(filename[i], filenamelength, "image_file%d.h5", (int)i);
 
         /* create file */
-        if ((file_id[i] = H5Fcreate(filename[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        if ((file_id[i] = H5Fcreate(filename[i], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
             FAIL_PUTS_ERROR("H5Fcreate() failed");
 
         /* define dataspace for the dataset */
-        if ((file_space = H5Screate_simple(RANK, dims1, max_dims)) < 0)
+        if ((file_space_id = H5Screate_simple(RANK, dims1, max_dims)) < 0)
             FAIL_PUTS_ERROR("H5Screate_simple() failed");
 
         /* create dataset property list */
-        if ((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
             FAIL_PUTS_ERROR("H5Pcreate() failed");
 
         /* set property list to create chunked dataset */
-        if (H5Pset_chunk(plist, RANK, dims1) < 0)
+        if (H5Pset_chunk(dcpl_id, RANK, dims1) < 0)
             FAIL_PUTS_ERROR("H5Pset_chunk() failed");
 
         /* create and write an integer type dataset named "dset" */
-        if ((dset_id[i] = H5Dcreate2(file_id[i], DSET_NAME, H5T_NATIVE_INT, file_space, H5P_DEFAULT, plist,
-                                     H5P_DEFAULT)) < 0)
+        if ((dset_id[i] = H5Dcreate2(file_id[i], DSET_NAME, H5T_NATIVE_INT, file_space_id, H5P_DEFAULT,
+                                     dcpl_id, H5P_DEFAULT)) < 0)
             FAIL_PUTS_ERROR("H5Dcreate() failed");
 
         /* dataset in open image 1 is written with "wrong" data */
@@ -153,11 +164,11 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             FAIL_PUTS_ERROR("H5Fflush() failed");
 
         /* close dataset property list */
-        if (H5Pclose(plist) < 0)
+        if (H5Pclose(dcpl_id) < 0)
             FAIL_PUTS_ERROR("H5Pclose() failed");
 
         /* close dataspace */
-        if (H5Sclose(file_space) < 0)
+        if (H5Sclose(file_space_id) < 0)
             FAIL_PUTS_ERROR("H5Sclose() failed");
 
         /* close dataset */
@@ -277,11 +288,11 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             FAIL_PUTS_ERROR("H5Dopen() failed");
 
         /* get dataspace for the dataset */
-        if ((file_space = H5Dget_space(dset_id[i])) < 0)
+        if ((file_space_id = H5Dget_space(dset_id[i])) < 0)
             FAIL_PUTS_ERROR("H5Dget_space() failed");
 
         /* get dimensions for the dataset */
-        if (H5Sget_simple_extent_dims(file_space, dims3, NULL) < 0)
+        if (H5Sget_simple_extent_dims(file_space_id, dims3, NULL) < 0)
             FAIL_PUTS_ERROR("H5Sget_simple_extent_dims() failed");
 
         /* read dataset */
@@ -312,7 +323,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
         } /* end else */
 
         /* close dataspace */
-        if (H5Sclose(file_space) < 0)
+        if (H5Sclose(file_space_id) < 0)
             FAIL_PUTS_ERROR("H5Sclose() failed");
     } /* end for */
 
@@ -455,11 +466,11 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             FAIL_PUTS_ERROR("H5Dopen() failed");
 
         /* get dataspace for the dataset */
-        if ((file_space = H5Dget_space(dset_id[i])) < 0)
+        if ((file_space_id = H5Dget_space(dset_id[i])) < 0)
             FAIL_PUTS_ERROR("H5Dget_space() failed");
 
         /* get dimensions for the dataset */
-        if (H5Sget_simple_extent_dims(file_space, dims3, NULL) < 0)
+        if (H5Sget_simple_extent_dims(file_space_id, dims3, NULL) < 0)
             FAIL_PUTS_ERROR("H5Sget_simple_extent_dims() failed");
 
         /* read dataset */
@@ -479,7 +490,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
                     FAIL_PUTS_ERROR("comparison of image values with original data failed");
 
         /* close dataspace */
-        if (H5Sclose(file_space) < 0)
+        if (H5Sclose(file_space_id) < 0)
             FAIL_PUTS_ERROR("H5Sclose() failed");
 
         /* close dataset */
@@ -512,6 +523,10 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
         } /* end if */
 
     } /* end for */
+
+    /* close file access property list */
+    if (H5Pclose(fapl_id) < 0)
+        FAIL_PUTS_ERROR("H5Pclose() failed");
 
     /* release temporary working buffers */
     for (i = 0; i < open_images; i++)

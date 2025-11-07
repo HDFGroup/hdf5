@@ -441,12 +441,18 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_VERSION_4 4
 
+/* This version uses a "size of lengths" size field to encode the sizes of
+ * filtered dataset chunks. This has a small file space penalty but prevents
+ * errors when a filter grows a dataset chunk.
+ */
+#define H5O_LAYOUT_VERSION_5 5
+
 /* The default version of the format.  (Earlier versions had bugs) */
 #define H5O_LAYOUT_VERSION_DEFAULT H5O_LAYOUT_VERSION_3
 
 /* The latest version of the format.  Look through the 'encode'
  *      and 'size' callbacks for places to change when updating this. */
-#define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_4
+#define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_5
 
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t; /* Defined in H5Dpkg.h               */
@@ -480,7 +486,7 @@ typedef struct H5O_storage_chunk_earray_t {
 
 /* Filtered info for single chunk index */
 typedef struct H5O_storage_chunk_single_filt_t {
-    uint32_t nbytes;      /* Size of chunk (in file) */
+    hsize_t  nbytes;      /* Size of chunk (in file) */
     uint32_t filter_mask; /* Excluded filters for chunk */
 } H5O_storage_chunk_single_filt_t;
 
@@ -644,7 +650,7 @@ typedef struct H5O_layout_chunk_earray_t {
     } cparam;
 
     unsigned unlim_dim;                                 /* Rank of unlimited dimension for dataset */
-    uint32_t swizzled_dim[H5O_LAYOUT_NDIMS];            /* swizzled chunk dimensions */
+    hsize_t  swizzled_dim[H5O_LAYOUT_NDIMS];            /* swizzled chunk dimensions */
     hsize_t  swizzled_down_chunks[H5O_LAYOUT_NDIMS];    /* swizzled "down" size of number of chunks in each
                                                            dimension */
     hsize_t swizzled_max_down_chunks[H5O_LAYOUT_NDIMS]; /* swizzled max "down" size of number of chunks in
@@ -664,9 +670,9 @@ typedef struct H5O_layout_chunk_t {
     H5D_chunk_index_t idx_type;                      /* Type of chunk index               */
     uint8_t           flags;                         /* Chunk layout flags                */
     unsigned          ndims;                         /* Num dimensions in chunk           */
-    uint32_t          dim[H5O_LAYOUT_NDIMS];         /* Size of chunk in elements         */
+    hsize_t           dim[H5O_LAYOUT_NDIMS];         /* Size of chunk in elements         */
     unsigned          enc_bytes_per_dim;             /* Encoded # of bytes for storing each chunk dimension */
-    uint32_t          size;                          /* Size of chunk in bytes            */
+    hsize_t           size;                          /* Size of chunk in bytes            */
     hsize_t           nchunks;                       /* Number of chunks in dataset	     */
     hsize_t           max_nchunks;                   /* Max. number of chunks in dataset	     */
     hsize_t           chunks[H5O_LAYOUT_NDIMS];      /* # of chunks in each dataset dimension  */

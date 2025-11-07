@@ -15,13 +15,16 @@
   conversion between compact and dense (indexed) groups.
  ************************************************************/
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.structs.H5G_info_t;
+import org.hdfgroup.javahdf5.H5G_info_t;
 
 public class H5Ex_G_Phase {
     private static String FILENAME = "H5Ex_G_Phase.h5";
@@ -52,24 +55,23 @@ public class H5Ex_G_Phase {
         public static H5G_storage get(int code) { return lookup.get(code); }
     }
 
-    private static void CreateGroup()
+    private static void CreateGroup(Arena arena)
     {
-        long file_id     = HDF5Constants.H5I_INVALID_HID;
-        long group_id    = HDF5Constants.H5I_INVALID_HID;
-        long subgroup_id = HDF5Constants.H5I_INVALID_HID;
-        long fapl_id     = HDF5Constants.H5I_INVALID_HID;
-        long gcpl_id     = HDF5Constants.H5I_INVALID_HID;
-        H5G_info_t ginfo;
-        String name = "G0"; // Name of subgroup_id
+        long file_id        = H5I_INVALID_HID();
+        long group_id       = H5I_INVALID_HID();
+        long subgroup_id    = H5I_INVALID_HID();
+        long fapl_id        = H5I_INVALID_HID();
+        long gcpl_id        = H5I_INVALID_HID();
+        MemorySegment ginfo = H5G_info_t.allocate(arena);
+        String name         = "G0"; // Name of subgroup_id
         int i;
 
         // Set file access property list to allow the latest file format.This will allow the library to create
         // new format groups.
         try {
-            fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+            fapl_id = H5Pcreate(H5P_CLS_FILE_ACCESS_ID_g());
             if (fapl_id >= 0)
-                H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST,
-                                        HDF5Constants.H5F_LIBVER_LATEST);
+                H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST(), H5F_LIBVER_LATEST());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -77,9 +79,9 @@ public class H5Ex_G_Phase {
 
         // Create group access property list and set the phase change conditions.
         try {
-            gcpl_id = H5.H5Pcreate(HDF5Constants.H5P_GROUP_CREATE);
+            gcpl_id = H5Pcreate(H5P_CLS_GROUP_CREATE_ID_g());
             if (gcpl_id >= 0)
-                H5.H5Pset_link_phase_change(gcpl_id, MAX_COMPACT, MIN_DENSE);
+                H5Pset_link_phase_change(gcpl_id, MAX_COMPACT, MIN_DENSE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -88,8 +90,7 @@ public class H5Ex_G_Phase {
         // Create a new file using the default properties.
         try {
             if (fapl_id >= 0)
-                file_id =
-                    H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, fapl_id);
+                file_id = H5Fcreate(arena.allocateFrom(FILENAME), H5F_ACC_TRUNC(), H5P_DEFAULT(), fapl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -98,8 +99,8 @@ public class H5Ex_G_Phase {
         // Create primary group.
         try {
             if ((file_id >= 0) && (gcpl_id >= 0))
-                group_id = H5.H5Gcreate(file_id, name, HDF5Constants.H5P_DEFAULT, gcpl_id,
-                                        HDF5Constants.H5P_DEFAULT);
+                group_id =
+                    H5Gcreate2(file_id, arena.allocateFrom(name), H5P_DEFAULT(), gcpl_id, H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -113,9 +114,9 @@ public class H5Ex_G_Phase {
             name        = name + append; /* G1, G2, G3 etc. */
             try {
                 if (group_id >= 0) {
-                    subgroup_id = H5.H5Gcreate(group_id, name, HDF5Constants.H5P_DEFAULT,
-                                               HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                    H5.H5Gclose(subgroup_id);
+                    subgroup_id = H5Gcreate2(group_id, arena.allocateFrom(name), H5P_DEFAULT(), H5P_DEFAULT(),
+                                             H5P_DEFAULT());
+                    H5Gclose(subgroup_id);
                 }
             }
             catch (Exception e) {
@@ -125,10 +126,10 @@ public class H5Ex_G_Phase {
             // Obtain the group info and print the group storage type
             try {
                 if (group_id >= 0) {
-                    ginfo = H5.H5Gget_info(group_id);
-                    System.out.print(ginfo.nlinks + " Group" + (ginfo.nlinks == 1 ? " " : "s") +
-                                     ": Storage type is ");
-                    switch (H5G_storage.get(ginfo.storage_type)) {
+                    H5Gget_info(group_id, ginfo);
+                    System.out.print(H5G_info_t.nlinks(ginfo) + " Group" +
+                                     (H5G_info_t.nlinks(ginfo) == 1 ? " " : "s") + ": Storage type is ");
+                    switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                     case H5G_STORAGE_TYPE_COMPACT:
                         System.out.println("H5G_STORAGE_TYPE_COMPACT"); // New compact format
                         break;
@@ -158,7 +159,7 @@ public class H5Ex_G_Phase {
         for (i = MAX_GROUPS; i >= 1; i--) {
             // Define the subgroup name and delete the subgroup.
             try {
-                H5.H5Ldelete(group_id, name, HDF5Constants.H5P_DEFAULT);
+                H5Ldelete(group_id, arena.allocateFrom(name), H5P_DEFAULT());
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -168,10 +169,10 @@ public class H5Ex_G_Phase {
             // Obtain the group info and print the group storage type
             try {
                 if (group_id >= 0) {
-                    ginfo = H5.H5Gget_info(group_id);
-                    System.out.print(ginfo.nlinks + " Group" + (ginfo.nlinks == 1 ? " " : "s") +
-                                     ": Storage type is ");
-                    switch (H5G_storage.get(ginfo.storage_type)) {
+                    H5Gget_info(group_id, ginfo);
+                    System.out.print(H5G_info_t.nlinks(ginfo) + " Group" +
+                                     (H5G_info_t.nlinks(ginfo) == 1 ? " " : "s") + ": Storage type is ");
+                    switch (H5G_storage.get(H5G_info_t.storage_type(ginfo))) {
                     case H5G_STORAGE_TYPE_COMPACT:
                         System.out.println("H5G_STORAGE_TYPE_COMPACT"); // New compact format
                         break;
@@ -198,7 +199,7 @@ public class H5Ex_G_Phase {
         // Close and release resources
         try {
             if (fapl_id >= 0)
-                H5.H5Pclose(fapl_id);
+                H5Pclose(fapl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -206,7 +207,7 @@ public class H5Ex_G_Phase {
 
         try {
             if (gcpl_id >= 0)
-                H5.H5Pclose(gcpl_id);
+                H5Pclose(gcpl_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -215,7 +216,7 @@ public class H5Ex_G_Phase {
         // Close the group
         try {
             if (group_id >= 0)
-                H5.H5Gclose(group_id);
+                H5Gclose(group_id);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -224,12 +225,17 @@ public class H5Ex_G_Phase {
         // Close the file
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) { H5Ex_G_Phase.CreateGroup(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            H5Ex_G_Phase.CreateGroup(arena);
+        }
+    }
 }

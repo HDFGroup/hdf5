@@ -38,8 +38,8 @@ cmake_minimum_required (VERSION 3.26)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "2.0.0")
-set (CTEST_SOURCE_VERSEXT "-4")
+set (CTEST_SOURCE_VERSION "2.0.1")
+set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
 # handle input parameters to script.
@@ -48,7 +48,7 @@ set (CTEST_SOURCE_VERSEXT "-4")
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-2.0.x
 #MODEL - CDash group name
-#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
+#HPC - run alternate configurations for HPC machines; sbatch, bsub, qsub
 #MPI - enable MPI
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form

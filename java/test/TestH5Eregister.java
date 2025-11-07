@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import hdf.hdf5lib.H5;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,7 +58,7 @@ public class TestH5Eregister {
         H5.H5Eregister_class("clsname", "libname", null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eunregister_class_invalid_classid() throws Throwable
     {
         H5.H5Eunregister_class(-1);

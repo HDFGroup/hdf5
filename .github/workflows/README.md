@@ -35,7 +35,10 @@ There are a few that only get triggered manually.
     * tarball.yml to create a source.zip and source.tar.gz
     * ctest.yml to create signed binaries
     * abi-report.yml to compare ABI to last released binaries
+    * maven-staging.yml to generate and test Maven artifacts with Java examples across all platforms
+    * maven-deploy.yml to deploy Maven artifacts to repositories
     * release-files.yml uploads new binaries to releases page
+- java-examples-maven-test.yml comprehensive Java examples testing with Maven artifacts
 
 ## Triggered Workflows
 - clang-format-check.yml runs clang-format and reports issues
@@ -61,6 +64,7 @@ There are a few that only get triggered manually.
     * in release mode and -Werror compiler option
     * with minimum CMake Version 3.18
 - main.yml configure, build, test, and package HDF5 on Ubuntu, macOS, and Windows
+- main-static.yml configure, build, test static only HDF5 on Ubuntu, macOS, and Windows
 - bintest.yml test binary packages created by main.yml
 - main-par.yml configure, build, and test HDF5 with openmpi
 - main-par-spc.yml configure, build, and test HDF5 with HDF5_ENABLE_WARNINGS_AS_ERRORS=ON

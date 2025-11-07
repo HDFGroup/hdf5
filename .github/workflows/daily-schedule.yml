@@ -29,14 +29,14 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v4.1.7
+        uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
           ref: '${{ github.head_ref || github.ref_name }}'
 
       # Get files created by tarball script
       - name: Get doxygen (Linux)
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: docs-doxygen
           path: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen

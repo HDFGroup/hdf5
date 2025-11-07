@@ -253,6 +253,10 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
         return ret_value;
     if ((floatingtypes[7] = (hid_t_f)H5Tcopy(H5T_FLOAT_BFLOAT16LE)) < 0)
         return ret_value;
+    if ((floatingtypes[8] = (hid_t_f)H5Tcopy(H5T_FLOAT_F8E4M3)) < 0)
+        return ret_value;
+    if ((floatingtypes[9] = (hid_t_f)H5Tcopy(H5T_FLOAT_F8E5M2)) < 0)
+        return ret_value;
 
     if ((integertypes[0] = (hid_t_f)H5Tcopy(H5T_STD_I8BE)) < 0)
         return ret_value;
@@ -548,6 +552,8 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5f_flags[28] = (int_f)H5F_LIBVER_V112;
     h5f_flags[29] = (int_f)H5F_LIBVER_V114;
     h5f_flags[30] = (int_f)H5F_LIBVER_V200;
+    h5f_flags[31] = (int_f)H5F_ACC_SWMR_READ;
+    h5f_flags[32] = (int_f)H5F_ACC_SWMR_WRITE;
 
     /*
      *  H5FD flags

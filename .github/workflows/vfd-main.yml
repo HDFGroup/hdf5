@@ -36,14 +36,20 @@ jobs:
   #  with:
   #    build_mode: "${{ inputs.build_mode }}"
 
+  # Build aws-c-s3 library for ROS3 VFD testing
+  build_aws_c_s3:
+    uses: ./.github/workflows/build-aws-c-s3.yml
+    with:
+      build_mode: "${{ inputs.build_mode }}"
+      aws_c_s3_tag: "main"
+
   # Test HDF5 ROS3 VFD
   hdf5_vfd_ros3:
+    needs: build_aws_c_s3
     uses: ./.github/workflows/vfd-ros3.yml
     with:
       build_mode: "${{ inputs.build_mode }}"
-      build_aws_c_s3_only: false
       aws_c_s3_build_type: "source"
-      aws_c_s3_tag: "main"
 
   # Test HDF5 HDFS VFD
   #hdf5_vfd_hdfs:

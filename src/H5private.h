@@ -650,8 +650,13 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif /* HDflock */
 
 #if defined(H5_HAVE_WIN32_API) || defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14)
-H5_DLL void HDqsort_context(void *base, size_t nel, size_t size,
-                            int (*compar)(const void *, const void *, void *), void *arg);
+H5_DLL herr_t HDqsort_context(void *base, size_t nel, size_t size,
+                              int (*compar)(const void *, const void *, void *), void *arg);
+#endif
+
+#ifndef H5_HAVE_QSORT_REENTRANT
+H5_DLL herr_t HDqsort_fallback(void *base, size_t nel, size_t size,
+                               int (*compar)(const void *, const void *, void *), void *arg);
 #endif
 
 #ifndef HDfseek
@@ -770,10 +775,17 @@ H5_DLL void HDqsort_context(void *base, size_t nel, size_t size,
 #define HDunsetenv(S) unsetenv(S)
 #endif
 #ifndef HDqsort_r
-#ifdef H5_HAVE_DARWIN
+#ifdef H5_HAVE_QSORT_REENTRANT
+#if defined(H5_HAVE_DARWIN) || (defined(__FreeBSD__) && __FreeBSD__ < 14)
+/* Darwin and FreeBSD < 14 use BSD-style qsort_r with different signature/argument order */
 #define HDqsort_r(B, N, S, C, A) HDqsort_context(B, N, S, C, A)
 #else
-#define HDqsort_r(B, N, S, C, A) qsort_r(B, N, S, C, A)
+/* Wrap native GNU qsort_r to vacuously return success */
+#define HDqsort_r(B, N, S, C, A) (qsort_r(B, N, S, C, A), SUCCEED)
+#endif
+#else
+/* No native qsort_r/qsort_s available - use fallback implementation */
+#define HDqsort_r(B, N, S, C, A) HDqsort_fallback(B, N, S, C, A)
 #endif
 #endif
 #ifndef HDvasprintf

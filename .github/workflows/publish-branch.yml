@@ -22,7 +22,7 @@ jobs:
     steps:
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - name: Get Sources
-          uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v4.1.7
+          uses: actions/checkout@v5.0.0
           with:
             fetch-depth: 0
             ref: '${{ github.head_ref || github.ref_name }}'

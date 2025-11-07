@@ -116,10 +116,10 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option for ZLib support
 #-----------------------------------------------------------------------------
-set(H5_ZLIB_FOUND FALSE)
+set (H5_ZLIB_FOUND FALSE)
 # Choose which zlib package to use by name
-if(NOT DEFINED ZLIB_PACKAGE_NAME)
-  set(ZLIB_PACKAGE_NAME "zlib")
+if (NOT DEFINED ZLIB_PACKAGE_NAME)
+  set (ZLIB_PACKAGE_NAME "zlib")
 endif ()
 if (NOT DEFINED ZLIBNG_PACKAGE_NAME)
   set (ZLIBNG_PACKAGE_NAME "zlib-ng")
@@ -203,10 +203,10 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option for SzLib support
 #-----------------------------------------------------------------------------
-set(H5_SZIP_FOUND FALSE)
+set (H5_SZIP_FOUND FALSE)
 # Choose which szip package to use by name
-if(NOT DEFINED LIBAEC_PACKAGE_NAME)
-  set(LIBAEC_PACKAGE_NAME "libaec")
+if (NOT DEFINED LIBAEC_PACKAGE_NAME)
+  set (LIBAEC_PACKAGE_NAME "libaec")
 endif ()
 if (HDF5_ENABLE_SZIP_SUPPORT)
   cmake_dependent_option (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" ON HDF5_ENABLE_SZIP_SUPPORT OFF)
