@@ -23,7 +23,7 @@ HDF5Examples/JAVA/
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-examples</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>linux-x86_64</classifier>
 </dependency>
 
@@ -44,7 +44,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>windows-x86_64</classifier>
 </dependency>
 
@@ -52,7 +52,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>macos-x86_64</classifier>
 </dependency>
 
@@ -60,7 +60,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>macos-aarch64</classifier>
 </dependency>
 ```
