@@ -322,6 +322,142 @@ This is **expected behavior** and indicates:
 - ✅ **Compilation succeeds**
 - ⚠️ **Native HDF5 libraries not available** (expected in Maven-only environment)
 
+### Running Examples Successfully
+
+To actually execute examples (not just compile them), you need HDF5 native libraries installed:
+
+#### Option 1: Install HDF5 from Package Manager (Recommended)
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install libhdf5-dev hdf5-tools
+```
+
+**Linux (Fedora/RHEL):**
+```bash
+sudo dnf install hdf5 hdf5-devel
+```
+
+**macOS (Homebrew):**
+```bash
+brew install hdf5
+```
+
+**Windows:**
+- Download pre-built binaries from [HDF Group Downloads](https://www.hdfgroup.org/downloads/hdf5/)
+- Add HDF5 `bin` directory to system PATH
+
+#### Option 2: Build HDF5 from Source
+
+Build HDF5 with Java support enabled:
+
+```bash
+# Clone HDF5 repository
+git clone https://github.com/HDFGroup/hdf5.git
+cd hdf5
+
+# Build with Java (JNI)
+cmake --preset ci-StdShar-GNUC --fresh
+cmake --build build/ci-StdShar-GNUC
+sudo cmake --install build/ci-StdShar-GNUC
+
+# Or build with Java (FFM) - requires Java 25+
+cmake --preset ci-StdShar-GNUC-FFM --fresh
+cmake --build build/ci-StdShar-GNUC-FFM
+sudo cmake --install build/ci-StdShar-GNUC-FFM
+```
+
+#### Option 3: Use LD_LIBRARY_PATH (Linux/macOS)
+
+If HDF5 is installed in a non-standard location:
+
+```bash
+# Add HDF5 library directory to path
+export LD_LIBRARY_PATH=/path/to/hdf5/lib:$LD_LIBRARY_PATH
+
+# For macOS
+export DYLD_LIBRARY_PATH=/path/to/hdf5/lib:$DYLD_LIBRARY_PATH
+
+# Then run examples
+cd build/maven-test-jni
+mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
+```
+
+#### Option 4: Specify Library Path in Java
+
+```bash
+# Run with explicit library path
+java -Djava.library.path=/path/to/hdf5/lib \
+     -cp "target/classes:~/.m2/repository/org/hdfgroup/hdf5-java-jni/2.0.1-SNAPSHOT/*" \
+     H5Ex_D_ReadWrite
+```
+
+#### Verify Native Libraries Are Found
+
+After installing HDF5, verify the libraries are accessible:
+
+**Linux:**
+```bash
+# Check library is in system path
+ldconfig -p | grep hdf5
+
+# Or find library location
+find /usr -name "libhdf5.so*" 2>/dev/null
+```
+
+**macOS:**
+```bash
+# Check library location
+find /usr/local -name "libhdf5*.dylib" 2>/dev/null
+```
+
+**Windows:**
+```cmd
+# Check PATH includes HDF5 bin directory
+echo %PATH%
+
+# Verify DLL exists
+where hdf5.dll
+```
+
+#### Running Examples After Library Installation
+
+Once native libraries are installed, examples should run successfully:
+
+**JNI Examples:**
+```bash
+cd build/maven-test-jni
+mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
+
+# Expected output:
+# Dataset successfully created and written
+# Data read from dataset: [1, 2, 3, 4, ...]
+```
+
+**FFM Examples:**
+```bash
+cd build/maven-test-ffm
+mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
+
+# Expected output:
+# Dataset successfully created and written
+# Data read from dataset: [1, 2, 3, 4, ...]
+```
+
+#### Why Maven Artifacts Don't Include Native Libraries
+
+Maven artifacts contain only:
+- ✅ Java bytecode (.class files)
+- ✅ Java source code (in -sources.jar)
+- ✅ Javadoc (in -javadoc.jar)
+
+They do **not** include:
+- ❌ Native shared libraries (.so, .dll, .dylib)
+- ❌ Platform-specific binaries
+
+**Reason:** Native libraries are platform-specific and typically hundreds of MB. Maven artifacts should be small (~2-5 MB) and platform-independent where possible. The JNI/FFM bindings provide the Java interface, but you must install the native HDF5 libraries separately.
+
 ### Pattern-Based Output Validation
 
 Examples are validated using pattern matching for:

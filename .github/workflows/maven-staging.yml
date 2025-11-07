@@ -518,11 +518,11 @@ jobs:
 
               # List some sample classes to verify content
               echo "   Sample classes:"
-              jar tf "$HDF5_JAR" | grep "org/hdfgroup/javahdf5.*\.class" | head -5 | sed 's/^/   - /'
+              jar tf "$HDF5_JAR" | grep "org/hdfgroup/javahdf5.*\.class" | head -5 2>/dev/null | sed 's/^/   - /' || true
             else
               echo "::error::JAR does not contain HDF5 FFM classes!"
               echo "JAR only contains:"
-              jar tf "$HDF5_JAR" | head -30
+              jar tf "$HDF5_JAR" | head -30 2>/dev/null || true
               VERIFICATION_FAILED=true
             fi
 
@@ -551,11 +551,11 @@ jobs:
 
               # List some sample classes to verify content
               echo "   Sample classes:"
-              jar tf "$HDF5_JAR" | grep "hdf/hdf5lib.*\.class" | head -5 | sed 's/^/   - /'
+              jar tf "$HDF5_JAR" | grep "hdf/hdf5lib.*\.class" | head -5 2>/dev/null | sed 's/^/   - /' || true
             else
               echo "::error::JAR does not contain HDF5 JNI classes!"
               echo "JAR only contains:"
-              jar tf "$HDF5_JAR" | head -30
+              jar tf "$HDF5_JAR" | head -30 2>/dev/null || true
               VERIFICATION_FAILED=true
             fi
           fi
