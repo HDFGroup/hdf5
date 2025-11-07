@@ -34,7 +34,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 - Full [UTF-8](/CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
 - Introduction of [bfloat16 predefined datatypes](/CHANGELOG.md#added-predefined-datatypes-for-bfloat16-data) for efficient machine learning conversions.
 - First-class support for [complex numbers](/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
-- A [new, larger chunk size limit](/CHANGELOG.md#added-support-for-large-chunks), in multi-petabytes, replaces the previous 4 GiB limit, potentially improving compression and general I/O performance depending on your I/O patterns and system.
+- A [new, larger chunk size limit](/CHANGELOG.md#added-support-for-large-chunks), in multi-petabytes, replaces the previous 4 GiB limit.
 
 ## Updated Foundation:
 
