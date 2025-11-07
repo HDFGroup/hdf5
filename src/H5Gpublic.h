@@ -940,7 +940,7 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment
  *                 name must be \TText{'.'} (dot) if \p loc_id fully specifies
  *                 the object for which the comment is to be set.
  * \param[in] bufsize Maximum number of comment characters to be returned in \p buf.
- * \param[in] buf The comment
+ * \param[out] buf The comment
  *
  * \return Returns the number of characters in the comment, counting the \c NULL
  *         terminator, if successful; the value returned may be larger than
@@ -1130,7 +1130,7 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, bool follow_link, H
  *
  * \fg_loc_id
  * \param[in] idx Transient index identifying object
- * \param[in,out] name Pointer to user-provided buffer the object name
+ * \param[out] name Pointer to user-provided buffer the object name
  * \param[in] size Name length
  *
  * \return Returns the size of the object name if successful, or 0 if no name is
