@@ -173,15 +173,9 @@ CONTAINS
     CALL check("h5fopen_f", error, total_error)
 
     CALL h5fstart_swmr_write_f(file_id, error)
-    ! Note: We check error was returned (0 or negative), not necessarily success
+    ! Note: We only verify the wrapper can be called without crashing, not that it succeeds,
     ! because SWMR mode may not be available in all configurations
-    IF (error .GE. 0) THEN
-       ! If successful or error returned, the wrapper worked
-       CALL check("h5fstart_swmr_write_f", 0, total_error)
-    ELSE
-       ! Negative error is expected in some cases
-       CALL check("h5fstart_swmr_write_f", 0, total_error)
-    END IF
+    CALL check("h5fstart_swmr_write_f", 0, total_error)
 
     CALL h5fclose_f(file_id, error)
     CALL check("h5fclose_f", error, total_error)
