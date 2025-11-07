@@ -91,6 +91,187 @@ This creates:
 - `hdf5-java-examples-{version}-sources.jar` - Source code
 - `hdf5-java-examples-{version}-javadoc.jar` - Documentation
 
+## Testing Maven Artifacts
+
+Two standalone scripts are provided to test HDF5 Maven artifacts against the examples in this directory:
+
+### test-maven-jni.sh - Test JNI Implementation
+
+Tests the JNI (Java Native Interface) implementation, compatible with Java 11+.
+
+**Usage:**
+```bash
+./test-maven-jni.sh [VERSION] [REPOSITORY_URL] [BUILD_DIR]
+```
+
+**Examples:**
+```bash
+# Test latest snapshot from HDFGroup
+./test-maven-jni.sh 2.0.1-SNAPSHOT
+
+# Test specific version from custom repository
+./test-maven-jni.sh 2.0.0 https://maven.pkg.github.com/myorg/hdf5
+
+# Use custom build directory
+./test-maven-jni.sh 2.0.1-SNAPSHOT https://maven.pkg.github.com/HDFGroup/hdf5 /tmp/test
+```
+
+**What it does:**
+1. Downloads `hdf5-java-jni` artifact from Maven repository
+2. Verifies JAR contains HDF5 classes (not just dependencies)
+3. Compiles examples from `compat/` subdirectories
+4. Runs H5Ex_D_ReadWrite example
+5. Reports results with detailed summary
+
+**Prerequisites:**
+- Java 11 or later
+- Maven 3.6.0 or later
+- GitHub authentication (for GitHub Packages)
+
+### test-maven-ffm.sh - Test FFM Implementation
+
+Tests the FFM (Foreign Function & Memory) implementation, requires Java 25+.
+
+**Usage:**
+```bash
+./test-maven-ffm.sh [VERSION] [REPOSITORY_URL] [BUILD_DIR]
+```
+
+**Examples:**
+```bash
+# Test FFM snapshot
+./test-maven-ffm.sh 2.0.1-SNAPSHOT
+
+# Test specific version
+./test-maven-ffm.sh 2.0.0-3 https://maven.pkg.github.com/HDFGroup/hdf5
+```
+
+**What it does:**
+1. Downloads `hdf5-java-ffm` artifact from Maven repository
+2. Verifies JAR contains FFM bindings (`org.hdfgroup.javahdf5.*`)
+3. Compiles examples from root directories (H5D, H5T, H5G, TUTR)
+4. Runs H5Ex_D_ReadWrite with native access enabled
+5. Reports results with detailed summary
+
+**Prerequisites:**
+- Java 25 or later (FFM requires Java 25+)
+- Maven 3.6.0 or later
+- GitHub authentication (for GitHub Packages)
+
+### Build Directory Pattern
+
+Both scripts use a separate build directory to keep the source tree clean:
+
+**Default locations:**
+- JNI: `HDF5Examples/JAVA/build/maven-test-jni/`
+- FFM: `HDF5Examples/JAVA/build/maven-test-ffm/`
+
+**Generated files:**
+```
+build/
+├── maven-test-jni/
+│   ├── pom-examples.xml       # Generated Maven POM
+│   ├── target/                # Compiled classes
+│   │   └── classes/
+│   └── *.h5                   # Output HDF5 files
+└── maven-test-ffm/
+    ├── pom-examples.xml
+    ├── target/
+    └── *.h5
+```
+
+**Benefits:**
+- ✅ Source tree stays clean (no generated files)
+- ✅ Easy cleanup: `rm -rf build/`
+- ✅ Multiple parallel tests possible
+- ✅ CMake-like out-of-source build pattern
+
+### GitHub Authentication
+
+For testing artifacts from GitHub Packages, authentication is required:
+
+**Option 1: GitHub CLI (Recommended)**
+```bash
+gh auth login
+gh auth refresh --scopes read:packages
+```
+
+Scripts automatically detect GitHub CLI authentication.
+
+**Option 2: Maven settings.xml**
+```bash
+# Scripts can create settings.xml automatically if gh is authenticated
+# Or create manually:
+cat > ~/.m2/settings.xml <<EOF
+<settings>
+  <servers>
+    <server>
+      <id>github-hdfgroup-hdf5</id>
+      <username>YOUR_GITHUB_USERNAME</username>
+      <password>YOUR_GITHUB_TOKEN</password>
+    </server>
+  </servers>
+</settings>
+EOF
+```
+
+### Running Additional Examples
+
+After initial test succeeds, you can run more examples:
+
+**JNI:**
+```bash
+cd build/maven-test-jni
+mvn exec:java -Dexec.mainClass="H5Ex_T_String" -f pom-examples.xml
+```
+
+**FFM:**
+```bash
+cd build/maven-test-ffm
+mvn exec:java -Dexec.mainClass="H5Ex_T_String" -f pom-examples.xml
+```
+
+### Cleanup
+
+**Remove single test build:**
+```bash
+rm -rf build/maven-test-jni
+rm -rf build/maven-test-ffm
+```
+
+**Remove all test builds:**
+```bash
+rm -rf build/
+```
+
+**Clean with Maven (keeps directory structure):**
+```bash
+mvn clean -f build/maven-test-jni/pom-examples.xml
+mvn clean -f build/maven-test-ffm/pom-examples.xml
+```
+
+### Troubleshooting Test Scripts
+
+**"Failed to download artifact"**
+- Check GitHub authentication: `gh auth status`
+- Verify repository URL is correct
+- Ensure version exists in repository
+
+**"JAR does not contain HDF5 classes"**
+- Indicates incomplete Maven artifact (build issue)
+- This is what the verification step catches!
+- Report to maintainers if public artifact is incomplete
+
+**"Java version too old"**
+- JNI requires Java 11+
+- FFM requires Java 25+
+- Check: `java -version`
+
+**"UnsatisfiedLinkError: no hdf5_java"**
+- This is expected during Maven-only testing
+- Indicates JAR structure is correct
+- Native libraries would be needed for full execution
+
 ## Example Categories
 
 ### H5D - Dataset Operations

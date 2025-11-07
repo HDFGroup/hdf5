@@ -2,19 +2,24 @@
 #
 # test-maven-jni.sh - Test HDF5 JNI examples against Maven artifacts
 #
-# Usage: ./test-maven-jni.sh [VERSION] [REPOSITORY_URL]
+# Usage: ./test-maven-jni.sh [VERSION] [REPOSITORY_URL] [BUILD_DIR]
 #
 # Examples:
-#   ./test-maven-jni.sh 2.0.0-SNAPSHOT
-#   ./test-maven-jni.sh 2.0.0-3
-#   ./test-maven-jni.sh 2.0.0-SNAPSHOT https://maven.pkg.github.com/HDFGroup/hdf5
+#   ./test-maven-jni.sh 2.0.1-SNAPSHOT
+#   ./test-maven-jni.sh 2.0.1
+#   ./test-maven-jni.sh 2.0.1-SNAPSHOT https://maven.pkg.github.com/HDFGroup/hdf5
+#   ./test-maven-jni.sh 2.0.1-SNAPSHOT https://maven.pkg.github.com/HDFGroup/hdf5 /tmp/maven-test-jni
 #
 
 set -e  # Exit on error
 
+# Determine source directory (where this script lives)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Default values
-VERSION="${1:-2.0.0-SNAPSHOT}"
+VERSION="${1:-2.0.1-SNAPSHOT}"
 REPOSITORY_URL="${2:-https://maven.pkg.github.com/HDFGroup/hdf5}"
+BUILD_DIR="${3:-${SCRIPT_DIR}/build/maven-test-jni}"
 ARTIFACT_ID="hdf5-java-jni"
 IMPLEMENTATION="JNI"
 
@@ -42,6 +47,9 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Create build directory
+mkdir -p "${BUILD_DIR}"
+
 # Print header
 echo "============================================"
 echo "HDF5 Maven ${IMPLEMENTATION} Examples Test"
@@ -49,6 +57,8 @@ echo "============================================"
 echo "Version:    ${VERSION}"
 echo "Repository: ${REPOSITORY_URL}"
 echo "Artifact:   org.hdfgroup:${ARTIFACT_ID}"
+echo "Source:     ${SCRIPT_DIR}"
+echo "Build:      ${BUILD_DIR}"
 echo "============================================"
 echo ""
 
@@ -139,10 +149,10 @@ fi
 log_success "Prerequisites check passed"
 echo ""
 
-# Generate pom-examples.xml
+# Generate pom-examples.xml in build directory
 log_info "Generating pom-examples.xml for ${IMPLEMENTATION}..."
 
-cat > pom-examples.xml <<EOF
+cat > "${BUILD_DIR}/pom-examples.xml" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -198,7 +208,7 @@ cat > pom-examples.xml <<EOF
                         <goals><goal>compile</goal></goals>
                         <configuration>
                             <compileSourceRoots>
-                                <compileSourceRoot>\${basedir}/compat/H5D</compileSourceRoot>
+                                <compileSourceRoot>${SCRIPT_DIR}/compat/H5D</compileSourceRoot>
                             </compileSourceRoots>
                         </configuration>
                     </execution>
@@ -208,7 +218,7 @@ cat > pom-examples.xml <<EOF
                         <goals><goal>compile</goal></goals>
                         <configuration>
                             <compileSourceRoots>
-                                <compileSourceRoot>\${basedir}/compat/H5T</compileSourceRoot>
+                                <compileSourceRoot>${SCRIPT_DIR}/compat/H5T</compileSourceRoot>
                             </compileSourceRoots>
                         </configuration>
                     </execution>
@@ -218,7 +228,7 @@ cat > pom-examples.xml <<EOF
                         <goals><goal>compile</goal></goals>
                         <configuration>
                             <compileSourceRoots>
-                                <compileSourceRoot>\${basedir}/compat/H5G</compileSourceRoot>
+                                <compileSourceRoot>${SCRIPT_DIR}/compat/H5G</compileSourceRoot>
                             </compileSourceRoots>
                         </configuration>
                     </execution>
@@ -228,7 +238,7 @@ cat > pom-examples.xml <<EOF
                         <goals><goal>compile</goal></goals>
                         <configuration>
                             <compileSourceRoots>
-                                <compileSourceRoot>\${basedir}/compat/TUTR</compileSourceRoot>
+                                <compileSourceRoot>${SCRIPT_DIR}/compat/TUTR</compileSourceRoot>
                             </compileSourceRoots>
                         </configuration>
                     </execution>
@@ -252,8 +262,8 @@ echo ""
 
 # Clean previous builds
 log_info "Cleaning previous builds..."
-mvn clean -f pom-examples.xml -q
-rm -f *.h5 2>/dev/null || true
+mvn clean -f "${BUILD_DIR}/pom-examples.xml" -q
+rm -f "${BUILD_DIR}"/*.h5 2>/dev/null || true
 log_success "Clean complete"
 echo ""
 
@@ -299,7 +309,7 @@ echo ""
 
 # Compile examples
 log_info "Compiling ${IMPLEMENTATION} examples..."
-if mvn compile -f pom-examples.xml; then
+if mvn compile -f "${BUILD_DIR}/pom-examples.xml"; then
     log_success "Examples compiled successfully"
 else
     log_error "Compilation failed"
@@ -308,19 +318,19 @@ fi
 echo ""
 
 # Count compiled example files
-COMPILED_COUNT=$(find target/classes -name "*.class" 2>/dev/null | wc -l)
+COMPILED_COUNT=$(find "${BUILD_DIR}/target/classes" -name "*.class" 2>/dev/null | wc -l)
 log_info "Compiled $COMPILED_COUNT example classes"
 echo ""
 
-# Run a test example
+# Run a test example (change to build directory so .h5 files are created there)
 log_info "Running test example: H5Ex_D_ReadWrite..."
-if mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml -q; then
+if (cd "${BUILD_DIR}" && mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml -q); then
     log_success "Example executed successfully"
 
     # Check if HDF5 file was created
-    if [ -f "H5Ex_D_ReadWrite.h5" ]; then
-        log_success "HDF5 file created: H5Ex_D_ReadWrite.h5"
-        log_info "File size: $(du -h H5Ex_D_ReadWrite.h5 | cut -f1)"
+    if [ -f "${BUILD_DIR}/H5Ex_D_ReadWrite.h5" ]; then
+        log_success "HDF5 file created: ${BUILD_DIR}/H5Ex_D_ReadWrite.h5"
+        log_info "File size: $(du -h "${BUILD_DIR}/H5Ex_D_ReadWrite.h5" | cut -f1)"
     else
         log_warning "HDF5 file not found (may have been deleted by example)"
     fi
@@ -344,8 +354,10 @@ echo "  - Compiled:  $COMPILED_COUNT example classes"
 echo "  - Execution: H5Ex_D_ReadWrite succeeded"
 echo "============================================"
 echo ""
+log_info "Build directory: ${BUILD_DIR}"
+echo ""
 log_info "To run more examples:"
-echo "  mvn exec:java -Dexec.mainClass=\"EXAMPLE_NAME\" -f pom-examples.xml"
+echo "  cd \"${BUILD_DIR}\" && mvn exec:java -Dexec.mainClass=\"EXAMPLE_NAME\" -f pom-examples.xml"
 echo ""
 log_info "To clean up test files:"
-echo "  mvn clean -f pom-examples.xml && rm -f *.h5"
+echo "  mvn clean -f \"${BUILD_DIR}/pom-examples.xml\" && rm -rf \"${BUILD_DIR}\""
