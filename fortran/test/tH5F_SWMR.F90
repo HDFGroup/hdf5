@@ -104,11 +104,13 @@ CONTAINS
     TYPE(C_FUNPTR) :: callback_func
     TYPE(C_PTR) :: user_data
     LOGICAL :: flag_set
+#ifdef H5_HAVE_HL
     INTEGER, DIMENSION(5), TARGET :: append_data
     INTEGER, DIMENSION(3), TARGET :: new_data
     TYPE(C_PTR) :: append_ptr
     INTEGER :: i
     INTEGER(SIZE_T) :: append_size
+#endif
 
     ! Initialize
     filename = "swmr_test.h5"
