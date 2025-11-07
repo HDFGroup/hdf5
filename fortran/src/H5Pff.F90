@@ -4373,8 +4373,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param dapl_id  Dataset access property list identifier.
 !! \param ndims    Number of elements in boundary array (rank of dataset).
 !! \param boundary Dimension sizes used to determine the boundary (HSIZE_T array of size ndims).
-!! \param func     User-defined callback function (TYPE(C_FUNPTR), optional).
-!! \param udata    User-defined input data for callback (TYPE(C_PTR), optional).
+!! \param func     Retrieved user-defined callback function (TYPE(C_FUNPTR), optional).
+!! \param udata    Retrieved user-defined data for callback (TYPE(C_PTR), optional).
 !! \param hdferr   \fortran_error
 !!
 !! See C API: @ref H5Pget_append_flush()
