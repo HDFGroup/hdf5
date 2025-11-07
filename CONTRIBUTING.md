@@ -62,6 +62,7 @@ Depending on which features you want to build or enable:
 * A _C++11_-compatible compiler for the C++ wrappers.
 * A _Fortran 2003_-compatible compiler for the Fortran wrappers.
 * A _Java 8_-compatible compiler for the Java wrappers.
+* **Maven** for Java artifact deployment and validation (when `HDF5_ENABLE_MAVEN_DEPLOY=ON`).
 * `flex`/`lex` and `bison`/`yacc` if you want to modify the high-level parsers.
 * Development versions of **zlib** and **szip** for compression support.
 * An MPI-3 compatible MPI library for parallel HDF5 development.
@@ -106,9 +107,26 @@ CMake is the required build system for all platforms:
 
 * **Memory Checking:** Use `HDF5_ENABLE_USING_MEMCHECKER:BOOL=ON` when using tools like Valgrind. This disables
                        internal memory pools that can hide memory issues.
-* **Developer Warnings:** Enable extra warnings with `HDF5_ENABLE_DEV_WARNINGS:BOOL=ON` (generates significant 
+* **Developer Warnings:** Enable extra warnings with `HDF5_ENABLE_DEV_WARNINGS:BOOL=ON` (generates significant
                           output but can be useful).
 * **Warnings as Errors:** The CI system builds with `-Werror`, so fix all compiler warnings before submitting pull requests.
+
+### Maven Integration Development
+
+For developers working on Java bindings and Maven integration:
+
+* **Enable Maven Support:** Use `HDF5_ENABLE_MAVEN_DEPLOY:BOOL=ON` to enable Maven artifact generation.
+* **Snapshot Builds:** Use `HDF5_MAVEN_SNAPSHOT:BOOL=ON` for development builds with `-SNAPSHOT` versions.
+* **Maven Presets:** Use Maven-enabled CMake presets for consistent builds:
+  ```bash
+  # For full builds (includes all components)
+  cmake --workflow --preset ci-StdShar-GNUC-Maven-Snapshot --fresh
+
+  # For Java artifact generation only (recommended for Maven development)
+  cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh
+  ```
+* **Artifact Validation:** Test Maven artifacts using `.github/scripts/validate-maven-artifacts.sh` script.
+* **Repository Testing:** Use the `maven-staging.yml` workflow for pull request validation.
 
 ---
 
@@ -120,7 +138,7 @@ Here's where to find things in the source tree:
 * **`test/`**: C library test code
 * **`testpar/`**: Parallel C library test code
 * **`tools/`**: Command-line tools (h5dump, h5repack, etc.)
-* **`HDF5Examples/`**: Library examples
+* **`HDF5Examples/`**: Library examples including Java examples with Maven integration
 * **`hl/`**: High-level library source, tests, and examples
 * **`c++/`**: C++ language wrapper
 * **`fortran/`**: Fortran language wrapper
@@ -301,6 +319,40 @@ Used only by the large `testhdf5` program. Uses global variables and should be a
 3. Avoid adding to the `testhdf5` program.
 4. Update `CMakeLists.txt` in the `test/` directory.
 5. Ensure tests run and pass under CMake.
+
+### Maven Deployment Testing
+
+For contributions involving Maven deployment or Java bindings:
+
+1. **Test Maven Artifacts:** Use the validation script to verify artifact generation:
+   ```bash
+   # Build with Maven support
+   cmake --workflow --preset ci-MinShar-GNUC-Maven-Snapshot --fresh
+
+   # Validate generated artifacts
+   .github/scripts/validate-maven-artifacts.sh build/ci-MinShar-GNUC-Maven-Snapshot
+   ```
+
+2. **PR Validation:** The `maven-staging.yml` workflow automatically tests Maven artifacts for pull requests when Java-related files are modified.
+
+3. **Multi-Platform Testing:** Verify artifacts generate correctly on all platforms by testing with different Maven presets:
+   - Linux: `ci-MinShar-GNUC-Maven-Snapshot`
+   - Windows: `ci-MinShar-MSVC-Maven-Snapshot`
+   - macOS: `ci-MinShar-Clang-Maven-Snapshot`
+
+4. **Dry Run Testing:** Before deploying to repositories, test deployment permissions using the dry run mode in release workflows.
+
+5. **Java Examples Testing:** The Java examples Maven integration includes comprehensive testing:
+   ```bash
+   # Test Java examples with Maven artifacts (all platforms)
+   gh workflow run maven-staging.yml -f platforms=all-platforms
+
+   # Run dedicated Java examples testing
+   gh workflow run java-examples-maven-test.yml -f category=all
+   ```
+   - **Cross-Platform Validation:** Ensures examples work with platform-specific Maven artifacts
+   - **Native Library Error Handling:** Validates JAR structure through expected native library errors
+   - **Multi-Platform Coverage:** Tests on Linux, Windows, macOS x86_64, and macOS aarch64
 
 ---
 

@@ -15,6 +15,7 @@ package test;
 import static org.junit.Assert.assertTrue;
 
 import hdf.hdf5lib.H5;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
@@ -39,11 +40,10 @@ public class TestH5Dparams {
         System.out.println();
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Dclose_invalid() throws Throwable
     {
         long did = H5.H5Dclose(-1);
-        assertTrue(did == 0);
     }
 
     @Test(expected = NullPointerException.class)
@@ -131,7 +131,7 @@ public class TestH5Dparams {
         H5.H5Dvlen_get_buf_size(-1, -1, -1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Dget_storage_size_invalid() throws Throwable
     {
         H5.H5Dget_storage_size(-1);

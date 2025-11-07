@@ -45,13 +45,15 @@ jobs:
         uses: lycheeverse/lychee-action@v2.7.0
         with:
           args: >
-            --verbose
             --base ${{ steps.build_docs.outputs.html_path }}
             --max-retries 4
             --max-concurrency 4
             --retry-wait-time 10
             --timeout 30
+            --accept 200..=299,429
             --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"
+            --skip-missing
+            --exclude ".*%23.*"
             --exclude "eigen.tuxfamily.org"
             --exclude "gnu.org"
             --exclude "en.wikipedia.org"
@@ -73,6 +75,7 @@ jobs:
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
           output: lychee-report.md
           format: markdown
+          jobSummary: false
           # Let the action fail naturally - we'll handle it in the summary step
           fail: true
 
@@ -80,7 +83,7 @@ jobs:
         if: always()
         run: |
           echo "## 🔗 Link Checker Report" >> "$GITHUB_STEP_SUMMARY"
-          
+
           # Check if lychee step succeeded or failed
           if [ "${{ steps.lychee.outcome }}" = "success" ]; then
             echo "✅ **No broken links found!**" >> "$GITHUB_STEP_SUMMARY"
@@ -99,7 +102,7 @@ jobs:
           else
             echo "⚠️ **Link checker step was skipped or cancelled.**" >> "$GITHUB_STEP_SUMMARY"
           fi
-          
+
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### Full Report:" >> "$GITHUB_STEP_SUMMARY"
           if [ -f "lychee-report.md" ]; then

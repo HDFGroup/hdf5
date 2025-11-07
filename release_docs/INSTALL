@@ -70,7 +70,7 @@ CONTENTS
 
 4.1. Solution
         CMake introduced presets in version 3.19. HDF Group provides a file in the source,
-        CMakePresets.json, requiring CMake 3.25 or higher. This file is in the HDF5 library
+        CMakePresets.json, requiring CMake 3.26 or higher. This file is in the HDF5 library
         source as well as the HDF5Examples source of the installed binary.
           The library source file will build HDF5 with the options for building a typical
         shared library with the common languages for a platform. The features include building

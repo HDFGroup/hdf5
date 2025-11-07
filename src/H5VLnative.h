@@ -91,7 +91,7 @@ typedef struct H5VL_native_dataset_chunk_read_t {
 typedef struct H5VL_native_dataset_chunk_write_t {
     const hsize_t *offset;
     uint32_t       filters;
-    uint32_t       size;
+    size_t         size;
     const void    *buf;
 } H5VL_native_dataset_chunk_write_t;
 

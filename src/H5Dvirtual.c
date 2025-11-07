@@ -98,6 +98,9 @@
 /********************/
 
 /* Layout operation callbacks */
+static herr_t H5D__virtual_construct(H5F_t *f, H5D_t *dset);
+static herr_t H5D__virtual_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open_op);
+static bool   H5D__virtual_is_space_alloc(const H5O_storage_t *storage);
 static bool   H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset);
 static herr_t H5D__virtual_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t H5D__virtual_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
@@ -149,7 +152,7 @@ static herr_t H5D__virtual_not_in_tree_add(H5O_storage_virtual_ent_t ***list, si
 
 /* Contiguous storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
-    NULL,                        /* construct */
+    H5D__virtual_construct,      /* construct */
     H5D__virtual_init,           /* init */
     H5D__virtual_is_space_alloc, /* is_space_alloc */
     H5D__virtual_is_data_cached, /* is_data_cached */
@@ -2648,6 +2651,46 @@ done:
 } /* end H5D__virtual_init_all() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_construct
+ *
+ * Purpose:     Constructs new virtual layout information for dataset and
+ *              upgrades layout version if appropriate
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_construct(H5F_t *f, H5D_t *dset)
+{
+    unsigned version;             /* Message version */
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    assert(f);
+    assert(dset);
+    assert(dset->shared);
+
+    /* Currently only handles layout version */
+    /* If the layout is below version 4, upgrade to version 4 if allowed. If not allowed throw an error, since
+     * virtual datasets require layout version 4. Do not upgrade past version 3 since there is no benefit. */
+    if (dset->shared->layout.version < H5O_LAYOUT_VERSION_4) {
+        version = MAX(dset->shared->layout.version, H5O_LAYOUT_VERSION_4);
+
+        /* Version bounds check */
+        if (version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)])
+            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "layout version out of bounds");
+
+        dset->shared->layout.version = version;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_construct() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__virtual_init
  *
  * Purpose:     Initialize the virtual layout information for a dataset.
@@ -2657,8 +2700,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
+static herr_t
+H5D__virtual_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool H5_ATTR_UNUSED open_op)
 {
     H5O_storage_virtual_t *storage;                      /* Convenience pointer */
     H5P_genplist_t        *dapl;                         /* Data access property list object pointer */
@@ -2781,7 +2824,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-bool
+static bool
 H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
     bool ret_value = false; /* Return value */

@@ -28,6 +28,8 @@ Then, you can compile the examples with:
     h5c++ -o example2 example2.cpp
     h5fc -o example3 example3.f90
 
+For Java examples with Maven integration, see the JAVA/README-MAVEN.md file for complete instructions on using the `org.hdfgroup:hdf5-java-examples` Maven artifact.
+
 The test-pc.sh script can test the examples with the h5*cc pkg-config wrappers with:
     cd \<path to examples\>
     export HDF5_HOME="hdf5 installation root"; sh ./test-pc.sh \<path to examples\> \<path to build dir\> .

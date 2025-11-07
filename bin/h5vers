@@ -188,11 +188,17 @@ my $CHANGELOG = $file;
 $CHANGELOG =~ s/[^\/]*$/..\/release_docs\/CHANGELOG.md/;
 die "unable to read file: $CHANGELOG\n" unless -r $file;
 my $H5_JAVA = $file;
-$H5_JAVA =~ s/[^\/]*$/..\/java\/src\/hdf\/hdf5lib\/H5.java/;
+$H5_JAVA =~ s/[^\/]*$/..\/java\/hdf\/hdf5lib\/H5.java/;
 die "unable to read file: $H5_JAVA\n" unless -r $file;
 my $TESTH5_JAVA = $file;
 $TESTH5_JAVA =~ s/[^\/]*$/..\/java\/test\/TestH5.java/;
 die "unable to read file: $TESTH5_JAVA\n" unless -r $file;
+my $H5_JNI_JAVA = $file;
+$H5_JNI_JAVA =~ s/[^\/]*$/..\/java\/src-jni\/hdf\/hdf5lib\/H5.java/;
+die "unable to read file: $H5_JNI_JAVA\n" unless -r $file;
+my $TESTH5_JNI_JAVA = $file;
+$TESTH5_JNI_JAVA =~ s/[^\/]*$/..\/java\/src-jni\/test\/TestH5.java/;
+die "unable to read file: $TESTH5_JNI_JAVA\n" unless -r $file;
 my $REPACK_LAYOUT_PLUGIN_VERSION = $file;
 $REPACK_LAYOUT_PLUGIN_VERSION =~ s/[^\/]*$/..\/tools\/test\/h5repack\/expected\/h5repack_layout.h5-plugin_version_test.ddl/;
 die "unable to read file: $REPACK_LAYOUT_PLUGIN_VERSION\n" unless -r $file;
@@ -365,7 +371,7 @@ if ($HDF5EXCONFCMAKE) {
   write_file($HDF5EXCONFCMAKE, $data);  
 }
 
-# Update the java/src/hdf/hdf5lib/H5.java file
+# Update the java/hdf/hdf5lib/H5.java file
 if ($H5_JAVA) {
   my $data = read_file($H5_JAVA);
 #  my $sub_rel_ver_str = "";
@@ -399,6 +405,42 @@ if ($TESTH5_JAVA) {
   $data =~ s/        int majnum = \d*, minnum = \d*, relnum = \d*;/        $version_string2;/;
 
   write_file($TESTH5_JAVA, $data);
+}
+
+# Update the java/src-jni/hdf/hdf5lib/H5.java file
+if ($H5_JNI_JAVA) {
+  my $data = read_file($H5_JNI_JAVA);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq ""
+     ? sprintf("\"%s\"", "")
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     );
+  my $version_string1 = sprintf("%d.%d.%d", @newver[0,1,2]);
+  my $version_string2 = sprintf("%d, %d, %d", @newver[0,1,2]);
+
+  $data =~ s/\@version HDF5 .* <BR>/\@version HDF5 $version_string1 <BR>/;
+  $data =~ s/    public final static int LIB_VERSION\[\] = \{\d*,.\d*,.\d*\};/    public final static int LIB_VERSION[] = \{$version_string2\};/;
+
+  write_file($H5_JNI_JAVA, $data);
+}
+
+# Update the java/src-jni/test/TestH5.java file
+if ($TESTH5_JNI_JAVA) {
+  my $data = read_file($TESTH5_JNI_JAVA);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq ""
+     ? sprintf("\"%s\"", "")
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     );
+  my $version_string1 = sprintf("%d, %d, %d", @newver[0,1,2]);
+  my $version_string2 = sprintf("int majnum = %d, minnum = %d, relnum = %d", @newver[0,1,2]);
+
+  $data =~ s/        int libversion\[\] = \{.*\};/        int libversion\[\] = \{$version_string1\};/;
+  $data =~ s/        int majnum = \d*, minnum = \d*, relnum = \d*;/        $version_string2;/;
+
+  write_file($TESTH5_JNI_JAVA, $data);
 }
 
 # Update the tools/test/h5repack/expected/h5repack_layout.h5-plugin_version_test.ddl file

@@ -11,8 +11,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
+import static org.hdfgroup.javahdf5.hdf5_h.*;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
 /**
  * <p>
@@ -40,19 +43,18 @@ public class HDF5DatasetCreate {
     private static long[] dims2D = {20, 10};
     private static long[] dims3D = {20, 10, 5};
 
-    private static void CreateDataset()
+    private static void CreateDataset(Arena arena)
     {
-        long file_id       = HDF5Constants.H5I_INVALID_HID;
-        long group_id1     = HDF5Constants.H5I_INVALID_HID;
-        long group_id2     = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id1 = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id2 = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
+        long file_id       = H5I_INVALID_HID();
+        long group_id1     = H5I_INVALID_HID();
+        long group_id2     = H5I_INVALID_HID();
+        long dataspace_id1 = H5I_INVALID_HID();
+        long dataspace_id2 = H5I_INVALID_HID();
+        long dataset_id    = H5I_INVALID_HID();
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file_id = H5Fcreate(arena.allocateFrom(fname), H5F_ACC_TRUNC(), H5P_DEFAULT(), H5P_DEFAULT());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -63,10 +65,10 @@ public class HDF5DatasetCreate {
         // Create a group in the file.
         try {
             if (file_id >= 0) {
-                group_id1 = H5.H5Gcreate(file_id, "g1", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                         HDF5Constants.H5P_DEFAULT);
-                group_id2 = H5.H5Gcreate(file_id, "g2", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                         HDF5Constants.H5P_DEFAULT);
+                group_id1 = H5Gcreate2(file_id, arena.allocateFrom("g1"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                       H5P_DEFAULT());
+                group_id2 = H5Gcreate2(file_id, arena.allocateFrom("g2"), H5P_DEFAULT(), H5P_DEFAULT(),
+                                       H5P_DEFAULT());
             }
         }
         catch (Exception e) {
@@ -75,7 +77,8 @@ public class HDF5DatasetCreate {
 
         // Create the data space for the  2D dataset.
         try {
-            dataspace_id1 = H5.H5Screate_simple(2, dims2D, null);
+            dataspace_id1 =
+                H5Screate_simple(2, arena.allocateFrom(ValueLayout.JAVA_LONG, dims2D), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -83,7 +86,8 @@ public class HDF5DatasetCreate {
 
         // Create the data space for the  3D dataset.
         try {
-            dataspace_id2 = H5.H5Screate_simple(3, dims3D, null);
+            dataspace_id2 =
+                H5Screate_simple(3, arena.allocateFrom(ValueLayout.JAVA_LONG, dims3D), MemorySegment.NULL);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -92,11 +96,11 @@ public class HDF5DatasetCreate {
         // create 2D 32-bit (4 bytes) integer dataset of 20 by 10
         try {
             if ((group_id1 >= 0) && (dataspace_id1 >= 0)) {
-                dataset_id = H5.H5Dcreate(
-                    group_id1, "2D 32-bit integer 20x10", HDF5Constants.H5T_NATIVE_INT32, dataspace_id1,
-                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dataset_id =
+                    H5Dcreate2(group_id1, arena.allocateFrom("2D 32-bit integer 20x10"), H5T_STD_I32LE_g(),
+                               dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (dataset_id >= 0)
-                    H5.H5Dclose(dataset_id);
+                    H5Dclose(dataset_id);
             }
         }
         catch (Exception e) {
@@ -107,11 +111,10 @@ public class HDF5DatasetCreate {
         try {
             if ((group_id1 >= 0) && (dataspace_id2 >= 0)) {
                 dataset_id =
-                    H5.H5Dcreate(group_id1, "3D 8-bit unsigned integer 20x10x5",
-                                 HDF5Constants.H5T_NATIVE_INT8, dataspace_id2, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    H5Dcreate2(group_id1, arena.allocateFrom("3D 8-bit unsigned integer 20x10x5"),
+                               H5T_STD_U8LE_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (dataset_id >= 0)
-                    H5.H5Dclose(dataset_id);
+                    H5Dclose(dataset_id);
             }
         }
         catch (Exception e) {
@@ -121,11 +124,11 @@ public class HDF5DatasetCreate {
         // create 2D 64-bit (8 bytes) double dataset of 20 by 10
         try {
             if ((group_id2 >= 0) && (dataspace_id1 >= 0)) {
-                dataset_id = H5.H5Dcreate(
-                    group_id2, "2D 64-bit double 20x10", HDF5Constants.H5T_NATIVE_DOUBLE, dataspace_id1,
-                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dataset_id =
+                    H5Dcreate2(group_id2, arena.allocateFrom("2D 64-bit double 20x10"), H5T_NATIVE_DOUBLE_g(),
+                               dataspace_id1, H5P_DEFAULT(), H5P_DEFAULT(), H5P_DEFAULT());
                 if (dataset_id >= 0)
-                    H5.H5Dclose(dataset_id);
+                    H5Dclose(dataset_id);
             }
         }
         catch (Exception e) {
@@ -135,11 +138,11 @@ public class HDF5DatasetCreate {
         // create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         try {
             if ((group_id2 >= 0) && (dataspace_id2 >= 0)) {
-                dataset_id = H5.H5Dcreate(
-                    group_id2, "3D 32-bit float  20x10x5", HDF5Constants.H5T_NATIVE_FLOAT, dataspace_id2,
-                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5Dcreate2(group_id2, arena.allocateFrom("3D 32-bit float  20x10x5"),
+                                        H5T_NATIVE_FLOAT_g(), dataspace_id2, H5P_DEFAULT(), H5P_DEFAULT(),
+                                        H5P_DEFAULT());
                 if (dataset_id >= 0)
-                    H5.H5Dclose(dataset_id);
+                    H5Dclose(dataset_id);
             }
         }
         catch (Exception e) {
@@ -149,14 +152,14 @@ public class HDF5DatasetCreate {
         // Terminate access to the data space.
         try {
             if (dataspace_id2 >= 0)
-                H5.H5Sclose(dataspace_id2);
+                H5Sclose(dataspace_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (dataspace_id1 >= 0)
-                H5.H5Sclose(dataspace_id1);
+                H5Sclose(dataspace_id1);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -165,14 +168,14 @@ public class HDF5DatasetCreate {
         // Close the groups.
         try {
             if (group_id2 >= 0)
-                H5.H5Gclose(group_id2);
+                H5Gclose(group_id2);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (group_id1 >= 0)
-                H5.H5Gclose(group_id1);
+                H5Gclose(group_id1);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -181,12 +184,17 @@ public class HDF5DatasetCreate {
         // Close the file.
         try {
             if (file_id >= 0)
-                H5.H5Fclose(file_id);
+                H5Fclose(file_id);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) { HDF5DatasetCreate.CreateDataset(); }
+    public static void main(String[] args)
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            HDF5DatasetCreate.CreateDataset(arena);
+        }
+    }
 }

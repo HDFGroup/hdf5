@@ -87,8 +87,9 @@ public class TestH5VL {
         long H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
                                   HDF5Constants.H5P_DEFAULT);
 
+        long native_id = HDF5Constants.H5I_INVALID_HID;
         try {
-            long native_id = H5.H5VLget_connector_id(H5fid);
+            native_id = H5.H5VLget_connector_id(H5fid);
             assertTrue("H5.H5VLget_connector_id", native_id >= 0);
 
             /*
@@ -108,6 +109,11 @@ public class TestH5VL {
         finally {
             if (H5fid > 0) {
                 try {
+                    H5.H5VLclose(native_id);
+                }
+                catch (Exception ex) {
+                }
+                try {
                     H5.H5Fclose(H5fid);
                 }
                 catch (Exception ex) {
@@ -120,8 +126,9 @@ public class TestH5VL {
     @Test
     public void testH5VLget_connector_id_by_name()
     {
+        long native_id = HDF5Constants.H5I_INVALID_HID;
         try {
-            long native_id = H5.H5VLget_connector_id_by_name(HDF5Constants.H5VL_NATIVE_NAME);
+            native_id = H5.H5VLget_connector_id_by_name(HDF5Constants.H5VL_NATIVE_NAME);
             assertTrue("H5.H5VLget_connector_id_by_name H5VL_NATIVE_NAME", native_id >= 0);
             assertTrue("H5.H5VLcmp_connector_cls(H5VL_NATIVE_NAME, native_id)",
                        H5.H5VLcmp_connector_cls(HDF5Constants.H5VL_NATIVE, native_id));
@@ -130,13 +137,21 @@ public class TestH5VL {
             err.printStackTrace();
             fail("H5.H5VLget_connector_id_by_name " + err);
         }
+        finally {
+            try {
+                H5.H5VLclose(native_id);
+            }
+            catch (Exception ex) {
+            }
+        }
     }
 
     @Test
     public void testH5VLget_connector_id_by_value()
     {
+        long native_id = HDF5Constants.H5I_INVALID_HID;
         try {
-            long native_id = H5.H5VLget_connector_id_by_value(HDF5Constants.H5VL_NATIVE_VALUE);
+            native_id = H5.H5VLget_connector_id_by_value(HDF5Constants.H5VL_NATIVE_VALUE);
             assertTrue("H5.H5VLget_connector_id_by_value H5VL_NATIVE_VALUE", native_id >= 0);
             assertTrue("H5.H5VLcmp_connector_cls(H5VL_NATIVE_NAME, native_id)",
                        H5.H5VLcmp_connector_cls(HDF5Constants.H5VL_NATIVE, native_id));
@@ -144,6 +159,13 @@ public class TestH5VL {
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5.H5VLget_connector_id_by_value " + err);
+        }
+        finally {
+            try {
+                H5.H5VLclose(native_id);
+            }
+            catch (Exception ex) {
+            }
         }
     }
 

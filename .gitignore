@@ -18,3 +18,4 @@ src/H5config.h.in
 .claude/
 /CMakeUserPresets.json
 HDF5Examples/CMakeUserPresets.json
+/CLAUDE.md

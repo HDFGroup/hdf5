@@ -5,8 +5,8 @@
 This document is an instruction on how to build, test and install HDF5 library
 on Cygwin.
 
-NOTE: hdf5 can be built with CMake, see the INSTALL_CMake.txt file for more
-guidance.
+NOTE: HDF5 2.0 and later requires CMake for building. See INSTALL_CMake.txt
+      for complete build instructions using CMake Presets (recommended method).
 
 Preconditions:
 --------------

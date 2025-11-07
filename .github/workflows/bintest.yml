@@ -8,6 +8,16 @@ on:
         description: "release vs. debug build"
         required: true
         type: string
+      save_binary:
+        description: "binary-ext-name or missing"
+        required: true
+        default: "skip"
+        type: string
+      java_version:
+        description: "Java version to use for testing (19, 21, 24, 25, latest)"
+        required: false
+        default: "19"
+        type: string
 
 permissions:
   contents: read
@@ -22,11 +32,16 @@ jobs:
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
-      - name: Set up JDK 19
+      - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v5
         with:
-          java-version: '19'
-          distribution: 'temurin'
+          java-version: |
+            ${{
+              inputs.save_binary == 'ffm' && '25' ||
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+          distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
@@ -35,7 +50,7 @@ jobs:
       - name: Get published binary (Windows)
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
-              name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}/hdf5
 
       - name: Uncompress hdf5 binary (Win)
@@ -100,16 +115,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz
 
-      - name: Set up JDK 19
+      - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v5
         with:
-          java-version: '19'
-          distribution: 'temurin'
+          java-version: |
+            ${{
+              inputs.save_binary == 'ffm' && '25' ||
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+          distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (Linux)
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
-              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (Linux)
@@ -152,16 +172,21 @@ jobs:
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja doxygen
 
-      - name: Set up JDK 21
+      - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: |
+            ${{
+              inputs.save_binary == 'ffm' && '25' ||
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+          distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (MacOS_latest)
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
-          name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
+          name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
           path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (MacOS_latest)
@@ -215,16 +240,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz
 
-      - name: Set up JDK 19
+      - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@v5
         with:
-          java-version: '19'
-          distribution: 'temurin'
+          java-version: |
+            ${{
+              inputs.save_binary == 'ffm' && '25' ||
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+          distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (Linux)
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
-              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (Linux)
@@ -258,4 +288,5 @@ jobs:
           cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
           sh ./test-pc.sh ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/build .
         shell: bash
+
 

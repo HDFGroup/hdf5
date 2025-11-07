@@ -26,6 +26,11 @@ on:
         description: "3.26.0 or later, latest"
         required: true
         type: string
+      maven_enabled:
+        description: 'Enable Maven artifact generation and upload'
+        type: boolean
+        required: false
+        default: false
     secrets:
         APPLE_CERTS_BASE64:
             required: true
@@ -101,6 +106,12 @@ jobs:
         run: |
           which cmake
           cmake --version
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: Set file base name (Windows)
         id: set-file-base
@@ -249,6 +260,12 @@ jobs:
           which cmake
           cmake --version
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
       - name: Set file base name (Linux)
         id: set-file-base
         run: |
@@ -278,9 +295,23 @@ jobs:
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
       - name: Run CTest (Linux)
+        id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-GNUC --fresh
+          if [ "${{ inputs.maven_enabled }}" == "true" ]; then
+            if [ "${{ inputs.use_environ }}" == "release" ]; then
+              echo "Building with Maven release preset"
+              ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC-Maven")
+            else
+              echo "Building with Maven snapshot preset"
+              ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC-Maven-Snapshot")
+            fi
+          else
+            echo "Building with standard preset"
+            ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC")
+          fi
+          echo "ACTIVE_PRESET=$ACTIVE_PRESET_BASE" >> $GITHUB_OUTPUT
+          cmake --workflow --preset=$ACTIVE_PRESET_BASE --fresh
         shell: bash
 
       - name: Publish binary (Linux)
@@ -289,8 +320,8 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
           cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz hdf5
         shell: bash
@@ -299,14 +330,14 @@ jobs:
         id: publish-ctest-deb-binary
         run: |
           mkdir "${{ runner.workspace }}/builddeb"
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
         shell: bash
 
       - name: Publish rpm binary (Linux)
         id: publish-ctest-rpm-binary
         run: |
           mkdir "${{ runner.workspace }}/buildrpm"
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
         shell: bash
 
       - name: List files in the space (Linux)
@@ -341,8 +372,39 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
               name: docs-doxygen
-              path: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/hdf5lib_docs/html
+              path: ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/hdf5lib_docs/html
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Upload Maven artifacts when Maven deployment is enabled
+      - name: Collect Maven artifacts (Linux)
+        if: ${{ inputs.maven_enabled == true }}
+        run: |
+          echo "Collecting Maven artifacts for deployment..."
+          mkdir -p ${{ runner.workspace }}/maven-artifacts
+
+          # Determine the build directory based on Maven preset used
+          BUILD_DIR="${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}"
+
+          echo "Looking for artifacts in: ${BUILD_DIR}"
+
+          # Copy JAR files
+          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # Copy POM files
+          find "${BUILD_DIR}" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # List collected artifacts
+          echo "Collected Maven artifacts:"
+          ls -la ${{ runner.workspace }}/maven-artifacts/
+        shell: bash
+
+      - name: Upload Maven artifacts (Linux)
+        if: ${{ inputs.maven_enabled == true }}
+        uses: actions/upload-artifact@v5
+        with:
+              name: Linux-${{ inputs.preset_name }}-artifacts
+              path: ${{ runner.workspace }}/maven-artifacts
+              if-no-files-found: warn
 
   build_and_test_mac_latest:
   # MacOS w/ Clang
