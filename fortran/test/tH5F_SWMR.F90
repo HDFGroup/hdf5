@@ -32,6 +32,9 @@
 MODULE TH5F_SWMR
 
   USE HDF5
+#ifdef H5_HAVE_HL
+  USE H5DO
+#endif
   USE TH5_MISC
   USE TH5_MISC_GEN
   USE ISO_C_BINDING
@@ -101,10 +104,11 @@ CONTAINS
     TYPE(C_FUNPTR) :: callback_func
     TYPE(C_PTR) :: user_data
     LOGICAL :: flag_set
-    ! Variables for callback invocation test
-    INTEGER(C_INT) :: callback_ret
-    INTEGER(HID_T) :: dummy_dset_id
-    TYPE(C_PTR) :: dummy_dims, f_ptr
+    INTEGER, DIMENSION(5), TARGET :: append_data
+    INTEGER, DIMENSION(3), TARGET :: new_data
+    TYPE(C_PTR) :: append_ptr
+    INTEGER :: i
+    INTEGER(SIZE_T) :: append_size
 
     ! Initialize
     filename = "swmr_test.h5"
@@ -260,36 +264,82 @@ CONTAINS
     flag_set = C_ASSOCIATED(user_data)
     CALL verify("h5pget_append_flush_f: user_data is associated", flag_set, .TRUE., total_error)
 
-    ! Test 5f: Verify callback function actually works when invoked
-    ! Reset counter and invoke the callback directly to test it
+#ifdef H5_HAVE_HL
+    ! Test 5f: Verify callback is actually invoked by using H5DOappend
+    ! NOTE: This test requires the HDF5 High-Level library
+    ! It is conditionally compiled only when HDF5_BUILD_HL_LIB is ON
+    ! Create an extensible dataset and use H5DOappend to trigger the callback
     callback_counter = 0
-    CALL verify("callback test: counter before invoke", INT(callback_counter), 0, total_error)
 
-    ! Invoke the callback function directly
-    ! The callback signature is: (dataset_id, cur_dims, op_data) -> ret
-    ! We can pass dummy values for dataset_id and cur_dims, real value for op_data
-    dummy_dset_id = 0  ! Dummy dataset ID (not used in callback)
-    dummy_dims = C_NULL_PTR  ! Dummy dimensions pointer (not used in callback)
+    ! Create a new FAPL with latest library format for the append test
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, error)
+    CALL check("h5pcreate_f (fapl for append)", error, total_error)
 
-    ! Invoke the callback with our counter as user data
-    f_ptr = C_LOC(callback_counter)
-    callback_ret = test_append_flush_callback(dummy_dset_id, dummy_dims, f_ptr)
+    CALL h5pset_libver_bounds_f(fapl_id, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
+    CALL check("h5pset_libver_bounds_f (for append)", error, total_error)
 
-    ! Verify callback returned success
-    CALL verify("callback test: return value", INT(callback_ret), 0, total_error)
+    ! Reopen file and create extensible dataset with append flush callback
+    CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, file_id, error, access_prp=fapl_id)
+    CALL check("h5fopen_f (for append test)", error, total_error)
 
-    ! Verify counter was incremented by the callback
-    CALL verify("callback test: counter after invoke", INT(callback_counter), 1, total_error)
+    ! Create extensible dataspace (1D for simplicity)
+    dims(1) = 5
+    CALL h5screate_simple_f(1, dims(1:1), space_id, error, (/H5S_UNLIMITED_F/))
+    CALL check("h5screate_simple_f (extensible)", error, total_error)
 
-    ! Invoke again to verify it increments again
-    callback_ret = test_append_flush_callback(dummy_dset_id, dummy_dims, C_LOC(callback_counter))
-    CALL verify("callback test: counter after 2nd invoke", INT(callback_counter), 2, total_error)
+    ! Create dataset with chunking and append flush callback
+    CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl_id, error)
+    CALL check("h5pcreate_f (dcpl for append)", error, total_error)
 
-    ! Reset for cleanup
-    callback_counter = 0
+    chunk_dims(1) = 2
+    CALL h5pset_chunk_f(dcpl_id, 1, chunk_dims(1:1), error)
+    CALL check("h5pset_chunk_f (for append)", error, total_error)
+
+    ! Set append flush with boundary=1 and our callback
+    boundary(1) = 1
+    CALL h5pset_append_flush_f(dapl_id, 1, boundary(1:1), error, &
+                                C_FUNLOC(test_append_flush_callback), C_LOC(callback_counter))
+    CALL check("h5pset_append_flush_f (for append test)", error, total_error)
+
+    ! Create dataset with the callback-enabled DAPL
+    CALL h5dcreate_f(file_id, "append_test", H5T_NATIVE_INTEGER, space_id, dset_id, error, &
+                     dcpl_id, dapl_id=dapl_id)
+    CALL check("h5dcreate_f (append test)", error, total_error)
+
+    ! Verify counter is still 0 before appending
+    CALL verify("callback counter before append", INT(callback_counter), 0, total_error)
+
+    ! Write initial data
+    DO i = 1, 5
+       append_data(i) = i * 10
+    END DO
+    append_ptr = C_LOC(append_data(1))
+    CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, append_ptr, error)
+    CALL check("h5dwrite_f (initial data)", error, total_error)
+
+    ! Now use H5DOappend to append 3 more elements - this should trigger callback
+    ! since boundary(1) = 1 (flush every 1 element appended)
+    new_data = (/100, 200, 300/)
+    append_ptr = C_LOC(new_data(1))
+    append_size = 3
+
+    CALL h5doappend_f(dset_id, H5P_DEFAULT_F, 0, append_size, H5T_NATIVE_INTEGER, append_ptr, error)
+    CALL check("h5doappend_f (trigger callback)", error, total_error)
+
+    ! Verify callback was invoked and counter was incremented
+    ! HDF5 calls the callback once per append operation (not per element)
+    CALL verify("callback invocation count", INT(callback_counter), 1, total_error)
+
+    ! Close and cleanup this test
+    CALL h5dclose_f(dset_id, error)
+    CALL h5sclose_f(space_id, error)
+    CALL h5pclose_f(dcpl_id, error)
+    CALL h5fclose_f(file_id, error)
+    CALL h5pclose_f(fapl_id, error)
+#endif
 
     CALL h5pclose_f(dapl_id, error)
-    CALL check("h5pclose_f", error, total_error)
+    CALL check("h5pclose_f (dapl)", error, total_error)
 
     !
     ! Test 6: Verify SWMR access flags are defined
