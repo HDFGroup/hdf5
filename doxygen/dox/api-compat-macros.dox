@@ -328,9 +328,9 @@ Navigate back: \ref index "Main" / \ref TN
   <tr>
   <th style="text-align: left;">Macro <br/> (\TText{H5xxx})</th>
   <th>Default function used if no macro specified
-  <ul><li>Function mapping:\TText{H5xxx_vers=N}</li></ul>
+  <ul><li>Function mapping: \TText{H5xxx_vers=N}</li></ul>
   </th>
-  <th>Function used if specifying 1.12 or 1.14
+  <th>Function used for backwards compatibility with 1.12 or 1.14
   <ul><li>Function mapping: \TText{H5xxx_vers=1}</li></ul>
   </th>
   </tr>
