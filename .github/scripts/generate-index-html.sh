@@ -350,11 +350,19 @@ if [ -z "$FILE_LIST" ]; then
     FILE_LIST="        <tr><td colspan='4' class='empty-message'>No files or directories found</td></tr>"
 fi
 
+# Create secure temporary file
+TEMP_FILE=$(mktemp) || {
+    echo "Error: Failed to create temporary file"
+    exit 1
+}
+
+# Ensure cleanup on exit
+trap 'rm -f "$TEMP_FILE"' EXIT
+
 # Use a different delimiter for sed since the content contains slashes
-echo "$FILE_LIST" > /tmp/filelist.tmp
-sed -i.bak "/FILE_LIST_PLACEHOLDER/r /tmp/filelist.tmp" "$OUTPUT_FILE"
+echo "$FILE_LIST" > "$TEMP_FILE"
+sed -i.bak "/FILE_LIST_PLACEHOLDER/r $TEMP_FILE" "$OUTPUT_FILE"
 sed -i.bak "/FILE_LIST_PLACEHOLDER/d" "$OUTPUT_FILE"
-rm -f /tmp/filelist.tmp
 
 # Clean up backup files
 rm -f "$OUTPUT_FILE.bak"

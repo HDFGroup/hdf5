@@ -187,6 +187,7 @@ cat > "${BUILD_DIR}/pom-examples.xml" <<EOF
             <groupId>org.hdfgroup</groupId>
             <artifactId>${ARTIFACT_ID}</artifactId>
             <version>\${hdf5.version}</version>
+            <classifier>${PLATFORM_CLASSIFIER}</classifier>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
