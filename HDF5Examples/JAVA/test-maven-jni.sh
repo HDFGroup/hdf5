@@ -267,11 +267,48 @@ rm -f "${BUILD_DIR}"/*.h5 2>/dev/null || true
 log_success "Clean complete"
 echo ""
 
+# Detect platform classifier
+log_info "Detecting platform..."
+OS_NAME=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+
+case "${OS_NAME}" in
+    linux*)
+        PLATFORM="linux"
+        ;;
+    darwin*)
+        PLATFORM="macos"
+        ;;
+    mingw*|msys*|cygwin*)
+        PLATFORM="windows"
+        ;;
+    *)
+        log_error "Unsupported OS: ${OS_NAME}"
+        exit 1
+        ;;
+esac
+
+case "${ARCH}" in
+    x86_64|amd64)
+        PLATFORM_ARCH="x86_64"
+        ;;
+    aarch64|arm64)
+        PLATFORM_ARCH="aarch64"
+        ;;
+    *)
+        log_error "Unsupported architecture: ${ARCH}"
+        exit 1
+        ;;
+esac
+
+PLATFORM_CLASSIFIER="${PLATFORM}-${PLATFORM_ARCH}"
+log_info "Platform classifier: ${PLATFORM_CLASSIFIER}"
+echo ""
+
 # Download dependencies and verify artifact
-log_info "Downloading Maven artifact: org.hdfgroup:${ARTIFACT_ID}:${VERSION}..."
+log_info "Downloading Maven artifact: org.hdfgroup:${ARTIFACT_ID}:${VERSION}:jar:${PLATFORM_CLASSIFIER}..."
 if mvn dependency:get \
-    -Dartifact=org.hdfgroup:${ARTIFACT_ID}:${VERSION} \
-    -DremoteRepositories=${REPOSITORY_URL} \
+    -Dartifact=org.hdfgroup:${ARTIFACT_ID}:${VERSION}:jar:${PLATFORM_CLASSIFIER} \
     -q; then
     log_success "Artifact downloaded successfully"
 else

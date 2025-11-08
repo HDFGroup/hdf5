@@ -107,8 +107,12 @@ jobs:
       - name: Verify JNI artifact exists and download
         run: |
           echo "::group::Download JNI artifact"
+          # Determine platform classifier
+          PLATFORM_CLASSIFIER="linux-x86_64"
+
+          echo "Downloading: org.hdfgroup:hdf5-java-jni:${{ inputs.version }}:jar:${PLATFORM_CLASSIFIER}"
           mvn dependency:get \
-            -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.version }} \
+            -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.version }}:jar:${PLATFORM_CLASSIFIER} \
             -Dtransitive=false
           echo "::endgroup::"
         env:
@@ -218,8 +222,12 @@ jobs:
       - name: Verify FFM artifact exists and download
         run: |
           echo "::group::Download FFM artifact"
+          # Determine platform classifier
+          PLATFORM_CLASSIFIER="linux-x86_64"
+
+          echo "Downloading: org.hdfgroup:hdf5-java-ffm:${{ inputs.version }}:jar:${PLATFORM_CLASSIFIER}"
           mvn dependency:get \
-            -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.version }} \
+            -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.version }}:jar:${PLATFORM_CLASSIFIER} \
             -Dtransitive=false
           echo "::endgroup::"
         env:
