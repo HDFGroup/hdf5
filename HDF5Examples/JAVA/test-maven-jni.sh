@@ -333,11 +333,18 @@ PLATFORM_CLASSIFIER="${PLATFORM}-${PLATFORM_ARCH}"
 log_info "Platform classifier: ${PLATFORM_CLASSIFIER}"
 echo ""
 
+# Clear cached SNAPSHOT to force fresh download
+if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
+    log_info "Clearing cached SNAPSHOT from local repository..."
+    rm -rf ~/.m2/repository/org/hdfgroup/${ARTIFACT_ID}/${VERSION}
+fi
+
 # Download dependencies and verify artifact
 log_info "Downloading Maven artifact: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}..."
 if mvn dependency:get \
     -Dartifact=org.hdfgroup:${ARTIFACT_ID}:${VERSION} \
     -Dclassifier=${PLATFORM_CLASSIFIER} \
+    -U \
     -q; then
     log_success "Artifact downloaded successfully"
 else
@@ -375,7 +382,7 @@ echo ""
 
 # Compile examples
 log_info "Compiling ${IMPLEMENTATION} examples..."
-if mvn compile -f "${BUILD_DIR}/pom-examples.xml"; then
+if mvn compile -f "${BUILD_DIR}/pom-examples.xml" -U; then
     log_success "Examples compiled successfully"
 else
     log_error "Compilation failed"

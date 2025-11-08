@@ -107,6 +107,9 @@ jobs:
       - name: Verify JNI artifact exists and download
         run: |
           echo "::group::Download JNI artifact"
+          # Clear cached SNAPSHOT to force fresh download
+          rm -rf ~/.m2/repository/org/hdfgroup/hdf5-java-jni/${{ inputs.version }}
+
           # Determine platform classifier
           PLATFORM_CLASSIFIER="linux-x86_64"
 
@@ -114,7 +117,8 @@ jobs:
           mvn dependency:get \
             -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.version }} \
             -Dclassifier=${PLATFORM_CLASSIFIER} \
-            -Dtransitive=false
+            -Dtransitive=false \
+            -U
           echo "::endgroup::"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -224,6 +228,9 @@ jobs:
       - name: Verify FFM artifact exists and download
         run: |
           echo "::group::Download FFM artifact"
+          # Clear cached SNAPSHOT to force fresh download
+          rm -rf ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/${{ inputs.version }}
+
           # Determine platform classifier
           PLATFORM_CLASSIFIER="linux-x86_64"
 
@@ -231,7 +238,8 @@ jobs:
           mvn dependency:get \
             -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.version }} \
             -Dclassifier=${PLATFORM_CLASSIFIER} \
-            -Dtransitive=false
+            -Dtransitive=false \
+            -U
           echo "::endgroup::"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
