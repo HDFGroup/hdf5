@@ -39,8 +39,9 @@ MODULE TH5F_SWMR
   USE TH5_MISC_GEN
   USE ISO_C_BINDING
 
-  ! Module variable to track callback invocations
+  ! Module variables to track callback invocations and dimension values
   INTEGER(C_INT), TARGET :: callback_counter = 0
+  INTEGER(HSIZE_T), TARGET :: last_cur_dim = 0_HSIZE_T
 
 CONTAINS
 
@@ -59,6 +60,13 @@ CONTAINS
     INTEGER(C_INT) :: ret
 
     INTEGER(C_INT), POINTER :: counter_ptr
+    INTEGER(HSIZE_T), POINTER :: dims_ptr(:)
+
+    ! Store the current dimension for verification by test
+    IF (C_ASSOCIATED(cur_dims)) THEN
+       CALL C_F_POINTER(cur_dims, dims_ptr, [1])
+       last_cur_dim = dims_ptr(1)
+    END IF
 
     ! Increment callback counter if op_data is associated
     IF (C_ASSOCIATED(op_data)) THEN
@@ -302,7 +310,9 @@ CONTAINS
                      dcpl_id, dapl_id=dapl_id)
     CALL check("h5dcreate_f (append test)", error, total_error)
 
-    ! Verify counter is still 0 before appending
+    ! Reset module variables before testing callback
+    callback_counter = 0
+    last_cur_dim = 0_HSIZE_T
     CALL verify("callback counter before append", INT(callback_counter), 0, total_error)
 
     ! Write initial data
@@ -325,6 +335,10 @@ CONTAINS
     ! Verify callback was invoked and counter was incremented
     ! HDF5 calls the callback once per append operation (not per element)
     CALL verify("callback invocation count", INT(callback_counter), 1, total_error)
+
+    ! Verify cur_dims was passed correctly to the callback
+    ! After appending 3 elements to the initial 5, dataset should have 8 elements
+    CALL verify("callback cur_dims value", INT(last_cur_dim), 8, total_error)
 
     ! Close and cleanup this test
     CALL h5dclose_f(dset_id, error)
