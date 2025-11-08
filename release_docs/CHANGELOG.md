@@ -25,29 +25,31 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
-- Up to [2500% faster](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#rtree) Virtual Dataset read/write operations
-- [30% faster opening](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#layoutcopydelay) and [25% faster closing](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) of virtual datasets.
-- [Reduced memory overhead](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
+- Up to [2500% faster](/CHANGELOG.md#rtree) Virtual Dataset read/write operations
+- [30% faster opening](/CHANGELOG.md#layoutcopydelay) and [25% faster closing](/CHANGELOG.md#fileformat) of virtual datasets.
+- [Reduced memory overhead](/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
 
 ## Significant Advancements:
 
-- Full [UTF-8](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
-- Introduction of [bfloat16 predefined datatypes](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#added-predefined-datatypes-for-bfloat16-data) for efficient machine learning conversions.
-- First-class support for [complex numbers](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
+- Full [UTF-8](/CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
+- Introduction of [bfloat16 predefined datatypes](/CHANGELOG.md#added-predefined-datatypes-for-bfloat16-data) for efficient machine learning conversions.
+- First-class support for [complex numbers](/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
+- A [new, larger chunk size limit](/CHANGELOG.md#added-support-for-large-chunks), in multi-petabytes, replaces the previous 4 GiB limit.
 
 ## Updated Foundation:
 
-- New [file format](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#fileformat) version (4.0) and compliance with the C11 standard.
+- New [file format](/CHANGELOG.md#fileformat) version (4.0) and compliance with the C11 standard.
+- Adopted [semantic versioning](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy) to clearly convey changes between versions.
 
 > [!IMPORTANT]
 >
-> - Transitioned to [CMake-only](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
+> - Transitioned to [CMake-only](/CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
 > - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
 > - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
 
 ## Enhanced Features:
 
-- Improved [ROS3 VFD](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
+- Improved [ROS3 VFD](/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
 
 ## Java Enhancements:
 
@@ -57,7 +59,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
   
 ## Acknowledgements: 
 
-We would like to thank the many HDF5 community members that contributed to HDF5 2.0.
+We would like to thank the many HDF5 community members who contributed to HDF5 2.0.
 
 # ⚠️ Breaking Changes
 
@@ -71,7 +73,7 @@ We would like to thank the many HDF5 community members that contributed to HDF5 
 
 ### Autotools support was removed from HDF5<a name="cmake">
 
-   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the AutotoolsToCMakeOptions.md file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
+   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the [AutotoolsToCMakeOptions.md](/AutotoolsToCMakeOptions.md) file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
 
 ### Fixed problems with family driver and user block
 
@@ -103,7 +105,7 @@ We would like to thank the many HDF5 community members that contributed to HDF5 
 
    The `HDF5_ENABLE_THREADS` option has been removed, as it no longer functions as a proper build option. The library will always check for thread support and set the internal status variable, `HDF5_THREADS_ENABLED`. The `HDF5_ENABLE_THREADSAFE` option is still available to build with thread-safe API calls.
 
-- Enhanced Maven repository deployment support
+### Enhanced Maven repository deployment support
 
    Added comprehensive Maven integration with optimized workflows for Java artifact deployment:
    - **New CMake options**: `HDF5_ENABLE_MAVEN_DEPLOY` and `HDF5_MAVEN_SNAPSHOT` for Maven repository deployment
@@ -121,7 +123,7 @@ We would like to thank the many HDF5 community members that contributed to HDF5 
    - **Production deployment validation**: Successfully resolved HTTP 409 version conflicts through snapshot versioning strategy
    - **Deployment status**: ✅ Fully validated and production-ready with comprehensive error resolution and testing documentation
 
- - Reorganized the files in the config/cmake folder into the config folder structure
+### Reorganized the files in the config/cmake folder into the config folder structure
 
    The config folder CMake files have been reorganized to make it easier to maintain and add new features. This includes the following changes:
    - The files in the config folder are the macros and templates for the build process.
@@ -627,7 +629,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    Fixed a heap buffer overflow in H5FS__sinfo_serialize_node_cb() by discarding file free space sections from the file free space manager when they are found to be invalid. Specifically crafted HDF5 files can result in an attempt to insert duplicate or overlapping file free space sections into a file free space manager, later resulting in a buffer overflow when the same free space section is serialized to the file multiple times.
 
-   Fixes GitHub issue #5577
+   Fixes GitHub issue [#5577](https://github.com/HDFGroup/hdf5/issues/5577)
 
 ### Fixed security issue [CVE-2025-2915](https://nvd.nist.gov/vuln/detail/CVE-2025-2915) and [OSV-2024-381](https://osv.dev/vulnerability/OSV-2024-381)
 
@@ -699,7 +701,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    The size of a continuation message was decoded as 0, causing multiple vulnerabilities.  An error check was added to return failure to prevent further processing of invalid data.
 
-   Fixes GitHub issue #5376 and #5384
+   Fixes GitHub issue [#5376](https://github.com/HDFGroup/hdf5/issues/5376) and [#5384](https://github.com/HDFGroup/hdf5/issues/5384)
 
 ### Revised handling of Unicode filenames on Windows<a name="utf-8">
 

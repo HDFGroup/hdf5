@@ -34,7 +34,11 @@ on:
         description: 'Java implementation to test'
         type: string
         required: false
-        default: 'auto'
+        default: 'both'
+    outputs:
+      version:
+        description: 'Maven artifact version that was built'
+        value: ${{ jobs.test-maven-deployment.outputs.version }}
   workflow_dispatch:
     inputs:
       test_maven_deployment:
@@ -61,12 +65,12 @@ on:
         description: 'Java implementation to test'
         type: choice
         required: false
-        default: 'auto'
+        default: 'both'
         options:
-          - 'auto'
+          - 'both'
           - 'ffm'
           - 'jni'
-          - 'both'
+          - 'auto'
 
 permissions:
   contents: read
@@ -470,6 +474,129 @@ jobs:
             exit 1
           fi
 
+      - name: Verify JAR contents (CRITICAL - Prevents Incomplete Packages)
+        shell: bash
+        run: |
+          echo "::group::Verify JAR contents"
+          echo "============================================"
+          echo "Verifying Maven artifacts contain HDF5 classes"
+          echo "============================================"
+
+          ARTIFACT_DIR="${{ runner.workspace }}/maven-artifacts"
+          VERIFICATION_FAILED=false
+          IMPL="${{ matrix.implementation }}"
+
+          # Find the main HDF5 JAR (not slf4j dependencies)
+          HDF5_JAR=$(find "$ARTIFACT_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" | head -1)
+
+          if [ -z "$HDF5_JAR" ]; then
+            # Try alternative naming (jarhdf5)
+            HDF5_JAR=$(find "$ARTIFACT_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          fi
+
+          if [ -z "$HDF5_JAR" ]; then
+            echo "::error::Could not find HDF5 JAR file in artifacts"
+            echo "Available JAR files:"
+            find "$ARTIFACT_DIR" -name "*.jar" -ls
+            exit 1
+          fi
+
+          echo "Found HDF5 JAR: $HDF5_JAR"
+          echo "JAR size: $(du -h "$HDF5_JAR" | cut -f1)"
+          echo ""
+
+          # Determine implementation type (FFM or JNI)
+          if [ "$IMPL" = "ffm" ]; then
+            echo "Verifying FFM implementation..."
+            echo "Expected package: org.hdfgroup.javahdf5.*"
+
+            # Check for key FFM classes
+            if jar tf "$HDF5_JAR" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
+              CLASS_COUNT=$(jar tf "$HDF5_JAR" | grep "org/hdfgroup/javahdf5.*\.class" | wc -l)
+              echo "✅ JAR contains HDF5 FFM classes"
+              echo "   Found $CLASS_COUNT FFM classes"
+
+              # List some sample classes to verify content
+              echo "   Sample classes:"
+              jar tf "$HDF5_JAR" | grep "org/hdfgroup/javahdf5.*\.class" | head -5 2>/dev/null | sed 's/^/   - /' || true
+            else
+              echo "::error::JAR does not contain HDF5 FFM classes!"
+              echo "JAR only contains:"
+              jar tf "$HDF5_JAR" | head -30 2>/dev/null || true
+              VERIFICATION_FAILED=true
+            fi
+
+          else
+            # JNI or auto (defaults to JNI)
+            echo "Verifying JNI implementation..."
+            echo "Expected package: hdf.hdf5lib.*"
+
+            # Check for key JNI classes
+            if jar tf "$HDF5_JAR" | grep -q "hdf/hdf5lib/H5.class"; then
+              CLASS_COUNT=$(jar tf "$HDF5_JAR" | grep "hdf/hdf5lib.*\.class" | wc -l)
+              echo "✅ JAR contains HDF5 JNI classes"
+              echo "   Found $CLASS_COUNT JNI classes"
+
+              # Verify key classes are present
+              MISSING_CLASSES=""
+              for key_class in "hdf/hdf5lib/H5.class" "hdf/hdf5lib/HDF5Constants.class" "hdf/hdf5lib/HDFNativeData.class"; do
+                if ! jar tf "$HDF5_JAR" | grep -q "$key_class"; then
+                  MISSING_CLASSES="$MISSING_CLASSES $key_class"
+                fi
+              done
+
+              if [ -n "$MISSING_CLASSES" ]; then
+                echo "::warning::Some expected classes are missing:$MISSING_CLASSES"
+              fi
+
+              # List some sample classes to verify content
+              echo "   Sample classes:"
+              jar tf "$HDF5_JAR" | grep "hdf/hdf5lib.*\.class" | head -5 2>/dev/null | sed 's/^/   - /' || true
+            else
+              echo "::error::JAR does not contain HDF5 JNI classes!"
+              echo "JAR only contains:"
+              jar tf "$HDF5_JAR" | head -30 2>/dev/null || true
+              VERIFICATION_FAILED=true
+            fi
+          fi
+
+          # Additional checks
+          echo ""
+          echo "Additional JAR checks:"
+
+          # Check JAR size (should be > 50KB for real HDF5 classes)
+          JAR_SIZE=$(stat -f%z "$HDF5_JAR" 2>/dev/null || stat -c%s "$HDF5_JAR" 2>/dev/null || echo "0")
+          if [ "$JAR_SIZE" -lt 51200 ]; then
+            echo "::warning::JAR size is suspiciously small: $JAR_SIZE bytes (expected > 50KB)"
+            echo "   This may indicate the JAR only contains dependencies."
+          else
+            echo "✅ JAR size is reasonable: $(($JAR_SIZE / 1024)) KB"
+          fi
+
+          # Count total files in JAR
+          TOTAL_FILES=$(jar tf "$HDF5_JAR" | wc -l)
+          echo "✅ Total files in JAR: $TOTAL_FILES"
+
+          echo "::endgroup::"
+
+          if [ "$VERIFICATION_FAILED" = true ]; then
+            echo ""
+            echo "::error::❌ JAR verification failed!"
+            echo "::error::The Maven artifact does not contain HDF5 classes."
+            echo "::error::This would result in an incomplete/broken package being deployed."
+            echo "::error::"
+            echo "::error::Possible causes:"
+            echo "::error::  1. CMake add_jar not executing correctly"
+            echo "::error::  2. Wrong JAR file being collected"
+            echo "::error::  3. Build failure that went undetected"
+            echo "::error::"
+            echo "::error::Please review the build logs and CMake configuration."
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ JAR verification passed - artifact is complete!"
+
       - name: Run validation script
         shell: bash
         run: |
@@ -492,6 +619,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [detect-changes, determine-matrix, build-maven-artifacts]
     if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' }}
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
     steps:
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -500,24 +629,30 @@ jobs:
           distribution: 'temurin'
 
       - name: Download all Maven artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           pattern: maven-staging-artifacts-*
           path: ./artifacts
           merge-multiple: false
 
-      - name: Test Maven deployment (dry run)
+      - name: Extract version for testing
+        id: extract-version
         run: |
-          echo "=== Maven Deployment Test (Dry Run) ==="
-
           # Extract version from first available POM file
           POM_FILE=$(find ./artifacts -name "pom.xml" 2>/dev/null | head -1)
           if [ -n "$POM_FILE" ]; then
             VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
-            echo "Version: $VERSION"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Extracted version: $VERSION"
           else
-            echo "Version: (detecting from artifacts)"
+            echo "version=2.0.0-SNAPSHOT" >> $GITHUB_OUTPUT
+            echo "Could not extract version, using default: 2.0.0-SNAPSHOT"
           fi
+
+      - name: Test Maven deployment (dry run)
+        run: |
+          echo "=== Maven Deployment Test (Dry Run) ==="
+          echo "Version: ${{ steps.extract-version.outputs.version }}"
 
           echo "Repository: GitHub Packages (staging)"
 
@@ -602,7 +737,7 @@ jobs:
           echo "Installed gtimeout: $(which gtimeout)"
 
       - name: Download Maven artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
           path: ./maven-artifacts/${{ matrix.platform }}
