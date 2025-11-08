@@ -18,7 +18,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Default values
 VERSION="${1:-2.0.1-SNAPSHOT}"
-REPOSITORY_URL="${2:-https://maven.pkg.github.com/byrnHDF/hdf5}"
+REPOSITORY_URL="${2:-https://maven.pkg.github.com/HDFGroup/hdf5}"
 BUILD_DIR="${3:-${SCRIPT_DIR}/build/maven-test-ffm}"
 ARTIFACT_ID="hdf5-java-ffm"
 IMPLEMENTATION="FFM"
