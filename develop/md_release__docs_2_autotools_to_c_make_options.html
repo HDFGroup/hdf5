@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,7 +141,7 @@ $(function(){initNavTree('md_release__docs_2_autotools_to_c_make_options.html','
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="autotoc_md192"></a></p>
-<p>CMake produces the following set of folders; bin, include, lib and share. The LICENSE and RELEASE.txt file are placed in the share folder.</p>
+<p>CMake produces the following set of folders; bin, include, lib and share. The LICENSE and CHANGELOG.md file are placed in the share folder.</p>
 <p>The bin folder contains the tools and the build scripts. Additionally, CMake creates dynamic versions of the tools with the suffix "-shared".</p>
 <div class="fragment"><div class="line">build scripts</div>
 <div class="line">/-------------</div>
@@ -161,15 +161,32 @@ Autotools to CMake Options</h2>
 <th class="markdownTableHeadNone">Autotools Build <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">CMake Build <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">Notes    </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">warnings-as-errors[default=no]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_WARNINGS_AS_ERRORS "Interpret some warnings as errors" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-</table>
-<p>| build-mode[&ndash;enable-build-mode=(debug|production|clean)] | CMAKE_BUILD_TYPE "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "Developer" [Release] | | | unsupported[Allow unsupported combinations of configure options] | HDF5_ALLOW_UNSUPPORTED "Allow unsupported combinations of configure options" [OFF] | | | nonstandard-features[Enable support for non-standard programming language features[default=yes]] | HDF5_ENABLE_NONSTANDARD_FEATURES "Enable support for non-standard programming language features" [ON] | | | nonstandard-feature-float16[Enable support for _Float16 C datatype [default=yes]] | HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" [${HDF5_ENABLE_NONSTANDARD_FEATURES}] | if (HDF5_ENABLE_NONSTANDARD_FEATURES) | | static_exec[Install only statically linked executables [default=no]] | BUILD_STATIC_EXECS "Build Static Executables" [OFF] | | | sharedlib-rpath[Disable use of the '=Wl,-rpath' linker option] | | | | zlib[Use zlib library for external deflate I/O filter [default=yes]] | HDF5_ENABLE_ZLIB_SUPPORT "Enable Zlib Filters" [OFF] | | | szlib[Use szlib library for external szlib I/O filter [default=yes]] | HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" [OFF] | | | default-api-version[Specify default release version of public symbols [default=v200]] | HDF5_DEFAULT_API_VERSION "v200" CACHE STRING "Enable v2.0 API (v16, v18, v110, v112, v114, v200)" [v200] | | | default-plugindir[&ndash;with-default-plugindir=location], [Specify default location for plugins [default="/usr/local/hdf5/lib/plugin"]] | H5_DEFAULT_PLUGINDIR “Define the default plugins path” | if (WINDOWS)<br  />
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">build-mode[&ndash;enable-build-mode=(debug|production|clean)]   </td><td class="markdownTableBodyNone">CMAKE_BUILD_TYPE "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "Developer" [Release]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">unsupported[Allow unsupported combinations of configure options]   </td><td class="markdownTableBodyNone">HDF5_ALLOW_UNSUPPORTED "Allow unsupported combinations of configure options" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">nonstandard-features[Enable support for non-standard programming language features[default=yes]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_NONSTANDARD_FEATURES "Enable support for non-standard programming language features" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">nonstandard-feature-float16[Enable support for _Float16 C datatype [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" [${HDF5_ENABLE_NONSTANDARD_FEATURES}]   </td><td class="markdownTableBodyNone">if (HDF5_ENABLE_NONSTANDARD_FEATURES)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">static_exec[Install only statically linked executables [default=no]]   </td><td class="markdownTableBodyNone">BUILD_STATIC_EXECS "Build Static Executables" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">sharedlib-rpath[Disable use of the '=Wl,-rpath' linker option]   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">zlib[Use zlib library for external deflate I/O filter [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_ZLIB_SUPPORT "Enable Zlib Filters" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">szlib[Use szlib library for external szlib I/O filter [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">default-api-version[Specify default release version of public symbols [default=v200]]   </td><td class="markdownTableBodyNone">HDF5_DEFAULT_API_VERSION "v200" CACHE STRING "Enable v2.0 API (v16, v18, v110, v112, v114, v200)" [v200]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">default-plugindir[&ndash;with-default-plugindir=location], [Specify default location for plugins [default="/usr/local/hdf5/lib/plugin"]]   </td><td class="markdownTableBodyNone">H5_DEFAULT_PLUGINDIR “Define the default plugins path”   </td><td class="markdownTableBodyNone">if (WINDOWS)<br  />
 H5_DEFAULT_PLUGINDIR "%ALLUSERSPROFILE%/hdf5/lib/plugin"<br  />
 else ()<br  />
 H5_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin"<br  />
-endif () |</p>
-<table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Autotools Features <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">CMake Features <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">Notes    </th></tr>
+endif ()    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Autotools Features <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>CMake Features <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>Notes</b>    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">dimension-scales-with-new-ref[Use new references when creating dimension scales. [default=no]]   </td><td class="markdownTableBodyNone">HDF5_DIMENSION_SCALES_NEW_REF "Use new-style references with dimension scale APIs" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
@@ -191,11 +208,9 @@ endif () |</p>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">file-locking[Sets the default for whether or not to use file locking when opening files. [default=best-effort]]   </td><td class="markdownTableBodyNone">HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" [ON]   </td><td class="markdownTableBodyNone">HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system" [ON]    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">enable-concurrency[Support for concurrent multithreaded operation of supported API routines [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" [OFF]   </td><td class="markdownTableBodyNone">This option also provides threadsafe execution of all other, non-concurrent operations.   </td></tr>
-</table>
-<table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Autotools Language <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">CMake Language <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">Notes    </th></tr>
+<td class="markdownTableBodyNone">enable-concurrency[Support for concurrent multithreaded operation of supported API routines [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" [OFF]   </td><td class="markdownTableBodyNone">This option also provides threadsafe execution of all other, non-concurrent operations.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Autotools Language <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>CMake Language <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>Notes</b>    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">fortran[Compile the Fortran interface [default=no]]   </td><td class="markdownTableBodyNone">HDF5_BUILD_FORTRAN "Build FORTRAN support" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
@@ -208,63 +223,62 @@ endif () |</p>
 <td class="markdownTableBodyNone">java[Compile the Java JNI interface [default=no]]   </td><td class="markdownTableBodyNone">HDF5_BUILD_JAVA "Build JAVA support" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">parallel[Search for MPI-IO and MPI support files]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-</table>
-<table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Autotools Test <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">CMake Test <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">Notes    </th></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>Autotools Test <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>CMake Test <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>Notes</b>    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">tests[Compile the HDF5 tests [default=yes]]   </td><td class="markdownTableBodyNone">BUILD_TESTING "Build HDF5 Unit Testing" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">test-express[Set HDF5 testing intensity level (0-3) [0 = exhaustive testing; 3 = quicker testing; default=3]   </td><td class="markdownTableBodyNone">HDF_TEST_EXPRESS "Control testing framework (0-3)" ["3"]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">tools[Compile the HDF5 tools [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_BUILD_TOOLS "Build HDF5 Tools" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">parallel-tools[Enable building parallel tools. [default=no]]   </td><td class="markdownTableBodyNone">HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-</table>
-<p>| Autotools Doc <a class="el" href="struct_options.html">Options</a> | CMake Doc <a class="el" href="struct_options.html">Options</a> | Notes | | doxygen[Compile the HDF5 doxygen files [default=no]] | HDF5_BUILD_DOC "Build documentation" [OFF] | | | doxygen-errors[Error on HDF5 doxygen warnings [default=no]] | HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." [OFF] | |</p>
-<table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Autotools Dev <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">CMake Dev <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">Notes    </th></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Autotools Doc <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>CMake Doc <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>Notes</b>    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">doxygen[Compile the HDF5 doxygen files [default=no]]   </td><td class="markdownTableBodyNone">HDF5_BUILD_DOC "Build documentation" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">doxygen-errors[Error on HDF5 doxygen warnings [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>Autotools Dev <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>CMake Dev <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>Notes</b>    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">sanitize-checks[default=none]   </td><td class="markdownTableBodyNone">HDF5_USE_SANITIZER ["Compile with a sanitizer. Options are: Address, Memory, MemoryWithOrigins, Undefined, Thread, Leak, 'Address;Undefined', CFI"]   </td><td class="markdownTableBodyNone">Requires HDF5_ENABLE_SANITIZERS "execute the Clang sanitizer" [OFF]    </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">asserts[Determines whether NDEBUG is defined or not, which controls assertions. [default=yes if debug build, otherwise no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_ASSERTS "Determines whether NDEBUG is defined to control assertions." [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">developer-warnings[Determines whether developer warnings will be emitted. [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_DEV_WARNINGS "Enable HDF5 developer group warnings" [OFF   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">show-all-warnings[Enable showing all compiler warnings (for developer debugging). [default=no]]   </td><td class="markdownTableBodyNone">HDF5_SHOW_ALL_WARNINGS "Show all warnings (i.e. not suppress "noisy" ones internally)" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">profiling[Enable profiling flags (e.g.: -pg). [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_PROFILING "Enable profiling flags independently from the build mode." [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">optimization[Enable optimization flags/settings [default depends on build mode: debug=debug, production=high, clean=none]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_OPTIMIZATION "Enable optimization flags/settings independently from the build mode" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">diags[Allow default enhanced diagnostics to the build. [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_BUILD_DIAGS "Enable color and URL extended diagnostic messages" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">symbols[Add debug symbols to the library (e.g.: build with -g). [default=yes if debug build, otherwise no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_SYMBOLS "Add debug symbols to the library independent of the build mode and optimization level." [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">internal-debug[Enable extra debugging output on HDF5 library errors. [default=all if debug build, otherwise none]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">trace[Enable HDF5 API tracing capability. [default=yes if debug build, otherwise no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_ASSERTS "Determines whether NDEBUG is defined to control assertions (OFF NO YES)" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">using-memchecker[Enable this option if a memory allocation and/or bounds checking tool will be used on the HDF5 library. [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">instrument[Enable library instrumentation of optimization tracing (only used with parallel builds). [default=yes if a parallel debug build, otherwise no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_INSTRUMENT "Instrument The library" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">dconv-exception[Check exception handling functions during data conversions [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_WANT_DCONV_EXCEPTION "exception handling functions is checked during data conversions" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">dconv-accuracy[Guarantee data accuracy during data conversions [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">deprecated-symbols[Enable deprecated public API symbols. [default=yes (unless build mode = clean)]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">strict-format-checks[Enable strict file format checks. [default=yes if debug build, otherwise no]]   </td><td class="markdownTableBodyNone">HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">preadwrite[Enable using pread/pwrite instead of read/write in sec2/log/core VFDs. [default=yes if pread/pwrite are present]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
+<td class="markdownTableBodyNone">strict-format-checks[Enable strict file format checks. [default=yes if debug build, otherwise no]]   </td><td class="markdownTableBodyNone">HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">preadwrite[Enable using pread/pwrite instead of read/write in sec2/log/core VFDs. [default=yes if pread/pwrite are present]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">embedded-libinfo[Enable embedded library information [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_EMBEDDED_LIBINFO "Embed library info into executables" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
-</table>
-<table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Autotools <a class="el" href="struct_options.html">Options</a>   </th><th class="markdownTableHeadNone">CMake Unused   </th><th class="markdownTableHeadNone">Notes    </th></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Autotools <a class="el" href="struct_options.html">Options</a></b>   </td><td class="markdownTableBodyNone"><b>CMake Unused</b>   </td><td class="markdownTableBodyNone"><b>Notes</b>    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">examplesdir[&ndash;with-examplesdir=location], [Specify path for examples [default="DATAROOTDIR/hdf5_examples"]]   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">

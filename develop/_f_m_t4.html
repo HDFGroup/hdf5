@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -1406,7 +1406,7 @@ Dimension #n Scaled Offset <em>(8 bytes)</em><br  />
 <li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.</li>
 </ul>
 <table class="doxtable">
-<caption><b>Fields: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks</b></caption>
+<caption><b>Fields: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</b></caption>
 <tr>
 <th width="30%">Field Name </th><th>Description  </th></tr>
 <tr>
@@ -1415,7 +1415,7 @@ Dimension #n Scaled Offset <em>(8 bytes)</em><br  />
 <td>Dimension #n Scaled Offset </td><td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of dimensions for the dataset. The first scaled offset stored in the list is for the slowest changing dimension, and the last scaled offset stored is for the fastest changing dimension. Scaled offset is calculated by dividing the chunk dimension sizes into the chunk offsets.  </td></tr>
 </table>
 <table class="doxtable">
-<caption><a class="anchor" id="FMT4V2BtType11"></a><b>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks</b></caption>
+<caption><a class="anchor" id="FMT4V2BtType11"></a><b>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 4)</b></caption>
 <tr>
 <th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
 <tr>
@@ -1452,16 +1452,66 @@ Dimension #n Scaled Offset <em>(8 bytes)</em><br  />
   </td></tr>
 </table>
 <ul>
-<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.</li>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>This encoding is used when this B-Tree is used as an index for a dataset with layout message version 4.</li>
 </ul>
 <table class="doxtable">
-<caption><b>Fields: Version 2 B-tree, Type 5 Record Layout - Non-filtered Dataset Chunks</b></caption>
+<caption>Type11 <b>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</b></caption>
+<tr>
+<th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
+<tr>
+<td colspan="4"><br  />
+Address<sup>O</sup><br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4"><br  />
+Chunk Size<sup>O</sup><br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4">Filter Mask  </td></tr>
+<tr>
+<td colspan="4"><br  />
+Dimension 0 Scaled Offset <em>(8 bytes)</em><br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4"><br  />
+Dimension 1 Scaled Offset <em>(8 bytes)</em><br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4"><br  />
+...<br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4"><br  />
+Dimension #n Scaled Offset <em>(8 bytes)</em><br  />
+<br  />
+  </td></tr>
+</table>
+<ul>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>This encoding is used when this B-tree is used as an index for a dataset with layout message version 5 or above.</li>
+</ul>
+<table class="doxtable">
+<caption><b>Fields: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks</b></caption>
 <tr>
 <th width="30%">Field Name </th><th>Description  </th></tr>
 <tr>
 <td>Address </td><td>This field is the address of the dataset chunk in the file.  </td></tr>
 <tr>
-<td>Chunk Size </td><td>This field is the size of the dataset chunk in bytes.  </td></tr>
+<td>Chunk Size </td><td>This field is the size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows: <table class="doxtable">
+<tr>
+<th width="20%" align="center">Layout Message Version </th><th align="left">Chunk Size Encoding Length  </th></tr>
+<tr>
+<td align="center"><code>4</code> </td><td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.  </td></tr>
+<tr>
+<td align="center"><code>5</code> or above </td><td>The size specified in the &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.  </td></tr>
+</table>
+</td></tr>
 <tr>
 <td>Filter Mask </td><td>This field is the filter mask which indicates the filter to skip for the dataset chunk. Each filter has an index number in the pipeline and if that filter is skipped, the bit corresponding to its index is set.  </td></tr>
 <tr>
@@ -4970,8 +5020,9 @@ Address<sup>O</sup><br  />
 <td>Dataset Element Size </td><td>The size of a dataset element, in bytes.  </td></tr>
 </table>
 <p><a class="anchor" id="FMT4DataLayoutV4"></a></p><h4>Version 4 of this message is similar to version 3 but has additional information for the virtual layout class as well as indexing information for the chunked layout class.</h4>
+<h4>Version 5 of this message is identical to version 4, except for the encoding of filtered chunk records for Fixed Array, Extensible Array, and v2 B-Tree indices. The Library also requires layout version 5 for datasets with chunk size greater than or equal to 4 GiB.</h4>
 <table class="doxtable">
-<caption><b>Layout: Data Layout Message (Version 4)</b></caption>
+<caption><b>Layout: Data Layout Message (Versions 4 and 5)</b></caption>
 <tr>
 <th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
 <tr>
@@ -4983,11 +5034,19 @@ Properties <em>(variable size)</em><br  />
   </td></tr>
 </table>
 <table class="doxtable">
-<caption><b>Fields: Data Layout Message (Version 4)</b></caption>
+<caption><b>Fields: Data Layout Message (Versions 4 and 5)</b></caption>
 <tr>
 <th width="30%">Field Name </th><th>Description  </th></tr>
 <tr>
-<td>Version </td><td>The value for this field is 4 and is used by version 1.10.0 and later of the library to store properties for each layout class and indexing information for the chunked layout.  </td></tr>
+<td>Version </td><td>The version number information is used for changes in the format of the data layout message and is described here: <table class="doxtable">
+<tr>
+<th width="20%">Version </th><th align="left">Description  </th></tr>
+<tr>
+<td align="center"><code>4</code> </td><td>Used by version 1.10.0 and later of the library to store properties for each layout class and indexing information for the chunked layout.  </td></tr>
+<tr>
+<td align="center"><code>5</code> </td><td>Used by version 2.0.0 and later of the library and is identical to version 4, except the encoding of filtered chunk records for Fixed Array, Extensible Array, and v2 B-Tree indices has been changed to allow for filters that expand chunks up to 2<sup>64</sup>-1 bytes. The Library will also not allow creation of datasets with chunk size greater than 2<sup>32</sup>-1 bytes (4 GiB - 1) with layout version 4 or below (including unfiltered chunks), because versions of the library that don't understand layout version 5 cannot process these large chunks. However, such large chunks are not precluded by the version 4 layout encoding per se.  </td></tr>
+</table>
+</td></tr>
 <tr>
 <td>Layout Class </td><td>The layout class specifies specifies the type of storage for the data and how the other fields of the layout message are to be interpreted. <table class="doxtable">
 <tr>
@@ -6937,7 +6996,7 @@ Address<sup>O</sup><br  />
 <td>Address </td><td>The address of the dataset chunk in the file.  </td></tr>
 </table>
 <p><a class="anchor" id="FMT4FaFilterChunk"></a></p><table class="doxtable">
-<caption><b>Layout: Data Block Element for Filtered Dataset Chunk</b></caption>
+<caption><b>Layout: Data Block Element for Filtered Dataset Chunk (Layout Version 4)</b></caption>
 <tr>
 <th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
 <tr>
@@ -6954,7 +7013,29 @@ Chunk Size <em>(variable size; at most 8 bytes)</em><br  />
 <td colspan="4">Filter Mask  </td></tr>
 </table>
 <ul>
-<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.</li>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>This encoding is used when this Fixed Array is used as an index for a dataset with layout message version 4.</li>
+</ul>
+<table class="doxtable">
+<caption><b>Layout: Data Block Element for Filtered Dataset Chunk (Layout Version 5)</b></caption>
+<tr>
+<th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
+<tr>
+<td colspan="4"><br  />
+Address<sup>O</sup><br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4"><br  />
+Chunk Size<sup>O</sup><br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4">Filter Mask  </td></tr>
+</table>
+<ul>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>This encoding is used when this Fixed Array is used as an index for a dataset with layout message version 5 or above.</li>
 </ul>
 <table class="doxtable">
 <caption><b>Fields: Data Block Element for Filtered Dataset Chunk</b></caption>
@@ -6963,7 +7044,15 @@ Chunk Size <em>(variable size; at most 8 bytes)</em><br  />
 <tr>
 <td>Address </td><td>The address of the dataset chunk in the file.  </td></tr>
 <tr>
-<td>Chunk Size </td><td>The size of the dataset chunk in bytes.  </td></tr>
+<td>Chunk Size </td><td>The size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows: <table class="doxtable">
+<tr>
+<th width="20%" align="center">Layout Message Version </th><th align="left">Chunk Size Encoding Length  </th></tr>
+<tr>
+<td align="center"><code>4</code> </td><td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.  </td></tr>
+<tr>
+<td align="center"><code>5</code> or above </td><td>The size specified in the &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.  </td></tr>
+</table>
+</td></tr>
 <tr>
 <td>Filter Mask </td><td>Indicates the filter to skip for the dataset chunk. Each filter has an index number in the pipeline; if that filter is skipped, the bit corresponding to its index is set.  </td></tr>
 </table>
@@ -7335,7 +7424,7 @@ Address<sup>O</sup><br  />
 <td>Address </td><td>The address of the dataset chunk in the file.  </td></tr>
 </table>
 <p><a class="anchor" id="FMT4EaFilterChunk"></a></p><table class="doxtable">
-<caption><b>Layout: Data Block Element for Filtered Dataset Chunk</b></caption>
+<caption><b>Layout: Data Block Element for Filtered Dataset Chunk (Layout Version 4)</b></caption>
 <tr>
 <th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
 <tr>
@@ -7352,7 +7441,29 @@ Chunk Size<em> (variable size; at most 8 bytes)</em><br  />
 <td colspan="4">Filter Mask  </td></tr>
 </table>
 <ul>
-<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.</li>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>This encoding is used when this B-Tree is used as an index for a dataset with layout message version 4.</li>
+</ul>
+<table class="doxtable">
+<caption><b>Layout: Data Block Element for Filtered Dataset Chunk (Layout Version 5)</b></caption>
+<tr>
+<th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
+<tr>
+<td colspan="4"><br  />
+Address<sup>O</sup><br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4"><br  />
+Chunk Size<em> (variable size; at most 8 bytes)</em><br  />
+<br  />
+  </td></tr>
+<tr>
+<td colspan="4">Filter Mask  </td></tr>
+</table>
+<ul>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>This encoding is used when this B-Tree is used as an index for a dataset with layout message version 5 or above.</li>
 </ul>
 <table class="doxtable">
 <caption><b>Fields: Data Block Element for Filtered Dataset Chunk</b></caption>
@@ -7361,7 +7472,15 @@ Chunk Size<em> (variable size; at most 8 bytes)</em><br  />
 <tr>
 <td>Address </td><td>The address of the dataset chunk in the file.  </td></tr>
 <tr>
-<td>Chunk Size </td><td>The size of the dataset chunk in bytes.  </td></tr>
+<td>Chunk Size </td><td>The size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows: <table class="doxtable">
+<tr>
+<th width="20%" align="center">Layout Message Version </th><th align="left">Chunk Size Encoding Length  </th></tr>
+<tr>
+<td align="center"><code>4</code> </td><td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.  </td></tr>
+<tr>
+<td align="center"><code>5</code> or above </td><td>The size specified in the &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.  </td></tr>
+</table>
+</td></tr>
 <tr>
 <td>Filter Mask </td><td>Indicates the filter to skip for the dataset chunk. Each filter has an index number in the pipeline; if that filter is skipped, the bit corresponding to its index is set.  </td></tr>
 </table>
