@@ -135,6 +135,9 @@ jobs:
     name: Test Deployed Maven Packages
     needs: [log-the-inputs, call-workflow-maven-staging, deploy-maven-artifacts]
     if: ${{ inputs.deploy_maven == true && needs.deploy-maven-artifacts.result == 'success' }}
+    permissions:
+      contents: read
+      packages: read
     uses: ./.github/workflows/test-maven-packages.yml
     with:
       version: ${{ needs.call-workflow-maven-staging.outputs.version }}
