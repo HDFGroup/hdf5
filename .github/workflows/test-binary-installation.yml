@@ -119,6 +119,7 @@ jobs:
       - name: Configure Maven for GitHub Packages
         run: |
           mkdir -p ~/.m2
+<<<<<<< Upstream, based on branch 'develop' of https://github.com/byrnHDF/hdf5.git
           cat > ~/.m2/settings.xml <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
@@ -322,6 +323,210 @@ EOF
               </activeProfiles>
           </settings>
           EOF
+=======
+          cat > ~/.m2/settings.xml << 'SETTINGSEOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                    http://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <servers>
+                  <server>
+                      <id>github-hdfgroup-hdf5</id>
+                      <username>${env.GITHUB_ACTOR}</username>
+                      <password>${env.GITHUB_TOKEN}</password>
+                  </server>
+              </servers>
+              <profiles>
+                  <profile>
+                      <id>github-packages</id>
+                      <repositories>
+                          <repository>
+                              <id>github-hdfgroup-hdf5</id>
+                              <url>MAVEN_REPO_URL_PLACEHOLDER</url>
+                              <snapshots><enabled>true</enabled></snapshots>
+                              <releases><enabled>true</enabled></releases>
+                          </repository>
+                      </repositories>
+                  </profile>
+              </profiles>
+              <activeProfiles>
+                  <activeProfile>github-packages</activeProfile>
+              </activeProfiles>
+          </settings>
+          SETTINGSEOF
+
+          # Replace placeholder with actual URL
+          sed -i "s|MAVEN_REPO_URL_PLACEHOLDER|${{ inputs.maven_repository }}|g" ~/.m2/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download JNI Maven artifact
+        run: |
+          echo "Downloading hdf5-java-jni:${{ inputs.maven_version }}"
+          mvn dependency:get \
+            -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.maven_version }} \
+            -DremoteRepositories=${{ inputs.maven_repository }} \
+            -Dtransitive=true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify JAR and native library integration
+        run: |
+          echo "=== Testing JNI Integration ==="
+
+          # Find downloaded JAR
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/${{ inputs.maven_version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          if [ -z "$JAR_PATH" ]; then
+            echo "❌ Could not find downloaded JAR"
+            exit 1
+          fi
+
+          echo "JAR location: $JAR_PATH"
+
+          # Find native library
+          HDF5_LIB=$(find /usr/lib /usr/local/lib -name "libhdf5.so*" 2>/dev/null | head -1)
+
+          if [ -z "$HDF5_LIB" ]; then
+            echo "❌ Could not find HDF5 native library"
+            exit 1
+          fi
+
+          echo "Native library: $HDF5_LIB"
+
+          # Set library path for testing
+          export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
+          export JAVA_LIBRARY_PATH=/usr/lib:/usr/local/lib
+
+          echo "Testing basic H5 initialization..."
+          cd HDF5Examples/JAVA
+
+          # Create simple test using printf to avoid heredoc issues in YAML
+          printf '%s\n' \
+            'import hdf.hdf5lib.H5;' \
+            'import hdf.hdf5lib.HDF5Constants;' \
+            '' \
+            'public class TestH5Init {' \
+            '    public static void main(String[] args) {' \
+            '        try {' \
+            '            H5.H5open();' \
+            '            int[] version = new int[3];' \
+            '            H5.H5get_libversion(version);' \
+            '            System.out.println("✅ HDF5 library initialized successfully");' \
+            '            System.out.println("Library version: " + version[0] + "." + version[1] + "." + version[2]);' \
+            '            H5.H5close();' \
+            '            System.exit(0);' \
+            '        } catch (Exception e) {' \
+            '            System.err.println("❌ Error: " + e.getMessage());' \
+            '            e.printStackTrace();' \
+            '            System.exit(1);' \
+            '        }' \
+            '    }' \
+            '}' \
+            > TestH5Init.java
+
+          # Compile and run
+          javac -cp "$JAR_PATH" TestH5Init.java
+          java -cp ".:$JAR_PATH" -Djava.library.path="$JAVA_LIBRARY_PATH" TestH5Init
+
+      - name: Run representative examples
+        run: |
+          cd HDF5Examples/JAVA
+
+          # Find JAR
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/${{ inputs.maven_version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          # Set library path
+          export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
+          export JAVA_LIBRARY_PATH=/usr/lib:/usr/local/lib
+
+          echo "=== Running Example Tests ==="
+
+          # Test a few representative examples from compat directory (JNI compatible)
+          for example in compat/TUTR/H5_*.java; do
+            if [ -f "$example" ]; then
+              example_name=$(basename "$example" .java)
+              echo "Testing: $example_name"
+
+              cd "$(dirname "$example")"
+              javac -cp "$JAR_PATH" "$example_name.java"
+
+              if timeout 30s java -cp ".:$JAR_PATH" -Djava.library.path="$JAVA_LIBRARY_PATH" "$example_name"; then
+                echo "✅ $example_name passed"
+              else
+                echo "❌ $example_name failed"
+              fi
+
+              cd - > /dev/null
+              break  # Just test one example for now
+            fi
+          done
+
+  test-ffm-binary:
+    name: Test FFM with Binary Installation
+    runs-on: ubuntu-latest
+    if: |
+      inputs.java_implementation == 'both' ||
+      inputs.java_implementation == 'ffm'
+    steps:
+      - name: Checkout HDF5Examples
+        uses: actions/checkout@v5.0.0
+        with:
+          repository: HDFGroup/HDF5Examples
+          path: HDF5Examples
+
+      - name: Set up Java 25 for FFM
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+          cache: 'maven'
+
+      - name: Install HDF5 native libraries
+        run: |
+          echo "=== Installing HDF5 Native Libraries ==="
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev hdf5-tools
+
+          echo "Installed HDF5 version:"
+          h5dump --version || echo "h5dump not found"
+
+      - name: Configure Maven for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'SETTINGSEOF2'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+              <servers>
+                  <server>
+                      <id>github-hdfgroup-hdf5</id>
+                      <username>${env.GITHUB_ACTOR}</username>
+                      <password>${env.GITHUB_TOKEN}</password>
+                  </server>
+              </servers>
+              <profiles>
+                  <profile>
+                      <id>github-packages</id>
+                      <repositories>
+                          <repository>
+                              <id>github-hdfgroup-hdf5</id>
+                              <url>MAVEN_REPO_URL_PLACEHOLDER</url>
+                              <snapshots><enabled>true</enabled></snapshots>
+                              <releases><enabled>true</enabled></releases>
+                          </repository>
+                      </repositories>
+                  </profile>
+              </profiles>
+              <activeProfiles>
+                  <activeProfile>github-packages</activeProfile>
+              </activeProfiles>
+          </settings>
+          SETTINGSEOF2
+
+          # Replace placeholder with actual URL
+          sed -i "s|MAVEN_REPO_URL_PLACEHOLDER|${{ inputs.maven_repository }}|g" ~/.m2/settings.xml
+>>>>>>> 3c348f6 Fix maven workflows
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
