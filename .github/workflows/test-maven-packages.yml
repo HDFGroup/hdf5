@@ -102,17 +102,18 @@ jobs:
           EOF
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify JNI artifact exists and download
         run: |
           echo "::group::Download JNI artifact"
           mvn dependency:get \
             -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.version }} \
-            -DremoteRepositories=${{ inputs.repository_url }} \
             -Dtransitive=false
           echo "::endgroup::"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify JAR contents (JNI)
         run: |
@@ -212,17 +213,18 @@ jobs:
           EOF
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify FFM artifact exists and download
         run: |
           echo "::group::Download FFM artifact"
           mvn dependency:get \
             -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.version }} \
-            -DremoteRepositories=${{ inputs.repository_url }} \
             -Dtransitive=false
           echo "::endgroup::"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify JAR contents (FFM)
         run: |
