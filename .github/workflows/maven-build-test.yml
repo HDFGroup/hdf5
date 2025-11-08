@@ -1,0 +1,194 @@
+name: Maven Build and Test (All Platforms)
+
+# Standalone workflow for building and testing Maven packages across all platforms
+# This workflow is useful for:
+# - Testing Maven package creation in forks before submitting PRs
+# - Validating Maven artifacts and deployment process
+# - Testing both FFM and JNI implementations independently
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to build'
+        type: choice
+        required: false
+        default: 'all-platforms'
+        options:
+          - 'linux-only'
+          - 'linux-windows'
+          - 'linux-macos'
+          - 'all-platforms'
+      java_implementation:
+        description: 'Java implementation to test'
+        type: choice
+        required: false
+        default: 'both'
+        options:
+          - 'both'
+          - 'ffm'
+          - 'jni'
+          - 'auto'
+      test_deployment:
+        description: 'Deploy to GitHub Packages for testing'
+        type: boolean
+        required: false
+        default: false
+      test_examples:
+        description: 'Run Java examples tests'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-maven-packages:
+    name: Build Maven Packages
+    uses: ./.github/workflows/maven-staging.yml
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+    with:
+      test_maven_deployment: true
+      use_snapshot_version: true
+      platforms: ${{ inputs.platforms }}
+      java_implementation: ${{ inputs.java_implementation }}
+
+  deploy-to-packages:
+    name: Deploy to GitHub Packages (Test)
+    needs: build-maven-packages
+    if: ${{ inputs.test_deployment && needs.build-maven-packages.result == 'success' }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/maven-deploy.yml
+    with:
+      repository_url: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
+      repository_id: 'github'
+      deploy_snapshots: true
+      dry_run: false
+    secrets:
+      MAVEN_USERNAME: ${{ github.actor }}
+      MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+  test-deployed-packages:
+    name: Test Deployed Packages
+    needs: [build-maven-packages, deploy-to-packages]
+    if: ${{ inputs.test_deployment && needs.deploy-to-packages.result == 'success' }}
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/test-maven-packages.yml
+    with:
+      version: ${{ needs.build-maven-packages.outputs.version }}
+      java_implementation: ${{ inputs.java_implementation }}
+      repository_url: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
+    secrets: inherit
+
+  summarize-results:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [build-maven-packages, deploy-to-packages, test-deployed-packages]
+    if: always()
+    steps:
+      - name: Generate test summary
+        run: |
+          echo "# Maven Build and Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Configuration:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Platforms: ${{ inputs.platforms }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Java Implementation: ${{ inputs.java_implementation }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Deployment Test: ${{ inputs.test_deployment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Examples Test: ${{ inputs.test_examples }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Build results
+          if [ "${{ needs.build-maven-packages.result }}" == "success" ]; then
+            echo "✅ **Maven Package Build:** PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "   - Version: ${{ needs.build-maven-packages.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Maven Package Build:** FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Deployment results
+          if [ "${{ inputs.test_deployment }}" == "true" ]; then
+            if [ "${{ needs.deploy-to-packages.result }}" == "success" ]; then
+              echo "✅ **Package Deployment:** PASSED" >> $GITHUB_STEP_SUMMARY
+              echo "   - Repository: https://github.com/${{ github.repository }}/packages" >> $GITHUB_STEP_SUMMARY
+            elif [ "${{ needs.deploy-to-packages.result }}" == "skipped" ]; then
+              echo "⏭️  **Package Deployment:** SKIPPED (build failed)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Package Deployment:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            # Test results
+            if [ "${{ needs.test-deployed-packages.result }}" == "success" ]; then
+              echo "✅ **Package Testing:** PASSED" >> $GITHUB_STEP_SUMMARY
+            elif [ "${{ needs.test-deployed-packages.result }}" == "skipped" ]; then
+              echo "⏭️  **Package Testing:** SKIPPED (deployment failed)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Package Testing:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Final status
+          if [ "${{ needs.build-maven-packages.result }}" == "success" ] && \
+             ([ "${{ inputs.test_deployment }}" == "false" ] || \
+              ([ "${{ needs.deploy-to-packages.result }}" == "success" ] && \
+               [ "${{ needs.test-deployed-packages.result }}" == "success" ])); then
+            echo "## 🎉 All Tests Passed!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Maven packages are ready for release." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ⚠️ Some Tests Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.repository }}" != "HDFGroup/hdf5" ]; then
+            echo "- Review artifacts in [GitHub Packages](https://github.com/${{ github.repository }}/packages)" >> $GITHUB_STEP_SUMMARY
+            echo "- Test manually by adding your repository to Maven settings" >> $GITHUB_STEP_SUMMARY
+            echo "- Submit PR to HDFGroup/hdf5 when ready" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Artifacts are ready for official release" >> $GITHUB_STEP_SUMMARY
+            echo "- Run the full release workflow to deploy to Maven Central" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check overall status
+        run: |
+          BUILD_RESULT="${{ needs.build-maven-packages.result }}"
+          DEPLOY_RESULT="${{ needs.deploy-to-packages.result }}"
+          TEST_RESULT="${{ needs.test-deployed-packages.result }}"
+
+          if [ "$BUILD_RESULT" != "success" ]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+
+          if [ "${{ inputs.test_deployment }}" == "true" ]; then
+            if [ "$DEPLOY_RESULT" != "success" ] && [ "$DEPLOY_RESULT" != "skipped" ]; then
+              echo "❌ Deployment failed"
+              exit 1
+            fi
+
+            if [ "$TEST_RESULT" != "success" ] && [ "$TEST_RESULT" != "skipped" ]; then
+              echo "❌ Package testing failed"
+              exit 1
+            fi
+          fi
+
+          echo "✅ All tests passed successfully"

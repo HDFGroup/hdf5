@@ -119,8 +119,7 @@ jobs:
       packages: write
     uses: ./.github/workflows/maven-deploy.yml
     with:
-      file_base: ${{ needs.log-the-inputs.outputs.file-base }}
-      preset_name: ${{ needs.log-the-inputs.outputs.preset-name-linux }}
+      # Note: file_base and preset_name are legacy parameters and not used by maven-deploy.yml
       repository_url: ${{ inputs.maven_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
       repository_id: ${{ inputs.maven_repository == 'github-packages' && 'github' || 'ossrh' }}
       deploy_snapshots: ${{ inputs.use_tag == 'snapshot' }}
