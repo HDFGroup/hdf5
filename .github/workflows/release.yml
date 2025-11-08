@@ -114,6 +114,9 @@ jobs:
     name: Deploy Maven Artifacts
     needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-maven-staging]
     if: ${{ inputs.deploy_maven == true }}
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/maven-deploy.yml
     with:
       file_base: ${{ needs.log-the-inputs.outputs.file-base }}
