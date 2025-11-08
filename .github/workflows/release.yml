@@ -111,92 +111,36 @@ jobs:
       java_implementation: 'both'  # Build both FFM and JNI implementations
 
   deploy-maven-artifacts:
-    name: Deploy Maven Artifacts (FFM & JNI)
+    name: Deploy Maven Artifacts
     needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-maven-staging]
     if: ${{ inputs.deploy_maven == true }}
-    runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write # For GitHub Packages deployment
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Linux artifacts
-          - implementation: ffm
-            artifact-name: maven-staging-artifacts-linux-x86_64-ffm
-          - implementation: jni
-            artifact-name: maven-staging-artifacts-linux-x86_64-jni
-          # Windows artifacts
-          - implementation: ffm
-            artifact-name: maven-staging-artifacts-windows-x86_64-ffm
-          - implementation: jni
-            artifact-name: maven-staging-artifacts-windows-x86_64-jni
-          # macOS x86_64 artifacts
-          - implementation: ffm
-            artifact-name: maven-staging-artifacts-macos-x86_64-ffm
-          - implementation: jni
-            artifact-name: maven-staging-artifacts-macos-x86_64-jni
-          # macOS aarch64 artifacts
-          - implementation: ffm
-            artifact-name: maven-staging-artifacts-macos-aarch64-ffm
-          - implementation: jni
-            artifact-name: maven-staging-artifacts-macos-aarch64-jni
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5.0.0
+      packages: write
+    uses: ./.github/workflows/maven-deploy.yml
+    with:
+      file_base: ${{ needs.log-the-inputs.outputs.file-base }}
+      preset_name: ${{ needs.log-the-inputs.outputs.preset-name-linux }}
+      repository_url: ${{ inputs.maven_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
+      repository_id: ${{ inputs.maven_repository == 'github-packages' && 'github' || 'ossrh' }}
+      deploy_snapshots: ${{ inputs.use_tag == 'snapshot' }}
+      dry_run: false
+    secrets:
+      MAVEN_USERNAME: ${{ inputs.maven_repository == 'github-packages' && github.actor || secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_PASSWORD: ${{ inputs.maven_repository == 'github-packages' && secrets.GITHUB_TOKEN || secrets.MAVEN_CENTRAL_PASSWORD }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          server-id: ${{ inputs.maven_repository == 'github-packages' && 'github' || 'ossrh' }}
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: GPG_PASSPHRASE
-
-      - name: Download Maven artifacts (${{ matrix.artifact-name }})
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
-        with:
-          name: ${{ matrix.artifact-name }}
-          path: ./maven-artifacts
-        continue-on-error: true
-
-      - name: Deploy to Maven repository
-        if: hashFiles('maven-artifacts/**') != ''
-        env:
-          MAVEN_USERNAME: ${{ inputs.maven_repository == 'github-packages' && github.actor || secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_PASSWORD: ${{ inputs.maven_repository == 'github-packages' && secrets.GITHUB_TOKEN || secrets.MAVEN_CENTRAL_PASSWORD }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          REPOSITORY_URL: ${{ inputs.maven_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
-          REPOSITORY_ID: ${{ inputs.maven_repository == 'github-packages' && 'github' || 'ossrh' }}
-        run: |
-          # Find POM and JAR files
-          POM_FILE=$(find ./maven-artifacts -name "pom.xml" | head -1)
-          JAR_FILE=$(find ./maven-artifacts -name "*.jar" -not -name "*sources*" -not -name "*javadoc*" | head -1)
-
-          if [ -z "$POM_FILE" ] || [ -z "$JAR_FILE" ]; then
-            echo "No artifacts found for ${{ matrix.platform }} - ${{ matrix.implementation }}"
-            exit 0
-          fi
-
-          # Extract Maven coordinates from POM
-          GROUP_ID=$(grep -o '<groupId>[^<]*</groupId>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
-          ARTIFACT_ID=$(grep -o '<artifactId>[^<]*</artifactId>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
-          VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
-
-          echo "Deploying: $GROUP_ID:$ARTIFACT_ID:$VERSION"
-          echo "Platform: ${{ matrix.platform }}, Implementation: ${{ matrix.implementation }}"
-          echo "Repository: $REPOSITORY_URL"
-
-          # Deploy to Maven repository
-          mvn deploy:deploy-file \
-            -Dfile="$JAR_FILE" \
-            -DpomFile="$POM_FILE" \
-            -DrepositoryId="$REPOSITORY_ID" \
-            -Durl="$REPOSITORY_URL" \
-            -DgeneratePom=false \
-            -DuniqueVersion=false
-
+  test-deployed-maven-packages:
+    name: Test Deployed Maven Packages
+    needs: [log-the-inputs, call-workflow-maven-staging, deploy-maven-artifacts]
+    if: ${{ inputs.deploy_maven == true && needs.deploy-maven-artifacts.result == 'success' }}
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/test-maven-packages.yml
+    with:
+      version: ${{ needs.call-workflow-maven-staging.outputs.version }}
+      java_implementation: 'both'
+      repository_url: ${{ inputs.maven_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://repo.maven.apache.org/maven2' }}
+    secrets: inherit

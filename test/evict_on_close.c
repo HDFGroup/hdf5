@@ -36,8 +36,8 @@
 /* (Requires debug build of the library) */
 /* #define EOC_MANUAL_INSPECTION */
 
-const char *FILENAMES[] = {"evict-on-close", /* 0 */
-                           NULL};
+static const char *FILENAMES[] = {"evict-on-close", /* 0 */
+                                  NULL};
 #define FILENAME_BUF_SIZE 1024
 
 /* Group names */

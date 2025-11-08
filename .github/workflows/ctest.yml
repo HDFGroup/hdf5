@@ -129,7 +129,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -281,7 +281,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -482,7 +482,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS_latest)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -656,7 +656,7 @@ jobs:
             ninjaVersion: latest
 
       - name: Install aws-c-s3 (Cached installation)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: libaws-c-s3-Release
 
@@ -689,7 +689,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux S3)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -773,7 +773,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows_intel)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -918,7 +918,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
