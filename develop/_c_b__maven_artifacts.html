@@ -274,7 +274,8 @@ Troubleshooting</h2>
 <dl class="section user"><dt>UnsatisfiedLinkError</dt><dd>If you see <code>java.lang.UnsatisfiedLinkError</code>: <ul>
 <li>Verify you're using the correct platform classifier </li>
 <li>Ensure only ONE HDF5 artifact (JNI or FFM) is on classpath </li>
-<li>Check Java version matches implementation (Java 25+ for FFM)</li>
+<li>Check Java version matches implementation (Java 25+ for FFM) </li>
+<li>Install HDF5 native libraries: <code>sudo apt-get install libhdf5-dev</code> (Linux) or <code>brew install <a class="el" href="namespacehdf5.html">hdf5</a></code> (macOS)</li>
 </ul>
 </dd></dl>
 <dl class="section user"><dt>Native Access Error (FFM only)</dt><dd>If you see <code>IllegalCallerException</code> with FFM: <ul>
@@ -313,10 +314,32 @@ Migrating Between JNI and FFM</h2>
 </li>
 </ol>
 </dd></dl>
+<h2><a class="anchor" id="subsec_maven_testing"></a>
+Testing Maven Artifacts</h2>
+<dl class="section user"><dt>Local Testing Scripts</dt><dd>HDF5 provides test scripts to verify Maven artifacts work correctly:</dd></dl>
+<div class="fragment"><div class="line">cd HDF5Examples/JAVA</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Test JNI implementation</span></div>
+<div class="line">./test-maven-jni.sh 2.0.0</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Test FFM implementation</span></div>
+<div class="line">./test-maven-ffm.sh 2.0.0</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Test against custom repository</span></div>
+<div class="line">./test-maven-ffm.sh 2.0.0 https:<span class="comment">//maven.pkg.github.com/YOUR_FORK/hdf5</span></div>
+</div><!-- fragment --><p>These scripts automatically: </p><ul>
+<li>Configure GitHub authentication </li>
+<li>Download and verify JARs </li>
+<li>Compile and run example programs </li>
+<li>Report detailed test results</li>
+</ul>
+<p>See <code><a class="el" href="_r_e_a_d_m_e-_m_a_v_e_n_8md.html">HDF5Examples/JAVA/README-MAVEN.md</a></code> for complete testing documentation.</p>
 <dl class="section user"><dt>See Also</dt><dd><ul>
 <li><a class="el" href="cmake-presets.html#subsec_cmake_presets_build_java">CMake Presets Use Case: Java Bindings</a> for building from source </li>
 <li><a class="el" href="release__docs_2_r_e_a_d_m_e_8md.html">release_docs/README.md</a> for complete Maven documentation </li>
-<li><a class="el" href="_r_e_a_d_m_e-_m_a_v_e_n_8md.html">HDF5Examples/JAVA/README-MAVEN.md</a> for examples with Maven </li>
+<li><a class="el" href="_r_e_a_d_m_e-_m_a_v_e_n_8md.html">HDF5Examples/JAVA/README-MAVEN.md</a> for testing and examples with Maven </li>
+<li>HDF5Examples/JAVA/test-maven-jni.sh for JNI artifact testing </li>
+<li>HDF5Examples/JAVA/test-maven-ffm.sh for FFM artifact testing </li>
 <li><a href="https://github.com/HDFGroup/hdf5-examples">https://github.com/HDFGroup/hdf5-examples</a> for more examples</li>
 </ul>
 <hr  />

@@ -140,7 +140,7 @@ $(function(){initNavTree('md_release__docs_2_autotools_to_c_make_options.html','
   <div class="headertitle"><div class="title">&lt;img src="Cmake_logo.svg" alt="Cmake logo" width=24&gt; CMake Installations</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md192"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md208"></a></p>
 <p>CMake produces the following set of folders; bin, include, lib and share. The LICENSE and CHANGELOG.md file are placed in the share folder.</p>
 <p>The bin folder contains the tools and the build scripts. Additionally, CMake creates dynamic versions of the tools with the suffix "-shared".</p>
 <div class="fragment"><div class="line">build scripts</div>
@@ -149,12 +149,12 @@ $(function(){initNavTree('md_release__docs_2_autotools_to_c_make_options.html','
 </div><!-- fragment --><p>The include folder holds the header files and the fortran mod files. CMake places the fortran mod files into separate shared and static subfolders, however the use of <code>HDF5_INSTALL_MOD_FORTRAN</code> places one set of mod files into the include folder. Because CMake produces a tools library, the header files for tools will appear in the include folder.</p>
 <p>The lib folder contains the library files, and CMake adds the pkgconfig subfolder with the hdf5*.pc files used by the bin/build scripts created by the CMake build. CMake separates the C interface code from the fortran code by creating C-stub libraries for each Fortran library. In addition, only CMake installs the tools library. The names of the szip libraries are different between the build systems.</p>
 <p>CMake builds include a number of CMake specific files for support of CMake's find_package and support for the HDF5 Examples CMake project.</p>
-<h1><a class="anchor" id="autotoc_md193"></a>
+<h1><a class="anchor" id="autotoc_md209"></a>
 How To Convert Autotools Build Options to CMake Options</h1>
-<h2><a class="anchor" id="autotoc_md194"></a>
+<h2><a class="anchor" id="autotoc_md210"></a>
 Introduction</h2>
 <p>The table below shows the equivalent CMake build options that match those from Autotools. See the release_docs/INSTALL_CMake.txt file for more information on the CMake build system and options.</p>
-<h2><a class="anchor" id="autotoc_md195"></a>
+<h2><a class="anchor" id="autotoc_md211"></a>
 Autotools to CMake Options</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
