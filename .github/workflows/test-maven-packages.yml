@@ -144,6 +144,11 @@ jobs:
           fi
           echo "::endgroup::"
 
+      - name: Install HDF5 native libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev hdf5-tools
+
       - name: Test JNI examples
         run: |
           cd HDF5Examples/JAVA
@@ -157,9 +162,7 @@ jobs:
         with:
           name: jni-test-results-${{ inputs.version }}
           path: |
-            HDF5Examples/JAVA/*.h5
-            HDF5Examples/JAVA/pom-examples.xml
-            HDF5Examples/JAVA/target/
+            HDF5Examples/JAVA/build/maven-test-jni/
 
   test-ffm-package:
     name: Test FFM Maven Package
@@ -255,6 +258,11 @@ jobs:
           fi
           echo "::endgroup::"
 
+      - name: Install HDF5 native libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev hdf5-tools
+
       - name: Test FFM examples
         run: |
           cd HDF5Examples/JAVA
@@ -268,9 +276,7 @@ jobs:
         with:
           name: ffm-test-results-${{ inputs.version }}
           path: |
-            HDF5Examples/JAVA/*.h5
-            HDF5Examples/JAVA/pom-examples.xml
-            HDF5Examples/JAVA/target/
+            HDF5Examples/JAVA/build/maven-test-ffm/
 
   summary:
     name: Test Summary
