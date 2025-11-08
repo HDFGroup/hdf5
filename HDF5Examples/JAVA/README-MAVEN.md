@@ -23,7 +23,7 @@ HDF5Examples/JAVA/
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-examples</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>linux-x86_64</classifier>
 </dependency>
 
@@ -44,7 +44,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>windows-x86_64</classifier>
 </dependency>
 
@@ -52,7 +52,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>macos-x86_64</classifier>
 </dependency>
 
@@ -60,7 +60,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>macos-aarch64</classifier>
 </dependency>
 ```
@@ -90,6 +90,187 @@ This creates:
 - `hdf5-java-examples-{version}.jar` - Compiled examples
 - `hdf5-java-examples-{version}-sources.jar` - Source code
 - `hdf5-java-examples-{version}-javadoc.jar` - Documentation
+
+## Testing Maven Artifacts
+
+Two standalone scripts are provided to test HDF5 Maven artifacts against the examples in this directory:
+
+### test-maven-jni.sh - Test JNI Implementation
+
+Tests the JNI (Java Native Interface) implementation, compatible with Java 11+.
+
+**Usage:**
+```bash
+./test-maven-jni.sh [VERSION] [REPOSITORY_URL] [BUILD_DIR]
+```
+
+**Examples:**
+```bash
+# Test latest snapshot from HDFGroup
+./test-maven-jni.sh 2.0.1-SNAPSHOT
+
+# Test specific version from custom repository
+./test-maven-jni.sh 2.0.0 https://maven.pkg.github.com/myorg/hdf5
+
+# Use custom build directory
+./test-maven-jni.sh 2.0.1-SNAPSHOT https://maven.pkg.github.com/HDFGroup/hdf5 /tmp/test
+```
+
+**What it does:**
+1. Downloads `hdf5-java-jni` artifact from Maven repository
+2. Verifies JAR contains HDF5 classes (not just dependencies)
+3. Compiles examples from `compat/` subdirectories
+4. Runs H5Ex_D_ReadWrite example
+5. Reports results with detailed summary
+
+**Prerequisites:**
+- Java 11 or later
+- Maven 3.6.0 or later
+- GitHub authentication (for GitHub Packages)
+
+### test-maven-ffm.sh - Test FFM Implementation
+
+Tests the FFM (Foreign Function & Memory) implementation, requires Java 25+.
+
+**Usage:**
+```bash
+./test-maven-ffm.sh [VERSION] [REPOSITORY_URL] [BUILD_DIR]
+```
+
+**Examples:**
+```bash
+# Test FFM snapshot
+./test-maven-ffm.sh 2.0.1-SNAPSHOT
+
+# Test specific version
+./test-maven-ffm.sh 2.0.0-3 https://maven.pkg.github.com/HDFGroup/hdf5
+```
+
+**What it does:**
+1. Downloads `hdf5-java-ffm` artifact from Maven repository
+2. Verifies JAR contains FFM bindings (`org.hdfgroup.javahdf5.*`)
+3. Compiles examples from root directories (H5D, H5T, H5G, TUTR)
+4. Runs H5Ex_D_ReadWrite with native access enabled
+5. Reports results with detailed summary
+
+**Prerequisites:**
+- Java 25 or later (FFM requires Java 25+)
+- Maven 3.6.0 or later
+- GitHub authentication (for GitHub Packages)
+
+### Build Directory Pattern
+
+Both scripts use a separate build directory to keep the source tree clean:
+
+**Default locations:**
+- JNI: `HDF5Examples/JAVA/build/maven-test-jni/`
+- FFM: `HDF5Examples/JAVA/build/maven-test-ffm/`
+
+**Generated files:**
+```
+build/
+├── maven-test-jni/
+│   ├── pom-examples.xml       # Generated Maven POM
+│   ├── target/                # Compiled classes
+│   │   └── classes/
+│   └── *.h5                   # Output HDF5 files
+└── maven-test-ffm/
+    ├── pom-examples.xml
+    ├── target/
+    └── *.h5
+```
+
+**Benefits:**
+- ✅ Source tree stays clean (no generated files)
+- ✅ Easy cleanup: `rm -rf build/`
+- ✅ Multiple parallel tests possible
+- ✅ CMake-like out-of-source build pattern
+
+### GitHub Authentication
+
+For testing artifacts from GitHub Packages, authentication is required:
+
+**Option 1: GitHub CLI (Recommended)**
+```bash
+gh auth login
+gh auth refresh --scopes read:packages
+```
+
+Scripts automatically detect GitHub CLI authentication.
+
+**Option 2: Maven settings.xml**
+```bash
+# Scripts can create settings.xml automatically if gh is authenticated
+# Or create manually:
+cat > ~/.m2/settings.xml <<EOF
+<settings>
+  <servers>
+    <server>
+      <id>github-hdfgroup-hdf5</id>
+      <username>YOUR_GITHUB_USERNAME</username>
+      <password>YOUR_GITHUB_TOKEN</password>
+    </server>
+  </servers>
+</settings>
+EOF
+```
+
+### Running Additional Examples
+
+After initial test succeeds, you can run more examples:
+
+**JNI:**
+```bash
+cd build/maven-test-jni
+mvn exec:java -Dexec.mainClass="H5Ex_T_String" -f pom-examples.xml
+```
+
+**FFM:**
+```bash
+cd build/maven-test-ffm
+mvn exec:java -Dexec.mainClass="H5Ex_T_String" -f pom-examples.xml
+```
+
+### Cleanup
+
+**Remove single test build:**
+```bash
+rm -rf build/maven-test-jni
+rm -rf build/maven-test-ffm
+```
+
+**Remove all test builds:**
+```bash
+rm -rf build/
+```
+
+**Clean with Maven (keeps directory structure):**
+```bash
+mvn clean -f build/maven-test-jni/pom-examples.xml
+mvn clean -f build/maven-test-ffm/pom-examples.xml
+```
+
+### Troubleshooting Test Scripts
+
+**"Failed to download artifact"**
+- Check GitHub authentication: `gh auth status`
+- Verify repository URL is correct
+- Ensure version exists in repository
+
+**"JAR does not contain HDF5 classes"**
+- Indicates incomplete Maven artifact (build issue)
+- This is what the verification step catches!
+- Report to maintainers if public artifact is incomplete
+
+**"Java version too old"**
+- JNI requires Java 11+
+- FFM requires Java 25+
+- Check: `java -version`
+
+**"UnsatisfiedLinkError: no hdf5_java"**
+- This is expected during Maven-only testing
+- Indicates JAR structure is correct
+- Native libraries would be needed for full execution
 
 ## Example Categories
 
@@ -140,6 +321,142 @@ This is **expected behavior** and indicates:
 - ✅ **Dependencies resolve properly**
 - ✅ **Compilation succeeds**
 - ⚠️ **Native HDF5 libraries not available** (expected in Maven-only environment)
+
+### Running Examples Successfully
+
+To actually execute examples (not just compile them), you need HDF5 native libraries installed:
+
+#### Option 1: Install HDF5 from Package Manager (Recommended)
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install libhdf5-dev hdf5-tools
+```
+
+**Linux (Fedora/RHEL):**
+```bash
+sudo dnf install hdf5 hdf5-devel
+```
+
+**macOS (Homebrew):**
+```bash
+brew install hdf5
+```
+
+**Windows:**
+- Download pre-built binaries from [HDF Group Downloads](https://www.hdfgroup.org/downloads/hdf5/)
+- Add HDF5 `bin` directory to system PATH
+
+#### Option 2: Build HDF5 from Source
+
+Build HDF5 with Java support enabled:
+
+```bash
+# Clone HDF5 repository
+git clone https://github.com/HDFGroup/hdf5.git
+cd hdf5
+
+# Build with Java (JNI)
+cmake --preset ci-StdShar-GNUC --fresh
+cmake --build build/ci-StdShar-GNUC
+sudo cmake --install build/ci-StdShar-GNUC
+
+# Or build with Java (FFM) - requires Java 25+
+cmake --preset ci-StdShar-GNUC-FFM --fresh
+cmake --build build/ci-StdShar-GNUC-FFM
+sudo cmake --install build/ci-StdShar-GNUC-FFM
+```
+
+#### Option 3: Use LD_LIBRARY_PATH (Linux/macOS)
+
+If HDF5 is installed in a non-standard location:
+
+```bash
+# Add HDF5 library directory to path
+export LD_LIBRARY_PATH=/path/to/hdf5/lib:$LD_LIBRARY_PATH
+
+# For macOS
+export DYLD_LIBRARY_PATH=/path/to/hdf5/lib:$DYLD_LIBRARY_PATH
+
+# Then run examples
+cd build/maven-test-jni
+mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
+```
+
+#### Option 4: Specify Library Path in Java
+
+```bash
+# Run with explicit library path
+java -Djava.library.path=/path/to/hdf5/lib \
+     -cp "target/classes:~/.m2/repository/org/hdfgroup/hdf5-java-jni/2.0.1-SNAPSHOT/*" \
+     H5Ex_D_ReadWrite
+```
+
+#### Verify Native Libraries Are Found
+
+After installing HDF5, verify the libraries are accessible:
+
+**Linux:**
+```bash
+# Check library is in system path
+ldconfig -p | grep hdf5
+
+# Or find library location
+find /usr -name "libhdf5.so*" 2>/dev/null
+```
+
+**macOS:**
+```bash
+# Check library location
+find /usr/local -name "libhdf5*.dylib" 2>/dev/null
+```
+
+**Windows:**
+```cmd
+# Check PATH includes HDF5 bin directory
+echo %PATH%
+
+# Verify DLL exists
+where hdf5.dll
+```
+
+#### Running Examples After Library Installation
+
+Once native libraries are installed, examples should run successfully:
+
+**JNI Examples:**
+```bash
+cd build/maven-test-jni
+mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
+
+# Expected output:
+# Dataset successfully created and written
+# Data read from dataset: [1, 2, 3, 4, ...]
+```
+
+**FFM Examples:**
+```bash
+cd build/maven-test-ffm
+mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
+
+# Expected output:
+# Dataset successfully created and written
+# Data read from dataset: [1, 2, 3, 4, ...]
+```
+
+#### Why Maven Artifacts Don't Include Native Libraries
+
+Maven artifacts contain only:
+- ✅ Java bytecode (.class files)
+- ✅ Java source code (in -sources.jar)
+- ✅ Javadoc (in -javadoc.jar)
+
+They do **not** include:
+- ❌ Native shared libraries (.so, .dll, .dylib)
+- ❌ Platform-specific binaries
+
+**Reason:** Native libraries are platform-specific and typically hundreds of MB. Maven artifacts should be small (~2-5 MB) and platform-independent where possible. The JNI/FFM bindings provide the Java interface, but you must install the native HDF5 libraries separately.
 
 ### Pattern-Based Output Validation
 

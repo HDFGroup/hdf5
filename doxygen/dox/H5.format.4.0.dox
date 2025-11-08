@@ -1913,7 +1913,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
-<caption><strong>Fields: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks</strong></caption>
+<caption><strong>Fields: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1932,7 +1932,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption>\anchor FMT4V2BtType11 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks</strong></caption>
+<caption>\anchor FMT4V2BtType11 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 4)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1963,9 +1963,44 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li This encoding is used when this B-Tree is used as an index for a dataset with layout message version 4.
 
 <table>
-<caption><strong>Fields: Version 2 B-tree, Type 5 Record Layout - Non-filtered Dataset Chunks</strong></caption>
+<caption>Type11 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Chunk Size<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filter Mask</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />...<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li This encoding is used when this B-tree is used as an index for a dataset with layout message version 5 or above.
+
+<table>
+<caption><strong>Fields: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1976,7 +2011,21 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 <tr>
   <td>Chunk Size</td>
-  <td>This field is the size of the dataset chunk in bytes.</td>
+  <td>This field is the size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Layout Message Version</th>
+        <th align="left">Chunk Size Encoding Length</th>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code> or above</td>
+        <td>The size specified in the &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Filter Mask</td>
@@ -7876,8 +7925,9 @@ Class-specific information for chunked storage (layout class 2):
 
 \anchor FMT4DataLayoutV4 <h4>Version 4 of this message is similar to version 3 but has additional
 information for the virtual layout class as well as indexing information for the chunked layout class.</h4>
+<h4>Version 5 of this message is identical to version 4, except for the encoding of filtered chunk records for Fixed Array, Extensible Array, and v2 B-Tree indices. The Library also requires layout version 5 for datasets with chunk size greater than or equal to 4 GiB.</h4>
 <table>
-<caption><strong>Layout: Data Layout Message (Version 4)</strong></caption>
+<caption><strong>Layout: Data Layout Message (Versions 4 and 5)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -7895,15 +7945,29 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
-<caption><strong>Fields: Data Layout Message (Version 4)</strong></caption>
+<caption><strong>Fields: Data Layout Message (Versions 4 and 5)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
 </tr>
 <tr>
   <td>Version</td>
-  <td>The value for this field is 4 and is used by version 1.10.0 and later of the library to
-      store properties for each layout class and indexing information for the chunked layout.</td>
+  <td>The version number information is used for changes in the format of the data layout message and
+      is described here:
+      <table>
+      <tr>
+        <th width="20%">Version</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>Used by version 1.10.0 and later of the library to store properties for each layout class and indexing information for the chunked layout.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>Used by version 2.0.0 and later of the library and is identical to version 4, except the encoding of filtered chunk records for Fixed Array, Extensible Array, and v2 B-Tree indices has been changed to allow for filters that expand chunks up to 2<sup>64</sup>-1 bytes. The Library will also not allow creation of datasets with chunk size greater than 2<sup>32</sup>-1 bytes (4 GiB - 1) with layout version 4 or below (including unfiltered chunks), because versions of the library that don't understand layout version 5 cannot process these large chunks. However, such large chunks are not precluded by the version 4 layout encoding per se.</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Layout Class</td>
@@ -10968,7 +11032,7 @@ types are described below.<br />
 
 \anchor FMT4FaFilterChunk
 <table>
-<caption><strong>Layout: Data Block Element for Filtered Dataset Chunk</strong></caption>
+<caption><strong>Layout: Data Block Element for Filtered Dataset Chunk (Layout Version 4)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -10987,6 +11051,29 @@ types are described below.<br />
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li This encoding is used when this Fixed Array is used as an index for a dataset with layout message version 4.
+
+<table>
+<caption><strong>Layout: Data Block Element for Filtered Dataset Chunk (Layout Version 5)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Chunk Size<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filter Mask</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li This encoding is used when this Fixed Array is used as an index for a dataset with layout message version 5 or above.
 
 <table>
 <caption><strong>Fields: Data Block Element for Filtered Dataset Chunk</strong></caption>
@@ -11000,7 +11087,21 @@ types are described below.<br />
 </tr>
 <tr>
   <td>Chunk Size</td>
-  <td>The size of the dataset chunk in bytes.</td>
+  <td>The size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Layout Message Version</th>
+        <th align="left">Chunk Size Encoding Length</th>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code> or above</td>
+        <td>The size specified in the &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Filter Mask</td>
@@ -11574,7 +11675,7 @@ blocks/pages in a chunk index varies as they are allocated as needed and the fir
 
 \anchor FMT4EaFilterChunk
 <table>
-<caption><strong>Layout: Data Block Element for Filtered Dataset Chunk</strong></caption>
+<caption><strong>Layout: Data Block Element for Filtered Dataset Chunk (Layout Version 4)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -11593,6 +11694,30 @@ blocks/pages in a chunk index varies as they are allocated as needed and the fir
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li This encoding is used when this B-Tree is used as an index for a dataset with layout message version 4.
+
+
+<table>
+<caption><strong>Layout: Data Block Element for Filtered Dataset Chunk (Layout Version 5)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Chunk Size<em> (variable size; at most 8 bytes)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filter Mask</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li This encoding is used when this B-Tree is used as an index for a dataset with layout message version 5 or above.
 
 <table>
 <caption><strong>Fields: Data Block Element for Filtered Dataset Chunk</strong></caption>
@@ -11606,7 +11731,21 @@ blocks/pages in a chunk index varies as they are allocated as needed and the fir
 </tr>
 <tr>
   <td>Chunk Size</td>
-  <td>The size of the dataset chunk in bytes.</td>
+  <td>The size of the dataset chunk in bytes. The length of this field is determined depending on the version of the associated layout message as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Layout Message Version</th>
+        <th align="left">Chunk Size Encoding Length</th>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>One more than the number of bytes that would be needed to encode the size of an unfiltered chunk, but not more than 8.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code> or above</td>
+        <td>The size specified in the &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Filter Mask</td>

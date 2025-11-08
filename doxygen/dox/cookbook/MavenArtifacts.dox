@@ -34,7 +34,7 @@ HDF5 provides three main Maven artifacts:
 <tr>
   <td><strong>hdf5-java-examples</strong></td>
   <td>Java 8+</td>
-  <td>62 example programs</td>
+  <td>example programs</td>
   <td>Platform-independent</td>
 </tr>
 </table>
@@ -50,7 +50,7 @@ Add the following dependency to your <code>pom.xml</code>:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-jni</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>linux-x86_64</classifier>
 </dependency>
 \endcode
@@ -93,7 +93,7 @@ Add the following dependency to your <code>pom.xml</code>:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-ffm</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
     <classifier>linux-x86_64</classifier>
 </dependency>
 \endcode
@@ -131,7 +131,7 @@ import hdf.hdf5lib.HDF5Constants;
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-examples</artifactId>
-    <version>2.0.0-3</version>
+    <version>2.0.0</version>
 </dependency>
 \endcode
 
@@ -145,10 +145,10 @@ The examples artifact contains 62 educational examples covering:
 \par Running Examples
 \code
 # List available examples
-java -cp hdf5-java-examples-2.0.0-3.jar examples.intro.H5_CreateFile
+java -cp hdf5-java-examples-2.0.0.jar examples.intro.H5_CreateFile
 
 # Run a specific example
-java -cp "hdf5-java-jni-2.0.0-3-linux-x86_64.jar:hdf5-java-examples-2.0.0-3.jar" \
+java -cp "hdf5-java-jni-2.0.0-linux-x86_64.jar:hdf5-java-examples-2.0.0.jar" \
      examples.intro.H5_CreateFile
 \endcode
 
@@ -204,6 +204,7 @@ If you see <code>java.lang.UnsatisfiedLinkError</code>:
 \li Verify you're using the correct platform classifier
 \li Ensure only ONE HDF5 artifact (JNI or FFM) is on classpath
 \li Check Java version matches implementation (Java 25+ for FFM)
+\li Install HDF5 native libraries: <code>sudo apt-get install libhdf5-dev</code> (Linux) or <code>brew install hdf5</code> (macOS)
 
 \par Native Access Error (FFM only)
 If you see <code>IllegalCallerException</code> with FFM:
@@ -236,10 +237,38 @@ Both implementations use identical APIs:
 3. Rebuild and test
    \li No code changes required!
 
+\subsection subsec_maven_testing Testing Maven Artifacts
+
+\par Local Testing Scripts
+HDF5 provides test scripts to verify Maven artifacts work correctly:
+
+\code
+cd HDF5Examples/JAVA
+
+# Test JNI implementation
+./test-maven-jni.sh 2.0.0
+
+# Test FFM implementation
+./test-maven-ffm.sh 2.0.0
+
+# Test against custom repository
+./test-maven-ffm.sh 2.0.0 https://maven.pkg.github.com/YOUR_FORK/hdf5
+\endcode
+
+These scripts automatically:
+\li Configure GitHub authentication
+\li Download and verify JARs
+\li Compile and run example programs
+\li Report detailed test results
+
+See <code>HDF5Examples/JAVA/README-MAVEN.md</code> for complete testing documentation.
+
 \par See Also
 \li \ref subsec_cmake_presets_build_java for building from source
 \li release_docs/README.md for complete Maven documentation
-\li HDF5Examples/JAVA/README-MAVEN.md for examples with Maven
+\li HDF5Examples/JAVA/README-MAVEN.md for testing and examples with Maven
+\li HDF5Examples/JAVA/test-maven-jni.sh for JNI artifact testing
+\li HDF5Examples/JAVA/test-maven-ffm.sh for FFM artifact testing
 \li https://github.com/HDFGroup/hdf5-examples for more examples
 
 <hr>
