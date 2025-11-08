@@ -110,9 +110,10 @@ jobs:
           # Determine platform classifier
           PLATFORM_CLASSIFIER="linux-x86_64"
 
-          echo "Downloading: org.hdfgroup:hdf5-java-jni:${{ inputs.version }}:jar:${PLATFORM_CLASSIFIER}"
+          echo "Downloading: org.hdfgroup:hdf5-java-jni:${{ inputs.version }} with classifier ${PLATFORM_CLASSIFIER}"
           mvn dependency:get \
-            -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.version }}:jar:${PLATFORM_CLASSIFIER} \
+            -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.version }} \
+            -Dclassifier=${PLATFORM_CLASSIFIER} \
             -Dtransitive=false
           echo "::endgroup::"
         env:
@@ -225,9 +226,10 @@ jobs:
           # Determine platform classifier
           PLATFORM_CLASSIFIER="linux-x86_64"
 
-          echo "Downloading: org.hdfgroup:hdf5-java-ffm:${{ inputs.version }}:jar:${PLATFORM_CLASSIFIER}"
+          echo "Downloading: org.hdfgroup:hdf5-java-ffm:${{ inputs.version }} with classifier ${PLATFORM_CLASSIFIER}"
           mvn dependency:get \
-            -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.version }}:jar:${PLATFORM_CLASSIFIER} \
+            -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.version }} \
+            -Dclassifier=${PLATFORM_CLASSIFIER} \
             -Dtransitive=false
           echo "::endgroup::"
         env:

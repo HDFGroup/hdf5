@@ -311,9 +311,10 @@ log_info "Platform classifier: ${PLATFORM_CLASSIFIER}"
 echo ""
 
 # Download dependencies and verify artifact
-log_info "Downloading Maven artifact: org.hdfgroup:${ARTIFACT_ID}:${VERSION}:jar:${PLATFORM_CLASSIFIER}..."
+log_info "Downloading Maven artifact: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}..."
 if mvn dependency:get \
-    -Dartifact=org.hdfgroup:${ARTIFACT_ID}:${VERSION}:jar:${PLATFORM_CLASSIFIER} \
+    -Dartifact=org.hdfgroup:${ARTIFACT_ID}:${VERSION} \
+    -Dclassifier=${PLATFORM_CLASSIFIER} \
     -q; then
     log_success "Artifact downloaded successfully"
 else
