@@ -1,0 +1,178 @@
+/** \page rel_spec_20 Release Specific Information for HDF5 2.0
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ * <hr>
+
+<h2 id="library_tools_20">HDF5 Library and Tools 2.0</h2>
+
+<h3 id="release">Release Information</h3>
+
+<table>
+<tr>
+<td style="background-color:#F5F5F5">
+Version
+</td>
+<td>
+HDF5 2.0
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+Release Date
+</td>
+<td>
+11/10/25
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+Additional Release Information
+</td>
+<td>
+<a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a>
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+\ref subsec_rel_spec_20_migrate
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+\ref sec_rel_spec_20_change
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+\ref subsec_rel_spec_20_feat
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+[Newsletter Announcement](https://www.hdfgroup.org/2025/02/05/release-of-hdf5-2.0-newsletter-205)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+[API Compatibility Reports between 2.0 and 1.14.6](https://github.com/HDFGroup/hdf5/releases/download/hdf5_2.0/hdf5-2.0.html.abi.reports.tar.gz)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+[Doxygen generated Reference Manual](https://support.hdfgroup.org/documentation/hdf5/latest/
+)
+</td>
+</tr>
+</table>
+
+
+<h3 id="download">Downloads</h3>
+
+Source code and binaries are available at:
+<a href="https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html</a>
+
+Please refer to [Build instructions](https://github.com/HDFGroup/hdf5/blob/hdf5_2.0/release_docs/INSTALL) for building with either CMake or Autotools.
+
+
+**Methods to obtain  (gz file)**
+* firefox – Download file and then run:  `gzip <distribution>.tar.gz | tar xzf -`
+* chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
+* `wget – wget https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.N.N/<distribution>.tar.gz`
+  * `gzip -cd <distribution>.tar.gz | tar xvf -`
+
+<h3 id="api_compat">Individual API Compatibility Reports</h3>
+
+* [hdf5-2.0-hdf5_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0-hdf5_compat_report.html) -- HTML C library ABI report file
+
+* [hdf5-2.0-hdf5_cpp_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0-hdf5_cpp_compat_report.html) -- HTML CPP library ABI report file
+
+* [hdf5-2.0-hdf5_hl_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0-hdf5_hl_compat_report.html) -- HTML HL C library ABI report file
+
+* [hdf5-2.0-java_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0-java_compat_report.html) -- HTML Java library ABI report file
+
+
+<h3 id="dox_gen_doc">Doxygen Generated Reference Manual</h3>
+
+The new HDF5 documentation based on [Doxygen](https://www.doxygen.nl/index.html) is available [here](https://support.hdfgroup.org/releases/hdf5/v2/index.html)
+
+This documentation is WORK-IN-PROGRESS. 
+
+Since this portion of the HDF5 documentation is now part of the source code, it gets the same treatment as code. In other words, issues, inaccuracies, corrections should be reported as issues in [GitHub](https://github.com/HDFGroup/hdf5/issues), and pull requests will be reviewed and accepted as any other code changes.
+
+\subsection subsec_rel_spec_20_migrate Migrating from HDF5 1.14 to HDF5 2.0
+
+\li Default file format is now 1.8
+
+\li The file format has been updated to 4.0<a name="fileformat"></a>
+
+\li API signature changes
+  \li `H5Dread_chunk()`
+  \li `H5Tdecode()`
+
+Please refer to \ref sec_rel_spec_20_change or <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for detail.
+
+\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3)<a name="ros3"></a> replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for a complete description on this feature.
+
+\li Significance in tools
+   <br>The tool h5dump has a new option --lformat and its XML option is deprecated.
+
+   <br>The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for an explanation.
+
+\subsubsection subsubsec_rel_spec_20_migrate_api API Changes
+Sample text
+
+\subsubsection subsubsec_rel_spec_20_migrate_api_h5ireg Sample / Sample
+Sample text
+\li <strong>Old:</strong> - <code>typedef herr_t (*H5I_free_t)(void *obj);</code>
+\li <strong>New:</strong> - <code>typedef herr_t (*H5I_free_t)(void *obj, void **request);</code>
+
+
+\subsection subsec_rel_spec_20_feat New Features in HDF5 Release 2.0
+
+The new features in the HDF5 2.0 series include:
+
+\li Support for complex number datatypes<a name="complex"></a>
+
+Support for the C99 `float _Complex`, `double _Complex` and `long double _Complex` (with MSVC, `_Fcomplex`, `_Dcomplex` and `_Lcomplex`) types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications). \ref_rfc20240129<br />
+
+\li An AWS endpoint command option
+
+   The new option is `--endpoint-url`, which allows the user to set an alternate endpoint URL other than the standard "protocol://service-code.region-code.amazonaws.com". If `--endpoint-url` is not specified, the ROS3 VFD will first check the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL` environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
+
+   This option is supported by the following tools:
+      `h5dump`, `h5ls`, `h5stat`
+
+\li Specifying ROS3 VFD on the command line is not required when using S3 URI
+
+   This feature applies to the following tools: `h5dump`, `h5ls`, `h5stat`.
+
+\li Performance improvement in opening a virtual dataset with many mappings
+
+   When opening a virtual dataset, the library would previously decode the mappings in the object header package, then copy them to the dataset struct, then copy them to the internal dataset creation property list. Copying the VDS mappings could be very expensive if there were many mappings. Changed this to delay decoding the mappings until the dataset code, and delay copying the layout to the DCPL until it is needed. This results in only the decoding and no copies in most use cases, as opposed to the decoding and two copies with the previous code.
+
+\li Support for chunks larger than 4 GiB using 64 bit addressing.
+
+\li New predefined datatypes for FP8 data in E4M3 and E5M2 formats (https://arxiv.org/abs/2209.05433), but not a native FP8 datatype.  Please refer to the <a href="https://\SRCURL/release_docs/CHANGELOG.md">CHANGELOG</a> for detail.
+
+\li Default chunk cache hash table size increased to 8191
+
+In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
+
+
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ *
+*/
