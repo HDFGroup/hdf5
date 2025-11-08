@@ -157,6 +157,7 @@ jobs:
           ./test-maven-jni.sh "${{ inputs.version }}" "${{ inputs.repository_url }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Upload test artifacts (JNI)
         if: always()
@@ -273,6 +274,7 @@ jobs:
           ./test-maven-ffm.sh "${{ inputs.version }}" "${{ inputs.repository_url }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Upload test artifacts (FFM)
         if: always()

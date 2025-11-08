@@ -60,22 +60,78 @@ jobs:
 
   deploy-to-packages:
     name: Deploy to GitHub Packages (Test)
+    runs-on: ubuntu-latest
     needs: build-maven-packages
     if: ${{ inputs.test_deployment && needs.build-maven-packages.result == 'success' }}
     permissions:
       contents: read
       packages: write
-    uses: ./.github/workflows/maven-deploy.yml
-    with:
-      repository_url: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
-      repository_id: 'github'
-      deploy_snapshots: true
-      dry_run: false
-    secrets:
-      MAVEN_USERNAME: ${{ github.actor }}
-      MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.0
+
+      - name: Download all Maven staging artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: maven-staging-artifacts-*
+          path: ./artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "=== Downloaded artifacts ==="
+          ls -R ./artifacts/
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Deploy to GitHub Packages
+        run: |
+          # Find all JAR files
+          for artifact_dir in ./artifacts/maven-staging-artifacts-*/; do
+            if [ -d "$artifact_dir" ]; then
+              echo "Processing: $artifact_dir"
+
+              # Find POM file
+              POM_FILE=$(find "$artifact_dir" -name "pom.xml" | head -1)
+
+              # Find JAR files (main artifacts, not sources/javadoc)
+              for jar_file in $(find "$artifact_dir" -name "jarhdf5-*.jar" ! -name "*sources*" ! -name "*javadoc*"); do
+                echo "Deploying: $(basename "$jar_file")"
+
+                # Extract classifier from filename if present
+                jar_basename=$(basename "$jar_file")
+                if [[ "$jar_basename" =~ jarhdf5-[0-9.]+-SNAPSHOT-(.+)\.jar ]]; then
+                  CLASSIFIER="${BASH_REMATCH[1]}"
+                  echo "  Classifier: $CLASSIFIER"
+
+                  # Determine artifact ID based on classifier
+                  if [[ "$CLASSIFIER" == *"ffm"* ]] || [[ "$jar_file" == *"ffm"* ]]; then
+                    ARTIFACT_ID="hdf5-java-ffm"
+                  else
+                    ARTIFACT_ID="hdf5-java-jni"
+                  fi
+
+                  mvn deploy:deploy-file \
+                    -DgroupId=org.hdfgroup \
+                    -DartifactId="$ARTIFACT_ID" \
+                    -Dversion="${{ needs.build-maven-packages.outputs.version }}" \
+                    -Dpackaging=jar \
+                    -Dfile="$jar_file" \
+                    -Dclassifier="$CLASSIFIER" \
+                    -DpomFile="$POM_FILE" \
+                    -DrepositoryId=github \
+                    -Durl=${{ format('https://maven.pkg.github.com/{0}', github.repository) }} \
+                    -Dusername=${{ github.actor }} \
+                    -Dpassword=${{ secrets.GITHUB_TOKEN }}
+                fi
+              done
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test-deployed-packages:
     name: Test Deployed Packages

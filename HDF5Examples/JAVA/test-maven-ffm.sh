@@ -101,13 +101,24 @@ if [[ "$REPOSITORY_URL" == *"github.com"* ]]; then
         fi
     fi
 
-    # Check if Maven settings exist
+    # Check if Maven settings exist and create/update as needed
+    NEED_UPDATE=false
     if [ ! -f ~/.m2/settings.xml ]; then
+        NEED_UPDATE=true
+        log_info "Maven settings.xml not found, will create it..."
+    elif ! grep -q "${REPOSITORY_URL}" ~/.m2/settings.xml 2>/dev/null; then
+        NEED_UPDATE=true
+        log_warning "Maven settings.xml has incorrect repository URL, will update it..."
+    fi
+
+    if [ "$NEED_UPDATE" = true ]; then
         if [ -z "$GITHUB_TOKEN" ]; then
-            log_error "No GitHub authentication found. Please run 'gh auth login' or create ~/.m2/settings.xml"
+            log_error "No GitHub authentication found. Please run 'gh auth login' or set GITHUB_TOKEN"
             exit 1
         else
             log_info "Creating ~/.m2/settings.xml with GitHub token..."
+            # Use GITHUB_ACTOR if available, otherwise fall back to git config
+            GITHUB_USERNAME="${GITHUB_ACTOR:-$(git config user.name || echo "user")}"
             mkdir -p ~/.m2
             cat > ~/.m2/settings.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -118,7 +129,7 @@ if [[ "$REPOSITORY_URL" == *"github.com"* ]]; then
     <servers>
         <server>
             <id>github-hdfgroup-hdf5</id>
-            <username>$(git config user.name || echo "user")</username>
+            <username>${GITHUB_USERNAME}</username>
             <password>${GITHUB_TOKEN}</password>
         </server>
     </servers>
@@ -140,10 +151,10 @@ if [[ "$REPOSITORY_URL" == *"github.com"* ]]; then
     </activeProfiles>
 </settings>
 EOF
-            log_success "Created ~/.m2/settings.xml"
+            log_success "Created/updated ~/.m2/settings.xml"
         fi
     else
-        log_success "Found ~/.m2/settings.xml"
+        log_success "Found ~/.m2/settings.xml with correct repository URL"
     fi
 fi
 
