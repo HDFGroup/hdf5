@@ -224,15 +224,18 @@ jobs:
           echo "Found ${jar_count} JAR file(s) for deployment"
 
           # Basic validation (artifacts should already be validated by staging workflow)
-          for jar_file in $(echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' ' '); do
+          # Parse format: jar_path|platform|implementation,jar_path|platform|implementation,...
+          echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
+            # Skip empty entries
+            [ -z "$jar_file" ] && continue
+
             if [ ! -f "${jar_file}" ]; then
               echo "ERROR: JAR file not found: ${jar_file}"
               exit 1
             fi
 
-            platform=$(dirname "${jar_file}" | sed 's|./artifacts/||')
             jar_name=$(basename "${jar_file}")
-            echo "✓ [$platform] ${jar_name}"
+            echo "✓ [${platform}/${impl}] ${jar_name}"
           done
 
           # Quick POM validation
