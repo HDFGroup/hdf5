@@ -329,9 +329,10 @@ if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
     TRUNCATED_CLASSIFIER=$(echo "$PLATFORM_CLASSIFIER" | sed -E 's/(86_64|_64|64)$//')
 
     # Parse XML using awk (xmllint may not be available)
+    # Format XML (GitHub Packages returns minified XML on one line)
     # Look for snapshotVersion blocks with matching classifier and jar extension
     log_info "Searching for classifier: ${TRUNCATED_CLASSIFIER}"
-    TIMESTAMPED_VERSION=$(awk -v search_classifier="${TRUNCATED_CLASSIFIER}" '
+    TIMESTAMPED_VERSION=$(sed 's/></>\n</g' "$TEMP_METADATA" | awk -v search_classifier="${TRUNCATED_CLASSIFIER}" '
       /<snapshotVersion>/ { in_block=1; classifier=""; extension=""; value="" }
       /<\/snapshotVersion>/ {
         if (in_block && classifier == search_classifier && extension ~ /jar/) {
@@ -343,7 +344,7 @@ if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
       in_block && /<classifier>/ { gsub(/.*<classifier>|<\/classifier>.*/, ""); classifier=$0 }
       in_block && /<extension>/ { gsub(/.*<extension>|<\/extension>.*/, ""); extension=$0 }
       in_block && /<value>/ { gsub(/.*<value>|<\/value>.*/, ""); value=$0 }
-    ' "$TEMP_METADATA")
+    ')
 
     if [ -z "$TIMESTAMPED_VERSION" ]; then
         log_error "Could not extract SNAPSHOT version from metadata"
