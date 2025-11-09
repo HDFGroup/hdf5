@@ -341,10 +341,11 @@ if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
 
     # Parse XML using awk (xmllint may not be available)
     # Look for snapshotVersion blocks with matching classifier and jar extension
-    TIMESTAMPED_VERSION=$(awk '
+    log_info "Searching for classifier: ${TRUNCATED_CLASSIFIER}"
+    TIMESTAMPED_VERSION=$(awk -v search_classifier="${TRUNCATED_CLASSIFIER}" '
       /<snapshotVersion>/ { in_block=1; classifier=""; extension=""; value="" }
       /<\/snapshotVersion>/ {
-        if (in_block && classifier ~ /^'"${TRUNCATED_CLASSIFIER}"'$/ && extension ~ /jar/) {
+        if (in_block && classifier == search_classifier && extension ~ /jar/) {
           print value
           exit
         }

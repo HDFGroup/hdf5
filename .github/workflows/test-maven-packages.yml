@@ -134,10 +134,11 @@ jobs:
 
             # Parse XML using awk (xmllint not available in GitHub Actions by default)
             # Look for snapshotVersion blocks with matching classifier and jar extension
-            TIMESTAMPED_VERSION=$(awk '
+            echo "Searching for classifier: ${TRUNCATED_CLASSIFIER}"
+            TIMESTAMPED_VERSION=$(awk -v search_classifier="${TRUNCATED_CLASSIFIER}" '
               /<snapshotVersion>/ { in_block=1; classifier=""; extension=""; value="" }
               /<\/snapshotVersion>/ {
-                if (in_block && classifier ~ /^'"${TRUNCATED_CLASSIFIER}"'$/ && extension ~ /jar/) {
+                if (in_block && classifier == search_classifier && extension ~ /jar/) {
                   print value
                   exit
                 }
@@ -324,10 +325,11 @@ jobs:
 
             # Parse XML using awk (xmllint not available in GitHub Actions by default)
             # Look for snapshotVersion blocks with matching classifier and jar extension
-            TIMESTAMPED_VERSION=$(awk '
+            echo "Searching for classifier: ${TRUNCATED_CLASSIFIER}"
+            TIMESTAMPED_VERSION=$(awk -v search_classifier="${TRUNCATED_CLASSIFIER}" '
               /<snapshotVersion>/ { in_block=1; classifier=""; extension=""; value="" }
               /<\/snapshotVersion>/ {
-                if (in_block && classifier ~ /^'"${TRUNCATED_CLASSIFIER}"'$/ && extension ~ /jar/) {
+                if (in_block && classifier == search_classifier && extension ~ /jar/) {
                   print value
                   exit
                 }
