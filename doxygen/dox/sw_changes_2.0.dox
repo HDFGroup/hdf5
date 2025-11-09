@@ -3,7 +3,7 @@
  * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_20
  * <hr>
 
-\subsection subsec_rel_spec_20_change Software Changes from Release to Release in HDF5 2.0
+\subsection sec_rel_spec_20_change Software Changes from Release to Release in HDF5 2.0
 
 This page provides information on the changes that a maintenance developer needs to
 be aware of between successive releases of HDF5, such as:
