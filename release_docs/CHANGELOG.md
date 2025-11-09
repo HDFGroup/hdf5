@@ -25,31 +25,31 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
-- Up to [2500% faster](/CHANGELOG.md#rtree) Virtual Dataset read/write operations
-- [30% faster opening](/CHANGELOG.md#layoutcopydelay) and [25% faster closing](/CHANGELOG.md#fileformat) of virtual datasets.
-- [Reduced memory overhead](/CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
+- Up to [2500% faster](CHANGELOG.md#rtree) Virtual Dataset read/write operations
+- [30% faster opening](CHANGELOG.md#layoutcopydelay) and [25% faster closing](CHANGELOG.md#fileformat) of virtual datasets.
+- [Reduced memory overhead](CHANGELOG.md#fileformat) via shared name strings and optimized spatial search algorithms for virtual datasets.
 
 ## Significant Advancements:
 
-- Full [UTF-8](/CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
-- Introduction of [bfloat16 predefined datatypes](/CHANGELOG.md#added-predefined-datatypes-for-bfloat16-data) for efficient machine learning conversions.
-- First-class support for [complex numbers](/CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
-- A [new, larger chunk size limit](/CHANGELOG.md#added-support-for-large-chunks), in multi-petabytes, replaces the previous 4 GiB limit.
+- Full [UTF-8](CHANGELOG.md#utf-8) filename support on Windows, resolving encoding issues from previous versions.
+- Introduction of [bfloat16 predefined datatypes](CHANGELOG.md#added-predefined-datatypes-for-bfloat16-data) for efficient machine learning conversions.
+- First-class support for [complex numbers](CHANGELOG.md#complex), eliminating manual workarounds in scientific applications.
+- A [new, larger chunk size limit](CHANGELOG.md#added-support-for-large-chunks), in multi-petabytes, replaces the previous 4 GiB limit.
 
 ## Updated Foundation:
 
-- New [file format](/CHANGELOG.md#fileformat) version (4.0) and compliance with the C11 standard.
+- New [file format](CHANGELOG.md#fileformat) version (4.0) and compliance with the C11 standard.
 - Adopted [semantic versioning](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy) to clearly convey changes between versions.
 
 > [!IMPORTANT]
 >
-> - Transitioned to [CMake-only](/CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
+> - Transitioned to [CMake-only](CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
 > - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
 > - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
 
 ## Enhanced Features:
 
-- Improved [ROS3 VFD](/CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
+- Improved [ROS3 VFD](CHANGELOG.md#ros3) capabilities using the aws-c-s3 library.
 
 ## Java Enhancements:
 
@@ -73,7 +73,7 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ### Autotools support was removed from HDF5<a name="cmake">
 
-   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the [AutotoolsToCMakeOptions.md](/AutotoolsToCMakeOptions.md) file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
+   CMake is now the build system available in HDF5 code. Version 3.26 or later is required. See the [AutotoolsToCMakeOptions.md](AutotoolsToCMakeOptions.md) file for highlights of the CMake HDF5 install layout and CMake options to use in place of former Autotools options.
 
 ### Fixed problems with family driver and user block
 
