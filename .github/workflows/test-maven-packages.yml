@@ -132,12 +132,26 @@ jobs:
             # Maven removes suffixes: 86_64, _64, or 64
             TRUNCATED_CLASSIFIER=$(echo "$PLATFORM_CLASSIFIER" | sed -E 's/(86_64|_64|64)$//')
 
-            # The value element contains the full timestamped version (e.g., 2.0.1-20251108.230757-57)
-            TIMESTAMPED_VERSION=$(xmllint --xpath "string(//snapshotVersion[contains(extension, 'jar') and starts-with(classifier, '${TRUNCATED_CLASSIFIER}')]/value)" /tmp/maven-metadata.xml 2>/dev/null)
+            # Parse XML using awk (xmllint not available in GitHub Actions by default)
+            # Look for snapshotVersion blocks with matching classifier and jar extension
+            TIMESTAMPED_VERSION=$(awk '
+              /<snapshotVersion>/ { in_block=1; classifier=""; extension=""; value="" }
+              /<\/snapshotVersion>/ {
+                if (in_block && classifier ~ /^'"${TRUNCATED_CLASSIFIER}"'$/ && extension ~ /jar/) {
+                  print value
+                  exit
+                }
+                in_block=0
+              }
+              in_block && /<classifier>/ { gsub(/.*<classifier>|<\/classifier>.*/, ""); classifier=$0 }
+              in_block && /<extension>/ { gsub(/.*<extension>|<\/extension>.*/, ""); extension=$0 }
+              in_block && /<value>/ { gsub(/.*<value>|<\/value>.*/, ""); value=$0 }
+            ' /tmp/maven-metadata.xml)
 
             if [ -z "$TIMESTAMPED_VERSION" ]; then
               echo "::error::Could not extract SNAPSHOT version from metadata"
               echo "::error::Searched for classifier starting with: ${TRUNCATED_CLASSIFIER}"
+              echo "::error::Metadata contents:"
               cat /tmp/maven-metadata.xml
               exit 1
             fi
@@ -308,12 +322,26 @@ jobs:
             # Maven removes suffixes: 86_64, _64, or 64
             TRUNCATED_CLASSIFIER=$(echo "$PLATFORM_CLASSIFIER" | sed -E 's/(86_64|_64|64)$//')
 
-            # The value element contains the full timestamped version (e.g., 2.0.1-20251108.230757-57)
-            TIMESTAMPED_VERSION=$(xmllint --xpath "string(//snapshotVersion[contains(extension, 'jar') and starts-with(classifier, '${TRUNCATED_CLASSIFIER}')]/value)" /tmp/maven-metadata.xml 2>/dev/null)
+            # Parse XML using awk (xmllint not available in GitHub Actions by default)
+            # Look for snapshotVersion blocks with matching classifier and jar extension
+            TIMESTAMPED_VERSION=$(awk '
+              /<snapshotVersion>/ { in_block=1; classifier=""; extension=""; value="" }
+              /<\/snapshotVersion>/ {
+                if (in_block && classifier ~ /^'"${TRUNCATED_CLASSIFIER}"'$/ && extension ~ /jar/) {
+                  print value
+                  exit
+                }
+                in_block=0
+              }
+              in_block && /<classifier>/ { gsub(/.*<classifier>|<\/classifier>.*/, ""); classifier=$0 }
+              in_block && /<extension>/ { gsub(/.*<extension>|<\/extension>.*/, ""); extension=$0 }
+              in_block && /<value>/ { gsub(/.*<value>|<\/value>.*/, ""); value=$0 }
+            ' /tmp/maven-metadata.xml)
 
             if [ -z "$TIMESTAMPED_VERSION" ]; then
               echo "::error::Could not extract SNAPSHOT version from metadata"
               echo "::error::Searched for classifier starting with: ${TRUNCATED_CLASSIFIER}"
+              echo "::error::Metadata contents:"
               cat /tmp/maven-metadata.xml
               exit 1
             fi
