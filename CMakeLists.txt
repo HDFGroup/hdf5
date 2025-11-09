@@ -677,7 +677,7 @@ if (HDF5_ENABLE_COVERAGE)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to use build with include-what-you-use
+# Option to build with include-what-you-use
 #-----------------------------------------------------------------------------
 option(HDF5_USE_IWYU "Run include-what-you-use when compiling" OFF)
 
