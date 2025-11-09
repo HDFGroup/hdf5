@@ -269,6 +269,10 @@ cat > "${BUILD_DIR}/pom-examples.xml" <<EOF
                                 <exclude>**/112/**</exclude>
                                 <exclude>**/18/**</exclude>
                                 <exclude>**/tfiles/**</exclude>
+                                <!-- FFM callback examples not yet adapted -->
+                                <exclude>**/H5Ex_G_Visit.java</exclude>
+                                <exclude>**/H5Ex_G_Intermediate.java</exclude>
+                                <exclude>**/H5Ex_G_Traverse.java</exclude>
                             </excludes>
                         </configuration>
                     </execution>

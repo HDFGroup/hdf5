@@ -150,9 +150,11 @@ Tests the FFM (Foreign Function & Memory) implementation, requires Java 25+.
 **What it does:**
 1. Downloads `hdf5-java-ffm` artifact from Maven repository
 2. Verifies JAR contains FFM bindings (`org.hdfgroup.javahdf5.*`)
-3. Compiles all 55 HDF5 v2.0+ examples from `compat/` subdirectories
+3. Compiles 52 HDF5 v2.0+ examples from `compat/` subdirectories
 4. Executes 12 comprehensive tests covering major HDF5 features
 5. Reports results with detailed pass/fail summary
+
+**Note:** 3 callback-based examples are excluded (H5Ex_G_Visit, H5Ex_G_Intermediate, H5Ex_G_Traverse) as FFM callback handling differs from JNI and these examples have not yet been adapted.
 
 **Prerequisites:**
 - Java 25 or later (class version 69.0)
