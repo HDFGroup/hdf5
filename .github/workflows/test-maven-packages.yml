@@ -60,10 +60,10 @@ jobs:
       - name: Checkout HDF5 repository (contains HDF5Examples)
         uses: actions/checkout@v5.0.0
 
-      - name: Set up Java 11 for JNI
+      - name: Set up Java 21 for JNI
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Configure Maven settings for GitHub Packages
