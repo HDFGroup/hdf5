@@ -607,11 +607,35 @@ jobs:
             echo "Validation script not found - skipping validation"
           fi
 
+      - name: Install HDF5 binaries for testing
+        shell: bash
+        run: |
+          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          INSTALL_DIR="${{ runner.workspace }}/hdf5-install"
+
+          echo "Installing HDF5 binaries to: $INSTALL_DIR"
+          cd "$BUILD_ROOT"
+          cmake --install . --prefix "$INSTALL_DIR"
+
+          echo "Installation contents:"
+          ls -la "$INSTALL_DIR"
+          if [ -d "$INSTALL_DIR/lib" ]; then
+            echo "Libraries:"
+            ls -la "$INSTALL_DIR/lib" | grep -E '\.so|\.dylib|\.dll' || echo "No shared libraries found"
+          fi
+
       - name: Upload Maven artifacts
         uses: actions/upload-artifact@v5
         with:
           name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
           path: ${{ runner.workspace }}/maven-artifacts
+          retention-days: 7
+
+      - name: Upload HDF5 installation for testing
+        uses: actions/upload-artifact@v5
+        with:
+          name: hdf5-install-${{ matrix.artifact-suffix }}
+          path: ${{ runner.workspace }}/hdf5-install
           retention-days: 7
 
   test-maven-deployment:

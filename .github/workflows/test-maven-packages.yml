@@ -221,10 +221,20 @@ jobs:
           fi
           echo "::endgroup::"
 
-      - name: Install HDF5 native libraries
+      - name: Download HDF5 installation from workflow
+        uses: actions/download-artifact@v5
+        with:
+          name: hdf5-install-linux-x86_64-jni
+          path: ${{ runner.workspace }}/hdf5-install
+
+      - name: Verify HDF5 installation
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libhdf5-dev hdf5-tools
+          echo "HDF5 installation contents:"
+          ls -la "${{ runner.workspace }}/hdf5-install"
+          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+            echo "Libraries:"
+            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+          fi
 
       - name: Test JNI examples
         run: |
@@ -233,6 +243,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+          HDF5_HOME: ${{ runner.workspace }}/hdf5-install
 
       - name: Upload test artifacts (JNI)
         if: always()
@@ -413,10 +424,20 @@ jobs:
           fi
           echo "::endgroup::"
 
-      - name: Install HDF5 native libraries
+      - name: Download HDF5 installation from workflow
+        uses: actions/download-artifact@v5
+        with:
+          name: hdf5-install-linux-x86_64-ffm
+          path: ${{ runner.workspace }}/hdf5-install
+
+      - name: Verify HDF5 installation
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libhdf5-dev hdf5-tools
+          echo "HDF5 installation contents:"
+          ls -la "${{ runner.workspace }}/hdf5-install"
+          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+            echo "Libraries:"
+            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+          fi
 
       - name: Test FFM examples
         run: |
@@ -425,6 +446,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+          HDF5_HOME: ${{ runner.workspace }}/hdf5-install
 
       - name: Upload test artifacts (FFM)
         if: always()
