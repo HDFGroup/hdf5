@@ -153,6 +153,7 @@ This section includes the new features introduced in the HDF5 2.0 series:
 \li Default chunk cache hash table size increased to 8191
 <br>In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
 
+\ref subsec_rel_spec_20_change
 
  *
  * <hr>
