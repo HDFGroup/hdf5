@@ -161,6 +161,44 @@ fi
 log_success "Prerequisites check passed"
 echo ""
 
+# Detect platform classifier (needed for POM generation)
+log_info "Detecting platform..."
+OS_NAME=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+
+case "${OS_NAME}" in
+    linux*)
+        PLATFORM="linux"
+        ;;
+    darwin*)
+        PLATFORM="macos"
+        ;;
+    mingw*|msys*|cygwin*)
+        PLATFORM="windows"
+        ;;
+    *)
+        log_error "Unsupported OS: ${OS_NAME}"
+        exit 1
+        ;;
+esac
+
+case "${ARCH}" in
+    x86_64|amd64)
+        PLATFORM_ARCH="x86_64"
+        ;;
+    aarch64|arm64)
+        PLATFORM_ARCH="aarch64"
+        ;;
+    *)
+        log_error "Unsupported architecture: ${ARCH}"
+        exit 1
+        ;;
+esac
+
+PLATFORM_CLASSIFIER="${PLATFORM}-${PLATFORM_ARCH}"
+log_info "Platform classifier: ${PLATFORM_CLASSIFIER}"
+echo ""
+
 # Generate pom-examples.xml in build directory
 log_info "Generating pom-examples.xml for ${IMPLEMENTATION}..."
 
@@ -284,44 +322,6 @@ rm -f "${BUILD_DIR}"/*.h5 2>/dev/null || true
 log_success "Clean complete"
 echo ""
 
-# Detect platform classifier
-log_info "Detecting platform..."
-OS_NAME=$(uname -s | tr '[:upper:]' '[:lower:]')
-ARCH=$(uname -m)
-
-case "${OS_NAME}" in
-    linux*)
-        PLATFORM="linux"
-        ;;
-    darwin*)
-        PLATFORM="macos"
-        ;;
-    mingw*|msys*|cygwin*)
-        PLATFORM="windows"
-        ;;
-    *)
-        log_error "Unsupported OS: ${OS_NAME}"
-        exit 1
-        ;;
-esac
-
-case "${ARCH}" in
-    x86_64|amd64)
-        PLATFORM_ARCH="x86_64"
-        ;;
-    aarch64|arm64)
-        PLATFORM_ARCH="aarch64"
-        ;;
-    *)
-        log_error "Unsupported architecture: ${ARCH}"
-        exit 1
-        ;;
-esac
-
-PLATFORM_CLASSIFIER="${PLATFORM}-${PLATFORM_ARCH}"
-log_info "Platform classifier: ${PLATFORM_CLASSIFIER}"
-echo ""
-
 # Clear cached SNAPSHOT to force fresh download
 if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
     log_info "Clearing cached SNAPSHOT from local repository..."
@@ -330,15 +330,94 @@ fi
 
 # Download dependencies and verify artifact
 log_info "Downloading Maven artifact: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}..."
-if mvn dependency:get \
-    -Dartifact=org.hdfgroup:${ARTIFACT_ID}:${VERSION} \
-    -Dclassifier=${PLATFORM_CLASSIFIER} \
-    -U \
-    -q; then
-    log_success "Artifact downloaded successfully"
+
+# For SNAPSHOT versions, download directly using curl to work around maven-metadata.xml classifier issues
+if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
+    log_info "SNAPSHOT version detected - using direct download..."
+    METADATA_URL="${REPOSITORY_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/maven-metadata.xml"
+
+    # Download metadata
+    TEMP_METADATA=$(mktemp) || {
+        log_error "Failed to create temporary file for metadata"
+        exit 1
+    }
+    trap "rm -f '$TEMP_METADATA'" EXIT
+
+    if ! curl -u "${GITHUB_ACTOR:-$USER}:${GITHUB_TOKEN}" -fsSL "$METADATA_URL" -o "$TEMP_METADATA"; then
+        log_error "Failed to download maven-metadata.xml from ${METADATA_URL}"
+        log_error "Check repository URL and authentication"
+        exit 1
+    fi
+
+    # Extract timestamped version from metadata
+    # Note: Maven may truncate long classifiers, so we search for partial matches
+    # e.g., "linux-x86_64" may be stored as classifier="linux-x" extension="6_64.jar"
+    # Maven removes suffixes: 86_64, _64, or 64
+    TRUNCATED_CLASSIFIER=$(echo "$PLATFORM_CLASSIFIER" | sed -E 's/(86_64|_64|64)$//')
+
+    # The value element contains the full timestamped version (e.g., 2.0.1-20251108.230757-57)
+    TIMESTAMPED_VERSION=$(xmllint --xpath "string(//snapshotVersion[contains(extension, 'jar') and starts-with(classifier, '${TRUNCATED_CLASSIFIER}')]/value)" "$TEMP_METADATA" 2>/dev/null)
+
+    if [ -z "$TIMESTAMPED_VERSION" ]; then
+        log_error "Could not extract SNAPSHOT version from metadata"
+        log_error "Searched for classifier starting with: ${TRUNCATED_CLASSIFIER}"
+        cat "$TEMP_METADATA"
+        exit 1
+    fi
+
+    log_info "Latest SNAPSHOT version: ${TIMESTAMPED_VERSION}"
+    JAR_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}-${PLATFORM_CLASSIFIER}.jar"
+    POM_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}.pom"
+
+    # Download JAR and POM
+    JAR_URL="${REPOSITORY_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${JAR_FILENAME}"
+    POM_URL="${REPOSITORY_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${POM_FILENAME}"
+
+    TEMP_DIR=$(mktemp -d) || {
+        log_error "Failed to create temporary directory"
+        exit 1
+    }
+    trap "rm -rf '$TEMP_DIR' '$TEMP_METADATA'" EXIT
+
+    log_info "Downloading JAR: ${JAR_FILENAME}"
+    if ! curl -u "${GITHUB_ACTOR:-$USER}:${GITHUB_TOKEN}" -fsSL "$JAR_URL" -o "$TEMP_DIR/${JAR_FILENAME}"; then
+        log_error "Failed to download JAR from ${JAR_URL}"
+        exit 1
+    fi
+
+    log_info "Downloading POM: ${POM_FILENAME}"
+    if ! curl -u "${GITHUB_ACTOR:-$USER}:${GITHUB_TOKEN}" -fsSL "$POM_URL" -o "$TEMP_DIR/${POM_FILENAME}"; then
+        log_error "Failed to download POM from ${POM_URL}"
+        exit 1
+    fi
+
+    # Install to local Maven repository
+    log_info "Installing artifact to local repository..."
+    if mvn install:install-file \
+        -Dfile="$TEMP_DIR/${JAR_FILENAME}" \
+        -DpomFile="$TEMP_DIR/${POM_FILENAME}" \
+        -DgroupId=org.hdfgroup \
+        -DartifactId=${ARTIFACT_ID} \
+        -Dversion=${VERSION} \
+        -Dpackaging=jar \
+        -Dclassifier=${PLATFORM_CLASSIFIER} \
+        -q; then
+        log_success "Artifact installed successfully"
+    else
+        log_error "Failed to install artifact"
+        exit 1
+    fi
 else
-    log_error "Failed to download artifact. Check version and repository URL."
-    exit 1
+    # Release version - use standard Maven download
+    if mvn dependency:get \
+        -Dartifact=org.hdfgroup:${ARTIFACT_ID}:${VERSION} \
+        -Dclassifier=${PLATFORM_CLASSIFIER} \
+        -q; then
+        log_success "Artifact downloaded successfully"
+    else
+        log_error "Failed to download artifact. Check version and repository URL."
+        exit 1
+    fi
 fi
 echo ""
 

@@ -112,13 +112,68 @@ jobs:
 
           # Determine platform classifier
           PLATFORM_CLASSIFIER="linux-x86_64"
+          ARTIFACT_ID="hdf5-java-jni"
+          VERSION="${{ inputs.version }}"
+          REPO_URL="${{ inputs.repository_url }}"
 
-          echo "Downloading: org.hdfgroup:hdf5-java-jni:${{ inputs.version }} with classifier ${PLATFORM_CLASSIFIER}"
-          mvn dependency:get \
-            -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.version }} \
-            -Dclassifier=${PLATFORM_CLASSIFIER} \
-            -Dtransitive=false \
-            -U
+          echo "Downloading: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}"
+
+          # For SNAPSHOT versions, get the latest timestamp from maven-metadata.xml
+          if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
+            echo "Fetching SNAPSHOT metadata..."
+            METADATA_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/maven-metadata.xml"
+
+            # Download metadata
+            curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$METADATA_URL" -o /tmp/maven-metadata.xml
+
+            # Extract timestamped version from metadata
+            # Note: Maven may truncate long classifiers, so we search for partial matches
+            # e.g., "linux-x86_64" may be stored as classifier="linux-x" extension="6_64.jar"
+            # Maven removes suffixes: 86_64, _64, or 64
+            TRUNCATED_CLASSIFIER=$(echo "$PLATFORM_CLASSIFIER" | sed -E 's/(86_64|_64|64)$//')
+
+            # The value element contains the full timestamped version (e.g., 2.0.1-20251108.230757-57)
+            TIMESTAMPED_VERSION=$(xmllint --xpath "string(//snapshotVersion[contains(extension, 'jar') and starts-with(classifier, '${TRUNCATED_CLASSIFIER}')]/value)" /tmp/maven-metadata.xml 2>/dev/null)
+
+            if [ -z "$TIMESTAMPED_VERSION" ]; then
+              echo "::error::Could not extract SNAPSHOT version from metadata"
+              echo "::error::Searched for classifier starting with: ${TRUNCATED_CLASSIFIER}"
+              cat /tmp/maven-metadata.xml
+              exit 1
+            fi
+
+            echo "Latest SNAPSHOT version: ${TIMESTAMPED_VERSION}"
+            JAR_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}-${PLATFORM_CLASSIFIER}.jar"
+            POM_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}.pom"
+          else
+            # Release version - use version as-is
+            JAR_FILENAME="${ARTIFACT_ID}-${VERSION}-${PLATFORM_CLASSIFIER}.jar"
+            POM_FILENAME="${ARTIFACT_ID}-${VERSION}.pom"
+          fi
+
+          # Download JAR and POM
+          JAR_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${JAR_FILENAME}"
+          POM_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${POM_FILENAME}"
+
+          echo "Downloading JAR: ${JAR_URL}"
+          mkdir -p /tmp/maven-download
+          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$JAR_URL" -o "/tmp/maven-download/${JAR_FILENAME}"
+
+          echo "Downloading POM: ${POM_URL}"
+          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$POM_URL" -o "/tmp/maven-download/${POM_FILENAME}"
+
+          # Install to local Maven repository
+          echo "Installing artifact to local repository..."
+          mvn install:install-file \
+            -Dfile="/tmp/maven-download/${JAR_FILENAME}" \
+            -DpomFile="/tmp/maven-download/${POM_FILENAME}" \
+            -DgroupId=org.hdfgroup \
+            -DartifactId=${ARTIFACT_ID} \
+            -Dversion=${VERSION} \
+            -Dpackaging=jar \
+            -Dclassifier=${PLATFORM_CLASSIFIER}
+
+          echo "✅ Artifact installed successfully"
           echo "::endgroup::"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -233,13 +288,68 @@ jobs:
 
           # Determine platform classifier
           PLATFORM_CLASSIFIER="linux-x86_64"
+          ARTIFACT_ID="hdf5-java-ffm"
+          VERSION="${{ inputs.version }}"
+          REPO_URL="${{ inputs.repository_url }}"
 
-          echo "Downloading: org.hdfgroup:hdf5-java-ffm:${{ inputs.version }} with classifier ${PLATFORM_CLASSIFIER}"
-          mvn dependency:get \
-            -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.version }} \
-            -Dclassifier=${PLATFORM_CLASSIFIER} \
-            -Dtransitive=false \
-            -U
+          echo "Downloading: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}"
+
+          # For SNAPSHOT versions, get the latest timestamp from maven-metadata.xml
+          if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
+            echo "Fetching SNAPSHOT metadata..."
+            METADATA_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/maven-metadata.xml"
+
+            # Download metadata
+            curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$METADATA_URL" -o /tmp/maven-metadata.xml
+
+            # Extract timestamped version from metadata
+            # Note: Maven may truncate long classifiers, so we search for partial matches
+            # e.g., "linux-x86_64" may be stored as classifier="linux-x" extension="6_64.jar"
+            # Maven removes suffixes: 86_64, _64, or 64
+            TRUNCATED_CLASSIFIER=$(echo "$PLATFORM_CLASSIFIER" | sed -E 's/(86_64|_64|64)$//')
+
+            # The value element contains the full timestamped version (e.g., 2.0.1-20251108.230757-57)
+            TIMESTAMPED_VERSION=$(xmllint --xpath "string(//snapshotVersion[contains(extension, 'jar') and starts-with(classifier, '${TRUNCATED_CLASSIFIER}')]/value)" /tmp/maven-metadata.xml 2>/dev/null)
+
+            if [ -z "$TIMESTAMPED_VERSION" ]; then
+              echo "::error::Could not extract SNAPSHOT version from metadata"
+              echo "::error::Searched for classifier starting with: ${TRUNCATED_CLASSIFIER}"
+              cat /tmp/maven-metadata.xml
+              exit 1
+            fi
+
+            echo "Latest SNAPSHOT version: ${TIMESTAMPED_VERSION}"
+            JAR_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}-${PLATFORM_CLASSIFIER}.jar"
+            POM_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}.pom"
+          else
+            # Release version - use version as-is
+            JAR_FILENAME="${ARTIFACT_ID}-${VERSION}-${PLATFORM_CLASSIFIER}.jar"
+            POM_FILENAME="${ARTIFACT_ID}-${VERSION}.pom"
+          fi
+
+          # Download JAR and POM
+          JAR_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${JAR_FILENAME}"
+          POM_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${POM_FILENAME}"
+
+          echo "Downloading JAR: ${JAR_URL}"
+          mkdir -p /tmp/maven-download
+          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$JAR_URL" -o "/tmp/maven-download/${JAR_FILENAME}"
+
+          echo "Downloading POM: ${POM_URL}"
+          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$POM_URL" -o "/tmp/maven-download/${POM_FILENAME}"
+
+          # Install to local Maven repository
+          echo "Installing artifact to local repository..."
+          mvn install:install-file \
+            -Dfile="/tmp/maven-download/${JAR_FILENAME}" \
+            -DpomFile="/tmp/maven-download/${POM_FILENAME}" \
+            -DgroupId=org.hdfgroup \
+            -DartifactId=${ARTIFACT_ID} \
+            -Dversion=${VERSION} \
+            -Dpackaging=jar \
+            -Dclassifier=${PLATFORM_CLASSIFIER}
+
+          echo "✅ Artifact installed successfully"
           echo "::endgroup::"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
