@@ -83,6 +83,14 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ## Configuration
 
+### Added CMake support for include-what-you-use
+
+   Adds an `HDF5_USE_IWYU` option to CMake (default OFF). This will run the `include-what-you-use` tool while compiling.
+
+   See https://include-what-you-use.org/ for more information.
+
+   This requires `include-what-you-use` to be installed.
+
 ### Improved the cross-compile support in the build system
 
    The CMake build system has been improved to better support cross-compiling. This includes the following changes:

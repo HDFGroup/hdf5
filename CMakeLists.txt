@@ -677,6 +677,17 @@ if (HDF5_ENABLE_COVERAGE)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to use build with include-what-you-use
+#-----------------------------------------------------------------------------
+option(HDF5_USE_IWYU "Run include-what-you-use when compiling" OFF)
+
+if(HDF5_USE_IWYU)
+    find_program(IWYU_EXE NAMES include-what-you-use REQUIRED)
+    set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_EXE})
+    set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_EXE})
+endif()
+
+#-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_USING_MEMCHECKER)
