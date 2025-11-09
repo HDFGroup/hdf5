@@ -27,12 +27,12 @@ the HDF5 source code tree in the release_docs directory.
 
 HDF5 version 2.0 provides a number of new C APIs and other user-visible changes in behavior in the transition from HDF5 Release 1.14.6 to Release 2.0.  Some of those require the use of the API Compatibility Macros for the main library. In addition, some APIs have been removed or have had their signature change.
 
-\li `hbool_t` has been removed from public API calls
-<br>The `hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.  Prior to HDF5 2.0, it had been purged from the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
-<br>The `hbool_t` typedef remains in H5public.h so existing code does not need to be updated.
+\li `#hbool_t` has been removed from public API calls
+<br>The `#hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.  Prior to HDF5 2.0, it had been purged from the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
+<br>The `#hbool_t` typedef remains in H5public.h so existing code does not need to be updated.
 
 \li Default page buffer size for the ROS3 driver changed
-<br>Calling `H5Pset_fapl_ros3` now has the side effect of setting the page buffer size in the FAPL to 64 MiB if it was not previously set. This will only have an effect if the file uses paged allocation. Also added the `H5F_PAGE_BUFFER_SIZE_DEFAULT` to allow the user to unset the page buffer size in an FAPL so it can be similarly overridden.
+<br>Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer size in the FAPL to 64 MiB if it was not previously set. This will only have an effect if the file uses paged allocation. Also added the `#H5F_PAGE_BUFFER_SIZE_DEFAULT` to allow the user to unset the page buffer size in an FAPL so it can be similarly overridden.
 
 \li Default dataset chunk cache size increased
 <br>The default dataset chunk cache size was increased to 8 MiB (8,388,608 bytes).
@@ -80,184 +80,210 @@ List of new public APIs/Macros
 <tr><th>This Function/Constant</th><th>Description</th></tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Dread_chunk1
+H5Dread_chunk1()
 </td>
 <td>
+Reads an entire chunk from the file directly (Deprecated in favor of `H5Dread_chunk2()`)
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Dread_chunk2
+H5Dread_chunk2()
 </td>
 <td>
+Reads an entire chunk from the file directly
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Iregister_type1
+H5Iregister_type1()
 </td>
 <td>
+Creates a new type of ID ((Deprecated in favor of `H5Iregister_type2)()`
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Iregister_type2
+H5Iregister_type2()
 </td>
 <td>
+Creates a new type of ID
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Pget_virtual_spatial_tree
+H5Pget_virtual_spatial_tree()
 </td>
 <td>
+Retrieves the setting for whether or not to use a spatial tree for VDS mappings
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Pset_virtual_spatial_tree
+H5Pset_virtual_spatial_tree()
 </td>
 <td>
+Sets the flag to use a spatial tree for mappings
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Tcomplex_create
+H5Tcomplex_create()
 </td>
 <td>
+Creates a new complex number datatype
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Tdecode1
+H5Tdecode1()
 </td>
 <td>
+Decodes a binary object description ()
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Tdecode2
+H5Tdecode2()
 </td>
 <td>
+Decodes a binary object description
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5VLclose_lib_context
+H5VLclose_lib_context()
 </td>
 <td>
+Closes the state of the library, undoing the effects of `H5VLopen_lib_context()`
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5VLopen_lib_context
+H5VLopen_lib_context()
 </td>
 <td>
+Opens a new internal context for the HDF5 library
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_COMPLEX_IEEE_F16BE
+#H5T_COMPLEX_IEEE_F16BE
 </td>
 <td>
+Complex number of 2 16-bit big-endian IEEE floating point numbers
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_COMPLEX_IEEE_F16LE
+#H5T_COMPLEX_IEEE_F16LE
 </td>
 <td>
+Complex number of 2 16-bit little-endian IEEE floating point numbers
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_COMPLEX_IEEE_F32BE
+#H5T_COMPLEX_IEEE_F32BE
 </td>
 <td>
+Complex number of 2 32-bit big-endian IEEE floating point numbers
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_COMPLEX_IEEE_F32LE
+#H5T_COMPLEX_IEEE_F32LE
 </td>
 <td>
+Complex number of 2 32-bit little-endian IEEE floating point numbers
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_COMPLEX_IEEE_F64BE
+#H5T_COMPLEX_IEEE_F64BE
 </td>
 <td>
+Complex number of 2 64-bit big-endian IEEE floating point numbers
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_COMPLEX_IEEE_F64LE
+#H5T_COMPLEX_IEEE_F64LE
 </td>
 <td>
+Complex number of 2 64-bit little-endian IEEE floating point numbers
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_FLOAT_BFLOAT16BE
+#H5T_FLOAT_BFLOAT16BE
 </td>
 <td>
+16-bit big-endian bfloat16 floating point
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_FLOAT_BFLOAT16LE
+#H5T_FLOAT_BFLOAT16LE
 </td>
 <td>
+16-bit little-endian bfloat16 floating point
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_FLOAT_F8E4M3
+#H5T_FLOAT_F8E4M3
 </td>
 <td>
+8-bit FP8 E4M3 (4 exponent bits, 3 mantissa bits) floating point
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_FLOAT_F8E5M2
+#H5T_FLOAT_F8E5M2
 </td>
 <td>
+8-bit FP8 E5M2 (5 exponent bits, 2 mantissa bits) floating point
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_NATIVE_DOUBLE_COMPLEX
+#H5T_NATIVE_DOUBLE_COMPLEX
 </td>
 <td>
+double _Complex (MSVC _Dcomplex)
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_NATIVE_FLOAT_COMPLEX
+#H5T_NATIVE_FLOAT_COMPLEX
 </td>
 <td>
+float _Complex (MSVC _Fcomplex)
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5T_NATIVE_LDOUBLE_COMPLEX
+#H5T_NATIVE_LDOUBLE_COMPLEX
 </td>
 <td>
+long double _Complex (MSVC _Lcomplex)
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5VL_NATIVE
+#H5VL_NATIVE
 </td>
 <td>
+Identifier for the native VOL connector
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5VL_PASSTHRU
+#H5VL_PASSTHRU
 </td>
 <td>
+Identifier for the pass-through VOL connector
 </td>
 </tr>
 </table>
@@ -265,61 +291,45 @@ H5VL_PASSTHRU
 List of removed public APIs
 
 <table>
-<tr><th>Function</th><th>Description</th></tr>
+<tr><th>Function</th></tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Dread_chunk
-</td>
-<td>
+H5Dread_chunk()
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5FDperform_init
-</td>
-<td>
+H5FDperform_init()
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Iregister_type
-</td>
-<td>
+H5Iregister_type()
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5Tdecode
-</td>
-<td>
+H5Tdecode()
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5VLpeek_connector_id_by_name
-</td>
-<td>
+H5VLpeek_connector_id_by_name()
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5VLpeek_connector_id_by_value
-</td>
-<td>
+H5VLpeek_connector_id_by_value()
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5VLfinish_lib_state
-</td>
-<td>
+H5VLfinish_lib_state()
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-H5VLstart_lib_state
-</td>
-<td>
+H5VLstart_lib_state()
 </td>
 </tr>
 </table>
