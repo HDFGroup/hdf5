@@ -33,6 +33,29 @@ import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
 
+enum H5O_type {
+    H5O_TYPE_UNKNOWN(-1),       // Unknown object type
+    H5O_TYPE_GROUP(0),          // Object is a group
+    H5O_TYPE_DATASET(1),        // Object is a dataset
+    H5O_TYPE_NAMED_DATATYPE(2), // Object is a named data type
+    H5O_TYPE_NTYPES(3);         // Number of different object types
+    private static final Map<Integer, H5O_type> lookup = new HashMap<Integer, H5O_type>();
+
+    static
+    {
+        for (H5O_type s : EnumSet.allOf(H5O_type.class))
+            lookup.put(s.getCode(), s);
+    }
+
+    private int code;
+
+    H5O_type(int layout_type) { this.code = layout_type; }
+
+    public int getCode() { return this.code; }
+
+    public static H5O_type get(int code) { return lookup.get(code); }
+}
+
 class opdata implements H5L_iterate_opdata_t {
     int recurs;
     opdata prev;
@@ -40,29 +63,6 @@ class opdata implements H5L_iterate_opdata_t {
 }
 
 public class H5Ex_G_Traverse {
-
-    enum H5O_type {
-        H5O_TYPE_UNKNOWN(-1),       // Unknown object type
-        H5O_TYPE_GROUP(0),          // Object is a group
-        H5O_TYPE_DATASET(1),        // Object is a dataset
-        H5O_TYPE_NAMED_DATATYPE(2), // Object is a named data type
-        H5O_TYPE_NTYPES(3);         // Number of different object types
-        private static final Map<Integer, H5O_type> lookup = new HashMap<Integer, H5O_type>();
-
-        static
-        {
-            for (H5O_type s : EnumSet.allOf(H5O_type.class))
-                lookup.put(s.getCode(), s);
-        }
-
-        private int code;
-
-        H5O_type(int layout_type) { this.code = layout_type; }
-
-        public int getCode() { return this.code; }
-
-        public static H5O_type get(int code) { return lookup.get(code); }
-    }
 
     private static String FILENAME      = "h5ex_g_traverse.h5";
     public static H5L_iterate_t iter_cb = new H5L_iter_callbackT();
