@@ -43,7 +43,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-\ref sec_rel_spec_20_change
+\ref subsec_rel_spec_20_change
 </td>
 </tr>
 <tr>
@@ -85,11 +85,15 @@ Source code and binaries are available at:
 Please refer to [Build instructions](https://github.com/HDFGroup/hdf5/blob/hdf5_2.0/release_docs/INSTALL) for building with either CMake or Autotools.
 
 
-**Methods to obtain  (gz file)**
-* firefox – Download file and then run:  `gzip <distribution>.tar.gz | tar xzf -`
-* chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
-* `wget – wget https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.N.N/<distribution>.tar.gz`
-  * `gzip -cd <distribution>.tar.gz | tar xvf -`
+<h3 id="method">Methods to obtain (gz file)</h3>
+
+\li firefox – Download file and then run:  `gzip <distribution>.tar.gz | tar xzf -`
+\li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
+\li wget –
+<div style="margin-left: 2em;">
+    `wget https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.N.N/<distribution>.tar.gz`<br>
+    `gzip -cd <distribution>.tar.gz | tar xvf -`
+</div>
 
 <h3 id="api_compat">Individual API Compatibility Reports</h3>
 
@@ -112,54 +116,42 @@ Since this portion of the HDF5 documentation is now part of the source code, it 
 
 \subsection subsec_rel_spec_20_migrate Migrating from HDF5 1.14 to HDF5 2.0
 
+This section highlights some changes that might affect migrating to HDF5.20, please refer to the \ref subsec_rel_spec_20_change or the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for detail.
+
 \li Default file format is now 1.8
-
 \li The file format has been updated to 4.0<a name="fileformat"></a>
-
 \li API signature changes
-  \li `H5Dread_chunk()`
-  \li `H5Tdecode()`
-
-Please refer to \ref sec_rel_spec_20_change or <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for detail.
-
-\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3)<a name="ros3"></a> replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for a complete description on this feature.
-
+    - `H5Dread_chunk()`<br>
+    - `H5Tdecode()`<br>
+    - `H5Iregister_type()`<br>
+\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for a complete description on this feature.
 \li Significance in tools
-   <br>The tool h5dump has a new option --lformat and its XML option is deprecated.
-
-   <br>The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for an explanation.
-
+    - The tool h5dump has a new option `--lformat` and its `XML` option is deprecated.
+    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for an explanation.
 
 \subsection subsec_rel_spec_20_feat New Features in HDF5 Release 2.0
 
-The new features in the HDF5 2.0 series include:
+This section includes the new features introduced in the HDF5 2.0 series:
 
-\li Support for complex number datatypes<a name="complex"></a>
-
-Support for the C99 `float _Complex`, `double _Complex` and `long double _Complex` (with MSVC, `_Fcomplex`, `_Dcomplex` and `_Lcomplex`) types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications). \ref_rfc20240129<br />
+\li \ref_rfc20240129complex
+<br>Support for the C99 `float _Complex`, `double _Complex` and `long double _Complex` (with MSVC, `_Fcomplex`, `_Dcomplex` and `_Lcomplex`) types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications).<br />
 
 \li An AWS endpoint command option
-
-   The new option is `--endpoint-url`, which allows the user to set an alternate endpoint URL other than the standard "protocol://service-code.region-code.amazonaws.com". If `--endpoint-url` is not specified, the ROS3 VFD will first check the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL` environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
-
-   This option is supported by the following tools:
-      `h5dump`, `h5ls`, `h5stat`
+<br>The new option is `--endpoint-url`, which allows the user to set an alternate endpoint URL other than the standard "protocol://service-code.region-code.amazonaws.com". If `--endpoint-url` is not specified, the ROS3 VFD will first check the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL` environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
+<br>This option is supported by the following tools: `h5dump`, `h5ls`, `h5stat`
 
 \li Specifying ROS3 VFD on the command line is not required when using S3 URI
-
-   This feature applies to the following tools: `h5dump`, `h5ls`, `h5stat`.
+<br>This feature applies to the following tools: `h5dump`, `h5ls`, `h5stat`.
 
 \li Performance improvement in opening a virtual dataset with many mappings
-
-   When opening a virtual dataset, the library would previously decode the mappings in the object header package, then copy them to the dataset struct, then copy them to the internal dataset creation property list. Copying the VDS mappings could be very expensive if there were many mappings. Changed this to delay decoding the mappings until the dataset code, and delay copying the layout to the DCPL until it is needed. This results in only the decoding and no copies in most use cases, as opposed to the decoding and two copies with the previous code.
+<br>When opening a virtual dataset, the library would previously decode the mappings in the object header package, then copy them to the dataset struct, then copy them to the internal dataset creation property list. Copying the VDS mappings could be very expensive if there were many mappings. Changed this to delay decoding the mappings until the dataset code, and delay copying the layout to the DCPL until it is needed. This results in only the decoding and no copies in most use cases, as opposed to the decoding and two copies with the previous code.
 
 \li Support for chunks larger than 4 GiB using 64 bit addressing.
 
 \li New predefined datatypes for FP8 data in E4M3 and E5M2 formats (https://arxiv.org/abs/2209.05433), but not a native FP8 datatype.  Please refer to the <a href="https://\SRCURL/release_docs/CHANGELOG.md">CHANGELOG</a> for detail.
 
 \li Default chunk cache hash table size increased to 8191
-
-In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
+<br>In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
 
 
  *
