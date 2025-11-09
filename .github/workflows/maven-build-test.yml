@@ -133,24 +133,110 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  test-deployed-packages:
-    name: Test Deployed Packages
+  test-jni-package:
+    name: Test JNI Maven Package
     needs: [build-maven-packages, deploy-to-packages]
-    if: ${{ inputs.test_deployment && needs.deploy-to-packages.result == 'success' }}
-    permissions:
-      contents: read
-      packages: read
-    uses: ./.github/workflows/test-maven-packages.yml
-    with:
-      version: ${{ needs.build-maven-packages.outputs.version }}
-      java_implementation: ${{ inputs.java_implementation }}
-      repository_url: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    if: |
+      inputs.test_deployment &&
+      needs.deploy-to-packages.result == 'success' &&
+      (inputs.java_implementation == 'both' || inputs.java_implementation == 'jni')
+    steps:
+      - name: Checkout HDF5 repository (contains HDF5Examples)
+        uses: actions/checkout@v5.0.0
+
+      - name: Set up Java 11 for JNI
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Download HDF5 installation from workflow
+        uses: actions/download-artifact@v5
+        with:
+          name: hdf5-install-linux-x86_64-jni
+          path: ${{ runner.workspace }}/hdf5-install
+
+      - name: Verify HDF5 installation
+        run: |
+          echo "HDF5 installation contents:"
+          ls -la "${{ runner.workspace }}/hdf5-install"
+          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+            echo "Libraries:"
+            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+          fi
+
+      - name: Test JNI examples
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-jni.sh "${{ needs.build-maven-packages.outputs.version }}" "${{ format('https://maven.pkg.github.com/{0}', github.repository) }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          HDF5_HOME: ${{ runner.workspace }}/hdf5-install
+
+      - name: Upload test artifacts (JNI)
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: jni-test-results-${{ needs.build-maven-packages.outputs.version }}
+          path: |
+            HDF5Examples/JAVA/build/maven-test-jni/
+
+  test-ffm-package:
+    name: Test FFM Maven Package
+    needs: [build-maven-packages, deploy-to-packages]
+    runs-on: ubuntu-latest
+    if: |
+      inputs.test_deployment &&
+      needs.deploy-to-packages.result == 'success' &&
+      (inputs.java_implementation == 'both' || inputs.java_implementation == 'ffm')
+    steps:
+      - name: Checkout HDF5 repository (contains HDF5Examples)
+        uses: actions/checkout@v5.0.0
+
+      - name: Set up Java 25 for FFM
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+
+      - name: Download HDF5 installation from workflow
+        uses: actions/download-artifact@v5
+        with:
+          name: hdf5-install-linux-x86_64-ffm
+          path: ${{ runner.workspace }}/hdf5-install
+
+      - name: Verify HDF5 installation
+        run: |
+          echo "HDF5 installation contents:"
+          ls -la "${{ runner.workspace }}/hdf5-install"
+          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+            echo "Libraries:"
+            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+          fi
+
+      - name: Test FFM examples
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-ffm.sh "${{ needs.build-maven-packages.outputs.version }}" "${{ format('https://maven.pkg.github.com/{0}', github.repository) }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          HDF5_HOME: ${{ runner.workspace }}/hdf5-install
+
+      - name: Upload test artifacts (FFM)
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: ffm-test-results-${{ needs.build-maven-packages.outputs.version }}
+          path: |
+            HDF5Examples/JAVA/build/maven-test-ffm/
 
   summarize-results:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [build-maven-packages, deploy-to-packages, test-deployed-packages]
+    needs: [build-maven-packages, deploy-to-packages, test-jni-package, test-ffm-package]
     if: always()
     steps:
       - name: Generate test summary
@@ -187,10 +273,17 @@ jobs:
             fi
 
             # Test results
-            if [ "${{ needs.test-deployed-packages.result }}" == "success" ]; then
-              echo "✅ **Package Testing:** PASSED" >> $GITHUB_STEP_SUMMARY
-            elif [ "${{ needs.test-deployed-packages.result }}" == "skipped" ]; then
-              echo "⏭️  **Package Testing:** SKIPPED (deployment failed)" >> $GITHUB_STEP_SUMMARY
+            JNI_RESULT="${{ needs.test-jni-package.result }}"
+            FFM_RESULT="${{ needs.test-ffm-package.result }}"
+
+            if [ "$JNI_RESULT" == "success" ] || [ "$JNI_RESULT" == "skipped" ]; then
+              if [ "$FFM_RESULT" == "success" ] || [ "$FFM_RESULT" == "skipped" ]; then
+                echo "✅ **Package Testing:** PASSED" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "⚠️ **Package Testing:** PARTIAL (FFM failed)" >> $GITHUB_STEP_SUMMARY
+              fi
+            elif [ "$FFM_RESULT" == "success" ] || [ "$FFM_RESULT" == "skipped" ]; then
+              echo "⚠️ **Package Testing:** PARTIAL (JNI failed)" >> $GITHUB_STEP_SUMMARY
             else
               echo "❌ **Package Testing:** FAILED" >> $GITHUB_STEP_SUMMARY
             fi
@@ -199,10 +292,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Final status
+          JNI_OK=$([[ "${{ needs.test-jni-package.result }}" =~ ^(success|skipped)$ ]] && echo "true" || echo "false")
+          FFM_OK=$([[ "${{ needs.test-ffm-package.result }}" =~ ^(success|skipped)$ ]] && echo "true" || echo "false")
+
           if [ "${{ needs.build-maven-packages.result }}" == "success" ] && \
              ([ "${{ inputs.test_deployment }}" == "false" ] || \
               ([ "${{ needs.deploy-to-packages.result }}" == "success" ] && \
-               [ "${{ needs.test-deployed-packages.result }}" == "success" ])); then
+               [ "$JNI_OK" == "true" ] && [ "$FFM_OK" == "true" ])); then
             echo "## 🎉 All Tests Passed!" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Maven packages are ready for release." >> $GITHUB_STEP_SUMMARY
@@ -228,7 +324,8 @@ jobs:
         run: |
           BUILD_RESULT="${{ needs.build-maven-packages.result }}"
           DEPLOY_RESULT="${{ needs.deploy-to-packages.result }}"
-          TEST_RESULT="${{ needs.test-deployed-packages.result }}"
+          JNI_RESULT="${{ needs.test-jni-package.result }}"
+          FFM_RESULT="${{ needs.test-ffm-package.result }}"
 
           if [ "$BUILD_RESULT" != "success" ]; then
             echo "❌ Build failed"
@@ -241,8 +338,13 @@ jobs:
               exit 1
             fi
 
-            if [ "$TEST_RESULT" != "success" ] && [ "$TEST_RESULT" != "skipped" ]; then
-              echo "❌ Package testing failed"
+            if [ "$JNI_RESULT" != "success" ] && [ "$JNI_RESULT" != "skipped" ]; then
+              echo "❌ JNI testing failed"
+              exit 1
+            fi
+
+            if [ "$FFM_RESULT" != "success" ] && [ "$FFM_RESULT" != "skipped" ]; then
+              echo "❌ FFM testing failed"
               exit 1
             fi
           fi
