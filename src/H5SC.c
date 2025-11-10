@@ -1528,7 +1528,6 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
         /* Sanity checks for the SCC callbacks for this dataset. */
         assert(dset_info[i].dset->shared->layout.sc_ops->lookup);
         assert(dset_info[i].dset->shared->layout.sc_ops->new_chunk);
-        assert(dset_info[i].dset->shared->layout.sc_ops->new_chunk);
         assert(dset_info[i].dset->shared->layout.sc_ops->gather_mem);
         assert(dset_info[i].dset->shared->layout.sc_ops->encode_in_place);
         assert(dset_info[i].dset->shared->layout.sc_ops->insert);
