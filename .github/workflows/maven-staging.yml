@@ -659,6 +659,11 @@ jobs:
           path: ./artifacts
           merge-multiple: false
 
+      - name: Checkout code for version extraction
+        uses: actions/checkout@v5.0.0
+        with:
+          path: source
+
       - name: Extract version for testing
         id: extract-version
         run: |
@@ -667,10 +672,28 @@ jobs:
           if [ -n "$POM_FILE" ]; then
             VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
             echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "Extracted version: $VERSION"
+            echo "✅ Extracted version from POM: $VERSION"
           else
-            echo "version=2.0.0-SNAPSHOT" >> $GITHUB_OUTPUT
-            echo "Could not extract version, using default: 2.0.0-SNAPSHOT"
+            # Fallback: Extract version from H5public.h
+            echo "⚠️ No POM file found, extracting version from source..."
+            if [ -f "source/src/H5public.h" ]; then
+              H5_MAJOR=$(grep '#define H5_VERS_MAJOR' source/src/H5public.h | awk '{print $3}')
+              H5_MINOR=$(grep '#define H5_VERS_MINOR' source/src/H5public.h | awk '{print $3}')
+              H5_RELEASE=$(grep '#define H5_VERS_RELEASE' source/src/H5public.h | awk '{print $3}')
+
+              # Determine if this should be a SNAPSHOT version
+              if [ "${{ inputs.use_snapshot_version }}" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
+                VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}-SNAPSHOT"
+              else
+                VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}"
+              fi
+
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+              echo "✅ Extracted version from H5public.h: $VERSION"
+            else
+              echo "::error::Could not extract version from POM or source files"
+              exit 1
+            fi
           fi
 
       - name: Test Maven deployment (dry run)

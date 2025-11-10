@@ -123,8 +123,28 @@ jobs:
             echo "Fetching SNAPSHOT metadata..."
             METADATA_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/maven-metadata.xml"
 
-            # Download metadata
-            curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$METADATA_URL" -o /tmp/maven-metadata.xml
+            # Download metadata with retry (GitHub Packages may need time to propagate)
+            echo "Downloading metadata (with retry for GitHub Packages propagation)..."
+            RETRY_COUNT=0
+            MAX_RETRIES=12
+            RETRY_DELAY=10
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$METADATA_URL" -o /tmp/maven-metadata.xml; then
+                echo "✅ Metadata downloaded successfully"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
+                  sleep $RETRY_DELAY
+                else
+                  echo "::error::Failed to download metadata after $MAX_RETRIES attempts"
+                  echo "::error::URL: $METADATA_URL"
+                  exit 1
+                fi
+              fi
+            done
 
             # Extract timestamped version from metadata
             # Note: Maven may truncate long classifiers, so we search for partial matches
@@ -167,16 +187,54 @@ jobs:
             POM_FILENAME="${ARTIFACT_ID}-${VERSION}.pom"
           fi
 
-          # Download JAR and POM
+          # Download JAR and POM with retry
           JAR_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${JAR_FILENAME}"
           POM_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${POM_FILENAME}"
-
-          echo "Downloading JAR: ${JAR_URL}"
           mkdir -p /tmp/maven-download
-          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$JAR_URL" -o "/tmp/maven-download/${JAR_FILENAME}"
 
+          # Download JAR with retry
+          echo "Downloading JAR: ${JAR_URL}"
+          RETRY_COUNT=0
+          MAX_RETRIES=12
+          RETRY_DELAY=10
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$JAR_URL" -o "/tmp/maven-download/${JAR_FILENAME}"; then
+              echo "✅ JAR downloaded successfully"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⏳ JAR download attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              else
+                echo "::error::Failed to download JAR after $MAX_RETRIES attempts"
+                echo "::error::URL: $JAR_URL"
+                exit 1
+              fi
+            fi
+          done
+
+          # Download POM with retry
           echo "Downloading POM: ${POM_URL}"
-          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$POM_URL" -o "/tmp/maven-download/${POM_FILENAME}"
+          RETRY_COUNT=0
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$POM_URL" -o "/tmp/maven-download/${POM_FILENAME}"; then
+              echo "✅ POM downloaded successfully"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⏳ POM download attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              else
+                echo "::error::Failed to download POM after $MAX_RETRIES attempts"
+                echo "::error::URL: $POM_URL"
+                exit 1
+              fi
+            fi
+          done
 
           # Install to local Maven repository
           echo "Installing artifact to local repository..."
@@ -326,8 +384,28 @@ jobs:
             echo "Fetching SNAPSHOT metadata..."
             METADATA_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/maven-metadata.xml"
 
-            # Download metadata
-            curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$METADATA_URL" -o /tmp/maven-metadata.xml
+            # Download metadata with retry (GitHub Packages may need time to propagate)
+            echo "Downloading metadata (with retry for GitHub Packages propagation)..."
+            RETRY_COUNT=0
+            MAX_RETRIES=12
+            RETRY_DELAY=10
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$METADATA_URL" -o /tmp/maven-metadata.xml; then
+                echo "✅ Metadata downloaded successfully"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
+                  sleep $RETRY_DELAY
+                else
+                  echo "::error::Failed to download metadata after $MAX_RETRIES attempts"
+                  echo "::error::URL: $METADATA_URL"
+                  exit 1
+                fi
+              fi
+            done
 
             # Extract timestamped version from metadata
             # Note: Maven may truncate long classifiers, so we search for partial matches
@@ -370,16 +448,54 @@ jobs:
             POM_FILENAME="${ARTIFACT_ID}-${VERSION}.pom"
           fi
 
-          # Download JAR and POM
+          # Download JAR and POM with retry
           JAR_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${JAR_FILENAME}"
           POM_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${POM_FILENAME}"
-
-          echo "Downloading JAR: ${JAR_URL}"
           mkdir -p /tmp/maven-download
-          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$JAR_URL" -o "/tmp/maven-download/${JAR_FILENAME}"
 
+          # Download JAR with retry
+          echo "Downloading JAR: ${JAR_URL}"
+          RETRY_COUNT=0
+          MAX_RETRIES=12
+          RETRY_DELAY=10
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$JAR_URL" -o "/tmp/maven-download/${JAR_FILENAME}"; then
+              echo "✅ JAR downloaded successfully"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⏳ JAR download attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              else
+                echo "::error::Failed to download JAR after $MAX_RETRIES attempts"
+                echo "::error::URL: $JAR_URL"
+                exit 1
+              fi
+            fi
+          done
+
+          # Download POM with retry
           echo "Downloading POM: ${POM_URL}"
-          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$POM_URL" -o "/tmp/maven-download/${POM_FILENAME}"
+          RETRY_COUNT=0
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$POM_URL" -o "/tmp/maven-download/${POM_FILENAME}"; then
+              echo "✅ POM downloaded successfully"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⏳ POM download attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              else
+                echo "::error::Failed to download POM after $MAX_RETRIES attempts"
+                echo "::error::URL: $POM_URL"
+                exit 1
+              fi
+            fi
+          done
 
           # Install to local Maven repository
           echo "Installing artifact to local repository..."
