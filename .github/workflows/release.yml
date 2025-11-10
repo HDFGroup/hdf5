@@ -114,7 +114,6 @@ jobs:
     name: Deploy Maven Artifacts (FFM & JNI)
     needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-maven-staging]
     if: ${{ inputs.deploy_maven == true }}
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
