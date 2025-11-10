@@ -15,5 +15,5 @@ var searchData=
   ['4_20versus_201_2010_203_12',['Release 1.10.4 versus 1.10.3',['../rel_spec_110_change.html#subsec_rel_spec_110_change_4versus3',1,'']]],
   ['4_20versus_20release_201_2014_203_13',['Release 1.14.4 versus Release 1.14.3',['../rel_spec_114_change.html#subsec_rel_spec_114_change_4versus3',1,'']]],
   ['4_20versus_20release_201_208_203_20november_202009_14',['Release 1.8.4 versus Release 1.8.3, November 2009',['../rel_spec_18.html#subsec_rel_spec_18_change_4',1,'']]],
-  ['4_3a_20specify_20library_20path_20in_20java_15',['Option 4: Specify Library Path in Java',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html#autotoc_md64',1,'']]]
+  ['4_3a_20specify_20library_20path_20in_20java_20advanced_15',['Option 4: Specify Library Path in Java (Advanced)',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html#autotoc_md64',1,'']]]
 ];

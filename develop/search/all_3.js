@@ -21,5 +21,5 @@ var searchData=
   ['3_20versus_201_2010_202_18',['Release 1.10.3 versus 1.10.2',['../rel_spec_110_change.html#subsec_rel_spec_110_change_3versus2',1,'']]],
   ['3_20versus_20release_201_2014_202_19',['Release 1.14.3 versus Release 1.14.2',['../rel_spec_114_change.html#subsec_rel_spec_114_change_3versus2',1,'']]],
   ['3_20versus_20release_201_208_202_20may_202009_20',['Release 1.8.3 versus Release 1.8.2, May 2009',['../rel_spec_18.html#subsec_rel_spec_18_change_3',1,'']]],
-  ['3_3a_20use_20ld_5flibrary_5fpath_20linux_20macos_21',['Option 3: Use LD_LIBRARY_PATH (Linux/macOS)',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html#autotoc_md63',1,'']]]
+  ['3_3a_20set_20hdf5_5fhome_20recommended_20for_20custom_20installations_21',['Option 3: Set HDF5_HOME (Recommended for Custom Installations)',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html#autotoc_md63',1,'']]]
 ];
