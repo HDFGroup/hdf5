@@ -1387,7 +1387,8 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
 
             if (defined_values_size_hint[i])
                 *defined_values_size_hint[i] = filtered ? udata->unfilt_size[0] : *defined_values_size[i];
-        } else {
+        }
+        else {
 
             *addr[i] = HADDR_UNDEF;
         }
@@ -3217,9 +3218,9 @@ H5D__struct_chunk_gather_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
                 if (H5S_close(sel_space) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release dataspace");
-
             }
-        } else {
+        }
+        else {
             if (NULL == (chk->sel_space = H5S_copy(file_space, false, true)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
         }
