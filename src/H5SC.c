@@ -1724,7 +1724,7 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
             /* Write the chunk to file using H5F_block_write */
             if (H5F_block_write(dset_info[i].dset->oloc.file, H5FD_MEM_DRAW, *addr[j], write_size_arr[j],
                                 chunk_arr[j]) < 0) {
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to block write to file(SCC)");
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to block write to file (SCC)");
             }
 
             chunk_arr[j] = H5MM_xfree(chunk_arr[j]);
