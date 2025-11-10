@@ -1388,6 +1388,10 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
             if (defined_values_size_hint[i])
                 *defined_values_size_hint[i] = filtered ? udata->unfilt_size[0] : *defined_values_size[i];
         }
+        else {
+
+            *addr[i] = HADDR_UNDEF;
+        }
 
         _udata[i] = (void *)udata;
 
@@ -3201,16 +3205,20 @@ H5D__struct_chunk_gather_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *
         hsize_t n;
 
         /* Combine selections */
+        /* TBD: how about other types: H5S_SEL_NONE, H5S_SEL_POINTS */
         if (chk->sel_space) {
-            if (NULL == (sel_space = H5S__combine_select(chk->sel_space, H5S_SELECT_OR, flex_fspace.vp)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
-            if (H5S_close(chk->sel_space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release dataspace");
+            if (H5S_GET_SELECT_TYPE(chk->sel_space) != H5S_SEL_ALL) {
 
-            if (NULL == (chk->sel_space = H5S_copy(sel_space, false, true)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
-            if (H5S_close(sel_space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release dataspace");
+                if (NULL == (sel_space = H5S__combine_select(chk->sel_space, H5S_SELECT_OR, flex_fspace.vp)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
+                if (H5S_close(chk->sel_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release dataspace");
+
+                if (NULL == (chk->sel_space = H5S_copy(sel_space, false, true)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
+                if (H5S_close(sel_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release dataspace");
+            }
         }
         else {
             if (NULL == (chk->sel_space = H5S_copy(file_space, false, true)))
@@ -3413,7 +3421,7 @@ H5D__struct_chunk_defined_values(H5D_t *dset, const H5S_t *selection, void *chun
 
     flex_sel.cvp = selection;
 
-    if (H5S_GET_SELECT_TYPE(selection) == H5S_ALL) {
+    if (H5S_GET_SELECT_TYPE(selection) == H5S_SEL_ALL) {
         if (NULL == (*defined_values = H5S_copy(chk->sel_space, false, true)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
     }
