@@ -3198,7 +3198,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     hsize_t          storage_size;
     hsize_t          curr_pos = 0;   /* total data element position   */
     h5tools_str_t    buffer;         /* string into which to render   */
-    unsigned         str_chunk_flag; /* type og structired chunk     */
+    unsigned         str_chunk_flag; /* type og structured chunk     */
 
     /* setup */
     memset(&buffer, 0, sizeof(h5tools_str_t));
