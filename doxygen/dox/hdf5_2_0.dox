@@ -3,9 +3,9 @@
  * Navigate back: \ref index "Main" / \ref release_specific_info
  * <hr>
 
-<h2 id="library_tools_20">HDF5 Library and Tools 2.0</h2>
+\section sec_rel_spec_20 HDF5 Library and Tools 2.0
 
-<h3 id="release">Release Information</h3>
+\subsection subsec_rel_info Release Information
 
 <table>
 <tr>
@@ -21,7 +21,7 @@ HDF5 2.0
 Release Date
 </td>
 <td>
-11/10/25
+11/11/25
 </td>
 </tr>
 <tr>
@@ -36,21 +36,21 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-\ref subsec_rel_spec_20_migrate
+\ref sec_rel_spec_20_migrate
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-\ref subsec_rel_spec_20_change
+\ref sec_rel_spec_20_change
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-\ref subsec_rel_spec_20_feat
+\ref sec_rel_spec_20_feat
 </td>
 </tr>
 <tr>
@@ -77,7 +77,7 @@ Additional Release Information
 </table>
 
 
-<h3 id="download">Downloads</h3>
+\subsection subsec_download Downloads
 
 Source code and binaries are available at:
 <a href="https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html</a>
@@ -85,7 +85,7 @@ Source code and binaries are available at:
 Please refer to [Build instructions](https://github.com/HDFGroup/hdf5/blob/hdf5_2.0/release_docs/INSTALL) for building with either CMake or Autotools.
 
 
-<h3 id="method">Methods to obtain (gz file)</h3>
+\subsection subsec_obtain_method Methods to obtain (gz file)
 
 \li firefox – Download file and then run:  `gzip <distribution>.tar.gz | tar xzf -`
 \li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
@@ -95,7 +95,7 @@ Please refer to [Build instructions](https://github.com/HDFGroup/hdf5/blob/hdf5_
     `gzip -cd <distribution>.tar.gz | tar xvf -`
 </div>
 
-<h3 id="api_compat">Individual API Compatibility Reports</h3>
+\subsection subsec_api_compat_reps Individual API Compatibility Reports
 
 * [hdf5-2.0-hdf5_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0-hdf5_compat_report.html) -- HTML C library ABI report file
 
@@ -106,7 +106,7 @@ Please refer to [Build instructions](https://github.com/HDFGroup/hdf5/blob/hdf5_
 * [hdf5-2.0-java_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0-java_compat_report.html) -- HTML Java library ABI report file
 
 
-<h3 id="dox_gen_doc">Doxygen Generated Reference Manual</h3>
+\subsection subsec_dox_gen_doc Doxygen Generated Reference Manual
 
 The new HDF5 documentation based on [Doxygen](https://www.doxygen.nl/index.html) is available [here](https://support.hdfgroup.org/releases/hdf5/v2/index.html)
 
@@ -114,9 +114,9 @@ This documentation is WORK-IN-PROGRESS.
 
 Since this portion of the HDF5 documentation is now part of the source code, it gets the same treatment as code. In other words, issues, inaccuracies, corrections should be reported as issues in [GitHub](https://github.com/HDFGroup/hdf5/issues), and pull requests will be reviewed and accepted as any other code changes.
 
-\subsection subsec_rel_spec_20_migrate Migrating from HDF5 1.14 to HDF5 2.0
+\section sec_rel_spec_20_migrate Migrating from HDF5 1.14 to HDF5 2.0
 
-This section highlights some changes that might affect migrating to HDF5.20, please refer to the \ref subsec_rel_spec_20_change or the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for detail.
+This section highlights some changes that might affect migrating to HDF5.20, please refer to the \ref sec_rel_spec_20_change or the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for detail.
 
 \li Default file format is now 1.8
 \li The file format has been updated to 4.0<a name="fileformat"></a>
@@ -129,7 +129,7 @@ This section highlights some changes that might affect migrating to HDF5.20, ple
     - The tool h5dump has a new option `--lformat` and its `XML` option is deprecated.
     - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for an explanation.
 
-\subsection subsec_rel_spec_20_feat New Features in HDF5 Release 2.0
+\section sec_rel_spec_20_feat New Features in HDF5 Release 2.0
 
 This section includes the new features introduced in the HDF5 2.0 series:
 
@@ -153,7 +153,7 @@ This section includes the new features introduced in the HDF5 2.0 series:
 \li Default chunk cache hash table size increased to 8191
 <br>In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
 
-\ref subsec_rel_spec_20_change
+\ref sec_rel_spec_20_change
 
  *
  * <hr>

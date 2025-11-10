@@ -1,9 +1,9 @@
-/** \page rel_spec_20_change Release Software Changes for HDF5 2.0
+/** \page rel_spec_20_change Release Specific Information for HDF5 2.0
  *
  * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_20
  * <hr>
 
-\subsection sec_rel_spec_20_change Software Changes from Release to Release in HDF5 2.0
+\section sec_rel_spec_20_change Software Changes from Release to Release in HDF5 2.0
 
 This page provides information on the changes that a maintenance developer needs to
 be aware of between successive releases of HDF5, such as:
@@ -12,11 +12,11 @@ be aware of between successive releases of HDF5, such as:
 \li Certain types of changes in configuration or build processes
 \li Note that bug fixes and performance enhancements in the C library are automatically picked up by the C++, Fortran, and Java libraries.
 
-\subsubsection subsubsec_rel_spec_20_change_compat API Compatibility
+\subsection subsec_rel_spec_20_change_compat API Compatibility
 See \ref api-compat-macros for details on using HDF5 version 2.0 with previous releases.
 \li <a href="https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.1.html.abi.reports.tar.gz">Compatibility reports for Release 2.0 versus Release 1.14.6</a>
 
-\subsubsection subsubsec_rel_spec_20_bw_releases Differences between releases
+\subsection subsec_rel_spec_20_bw_releases Differences between releases
 \li \ref subsubsec_rel_spec_20_change_0versus14_6
 
 The <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> (a.k.a. the RELEASE.txt prior to release 2.0) also lists changes made to the library, but these notes tend to be more at a more detail-oriented level. It include new features, bugs fixed, supported configuration features, platforms on which the library has been tested, and known problems.
@@ -37,7 +37,7 @@ HDF5 version 2.0 provides a number of new C APIs and other user-visible changes 
 \li Default dataset chunk cache size increased
 <br>The default dataset chunk cache size was increased to 8 MiB (8,388,608 bytes).
 
-\li `H5Dread_chunk()` signature has changed
+\li H5Dread_chunk() signature has changed
 <br>A new parameter, `nalloc`, has been added to `H5Dread_chunk()`. This parameter contains a pointer to a variable that holds the size of the buffer buf. If *nalloc is not large enough to hold the entire chunk being read, no data is read. On exit, the value of this variable is set to the buffer size needed to read the chunk.
 The old signature has been renamed to `H5Dread_chunk1()` and is considered deprecated:
 ```c
@@ -49,7 +49,7 @@ The new signature is `H5Dread_chunk2()`. All code should be updated to use this 
 ```
 `H5Dread_chunk()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
 
-\li `H5Tdecode()` signature has changed
+\li H5Tdecode() signature has changed
 <br>A new parameter, `buf_size`, has been added to `H5Tdecode()` to prevent walking off the end of the buffer.
 The old signature has been renamed to `H5Tdecode1()` and is considered deprecated:
 ```c
@@ -62,7 +62,7 @@ The new signature is `H5Tdecode2()`. All code should be updated to use this vers
 `H5Tdecode()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
 
 
-\li `H5Iregister_type()` signature has changed
+\li H5Iregister_type() signature has changed
 <br>The hash_size parameter has not been used since early versions of HDF5 1.8, so it has been removed and the API call has been versioned.
 The old signature has been renamed to `H5Iregister_type1()` and is considered deprecated:
 ```c
@@ -77,7 +77,7 @@ The new signature is H5Iregister_type2(). New code should use this version:
 List of new public APIs/Macros
 
 <table>
-<tr><th>This Function/Constant</th><th>Description</th></tr>
+<tr><th>Function/Constant</th><th>Description</th></tr>
 <tr>
 <td style="background-color:#F5F5F5">
 H5Dread_chunk1()
@@ -99,7 +99,7 @@ Reads an entire chunk from the file directly
 H5Iregister_type1()
 </td>
 <td>
-Creates a new type of ID ((Deprecated in favor of `H5Iregister_type2)()`
+Creates a new type of ID (Deprecated in favor of `H5Iregister_type2()`)
 </td>
 </tr>
 <tr>
@@ -139,7 +139,7 @@ Creates a new complex number datatype
 H5Tdecode1()
 </td>
 <td>
-Decodes a binary object description ()
+Decodes a binary object description (Deprecated in favor of `H5Tdecode2()`)
 </td>
 </tr>
 <tr>
