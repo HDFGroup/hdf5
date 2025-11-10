@@ -934,9 +934,6 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (H5SC_write(H5F_SHARED_CACHE(dset_info[0].dset->oloc.file), count, dset_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "write through shared chunk cache failed");
 
-        if (orig_mem_space) {
-            orig_mem_space = NULL;
-        }
     }
 
 done:
