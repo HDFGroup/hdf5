@@ -530,7 +530,13 @@ jobs:
           path: ./artifacts
           merge-multiple: false
 
-      - name: Test Maven deployment (dry run)
+      - name: Checkout code for version extraction
+        uses: actions/checkout@v5.0.0
+        with:
+          path: source
+
+      - name: Extract version for testing
+        id: extract-version
         run: |
           echo "=== Maven Deployment Test (Dry Run) ==="
 
@@ -538,9 +544,29 @@ jobs:
           POM_FILE=$(find ./artifacts -name "pom.xml" 2>/dev/null | head -1)
           if [ -n "$POM_FILE" ]; then
             VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
-            echo "Version: $VERSION"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "✅ Extracted version from POM: $VERSION"
           else
-            echo "Version: (detecting from artifacts)"
+            # Fallback: Extract version from H5public.h
+            echo "⚠️ No POM file found, extracting version from source..."
+            if [ -f "source/src/H5public.h" ]; then
+              H5_MAJOR=$(grep '#define H5_VERS_MAJOR' source/src/H5public.h | awk '{print $3}')
+              H5_MINOR=$(grep '#define H5_VERS_MINOR' source/src/H5public.h | awk '{print $3}')
+              H5_RELEASE=$(grep '#define H5_VERS_RELEASE' source/src/H5public.h | awk '{print $3}')
+
+              # Determine if this should be a SNAPSHOT version
+              if [ "${{ inputs.use_snapshot_version }}" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
+                VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}-SNAPSHOT"
+              else
+                VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}"
+              fi
+
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+              echo "✅ Extracted version from H5public.h: $VERSION"
+            else
+              echo "::error::Could not extract version from POM or source files"
+              exit 1
+            fi
           fi
 
           echo "Repository: GitHub Packages (staging)"
