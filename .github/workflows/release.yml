@@ -111,10 +111,9 @@ jobs:
       java_implementation: 'both'  # Build both FFM and JNI implementations
 
   deploy-maven-artifacts:
-    name: Deploy Maven Artifacts (FFM & JNI)
+    name: Deploy Maven Artifacts
     needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-maven-staging]
     if: ${{ inputs.deploy_maven == true }}
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
