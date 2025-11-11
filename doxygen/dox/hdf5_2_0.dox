@@ -64,7 +64,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-[API Compatibility Reports between 2.0 and 1.14.6](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz)
+[API Compatibility Reports between 2.0 and 1.14.6](https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz)
 </td>
 </tr>
 <tr>
@@ -80,9 +80,9 @@ Additional Release Information
 \subsection subsec_download Downloads
 
 Source code and binaries are available at:
-<a href="https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html</a>
+<a href="https://\RELURL/v2_0/v2_0_0/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html</a>
 
-Please refer to [Build instructions](https://github.com/HDFGroup/hdf5/blob/hdf5_2.0/release_docs/INSTALL) for building with either CMake or Autotools.
+Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with either CMake or Autotools.
 
 
 \subsection subsec_obtain_method Methods to obtain (gz file)
@@ -91,24 +91,24 @@ Please refer to [Build instructions](https://github.com/HDFGroup/hdf5/blob/hdf5_
 \li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
 \li wget –
 <div style="margin-left: 2em;">
-    `wget https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.N.N/<distribution>.tar.gz`<br>
+    `wget https://github.com/HDFGroup/hdf5/releases/download/1.N.N/<distribution>.tar.gz`<br>
     `gzip -cd <distribution>.tar.gz | tar xvf -`
 </div>
 
 \subsection subsec_api_compat_reps Individual API Compatibility Reports
 
-* [hdf5-2.0-hdf5_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_compat_report.html) -- HTML C library ABI report file
+* [hdf5-2.0-hdf5_compat_report.html](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_compat_report.html) -- HTML C library ABI report file
 
-* [hdf5-2.0-hdf5_cpp_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_cpp_compat_report.html) -- HTML CPP library ABI report file
+* [hdf5-2.0-hdf5_cpp_compat_report.html](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_cpp_compat_report.html) -- HTML CPP library ABI report file
 
-* [hdf5-2.0-hdf5_hl_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_hl_compat_report.html) -- HTML HL C library ABI report file
+* [hdf5-2.0-hdf5_hl_compat_report.html](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_hl_compat_report.html) -- HTML HL C library ABI report file
 
-* [hdf5-2.0-java_compat_report.html](https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-java_compat_report.html) -- HTML Java library ABI report file
+* [hdf5-2.0-java_compat_report.html](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-java_compat_report.html) -- HTML Java library ABI report file
 
 
 \subsection subsec_dox_gen_doc Doxygen Generated Reference Manual
 
-The new HDF5 documentation based on [Doxygen](https://www.doxygen.nl/index.html) is available [here](https://support.hdfgroup.org/releases/hdf5/v2/index.html)
+The new HDF5 documentation based on [Doxygen](https://www.doxygen.nl/index.html) is available \ref index "here".
 
 This documentation is WORK-IN-PROGRESS. 
 
