@@ -235,7 +235,12 @@ When opening a virtual dataset, the library would previously decode the mappings
 <li>Support for chunks larger than 4 GiB using 64 bit addressing.</li>
 </ul>
 <ul>
-<li>New predefined datatypes for FP8 data in E4M3 and E5M2 formats (<a href="https://arxiv.org/abs/2209.05433">https://arxiv.org/abs/2209.05433</a>), but not a native FP8 datatype. Please refer to the <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md">CHANGELOG</a> for detail.</li>
+<li>New predefined datatypes for<ul>
+<li>FP8 data in E4M3 and E5M2 formats (<a href="https://arxiv.org/abs/2209.05433">https://arxiv.org/abs/2209.05433</a>), but not a native FP8 datatype.</li>
+<li>little- and big-endian <a href="https://en.wikipedia.org/wiki/Bfloat16_floating-point_format">bfloat16</a> data. <br  />
+Please refer to the <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md">CHANGELOG</a> for detail.</li>
+</ul>
+</li>
 </ul>
 <ul>
 <li>Default chunk cache hash table size increased to 8191 <br  />
