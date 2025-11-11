@@ -2178,7 +2178,7 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc space for udata");
 
     for (i = 0; i < count; i++) {
-        bool need_alloc  = true;
+        bool need_alloc = true;
 
         memset(my_udata, 0, sizeof(H5D_chunk_ud_t));
 
