@@ -1,0 +1,341 @@
+/** \page rel_spec_20_change Release Specific Information for HDF5 2.0
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_20
+ * <hr>
+
+\section sec_rel_spec_20_change Software Changes from Release to Release in HDF5 2.0
+
+This page provides information on the changes that a maintenance developer needs to
+be aware of between successive releases of HDF5, such as:
+\li New or changed features or tools
+\li Syntax and behavioral changes in the existing application programming interface (the API)
+\li Certain types of changes in configuration or build processes
+\li Note that bug fixes and performance enhancements in the C library are automatically picked up by the C++, Fortran, and Java libraries.
+
+\subsection subsec_rel_spec_20_change_compat API Compatibility
+See \ref api-compat-macros for details on using HDF5 version 2.0 with previous releases.
+\li <a href="https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.1.html.abi.reports.tar.gz">Compatibility reports for Release 2.0 versus Release 1.14.6</a>
+
+\subsection subsec_rel_spec_20_bw_releases Differences between releases
+\li \ref subsubsec_rel_spec_20_change_0versus14_6
+
+The <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> (a.k.a. the RELEASE.txt prior to release 2.0) also lists changes made to the library, but these notes tend to be more at a more detail-oriented level. It include new features, bugs fixed, supported configuration features, platforms on which the library has been tested, and known problems.
+The change log files are listed in each release section and can be found at the top level of
+the HDF5 source code tree in the release_docs directory.
+
+\subsubsection subsubsec_rel_spec_20_change_0versus14_6 Release 2.0 versus Release 1.14.6
+
+HDF5 version 2.0 provides a number of new C APIs and other user-visible changes in behavior in the transition from HDF5 Release 1.14.6 to Release 2.0.  Some of those require the use of the API Compatibility Macros for the main library. In addition, some APIs have been removed or have had their signature change.
+
+\li `#hbool_t` has been removed from public API calls
+<br>The `#hbool_t` type was introduced before the library supported C99's Boolean type. Originally typedef'd to an integer, it has been typedef'd to C99's bool for many years.  Prior to HDF5 2.0, it had been purged from the library code and only remained in public API signatures. In HDF5 2.0, it has also been removed from public API signatures.
+<br>The `#hbool_t` typedef remains in H5public.h so existing code does not need to be updated.
+
+\li Default page buffer size for the ROS3 driver changed
+<br>Calling `H5Pset_fapl_ros3()` now has the side effect of setting the page buffer size in the FAPL to 64 MiB if it was not previously set. This will only have an effect if the file uses paged allocation. Also added the `#H5F_PAGE_BUFFER_SIZE_DEFAULT` to allow the user to unset the page buffer size in an FAPL so it can be similarly overridden.
+
+\li Default dataset chunk cache size increased
+<br>The default dataset chunk cache size was increased to 8 MiB (8,388,608 bytes).
+
+\li H5Dread_chunk() signature has changed
+<br>A new parameter, `nalloc`, has been added to `H5Dread_chunk()`. This parameter contains a pointer to a variable that holds the size of the buffer buf. If *nalloc is not large enough to hold the entire chunk being read, no data is read. On exit, the value of this variable is set to the buffer size needed to read the chunk.
+The old signature has been renamed to `H5Dread_chunk1()` and is considered deprecated:
+```c
+   herr_t H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf);
+```
+The new signature is `H5Dread_chunk2()`. All code should be updated to use this version:
+```c
+   herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf, size_t *nalloc);
+```
+`H5Dread_chunk()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
+
+\li H5Tdecode() signature has changed
+<br>A new parameter, `buf_size`, has been added to `H5Tdecode()` to prevent walking off the end of the buffer.
+The old signature has been renamed to `H5Tdecode1()` and is considered deprecated:
+```c
+   herr_t H5Tdecode1(const void *buf);
+```
+The new signature is `H5Tdecode2()`. All code should be updated to use this version:
+```c
+   herr_t H5Tdecode2(const void *buf, size_t buf_size);
+```
+`H5Tdecode()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
+
+
+\li H5Iregister_type() signature has changed
+<br>The hash_size parameter has not been used since early versions of HDF5 1.8, so it has been removed and the API call has been versioned.
+The old signature has been renamed to `H5Iregister_type1()` and is considered deprecated:
+```c
+   H5I_type_t H5Iregister_type1(size_t hash_size, unsigned reserved, H5I_free_t free_func);
+```
+The new signature is H5Iregister_type2(). New code should use this version:
+```c
+   H5I_type_t H5Iregister_type2(unsigned reserved, H5I_free_t free_func);
+```
+`H5Iregister_type()` will map to the new signature unless the library is explicitly configured to use an older version of the API.
+
+List of new public APIs/Macros
+
+<table>
+<tr><th>Function/Constant</th><th>Description</th></tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Dread_chunk1()
+</td>
+<td>
+Reads an entire chunk from the file directly (Deprecated in favor of `H5Dread_chunk2()`)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Dread_chunk2()
+</td>
+<td>
+Reads an entire chunk from the file directly
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Iregister_type1()
+</td>
+<td>
+Creates a new type of ID (Deprecated in favor of `H5Iregister_type2()`)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Iregister_type2()
+</td>
+<td>
+Creates a new type of ID
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Pget_virtual_spatial_tree()
+</td>
+<td>
+Retrieves the setting for whether or not to use a spatial tree for VDS mappings
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Pset_virtual_spatial_tree()
+</td>
+<td>
+Sets the flag to use a spatial tree for mappings
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Tcomplex_create()
+</td>
+<td>
+Creates a new complex number datatype
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Tdecode1()
+</td>
+<td>
+Decodes a binary object description (Deprecated in favor of `H5Tdecode2()`)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Tdecode2()
+</td>
+<td>
+Decodes a binary object description
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5VLclose_lib_context()
+</td>
+<td>
+Closes the state of the library, undoing the effects of `H5VLopen_lib_context()`
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5VLopen_lib_context()
+</td>
+<td>
+Opens a new internal context for the HDF5 library
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_COMPLEX_IEEE_F16BE
+</td>
+<td>
+Complex number of 2 16-bit big-endian IEEE floating point numbers
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_COMPLEX_IEEE_F16LE
+</td>
+<td>
+Complex number of 2 16-bit little-endian IEEE floating point numbers
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_COMPLEX_IEEE_F32BE
+</td>
+<td>
+Complex number of 2 32-bit big-endian IEEE floating point numbers
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_COMPLEX_IEEE_F32LE
+</td>
+<td>
+Complex number of 2 32-bit little-endian IEEE floating point numbers
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_COMPLEX_IEEE_F64BE
+</td>
+<td>
+Complex number of 2 64-bit big-endian IEEE floating point numbers
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_COMPLEX_IEEE_F64LE
+</td>
+<td>
+Complex number of 2 64-bit little-endian IEEE floating point numbers
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_FLOAT_BFLOAT16BE
+</td>
+<td>
+16-bit big-endian bfloat16 floating point
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_FLOAT_BFLOAT16LE
+</td>
+<td>
+16-bit little-endian bfloat16 floating point
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_FLOAT_F8E4M3
+</td>
+<td>
+8-bit FP8 E4M3 (4 exponent bits, 3 mantissa bits) floating point
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_FLOAT_F8E5M2
+</td>
+<td>
+8-bit FP8 E5M2 (5 exponent bits, 2 mantissa bits) floating point
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_NATIVE_DOUBLE_COMPLEX
+</td>
+<td>
+double _Complex (MSVC _Dcomplex)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_NATIVE_FLOAT_COMPLEX
+</td>
+<td>
+float _Complex (MSVC _Fcomplex)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_NATIVE_LDOUBLE_COMPLEX
+</td>
+<td>
+long double _Complex (MSVC _Lcomplex)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5VL_NATIVE
+</td>
+<td>
+Identifier for the native VOL connector
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5VL_PASSTHRU
+</td>
+<td>
+Identifier for the pass-through VOL connector
+</td>
+</tr>
+</table>
+
+List of removed public APIs
+
+<table>
+<tr><th>Function</th></tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Dread_chunk()
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5FDperform_init()
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Iregister_type()
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Tdecode()
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5VLpeek_connector_id_by_name()
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5VLpeek_connector_id_by_value()
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5VLfinish_lib_state()
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5VLstart_lib_state()
+</td>
+</tr>
+</table>
+
+
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_20
+*/

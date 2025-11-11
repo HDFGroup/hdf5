@@ -21,14 +21,40 @@ implements the structure described in the User's Guide,
 chapter 4, figure 26.
  ************************************************************/
 
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.callbacks.H5L_iterate_opdata_t;
 import hdf.hdf5lib.callbacks.H5L_iterate_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
+import hdf.hdf5lib.structs.H5O_token_t;
 
-import examples.groups.H5Ex_G_Iterate.H5O_type;
+enum H5O_type {
+    H5O_TYPE_UNKNOWN(-1),       // Unknown object type
+    H5O_TYPE_GROUP(0),          // Object is a group
+    H5O_TYPE_DATASET(1),        // Object is a dataset
+    H5O_TYPE_NAMED_DATATYPE(2), // Object is a named data type
+    H5O_TYPE_NTYPES(3);         // Number of different object types
+    private static final Map<Integer, H5O_type> lookup = new HashMap<Integer, H5O_type>();
+
+    static
+    {
+        for (H5O_type s : EnumSet.allOf(H5O_type.class))
+            lookup.put(s.getCode(), s);
+    }
+
+    private int code;
+
+    H5O_type(int layout_type) { this.code = layout_type; }
+
+    public int getCode() { return this.code; }
+
+    public static H5O_type get(int code) { return lookup.get(code); }
+}
 
 class opdata implements H5L_iterate_opdata_t {
     int recurs;

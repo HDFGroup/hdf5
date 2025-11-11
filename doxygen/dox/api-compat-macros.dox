@@ -152,7 +152,17 @@ Navigate back: \ref index "Main" / \ref TN
   <th>Deprecated functions available? <br/> (\TText{H5Lvisit1})</th>
   </tr>
   <tr align="center">
-  <td>\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v112"} <br/> (the default in 1.12)</td>
+  <td>\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v200"} <br/> (the default in 2.0.0)</td>
+  <td>2.0.x (\TText{H5Lvisit2})</td>
+  <td>yes</td>
+  </tr>
+  <tr align="center">
+  <td>\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v114"}</td>
+  <td>1.14.x (\TText{H5Lvisit2})</td>
+  <td>yes</td>
+  </tr>
+  <tr align="center">
+  <td>\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v112"}</td>
   <td>1.12.x (\TText{H5Lvisit2})</td>
   <td>yes</td>
   </tr>
@@ -182,7 +192,7 @@ Navigate back: \ref index "Main" / \ref TN
   installed to determine the \TText{configure} flags used to build the library. In particular,
   look for the two lines shown here under \Emph{Features}:
 
-  \TText{Default API mapping: v112}
+  \TText{Default API mapping: v200}
 
   \TText{With deprecated public symbols: yes}
 
@@ -204,13 +214,23 @@ Navigate back: \ref index "Main" / \ref TN
   <th>Deprecated functions available? <br/>(\TText{H5Lvisit1})</th>
   </tr>
   <tr align="center">
-  <td align="left">\TText{-DH5_USE_112_API} <br/> \Emph{(Default behavior if no option specified.)}</td>
-  <td>1.12.x (\TText{HLvisit2})</td>
+  <td align="left">\TText{-DH5_USE_200_API} <br/> \Emph{(Default behavior if no option specified.)}</td>
+  <td>2.0.x (\TText{H5Lvisit2})</td>
+  <td>yes* <br/> \Emph{*if available in library}</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\TText{-DH5_USE_114_API}</td>
+  <td>1.14.x (\TText{H5Lvisit2})</td>
+  <td>yes* <br/> \Emph{*if available in library}</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\TText{-DH5_USE_112_API}</td>
+  <td>1.12.x (\TText{H5Lvisit2})</td>
   <td>yes* <br/> \Emph{*if available in library}</td>
   </tr>
   <tr align="center">
   <td align="left">\TText{-DH5_USE_110_API}</td>
-  <td>1.10.x (\TText{HLvisit1})</td>
+  <td>1.10.x (\TText{H5Lvisit1})</td>
   <td>yes* <br/> \Emph{*if available in library}</td>
   </tr>
   <tr align="center">
@@ -302,6 +322,61 @@ Navigate back: \ref index "Main" / \ref TN
                 -DH5L_iterate_t_vers=1 -DH5Lget_info_by_idx_vers=1 \
                 -DH5Lget_info_vers=1 application.c
            \endcode
+
+  \subsubsection fun-options-200 Function Mapping Options in Releases 2.0.x
+  <table>
+  <tr>
+  <th style="text-align: left;">Macro <br/> (\TText{H5xxx})</th>
+  <th>Default function used if no macro specified
+  <ul><li>Function mapping: \TText{H5xxx_vers=N}</li></ul>
+  </th>
+  <th>Function used for backwards compatibility with 1.12 or 1.14
+  <ul><li>Function mapping: \TText{H5xxx_vers=1}</li></ul>
+  </th>
+  </tr>
+  <tr>
+  <td>H5Dread_chunk()</td>
+  <td>H5Dread_chunk2()
+  <ul>
+  <li>Function mapping:\TText{H5Dread_chunk_vers=2}</li>
+  </ul>
+  </td>
+  <td>H5Dread_chunk1()
+  <ul>
+  <li>Function mapping:\TText{H5Dread_chunk_vers=1}</li>
+  </ul>
+  </td>
+  </tr>
+  <tr>
+  <td>H5Iregister_type()</td>
+  <td>H5Iregister_type2()
+  <ul>
+  <li>Function mapping:\TText{H5Iregister_type_vers=2}</li>
+  </ul>
+  </td>
+  <td>H5Iregister_type1()
+  <ul>
+  <li>Function mapping:\TText{H5Iregister_type_vers=1}</li>
+  </ul>
+  </td>
+  </tr>
+  <tr>
+  <td>H5Tdecode()</td>
+  <td>H5Tdecode2()
+  <ul>
+  <li>Function mapping:\TText{H5Tdecode_vers=2}</li>
+  </ul>
+  </td>
+  <td>H5Tdecode1()
+  <ul>
+  <li>Function mapping:\TText{H5Tdecode_vers=1}</li>
+  </ul>
+  </td>
+  </tr>
+  </table>
+
+  \subsubsection fun-options-114 Function Mapping Options in Releases 1.14.x
+  No versioned functions were added in the 1.14.x releases.
 
   \subsubsection fun-options-112 Function Mapping Options in Releases 1.12.x
   <table>

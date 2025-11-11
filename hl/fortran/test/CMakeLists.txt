@@ -11,6 +11,7 @@ project (HDF5_HL_FORTRAN_TESTS C Fortran)
 # Add Tests
 #-----------------------------------------------------------------------------
 set (H5_TESTS
+    tstdo
     tstds
     tstlite
     tstimage

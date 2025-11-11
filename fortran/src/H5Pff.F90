@@ -4368,6 +4368,104 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !>
 !! \ingroup FH5P
 !!
+!! \brief Retrieves the append flush property values from the dataset access property list.
+!!
+!! \param dapl_id  Dataset access property list identifier.
+!! \param ndims    Number of elements in boundary array (rank of dataset).
+!! \param boundary Dimension sizes used to determine the boundary (HSIZE_T array of size ndims).
+!! \param func     Retrieved user-defined callback function (TYPE(C_FUNPTR), optional).
+!! \param udata    Retrieved user-defined data for callback (TYPE(C_PTR), optional).
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pget_append_flush()
+!!
+  SUBROUTINE h5pget_append_flush_f(dapl_id, ndims, boundary, hdferr, func, udata)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dapl_id
+    INTEGER, INTENT(IN) :: ndims
+    INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(OUT) :: boundary
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_FUNPTR), OPTIONAL, INTENT(OUT) :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(OUT) :: udata
+
+    TYPE(C_FUNPTR) :: func_default
+    TYPE(C_PTR) :: udata_default
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_append_flush(dapl_id, ndims, boundary, func, udata) &
+            BIND(C,NAME='H5Pget_append_flush')
+         IMPORT :: C_INT, C_FUNPTR, C_PTR
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: dapl_id
+         INTEGER(C_INT), VALUE :: ndims
+         INTEGER(HSIZE_T), DIMENSION(*) :: boundary
+         TYPE(C_FUNPTR) :: func
+         TYPE(C_PTR) :: udata
+       END FUNCTION H5Pget_append_flush
+    END INTERFACE
+
+    hdferr = INT(H5Pget_append_flush(dapl_id, INT(ndims, C_INT), boundary, func_default, udata_default))
+
+    IF (PRESENT(func)) func = func_default
+    IF (PRESENT(udata)) udata = udata_default
+
+  END SUBROUTINE h5pget_append_flush_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets the append flush property values for a dataset access property list
+!!
+!! \param dapl_id    Dataset access property list identifier
+!! \param ndims      Number of elements in boundary array
+!! \param boundary   Array of dimension sizes for boundary
+!! \param hdferr     \fortran_error
+!! \param func       User-defined callback function
+!! \param udata      User-defined input data for callback
+!!
+!! See C API: @ref H5Pset_append_flush()
+!!
+  SUBROUTINE h5pset_append_flush_f(dapl_id, ndims, boundary, hdferr, func, udata)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dapl_id
+    INTEGER, INTENT(IN) :: ndims
+    INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(IN) :: boundary
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_FUNPTR), OPTIONAL, INTENT(IN) :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: udata
+
+    TYPE(C_FUNPTR) :: func_default
+    TYPE(C_PTR) :: udata_default
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pset_append_flush(dapl_id, ndims, boundary, func, udata) &
+            BIND(C,NAME='H5Pset_append_flush')
+         IMPORT :: C_INT, C_FUNPTR, C_PTR
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: dapl_id
+         INTEGER(C_INT), VALUE :: ndims
+         INTEGER(HSIZE_T), DIMENSION(*) :: boundary
+         TYPE(C_FUNPTR), VALUE :: func
+         TYPE(C_PTR), VALUE :: udata
+       END FUNCTION H5Pset_append_flush
+    END INTERFACE
+
+    ! Set defaults for optional parameters
+    func_default = C_NULL_FUNPTR
+    udata_default = C_NULL_PTR
+
+    IF (PRESENT(func)) func_default = func
+    IF (PRESENT(udata)) udata_default = udata
+
+    hdferr = INT(H5Pset_append_flush(dapl_id, INT(ndims, C_INT), boundary, func_default, udata_default))
+
+  END SUBROUTINE h5pset_append_flush_f
+
+!>
+!! \ingroup FH5P
+!!
 !! \brief Retrieves the flag for whether to use/not use a spatial tree
 !! during mapping operations on a Virtual Dataset. The default value is true.
 !!
