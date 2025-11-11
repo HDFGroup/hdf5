@@ -14,7 +14,7 @@ be aware of between successive releases of HDF5, such as:
 
 \subsection subsec_rel_spec_20_change_compat API Compatibility
 See \ref api-compat-macros for details on using HDF5 version 2.0 with previous releases.
-\li <a href="https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.1.html.abi.reports.tar.gz">Compatibility reports for Release 2.0 versus Release 1.14.6</a>
+\li <a href="https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz">Compatibility reports for Release 2.0 versus Release 1.14.6</a>
 
 \subsection subsec_rel_spec_20_bw_releases Differences between releases
 \li \ref subsubsec_rel_spec_20_change_0versus14_6
