@@ -2153,10 +2153,8 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
 {
     H5D_chunk_ud_t             *udata;
     H5D_chk_idx_info_t          idx_info; /* Chunked index info */
-    H5O_storage_struct_chunk_t *storage     = &(dset->shared->layout.storage.u.struct_chunk);
-    H5O_layout_struct_chunk_t  *layout      = &(dset->shared->layout.u.struct_chunk);
-    bool                        need_alloc  = true;
-    bool                        need_insert = true;
+    H5O_storage_struct_chunk_t *storage = &(dset->shared->layout.storage.u.struct_chunk);
+    H5O_layout_struct_chunk_t  *layout  = &(dset->shared->layout.u.struct_chunk);
     size_t                      i;
     H5D_chunk_ud_t             *my_udata;
     herr_t                      ret_value = SUCCEED; /* Return value */
@@ -2180,6 +2178,8 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc space for udata");
 
     for (i = 0; i < count; i++) {
+        bool need_alloc  = true;
+        bool need_insert = true;
 
         memset(my_udata, 0, sizeof(H5D_chunk_ud_t));
 
@@ -2198,10 +2198,8 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
             assert(*addr[i] == my_udata->chunk_block.offset);
             assert(old_disk_size[i] == my_udata->chunk_block.length);
 
-            if (old_disk_size[i] == new_disk_size[i]) {
-                need_alloc  = false;
-                need_insert = false;
-            }
+            if (old_disk_size[i] == new_disk_size[i])
+                need_alloc = false;
             else {
                 if (H5MF_xfree(dset->oloc.file, H5FD_MEM_DRAW, *addr[i], old_disk_size[i]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
