@@ -2178,8 +2178,7 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc space for udata");
 
     for (i = 0; i < count; i++) {
-        bool need_alloc  = true;
-        bool need_insert = true;
+        bool need_alloc = true;
 
         memset(my_udata, 0, sizeof(H5D_chunk_ud_t));
 
@@ -2214,19 +2213,19 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed");
         }
 
-        if (need_insert) {
+        /* For dense chunk, no need to insert for non-filtered chunk with the same old/new sizes */
+        /* For structured chunk, there is metadata for filtered and non-filtered chunk, so insert anyway */
 
-            udata = (H5D_chunk_ud_t *)_udata[i];
+        udata = (H5D_chunk_ud_t *)_udata[i];
 
-            udata->chunk_block.offset = *(addr[i]);
-            udata->chunk_block.length = new_disk_size[i];
-            udata->chunk_idx          = my_udata->chunk_idx;
-            udata->common.scaled      = scaled[i];
+        udata->chunk_block.offset = *(addr[i]);
+        udata->chunk_block.length = new_disk_size[i];
+        udata->chunk_idx          = my_udata->chunk_idx;
+        udata->common.scaled      = scaled[i];
 
-            if (storage->ops->insert) {
-                if ((storage->ops->insert)(&idx_info, udata, dset) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index");
-            }
+        if (storage->ops->insert) {
+            if ((storage->ops->insert)(&idx_info, udata, dset) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index");
         }
 
     } /* end for */
