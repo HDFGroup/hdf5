@@ -63,7 +63,7 @@ jobs:
         with:
           repository: HDFGroup/hdf5
           tag: ${{ inputs.use_tag }}
-          fileName: ${{ inputs.file_name }}-*
+          fileName: ${{ inputs.file_name }}*
           out-file-path: HDF5
           extract: false
 
