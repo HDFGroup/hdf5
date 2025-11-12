@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-11</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-12</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -753,7 +753,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier. The identifier may be that of a file, group, dataset, or named datatype. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Name of the object whose comment is to be set or reset name must be <code>'.'</code> (dot) if <code class="param">loc_id</code> fully specifies the object for which the comment is to be set. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bufsize</td><td>Maximum number of comment characters to be returned in <code class="param">buf</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">buf</td><td>The comment</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>The comment</td></tr>
   </table>
   </dd>
 </dl>
@@ -1197,7 +1197,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier. The identifier may be that of a file or group. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">idx</td><td>Transient index identifying object </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">name</td><td>Pointer to user-provided buffer the object name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">name</td><td>Pointer to user-provided buffer the object name </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Name length</td></tr>
   </table>
   </dd>
