@@ -1373,20 +1373,12 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
                 *addr[i] = udata->chunk_block.offset;
             if (size[i])
                 *size[i] = udata->chunk_block.length;
-
-            if (filtered)
-                /* For now: assume two sections for fixed data */
-                tot_unfilt_size = udata->unfilt_size[0] + udata->unfilt_size[1];
-
             if (size_hint[i])
-                *size_hint[i] = filtered ? tot_unfilt_size : *size[i];
-
-            /* Size of defined values */
+                *size_hint[i] = *size[i];
             if (defined_values_size[i])
-                *defined_values_size[i] = filtered ? udata->unfilt_size[0] : udata->offset[1];
-
+                *defined_values_size[i] = udata->offset[1];
             if (defined_values_size_hint[i])
-                *defined_values_size_hint[i] = filtered ? udata->unfilt_size[0] : *defined_values_size[i];
+                *defined_values_size_hint[i] = *defined_values_size[i];
         }
         else {
 
