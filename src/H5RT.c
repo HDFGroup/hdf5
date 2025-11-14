@@ -541,9 +541,9 @@ done:
 static herr_t
 H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], H5RT_result_set_t *result_set)
 {
-    hsize_t *curr_min = NULL;
-    hsize_t *curr_max = NULL;
-    herr_t       ret_value = SUCCEED;
+    hsize_t *curr_min  = NULL;
+    hsize_t *curr_max  = NULL;
+    herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -554,8 +554,8 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
     if (node->children_are_leaves)
         for (int i = 0; i < node->nchildren; i++) {
             H5RT_leaf_t *curr_leaf = node->children.leaves + i;
-            curr_min  = curr_leaf->min;
-            curr_max  = curr_leaf->max;
+            curr_min               = curr_leaf->min;
+            curr_max               = curr_leaf->max;
 
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
                 /* We found an intersecting leaf, add it to the result set */
@@ -567,8 +567,8 @@ H5RT__search_recurse(H5RT_node_t *node, int rank, hsize_t min[], hsize_t max[], 
         for (int i = 0; i < node->nchildren; i++) {
             /* This is an internal node in the r-tree */
             H5RT_node_t *curr_node = node->children.nodes[i];
-            curr_min  = curr_node->min;
-            curr_max  = curr_node->max;
+            curr_min               = curr_node->min;
+            curr_max               = curr_node->max;
 
             /* Only recurse into child node if its bounding box overlaps with the search region */
             if (H5RT__leaves_intersect(rank, min, max, curr_min, curr_max)) {
