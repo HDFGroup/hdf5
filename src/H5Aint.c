@@ -784,7 +784,7 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
                 }
 
                 /* Validate conversion is valid */
-                if(H5T_validate_atomic_conversion(attr->shared->dt, mem_type))
+                if (H5T_validate_atomic_conversion(attr->shared->dt, mem_type))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
                 /* Perform datatype conversion.  */
