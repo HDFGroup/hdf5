@@ -16,8 +16,9 @@ ALIASES += DWNURL="\RELURL/downloads/latest"
 # URL for RFCs
 ALIASES += RFCURL="\DOCURL/rfc"
 ALIASES += AEXURL="\HDFURL/archive/support/ftp/HDF5/examples"
-#branch name (develop, hdf5_1_14)
+#branch name (develop, hdf5_2_0_0)
 ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop"
+ALIASES += SRCURL20="github.com/HDFGroup/hdf5/blob/hdf5_2_0_0"
 #Other projects that contribute to HDF5
 ALIASES += PRJURL="\HDFURL/archive/support/projects"
 ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/master"
@@ -278,6 +279,8 @@ ALIASES += ref_vol_doc="VOL documentation"
 ################################################################################
 
 ALIASES += ref_rfc20240129="<a href=\"https://\RFCURL/RFC__Adding_support_for_16_bit_floating_point_and_Complex_number_datatypes_to_HDF5.pdf\">Adding support for 16-bit floating point and Complex number datatypes to HDF</a>"
+# Same RFC, but complex number datatypes was delayed to 2.0
+ALIASES += ref_rfc20240129complex="<a href=\"https://\RFCURL/RFC__Adding_support_for_16_bit_floating_point_and_Complex_number_datatypes_to_HDF5.pdf\">Support for Complex number datatypes</a>"
 ALIASES += ref_rfc20220819="<a href=\"https://\RFCURL/Terminal_VOL_Connector_Feature_Flags.pdf\">Terminal VOL Connector Feature Flags</a>"
 ALIASES += ref_rfc20210528="<a href=\"https://\RFCURL/RFC_multi_thread.pdf\">Multi-Thread HDF5</a>"
 ALIASES += ref_rfc20210219="<a href=\"https://\RFCURL/selection_io_RFC_210610.pdf\">Selection I/O</a>"

@@ -256,6 +256,33 @@ CONTAINS
 !>
 !! \ingroup FH5F
 !!
+!! \brief Enables SWMR writing mode for a file.
+!!
+!! \param file_id File identifier.
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Fstart_swmr_write()
+!!
+  SUBROUTINE h5fstart_swmr_write_f(file_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: file_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Fstart_swmr_write(file_id) BIND(C,NAME='H5Fstart_swmr_write')
+         IMPORT :: C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: file_id
+       END FUNCTION H5Fstart_swmr_write
+    END INTERFACE
+
+    hdferr = INT(H5Fstart_swmr_write(file_id))
+
+  END SUBROUTINE h5fstart_swmr_write_f
+!>
+!! \ingroup FH5F
+!!
 !! \brief Deletes an HDF5 file
 !!
 !! \param name       Name of the file to delete

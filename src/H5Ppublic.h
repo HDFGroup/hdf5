@@ -7292,10 +7292,10 @@ H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_fil
  *        the dataset access property list
  *
  * \dapl_id
- * \param[in] dims     The number of elements for \p boundary
- * \param[in] boundary The dimension sizes used to determine the boundary
- * \param[in] func     The user-defined callback function
- * \param[in] udata    The user-defined input data
+ * \param[in] dims      The number of elements for \p boundary
+ * \param[out] boundary The dimension sizes used to determine the boundary
+ * \param[out] func     The user-defined callback function
+ * \param[out] udata    The user-defined input data
  *
  * \return \herr_t
  *

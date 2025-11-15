@@ -518,6 +518,34 @@ CONTAINS
 !>
 !! \ingroup FH5D
 !!
+!! \brief Flushes all buffers associated with a dataset to disk.
+!!
+!! \param dset_id Dataset identifier.
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Dflush()
+!!
+  SUBROUTINE h5dflush_f(dset_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Dflush(dset_id) BIND(C,NAME='H5Dflush')
+         IMPORT :: C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: dset_id
+       END FUNCTION H5Dflush
+    END INTERFACE
+
+    hdferr = INT(H5Dflush(dset_id))
+
+  END SUBROUTINE h5dflush_f
+
+!>
+!! \ingroup FH5D
+!!
 !! \brief Asynchronously closes a dataset.
 !!
 !! \param dset_id Dataset identifier

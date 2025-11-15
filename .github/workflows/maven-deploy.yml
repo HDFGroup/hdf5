@@ -5,13 +5,15 @@ on:
   workflow_call:
     inputs:
       file_base:
-        description: "The common base name of the source tarballs"
-        required: true
+        description: "The common base name of the source tarballs (legacy, not used)"
+        required: false
         type: string
+        default: ""
       preset_name:
-        description: "The preset configuration name used for build"
-        required: true
+        description: "The preset configuration name used for build (legacy, not used)"
+        required: false
         type: string
+        default: ""
       repository_url:
         description: 'Maven repository URL (GitHub Packages or Maven Central)'
         required: false
@@ -82,72 +84,85 @@ jobs:
       pom-file: ${{ steps.find-pom.outputs.pom-file }}
       platform-classifier: ${{ steps.platform-info.outputs.classifier }}
     steps:
-      - name: Download artifacts (Linux)
+      - name: Download all Maven artifacts
         uses: actions/download-artifact@v5
         with:
-          name: maven-staging-artifacts-linux-x86_64
-          path: ./artifacts/linux
+          pattern: maven-staging-artifacts-*
+          path: ./artifacts
+          merge-multiple: false
         continue-on-error: true
 
-      - name: Download artifacts (Windows)
-        uses: actions/download-artifact@v5
-        with:
-          name: maven-staging-artifacts-windows-x86_64
-          path: ./artifacts/windows
-        continue-on-error: true
-
-      - name: Download artifacts (macOS x86_64)
-        uses: actions/download-artifact@v5
-        with:
-          name: maven-staging-artifacts-macos-x86_64
-          path: ./artifacts/macos-x86_64
-        continue-on-error: true
-
-      - name: Download artifacts (macOS aarch64)
-        uses: actions/download-artifact@v5
-        with:
-          name: maven-staging-artifacts-macos-aarch64
-          path: ./artifacts/macos-aarch64
-        continue-on-error: true
+      - name: List downloaded artifacts
+        run: |
+          echo "=== Downloaded Artifacts Structure ==="
+          find ./artifacts -type d -maxdepth 2
+          echo ""
+          echo "=== JAR files found ==="
+          find ./artifacts -name "*.jar" -type f
 
       - name: Find JAR files
         id: find-jars
         run: |
-          # Find only main HDF5 JAR files across all platform directories
+          # Find only main HDF5 JAR files across all artifact directories
+          # Handles both single implementation and multiple implementation builds
           JAR_FILES=""
           echo "=== Scanning for main HDF5 JAR files ==="
 
-          for platform_dir in ./artifacts/*/; do
-            if [ -d "$platform_dir" ]; then
-              platform_name=$(basename "$platform_dir")
-              echo "Scanning platform: $platform_name"
+          # Artifacts are in subdirectories like:
+          # ./artifacts/maven-staging-artifacts-linux-x86_64-ffm/
+          # ./artifacts/maven-staging-artifacts-linux-x86_64-jni/
+          # ./artifacts/maven-staging-artifacts-linux-x86_64/  (if single implementation)
+
+          for artifact_dir in ./artifacts/maven-staging-artifacts-*/; do
+            if [ -d "$artifact_dir" ]; then
+              artifact_name=$(basename "$artifact_dir")
+              echo "Scanning artifact directory: $artifact_name"
+
+              # Extract platform and implementation from directory name
+              # Format: maven-staging-artifacts-{platform}-{implementation}
+              # or:     maven-staging-artifacts-{platform}
+              PLATFORM=""
+              IMPLEMENTATION=""
+
+              if [[ "$artifact_name" =~ maven-staging-artifacts-(.+)-(ffm|jni)$ ]]; then
+                # Has implementation suffix
+                PLATFORM="${BASH_REMATCH[1]}"
+                IMPLEMENTATION="${BASH_REMATCH[2]}"
+                echo "  Platform: $PLATFORM, Implementation: $IMPLEMENTATION"
+              elif [[ "$artifact_name" =~ maven-staging-artifacts-(.+)$ ]]; then
+                # No implementation suffix (single implementation build)
+                PLATFORM="${BASH_REMATCH[1]}"
+                IMPLEMENTATION="auto"
+                echo "  Platform: $PLATFORM, Implementation: auto"
+              fi
 
               # Find main HDF5 JAR files (jarhdf5-*.jar) and examples JAR files (hdf5-java-examples-*.jar)
-              # Find both main HDF5 JARs and examples JARs
-              platform_jars=$(find "$platform_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" \) 2>/dev/null || true)
+              artifact_jars=$(find "$artifact_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" \) ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null || true)
 
-              if [ -n "$platform_jars" ]; then
-                echo "Found HDF5 JARs in $platform_name:"
-                echo "$platform_jars" | while read jar; do echo "  - $(basename "$jar")"; done
+              if [ -n "$artifact_jars" ]; then
+                echo "  Found HDF5 JARs:"
+                echo "$artifact_jars" | while read jar; do echo "    - $(basename "$jar")"; done
 
-                if [ -z "$JAR_FILES" ]; then
-                  JAR_FILES="$platform_jars"
-                else
-                  JAR_FILES="$JAR_FILES,$platform_jars"
-                fi
+                # Store JAR files with metadata (format: jar_path|platform|implementation)
+                for jar in $artifact_jars; do
+                  if [ -z "$JAR_FILES" ]; then
+                    JAR_FILES="${jar}|${PLATFORM}|${IMPLEMENTATION}"
+                  else
+                    JAR_FILES="${JAR_FILES},${jar}|${PLATFORM}|${IMPLEMENTATION}"
+                  fi
+                done
               else
-                echo "No HDF5 JARs found in $platform_name"
+                echo "  No HDF5 JARs found"
               fi
             fi
           done
 
-          # Remove trailing comma and convert newlines to commas
-          JAR_FILES=$(echo "$JAR_FILES" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
           echo "jar-files=${JAR_FILES}" >> $GITHUB_OUTPUT
+          echo ""
           echo "=== Final JAR list for deployment ==="
-          echo "$JAR_FILES" | tr ',' '\n' | while read jar; do
-            if [ -n "$jar" ]; then
-              echo "  - $jar"
+          echo "$JAR_FILES" | tr ',' '\n' | while IFS='|' read jar_path platform impl; do
+            if [ -n "$jar_path" ]; then
+              echo "  - $(basename "$jar_path") [platform: $platform, implementation: $impl]"
             fi
           done
 
@@ -209,15 +224,18 @@ jobs:
           echo "Found ${jar_count} JAR file(s) for deployment"
 
           # Basic validation (artifacts should already be validated by staging workflow)
-          for jar_file in $(echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' ' '); do
+          # Parse format: jar_path|platform|implementation,jar_path|platform|implementation,...
+          echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
+            # Skip empty entries
+            [ -z "$jar_file" ] && continue
+
             if [ ! -f "${jar_file}" ]; then
               echo "ERROR: JAR file not found: ${jar_file}"
               exit 1
             fi
 
-            platform=$(dirname "${jar_file}" | sed 's|./artifacts/||')
             jar_name=$(basename "${jar_file}")
-            echo "✓ [$platform] ${jar_name}"
+            echo "✓ [${platform}/${impl}] ${jar_name}"
           done
 
           # Quick POM validation
@@ -236,33 +254,19 @@ jobs:
     needs: [check-secret, validate-artifacts]
     if: ${{ !inputs.dry_run }}
     steps:
-      - name: Download artifacts (Linux)
+      - name: Download all Maven artifacts
         uses: actions/download-artifact@v5
         with:
-          name: maven-staging-artifacts-linux-x86_64
-          path: ./artifacts/linux
-        continue-on-error: true
+          pattern: maven-staging-artifacts-*
+          path: ./artifacts
+          merge-multiple: false
 
-      - name: Download artifacts (Windows)
-        uses: actions/download-artifact@v5
-        with:
-          name: maven-staging-artifacts-windows-x86_64
-          path: ./artifacts/windows
-        continue-on-error: true
-
-      - name: Download artifacts (macOS x86_64)
-        uses: actions/download-artifact@v5
-        with:
-          name: maven-staging-artifacts-macos-x86_64
-          path: ./artifacts/macos-x86_64
-        continue-on-error: true
-
-      - name: Download artifacts (macOS aarch64)
-        uses: actions/download-artifact@v5
-        with:
-          name: maven-staging-artifacts-macos-aarch64
-          path: ./artifacts/macos-aarch64
-        continue-on-error: true
+      - name: List downloaded artifacts for deployment
+        run: |
+          echo "=== Artifacts ready for deployment ==="
+          find ./artifacts -name "*.jar" -type f | while read jar; do
+            echo "  - $jar ($(du -h "$jar" | cut -f1))"
+          done
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -325,19 +329,23 @@ jobs:
             echo "GPG signing disabled (no private key)"
           fi
 
-          # Deploy each JAR file with auto-detected platform classifier
+          # Deploy each JAR file with proper artifact ID and platform classifier
           success_count=0
           total_count=0
 
           echo "=== Starting JAR Deployment ==="
-          for jar_file in $(echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' ' '); do
+          # Parse jar-files output: format is "jar_path|platform|implementation,jar_path|platform|implementation,..."
+          echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
+            # Skip empty entries
+            [ -z "$jar_file" ] && continue
+
             total_count=$((total_count + 1))
             jar_basename=$(basename "${jar_file}")
-            platform_dir=$(dirname "${jar_file}")
 
             echo "--- Processing JAR $total_count: $jar_basename ---"
             echo "Full path: $jar_file"
-            echo "Platform dir: $platform_dir"
+            echo "Platform: $platform"
+            echo "Implementation: $impl"
 
             # Verify file exists
             if [ ! -f "$jar_file" ]; then
@@ -351,34 +359,44 @@ jobs:
 
             # Determine artifact type and settings
             if [[ "${jar_basename}" == *"hdf5-java-examples"* ]]; then
-              # Java Examples artifact
+              # Java Examples artifact (platform-independent)
               ARTIFACT_ID="hdf5-java-examples"
               CURRENT_CLASSIFIER=""  # Examples JAR has no platform classifier
               classifier_opts=""
-              echo "Artifact type: Java Examples (no classifier)"
+              echo "Artifact type: Java Examples (platform-independent)"
             else
-              # Main HDF5 Java library
-              ARTIFACT_ID="hdf5-java"
-
-              # Auto-detect platform classifier from directory structure
-              CURRENT_CLASSIFIER=""
-              if [[ "${platform_dir}" == *"/linux"* ]]; then
-                CURRENT_CLASSIFIER="linux-x86_64"
-              elif [[ "${platform_dir}" == *"/windows"* ]]; then
-                CURRENT_CLASSIFIER="windows-x86_64"
-              elif [[ "${platform_dir}" == *"/macos-x86_64"* ]]; then
-                CURRENT_CLASSIFIER="macos-x86_64"
-              elif [[ "${platform_dir}" == *"/macos-aarch64"* ]]; then
-                CURRENT_CLASSIFIER="macos-aarch64"
+              # Main HDF5 Java library - determine implementation
+              # Check JAR contents to detect FFM vs JNI
+              if jar tf "$jar_file" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
+                DETECTED_IMPL="ffm"
+              elif jar tf "$jar_file" | grep -q "hdf/hdf5lib/H5.class"; then
+                DETECTED_IMPL="jni"
+              else
+                echo "⚠️  WARNING: Could not detect implementation from JAR contents, using metadata: $impl"
+                DETECTED_IMPL="$impl"
               fi
+
+              # Set artifact ID based on detected/provided implementation
+              if [ "$DETECTED_IMPL" = "ffm" ]; then
+                ARTIFACT_ID="hdf5-java-ffm"
+                echo "Artifact type: HDF5 Java FFM Library"
+              elif [ "$DETECTED_IMPL" = "jni" ]; then
+                ARTIFACT_ID="hdf5-java-jni"
+                echo "Artifact type: HDF5 Java JNI Library"
+              else
+                # Fallback for 'auto' or unknown - use generic name
+                ARTIFACT_ID="hdf5-java"
+                echo "Artifact type: HDF5 Java Library (auto)"
+              fi
+
+              # Set platform classifier (always present for main library)
+              CURRENT_CLASSIFIER="$platform"
 
               # Determine classifier options for main library
               classifier_opts=""
               if [ -n "${CURRENT_CLASSIFIER}" ] && [[ "${jar_basename}" != *"sources"* ]] && [[ "${jar_basename}" != *"javadoc"* ]]; then
                 classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
-                echo "Artifact type: HDF5 Java Library, classifier: ${CURRENT_CLASSIFIER}"
-              else
-                echo "Artifact type: HDF5 Java Library (no classifier)"
+                echo "Platform classifier: ${CURRENT_CLASSIFIER}"
               fi
             fi
 
