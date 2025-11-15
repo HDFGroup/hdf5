@@ -250,7 +250,7 @@ jobs:
           then
             TAG_NAME_BASE=$(echo "snapshot")
           else
-            TAG_NAME_BASE=$(echo "v${{ inputs.use_tag }}")
+            TAG_NAME_BASE=$(echo "${{ inputs.use_tag }}")
           fi
           echo "TAG_BASE=$TAG_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash

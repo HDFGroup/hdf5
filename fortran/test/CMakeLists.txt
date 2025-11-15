@@ -246,6 +246,7 @@ add_executable (testhdf5_fortran
     tH5D.F90
     tH5E.F90
     tH5F.F90
+    tH5F_SWMR.F90
     tH5G.F90
     tH5I.F90
     tH5P.F90
@@ -269,7 +270,12 @@ if (MSVC)
 endif ()
 if (NOT BUILD_SHARED_LIBS)
   target_include_directories (testhdf5_fortran PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
-  target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
+  if (HDF5_BUILD_HL_LIB)
+    target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_HL_F90_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
+    target_compile_definitions (testhdf5_fortran PRIVATE H5_HAVE_HL)
+  else ()
+    target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
+  endif ()
   set_target_properties (testhdf5_fortran PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -278,7 +284,12 @@ if (NOT BUILD_SHARED_LIBS)
   add_dependencies (testhdf5_fortran ${HDF5_F90_TEST_LIB_TARGET})
 else ()
   target_include_directories (testhdf5_fortran PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
-  target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
+  if (HDF5_BUILD_HL_LIB)
+    target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_HL_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
+    target_compile_definitions (testhdf5_fortran PRIVATE H5_HAVE_HL)
+  else ()
+    target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
+  endif ()
   set_target_properties (testhdf5_fortran PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
