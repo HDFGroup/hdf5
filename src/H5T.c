@@ -6478,15 +6478,15 @@ H5T_convert(H5T_path_t *tpath, const H5T_t *src_type, const H5T_t *dst_type, siz
     size_t min_prec      = MIN(dst_type->shared->u.atomic.prec, src_type->shared->u.atomic.prec);
     size_t src_last_idx  = (src_type->shared->u.atomic.offset + min_prec) / 8;
 
-    if (min_prec > 0 && (src_first_idx > src_type->shared->size || src_last_idx > src_type->shared->size))
+    if (H5T_IS_ATOMIC(src_type->shared) &&
+        (src_first_idx > src_type->shared->size || src_last_idx > src_type->shared->size))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "invalid source offset or precision");
 
     size_t dst_first_idx = dst_type->shared->u.atomic.offset / 8;
-    size_t dst_last_idx  = (dst_type->shared->u.atomic.offset +
-                           MIN(dst_type->shared->u.atomic.prec, src_type->shared->u.atomic.prec)) /
-                          8;
+    size_t dst_last_idx  = (dst_type->shared->u.atomic.offset + min_prec) / 8;
 
-    if (min_prec > 0 && (dst_first_idx > dst_type->shared->size || dst_last_idx > dst_type->shared->size))
+    if (H5T_IS_ATOMIC(dst_type->shared) &&
+        (dst_first_idx > dst_type->shared->size || dst_last_idx > dst_type->shared->size))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "invalid destination offset or precision");
 
     if (H5T_convert_with_ctx(tpath, src_type, dst_type, &conv_ctx, nelmts, buf_stride, bkg_stride, buf, bkg) <
