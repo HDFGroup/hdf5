@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -156,7 +156,7 @@ Maven Artifact Selection</h2>
 <tr>
 <td><b>hdf5-java-ffm</b> </td><td>Java 25+ </td><td>FFM implementation (future default) </td><td>Production-ready  </td></tr>
 <tr>
-<td><b>hdf5-java-examples</b> </td><td>Java 8+ </td><td>62 example programs </td><td>Platform-independent  </td></tr>
+<td><b>hdf5-java-examples</b> </td><td>Java 8+ </td><td>example programs </td><td>Platform-independent  </td></tr>
 </table>
 <p><em>Note: FFM will become the default implementation in the next major HDF5 release.</em></p>
 <h2><a class="anchor" id="subsec_maven_jni"></a>
@@ -165,7 +165,7 @@ Using JNI Implementation (Java 8+)</h2>
 <div class="fragment"><div class="line">&lt;<span class="keywordtype">dependency</span>&gt;</div>
 <div class="line">    &lt;<span class="keywordtype">groupId</span>&gt;<span class="keyword">org.hdfgroup</span>&lt;/<span class="keywordtype">groupId</span>&gt;</div>
 <div class="line">    &lt;<span class="keywordtype">artifactId</span>&gt;<span class="keyword">hdf5-java-jni</span>&lt;/<span class="keywordtype">artifactId</span>&gt;</div>
-<div class="line">    &lt;<span class="keywordtype">version</span>&gt;2.0.0-3&lt;/<span class="keywordtype">version</span>&gt;</div>
+<div class="line">    &lt;<span class="keywordtype">version</span>&gt;2.0.0&lt;/<span class="keywordtype">version</span>&gt;</div>
 <div class="line">    &lt;<span class="keywordtype">classifier</span>&gt;<span class="keyword">linux-x86_64</span>&lt;/<span class="keywordtype">classifier</span>&gt;</div>
 <div class="line">&lt;/<span class="keywordtype">dependency</span>&gt;</div>
 </div><!-- fragment --><p>Replace the classifier with your platform: </p><ul>
@@ -201,7 +201,7 @@ Using FFM Implementation (Java 25+)</h2>
 <div class="fragment"><div class="line">&lt;<span class="keywordtype">dependency</span>&gt;</div>
 <div class="line">    &lt;<span class="keywordtype">groupId</span>&gt;<span class="keyword">org.hdfgroup</span>&lt;/<span class="keywordtype">groupId</span>&gt;</div>
 <div class="line">    &lt;<span class="keywordtype">artifactId</span>&gt;<span class="keyword">hdf5-java-ffm</span>&lt;/<span class="keywordtype">artifactId</span>&gt;</div>
-<div class="line">    &lt;<span class="keywordtype">version</span>&gt;2.0.0-3&lt;/<span class="keywordtype">version</span>&gt;</div>
+<div class="line">    &lt;<span class="keywordtype">version</span>&gt;2.0.0&lt;/<span class="keywordtype">version</span>&gt;</div>
 <div class="line">    &lt;<span class="keywordtype">classifier</span>&gt;<span class="keyword">linux-x86_64</span>&lt;/<span class="keywordtype">classifier</span>&gt;</div>
 <div class="line">&lt;/<span class="keywordtype">dependency</span>&gt;</div>
 </div><!-- fragment --><dl class="section user"><dt>Java Runtime Configuration</dt><dd>FFM requires enabling native access: <div class="fragment"><div class="line">java --enable-native-access=ALL-UNNAMED -cp yourapp.jar com.example.Main</div>
@@ -223,7 +223,7 @@ Using Java Examples</h2>
 <dl class="section user"><dt>Adding Examples Artifact</dt><dd><div class="fragment"><div class="line">&lt;<span class="keywordtype">dependency</span>&gt;</div>
 <div class="line">    &lt;<span class="keywordtype">groupId</span>&gt;<span class="keyword">org.hdfgroup</span>&lt;/<span class="keywordtype">groupId</span>&gt;</div>
 <div class="line">    &lt;<span class="keywordtype">artifactId</span>&gt;<span class="keyword">hdf5-java-examples</span>&lt;/<span class="keywordtype">artifactId</span>&gt;</div>
-<div class="line">    &lt;<span class="keywordtype">version</span>&gt;2.0.0-3&lt;/<span class="keywordtype">version</span>&gt;</div>
+<div class="line">    &lt;<span class="keywordtype">version</span>&gt;2.0.0&lt;/<span class="keywordtype">version</span>&gt;</div>
 <div class="line">&lt;/<span class="keywordtype">dependency</span>&gt;</div>
 </div><!-- fragment --></dd></dl>
 <p>The examples artifact contains 62 educational examples covering: </p><ul>
@@ -234,10 +234,10 @@ Using Java Examples</h2>
 <li>Parallel I/O examples</li>
 </ul>
 <dl class="section user"><dt>Running Examples</dt><dd><div class="fragment"><div class="line"><span class="preprocessor"># List available examples</span></div>
-<div class="line">java -cp <a class="code hl_namespace" href="namespacehdf5.html">hdf5</a>-java-examples-2.0.0-3.jar examples.intro.H5_CreateFile</div>
+<div class="line">java -cp <a class="code hl_namespace" href="namespacehdf5.html">hdf5</a>-java-examples-2.0.0.jar examples.intro.H5_CreateFile</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Run a specific example</span></div>
-<div class="line">java -cp <span class="stringliteral">&quot;hdf5-java-jni-2.0.0-3-linux-x86_64.jar:hdf5-java-examples-2.0.0-3.jar&quot;</span> \</div>
+<div class="line">java -cp <span class="stringliteral">&quot;hdf5-java-jni-2.0.0-linux-x86_64.jar:hdf5-java-examples-2.0.0.jar&quot;</span> \</div>
 <div class="line">     examples.intro.H5_CreateFile</div>
 <div class="ttc" id="anamespacehdf5_html"><div class="ttname"><a href="namespacehdf5.html">hdf5</a></div><div class="ttdef"><b>Definition</b> HDF5.F90:26</div></div>
 </div><!-- fragment --></dd></dl>
@@ -274,7 +274,8 @@ Troubleshooting</h2>
 <dl class="section user"><dt>UnsatisfiedLinkError</dt><dd>If you see <code>java.lang.UnsatisfiedLinkError</code>: <ul>
 <li>Verify you're using the correct platform classifier </li>
 <li>Ensure only ONE HDF5 artifact (JNI or FFM) is on classpath </li>
-<li>Check Java version matches implementation (Java 25+ for FFM)</li>
+<li>Check Java version matches implementation (Java 25+ for FFM) </li>
+<li>Install HDF5 native libraries: <code>sudo apt-get install libhdf5-dev</code> (Linux) or <code>brew install <a class="el" href="namespacehdf5.html">hdf5</a></code> (macOS)</li>
 </ul>
 </dd></dl>
 <dl class="section user"><dt>Native Access Error (FFM only)</dt><dd>If you see <code>IllegalCallerException</code> with FFM: <ul>
@@ -313,10 +314,32 @@ Migrating Between JNI and FFM</h2>
 </li>
 </ol>
 </dd></dl>
+<h2><a class="anchor" id="subsec_maven_testing"></a>
+Testing Maven Artifacts</h2>
+<dl class="section user"><dt>Local Testing Scripts</dt><dd>HDF5 provides test scripts to verify Maven artifacts work correctly:</dd></dl>
+<div class="fragment"><div class="line">cd HDF5Examples/JAVA</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Test JNI implementation</span></div>
+<div class="line">./test-maven-jni.sh 2.0.0</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Test FFM implementation</span></div>
+<div class="line">./test-maven-ffm.sh 2.0.0</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Test against custom repository</span></div>
+<div class="line">./test-maven-ffm.sh 2.0.0 https:<span class="comment">//maven.pkg.github.com/YOUR_FORK/hdf5</span></div>
+</div><!-- fragment --><p>These scripts automatically: </p><ul>
+<li>Configure GitHub authentication </li>
+<li>Download and verify JARs </li>
+<li>Compile and run example programs </li>
+<li>Report detailed test results</li>
+</ul>
+<p>See <code><a class="el" href="_r_e_a_d_m_e-_m_a_v_e_n_8md.html">HDF5Examples/JAVA/README-MAVEN.md</a></code> for complete testing documentation.</p>
 <dl class="section user"><dt>See Also</dt><dd><ul>
 <li><a class="el" href="cmake-presets.html#subsec_cmake_presets_build_java">CMake Presets Use Case: Java Bindings</a> for building from source </li>
 <li><a class="el" href="release__docs_2_r_e_a_d_m_e_8md.html">release_docs/README.md</a> for complete Maven documentation </li>
-<li><a class="el" href="_r_e_a_d_m_e-_m_a_v_e_n_8md.html">HDF5Examples/JAVA/README-MAVEN.md</a> for examples with Maven </li>
+<li><a class="el" href="_r_e_a_d_m_e-_m_a_v_e_n_8md.html">HDF5Examples/JAVA/README-MAVEN.md</a> for testing and examples with Maven </li>
+<li>HDF5Examples/JAVA/test-maven-jni.sh for JNI artifact testing </li>
+<li>HDF5Examples/JAVA/test-maven-ffm.sh for FFM artifact testing </li>
 <li><a href="https://github.com/HDFGroup/hdf5-examples">https://github.com/HDFGroup/hdf5-examples</a> for more examples</li>
 </ul>
 <hr  />

@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -140,8 +140,8 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
   <div class="headertitle"><div class="title">Installation Instructions for Parallel HDF5</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md248"></a></p>
-<h1><a class="anchor" id="autotoc_md249"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md264"></a></p>
+<h1><a class="anchor" id="autotoc_md265"></a>
 1. Overview</h1>
 <p>This file contains instructions for installing parallel HDF5 (PHDF5) using CMake. The document covers:</p>
 <ul>
@@ -154,7 +154,7 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 <li><b>Section 7:</b> Running parallel tests</li>
 <li><b>Appendix A:</b> Sample MPI-IO programs</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md250"></a>
+<h2><a class="anchor" id="autotoc_md266"></a>
 1.1. Requirements</h2>
 <p>PHDF5 requires:</p>
 <ul>
@@ -169,7 +169,7 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 <li>How to access the parallel file system</li>
 </ul>
 <p>Sample MPI-IO C and Fortran programs are provided in Appendix A. Use them to test your MPI compiler and parallel file system before building HDF5.</p>
-<h2><a class="anchor" id="autotoc_md251"></a>
+<h2><a class="anchor" id="autotoc_md267"></a>
 1.2. Prerequisites for HPC Systems</h2>
 <p>When building on HPC systems:</p>
 <ol type="1">
@@ -186,7 +186,7 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 <div class="line">export CXX=CC</div>
 </div><!-- fragment --></li>
 </ol>
-<h2><a class="anchor" id="autotoc_md252"></a>
+<h2><a class="anchor" id="autotoc_md268"></a>
 1.3. Further Help</h2>
 <p>For installation help, post questions to the HDF Forum or HDF Support:</p>
 <ul>
@@ -195,7 +195,7 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 </ul>
 <p>Include the output of <code>uname -a</code> and the contents of <code>CMakeCache.txt</code> and <code>CMakeError.log</code> from your build directory, and the loaded modules if applicable.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md254"></a>
+<h1><a class="anchor" id="autotoc_md270"></a>
 2. Obtaining HDF5 Source</h1>
 <p>Obtain HDF5 source code from the HDF5 repository or from a release tar file:</p>
 <div class="fragment"><div class="line">git clone https://github.com/HDFGroup/hdf5.git [-b branch] [directory]</div>
@@ -205,9 +205,9 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 <p><b>Note:</b> When using the ctest automated build method (Section 4), the source directory should be named <code>hdf5-&lt;version&gt;</code>, where version uses format <code>1.xx.xx</code> or <code>2.xx.xx</code>. Use <code>bin/h5vers</code> to determine the version string if needed. </p>
 </blockquote>
 <hr  />
-<h1><a class="anchor" id="autotoc_md256"></a>
+<h1><a class="anchor" id="autotoc_md272"></a>
 3. Quick Start Instructions</h1>
-<h2><a class="anchor" id="autotoc_md257"></a>
+<h2><a class="anchor" id="autotoc_md273"></a>
 3.1. Using CMake Presets (Recommended for General Builds)</h2>
 <p>For building with CMake 3.26 or greater using presets:</p>
 <div class="fragment"><div class="line">cd hdf5</div>
@@ -215,7 +215,7 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 </div><!-- fragment --><blockquote class="doxtable">
 <p><b>Note:</b> Standard presets do not enable parallel by default. To enable parallel support, you need to create a custom preset in <code>CMakeUserPresets.json</code> that sets <code>-DHDF5_ENABLE_PARALLEL=ON</code>, or use the standard CMake build approach below. </p>
 </blockquote>
-<h2><a class="anchor" id="autotoc_md258"></a>
+<h2><a class="anchor" id="autotoc_md274"></a>
 3.2. Standard CMake Build (Recommended for Parallel)</h2>
 <p>For a basic parallel build:</p>
 <div class="fragment"><div class="line">mkdir build &amp;&amp; cd build</div>
@@ -227,7 +227,7 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 <div class="line">cmake --build . --config Release</div>
 <div class="line">ctest . -C Release</div>
 <div class="line">cmake --install . --prefix /path/to/install</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md259"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md275"></a>
 3.3. Specifying MPI Compiler</h2>
 <p>CMake can usually find MPI automatically. To specify explicitly:</p>
 <div class="fragment"><div class="line">cmake -DCMAKE_C_COMPILER=mpicc \</div>
@@ -238,7 +238,7 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 <div class="fragment"><div class="line">export CC=mpicc</div>
 <div class="line">export FC=mpif90</div>
 <div class="line">cmake -DHDF5_ENABLE_PARALLEL=ON ..</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md260"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md276"></a>
 3.4. Important Configuration Options</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -268,10 +268,10 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 <p><b>Note:</b> Some MPI implementations (e.g., OpenMPI 4.0+) disallow oversubscribing by default. Set <code>MPIEXEC_MAX_NUMPROCS</code> to available processors or fewer, or add appropriate flags (e.g., <code>--oversubscribe</code> for OpenMPI). </p>
 </blockquote>
 <hr  />
-<h1><a class="anchor" id="autotoc_md262"></a>
+<h1><a class="anchor" id="autotoc_md278"></a>
 4. Automated Builds with ctest (HPC Systems)</h1>
 <p>The ctest command provides automated configure, build, test, and package workflow for HPC systems with batch schedulers.</p>
-<h2><a class="anchor" id="autotoc_md263"></a>
+<h2><a class="anchor" id="autotoc_md279"></a>
 4.1. Setup Steps</h2>
 <ol type="1">
 <li>Rename source directory to <code>hdf5-&lt;version&gt;</code> (e.g., <code>hdf5-2.0.0</code>)</li>
@@ -287,13 +287,13 @@ $(function(){initNavTree('md_release__docs_2_r_e_a_d_m_e___h_p_c.html',''); init
 <div class="line">hdf5-&lt;version&gt;/</div>
 </div><!-- fragment --></li>
 </ol>
-<h2><a class="anchor" id="autotoc_md264"></a>
+<h2><a class="anchor" id="autotoc_md280"></a>
 4.2. Running ctest</h2>
 <p>Basic ctest command:</p>
 <div class="fragment"><div class="line">ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log</div>
 </div><!-- fragment --><p>For parallel builds on HPC systems with batch schedulers:</p>
 <div class="fragment"><div class="line">ctest -S HDF5config.cmake,HPC=sbatch,MPI=true -C Release -V -O hdf5.log</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md265"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md281"></a>
 Available HPC Options</h3>
 <p>Add after <code>HDF5config.cmake,</code> separated by commas:</p>
 <table class="markdownTable">
@@ -308,20 +308,20 @@ Available HPC Options</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>LOCAL_BATCH_SCRIPT_ARGS="--account=&lt;acct&gt;"</code>   </td><td class="markdownTableBodyNone">Supply batch job account information   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md266"></a>
+<h3><a class="anchor" id="autotoc_md282"></a>
 Examples</h3>
 <p><b>SLURM system with parallel:</b></p>
 <div class="fragment"><div class="line">ctest -S HDF5config.cmake,HPC=sbatch,MPI=true \</div>
 <div class="line">      -C Release -V -O hdf5.log</div>
 </div><!-- fragment --><p>Use <code>-VV</code> instead of <code>-V</code> for more detailed logging.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md268"></a>
+<h1><a class="anchor" id="autotoc_md284"></a>
 5. Manual CMake Configuration</h1>
 <p>If the automated ctest approach is not suitable, you can manually configure and build HDF5.</p>
-<h2><a class="anchor" id="autotoc_md269"></a>
+<h2><a class="anchor" id="autotoc_md285"></a>
 5.1. Create Build Directory</h2>
 <div class="fragment"><div class="line">mkdir build &amp;&amp; cd build</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md270"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md286"></a>
 5.2. Run CMake Configure</h2>
 <p>Example for parallel build with Fortran on HPC system:</p>
 <div class="fragment"><div class="line">cmake \</div>
@@ -340,24 +340,24 @@ Examples</h3>
 <div class="line">  -DMPIEXEC_MAX_NUMPROCS:STRING=6 \</div>
 <div class="line">  -G&quot;Unix Makefiles&quot; \</div>
 <div class="line">  ../hdf5-&lt;version&gt;</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md271"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md287"></a>
 5.3. Build</h2>
 <div class="fragment"><div class="line">cmake --build . --config Release -j 8</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md272"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md288"></a>
 5.4. Test</h2>
 <p>For systems where you can run MPI directly:</p>
 <div class="fragment"><div class="line">ctest . -C Release</div>
 </div><!-- fragment --><p>For batch systems, create and submit batch scripts (see section 7.3).</p>
-<h2><a class="anchor" id="autotoc_md273"></a>
+<h2><a class="anchor" id="autotoc_md289"></a>
 5.5. Install</h2>
 <div class="fragment"><div class="line">cmake --install . --prefix /install/path</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md275"></a>
+<h1><a class="anchor" id="autotoc_md291"></a>
 6. Cross-Compiling for HPC Hardware</h1>
-<h2><a class="anchor" id="autotoc_md276"></a>
+<h2><a class="anchor" id="autotoc_md292"></a>
 6.1. Overview</h2>
 <p>Cross-compiling is the process of building software on one system architecture (like a login node) to be run on a different architecture (like a compute node). This section provides a historical overview of how this was done on systems that are no longer in service.</p>
-<h2><a class="anchor" id="autotoc_md277"></a>
+<h2><a class="anchor" id="autotoc_md293"></a>
 6.2. Historical Example: Knights Landing (KNL) on Cray XC40</h2>
 <p>A common historical use case was compiling for Intel Knights Landing (KNL) nodes on Cray XC40 systems, such as the retired Mutrino and Cori machines. These supercomputers had login nodes with a standard CPU architecture (e.g., Haswell) but used the different KNL architecture for their compute nodes.</p>
 <p>To build software for KNL, a "module swapping" technique was required. The build process involved:</p><ol type="1">
@@ -365,15 +365,15 @@ Examples</h3>
 <li>Switching to the compiler module for the compute node architecture (e.g., <code>craype-mic-knl</code>) before starting the actual compilation.</li>
 </ol>
 <p>This process was managed by special CMake toolchain files and custom batch scripts, which were often automated within the <code>ctest</code> framework.</p>
-<h2><a class="anchor" id="autotoc_md278"></a>
+<h2><a class="anchor" id="autotoc_md294"></a>
 6.3. Cross-Compilation on Current Systems</h2>
 <p>The specific hardware (Cray XC40, KNL) and the build procedures described above are historical and no longer in use.</p>
 <p>While cross-compilation is less common on many modern, homogeneous HPC clusters, it is still a necessary technique for advanced architectures, such as systems with different processor types or accelerators (e.g., GPUs).</p>
 <p><b>If you need assistance with cross-compiling for a current HPC system, please contact the facility administrators or The HDF Group (Section 1.3).</b></p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md280"></a>
+<h1><a class="anchor" id="autotoc_md296"></a>
 7. Running Parallel Tests</h1>
-<h2><a class="anchor" id="autotoc_md281"></a>
+<h2><a class="anchor" id="autotoc_md297"></a>
 7.1. Test Directory Location</h2>
 <p>The parallel test suite (<code>testpar/</code>) contains tests for Parallel HDF5 and MPI-IO.</p>
 <p>By default, tests use the current directory for test files. To specify a different location (e.g., parallel file system):</p>
@@ -382,25 +382,25 @@ Examples</h3>
 </div><!-- fragment --><blockquote class="doxtable">
 <p><b>Important:</b> This is critical for performance - avoid using NFS or home directories for parallel testing. </p>
 </blockquote>
-<h2><a class="anchor" id="autotoc_md282"></a>
+<h2><a class="anchor" id="autotoc_md298"></a>
 7.2. Important Test Notes</h2>
-<h3><a class="anchor" id="autotoc_md283"></a>
+<h3><a class="anchor" id="autotoc_md299"></a>
 t_mpi</h3>
 <p>Tests basic MPI-IO features used by Parallel HDF5. Returns non-zero exit code if required features fail.</p>
 <p><b>Exception:</b> Testing files &gt;2GB will print informational messages but not fail, as HDF5 can use alternative file drivers (e.g., family driver) to handle size limits.</p>
-<h3><a class="anchor" id="autotoc_md284"></a>
+<h3><a class="anchor" id="autotoc_md300"></a>
 t_cache</h3>
 <p>Performs many small I/O requests. May run slowly on NFS or other non-parallel file systems. Set <code>HDF5_PARAPREFIX</code> to a parallel file system if this test is slow.</p>
-<h3><a class="anchor" id="autotoc_md285"></a>
+<h3><a class="anchor" id="autotoc_md301"></a>
 Test Express Level</h3>
 <p>Controls test thoroughness:</p>
 <div class="fragment"><div class="line">export HDF5_TEST_EXPRESS=3    # Quick tests (default)</div>
 <div class="line">export HDF5_TEST_EXPRESS=0    # Exhaustive tests</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md286"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md302"></a>
 Test Timeout</h3>
 <p>Default is 1200 seconds (20 minutes). Modify in CMake with:</p>
 <div class="fragment"><div class="line">-DDART_TESTING_TIMEOUT=3600</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md287"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md303"></a>
 7.3. Running Tests on Batch Systems</h2>
 <p><b>For SLURM systems:</b></p>
 <div class="fragment"><div class="line">sbatch -C quad,cache build/bin/batch/ctestS.sl    # Serial tests</div>
@@ -409,7 +409,7 @@ Test Timeout</h3>
 <div class="fragment"><div class="line">bsub build/bin/batch/ctestS.lsf    # Serial tests</div>
 <div class="line">bsub build/bin/batch/ctestP.lsf    # Parallel tests</div>
 </div><!-- fragment --><p>Batch scripts are generated during CMake configuration in the build directory.</p>
-<h2><a class="anchor" id="autotoc_md288"></a>
+<h2><a class="anchor" id="autotoc_md304"></a>
 7.4. Running Specific Test Categories</h2>
 <p>To run specific test suites:</p>
 <div class="fragment"><div class="line">ctest -R &quot;H5TEST&quot;              # Core library tests</div>
@@ -418,14 +418,14 @@ Test Timeout</h3>
 <div class="line">ctest -E &quot;MPI_TEST&quot;            # Exclude parallel tests</div>
 <div class="line">ctest --parallel 4             # Run 4 tests in parallel</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md290"></a>
+<h1><a class="anchor" id="autotoc_md306"></a>
 8. Known Platform Notes</h1>
-<h2><a class="anchor" id="autotoc_md291"></a>
+<h2><a class="anchor" id="autotoc_md307"></a>
 8.1. Linux Systems</h2>
 <p>For MPICH on Linux, ensure &gt;2GB file support by configuring MPICH with:</p>
 <div class="fragment"><div class="line">-cflags=&quot;-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64&quot;</div>
 </div><!-- fragment --><p>This is available on Linux kernels 2.4 and greater.</p>
-<h2><a class="anchor" id="autotoc_md292"></a>
+<h2><a class="anchor" id="autotoc_md308"></a>
 8.2. Cray Systems</h2>
 <ul>
 <li>Use <code>CC=cc</code>, <code>FC=ftn</code>, <code>CXX=CC</code> after loading compiler modules</li>
@@ -433,7 +433,7 @@ Test Timeout</h3>
 <li>Disable shared libraries if encountering linking issues: <div class="fragment"><div class="line">-DBUILD_SHARED_LIBS=OFF</div>
 </div><!-- fragment --></li>
 </ul>
-<h2><a class="anchor" id="autotoc_md293"></a>
+<h2><a class="anchor" id="autotoc_md309"></a>
 8.3. OpenMPI</h2>
 <p>OpenMPI 4.0+ disallows oversubscribing by default. Either:</p>
 <ul>
@@ -441,24 +441,24 @@ Test Timeout</h3>
 <li>Add <code>--oversubscribe</code> flag: <code>-DMPIEXEC_PREFLAGS=--oversubscribe</code></li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md295"></a>
+<h1><a class="anchor" id="autotoc_md311"></a>
 References</h1>
 <p><b>POSIX Compliant:</b> After a write() to a regular file has successfully returned, any successful read() from each byte position modified by that write() will return the data that was written. A subsequent write() to the same byte will overwrite the file data. If a read() can be proven by any means [e.g., MPI_Barrier()] to occur after a write() of that data, it must reflect that write(), even if calls are made by different processes.</p>
 <blockquote class="doxtable">
 <p>Lewin, D. (1994). "POSIX Programmer's Guide (pg. 513-4)". O'Reilly &amp; Associates. </p>
 </blockquote>
 <hr  />
-<h1><a class="anchor" id="autotoc_md297"></a>
+<h1><a class="anchor" id="autotoc_md313"></a>
 Appendix A. Sample MPI-IO Programs</h1>
 <p>Here are sample MPI-IO C and Fortran programs to test your MPI compiler and parallel file system before building HDF5. The programs assume they run in a parallel file system (create test files in current directory). For more examples, please refer to the following directories: HDF5Examples/C/H5PAR and HDF5Examples/FORTRAN/H5PAR</p>
-<h2><a class="anchor" id="autotoc_md298"></a>
+<h2><a class="anchor" id="autotoc_md314"></a>
 Example Compiling and Running</h2>
 <div class="fragment"><div class="line">mpicc Sample_mpio.c -o c.out</div>
 <div class="line">mpiexec -np 4 c.out</div>
 <div class="line"> </div>
 <div class="line">mpif90 Sample_mpio.f90 -o f.out</div>
 <div class="line">mpiexec -np 4 f.out</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md299"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md315"></a>
 Sample_mpio.c</h2>
 <div class="fragment"><div class="line"><span class="comment">/* Simple MPI-IO program testing if a parallel file can be created.</span></div>
 <div class="line"><span class="comment"> * Default filename can be specified via first program argument.</span></div>
@@ -574,7 +574,7 @@ Sample_mpio.c</h2>
 <div class="line">    MPI_Finalize();</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md300"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md316"></a>
 Sample_mpio.f90</h2>
 <div class="fragment"><div class="line"><span class="comment">!</span></div>
 <div class="line"><span class="comment">! The following example demonstrates how to create and close a parallel</span></div>

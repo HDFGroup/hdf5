@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -140,19 +140,19 @@ $(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">README</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>HDF5 version 2.0.0-4263d7f released on 2025-11-05</p>
+<div class="textblock"><p>HDF5 version 2.0.1-143f04a released on 2025-11-15</p>
 <dl class="section warning"><dt>Warning</dt><dd><b>Heads Up: HDF5 Dropped Autotools March 10th</b> <br  />
 <br  />
  It's happened—the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5. <br  />
 <br  />
  The <a href="https://github.com/HDFGroup/hdf5/pull/5308">PR stripping all autotools</a> was merged into the "develop" branch on <b>March 10, 2025</b>. Starting with HDF5 2.0, <em>only</em> the CMake build system is supported.</dd></dl>
 <p><img src="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/img/HDF5.png" alt="HDF5 Logo" class="inline"/></p>
-<p><a href="https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=develop&amp;label=HDF5%20develop%20CMake%20CI" alt="develop cmake build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/daily-schedule.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/daily-schedule.yml?branch=develop&amp;label=HDF5%20develop%20daily%20build" alt="HDF5 develop daily build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/hdfeos5.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&amp;label=HDF-EOS5" alt="HDF-EOS5 build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&amp;label=netCDF" alt="netCDF build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&amp;label=h5py" alt="h5py build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&amp;label=CVE" alt="CVE regression" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/vol.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vol.yml?branch=develop&amp;label=HDF5-VOL" alt="HDF5 VOL connectors build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/vfd.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vfd.yml?branch=develop&amp;label=HDF5-VFD" alt="HDF5 VFD build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/blob/develop/LICENSE"><img src="https://img.shields.io/badge/License-BSD-blue.svg" alt="BSD" style="pointer-events: none;" class="inline"/></a> <a href="https://oss-fuzz-build-logs.storage.googleapis.com/index.html#hdf5"><img src="https://oss-fuzz-build-logs.storage.googleapis.com/badges/hdf5.svg" alt="OSS-Fuzz Status" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml"><img src="https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml/badge.svg" alt="Link Checker Status" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=develop&amp;label=HDF5%20develop%20CMake%20CI" alt="develop cmake build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/daily-schedule.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/daily-schedule.yml?branch=develop&amp;label=HDF5%20develop%20daily%20build" alt="HDF5 develop daily build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/hdfeos5.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&amp;label=HDF-EOS5" alt="HDF-EOS5 build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&amp;label=netCDF" alt="netCDF build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&amp;label=h5py" alt="h5py build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&amp;label=CVE" alt="CVE regression" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/vol.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vol.yml?branch=develop&amp;label=HDF5-VOL" alt="HDF5 VOL connectors build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/vfd.yml?query=branch%3Adevelop"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vfd.yml?branch=develop&amp;label=HDF5-VFD" alt="HDF5 VFD build status" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/blob/develop/LICENSE"><img src="https://img.shields.io/badge/License-BSD-blue.svg" alt="BSD" style="pointer-events: none;" class="inline"/></a> <a href="https://oss-fuzz-build-logs.storage.googleapis.com/index.html#hdf5"><img src="https://oss-fuzz-build-logs.storage.googleapis.com/badges/hdf5.svg" alt="OSS-Fuzz Status" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml"><img src="https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/linkchecker.yml?branch=develop&amp;label=Link%20Checker" alt="Link Checker Status" class="inline"/></a></p>
 <p><a href="https://my.cdash.org/index.php?project=HDF5">HPC configure/build/test results</a></p>
 <p><em>Please refer to the release_docs/INSTALL file for installation/usage instructions.</em></p>
 <p>This repository contains a high-performance library's source code and a file format specification that implements the HDF5® data model. The model has been adopted across many industries, and this implementation has become a de facto data management standard in science, engineering, and research communities worldwide.</p>
 <p>The HDF Group is the developer, maintainer, and steward of HDF5 software. Find more information about The HDF Group, the HDF5 Community, and other HDF5 software projects, tools, and services at <a href="https://www.hdfgroup.org/">The HDF Group's website</a>.</p>
-<h2><a class="anchor" id="autotoc_md186"></a>
+<h2><a class="anchor" id="autotoc_md202"></a>
 DOCUMENTATION</h2>
 <p>Documentation for all HDF software is available at:</p>
 <p><a href="https://support.hdfgroup.org/documentation/index.html">https://support.hdfgroup.org/documentation/index.html</a></p>
@@ -167,11 +167,11 @@ DOCUMENTATION</h2>
 <li>USING_HDF5_CMake - Build and Install HDF5 Applications with CMake</li>
 <li>USING_CMake_Examples - Build and Test HDF5 Examples with CMake</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md187"></a>
+<h2><a class="anchor" id="autotoc_md203"></a>
 HELP AND SUPPORT</h2>
 <p>The HDF Group staffs a free Help Desk accessible at <a href="https://help.hdfgroup.org">https://help.hdfgroup.org</a> and also monitors the <a href="https://forum.hdfgroup.org">Forum</a>. Our free support service is community-based and handled as time allows. We’ll do our best to respond to your question as soon as possible, but please note that response times may vary depending on the complexity of the issue and staff availability.</p>
 <p>If you're interested in guaranteed response and resolution times, a dedicated technical account manager, and more benefits (all while supporting the open-source work of The HDF Group), please check out <a href="https://www.hdfgroup.org/solutions/priority-support/">Priority Support</a>.</p>
-<h2><a class="anchor" id="autotoc_md188"></a>
+<h2><a class="anchor" id="autotoc_md204"></a>
 FORUM and NEWS</h2>
 <p>The <a href="https://forum.hdfgroup.org">HDF Forum</a> is provided for public announcements, technical questions, and discussions of interest to the general HDF5 Community.</p>
 <ul>
@@ -179,7 +179,7 @@ FORUM and NEWS</h2>
 <li>HDF5 Topics <a href="https://forum.hdfgroup.org/c/hdf5">https://forum.hdfgroup.org/c/hdf5</a></li>
 </ul>
 <p>These forums are provided as an open and public service for searching and reading. Posting requires completing a simple registration and allows one to join in the conversation. Please read the <a href="https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum">instructions</a> for more information on how to get started.</p>
-<h2><a class="anchor" id="autotoc_md189"></a>
+<h2><a class="anchor" id="autotoc_md205"></a>
 RELEASE SCHEDULE</h2>
 <p><img src="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/img/release-schedule.png" alt="HDF5 release schedule" class="inline"/></p>
 <p>HDF5 does not follow a regular release schedule. Instead, updates are based on the introduction of new features and the resolution of bugs. However, we aim to have at least one annual release for each maintenance branch.</p>
@@ -191,7 +191,7 @@ RELEASE SCHEDULE</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">FUTURE   </td><td class="markdownTableBodyNone">Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows)   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md190"></a>
+<h3><a class="anchor" id="autotoc_md206"></a>
 Release Progress</h3>
 <p><a href="https://github.com/orgs/HDFGroup/projects/39/views/24"><img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-progress-hdf5.json" alt="Release Progress" class="inline"/></a></p>
 <p>The badge above shows the current progress of release-blocking issues with colors that reflect completion status:</p>
@@ -202,7 +202,7 @@ Release Progress</h3>
 <li><b>🔴 Red (&lt;40%)</b>: Initial Phase - significant blockers remain</li>
 </ul>
 <p>Click the badge to view the detailed project board with current release-blocking issues.</p>
-<h2><a class="anchor" id="autotoc_md191"></a>
+<h2><a class="anchor" id="autotoc_md207"></a>
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE</h2>
 <p>Periodically development code snapshots are provided at the following URL:</p>
 <p><a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot">https://github.com/HDFGroup/hdf5/releases/tag/snapshot</a></p>

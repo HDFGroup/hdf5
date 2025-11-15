@@ -21,9 +21,10 @@ var searchData=
   ['release_20specific_20information_20for_20hdf5_201_2012_18',['Release Specific Information for HDF5 1.12',['../rel_spec_112.html',1,'']]],
   ['release_20specific_20information_20for_20hdf5_201_2014_19',['Release Specific Information for HDF5 1.14',['../rel_spec_114.html',1,'']]],
   ['release_20specific_20information_20for_20hdf5_201_208_20',['Release Specific Information for HDF5 1.8',['../rel_spec_18.html',1,'']]],
-  ['release_20version_20numbers_21',['HDF5 Library Release Version Numbers',['../_r_e_l_v_e_r_s_i_o_n.html',1,'']]],
-  ['requirements_20in_20parallel_20hdf5_20applications_22',['Collective Calling Requirements in Parallel HDF5 Applications',['../collective_calls.html',1,'']]],
-  ['resources_23',['Additional Resources',['../_a_r__u_g.html',1,'']]],
-  ['rfcs_24',['RFCs',['../_r_f_c.html',1,'']]],
-  ['rm_20page_20template_25',['Reference Manual (RM) Page Template',['../_r_m_t.html',1,'']]]
+  ['release_20specific_20information_20for_20hdf5_202_200_21',['Release Specific Information for HDF5 2 0',['../rel_spec_20.html',1,'Release Specific Information for HDF5 2.0'],['../rel_spec_20_change.html',1,'Release Specific Information for HDF5 2.0']]],
+  ['release_20version_20numbers_22',['HDF5 Library Release Version Numbers',['../_r_e_l_v_e_r_s_i_o_n.html',1,'']]],
+  ['requirements_20in_20parallel_20hdf5_20applications_23',['Collective Calling Requirements in Parallel HDF5 Applications',['../collective_calls.html',1,'']]],
+  ['resources_24',['Additional Resources',['../_a_r__u_g.html',1,'']]],
+  ['rfcs_25',['RFCs',['../_r_f_c.html',1,'']]],
+  ['rm_20page_20template_26',['Reference Manual (RM) Page Template',['../_r_m_t.html',1,'']]]
 ];

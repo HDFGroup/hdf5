@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -740,7 +740,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ref_ptr</td><td>Pointer to reference to query </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">name</td><td>Buffer to place the attribute name of the reference </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">name</td><td>Buffer to place the attribute name of the reference </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the <code class="param">name</code> buffer</td></tr>
   </table>
   </dd>
@@ -783,7 +783,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ref_ptr</td><td>Pointer to reference to query </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">name</td><td>Buffer to place the file name of the reference </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">name</td><td>Buffer to place the file name of the reference </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the <code class="param">name</code> buffer. When the size is passed in, the <code>NULL</code> terminator needs to be included.</td></tr>
   </table>
   </dd>
@@ -902,7 +902,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ref_ptr</td><td>Pointer to reference to query </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rapl_id</td><td>Reference access property list identifier </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">name</td><td>Buffer to place the object name of the reference </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">name</td><td>Buffer to place the object name of the reference </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the <code class="param">name</code> buffer. When the size is passed in, the <code>NULL</code> terminator needs to be included.</td></tr>
   </table>
   </dd>

@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -238,6 +238,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:gafda7e4a737f10a9be280afcdbf468e61" id="r_gafda7e4a737f10a9be280afcdbf468e61"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gafda7e4a737f10a9be280afcdbf468e61">h5fset_dset_no_attrs_hint_f</a> (file_id, minimize, hdferr)</td></tr>
 <tr class="memdesc:gafda7e4a737f10a9be280afcdbf468e61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the value of the "minimize dataset headers" value which creates smaller dataset object headers when its set and no attributes are present.  <br /></td></tr>
 <tr class="separator:gafda7e4a737f10a9be280afcdbf468e61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga75cc7b589115fd1a726a0d35d69cdb8e" id="r_ga75cc7b589115fd1a726a0d35d69cdb8e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga75cc7b589115fd1a726a0d35d69cdb8e">h5fstart_swmr_write_f</a> (file_id, hdferr)</td></tr>
+<tr class="memdesc:ga75cc7b589115fd1a726a0d35d69cdb8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables SWMR writing mode for a file.  <br /></td></tr>
+<tr class="separator:ga75cc7b589115fd1a726a0d35d69cdb8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9c7c7614d0ad2b528161ca939feee370" id="r_ga9c7c7614d0ad2b528161ca939feee370"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9c7c7614d0ad2b528161ca939feee370">h5funmount_f</a> (loc_id, name, hdferr)</td></tr>
 <tr class="memdesc:ga9c7c7614d0ad2b528161ca939feee370"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unmounts a file.  <br /></td></tr>
 <tr class="separator:ga9c7c7614d0ad2b528161ca939feee370"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1607,6 +1610,37 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___h5_f.html#gaddd372973b35cde53300817d3ffaee5a">H5Fset_dset_no_attrs_hint()</a> </p>
+
+</div>
+</div>
+<a id="ga75cc7b589115fd1a726a0d35d69cdb8e" name="ga75cc7b589115fd1a726a0d35d69cdb8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga75cc7b589115fd1a726a0d35d69cdb8e">&#9670;&#160;</a></span>h5fstart_swmr_write_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5fstart_swmr_write_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>file_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)</td>          <td class="paramname"><span class="paramname"><em>hdferr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Enables SWMR writing mode for a file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file_id</td><td>File identifier. </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___s_w_m_r.html#ga159be34fbe7e4a959589310ef0196dfe">H5Fstart_swmr_write()</a> </p>
 
 </div>
 </div>
