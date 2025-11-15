@@ -871,3 +871,41 @@ H5T__conv_order_opt(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__conv_order_opt() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_validate_atomic_conversion
+ *
+ * Purpose:     Validate if conversion of src data type to dst data type is a valid atomic conversion
+ *
+ * Return:      Returns zero if valid, non-zero if invalid
+ *
+ *-------------------------------------------------------------------------
+ */
+ htri_t H5T_validate_atomic_conversion(const H5T_t *src, const H5T_t *dst) {
+    int ret_value = FAIL; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Validate if the specified conversion is valid and does not exceed the source and destination
+     * bit fields*/
+
+    size_t src_first_idx = src->shared->u.atomic.offset / 8;
+    size_t min_prec      = MIN(dst->shared->u.atomic.prec, src->shared->u.atomic.prec);
+    size_t src_last_idx  = (src->shared->u.atomic.offset + min_prec) / 8;
+
+    if (H5T_IS_ATOMIC(src->shared) &&
+        (src_first_idx > src->shared->size || src_last_idx > src->shared->size))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "invalid source offset or precision");
+
+    size_t dst_first_idx = dst->shared->u.atomic.offset / 8;
+    size_t dst_last_idx  = (dst->shared->u.atomic.offset + min_prec) / 8;
+
+    if (H5T_IS_ATOMIC(dst->shared) &&
+        (dst_first_idx > dst->shared->size || dst_last_idx > dst->shared->size))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "invalid destination offset or precision");
+
+    ret_value = SUCCEED;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_validate_atomic_conversion() */
