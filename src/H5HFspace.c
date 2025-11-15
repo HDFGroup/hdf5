@@ -159,7 +159,7 @@ H5HF__space_add(H5HF_hdr_t *hdr, H5HF_free_section_t *node, unsigned flags)
     udata.hdr = hdr;
 
     /* Add to the free space for the heap */
-    if (H5FS_sect_add(hdr->f, hdr->fspace, (H5FS_section_info_t *)node, flags, &udata) < 0)
+    if (H5FS_sect_add(hdr->f, hdr->fspace, (H5FS_section_info_t *)node, flags, &udata, NULL) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't add section to heap free space");
 
 done:

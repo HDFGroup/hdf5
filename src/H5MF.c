@@ -599,7 +599,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_section_t *node)
+H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_section_t *node,
+               bool *merged_or_shrunk)
 {
     H5AC_ring_t    orig_ring = H5AC_RING_INV; /* Original ring value */
     H5AC_ring_t    fsm_ring  = H5AC_RING_INV; /* Ring of FSM */
@@ -631,7 +632,8 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
             __func__, node->sect_info.addr, node->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     /* Add the section */
-    if (H5FS_sect_add(f, fspace, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, &udata) < 0)
+    if (H5FS_sect_add(f, fspace, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, &udata,
+                      merged_or_shrunk) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space");
 
 done:
@@ -711,8 +713,11 @@ H5MF__find_sect(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5FS_t *fspace, h
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
             /* Re-add the section to the free-space manager */
-            if (H5MF__add_sect(f, alloc_type, fspace, node) < 0)
+            if (H5MF__add_sect(f, alloc_type, fspace, node, NULL) < 0) {
+                node->sect_info.addr -= size;
+                node->sect_info.size += size;
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space");
+            }
         } /* end else */
     }     /* end if */
 
@@ -852,9 +857,10 @@ done:
 static haddr_t
 H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 {
-    H5F_mem_page_t       ptype;                   /* Free-space manager type */
-    H5MF_free_section_t *node      = NULL;        /* Free space section pointer */
-    haddr_t              ret_value = HADDR_UNDEF; /* Return value */
+    H5F_mem_page_t       ptype;                     /* Free-space manager type */
+    H5MF_free_section_t *node        = NULL;        /* Free space section pointer */
+    bool    section_merged_or_shrunk = false;       /* Whether free space section was merged or shrunk away */
+    haddr_t ret_value                = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -900,9 +906,13 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
                                 "can't initialize free space section");
 
                 /* Add the fragment to the large free-space manager */
-                if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[ptype], node) < 0)
+                if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[ptype], node, &section_merged_or_shrunk) <
+                    0) {
+                    if (section_merged_or_shrunk)
+                        node = NULL;
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF,
                                 "can't re-add section to file free space");
+                }
 
                 node = NULL;
             } /* end if */
@@ -931,9 +941,13 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize free space section");
 
             /* Add the remaining space in the page to the manager */
-            if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[ptype], node) < 0)
+            if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[ptype], node, &section_merged_or_shrunk) <
+                0) {
+                if (section_merged_or_shrunk)
+                    node = NULL;
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF,
                             "can't re-add section to file free space");
+            }
 
             node = NULL;
 
@@ -1154,6 +1168,8 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 
     /* If size of the freed section is larger than threshold, add it to the free space manager */
     if (size >= f->shared->fs_threshold) {
+        bool section_merged_or_shrunk = false; /* Whether free space section was merged or shrunk away */
+
         assert(f->shared->fs_man[fs_type]);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
@@ -1161,8 +1177,12 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Add to the free space for the file */
-        if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[fs_type], node) < 0)
+        if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[fs_type], node, &section_merged_or_shrunk) < 0) {
+            if (section_merged_or_shrunk)
+                node = NULL;
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't add section to file free space");
+        }
+
         node = NULL;
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
@@ -1316,7 +1336,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section");
 
             /* Add the fragment to the large-sized free-space manager */
-            if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[fs_type], node) < 0)
+            if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[fs_type], node, NULL) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space");
 
             node = NULL;
@@ -3059,8 +3079,13 @@ H5MF_settle_meta_data_fsm(H5F_t *f, bool *fsm_settled)
         assert(sm_fssinfo_fs_type > H5F_MEM_PAGE_DEFAULT);
         assert(sm_fssinfo_fs_type < H5F_MEM_PAGE_LARGE_SUPER);
 
-        assert(!H5_addr_defined(f->shared->fs_addr[sm_fshdr_fs_type]));
-        assert(!H5_addr_defined(f->shared->fs_addr[sm_fssinfo_fs_type]));
+        if (H5_addr_defined(f->shared->fs_addr[sm_fshdr_fs_type]))
+            HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL,
+                        "small free space header block manager should not have had file space allocated");
+        if (H5_addr_defined(f->shared->fs_addr[sm_fssinfo_fs_type]))
+            HGOTO_ERROR(
+                H5E_FSPACE, H5E_BADVALUE, FAIL,
+                "small free space serialized section manager should not have had file space allocated");
 
         /* Note that in most cases, sm_hdr_fspace will equal sm_sinfo_fspace. */
         sm_hdr_fspace   = f->shared->fs_man[sm_fshdr_fs_type];
@@ -3078,8 +3103,13 @@ H5MF_settle_meta_data_fsm(H5F_t *f, bool *fsm_settled)
             assert(lg_fssinfo_fs_type >= H5F_MEM_PAGE_LARGE_SUPER);
             assert(lg_fssinfo_fs_type < H5F_MEM_PAGE_NTYPES);
 
-            assert(!H5_addr_defined(f->shared->fs_addr[lg_fshdr_fs_type]));
-            assert(!H5_addr_defined(f->shared->fs_addr[lg_fssinfo_fs_type]));
+            if (H5_addr_defined(f->shared->fs_addr[lg_fshdr_fs_type]))
+                HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL,
+                            "large free space header block manager should not have had file space allocated");
+            if (H5_addr_defined(f->shared->fs_addr[lg_fssinfo_fs_type]))
+                HGOTO_ERROR(
+                    H5E_FSPACE, H5E_BADVALUE, FAIL,
+                    "large free space serialized section manager should not have had file space allocated");
 
             /* Note that in most cases, lg_hdr_fspace will equal lg_sinfo_fspace. */
             lg_hdr_fspace   = f->shared->fs_man[lg_fshdr_fs_type];
