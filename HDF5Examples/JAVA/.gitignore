@@ -1,0 +1,22 @@
+# Maven test script build directories
+build/
+
+# Generated POM files (if any escape to root)
+pom-examples.xml
+
+# HDF5 output files from examples
+*.h5
+
+# Maven target directory (if built in-place)
+target/
+
+# Compiled class files
+*.class
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project

@@ -928,9 +928,9 @@ H5_DLL hid_t H5Pdecode(const void *buf);
  *          control the encoding via the \a libver_bounds property
  *          (see H5Pset_libver_bounds()). If the \a libver_bounds
  *          property is missing, H5Pencode2() proceeds as if the \a
- *          libver_bounds property were set to (#H5F_LIBVER_EARLIEST,
+ *          libver_bounds property were set to (#H5F_LIBVER_V18,
  *          #H5F_LIBVER_LATEST). (Functionally, H5Pencode1() is identical to
- *          H5Pencode2() with \a libver_bounds set to (#H5F_LIBVER_EARLIEST,
+ *          H5Pencode2() with \a libver_bounds set to (#H5F_LIBVER_V18,
  *          #H5F_LIBVER_LATEST).)
  *          Properties that do not have encode callbacks will be skipped.
  *          There is currently no mechanism to register an encode callback for
@@ -5116,12 +5116,16 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *           </tr>
  *          </table>
  *
+ *          The default settings are \p low=#H5F_LIBVER_V18, \p high=#H5F_LIBVER_LATEST.
+ *
  * \note *H5F_LIBVER_LATEST*:<br />
  *                 Since 2.0.x is also #H5F_LIBVER_LATEST, there is no upper
  *                 limit on the format versions to use.  That is, if a
  *                 newer format version is required to support a feature
  *                 in 2.0.x series, this setting will allow the object to be
  *                 created.
+ *
+ * \version 2.0.0  Default setting for \p low changed to #H5F_LIBVER_V18
  *
  * \version 1.10.2 #H5F_LIBVER_V18 added to the enumerated defines in
  *                 #H5F_libver_t.

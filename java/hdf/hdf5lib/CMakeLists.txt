@@ -150,15 +150,39 @@ if (HDF5_ENABLE_MAVEN_DEPLOY)
     set (HDF5_MAVEN_VERSION_SUFFIX "")
   endif ()
 
+  # For FFM builds, include the FFM binding sources in the Maven JAR
+  # This ensures the final JAR contains both the FFM bindings (org.hdfgroup.javahdf5.*)
+  # and the compatibility layer (hdf.hdf5lib.*)
+  set (HDF5_MAVEN_JAR_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_SOURCES}
+  )
+
+  # Include FFM bindings if this is an FFM build
+  if (HDF5_JAVA_USE_FFM)
+    # Glob the generated FFM binding sources
+    file (GLOB HDF5_FFM_BINDING_SOURCES
+      LIST_DIRECTORIES false
+      ${HDF5_JAVA_JSRC_BINARY_DIR}/org/hdfgroup/javahdf5/*.java
+    )
+
+    if (HDF5_FFM_BINDING_SOURCES)
+      list (LENGTH HDF5_FFM_BINDING_SOURCES list_count)
+      message (STATUS "Including FFM bindings in Maven JAR (${list_count} files)")
+      list (APPEND HDF5_MAVEN_JAR_SOURCES ${HDF5_FFM_BINDING_SOURCES})
+    else ()
+      message (WARNING "FFM build but no FFM binding sources found in ${HDF5_JAVA_JSRC_BINARY_DIR}/org/hdfgroup/javahdf5/")
+    endif ()
+  endif ()
+
   # Build JAR once with platform classifier - this is the primary JAR
   set (HDF5_JAR_CLASSIFIER "${HDF5_MAVEN_PLATFORM}-${HDF5_MAVEN_ARCHITECTURE}")
   add_jar (${HDF5_JAVA_HDF5_LIB_TARGET}
     OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}"
     MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt
-    ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
-    ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES}
-    ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
-    ${HDF5_JAVA_HDF_HDF5_SOURCES}
+    ${HDF5_MAVEN_JAR_SOURCES}
   )
 
   # Get the JAR file path for the platform-specific JAR
@@ -198,7 +222,31 @@ if (HDF5_ENABLE_MAVEN_DEPLOY)
   SET_GLOBAL_VARIABLE (HDF5_MAVEN_PLATFORM_JAR_FILE "${HDF5_JAVA_PLATFORM_JAR_FILE}")
 else ()
   # Standard JAR creation without Maven classifiers
-  add_jar (${HDF5_JAVA_HDF5_LIB_TARGET} OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}" MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
+  # Include FFM bindings if this is an FFM build
+  set (HDF5_STANDARD_JAR_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
+    ${HDF5_JAVA_HDF_HDF5_SOURCES}
+  )
+
+  if (HDF5_JAVA_USE_FFM)
+    # Glob the generated FFM binding sources
+    file (GLOB HDF5_FFM_BINDING_SOURCES
+      LIST_DIRECTORIES false
+      ${HDF5_JAVA_JSRC_BINARY_DIR}/org/hdfgroup/javahdf5/*.java
+    )
+
+    if (HDF5_FFM_BINDING_SOURCES)
+      list (LENGTH HDF5_FFM_BINDING_SOURCES list_count)
+      message (STATUS "Including FFM bindings in standard JAR (${list_count} files)")
+      list (APPEND HDF5_STANDARD_JAR_SOURCES ${HDF5_FFM_BINDING_SOURCES})
+    else ()
+      message (WARNING "FFM build but no FFM binding sources found in ${HDF5_JAVA_JSRC_BINARY_DIR}/org/hdfgroup/javahdf5/")
+    endif ()
+  endif ()
+
+  add_jar (${HDF5_JAVA_HDF5_LIB_TARGET} OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}" MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt ${HDF5_STANDARD_JAR_SOURCES})
   install_jar (${HDF5_JAVA_HDF5_LIB_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT libraries)
   # For non-Maven builds, use the standard JAR
   get_target_property (${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE ${HDF5_JAVA_HDF5_LIB_TARGET} JAR_FILE)

@@ -1,0 +1,325 @@
+name: Test Maven Packages
+
+# This workflow tests published Maven artifacts by:
+# 1. Downloading packages from GitHub Packages
+# 2. Verifying JAR contents are complete (not just dependencies)
+# 3. Building and running HDF5Examples against the packages
+# 4. Testing both JNI and FFM implementations
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Maven artifact version to test'
+        type: string
+        required: true
+      java_implementation:
+        description: 'Java implementation(s) to test: jni, ffm, or both'
+        type: string
+        required: false
+        default: 'both'
+      repository_url:
+        description: 'Maven repository URL'
+        type: string
+        required: false
+        default: 'https://maven.pkg.github.com/HDFGroup/hdf5'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Maven artifact version to test'
+        type: string
+        required: true
+        default: '2.0.0-SNAPSHOT'
+      java_implementation:
+        description: 'Java implementation(s) to test'
+        type: choice
+        required: false
+        default: 'both'
+        options:
+          - 'both'
+          - 'jni'
+          - 'ffm'
+      repository_url:
+        description: 'Maven repository URL'
+        type: string
+        required: false
+        default: 'https://maven.pkg.github.com/HDFGroup/hdf5'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  test-jni-package:
+    name: Test JNI Maven Package
+    runs-on: ubuntu-latest
+    if: |
+      inputs.java_implementation == 'both' ||
+      inputs.java_implementation == 'jni'
+    steps:
+      - name: Checkout HDF5Examples
+        uses: actions/checkout@v5.0.0
+        with:
+          repository: HDFGroup/HDF5Examples
+          path: HDF5Examples
+
+      - name: Set up Java 11 for JNI
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Configure Maven settings for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                    http://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <servers>
+                  <server>
+                      <id>github-hdfgroup-hdf5</id>
+                      <username>\${env.GITHUB_ACTOR}</username>
+                      <password>\${env.GITHUB_TOKEN}</password>
+                  </server>
+              </servers>
+              <profiles>
+                  <profile>
+                      <id>github-packages</id>
+                      <repositories>
+                          <repository>
+                              <id>github-hdfgroup-hdf5</id>
+                              <url>${{ inputs.repository_url }}</url>
+                              <snapshots><enabled>true</enabled></snapshots>
+                              <releases><enabled>true</enabled></releases>
+                          </repository>
+                      </repositories>
+                  </profile>
+              </profiles>
+              <activeProfiles>
+                  <activeProfile>github-packages</activeProfile>
+              </activeProfiles>
+          </settings>
+          EOF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify JNI artifact exists and download
+        run: |
+          echo "::group::Download JNI artifact"
+          mvn dependency:get \
+            -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.version }} \
+            -DremoteRepositories=${{ inputs.repository_url }} \
+            -Dtransitive=false
+          echo "::endgroup::"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify JAR contents (JNI)
+        run: |
+          echo "::group::Verify JAR contents"
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/${{ inputs.version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          if [ -z "$JAR_PATH" ]; then
+            echo "::error::Could not find downloaded JAR file"
+            exit 1
+          fi
+
+          echo "JAR location: $JAR_PATH"
+          echo "JAR size: $(du -h "$JAR_PATH" | cut -f1)"
+
+          # Verify HDF5 classes are present
+          if jar tf "$JAR_PATH" | grep -q "hdf/hdf5lib/H5.class"; then
+            echo "✅ JAR contains HDF5 JNI classes"
+            CLASS_COUNT=$(jar tf "$JAR_PATH" | grep "hdf/hdf5lib.*\.class" | wc -l)
+            echo "Found $CLASS_COUNT HDF5 classes"
+          else
+            echo "::error::JAR does not contain HDF5 classes!"
+            echo "JAR contents (first 50 files):"
+            jar tf "$JAR_PATH" | head -50
+            exit 1
+          fi
+          echo "::endgroup::"
+
+      - name: Install HDF5 native libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev hdf5-tools
+
+      - name: Test JNI examples
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-jni.sh "${{ inputs.version }}" "${{ inputs.repository_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload test artifacts (JNI)
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: jni-test-results-${{ inputs.version }}
+          path: |
+            HDF5Examples/JAVA/build/maven-test-jni/
+
+  test-ffm-package:
+    name: Test FFM Maven Package
+    runs-on: ubuntu-latest
+    if: |
+      inputs.java_implementation == 'both' ||
+      inputs.java_implementation == 'ffm'
+    steps:
+      - name: Checkout HDF5Examples
+        uses: actions/checkout@v5.0.0
+        with:
+          repository: HDFGroup/HDF5Examples
+          path: HDF5Examples
+
+      - name: Set up Java 25 for FFM
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+          cache: 'maven'
+
+      - name: Configure Maven settings for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                    http://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <servers>
+                  <server>
+                      <id>github-hdfgroup-hdf5</id>
+                      <username>\${env.GITHUB_ACTOR}</username>
+                      <password>\${env.GITHUB_TOKEN}</password>
+                  </server>
+              </servers>
+              <profiles>
+                  <profile>
+                      <id>github-packages</id>
+                      <repositories>
+                          <repository>
+                              <id>github-hdfgroup-hdf5</id>
+                              <url>${{ inputs.repository_url }}</url>
+                              <snapshots><enabled>true</enabled></snapshots>
+                              <releases><enabled>true</enabled></releases>
+                          </repository>
+                      </repositories>
+                  </profile>
+              </profiles>
+              <activeProfiles>
+                  <activeProfile>github-packages</activeProfile>
+              </activeProfiles>
+          </settings>
+          EOF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify FFM artifact exists and download
+        run: |
+          echo "::group::Download FFM artifact"
+          mvn dependency:get \
+            -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.version }} \
+            -DremoteRepositories=${{ inputs.repository_url }} \
+            -Dtransitive=false
+          echo "::endgroup::"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify JAR contents (FFM)
+        run: |
+          echo "::group::Verify JAR contents"
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/${{ inputs.version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          if [ -z "$JAR_PATH" ]; then
+            echo "::error::Could not find downloaded JAR file"
+            exit 1
+          fi
+
+          echo "JAR location: $JAR_PATH"
+          echo "JAR size: $(du -h "$JAR_PATH" | cut -f1)"
+
+          # Verify HDF5 FFM classes are present
+          if jar tf "$JAR_PATH" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
+            echo "✅ JAR contains HDF5 FFM classes"
+            CLASS_COUNT=$(jar tf "$JAR_PATH" | grep "org/hdfgroup/javahdf5.*\.class" | wc -l)
+            echo "Found $CLASS_COUNT HDF5 FFM classes"
+          else
+            echo "::error::JAR does not contain HDF5 FFM classes!"
+            echo "JAR contents (first 50 files):"
+            jar tf "$JAR_PATH" | head -50
+            exit 1
+          fi
+          echo "::endgroup::"
+
+      - name: Install HDF5 native libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev hdf5-tools
+
+      - name: Test FFM examples
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-ffm.sh "${{ inputs.version }}" "${{ inputs.repository_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload test artifacts (FFM)
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: ffm-test-results-${{ inputs.version }}
+          path: |
+            HDF5Examples/JAVA/build/maven-test-ffm/
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-jni-package, test-ffm-package]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          echo "## Maven Package Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ inputs.repository_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          JNI_RESULT="${{ needs.test-jni-package.result }}"
+          FFM_RESULT="${{ needs.test-ffm-package.result }}"
+
+          echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$JNI_RESULT" != "skipped" ]; then
+            if [ "$JNI_RESULT" == "success" ]; then
+              echo "✅ **JNI Package:** PASSED" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **JNI Package:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          if [ "$FFM_RESULT" != "skipped" ]; then
+            if [ "$FFM_RESULT" == "success" ]; then
+              echo "✅ **FFM Package:** PASSED" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **FFM Package:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          # Fail if any tests failed
+          if [ "$JNI_RESULT" == "failure" ] || [ "$FFM_RESULT" == "failure" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **One or more tests failed. Check the logs above for details.**" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 **All tests passed!**" >> $GITHUB_STEP_SUMMARY

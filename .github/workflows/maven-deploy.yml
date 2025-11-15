@@ -83,28 +83,28 @@ jobs:
       platform-classifier: ${{ steps.platform-info.outputs.classifier }}
     steps:
       - name: Download artifacts (Linux)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-linux-x86_64
           path: ./artifacts/linux
         continue-on-error: true
 
       - name: Download artifacts (Windows)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-windows-x86_64
           path: ./artifacts/windows
         continue-on-error: true
 
       - name: Download artifacts (macOS x86_64)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-macos-x86_64
           path: ./artifacts/macos-x86_64
         continue-on-error: true
 
       - name: Download artifacts (macOS aarch64)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-macos-aarch64
           path: ./artifacts/macos-aarch64
@@ -237,28 +237,28 @@ jobs:
     if: ${{ !inputs.dry_run }}
     steps:
       - name: Download artifacts (Linux)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-linux-x86_64
           path: ./artifacts/linux
         continue-on-error: true
 
       - name: Download artifacts (Windows)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-windows-x86_64
           path: ./artifacts/windows
         continue-on-error: true
 
       - name: Download artifacts (macOS x86_64)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-macos-x86_64
           path: ./artifacts/macos-x86_64
         continue-on-error: true
 
       - name: Download artifacts (macOS aarch64)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@v5
         with:
           name: maven-staging-artifacts-macos-aarch64
           path: ./artifacts/macos-aarch64
