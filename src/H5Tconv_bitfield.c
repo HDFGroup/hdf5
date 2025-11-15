@@ -78,24 +78,6 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
             if (NULL == conv_ctx)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid datatype conversion context pointer");
 
-            /* Validate if the specified conversion is valid and does not exceed the source and destination
-             * bit fields*/
-            size_t src_first_idx = src->shared->u.atomic.offset / 8;
-            size_t src_last_idx  = (src->shared->u.atomic.offset +
-                                   MIN(dst->shared->u.atomic.prec, src->shared->u.atomic.prec) - 1) /
-                                  8;
-
-            if (src_first_idx >= src->shared->size || src_last_idx >= src->shared->size)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "invalid source offset or precision");
-
-            size_t dst_first_idx = dst->shared->u.atomic.offset / 8;
-            size_t dst_last_idx  = (dst->shared->u.atomic.offset +
-                                   MIN(dst->shared->u.atomic.prec, src->shared->u.atomic.prec) - 1) /
-                                  8;
-
-            if (dst_first_idx >= dst->shared->size || dst_last_idx >= dst->shared->size)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "invalid destination offset or precision");
-
             /*
              * Do we process the values from beginning to end or vice versa? Also,
              * how many of the elements have the source and destination areas
