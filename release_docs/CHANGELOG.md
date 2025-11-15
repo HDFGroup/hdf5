@@ -95,7 +95,7 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
    The variables used in hdf5-config.cmake to indicate what options were used to build the installed library have been renamed. All `HDF5_BUILD/ENABLE_{feature}` variables are now `HDF5_PROVIDES_{feature}`. This more clearly indicates that these variables reflect whether the feature is supported by the installed library, instead of whether the feature is an option that can be changed when building an application with the library.
 
-   Created macro `EXTERNAL_HDF5_STATUS` to convert between the old and new names. The macro is in the config/examples/HDF5SubdirMacros.cmake file and can be copied into a project's CMakeLists.txt file to provide backward compatibility.
+   Created macro `EXTERNAL_HDF5_STATUS` to convert between the old and new names. The macro is in the config/examples/HDF5AsSubdirMacros.cmake file and can be copied into a project's CMakeLists.txt file to provide backward compatibility.
 
 ### CMake minimum version is now 3.26
 
