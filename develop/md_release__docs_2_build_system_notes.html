@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-15</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -140,20 +140,20 @@ $(function(){initNavTree('md_release__docs_2_build_system_notes.html',''); initR
   <div class="headertitle"><div class="title">HDF5 Build System Summary</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md212"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md196"></a></p>
 <p>A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastructure for development planning.</p>
-<h1><a class="anchor" id="autotoc_md213"></a>
+<h1><a class="anchor" id="autotoc_md197"></a>
 Build System Architecture</h1>
-<h2><a class="anchor" id="autotoc_md214"></a>
+<h2><a class="anchor" id="autotoc_md198"></a>
 CMake-Only Migration (March 2025)</h2>
 <ul>
 <li><b>Complete transition</b>: Autotools support was completely dropped in HDF5 2.0</li>
 <li><b>CMake minimum version</b>: 3.26 required</li>
 <li><b>Out-of-source builds</b>: Enforced - in-source builds are blocked with clear error messages</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md215"></a>
+<h2><a class="anchor" id="autotoc_md199"></a>
 Core CMake Structure</h2>
-<h3><a class="anchor" id="autotoc_md216"></a>
+<h3><a class="anchor" id="autotoc_md200"></a>
 Main Configuration Files</h3>
 <ul>
 <li><code>CMakeLists.txt</code> - Root build configuration</li>
@@ -165,7 +165,7 @@ Main Configuration Files</h3>
 <li><code>CMakePlugins.cmake</code> - Plugin architecture support</li>
 <li><code>java/src/hdf/hdf5lib/pom.xml.in</code> - Maven POM template for Java artifacts</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md217"></a>
+<h3><a class="anchor" id="autotoc_md201"></a>
 Build Options Categories</h3>
 <p><b>Library Types:</b></p><ul>
 <li><code>BUILD_STATIC_LIBS=ON</code> - Static library builds</li>
@@ -198,9 +198,9 @@ Build Options Categories</h3>
 <li><code>HDF5_ENABLE_MAP_API=OFF</code> - Map API (experimental)</li>
 <li><code>HDF5_ENABLE_HDFS=OFF</code> - Hadoop HDFS support</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md218"></a>
+<h1><a class="anchor" id="autotoc_md202"></a>
 CMake Preset System</h1>
-<h2><a class="anchor" id="autotoc_md219"></a>
+<h2><a class="anchor" id="autotoc_md203"></a>
 Preset Architecture</h2>
 <ul>
 <li><b>Layered inheritance</b>: Base presets + feature-specific + platform-specific</li>
@@ -210,7 +210,7 @@ Preset Architecture</h2>
 <li><b>Minimal Maven presets</b>: Streamlined configurations for Java artifact generation only</li>
 <li><b>Build type matrix</b>: Debug, Release (RelWithDebInfo + docs), Maven variants</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md220"></a>
+<h2><a class="anchor" id="autotoc_md204"></a>
 Key Preset Patterns</h2>
 <div class="fragment"><div class="line"># Standard shared library builds</div>
 <div class="line">cmake --workflow --preset ci-StdShar-GNUC --fresh      # GCC</div>
@@ -233,7 +233,7 @@ Key Preset Patterns</h2>
 <div class="line"># Snapshot: Adds -SNAPSHOT suffix for development versions</div>
 <div class="line"># Minimal Maven presets: Skip examples, testing, tools, C++, Fortran - Java artifacts only</div>
 <div class="line"># Java Examples Maven Integration: Comprehensive testing of Java examples with Maven artifacts across all platforms</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md221"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md205"></a>
 Preset Configuration Strategy</h2>
 <ul>
 <li><b>Binary directory</b>: <code>${sourceParentDir}/build/${presetName}</code></li>
@@ -241,9 +241,9 @@ Preset Configuration Strategy</h2>
 <li><b>Generator</b>: Ninja (default for most presets)</li>
 <li><b>External libraries</b>: TGZ/GIT support for zlib, szip, libaec</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md222"></a>
+<h1><a class="anchor" id="autotoc_md206"></a>
 Testing Infrastructure</h1>
-<h2><a class="anchor" id="autotoc_md223"></a>
+<h2><a class="anchor" id="autotoc_md207"></a>
 Test Framework Structure</h2>
 <ul>
 <li><b>CTest integration</b>: Primary test runner</li>
@@ -251,7 +251,7 @@ Test Framework Structure</h2>
 <li><b>Timeout system</b>: Base 1200s, with short/long/very-long variants</li>
 <li><b>Parallel testing</b>: Separate test infrastructure for MPI builds</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md224"></a>
+<h2><a class="anchor" id="autotoc_md208"></a>
 Test Categories</h2>
 <ul>
 <li><b>Core tests</b>: <code>test/</code> - Library unit tests</li>
@@ -262,7 +262,7 @@ Test Categories</h2>
 <li><b>VOL tests</b>: Virtual Object Layer connector testing</li>
 <li><b>Language binding tests</b>: C++, Fortran, Java specific tests</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md225"></a>
+<h2><a class="anchor" id="autotoc_md209"></a>
 Test Execution Patterns</h2>
 <div class="fragment"><div class="line"># Express testing (quick)</div>
 <div class="line">export HDF_TEST_EXPRESS=3</div>
@@ -276,9 +276,9 @@ Test Execution Patterns</h2>
 <div class="line"> </div>
 <div class="line"># API comprehensive tests</div>
 <div class="line">ctest -R &quot;H5_api_test&quot;</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md226"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md210"></a>
 CI/CD Pipeline Architecture</h1>
-<h2><a class="anchor" id="autotoc_md227"></a>
+<h2><a class="anchor" id="autotoc_md211"></a>
 GitHub Actions Matrix</h2>
 <ul>
 <li>Comprehensive testing across platforms/compilers</li>
@@ -289,7 +289,7 @@ GitHub Actions Matrix</h2>
 </ul>
 </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md228"></a>
+<h2><a class="anchor" id="autotoc_md212"></a>
 Key Workflow Categories</h2>
 <p><b>Main CI Workflows:</b></p><ul>
 <li><code>main.yml</code> - Primary CI across platforms</li>
@@ -315,7 +315,7 @@ Key Workflow Categories</h2>
 <li><code>maven-staging.yml</code> - PR-based Maven testing and validation workflow</li>
 <li><code>daily-schedule.yml</code> - Scheduled builds with AWS integration</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md229"></a>
+<h2><a class="anchor" id="autotoc_md213"></a>
 Build Matrix Strategy</h2>
 <ul>
 <li><b>Cross-platform validation</b>: Windows/Linux/macOS for every PR</li>
@@ -323,16 +323,16 @@ Build Matrix Strategy</h2>
 <li><b>Feature combinations</b>: Systematic testing of feature interactions</li>
 <li><b>Performance variants</b>: Debug vs Release vs specialized builds</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md230"></a>
+<h1><a class="anchor" id="autotoc_md214"></a>
 Packaging &amp; Distribution</h1>
-<h2><a class="anchor" id="autotoc_md231"></a>
+<h2><a class="anchor" id="autotoc_md215"></a>
 Installation System</h2>
 <ul>
 <li><b>Component-based</b>: Libraries, headers, tools, docs, examples</li>
 <li><b>CMake integration</b>: Full config package support</li>
 <li><b>Cross-platform</b>: Windows (NSIS/WiX), macOS (DMG/Framework), Linux (DEB/RPM/TGZ)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md232"></a>
+<h2><a class="anchor" id="autotoc_md216"></a>
 Release Process</h2>
 <ul>
 <li><b>Automated packaging</b>: CPack integration with platform-specific installers</li>
@@ -340,7 +340,7 @@ Release Process</h2>
 <li><b>SOVERSION handling</b>: Complex library versioning for different components</li>
 <li><b>External dependencies</b>: Bundled compression libraries option</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md233"></a>
+<h2><a class="anchor" id="autotoc_md217"></a>
 Distribution Formats</h2>
 <ul>
 <li><b>Source tarballs</b>: Automated via GitHub Actions</li>
@@ -350,9 +350,9 @@ Distribution Formats</h2>
 <li><b>Container support</b>: Docker environments for CI</li>
 <li><b>HPC integration</b>: Specialized configurations for batch systems</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md234"></a>
+<h1><a class="anchor" id="autotoc_md218"></a>
 Development Workflow Recommendations</h1>
-<h2><a class="anchor" id="autotoc_md235"></a>
+<h2><a class="anchor" id="autotoc_md219"></a>
 Build Strategy</h2>
 <ol type="1">
 <li><b>Use presets for consistency</b>: Leverage the preset system for reproducible builds</li>
@@ -360,7 +360,7 @@ Build Strategy</h2>
 <li><b>Express testing</b>: Use level 3 for development, lower levels for validation</li>
 <li><b>Parallel development</b>: Separate MPI builds from serial development</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md236"></a>
+<h2><a class="anchor" id="autotoc_md220"></a>
 Testing Strategy</h2>
 <ol type="1">
 <li><b>Incremental testing</b>: Start with <code>testhdf5</code> core tests</li>
@@ -368,7 +368,7 @@ Testing Strategy</h2>
 <li><b>Cross-platform validation</b>: Test on primary CI platforms early</li>
 <li><b>Performance testing</b>: Include Release builds for performance-critical changes</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md237"></a>
+<h2><a class="anchor" id="autotoc_md221"></a>
 CI Integration</h2>
 <ol type="1">
 <li><b>Workflow triggers</b>: Understand which changes trigger which test suites</li>
@@ -376,7 +376,7 @@ CI Integration</h2>
 <li><b>Failure isolation</b>: Use workflow categories to isolate platform/feature issues</li>
 <li><b>External dependency management</b>: Plan for compression library updates</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md238"></a>
+<h2><a class="anchor" id="autotoc_md222"></a>
 Maven Integration Workflow</h2>
 <ol type="1">
 <li><b>Java Build Configuration</b>: Enable Maven deployment with <code>HDF5_ENABLE_MAVEN_DEPLOY=ON</code></li>
@@ -389,9 +389,9 @@ Maven Integration Workflow</h2>
 <li><b>Repository Selection</b>: Choose between GitHub Packages and Maven Central via workflow inputs</li>
 <li><b>Release Integration</b>: Optional Maven deployment in release workflow with user control</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md239"></a>
+<h1><a class="anchor" id="autotoc_md223"></a>
 Critical Dependencies</h1>
-<h2><a class="anchor" id="autotoc_md240"></a>
+<h2><a class="anchor" id="autotoc_md224"></a>
 Build Dependencies</h2>
 <ul>
 <li><b>CMake 3.26+</b>: Required for preset support and modern features</li>
@@ -401,14 +401,14 @@ Build Dependencies</h2>
 <li><b>Java 11+</b>: Required for Java bindings and Maven deployment (when <code>HDF5_BUILD_JAVA=ON</code>)</li>
 <li><b>Maven</b>: Optional for local Maven operations and validation</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md241"></a>
+<h2><a class="anchor" id="autotoc_md225"></a>
 Platform-Specific Requirements</h2>
 <ul>
 <li><b>Windows</b>: Visual Studio 2022, optional NSIS/WiX for packaging</li>
 <li><b>macOS</b>: Xcode command line tools, universal binary support</li>
 <li><b>Linux</b>: GCC/Clang, various package managers for dependencies</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md242"></a>
+<h2><a class="anchor" id="autotoc_md226"></a>
 Development Tools Integration</h2>
 <ul>
 <li><b>Static analysis</b>: Clang tools integration available</li>
@@ -417,23 +417,23 @@ Development Tools Integration</h2>
 <li><b>Sanitizers</b>: Runtime error detection support</li>
 <li><b>Maven validation</b>: <code>.github/scripts/validate-maven-artifacts.sh</code> for pre-deployment validation</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md243"></a>
+<h1><a class="anchor" id="autotoc_md227"></a>
 Future Considerations</h1>
-<h2><a class="anchor" id="autotoc_md244"></a>
+<h2><a class="anchor" id="autotoc_md228"></a>
 Build System Evolution</h2>
 <ul>
 <li><b>CMake modernization</b>: Potential for newer CMake features as minimum version increases</li>
 <li><b>Preset expansion</b>: More specialized presets for emerging use cases</li>
 <li><b>Container integration</b>: Enhanced Docker/container support for development</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md245"></a>
+<h2><a class="anchor" id="autotoc_md229"></a>
 Testing Infrastructure</h2>
 <ul>
 <li><b>Test parallelization</b>: Opportunities for faster CI execution</li>
 <li><b>Cloud testing</b>: Integration with cloud-native testing platforms</li>
 <li><b>Performance regression</b>: Automated performance monitoring integration</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md246"></a>
+<h2><a class="anchor" id="autotoc_md230"></a>
 Platform Support</h2>
 <ul>
 <li><b>Emerging architectures</b>: ARM64, RISC-V support expansion</li>

@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-15</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-05</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -211,12 +211,8 @@ Library Mapping Options</h2>
  (versioned function; <code>H5Lvisit</code> shown) </th><th>Deprecated functions available? <br  />
  (<code>H5Lvisit1</code>)  </th></tr>
 <tr align="center">
-<td><code>-DHDF5_DEFAULT_API_VERSION:STRING="v200"</code> <br  />
- (the default in 2.0.0) </td><td>2.0.x (<code>H5Lvisit2</code>) </td><td>yes  </td></tr>
-<tr align="center">
-<td><code>-DHDF5_DEFAULT_API_VERSION:STRING="v114"</code> </td><td>1.14.x (<code>H5Lvisit2</code>) </td><td>yes  </td></tr>
-<tr align="center">
-<td><code>-DHDF5_DEFAULT_API_VERSION:STRING="v112"</code> </td><td>1.12.x (<code>H5Lvisit2</code>) </td><td>yes  </td></tr>
+<td><code>-DHDF5_DEFAULT_API_VERSION:STRING="v112"</code> <br  />
+ (the default in 1.12) </td><td>1.12.x (<code>H5Lvisit2</code>) </td><td>yes  </td></tr>
 <tr align="center">
 <td align="left"><code>-DHDF5_DEFAULT_API_VERSION:STRING="v110"</code> </td><td>1.10.x (<code>H5Lvisit1</code>) </td><td>yes  </td></tr>
 <tr align="center">
@@ -227,7 +223,7 @@ Library Mapping Options</h2>
 <td align="left"><code>-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF</code> </td><td>1.12.x (<code>H5Lvisit2</code>) </td><td>no  </td></tr>
 </table>
 </div><p> Refer to the file <code>libhdf5.settings</code> in the directory where the HDF5 library is installed to determine the <code>configure</code> flags used to build the library. In particular, look for the two lines shown here under <em>Features</em>:</p>
-<p><code>Default API mapping: v200</code></p>
+<p><code>Default API mapping: v112</code></p>
 <p><code>With deprecated public symbols: yes</code></p>
 <h2><a class="anchor" id="app-options"></a>
 Application Mapping Options</h2>
@@ -239,17 +235,11 @@ Application Mapping Options</h2>
 (versioned function; <code>H5Lvisit</code> shown) </th><th>Deprecated functions available? <br  />
 (<code>H5Lvisit1</code>)  </th></tr>
 <tr align="center">
-<td align="left"><code>-DH5_USE_200_API</code> <br  />
- <em>(Default behavior if no option specified.)</em> </td><td>2.0.x (<code>H5Lvisit2</code>) </td><td>yes* <br  />
+<td align="left"><code>-DH5_USE_112_API</code> <br  />
+ <em>(Default behavior if no option specified.)</em> </td><td>1.12.x (<code>HLvisit2</code>) </td><td>yes* <br  />
  <em>*if available in library</em>  </td></tr>
 <tr align="center">
-<td align="left"><code>-DH5_USE_114_API</code> </td><td>1.14.x (<code>H5Lvisit2</code>) </td><td>yes* <br  />
- <em>*if available in library</em>  </td></tr>
-<tr align="center">
-<td align="left"><code>-DH5_USE_112_API</code> </td><td>1.12.x (<code>H5Lvisit2</code>) </td><td>yes* <br  />
- <em>*if available in library</em>  </td></tr>
-<tr align="center">
-<td align="left"><code>-DH5_USE_110_API</code> </td><td>1.10.x (<code>H5Lvisit1</code>) </td><td>yes* <br  />
+<td align="left"><code>-DH5_USE_110_API</code> </td><td>1.10.x (<code>HLvisit1</code>) </td><td>yes* <br  />
  <em>*if available in library</em>  </td></tr>
 <tr align="center">
 <td align="left"><code>-DH5_USE_18_API</code> </td><td>1.8.x (<code>H5Lvisit1</code>) </td><td>yes* <br  />
@@ -292,54 +282,6 @@ When <code>H5Rreference_vers</code> is not set, the macro <code>H5Rreference</co
 <div class="line">     -DH5L_iterate_t_vers=1 -DH5Lget_info_by_idx_vers=1 \</div>
 <div class="line">     -DH5Lget_info_vers=1 application.c</div>
 </div><!-- fragment --></dd></dl>
-<h3><a class="anchor" id="fun-options-200"></a>
-Function Mapping Options in Releases 2.0.x</h3>
-<table class="doxtable">
-<tr>
-<th style="text-align: left;">Macro <br  />
- (<code>H5xxx</code>) </th><th>Default function used if no macro specified <ul>
-<li>
-Function mapping: <code>H5xxx_vers=N</code></li>
-</ul>
-</th><th>Function used for backwards compatibility with 1.12 or 1.14 <ul>
-<li>
-Function mapping: <code>H5xxx_vers=1</code></li>
-</ul>
-</th></tr>
-<tr>
-<td><a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk()</a> </td><td><a class="el" href="group___h5_d.html#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> <ul>
-<li>
-Function mapping:<code>H5Dread_chunk_vers=2</code> </li>
-</ul>
-</td><td><a class="el" href="group___h5_d.html#gad3b9b3024ca4ab7eb7fe6872088398f3" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk1()</a> <ul>
-<li>
-Function mapping:<code>H5Dread_chunk_vers=1</code> </li>
-</ul>
-</td></tr>
-<tr>
-<td><a class="el" href="_h5version_8h.html#af51df104e1e3ff0b99b7a8ca368f14ab">H5Iregister_type()</a> </td><td><a class="el" href="group___h5_i_u_d.html#gad698dd84ea83ade847ffd6c49bc865e2" title="Creates and returns a new ID type.">H5Iregister_type2()</a> <ul>
-<li>
-Function mapping:<code>H5Iregister_type_vers=2</code> </li>
-</ul>
-</td><td><a class="el" href="group___h5_i_u_d.html#gab57559f14a16d4375815e45054abad16" title="Creates and returns a new ID type.">H5Iregister_type1()</a> <ul>
-<li>
-Function mapping:<code>H5Iregister_type_vers=1</code> </li>
-</ul>
-</td></tr>
-<tr>
-<td><a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode()</a> </td><td><a class="el" href="group___h5_t.html#ga485114ecc0c366fda0d88833dd1083a1" title="Decodes a binary object description of datatype and returns a new object handle.">H5Tdecode2()</a> <ul>
-<li>
-Function mapping:<code>H5Tdecode_vers=2</code> </li>
-</ul>
-</td><td><a class="el" href="group___h5_t.html#gacf3174a0433c2768ca23a1047164c05e" title="Decodes a binary object description of datatype and returns a new object handle.">H5Tdecode1()</a> <ul>
-<li>
-Function mapping:<code>H5Tdecode_vers=1</code> </li>
-</ul>
-</td></tr>
-</table>
-<h3><a class="anchor" id="fun-options-114"></a>
-Function Mapping Options in Releases 1.14.x</h3>
-<p>No versioned functions were added in the 1.14.x releases.</p>
 <h3><a class="anchor" id="fun-options-112"></a>
 Function Mapping Options in Releases 1.12.x</h3>
 <table class="doxtable">
