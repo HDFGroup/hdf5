@@ -891,7 +891,7 @@ H5T_validate_atomic_conversion(const H5T_t *src, const H5T_t *dst)
     /* Validate if the specified conversion is valid and does not exceed the source and destination
      * bit fields*/
 
-    size_t src_first_idx = src->shared->u.atomic.offset / 8;
+    size_t  src_first_idx = src->shared->u.atomic.offset / 8;
     ssize_t min_prec      = (ssize_t)MIN(dst->shared->u.atomic.prec, src->shared->u.atomic.prec) - 1;
     ssize_t src_last_idx  = ((ssize_t)src->shared->u.atomic.offset + min_prec) / 8;
 
@@ -899,7 +899,7 @@ H5T_validate_atomic_conversion(const H5T_t *src, const H5T_t *dst)
         (src_first_idx >= src->shared->size || src_last_idx >= src->shared->size))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "invalid source offset or precision");
 
-    size_t dst_first_idx = dst->shared->u.atomic.offset / 8;
+    size_t  dst_first_idx = dst->shared->u.atomic.offset / 8;
     ssize_t dst_last_idx  = ((ssize_t)dst->shared->u.atomic.offset + min_prec) / 8;
 
     if (H5T_IS_ATOMIC(dst->shared) &&
