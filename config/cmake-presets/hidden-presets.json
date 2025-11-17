@@ -97,7 +97,7 @@
       "name": "ci-Intel",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_TOOLCAHIN_FILE": "config/toolchain/intel.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "config/toolchain/intel.cmake"
       }
     },
     {
