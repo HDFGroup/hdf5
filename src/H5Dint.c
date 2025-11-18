@@ -1420,7 +1420,7 @@ done:
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset I/O pipeline info");
             if (stc_pline_copied)
                 if (H5O_msg_reset(H5O_STC_PLINE_ID, &new_dset->shared->dcpl_cache.stc_pline) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset I/O pipeline info");
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset STC pipeline info");
             if (layout_copied)
                 if (H5O_msg_reset(H5O_LAYOUT_ID, &new_dset->shared->layout) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset layout info");
