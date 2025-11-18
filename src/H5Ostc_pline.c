@@ -724,7 +724,7 @@ H5O__stc_pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, in
                 fprintf(stream, "%*s%-*s NONE\n", indent + 3, "", MAX(0, fwidth - 3), "Filter name:");
 
             fprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
-                    "Flags:", filt_sect->filter[i].flags);
+                    "Flags:", filt_sect->filter[j].flags);
 
             fprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
                     "Num CD values:", filt_sect->filter[j].cd_nelmts);
