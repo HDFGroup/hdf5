@@ -1492,7 +1492,7 @@ H5Pall_filters_avail(hid_t plist_id)
 
     FUNC_ENTER_API(FAIL)
 
-    /* There are now two pline: one for legacy chunkded and one for structured chunk.
+    /* There are now two pline: one for legacy chunked and one for structured chunk.
      * Since upon entry to this API couldn't tell whether dataset layout is set or not.
      * So, first check the legacy pline.
      * If there is legacy pline.used, just return either true or false in ret_value.
