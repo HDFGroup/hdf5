@@ -871,7 +871,7 @@ H5Z__prelude_callback(const void *mesg, hid_t dcpl_id, hid_t type_id, hid_t spac
 
     if (stc) { /* structured chunk */
 
-        const H5O_stc_pline_t *pline = (const H5O_stc_pline_t *)mesg;
+        const H5O_stc_pline_t       *pline = (const H5O_stc_pline_t *)mesg;
         const H5O_stc_filter_sect_t *filt_sect;
         unsigned                     i;
 
@@ -883,7 +883,8 @@ H5Z__prelude_callback(const void *mesg, hid_t dcpl_id, hid_t type_id, hid_t spac
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply prelude callback");
             }
         }
-    } else { /* chunked */
+    }
+    else { /* chunked */
         const H5O_pline_t *pline = (const H5O_pline_t *)mesg;
 
         if (H5Z__prelude_callback_real(dcpl_id, type_id, space_id, prelude_type, pline->nused, pline->filter,
@@ -912,10 +913,10 @@ done:
 static herr_t
 H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
 {
-    hid_t         space_id    = -1;      /* ID for dataspace describing chunk */
-    H5O_layout_t *dcpl_layout = NULL;    /* Dataset's layout information */
-    const void  *pline_mesg;
-    herr_t        ret_value   = SUCCEED; /* Return value */
+    hid_t         space_id    = -1;   /* ID for dataspace describing chunk */
+    H5O_layout_t *dcpl_layout = NULL; /* Dataset's layout information */
+    const void   *pline_mesg;
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -939,7 +940,7 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout");
 
         if (H5D_CHUNKED == dcpl_layout->type || H5D_STRUCT_CHUNK == dcpl_layout->type) {
-            bool        have_filters = false;
+            bool have_filters = false;
 
             /* Check if the dataset is chunked */
             if (H5D_CHUNKED == dcpl_layout->type) {
@@ -951,10 +952,10 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
 
                 if (dcpl_pline.nused > 0) {
                     have_filters = true;
-                    pline_mesg = (const void *)&dcpl_pline;
+                    pline_mesg   = (const void *)&dcpl_pline;
                 }
-
-            } else {
+            }
+            else {
 
                 assert(H5D_STRUCT_CHUNK == dcpl_layout->type);
                 H5O_stc_pline_t dcpl_pline; /* Object's I/O pipeline information */
@@ -971,7 +972,7 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
                          i++, filt_sect++) {
                         if (filt_sect->nused) {
                             have_filters = true;
-                            pline_mesg = (const void *)&dcpl_pline;
+                            pline_mesg   = (const void *)&dcpl_pline;
                             break;
                         }
                     }
@@ -997,7 +998,8 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
                 }
 
                 /* Make the callbacks */
-                if (H5Z__prelude_callback(pline_mesg, dcpl_id, type_id, space_id, prelude_type, (H5D_STRUCT_CHUNK == dcpl_layout->type ?true:false)) < 0)
+                if (H5Z__prelude_callback(pline_mesg, dcpl_id, type_id, space_id, prelude_type,
+                                          (H5D_STRUCT_CHUNK == dcpl_layout->type ? true : false)) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
             }
         }
@@ -1176,8 +1178,8 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
     /* When these conditions occur, if there are required filters in pline,
        then report a failure, otherwise, set flag that they can be ignored */
     if (bad_for_filters) {
-        H5O_layout_t    layout;                  /* Object's layout information */
-        size_t ii;
+        H5O_layout_t layout; /* Object's layout information */
+        size_t       ii;
 
         /* Peek at the layout information */
         if (H5P_peek(dc_plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
@@ -1185,7 +1187,7 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
 
         /* Get pipeline information depending on layout type */
         if (layout.type == H5D_STRUCT_CHUNK) {
-            H5O_stc_pline_t     pline;                   /* Object's I/O pipeline information */
+            H5O_stc_pline_t pline; /* Object's I/O pipeline information */
 
             if (H5P_peek(dc_plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
@@ -1193,16 +1195,18 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
                 const H5O_stc_filter_sect_t *filt_sect;
                 const H5Z_filter_info_t     *filter;
 
-                for (ii = 0, filt_sect = &pline.filt_sects[0]; ii < pline.tot_filt_nsects; ii++, filt_sect++) {
+                for (ii = 0, filt_sect = &pline.filt_sects[0]; ii < pline.tot_filt_nsects;
+                     ii++, filt_sect++) {
                     if (!(filter->flags & H5Z_FLAG_OPTIONAL))
                         HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "not suitable for filters");
                 }
-             }
+            }
 
-             /* All filters are optional, we can ignore them */
-             ret_value = true;
-        } else {
-            H5O_pline_t     pline;                   /* Object's I/O pipeline information */
+            /* All filters are optional, we can ignore them */
+            ret_value = true;
+        }
+        else {
+            H5O_pline_t pline; /* Object's I/O pipeline information */
 
             if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
@@ -2003,8 +2007,8 @@ herr_t
 H5Z_delete(H5Z_filter_t filter_id, H5Z_filter_info_t *filter, size_t *_nused)
 {
     size_t nused = *(_nused);
-    size_t                 idx; /* Index of filter in pipeline */
-    bool                   found = false; /* Indicate filter was found in pipeline */
+    size_t idx;                 /* Index of filter in pipeline */
+    bool   found     = false;   /* Indicate filter was found in pipeline */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

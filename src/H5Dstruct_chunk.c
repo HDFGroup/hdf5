@@ -307,7 +307,7 @@ H5D__struct_chunk_create(const H5D_t *dset /*in,out*/)
 
     /* Compose chunked index info struct */
     idx_info.f           = dset->oloc.file;
-    idx_info.stc_pline       = &dset->shared->dcpl_cache.stc_pline;
+    idx_info.stc_pline   = &dset->shared->dcpl_cache.stc_pline;
     idx_info.stc_layout  = &dset->shared->layout.u.struct_chunk;
     idx_info.stc_storage = store;
 
@@ -345,7 +345,7 @@ H5D__struct_chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_in
     assert(dataset);
 
     /* Don't use selection I/O if there are filters on the dataset (for now) */
-    if (dataset->shared->dcpl_cache.stc_pline.tot_filt_nsects> 0) {
+    if (dataset->shared->dcpl_cache.stc_pline.tot_filt_nsects > 0) {
         io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
         io_info->no_selection_io_cause |= H5D_SEL_IO_DATASET_FILTER;
     }
@@ -857,7 +857,7 @@ H5D__struct_chunk_init(H5F_t *f, const H5D_t *const dset, hid_t H5_ATTR_UNUSED d
 
     /* Compose chunked index info struct */
     idx_info.f           = f;
-    idx_info.stc_pline       = &dset->shared->dcpl_cache.stc_pline;
+    idx_info.stc_pline   = &dset->shared->dcpl_cache.stc_pline;
     idx_info.stc_layout  = &dset->shared->layout.u.struct_chunk;
     idx_info.stc_storage = storage;
 
@@ -959,7 +959,7 @@ H5D__struct_chunk_allocated(const H5D_t *dset, hsize_t *nbytes)
 
     /* Compose chunked index info struct */
     idx_info.f           = dset->oloc.file;
-    idx_info.stc_pline       = &dset->shared->dcpl_cache.stc_pline;
+    idx_info.stc_pline   = &dset->shared->dcpl_cache.stc_pline;
     idx_info.stc_layout  = &dset->shared->layout.u.struct_chunk;
     idx_info.stc_storage = sc;
 
@@ -1269,7 +1269,7 @@ H5D__struct_chunk_dest(H5D_t *dset)
 
     /* Compose chunked index info struct */
     idx_info.f           = dset->oloc.file;
-    idx_info.stc_pline       = &dset->shared->dcpl_cache.stc_pline;
+    idx_info.stc_pline   = &dset->shared->dcpl_cache.stc_pline;
     idx_info.stc_layout  = &dset->shared->layout.u.struct_chunk;
     idx_info.stc_storage = storage;
 
@@ -1325,7 +1325,7 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
     H5O_storage_struct_chunk_t *storage = &(dset->shared->layout.storage.u.struct_chunk);
     H5O_layout_struct_chunk_t  *layout  = &dset->shared->layout.u.struct_chunk;
     H5D_chk_idx_info_t          idx_info; /* Chunked index info */
-    H5O_stc_pline_t             *pline;    /* I/O pipeline info */
+    H5O_stc_pline_t            *pline;    /* I/O pipeline info */
     hbool_t                     filtered        = false;
     size_t                      tot_unfilt_size = 0;
     size_t                      i;
@@ -1561,7 +1561,7 @@ H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, 
 {
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
     H5D_chunk_cache_mem_t *chk;   /* Chunk's intermediate struct */
-    H5O_stc_pline_t        *pline; /* I/O pipeline info */
+    H5O_stc_pline_t       *pline; /* I/O pipeline info */
     hbool_t                filtered = false;
     uint32_t               stored_chksum;   /* Stored metadata checksum value */
     uint32_t               computed_chksum; /* Computed metadata checksum value */

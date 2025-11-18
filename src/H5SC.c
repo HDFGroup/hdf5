@@ -978,7 +978,7 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     const H5S_t       *scatter_file_space; /* Used in the scatter_mem callback */
     haddr_t            md_tag                                  = HADDR_UNDEF;
     bool               partial_bound_chunks_different_encoding = false;
-    H5O_stc_pline_t    *pline                                   = NULL; /* I/O pipeline info */
+    H5O_stc_pline_t   *pline                                   = NULL; /* I/O pipeline info */
     hbool_t            filtered                                = false;
     // size_t             nbytes;
     // size_t             buf_size;
@@ -1503,7 +1503,7 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     const H5S_t       *gather_file_space;
     haddr_t            md_tag                                  = HADDR_UNDEF;
     bool               partial_bound_chunks_different_encoding = false;
-    H5O_stc_pline_t    *pline                                   = NULL; /* I/O pipeline info */
+    H5O_stc_pline_t   *pline                                   = NULL; /* I/O pipeline info */
     hbool_t            filtered                                = false;
 
     FUNC_ENTER_NOAPI(FAIL)

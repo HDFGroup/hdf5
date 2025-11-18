@@ -646,7 +646,8 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
         H5O_pline_t *pline; /* Dataset's I/O pipeline information */
 
         pline = &dset->shared->dcpl_cache.pline;
-        if (pline->nused > 0 && H5O_msg_append_oh(file, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
+        if (pline->nused > 0 &&
+            H5O_msg_append_oh(file, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
     } /* end if */
 
@@ -655,7 +656,8 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
         H5O_stc_pline_t *pline; /* Dataset's I/O pipeline information */
 
         pline = &dset->shared->dcpl_cache.stc_pline;
-        if (pline->tot_filt_nsects > 0 && H5O_msg_append_oh(file, oh, H5O_STC_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
+        if (pline->tot_filt_nsects > 0 &&
+            H5O_msg_append_oh(file, oh, H5O_STC_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
     } /* end if */
 
@@ -736,7 +738,8 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
      */
     if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type &&
         H5D_STRUCT_CHUNK != layout->type && !dset->shared->dcpl_cache.pline.nused &&
-        !dset->shared->dcpl_cache.stc_pline.tot_filt_nsects && (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
+        !dset->shared->dcpl_cache.stc_pline.tot_filt_nsects &&
+        (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
         layout_mesg_flags = H5O_MSG_FLAG_CONSTANT;
     else
         layout_mesg_flags = 0;
@@ -774,12 +777,12 @@ done:
 herr_t
 H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
 {
-    htri_t msg_exists;              /* Whether a particular type of message exists */
-    bool   pline_copied  = false;   /* Flag to indicate that dcpl_cache.pline's message was copied */
-    bool   stc_pline_copied  = false;   /* Flag to indicate that dcpl_cache.pline's message was copied */
-    bool   layout_copied = false;   /* Flag to indicate that layout message was copied */
-    bool   efl_copied    = false;   /* Flag to indicate that the EFL message was copied */
-    herr_t ret_value     = SUCCEED; /* Return value */
+    htri_t msg_exists;                 /* Whether a particular type of message exists */
+    bool   pline_copied     = false;   /* Flag to indicate that dcpl_cache.pline's message was copied */
+    bool   stc_pline_copied = false;   /* Flag to indicate that dcpl_cache.pline's message was copied */
+    bool   layout_copied    = false;   /* Flag to indicate that layout message was copied */
+    bool   efl_copied       = false;   /* Flag to indicate that the EFL message was copied */
+    herr_t ret_value        = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

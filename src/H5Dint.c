@@ -1207,10 +1207,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     bool            layout_copied = false; /* Flag to indicate that layout message was copied */
     bool            fill_copied   = false; /* Flag to indicate that fill-value message was copied */
     bool            pline_copied  = false; /* Flag to indicate that pipeline message was copied */
-    bool            stc_pline_copied  = false; /* Flag to indicate that pipeline message for structured chunk was copied */
-    bool            efl_copied    = false; /* Flag to indicate that external file list message was copied */
-    H5G_loc_t       dset_loc;              /* Dataset location */
-    H5D_t          *ret_value = NULL;      /* Return value */
+    bool            stc_pline_copied =
+        false;                    /* Flag to indicate that pipeline message for structured chunk was copied */
+    bool      efl_copied = false; /* Flag to indicate that external file list message was copied */
+    H5G_loc_t dset_loc;           /* Dataset location */
+    H5D_t    *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1266,11 +1267,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if (new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
         H5O_layout_t    *layout;                 /* Dataset's layout information */
-        H5O_pline_t  *pline;                  /* Dataset's I/O pipeline information */
-        H5O_stc_pline_t  *stc_pline;          /* Dataset's I/O pipeline information for structured chunk */
-        H5O_fill_t   *fill;                   /* Dataset's fill value info */
-        H5O_efl_t    *efl;                    /* Dataset's external file list info */
-        htri_t        ignore_filters = false; /* Ignore optional filters or not */
+        H5O_pline_t     *pline;                  /* Dataset's I/O pipeline information */
+        H5O_stc_pline_t *stc_pline;              /* Dataset's I/O pipeline information for structured chunk */
+        H5O_fill_t      *fill;                   /* Dataset's fill value info */
+        H5O_efl_t       *efl;                    /* Dataset's external file list info */
+        htri_t           ignore_filters = false; /* Ignore optional filters or not */
 
         if ((ignore_filters = H5Z_ignore_filters(new_dset->shared->dcpl_id, dt, space)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed");
@@ -1289,7 +1290,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
         if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
 
-        layout       = &new_dset->shared->layout;
+        layout = &new_dset->shared->layout;
         if (H5P_get(dc_plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve layout");
         layout_copied = true;
@@ -1305,7 +1306,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve pipeline filter");
         stc_pline_copied = true;
 
-        fill          = &new_dset->shared->dcpl_cache.fill;
+        fill = &new_dset->shared->dcpl_cache.fill;
         if (H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, fill) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve fill value info");
         fill_copied = true;

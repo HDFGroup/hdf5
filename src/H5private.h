@@ -553,7 +553,7 @@ typedef enum {
 
 /* Common object copying udata (right now only used for groups and datasets) */
 typedef struct H5O_copy_file_ud_common_t {
-    struct H5O_pline_t *src_pline; /* Copy of filter pipeline for object */
+    struct H5O_pline_t     *src_pline;     /* Copy of filter pipeline for object */
     struct H5O_stc_pline_t *stc_src_pline; /* Copy of filter pipeline for object */
 } H5O_copy_file_ud_common_t;
 
