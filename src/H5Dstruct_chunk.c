@@ -2503,7 +2503,7 @@ H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_spac
         HGOTO_DONE(SUCCEED);
     }
 
-    /* missing this see vectore_read */
+    /* missing this see vector_read */
     pline = &(dset->shared->dcpl_cache.stc_pline);
     if (pline && pline->tot_filt_nsects) {
         /* true: a NOT-to-be-filtered-partial-edge chunk */
