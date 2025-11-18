@@ -2370,7 +2370,7 @@ H5P__ocrt_stc_pipeline_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUS
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__ocrt_stc-pipeline_get() */
+} /* end H5P__ocrt_stc_pipeline_get() */
 
 /*-------------------------------------------------------------------------
  * Function:       H5P__ocrt_stc_pipeline_enc: TBD
