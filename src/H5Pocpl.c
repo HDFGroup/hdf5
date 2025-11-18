@@ -66,6 +66,17 @@
 #define H5O_CRT_PIPELINE_CMP   H5P__ocrt_pipeline_cmp
 #define H5O_CRT_PIPELINE_CLOSE H5P__ocrt_pipeline_close
 
+/* Definitions for structured chunk filter pipeline */
+#define H5O_CRT_STC_PIPELINE_SIZE  sizeof(H5O_stc_pline_t)
+#define H5O_CRT_STC_PIPELINE_SET   H5P__ocrt_stc_pipeline_set
+#define H5O_CRT_STC_PIPELINE_GET   H5P__ocrt_stc_pipeline_get
+#define H5O_CRT_STC_PIPELINE_ENC   H5P__ocrt_stc_pipeline_enc
+#define H5O_CRT_STC_PIPELINE_DEC   H5P__ocrt_stc_pipeline_dec
+#define H5O_CRT_STC_PIPELINE_DEL   H5P__ocrt_stc_pipeline_del
+#define H5O_CRT_STC_PIPELINE_COPY  H5P__ocrt_stc_pipeline_copy
+#define H5O_CRT_STC_PIPELINE_CMP   H5P__ocrt_stc_pipeline_cmp
+#define H5O_CRT_STC_PIPELINE_CLOSE H5P__ocrt_stc_pipeline_close
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -90,6 +101,16 @@ static herr_t H5P__ocrt_pipeline_del(hid_t prop_id, const char *name, size_t siz
 static herr_t H5P__ocrt_pipeline_copy(const char *name, size_t size, void *value);
 static int    H5P__ocrt_pipeline_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__ocrt_pipeline_close(const char *name, size_t size, void *value);
+
+/* Property callbacks for structured chunk pipeline */
+static herr_t H5P__ocrt_stc_pipeline_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__ocrt_stc_pipeline_dec(const void **_pp, void *value);
+static herr_t H5P__ocrt_stc_pipeline_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__ocrt_stc_pipeline_get(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__ocrt_stc_pipeline_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__ocrt_stc_pipeline_copy(const char *name, size_t size, void *value);
+static int    H5P__ocrt_stc_pipeline_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__ocrt_stc_pipeline_close(const char *name, size_t size, void *value);
 
 /* Local routines */
 static herr_t H5P__set_filter1(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags,
@@ -135,8 +156,11 @@ static const unsigned H5O_def_attr_max_compact_g =
 static const unsigned H5O_def_attr_min_dense_g =
     H5O_CRT_ATTR_MIN_DENSE_DEF; /* Default min. dense attribute storage settings */
 static const uint8_t H5O_def_ohdr_flags_g = H5O_CRT_OHDR_FLAGS_DEF; /* Default object header flag settings */
+
 static const H5O_pline_t H5O_def_pline_g  = H5O_CRT_PIPELINE_DEF;   /* Default I/O pipeline setting */
-static const H5O_pline_t H5O_def_pline_struct_chunk_g = H5O_CRT_PIPELINE_STRUCT_CHUNK_DEF;
+
+/* Default I/O pipeline setting for structured chunk */
+static const H5O_stc_pline_t H5O_def_stc_pline_g  = H5O_CRT_STC_PIPELINE_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__ocrt_reg_prop
@@ -177,6 +201,13 @@ H5P__ocrt_reg_prop(H5P_genclass_t *pclass)
                            H5O_CRT_PIPELINE_SET, H5O_CRT_PIPELINE_GET, H5O_CRT_PIPELINE_ENC,
                            H5O_CRT_PIPELINE_DEC, H5O_CRT_PIPELINE_DEL, H5O_CRT_PIPELINE_COPY,
                            H5O_CRT_PIPELINE_CMP, H5O_CRT_PIPELINE_CLOSE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
+    /* Register the pipeline property for structured chunk */
+    if (H5P__register_real(pclass, H5O_CRT_STC_PIPELINE_NAME, H5O_CRT_STC_PIPELINE_SIZE, &H5O_def_stc_pline_g, NULL,
+                           H5O_CRT_STC_PIPELINE_SET, H5O_CRT_STC_PIPELINE_GET, H5O_CRT_STC_PIPELINE_ENC,
+                           H5O_CRT_STC_PIPELINE_DEC, H5O_CRT_STC_PIPELINE_DEL, H5O_CRT_STC_PIPELINE_COPY,
+                           H5O_CRT_STC_PIPELINE_CMP, H5O_CRT_STC_PIPELINE_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
@@ -475,6 +506,8 @@ done:
  * Note:    This function currently supports only the permanent filter
  *        pipeline.  That is, PLIST_ID must be a dataset creation
  *        property list.
+ *        
+ * NOTE:    This routine is also called by a filter's set_local callabck.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -484,26 +517,33 @@ herr_t
 H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t id, H5_section_type_t sec_type, unsigned flags,
                   size_t cd_nelmts, const unsigned cd_values[/*cd_nelmts*/])
 {
-    H5O_pline_t pline;
     herr_t      ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Get the pipeline property to modify */
-    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if (sec_type == H5_SECTION_UNKNOWN) {
+        H5O_pline_t pline;
 
-    if (pline.version < H5O_PLINE_VERSION_3) {
+        /* Get the pipeline property to modify */
+        if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
         /* Get pointer to filter in pipeline */
         /* Modify the filter parameters of the I/O pipeline */
         if (H5Z_modify(pline.filter, pline.nused, id, flags, cd_nelmts, cd_values) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to modify filter parameters in pipeline");
-    }
-    else {
-        assert(pline.version == H5O_PLINE_VERSION_3);
-        H5Z_stc_filter_sect_t *filt_sect = NULL;
+
+        /* Put the I/O pipeline information back into the property list */
+        if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+    } else {
+        H5O_stc_pline_t pline;
+        H5O_stc_filter_sect_t *filt_sect = NULL;
         unsigned               i;
+
+        /* Get the pipeline property to modify */
+        if (H5P_peek(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
         for (i = 0, filt_sect = &pline.filt_sects[0]; i < pline.tot_filt_nsects; i++, filt_sect++) {
             if (filt_sect->seq_sect == (size_t)sec_type)
@@ -515,11 +555,11 @@ H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t id, H5_section_type_t sec_
         /* Modify the filter parameters of the I/O pipeline */
         if (H5Z_modify(filt_sect->filter, filt_sect->nused, id, flags, cd_nelmts, cd_values) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to modify filter parameters in pipeline");
-    }
 
-    /* Put the I/O pipeline information back into the property list */
-    if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+        /* Put the I/O pipeline information back into the property list */
+        if (H5P_poke(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -547,8 +587,8 @@ done:
  *              failed; the filter will not participate in the pipeline
  *              during an H5Dread() of the chunk.  If this bit is clear and
  *              the filter fails then the entire I/O operation fails.
- *      If this bit is set but encoding is disabled for a filter,
- *      attempting to write will generate an error.
+ *              If this bit is set but encoding is disabled for a filter,
+ *              attempting to write will generate an error.
  *
  * Note:        This function currently supports only the permanent filter
  *              pipeline.  That is, PLIST_ID must be a dataset creation
@@ -878,7 +918,6 @@ done:
  *        filter fails during an H5Dwrite() operation then the filter
  *        is just excluded from the pipeline for the chunk for which it
  *        failed; the filter will not participate in the pipeline
-
  *        during an H5Dread() of the chunk.
  *
  *        If this bit is clear and the filter fails then the entire I/O
@@ -898,9 +937,9 @@ static herr_t
 H5P__set_filter2(H5P_genplist_t *plist, H5_section_type_t sec_type, H5Z_filter_t filter_id,
                  unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
-    H5O_pline_t            pline;        /* Filter pipeline */
+    H5O_stc_pline_t        pline;        /* Filter pipeline */
     htri_t                 filter_avail; /* Filter availability */
-    H5Z_stc_filter_sect_t *filt_sect = NULL;
+    H5O_stc_filter_sect_t *filt_sect = NULL;
     bool                   found     = false;
     unsigned               i         = 0;
     herr_t                 ret_value = SUCCEED; /* Return value */
@@ -912,11 +951,8 @@ H5P__set_filter2(H5P_genplist_t *plist, H5_section_type_t sec_type, H5Z_filter_t
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
 
     /* Get the pipeline property to append to */
-    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if (H5P_peek(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
-
-    if (!pline.tot_filt_nsects)
-        pline = H5O_def_pline_struct_chunk_g;
 
     for (i = 0; i < pline.tot_filt_nsects; i++)
         if (pline.filt_sects[i].seq_sect == (size_t)sec_type) {
@@ -938,7 +974,7 @@ H5P__set_filter2(H5P_genplist_t *plist, H5_section_type_t sec_type, H5Z_filter_t
     }
 
     /* Put the I/O pipeline information back into the property list */
-    if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if (H5P_poke(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
@@ -1009,7 +1045,7 @@ herr_t
 H5Pget_nfilters2(hid_t plist_id, H5_section_type_t sec_type, int *num_filters)
 {
     H5P_genplist_t *plist; /* Property list */
-    H5O_pline_t     pline; /* Filter pipeline */
+    H5O_stc_pline_t     pline; /* Filter pipeline */
     unsigned        i;
     int             num       = 0;
     herr_t          ret_value = SUCCEED; /* return value */
@@ -1021,7 +1057,7 @@ H5Pget_nfilters2(hid_t plist_id, H5_section_type_t sec_type, int *num_filters)
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the pipeline property to query */
-    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if (H5P_peek(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Set return value */
@@ -1035,6 +1071,7 @@ H5Pget_nfilters2(hid_t plist_id, H5_section_type_t sec_type, int *num_filters)
 
     if (num_filters)
         *num_filters = num;
+
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1158,7 +1195,7 @@ H5Pget_filter3(hid_t plist_id, H5_section_type_t sec_type, unsigned idx, unsigne
 {
     H5P_genplist_t          *plist;  /* Property list */
     const H5Z_filter_info_t *filter; /* Pointer to filter information */
-    H5O_pline_t              pline;  /* Filter pipeline */
+    H5O_stc_pline_t          pline;  /* Filter pipeline */
     unsigned                 i;
     H5Z_filter_t             ret_value; /* return value */
 
@@ -1191,7 +1228,7 @@ H5Pget_filter3(hid_t plist_id, H5_section_type_t sec_type, unsigned idx, unsigne
         HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_FILTER_ERROR, "can't find object for ID");
 
     /* Get the pipeline property to query */
-    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if (H5P_peek(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline");
 
     for (i = 0; i < pline.tot_filt_nsects; i++) {
@@ -1232,6 +1269,8 @@ done:
  *      should be the filter ID to retrieve the parameters for.  If the
  *      filter is not set for the property list, an error will be returned.
  *
+ * NOTE:    This routine is also called by a filter's set_local callabck.
+ *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
@@ -1242,26 +1281,30 @@ H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, H5_section_type_t s
                      unsigned int *flags /*out*/, size_t *cd_nelmts /*in,out*/, unsigned cd_values[] /*out*/,
                      size_t namelen, char name[] /*out*/, unsigned *filter_config)
 {
-    H5O_pline_t        pline;               /* Filter pipeline */
     H5Z_filter_info_t *filter;              /* Pointer to filter information */
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Get pipeline info */
-    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if (sec_type == H5_SECTION_UNKNOWN) {
+        H5O_pline_t        pline;               /* Filter pipeline */
 
-    if (pline.version < H5O_PLINE_VERSION_3) {
+        /* Get pipeline info */
+        if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
         /* Get pointer to filter in pipeline */
         if (NULL == (filter = H5Z_filter_info(pline.filter, pline.nused, id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID is invalid");
     }
     else {
-        assert(pline.version == H5O_PLINE_VERSION_3);
-        H5Z_stc_filter_sect_t *filt_sect = NULL;
+        H5O_stc_pline_t        pline;               /* Filter pipeline */
+        H5O_stc_filter_sect_t *filt_sect = NULL;
         unsigned               i;
+
+        /* Get pipeline info */
+        if (H5P_peek(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
         for (i = 0, filt_sect = &pline.filt_sects[0]; i < pline.tot_filt_nsects; i++, filt_sect++) {
             if (filt_sect->seq_sect == (size_t)sec_type)
@@ -1444,31 +1487,41 @@ H5Pall_filters_avail(hid_t plist_id)
 {
     H5P_genplist_t *plist;     /* Property list */
     H5O_pline_t     pline;     /* Filter pipeline */
+    H5O_stc_pline_t    stc_pline;     /* Filter pipeline */
     htri_t          ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+
+    /* There are now two pline: one for legacy chunkded and one for structured chunk.
+     * Since upon entry to this API couldn't tell whether dataset layout is set or not.
+     * So, first check the legacy pline.  
+     * If there is legacy pline.used, just return either true or false in ret_value.
+     * Otherwise, check the pline for structured chunk.
+     */
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
-    /* Get the pipeline property to query */
+    /* Get the legacy pipeline property to query */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
-    if (pline.version < H5O_PLINE_VERSION_3) {
+    /* Check if all filters are available */
+    if ((ret_value = H5Z_all_filters_avail(pline.filter, pline.nused)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "can't check pipeline information");
 
-        /* Check if all filters are available */
-        if ((ret_value = H5Z_all_filters_avail(pline.filter, pline.nused)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "can't check pipeline information");
-    }
-    else {
-        assert(pline.version == H5O_PLINE_VERSION_3);
-        H5Z_stc_filter_sect_t *filt_sect = NULL;
+    if (!pline.nused) {
+
+        assert(ret_value);
+        H5O_stc_filter_sect_t *filt_sect = NULL;
         unsigned               i;
 
+        if (H5P_peek(plist, H5O_CRT_STC_PIPELINE_NAME, &stc_pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
         /* Check if all filters are available */
-        for (i = 0, filt_sect = &pline.filt_sects[0]; i < pline.tot_filt_nsects; i++, filt_sect++) {
+        for (i = 0, filt_sect = &stc_pline.filt_sects[0]; i < stc_pline.tot_filt_nsects; i++, filt_sect++) {
             if ((ret_value = H5Z_all_filters_avail(filt_sect->filter, filt_sect->nused)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "can't check pipeline information");
             if (ret_value == false)
@@ -1484,36 +1537,39 @@ done:
  * Function:    H5P_filter_in_pline
  *
  * Purpose:    Check whether the filter is in the pipeline of the object
- *              creation property list.
+ *             creation property list.
  *
- * Return:    true:        found
- *        false:        not found
- *              FAIL:         error
+ * NOTE:       This function is called by H5Z__check_unregister() which is
+ *             called by H5Zunregister() which iterates through all opened
+ *             datasets and groups. Therefore can check plist to determine
+ *             layout type.
+ *
+ * Return:     true:        found
+ *             false:       not found
+ *             FAIL:        error
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id)
 {
-    H5O_pline_t pline;               /* Filter pipeline */
+    bool    stc = false;
+    H5O_layout_t layout;
     htri_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Get pipeline info */
-    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if (H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) >= 0 && 
+        layout.type == H5D_STRUCT_CHUNK)
+        stc = true;
 
-    if (pline.version < H5O_PLINE_VERSION_3) {
-
-        /* Get pointer to filter in pipeline */
-        if ((ret_value = H5Z_filter_in_pline(pline.filter, pline.nused, id)) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTCOMPARE, FAIL, "can't find filter");
-    }
-    else {
-        assert(pline.version == H5O_PLINE_VERSION_3);
-        H5Z_stc_filter_sect_t *filt_sect = NULL;
+    if (stc) {
+        H5O_stc_pline_t pline;               /* Filter pipeline */
+        H5O_stc_filter_sect_t *filt_sect = NULL;
         unsigned               i;
+
+        if (H5P_peek(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
         /* Check if filter is in the pipeline for each section */
         for (i = 0, filt_sect = &pline.filt_sects[0]; i < pline.tot_filt_nsects; i++, filt_sect++) {
@@ -1524,6 +1580,16 @@ H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id)
         }
         if (i >= pline.tot_filt_nsects)
             ret_value = false;
+
+    } else {
+        H5O_pline_t pline;               /* Filter pipeline */
+
+        /* Get pipeline info */
+        if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
+        if ((ret_value = H5Z_filter_in_pline(pline.filter, pline.nused, id)) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTCOMPARE, FAIL, "can't find filter");
     }
 
 done:
@@ -1531,7 +1597,7 @@ done:
 } /* end H5P_filter_in_pline() */
 
 /*-------------------------------------------------------------------------
- * Function: H5Premove_filter
+ * Function: H5Premove_filter1
  *
  * Purpose: Deletes a filter from the dataset creation property list;
  *  deletes all filters if FILTER is H5Z_FILTER_ALL
@@ -1559,13 +1625,23 @@ H5Premove_filter1(hid_t plist_id, H5Z_filter_t filter_id)
 
     /* Check if there are any filters */
     if (pline.filter && pline.nused) {
-        /* Delete filter */
-        if (H5Z_delete(&pline, filter_id, H5_SECTION_UNKNOWN) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter");
+
+        if (H5Z_FILTER_ALL == filter_id) {
+
+            if (H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info");
+        } else {
+
+            /* Delete filter */
+            if (H5Z_delete(filter_id, pline.filter, &pline.nused) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter");
+
+        }
 
         /* Put the I/O pipeline information back into the property list */
         if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+
     } /* end if */
 
 done:
@@ -1587,7 +1663,9 @@ herr_t
 H5Premove_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter_id)
 {
     H5P_genplist_t *plist;               /* Property list */
-    H5O_pline_t     pline;               /* Filter pipeline */
+    H5O_stc_pline_t pline;               /* Filter pipeline */
+    H5O_stc_filter_sect_t *filt_sect;
+    unsigned i;
     herr_t          ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
@@ -1597,17 +1675,35 @@ H5Premove_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filte
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the pipeline property to modify */
-    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if (H5P_peek(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Check if there are any filters */
     if (pline.tot_filt_nsects) {
-        /* Delete filter */
-        if (H5Z_delete(&pline, filter_id, sec_type) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter");
+        if (H5Z_FILTER_ALL == filter_id) {
+
+            if (H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info");
+
+        } else {
+
+            for (i = 0, filt_sect = &pline.filt_sects[0]; i < pline.tot_filt_nsects; i++, filt_sect++) {
+                if (filt_sect->seq_sect == (size_t)sec_type)
+                    break;
+            }
+            if (i >= pline.tot_filt_nsects)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "no filter defined for sec_type");
+
+            /* Delete filter */
+            if (H5Z_delete(filter_id, filt_sect->filter, &filt_sect->nused) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter");
+
+            if (filt_sect->nused == 0)
+                --pline.tot_filt_nsects;
+        }
 
         /* Put the I/O pipeline information back into the property list */
-        if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        if (H5P_poke(plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
     } /* end if */
 
@@ -2204,6 +2300,484 @@ H5P__ocrt_pipeline_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__ocrt_pipeline_close() */
+
+/*
+ * Structured chunk
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocrt_stc_pipeline_set
+ *
+ * Purpose:     Copies an I/O pipeline property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_stc_pipeline_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                            size_t H5_ATTR_UNUSED size, void *value)
+{
+    H5O_stc_pline_t *pline = (H5O_stc_pline_t *)value; /* Create local aliases for values */
+    H5O_stc_pline_t  new_pline;
+    herr_t       ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    assert(value);
+
+    /* Make copy of I/O pipeline */
+    if (NULL == H5O_msg_copy(H5O_STC_PLINE_ID, pline, &new_pline))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline");
+
+    /* Copy new I/O pipeline message over old one */
+    *pline = new_pline;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_stc_pipeline_set() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocrt_stc_pipeline_get
+ *
+ * Purpose:     Copies a layout property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_stc_pipeline_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                       size_t H5_ATTR_UNUSED size, void *value)
+{
+    H5O_stc_pline_t *pline = (H5O_stc_pline_t *)value; /* Create local aliases for values */
+    H5O_stc_pline_t  new_pline;
+    herr_t       ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    assert(value);
+
+    /* Make copy of I/O pipeline */
+    if (NULL == H5O_msg_copy(H5O_STC_PLINE_ID, pline, &new_pline))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline");
+
+    /* Copy new I/O pipeline message over old one */
+    *pline = new_pline;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_stc-pipeline_get() */
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__ocrt_stc_pipeline_enc: TBD 
+ *
+ * Purpose:        Callback routine which is called whenever the pipeline
+ *                 property in the dataset access property list is
+ *                 decoded.
+ *
+ * Return:       Success:    Non-negative
+ *           Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_stc_pipeline_enc(const void *value, void **_pp, size_t *size)
+{
+    const H5O_stc_pline_t *pline = (const H5O_stc_pline_t *)value;
+    uint8_t          **pp    = (uint8_t **)_pp;
+    size_t             u; /* Local index variable */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    assert(pline);
+    assert(size);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    if (NULL != *pp) {
+        unsigned enc_size;
+        uint64_t enc_value;
+
+        /* Encode size of unsigned */
+        *(*pp)++ = (uint8_t)sizeof(unsigned);
+
+        /* encode nused value */
+        enc_value = (uint64_t)pline->tot_filt_nsects;
+        enc_size  = H5VM_limit_enc_size(enc_value);
+        assert(enc_size < 256);
+        *(*pp)++ = (uint8_t)enc_size;
+        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+/* TBD: to be done when working on H5Pencode2/H5Pdecode APIs */
+#ifdef TBD
+        /* encode each pipeline */
+        for (u = 0; u < pline->nused; u++) {
+            unsigned v; /* Local index variable */
+
+            /* encode filter ID */
+            INT32ENCODE(*pp, pline->filter[u].id);
+
+            /* encode filter flags */
+            H5_ENCODE_UNSIGNED(*pp, pline->filter[u].flags);
+
+            /* encode filter name if it exists */
+            if (NULL != pline->filter[u].name) {
+                /* encode true indicating that it exits */
+                *(*pp)++ = (uint8_t) true;
+
+                /* encode filter name */
+                H5MM_memcpy(*pp, (uint8_t *)(pline->filter[u].name), H5Z_COMMON_NAME_LEN);
+                *pp += H5Z_COMMON_NAME_LEN;
+            } /* end if */
+            else
+                /* encode false indicating that it does not exist */
+                *(*pp)++ = (uint8_t) false;
+
+            /* encode cd_nelmts */
+            enc_value = (uint64_t)pline->filter[u].cd_nelmts;
+            enc_size  = H5VM_limit_enc_size(enc_value);
+            assert(enc_size < 256);
+            *(*pp)++ = (uint8_t)enc_size;
+            UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+            /* encode all values */
+            for (v = 0; v < pline->filter[u].cd_nelmts; v++)
+                H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v]);
+        } /* end for */
+#endif
+    }     /* end if */
+
+    /* calculate size required for encoding */
+    *size += 1;
+    *size += (1 + H5VM_limit_enc_size((uint64_t)pline->tot_filt_nsects));
+#ifdef TBD
+    for (u = 0; u < pline->nused; u++) {
+        *size += (sizeof(int32_t) + sizeof(unsigned) + 1);
+        if (NULL != pline->filter[u].name)
+            *size += H5Z_COMMON_NAME_LEN;
+        *size += (1 + H5VM_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
+        *size += pline->filter[u].cd_nelmts * sizeof(unsigned);
+    } /* end for */
+#endif
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__ocrt_stc_pipeline_enc() */
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__ocrt_stc_pipeline_dec: TBD 
+ *
+ * Purpose:        Callback routine which is called whenever the pipeline
+ *                 property in the dataset access property list is
+ *                 decoded.
+ *
+ * Return:       Success:    Non-negative
+ *           Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_stc_pipeline_dec(const void **_pp, void *_value)
+{
+    H5O_stc_pline_t    *pline = (H5O_stc_pline_t *)_value; /* Property to set */
+    const uint8_t **pp    = (const uint8_t **)_pp;
+    size_t          tot_filt_nsects;               /* Number of filters used for pipeline */
+    unsigned        enc_size;            /* Size of encoded value (in bytes) */
+    uint64_t        enc_value;           /* Value to encode */
+    size_t          u;                   /* Local index variable */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* Decode the size of size_t */
+    enc_size = *(*pp)++;
+    if (enc_size != sizeof(unsigned))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded");
+
+    /* decode tot_filt_nsects */
+    enc_size = *(*pp)++;
+    assert(enc_size < 256);
+    UINT64DECODE_VAR(*pp, enc_value, enc_size);
+    tot_filt_nsects = (size_t)enc_value;
+
+    /* Set property default value */
+    memset(pline, 0, sizeof(H5O_stc_pline_t));
+    *pline = H5O_def_stc_pline_g;
+
+/* TBD: to be done when working on H5Pencode2/H5Pdecode APIs */
+#ifdef TBD
+    for (u = 0; u < nused; u++) {
+        H5Z_filter_info_t filter;   /* Filter info, for pipeline */
+        uint8_t           has_name; /* Flag to indicate whether filter has a name */
+        unsigned          v;        /* Local index variable */
+
+        /* decode filter id */
+        INT32DECODE(*pp, filter.id);
+
+        /* decode filter flags */
+        H5_DECODE_UNSIGNED(*pp, filter.flags);
+
+        /* decode value indicating if the name is encoded */
+        has_name = *(*pp)++;
+        if (has_name) {
+            /* decode name */
+            filter.name = H5MM_xstrdup((const char *)(*pp));
+            *pp += H5Z_COMMON_NAME_LEN;
+        } /* end if */
+        else
+            filter.name = NULL;
+
+        /* decode num elements */
+        enc_size = *(*pp)++;
+        assert(enc_size < 256);
+        UINT64DECODE_VAR(*pp, enc_value, enc_size);
+        filter.cd_nelmts = (size_t)enc_value;
+
+        if (filter.cd_nelmts) {
+            if (NULL == (filter.cd_values = (unsigned *)H5MM_malloc(sizeof(unsigned) * filter.cd_nelmts)))
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for cd_values");
+        } /* end if */
+        else
+            filter.cd_values = NULL;
+
+        /* decode values */
+        for (v = 0; v < filter.cd_nelmts; v++)
+            H5_DECODE_UNSIGNED(*pp, filter.cd_values[v]);
+
+        /* Add the filter to the I/O pipeline */
+        if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
+
+        /* Free cd_values, if it was allocated */
+        filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
+    } /* end for */
+#endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5P__ocrt_stc_pipeline_dec() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocrt_stc_pipeline_del
+ *
+ * Purpose:     Frees memory used to store the I/O pipeline property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_stc_pipeline_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                       size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    assert(value);
+
+    /* Reset the old I/O pipeline */
+    if (H5O_msg_reset(H5O_STC_PLINE_ID, value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_stc_pipeline_del() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5P__ocrt_stc_pipeline_copy
+ *
+ * Purpose:     Copy the I/O pipeline property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_stc_pipeline_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    H5O_stc_pline_t *pline = (H5O_stc_pline_t *)value; /* Create local aliases for values */
+    H5O_stc_pline_t  new_pline;
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    assert(pline);
+
+    /* Make copy of I/O pipeline */
+    if (NULL == H5O_msg_copy(H5O_STC_PLINE_ID, pline, &new_pline))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline");
+
+    /* Copy new I/O pipeline message over old one */
+    *pline = new_pline;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_stc_pipeline_copy() */
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__ocrt_stc_pipeline_cmp
+ *
+ * Purpose:        Callback routine which is called whenever a filter pipeline
+ *                 property in a property list is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__ocrt_stc_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_UNUSED size)
+{
+    const H5O_stc_pline_t *pline1 = (const H5O_stc_pline_t *)_pline1, /* Create local aliases for values */
+        *pline2               = (const H5O_stc_pline_t *)_pline2;
+    const H5O_stc_filter_sect_t *filt_sect1 = NULL;
+    const H5O_stc_filter_sect_t *filt_sect2 = NULL;
+    int    cmp_value;     /* Value from comparison */
+    size_t i;           /* Local index variable */
+    herr_t ret_value = 0; /* Return value */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    assert(pline1);
+    assert(pline2);
+    assert(size == sizeof(H5O_stc_pline_t));
+
+    /* Check the number of used pipeline entries */
+    if (pline1->tot_filt_nsects < pline2->tot_filt_nsects)
+        HGOTO_DONE(-1);
+    if (pline1->tot_filt_nsects > pline2->tot_filt_nsects)
+        HGOTO_DONE(1);
+
+    /* tot_filt_nsects should be equal at this point */
+    for (i = 0, filt_sect1 = &pline1->filt_sects[0], filt_sect2 = &pline2->filt_sects[0]; 
+         i < pline1->tot_filt_nsects; i++, filt_sect1++, filt_sect2++) {
+        if (filt_sect1->seq_sect < filt_sect2->seq_sect)
+            HGOTO_DONE(-1);
+        if (filt_sect1->seq_sect > filt_sect2->seq_sect)
+            HGOTO_DONE(1);
+
+        /* seq_sect should be equal at this point */
+
+        if (filt_sect1->nused < filt_sect2->nused)
+            HGOTO_DONE(-1);
+        if (filt_sect1->nused > filt_sect2->nused)
+            HGOTO_DONE(1);
+
+        /* nused should be equal at this point */
+
+        if (filt_sect1->size_filt_descr < filt_sect2->size_filt_descr)
+            HGOTO_DONE(-1);
+        if (filt_sect1->size_filt_descr > filt_sect2->size_filt_descr)
+            HGOTO_DONE(1);
+
+        /* size_filt_descr should be equal at this point */
+
+        /* Check the filter entry information */
+        if (filt_sect1->filter == NULL && filt_sect2->filter != NULL)
+            HGOTO_DONE(-1);
+        if (filt_sect1->filter != NULL && filt_sect2->filter == NULL)
+            HGOTO_DONE(1);
+
+        /* should have filter at this point */
+
+        if (filt_sect1->filter != NULL && filt_sect1->nused > 0) {
+            size_t u; /* Local index variable */
+
+            /* Loop through all filters, comparing them */
+            for (u = 0; u < filt_sect1->nused; u++) {
+
+                /* Check the ID of the filter */
+                if (filt_sect1->filter[u].id < filt_sect2->filter[u].id)
+                    HGOTO_DONE(-1);
+                if (filt_sect1->filter[u].id > filt_sect2->filter[u].id)
+                    HGOTO_DONE(1);
+
+                /* Check the flags for the filter */
+                if (filt_sect1->filter[u].flags < filt_sect2->filter[u].flags)
+                    HGOTO_DONE(-1);
+                if (filt_sect1->filter[u].flags > filt_sect2->filter[u].flags)
+                    HGOTO_DONE(1);
+
+                /* Check the name of the filter */
+                if (filt_sect1->filter[u].name == NULL && filt_sect2->filter[u].name != NULL)
+                    HGOTO_DONE(-1);
+                if (filt_sect1->filter[u].name != NULL && filt_sect2->filter[u].name == NULL)
+                    HGOTO_DONE(1);
+                if (filt_sect1->filter[u].name != NULL)
+                    if ((cmp_value = strcmp(filt_sect1->filter[u].name, filt_sect2->filter[u].name)) != 0)
+                        HGOTO_DONE(cmp_value);
+
+                /* Check the number of parameters for the filter */
+                if (filt_sect1->filter[u].cd_nelmts < filt_sect2->filter[u].cd_nelmts)
+                    HGOTO_DONE(-1);
+                if (filt_sect1->filter[u].cd_nelmts > filt_sect2->filter[u].cd_nelmts)
+                    HGOTO_DONE(1);
+
+                /* Check the filter parameter information */
+                if (filt_sect1->filter[u].cd_values == NULL && filt_sect2->filter[u].cd_values != NULL)
+                    HGOTO_DONE(-1);
+                if (filt_sect1->filter[u].cd_values != NULL && filt_sect2->filter[u].cd_values == NULL)
+                    HGOTO_DONE(1);
+                if (filt_sect1->filter[u].cd_values != NULL && filt_sect1->filter[u].cd_nelmts > 0) {
+                    size_t v; /* Local index variable */
+
+                    /* Loop through all parameters, comparing them */
+                    for (v = 0; v < filt_sect1->filter[u].cd_nelmts; v++) {
+                        /* Check each parameter for the filter */
+                        if (filt_sect1->filter[u].cd_values[v] < filt_sect2->filter[u].cd_values[v])
+                            HGOTO_DONE(-1);
+                        if (filt_sect1->filter[u].cd_values[v] > filt_sect2->filter[u].cd_values[v])
+                            HGOTO_DONE(1);
+                    } /* end for */
+                }     /* end if */
+            }         /* end for */
+        }             /* end if */
+
+    } /* end for tot_filt_nsects */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_stc_pipeline_cmp() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocrt_stc_pipeline_close
+ *
+ * Purpose:     Frees memory used to store the I/O pipeline property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_stc_pipeline_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    assert(value);
+
+    /* Reset the old I/O pipeline */
+    if (H5O_msg_reset(H5O_STC_PLINE_ID, value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_stc_pipeline_close() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 

@@ -62,16 +62,6 @@ struct H5Z_filter_info_t {
     unsigned    *cd_values;                        /*client data values		     */
 };
 
-/* Structured chunk */
-/* Structure to store filter information for a section */
-typedef struct H5Z_stc_filter_sect_t {
-    size_t seq_sect;        /* Sequence # of the ith filtered section */
-    size_t nused;           /* Number of filters defined for 'seq_sect' */
-    size_t nalloc;          /* (not stored) Number of elements allocated for the `filter' description array */
-    size_t size_filt_descr; /* Size of the 'filter' description array */
-    H5Z_filter_info_t *filter; /* Array of filters   */
-} H5Z_stc_filter_sect_t;
-
 /*****************************/
 /* Library-private Variables */
 /*****************************/
@@ -114,7 +104,7 @@ H5_DLL htri_t H5Z_filter_in_pline(H5Z_filter_info_t *filter, size_t nused, H5Z_f
 
 H5_DLL htri_t H5Z_all_filters_avail(H5Z_filter_info_t *filter, size_t nused);
 H5_DLL htri_t H5Z_filter_avail(H5Z_filter_t id);
-H5_DLL herr_t H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter, H5_section_type_t sec_type);
+H5_DLL herr_t H5Z_delete(H5Z_filter_t filter_id, H5Z_filter_info_t *filter, size_t *_nused);
 H5_DLL herr_t H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 
 /* Data Transform Functions */

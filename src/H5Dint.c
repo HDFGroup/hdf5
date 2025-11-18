@@ -221,6 +221,8 @@ H5D__init_package(void)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill value");
     if (H5P_get(def_dcpl, H5O_CRT_PIPELINE_NAME, &H5D_def_dset.dcpl_cache.pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
+    if (H5P_get(def_dcpl, H5O_CRT_STC_PIPELINE_NAME, &H5D_def_dset.dcpl_cache.stc_pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
 
     /* Mark "top" of interface as initialized, too */
     H5D_top_package_initialize_s = true;
@@ -799,9 +801,9 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     }
 
     /* Filter/Pipeline message size */
-    if (H5D_CHUNKED == dset->shared->layout.type || H5D_STRUCT_CHUNK == dset->shared->layout.type) {
+    if (H5D_CHUNKED == dset->shared->layout.type) {
         H5O_pline_t *pline = &dset->shared->dcpl_cache.pline;
-        if (pline->nused > 0 || pline->tot_filt_nsects > 0) {
+        if (pline->nused > 0) {
             get_value = H5O_msg_size_oh(file, ohdr, H5O_PLINE_ID, pline, 0);
             if (get_value == 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of filter message");
@@ -809,6 +811,15 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
         }
     }
 
+    if (H5D_STRUCT_CHUNK == dset->shared->layout.type) {
+        H5O_stc_pline_t *pline = &dset->shared->dcpl_cache.stc_pline;
+        if (pline->tot_filt_nsects > 0) {
+            get_value = H5O_msg_size_oh(file, ohdr, H5O_STC_PLINE_ID, pline, 0);
+            if (get_value == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of filter message");
+            ret_value += get_value;
+        }
+    }
     /* External File Link message size */
     if (dset->shared->dcpl_cache.efl.nused > 0) {
         get_value = H5O_msg_size_oh(file, ohdr, H5O_EFL_ID, &dset->shared->dcpl_cache.efl, 0);
@@ -1196,6 +1207,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     bool            layout_copied = false; /* Flag to indicate that layout message was copied */
     bool            fill_copied   = false; /* Flag to indicate that fill-value message was copied */
     bool            pline_copied  = false; /* Flag to indicate that pipeline message was copied */
+    bool            stc_pline_copied  = false; /* Flag to indicate that pipeline message for structured chunk was copied */
     bool            efl_copied    = false; /* Flag to indicate that external file list message was copied */
     H5G_loc_t       dset_loc;              /* Dataset location */
     H5D_t          *ret_value = NULL;      /* Return value */
@@ -1253,8 +1265,9 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if (new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
-        H5O_layout_t *layout;                 /* Dataset's layout information */
+        H5O_layout_t    *layout;                 /* Dataset's layout information */
         H5O_pline_t  *pline;                  /* Dataset's I/O pipeline information */
+        H5O_stc_pline_t  *stc_pline;          /* Dataset's I/O pipeline information for structured chunk */
         H5O_fill_t   *fill;                   /* Dataset's fill value info */
         H5O_efl_t    *efl;                    /* Dataset's external file list info */
         htri_t        ignore_filters = false; /* Ignore optional filters or not */
@@ -1276,15 +1289,22 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
         if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
 
+        layout       = &new_dset->shared->layout;
+        if (H5P_get(dc_plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve layout");
+        layout_copied = true;
+
         /* Retrieve the properties we need */
         pline = &new_dset->shared->dcpl_cache.pline;
         if (H5P_get(dc_plist, H5O_CRT_PIPELINE_NAME, pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve pipeline filter");
         pline_copied = true;
-        layout       = &new_dset->shared->layout;
-        if (H5P_get(dc_plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve layout");
-        layout_copied = true;
+
+        stc_pline = &new_dset->shared->dcpl_cache.stc_pline;
+        if (H5P_get(dc_plist, H5O_CRT_STC_PIPELINE_NAME, stc_pline) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve pipeline filter");
+        stc_pline_copied = true;
+
         fill          = &new_dset->shared->dcpl_cache.fill;
         if (H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, fill) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve fill value info");
@@ -1298,7 +1318,8 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             /* Check that chunked layout is used if filters are enabled */
             if (pline->nused > 0 && H5D_CHUNKED != layout->type)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout");
-            if (pline->tot_filt_nsects > 0 && H5D_STRUCT_CHUNK != layout->type)
+
+            if (stc_pline->tot_filt_nsects > 0 && H5D_STRUCT_CHUNK != layout->type)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
                             "filters can only be used with structured chunked layout");
         }
@@ -1312,26 +1333,13 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "compact dataset must have early space allocation");
     } /* end if */
 
-    /* TBD: NOTE HERE */
-    /*  Version 3 of pipeline message is introduced to support structured chunk layout
-     *  but as of now this version does not support other layout types yet.
-     *  Make sure that the file's high bound is latest to allow version 3
-     *  because H5Pset_filter2() will set pipeline message to version 3
-     */
-    if (new_dset->shared->dcpl_cache.pline.version >= H5O_PLINE_VERSION_3) {
-        assert(new_dset->shared->layout.type == H5D_STRUCT_CHUNK);
-        if (H5F_HIGH_BOUND(file) != H5F_LIBVER_LATEST)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL,
-                        "need to use latest format for version 3 of filter pipeline message");
-    }
-    else {
-
-        /* H5O_PLINE_VERSION_LATEST is still version 2 because version 3 pipeline message
-         * does not support other layout types yet.
-         */
-        if (H5O_pline_set_version(file, &new_dset->shared->dcpl_cache.pline) < 0)
+    if (new_dset->shared->layout.type == H5D_STRUCT_CHUNK) {
+        if (H5O_stc_pline_set_version(file, &new_dset->shared->dcpl_cache.stc_pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline");
     }
+
+    if (H5O_pline_set_version(file, &new_dset->shared->dcpl_cache.pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline");
 
     /* Set the version for the fill message */
     if (H5O_fill_set_version(file, &new_dset->shared->dcpl_cache.fill) < 0)
@@ -1359,7 +1367,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
      * allocation to facilitate independent raw data operations.
      */
     if (H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && (new_dset->shared->dcpl_cache.pline.nused == 0) &&
-        (new_dset->shared->dcpl_cache.pline.tot_filt_nsects == 0))
+        (new_dset->shared->dcpl_cache.stc_pline.tot_filt_nsects == 0))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 
     /* Set the dataset's I/O operations */
@@ -1408,6 +1416,9 @@ done:
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to destroy layout info");
             if (pline_copied)
                 if (H5O_msg_reset(H5O_PLINE_ID, &new_dset->shared->dcpl_cache.pline) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset I/O pipeline info");
+            if (stc_pline_copied)
+                if (H5O_msg_reset(H5O_STC_PLINE_ID, &new_dset->shared->dcpl_cache.stc_pline) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset I/O pipeline info");
             if (layout_copied)
                 if (H5O_msg_reset(H5O_LAYOUT_ID, &new_dset->shared->layout) < 0)
@@ -1909,7 +1920,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     must_init_storage = must_init_storage && (H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_ALLOCATE_EARLY) ||
                                               (H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI) &&
                                                dataset->shared->dcpl_cache.pline.nused == 0 &&
-                                               dataset->shared->dcpl_cache.pline.tot_filt_nsects == 0));
+                                               dataset->shared->dcpl_cache.stc_pline.tot_filt_nsects == 0));
 
     if (must_init_storage && (H5D__alloc_storage(dataset, H5D_ALLOC_OPEN, false, NULL) < 0))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage");

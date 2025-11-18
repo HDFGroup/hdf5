@@ -678,7 +678,7 @@ H5D__single_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR
     /* Check args */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
 
@@ -694,7 +694,7 @@ H5D__single_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR
 
     idx_info->stc_storage->u.single.chunk_size_len = chunk_size_len;
 
-    if (idx_info->pline->tot_filt_nsects)
+    if (idx_info->stc_pline->tot_filt_nsects)
         idx_info->stc_layout->flags |= H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER;
     else
         idx_info->stc_layout->flags = 0;
@@ -730,14 +730,14 @@ H5D__single_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Check args */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(idx_info->stc_layout->max_nchunks == idx_info->stc_layout->nchunks);
     assert(idx_info->stc_layout->nchunks == 1);
     assert(!H5_addr_defined(idx_info->stc_storage->idx_addr));
 
-    if (idx_info->pline->tot_filt_nsects)
+    if (idx_info->stc_pline->tot_filt_nsects)
         assert(idx_info->stc_layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER);
     else
         assert(!(idx_info->stc_layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER));
@@ -852,7 +852,7 @@ H5D__single_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(idx_info->stc_layout->nchunks == 1);
@@ -866,7 +866,7 @@ H5D__single_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     H5_CHECKED_ASSIGN(idx_info->stc_storage->u.single.chunk_size, uint64_t, udata->chunk_block.length,
                       hsize_t);
 
-    if (idx_info->pline->tot_filt_nsects > 0) { /* filtered chunk */
+    if (idx_info->stc_pline->tot_filt_nsects > 0) { /* filtered chunk */
 
         for (u = 0; u < idx_info->stc_storage->nsects; u++) {
             idx_info->stc_storage->u.single.offset[u] =
@@ -916,7 +916,7 @@ H5D__single_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(idx_info->stc_layout->nchunks == 1);
@@ -992,7 +992,7 @@ H5D__single_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_fun
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(chunk_cb);
@@ -1045,7 +1045,7 @@ H5D__single_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(H5_addr_defined(idx_info->stc_storage->idx_addr));
@@ -1082,7 +1082,7 @@ H5D__single_stc_idx_delete(const H5D_chk_idx_info_t *idx_info)
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
 
@@ -1115,14 +1115,14 @@ H5D__single_stc_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *i
     /* Check args */
     assert(idx_info_src);
     assert(idx_info_src->f);
-    assert(idx_info_src->pline);
+    assert(idx_info_src->stc_pline);
     assert(idx_info_src->stc_layout);
     assert(idx_info_src->stc_storage);
     assert(H5_addr_defined(idx_info_src->stc_storage->idx_addr));
 
     assert(idx_info_dst);
     assert(idx_info_dst->f);
-    assert(idx_info_dst->pline);
+    assert(idx_info_dst->stc_pline);
     assert(idx_info_dst->stc_layout);
     assert(idx_info_dst->stc_storage);
 

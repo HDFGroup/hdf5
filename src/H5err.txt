@@ -61,6 +61,7 @@ MAJOR, H5E_STORAGE, Data storage
 MAJOR, H5E_PLIST, Property lists
 MAJOR, H5E_ATTR, Attribute
 MAJOR, H5E_PLINE, Data filters
+MAJOR, H5E_STC_PLINE, Data filters for structured chunk
 MAJOR, H5E_EFL, External file list
 MAJOR, H5E_REFERENCE, References
 MAJOR, H5E_VFL, Virtual File Layer
