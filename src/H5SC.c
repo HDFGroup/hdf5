@@ -757,7 +757,7 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     const H5S_t       *scatter_file_space; /* Used in the scatter_mem callback */
     haddr_t            md_tag                                  = HADDR_UNDEF;
     bool               partial_bound_chunks_different_encoding = false;
-    H5O_pline_t       *pline                                   = NULL; /* I/O pipeline info */
+    H5O_stc_pline_t   *pline                                   = NULL; /* I/O pipeline info */
     hbool_t            filtered                                = false;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -978,7 +978,7 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     const H5S_t       *scatter_file_space; /* Used in the scatter_mem callback */
     haddr_t            md_tag                                  = HADDR_UNDEF;
     bool               partial_bound_chunks_different_encoding = false;
-    H5O_pline_t       *pline                                   = NULL; /* I/O pipeline info */
+    H5O_stc_pline_t   *pline                                   = NULL; /* I/O pipeline info */
     hbool_t            filtered                                = false;
     // size_t             nbytes;
     // size_t             buf_size;
@@ -1066,7 +1066,7 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query chunk dimensions");
 
         /* Filtered or not */
-        pline = &(dset_info[i].dset->shared->dcpl_cache.pline);
+        pline = &(dset_info[i].dset->shared->dcpl_cache.stc_pline);
         if (pline && pline->tot_filt_nsects)
             filtered = true;
 
@@ -1218,7 +1218,7 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     hsize_t            write_size_arr[H5S_MAX_RANK];
     haddr_t            md_tag                                  = HADDR_UNDEF;
     bool               partial_bound_chunks_different_encoding = false;
-    H5O_pline_t       *pline                                   = NULL; /* I/O pipeline info */
+    H5O_stc_pline_t   *pline                                   = NULL; /* I/O pipeline info */
     hbool_t            filtered                                = false;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1503,7 +1503,7 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     const H5S_t       *gather_file_space;
     haddr_t            md_tag                                  = HADDR_UNDEF;
     bool               partial_bound_chunks_different_encoding = false;
-    H5O_pline_t       *pline                                   = NULL; /* I/O pipeline info */
+    H5O_stc_pline_t   *pline                                   = NULL; /* I/O pipeline info */
     hbool_t            filtered                                = false;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1616,7 +1616,7 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
                 dset_info[i].dset, NULL, NULL, &partial_bound_chunks_different_encoding) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query chunk dimensions");
 
-        pline = &(dset_info[i].dset->shared->dcpl_cache.pline);
+        pline = &(dset_info[i].dset->shared->dcpl_cache.stc_pline);
         if (pline && pline->tot_filt_nsects)
             filtered = true;
 

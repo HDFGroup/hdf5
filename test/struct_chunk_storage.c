@@ -3880,6 +3880,7 @@ main(void)
                             (test_struct_chunk_1d_fa(my_fcpl, libver_fapl, filtered, early) < 0 ? 1 : 0);
                         nerrors +=
                             (test_struct_chunk_2d_ea(my_fcpl, libver_fapl, filtered, early) < 0 ? 1 : 0);
+
                         nerrors += (test_struct_chunk_filter_register(my_fcpl, libver_fapl) < 0 ? 1 : 0);
 
                         /* Tests to be worked on when APIs are implemented */

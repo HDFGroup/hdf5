@@ -99,18 +99,13 @@ typedef struct H5O_mesg_t      H5O_mesg_t;
 #define H5O_CRT_PIPELINE_NAME         "pline"               /* Filter pipeline */
 #define H5O_CRT_PIPELINE_DEF                                                                                 \
     {                                                                                                        \
-        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL, 0,                      \
-        {                                                                                                    \
-            {0, 0, 0, 0, NULL}, {0, 0, 0, 0, NULL},                                                          \
-            {                                                                                                \
-                0, 0, 0, 0, NULL                                                                             \
-            }                                                                                                \
-        }                                                                                                    \
+        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL                          \
     }
 
-#define H5O_CRT_PIPELINE_STRUCT_CHUNK_DEF                                                                    \
+#define H5O_CRT_STC_PIPELINE_NAME "stc_pline" /* Filter pipeline for structured chunk */
+#define H5O_CRT_STC_PIPELINE_DEF                                                                             \
     {                                                                                                        \
-        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_3, 0, 0, NULL, 0,                      \
+        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0,                                  \
         {                                                                                                    \
             {0, 0, 0, 0, NULL}, {0, 0, 0, 0, NULL},                                                          \
             {                                                                                                \
@@ -246,7 +241,8 @@ typedef struct H5O_copy_t {
 #define H5O_REFCOUNT_ID    0x0016 /* Reference count message.  */
 #define H5O_FSINFO_ID      0x0017 /* File space info message.  */
 #define H5O_MDCI_MSG_ID    0x0018 /* Metadata Cache Image Message */
-#define H5O_UNKNOWN_ID     0x0019 /* Placeholder message ID for unknown message.  */
+#define H5O_STC_PLINE_ID   0x0019 /* Filter pipeline message.  */
+#define H5O_UNKNOWN_ID     0x001a /* Placeholder message ID for unknown message.  */
 /* (this should never exist in a file) */
 /*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
@@ -256,7 +252,7 @@ typedef struct H5O_copy_t {
  *
  * (this should never exist in a file)
  */
-#define H5O_BOGUS_INVALID_ID 0x001a /* "Bogus invalid" Message.  */
+#define H5O_BOGUS_INVALID_ID 0x001b /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -802,10 +798,35 @@ typedef struct H5O_pline_t {
     size_t             nalloc; /*num elements in `filter' array     */
     size_t             nused;  /*num filters defined		     */
     H5Z_filter_info_t *filter; /*array of filters		     */
-    /* For structured chunk */
-    size_t                tot_filt_nsects; /* Total # of filtered sections in the structured chunk */
-    H5Z_stc_filter_sect_t filt_sects[H5O_MAX_STC_NSECTS];
 } H5O_pline_t;
+
+/*
+ * Filter pipeline message for structured chunk
+ * (Data structure in memory)
+ */
+
+/* The initial version of the format */
+#define H5O_STC_PLINE_VERSION_1 1
+
+/* The latest version of the format.  Look through the 'encode' and 'size'
+ *      callbacks for places to change when updating this. */
+#define H5O_STC_PLINE_VERSION_LATEST H5O_STC_PLINE_VERSION_1
+
+/* Filter info for each filtered section */
+typedef struct H5O_stc_filter_sect_t {
+    size_t seq_sect;        /* Sequence # of the ith filtered section */
+    size_t nused;           /* Number of filters defined for 'seq_sect' */
+    size_t nalloc;          /* (not stored) Number of elements allocated for the `filter' description array */
+    size_t size_filt_descr; /* Size of the 'filter' description array */
+    H5Z_filter_info_t *filter; /* Array of filters   */
+} H5O_stc_filter_sect_t;
+
+typedef struct H5O_stc_pline_t {
+    H5O_shared_t          sh_loc;          /* Shared message info (must be first) */
+    unsigned              version;         /* Encoding version number */
+    size_t                tot_filt_nsects; /* Total # of filtered sections in the structured chunk */
+    H5O_stc_filter_sect_t filt_sects[H5O_MAX_STC_NSECTS];
+} H5O_stc_pline_t;
 
 /*
  * Object name message.
@@ -1105,6 +1126,8 @@ H5_DLL herr_t H5O_link_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 
 /* Filter pipeline operators */
 H5_DLL herr_t H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline);
+/* Filter pipeline operators for structured chunk */
+H5_DLL herr_t H5O_stc_pline_set_version(H5F_t *f, H5O_stc_pline_t *pline);
 
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);

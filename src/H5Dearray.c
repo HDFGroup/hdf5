@@ -2006,7 +2006,7 @@ H5D__earray_stc_idx_depend(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info);
     assert(idx_info->f);
     assert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(H5D_CHUNK_IDX_EARRAY == idx_info->stc_layout->idx_type);
     assert(idx_info->stc_storage);
@@ -2064,7 +2064,7 @@ H5D__earray_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
     /* Check args */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(space);
@@ -2133,7 +2133,7 @@ H5D__earray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Check args */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(layout);
     assert(storage);
     assert(!H5_addr_defined(storage->idx_addr));
@@ -2149,7 +2149,7 @@ H5D__earray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
         chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
 
     /* General parameters */
-    if (idx_info->pline->tot_filt_nsects > 0) {
+    if (idx_info->stc_pline->tot_filt_nsects > 0) {
 
         cparam.cls = H5EA_CLS_FILT_STRUCT_CHUNK;
 
@@ -2236,7 +2236,7 @@ H5D__earray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
     /* Check args */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(H5D_CHUNK_IDX_EARRAY == idx_info->stc_layout->idx_type);
     assert(idx_info->stc_storage);
@@ -2373,7 +2373,7 @@ H5D__earray_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(H5_addr_defined(idx_info->stc_storage->idx_addr));
@@ -2397,7 +2397,7 @@ H5D__earray_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32");
 
     /* Check for filters on chunks */
-    if (idx_info->pline->tot_filt_nsects > 0) {
+    if (idx_info->stc_pline->tot_filt_nsects > 0) {
         H5D_earray_stc_filt_elmt_t elmt; /* Extensible array element */
 
         elmt.addr = udata->chunk_block.offset;
@@ -2454,7 +2454,7 @@ H5D__earray_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(H5_addr_defined(idx_info->stc_storage->idx_addr));
@@ -2497,7 +2497,7 @@ H5D__earray_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
     udata->chunk_idx = idx;
 
     /* Check for filters on chunks */
-    if (idx_info->pline->tot_filt_nsects > 0) {
+    if (idx_info->stc_pline->tot_filt_nsects > 0) {
         H5D_earray_stc_filt_elmt_t elmt; /* Fixed array element */
 
         /* Get the information for the chunk */
@@ -2731,7 +2731,7 @@ H5D__earray_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_fun
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(H5_addr_defined(idx_info->stc_storage->idx_addr));
@@ -2762,7 +2762,7 @@ H5D__earray_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_fun
         udata.common.stc_layout  = idx_info->stc_layout;
         udata.common.stc_storage = idx_info->stc_storage;
         memset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
-        udata.filtered   = (idx_info->pline->tot_filt_nsects > 0);
+        udata.filtered   = (idx_info->stc_pline->tot_filt_nsects > 0);
         udata.stc_nsects = idx_info->stc_storage->nsects;
         udata.cb         = chunk_cb;
         udata.udata      = chunk_udata;
@@ -2796,7 +2796,7 @@ H5D__earray_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(H5_addr_defined(idx_info->stc_storage->idx_addr));
@@ -2838,7 +2838,7 @@ H5D__earray_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_
     } /* end else */
 
     /* Check for filters on chunks */
-    if (idx_info->pline->tot_filt_nsects > 0) {
+    if (idx_info->stc_pline->tot_filt_nsects > 0) {
         H5D_earray_stc_filt_elmt_t elmt; /* Fixed array element */
 
         /* Get the info about the chunk for the index */
@@ -2951,7 +2951,7 @@ H5D__earray_stc_idx_delete(const H5D_chk_idx_info_t *idx_info)
     /* Sanity checks */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
 
@@ -3002,12 +3002,12 @@ H5D__earray_stc_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D
     /* Check args */
     assert(idx_info_src);
     assert(idx_info_src->f);
-    assert(idx_info_src->pline);
+    assert(idx_info_src->stc_pline);
     assert(idx_info_src->stc_layout);
     assert(idx_info_src->stc_storage);
     assert(idx_info_dst);
     assert(idx_info_dst->f);
-    assert(idx_info_dst->pline);
+    assert(idx_info_dst->stc_pline);
     assert(idx_info_dst->stc_layout);
     assert(idx_info_dst->stc_storage);
     assert(!H5_addr_defined(idx_info_dst->stc_storage->idx_addr));
@@ -3094,7 +3094,7 @@ H5D__earray_stc_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size
     /* Check args */
     assert(idx_info);
     assert(idx_info->f);
-    assert(idx_info->pline);
+    assert(idx_info->stc_pline);
     assert(idx_info->stc_layout);
     assert(idx_info->stc_storage);
     assert(H5_addr_defined(idx_info->stc_storage->idx_addr));

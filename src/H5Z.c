@@ -852,7 +852,7 @@ done:
  * Function: H5Z__prelude_callback
  *
  * Purpose:  Makes a dataset creation "prelude" callback for the "can_apply"
- *           or "set_local" routines.
+ *           or "set_local" routines depending on the layout type
  *
  * Return:   Non-negative on success/Negative on failure
  *
@@ -862,23 +862,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hid_t space_id,
-                      H5Z_prelude_type_t prelude_type)
+H5Z__prelude_callback(const void *mesg, hid_t dcpl_id, hid_t type_id, hid_t space_id,
+                      H5Z_prelude_type_t prelude_type, bool stc)
 {
     htri_t ret_value = true; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    if (pline->version < H5O_PLINE_VERSION_3) {
+    if (stc) { /* structured chunk */
 
-        if (H5Z__prelude_callback_real(dcpl_id, type_id, space_id, prelude_type, pline->nused, pline->filter,
-                                       H5_SECTION_UNKNOWN) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply prelude callback");
-    }
-    else {
-        const H5Z_stc_filter_sect_t *filt_sect;
+        const H5O_stc_pline_t       *pline = (const H5O_stc_pline_t *)mesg;
+        const H5O_stc_filter_sect_t *filt_sect;
         unsigned                     i;
-        assert(pline->version == H5O_PLINE_VERSION_3);
 
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
 
@@ -888,6 +883,13 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply prelude callback");
             }
         }
+    }
+    else { /* chunked */
+        const H5O_pline_t *pline = (const H5O_pline_t *)mesg;
+
+        if (H5Z__prelude_callback_real(dcpl_id, type_id, space_id, prelude_type, pline->nused, pline->filter,
+                                       H5_SECTION_UNKNOWN) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply prelude callback");
     }
 
 done:
@@ -911,9 +913,10 @@ done:
 static herr_t
 H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
 {
-    hid_t         space_id    = -1;      /* ID for dataspace describing chunk */
-    H5O_layout_t *dcpl_layout = NULL;    /* Dataset's layout information */
-    herr_t        ret_value   = SUCCEED; /* Return value */
+    hid_t         space_id    = -1;   /* ID for dataspace describing chunk */
+    H5O_layout_t *dcpl_layout = NULL; /* Dataset's layout information */
+    const void   *pline_mesg;
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -936,26 +939,42 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
         if (H5P_peek(dc_plist, H5D_CRT_LAYOUT_NAME, dcpl_layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout");
 
-        /* Check if the dataset is chunked */
         if (H5D_CHUNKED == dcpl_layout->type || H5D_STRUCT_CHUNK == dcpl_layout->type) {
-            H5O_pline_t dcpl_pline; /* Object's I/O pipeline information */
-            bool        have_filters = false;
+            bool have_filters = false;
 
-            /* Get I/O pipeline information */
-            if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &dcpl_pline) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
+            /* Check if the dataset is chunked */
+            if (H5D_CHUNKED == dcpl_layout->type) {
+                H5O_pline_t dcpl_pline; /* Object's I/O pipeline information */
 
-            if (H5D_CHUNKED == dcpl_layout->type && dcpl_pline.nused > 0)
-                have_filters = true;
-            if (H5D_STRUCT_CHUNK == dcpl_layout->type && dcpl_pline.tot_filt_nsects > 0) {
-                const H5Z_stc_filter_sect_t *filt_sect;
-                unsigned                     i;
+                /* Get I/O pipeline information */
+                if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &dcpl_pline) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
 
-                for (i = 0, filt_sect = &dcpl_pline.filt_sects[0]; i < dcpl_pline.tot_filt_nsects;
-                     i++, filt_sect++) {
-                    if (filt_sect->nused) {
-                        have_filters = true;
-                        break;
+                if (dcpl_pline.nused > 0) {
+                    have_filters = true;
+                    pline_mesg   = (const void *)&dcpl_pline;
+                }
+            }
+            else {
+
+                assert(H5D_STRUCT_CHUNK == dcpl_layout->type);
+                H5O_stc_pline_t dcpl_pline; /* Object's I/O pipeline information */
+
+                /* Get I/O pipeline information */
+                if (H5P_peek(dc_plist, H5O_CRT_STC_PIPELINE_NAME, &dcpl_pline) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
+
+                if (dcpl_pline.tot_filt_nsects > 0) {
+                    const H5O_stc_filter_sect_t *filt_sect;
+                    unsigned                     i;
+
+                    for (i = 0, filt_sect = &dcpl_pline.filt_sects[0]; i < dcpl_pline.tot_filt_nsects;
+                         i++, filt_sect++) {
+                        if (filt_sect->nused) {
+                            have_filters = true;
+                            pline_mesg   = (const void *)&dcpl_pline;
+                            break;
+                        }
                     }
                 }
             }
@@ -979,7 +998,8 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
                 }
 
                 /* Make the callbacks */
-                if (H5Z__prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, prelude_type) < 0)
+                if (H5Z__prelude_callback(pline_mesg, dcpl_id, type_id, space_id, prelude_type,
+                                          (H5D_STRUCT_CHUNK == dcpl_layout->type ? true : false)) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
             }
         }
@@ -1076,7 +1096,7 @@ H5Z_can_apply_direct(const H5O_pline_t *pline)
     assert(pline->nused > 0);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY, false) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
 
 done:
@@ -1108,7 +1128,7 @@ H5Z_set_local_direct(const H5O_pline_t *pline)
     assert(pline->nused > 0);
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_SET_LOCAL, false) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set");
 
 done:
@@ -1137,7 +1157,6 @@ htri_t
 H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
 {
     H5P_genplist_t *dc_plist;                /* Dataset creation property list object */
-    H5O_pline_t     pline;                   /* Object's I/O pipeline information */
     H5S_class_t     space_class;             /* To check class of space */
     H5T_class_t     type_class;              /* To check if type is VL */
     bool            bad_for_filters = false; /* Suitable to have filters */
@@ -1147,10 +1166,6 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
 
     if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list");
-
-    /* Get pipeline information */
-    if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
 
     /* Get datatype and dataspace classes for quick access */
     space_class = H5S_GET_EXTENT_TYPE(space);
@@ -1163,23 +1178,25 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
     /* When these conditions occur, if there are required filters in pline,
        then report a failure, otherwise, set flag that they can be ignored */
     if (bad_for_filters) {
-        size_t ii, jj;
+        H5O_layout_t layout; /* Object's layout information */
+        size_t       ii;
 
-        if (pline.nused > 0) {
-            for (ii = 0; ii < pline.nused; ii++) {
-                if (!(pline.filter[ii].flags & H5Z_FLAG_OPTIONAL))
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "not suitable for filters");
-            }
+        /* Peek at the layout information */
+        if (H5P_peek(dc_plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout");
 
-            /* All filters are optional, we can ignore them */
-            ret_value = true;
-        }
-        else if (pline.version == H5O_PLINE_VERSION_3 && pline.tot_filt_nsects) {
-            const H5Z_stc_filter_sect_t *filt_sect;
-            const H5Z_filter_info_t     *filter;
+        /* Get pipeline information depending on layout type */
+        if (layout.type == H5D_STRUCT_CHUNK) {
+            H5O_stc_pline_t pline; /* Object's I/O pipeline information */
 
-            for (ii = 0, filt_sect = &pline.filt_sects[0]; ii < pline.tot_filt_nsects; ii++, filt_sect++) {
-                for (jj = 0, filter = &filt_sect->filter[0]; jj < filt_sect->nused; jj++, filter++) {
+            if (H5P_peek(dc_plist, H5O_CRT_STC_PIPELINE_NAME, &pline) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
+            if (pline.tot_filt_nsects) {
+                const H5O_stc_filter_sect_t *filt_sect;
+                const H5Z_filter_info_t     *filter;
+
+                for (ii = 0, filt_sect = &pline.filt_sects[0]; ii < pline.tot_filt_nsects;
+                     ii++, filt_sect++) {
                     if (!(filter->flags & H5Z_FLAG_OPTIONAL))
                         HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "not suitable for filters");
                 }
@@ -1187,6 +1204,21 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
 
             /* All filters are optional, we can ignore them */
             ret_value = true;
+        }
+        else {
+            H5O_pline_t pline; /* Object's I/O pipeline information */
+
+            if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
+            if (pline.nused > 0) {
+                for (ii = 0; ii < pline.nused; ii++) {
+                    if (!(pline.filter[ii].flags & H5Z_FLAG_OPTIONAL))
+                        HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "not suitable for filters");
+                }
+
+                /* All filters are optional, we can ignore them */
+                ret_value = true;
+            }
         }
 
     } /* bad for filters */
@@ -1279,7 +1311,6 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter_id, unsigned flags, size_t cd
            const unsigned int cd_values[/*cd_nelmts*/])
 {
     herr_t ret_value = SUCCEED; /* Return value */
-
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(pline);
@@ -1872,6 +1903,7 @@ done:
  *           Negative on failure
  *-------------------------------------------------------------------------
  */
+#ifdef out
 herr_t
 H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter_id, H5_section_type_t sec_type)
 {
@@ -1891,7 +1923,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter_id, H5_section_type_t sec_typ
         /* Delete the filter */
         size_t                 nused;
         H5Z_filter_info_t     *filter;
-        H5Z_stc_filter_sect_t *filt_sect;
+        H5O_stc_filter_sect_t *filt_sect;
         size_t                 idx; /* Index of filter in pipeline */
         unsigned               i;
         bool                   found = false; /* Indicate filter was found in pipeline */
@@ -1968,6 +2000,62 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter_id, H5_section_type_t sec_typ
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_delete() */
+#endif
+
+herr_t
+H5Z_delete(H5Z_filter_t filter_id, H5Z_filter_info_t *filter, size_t *_nused)
+{
+    size_t nused = *(_nused);
+    size_t idx;                 /* Index of filter in pipeline */
+    bool   found     = false;   /* Indicate filter was found in pipeline */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Locate the filter in the pipeline */
+    for (idx = 0; idx < nused; idx++)
+        if (filter[idx].id == filter_id) {
+            found = true;
+            break;
+        }
+
+    /* filter_id was not found in the pipeline */
+    if (!found)
+        HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter not in pipeline");
+
+    /* Free information for deleted filter */
+    if (filter[idx].name && filter[idx].name != filter[idx]._name)
+        assert((strlen(filter[idx].name) + 1) > H5Z_COMMON_NAME_LEN);
+    if (filter[idx].name != filter[idx]._name)
+        filter[idx].name = (char *)H5MM_xfree(filter[idx].name);
+    if (filter[idx].cd_values && filter[idx].cd_values != filter[idx]._cd_values)
+        assert(filter[idx].cd_nelmts > H5Z_COMMON_CD_VALUES);
+    if (filter[idx].cd_values != filter[idx]._cd_values)
+        filter[idx].cd_values = (unsigned *)H5MM_xfree(filter[idx].cd_values);
+
+    /* Remove filter from pipeline array */
+    if ((idx + 1) < nused) {
+        /* Copy filters down & fix up any client data value arrays using internal storage */
+        for (; (idx + 1) < nused; idx++) {
+            filter[idx] = filter[idx + 1];
+            if (filter[idx].name && (strlen(filter[idx].name) + 1) <= H5Z_COMMON_NAME_LEN)
+                filter[idx].name = filter[idx]._name;
+            if (filter[idx].cd_nelmts <= H5Z_COMMON_CD_VALUES)
+                filter[idx].cd_values = filter[idx]._cd_values;
+        }
+    }
+
+    /* Decrement number of used filters */
+    --nused;
+    *_nused = nused;
+
+    /* Reset information for previous last filter in pipeline */
+    memset(&filter[nused], 0, sizeof(H5Z_filter_info_t));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5Z_delete() */
 
 /*-------------------------------------------------------------------------

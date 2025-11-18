@@ -77,7 +77,7 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5Ocont.c H5Ocopy.c H5Ocopy_ref.c H5Odbg.c H5Odrvinfo.c H5Odtype.c \
         H5Oefl.c H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c H5Oint.c \
         H5Olayout.c H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c H5Oname.c \
-        H5Onull.c H5Opline.c H5Orefcount.c H5Osdspace.c H5Oshared.c \
+        H5Onull.c H5Opline.c H5Ostc_pline.c H5Orefcount.c H5Osdspace.c H5Oshared.c \
         H5Oshmesg.c H5Ostab.c H5Otest.c H5Ounknown.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c H5Pgcpl.c H5Pint.c H5Plapl.c H5Plcpl.c \

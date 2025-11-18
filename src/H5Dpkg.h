@@ -145,9 +145,10 @@
 
 /* Typedef for cached dataset creation property list information */
 typedef struct H5D_dcpl_cache_t {
-    H5O_fill_t  fill;  /* Fill value info (H5D_CRT_FILL_VALUE_NAME) */
-    H5O_pline_t pline; /* I/O pipeline info (H5O_CRT_PIPELINE_NAME) */
-    H5O_efl_t   efl;   /* External file list info (H5D_CRT_EXT_FILE_LIST_NAME) */
+    H5O_fill_t      fill;      /* Fill value info (H5D_CRT_FILL_VALUE_NAME) */
+    H5O_pline_t     pline;     /* I/O pipeline info (H5O_CRT_PIPELINE_NAME) */
+    H5O_stc_pline_t stc_pline; /* I/O pipeline info for structured chunk (H5O_CRT_STC_PIPELINE_NAME) */
+    H5O_efl_t       efl;       /* External file list info (H5D_CRT_EXT_FILE_LIST_NAME) */
 } H5D_dcpl_cache_t;
 
 /* Typedef for datatype information for a single dataset in a raw data I/O operation */
@@ -437,6 +438,7 @@ typedef struct H5D_chk_idx_info_t {
     H5O_layout_chunk_t  *layout;  /* Chunk layout description */
     H5O_storage_chunk_t *storage; /* Chunk storage description */
     /* Structured chunk */
+    const H5O_stc_pline_t      *stc_pline;   /* Structured chunk I/O pipeline info */
     H5O_layout_struct_chunk_t  *stc_layout;  /* Structured chunk layout description */
     H5O_storage_struct_chunk_t *stc_storage; /* structured chunk storage description */
 } H5D_chk_idx_info_t;

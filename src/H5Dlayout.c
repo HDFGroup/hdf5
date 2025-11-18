@@ -642,12 +642,22 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     fill_prop = &dset->shared->dcpl_cache.fill;
 
     /* Update the filters message, if this is a chunked dataset */
-    if (layout->type == H5D_CHUNKED || layout->type == H5D_STRUCT_CHUNK) {
+    if (layout->type == H5D_CHUNKED) {
         H5O_pline_t *pline; /* Dataset's I/O pipeline information */
 
         pline = &dset->shared->dcpl_cache.pline;
-        if ((pline->nused > 0 || pline->tot_filt_nsects > 0) &&
+        if (pline->nused > 0 &&
             H5O_msg_append_oh(file, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
+    } /* end if */
+
+    /* Update the filters message, if this is a structured chunk dataset */
+    if (layout->type == H5D_STRUCT_CHUNK) {
+        H5O_stc_pline_t *pline; /* Dataset's I/O pipeline information */
+
+        pline = &dset->shared->dcpl_cache.stc_pline;
+        if (pline->tot_filt_nsects > 0 &&
+            H5O_msg_append_oh(file, oh, H5O_STC_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
     } /* end if */
 
@@ -728,7 +738,8 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
      */
     if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type &&
         H5D_STRUCT_CHUNK != layout->type && !dset->shared->dcpl_cache.pline.nused &&
-        !dset->shared->dcpl_cache.pline.tot_filt_nsects && (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
+        !dset->shared->dcpl_cache.stc_pline.tot_filt_nsects &&
+        (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
         layout_mesg_flags = H5O_MSG_FLAG_CONSTANT;
     else
         layout_mesg_flags = 0;
@@ -766,11 +777,12 @@ done:
 herr_t
 H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
 {
-    htri_t msg_exists;              /* Whether a particular type of message exists */
-    bool   pline_copied  = false;   /* Flag to indicate that dcpl_cache.pline's message was copied */
-    bool   layout_copied = false;   /* Flag to indicate that layout message was copied */
-    bool   efl_copied    = false;   /* Flag to indicate that the EFL message was copied */
-    herr_t ret_value     = SUCCEED; /* Return value */
+    htri_t msg_exists;                 /* Whether a particular type of message exists */
+    bool   pline_copied     = false;   /* Flag to indicate that dcpl_cache.pline's message was copied */
+    bool   stc_pline_copied = false;   /* Flag to indicate that dcpl_cache.pline's message was copied */
+    bool   layout_copied    = false;   /* Flag to indicate that layout message was copied */
+    bool   efl_copied       = false;   /* Flag to indicate that the EFL message was copied */
+    herr_t ret_value        = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -788,6 +800,19 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         pline_copied = true;
         /* Set the I/O pipeline info in the property list */
         if (H5P_set(plist, H5O_CRT_PIPELINE_NAME, &dataset->shared->dcpl_cache.pline) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set pipeline");
+    } /* end if */
+
+    /* Get the optional filters message */
+    if ((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_STC_PLINE_ID)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if message exists");
+    if (msg_exists) {
+        /* Retrieve the I/O pipeline message */
+        if (NULL == H5O_msg_read(&(dataset->oloc), H5O_STC_PLINE_ID, &dataset->shared->dcpl_cache.stc_pline))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message");
+        stc_pline_copied = true;
+        /* Set the I/O pipeline info in the property list */
+        if (H5P_set(plist, H5O_CRT_STC_PIPELINE_NAME, &dataset->shared->dcpl_cache.stc_pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set pipeline");
     } /* end if */
 
@@ -850,6 +875,9 @@ done:
     if (ret_value < 0) {
         if (pline_copied)
             if (H5O_msg_reset(H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset pipeline info");
+        if (stc_pline_copied)
+            if (H5O_msg_reset(H5O_STC_PLINE_ID, &dataset->shared->dcpl_cache.stc_pline) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset pipeline info");
         if (layout_copied)
             if (H5O_msg_reset(H5O_LAYOUT_ID, &dataset->shared->layout) < 0)
