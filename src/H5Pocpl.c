@@ -1269,7 +1269,7 @@ done:
  *      should be the filter ID to retrieve the parameters for.  If the
  *      filter is not set for the property list, an error will be returned.
  *
- * NOTE:    This routine is also called by a filter's set_local callabck.
+ * NOTE:    This routine is also called by a filter's set_local callback.
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
