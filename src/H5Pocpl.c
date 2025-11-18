@@ -507,7 +507,7 @@ done:
  *        pipeline.  That is, PLIST_ID must be a dataset creation
  *        property list.
  *
- * NOTE:    This routine is also called by a filter's set_local callabck.
+ * NOTE:    This routine is also called by a filter's set_local callback.
  *
  * Return:    Non-negative on success/Negative on failure
  *
