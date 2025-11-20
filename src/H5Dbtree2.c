@@ -1834,7 +1834,8 @@ H5D__bt2_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
      * allowing for an extra byte, in case the structured chunk
      * size (encoded selection + data) make the chunk larger.
      */
-    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)layout->size) + storage->offset_size) / storage->offset_size);
+    chunk_size_len =
+        1 + ((H5VM_log2_gen((uint64_t)layout->size) + storage->offset_size) / storage->offset_size);
     if (chunk_size_len > storage->offset_size)
         chunk_size_len = storage->offset_size;
 

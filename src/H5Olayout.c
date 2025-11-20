@@ -590,7 +590,6 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 for (unsigned u = 1; u < mesg->u.struct_chunk.ndims; u++)
                     mesg->u.struct_chunk.size *= mesg->u.struct_chunk.dim[u];
 
-
                 /* Structured chunk composition */
                 if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -608,7 +607,6 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects_md; i++)
                     mesg->storage.u.struct_chunk.seq_sects_md[i] = *p++;
-
 
                 /* Chunk index type */
                 if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -638,7 +636,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                          * size (encoded selection + data) make the chunk larger.
                          */
                         chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)mesg->u.struct_chunk.size) +
-                                               mesg->storage.u.struct_chunk.offset_size) / mesg->storage.u.struct_chunk.offset_size);
+                                               mesg->storage.u.struct_chunk.offset_size) /
+                                              mesg->storage.u.struct_chunk.offset_size);
                         if (chunk_size_len > mesg->storage.u.struct_chunk.offset_size)
                             chunk_size_len = mesg->storage.u.struct_chunk.offset_size;
 
@@ -1285,7 +1284,6 @@ H5O__layout_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_
              * Other indexes: chunk index address
              */
             H5F_addr_encode(f, &p, mesg->storage.u.struct_chunk.idx_addr);
-
 
             break;
 

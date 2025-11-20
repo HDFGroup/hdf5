@@ -70,7 +70,7 @@
 #define H5D_DEF_STORAGE_STRUCT_CHUNK_INIT                                                                    \
     {                                                                                                        \
         H5D_CHUNK_IDX_FARRAY, HADDR_UNDEF, H5D_COPS_STRUCT_CHUNK_FARRAY, H5O_STRUCT_CHUNK_OFFSET_SIZE,       \
-        H5O_SPARSE_NSECTS, 1, {0, 0, 0},                                                                     \
+            H5O_SPARSE_NSECTS, 1, {0, 0, 0},                                                                 \
         {                                                                                                    \
             {                                                                                                \
                 HADDR_UNDEF, NULL                                                                            \
@@ -3649,18 +3649,18 @@ H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], uns
     if (!dim)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no chunk dimensions specified");
 
-    /* 
+    /*
      *  The structured chunk composition fields are initialized as:
-     *  --offset_size: 
+     *  --offset_size:
      *    --number of bytes used to store offset
      *    --H5O_STRUCT_CHUNK_OFFSET_SIZE which is 8 bytes
-     *  --nsects: 
+     *  --nsects:
      *    --number of sections
      *    --H5O_SPARSE_NSECTS which is 2 for sparse chunk
-     *  --nsects_md: 
+     *  --nsects_md:
      *    --number of sections containing metadata
      *    --1 for sparse chunk
-     *  --seq_sects_md[]: 
+     *  --seq_sects_md[]:
      *    --sequence number of the ith section that contains metadata
      *    --seq_sects_md[0] = 0 (sequence number for selection section)
      *
@@ -3670,7 +3670,6 @@ H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], uns
     H5MM_memcpy(&layout, &H5D_def_layout_struct_chunk_g, sizeof(H5D_def_layout_struct_chunk_g));
 
     layout.u.struct_chunk.stc_type = (uint8_t)flag;
-
 
     /* Verify & initialize property's chunk dims */
     memset(&layout.u.struct_chunk.dim, 0, sizeof(layout.u.struct_chunk.dim));
