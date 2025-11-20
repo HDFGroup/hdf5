@@ -753,7 +753,18 @@ extern "C" {
  * \subsection subsec_dim_scales_api_func Programming API: H5DS
  *  @see H5DS Reference Manual
  *
- * @todo Under Construction
+ * \subsection subsec_dim_scales_intro Introduction
+ *
+ * The HDF5 Dimension Scale API (H5DS) provides functions for associating dimension scales
+ * with dataset dimensions. Dimension scales are HDF5 datasets that define coordinate systems
+ * for dataset dimensions, similar to axis labels in scientific data.
+ *
+ * \subsection subsec_dim_scales_ops Dimension Scale Operations
+ *
+ * Attach dimension scales to datasets using #H5DSattach_scale and detach with #H5DSdetach_scale.
+ * Set and retrieve dimension scale names with #H5DSset_scale and #H5DSget_scale_name. Query
+ * if a dataset is a dimension scale with #H5DSis_scale and check attachments with #H5DSis_attached.
+ * Iterate through scales with #H5DSiterate_scales.
  *
  * Previous Chapter \ref sec_hldo_direct_chunk - Next Chapter \ref sec_hl_images
  *
