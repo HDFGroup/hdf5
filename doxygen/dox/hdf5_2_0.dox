@@ -3,7 +3,7 @@
  * Navigate back: \ref index "Main" / \ref release_specific_info
  * <hr>
 
-\section sec_rel_spec_20 HDF5 Library and Tools 2.0
+\section sec_rel_spec_20 HDF5 Library and Tools 2.0.0
 
 \subsection subsec_rel_info Release Information
 
@@ -13,7 +13,7 @@
 Version
 </td>
 <td>
-HDF5 2.0
+HDF5 2.0.0
 </td>
 </tr>
 <tr>
@@ -64,7 +64,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-[API Compatibility Reports between 2.0 and 1.14.6](https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz)
+[API Compatibility Reports between 2.0.0 and 1.14.6](https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz)
 </td>
 </tr>
 <tr>

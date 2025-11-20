@@ -23,7 +23,7 @@ documents cover a mix of tasks, concepts, and reference, to help a specific
 \ref release_specific_info
 
 \par Offline reading
-     You can <a href="https://\RELURL/v1_14/v1_14_5/downloads/hdf5-1.14.5.doxygen.zip">download</a> it as an archive for offline reading.
+     You can download the hdf5-x.y.z-doxygen.zip file from the most recent release as an archive for offline reading from <a href="https://\DWNURL/">this page</a>.
 
 \par ToDo List
      There is plenty of \ref todo unfinished business.
