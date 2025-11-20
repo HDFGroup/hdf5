@@ -328,7 +328,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, bool include_c
 
                 case H5D_CHUNK_IDX_SINGLE:
                     /* chunk size */
-                    ret_value += H5O_STRUCT_CHUNK_OFFSET_SIZE;
+                    ret_value += layout->storage.u.struct_chunk.offset_size;
 
                     /* offsets for n - 1 sections */
                     ret_value += ((layout->storage.u.struct_chunk.nsects - 1) * 8);
