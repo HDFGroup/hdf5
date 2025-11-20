@@ -687,10 +687,10 @@ H5D__single_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR
      * size (encoded selection + data) make the chunk larger.
      */
     chunk_size_len =
-        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-             H5O_STRUCT_CHUNK_OFFSET_SIZE);
-    if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
-        chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
+        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + idx_info->stc_storage->offset_size) /
+             idx_info->stc_storage->offset_size);
+    if (chunk_size_len > idx_info->stc_storage->offset_size)
+        chunk_size_len = idx_info->stc_storage->offset_size;
 
     idx_info->stc_storage->u.single.chunk_size_len = chunk_size_len;
 

@@ -1834,10 +1834,10 @@ H5D__bt2_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
      * allowing for an extra byte, in case the structured chunk
      * size (encoded selection + data) make the chunk larger.
      */
-    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                          H5O_STRUCT_CHUNK_OFFSET_SIZE);
-    if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
-        chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
+    chunk_size_len =
+        1 + ((H5VM_log2_gen((uint64_t)layout->size) + storage->offset_size) / storage->offset_size);
+    if (chunk_size_len > storage->offset_size)
+        chunk_size_len = storage->offset_size;
 
     /* General parameters */
     if (idx_info->stc_pline->tot_filt_nsects > 0) {
@@ -1853,8 +1853,8 @@ H5D__bt2_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
          */
         bt2_cparam.rrec_size =
             (H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len + (layout->ndims - 1) * 8 +
-             (uint8_t)((storage->nsects - 1) * H5O_STRUCT_CHUNK_OFFSET_SIZE) +
-             (uint8_t)(storage->nsects * H5O_STRUCT_CHUNK_OFFSET_SIZE) + (uint8_t)(4 * storage->nsects));
+             (uint8_t)((storage->nsects - 1) * storage->offset_size) +
+             (uint8_t)(storage->nsects * storage->offset_size) + (uint8_t)(4 * storage->nsects));
 
         bt2_cparam.cls = H5D_BT2_FILT_STRUCT_CHUNK;
     }
@@ -1867,7 +1867,7 @@ H5D__bt2_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
          *                  size of offsets for (n - 1) sections
          */
         bt2_cparam.rrec_size = (H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len + (layout->ndims - 1) * 8 +
-                                (uint8_t)((storage->nsects - 1) * H5O_STRUCT_CHUNK_OFFSET_SIZE));
+                                (uint8_t)((storage->nsects - 1) * storage->offset_size));
 
         bt2_cparam.cls = H5D_BT2_STRUCT_CHUNK;
     }
@@ -1945,10 +1945,10 @@ H5D__bt2_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
      * size (encoded selection + data) make the chunk larger.
      */
     chunk_size_len =
-        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-             H5O_STRUCT_CHUNK_OFFSET_SIZE);
-    if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
-        chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
+        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + idx_info->stc_storage->offset_size) /
+             idx_info->stc_storage->offset_size);
+    if (chunk_size_len > idx_info->stc_storage->offset_size)
+        chunk_size_len = idx_info->stc_storage->offset_size;
 
     /* Set up the user data */
     u_ctx.f              = idx_info->f;
@@ -2865,17 +2865,6 @@ H5D__bt2_stc_crt_context(void *_udata)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate chunk dims");
     H5MM_memcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
     ctx->dim = my_dim;
-
-#ifdef out
-    /*
-     * Compute the size required for encoding the size of a chunk,
-     * allowing for an extra byte, in case the filter makes the chunk larger.
-     */
-    ctx->chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)udata->chunk_size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                               H5O_STRUCT_CHUNK_OFFSET_SIZE);
-    if (ctx->chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
-        ctx->chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
-#endif
 
     /* Set return value */
     ret_value = ctx;

@@ -590,6 +590,24 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 for (unsigned u = 1; u < mesg->u.struct_chunk.ndims; u++)
                     mesg->u.struct_chunk.size *= mesg->u.struct_chunk.dim[u];
 
+                /* Structured chunk composition */
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                mesg->storage.u.struct_chunk.offset_size = *p++;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                mesg->storage.u.struct_chunk.nsects = *p++;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                mesg->storage.u.struct_chunk.nsects_md = *p++;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, mesg->storage.u.struct_chunk.nsects_md, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects_md; i++)
+                    mesg->storage.u.struct_chunk.seq_sects_md[i] = *p++;
+
                 /* Chunk index type */
                 if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -598,9 +616,6 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 if (mesg->u.struct_chunk.idx_type >= H5D_CHUNK_IDX_NTYPES)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "unknown chunk index type");
                 mesg->storage.u.struct_chunk.idx_type = mesg->u.struct_chunk.idx_type;
-
-                /* NOTE HERE */
-                /* TBD: probably put structured chunk composition here after idx type */
 
                 switch (mesg->u.struct_chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
@@ -621,10 +636,10 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                          * size (encoded selection + data) make the chunk larger.
                          */
                         chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)mesg->u.struct_chunk.size) +
-                                               H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                                              H5O_STRUCT_CHUNK_OFFSET_SIZE);
-                        if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
-                            chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
+                                               mesg->storage.u.struct_chunk.offset_size) /
+                                              mesg->storage.u.struct_chunk.offset_size);
+                        if (chunk_size_len > mesg->storage.u.struct_chunk.offset_size)
+                            chunk_size_len = mesg->storage.u.struct_chunk.offset_size;
 
                         if (H5_IS_BUFFER_OVERFLOW(p, chunk_size_len, p_end))
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
@@ -633,28 +648,24 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         /* chunk size */
                         UINT64DECODE_VAR(p, mesg->storage.u.struct_chunk.u.single.chunk_size, chunk_size_len);
 
-                        /* NOTE HERE */
-                        /* TBD: composition information (nsects, offset_size) is not available yet at this
-                         * point */
-
-                        if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS - 1) * 8, p_end))
+                        if (H5_IS_BUFFER_OVERFLOW(p, (mesg->storage.u.struct_chunk.nsects - 1) * 8, p_end))
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding");
 
-                        for (unsigned i = 1; i < H5O_SPARSE_NSECTS; i++)
+                        for (unsigned i = 1; i < mesg->storage.u.struct_chunk.nsects; i++)
                             UINT64DECODE(p, mesg->storage.u.struct_chunk.u.single.offset[i]);
 
                         if (mesg->u.struct_chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
-                            if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS * 8), p_end))
+                            if (H5_IS_BUFFER_OVERFLOW(p, (mesg->storage.u.struct_chunk.nsects * 8), p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                             "ran off end of input buffer while decoding");
-                            for (unsigned i = 0; i < H5O_SPARSE_NSECTS; i++)
+                            for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects; i++)
                                 UINT64DECODE(p, mesg->storage.u.struct_chunk.u.single.unfilt_size[i]);
 
-                            if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS * 4), p_end))
+                            if (H5_IS_BUFFER_OVERFLOW(p, (mesg->storage.u.struct_chunk.nsects * 4), p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                             "ran off end of input buffer while decoding");
-                            for (unsigned i = 0; i < H5O_SPARSE_NSECTS; i++)
+                            for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects; i++)
                                 UINT32DECODE(p, mesg->storage.u.struct_chunk.u.single.filt_mask[i]);
                         }
 
@@ -771,26 +782,6 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_addr_decode(f, &p, &(mesg->storage.u.struct_chunk.idx_addr));
-
-                /* NOTE HERE */
-                /* Structured chunk composition */
-
-                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-                mesg->storage.u.struct_chunk.offset_size = *p++;
-
-                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-                mesg->storage.u.struct_chunk.nsects = *p++;
-
-                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-                mesg->storage.u.struct_chunk.nsects_md = *p++;
-
-                if (H5_IS_BUFFER_OVERFLOW(p, mesg->storage.u.struct_chunk.nsects_md, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-                for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects_md; i++)
-                    mesg->storage.u.struct_chunk.seq_sects_md[i] = *p++;
 
                 /* Set the layout operations */
                 mesg->ops = H5D_LOPS_STRUCT_CHUNK;
@@ -1223,6 +1214,13 @@ H5O__layout_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_
             for (u = 0; u < mesg->u.struct_chunk.ndims; u++)
                 UINT64ENCODE_VAR(p, mesg->u.struct_chunk.dim[u], mesg->u.struct_chunk.enc_bytes_per_dim);
 
+            /* structured chunk composition */
+            *p++ = (uint8_t)mesg->storage.u.struct_chunk.offset_size;
+            *p++ = (uint8_t)mesg->storage.u.struct_chunk.nsects;
+            *p++ = (uint8_t)mesg->storage.u.struct_chunk.nsects_md;
+            for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects_md; i++)
+                *p++ = (uint8_t)mesg->storage.u.struct_chunk.seq_sects_md[i];
+
             /* Chunk index type */
             *p++ = (uint8_t)mesg->u.struct_chunk.idx_type;
 
@@ -1286,13 +1284,6 @@ H5O__layout_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_
              * Other indexes: chunk index address
              */
             H5F_addr_encode(f, &p, mesg->storage.u.struct_chunk.idx_addr);
-
-            *p++ = (uint8_t)mesg->storage.u.struct_chunk.offset_size;
-            *p++ = (uint8_t)mesg->storage.u.struct_chunk.nsects;
-            *p++ = (uint8_t)mesg->storage.u.struct_chunk.nsects_md;
-
-            for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects_md; i++)
-                *p++ = (uint8_t)mesg->storage.u.struct_chunk.seq_sects_md[i];
 
             break;
 

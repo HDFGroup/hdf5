@@ -1958,10 +1958,10 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
      * allowing for an extra byte, in case the structured chunk
      * size (encoded selection + data) make the chunk larger.
      */
-    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                          H5O_STRUCT_CHUNK_OFFSET_SIZE);
-    if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
-        chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
+    chunk_size_len =
+        1 + ((H5VM_log2_gen((uint64_t)layout->size) + storage->offset_size) / storage->offset_size);
+    if (chunk_size_len > storage->offset_size)
+        chunk_size_len = storage->offset_size;
 
     /* General parameters */
     if (idx_info->stc_pline->tot_filt_nsects > 0) {
@@ -1974,10 +1974,10 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
          *                 size of unfiltered size for n sections +
          *                 size of filtered mask for n sections
          */
-        cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len +
-                                         (uint8_t)((storage->nsects - 1) * H5O_STRUCT_CHUNK_OFFSET_SIZE) +
-                                         (uint8_t)(storage->nsects * H5O_STRUCT_CHUNK_OFFSET_SIZE) +
-                                         (uint8_t)(4 * storage->nsects));
+        cparam.raw_elmt_size =
+            (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len +
+                      (uint8_t)((storage->nsects - 1) * storage->offset_size) +
+                      (uint8_t)(storage->nsects * storage->offset_size) + (uint8_t)(4 * storage->nsects));
     }
     else {
         cparam.cls = H5FA_CLS_STRUCT_CHUNK;
@@ -1987,7 +1987,7 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
          *                  size of offsets for (n - 1) sections
          */
         cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len +
-                                         (uint8_t)((storage->nsects - 1) * H5O_STRUCT_CHUNK_OFFSET_SIZE));
+                                         (uint8_t)((storage->nsects - 1) * storage->offset_size));
     }
 
     cparam.max_dblk_page_nelmts_bits = layout->u.farray.cparam.max_dblk_page_nelmts_bits;
@@ -2056,10 +2056,10 @@ H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
      * size (encoded selection + data) make the chunk larger.
      */
     chunk_size_len =
-        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-             H5O_STRUCT_CHUNK_OFFSET_SIZE);
-    if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
-        chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
+        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + idx_info->stc_storage->offset_size) /
+             idx_info->stc_storage->offset_size);
+    if (chunk_size_len > idx_info->stc_storage->offset_size)
+        chunk_size_len = idx_info->stc_storage->offset_size;
 
     /* Set up the user data */
     udata.f              = idx_info->f;
