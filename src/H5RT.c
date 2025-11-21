@@ -363,27 +363,27 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
     assert(prev_sort_dim >= -1);
     assert(rank >= 1 && rank <= H5S_MAX_RANK);
 
+    /* Compute the max/min bounds of the provided node */
+    /* Initial values */
+    for (int i = 0; i < rank; i++) {
+        node->min[i] = leaves[0].min[i];
+        node->max[i] = leaves[0].max[i];
+    }
+    /* Compute max/min from leaves */
+    for (size_t i = 0; i < count; i++) {
+        for (int d = 0; d < rank; d++) {
+            if (leaves[i].min[d] < node->min[d])
+                node->min[d] = leaves[i].min[d];
+            if (leaves[i].max[d] > node->max[d])
+                node->max[d] = leaves[i].max[d];
+        }
+    }
+
     if (count <= H5RT_MAX_NODE_SIZE) {
         /* Base Case - All leaves will fit into this node */
         node->nchildren           = (int)count;
         node->children_are_leaves = true;
         node->children.leaves     = leaves;
-
-        /* Compute the max/min bounds of the provided node using the values from the child leaves */
-        /* Initial values */
-        for (int i = 0; i < rank; i++) {
-            node->min[i] = leaves[0].min[i];
-            node->max[i] = leaves[0].max[i];
-        }
-        /* Compute max/min from leaves */
-        for (size_t i = 1; i < count; i++) {
-            for (int d = 0; d < rank; d++) {
-                if (leaves[i].min[d] < node->min[d])
-                    node->min[d] = leaves[i].min[d];
-                if (leaves[i].max[d] > node->max[d])
-                    node->max[d] = leaves[i].max[d];
-            }
-        }
     }
     else {
         /* Recursive case - there will be child nodes */
@@ -434,22 +434,6 @@ H5RT__bulk_load(H5RT_node_t *node, int rank, H5RT_leaf_t *leaves, size_t count, 
             /* The next 'child_leaf_count' leaves are now assigned */
             child_leaf_start += child_leaf_count;
             leaves_left -= child_leaf_count;
-
-            /* Compute the max/min bounds of the provided node using the values from the child nodes */
-            if (i == 0)
-                /* Initial values */
-                for (int d = 0; d < rank; d++) {
-                    node->min[d] = node->children.nodes[0]->min[d];
-                    node->max[d] = node->children.nodes[0]->max[d];
-                }
-            else
-                /* Compute max/min from child nodes */
-                for (int d = 0; d < rank; d++) {
-                    if (node->children.nodes[i]->min[d] < node->min[d])
-                        node->min[d] = node->children.nodes[i]->min[d];
-                    if (node->children.nodes[i]->max[d] > node->max[d])
-                        node->max[d] = node->children.nodes[i]->max[d];
-                }
         }
     }
 
