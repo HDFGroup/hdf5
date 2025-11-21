@@ -71,17 +71,6 @@
  *
  * When a reference count reaches zero, the associated resources are automatically released.
  *
- * \code
- * // Get reference count
- * int ref_count = H5Iget_ref(dataset_id);
- *
- * // Increment reference count (keeps object alive)
- * H5Iinc_ref(dataset_id);
- *
- * // Later, decrement to balance
- * H5Idec_ref(dataset_id);
- * \endcode
- *
  * \subsection subsec_identifier_valid Identifier Validation
  *
  * The H5I interface provides functions to validate identifiers:
@@ -89,14 +78,6 @@
  * \li #H5Iis_valid checks if an identifier is valid and has a positive reference count
  * \li #H5Iget_type retrieves the type of an identifier
  * \li #H5Itype_exists checks if an identifier type is registered
- *
- * \code
- * // Check if identifier is valid
- * if (H5Iis_valid(file_id) > 0) {
- *     // Identifier is valid
- *     H5I_type_t type = H5Iget_type(file_id);
- * }
- * \endcode
  *
  * \subsection subsec_identifier_query Querying Identifiers
  *

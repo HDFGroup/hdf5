@@ -66,17 +66,6 @@
  * These functions invoke a user-supplied callback for each object encountered, enabling
  * custom processing, cataloging, or analysis of file contents.
  *
- * \code
- * // Callback function for object visitation
- * herr_t visit_callback(hid_t obj_id, const char *name, const H5O_info_t *info, void *op_data) {
- *     printf("Object: %s, Type: %d\n", name, info->type);
- *     return 0;  // Continue iteration
- * }
- *
- * // Visit all objects in a group
- * H5Ovisit(group_id, H5_INDEX_NAME, H5_ITER_NATIVE, visit_callback, NULL, H5O_INFO_ALL);
- * \endcode
- *
  * \subsection subsec_object_comments Object Comments
  *
  * Objects can have associated comment strings for documentation purposes:

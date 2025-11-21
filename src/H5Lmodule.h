@@ -59,17 +59,6 @@
  * \li #H5Lcreate_soft creates soft (symbolic) links using path strings
  * \li #H5Lcreate_external creates links to objects in other HDF5 files
  *
- * \code
- * // Create a hard link to a dataset
- * H5Lcreate_hard(file_id, "/original/dataset", file_id, "/links/hardlink", H5P_DEFAULT, H5P_DEFAULT);
- *
- * // Create a soft link using a path
- * H5Lcreate_soft("/original/dataset", file_id, "/links/softlink", H5P_DEFAULT, H5P_DEFAULT);
- *
- * // Create an external link to an object in another file
- * H5Lcreate_external("other_file.h5", "/dataset", file_id, "/links/external", H5P_DEFAULT, H5P_DEFAULT);
- * \endcode
- *
  * \subsection subsec_link_ops Link Operations
  *
  * The H5L interface provides functions for:

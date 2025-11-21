@@ -64,36 +64,14 @@
  *
  * \subsection subsec_filter_usage Using Filters
  *
- * Filters are configured through dataset creation property lists. Here's an example
- * of applying compression to a dataset:
- *
- * \code
- * // Create dataset creation property list
- * hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
- *
- * // Enable chunking (required for filters)
- * hsize_t chunk_dims[2] = {100, 100};
- * H5Pset_chunk(dcpl, 2, chunk_dims);
- *
- * // Add DEFLATE compression at level 6
- * H5Pset_deflate(dcpl, 6);
- *
- * // Create dataset with compression
- * hid_t dset = H5Dcreate(file_id, "compressed_data", H5T_NATIVE_FLOAT,
- *                        space_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
- * \endcode
+ * Filters are configured through dataset creation property lists. Enable chunking first
+ * using #H5Pset_chunk, then add compression with functions like #H5Pset_deflate.
  *
  * \subsection subsec_filter_pipeline Filter Pipelines
  *
  * Multiple filters can be combined in a pipeline. Filters are applied in the order
  * they are added during write operations and in reverse order during read operations.
- *
- * \code
- * // Create a filter pipeline: SHUFFLE -> DEFLATE -> FLETCHER32
- * H5Pset_shuffle(dcpl);          // Improve compression
- * H5Pset_deflate(dcpl, 6);       // Compress data
- * H5Pset_fletcher32(dcpl);       // Add error checking
- * \endcode
+ * Common pipelines combine #H5Pset_shuffle, #H5Pset_deflate, and #H5Pset_fletcher32.
  *
  * \subsection subsec_filter_custom Custom Filters
  *
