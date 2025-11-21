@@ -30,6 +30,8 @@ extern "C" {
  * fixed-length packets of data in append-only datasets. Packet tables are optimized
  * for streaming data collection where records are added sequentially.
  *
+ * @see H5PT Reference Manual
+ *
  * \subsection subsec_hl_packet_ops Packet Table Operations
  *
  * Create packet tables with #H5PTcreate or open existing ones with #H5PTopen. Append

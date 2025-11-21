@@ -233,6 +233,9 @@ extern "C" {
  *     ...
  * \endcode
  *
+ * \subsection subsec_hldo_prog_api Programming API: H5DO
+ *  @see H5DO Reference Manual
+ *
  * Next Chapter \ref sec_dim_scales_stand
  *
  * <hr>

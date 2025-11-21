@@ -47,6 +47,8 @@ extern "C" {
  * multiple low-level calls into single high-level functions. This reduces code complexity and
  * makes HDF5 more accessible for straightforward data storage tasks.
  *
+ * @see H5LT Reference Manual
+ *
  * \subsection subsec_hl_lite_dataset Dataset Operations
  *
  * Create and access datasets with single function calls using type-specific functions like

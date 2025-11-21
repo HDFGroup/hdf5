@@ -30,6 +30,8 @@ extern "C" {
  * as tables with named fields, similar to database tables or spreadsheets. Tables organize
  * data in rows and columns, making them ideal for storing structured records.
  *
+ * @see H5TB Reference Manual
+ *
  * \subsection subsec_hl_table_ops Table Operations
  *
  * Create tables with #H5TBmake_table, append rows with #H5TBappend_records, write data with

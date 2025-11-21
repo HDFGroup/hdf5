@@ -526,15 +526,11 @@ extern "C" {
  *
  * These relationships are represented in the file by attributes of the Dataset D and the Dimension
  * Scale Datasets. Figure 5 shows the values that are stored for the DIMENSION_LIST attribute of
- * Dataset D. This
- * <table>
- * <tr>
- * <td>
+ * Dataset D.
+ *
  * \image html UML_Attribute.jpg "The UML model for an HDF5 attribute"
- * </td>
- * </tr>
- * </table>
- * attribute is a one-dimensional array with the HDF5 datatype variable length
+ *
+ * This attribute is a one-dimensional array with the HDF5 datatype variable length
  * #H5T_STD_REF_OBJ. Each row of the array is zero or more object references for Dimension Scale datasets.
  *
  * Table 6 shows the DIMENSION_LABELLIST for Dataset D. This is a one dimensional array with some empty
@@ -559,30 +555,11 @@ extern "C" {
  * an item from the table, because the entries at both ends of the association must be updated
  * at the same time.
  *
- * <table>
- * <tr>
- * <td>
  * \image html H5DS_fig3.png "Figure 3. Example dataset and scales."
- * </td>
- * </tr>
- * </table>
  *
- * <table>
- * <tr>
- * <td>
  * \image html H5DS_fig4.png "Figure 4. Example labels, names, and attached scales."
- * </td>
- * </tr>
- * </table>
  *
- * <table>
- * <tr>
- * <td>
- * \image html H5DS_fig5.png "Figure 5. The table of dimension references, stored as an attribute of the
- * Dataset."
- * </td>
- * </tr>
- * </table>
+ * \image html H5DS_fig5.png "Figure 5. The table of dimension references."
  *
  * <table><caption>Table 6. The table of dimension labels.</caption>
  * <tr>
@@ -749,15 +726,6 @@ extern "C" {
  *    2. Iterate through the scales of each dimension of D
  *    3. For each scale, detach the Dimension Scale S from dimension j of Dataset D with H5DSdetach_scale
  *    4. Delete the Dataset, with H5Gunlink.
- *
- * \subsection subsec_dim_scales_api_func Programming API: H5DS
- *  @see H5DS Reference Manual
- *
- * \subsection subsec_dim_scales_intro Introduction
- *
- * The HDF5 Dimension Scale API (H5DS) provides functions for associating dimension scales
- * with dataset dimensions. Dimension scales are HDF5 datasets that define coordinate systems
- * for dataset dimensions, similar to axis labels in scientific data.
  *
  * \subsection subsec_dim_scales_ops Dimension Scale Operations
  *
