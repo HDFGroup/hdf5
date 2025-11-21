@@ -90,7 +90,7 @@
  *
  * \subsection subsec_identifier_user User-Defined Identifier Types
  *
- * Advanced applications can register custom identifier types using #H5Iregister_type.
+ * Advanced applications can register custom identifier types using #H5Iregister.
  * This allows user-defined objects to benefit from HDF5's identifier management:
  *
  * \li Automatic reference counting

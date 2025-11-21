@@ -142,7 +142,8 @@
  * Applications can query the current file driver:
  *
  * \li #H5Pget_driver retrieves the driver identifier from a file access property list
- * \li #H5FDis_driver_registered checks if a specific driver is available
+ * \li #H5FDis_driver_registered_by_name checks if a specific driver is available by name
+ * \li #H5FDis_driver_registered_by_value checks if a specific driver is available by value
  * \li Driver-specific property list functions retrieve driver parameters
  *
  * \subsection subsec_vfd_summary Summary

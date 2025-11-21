@@ -50,7 +50,7 @@
  * </tr>
  * <tr>
  * <th>H5F</th>
- * <td>#H5Fcreate, #H5Fflush, #H5Fis_accessible, #H5Fopen, #H5Fclose
+ * <td>#H5Fcreate, #H5Fflush, #H5Fopen, #H5Fclose
  * </td>
  * </tr>
  * <tr>
@@ -81,7 +81,7 @@
  * </tr>
  * <tr>
  * <th>H5R</th>
- * <td>#H5Ropen_attr, #H5Ropen_object #H5Ropen_region, #H5Rdereference
+ * <td>#H5Ropen_attr, #H5Ropen_object #H5Ropen_region
  * </td>
  * </tr>
  * <tr>
@@ -91,7 +91,7 @@
  * </tr>
  * <tr>
  * <th>H5T</th>
- * <td>#H5Tcommit, #H5Topen, #H5Tcopy, #H5Tclose
+ * <td>#H5Tcommit, #H5Topen, #H5Tclose
  * </td>
  * </tr>
  * </table>
