@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-22</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -199,7 +199,7 @@ Writing a Contiguous Hyperslab in C</h1>
 <div class="line"><span class="comment">83       */</span></div>
 <div class="line">84      filespace = <a class="code hl_function" href="group___h5_d.html#gad42a46be153d895d8c28a11ebf5a0d0a">H5Dget_space</a>(dset_id);</div>
 <div class="line">85      <a class="code hl_function" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a>(filespace, <a class="code hl_enumvalue" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, offset, NULL, count, NULL);</div>
-<div class="ttc" id="a_h5_spublic_8h_html_a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550"><div class="ttname"><a href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a></div><div class="ttdeci">@ H5S_SELECT_SET</div><div class="ttdef"><b>Definition</b> H5Spublic.h:93</div></div>
+<div class="ttc" id="a_h5_spublic_8h_html_a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550"><div class="ttname"><a href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a></div><div class="ttdeci">@ H5S_SELECT_SET</div><div class="ttdef"><b>Definition</b> H5Spublic.h:97</div></div>
 <div class="ttc" id="agroup___h5_d_html_gad42a46be153d895d8c28a11ebf5a0d0a"><div class="ttname"><a href="group___h5_d.html#gad42a46be153d895d8c28a11ebf5a0d0a">H5Dget_space</a></div><div class="ttdeci">hid_t H5Dget_space(hid_t dset_id)</div><div class="ttdoc">Returns an identifier for a copy of the dataspace for a dataset.</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga6adfdf1b95dc108a65bf66e97d38536d"><div class="ttname"><a href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a></div><div class="ttdeci">herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])</div><div class="ttdoc">Selects a hyperslab region to add to the current selected region.</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>

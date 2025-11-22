@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-22</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -157,9 +157,9 @@ Macros</h2></td></tr>
 <tr class="separator:a265cb2343f05cb71831119c90de31a8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afee156939b96525e1b0026856f2288cf" id="r_afee156939b96525e1b0026856f2288cf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afee156939b96525e1b0026856f2288cf">H5S_PLIST</a>&#160;&#160;&#160;2</td></tr>
 <tr class="separator:afee156939b96525e1b0026856f2288cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d17cb15354aaa5d6a16f66158e6eb1f" id="r_a6d17cb15354aaa5d6a16f66158e6eb1f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d17cb15354aaa5d6a16f66158e6eb1f">H5S_SEL_ITER_GET_SEQ_LIST_SORTED</a>&#160;&#160;&#160;    0x0001</td></tr>
+<tr class="memitem:a6d17cb15354aaa5d6a16f66158e6eb1f" id="r_a6d17cb15354aaa5d6a16f66158e6eb1f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d17cb15354aaa5d6a16f66158e6eb1f">H5S_SEL_ITER_GET_SEQ_LIST_SORTED</a>&#160;&#160;&#160;0x0001</td></tr>
 <tr class="separator:a6d17cb15354aaa5d6a16f66158e6eb1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8e372b854ca8250c47f316428af3d1f" id="r_ac8e372b854ca8250c47f316428af3d1f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8e372b854ca8250c47f316428af3d1f">H5S_SEL_ITER_SHARE_WITH_DATASPACE</a>&#160;&#160;&#160;    0x0002</td></tr>
+<tr class="memitem:ac8e372b854ca8250c47f316428af3d1f" id="r_ac8e372b854ca8250c47f316428af3d1f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8e372b854ca8250c47f316428af3d1f">H5S_SEL_ITER_SHARE_WITH_DATASPACE</a>&#160;&#160;&#160;0x0002</td></tr>
 <tr class="separator:ac8e372b854ca8250c47f316428af3d1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5af9ab788797b2ea9a4843857674ac18" id="r_a5af9ab788797b2ea9a4843857674ac18"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a>&#160;&#160;&#160;<a class="el" href="_h5public_8h.html#a95782c58865515978907a9ced9e013e8">HSIZE_UNDEF</a></td></tr>
 <tr class="separator:a5af9ab788797b2ea9a4843857674ac18"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -400,11 +400,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5S_SEL_ITER_GET_SEQ_LIST_SORTED&#160;&#160;&#160;    0x0001</td>
+          <td class="memname">#define H5S_SEL_ITER_GET_SEQ_LIST_SORTED&#160;&#160;&#160;0x0001</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Retrieve elements from iterator in increasing offset order, for \ each call to retrieve sequences. Currently, this only applies to \ point selections, as hyperslab selections are always returned in \ increasing offset order. Note that the order is only increasing \ for each call to H5Sget_seq_list(), the next set of sequences \ could start with an earlier offset than the previous one. \ \ </p><dl class="section since"><dt>Since</dt><dd>1.12.0 \ </dd></dl>
+<p>Retrieve elements from iterator in increasing offset order, for each call to retrieve sequences. Currently, this only applies to point selections, as hyperslab selections are always returned in increasing offset order. Note that the order is only increasing for each call to H5Sget_seq_list(), the next set of sequences could start with an earlier offset than the previous one.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -415,11 +416,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5S_SEL_ITER_SHARE_WITH_DATASPACE&#160;&#160;&#160;    0x0002</td>
+          <td class="memname">#define H5S_SEL_ITER_SHARE_WITH_DATASPACE&#160;&#160;&#160;0x0002</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Don't copy the dataspace selection when creating the selection \ iterator. This can improve performance of creating the iterator, \ but the dataspace <b>MUST NOT</b> be modified or closed until the \ selection iterator is closed or the iterator's behavior will be \ undefined. \ \ </p><dl class="section since"><dt>Since</dt><dd>1.12.0 \ </dd></dl>
+<p>Don't copy the dataspace selection when creating the selection iterator. This can improve performance of creating the iterator, but the dataspace <b>MUST NOT</b> be modified or closed until the selection iterator is closed or the iterator's behavior will be undefined.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>

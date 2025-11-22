@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-11-22</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -215,11 +215,11 @@ Macros</h2></td></tr>
 <tr class="separator:a5c2694ad5fe9037075fa4b230ee9bf5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af8285c255986a929c42fa1b4842c019b" id="r_af8285c255986a929c42fa1b4842c019b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8285c255986a929c42fa1b4842c019b">H5FD_CTL_MEM_FREE</a>&#160;&#160;&#160;6</td></tr>
 <tr class="separator:af8285c255986a929c42fa1b4842c019b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15856eca70f27639e38e506ca1e7e378" id="r_a15856eca70f27639e38e506ca1e7e378"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a15856eca70f27639e38e506ca1e7e378">H5FD_CTL_OPC_EXPER_MAX</a>&#160;&#160;&#160;    (<a class="el" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a> + 511) /* Maximum opcode value available for experimental use */</td></tr>
+<tr class="memitem:a15856eca70f27639e38e506ca1e7e378" id="r_a15856eca70f27639e38e506ca1e7e378"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a15856eca70f27639e38e506ca1e7e378">H5FD_CTL_OPC_EXPER_MAX</a>&#160;&#160;&#160;(<a class="el" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a> + 511)</td></tr>
 <tr class="separator:a15856eca70f27639e38e506ca1e7e378"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e06f5245322597aabf9db0958bd7801" id="r_a1e06f5245322597aabf9db0958bd7801"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e06f5245322597aabf9db0958bd7801">H5FD_CTL_OPC_EXPER_MIN</a></td></tr>
+<tr class="memitem:a1e06f5245322597aabf9db0958bd7801" id="r_a1e06f5245322597aabf9db0958bd7801"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e06f5245322597aabf9db0958bd7801">H5FD_CTL_OPC_EXPER_MIN</a>&#160;&#160;&#160;<a class="el" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a></td></tr>
 <tr class="separator:a1e06f5245322597aabf9db0958bd7801"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ba9e21fe8d56e77e8da8faa337624bd" id="r_a2ba9e21fe8d56e77e8da8faa337624bd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a>&#160;&#160;&#160;512 /* Opcodes below this value are reserved for library use */</td></tr>
+<tr class="memitem:a2ba9e21fe8d56e77e8da8faa337624bd" id="r_a2ba9e21fe8d56e77e8da8faa337624bd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a>&#160;&#160;&#160;512</td></tr>
 <tr class="separator:a2ba9e21fe8d56e77e8da8faa337624bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d29073cf12e48e611a9b222c2cf5fa1" id="r_a3d29073cf12e48e611a9b222c2cf5fa1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3d29073cf12e48e611a9b222c2cf5fa1">H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG</a>&#160;&#160;&#160;0x0002</td></tr>
 <tr class="separator:a3d29073cf12e48e611a9b222c2cf5fa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -693,10 +693,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_CTL_OPC_EXPER_MAX&#160;&#160;&#160;    (<a class="el" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a> + 511) /* Maximum opcode value available for experimental use */</td>
+          <td class="memname">#define H5FD_CTL_OPC_EXPER_MAX&#160;&#160;&#160;(<a class="el" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a> + 511)</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Maximum opcode value available for experimental use </p>
 
 </div>
 </div>
@@ -707,14 +708,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_CTL_OPC_EXPER_MIN</td>
+          <td class="memname">#define H5FD_CTL_OPC_EXPER_MIN&#160;&#160;&#160;<a class="el" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">    <a class="code hl_define" href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a> <span class="comment">/* Minimum opcode value available for experimental use                             \</span></div>
-<div class="line"><span class="comment">                           */</span></div>
-<div class="ttc" id="a_h5_f_dpublic_8h_html_a2ba9e21fe8d56e77e8da8faa337624bd"><div class="ttname"><a href="#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a></div><div class="ttdeci">#define H5FD_CTL_OPC_RESERVED</div><div class="ttdef"><b>Definition</b> H5FDpublic.h:180</div></div>
-</div><!-- fragment -->
+<p>Minimum opcode value available for experimental use </p>
+
 </div>
 </div>
 <a id="a2ba9e21fe8d56e77e8da8faa337624bd" name="a2ba9e21fe8d56e77e8da8faa337624bd"></a>
@@ -724,10 +723,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_CTL_OPC_RESERVED&#160;&#160;&#160;512 /* Opcodes below this value are reserved for library use */</td>
+          <td class="memname">#define H5FD_CTL_OPC_RESERVED&#160;&#160;&#160;512</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Opcodes below this value are reserved for library use </p>
 
 </div>
 </div>
