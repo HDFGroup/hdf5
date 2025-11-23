@@ -899,8 +899,10 @@ if (${HDF_PREFIX}_HAVE_COMPLEX_H)
   HDF_CHECK_TYPE_SIZE ("double _Complex" ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX)
   HDF_CHECK_TYPE_SIZE ("long double _Complex" ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX)
 
-  if (MSVC AND NOT ${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX AND NOT ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX
-      AND NOT ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX)
+  if (MSVC AND 
+      ((NOT ${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX)       OR ${HDF_PREFIX}_SIZEOF__FCOMPLEX) AND 
+      ((NOT ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX)      OR ${HDF_PREFIX}_SIZEOF__DCOMPLEX) AND 
+      ((NOT ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX) OR ${HDF_PREFIX}_SIZEOF__LCOMPLEX))
     # If using MSVC, the _Complex types (if available) are _Fcomplex, _Dcomplex and _Lcomplex.
     # The standard types are checked for first in case MSVC uses them in the future or in case
     # the compiler used is simulating MSVC and uses the standard types.
