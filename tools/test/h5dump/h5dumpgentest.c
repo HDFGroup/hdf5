@@ -6087,15 +6087,23 @@ set_local_myfilter(hid_t dcpl_id, hid_t H5_ATTR_UNUSED tid, hid_t H5_ATTR_UNUSED
 void
 gent_fcontents(void)
 {
-    hid_t                     fid;  /* file id */
-    hid_t                     gid1; /* group ID */
-    hid_t                     tid;  /* datatype ID */
+    hid_t                     fid;     /* file id */
+    hid_t                     gid1;    /* group ID */
+    hid_t                     tid;     /* datatype ID */
+    hid_t                     fapl_id; /* file access property list */
     hsize_t                   dims[1] = {4};
     int                       buf[4]  = {1, 2, 3, 4};
     int H5_ATTR_NDEBUG_UNUSED ret;
 
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    assert(fapl_id >= 0);
+
+    /* reference file has superblock version 0 */
+    ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    assert(ret >= 0);
+
     /* create a file */
-    fid = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(fid >= 0);
 
     write_dset(fid, 1, dims, "dset", H5T_STD_I32BE, H5T_NATIVE_INT, buf);
@@ -6173,10 +6181,13 @@ gent_fcontents(void)
     assert(ret >= 0);
 
     /* create a file for the bootblock test */
-    fid = H5Fcreate(FILE47, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE47, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(fid >= 0);
 
     ret = H5Fclose(fid);
+    assert(ret >= 0);
+
+    ret = H5Pclose(fapl_id);
     assert(ret >= 0);
 }
 
