@@ -1180,7 +1180,7 @@ ADD_H5_TEST (tattrcontents2 RESULT_CODE 0 --enable-error-stack -n 1 --sort_order
 # compact
 ADD_H5_TEST (tcompact RESULT_CODE 0 --enable-error-stack -H -p -d compact TARGET_FILE tfilters.h5)
 # contiguous
-ADD_H5_TEST (tcontiguos RESULT_CODE 0 --enable-error-stack -H -p -d contiguous TARGET_FILE tfilters.h5 APPLY_FILTERS 1)
+ADD_H5_TEST (tcontiguos RESULT_CODE 0 --enable-error-stack -H -p -d contiguous TARGET_FILE tfilters.h5)
 # chunked
 ADD_H5_TEST (tchunked RESULT_CODE 0 --enable-error-stack -H -p -d chunked TARGET_FILE tfilters.h5)
 # external
@@ -1296,7 +1296,7 @@ ADD_H5_TEST (tgrpnullspace RESULT_CODE 0 -p --enable-error-stack TARGET_FILE tgr
 ADD_H5_TEST (zerodim RESULT_CODE 0 --enable-error-stack TARGET_FILE zerodim.h5)
 
 # test for long double (some systems do not have long double)
-ADD_H5_TEST (tfloatsattrs RESULT_CODE 0 -p --format=%.4g --lformat=%.4Lg --width=80 --enable-error-stack TARGET_FILE tfloatsattrs.h5 APPLY_FILTERS 1)
+ADD_H5_TEST (tfloatsattrs RESULT_CODE 0 -p --format=%.4g --lformat=%.4Lg --width=80 --enable-error-stack TARGET_FILE tfloatsattrs.h5)
 ADD_H5_TEST (tldouble RESULT_CODE 0 --enable-error-stack TARGET_FILE tldouble.h5)
 ADD_H5_TEST (tldouble_scalar RESULT_CODE 0 -p --enable-error-stack TARGET_FILE tldouble_scalar.h5)
 
@@ -1340,13 +1340,13 @@ ADD_H5_TEST (tcomplex RESULT_CODE 0 --enable-error-stack -m %.6f -w80 -d ArrayDa
               -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex.h5)
 ADD_H5_TEST (tcomplex_info RESULT_CODE 0 --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex
               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
-              -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex.h5 APPLY_FILTERS 1)
+              -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex.h5)
 ADD_H5_TEST (tcomplex_be RESULT_CODE 0 --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex
               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
               -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex_be.h5)
 ADD_H5_TEST (tcomplex_be_info RESULT_CODE 0 --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex
               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
-              -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex_be.h5 APPLY_FILTERS 1)
+              -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex_be.h5)
 
 # test for vms
 ADD_H5_TEST (tvms RESULT_CODE 0 --enable-error-stack TARGET_FILE tvms.h5)
