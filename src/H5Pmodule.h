@@ -1144,6 +1144,11 @@
  * TAPL isn't supported yet.
  *
  *
+ * \defgroup MCPL Map Creation Properties
+ * \ingroup H5P
+ * Properties for map object creation.
+ *
+ *
  * \defgroup MAPL VOL Data Mapping Properties
  * \ingroup H5P
  * Empty property class.

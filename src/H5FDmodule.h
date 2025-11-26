@@ -205,6 +205,9 @@
  * with different storage mechanisms. VFDs can be selected to optimize performance for specific
  * environments or to enable specialized storage backends.
  *
+ * \defgroup H5VFD Virtual File Driver Features
+ * \ingroup H5FD
+ *
  */
 
 #endif /* H5FDmodule_H */
