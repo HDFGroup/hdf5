@@ -893,16 +893,14 @@ endmacro ()
 message (STATUS "Checking if complex number support is available")
 CHECK_INCLUDE_FILE (complex.h ${HDF_PREFIX}_HAVE_COMPLEX_H)
 if (${HDF_PREFIX}_HAVE_COMPLEX_H)
-  set (H5_HAVE_C99_COMPLEX_NUMBERS 1)
-
   HDF_CHECK_TYPE_SIZE ("float _Complex" ${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX)
   HDF_CHECK_TYPE_SIZE ("double _Complex" ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX)
   HDF_CHECK_TYPE_SIZE ("long double _Complex" ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX)
 
   if (MSVC AND 
-      ((NOT ${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX)       OR ${HDF_PREFIX}_SIZEOF__FCOMPLEX) AND 
-      ((NOT ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX)      OR ${HDF_PREFIX}_SIZEOF__DCOMPLEX) AND 
-      ((NOT ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX) OR ${HDF_PREFIX}_SIZEOF__LCOMPLEX))
+      (NOT ${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX) AND 
+      (NOT ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX) AND 
+      (NOT ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX))
     # If using MSVC, the _Complex types (if available) are _Fcomplex, _Dcomplex and _Lcomplex.
     # The standard types are checked for first in case MSVC uses them in the future or in case
     # the compiler used is simulating MSVC and uses the standard types.
@@ -920,8 +918,8 @@ if (${HDF_PREFIX}_HAVE_COMPLEX_H)
            CACHE INTERNAL "SizeOf for double _Complex" FORCE)
       set (${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX ${${HDF_PREFIX}_SIZEOF__LCOMPLEX}
            CACHE INTERNAL "SizeOf for long double _Complex" FORCE)
-
-      unset (H5_HAVE_C99_COMPLEX_NUMBERS)
+      # Mark that we don't have C99 complex types (we have MSVC complex types instead)
+      set (H5_HAVE_C99_COMPLEX_NUMBERS 0 CACHE INTERNAL "Using MSVC, no C99 complex" FORCE)
     endif ()
   endif ()
 
@@ -936,6 +934,15 @@ if (${HDF_PREFIX}_HAVE_COMPLEX_H)
       HDF_FUNCTION_TEST (HAVE_COMPLEX_NUMBERS)
 
       if (H5_HAVE_COMPLEX_NUMBERS)
+        
+        if (NOT DEFINED H5_HAVE_C99_COMPLEX_NUMBERS)
+          # If complex numbers are supported and the variable `H5_HAVE_C99_COMPLEX_NUMBERS` 
+          # was never set to 0 in the MSVC unique check above (i.e., `NOT DEFINED`), 
+          # it implies standard C99 complex types are available.
+          # Therefore, we force the cache variable `H5_HAVE_C99_COMPLEX_NUMBERS` to 1.
+          set (H5_HAVE_C99_COMPLEX_NUMBERS 1 CACHE INTERNAL "Using C99 complex" FORCE)
+        endif()
+
         if (H5_HAVE_C99_COMPLEX_NUMBERS)
           message (STATUS "Using C99 complex number types")
         else ()
