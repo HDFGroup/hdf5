@@ -85,8 +85,25 @@
  * \li \Bold{MPI-IO Driver}: Enables parallel I/O using MPI-IO for HPC applications. Required for
  *     parallel HDF5 operations. Set with #H5Pset_fapl_mpio.
  *
+ * \li \Bold{Subfiling Driver}: An MPI-based driver that improves parallel I/O performance on shared
+ *     file systems by splitting the logical HDF5 file into multiple subfiles distributed across I/O
+ *     concentrator nodes. Reduces contention and improves scalability for large-scale parallel
+ *     applications. Set with #H5Pset_fapl_subfiling.
+ *
  * \li \Bold{Direct Driver}: Uses direct I/O (O_DIRECT) to bypass OS caching. Can improve performance
  *     for large sequential I/O. Set with #H5Pset_fapl_direct.
+ *
+ * \li \Bold{Onion Driver}: Provides revision control for HDF5 files by storing file modifications
+ *     as separate revisions. Enables tracking changes over time and accessing previous versions.
+ *     Set with #H5Pset_fapl_onion.
+ *
+ * \li \Bold{Splitter Driver}: Writes file operations simultaneously to two different channels using
+ *     different VFDs. Useful for creating redundant copies or logging I/O to separate locations.
+ *     Set with #H5Pset_fapl_splitter.
+ *
+ * \li \Bold{Mirror Driver}: Mirrors all file operations to a remote server in real-time over a
+ *     network connection. Enables remote backup and replication scenarios. Set with
+ *     #H5Pset_fapl_mirror.
  *
  * \li \Bold{ROS3 Driver}: Read-only driver for accessing HDF5 files in S3-compatible object storage.
  *     Set with #H5Pset_fapl_ros3.
@@ -129,6 +146,17 @@
  * \li Provide MPI communicator and info objects
  * \li Coordinate file access across processes
  *
+ * The Subfiling driver builds on top of MPI-IO to provide additional performance benefits for
+ * large-scale parallel applications on shared file systems. It works by:
+ *
+ * \li Distributing the HDF5 file across multiple subfiles
+ * \li Designating I/O concentrator processes (typically one per node)
+ * \li Striping data across subfiles to reduce contention
+ * \li Enabling better parallel I/O scaling on Lustre, GPFS, and similar file systems
+ *
+ * The Subfiling driver is particularly beneficial when running at scale on parallel file systems
+ * where a single shared file can become a bottleneck.
+ *
  * \subsection subsec_vfd_performance Performance Considerations
  *
  * Choosing the right file driver can significantly impact I/O performance:
@@ -137,7 +165,11 @@
  * \li \Bold{Temporary Data}: Core driver provides fastest access by avoiding disk I/O
  * \li \Bold{Large Files}: Family driver can work around file size limitations
  * \li \Bold{Parallel Applications}: MPI-IO driver required for coordinated parallel access
+ * \li \Bold{Large-Scale Parallel}: Subfiling driver can dramatically improve performance on shared
+ *     parallel file systems by reducing metadata contention and enabling better striping
  * \li \Bold{Network Storage}: Consider drivers optimized for network protocols
+ * \li \Bold{Redundancy}: Splitter or Mirror drivers enable real-time backup and replication
+ * \li \Bold{Versioning}: Onion driver enables tracking file revisions for provenance and rollback
  *
  * \subsection subsec_vfd_query Querying File Driver Information
  *
