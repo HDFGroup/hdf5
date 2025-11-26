@@ -79,11 +79,11 @@ jobs:
 
       - name: Run Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "testhdf5-base|dt_arith|H5TEST-dtypes|h5_api_test"
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "dt_arith|h5_api_test"
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Expected to Fail Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "testhdf5-base|dt_arith|H5TEST-dtypes|h5_api_test"
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "dt_arith|h5_api_test"
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
