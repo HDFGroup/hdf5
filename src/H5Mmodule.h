@@ -59,7 +59,8 @@
  *     <li>Create a new map with #H5Mcreate() or #H5Mcreate_anon():
  *         <ul>
  *         <li>#H5Mcreate() creates a map and links it into the file hierarchy with a specified name</li>
- *         <li>#H5Mcreate_anon() creates an anonymous map that must be linked with #H5Olink before closing</li>
+ *         <li>#H5Mcreate_anon() creates an anonymous map that must be linked with #H5Olink before
+ * closing</li>
  *         </ul>
  *     </li>
  *     <li>Specify the key datatype and value datatype during creation - these define how keys and values
