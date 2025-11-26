@@ -198,19 +198,12 @@
 
 /**
  * \defgroup H5FD File Drivers (H5FD)
- * \ingroup H5VFD
  *
  * Use the functions in this module to manage HDF5 Virtual File Drivers (VFDs).
  *
  * Virtual File Drivers (VFDs) provide an abstraction layer for file I/O, enabling HDF5 to work
  * with different storage mechanisms. VFDs can be selected to optimize performance for specific
  * environments or to enable specialized storage backends.
- *
- * \defgroup H5VFD Virtual File Driver Features
- * \ingroup H5FD
- *
- * HDF5 Virtual File Drivers enable flexible file I/O strategies by providing an abstraction
- * layer between the HDF5 library and the underlying storage system.
  *
  */
 
