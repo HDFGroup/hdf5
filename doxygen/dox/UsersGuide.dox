@@ -113,6 +113,15 @@ Navigate back: \ref index "Main"
     </ul>
 \li \ref subsec_group_examples
 
+\ref H5L_UG
+\li \ref subsec_link_intro
+\li \ref subsec_link_types
+\li \ref subsec_link_create
+\li \ref subsec_link_ops
+\li \ref subsec_link_traverse
+\li \ref subsec_link_user
+\li \ref subsec_link_summary
+
 \ref sec_dataset
 \li \ref subsec_dataset_intro
 \li \ref subsec_dataset_function
@@ -236,6 +245,16 @@ Navigate back: \ref index "Main"
 \li \ref subsec_object_refcount
 \li \ref subsec_object_cache
 \li \ref subsec_object_summary
+
+\ref H5I_UG
+\li \ref subsec_identifier_intro
+\li \ref subsec_identifier_types
+\li \ref subsec_identifier_refcount
+\li \ref subsec_identifier_valid
+\li \ref subsec_identifier_query
+\li \ref subsec_identifier_user
+\li \ref subsec_identifier_iteration
+\li \ref subsec_identifier_summary
 
 \ref sec_error
 \li \ref subsec_error_intro
@@ -367,7 +386,15 @@ Navigate back: \ref index "Main"
 
 \ref sec_reference
 
-\ref sec_filter_plugins
+\ref H5Z_UG
+\li \ref subsec_filter_intro
+\li \ref subsec_filter_builtin
+\li \ref subsec_filter_usage
+\li \ref subsec_filter_pipeline
+\li \ref subsec_filter_custom
+\li \ref subsec_filter_query
+\li \ref subsec_filter_plugins
+\li \ref subsec_filter_summary
 
 \section sec_hl HDF5 High Level APIs
 \li \ref H5DO_UG
