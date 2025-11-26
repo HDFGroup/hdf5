@@ -108,6 +108,35 @@ main(void)
 #endif
 #endif
 
+#ifdef HAVE_C99_COMPLEX_SYNTAX
+/* Test specifically for C99 complex syntax support */
+#include <complex.h>
+
+int
+main(void)
+{
+    /* Try to use C99 complex types directly */
+    float _Complex fc = 1.0f + 2.0f * I;
+    double _Complex dc = 3.0 + 4.0 * I;
+    long double _Complex ldc = 5.0L + 6.0L * I;
+
+    /* Test arithmetic operations */
+    fc = fc + (1.0f + 1.0f * I);
+    dc = dc * (2.0 + 0.0 * I);
+    ldc = ldc - (1.0L + 1.0L * I);
+
+    /* Test standard functions */
+    float r1 = crealf(fc);
+    float i1 = cimagf(fc);
+    double r2 = creal(dc);
+    double i2 = cimag(dc);
+    long double r3 = creall(ldc);
+    long double i3 = cimagl(ldc);
+
+    return ((r1 > 0) && (i1 > 0) && (r2 > 0) && (i2 > 0) && (r3 > 0) && (i3 > 0)) ? 0 : 1;
+}
+#endif
+
 #ifdef HAVE_COMPLEX_NUMBERS
 #include <complex.h>
 

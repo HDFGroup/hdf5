@@ -939,14 +939,19 @@ if (${HDF_PREFIX}_HAVE_COMPLEX_H)
       HDF_FUNCTION_TEST (HAVE_COMPLEX_NUMBERS)
 
       if (H5_HAVE_COMPLEX_NUMBERS)
-        # Determine if we're using C99 or MSVC types based on which types were detected
-        # This is deterministic: if MSVC-specific type sizes exist, we're using MSVC types
-        if (${HDF_PREFIX}_SIZEOF__FCOMPLEX)
-          set (H5_HAVE_C99_COMPLEX_NUMBERS 0)
-          message (STATUS "Using MSVC complex number types")
-        else ()
+        # Test if we can actually use C99 complex syntax
+        # This test explicitly tries float _Complex, double _Complex, and long double _Complex
+        # with C99 operations. If this passes, we prefer C99 regardless of whether MSVC
+        # types also exist (for forward compatibility if MSVC adds C99 support in the future)
+        HDF_FUNCTION_TEST (HAVE_C99_COMPLEX_SYNTAX)
+
+        if (H5_HAVE_C99_COMPLEX_SYNTAX)
           set (H5_HAVE_C99_COMPLEX_NUMBERS 1)
           message (STATUS "Using C99 complex number types")
+        else ()
+          # C99 syntax test failed, so we must be using MSVC types
+          set (H5_HAVE_C99_COMPLEX_NUMBERS 0)
+          message (STATUS "Using MSVC complex number types")
         endif ()
       else ()
         message (STATUS "Complex number support has been disabled since a simple test program couldn't be compiled and linked")
