@@ -85,7 +85,7 @@
  * \li \Bold{MPI-IO Driver}: Enables parallel I/O using MPI-IO for HPC applications. Required for
  *     parallel HDF5 operations. Set with #H5Pset_fapl_mpio.
  *
- * \li \Bold{Subfiling Driver}: An parallel I/O driver that improves parallel I/O performance on parallel
+ * \li \Bold{Subfiling Driver}: A parallel I/O driver that improves parallel I/O performance on parallel
  *     file systems by splitting the logical HDF5 file into multiple subfiles distributed across I/O
  *     concentrator nodes. Reduces contention and improves scalability for large-scale parallel
  *     applications. Set with #H5Pset_fapl_subfiling.
@@ -146,7 +146,7 @@
  * \li Provide MPI communicator and info objects
  * \li Coordinate file access across processes
  *
- * The Subfiling driver provide additional performance benefits for
+ * The Subfiling driver provides additional performance benefits for
  * large-scale parallel applications on parallel file systems. It works by:
  *
  * \li Distributing the HDF5 file across multiple subfiles
