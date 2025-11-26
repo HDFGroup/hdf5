@@ -39,6 +39,8 @@
  * file access operations and forwards them to a specific driver implementation, allowing HDF5 files
  * to be stored in various ways beyond simple POSIX files.
  *
+ * @see H5FD Reference Manual
+ *
  * \subsection subsec_vfd_purpose Purpose and Benefits
  *
  * The Virtual File Driver interface serves several important purposes:

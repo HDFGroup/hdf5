@@ -228,6 +228,15 @@ Navigate back: \ref index "Main"
     </ul>
 \li \ref subsec_attribute_special
 
+\ref H5O_UG
+\li \ref subsec_object_intro
+\li \ref subsec_object_ops
+\li \ref subsec_object_visit
+\li \ref subsec_object_comments
+\li \ref subsec_object_refcount
+\li \ref subsec_object_cache
+\li \ref subsec_object_summary
+
 \ref sec_error
 \li \ref subsec_error_intro
 \li \ref subsec_error_program
@@ -265,6 +274,17 @@ Navigate back: \ref index "Main"
 \li \ref subsec_plist_H5P
 \li \ref subsec_plist_resources
 \li \ref subsec_plist_notes
+
+\ref H5FD_UG
+\li \ref subsec_vfd_intro
+\li \ref subsec_vfd_purpose
+\li \ref subsec_vfd_drivers
+\li \ref subsec_vfd_selection
+\li \ref subsec_vfd_custom
+\li \ref subsec_vfd_parallel
+\li \ref subsec_vfd_performance
+\li \ref subsec_vfd_query
+\li \ref subsec_vfd_summary
 
 \ref sec_vol
 \li \ref subsec_vol_intro
@@ -337,7 +357,13 @@ Navigate back: \ref index "Main"
 \ref sec_async
 \li \ref subsec_async_intro
 
-\ref sec_map
+\ref H5M_UG
+\li \ref subsec_map_intro
+\li \ref subsec_map_lifecycle
+\li \ref subsec_map_plist
+\li \ref subsec_map_datatypes
+\li \ref subsec_map_example
+\li \ref subsec_map_notes
 
 \ref sec_reference
 

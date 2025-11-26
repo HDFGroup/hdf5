@@ -38,6 +38,8 @@
  * While specific object types (groups, datasets, datatypes) have their own interfaces (\ref H5G,
  * \ref H5D, \ref H5T), the H5O interface enables operations that apply to all object types uniformly.
  *
+ * @see H5O Reference Manual
+ *
  * \subsection subsec_object_ops Object Operations
  *
  * The H5O interface provides several categories of operations:
