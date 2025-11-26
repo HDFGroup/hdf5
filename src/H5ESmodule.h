@@ -33,7 +33,7 @@
  * \section sec_async The HDF5 Event Set Interface
  * \subsection subsec_async_overview Overview
  *
- * \section subsec_async_intro Introduction
+ * \subsection subsec_async_intro Introduction
  * HDF5 provides asynchronous APIs for the HDF5 VOL connectors that support asynchronous HDF5
  * operations using the HDF5 Event Set (H5ES) API. This allows I/O to proceed in the background
  * while the application is performing other tasks.
