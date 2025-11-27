@@ -31,7 +31,6 @@
  * <hr>
  *
  * \section sec_async The HDF5 Event Set Interface
- * \subsection subsec_async_overview Overview
  *
  * \subsection subsec_async_intro Introduction
  * HDF5 provides asynchronous APIs for the HDF5 VOL connectors that support asynchronous HDF5

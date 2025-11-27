@@ -649,6 +649,10 @@
  *
  * <h3>VOL Connector Life Cycle</h3>
  *
+ * VOL connectors can be implemented as dynamically loaded plugins, statically linked libraries,
+ * or built into the HDF5 library itself. Throughout this documentation, "VOL connector" refers
+ * to the connector implementation regardless of how it is deployed.
+ *
  * VOL connectors follow a well-defined life cycle from loading to cleanup:
  *
  * <ol>
@@ -657,8 +661,8 @@
  *     <li>For dynamically loaded plugins: The library searches the plugin path
  *         (default: /usr/local/hdf5/lib/plugin on POSIX, %ALLUSERSPROFILE%/hdf5/lib/plugin on Windows)</li>
  *     <li>Plugin path can be overridden using the #HDF5_PLUGIN_PATH environment variable</li>
- *     <li>For statically linked connectors: The connector is available immediately when the library
- *loads</li> <li>For internal connectors: Built into the HDF5 library (e.g., the native VOL connector)</li>
+ *     <li>For statically linked connectors: The connector is available immediately when the library loads</li>
+ *     <li>For internal connectors: Built into the HDF5 library (e.g., the native VOL connector)</li>
  *     </ul>
  * </li>
  *
@@ -685,8 +689,8 @@
  *         <li>#HDF5_VOL_CONNECTOR environment variable - Sets the default connector for all file opens</li>
  *         </ul>
  *     </li>
- *     <li>Configuration may include connector-specific parameters passed via info structs or parameter
- *strings</li> <li>Parameter strings can be parsed using #H5VLconnector_str_to_info()</li>
+ *     <li>Configuration may include connector-specific parameters passed via info structs or parameter strings</li>
+ *     <li>Parameter strings can be parsed using #H5VLconnector_str_to_info()</li>
  *     </ul>
  * </li>
  *
@@ -722,10 +726,10 @@
  *     </li>
  *     <li>The library maintains reference counts on connector IDs and will not actually close them until
  *         the reference count reaches zero</li>
- *     <li>It is safe to close connector IDs after use, even while files opened with that connector remain
- *open</li> <li>The library automatically unloads all connectors when it shuts down</li> <li>The native VOL
- *connector cannot be unloaded and is always available</li> <li>Connector-specific info structures should be
- *freed using #H5VLfree_connector_info()</li>
+ *     <li>It is safe to close connector IDs after use, even while files opened with that connector remain open</li>
+ *     <li>The library automatically unloads all connectors when it shuts down</li>
+ *     <li>The native VOL connector cannot be unloaded and is always available</li>
+ *     <li>Connector-specific info structures should be freed using #H5VLfree_connector_info()</li>
  *     </ul>
  * </li>
  * </ol>

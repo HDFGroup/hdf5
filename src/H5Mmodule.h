@@ -187,16 +187,21 @@
  *
  * \subsection subsec_map_example Example Usage
  *
- * The following example demonstrates creating a map, adding key-value pairs, and retrieving values:
+ * The following example demonstrates creating a map, adding key-value pairs, and retrieving values.
+ * Note that this example requires a VOL connector with map support (e.g., DAOS).
+ * See \ref H5VL_UG for VOL connector configuration details.
  *
  * \code
- * hid_t file_id, map_id, vls_type_id;
+ * hid_t file_id, map_id, vls_type_id, fapl_id;
  * const char *names[2] = {"Alice", "Bob"};
  * uint64_t IDs[2] = {25385486, 34873275};
  * uint64_t val_out;
+ * herr_t ret;
  *
- * // Setup VOL connector that supports maps (e.g., DAOS)
- * // ...
+ * // Setup file access property list with VOL connector that supports maps
+ * // (Configuration depends on specific VOL connector - see connector documentation)
+ * fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+ * // ... configure VOL connector in fapl_id ...
  *
  * // Create variable-length string datatype for keys
  * vls_type_id = H5Tcopy(H5T_C_S1);
@@ -214,14 +219,27 @@
  * H5Mput(map_id, vls_type_id, &names[1], H5T_NATIVE_UINT64, &IDs[1], H5P_DEFAULT);
  *
  * // Retrieve a value by key
- * H5Mget(map_id, vls_type_id, &names[0], H5T_NATIVE_UINT64, &val_out, H5P_DEFAULT);
- * if(val_out != IDs[0])
- *     ERROR;
+ * ret = H5Mget(map_id, vls_type_id, &names[0], H5T_NATIVE_UINT64, &val_out, H5P_DEFAULT);
+ * if(ret < 0 || val_out != IDs[0]) {
+ *     fprintf(stderr, "Failed to retrieve correct value from map\n");
+ *     goto error;
+ * }
  *
  * // Close map and other objects
  * H5Mclose(map_id);
  * H5Tclose(vls_type_id);
+ * H5Pclose(fapl_id);
  * H5Fclose(file_id);
+ * return 0;
+ *
+ * error:
+ *     H5E_BEGIN_TRY {
+ *         H5Mclose(map_id);
+ *         H5Tclose(vls_type_id);
+ *         H5Pclose(fapl_id);
+ *         H5Fclose(file_id);
+ *     } H5E_END_TRY;
+ *     return -1;
  * \endcode
  *
  * \subsection subsec_map_notes Important Notes
@@ -275,24 +293,32 @@
  *
  * \par Example:
  * \code
+ * // NOTE: This example requires a VOL connector with map support (e.g., DAOS)
  * hid_t file_id, fapl_id, map_id, vls_type_id;
- * const char *names[2] = ["Alice", "Bob"];
- * uint64_t IDs[2] = [25385486, 34873275];
+ * const char *names[2] = {"Alice", "Bob"};
+ * uint64_t IDs[2] = {25385486, 34873275};
  * uint64_t val_out;
+ * herr_t ret;
  *
- * <HDF5 VOL setup code ....>
+ * // Setup file access property list with VOL connector that supports maps
+ * fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+ * // ... configure VOL connector in fapl_id (see connector documentation) ...
  *
  * vls_type_id = H5Tcopy(H5T_C_S1);
  * H5Tset_size(vls_type_id, H5T_VARIABLE);
  * file_id = H5Fcreate("file.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
- * map_id = H5Mcreate(file_id, "map", vls_type_id, H5T_NATIVE_UINT64, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ * map_id = H5Mcreate(file_id, "map", vls_type_id, H5T_NATIVE_UINT64,
+ *                    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  * H5Mput(map_id, vls_type_id, &names[0], H5T_NATIVE_UINT64, &IDs[0], H5P_DEFAULT);
  * H5Mput(map_id, vls_type_id, &names[1], H5T_NATIVE_UINT64, &IDs[1], H5P_DEFAULT);
- * H5Mget(map_id, vls_type_id, &names[0], H5T_NATIVE_UINT64, &val_out, H5P_DEFAULT);
- * if(val_out != IDs[0])
- *   ERROR;
+ * ret = H5Mget(map_id, vls_type_id, &names[0], H5T_NATIVE_UINT64, &val_out, H5P_DEFAULT);
+ * if(ret < 0 || val_out != IDs[0]) {
+ *     fprintf(stderr, "Map retrieval failed\n");
+ *     // Handle error...
+ * }
  * H5Mclose(map_id);
  * H5Tclose(vls_type_id);
+ * H5Pclose(fapl_id);
  * H5Fclose(file_id);
  * \endcode
  *

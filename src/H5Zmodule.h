@@ -38,9 +38,9 @@
  * dataset data during I/O operations. Filters can perform data compression, error checking,
  * data transformation, and other custom operations on dataset chunks.
  *
- * Filters operate on chunked datasets only and are applied independently to each chunk.
- * Multiple filters can be chained together in a pipeline, where the output of one filter
- * becomes the input to the next.
+ * Filters operate on chunked datasets only (see \ref subsec_dataset_filters for details on
+ * dataset chunking) and are applied independently to each chunk. Multiple filters can be
+ * chained together in a pipeline, where the output of one filter becomes the input to the next.
  *
  * \subsection subsec_filter_builtin Built-in Filters
  *

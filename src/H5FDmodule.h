@@ -137,9 +137,9 @@
  *
  * \subsection subsec_vfd_parallel Parallel File Drivers
  *
- * For parallel HDF5 applications, the MPI-IO file driver is required. This driver coordinates
- * file access across multiple MPI processes, enabling collective I/O operations and preventing
- * conflicts. Parallel applications must:
+ * For parallel HDF5 applications, the MPI-IO file driver is required (see \ref sec_pmode for
+ * details on parallel HDF5 programming). This driver coordinates file access across multiple
+ * MPI processes, enabling collective I/O operations and preventing conflicts. Parallel applications must:
  *
  * \li Build HDF5 with parallel support enabled
  * \li Use the MPI-IO file driver via #H5Pset_fapl_mpio

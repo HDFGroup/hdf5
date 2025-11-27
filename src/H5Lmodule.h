@@ -73,9 +73,10 @@
  * The H5L interface includes powerful traversal functions that can iterate over all links
  * in a group or recursively visit all links in a group hierarchy:
  *
- * \li #H5Literate iterates over links in a group
- * \li #H5Lvisit recursively visits all links in a group and its subgroups
- * \li #H5Literate_by_name and #H5Lvisit_by_name provide similar functionality with name-based access
+ * \li #H5Literate iterates over links in a group using a group identifier
+ * \li #H5Lvisit recursively visits all links in a group and its subgroups using a group identifier
+ * \li #H5Literate_by_name and #H5Lvisit_by_name provide the same functionality but accept a
+ *     location identifier and group name, allowing traversal without first opening the group
  *
  * These functions accept callbacks that are invoked for each link, enabling custom processing.
  *

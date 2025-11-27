@@ -77,8 +77,8 @@
  *
  * \subsection subsec_object_refcount Reference Counting
  *
- * HDF5 uses reference counting to manage object lifetimes. Objects are deleted when their
- * reference count reaches zero:
+ * HDF5 uses reference counting to manage object lifetimes. The library automatically
+ * deletes objects when their reference count reaches zero:
  *
  * \li #H5Oincr_refcount manually increments an object's reference count
  * \li #H5Odecr_refcount manually decrements an object's reference count
