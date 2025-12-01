@@ -380,8 +380,19 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
-        run: cpack -C ${{ inputs.build_mode }} -V
+        run: |
+          # Clean any stale mounts
+          for vol in /Volumes/HDF5*; do
+            [ -d "$vol" ] && hdiutil detach "$vol" -force || true
+          done
+
+          # Disable indexing
+          sudo mdutil -i off / || true
+
+          # Run cpack with retry
+          cpack -C ${{ inputs.build_mode }} -V || (sleep 5 && cpack -C ${{ inputs.build_mode }} -V)
         working-directory: ${{ runner.workspace }}/build
+        shell: bash
 
       - name: List files in the space
         run: |
