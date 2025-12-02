@@ -580,4 +580,90 @@ public class TestH5T {
                 }
         }
     }
+
+    @Test
+    public void testH5Tfloat16_dataset()
+    {
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long[] dims = {4, 4};
+
+        try {
+            // Create a simple dataspace
+            dataspace_id = H5.H5Screate_simple(2, dims, null);
+            assertTrue("testH5Tfloat16_dataset:H5Screate_simple", dataspace_id >= 0);
+
+            // Create a dataset with H5T_NATIVE_FLOAT16 datatype
+            dataset_id = H5.H5Dcreate(H5fid, "float16_dataset",
+                                      HDF5Constants.H5T_NATIVE_FLOAT16,
+                                      dataspace_id,
+                                      HDF5Constants.H5P_DEFAULT,
+                                      HDF5Constants.H5P_DEFAULT,
+                                      HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Tfloat16_dataset:H5Dcreate", dataset_id >= 0);
+
+            // Get the dataset type
+            long dtype_id = H5.H5Dget_type(dataset_id);
+            assertTrue("testH5Tfloat16_dataset:H5Dget_type", dtype_id >= 0);
+
+            // Verify it's a float type with size 2
+            int type_class = H5.H5Tget_class(dtype_id);
+            assertTrue("testH5Tfloat16_dataset: type should be H5T_FLOAT",
+                      type_class == HDF5Constants.H5T_FLOAT);
+
+            long size = H5.H5Tget_size(dtype_id);
+            assertTrue("testH5Tfloat16_dataset: size should be 2", size == 2);
+
+            // Close the datatype
+            if (dtype_id >= 0)
+                H5.H5Tclose(dtype_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Tfloat16_dataset: " + err);
+        }
+        finally {
+            if (dataset_id >= 0)
+                try {
+                    H5.H5Dclose(dataset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dataspace_id >= 0)
+                try {
+                    H5.H5Sclose(dataspace_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    @Test
+    public void testH5Tfloat16_properties()
+    {
+        try {
+            // Verify H5T_NATIVE_FLOAT16 is valid
+            assertTrue("H5T_NATIVE_FLOAT16 should be valid",
+                      HDF5Constants.H5T_NATIVE_FLOAT16 >= 0);
+
+            // Get the type class
+            int type_class = H5.H5Tget_class(HDF5Constants.H5T_NATIVE_FLOAT16);
+            assertTrue("H5T_NATIVE_FLOAT16 should be H5T_FLOAT class",
+                      type_class == HDF5Constants.H5T_FLOAT);
+
+            // Get the size
+            long size = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT16);
+            assertTrue("H5T_NATIVE_FLOAT16 size should be 2", size == 2);
+
+            // Get the byte order
+            int order = H5.H5Tget_order(HDF5Constants.H5T_NATIVE_FLOAT16);
+            assertTrue("H5T_NATIVE_FLOAT16 should have valid byte order",
+                      order == HDF5Constants.H5T_ORDER_LE ||
+                      order == HDF5Constants.H5T_ORDER_BE);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Tfloat16_properties: " + err);
+        }
+    }
 }
