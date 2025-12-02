@@ -306,17 +306,8 @@ jobs:
         id: buildhdf5
         shell: bash
         run: |
-          # macOS: Clean any stale disk image mounts before running CPack
+          # macOS: Disable Spotlight indexing to prevent file locking during CPack
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            echo "=== Cleaning stale HDF5 disk image mounts on macOS ==="
-            for vol in /Volumes/HDF5*; do
-              if [ -d "$vol" ]; then
-                echo "Detaching stale mount: $vol"
-                hdiutil detach "$vol" -force || true
-              fi
-            done
-
-            # Disable Spotlight indexing to prevent file locking during CPack
             echo "Disabling Spotlight indexing temporarily"
             sudo mdutil -i off / || true
           fi
@@ -327,19 +318,8 @@ jobs:
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             echo "Running CMake workflow with macOS retry logic..."
             if ! cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh; then
-              echo "⚠️ First attempt failed, cleaning up and retrying in 5 seconds..."
+              echo "⚠️ First attempt failed, retrying in 5 seconds..."
               sleep 5
-
-              # Clean up again before retry
-              for vol in /Volumes/HDF5*; do
-                if [ -d "$vol" ]; then
-                  echo "Detaching stale mount: $vol"
-                  hdiutil detach "$vol" -force || true
-                fi
-              done
-
-              # Retry the workflow
-              echo "Retrying CMake workflow..."
               cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
             fi
           else

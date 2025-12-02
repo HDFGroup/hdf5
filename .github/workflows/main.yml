@@ -310,12 +310,7 @@ jobs:
       - name: Run Package
         run: |
           if [[ "${{ matrix.ostype }}" == "macos" ]]; then
-            # Clean any stale mounts
-            for vol in /Volumes/HDF5*; do
-              [ -d "$vol" ] && hdiutil detach "$vol" -force || true
-            done
-
-            # Disable indexing
+            # Disable indexing to prevent file locking during CPack
             sudo mdutil -i off / || true
 
             # Run cpack with retry
