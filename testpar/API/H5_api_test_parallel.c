@@ -296,7 +296,9 @@ main(int argc, char **argv)
     snprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
              PARALLEL_TEST_FILE_NAME);
 
-    if (NULL == (vol_connector_string = getenv(HDF5_VOL_CONNECTOR))) {
+    vol_connector_string = getenv(HDF5_VOL_CONNECTOR);
+
+    if (!vol_connector_string || *vol_connector_string == '\0') {
         if (MAINPROCESS)
             printf("No VOL connector selected; using native VOL connector\n");
         vol_connector_name = "native";

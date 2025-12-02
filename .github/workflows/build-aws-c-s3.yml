@@ -52,14 +52,14 @@ jobs:
     steps:
       - name: Get aws-c-s3 sources (main)
         if: inputs.aws_c_s3_tag == ''
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-s3
           path: aws-c-s3
 
       - name: Get aws-c-s3 sources (tag)
         if: inputs.aws_c_s3_tag != ''
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-s3
           path: aws-c-s3
@@ -85,70 +85,70 @@ jobs:
 
       - name: Get aws-lc sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: aws/aws-lc
           path: aws-lc
 
       - name: Get s2n-tls sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: aws/s2n-tls
           path: s2n-tls
 
       - name: Get aws-c-common sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-common
           path: aws-c-common
 
       - name: Get aws-checksums sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-checksums
           path: aws-checksums
 
       - name: Get aws-c-cal sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-cal
           path: aws-c-cal
 
       - name: Get aws-c-io sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-io
           path: aws-c-io
 
       - name: Get aws-c-compression sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-compression
           path: aws-c-compression
 
       - name: Get aws-c-http sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-http
           path: aws-c-http
 
       - name: Get aws-c-sdkutils sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-sdkutils
           path: aws-c-sdkutils
 
       - name: Get aws-c-auth sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: awslabs/aws-c-auth
           path: aws-c-auth

@@ -35,12 +35,12 @@ jobs:
           sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           path: hdf5
 
       - name: Checkout Argobots
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: pmodels/argobots
           path: abt

@@ -42,7 +42,7 @@ jobs:
           sudo apt-get install libcurl4-openssl-dev libyajl-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           path: hdf5
 
@@ -82,7 +82,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Checkout HSDS
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: HDFGroup/hsds
           path: ${{github.workspace}}/hsds
