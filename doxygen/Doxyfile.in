@@ -810,7 +810,7 @@ EXCLUDE_PATTERNS       = */fortran/test/* \
                          */sanitizer/* \
                          */CONTRIBUTING.md \
                          */CHANGELOG.md \
-                         */HISTORY-2.X.md
+                         */HISTORY-*.md
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
