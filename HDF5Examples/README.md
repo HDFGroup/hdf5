@@ -73,7 +73,7 @@ Periodically development code snapshots are provided at the following URL:
 
 Source packages for current and previous releases are located at:
 
-   hdf5 2.0.0 release:
+   HDF5 2.0.0 release:
    [hdf5-2.0.0.tar.gz](https://github.com/HDFGroup/hdf5/releases/download/2.0.0/hdf5-2.0.0.tar.gz)
    or [hdf5-2.0.0.zip](https://github.com/HDFGroup/hdf5/releases/download/2.0.0/hdf5-2.0.0.zip),
    or [browse release files](https://github.com/HDFGroup/hdf5/releases).
