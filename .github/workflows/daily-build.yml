@@ -36,7 +36,7 @@ jobs:
       run-ignore: ${{ steps.getinputs.outputs.INPUTS_IGNORE }}
 
     steps:
-    - uses: actions/checkout@v5.0.0
+    - uses: actions/checkout@v6.0.0
 
     - name: Get hdf5 release base name
       uses: dsaltares/fetch-gh-release-asset@master
