@@ -74,16 +74,16 @@ jobs:
 
       - name: Build
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 2 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "dt_arith|h5_api_test"
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "dt_arith"
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Expected to Fail Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "dt_arith|h5_api_test"
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "dt_arith"
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
