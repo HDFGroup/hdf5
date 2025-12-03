@@ -42,7 +42,9 @@ namespace H5 {
 //--------------------------------------------------------------------------
 // Function:    H5Location default constructor (protected)
 //--------------------------------------------------------------------------
-H5Location::H5Location() : IdComponent() { }
+H5Location::H5Location() : IdComponent()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
