@@ -647,7 +647,7 @@ H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 ///\brief       Creates a new group at this location, which can be a file,
 ///             group, dataset, attribute, or named datatype.
 ///\param       name - IN: Name of the group to create
-///\param       lcpl - IN: Link creation properly list
+///\param       lcpl - IN: Link creation property list
 ///\return      Group instance
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\par Description
@@ -795,9 +795,9 @@ H5Location::openGroup(const H5std_string &name) const
 ///\param       name       - IN: Name of the dataset to create
 ///\param       data_type  - IN: Datatype of the dataset
 ///\param       data_space - IN: Dataspace for the dataset
-///\param       dcpl       - IN: Dataset creation properly list
-///\param       lcpl       - IN: Link creation properly list
-///\param       dapl       - IN: Dataset access properly list
+///\param       dcpl       - IN: Dataset creation property list
+///\param       lcpl       - IN: Link creation property list
+///\param       dapl       - IN: Dataset access property list
 ///\return      DataSet instance
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 //--------------------------------------------------------------------------
@@ -844,7 +844,7 @@ H5Location::createDataSet(const H5std_string &name, const DataType &data_type, c
 // Function:    H5Location::openDataSet
 ///\brief       Opens an existing dataset at this location.
 ///\param       name - IN: Name of the dataset to open
-///\param       dapl - IN: Dataset access properly list
+///\param       dapl - IN: Dataset access property list
 ///\return      DataSet instance
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 //--------------------------------------------------------------------------
