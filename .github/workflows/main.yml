@@ -197,7 +197,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
 
       - name: Setup jextract (FFM builds only)
         if: ${{ inputs.force_java_implementation == 'ffm' }}
@@ -308,8 +308,18 @@ jobs:
         if: ${{ matrix.run_tests }}
 
       - name: Run Package
-        run: cpack -C ${{ inputs.build_mode }} -V
+        run: |
+          if [[ "${{ matrix.ostype }}" == "macos" ]]; then
+            # Disable indexing to prevent file locking during CPack
+            sudo mdutil -i off / || true
+
+            # Run cpack with retry
+            cpack -C ${{ inputs.build_mode }} -V || (sleep 5 && cpack -C ${{ inputs.build_mode }} -V)
+          else
+            cpack -C ${{ inputs.build_mode }} -V
+          fi
         working-directory: ${{ runner.workspace }}/build
+        shell: bash
 #        if: ${{ (matrix.ostype != 'macos') && (inputs.build_mode != 'Debug') }}
 
 #      - name: Run Package (Mac_latest)

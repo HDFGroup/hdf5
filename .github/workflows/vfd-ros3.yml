@@ -126,7 +126,7 @@ jobs:
           echo "CC=cl.exe" >> $GITHUB_ENV
 
       - name: Get HDF5 sources
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
 
       - name: Setup jextract (FFM builds only)
         if: ${{ inputs.force_java_implementation == 'ffm' }}
@@ -288,7 +288,7 @@ jobs:
           echo "CC=cl.exe" >> $GITHUB_ENV
 
       - name: Get HDF5 sources
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
 
       - name: Setup jextract (FFM builds only)
         if: ${{ inputs.force_java_implementation == 'ffm' }}

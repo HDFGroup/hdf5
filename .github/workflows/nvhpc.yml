@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Get Sources
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@v1.3.1

@@ -60,7 +60,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
 
       # CONFIGURE
       - name: Configure
@@ -175,7 +175,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
 
       # CONFIGURE
       - name: Configure
@@ -295,7 +295,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
 
       # CONFIGURE
       - name: Configure
@@ -380,8 +380,14 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
-        run: cpack -C ${{ inputs.build_mode }} -V
+        run: |
+          # Disable indexing to prevent file locking during CPack
+          sudo mdutil -i off / || true
+
+          # Run cpack with retry
+          cpack -C ${{ inputs.build_mode }} -V || (sleep 5 && cpack -C ${{ inputs.build_mode }} -V)
         working-directory: ${{ runner.workspace }}/build
+        shell: bash
 
       - name: List files in the space
         run: |

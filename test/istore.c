@@ -38,8 +38,7 @@ static const char *FILENAME[] = {"istore", NULL};
 #define TEST_CHUNK_SIZE  50
 #define TEST_SPARSE_SIZE 1000000
 
-hsize_t chunk_dims[H5O_LAYOUT_NDIMS];
-hsize_t zero[H5O_LAYOUT_NDIMS];
+static hsize_t chunk_dims[H5O_LAYOUT_NDIMS];
 
 /*-------------------------------------------------------------------------
  * Function:    is_sparse

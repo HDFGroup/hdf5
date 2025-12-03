@@ -38,7 +38,7 @@ jobs:
         mpi: [ 'msmpi', 'intelmpi']
     name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v6.0.0
 
       - name: Install Dependencies (Windows)
         run: choco install ninja
@@ -287,7 +287,7 @@ jobs:
         mpi: [ 'mpich', 'openmpi']
     name: "Parallel ${{ matrix.mpi }} macos-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v6.0.0
 
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja

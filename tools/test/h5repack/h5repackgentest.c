@@ -5781,6 +5781,7 @@ gen_filespaces(void)
 {
     hid_t                 fid  = H5I_INVALID_HID; /* File ID */
     hid_t                 fcpl = H5I_INVALID_HID; /* File creation property list */
+    hid_t                 fapl = H5I_INVALID_HID; /* File access property list */
     hid_t                 did  = H5I_INVALID_HID; /* Dataset ID */
     hid_t                 sid  = H5I_INVALID_HID; /* Dataspace ID */
     hsize_t               dim[1];                 /* Dimension sizes */
@@ -5801,11 +5802,17 @@ gen_filespaces(void)
             if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
                 goto error;
 
+            if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+                goto error;
+
+            if ((H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST)) < 0)
+                goto error;
+
             if (H5Pset_file_space_strategy(fcpl, fs_strategy, fs_persist, (hsize_t)1) < 0)
                 goto error;
 
             /* Create the file with the file space info */
-            if ((fid = H5Fcreate(FILENAMES[j], H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+            if ((fid = H5Fcreate(FILENAMES[j], H5F_ACC_TRUNC, fcpl, fapl)) < 0)
                 goto error;
 
             /* Create the dataset */
@@ -5832,6 +5839,8 @@ gen_filespaces(void)
                 goto error;
             if (H5Pclose(fcpl) < 0)
                 goto error;
+            if (H5Pclose(fapl) < 0)
+                goto error;
             ++j;
         }
     }
@@ -5845,6 +5854,7 @@ error:
         H5Sclose(sid);
         H5Sclose(did);
         H5Pclose(fcpl);
+        H5Pclose(fapl);
         H5Fclose(fid);
     }
     H5E_END_TRY

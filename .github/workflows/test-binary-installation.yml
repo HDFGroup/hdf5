@@ -71,7 +71,7 @@ jobs:
       inputs.java_implementation == 'jni'
     steps:
       - name: Checkout HDF5Examples
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: HDFGroup/HDF5Examples
           path: HDF5Examples
@@ -266,7 +266,7 @@ jobs:
       inputs.java_implementation == 'ffm'
     steps:
       - name: Checkout HDF5Examples
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: HDFGroup/HDF5Examples
           path: HDF5Examples
