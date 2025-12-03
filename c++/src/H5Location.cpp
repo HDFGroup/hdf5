@@ -1546,11 +1546,14 @@ H5Location::getObjinfo(const char *grp_name, H5_index_t idx_type, H5_iter_order_
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
-///\param       name    - IN: Name of the object to be queried - \c H5std_string
-///\param       objinfo - OUT: Struct containing the object info
-///\param       fields  - IN: Indicates a group of information to be retrieved
+///\param       grp_name - IN: Group name where the object belongs - \c H5std_string
+///\param       idx_type - IN: Type of index
+///\param       order    - IN: Order to traverse
+///\param       idx      - IN: Object position
+///\param       objinfo  - OUT: Struct containing the object info
+///\param       fields   - IN: Indicates a group of information to be retrieved
 ///                           - default to H5O_INFO_BASIC
-///\param       lapl - IN: Link access property list
+///\param       lapl     - IN: Link access property list
 //--------------------------------------------------------------------------
 void
 H5Location::getObjinfo(const H5std_string &grp_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t idx,

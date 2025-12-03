@@ -600,7 +600,6 @@ DSetCreatPropList::setAllocTime(H5D_alloc_time_t alloc_time) const
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList::setFillTime
 ///\brief       Sets fill value writing time for dataset.
-///\return      Fill value writing time
 ///\exception   H5::PropListIException
 ///\par Description
 ///             Valid values for fill value writing time include

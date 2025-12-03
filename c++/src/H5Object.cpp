@@ -262,13 +262,14 @@ H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
 ///             \li \c H5O_INFO_TIME       atime, mtime, ctime, and btime fields
 ///             \li \c H5O_INFO_NUM_ATTRS  num_attrs field
 ///             \li \c H5O_INFO_ALL        H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS
-///\return
-///             \li On success:
-///                 \li the return value of the first operator that returns a positive value
-///                 \li zero if all members were processed with no operator returning non-zero
-///             \li On failure:
-///                 \li an exception Exception will be thrown if something went
-///                     wrong within the library or the operator failed
+// return
+//              \li On success:
+//                  \li the return value of the first operator that returns a positive value
+//                  \li zero if all members were processed with no operator returning non-zero
+//              \li On failure:
+//                  \li an exception Exception will be thrown if something went
+//                      wrong within the library or the operator failed
+// (This needs a re-evaluation)
 ///\exception   H5::Exception
 ///\par Description
 ///             For information, please refer to the H5Ovisit3 API in the HDF5
