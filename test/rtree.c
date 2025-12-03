@@ -1075,12 +1075,10 @@ test_vds_empty_slice(hid_t vds_fapl, hid_t src_fapl)
         FAIL_STACK_ERROR;
     if ((vds_space = H5Screate_simple(1, &vds_dim, NULL)) < 0)
         FAIL_STACK_ERROR;
-    if ((src_space = H5Screate_simple(1, &src_dim, NULL)) < 0)
-        FAIL_STACK_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Add mappings  */
+    /* Add mappings and create VDS */
     for (i = 0; i < vds_dim; i++) {
         if ((vds_sel = H5Scopy(vds_space)) < 0)
             FAIL_STACK_ERROR;
@@ -1095,7 +1093,6 @@ test_vds_empty_slice(hid_t vds_fapl, hid_t src_fapl)
         vds_sel = H5I_INVALID_HID;
     }
 
-    /* Create VDS */
     if ((vds_dset_id =
              H5Dcreate2(vdsfile_id, "vds", H5T_NATIVE_INT, vds_space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
