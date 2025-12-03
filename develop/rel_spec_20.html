@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-02</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -174,8 +174,9 @@ Methods to obtain (gz file)</h2>
 <ul>
 <li>firefox – Download file and then run: <code>gzip &lt;distribution&gt;.tar.gz | tar xzf -</code> </li>
 <li>chrome – Download file and then run: <code>gzip -cd &lt;distribution&gt;.tar.gz | tar xvf -</code> </li>
-<li>wget – <div style="margin-left: 2em;"> <code>wget <a href="https://github.com/HDFGroup/hdf5/releases/download/2.N.N/">https://github.com/HDFGroup/hdf5/releases/download/2.N.N/</a>&lt;distribution&gt;.tar.gz</code><br  />
- <code>gzip -cd &lt;distribution&gt;.tar.gz | tar xvf -</code> </div></li>
+<li>wget – <div style="margin-left: 2em;"> <code>wget <a href="https://github.com/HDFGroup/hdf5/releases/download/">https://github.com/HDFGroup/hdf5/releases/download/</a>${PACKAGEVERSION}/&lt;distribution&gt;.tar.gz</code><br  />
+ <code>gzip -cd &lt;distribution&gt;.tar.gz | tar xvf -</code> </div> </li>
+<li><code>&lt;distribution&gt;</code> is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.0.0 for this release</li>
 </ul>
 <h2><a class="anchor" id="subsec_api_compat_reps"></a>
 Individual API Compatibility Reports</h2>
