@@ -98,8 +98,8 @@
  * \li \Bold{Print and Continue}: Use default error handling to print diagnostic information and
  *     continue execution where possible. This is the default behavior.
  *
- * \li \Bold{Silent Error Handling}: Disable automatic error printing with #H5Eset_auto(H5E_DEFAULT, NULL, NULL)
- *     and check return values explicitly. This is common in production code.
+ * \li \Bold{Silent Error Handling}: Disable automatic error printing with #H5Eset_auto(H5E_DEFAULT, NULL,
+ *NULL) and check return values explicitly. This is common in production code.
  *
  * \li \Bold{Custom Error Handler}: Install a custom error handler to implement application-specific
  *     error logging, user notification, or recovery procedures.
