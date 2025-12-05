@@ -670,6 +670,7 @@
  *     <ul>
  *     <li>Before use, connectors must be registered with the library using:
  *         <ul>
+ *         <li>#H5VLregister_connector() - Registers a new VOL connector</li>
  *         <li>#H5VLregister_connector_by_name() - Register by connector name</li>
  *         <li>#H5VLregister_connector_by_value() - Register by connector-specific value</li>
  *         </ul>

@@ -415,7 +415,6 @@
  * <td>#H5Lcreate_ud</td>
  * <td>Creates a link of a user-defined type.</td>
  * </tr>
- * </tr>
  * <tr>
  * <td>#H5Lget_val</td>
  * <td>Returns the value of a symbolic link. Replaces H5Gget_linkval.</td>
