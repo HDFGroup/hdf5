@@ -974,7 +974,26 @@
  *
  * \subsection subsec_dataspace_select Dataspace Selection Operations and Data Transfer
  *
- * This section is under construction.
+ * Dataspace selections play a critical role in HDF5 data transfer operations. When reading or writing
+ * data with #H5Dread or #H5Dwrite, selections determine which elements are transferred between memory
+ * and the dataset. The HDF5 Library supports independent specification of selections for both the
+ * dataset (file dataspace) and the memory buffer (memory dataspace).
+ *
+ * During data transfer, HDF5 performs the following operations:
+ * \li The selection in the file dataspace identifies which elements to read from or write to in the dataset
+ * \li The selection in the memory dataspace identifies where to place read data or where to get write data
+ * \li If the selections have different numbers of elements or exceed the dataset extents, an error occurs
+ * \li Data type conversion is applied as elements are transferred between file and memory representations
+ *
+ * Selection operations are designed to work with commonly structured patterns while also allowing for
+ * arbitrary point and hyperslab selections to provide maximum flexibility. These selections can be combined
+ * using set operations, such as #H5S_SELECT_OR for a union and #H5S_SELECT_AND for an intersection. You can
+ * then pass these combined selections to #H5Sselect_hyperslab or #H5Sselect_elements to efficiently create
+ * complex selection patterns.
+ *
+ * For parallel I/O operations, collective data transfers can optimize performance when multiple processes
+ * access different selections of the same dataset simultaneously. See the parallel HDF5 documentation for
+ * details on collective I/O with selections.
  *
  * \subsection subsec_dataspace_refer References
  *
