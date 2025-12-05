@@ -113,7 +113,7 @@ Navigate back: \ref index "Main"
     </ul>
 \li \ref subsec_group_examples
 
-\ref H5L_UG
+\ref sec_link
 \li \ref subsec_link_intro
 \li \ref subsec_link_types
 \li \ref subsec_link_create
@@ -237,7 +237,7 @@ Navigate back: \ref index "Main"
     </ul>
 \li \ref subsec_attribute_special
 
-\ref H5O_UG
+\ref sec_object
 \li \ref subsec_object_intro
 \li \ref subsec_object_ops
 \li \ref subsec_object_visit
@@ -246,7 +246,7 @@ Navigate back: \ref index "Main"
 \li \ref subsec_object_cache
 \li \ref subsec_object_summary
 
-\ref H5I_UG
+\ref sec_identifier
 \li \ref subsec_identifier_intro
 \li \ref subsec_identifier_types
 \li \ref subsec_identifier_refcount
@@ -376,7 +376,7 @@ Navigate back: \ref index "Main"
 \ref sec_async
 \li \ref subsec_async_intro
 
-\ref H5M_UG
+\ref sec_map
 \li \ref subsec_map_intro
 \li \ref subsec_map_lifecycle
 \li \ref subsec_map_plist
@@ -386,7 +386,7 @@ Navigate back: \ref index "Main"
 
 \ref sec_reference
 
-\ref H5Z_UG
+\ref sec_filter
 \li \ref subsec_filter_intro
 \li \ref subsec_filter_builtin
 \li \ref subsec_filter_usage
