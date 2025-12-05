@@ -981,7 +981,8 @@
  *
  * During data transfer, selections work as follows:
  * \li The selection in the file dataspace identifies which elements to read from or write to in the dataset.
- * \li The selection in the memory dataspace defines where to place the read data or where to retrieve the write data.
+ * \li The selection in the memory dataspace defines where to place the read data or where to retrieve the
+ write data.
  * \li Both selections must contain the same number of elements and should not exceed the dataset dimensions.
  *
  * Additionally, as data is transferred, HDF5 automatically performs data type conversion between the
