@@ -294,7 +294,7 @@ Navigate back: \ref index "Main"
 \li \ref subsec_plist_resources
 \li \ref subsec_plist_notes
 
-\ref H5FD_UG
+\ref sec_vfd
 \li \ref subsec_vfd_intro
 \li \ref subsec_vfd_purpose
 \li \ref subsec_vfd_drivers
