@@ -979,11 +979,13 @@
  * and the dataset. The HDF5 Library supports independent specification of selections for both the
  * dataset (file dataspace) and the memory buffer (memory dataspace).
  *
- * During data transfer, HDF5 performs the following operations:
- * \li The selection in the file dataspace identifies which elements to read from or write to in the dataset
- * \li The selection in the memory dataspace identifies where to place read data or where to get write data
- * \li If the selections have different numbers of elements or exceed the dataset extents, an error occurs
- * \li Data type conversion is applied as elements are transferred between file and memory representations
+ * During data transfer, selections work as follows:
+ * \li The selection in the file dataspace identifies which elements to read from or write to in the dataset.
+ * \li The selection in the memory dataspace defines where to place the read data or where to retrieve the write data.
+ * \li Both selections must contain the same number of elements and should not exceed the dataset dimensions.
+ *
+ * Additionally, as data is transferred, HDF5 automatically performs data type conversion between the
+ * file and memory representations if the source and destination data types differ.
  *
  * Selection operations are designed to work with commonly structured patterns while also allowing for
  * arbitrary point and hyperslab selections to provide maximum flexibility. These selections can be combined
