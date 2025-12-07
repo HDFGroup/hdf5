@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -164,120 +164,165 @@ $(function(){initNavTree('class_h5_1_1_data_space.html',''); initResizable(true)
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a547c58c858ce4a8fdfd32b25523f4c03" id="r_a547c58c858ce4a8fdfd32b25523f4c03"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a547c58c858ce4a8fdfd32b25523f4c03">close</a> () override</td></tr>
-<tr class="separator:a547c58c858ce4a8fdfd32b25523f4c03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7008bca493d69ea65f12e0940f3a6886" id="r_a7008bca493d69ea65f12e0940f3a6886"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7008bca493d69ea65f12e0940f3a6886">close</a> () override</td></tr>
+<tr class="memdesc:a7008bca493d69ea65f12e0940f3a6886"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes this dataspace.  <br /></td></tr>
+<tr class="separator:a7008bca493d69ea65f12e0940f3a6886"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a183f2d38e20f19902144edd900e8504d" id="r_a183f2d38e20f19902144edd900e8504d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a183f2d38e20f19902144edd900e8504d">copy</a> (const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;like_space)</td></tr>
+<tr class="memdesc:a183f2d38e20f19902144edd900e8504d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes a copy of an existing dataspace.  <br /></td></tr>
 <tr class="separator:a183f2d38e20f19902144edd900e8504d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83c58eb84dd6f4697c75aa51e8fd682f" id="r_a83c58eb84dd6f4697c75aa51e8fd682f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83c58eb84dd6f4697c75aa51e8fd682f">DataSpace</a> (const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;original)</td></tr>
+<tr class="memdesc:a83c58eb84dd6f4697c75aa51e8fd682f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor: same HDF5 object as <em class="arg">original</em>.  <br /></td></tr>
 <tr class="separator:a83c58eb84dd6f4697c75aa51e8fd682f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1d210eb25d9ff89bb4fd1c73eaa1805" id="r_ac1d210eb25d9ff89bb4fd1c73eaa1805"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac1d210eb25d9ff89bb4fd1c73eaa1805">DataSpace</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id)</td></tr>
+<tr class="memdesc:ac1d210eb25d9ff89bb4fd1c73eaa1805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a <a class="el" href="class_h5_1_1_data_space.html" title="Class DataSpace inherits from IdComponent and provides wrappers for the HDF5&#39;s dataspaces.">DataSpace</a> object using the id of an existing dataspace.  <br /></td></tr>
 <tr class="separator:ac1d210eb25d9ff89bb4fd1c73eaa1805"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a33e9a48af4407ee5527ccd96ba3fd32c" id="r_a33e9a48af4407ee5527ccd96ba3fd32c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33e9a48af4407ee5527ccd96ba3fd32c">DataSpace</a> (<a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0a">H5S_class_t</a> type=<a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8">H5S_SCALAR</a>)</td></tr>
+<tr class="memdesc:a33e9a48af4407ee5527ccd96ba3fd32c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new dataspace given a dataspace type.  <br /></td></tr>
 <tr class="separator:a33e9a48af4407ee5527ccd96ba3fd32c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a171f3ef1149f62a2dd50020634695536" id="r_a171f3ef1149f62a2dd50020634695536"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a171f3ef1149f62a2dd50020634695536">DataSpace</a> (int rank, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *dims, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *maxdims=NULL)</td></tr>
+<tr class="memdesc:a171f3ef1149f62a2dd50020634695536"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new simple dataspace.  <br /></td></tr>
 <tr class="separator:a171f3ef1149f62a2dd50020634695536"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b39659770019a6b022247b27806c427" id="r_a3b39659770019a6b022247b27806c427"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b39659770019a6b022247b27806c427">extentCopy</a> (const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;dest_space) const</td></tr>
+<tr class="memdesc:a3b39659770019a6b022247b27806c427"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies the extent of a dataspace.  <br /></td></tr>
 <tr class="separator:a3b39659770019a6b022247b27806c427"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a71c2693398514fad4828112c9d21554b" id="r_a71c2693398514fad4828112c9d21554b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71c2693398514fad4828112c9d21554b">fromClass</a> () const override</td></tr>
-<tr class="memdesc:a71c2693398514fad4828112c9d21554b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns this class name.  <br /></td></tr>
-<tr class="separator:a71c2693398514fad4828112c9d21554b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5eda254838615bd58b46e86bfbb717f" id="r_aa5eda254838615bd58b46e86bfbb717f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5eda254838615bd58b46e86bfbb717f">getId</a> () const override</td></tr>
-<tr class="separator:aa5eda254838615bd58b46e86bfbb717f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac03ba7f9a230d046132e6495a2a4e1b9" id="r_ac03ba7f9a230d046132e6495a2a4e1b9"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac03ba7f9a230d046132e6495a2a4e1b9">fromClass</a> () const override</td></tr>
+<tr class="memdesc:ac03ba7f9a230d046132e6495a2a4e1b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns this class name.  <br /></td></tr>
+<tr class="separator:ac03ba7f9a230d046132e6495a2a4e1b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33cf3dd14411c99df91585556675de06" id="r_a33cf3dd14411c99df91585556675de06"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33cf3dd14411c99df91585556675de06">getId</a> () const override</td></tr>
+<tr class="memdesc:a33cf3dd14411c99df91585556675de06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the id of this dataspace.  <br /></td></tr>
+<tr class="separator:a33cf3dd14411c99df91585556675de06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad65fb5e77aebb5b2fc5e53345c891fa0" id="r_ad65fb5e77aebb5b2fc5e53345c891fa0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad65fb5e77aebb5b2fc5e53345c891fa0">getSelectBounds</a> (<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *start, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *end) const</td></tr>
+<tr class="memdesc:ad65fb5e77aebb5b2fc5e53345c891fa0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the bounding box containing the current selection.  <br /></td></tr>
 <tr class="separator:ad65fb5e77aebb5b2fc5e53345c891fa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ae5e8ae0ade16dc347b24e5b3626cea" id="r_a0ae5e8ae0ade16dc347b24e5b3626cea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ae5e8ae0ade16dc347b24e5b3626cea">getSelectElemNpoints</a> () const</td></tr>
+<tr class="memdesc:a0ae5e8ae0ade16dc347b24e5b3626cea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of element points in the current selection.  <br /></td></tr>
 <tr class="separator:a0ae5e8ae0ade16dc347b24e5b3626cea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5189c362d2c92ffa62924833d3eddcf9" id="r_a5189c362d2c92ffa62924833d3eddcf9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5189c362d2c92ffa62924833d3eddcf9">getSelectElemPointlist</a> (<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> startpoint, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> numpoints, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *buf) const</td></tr>
+<tr class="memdesc:a5189c362d2c92ffa62924833d3eddcf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the list of element points currently selected.  <br /></td></tr>
 <tr class="separator:a5189c362d2c92ffa62924833d3eddcf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1017d5ddf7a957cd40819c7d9fb2656" id="r_ab1017d5ddf7a957cd40819c7d9fb2656"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1017d5ddf7a957cd40819c7d9fb2656">getSelectHyperBlocklist</a> (<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> startblock, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> numblocks, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *buf) const</td></tr>
+<tr class="memdesc:ab1017d5ddf7a957cd40819c7d9fb2656"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the list of hyperslab blocks currently selected.  <br /></td></tr>
 <tr class="separator:ab1017d5ddf7a957cd40819c7d9fb2656"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29dc94c319732bd0c07d31dd2dd98ea8" id="r_a29dc94c319732bd0c07d31dd2dd98ea8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a29dc94c319732bd0c07d31dd2dd98ea8">getSelectHyperNblocks</a> () const</td></tr>
+<tr class="memdesc:a29dc94c319732bd0c07d31dd2dd98ea8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns number of hyperslab blocks.  <br /></td></tr>
 <tr class="separator:a29dc94c319732bd0c07d31dd2dd98ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc490a8213dd7f0cb90e13783f112ad0" id="r_acc490a8213dd7f0cb90e13783f112ad0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acc490a8213dd7f0cb90e13783f112ad0">getSelectNpoints</a> () const</td></tr>
+<tr class="memdesc:acc490a8213dd7f0cb90e13783f112ad0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of elements in a dataspace selection.  <br /></td></tr>
 <tr class="separator:acc490a8213dd7f0cb90e13783f112ad0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fd1b308110689c37163bc3b7453a402" id="r_a1fd1b308110689c37163bc3b7453a402"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1fd1b308110689c37163bc3b7453a402">getSimpleExtentDims</a> (<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *dims, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *maxdims=NULL) const</td></tr>
+<tr class="memdesc:a1fd1b308110689c37163bc3b7453a402"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves dataspace dimension size and maximum size.  <br /></td></tr>
 <tr class="separator:a1fd1b308110689c37163bc3b7453a402"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15bd862c03e5ab3ddc0406b01be276d7" id="r_a15bd862c03e5ab3ddc0406b01be276d7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a15bd862c03e5ab3ddc0406b01be276d7">getSimpleExtentNdims</a> () const</td></tr>
+<tr class="memdesc:a15bd862c03e5ab3ddc0406b01be276d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the dimensionality of a dataspace.  <br /></td></tr>
 <tr class="separator:a15bd862c03e5ab3ddc0406b01be276d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad079cdf0a90ea26e2cf2ee04729a960d" id="r_ad079cdf0a90ea26e2cf2ee04729a960d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad079cdf0a90ea26e2cf2ee04729a960d">getSimpleExtentNpoints</a> () const</td></tr>
+<tr class="memdesc:ad079cdf0a90ea26e2cf2ee04729a960d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of elements in a dataspace.  <br /></td></tr>
 <tr class="separator:ad079cdf0a90ea26e2cf2ee04729a960d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f439b2be93492d3384b064be4a90c43" id="r_a7f439b2be93492d3384b064be4a90c43"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0a">H5S_class_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7f439b2be93492d3384b064be4a90c43">getSimpleExtentType</a> () const</td></tr>
+<tr class="memdesc:a7f439b2be93492d3384b064be4a90c43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current class of a dataspace.  <br /></td></tr>
 <tr class="separator:a7f439b2be93492d3384b064be4a90c43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15029b17f5e40b4658668c6195918ae0" id="r_a15029b17f5e40b4658668c6195918ae0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a15029b17f5e40b4658668c6195918ae0">isSimple</a> () const</td></tr>
+<tr class="memdesc:a15029b17f5e40b4658668c6195918ae0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether this dataspace is a simple dataspace.  <br /></td></tr>
 <tr class="separator:a15029b17f5e40b4658668c6195918ae0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53c2b64eaaa8a100fee038ef5064e36e" id="r_a53c2b64eaaa8a100fee038ef5064e36e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a53c2b64eaaa8a100fee038ef5064e36e">offsetSimple</a> (const <a class="el" href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a> *offset) const</td></tr>
+<tr class="memdesc:a53c2b64eaaa8a100fee038ef5064e36e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the offset of this simple dataspace.  <br /></td></tr>
 <tr class="separator:a53c2b64eaaa8a100fee038ef5064e36e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a268d01b0718928c0e1468b6cc40a5a33" id="r_a268d01b0718928c0e1468b6cc40a5a33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a268d01b0718928c0e1468b6cc40a5a33">operator=</a> (const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;rhs)</td></tr>
+<tr class="memdesc:a268d01b0718928c0e1468b6cc40a5a33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator.  <br /></td></tr>
 <tr class="separator:a268d01b0718928c0e1468b6cc40a5a33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a638af4a73d4fb5a8384a36e053383331" id="r_a638af4a73d4fb5a8384a36e053383331"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a638af4a73d4fb5a8384a36e053383331">selectAll</a> () const</td></tr>
+<tr class="memdesc:a638af4a73d4fb5a8384a36e053383331"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects the entire dataspace.  <br /></td></tr>
 <tr class="separator:a638af4a73d4fb5a8384a36e053383331"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40f532742a2c68ef13991d10c4c690e2" id="r_a40f532742a2c68ef13991d10c4c690e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a40f532742a2c68ef13991d10c4c690e2">selectElements</a> (<a class="el" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0f">H5S_seloper_t</a> op, const size_t num_elements, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *coord) const</td></tr>
+<tr class="memdesc:a40f532742a2c68ef13991d10c4c690e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects array elements to be included in the selection for this dataspace.  <br /></td></tr>
 <tr class="separator:a40f532742a2c68ef13991d10c4c690e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04dd5040191eaceca4e26fc260705dd4" id="r_a04dd5040191eaceca4e26fc260705dd4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04dd5040191eaceca4e26fc260705dd4">selectHyperslab</a> (<a class="el" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0f">H5S_seloper_t</a> op, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *count, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *start, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *stride=NULL, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *block=NULL) const</td></tr>
+<tr class="memdesc:a04dd5040191eaceca4e26fc260705dd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects a hyperslab region to add to the current selected region.  <br /></td></tr>
 <tr class="separator:a04dd5040191eaceca4e26fc260705dd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99980063da1a751bb8b03903d8907d8e" id="r_a99980063da1a751bb8b03903d8907d8e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a99980063da1a751bb8b03903d8907d8e">selectNone</a> () const</td></tr>
+<tr class="memdesc:a99980063da1a751bb8b03903d8907d8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the selection region to include no elements.  <br /></td></tr>
 <tr class="separator:a99980063da1a751bb8b03903d8907d8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17d89325d2ef2abf626f073777b3c810" id="r_a17d89325d2ef2abf626f073777b3c810"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17d89325d2ef2abf626f073777b3c810">selectValid</a> () const</td></tr>
+<tr class="memdesc:a17d89325d2ef2abf626f073777b3c810"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verifies that the selection is within the extent of the dataspace.  <br /></td></tr>
 <tr class="separator:a17d89325d2ef2abf626f073777b3c810"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae675c6017b5bbcbeb1a86ba87a9333fe" id="r_ae675c6017b5bbcbeb1a86ba87a9333fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae675c6017b5bbcbeb1a86ba87a9333fe">setExtentNone</a> () const</td></tr>
+<tr class="memdesc:ae675c6017b5bbcbeb1a86ba87a9333fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes the extent from a dataspace.  <br /></td></tr>
 <tr class="separator:ae675c6017b5bbcbeb1a86ba87a9333fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a651730cf6f647f84f08abee7524a037b" id="r_a651730cf6f647f84f08abee7524a037b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a651730cf6f647f84f08abee7524a037b">setExtentSimple</a> (int rank, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *current_size, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *maximum_size=NULL) const</td></tr>
+<tr class="memdesc:a651730cf6f647f84f08abee7524a037b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets or resets the size of an existing dataspace.  <br /></td></tr>
 <tr class="separator:a651730cf6f647f84f08abee7524a037b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91c87239d6ab443ec2cb7ea3fba2237f" id="r_a91c87239d6ab443ec2cb7ea3fba2237f"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91c87239d6ab443ec2cb7ea3fba2237f">~DataSpace</a> () override</td></tr>
-<tr class="separator:a91c87239d6ab443ec2cb7ea3fba2237f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10d8777074591cc52ee2f1299c0c92ba" id="r_a10d8777074591cc52ee2f1299c0c92ba"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10d8777074591cc52ee2f1299c0c92ba">~DataSpace</a> () override</td></tr>
+<tr class="memdesc:a10d8777074591cc52ee2f1299c0c92ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Properly terminates access to this dataspace.  <br /></td></tr>
+<tr class="separator:a10d8777074591cc52ee2f1299c0c92ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
 <tr class="memitem:a8ef8ed7ea6de87c0efd63545807ffa19 inherit pub_methods_class_h5_1_1_id_component" id="r_a8ef8ed7ea6de87c0efd63545807ffa19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a8ef8ed7ea6de87c0efd63545807ffa19">decRefCount</a> () const</td></tr>
+<tr class="memdesc:a8ef8ed7ea6de87c0efd63545807ffa19 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrement reference counter for the id of this object.  <br /></td></tr>
 <tr class="separator:a8ef8ed7ea6de87c0efd63545807ffa19 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6fd1ad4b3de42fd56c1af67bafc16bb inherit pub_methods_class_h5_1_1_id_component" id="r_af6fd1ad4b3de42fd56c1af67bafc16bb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#af6fd1ad4b3de42fd56c1af67bafc16bb">decRefCount</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id) const</td></tr>
+<tr class="memdesc:af6fd1ad4b3de42fd56c1af67bafc16bb inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrement reference counter for a given id.  <br /></td></tr>
 <tr class="separator:af6fd1ad4b3de42fd56c1af67bafc16bb inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e1c79c2f7ea65f480003c4162ade647 inherit pub_methods_class_h5_1_1_id_component" id="r_a9e1c79c2f7ea65f480003c4162ade647"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a9e1c79c2f7ea65f480003c4162ade647">getCounter</a> () const</td></tr>
+<tr class="memdesc:a9e1c79c2f7ea65f480003c4162ade647 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the reference counter for the id of this object.  <br /></td></tr>
 <tr class="separator:a9e1c79c2f7ea65f480003c4162ade647 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d474b97d3fcdb866c662b7c45afc101 inherit pub_methods_class_h5_1_1_id_component" id="r_a3d474b97d3fcdb866c662b7c45afc101"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a3d474b97d3fcdb866c662b7c45afc101">getCounter</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id) const</td></tr>
+<tr class="memdesc:a3d474b97d3fcdb866c662b7c45afc101 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the reference counter for a given id.  <br /></td></tr>
 <tr class="separator:a3d474b97d3fcdb866c662b7c45afc101 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab7818457e11039a6720b8daa491a2a23 inherit pub_methods_class_h5_1_1_id_component" id="r_ab7818457e11039a6720b8daa491a2a23"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ab7818457e11039a6720b8daa491a2a23">getHDFObjType</a> () const</td></tr>
+<tr class="memdesc:ab7818457e11039a6720b8daa491a2a23 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the type of the object. It is an overloaded function of the above function.  <br /></td></tr>
 <tr class="separator:ab7818457e11039a6720b8daa491a2a23 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68f1f3d122061267fc7ba9ff26a8e116 inherit pub_methods_class_h5_1_1_id_component" id="r_a68f1f3d122061267fc7ba9ff26a8e116"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a68f1f3d122061267fc7ba9ff26a8e116">incRefCount</a> () const</td></tr>
+<tr class="memdesc:a68f1f3d122061267fc7ba9ff26a8e116 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment reference counter for the id of this object.  <br /></td></tr>
 <tr class="separator:a68f1f3d122061267fc7ba9ff26a8e116 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa982b0a0eba28a3c45c8703b50b2cdc inherit pub_methods_class_h5_1_1_id_component" id="r_aaa982b0a0eba28a3c45c8703b50b2cdc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#aaa982b0a0eba28a3c45c8703b50b2cdc">incRefCount</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id) const</td></tr>
+<tr class="memdesc:aaa982b0a0eba28a3c45c8703b50b2cdc inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment reference counter for a given id.  <br /></td></tr>
 <tr class="separator:aaa982b0a0eba28a3c45c8703b50b2cdc inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad73041310c0799fde5df3017a21062a8 inherit pub_methods_class_h5_1_1_id_component" id="r_ad73041310c0799fde5df3017a21062a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ad73041310c0799fde5df3017a21062a8">inMemFunc</a> (const char *func_name) const</td></tr>
-<tr class="separator:ad73041310c0799fde5df3017a21062a8 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71c30bbf80130e0d1a6912810c837ec1 inherit pub_methods_class_h5_1_1_id_component" id="r_a71c30bbf80130e0d1a6912810c837ec1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a71c30bbf80130e0d1a6912810c837ec1">inMemFunc</a> (const char *func_name) const</td></tr>
+<tr class="memdesc:a71c30bbf80130e0d1a6912810c837ec1 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes and returns string "&lt;class-name&gt;::&lt;func_name&gt;".  <br /></td></tr>
+<tr class="separator:a71c30bbf80130e0d1a6912810c837ec1 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a296e6802a14ff5802ebd1cbdd8111d8e inherit pub_methods_class_h5_1_1_id_component" id="r_a296e6802a14ff5802ebd1cbdd8111d8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h5_1_1_id_component.html">IdComponent</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a296e6802a14ff5802ebd1cbdd8111d8e">operator=</a> (const <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a> &amp;rhs)</td></tr>
+<tr class="memdesc:a296e6802a14ff5802ebd1cbdd8111d8e inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator.  <br /></td></tr>
 <tr class="separator:a296e6802a14ff5802ebd1cbdd8111d8e inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2cb88c7456b7e40fcda2f3f438162cd inherit pub_methods_class_h5_1_1_id_component" id="r_af2cb88c7456b7e40fcda2f3f438162cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#af2cb88c7456b7e40fcda2f3f438162cd">setId</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_id)</td></tr>
+<tr class="memdesc:af2cb88c7456b7e40fcda2f3f438162cd inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the identifier of this object to a new value.  <br /></td></tr>
 <tr class="separator:af2cb88c7456b7e40fcda2f3f438162cd inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a714d6f959f80fb0085d70258816d1c6d inherit pub_methods_class_h5_1_1_id_component" id="r_a714d6f959f80fb0085d70258816d1c6d"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a714d6f959f80fb0085d70258816d1c6d">~IdComponent</a> ()=default</td></tr>
 <tr class="separator:a714d6f959f80fb0085d70258816d1c6d inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:afd46e0aaace492e09ece03be530dd13a" id="r_afd46e0aaace492e09ece03be530dd13a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd46e0aaace492e09ece03be530dd13a">deleteConstants</a> ()</td></tr>
-<tr class="separator:afd46e0aaace492e09ece03be530dd13a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1307af2491a89c6bc96b1cc4524b697" id="r_ab1307af2491a89c6bc96b1cc4524b697"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1307af2491a89c6bc96b1cc4524b697">deleteConstants</a> ()</td></tr>
+<tr class="separator:ab1307af2491a89c6bc96b1cc4524b697"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
-<tr class="memitem:abc3fbcf4fff6fdc48838675a8db06253 inherit pub_static_methods_class_h5_1_1_id_component" id="r_abc3fbcf4fff6fdc48838675a8db06253"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#abc3fbcf4fff6fdc48838675a8db06253">getHDFObjType</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id)</td></tr>
-<tr class="separator:abc3fbcf4fff6fdc48838675a8db06253 inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad101d2b666ffdd27c1888559cb48862e inherit pub_static_methods_class_h5_1_1_id_component" id="r_ad101d2b666ffdd27c1888559cb48862e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ad101d2b666ffdd27c1888559cb48862e">getNumMembers</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
-<tr class="separator:ad101d2b666ffdd27c1888559cb48862e inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac121ded620518cc83d13cbe0eed6648e inherit pub_static_methods_class_h5_1_1_id_component" id="r_ac121ded620518cc83d13cbe0eed6648e"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ac121ded620518cc83d13cbe0eed6648e">isValid</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> an_id)</td></tr>
-<tr class="separator:ac121ded620518cc83d13cbe0eed6648e inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abad7a77fcb34ef1721f640c5a35fae2d inherit pub_static_methods_class_h5_1_1_id_component" id="r_abad7a77fcb34ef1721f640c5a35fae2d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#abad7a77fcb34ef1721f640c5a35fae2d">typeExists</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
-<tr class="separator:abad7a77fcb34ef1721f640c5a35fae2d inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae31687ab82814d70c6ea976f7ee6d433 inherit pub_static_methods_class_h5_1_1_id_component" id="r_ae31687ab82814d70c6ea976f7ee6d433"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ae31687ab82814d70c6ea976f7ee6d433">getHDFObjType</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id)</td></tr>
+<tr class="memdesc:ae31687ab82814d70c6ea976f7ee6d433 inherit pub_static_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Given an id, returns the type of the object.  <br /></td></tr>
+<tr class="separator:ae31687ab82814d70c6ea976f7ee6d433 inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1813465eb51329577eace28ffc84569e inherit pub_static_methods_class_h5_1_1_id_component" id="r_a1813465eb51329577eace28ffc84569e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a1813465eb51329577eace28ffc84569e">getNumMembers</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
+<tr class="memdesc:a1813465eb51329577eace28ffc84569e inherit pub_static_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of members of the given type.  <br /></td></tr>
+<tr class="separator:a1813465eb51329577eace28ffc84569e inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6226b90ed11f416dfc15e93fca4e9fb1 inherit pub_static_methods_class_h5_1_1_id_component" id="r_a6226b90ed11f416dfc15e93fca4e9fb1"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a6226b90ed11f416dfc15e93fca4e9fb1">isValid</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> an_id)</td></tr>
+<tr class="memdesc:a6226b90ed11f416dfc15e93fca4e9fb1 inherit pub_static_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the given ID is valid.  <br /></td></tr>
+<tr class="separator:a6226b90ed11f416dfc15e93fca4e9fb1 inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bd4e1f8a1211dededbb7e1c6a3926a2 inherit pub_static_methods_class_h5_1_1_id_component" id="r_a4bd4e1f8a1211dededbb7e1c6a3926a2"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a4bd4e1f8a1211dededbb7e1c6a3926a2">typeExists</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
+<tr class="memdesc:a4bd4e1f8a1211dededbb7e1c6a3926a2 inherit pub_static_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries if a given type is currently registered with the library.  <br /></td></tr>
+<tr class="separator:a4bd4e1f8a1211dededbb7e1c6a3926a2 inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:ad474efd5cb97935c0f4d9cf8ff59d9be" id="r_ad474efd5cb97935c0f4d9cf8ff59d9be"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad474efd5cb97935c0f4d9cf8ff59d9be">ALL</a></td></tr>
-<tr class="memdesc:ad474efd5cb97935c0f4d9cf8ff59d9be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default <a class="el" href="class_h5_1_1_data_space.html" title="Class DataSpace inherits from IdComponent and provides wrappers for the HDF5&#39;s dataspaces.">DataSpace</a> objects.  <br /></td></tr>
-<tr class="separator:ad474efd5cb97935c0f4d9cf8ff59d9be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5477ae00aa40c34febd160fda512023" id="r_aa5477ae00aa40c34febd160fda512023"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5477ae00aa40c34febd160fda512023">ALL</a> = *getConstant()</td></tr>
+<tr class="memdesc:aa5477ae00aa40c34febd160fda512023"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default <a class="el" href="class_h5_1_1_data_space.html" title="Class DataSpace inherits from IdComponent and provides wrappers for the HDF5&#39;s dataspaces.">DataSpace</a> objects.  <br /></td></tr>
+<tr class="separator:aa5477ae00aa40c34febd160fda512023"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:aa9f8a5ef0ac0007c6ae942e03ecaa906" id="r_aa9f8a5ef0ac0007c6ae942e03ecaa906"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa9f8a5ef0ac0007c6ae942e03ecaa906">p_setId</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_id) override</td></tr>
-<tr class="separator:aa9f8a5ef0ac0007c6ae942e03ecaa906"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac71812533616027b32eaf36bcaaebca6" id="r_ac71812533616027b32eaf36bcaaebca6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac71812533616027b32eaf36bcaaebca6">p_setId</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_id) override</td></tr>
+<tr class="memdesc:ac71812533616027b32eaf36bcaaebca6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the identifier of this object to a new value.  <br /></td></tr>
+<tr class="separator:ac71812533616027b32eaf36bcaaebca6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
 <tr class="memitem:a451c0471e69ff48f14c4e26f8a0856a7 inherit pro_methods_class_h5_1_1_id_component" id="r_a451c0471e69ff48f14c4e26f8a0856a7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a451c0471e69ff48f14c4e26f8a0856a7">IdComponent</a> ()</td></tr>
+<tr class="memdesc:a451c0471e69ff48f14c4e26f8a0856a7 inherit pro_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <br /></td></tr>
 <tr class="separator:a451c0471e69ff48f14c4e26f8a0856a7 inherit pro_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a212a32d32b740516ef3ee0be8b82b5eb inherit pro_methods_class_h5_1_1_id_component" id="r_a212a32d32b740516ef3ee0be8b82b5eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a212a32d32b740516ef3ee0be8b82b5eb">p_get_file_name</a> () const</td></tr>
-<tr class="separator:a212a32d32b740516ef3ee0be8b82b5eb inherit pro_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bee444ef3a9fbae799ee5a78e991cb0 inherit pro_methods_class_h5_1_1_id_component" id="r_a7bee444ef3a9fbae799ee5a78e991cb0"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a7bee444ef3a9fbae799ee5a78e991cb0">p_get_file_name</a> () const</td></tr>
+<tr class="separator:a7bee444ef3a9fbae799ee5a78e991cb0 inherit pro_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
@@ -287,10 +332,10 @@ Friends</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pro_static_methods_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_static_methods_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Static Protected Member Functions inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
-<tr class="memitem:a64f606acad8935a5fdc1fc6434742176 inherit pro_static_methods_class_h5_1_1_id_component" id="r_a64f606acad8935a5fdc1fc6434742176"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a64f606acad8935a5fdc1fc6434742176">p_valid_id</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id)</td></tr>
-<tr class="separator:a64f606acad8935a5fdc1fc6434742176 inherit pro_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a8de178e681998c6a891b70164fc4fd inherit pro_static_methods_class_h5_1_1_id_component" id="r_a4a8de178e681998c6a891b70164fc4fd"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a4a8de178e681998c6a891b70164fc4fd">p_valid_id</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id)</td></tr>
+<tr class="separator:a4a8de178e681998c6a891b70164fc4fd inherit pro_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_static_attribs_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_static_attribs_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Static Protected Attributes inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
-<tr class="memitem:a824f3faa415dac39709767ca4a9dbb11 inherit pro_static_attribs_class_h5_1_1_id_component" id="r_a824f3faa415dac39709767ca4a9dbb11"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a824f3faa415dac39709767ca4a9dbb11">H5dontAtexit_called</a></td></tr>
+<tr class="memitem:a824f3faa415dac39709767ca4a9dbb11 inherit pro_static_attribs_class_h5_1_1_id_component" id="r_a824f3faa415dac39709767ca4a9dbb11"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a824f3faa415dac39709767ca4a9dbb11">H5dontAtexit_called</a> = false</td></tr>
 <tr class="separator:a824f3faa415dac39709767ca4a9dbb11 inherit pro_static_attribs_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -308,6 +353,20 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Creates a new dataspace given a dataspace type. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>- IN: Type of the dataspace to be created, which currently can be either <code>H5S_SCALAR</code> or <code>H5S_SIMPLE</code>; default to <code>H5S_SCALAR</code>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -335,6 +394,22 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Creates a new simple dataspace. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rank</td><td>- IN: Number of dimensions of dataspace. </td></tr>
+    <tr><td class="paramname">dims</td><td>- IN: An array of the size of each dimension. </td></tr>
+    <tr><td class="paramname">maxdims</td><td>- IN: An array of the maximum size of each dimension. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ac1d210eb25d9ff89bb4fd1c73eaa1805" name="ac1d210eb25d9ff89bb4fd1c73eaa1805"></a>
@@ -346,11 +421,25 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>space_id</em></span></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>existing_id</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Creates a <a class="el" href="class_h5_1_1_data_space.html" title="Class DataSpace inherits from IdComponent and provides wrappers for the HDF5&#39;s dataspaces.">DataSpace</a> object using the id of an existing dataspace. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">existing_id</td><td>- IN: Id of an existing dataspace </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -369,10 +458,18 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Copy constructor: same HDF5 object as <em class="arg">original</em>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">original</td><td>- IN: <a class="el" href="class_h5_1_1_data_space.html" title="Class DataSpace inherits from IdComponent and provides wrappers for the HDF5&#39;s dataspaces.">DataSpace</a> object to copy </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
-<a id="a91c87239d6ab443ec2cb7ea3fba2237f" name="a91c87239d6ab443ec2cb7ea3fba2237f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a91c87239d6ab443ec2cb7ea3fba2237f">&#9670;&#160;</a></span>~DataSpace()</h2>
+<a id="a10d8777074591cc52ee2f1299c0c92ba" name="a10d8777074591cc52ee2f1299c0c92ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10d8777074591cc52ee2f1299c0c92ba">&#9670;&#160;</a></span>~DataSpace()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -381,7 +478,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual ~<a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> </td>
+          <td class="memname">~<a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -393,12 +490,14 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Properly terminates access to this dataspace. </p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a547c58c858ce4a8fdfd32b25523f4c03" name="a547c58c858ce4a8fdfd32b25523f4c03"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a547c58c858ce4a8fdfd32b25523f4c03">&#9670;&#160;</a></span>close()</h2>
+<a id="a7008bca493d69ea65f12e0940f3a6886" name="a7008bca493d69ea65f12e0940f3a6886"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7008bca493d69ea65f12e0940f3a6886">&#9670;&#160;</a></span>close()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -407,7 +506,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void close </td>
+          <td class="memname">void close </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -419,6 +518,14 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Closes this dataspace. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Implements <a class="el" href="class_h5_1_1_id_component.html#af6ee7eacbde6b379b68d954e44f6e549">IdComponent</a>.</p>
 
@@ -439,10 +546,24 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Makes a copy of an existing dataspace. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">like_space</td><td>- IN: Dataspace to be copied </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
-<a id="afd46e0aaace492e09ece03be530dd13a" name="afd46e0aaace492e09ece03be530dd13a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afd46e0aaace492e09ece03be530dd13a">&#9670;&#160;</a></span>deleteConstants()</h2>
+<a id="ab1307af2491a89c6bc96b1cc4524b697" name="ab1307af2491a89c6bc96b1cc4524b697"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1307af2491a89c6bc96b1cc4524b697">&#9670;&#160;</a></span>deleteConstants()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -451,7 +572,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void deleteConstants </td>
+          <td class="memname">void deleteConstants </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -481,10 +602,24 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Copies the extent of a dataspace. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dest_space</td><td>- IN: Dataspace to copy from </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
-<a id="a71c2693398514fad4828112c9d21554b" name="a71c2693398514fad4828112c9d21554b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a71c2693398514fad4828112c9d21554b">&#9670;&#160;</a></span>fromClass()</h2>
+<a id="ac03ba7f9a230d046132e6495a2a4e1b9" name="ac03ba7f9a230d046132e6495a2a4e1b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac03ba7f9a230d046132e6495a2a4e1b9">&#9670;&#160;</a></span>fromClass()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -493,7 +628,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> fromClass </td>
+          <td class="memname">virtual std::string fromClass </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -508,12 +643,12 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Returns this class name. </p>
 
-<p>Reimplemented from <a class="el" href="class_h5_1_1_id_component.html#adbe305aad1494f55c636a5bb2af2ac3c">IdComponent</a>.</p>
+<p>Reimplemented from <a class="el" href="class_h5_1_1_id_component.html#a9e2cd9889a2a9afcd689d447111aea61">IdComponent</a>.</p>
 
 </div>
 </div>
-<a id="aa5eda254838615bd58b46e86bfbb717f" name="aa5eda254838615bd58b46e86bfbb717f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa5eda254838615bd58b46e86bfbb717f">&#9670;&#160;</a></span>getId()</h2>
+<a id="a33cf3dd14411c99df91585556675de06" name="a33cf3dd14411c99df91585556675de06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33cf3dd14411c99df91585556675de06">&#9670;&#160;</a></span>getId()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -522,7 +657,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> getId </td>
+          <td class="memname"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> getId </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -534,6 +669,9 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Get the id of this dataspace. </p>
+<dl class="section return"><dt>Returns</dt><dd>Dataspace identifier </dd></dl>
 
 <p>Implements <a class="el" href="class_h5_1_1_id_component.html#a8680b50b3b41ed5692dcbed6a3241c1f">IdComponent</a>.</p>
 
@@ -558,6 +696,22 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Gets the bounding box containing the current selection. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">start</td><td>- IN: Starting coordinates of the bounding box </td></tr>
+    <tr><td class="paramname">end</td><td>- IN: Ending coordinates of the bounding box, i.e., the coordinates of the diagonally opposite corner </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>For information, please refer to the H5Sget_select_bounds API in the HDF5 C Reference Manual. </dd></dl>
+
 </div>
 </div>
 <a id="a0ae5e8ae0ade16dc347b24e5b3626cea" name="a0ae5e8ae0ade16dc347b24e5b3626cea"></a>
@@ -574,6 +728,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Returns the number of element points in the current selection. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of element points </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -601,6 +764,23 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Gets the list of element points currently selected. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">startpoint</td><td>- IN: Element point to start with </td></tr>
+    <tr><td class="paramname">numpoints</td><td>- IN: Number of element points to get </td></tr>
+    <tr><td class="paramname">buf</td><td>- IN: List of element points selected </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>For information, please refer to the C API H5Sget_select_elem_pointlist in the HDF5 C Reference Manual. </dd></dl>
+
 </div>
 </div>
 <a id="ab1017d5ddf7a957cd40819c7d9fb2656" name="ab1017d5ddf7a957cd40819c7d9fb2656"></a>
@@ -627,6 +807,22 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Gets the list of hyperslab blocks currently selected. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">startblock</td><td>- IN: Hyperslab block to start with </td></tr>
+    <tr><td class="paramname">numblocks</td><td>- IN: Number of hyperslab blocks to get </td></tr>
+    <tr><td class="paramname">buf</td><td>- IN: List of hyperslab blocks selected </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a29dc94c319732bd0c07d31dd2dd98ea8" name="a29dc94c319732bd0c07d31dd2dd98ea8"></a>
@@ -644,6 +840,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns number of hyperslab blocks. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of hyperslab blocks </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="acc490a8213dd7f0cb90e13783f112ad0" name="acc490a8213dd7f0cb90e13783f112ad0"></a>
@@ -660,6 +865,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Returns the number of elements in a dataspace selection. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of elements </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -682,6 +896,22 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Retrieves dataspace dimension size and maximum size. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dims</td><td>- IN: Name of the new member </td></tr>
+    <tr><td class="paramname">maxdims</td><td>- IN: Pointer to the value of the new member </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of dimensions, the same value as returned by <code><a class="el" href="#a15bd862c03e5ab3ddc0406b01be276d7" title="Returns the dimensionality of a dataspace.">DataSpace::getSimpleExtentNdims()</a></code> </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a15bd862c03e5ab3ddc0406b01be276d7" name="a15bd862c03e5ab3ddc0406b01be276d7"></a>
@@ -698,6 +928,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Returns the dimensionality of a dataspace. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of dimensions </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -716,6 +955,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns the number of elements in a dataspace. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of elements </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a7f439b2be93492d3384b064be4a90c43" name="a7f439b2be93492d3384b064be4a90c43"></a>
@@ -732,6 +980,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Returns the current class of a dataspace. </p>
+<dl class="section return"><dt>Returns</dt><dd>Class of the dataspace </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -750,6 +1007,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Determines whether this dataspace is a simple dataspace. </p>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if the dataspace is a simple dataspace, and <code>false</code>, otherwise </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a53c2b64eaaa8a100fee038ef5064e36e" name="a53c2b64eaaa8a100fee038ef5064e36e"></a>
@@ -766,6 +1032,21 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets the offset of this simple dataspace. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">offset</td><td>- IN: Offset to position the selection at </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>This function creates an offset for the selection within an extent, allowing the same shaped selection to be moved to different locations within a dataspace without requiring it to be re-defined. </dd></dl>
 
 </div>
 </div>
@@ -784,10 +1065,25 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Assignment operator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rhs</td><td>- IN: Reference to the existing dataspace </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Reference to <a class="el" href="class_h5_1_1_data_space.html" title="Class DataSpace inherits from IdComponent and provides wrappers for the HDF5&#39;s dataspaces.">DataSpace</a> instance </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
-<a id="aa9f8a5ef0ac0007c6ae942e03ecaa906" name="aa9f8a5ef0ac0007c6ae942e03ecaa906"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9f8a5ef0ac0007c6ae942e03ecaa906">&#9670;&#160;</a></span>p_setId()</h2>
+<a id="ac71812533616027b32eaf36bcaaebca6" name="ac71812533616027b32eaf36bcaaebca6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac71812533616027b32eaf36bcaaebca6">&#9670;&#160;</a></span>p_setId()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -796,7 +1092,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void p_setId </td>
+          <td class="memname">void p_setId </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>new_id</em></span></td><td>)</td>
           <td></td>
@@ -808,6 +1104,14 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Sets the identifier of this object to a new value. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_id_component_exception.html">H5::IdComponentException</a></td><td>when the attempt to close the HDF5 object fails </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Implements <a class="el" href="class_h5_1_1_id_component.html#a9579f693da66fa5dcf98043e8a738bfb">IdComponent</a>.</p>
 
@@ -827,6 +1131,14 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Selects the entire dataspace. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -853,6 +1165,23 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Selects array elements to be included in the selection for this dataspace. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">op</td><td>- IN: Operator specifying how the new selection is to be combined with the existing selection for the dataspace </td></tr>
+    <tr><td class="paramname">num_elements</td><td>- IN: Number of elements to be selected </td></tr>
+    <tr><td class="paramname">coord</td><td>- IN: A 2-dimensional array of 0-based values specifying the coordinates of the elements being selected </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>For information, please refer to the H5Sselect_elements API in the HDF5 C Reference Manual. </dd></dl>
 
 </div>
 </div>
@@ -890,6 +1219,25 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Selects a hyperslab region to add to the current selected region. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">op</td><td>- IN: Operation to perform on current selection </td></tr>
+    <tr><td class="paramname">count</td><td>- IN: Number of blocks included in the hyperslab </td></tr>
+    <tr><td class="paramname">start</td><td>- IN: Offset of the start of hyperslab </td></tr>
+    <tr><td class="paramname">stride</td><td>- IN: Hyperslab stride - default to <code>NULL</code> </td></tr>
+    <tr><td class="paramname">block</td><td>- IN: Size of block in the hyperslab - default to <code>NULL</code> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>For information, please refer to the H5Sselect_hyperslab API in the HDF5 C Reference Manual. </dd></dl>
+
 </div>
 </div>
 <a id="a99980063da1a751bb8b03903d8907d8e" name="a99980063da1a751bb8b03903d8907d8e"></a>
@@ -906,6 +1254,14 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Resets the selection region to include no elements. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -924,6 +1280,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Verifies that the selection is within the extent of the dataspace. </p>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if the selection is within the extent of the dataspace, and <code>false</code>, otherwise </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ae675c6017b5bbcbeb1a86ba87a9333fe" name="ae675c6017b5bbcbeb1a86ba87a9333fe"></a>
@@ -940,6 +1305,14 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Removes the extent from a dataspace. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -966,6 +1339,22 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets or resets the size of an existing dataspace. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rank</td><td>- IN: Rank of the dataspace </td></tr>
+    <tr><td class="paramname">current_size</td><td>- IN: Array containing current size of dataspace </td></tr>
+    <tr><td class="paramname">maximum_size</td><td>- IN: Array containing maximum size of dataspace </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_data_space_i_exception.html">H5::DataSpaceIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1000,8 +1389,8 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Field Documentation</h2>
-<a id="ad474efd5cb97935c0f4d9cf8ff59d9be" name="ad474efd5cb97935c0f4d9cf8ff59d9be"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad474efd5cb97935c0f4d9cf8ff59d9be">&#9670;&#160;</a></span>ALL</h2>
+<a id="aa5477ae00aa40c34febd160fda512023" name="aa5477ae00aa40c34febd160fda512023"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5477ae00aa40c34febd160fda512023">&#9670;&#160;</a></span>ALL</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1010,7 +1399,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a>&amp; ALL</td>
+          <td class="memname">const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp; ALL = *getConstant()</td>
         </tr>
       </table>
   </td>
@@ -1024,8 +1413,9 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>c++/src/<a class="el" href="_h5_data_space_8h.html">H5DataSpace.h</a></li>
+<li>c++/src/<a class="el" href="_h5_data_space_8cpp.html">H5DataSpace.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

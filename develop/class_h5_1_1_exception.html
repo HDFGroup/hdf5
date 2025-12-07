@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -175,45 +175,60 @@ $(function(){initNavTree('class_h5_1_1_exception.html',''); initResizable(true);
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:abfbc23b99b2e78b609d50ac688611236" id="r_abfbc23b99b2e78b609d50ac688611236"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abfbc23b99b2e78b609d50ac688611236">Exception</a> ()</td></tr>
+<tr class="memdesc:abfbc23b99b2e78b609d50ac688611236"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <br /></td></tr>
 <tr class="separator:abfbc23b99b2e78b609d50ac688611236"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acad34d4fc0c2bfc6c8739c3db96d317e" id="r_acad34d4fc0c2bfc6c8739c3db96d317e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acad34d4fc0c2bfc6c8739c3db96d317e">Exception</a> (const <a class="el" href="class_h5_1_1_exception.html">Exception</a> &amp;orig)</td></tr>
+<tr class="memdesc:acad34d4fc0c2bfc6c8739c3db96d317e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor: same HDF5 object as <em class="arg">original</em>.  <br /></td></tr>
 <tr class="separator:acad34d4fc0c2bfc6c8739c3db96d317e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a480eadecaf7b936ad9aebab914243a76" id="r_a480eadecaf7b936ad9aebab914243a76"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a480eadecaf7b936ad9aebab914243a76">Exception</a> (const std::string &amp;func_name, const std::string &amp;message=<a class="el" href="#a47911232d969297b6ac8b7cdc42593cd">DEFAULT_MSG</a>)</td></tr>
+<tr class="memitem:a480eadecaf7b936ad9aebab914243a76" id="r_a480eadecaf7b936ad9aebab914243a76"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a480eadecaf7b936ad9aebab914243a76">Exception</a> (const std::string &amp;func_name, const std::string &amp;message=<a class="el" href="#ac6cad9847003e45256651f63be151495">DEFAULT_MSG</a>)</td></tr>
+<tr class="memdesc:a480eadecaf7b936ad9aebab914243a76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an exception with the name of the function, in which the failure occurs, and an optional detailed message.  <br /></td></tr>
 <tr class="separator:a480eadecaf7b936ad9aebab914243a76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9261d8c971d2221064de465a044e23a4" id="r_a9261d8c971d2221064de465a044e23a4"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9261d8c971d2221064de465a044e23a4">getCDetailMsg</a> () const</td></tr>
+<tr class="memdesc:a9261d8c971d2221064de465a044e23a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the detailed message set at the time the exception is thrown.  <br /></td></tr>
 <tr class="separator:a9261d8c971d2221064de465a044e23a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0687e8cfdd6010cf1f7389acec979d8f" id="r_a0687e8cfdd6010cf1f7389acec979d8f"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0687e8cfdd6010cf1f7389acec979d8f">getCFuncName</a> () const</td></tr>
+<tr class="memdesc:a0687e8cfdd6010cf1f7389acec979d8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the name of the function, where the exception is thrown.  <br /></td></tr>
 <tr class="separator:a0687e8cfdd6010cf1f7389acec979d8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8da747cc2259a2f6691b41bd0f19248" id="r_ad8da747cc2259a2f6691b41bd0f19248"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad8da747cc2259a2f6691b41bd0f19248">getDetailMsg</a> () const</td></tr>
+<tr class="memdesc:ad8da747cc2259a2f6691b41bd0f19248"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the detailed message set at the time the exception is thrown.  <br /></td></tr>
 <tr class="separator:ad8da747cc2259a2f6691b41bd0f19248"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4425f35e8f44fc664a5c6d505d233d5" id="r_ac4425f35e8f44fc664a5c6d505d233d5"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac4425f35e8f44fc664a5c6d505d233d5">getFuncName</a> () const</td></tr>
+<tr class="memdesc:ac4425f35e8f44fc664a5c6d505d233d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the name of the function, where the exception is thrown.  <br /></td></tr>
 <tr class="separator:ac4425f35e8f44fc664a5c6d505d233d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b5150b7308060a67989c4fe1aab7acf" id="r_a8b5150b7308060a67989c4fe1aab7acf"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b5150b7308060a67989c4fe1aab7acf">getMajorString</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> err_major_id) const</td></tr>
+<tr class="memdesc:a8b5150b7308060a67989c4fe1aab7acf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a text string that describes the error specified by a major error number.  <br /></td></tr>
 <tr class="separator:a8b5150b7308060a67989c4fe1aab7acf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1797c734da505d69bfbf3651f0da570f" id="r_a1797c734da505d69bfbf3651f0da570f"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1797c734da505d69bfbf3651f0da570f">getMinorString</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> err_minor_id) const</td></tr>
+<tr class="memdesc:a1797c734da505d69bfbf3651f0da570f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a text string that describes the error specified by a minor error number.  <br /></td></tr>
 <tr class="separator:a1797c734da505d69bfbf3651f0da570f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1de477f66297b28e1bb70ca104523d26" id="r_a1de477f66297b28e1bb70ca104523d26"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1de477f66297b28e1bb70ca104523d26">~Exception</a> ()=default</td></tr>
 <tr class="separator:a1de477f66297b28e1bb70ca104523d26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a12f3de9ed19276bbac2733e726762d58" id="r_a12f3de9ed19276bbac2733e726762d58"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a12f3de9ed19276bbac2733e726762d58">clearErrorStack</a> ()</td></tr>
-<tr class="separator:a12f3de9ed19276bbac2733e726762d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ea71ce86e4ebbcd93d820da4204f6de" id="r_a3ea71ce86e4ebbcd93d820da4204f6de"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ea71ce86e4ebbcd93d820da4204f6de">dontPrint</a> ()</td></tr>
-<tr class="separator:a3ea71ce86e4ebbcd93d820da4204f6de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1939a4a0b21fd2c6b5565b3a0fafebc6" id="r_a1939a4a0b21fd2c6b5565b3a0fafebc6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1939a4a0b21fd2c6b5565b3a0fafebc6">getAutoPrint</a> (<a class="el" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a> &amp;func, void **client_data)</td></tr>
-<tr class="separator:a1939a4a0b21fd2c6b5565b3a0fafebc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa240549c299c7d73acaa03d6b6bcc93f" id="r_aa240549c299c7d73acaa03d6b6bcc93f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa240549c299c7d73acaa03d6b6bcc93f">printErrorStack</a> (FILE *stream=stderr, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> err_stack=<a class="el" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a>)</td></tr>
-<tr class="separator:aa240549c299c7d73acaa03d6b6bcc93f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbc01458dbde72a6ba5cd42344db35a5" id="r_adbc01458dbde72a6ba5cd42344db35a5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbc01458dbde72a6ba5cd42344db35a5">setAutoPrint</a> (<a class="el" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a> &amp;func, void *client_data)</td></tr>
-<tr class="separator:adbc01458dbde72a6ba5cd42344db35a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0917968b9c7947fdedbe5541474451a6" id="r_a0917968b9c7947fdedbe5541474451a6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0917968b9c7947fdedbe5541474451a6">walkErrorStack</a> (<a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813">H5E_direction_t</a> direction, <a class="el" href="_h5_epublic_8h.html#aa0fc6445c613e4159a17d28ca61be825">H5E_walk2_t</a> func, void *client_data)</td></tr>
-<tr class="separator:a0917968b9c7947fdedbe5541474451a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29f3b25b1b290a2c867a4015a8bb808c" id="r_a29f3b25b1b290a2c867a4015a8bb808c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a29f3b25b1b290a2c867a4015a8bb808c">clearErrorStack</a> ()</td></tr>
+<tr class="memdesc:a29f3b25b1b290a2c867a4015a8bb808c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears the error stack for the current thread.  <br /></td></tr>
+<tr class="separator:a29f3b25b1b290a2c867a4015a8bb808c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7deb933f2a3bd479bc592862b90428ed" id="r_a7deb933f2a3bd479bc592862b90428ed"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7deb933f2a3bd479bc592862b90428ed">dontPrint</a> ()</td></tr>
+<tr class="memdesc:a7deb933f2a3bd479bc592862b90428ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turns off the automatic error printing from the C library.  <br /></td></tr>
+<tr class="separator:a7deb933f2a3bd479bc592862b90428ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca573fd364e64a80f9eb9cdd0dcf9591" id="r_aca573fd364e64a80f9eb9cdd0dcf9591"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca573fd364e64a80f9eb9cdd0dcf9591">getAutoPrint</a> (<a class="el" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a> &amp;func, void **client_data)</td></tr>
+<tr class="memdesc:aca573fd364e64a80f9eb9cdd0dcf9591"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the current settings for the automatic error stack traversal function and its data.  <br /></td></tr>
+<tr class="separator:aca573fd364e64a80f9eb9cdd0dcf9591"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a069c7489dd4f423fde47a65b8d25b23d" id="r_a069c7489dd4f423fde47a65b8d25b23d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a069c7489dd4f423fde47a65b8d25b23d">printErrorStack</a> (FILE *stream=stderr, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> err_stack=<a class="el" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a>)</td></tr>
+<tr class="memdesc:a069c7489dd4f423fde47a65b8d25b23d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prints the error stack in a default manner.  <br /></td></tr>
+<tr class="separator:a069c7489dd4f423fde47a65b8d25b23d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2fb84ab9840878fbc07812a6e1a930e" id="r_af2fb84ab9840878fbc07812a6e1a930e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2fb84ab9840878fbc07812a6e1a930e">setAutoPrint</a> (<a class="el" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a> &amp;func, void *client_data)</td></tr>
+<tr class="memdesc:af2fb84ab9840878fbc07812a6e1a930e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turns on the automatic error printing.  <br /></td></tr>
+<tr class="separator:af2fb84ab9840878fbc07812a6e1a930e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb3a720038672851192842936a120721" id="r_afb3a720038672851192842936a120721"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afb3a720038672851192842936a120721">walkErrorStack</a> (<a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813">H5E_direction_t</a> direction, <a class="el" href="_h5_epublic_8h.html#aa0fc6445c613e4159a17d28ca61be825">H5E_walk2_t</a> func, void *client_data)</td></tr>
+<tr class="memdesc:afb3a720038672851192842936a120721"><td class="mdescLeft">&#160;</td><td class="mdescRight">Walks the error stack for the current thread, calling the specified function.  <br /></td></tr>
+<tr class="separator:afb3a720038672851192842936a120721"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
-<tr class="memitem:a47911232d969297b6ac8b7cdc42593cd" id="r_a47911232d969297b6ac8b7cdc42593cd"><td class="memItemLeft" align="right" valign="top">static const char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a47911232d969297b6ac8b7cdc42593cd">DEFAULT_MSG</a> []</td></tr>
-<tr class="separator:a47911232d969297b6ac8b7cdc42593cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6cad9847003e45256651f63be151495" id="r_ac6cad9847003e45256651f63be151495"><td class="memItemLeft" align="right" valign="top">static const char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6cad9847003e45256651f63be151495">DEFAULT_MSG</a> [] = &quot;No detailed information provided&quot;</td></tr>
+<tr class="separator:ac6cad9847003e45256651f63be151495"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a480eadecaf7b936ad9aebab914243a76" name="a480eadecaf7b936ad9aebab914243a76"></a>
@@ -225,15 +240,24 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="class_h5_1_1_exception.html">Exception</a> </td>
           <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>func_name</em></span>, </td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>func</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>message</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a47911232d969297b6ac8b7cdc42593cd">DEFAULT_MSG</a></span>&#160;)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>message</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#ac6cad9847003e45256651f63be151495">DEFAULT_MSG</a></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Creates an exception with the name of the function, in which the failure occurs, and an optional detailed message. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">func</td><td>- IN: Name of the function where failure occurs </td></tr>
+    <tr><td class="paramname">message</td><td>- IN: Message on the failure </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -252,6 +276,8 @@ Static Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Default constructor. </p>
+
 </div>
 </div>
 <a id="acad34d4fc0c2bfc6c8739c3db96d317e" name="acad34d4fc0c2bfc6c8739c3db96d317e"></a>
@@ -268,6 +294,14 @@ Static Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Copy constructor: same HDF5 object as <em class="arg">original</em>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">orig</td><td>- IN: <a class="el" href="class_h5_1_1_exception.html" title="Exception provides wrappers of HDF5 error handling functions.">Exception</a> instance to copy </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -297,8 +331,8 @@ Static Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a12f3de9ed19276bbac2733e726762d58" name="a12f3de9ed19276bbac2733e726762d58"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a12f3de9ed19276bbac2733e726762d58">&#9670;&#160;</a></span>clearErrorStack()</h2>
+<a id="a29f3b25b1b290a2c867a4015a8bb808c" name="a29f3b25b1b290a2c867a4015a8bb808c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29f3b25b1b290a2c867a4015a8bb808c">&#9670;&#160;</a></span>clearErrorStack()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -307,7 +341,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void clearErrorStack </td>
+          <td class="memname">void clearErrorStack </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -320,10 +354,13 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Clears the error stack for the current thread. </p>
+<dl class="section user"><dt>Description</dt><dd>The stack is also cleared whenever a C API function is called, with certain exceptions (for instance, <code>H5Eprint</code>). </dd></dl>
+
 </div>
 </div>
-<a id="a3ea71ce86e4ebbcd93d820da4204f6de" name="a3ea71ce86e4ebbcd93d820da4204f6de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ea71ce86e4ebbcd93d820da4204f6de">&#9670;&#160;</a></span>dontPrint()</h2>
+<a id="a7deb933f2a3bd479bc592862b90428ed" name="a7deb933f2a3bd479bc592862b90428ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7deb933f2a3bd479bc592862b90428ed">&#9670;&#160;</a></span>dontPrint()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -332,7 +369,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void dontPrint </td>
+          <td class="memname">void dontPrint </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -345,10 +382,12 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Turns off the automatic error printing from the C library. </p>
+
 </div>
 </div>
-<a id="a1939a4a0b21fd2c6b5565b3a0fafebc6" name="a1939a4a0b21fd2c6b5565b3a0fafebc6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1939a4a0b21fd2c6b5565b3a0fafebc6">&#9670;&#160;</a></span>getAutoPrint()</h2>
+<a id="aca573fd364e64a80f9eb9cdd0dcf9591" name="aca573fd364e64a80f9eb9cdd0dcf9591"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca573fd364e64a80f9eb9cdd0dcf9591">&#9670;&#160;</a></span>getAutoPrint()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -357,7 +396,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void getAutoPrint </td>
+          <td class="memname">void getAutoPrint </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>func</em></span>, </td>
         </tr>
@@ -373,6 +412,15 @@ Static Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Retrieves the current settings for the automatic error stack traversal function and its data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">func</td><td>- OUT: Current setting for the function to be called upon an error condition </td></tr>
+    <tr><td class="paramname">client_data</td><td>- OUT: Current setting for the data passed to the error function </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -391,6 +439,9 @@ Static Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns the detailed message set at the time the exception is thrown. </p>
+<dl class="section return"><dt>Returns</dt><dd>Text message - <code>char</code> pointer </dd></dl>
+
 </div>
 </div>
 <a id="a0687e8cfdd6010cf1f7389acec979d8f" name="a0687e8cfdd6010cf1f7389acec979d8f"></a>
@@ -407,6 +458,9 @@ Static Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Returns the name of the function, where the exception is thrown. </p>
+<dl class="section return"><dt>Returns</dt><dd>Text message - <code>char</code> pointer </dd></dl>
 
 </div>
 </div>
@@ -425,6 +479,9 @@ Static Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns the detailed message set at the time the exception is thrown. </p>
+<dl class="section return"><dt>Returns</dt><dd>Text message - <code>H5std_string</code> </dd></dl>
+
 </div>
 </div>
 <a id="ac4425f35e8f44fc664a5c6d505d233d5" name="ac4425f35e8f44fc664a5c6d505d233d5"></a>
@@ -442,6 +499,9 @@ Static Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns the name of the function, where the exception is thrown. </p>
+<dl class="section return"><dt>Returns</dt><dd>Text message - <code>H5std_string</code> </dd></dl>
+
 </div>
 </div>
 <a id="a8b5150b7308060a67989c4fe1aab7acf" name="a8b5150b7308060a67989c4fe1aab7acf"></a>
@@ -453,11 +513,21 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">std::string getMajorString </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>err_major_id</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>err_major</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Returns a text string that describes the error specified by a major error number. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_major</td><td>- IN: Major error number </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Major error string </dd></dl>
+<dl class="section user"><dt>Description</dt><dd>In the failure case, the string "Invalid major error number" will be returned. </dd></dl>
 
 </div>
 </div>
@@ -470,16 +540,26 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">std::string getMinorString </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>err_minor_id</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>err_minor</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns a text string that describes the error specified by a minor error number. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">err_minor</td><td>- IN: Minor error number </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Minor error string </dd></dl>
+<dl class="section user"><dt>Description</dt><dd>In the failure case, the string "Invalid minor error number" will be returned. </dd></dl>
+
 </div>
 </div>
-<a id="aa240549c299c7d73acaa03d6b6bcc93f" name="aa240549c299c7d73acaa03d6b6bcc93f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa240549c299c7d73acaa03d6b6bcc93f">&#9670;&#160;</a></span>printErrorStack()</h2>
+<a id="a069c7489dd4f423fde47a65b8d25b23d" name="a069c7489dd4f423fde47a65b8d25b23d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a069c7489dd4f423fde47a65b8d25b23d">&#9670;&#160;</a></span>printErrorStack()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -488,7 +568,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void printErrorStack </td>
+          <td class="memname">void printErrorStack </td>
           <td>(</td>
           <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>stream</em></span><span class="paramdefsep"> = </span><span class="paramdefval">stderr</span>, </td>
         </tr>
@@ -505,10 +585,19 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Prints the error stack in a default manner. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stream</td><td>- IN: File pointer, default to stderr </td></tr>
+    <tr><td class="paramname">err_stack</td><td>- IN: Error stack ID, default to <a class="el" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT(0)</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
-<a id="adbc01458dbde72a6ba5cd42344db35a5" name="adbc01458dbde72a6ba5cd42344db35a5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adbc01458dbde72a6ba5cd42344db35a5">&#9670;&#160;</a></span>setAutoPrint()</h2>
+<a id="af2fb84ab9840878fbc07812a6e1a930e" name="af2fb84ab9840878fbc07812a6e1a930e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2fb84ab9840878fbc07812a6e1a930e">&#9670;&#160;</a></span>setAutoPrint()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -517,7 +606,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void setAutoPrint </td>
+          <td class="memname">void setAutoPrint </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>func</em></span>, </td>
         </tr>
@@ -534,10 +623,21 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Turns on the automatic error printing. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">func</td><td>- IN: Function to be called upon an error condition </td></tr>
+    <tr><td class="paramname">client_data</td><td>- IN: Data passed to the error function </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>When the library is first initialized the auto printing function, <em class="arg">func</em>, is set to the C API <code>H5Eprint</code> and <em class="arg">client_data</em> is the standard error stream pointer, <code>stderr</code>. Automatic stack traversal is always in the <code>H5E_WALK_DOWNWARD</code> direction. </dd></dl>
+<dl class="section user"><dt></dt><dd>Users are encouraged to write their own more specific error handlers </dd></dl>
+
 </div>
 </div>
-<a id="a0917968b9c7947fdedbe5541474451a6" name="a0917968b9c7947fdedbe5541474451a6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0917968b9c7947fdedbe5541474451a6">&#9670;&#160;</a></span>walkErrorStack()</h2>
+<a id="afb3a720038672851192842936a120721" name="afb3a720038672851192842936a120721"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb3a720038672851192842936a120721">&#9670;&#160;</a></span>walkErrorStack()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -546,7 +646,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void walkErrorStack </td>
+          <td class="memname">void walkErrorStack </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="_h5_epublic_8h.html#ae30cff307b364e94ce2d552edbca6813">H5E_direction_t</a></td>          <td class="paramname"><span class="paramname"><em>direction</em></span>, </td>
         </tr>
@@ -568,11 +668,49 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Walks the error stack for the current thread, calling the specified function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">direction</td><td>- IN: Direction in which the error stack is to be walked </td></tr>
+    <tr><td class="paramname">func</td><td>- IN: Function to be called for each error encountered </td></tr>
+    <tr><td class="paramname">client_data</td><td>- IN: Data passed to the error function </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>Valid values for <em class="arg">direction</em> include: <ul>
+<li><code>H5E_WALK_UPWARD</code> - begin with the most specific error and end at the API </li>
+<li><code>H5E_WALK_DOWNWARD</code> - begin at the API and end at the inner-most function where the error was first detected </li>
+</ul>
+</dd></dl>
+<dl class="section user"><dt></dt><dd>The function specified by <em class="arg">func</em> will be called for each error in the error stack. The <code>H5E_walk_t</code> prototype is as follows: <div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> (*<a class="code hl_define" href="_h5version_8h.html#a7bbdcafe87980d81a22ae5226f85c84e">H5E_walk_t</a>)(<span class="keywordtype">int</span> n, <a class="code hl_define" href="_h5version_8h.html#a2592cae9c5fa61a6045b621cd94d3383">H5E_error_t</a> *err_desc, <span class="keywordtype">void</span> *client_data)</div>
+<div class="line">    <span class="keywordtype">int</span> n - Indexed position of the error in the stack; it begins at zero</div>
+<div class="line">            regardless of stack traversal direction</div>
+<div class="line">    <a class="code hl_define" href="_h5version_8h.html#a2592cae9c5fa61a6045b621cd94d3383">H5E_error_t</a> *err_desc - Pointer to a data structure describing the</div>
+<div class="line">            error.  This structure is listed below.</div>
+<div class="line">    <span class="keywordtype">void</span> *client_data - Pointer to client data in the format expected by</div>
+<div class="line">            the user-defined function.</div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:252</div></div>
+<div class="ttc" id="a_h5version_8h_html_a2592cae9c5fa61a6045b621cd94d3383"><div class="ttname"><a href="_h5version_8h.html#a2592cae9c5fa61a6045b621cd94d3383">H5E_error_t</a></div><div class="ttdeci">#define H5E_error_t</div><div class="ttdef"><b>Definition</b> H5version.h:1213</div></div>
+<div class="ttc" id="a_h5version_8h_html_a7bbdcafe87980d81a22ae5226f85c84e"><div class="ttname"><a href="_h5version_8h.html#a7bbdcafe87980d81a22ae5226f85c84e">H5E_walk_t</a></div><div class="ttdeci">#define H5E_walk_t</div><div class="ttdef"><b>Definition</b> H5version.h:1214</div></div>
+</div><!-- fragment --> </dd></dl>
+<dl class="section user"><dt></dt><dd>Data structure to describe the error: <div class="fragment"><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct_h5_e__error2__t.html">H5E_error2_t</a> {</div>
+<div class="line">    <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>       cls_id;         <span class="comment">//class ID</span></div>
+<div class="line">    <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>       maj_num;        <span class="comment">//major error ID</span></div>
+<div class="line">    <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>       min_num;        <span class="comment">//minor error number</span></div>
+<div class="line">    <span class="keyword">const</span> <span class="keywordtype">char</span>  *func_name;     <span class="comment">//function in which error occurred</span></div>
+<div class="line">    <span class="keyword">const</span> <span class="keywordtype">char</span>  *file_name;     <span class="comment">//file in which error occurred</span></div>
+<div class="line">    <span class="keywordtype">unsigned</span>    line;           <span class="comment">//line in file where error occurs</span></div>
+<div class="line">    <span class="keyword">const</span> <span class="keywordtype">char</span>  *desc;          <span class="comment">//optional supplied description</span></div>
+<div class="line">} <a class="code hl_struct" href="struct_h5_e__error2__t.html">H5E_error2_t</a>;</div>
+<div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
+<div class="ttc" id="astruct_h5_e__error2__t_html"><div class="ttname"><a href="struct_h5_e__error2__t.html">H5E_error2_t</a></div><div class="ttdef"><b>Definition</b> H5Epublic.h:35</div></div>
+</div><!-- fragment --> </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Field Documentation</h2>
-<a id="a47911232d969297b6ac8b7cdc42593cd" name="a47911232d969297b6ac8b7cdc42593cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a47911232d969297b6ac8b7cdc42593cd">&#9670;&#160;</a></span>DEFAULT_MSG</h2>
+<a id="ac6cad9847003e45256651f63be151495" name="ac6cad9847003e45256651f63be151495"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6cad9847003e45256651f63be151495">&#9670;&#160;</a></span>DEFAULT_MSG</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -581,7 +719,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const char DEFAULT_MSG[]</td>
+          <td class="memname">const char DEFAULT_MSG = &quot;No detailed information provided&quot;</td>
         </tr>
       </table>
   </td>
@@ -593,8 +731,9 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>c++/src/<a class="el" href="_h5_exception_8h.html">H5Exception.h</a></li>
+<li>c++/src/<a class="el" href="_h5_exception_8cpp.html">H5Exception.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

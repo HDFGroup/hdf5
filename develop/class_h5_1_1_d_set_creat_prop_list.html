@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -165,243 +165,334 @@ $(function(){initNavTree('class_h5_1_1_d_set_creat_prop_list.html',''); initResi
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ae9054ff038ba68e7850694fc9064539c" id="r_ae9054ff038ba68e7850694fc9064539c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae9054ff038ba68e7850694fc9064539c">allFiltersAvail</a> () const</td></tr>
+<tr class="memdesc:ae9054ff038ba68e7850694fc9064539c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries whether all the filters set in this property list are available currently.  <br /></td></tr>
 <tr class="separator:ae9054ff038ba68e7850694fc9064539c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3120e17495d007633d123f598036993" id="r_ab3120e17495d007633d123f598036993"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab3120e17495d007633d123f598036993">DSetCreatPropList</a> ()</td></tr>
+<tr class="memdesc:ab3120e17495d007633d123f598036993"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor: creates a stub dataset creation property list.  <br /></td></tr>
 <tr class="separator:ab3120e17495d007633d123f598036993"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73714aa53db194cfc11dfe53c83963a3" id="r_a73714aa53db194cfc11dfe53c83963a3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73714aa53db194cfc11dfe53c83963a3">DSetCreatPropList</a> (const <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html">DSetCreatPropList</a> &amp;orig)</td></tr>
+<tr class="memdesc:a73714aa53db194cfc11dfe53c83963a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor: same HDF5 object as <em class="arg">original</em> <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html" title="Class DSetCreatPropList inherits from ObjCreatPropList and provides wrappers for the HDF5 dataset cre...">DSetCreatPropList</a> object.  <br /></td></tr>
 <tr class="separator:a73714aa53db194cfc11dfe53c83963a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6851aa48cc2e76881dbaf092e676eda0" id="r_a6851aa48cc2e76881dbaf092e676eda0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6851aa48cc2e76881dbaf092e676eda0">DSetCreatPropList</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id)</td></tr>
+<tr class="memdesc:a6851aa48cc2e76881dbaf092e676eda0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html" title="Class DSetCreatPropList inherits from ObjCreatPropList and provides wrappers for the HDF5 dataset cre...">DSetCreatPropList</a> object using the id of an existing dataset creation property list.  <br /></td></tr>
 <tr class="separator:a6851aa48cc2e76881dbaf092e676eda0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a71c2693398514fad4828112c9d21554b" id="r_a71c2693398514fad4828112c9d21554b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71c2693398514fad4828112c9d21554b">fromClass</a> () const override</td></tr>
-<tr class="memdesc:a71c2693398514fad4828112c9d21554b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns this class name.  <br /></td></tr>
-<tr class="separator:a71c2693398514fad4828112c9d21554b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac03ba7f9a230d046132e6495a2a4e1b9" id="r_ac03ba7f9a230d046132e6495a2a4e1b9"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac03ba7f9a230d046132e6495a2a4e1b9">fromClass</a> () const override</td></tr>
+<tr class="memdesc:ac03ba7f9a230d046132e6495a2a4e1b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns this class name.  <br /></td></tr>
+<tr class="separator:ac03ba7f9a230d046132e6495a2a4e1b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad120a29994d809fcb7b23c8cda1a0b42" id="r_ad120a29994d809fcb7b23c8cda1a0b42"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_dpublic_8h.html#aab70b464cf3c5fc931dce0c4fe98b3d2">H5D_alloc_time_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad120a29994d809fcb7b23c8cda1a0b42">getAllocTime</a> () const</td></tr>
+<tr class="memdesc:ad120a29994d809fcb7b23c8cda1a0b42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get space allocation time for this property.  <br /></td></tr>
 <tr class="separator:ad120a29994d809fcb7b23c8cda1a0b42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9a868c0fc2b341f0d9284bb8208933a" id="r_aa9a868c0fc2b341f0d9284bb8208933a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa9a868c0fc2b341f0d9284bb8208933a">getChunk</a> (int max_ndims, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *dim) const</td></tr>
+<tr class="memdesc:aa9a868c0fc2b341f0d9284bb8208933a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the size of the chunks used to store a chunked layout dataset.  <br /></td></tr>
 <tr class="separator:aa9a868c0fc2b341f0d9284bb8208933a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18c9242bd8e17520d4f4719a99ce568a" id="r_a18c9242bd8e17520d4f4719a99ce568a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18c9242bd8e17520d4f4719a99ce568a">getExternal</a> (unsigned idx, size_t name_size, char *name, <a class="el" href="_h5public_8h.html#a7231b68f6d5811a693d4cbc937a34604">HDoff_t</a> &amp;offset, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> &amp;size) const</td></tr>
+<tr class="memdesc:a18c9242bd8e17520d4f4719a99ce568a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about an external file.  <br /></td></tr>
 <tr class="separator:a18c9242bd8e17520d4f4719a99ce568a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a626b0dd422d21e3b4fa2798a1e903c6d" id="r_a626b0dd422d21e3b4fa2798a1e903c6d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a626b0dd422d21e3b4fa2798a1e903c6d">getExternalCount</a> () const</td></tr>
+<tr class="memdesc:a626b0dd422d21e3b4fa2798a1e903c6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of external files for a dataset.  <br /></td></tr>
 <tr class="separator:a626b0dd422d21e3b4fa2798a1e903c6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af625cdd0f4eb1d9d8b5555341dd7d40f" id="r_af625cdd0f4eb1d9d8b5555341dd7d40f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_dpublic_8h.html#aa39293626c4e68dd28b06c0dc84bde4a">H5D_fill_time_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af625cdd0f4eb1d9d8b5555341dd7d40f">getFillTime</a> () const</td></tr>
+<tr class="memdesc:af625cdd0f4eb1d9d8b5555341dd7d40f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets fill value writing time.  <br /></td></tr>
 <tr class="separator:af625cdd0f4eb1d9d8b5555341dd7d40f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca9c9c79d5c1410056a6106700ceee17" id="r_aca9c9c79d5c1410056a6106700ceee17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca9c9c79d5c1410056a6106700ceee17">getFillValue</a> (const <a class="el" href="class_h5_1_1_data_type.html">DataType</a> &amp;fvalue_type, void *value) const</td></tr>
+<tr class="memdesc:aca9c9c79d5c1410056a6106700ceee17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a dataset fill value.  <br /></td></tr>
 <tr class="separator:aca9c9c79d5c1410056a6106700ceee17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2afed19028f9e23efeeb7bda3d1aa648" id="r_a2afed19028f9e23efeeb7bda3d1aa648"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2afed19028f9e23efeeb7bda3d1aa648">getFilter</a> (int filter_number, unsigned int &amp;flags, size_t &amp;cd_nelmts, unsigned int *cd_values, size_t namelen, char name[], unsigned int &amp;filter_config) const</td></tr>
+<tr class="memdesc:a2afed19028f9e23efeeb7bda3d1aa648"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about a filter in a pipeline.  <br /></td></tr>
 <tr class="separator:a2afed19028f9e23efeeb7bda3d1aa648"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5495df10b7603fa7fb90a454e0cb258d" id="r_a5495df10b7603fa7fb90a454e0cb258d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5495df10b7603fa7fb90a454e0cb258d">getFilterById</a> (<a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a> filter_id, unsigned int &amp;flags, size_t &amp;cd_nelmts, unsigned int *cd_values, size_t namelen, char name[], unsigned int &amp;filter_config) const</td></tr>
+<tr class="memdesc:a5495df10b7603fa7fb90a454e0cb258d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about a filter in a pipeline given the filter id.  <br /></td></tr>
 <tr class="separator:a5495df10b7603fa7fb90a454e0cb258d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6c50301b3975ebe50b9a0afc41d8a71" id="r_af6c50301b3975ebe50b9a0afc41d8a71"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_dpublic_8h.html#a57e163d4c263b585ca2d904996f5e06e">H5D_layout_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6c50301b3975ebe50b9a0afc41d8a71">getLayout</a> () const</td></tr>
+<tr class="memdesc:af6c50301b3975ebe50b9a0afc41d8a71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the layout type of this property list.  <br /></td></tr>
 <tr class="separator:af6c50301b3975ebe50b9a0afc41d8a71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e09b2f4b4e7cd2605a14ff00f67c8c5" id="r_a6e09b2f4b4e7cd2605a14ff00f67c8c5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e09b2f4b4e7cd2605a14ff00f67c8c5">getNfilters</a> () const</td></tr>
+<tr class="memdesc:a6e09b2f4b4e7cd2605a14ff00f67c8c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of filters in the pipeline.  <br /></td></tr>
 <tr class="separator:a6e09b2f4b4e7cd2605a14ff00f67c8c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee4ad81bc2e5a450f80e4d5404f582a1" id="r_aee4ad81bc2e5a450f80e4d5404f582a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_dpublic_8h.html#a322c8263bd76fa5af8ff7636de5dfa23">H5D_fill_value_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aee4ad81bc2e5a450f80e4d5404f582a1">isFillValueDefined</a> () const</td></tr>
+<tr class="memdesc:aee4ad81bc2e5a450f80e4d5404f582a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if fill value has been defined for this property.  <br /></td></tr>
 <tr class="separator:aee4ad81bc2e5a450f80e4d5404f582a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab31eb2524ac596ba42a2f9375771f3b6" id="r_ab31eb2524ac596ba42a2f9375771f3b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab31eb2524ac596ba42a2f9375771f3b6">modifyFilter</a> (<a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a> filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[]) const</td></tr>
+<tr class="memdesc:ab31eb2524ac596ba42a2f9375771f3b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified filter.  <br /></td></tr>
 <tr class="separator:ab31eb2524ac596ba42a2f9375771f3b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cd9c3f5587dcee8322441e5dfdac857" id="r_a5cd9c3f5587dcee8322441e5dfdac857"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5cd9c3f5587dcee8322441e5dfdac857">removeFilter</a> (<a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a> filter_id) const</td></tr>
+<tr class="memdesc:a5cd9c3f5587dcee8322441e5dfdac857"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes one or more filters.  <br /></td></tr>
 <tr class="separator:a5cd9c3f5587dcee8322441e5dfdac857"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabce95d2078c4549f28e6695c97fa62a" id="r_aabce95d2078c4549f28e6695c97fa62a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aabce95d2078c4549f28e6695c97fa62a">setAllocTime</a> (<a class="el" href="_h5_dpublic_8h.html#aab70b464cf3c5fc931dce0c4fe98b3d2">H5D_alloc_time_t</a> alloc_time) const</td></tr>
+<tr class="memdesc:aabce95d2078c4549f28e6695c97fa62a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets space allocation time for dataset during creation.  <br /></td></tr>
 <tr class="separator:aabce95d2078c4549f28e6695c97fa62a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a816d657d6913a057c1388223bff8e9c9" id="r_a816d657d6913a057c1388223bff8e9c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a816d657d6913a057c1388223bff8e9c9">setChunk</a> (int ndims, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *dim) const</td></tr>
+<tr class="memdesc:a816d657d6913a057c1388223bff8e9c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the size of the chunks used to store a chunked layout dataset.  <br /></td></tr>
 <tr class="separator:a816d657d6913a057c1388223bff8e9c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0256c15b8b901599a4973a0361b6e6e" id="r_ae0256c15b8b901599a4973a0361b6e6e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae0256c15b8b901599a4973a0361b6e6e">setDeflate</a> (int level) const</td></tr>
+<tr class="memdesc:ae0256c15b8b901599a4973a0361b6e6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets compression method and compression level.  <br /></td></tr>
 <tr class="separator:ae0256c15b8b901599a4973a0361b6e6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ababa8ad7befdff39e37bad70312dad7b" id="r_ababa8ad7befdff39e37bad70312dad7b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ababa8ad7befdff39e37bad70312dad7b">setExternal</a> (const char *name, <a class="el" href="_h5public_8h.html#a7231b68f6d5811a693d4cbc937a34604">HDoff_t</a> offset, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> size) const</td></tr>
+<tr class="memdesc:ababa8ad7befdff39e37bad70312dad7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds an external file to the list of external files.  <br /></td></tr>
 <tr class="separator:ababa8ad7befdff39e37bad70312dad7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca7f7d07d71df95444ae7a2c5cc2368e" id="r_aca7f7d07d71df95444ae7a2c5cc2368e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca7f7d07d71df95444ae7a2c5cc2368e">setFillTime</a> (<a class="el" href="_h5_dpublic_8h.html#aa39293626c4e68dd28b06c0dc84bde4a">H5D_fill_time_t</a> fill_time) const</td></tr>
+<tr class="memdesc:aca7f7d07d71df95444ae7a2c5cc2368e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets fill value writing time for dataset.  <br /></td></tr>
 <tr class="separator:aca7f7d07d71df95444ae7a2c5cc2368e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3d9c6dcd94bca85d09b696d29f54d70" id="r_ae3d9c6dcd94bca85d09b696d29f54d70"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae3d9c6dcd94bca85d09b696d29f54d70">setFillValue</a> (const <a class="el" href="class_h5_1_1_data_type.html">DataType</a> &amp;fvalue_type, const void *value) const</td></tr>
+<tr class="memdesc:ae3d9c6dcd94bca85d09b696d29f54d70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a dataset fill value.  <br /></td></tr>
 <tr class="separator:ae3d9c6dcd94bca85d09b696d29f54d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3e50e97ae8571c665312a72cb45cbf3" id="r_ab3e50e97ae8571c665312a72cb45cbf3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab3e50e97ae8571c665312a72cb45cbf3">setFilter</a> (<a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a> filter, unsigned int flags=0, size_t cd_nelmts=0, const unsigned int cd_values[]=NULL) const</td></tr>
+<tr class="memdesc:ab3e50e97ae8571c665312a72cb45cbf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a filter to the filter pipeline.  <br /></td></tr>
 <tr class="separator:ab3e50e97ae8571c665312a72cb45cbf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b09e7ed3d0bca6141f8cd85496ef856" id="r_a4b09e7ed3d0bca6141f8cd85496ef856"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b09e7ed3d0bca6141f8cd85496ef856">setFletcher32</a> () const</td></tr>
+<tr class="memdesc:a4b09e7ed3d0bca6141f8cd85496ef856"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets Fletcher32 checksum of EDC for this property list.  <br /></td></tr>
 <tr class="separator:a4b09e7ed3d0bca6141f8cd85496ef856"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48b9de1cb0d818fe0893eb086f65ac73" id="r_a48b9de1cb0d818fe0893eb086f65ac73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a48b9de1cb0d818fe0893eb086f65ac73">setLayout</a> (<a class="el" href="_h5_dpublic_8h.html#a57e163d4c263b585ca2d904996f5e06e">H5D_layout_t</a> layout) const</td></tr>
+<tr class="memdesc:a48b9de1cb0d818fe0893eb086f65ac73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the type of storage used store the raw data for a dataset.  <br /></td></tr>
 <tr class="separator:a48b9de1cb0d818fe0893eb086f65ac73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e7450fd7aca4d9575624c21e75001f9" id="r_a2e7450fd7aca4d9575624c21e75001f9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2e7450fd7aca4d9575624c21e75001f9">setNbit</a> () const</td></tr>
+<tr class="memdesc:a2e7450fd7aca4d9575624c21e75001f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up for the use of the Nbit compression filter.  <br /></td></tr>
 <tr class="separator:a2e7450fd7aca4d9575624c21e75001f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e71b8c975459a696243224a63c2a356" id="r_a7e71b8c975459a696243224a63c2a356"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e71b8c975459a696243224a63c2a356">setShuffle</a> () const</td></tr>
+<tr class="memdesc:a7e71b8c975459a696243224a63c2a356"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets method of the shuffle filter.  <br /></td></tr>
 <tr class="separator:a7e71b8c975459a696243224a63c2a356"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7d284d447001e5b51a97d0a7235e695" id="r_af7d284d447001e5b51a97d0a7235e695"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7d284d447001e5b51a97d0a7235e695">setSzip</a> (unsigned int options_mask, unsigned int pixels_per_block) const</td></tr>
+<tr class="memdesc:af7d284d447001e5b51a97d0a7235e695"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up for the use of the SZIP compression filter.  <br /></td></tr>
 <tr class="separator:af7d284d447001e5b51a97d0a7235e695"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fcb5a1b4576aae6b6d820c4f6131973" id="r_a1fcb5a1b4576aae6b6d820c4f6131973"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1fcb5a1b4576aae6b6d820c4f6131973">setVirtual</a> (const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;vspace, const char *src_fname, const char *src_dsname, const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;sspace) const</td></tr>
+<tr class="memdesc:a1fcb5a1b4576aae6b6d820c4f6131973"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps elements of a virtual dataset to elements of the source dataset.  <br /></td></tr>
 <tr class="separator:a1fcb5a1b4576aae6b6d820c4f6131973"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a75bbdb70662901af84feac2812bffd11" id="r_a75bbdb70662901af84feac2812bffd11"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75bbdb70662901af84feac2812bffd11">setVirtual</a> (const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;vspace, const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> src_fname, const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> src_dsname, const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;sspace) const</td></tr>
-<tr class="separator:a75bbdb70662901af84feac2812bffd11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bc431e2d4a0133ae83c984204ee6b9e" id="r_a3bc431e2d4a0133ae83c984204ee6b9e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3bc431e2d4a0133ae83c984204ee6b9e">setVirtual</a> (const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;vspace, const std::string src_fname, const std::string src_dsname, const <a class="el" href="class_h5_1_1_data_space.html">DataSpace</a> &amp;sspace) const</td></tr>
+<tr class="memdesc:a3bc431e2d4a0133ae83c984204ee6b9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps elements of a virtual dataset to elements of the source dataset.  <br /></td></tr>
+<tr class="separator:a3bc431e2d4a0133ae83c984204ee6b9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3c18b6073b9d65ae364504ff1649128" id="r_ad3c18b6073b9d65ae364504ff1649128"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad3c18b6073b9d65ae364504ff1649128">~DSetCreatPropList</a> () override=default</td></tr>
 <tr class="separator:ad3c18b6073b9d65ae364504ff1649128"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_h5_1_1_obj_creat_prop_list"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_h5_1_1_obj_creat_prop_list')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_h5_1_1_obj_creat_prop_list.html">ObjCreatPropList</a></td></tr>
 <tr class="memitem:ab5bdffda763c7a08c4eb86a43c31664e inherit pub_methods_class_h5_1_1_obj_creat_prop_list" id="r_ab5bdffda763c7a08c4eb86a43c31664e"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#ab5bdffda763c7a08c4eb86a43c31664e">getAttrCrtOrder</a> () const</td></tr>
+<tr class="memdesc:ab5bdffda763c7a08c4eb86a43c31664e inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the flags indicating creation order is tracked/indexed for attributes on an object.  <br /></td></tr>
 <tr class="separator:ab5bdffda763c7a08c4eb86a43c31664e inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4362b6a7d3c77db1dc4f5472eb1e0a03 inherit pub_methods_class_h5_1_1_obj_creat_prop_list" id="r_a4362b6a7d3c77db1dc4f5472eb1e0a03"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#a4362b6a7d3c77db1dc4f5472eb1e0a03">getAttrPhaseChange</a> (unsigned &amp;max_compact, unsigned &amp;min_dense) const</td></tr>
+<tr class="memdesc:a4362b6a7d3c77db1dc4f5472eb1e0a03 inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets attribute storage phase change thresholds.  <br /></td></tr>
 <tr class="separator:a4362b6a7d3c77db1dc4f5472eb1e0a03 inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5b0e0b1d35a9bf2849bce4eab34a57d inherit pub_methods_class_h5_1_1_obj_creat_prop_list" id="r_ac5b0e0b1d35a9bf2849bce4eab34a57d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#ac5b0e0b1d35a9bf2849bce4eab34a57d">ObjCreatPropList</a> ()</td></tr>
+<tr class="memdesc:ac5b0e0b1d35a9bf2849bce4eab34a57d inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a file access property list.  <br /></td></tr>
 <tr class="separator:ac5b0e0b1d35a9bf2849bce4eab34a57d inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a523af9e015d4b1dddbf312e83bf18259 inherit pub_methods_class_h5_1_1_obj_creat_prop_list" id="r_a523af9e015d4b1dddbf312e83bf18259"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#a523af9e015d4b1dddbf312e83bf18259">ObjCreatPropList</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id)</td></tr>
+<tr class="memdesc:a523af9e015d4b1dddbf312e83bf18259 inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a file access property list using the id of an existing one.  <br /></td></tr>
 <tr class="separator:a523af9e015d4b1dddbf312e83bf18259 inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9807c41edd5c560867e16656a9590ea inherit pub_methods_class_h5_1_1_obj_creat_prop_list" id="r_af9807c41edd5c560867e16656a9590ea"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#af9807c41edd5c560867e16656a9590ea">ObjCreatPropList</a> (const <a class="el" href="class_h5_1_1_obj_creat_prop_list.html">ObjCreatPropList</a> &amp;original)</td></tr>
+<tr class="memdesc:af9807c41edd5c560867e16656a9590ea inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor: same HDF5 object as <em class="arg">original</em>.  <br /></td></tr>
 <tr class="separator:af9807c41edd5c560867e16656a9590ea inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f4c37d90bf4dd1b1cf682b87e695cae inherit pub_methods_class_h5_1_1_obj_creat_prop_list" id="r_a5f4c37d90bf4dd1b1cf682b87e695cae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#a5f4c37d90bf4dd1b1cf682b87e695cae">setAttrCrtOrder</a> (unsigned crt_order_flags) const</td></tr>
+<tr class="memdesc:a5f4c37d90bf4dd1b1cf682b87e695cae inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the flags for creation order of attributes on an object.  <br /></td></tr>
 <tr class="separator:a5f4c37d90bf4dd1b1cf682b87e695cae inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4dea041b411800ec8d95341305db186 inherit pub_methods_class_h5_1_1_obj_creat_prop_list" id="r_ab4dea041b411800ec8d95341305db186"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#ab4dea041b411800ec8d95341305db186">setAttrPhaseChange</a> (unsigned max_compact=8, unsigned min_dense=6) const</td></tr>
+<tr class="memdesc:ab4dea041b411800ec8d95341305db186 inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets attribute storage phase change thresholds.  <br /></td></tr>
 <tr class="separator:ab4dea041b411800ec8d95341305db186 inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a539bbc68e263ec054ab02d4c55265d inherit pub_methods_class_h5_1_1_obj_creat_prop_list" id="r_a1a539bbc68e263ec054ab02d4c55265d"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#a1a539bbc68e263ec054ab02d4c55265d">~ObjCreatPropList</a> () override=default</td></tr>
 <tr class="separator:a1a539bbc68e263ec054ab02d4c55265d inherit pub_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_h5_1_1_prop_list"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_h5_1_1_prop_list')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_h5_1_1_prop_list.html">PropList</a></td></tr>
-<tr class="memitem:a547c58c858ce4a8fdfd32b25523f4c03 inherit pub_methods_class_h5_1_1_prop_list" id="r_a547c58c858ce4a8fdfd32b25523f4c03"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a547c58c858ce4a8fdfd32b25523f4c03">close</a> () override</td></tr>
-<tr class="separator:a547c58c858ce4a8fdfd32b25523f4c03 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7008bca493d69ea65f12e0940f3a6886 inherit pub_methods_class_h5_1_1_prop_list" id="r_a7008bca493d69ea65f12e0940f3a6886"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a7008bca493d69ea65f12e0940f3a6886">close</a> () override</td></tr>
+<tr class="memdesc:a7008bca493d69ea65f12e0940f3a6886 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes the property list if it is not a default one.  <br /></td></tr>
+<tr class="separator:a7008bca493d69ea65f12e0940f3a6886 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab7e21b78a5e3e3d44681f47787087807 inherit pub_methods_class_h5_1_1_prop_list" id="r_ab7e21b78a5e3e3d44681f47787087807"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#ab7e21b78a5e3e3d44681f47787087807">closeClass</a> () const</td></tr>
+<tr class="memdesc:ab7e21b78a5e3e3d44681f47787087807 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close a property list class.  <br /></td></tr>
 <tr class="separator:ab7e21b78a5e3e3d44681f47787087807 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab5c5d6cc3c376975f6bdbf39ef2f1832 inherit pub_methods_class_h5_1_1_prop_list" id="r_ab5c5d6cc3c376975f6bdbf39ef2f1832"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#ab5c5d6cc3c376975f6bdbf39ef2f1832">copy</a> (const <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;like_plist)</td></tr>
+<tr class="memdesc:ab5c5d6cc3c376975f6bdbf39ef2f1832 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes a copy of an existing property list.  <br /></td></tr>
 <tr class="separator:ab5c5d6cc3c376975f6bdbf39ef2f1832 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4bcdfecec8f6e3c8262b46f858e78d21 inherit pub_methods_class_h5_1_1_prop_list" id="r_a4bcdfecec8f6e3c8262b46f858e78d21"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a4bcdfecec8f6e3c8262b46f858e78d21">copyProp</a> (<a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;dest, const char *name) const</td></tr>
+<tr class="memdesc:a4bcdfecec8f6e3c8262b46f858e78d21 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies a property from this property list or class to another.  <br /></td></tr>
 <tr class="separator:a4bcdfecec8f6e3c8262b46f858e78d21 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3035445b822b818995f14b6dda0886f2 inherit pub_methods_class_h5_1_1_prop_list" id="r_a3035445b822b818995f14b6dda0886f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a3035445b822b818995f14b6dda0886f2">copyProp</a> (<a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;dest, const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name) const</td></tr>
-<tr class="separator:a3035445b822b818995f14b6dda0886f2 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac993d44fe6d9d835bbeeae1d0b7b35d0 inherit pub_methods_class_h5_1_1_prop_list" id="r_ac993d44fe6d9d835bbeeae1d0b7b35d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#ac993d44fe6d9d835bbeeae1d0b7b35d0">copyProp</a> (<a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;dest, const std::string &amp;name) const</td></tr>
+<tr class="memdesc:ac993d44fe6d9d835bbeeae1d0b7b35d0 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:ac993d44fe6d9d835bbeeae1d0b7b35d0 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf890685c19818626d8aab7bfc64b916 inherit pub_methods_class_h5_1_1_prop_list" id="r_abf890685c19818626d8aab7bfc64b916"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#abf890685c19818626d8aab7bfc64b916">copyProp</a> (<a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;dest, <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;src, const char *name) const</td></tr>
+<tr class="memdesc:abf890685c19818626d8aab7bfc64b916 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies a property from one list or class to another - Obsolete.  <br /></td></tr>
 <tr class="separator:abf890685c19818626d8aab7bfc64b916 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36ee84f0073cf3e91dca905f9b18411f inherit pub_methods_class_h5_1_1_prop_list" id="r_a36ee84f0073cf3e91dca905f9b18411f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a36ee84f0073cf3e91dca905f9b18411f">copyProp</a> (<a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;dest, <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;src, const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name) const</td></tr>
-<tr class="separator:a36ee84f0073cf3e91dca905f9b18411f inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a942d4db79eccc983c4a4d7be4b10b101 inherit pub_methods_class_h5_1_1_prop_list" id="r_a942d4db79eccc983c4a4d7be4b10b101"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a942d4db79eccc983c4a4d7be4b10b101">copyProp</a> (<a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;dest, <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;src, const std::string &amp;name) const</td></tr>
+<tr class="memdesc:a942d4db79eccc983c4a4d7be4b10b101 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts. - Obsolete.  <br /></td></tr>
+<tr class="separator:a942d4db79eccc983c4a4d7be4b10b101 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5734ba2e94e524bd741526e59e344f78 inherit pub_methods_class_h5_1_1_prop_list" id="r_a5734ba2e94e524bd741526e59e344f78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a5734ba2e94e524bd741526e59e344f78">getClass</a> () const</td></tr>
+<tr class="memdesc:a5734ba2e94e524bd741526e59e344f78 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the class of this property list, i.e. <code>H5P_FILE_CREATE</code>...  <br /></td></tr>
 <tr class="separator:a5734ba2e94e524bd741526e59e344f78 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4a36c1d31a0ad5e1202a2b7554ee987 inherit pub_methods_class_h5_1_1_prop_list" id="r_af4a36c1d31a0ad5e1202a2b7554ee987"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#af4a36c1d31a0ad5e1202a2b7554ee987">getClassName</a> () const</td></tr>
-<tr class="separator:af4a36c1d31a0ad5e1202a2b7554ee987 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e18cc4e70c796bee4100e151909057d inherit pub_methods_class_h5_1_1_prop_list" id="r_a4e18cc4e70c796bee4100e151909057d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a4e18cc4e70c796bee4100e151909057d">getClassName</a> () const</td></tr>
+<tr class="memdesc:a4e18cc4e70c796bee4100e151909057d inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the name of a generic property list class.  <br /></td></tr>
+<tr class="separator:a4e18cc4e70c796bee4100e151909057d inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6df46d944be47afde7d90c54dd5277c5 inherit pub_methods_class_h5_1_1_prop_list" id="r_a6df46d944be47afde7d90c54dd5277c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h5_1_1_prop_list.html">PropList</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a6df46d944be47afde7d90c54dd5277c5">getClassParent</a> () const</td></tr>
+<tr class="memdesc:a6df46d944be47afde7d90c54dd5277c5 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the parent class of a generic property class.  <br /></td></tr>
 <tr class="separator:a6df46d944be47afde7d90c54dd5277c5 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5eda254838615bd58b46e86bfbb717f inherit pub_methods_class_h5_1_1_prop_list" id="r_aa5eda254838615bd58b46e86bfbb717f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#aa5eda254838615bd58b46e86bfbb717f">getId</a> () const override</td></tr>
-<tr class="separator:aa5eda254838615bd58b46e86bfbb717f inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33cf3dd14411c99df91585556675de06 inherit pub_methods_class_h5_1_1_prop_list" id="r_a33cf3dd14411c99df91585556675de06"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a33cf3dd14411c99df91585556675de06">getId</a> () const override</td></tr>
+<tr class="memdesc:a33cf3dd14411c99df91585556675de06 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the id of this property list.  <br /></td></tr>
+<tr class="separator:a33cf3dd14411c99df91585556675de06 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0c74a2852b8152b2218ce60ec081764 inherit pub_methods_class_h5_1_1_prop_list" id="r_ae0c74a2852b8152b2218ce60ec081764"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#ae0c74a2852b8152b2218ce60ec081764">getNumProps</a> () const</td></tr>
+<tr class="memdesc:ae0c74a2852b8152b2218ce60ec081764 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of properties in this property list or class.  <br /></td></tr>
 <tr class="separator:ae0c74a2852b8152b2218ce60ec081764 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52f55eb956d453db44b218ae1d6a38d7 inherit pub_methods_class_h5_1_1_prop_list" id="r_a52f55eb956d453db44b218ae1d6a38d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a52f55eb956d453db44b218ae1d6a38d7">getProperty</a> (const char *name) const</td></tr>
-<tr class="separator:a52f55eb956d453db44b218ae1d6a38d7 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa79ae41e272eb3fe63494e654a857dc9 inherit pub_methods_class_h5_1_1_prop_list" id="r_aa79ae41e272eb3fe63494e654a857dc9"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#aa79ae41e272eb3fe63494e654a857dc9">getProperty</a> (const char *name) const</td></tr>
+<tr class="memdesc:aa79ae41e272eb3fe63494e654a857dc9 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:aa79ae41e272eb3fe63494e654a857dc9 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f3f68df64c969fb23ffda131253eb6f inherit pub_methods_class_h5_1_1_prop_list" id="r_a4f3f68df64c969fb23ffda131253eb6f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a4f3f68df64c969fb23ffda131253eb6f">getProperty</a> (const char *name, void *value) const</td></tr>
+<tr class="memdesc:a4f3f68df64c969fb23ffda131253eb6f inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the value of a property in a property list.  <br /></td></tr>
 <tr class="separator:a4f3f68df64c969fb23ffda131253eb6f inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a313ec71dee8352b86be057cc0b4b5bad inherit pub_methods_class_h5_1_1_prop_list" id="r_a313ec71dee8352b86be057cc0b4b5bad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a313ec71dee8352b86be057cc0b4b5bad">getProperty</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name) const</td></tr>
-<tr class="separator:a313ec71dee8352b86be057cc0b4b5bad inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d057793790a733a3376fb710da67fc4 inherit pub_methods_class_h5_1_1_prop_list" id="r_a7d057793790a733a3376fb710da67fc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a7d057793790a733a3376fb710da67fc4">getProperty</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name, void *value) const</td></tr>
-<tr class="separator:a7d057793790a733a3376fb710da67fc4 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a982d27de681cd3e0e18c33c94b837ed1 inherit pub_methods_class_h5_1_1_prop_list" id="r_a982d27de681cd3e0e18c33c94b837ed1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a982d27de681cd3e0e18c33c94b837ed1">getProperty</a> (const std::string &amp;name) const</td></tr>
+<tr class="memdesc:a982d27de681cd3e0e18c33c94b837ed1 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:a982d27de681cd3e0e18c33c94b837ed1 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a520fd50dc8109e95de1e3b87a7fda70e inherit pub_methods_class_h5_1_1_prop_list" id="r_a520fd50dc8109e95de1e3b87a7fda70e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a520fd50dc8109e95de1e3b87a7fda70e">getProperty</a> (const std::string &amp;name, void *value) const</td></tr>
+<tr class="memdesc:a520fd50dc8109e95de1e3b87a7fda70e inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:a520fd50dc8109e95de1e3b87a7fda70e inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e8713fd94b6a8fbd8072b6964883f73 inherit pub_methods_class_h5_1_1_prop_list" id="r_a9e8713fd94b6a8fbd8072b6964883f73"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a9e8713fd94b6a8fbd8072b6964883f73">getPropSize</a> (const char *name) const</td></tr>
+<tr class="memdesc:a9e8713fd94b6a8fbd8072b6964883f73 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the size of a property in a property list or class.  <br /></td></tr>
 <tr class="separator:a9e8713fd94b6a8fbd8072b6964883f73 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f844d2c8fd0c9fbfa47d74b7ae800ab inherit pub_methods_class_h5_1_1_prop_list" id="r_a6f844d2c8fd0c9fbfa47d74b7ae800ab"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a6f844d2c8fd0c9fbfa47d74b7ae800ab">getPropSize</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name) const</td></tr>
-<tr class="separator:a6f844d2c8fd0c9fbfa47d74b7ae800ab inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a834432a701ae6e58f726225a2c526f00 inherit pub_methods_class_h5_1_1_prop_list" id="r_a834432a701ae6e58f726225a2c526f00"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a834432a701ae6e58f726225a2c526f00">getPropSize</a> (const std::string &amp;name) const</td></tr>
+<tr class="memdesc:a834432a701ae6e58f726225a2c526f00 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:a834432a701ae6e58f726225a2c526f00 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d0511d1b5e624cd38f8e0dcdc0551e2 inherit pub_methods_class_h5_1_1_prop_list" id="r_a7d0511d1b5e624cd38f8e0dcdc0551e2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a7d0511d1b5e624cd38f8e0dcdc0551e2">isAClass</a> (const <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;prop_class) const</td></tr>
+<tr class="memdesc:a7d0511d1b5e624cd38f8e0dcdc0551e2 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether a property list is a certain class.  <br /></td></tr>
 <tr class="separator:a7d0511d1b5e624cd38f8e0dcdc0551e2 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97455bd2e8e4a3eccd78cffce019c248 inherit pub_methods_class_h5_1_1_prop_list" id="r_a97455bd2e8e4a3eccd78cffce019c248"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a97455bd2e8e4a3eccd78cffce019c248">operator=</a> (const <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;rhs)</td></tr>
+<tr class="memdesc:a97455bd2e8e4a3eccd78cffce019c248 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator.  <br /></td></tr>
 <tr class="separator:a97455bd2e8e4a3eccd78cffce019c248 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9acf4e4795ae8a6889e1ffcacd22e085 inherit pub_methods_class_h5_1_1_prop_list" id="r_a9acf4e4795ae8a6889e1ffcacd22e085"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a9acf4e4795ae8a6889e1ffcacd22e085">operator==</a> (const <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;rhs) const</td></tr>
+<tr class="memdesc:a9acf4e4795ae8a6889e1ffcacd22e085 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares this property list or class against the given list or class.  <br /></td></tr>
 <tr class="separator:a9acf4e4795ae8a6889e1ffcacd22e085 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4330677b6c7fee9bc03df1377567cf4 inherit pub_methods_class_h5_1_1_prop_list" id="r_ae4330677b6c7fee9bc03df1377567cf4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#ae4330677b6c7fee9bc03df1377567cf4">propExist</a> (const char *name) const</td></tr>
 <tr class="memdesc:ae4330677b6c7fee9bc03df1377567cf4 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the existence of a property in a property object.  <br /></td></tr>
 <tr class="separator:ae4330677b6c7fee9bc03df1377567cf4 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25d2d519b6bcb13a8bbe128b26bd63a4 inherit pub_methods_class_h5_1_1_prop_list" id="r_a25d2d519b6bcb13a8bbe128b26bd63a4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a25d2d519b6bcb13a8bbe128b26bd63a4">propExist</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name) const</td></tr>
-<tr class="separator:a25d2d519b6bcb13a8bbe128b26bd63a4 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afff0f2ab3a25b904bbe2a6bed71cc4ed inherit pub_methods_class_h5_1_1_prop_list" id="r_afff0f2ab3a25b904bbe2a6bed71cc4ed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#afff0f2ab3a25b904bbe2a6bed71cc4ed">propExist</a> (const std::string &amp;name) const</td></tr>
+<tr class="memdesc:afff0f2ab3a25b904bbe2a6bed71cc4ed inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:afff0f2ab3a25b904bbe2a6bed71cc4ed inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4800b13542f44210b3ea7ef9f6ed2f83 inherit pub_methods_class_h5_1_1_prop_list" id="r_a4800b13542f44210b3ea7ef9f6ed2f83"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a4800b13542f44210b3ea7ef9f6ed2f83">PropList</a> ()</td></tr>
+<tr class="memdesc:a4800b13542f44210b3ea7ef9f6ed2f83 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor: creates a stub property list object.  <br /></td></tr>
 <tr class="separator:a4800b13542f44210b3ea7ef9f6ed2f83 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf471b6f95c0f2414a853681eb3053b3 inherit pub_methods_class_h5_1_1_prop_list" id="r_aaf471b6f95c0f2414a853681eb3053b3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#aaf471b6f95c0f2414a853681eb3053b3">PropList</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id)</td></tr>
+<tr class="memdesc:aaf471b6f95c0f2414a853681eb3053b3 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a property list using the id of an existing property.  <br /></td></tr>
 <tr class="separator:aaf471b6f95c0f2414a853681eb3053b3 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1372a31844509ee2be98bfc7689299d8 inherit pub_methods_class_h5_1_1_prop_list" id="r_a1372a31844509ee2be98bfc7689299d8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a1372a31844509ee2be98bfc7689299d8">PropList</a> (const <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;original)</td></tr>
+<tr class="memdesc:a1372a31844509ee2be98bfc7689299d8 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor: same HDF5 object as <em class="arg">original</em>.  <br /></td></tr>
 <tr class="separator:a1372a31844509ee2be98bfc7689299d8 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e42ec3f5bea2481f8ca077533b69f13 inherit pub_methods_class_h5_1_1_prop_list" id="r_a9e42ec3f5bea2481f8ca077533b69f13"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a9e42ec3f5bea2481f8ca077533b69f13">removeProp</a> (const char *name) const</td></tr>
+<tr class="memdesc:a9e42ec3f5bea2481f8ca077533b69f13 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a property from a property list.  <br /></td></tr>
 <tr class="separator:a9e42ec3f5bea2481f8ca077533b69f13 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a13fdaa090e0caa8c3f34f9e28b90056f inherit pub_methods_class_h5_1_1_prop_list" id="r_a13fdaa090e0caa8c3f34f9e28b90056f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a13fdaa090e0caa8c3f34f9e28b90056f">removeProp</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name) const</td></tr>
-<tr class="separator:a13fdaa090e0caa8c3f34f9e28b90056f inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a4da28534ffb98a03385e8ab2fc4356 inherit pub_methods_class_h5_1_1_prop_list" id="r_a7a4da28534ffb98a03385e8ab2fc4356"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a7a4da28534ffb98a03385e8ab2fc4356">removeProp</a> (const std::string &amp;name) const</td></tr>
+<tr class="memdesc:a7a4da28534ffb98a03385e8ab2fc4356 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:a7a4da28534ffb98a03385e8ab2fc4356 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace17435c694b5a23bcd3970ddd0f194c inherit pub_methods_class_h5_1_1_prop_list" id="r_ace17435c694b5a23bcd3970ddd0f194c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#ace17435c694b5a23bcd3970ddd0f194c">setProperty</a> (const char *name, const char *charptr) const</td></tr>
+<tr class="memdesc:ace17435c694b5a23bcd3970ddd0f194c inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
 <tr class="separator:ace17435c694b5a23bcd3970ddd0f194c inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af6679089d88aabf25f60099440d71d7c inherit pub_methods_class_h5_1_1_prop_list" id="r_af6679089d88aabf25f60099440d71d7c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#af6679089d88aabf25f60099440d71d7c">setProperty</a> (const char *name, const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;strg) const</td></tr>
-<tr class="separator:af6679089d88aabf25f60099440d71d7c inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a669354dac965d3ff6d535f72962e6c88 inherit pub_methods_class_h5_1_1_prop_list" id="r_a669354dac965d3ff6d535f72962e6c88"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a669354dac965d3ff6d535f72962e6c88">setProperty</a> (const char *name, const std::string &amp;strg) const</td></tr>
+<tr class="memdesc:a669354dac965d3ff6d535f72962e6c88 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:a669354dac965d3ff6d535f72962e6c88 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfb77778b2a3ab1b1b9ec90372fb7c5a inherit pub_methods_class_h5_1_1_prop_list" id="r_adfb77778b2a3ab1b1b9ec90372fb7c5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#adfb77778b2a3ab1b1b9ec90372fb7c5a">setProperty</a> (const char *name, const void *value) const</td></tr>
+<tr class="memdesc:adfb77778b2a3ab1b1b9ec90372fb7c5a inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a property's value in a property list.  <br /></td></tr>
 <tr class="separator:adfb77778b2a3ab1b1b9ec90372fb7c5a inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a308580879f6e2cbd2fec7c88d4c84b94 inherit pub_methods_class_h5_1_1_prop_list" id="r_a308580879f6e2cbd2fec7c88d4c84b94"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a308580879f6e2cbd2fec7c88d4c84b94">setProperty</a> (const char *name, <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;strg) const</td></tr>
-<tr class="separator:a308580879f6e2cbd2fec7c88d4c84b94 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17655f3e8f54694f05e1e86322517067 inherit pub_methods_class_h5_1_1_prop_list" id="r_a17655f3e8f54694f05e1e86322517067"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a17655f3e8f54694f05e1e86322517067">setProperty</a> (const char *name, std::string &amp;strg) const</td></tr>
+<tr class="memdesc:a17655f3e8f54694f05e1e86322517067 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deprecated due to missing const in prototype. (1.10.1)  <br /></td></tr>
+<tr class="separator:a17655f3e8f54694f05e1e86322517067 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3db8335d969d5d690c1d958c2c6ceac3 inherit pub_methods_class_h5_1_1_prop_list" id="r_a3db8335d969d5d690c1d958c2c6ceac3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a3db8335d969d5d690c1d958c2c6ceac3">setProperty</a> (const char *name, void *value) const</td></tr>
+<tr class="memdesc:a3db8335d969d5d690c1d958c2c6ceac3 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deprecated due to missing const in prototype. (1.10.1)  <br /></td></tr>
 <tr class="separator:a3db8335d969d5d690c1d958c2c6ceac3 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43ebf621043bb2899279a268f4cd0294 inherit pub_methods_class_h5_1_1_prop_list" id="r_a43ebf621043bb2899279a268f4cd0294"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a43ebf621043bb2899279a268f4cd0294">setProperty</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name, const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;strg) const</td></tr>
-<tr class="separator:a43ebf621043bb2899279a268f4cd0294 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b05fe205c2beb6190abd69fcd47d2bd inherit pub_methods_class_h5_1_1_prop_list" id="r_a8b05fe205c2beb6190abd69fcd47d2bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a8b05fe205c2beb6190abd69fcd47d2bd">setProperty</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name, const void *value) const</td></tr>
-<tr class="separator:a8b05fe205c2beb6190abd69fcd47d2bd inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaee67e7930b3eb7f7e13f2bab8f5d0a1 inherit pub_methods_class_h5_1_1_prop_list" id="r_aaee67e7930b3eb7f7e13f2bab8f5d0a1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#aaee67e7930b3eb7f7e13f2bab8f5d0a1">setProperty</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name, <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;strg) const</td></tr>
-<tr class="separator:aaee67e7930b3eb7f7e13f2bab8f5d0a1 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd9bbbe1179b1ece5721ad5f7760cc45 inherit pub_methods_class_h5_1_1_prop_list" id="r_abd9bbbe1179b1ece5721ad5f7760cc45"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#abd9bbbe1179b1ece5721ad5f7760cc45">setProperty</a> (const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> &amp;name, void *value) const</td></tr>
-<tr class="separator:abd9bbbe1179b1ece5721ad5f7760cc45 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ab3febdb998c0f766f9acc88bb3b069 inherit pub_methods_class_h5_1_1_prop_list" id="r_a4ab3febdb998c0f766f9acc88bb3b069"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a4ab3febdb998c0f766f9acc88bb3b069">~PropList</a> () override</td></tr>
-<tr class="separator:a4ab3febdb998c0f766f9acc88bb3b069 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a822183873b83f76cbb66d96203dd95ff inherit pub_methods_class_h5_1_1_prop_list" id="r_a822183873b83f76cbb66d96203dd95ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a822183873b83f76cbb66d96203dd95ff">setProperty</a> (const std::string &amp;name, const std::string &amp;strg) const</td></tr>
+<tr class="memdesc:a822183873b83f76cbb66d96203dd95ff inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:a822183873b83f76cbb66d96203dd95ff inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f22f5e1836b8af9d8872614eec9f2eb inherit pub_methods_class_h5_1_1_prop_list" id="r_a4f22f5e1836b8af9d8872614eec9f2eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a4f22f5e1836b8af9d8872614eec9f2eb">setProperty</a> (const std::string &amp;name, const void *value) const</td></tr>
+<tr class="memdesc:a4f22f5e1836b8af9d8872614eec9f2eb inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function only in what arguments it accepts.  <br /></td></tr>
+<tr class="separator:a4f22f5e1836b8af9d8872614eec9f2eb inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44eafef7dc4a9b21e60cdacc039e00cf inherit pub_methods_class_h5_1_1_prop_list" id="r_a44eafef7dc4a9b21e60cdacc039e00cf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a44eafef7dc4a9b21e60cdacc039e00cf">setProperty</a> (const std::string &amp;name, std::string &amp;strg) const</td></tr>
+<tr class="memdesc:a44eafef7dc4a9b21e60cdacc039e00cf inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deprecated due to missing const in prototype. (1.10.1)  <br /></td></tr>
+<tr class="separator:a44eafef7dc4a9b21e60cdacc039e00cf inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d8ee922c8efb06cf06e406eebe63fe6 inherit pub_methods_class_h5_1_1_prop_list" id="r_a9d8ee922c8efb06cf06e406eebe63fe6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a9d8ee922c8efb06cf06e406eebe63fe6">setProperty</a> (const std::string &amp;name, void *value) const</td></tr>
+<tr class="memdesc:a9d8ee922c8efb06cf06e406eebe63fe6 inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deprecated due to missing const in prototype. (1.10.1)  <br /></td></tr>
+<tr class="separator:a9d8ee922c8efb06cf06e406eebe63fe6 inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fed384cff81d656e2e3645fb5ef554d inherit pub_methods_class_h5_1_1_prop_list" id="r_a7fed384cff81d656e2e3645fb5ef554d"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a7fed384cff81d656e2e3645fb5ef554d">~PropList</a> () override</td></tr>
+<tr class="memdesc:a7fed384cff81d656e2e3645fb5ef554d inherit pub_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Properly terminates access to this property list.  <br /></td></tr>
+<tr class="separator:a7fed384cff81d656e2e3645fb5ef554d inherit pub_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
 <tr class="memitem:a8ef8ed7ea6de87c0efd63545807ffa19 inherit pub_methods_class_h5_1_1_id_component" id="r_a8ef8ed7ea6de87c0efd63545807ffa19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a8ef8ed7ea6de87c0efd63545807ffa19">decRefCount</a> () const</td></tr>
+<tr class="memdesc:a8ef8ed7ea6de87c0efd63545807ffa19 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrement reference counter for the id of this object.  <br /></td></tr>
 <tr class="separator:a8ef8ed7ea6de87c0efd63545807ffa19 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6fd1ad4b3de42fd56c1af67bafc16bb inherit pub_methods_class_h5_1_1_id_component" id="r_af6fd1ad4b3de42fd56c1af67bafc16bb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#af6fd1ad4b3de42fd56c1af67bafc16bb">decRefCount</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id) const</td></tr>
+<tr class="memdesc:af6fd1ad4b3de42fd56c1af67bafc16bb inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrement reference counter for a given id.  <br /></td></tr>
 <tr class="separator:af6fd1ad4b3de42fd56c1af67bafc16bb inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e1c79c2f7ea65f480003c4162ade647 inherit pub_methods_class_h5_1_1_id_component" id="r_a9e1c79c2f7ea65f480003c4162ade647"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a9e1c79c2f7ea65f480003c4162ade647">getCounter</a> () const</td></tr>
+<tr class="memdesc:a9e1c79c2f7ea65f480003c4162ade647 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the reference counter for the id of this object.  <br /></td></tr>
 <tr class="separator:a9e1c79c2f7ea65f480003c4162ade647 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d474b97d3fcdb866c662b7c45afc101 inherit pub_methods_class_h5_1_1_id_component" id="r_a3d474b97d3fcdb866c662b7c45afc101"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a3d474b97d3fcdb866c662b7c45afc101">getCounter</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id) const</td></tr>
+<tr class="memdesc:a3d474b97d3fcdb866c662b7c45afc101 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the reference counter for a given id.  <br /></td></tr>
 <tr class="separator:a3d474b97d3fcdb866c662b7c45afc101 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab7818457e11039a6720b8daa491a2a23 inherit pub_methods_class_h5_1_1_id_component" id="r_ab7818457e11039a6720b8daa491a2a23"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ab7818457e11039a6720b8daa491a2a23">getHDFObjType</a> () const</td></tr>
+<tr class="memdesc:ab7818457e11039a6720b8daa491a2a23 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the type of the object. It is an overloaded function of the above function.  <br /></td></tr>
 <tr class="separator:ab7818457e11039a6720b8daa491a2a23 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68f1f3d122061267fc7ba9ff26a8e116 inherit pub_methods_class_h5_1_1_id_component" id="r_a68f1f3d122061267fc7ba9ff26a8e116"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a68f1f3d122061267fc7ba9ff26a8e116">incRefCount</a> () const</td></tr>
+<tr class="memdesc:a68f1f3d122061267fc7ba9ff26a8e116 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment reference counter for the id of this object.  <br /></td></tr>
 <tr class="separator:a68f1f3d122061267fc7ba9ff26a8e116 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa982b0a0eba28a3c45c8703b50b2cdc inherit pub_methods_class_h5_1_1_id_component" id="r_aaa982b0a0eba28a3c45c8703b50b2cdc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#aaa982b0a0eba28a3c45c8703b50b2cdc">incRefCount</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id) const</td></tr>
+<tr class="memdesc:aaa982b0a0eba28a3c45c8703b50b2cdc inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment reference counter for a given id.  <br /></td></tr>
 <tr class="separator:aaa982b0a0eba28a3c45c8703b50b2cdc inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad73041310c0799fde5df3017a21062a8 inherit pub_methods_class_h5_1_1_id_component" id="r_ad73041310c0799fde5df3017a21062a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ad73041310c0799fde5df3017a21062a8">inMemFunc</a> (const char *func_name) const</td></tr>
-<tr class="separator:ad73041310c0799fde5df3017a21062a8 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71c30bbf80130e0d1a6912810c837ec1 inherit pub_methods_class_h5_1_1_id_component" id="r_a71c30bbf80130e0d1a6912810c837ec1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a71c30bbf80130e0d1a6912810c837ec1">inMemFunc</a> (const char *func_name) const</td></tr>
+<tr class="memdesc:a71c30bbf80130e0d1a6912810c837ec1 inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes and returns string "&lt;class-name&gt;::&lt;func_name&gt;".  <br /></td></tr>
+<tr class="separator:a71c30bbf80130e0d1a6912810c837ec1 inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a296e6802a14ff5802ebd1cbdd8111d8e inherit pub_methods_class_h5_1_1_id_component" id="r_a296e6802a14ff5802ebd1cbdd8111d8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h5_1_1_id_component.html">IdComponent</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a296e6802a14ff5802ebd1cbdd8111d8e">operator=</a> (const <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a> &amp;rhs)</td></tr>
+<tr class="memdesc:a296e6802a14ff5802ebd1cbdd8111d8e inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator.  <br /></td></tr>
 <tr class="separator:a296e6802a14ff5802ebd1cbdd8111d8e inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2cb88c7456b7e40fcda2f3f438162cd inherit pub_methods_class_h5_1_1_id_component" id="r_af2cb88c7456b7e40fcda2f3f438162cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#af2cb88c7456b7e40fcda2f3f438162cd">setId</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_id)</td></tr>
+<tr class="memdesc:af2cb88c7456b7e40fcda2f3f438162cd inherit pub_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the identifier of this object to a new value.  <br /></td></tr>
 <tr class="separator:af2cb88c7456b7e40fcda2f3f438162cd inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a714d6f959f80fb0085d70258816d1c6d inherit pub_methods_class_h5_1_1_id_component" id="r_a714d6f959f80fb0085d70258816d1c6d"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a714d6f959f80fb0085d70258816d1c6d">~IdComponent</a> ()=default</td></tr>
 <tr class="separator:a714d6f959f80fb0085d70258816d1c6d inherit pub_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:afd46e0aaace492e09ece03be530dd13a" id="r_afd46e0aaace492e09ece03be530dd13a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd46e0aaace492e09ece03be530dd13a">deleteConstants</a> ()</td></tr>
-<tr class="separator:afd46e0aaace492e09ece03be530dd13a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1307af2491a89c6bc96b1cc4524b697" id="r_ab1307af2491a89c6bc96b1cc4524b697"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1307af2491a89c6bc96b1cc4524b697">deleteConstants</a> ()</td></tr>
+<tr class="separator:ab1307af2491a89c6bc96b1cc4524b697"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_class_h5_1_1_obj_creat_prop_list"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_h5_1_1_obj_creat_prop_list')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_h5_1_1_obj_creat_prop_list.html">ObjCreatPropList</a></td></tr>
-<tr class="memitem:afd46e0aaace492e09ece03be530dd13a inherit pub_static_methods_class_h5_1_1_obj_creat_prop_list" id="r_afd46e0aaace492e09ece03be530dd13a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#afd46e0aaace492e09ece03be530dd13a">deleteConstants</a> ()</td></tr>
-<tr class="separator:afd46e0aaace492e09ece03be530dd13a inherit pub_static_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1307af2491a89c6bc96b1cc4524b697 inherit pub_static_methods_class_h5_1_1_obj_creat_prop_list" id="r_ab1307af2491a89c6bc96b1cc4524b697"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#ab1307af2491a89c6bc96b1cc4524b697">deleteConstants</a> ()</td></tr>
+<tr class="separator:ab1307af2491a89c6bc96b1cc4524b697 inherit pub_static_methods_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_class_h5_1_1_prop_list"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_h5_1_1_prop_list')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_h5_1_1_prop_list.html">PropList</a></td></tr>
-<tr class="memitem:afd46e0aaace492e09ece03be530dd13a inherit pub_static_methods_class_h5_1_1_prop_list" id="r_afd46e0aaace492e09ece03be530dd13a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#afd46e0aaace492e09ece03be530dd13a">deleteConstants</a> ()</td></tr>
-<tr class="separator:afd46e0aaace492e09ece03be530dd13a inherit pub_static_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1307af2491a89c6bc96b1cc4524b697 inherit pub_static_methods_class_h5_1_1_prop_list" id="r_ab1307af2491a89c6bc96b1cc4524b697"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#ab1307af2491a89c6bc96b1cc4524b697">deleteConstants</a> ()</td></tr>
+<tr class="separator:ab1307af2491a89c6bc96b1cc4524b697 inherit pub_static_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
-<tr class="memitem:abc3fbcf4fff6fdc48838675a8db06253 inherit pub_static_methods_class_h5_1_1_id_component" id="r_abc3fbcf4fff6fdc48838675a8db06253"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#abc3fbcf4fff6fdc48838675a8db06253">getHDFObjType</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id)</td></tr>
-<tr class="separator:abc3fbcf4fff6fdc48838675a8db06253 inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad101d2b666ffdd27c1888559cb48862e inherit pub_static_methods_class_h5_1_1_id_component" id="r_ad101d2b666ffdd27c1888559cb48862e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ad101d2b666ffdd27c1888559cb48862e">getNumMembers</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
-<tr class="separator:ad101d2b666ffdd27c1888559cb48862e inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac121ded620518cc83d13cbe0eed6648e inherit pub_static_methods_class_h5_1_1_id_component" id="r_ac121ded620518cc83d13cbe0eed6648e"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ac121ded620518cc83d13cbe0eed6648e">isValid</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> an_id)</td></tr>
-<tr class="separator:ac121ded620518cc83d13cbe0eed6648e inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abad7a77fcb34ef1721f640c5a35fae2d inherit pub_static_methods_class_h5_1_1_id_component" id="r_abad7a77fcb34ef1721f640c5a35fae2d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#abad7a77fcb34ef1721f640c5a35fae2d">typeExists</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
-<tr class="separator:abad7a77fcb34ef1721f640c5a35fae2d inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae31687ab82814d70c6ea976f7ee6d433 inherit pub_static_methods_class_h5_1_1_id_component" id="r_ae31687ab82814d70c6ea976f7ee6d433"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#ae31687ab82814d70c6ea976f7ee6d433">getHDFObjType</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id)</td></tr>
+<tr class="memdesc:ae31687ab82814d70c6ea976f7ee6d433 inherit pub_static_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Given an id, returns the type of the object.  <br /></td></tr>
+<tr class="separator:ae31687ab82814d70c6ea976f7ee6d433 inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1813465eb51329577eace28ffc84569e inherit pub_static_methods_class_h5_1_1_id_component" id="r_a1813465eb51329577eace28ffc84569e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a1813465eb51329577eace28ffc84569e">getNumMembers</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
+<tr class="memdesc:a1813465eb51329577eace28ffc84569e inherit pub_static_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of members of the given type.  <br /></td></tr>
+<tr class="separator:a1813465eb51329577eace28ffc84569e inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6226b90ed11f416dfc15e93fca4e9fb1 inherit pub_static_methods_class_h5_1_1_id_component" id="r_a6226b90ed11f416dfc15e93fca4e9fb1"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a6226b90ed11f416dfc15e93fca4e9fb1">isValid</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> an_id)</td></tr>
+<tr class="memdesc:a6226b90ed11f416dfc15e93fca4e9fb1 inherit pub_static_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the given ID is valid.  <br /></td></tr>
+<tr class="separator:a6226b90ed11f416dfc15e93fca4e9fb1 inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bd4e1f8a1211dededbb7e1c6a3926a2 inherit pub_static_methods_class_h5_1_1_id_component" id="r_a4bd4e1f8a1211dededbb7e1c6a3926a2"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a4bd4e1f8a1211dededbb7e1c6a3926a2">typeExists</a> (<a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832b">H5I_type_t</a> type)</td></tr>
+<tr class="memdesc:a4bd4e1f8a1211dededbb7e1c6a3926a2 inherit pub_static_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries if a given type is currently registered with the library.  <br /></td></tr>
+<tr class="separator:a4bd4e1f8a1211dededbb7e1c6a3926a2 inherit pub_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a63ed1e479ff9a4db8c636fa7d6932ddc" id="r_a63ed1e479ff9a4db8c636fa7d6932ddc"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html">DSetCreatPropList</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a63ed1e479ff9a4db8c636fa7d6932ddc">DEFAULT</a></td></tr>
-<tr class="memdesc:a63ed1e479ff9a4db8c636fa7d6932ddc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default dataset creation property list.  <br /></td></tr>
-<tr class="separator:a63ed1e479ff9a4db8c636fa7d6932ddc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c8c1b90e282556a478ff9cadfea6349" id="r_a6c8c1b90e282556a478ff9cadfea6349"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html">DSetCreatPropList</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6c8c1b90e282556a478ff9cadfea6349">DEFAULT</a> = *getConstant()</td></tr>
+<tr class="memdesc:a6c8c1b90e282556a478ff9cadfea6349"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default dataset creation property list.  <br /></td></tr>
+<tr class="separator:a6c8c1b90e282556a478ff9cadfea6349"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_attribs_class_h5_1_1_obj_creat_prop_list"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_attribs_class_h5_1_1_obj_creat_prop_list')"><img src="closed.png" alt="-"/>&#160;Static Public Attributes inherited from <a class="el" href="class_h5_1_1_obj_creat_prop_list.html">ObjCreatPropList</a></td></tr>
-<tr class="memitem:a3822277e4cf55495a3bbd4aac4866394 inherit pub_static_attribs_class_h5_1_1_obj_creat_prop_list" id="r_a3822277e4cf55495a3bbd4aac4866394"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="class_h5_1_1_obj_creat_prop_list.html">ObjCreatPropList</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#a3822277e4cf55495a3bbd4aac4866394">DEFAULT</a></td></tr>
-<tr class="memdesc:a3822277e4cf55495a3bbd4aac4866394 inherit pub_static_attribs_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default object creation property list.  <br /></td></tr>
-<tr class="separator:a3822277e4cf55495a3bbd4aac4866394 inherit pub_static_attribs_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa34194021d6b4fa3405d9e91b5c9b3e9 inherit pub_static_attribs_class_h5_1_1_obj_creat_prop_list" id="r_aa34194021d6b4fa3405d9e91b5c9b3e9"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="class_h5_1_1_obj_creat_prop_list.html">ObjCreatPropList</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_obj_creat_prop_list.html#aa34194021d6b4fa3405d9e91b5c9b3e9">DEFAULT</a> = *getConstant()</td></tr>
+<tr class="memdesc:aa34194021d6b4fa3405d9e91b5c9b3e9 inherit pub_static_attribs_class_h5_1_1_obj_creat_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default object creation property list.  <br /></td></tr>
+<tr class="separator:aa34194021d6b4fa3405d9e91b5c9b3e9 inherit pub_static_attribs_class_h5_1_1_obj_creat_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_attribs_class_h5_1_1_prop_list"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_attribs_class_h5_1_1_prop_list')"><img src="closed.png" alt="-"/>&#160;Static Public Attributes inherited from <a class="el" href="class_h5_1_1_prop_list.html">PropList</a></td></tr>
-<tr class="memitem:a5b68b4892eb2eff8946c3ea40babca0a inherit pub_static_attribs_class_h5_1_1_prop_list" id="r_a5b68b4892eb2eff8946c3ea40babca0a"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a5b68b4892eb2eff8946c3ea40babca0a">DEFAULT</a></td></tr>
-<tr class="memdesc:a5b68b4892eb2eff8946c3ea40babca0a inherit pub_static_attribs_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default property list.  <br /></td></tr>
-<tr class="separator:a5b68b4892eb2eff8946c3ea40babca0a inherit pub_static_attribs_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c1121beda08866b1a8fbafdda2ae067 inherit pub_static_attribs_class_h5_1_1_prop_list" id="r_a9c1121beda08866b1a8fbafdda2ae067"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="class_h5_1_1_prop_list.html">PropList</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a9c1121beda08866b1a8fbafdda2ae067">DEFAULT</a> = *getConstant()</td></tr>
+<tr class="memdesc:a9c1121beda08866b1a8fbafdda2ae067 inherit pub_static_attribs_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default property list.  <br /></td></tr>
+<tr class="separator:a9c1121beda08866b1a8fbafdda2ae067 inherit pub_static_attribs_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pro_methods_class_h5_1_1_prop_list"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_h5_1_1_prop_list')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_h5_1_1_prop_list.html">PropList</a></td></tr>
-<tr class="memitem:aa9f8a5ef0ac0007c6ae942e03ecaa906 inherit pro_methods_class_h5_1_1_prop_list" id="r_aa9f8a5ef0ac0007c6ae942e03ecaa906"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#aa9f8a5ef0ac0007c6ae942e03ecaa906">p_setId</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_id) override</td></tr>
-<tr class="separator:aa9f8a5ef0ac0007c6ae942e03ecaa906 inherit pro_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac71812533616027b32eaf36bcaaebca6 inherit pro_methods_class_h5_1_1_prop_list" id="r_ac71812533616027b32eaf36bcaaebca6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#ac71812533616027b32eaf36bcaaebca6">p_setId</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_id) override</td></tr>
+<tr class="memdesc:ac71812533616027b32eaf36bcaaebca6 inherit pro_methods_class_h5_1_1_prop_list"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the identifier of this object to a new value.  <br /></td></tr>
+<tr class="separator:ac71812533616027b32eaf36bcaaebca6 inherit pro_methods_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
 <tr class="memitem:a451c0471e69ff48f14c4e26f8a0856a7 inherit pro_methods_class_h5_1_1_id_component" id="r_a451c0471e69ff48f14c4e26f8a0856a7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a451c0471e69ff48f14c4e26f8a0856a7">IdComponent</a> ()</td></tr>
+<tr class="memdesc:a451c0471e69ff48f14c4e26f8a0856a7 inherit pro_methods_class_h5_1_1_id_component"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <br /></td></tr>
 <tr class="separator:a451c0471e69ff48f14c4e26f8a0856a7 inherit pro_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a212a32d32b740516ef3ee0be8b82b5eb inherit pro_methods_class_h5_1_1_id_component" id="r_a212a32d32b740516ef3ee0be8b82b5eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a212a32d32b740516ef3ee0be8b82b5eb">p_get_file_name</a> () const</td></tr>
-<tr class="separator:a212a32d32b740516ef3ee0be8b82b5eb inherit pro_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bee444ef3a9fbae799ee5a78e991cb0 inherit pro_methods_class_h5_1_1_id_component" id="r_a7bee444ef3a9fbae799ee5a78e991cb0"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a7bee444ef3a9fbae799ee5a78e991cb0">p_get_file_name</a> () const</td></tr>
+<tr class="separator:a7bee444ef3a9fbae799ee5a78e991cb0 inherit pro_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_static_methods_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_static_methods_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Static Protected Member Functions inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
-<tr class="memitem:a64f606acad8935a5fdc1fc6434742176 inherit pro_static_methods_class_h5_1_1_id_component" id="r_a64f606acad8935a5fdc1fc6434742176"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a64f606acad8935a5fdc1fc6434742176">p_valid_id</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id)</td></tr>
-<tr class="separator:a64f606acad8935a5fdc1fc6434742176 inherit pro_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a8de178e681998c6a891b70164fc4fd inherit pro_static_methods_class_h5_1_1_id_component" id="r_a4a8de178e681998c6a891b70164fc4fd"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a4a8de178e681998c6a891b70164fc4fd">p_valid_id</a> (const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id)</td></tr>
+<tr class="separator:a4a8de178e681998c6a891b70164fc4fd inherit pro_static_methods_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_h5_1_1_prop_list"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_h5_1_1_prop_list')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_h5_1_1_prop_list.html">PropList</a></td></tr>
 <tr class="memitem:a49ffeaac2cb90ecf98f9966fb1308fd1 inherit pro_attribs_class_h5_1_1_prop_list" id="r_a49ffeaac2cb90ecf98f9966fb1308fd1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_prop_list.html#a49ffeaac2cb90ecf98f9966fb1308fd1">id</a></td></tr>
 <tr class="separator:a49ffeaac2cb90ecf98f9966fb1308fd1 inherit pro_attribs_class_h5_1_1_prop_list"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_static_attribs_class_h5_1_1_id_component"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_static_attribs_class_h5_1_1_id_component')"><img src="closed.png" alt="-"/>&#160;Static Protected Attributes inherited from <a class="el" href="class_h5_1_1_id_component.html">IdComponent</a></td></tr>
-<tr class="memitem:a824f3faa415dac39709767ca4a9dbb11 inherit pro_static_attribs_class_h5_1_1_id_component" id="r_a824f3faa415dac39709767ca4a9dbb11"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a824f3faa415dac39709767ca4a9dbb11">H5dontAtexit_called</a></td></tr>
+<tr class="memitem:a824f3faa415dac39709767ca4a9dbb11 inherit pro_static_attribs_class_h5_1_1_id_component" id="r_a824f3faa415dac39709767ca4a9dbb11"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_h5_1_1_id_component.html#a824f3faa415dac39709767ca4a9dbb11">H5dontAtexit_called</a> = false</td></tr>
 <tr class="separator:a824f3faa415dac39709767ca4a9dbb11 inherit pro_static_attribs_class_h5_1_1_id_component"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -420,6 +511,8 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Default constructor: creates a stub dataset creation property list. </p>
+
 </div>
 </div>
 <a id="a73714aa53db194cfc11dfe53c83963a3" name="a73714aa53db194cfc11dfe53c83963a3"></a>
@@ -437,6 +530,8 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Copy constructor: same HDF5 object as <em class="arg">original</em> <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html" title="Class DSetCreatPropList inherits from ObjCreatPropList and provides wrappers for the HDF5 dataset cre...">DSetCreatPropList</a> object. </p>
+
 </div>
 </div>
 <a id="a6851aa48cc2e76881dbaf092e676eda0" name="a6851aa48cc2e76881dbaf092e676eda0"></a>
@@ -453,6 +548,8 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Creates a <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html" title="Class DSetCreatPropList inherits from ObjCreatPropList and provides wrappers for the HDF5 dataset cre...">DSetCreatPropList</a> object using the id of an existing dataset creation property list. </p>
 
 </div>
 </div>
@@ -497,10 +594,19 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Queries whether all the filters set in this property list are available currently. </p>
+<dl class="section return"><dt>Returns</dt><dd>true if all filters available, and false if one or more filters not currently available </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
-<a id="afd46e0aaace492e09ece03be530dd13a" name="afd46e0aaace492e09ece03be530dd13a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afd46e0aaace492e09ece03be530dd13a">&#9670;&#160;</a></span>deleteConstants()</h2>
+<a id="ab1307af2491a89c6bc96b1cc4524b697" name="ab1307af2491a89c6bc96b1cc4524b697"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1307af2491a89c6bc96b1cc4524b697">&#9670;&#160;</a></span>deleteConstants()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -509,7 +615,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void deleteConstants </td>
+          <td class="memname">void deleteConstants </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -524,8 +630,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="a71c2693398514fad4828112c9d21554b" name="a71c2693398514fad4828112c9d21554b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a71c2693398514fad4828112c9d21554b">&#9670;&#160;</a></span>fromClass()</h2>
+<a id="ac03ba7f9a230d046132e6495a2a4e1b9" name="ac03ba7f9a230d046132e6495a2a4e1b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac03ba7f9a230d046132e6495a2a4e1b9">&#9670;&#160;</a></span>fromClass()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -534,7 +640,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a> fromClass </td>
+          <td class="memname">virtual std::string fromClass </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -549,7 +655,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Returns this class name. </p>
 
-<p>Reimplemented from <a class="el" href="class_h5_1_1_obj_creat_prop_list.html#a71c2693398514fad4828112c9d21554b">ObjCreatPropList</a>.</p>
+<p>Reimplemented from <a class="el" href="class_h5_1_1_obj_creat_prop_list.html#ac03ba7f9a230d046132e6495a2a4e1b9">ObjCreatPropList</a>.</p>
 
 </div>
 </div>
@@ -567,6 +673,22 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Get space allocation time for this property. </p>
+<dl class="section return"><dt>Returns</dt><dd>Space allocation time. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The values of space allocation time can be one of the following: <ul>
+<li><code>H5D_ALLOC_TIME_DEFAULT</code> </li>
+<li><code>H5D_ALLOC_TIME_EARLY</code> </li>
+<li><code>H5D_ALLOC_TIME_LATE</code> </li>
+<li><code>H5D_ALLOC_TIME_INCR</code> </li>
+</ul>
+</dd></dl>
 
 </div>
 </div>
@@ -588,6 +710,21 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Retrieves the size of the chunks used to store a chunked layout dataset. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">max_ndims</td><td>- IN: Size of <em class="arg">dim</em> array </td></tr>
+    <tr><td class="paramname">dim</td><td>- OUT: Array to store the chunk dimensions </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -625,6 +762,27 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns information about an external file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">idx</td><td>- IN: Index of the external file, ranges [0-(N-1)] and returned by <a class="el" href="#a626b0dd422d21e3b4fa2798a1e903c6d" title="Returns the number of external files for a dataset.">getExternalCount()</a> </td></tr>
+    <tr><td class="paramname">name_size</td><td>- IN: Maximum length of <em class="arg">name</em> </td></tr>
+    <tr><td class="paramname">name</td><td>- OUT: Name of the external file </td></tr>
+    <tr><td class="paramname">offset</td><td>- OUT: Location to return an offset value </td></tr>
+    <tr><td class="paramname">size</td><td>- OUT: Location to return the size of the external file data </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The parameter <em class="arg">idx</em> ranges [0..N-1] where N is returned by <a class="el" href="#a626b0dd422d21e3b4fa2798a1e903c6d" title="Returns the number of external files for a dataset.">getExternalCount()</a>. At most <em class="arg">name_size</em> characters are copied into the name array. If the external file name is longer than name_size with the null terminator, the return value is not null terminated (similar to strncpy()). If <em class="arg">name_size</em> is zero or <em class="arg">name</em> is a null pointer, the external file name will not be returned. If <em class="arg">offset</em> or <em class="arg">size</em> are null pointers then the corresponding information will not be returned. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>In 1.14.x and earlier, the offset parameter was of type off_t, which is a 32-bit signed long value on Windows, which limited the valid offset that can be returned to 2 GiB. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>2.0.0 <code class="param">offset</code> parameter type changed to <a class="el" href="_h5public_8h.html#a7231b68f6d5811a693d4cbc937a34604">HDoff_t</a> from off_t. </dd></dl>
+
 </div>
 </div>
 <a id="a626b0dd422d21e3b4fa2798a1e903c6d" name="a626b0dd422d21e3b4fa2798a1e903c6d"></a>
@@ -642,6 +800,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns the number of external files for a dataset. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of external files </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="af625cdd0f4eb1d9d8b5555341dd7d40f" name="af625cdd0f4eb1d9d8b5555341dd7d40f"></a>
@@ -658,6 +825,20 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Gets fill value writing time. </p>
+<dl class="section return"><dt>Returns</dt><dd>Fill value writing time </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>Valid values for fill value writing time include <ul>
+<li><code>H5D_FILL_TIME_NEVER</code> </li>
+<li><code>H5D_FILL_TIME_ALLOC</code>. </li>
+</ul>
+</dd></dl>
 
 </div>
 </div>
@@ -679,6 +860,22 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Retrieves a dataset fill value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fvalue_type</td><td>- IN: Data type for the value passed via <em class="arg">value</em> </td></tr>
+    <tr><td class="paramname">value</td><td>- OUT: Pointer to buffer to hold the retrieved fill value </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The fill value is returned through <em class="arg">value</em> pointer and the memory is allocated by the caller. The fill value will be converted from its current data type to the specified by <em class="arg">fvalue_type</em>. </dd></dl>
 
 </div>
 </div>
@@ -726,6 +923,28 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns information about a filter in a pipeline. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filter_number</td><td>- IN: Filter to get, range [0..N-1], where N is returned by <a class="el" href="group___o_c_p_l.html#gacbad1ca36a61246b439a25f28e7575fb" title="Returns the number of filters in the pipeline.">H5Pget_nfilters()</a> </td></tr>
+    <tr><td class="paramname">flags</td><td>- OUT: General properties of the filter </td></tr>
+    <tr><td class="paramname">cd_nelmts</td><td>- IN/OUT: Number of elements in <em class="arg">cd_values</em> /Number of values defined by the filter </td></tr>
+    <tr><td class="paramname">cd_values</td><td>- OUT: Array to hold the data; allocated by the user </td></tr>
+    <tr><td class="paramname">namelen</td><td>- IN: Length of <em class="arg">name</em> </td></tr>
+    <tr><td class="paramname">name</td><td>- OUT: Name of the filter </td></tr>
+    <tr><td class="paramname">filter_config</td><td>- OUT: Flags indicating whether filter can encode/decode </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Filter id </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>Failure occurs when <em class="arg">filter_number</em> is out of range. </dd></dl>
+
 </div>
 </div>
 <a id="a5495df10b7603fa7fb90a454e0cb258d" name="a5495df10b7603fa7fb90a454e0cb258d"></a>
@@ -772,6 +991,26 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns information about a filter in a pipeline given the filter id. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filter_id</td><td>- IN: Filter to get </td></tr>
+    <tr><td class="paramname">flags</td><td>- OUT: General properties of the filter </td></tr>
+    <tr><td class="paramname">cd_nelmts</td><td>- IN/OUT: Number of elements in <em class="arg">cd_values</em> /Number of values defined by the filter </td></tr>
+    <tr><td class="paramname">cd_values</td><td>- OUT: Array to hold the data; allocated by the user </td></tr>
+    <tr><td class="paramname">namelen</td><td>- IN: Length of <em class="arg">name</em> </td></tr>
+    <tr><td class="paramname">name</td><td>- OUT: Name of the filter </td></tr>
+    <tr><td class="paramname">filter_config</td><td>- OUT: Flags indicating whether filter can encode/decode </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="af6c50301b3975ebe50b9a0afc41d8a71" name="af6c50301b3975ebe50b9a0afc41d8a71"></a>
@@ -788,6 +1027,21 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Retrieves the layout type of this property list. </p>
+<dl class="section return"><dt>Returns</dt><dd>Layout type, which can be: <ul>
+<li><code>H5D_COMPACT</code> - raw data is stored in the object header in the file. </li>
+<li><code>H5D_CONTIGUOUS</code> - raw data is stored separately from the object header in one contiguous chunk in the file. </li>
+<li><code>H5D_CHUNKED</code> - raw data is stored separately from the object header in chunks in separate locations in the file. </li>
+</ul>
+</dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd></dd></dl>
 
 </div>
 </div>
@@ -806,6 +1060,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns the number of filters in the pipeline. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of filters </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="aee4ad81bc2e5a450f80e4d5404f582a1" name="aee4ad81bc2e5a450f80e4d5404f582a1"></a>
@@ -822,6 +1085,20 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Check if fill value has been defined for this property. </p>
+<dl class="section return"><dt>Returns</dt><dd><ul>
+<li><code>H5D_FILL_VALUE_UNDEFINED</code> =0, </li>
+<li><code>H5D_FILL_VALUE_DEFAULT</code> =1, </li>
+<li><code>H5D_FILL_VALUE_USER_DEFINED</code> =2 </li>
+</ul>
+</dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -854,6 +1131,26 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Modifies the specified filter. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filter_id</td><td>- IN: Filter to get </td></tr>
+    <tr><td class="paramname">flags</td><td>- OUT: General properties of the filter </td></tr>
+    <tr><td class="paramname">cd_nelmts</td><td>- IN: Number of elements in <em class="arg">cd_values</em> <br  />
+ OUT: Number of values defined by the filter </td></tr>
+    <tr><td class="paramname">cd_values</td><td>- OUT: Array to hold the data; allocated by the user </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The <em class="arg">flags</em> argument is a bit vector of the field: <code><a class="el" href="_h5_zpublic_8h.html#a70bde763f28557539e1628ecc2e2e2fd">H5Z_FLAG_OPTIONAL(0x0001)</a></code> </dd></dl>
+<dl class="section user"><dt></dt><dd>If this bit is set then the filter is optional. If the filter fails during a <a class="el" href="class_h5_1_1_data_set.html#a6dfe8e9cfc09aa8e310c1b36be938245" title="Writes raw data from an application buffer to a dataset.">DataSet::write()</a> operation then the filter is just excluded from the pipeline for the chunk for which it failed; the filter will not participate in the pipeline during a <a class="el" href="class_h5_1_1_data_set.html#abd6abb69a307378b118871dbd6ebb14c" title="Reads raw data from the specified dataset.">DataSet::read()</a> of the chunk. If this bit is clear and the filter fails then the entire I/O operation fails. </dd></dl>
+
 </div>
 </div>
 <a id="a5cd9c3f5587dcee8322441e5dfdac857" name="a5cd9c3f5587dcee8322441e5dfdac857"></a>
@@ -871,6 +1168,21 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Removes one or more filters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filter_id</td><td>- IN: Filter to remove </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>Deletes a filter from the dataset creation property list; deletes all filters if <em class="arg">filter_id</em> is <code>H5Z_FILTER_ALL</code>. </dd></dl>
+
 </div>
 </div>
 <a id="aabce95d2078c4549f28e6695c97fa62a" name="aabce95d2078c4549f28e6695c97fa62a"></a>
@@ -887,6 +1199,27 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets space allocation time for dataset during creation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alloc_time</td><td>- IN: Allocation time </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>Valid values for space allocation time include: <ul>
+<li><code>H5D_ALLOC_TIME_DEFAULT</code> </li>
+<li><code>H5D_ALLOC_TIME_EARLY</code> </li>
+<li><code>H5D_ALLOC_TIME_LATE</code> </li>
+<li><code>H5D_ALLOC_TIME_INCR</code> </li>
+</ul>
+</dd></dl>
 
 </div>
 </div>
@@ -909,6 +1242,22 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Sets the size of the chunks used to store a chunked layout dataset. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ndims</td><td>- IN: Number of dimensions of each chunk </td></tr>
+    <tr><td class="paramname">dim</td><td>- IN: Array containing the size of each chunk </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The <em class="arg">ndims</em> parameter currently must have the same value as the rank of the dataset. The values of the <em class="arg">dim</em> array define the size of the chunks to store the dataset's raw data. As a side-effect, the layout of the dataset will be changed to <code>H5D_CHUNKED</code>, if it is not so already. </dd></dl>
+
 </div>
 </div>
 <a id="ae0256c15b8b901599a4973a0361b6e6e" name="ae0256c15b8b901599a4973a0361b6e6e"></a>
@@ -925,6 +1274,21 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets compression method and compression level. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">level</td><td>- IN: Compression level, should [0..9], inclusive </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The function sets the compression method for this property list to <code>H5D_COMPRESS_DEFLATE</code> and the compression level to <em class="arg">level</em>. Lower compression levels are faster but result in less compression. </dd></dl>
 
 </div>
 </div>
@@ -952,6 +1316,25 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Adds an external file to the list of external files. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>- IN: Name of the external file </td></tr>
+    <tr><td class="paramname">offset</td><td>- IN: Location where the data starts in the file </td></tr>
+    <tr><td class="paramname">size</td><td>- IN: Number of bytes reserved in the file for the data </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>If a dataset is split across multiple files then the files should be defined in order. The total size of the dataset is the sum of the <em class="arg">size</em> arguments for all the external files. If the total size is larger than the size of a dataset then the dataset can be extended (provided the data space also allows the extending). </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>In 1.14.x and earlier, the offset parameter was of type off_t, which is a 32-bit signed long value on Windows, which limited the valid offset that can be set to 2 GiB. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>2.0.0 <code class="param">offset</code> parameter type changed to <a class="el" href="_h5public_8h.html#a7231b68f6d5811a693d4cbc937a34604">HDoff_t</a> from off_t. </dd></dl>
+
 </div>
 </div>
 <a id="aca7f7d07d71df95444ae7a2c5cc2368e" name="aca7f7d07d71df95444ae7a2c5cc2368e"></a>
@@ -968,6 +1351,19 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets fill value writing time for dataset. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>Valid values for fill value writing time include <ul>
+<li><code>H5D_FILL_TIME_NEVER</code> </li>
+<li><code>H5D_FILL_TIME_ALLOC</code>. </li>
+</ul>
+</dd></dl>
 
 </div>
 </div>
@@ -990,6 +1386,23 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Sets a dataset fill value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fvalue_type</td><td>- IN: Data type for the value passed via <em class="arg">value</em> </td></tr>
+    <tr><td class="paramname">value</td><td>- IN: Pointer to buffer containing the fill value </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The datatype may differ from that of the dataset, but it must be one that the HDF5 library is able to convert <em class="arg">value</em> to the dataset datatype when the dataset is created. The default fill value is 0 (zero,) which is interpreted according to the actual dataset datatype. </dd></dl>
+<dl class="section user"><dt></dt><dd>For information on setting fill value, please refer to the H5Pset_fill_value API in the HDF5 C Reference Manual. </dd></dl>
+
 </div>
 </div>
 <a id="ab3e50e97ae8571c665312a72cb45cbf3" name="ab3e50e97ae8571c665312a72cb45cbf3"></a>
@@ -1001,7 +1414,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname">void setFilter </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a></td>          <td class="paramname"><span class="paramname"><em>filter</em></span>, </td>
+          <td class="paramtype"><a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a></td>          <td class="paramname"><span class="paramname"><em>filter_id</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1021,6 +1434,25 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Adds a filter to the filter pipeline. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filter_id</td><td>- IN: Filter to add </td></tr>
+    <tr><td class="paramname">flags</td><td>- IN: Specifies general properties of the filter </td></tr>
+    <tr><td class="paramname">cd_nelmts</td><td>- IN: Number of elements in cd_values </td></tr>
+    <tr><td class="paramname">cd_values</td><td>- IN: Auxiliary data for the filter </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The <em class="arg">flags</em> argument is a bit vector of the field: <code><a class="el" href="_h5_zpublic_8h.html#a70bde763f28557539e1628ecc2e2e2fd">H5Z_FLAG_OPTIONAL(0x0001)</a></code> </dd></dl>
+<dl class="section user"><dt></dt><dd>If this bit is set then the filter is optional. If the filter fails during a <code><a class="el" href="class_h5_1_1_data_set.html#a6dfe8e9cfc09aa8e310c1b36be938245" title="Writes raw data from an application buffer to a dataset.">DataSet::write()</a></code> operation then the filter is just excluded from the pipeline for the chunk for which it failed; the filter will not participate in the pipeline during a <code><a class="el" href="class_h5_1_1_data_set.html#abd6abb69a307378b118871dbd6ebb14c" title="Reads raw data from the specified dataset.">DataSet::read()</a></code> of the chunk. If this bit is clear and the filter fails then the entire I/O operation fails. </dd></dl>
+
 </div>
 </div>
 <a id="a4b09e7ed3d0bca6141f8cd85496ef856" name="a4b09e7ed3d0bca6141f8cd85496ef856"></a>
@@ -1037,6 +1469,14 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets Fletcher32 checksum of EDC for this property list. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1055,6 +1495,21 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Sets the type of storage used store the raw data for a dataset. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">layout</td><td>- IN: Type of storage layout for raw data </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>For information, please refer to the H5Pset_layout API in the HDF5 C Reference Manual. </dd></dl>
+
 </div>
 </div>
 <a id="a2e7450fd7aca4d9575624c21e75001f9" name="a2e7450fd7aca4d9575624c21e75001f9"></a>
@@ -1072,6 +1527,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Sets up for the use of the Nbit compression filter. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The associate C function sets an Nbit compression filter, H5Z_FILTER_NBIT, for a dataset. For more information about Nbit compression, please refer to the H5Pset_nbit API in the HDF5 C Reference Manual. </dd></dl>
+
 </div>
 </div>
 <a id="a7e71b8c975459a696243224a63c2a356" name="a7e71b8c975459a696243224a63c2a356"></a>
@@ -1088,6 +1552,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets method of the shuffle filter. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>For information, please refer to the H5Pset_shuffle API in the HDF5 C Reference Manual. </dd></dl>
 
 </div>
 </div>
@@ -1109,6 +1582,22 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets up for the use of the SZIP compression filter. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">options_mask</td><td>- IN: A bit-mask conveying the desired SZIP options. Valid values are H5_SZIP_EC_OPTION_MASK and H5_SZIP_NN_OPTION_MASK. </td></tr>
+    <tr><td class="paramname">pixels_per_block</td><td>- IN: Number of pixels or data elements in each data block. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>The associate C function sets an SZIP compression filter, H5Z_FILTER_SZIP, for a dataset. For more information about SZIP and usage, please refer to the H5Pset_szip API in the HDF5 C Reference Manual. </dd></dl>
 
 </div>
 </div>
@@ -1141,10 +1630,28 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Maps elements of a virtual dataset to elements of the source dataset. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vspace</td><td>- IN: Dataspace the virtual dataset, possibly an unlimited selection </td></tr>
+    <tr><td class="paramname">src_fname</td><td>- IN: Name of the HDF5 file where the source dataset is located (<em class="arg">char*</em>) </td></tr>
+    <tr><td class="paramname">src_dsname</td><td>- IN: Path to the dataset in the file specified by <em class="arg">src_file_name</em> (<em class="arg">char*</em>) </td></tr>
+    <tr><td class="paramname">sspace</td><td>- IN: Dataspace with a selection applied, possibly an unlimited selection </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>For information, please refer to the H5Pset_virtual API in the HDF5 C Reference Manual. </dd></dl>
+
 </div>
 </div>
-<a id="a75bbdb70662901af84feac2812bffd11" name="a75bbdb70662901af84feac2812bffd11"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a75bbdb70662901af84feac2812bffd11">&#9670;&#160;</a></span>setVirtual() <span class="overload">[2/2]</span></h2>
+<a id="a3bc431e2d4a0133ae83c984204ee6b9e" name="a3bc431e2d4a0133ae83c984204ee6b9e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bc431e2d4a0133ae83c984204ee6b9e">&#9670;&#160;</a></span>setVirtual() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1157,12 +1664,12 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a></td>          <td class="paramname"><span class="paramname"><em>src_fname</em></span>, </td>
+          <td class="paramtype">const std::string</td>          <td class="paramname"><span class="paramname"><em>src_fname</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="_h5_exception_8h.html#a5c3fdf56d98d169f63f1b114803db592">H5std_string</a></td>          <td class="paramname"><span class="paramname"><em>src_dsname</em></span>, </td>
+          <td class="paramtype">const std::string</td>          <td class="paramname"><span class="paramname"><em>src_dsname</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1172,11 +1679,29 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Maps elements of a virtual dataset to elements of the source dataset. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vspace</td><td>- IN: Dataspace the virtual dataset, possibly an unlimited selection </td></tr>
+    <tr><td class="paramname">src_fname</td><td>- IN: Name of the HDF5 file where the source dataset is located (<em class="arg">H5std_string</em>) </td></tr>
+    <tr><td class="paramname">src_dsname</td><td>- IN: Path to the dataset in the file specified by <em class="arg">src_file_name</em> (<em class="arg">H5std_string</em>) </td></tr>
+    <tr><td class="paramname">sspace</td><td>- IN: Dataspace with a selection applied, possibly an unlimited selection </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_h5_1_1_prop_list_i_exception.html">H5::PropListIException</a></td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Description</dt><dd>For information, please refer to the H5Pset_virtual API in the HDF5 C Reference Manual. </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Field Documentation</h2>
-<a id="a63ed1e479ff9a4db8c636fa7d6932ddc" name="a63ed1e479ff9a4db8c636fa7d6932ddc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a63ed1e479ff9a4db8c636fa7d6932ddc">&#9670;&#160;</a></span>DEFAULT</h2>
+<a id="a6c8c1b90e282556a478ff9cadfea6349" name="a6c8c1b90e282556a478ff9cadfea6349"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c8c1b90e282556a478ff9cadfea6349">&#9670;&#160;</a></span>DEFAULT</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1185,7 +1710,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html">DSetCreatPropList</a>&amp; DEFAULT</td>
+          <td class="memname">const <a class="el" href="class_h5_1_1_d_set_creat_prop_list.html">DSetCreatPropList</a> &amp; DEFAULT = *getConstant()</td>
         </tr>
       </table>
   </td>
@@ -1199,8 +1724,9 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>c++/src/<a class="el" href="_h5_dcreat_prop_8h.html">H5DcreatProp.h</a></li>
+<li>c++/src/<a class="el" href="_h5_dcreat_prop_8cpp.html">H5DcreatProp.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
