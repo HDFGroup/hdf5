@@ -1,0 +1,58 @@
+/** \page h5_cpp_intro C++ API Introduction
+
+\section cpp_overview Overview
+
+The HDF5 C++ API provides object-oriented wrappers for the HDF5 C Library,
+enabling modern C++ applications to leverage HDF5's powerful data management
+capabilities with:
+- Automatic resource management through RAII
+- Exception-based error handling
+- Type-safe interfaces
+- STL integration (std::string support)
+
+\subsection cpp_prerequisites Prerequisites
+
+Users should be familiar with:
+- HDF5 concepts (files, groups, datasets, attributes, datatypes, dataspaces)
+- Basic C++ programming (classes, exceptions, templates)
+- The HDF5 \ref RM "Reference Manual" for underlying C API concepts
+
+\subsection cpp_mapping C API to C++ Class Mapping
+
+The C++ classes closely mirror the HDF5 C API modules:
+
+| C API Module | C++ Class | Purpose |
+|--------------|-----------|---------|
+| H5A (Attributes) | H5::Attribute | Metadata attached to objects |
+| H5D (Datasets) | H5::DataSet | Data storage and I/O |
+| H5S (Dataspaces) | H5::DataSpace | Dimensional structure of data |
+| H5T (Datatypes) | H5::DataType | Data type definitions |
+| H5F (Files) | H5::H5File | File access and management |
+| H5G (Groups) | H5::Group | Hierarchical organization |
+| H5P (Property Lists) | H5::PropList + subclasses | Configuration parameters |
+| H5L/H5O (Links/Objects) | H5::Location | Management of links and objects |
+| H5E (Errors) | H5::Exception | Error reporting |
+
+\subsection cpp_examples Quick Start Examples
+
+See the \ref cpp_examples "C++ Examples" page for:
+- Creating groups and dataset: <a href="https://\CPPEXS/h5tutr_crtgrp.cpp">h5tutr_crtgrp.cpp</a> <a href="https://\CPPEXS/h5tutr_crtdat.cpp">h5tutr_crtdat.cpp</a>
+- Writing/Reading data <a href="https://\CPPEXS/h5tutr_rdwt.cpp">h5tutr_rdwt.cpp</a> <a href="https://\CPPEXS/h5tutr_subset.cpp">h5tutr_subset.cpp</a>
+- Working with attributes <a href="https://\CPPEXS/h5tutr_crtatt.cpp">h5tutr_crtatt.cpp</a>
+- Extendible datasets <a href="https://\CPPEXS/h5tutr_extend.cpp">h5tutr_extend.cpp</a>
+- Chunked/Compressed datasets <a href="https://\CPPEXS/h5tutr_cmprss.cpp">h5tutr_cmprss.cpp</a>
+
+\subsection cpp_building Building Applications
+
+The HDF5 C++ API is built when configured with:
+\code{.sh}
+cmake -DHDF5_BUILD_CPP_LIB=ON ...
+\endcode
+
+Link against: `hdf5_cpp` and `hdf5`
+
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted
+
+*/

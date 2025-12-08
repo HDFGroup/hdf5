@@ -177,6 +177,10 @@ Follow these simple rules and stay out of trouble:
 
 \cpp_c_api_note
 
+\par C++ API Guide
+     New to the HDF5 C++ API? See the \ref h5_cpp_intro for an introduction,
+     class mapping guide, and examples.
+
 \par Don't like what you see? - You can help to improve this Reference Manual
      Complete the survey linked near the top of this page!\n
      We treat documentation like code: Fork the
