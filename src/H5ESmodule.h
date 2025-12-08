@@ -80,7 +80,7 @@
  * </tr>
  * <tr>
  * <th>H5R</th>
- * <td>#H5Ropen_attr, #H5Ropen_object #H5Ropen_region
+ * <td>#H5Ropen_attr, #H5Ropen_object #H5Ropen_region,
  * </td>
  * </tr>
  * <tr>
