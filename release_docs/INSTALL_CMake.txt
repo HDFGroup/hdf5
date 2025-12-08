@@ -9,7 +9,7 @@ Section I:    Preconditions
 Section II:   RECOMMENDED: Quick Start with CMake Presets
 Section III:  Advanced: Building HDF5 Libraries with CMake Script Mode
 Section IV:   Advanced: Building HDF5 Libraries with CMake Command Mode
-Section V.    Further Considerations
+Section V:    Further Considerations
 Section VI:   Options for building HDF5 Libraries with CMake Command Line
 Section VII:  CMake Option Defaults for HDF5
 Section VIII: User Defined Options for HDF5 Libraries with CMake
