@@ -1,5 +1,8 @@
 /** \page h5_cpp_intro C++ API Introduction
 
+Navigate back: \ref index "Main" / \ref GettingStarted
+<hr>
+
 \section cpp_overview Overview
 
 The HDF5 C++ API provides object-oriented wrappers for the HDF5 C Library,
@@ -35,21 +38,17 @@ The C++ classes closely mirror the HDF5 C API modules:
 
 \subsection cpp_examples Quick Start Examples
 
-See the \ref cpp_examples "C++ Examples" page for:
-- Creating groups and dataset: <a href="https://\CPPEXS/h5tutr_crtgrp.cpp">h5tutr_crtgrp.cpp</a> <a href="https://\CPPEXS/h5tutr_crtdat.cpp">h5tutr_crtdat.cpp</a>
+- Creating groups and datasets: <a href="https://\CPPEXS/h5tutr_crtgrp.cpp">h5tutr_crtgrp.cpp</a> <a href="https://\CPPEXS/h5tutr_crtdat.cpp">h5tutr_crtdat.cpp</a>
 - Writing/Reading data <a href="https://\CPPEXS/h5tutr_rdwt.cpp">h5tutr_rdwt.cpp</a> <a href="https://\CPPEXS/h5tutr_subset.cpp">h5tutr_subset.cpp</a>
 - Working with attributes <a href="https://\CPPEXS/h5tutr_crtatt.cpp">h5tutr_crtatt.cpp</a>
 - Extendible datasets <a href="https://\CPPEXS/h5tutr_extend.cpp">h5tutr_extend.cpp</a>
 - Chunked/Compressed datasets <a href="https://\CPPEXS/h5tutr_cmprss.cpp">h5tutr_cmprss.cpp</a>
 
+See the See \ref LBExamples for additional examples.
+
 \subsection cpp_building Building Applications
 
-The HDF5 C++ API is built when configured with:
-\code{.sh}
-cmake -DHDF5_BUILD_CPP_LIB=ON ...
-\endcode
-
-Link against: `hdf5_cpp` and `hdf5`
+Please refer to the release_docs/INSTALL_CMake.txt file under the top directory of the HDF5 source code or <a href="https://\SRCURL/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt on GitHub for information about installing, building, and testing the C++ API.
 
 
 <hr>
