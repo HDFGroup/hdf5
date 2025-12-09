@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -144,8 +144,272 @@ $(function(){initNavTree('_h5_m__u_g.html',''); initResizable(true); });
 <p><b>The HDF5 Data Mapping can only be used with the HDF5 VOL connectors that implement map objects.</b> The native HDF5 library does not support this feature.</p>
 <h1><a class="anchor" id="sec_map"></a>
 HDF5 Map Object</h1>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo</a></b></dt><dd>Describe the map life cycle.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo</a></b></dt><dd>How does MAPL fit into <a class="el" href="_h5_p__u_g.html#subsubsec_plist_class">Property List Classes</a>.</dd></dl>
+<h2><a class="anchor" id="subsec_map_intro"></a>
+Introduction</h2>
+<p>While the HDF5 data model provides a flexible way to store structured data, some applications require a more general mechanism for indexing information with arbitrary keys. HDF5 Map objects address this need by providing application-defined key-value stores where key-value pairs can be added, retrieved by key, and iterated over.</p>
+<p>Map objects are available only through VOL connectors that implement the map interface. The native HDF5 file format does not support map objects. VOL connectors with map support include DAOS and other storage systems optimized for key-value operations.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_m.html">VOL Mapping (H5M)</a> Reference Manual</dd></dl>
+<h2><a class="anchor" id="subsec_map_lifecycle"></a>
+Map Object Life Cycle</h2>
+<p>Map objects follow a well-defined life cycle from creation through cleanup:</p>
+<ol>
+<li>
+<p class="startli"><b>Creation</b> </p><ul>
+<li>
+Create a new map with <a class="el" href="group___h5_m.html#gac85972f70201429a93184408d40e4b09" title="Creates a map object.">H5Mcreate()</a> or <a class="el" href="group___h5_m.html#ga978881a6ecbacc418232d318549307f2" title="Creates a map object without linking it into a file.">H5Mcreate_anon()</a>: <ul>
+<li>
+<a class="el" href="group___h5_m.html#gac85972f70201429a93184408d40e4b09" title="Creates a map object.">H5Mcreate()</a> creates a map and links it into the file hierarchy with a specified name </li>
+<li>
+<a class="el" href="group___h5_m.html#ga978881a6ecbacc418232d318549307f2" title="Creates a map object without linking it into a file.">H5Mcreate_anon()</a> creates an anonymous map that must be linked with <a class="el" href="group___h5_o.html#ga2c97dd58e64b67d16325fceb7e02113f" title="Creates a hard link to an object in an HDF5 file.">H5Olink</a> before closing </li>
+</ul>
+</li>
+<li>
+Specify the key datatype and value datatype during creation - these define how keys and values are stored in the map </li>
+<li>
+Optionally provide creation and access property lists (MCPL and MAPL) to control map behavior </li>
+<li>
+The function returns a map identifier (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>) used for all subsequent operations </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Opening</b> </p><ul>
+<li>
+Open an existing map with <a class="el" href="group___h5_m.html#ga426fbeac4c90849f2ac1855447fb8d43" title="Opens a map object.">H5Mopen()</a> by providing its location and name </li>
+<li>
+Optionally specify a map access property list (MAPL) to control access behavior </li>
+<li>
+Multiple opens of the same map are allowed and each returns a separate identifier </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Data Operations</b> </p><ul>
+<li>
+<b>Adding/Updating</b>: Use <a class="el" href="group___h5_m.html#ga8cb388b30893cb79ed4d2bec4a8e8c4f" title="Adds a key-value pair to a map object.">H5Mput()</a> to add new key-value pairs or update existing values <ul>
+<li>
+Specify memory datatypes for the key and value being written </li>
+<li>
+If the key already exists, its value is updated </li>
+<li>
+If the key is new, a new key-value pair is added </li>
+</ul>
+</li>
+<li>
+<b>Retrieving</b>: Use <a class="el" href="group___h5_m.html#ga585b7c3352cbca858e11bf50d3dd68ed" title="Retrieves a key-value pair from a map object.">H5Mget()</a> to retrieve a value by its key <ul>
+<li>
+Provide a buffer to receive the value </li>
+<li>
+Specify memory datatypes for key and value </li>
+<li>
+Type conversion is performed if memory and stored datatypes differ </li>
+</ul>
+</li>
+<li>
+<b>Checking Existence</b>: Use <a class="el" href="group___h5_m.html#ga4754a39d7fd23715592df34ece9801f7" title="Checks if provided key exists in a map object.">H5Mexists()</a> to check if a key exists without retrieving its value  </li>
+<li>
+<b>Deleting</b>: Use <a class="el" href="group___h5_m.html#gae3cd428dc0746052779e7e372bfd2cad" title="Deletes a key-value pair from a map object.">H5Mdelete()</a> to remove a key-value pair from the map  </li>
+<li>
+<b>Iterating</b>: Use <a class="el" href="group___h5_m.html#gaff5dc81a8a1150acee7e729a7747f1f2" title="Iterates over all key-value pairs in a map object.">H5Miterate()</a> or <a class="el" href="group___h5_m.html#ga9318fe7ee18d5630ad831868675c7ce9" title="Iterates over all key-value pairs in a map object.">H5Miterate_by_name()</a> to process all key-value pairs <ul>
+<li>
+Provide a callback function that is invoked for each key-value pair </li>
+<li>
+Iteration order is determined by the VOL connector implementation </li>
+<li>
+Can start iteration from a specific index position </li>
+</ul>
+</li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Query Operations</b> </p><ul>
+<li>
+<a class="el" href="group___h5_m.html#ga1c6119224bdb84e4254f772bbee08ac0" title="Retrieves the number of key-value pairs in a map object.">H5Mget_count()</a> retrieves the number of key-value pairs stored in the map </li>
+<li>
+<a class="el" href="group___h5_m.html#ga2001636fe6ce4c8aed13fa768c76a8fc" title="Gets key datatype for a map object.">H5Mget_key_type()</a> returns the datatype used for keys </li>
+<li>
+<a class="el" href="group___h5_m.html#ga3c88ee008fa4ac1fa3b7824f182afc45" title="Gets value datatype for a map object.">H5Mget_val_type()</a> returns the datatype used for values </li>
+<li>
+<a class="el" href="group___h5_m.html#ga5d05e2962702d80d27643abc05ee3da7" title="Gets creation property list for a map object.">H5Mget_create_plist()</a> retrieves the map creation property list (MCPL) </li>
+<li>
+<a class="el" href="group___h5_m.html#ga48dd6941c1cac4f8f0f3beaf01c5d7de" title="Gets access property list for a map object.">H5Mget_access_plist()</a> retrieves the map access property list (MAPL) </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<b>Closing</b> <ul>
+<li>
+Close the map with <a class="el" href="group___h5_m.html#gad9a6a1199edc0fb4a50d831a213a5f44" title="Terminates access to a map object.">H5Mclose()</a> when finished </li>
+<li>
+All map identifiers should be closed before closing the file </li>
+<li>
+Closing a map does not delete it from the file </li>
+<li>
+The library maintains reference counts and will not actually close the map until all identifiers are closed </li>
+</ul>
+</li>
+</ol>
+<h2><a class="anchor" id="subsec_map_plist"></a>
+Map Property Lists</h2>
+<p>Map objects use two types of property lists that fit into the HDF5 property list class hierarchy (see <a class="el" href="_h5_p__u_g.html#subsubsec_plist_class">Property List Classes</a>):</p>
+<ul>
+<li>
+<p class="startli"><b>Map Creation Property List (MCPL) - <a class="el" href="_h5_ppublic_8h.html#a50729bf4bfe1588f1ef3919e18e7d546">H5P_MAP_CREATE</a></b> </p><ul>
+<li>
+Controls properties that are set when a map is created </li>
+<li>
+These properties are permanent characteristics of the map </li>
+<li>
+Inherits from the Object Creation Property List (OCPL) class </li>
+<li>
+Can be retrieved later with <a class="el" href="group___h5_m.html#ga5d05e2962702d80d27643abc05ee3da7" title="Gets creation property list for a map object.">H5Mget_create_plist()</a> </li>
+<li>
+Default MCPL: <a class="el" href="_h5_ppublic_8h.html#aae5f6717cbedd91695b16d418cba6609">H5P_MAP_CREATE_DEFAULT</a> or <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<b>Map Access Property List (MAPL) - <a class="el" href="_h5_ppublic_8h.html#a79320cf1e087a106edf5389499366ab3">H5P_MAP_ACCESS</a></b> <ul>
+<li>
+Controls properties for accessing an existing map </li>
+<li>
+These properties affect how the map is opened and accessed </li>
+<li>
+Settings can vary between different opens of the same map </li>
+<li>
+Can be retrieved with <a class="el" href="group___h5_m.html#ga48dd6941c1cac4f8f0f3beaf01c5d7de" title="Gets access property list for a map object.">H5Mget_access_plist()</a> </li>
+<li>
+Default MAPL: <a class="el" href="_h5_ppublic_8h.html#acdbe2a2c6e0695f8fc7e38fd727afc80">H5P_MAP_ACCESS_DEFAULT</a> or <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> </li>
+</ul>
+</li>
+</ul>
+<p>These property list classes follow the same inheritance hierarchy as other HDF5 objects. The MCPL inherits properties relevant to object creation (like character encoding for names), while the MAPL controls access-specific settings.</p>
+<h2><a class="anchor" id="subsec_map_datatypes"></a>
+Key and Value Datatypes</h2>
+<p>Map objects require two datatypes:</p>
+<ul>
+<li>
+<p class="startli"><b>Key Datatype</b>: Defines how keys are stored in the map </p><ul>
+<li>
+Can be any valid HDF5 datatype (integer, float, string, compound, etc.) </li>
+<li>
+Variable-length strings (<a class="el" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a> with <a class="el" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a> size) are commonly used for keys </li>
+<li>
+Fixed at map creation time </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<b>Value Datatype</b>: Defines how values are stored in the map <ul>
+<li>
+Can be any valid HDF5 datatype </li>
+<li>
+All values in a map must have the same datatype </li>
+<li>
+Fixed at map creation time </li>
+</ul>
+</li>
+</ul>
+<p>During <a class="el" href="group___h5_m.html#ga8cb388b30893cb79ed4d2bec4a8e8c4f" title="Adds a key-value pair to a map object.">H5Mput()</a> and <a class="el" href="group___h5_m.html#ga585b7c3352cbca858e11bf50d3dd68ed" title="Retrieves a key-value pair from a map object.">H5Mget()</a> operations, memory datatypes can differ from the stored datatypes. The HDF5 library will perform type conversion as needed, similar to dataset I/O operations.</p>
+<h2><a class="anchor" id="subsec_map_example"></a>
+Example Usage</h2>
+<p>The following example demonstrates creating a map, adding key-value pairs, and retrieving values. Note that this example requires a VOL connector with map support (e.g., DAOS). See <a class="el" href="_h5_v_l__u_g.html">HDF5 Virtual Object Layer (VOL)</a> for VOL connector configuration details.</p>
+<div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, map_id, vls_type_id, fapl_id;</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">char</span> *names[2] = {<span class="stringliteral">&quot;Alice&quot;</span>, <span class="stringliteral">&quot;Bob&quot;</span>};</div>
+<div class="line">uint64_t IDs[2] = {25385486, 34873275};</div>
+<div class="line">uint64_t val_out;</div>
+<div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> ret;</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Setup file access property list with VOL connector that supports maps</span></div>
+<div class="line"><span class="comment">// (Configuration depends on specific VOL connector - see connector documentation)</span></div>
+<div class="line">fapl_id = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a>(<a class="code hl_define" href="_h5_ppublic_8h.html#a60ec2d4334addfc0eda89614598ee38e">H5P_FILE_ACCESS</a>);</div>
+<div class="line"><span class="comment">// ... configure VOL connector in fapl_id ...</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Create variable-length string datatype for keys</span></div>
+<div class="line">vls_type_id = <a class="code hl_function" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a>(<a class="code hl_define" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a>);</div>
+<div class="line"><a class="code hl_function" href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c">H5Tset_size</a>(vls_type_id, <a class="code hl_define" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a>);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Create file</span></div>
+<div class="line">file_id = <a class="code hl_function" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a>(<span class="stringliteral">&quot;file.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, fapl_id);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Create map with string keys and uint64 values</span></div>
+<div class="line">map_id = <a class="code hl_function" href="group___h5_m.html#gac85972f70201429a93184408d40e4b09">H5Mcreate</a>(file_id, <span class="stringliteral">&quot;map&quot;</span>, vls_type_id, <a class="code hl_define" href="group___p_d_t_c9x.html#ga5eda31dcf868e6b9487d1486ec4a5613">H5T_NATIVE_UINT64</a>,</div>
+<div class="line">                   <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Add key-value pairs</span></div>
+<div class="line"><a class="code hl_function" href="group___h5_m.html#ga8cb388b30893cb79ed4d2bec4a8e8c4f">H5Mput</a>(map_id, vls_type_id, &amp;names[0], <a class="code hl_define" href="group___p_d_t_c9x.html#ga5eda31dcf868e6b9487d1486ec4a5613">H5T_NATIVE_UINT64</a>, &amp;IDs[0], <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line"><a class="code hl_function" href="group___h5_m.html#ga8cb388b30893cb79ed4d2bec4a8e8c4f">H5Mput</a>(map_id, vls_type_id, &amp;names[1], <a class="code hl_define" href="group___p_d_t_c9x.html#ga5eda31dcf868e6b9487d1486ec4a5613">H5T_NATIVE_UINT64</a>, &amp;IDs[1], <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Retrieve a value by key</span></div>
+<div class="line">ret = <a class="code hl_function" href="group___h5_m.html#ga585b7c3352cbca858e11bf50d3dd68ed">H5Mget</a>(map_id, vls_type_id, &amp;names[0], <a class="code hl_define" href="group___p_d_t_c9x.html#ga5eda31dcf868e6b9487d1486ec4a5613">H5T_NATIVE_UINT64</a>, &amp;val_out, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line"><span class="keywordflow">if</span>(ret &lt; 0 || val_out != IDs[0]) {</div>
+<div class="line">    fprintf(stderr, <span class="stringliteral">&quot;Failed to retrieve correct value from map\n&quot;</span>);</div>
+<div class="line">    <span class="keywordflow">goto</span> error;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Close map and other objects</span></div>
+<div class="line"><a class="code hl_function" href="group___h5_m.html#gad9a6a1199edc0fb4a50d831a213a5f44">H5Mclose</a>(map_id);</div>
+<div class="line"><a class="code hl_function" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a>(vls_type_id);</div>
+<div class="line"><a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a>(fapl_id);</div>
+<div class="line"><a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file_id);</div>
+<div class="line"><span class="keywordflow">return</span> 0;</div>
+<div class="line"> </div>
+<div class="line">error:</div>
+<div class="line">    <a class="code hl_define" href="_h5_epublic_8h.html#aec70809990a203fe2e6b044437f74551">H5E_BEGIN_TRY</a> {</div>
+<div class="line">        <a class="code hl_function" href="group___h5_m.html#gad9a6a1199edc0fb4a50d831a213a5f44">H5Mclose</a>(map_id);</div>
+<div class="line">        <a class="code hl_function" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a>(vls_type_id);</div>
+<div class="line">        <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a>(fapl_id);</div>
+<div class="line">        <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file_id);</div>
+<div class="line">    } <a class="code hl_define" href="_h5_epublic_8h.html#abed534bb6c70e3ac080b93e19343a3a5">H5E_END_TRY</a>;</div>
+<div class="line">    <span class="keywordflow">return</span> -1;</div>
+<div class="ttc" id="a_h5_epublic_8h_html_abed534bb6c70e3ac080b93e19343a3a5"><div class="ttname"><a href="_h5_epublic_8h.html#abed534bb6c70e3ac080b93e19343a3a5">H5E_END_TRY</a></div><div class="ttdeci">#define H5E_END_TRY</div><div class="ttdef"><b>Definition</b> H5Epublic.h:103</div></div>
+<div class="ttc" id="a_h5_epublic_8h_html_aec70809990a203fe2e6b044437f74551"><div class="ttname"><a href="_h5_epublic_8h.html#aec70809990a203fe2e6b044437f74551">H5E_BEGIN_TRY</a></div><div class="ttdeci">#define H5E_BEGIN_TRY</div><div class="ttdef"><b>Definition</b> H5Epublic.h:84</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a5a2d6726f9ad8d2bca8df2b817e5ad6a"><div class="ttname"><a href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a></div><div class="ttdeci">#define H5F_ACC_TRUNC</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:30</div></div>
+<div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_a60ec2d4334addfc0eda89614598ee38e"><div class="ttname"><a href="_h5_ppublic_8h.html#a60ec2d4334addfc0eda89614598ee38e">H5P_FILE_ACCESS</a></div><div class="ttdeci">#define H5P_FILE_ACCESS</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:56</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:220</div></div>
+<div class="ttc" id="a_h5_tpublic_8h_html_a5185e14efde13b48249fe391324331bc"><div class="ttname"><a href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a></div><div class="ttdeci">#define H5T_VARIABLE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:208</div></div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:252</div></div>
+<div class="ttc" id="agroup___h5_f_html_gac55cd91d80822e4f8c2a7f04ea71b124"><div class="ttname"><a href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a></div><div class="ttdeci">herr_t H5Fclose(hid_t file_id)</div><div class="ttdoc">Terminates access to an HDF5 file.</div></div>
+<div class="ttc" id="agroup___h5_f_html_gae64b51ee9ac0781bc4ccc599d98387f4"><div class="ttname"><a href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a></div><div class="ttdeci">hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)</div><div class="ttdoc">Creates an HDF5 file.</div></div>
+<div class="ttc" id="agroup___h5_m_html_ga585b7c3352cbca858e11bf50d3dd68ed"><div class="ttname"><a href="group___h5_m.html#ga585b7c3352cbca858e11bf50d3dd68ed">H5Mget</a></div><div class="ttdeci">herr_t H5Mget(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id)</div><div class="ttdoc">Retrieves a key-value pair from a map object.</div></div>
+<div class="ttc" id="agroup___h5_m_html_ga8cb388b30893cb79ed4d2bec4a8e8c4f"><div class="ttname"><a href="group___h5_m.html#ga8cb388b30893cb79ed4d2bec4a8e8c4f">H5Mput</a></div><div class="ttdeci">herr_t H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value, hid_t dxpl_id)</div><div class="ttdoc">Adds a key-value pair to a map object.</div></div>
+<div class="ttc" id="agroup___h5_m_html_gac85972f70201429a93184408d40e4b09"><div class="ttname"><a href="group___h5_m.html#gac85972f70201429a93184408d40e4b09">H5Mcreate</a></div><div class="ttdeci">hid_t H5Mcreate(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id)</div><div class="ttdoc">Creates a map object.</div></div>
+<div class="ttc" id="agroup___h5_m_html_gad9a6a1199edc0fb4a50d831a213a5f44"><div class="ttname"><a href="group___h5_m.html#gad9a6a1199edc0fb4a50d831a213a5f44">H5Mclose</a></div><div class="ttdeci">herr_t H5Mclose(hid_t map_id)</div><div class="ttdoc">Terminates access to a map object.</div></div>
+<div class="ttc" id="agroup___h5_t_html_gae5f38bfd4a4c557496b3194b5180212c"><div class="ttname"><a href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c">H5Tset_size</a></div><div class="ttdeci">herr_t H5Tset_size(hid_t type_id, size_t size)</div><div class="ttdoc">Sets size for a datatype.</div></div>
+<div class="ttc" id="agroup___h5_t_html_gaec07efbab84f4e5b4ed22f010786be8e"><div class="ttname"><a href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a></div><div class="ttdeci">hid_t H5Tcopy(hid_t type_id)</div><div class="ttdoc">Copies an existing datatype.</div></div>
+<div class="ttc" id="agroup___h5_t_html_gafcba4db244f6a4d71e99c6e72b8678f0"><div class="ttname"><a href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a></div><div class="ttdeci">herr_t H5Tclose(hid_t type_id)</div><div class="ttdoc">Releases a datatype.</div></div>
+<div class="ttc" id="agroup___p_d_t_c9x_html_ga5eda31dcf868e6b9487d1486ec4a5613"><div class="ttname"><a href="group___p_d_t_c9x.html#ga5eda31dcf868e6b9487d1486ec4a5613">H5T_NATIVE_UINT64</a></div><div class="ttdeci">#define H5T_NATIVE_UINT64</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:1106</div></div>
+<div class="ttc" id="agroup___p_d_t_s_html_ga7f6b6959fefe56d2e871659110936d2d"><div class="ttname"><a href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a></div><div class="ttdeci">#define H5T_C_S1</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:572</div></div>
+<div class="ttc" id="agroup___p_l_c_r_html_ga5dce61149211d3ef319452aa598887fb"><div class="ttname"><a href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a></div><div class="ttdeci">herr_t H5Pclose(hid_t plist_id)</div><div class="ttdoc">Terminates access to a property list.</div></div>
+<div class="ttc" id="agroup___p_l_c_r_html_gaf1b11da01d4d45d788c45f8bc5f0cbfa"><div class="ttname"><a href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div><div class="ttdeci">hid_t H5Pcreate(hid_t cls_id)</div><div class="ttdoc">Creates a new property list as an instance of a property list class.</div></div>
+</div><!-- fragment --><h2><a class="anchor" id="subsec_map_notes"></a>
+Important Notes</h2>
+<ul>
+<li>
+<p class="startli"><b>VOL Connector Requirement</b>: Map functionality is only available through VOL connectors that implement the map interface. The native HDF5 file format does not support maps.</p>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Experimental API</b>: The H5M interface is experimental and subject to change in future releases. Application code using maps should be prepared for potential API modifications.</p>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Key Uniqueness</b>: Each key in a map must be unique. Calling <a class="el" href="group___h5_m.html#ga8cb388b30893cb79ed4d2bec4a8e8c4f" title="Adds a key-value pair to a map object.">H5Mput()</a> with an existing key will update that key's value rather than creating a duplicate entry.</p>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Iteration Order</b>: The order in which key-value pairs are returned during iteration is determined by the VOL connector implementation and may not be predictable.</p>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Type Conversion</b>: As with datasets, the library performs datatype conversion between memory and storage representations. Ensure memory buffers are sized appropriately for the memory datatype specified.</p>
+<p class="endli"></p>
+</li>
+<li>
+<b>Asynchronous Operations</b>: Several map operations have asynchronous variants (e.g., <a class="el" href="group___a_s_y_n_c.html#ga8bb9c2b6c4e695156c529532e2984184">H5Mcreate_async</a>, <a class="el" href="group___a_s_y_n_c.html#ga128bb64acfc9bf04191424c673da358d">H5Mopen_async</a>) for use with the asynchronous I/O interface. </li>
+</ul>
 <p>Previous Chapter <a class="el" href="_h5_e_s__u_g.html#sec_async">The HDF5 Event Set Interface</a> - Next Chapter <a class="el" href="_h5_r__u_g.html#sec_reference">HDF5 References</a></p>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>

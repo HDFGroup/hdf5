@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -307,6 +307,15 @@ $(function(){initNavTree('_u_g.html',''); initResizable(true); });
 </li>
 <li><a class="el" href="_h5_g__u_g.html#subsec_group_examples">Examples of File Structures</a></li>
 </ul>
+<p><a class="el" href="_h5_l__u_g.html#sec_link">The HDF5 Link Interface</a> </p><ul>
+<li><a class="el" href="_h5_l__u_g.html#subsec_link_intro">Introduction</a> </li>
+<li><a class="el" href="_h5_l__u_g.html#subsec_link_types">Link Types</a> </li>
+<li><a class="el" href="_h5_l__u_g.html#subsec_link_create">Creating Links</a> </li>
+<li><a class="el" href="_h5_l__u_g.html#subsec_link_ops">Link Operations</a> </li>
+<li><a class="el" href="_h5_l__u_g.html#subsec_link_traverse">Link Traversal</a> </li>
+<li><a class="el" href="_h5_l__u_g.html#subsec_link_user">User-Defined Link Types</a> </li>
+<li><a class="el" href="_h5_l__u_g.html#subsec_link_summary">Summary</a></li>
+</ul>
 <p><a class="el" href="_h5_d__u_g.html#sec_dataset">HDF5 Datasets</a> </p><ul>
 <li><a class="el" href="_h5_d__u_g.html#subsec_dataset_intro">Introduction</a> </li>
 <li><a class="el" href="_h5_d__u_g.html#subsec_dataset_function">Dataset Function Summaries</a> </li>
@@ -472,6 +481,25 @@ To Open and Read or Write an Existing Attribute  </li>
 </li>
 <li><a class="el" href="_h5_a__u_g.html#subsec_attribute_special">Special Issues</a></li>
 </ul>
+<p><a class="el" href="_h5_o__u_g.html#sec_object">The HDF5 Object Interface</a> </p><ul>
+<li><a class="el" href="_h5_o__u_g.html#subsec_object_intro">Introduction</a> </li>
+<li><a class="el" href="_h5_o__u_g.html#subsec_object_ops">Object Operations</a> </li>
+<li><a class="el" href="_h5_o__u_g.html#subsec_object_visit">Object Traversal</a> </li>
+<li><a class="el" href="_h5_o__u_g.html#subsec_object_comments">Object Comments</a> </li>
+<li><a class="el" href="_h5_o__u_g.html#subsec_object_refcount">Reference Counting</a> </li>
+<li><a class="el" href="_h5_o__u_g.html#subsec_object_cache">Cache Control</a> </li>
+<li><a class="el" href="_h5_o__u_g.html#subsec_object_summary">Summary</a></li>
+</ul>
+<p><a class="el" href="_h5_i__u_g.html#sec_identifier">The HDF5 Identifier Interface</a> </p><ul>
+<li><a class="el" href="_h5_i__u_g.html#subsec_identifier_intro">Introduction</a> </li>
+<li><a class="el" href="_h5_i__u_g.html#subsec_identifier_types">Identifier Types</a> </li>
+<li><a class="el" href="_h5_i__u_g.html#subsec_identifier_refcount">Reference Counting</a> </li>
+<li><a class="el" href="_h5_i__u_g.html#subsec_identifier_valid">Identifier Validation</a> </li>
+<li><a class="el" href="_h5_i__u_g.html#subsec_identifier_query">Querying Identifiers</a> </li>
+<li><a class="el" href="_h5_i__u_g.html#subsec_identifier_user">User-Defined Identifier Types</a> </li>
+<li><a class="el" href="_h5_i__u_g.html#subsec_identifier_iteration">Identifier Iteration</a> </li>
+<li><a class="el" href="_h5_i__u_g.html#subsec_identifier_summary">Summary</a></li>
+</ul>
 <p><a class="el" href="_h5_e__u_g.html#sec_error">HDF5 Error Handling</a> </p><ul>
 <li><a class="el" href="_h5_e__u_g.html#subsec_error_intro">Introduction</a> </li>
 <li><a class="el" href="_h5_e__u_g.html#subsec_error_program">Programming Model for Error Handling</a> </li>
@@ -523,6 +551,17 @@ To Open and Read or Write an Existing Attribute  </li>
 <li><a class="el" href="_h5_p__u_g.html#subsec_plist_H5P">Property List Function Summaries</a> </li>
 <li><a class="el" href="_h5_p__u_g.html#subsec_plist_resources">Additional Property List Resources</a> </li>
 <li><a class="el" href="_h5_p__u_g.html#subsec_plist_notes">Notes</a></li>
+</ul>
+<p><a class="el" href="_h5_f_d__u_g.html#sec_vfd">The HDF5 Virtual File Driver Interface</a> </p><ul>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_intro">Introduction</a> </li>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_purpose">Purpose and Benefits</a> </li>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_drivers">Built-in File Drivers</a> </li>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_selection">Selecting a File Driver</a> </li>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_custom">Custom File Drivers</a> </li>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_parallel">Parallel File Drivers</a> </li>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_performance">Performance Considerations</a> </li>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_query">Querying File Driver Information</a> </li>
+<li><a class="el" href="_h5_f_d__u_g.html#subsec_vfd_summary">Summary</a></li>
 </ul>
 <p><a class="el" href="_h5_v_l__u_g.html#sec_vol">The HDF5 Virtual Object Layer (VOL)</a> </p><ul>
 <li><a class="el" href="_h5_v_l__u_g.html#subsec_vol_intro">Introduction</a> </li>
@@ -627,9 +666,25 @@ To Open and Read or Write an Existing Attribute  </li>
 <p><a class="el" href="_h5_e_s__u_g.html#sec_async">The HDF5 Event Set Interface</a> </p><ul>
 <li><a class="el" href="_h5_e_s__u_g.html#subsec_async_intro">Introduction</a></li>
 </ul>
-<p><a class="el" href="_h5_m__u_g.html#sec_map">HDF5 Map Object</a></p>
+<p><a class="el" href="_h5_m__u_g.html#sec_map">HDF5 Map Object</a> </p><ul>
+<li><a class="el" href="_h5_m__u_g.html#subsec_map_intro">Introduction</a> </li>
+<li><a class="el" href="_h5_m__u_g.html#subsec_map_lifecycle">Map Object Life Cycle</a> </li>
+<li><a class="el" href="_h5_m__u_g.html#subsec_map_plist">Map Property Lists</a> </li>
+<li><a class="el" href="_h5_m__u_g.html#subsec_map_datatypes">Key and Value Datatypes</a> </li>
+<li><a class="el" href="_h5_m__u_g.html#subsec_map_example">Example Usage</a> </li>
+<li><a class="el" href="_h5_m__u_g.html#subsec_map_notes">Important Notes</a></li>
+</ul>
 <p><a class="el" href="_h5_r__u_g.html#sec_reference">HDF5 References</a></p>
-<p><a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a></p>
+<p><a class="el" href="_h5_z__u_g.html#sec_filter">The HDF5 Filter Interface</a> </p><ul>
+<li><a class="el" href="_h5_z__u_g.html#subsec_filter_intro">Introduction</a> </li>
+<li><a class="el" href="_h5_z__u_g.html#subsec_filter_builtin">Built-in Filters</a> </li>
+<li><a class="el" href="_h5_z__u_g.html#subsec_filter_usage">Using Filters</a> </li>
+<li><a class="el" href="_h5_z__u_g.html#subsec_filter_pipeline">Filter Pipelines</a> </li>
+<li><a class="el" href="_h5_z__u_g.html#subsec_filter_custom">Custom Filters</a> </li>
+<li><a class="el" href="_h5_z__u_g.html#subsec_filter_query">Querying Filters</a> </li>
+<li><a class="el" href="_h5_z__u_g.html#subsec_filter_plugins">Filter Plugins</a> </li>
+<li><a class="el" href="_h5_z__u_g.html#subsec_filter_summary">Summary</a></li>
+</ul>
 <h1><a class="anchor" id="sec_hl"></a>
 HDF5 High Level APIs</h1>
 <ul>

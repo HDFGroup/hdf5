@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -238,8 +238,12 @@ Property List Classes</h3>
 <td>String creation (STRCPL)  </td><td><a class="el" href="_h5_ppublic_8h.html#ad5c40cc58ce5ddb42dff95eb684bd6cf">H5P_STRING_CREATE</a>  </td><td>See <a class="el" href="_h5_d__u_g.html#subsec_dataset_program">Programming Model for Datasets</a> and <a class="el" href="_h5_t__u_g.html#subsec_datatype_program">Programming Model for Datatypes</a>   </td></tr>
 <tr valign="top">
 <td>Attribute creation (ACPL)  </td><td><a class="el" href="_h5_ppublic_8h.html#aa0102211c679e031e2e9831b66c48a12">H5P_ATTRIBUTE_CREATE</a>  </td><td>See <a class="el" href="_h5_a__u_g.html#subsec_attribute_work">Working with Attributes</a>.   </td></tr>
+<tr valign="top">
+<td>Map creation (MCPL)  </td><td><a class="el" href="_h5_ppublic_8h.html#a50729bf4bfe1588f1ef3919e18e7d546">H5P_MAP_CREATE</a>  </td><td>See <a class="el" href="_h5_m__u_g.html#subsec_map_plist">Map Property Lists</a>. Only available with VOL connectors that support maps.   </td></tr>
+<tr valign="top">
+<td>Map access (MAPL)  </td><td><a class="el" href="_h5_ppublic_8h.html#a79320cf1e087a106edf5389499366ab3">H5P_MAP_ACCESS</a>  </td><td>See <a class="el" href="_h5_m__u_g.html#subsec_map_plist">Map Property Lists</a>. Only available with VOL connectors that support maps.   </td></tr>
 </table>
-<p>Note: In the table above, the abbreviations to the right of each property list class name in this table are widely used in both HDF5 programmer documentation and HDF5 source code. For example, <a class="el" href="group___f_c_p_l.html">File Creation Properties</a> (FCPL) is the file creation property list, <a class="el" href="group___o_c_p_l.html">Object Creation Properties</a> (OCPL) is the object creation property list, <a class="el" href="group___o_c_p_y_p_l.html">Object Copy Properties</a> (OCPYPL) is object copy property list, and <a class="el" href="group___s_t_r_c_p_l.html">String Creation Properties</a> (STRCPL) is the string creation property list. These abbreviations may appear in either uppercase or lowercase.</p>
+<p>Note: In the table above, the abbreviations to the right of each property list class name in this table are widely used in both HDF5 programmer documentation and HDF5 source code. For example, <a class="el" href="group___f_c_p_l.html">File Creation Properties</a> (FCPL) is the file creation property list, <a class="el" href="group___o_c_p_l.html">Object Creation Properties</a> (OCPL) is the object creation property list, <a class="el" href="group___o_c_p_y_p_l.html">Object Copy Properties</a> (OCPYPL) is object copy property list, <a class="el" href="group___s_t_r_c_p_l.html">String Creation Properties</a> (STRCPL) is the string creation property list, and <a class="el" href="group___m_c_p_l.html">Map Creation Properties</a> (MCPL) and <a class="el" href="group___m_a_p_l.html">VOL Data Mapping Properties</a> (MAPL) are the map creation and access property lists. These abbreviations may appear in either uppercase or lowercase.</p>
 <p>The “HDF5 property list class inheritance hierarchy” figure, immediately following, illustrates the inheritance hierarchy of HDF5's property list classes. Properties are defined at the root of the HDF5 property environment (<a class="el" href="group___p_l_c_r.html">Property List Class Root</a> in the figure below). Property list classes then inherit properties from that root, either directly or indirectly through a parent class. In every case, a property list class inherits only the properties relevant to its role. For example, the <a class="el" href="group___o_c_p_l.html">Object Creation Properties</a> (OCPL) inherits all properties that are relevant to the creation of any object while the <a class="el" href="group___g_c_p_l.html">Group Creation Properties</a> (GCPL) inherits only those properties that are relevant to group creation.</p>
 <table class="doxtable">
 <tr>

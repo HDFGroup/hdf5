@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,7 +141,67 @@ $(function(){initNavTree('_h5_o__u_g.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo</a></b></dt><dd>Under Construction</dd></dl>
+<h1><a class="anchor" id="sec_object"></a>
+The HDF5 Object Interface</h1>
+<h2><a class="anchor" id="subsec_object_intro"></a>
+Introduction</h2>
+<p>The HDF5 Object interface (H5O) provides functions for managing HDF5 objects at a generic level. While specific object types (groups, datasets, datatypes) have their own interfaces (<a class="el" href="group___h5_g.html">Groups (H5G)</a>, <a class="el" href="group___h5_d.html">Datasets (H5D)</a>, <a class="el" href="group___h5_t.html">Datatypes (H5T)</a>), the H5O interface enables operations that apply to all object types uniformly.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_o.html">Objects (H5O)</a> Reference Manual</dd></dl>
+<h2><a class="anchor" id="subsec_object_ops"></a>
+Object Operations</h2>
+<p>The H5O interface provides several categories of operations:</p>
+<ul>
+<li><b>Object Information</b>: Retrieve metadata about objects using <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a>, <a class="el" href="group___h5_o.html#ga16d8ac07f9244cfccb42b5f309ca6b3c">H5Oget_info_by_name</a>, <a class="el" href="group___h5_o.html#gafe764884e1530f86079288dd5895a7bd">H5Oget_info_by_idx</a>, and <a class="el" href="group___h5_o.html#ga677d99ab106e2032b991b75b75de0e46" title="Retrieve native file format information about an object.">H5Oget_native_info</a>. These functions return information such as reference counts, modification times, and storage details.</li>
+</ul>
+<ul>
+<li><b>Object Copying</b>: Copy objects between locations or files using <a class="el" href="group___h5_o.html#gaa94449be6f67f499be5ddd3fc44f4225" title="Copies an object in an HDF5 file.">H5Ocopy</a>. This creates a complete copy of the source object including all its attributes and, for groups, can optionally copy contained objects recursively.</li>
+</ul>
+<ul>
+<li><b>Object Opening</b>: Open objects by address or index using <a class="el" href="group___h5_o.html#ga9f635f58c7ddf17f87c253bfbca08bc1" title="Opens an object in an HDF5 file by location identifier and path name.">H5Oopen</a>, <a class="el" href="group___h5_o.html#gaeb66e5cbb3ca79890fc284a0b06762be" title="Opens the nth object in a group.">H5Oopen_by_idx</a>, or <a class="el" href="group___h5_o.html#ga2ea3627cf171d0565307702a5e203262" title="Opens an object in an HDF5 file using its VOL independent token.">H5Oopen_by_token</a>. This enables access to objects when the specific type is unknown.</li>
+</ul>
+<ul>
+<li><b>Object Linking</b>: Create links to objects using <a class="el" href="group___h5_o.html#ga2c97dd58e64b67d16325fceb7e02113f" title="Creates a hard link to an object in an HDF5 file.">H5Olink</a>, enabling multiple names to reference the same object.</li>
+</ul>
+<h2><a class="anchor" id="subsec_object_visit"></a>
+Object Traversal</h2>
+<p>The H5O interface provides powerful traversal capabilities:</p>
+<ul>
+<li><a class="el" href="group___h5_o.html#ga5ce86255fcc34ceaf84a62551cd24233">H5Ovisit</a> recursively visits all objects in a group hierarchy </li>
+<li><a class="el" href="group___h5_o.html#gab02a69e88b11404e7fd61f55344b186c">H5Ovisit_by_name</a> performs recursive visitation starting from a named location</li>
+</ul>
+<p>These functions invoke a user-supplied callback for each object encountered, enabling custom processing, cataloging, or analysis of file contents.</p>
+<h2><a class="anchor" id="subsec_object_comments"></a>
+Object Comments</h2>
+<p>Objects can have associated comment strings for documentation purposes:</p>
+<ul>
+<li><a class="el" href="group___h5_o.html#ga8b5cf8e916204e29616516046121f631" title="Sets comment for specified object.">H5Oset_comment</a> and <a class="el" href="group___h5_o.html#gafeb5242de7f1080b5c19f4fe19784505" title="Sets comment for specified object.">H5Oset_comment_by_name</a> attach comments to objects </li>
+<li><a class="el" href="group___h5_o.html#gaa1511ce5e2fe01ce7ea58f2f851d694b" title="Retrieves comment for specified object.">H5Oget_comment</a> and <a class="el" href="group___h5_o.html#gae6d92d597c5a292d342a1bda91e41171" title="Retrieves comment for specified object.">H5Oget_comment_by_name</a> retrieve object comments</li>
+</ul>
+<h2><a class="anchor" id="subsec_object_refcount"></a>
+Reference Counting</h2>
+<p>HDF5 uses reference counting to manage object lifetimes. The library automatically deletes objects when their reference count reaches zero:</p>
+<ul>
+<li><a class="el" href="group___h5_o.html#ga2086bad6c3cd2a711c306a48c093ff55" title="Increments an object reference count.">H5Oincr_refcount</a> manually increments an object's reference count </li>
+<li><a class="el" href="group___h5_o.html#ga60c20da5e244c28a653d4fa23d316b44" title="Decrements an object reference count.">H5Odecr_refcount</a> manually decrements an object's reference count</li>
+</ul>
+<dl class="section attention"><dt>Attention</dt><dd>Manual manipulation of reference counts should be used with extreme caution. Improper use can lead to memory leaks or premature object deletion.</dd></dl>
+<h2><a class="anchor" id="subsec_object_cache"></a>
+Cache Control</h2>
+<p>For performance optimization, the H5O interface provides cache management functions:</p>
+<ul>
+<li><a class="el" href="group___h5_o.html#gaf0318b68be9ab23a92b8a6bee0af9e2f" title="Refreshes all buffers associated with an HDF5 object.">H5Orefresh</a> reloads object metadata from disk, discarding cached data </li>
+<li><a class="el" href="group___h5_o.html#gad99f35048cba4534b6393214684f090f" title="Flushes all buffers associated with an HDF5 object to disk.">H5Oflush</a> writes object metadata to disk immediately</li>
+</ul>
+<p>These functions are particularly useful in SWMR (Single Writer Multiple Reader) scenarios.</p>
+<h2><a class="anchor" id="subsec_object_summary"></a>
+Summary</h2>
+<p>The H5O interface provides essential generic object operations: </p><ul>
+<li>Query object metadata and properties across all object types </li>
+<li>Copy objects within and between HDF5 files </li>
+<li>Traverse object hierarchies with custom processing </li>
+<li>Manage object comments for documentation </li>
+<li>Control object caching and persistence</li>
+</ul>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>
 </div></div><!-- contents -->

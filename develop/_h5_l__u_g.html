@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,7 +141,61 @@ $(function(){initNavTree('_h5_l__u_g.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo</a></b></dt><dd>Under Construction</dd></dl>
+<h1><a class="anchor" id="sec_link"></a>
+The HDF5 Link Interface</h1>
+<h2><a class="anchor" id="subsec_link_intro"></a>
+Introduction</h2>
+<p>The HDF5 Link interface (H5L) provides functions for creating, querying, and manipulating links between objects in an HDF5 file. Links are the primary mechanism for organizing objects in the HDF5 file hierarchy and enabling navigation between related data.</p>
+<h2><a class="anchor" id="subsec_link_types"></a>
+Link Types</h2>
+<p>HDF5 supports three types of links:</p>
+<ul>
+<li><b>Hard Links</b>: Direct references to objects within the same file. An object exists as long as at least one hard link points to it. Hard links cannot cross file boundaries.</li>
+</ul>
+<ul>
+<li><b>Soft Links (Symbolic Links)</b>: Path-based references that store the path to an object as a string. Soft links can "dangle" if the target object is deleted or moved.</li>
+</ul>
+<ul>
+<li><b>External Links</b>: References to objects in other HDF5 files. External links store both the filename and the path to the object within that file.</li>
+</ul>
+<h2><a class="anchor" id="subsec_link_create"></a>
+Creating Links</h2>
+<p>Links can be created using several methods:</p>
+<ul>
+<li><a class="el" href="group___h5_l.html#ga69d50f7acdfd2f1dc7c4372397e63bd2" title="Creates a hard link to an object.">H5Lcreate_hard</a> creates hard links to objects </li>
+<li><a class="el" href="group___h5_l.html#ga894444623b58ce1ac3bd35538245ac78" title="Creates a soft link.">H5Lcreate_soft</a> creates soft (symbolic) links using path strings </li>
+<li><a class="el" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683" title="Creates an external link, a soft link to an object in a different file.">H5Lcreate_external</a> creates links to objects in other HDF5 files</li>
+</ul>
+<h2><a class="anchor" id="subsec_link_ops"></a>
+Link Operations</h2>
+<p>The H5L interface provides functions for:</p>
+<ul>
+<li><b>Querying</b>: <a class="el" href="group___h5_l.html#ga171be6e41dc1a464edc402df0ebdf801" title="Determines whether a link with the specified name exists in a group.">H5Lexists</a> checks if a link exists, <a class="el" href="group___h5_l.html#ga97279697f3010a6ad31dd7f4341eb698">H5Lget_info</a> retrieves link information </li>
+<li><b>Moving/Copying</b>: <a class="el" href="group___h5_l.html#ga0bbc7f9bf25c8aca9dd8433a325c8acb" title="Moves a link within an HDF5 file.">H5Lmove</a> and <a class="el" href="group___h5_l.html#gafd4624f1c040d5f1df36cb1e6986aac6" title="Creates an identical copy of a link with the same creation time and target. The new link can have a d...">H5Lcopy</a> relocate or duplicate links </li>
+<li><b>Deleting</b>: <a class="el" href="group___h5_l.html#ga5b4e7f59f5d4bdae94fd8ce6875295cf" title="Removes a link from a group.">H5Ldelete</a> removes links from the file </li>
+<li><b>Iterating</b>: <a class="el" href="group___t_r_a_v.html#ga55406698106930db68242987c11ba051">H5Literate</a> and <a class="el" href="group___t_r_a_v.html#gac0558936502924d9e898d8b6e041ed69">H5Lvisit</a> traverse links in groups</li>
+</ul>
+<h2><a class="anchor" id="subsec_link_traverse"></a>
+Link Traversal</h2>
+<p>The H5L interface includes powerful traversal functions that can iterate over all links in a group or recursively visit all links in a group hierarchy:</p>
+<ul>
+<li><a class="el" href="group___t_r_a_v.html#ga55406698106930db68242987c11ba051">H5Literate</a> iterates over links in a group using a group identifier </li>
+<li><a class="el" href="group___t_r_a_v.html#gac0558936502924d9e898d8b6e041ed69">H5Lvisit</a> recursively visits all links in a group and its subgroups using a group identifier </li>
+<li><a class="el" href="group___t_r_a_v.html#ga655b002428e0176c2fa23a0315fbbcc2">H5Literate_by_name</a> and <a class="el" href="group___t_r_a_v.html#ga138405315e233673741893e4e250f055">H5Lvisit_by_name</a> provide the same functionality but accept a location identifier and group name, allowing traversal without first opening the group</li>
+</ul>
+<p>These functions accept callbacks that are invoked for each link, enabling custom processing.</p>
+<h2><a class="anchor" id="subsec_link_user"></a>
+User-Defined Link Types</h2>
+<p>HDF5 allows registration of custom link types through <a class="el" href="group___h5_l_a.html#ga5073a814de9878bad53e1d3c900ea77f" title="Registers a user-defined link class or changes behavior of an existing class.">H5Lregister</a>. User-defined links can implement custom traversal and access behaviors. Use <a class="el" href="group___h5_l_a.html#ga01ddc889d27306a96a7cd27b6084a5ec" title="Unregisters a class of user-defined links.">H5Lunregister</a> to remove user-defined link classes and <a class="el" href="group___h5_l_a.html#ga02c1cf38efea97d18e5e2f65df3f08a2" title="Determines whether a class of user-defined links is registered.">H5Lis_registered</a> to check if a link class is registered.</p>
+<h2><a class="anchor" id="subsec_link_summary"></a>
+Summary</h2>
+<p>The H5L interface provides flexible mechanisms for organizing and navigating HDF5 files: </p><ul>
+<li>Hard links provide reference-counted object management </li>
+<li>Soft links enable flexible, path-based references </li>
+<li>External links connect objects across multiple files </li>
+<li>Iteration functions enable systematic traversal of file hierarchies </li>
+<li>User-defined links support extensibility for custom use cases</li>
+</ul>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>
 </div></div><!-- contents -->

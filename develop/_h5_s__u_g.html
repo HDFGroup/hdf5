@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -738,7 +738,15 @@ Write data to separate points</div></div>
 </table>
 <h2><a class="anchor" id="subsec_dataspace_select"></a>
 Dataspace Selection Operations and Data Transfer</h2>
-<p>This section is under construction.</p>
+<p>Dataspace selections play a critical role in HDF5 data transfer operations. When reading or writing data with <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread</a> or <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite</a>, selections determine which elements are transferred between memory and the dataset. The HDF5 Library supports independent specification of selections for both the dataset (file dataspace) and the memory buffer (memory dataspace).</p>
+<p>During data transfer, selections work as follows: </p><ul>
+<li>The selection in the file dataspace identifies which elements to read from or write to in the dataset. </li>
+<li>The selection in the memory dataspace defines where to place the read data or where to retrieve the write data. </li>
+<li>Both selections must contain the same number of elements and should not exceed the dataset dimensions.</li>
+</ul>
+<p>Additionally, as data is transferred, HDF5 automatically performs data type conversion between the file and memory representations if the source and destination data types differ.</p>
+<p>Selection operations are designed to work with commonly structured patterns while also allowing for arbitrary point and hyperslab selections to provide maximum flexibility. These selections can be combined using set operations, such as <a class="el" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fa1a8dc2bbb8d8268d6e7665a4664b9ad8">H5S_SELECT_OR</a> for a union and <a class="el" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0faae87b1594f2efe5f2717a865211d9418">H5S_SELECT_AND</a> for an intersection. You can then pass these combined selections to <a class="el" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d" title="Selects a hyperslab region to add to the current selected region.">H5Sselect_hyperslab</a> or <a class="el" href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d" title="Selects array elements to be included in the selection for a dataspace.">H5Sselect_elements</a> to efficiently create complex selection patterns.</p>
+<p>For parallel I/O operations, collective data transfers can optimize performance when multiple processes access different selections of the same dataset simultaneously. See the parallel HDF5 documentation for details on collective I/O with selections.</p>
 <h2><a class="anchor" id="subsec_dataspace_refer"></a>
 References</h2>
 <p>Another use of selections is to store a reference to a region of a dataset in the file or an external file. An HDF5 object reference object is a pointer to an object (attribute, dataset, group, or committed datatype) in the file or an external file. A selection can be used to create a pointer to a set of selected elements of a dataset, called a region reference. The selection can be either a point selection or a hyperslab selection.</p>

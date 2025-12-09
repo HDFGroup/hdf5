@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,6 +141,10 @@ $(function(){initNavTree('_h5_d_o__u_g.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
+<h1><a class="anchor" id="sec_hldo_intro"></a>
+Introduction</h1>
+<p>The HDF5 Dataset Optimization (H5DO) interface provides high-performance functions for specialized dataset I/O operations that bypass standard HDF5 processing layers when appropriate.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_d_o.html">HDF5 Optimizations APIs (H5DO)</a> Reference Manual</dd></dl>
 <p>Since version 1.10.3 these functions are deprecated in favor of <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a> and <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk</a>.</p>
 <h1><a class="anchor" id="sec_hldo_direct_chunk"></a>
 Direct Chunk Write Function</h1>

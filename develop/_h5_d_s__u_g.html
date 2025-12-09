@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -341,223 +341,171 @@ Example</h2>
 <p>The dimensions of dataset D have been assigned zero or more scales and labels. Dimension 0 has two scales, Dimension 1 has one scale, and so on. Dimension 2 has no scale associated with it.</p>
 <p>Some of the dimensions have labels as well. Note that dimension 2 has a label but no scale, and dimension 3 has scales but no label.</p>
 <p>Some of the Dimension Scales are shared. Dimension Scale DS1 is referenced by dimension 0 of D and by another unspecified dataset. Dimension Scale DS3 is referenced by dimension 1 and 3 of Dataset D.</p>
-<p>These relationships are represented in the file by attributes of the Dataset D and the Dimension Scale Datasets. Figure 5 shows the values that are stored for the DIMENSION_LIST attribute of Dataset D. This </p><table class="doxtable">
-<tr>
-<td><div class="image">
+<p>These relationships are represented in the file by attributes of the Dataset D and the Dimension Scale Datasets. Figure 5 shows the values that are stored for the DIMENSION_LIST attribute of Dataset D.</p>
+<div class="image">
 <img src="UML_Attribute.jpg" alt=""/>
 <div class="caption">
 The UML model for an HDF5 attribute</div></div>
-   </td></tr>
-</table>
-<p>attribute is a one-dimensional array with the HDF5 datatype variable length <a class="el" href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a>. Each row of the array is zero or more object references for Dimension Scale datasets.</p>
+<p>This attribute is a one-dimensional array with the HDF5 datatype variable length <a class="el" href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a>. Each row of the array is zero or more object references for Dimension Scale datasets.</p>
 <p>Table 6 shows the DIMENSION_LABELLIST for Dataset D. This is a one dimensional array with some empty values.</p>
 <p>Each of the Dimension Scale Datasets has a name and other attributes. The references are represented in the REFERENCE_LIST attributes. Table 7 – Table 10 show the values for these tables. Note that Dimension Scale DS4 and DS6 have no references to them in this diagram.</p>
 <p>The tables are stored as attributes of the Dimension Scale Dataset and the Datasets that refer to scales. Essentially, the association between a dimension of a Dataset and a Dimension Scale is represented by “pointers” (i.e., HDF5 Object References) in both of the associated objects. Since there can be multiple associations, there can be multiple pointers stored at each object, representing the endpoints of the associations. These will be stored in tables, i.e., as an attribute with an array of values.</p>
 <p>When dimension scales are attached or detached, the tables in the Dataset and the Dimension Scale must be updated. The arrays in the attributes can grow, and items can be deleted.</p>
 <p>The associations are identified by the object reference and dimension which is stored in a back pointer and returned from an API. The detach function needs to be careful how it deletes an item from the table, because the entries at both ends of the association must be updated at the same time.</p>
-<table class="doxtable">
-<tr>
-<td><div class="image">
+<div class="image">
 <img src="H5DS_fig3.png" alt=""/>
 <div class="caption">
 Figure 3. Example dataset and scales.</div></div>
-   </td></tr>
-</table>
-<table class="doxtable">
-<tr>
-<td><div class="image">
+<div class="image">
 <img src="H5DS_fig4.png" alt=""/>
 <div class="caption">
 Figure 4. Example labels, names, and attached scales.</div></div>
-   </td></tr>
-</table>
-<table class="doxtable">
-<tr>
-<td><div class="image">
+<div class="image">
 <img src="H5DS_fig5.png" alt=""/>
 <div class="caption">
-Figure 5. The table of dimension references, stored as an attribute of the</div></div>
- Dataset."
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-
-&lt;table&gt;&lt;caption&gt;Table 6. The table of dimension labels.&lt;/caption&gt;
-&lt;tr&gt;
-&lt;th&gt;Dataset Dimension&lt;/th&gt;
-&lt;th&gt;Label&lt;/th&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;“LX”&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;“LZ”&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;2&lt;/td&gt;
-&lt;td&gt;“LQ”&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;3&lt;/td&gt;
-&lt;td&gt;“”&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-
-&lt;table&gt;&lt;caption&gt;Table 7. The reference list for DS1.&lt;/caption&gt;
-&lt;tr&gt;
-&lt;th&gt;Reference&lt;/th&gt;
-&lt;th&gt;Dataset Reference Record&lt;/th&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;{Object reference to Dataset D, 0}&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;{Object reference to other Dataset, ?}&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-
-&lt;table&gt;&lt;caption&gt;Table 8. Reference list for DS2&lt;/caption&gt;
-&lt;tr&gt;
-&lt;th&gt;Reference&lt;/th&gt;
-&lt;th&gt;Dataset Reference Record&lt;/th&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;{Object reference to Dataset D, 0}&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-
-&lt;table&gt;&lt;caption&gt;Table 9. Reference list for DS3&lt;/caption&gt;
-&lt;tr&gt;
-&lt;th&gt;Reference&lt;/th&gt;
-&lt;th&gt;Dataset Reference Record&lt;/th&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;{Object reference to Dataset D, 1}&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;{Object reference to Dataset D, 3}&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-
-&lt;table&gt;&lt;caption&gt;Table 10. Reference List for DS5&lt;/caption&gt;
-&lt;tr&gt;
-&lt;th&gt;Reference&lt;/th&gt;
-&lt;th&gt;Dataset Reference Record&lt;/th&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;{Object reference to Dataset D, 3}&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-
-@section sec_dim_scales_api Programming Model and API
-
-@subsection subsec_dim_scales_api_model Programming Model
-Dimension Scales are HDF5 Datasets, so they may be created and accesses through any
-HDF5 API for datasets [10]. The HDF5 Dimension Scale API implements the specification
-defined in this document. The operations include:
-\li Convert dataset to scale (D) – convert dataset D to a dimension scale. D may be
-    specified by an id or by a path name.
-\li Attach scale (D, S, i) – attach dimension scale S to the ith dimension of D. D
-    and S may be specified by an id or path name
-\li Detach scale (D, i, scale) – detach scale from the ith dimension of D.
-\li Iterate through scales of (D, i) – get each scale attached.
-\li Get the number of scales of (D, i)
-\li Get the ith scale of D
-\li Set/Get name (S) – set/get the name about dimension scale S.
-
-The API also defines operations for dimension labels:
-\li Set/Get label (D, i) – set/get the label for ith dimension of D.
-
-@subsubsection subsubsec_dim_scales_api_model_create Create new Dimension Scale with Initial Values
-   1. Create dataset with for the Dimension Scale with H5Dcreate and other standard HDF5 calls.
-   2. Initialize the values of the Dimension Scale with H5Dwrite and other calls.
-   3. Convert the dataset to a Dimension Scale with H5DSmake_scale.
-   4. Close the Dimension Scale when finished with H5Dclose.
-
-@subsubsection subsubsec_dim_scales_api_model_attach Attach Dimension Scale to Dataset
-   1. Create or open the Dataset, D, with H5Dopen, etc.
-   2. Create or open the Dimension Scale dataset, S, with H5Dopen or as above.
-   3. Attach the Dimension Scale S to dimension j of Dataset D with H5DSattach_scale
-   4. When finished, close the Dimension Scale and Dataset with H5Dclose.
-
-@subsubsection subsubsec_dim_scales_api_model_read Read Dimension Scale values
-   1. Open the Dataset D, with H5Dopen
-   2. Get the number of dimensions of D with H5Dget_space.
-   3. Iterate through the scales of dimension i, locate the target scale, S (e.g., by its name).
-   4. Get the datatype, dataspace, etc. of S with H5Dget_space, H5Dget_type, H5Sget_ndims, etc.
-   5. Read the values of S into memory with H5Dread, e.g. into dscalebuff.
-   6. When finished, close the S and other objects with H5Dclose etc.
-   7. When finished, close the Dataset D with H5Dclose.
-
-@subsubsection subsubsec_dim_scales_api_model_write Write or Update Dimension Scale values
-   1. Open the Dimension Scale Dataset S with H5open
-   2. Get the datatype, dataspace, etc. of S with H5Dget_space, H5Dget_type, H5Sget_ndims, etc.
-   3. If needed, read the values of S into memory with H5Dread. Note, may read selected values using a
-selection.
-   4. Write updated values to S with H5Dwrite. Note, may write selected values using a selection.
-   5. When finished, close S and other objects with H5Dclose etc.
-
-@subsubsection subsubsec_dim_scales_api_model_label Create a label for a dimension
-   1. Open the Dataset D with H5open
-   2. Add write a label for dimension i of D, with H5DSset_label.
-   3. When finished, close the Dimension Scale Dataset and other objects with H5Dclose etc.
-
-@subsubsection subsubsec_dim_scales_api_model_extend Extending a Dimension with a Dimension Scale attached
-When an extendible Dataset has Dimension Scales, it is necessary to coordinate when the dimensions change
-size.
-   1. Open the Dataset to be extended, with H5Dopen.
-   2. Extend the dimension(s) with H5Dextend
-   3. Iterate through the scales of each extended dimension. For each scale
-       a. Extend the scale to the new size of the dimension with H5Dextend
-       b. Write new values to the extended scale with H5Dwrite, etc.
-       c. Close the Dimension Scale Dataset with H5Dclose if necessary.
-   4. When finished, close the Dataset with H5Dclose
-
-@subsubsection subsubsec_dim_scales_api_model_detach Detach Dimension Scale from Dataset
-The detach operation removes an association between a dimension and a scale.  It does not delete the
-Dimension Scale Dataset.
-   1. Open the Dataset, D, with H5Dopen.
-   2. Iterate through the scales of dimension i, locate the target scale, S (e.g., by its name).
-   3. Detach the Dimension Scale S to dimension j of Dataset D with H5DSdetach_scale
-   4. When finished, close the Dimension Scale and Dataset with H5Dclose.
-
-@subsubsection subsubsec_dim_scales_api_model_del Delete a Dimension Scale Dataset
-When it is necessary to delete a Dimension Scale Dataset, it is necessary to detach it from all dataset.
-This section outlines the necessary steps.
-   1. Open the Dimension Scale to be deleted.
-   2. Read the REFERENCE_LIST attribute into memory with H5Aread etc.
-   3. For each entry in the list:
-       a. Dereference the dataset reference
-       b. Detach the scale with H5DSdetach_scale
-       c. Close the dataset reference
-   4. Delete the Dimension Scale Dataset
-
-@subsubsection subsubsec_dim_scales_api_model_clean Clean up Dimension Scales when deleting a Dataset
-When it is necessary to delete a dataset that has scales attached, it is necessary to delete all the
-scales before deleting the dataset.  Here is a sketch of the steps.
-   1. Open the Dataset to be deleted, with H5Dopen.
-   2. Iterate through the scales of each dimension of D
-   3. For each scale, detach the Dimension Scale S from dimension j of Dataset D with H5DSdetach_scale
-   4. Delete the Dataset, with H5Gunlink.
-
-@subsection subsec_dim_scales_api_func Programming API: H5DS
- @see H5DS Reference Manual
-
- \xrefitem todo 3.
-
-Previous Chapter \ref sec_hldo_direct_chunk - Next Chapter \ref sec_hl_images
-
-&lt;hr&gt;
-Navigate back: \ref index "Main" / <a class="el" href="_u_g.html">HDF5 User Guide</a> </td></tr>
+Figure 5. The table of dimension references.</div></div>
+<table class="doxtable">
+<caption>Table 6. The table of dimension labels.</caption>
+<tr>
+<th>Dataset Dimension </th><th>Label  </th></tr>
+<tr>
+<td>0 </td><td>“LX”  </td></tr>
+<tr>
+<td>1 </td><td>“LZ”  </td></tr>
+<tr>
+<td>2 </td><td>“LQ”  </td></tr>
+<tr>
+<td>3 </td><td>“”  </td></tr>
 </table>
+<table class="doxtable">
+<caption>Table 7. The reference list for DS1.</caption>
+<tr>
+<th>Reference </th><th>Dataset Reference Record  </th></tr>
+<tr>
+<td>0 </td><td>{Object reference to Dataset D, 0}  </td></tr>
+<tr>
+<td>1 </td><td>{Object reference to other Dataset, ?}  </td></tr>
+</table>
+<table class="doxtable">
+<caption>Table 8. Reference list for DS2</caption>
+<tr>
+<th>Reference </th><th>Dataset Reference Record  </th></tr>
+<tr>
+<td>0 </td><td>{Object reference to Dataset D, 0}  </td></tr>
+</table>
+<table class="doxtable">
+<caption>Table 9. Reference list for DS3</caption>
+<tr>
+<th>Reference </th><th>Dataset Reference Record  </th></tr>
+<tr>
+<td>0 </td><td>{Object reference to Dataset D, 1}  </td></tr>
+<tr>
+<td>1 </td><td>{Object reference to Dataset D, 3}  </td></tr>
+</table>
+<table class="doxtable">
+<caption>Table 10. Reference List for DS5</caption>
+<tr>
+<th>Reference </th><th>Dataset Reference Record  </th></tr>
+<tr>
+<td>0 </td><td>{Object reference to Dataset D, 3}  </td></tr>
+</table>
+<h1><a class="anchor" id="sec_dim_scales_api"></a>
+Programming Model and API</h1>
+<h2><a class="anchor" id="subsec_dim_scales_api_model"></a>
+Programming Model</h2>
+<p>Dimension Scales are HDF5 Datasets, so they may be created and accesses through any HDF5 API for datasets [10]. The HDF5 Dimension Scale API implements the specification defined in this document. The operations include: </p><ul>
+<li>Convert dataset to scale (D) – convert dataset D to a dimension scale. D may be specified by an id or by a path name. </li>
+<li>Attach scale (D, S, i) – attach dimension scale S to the ith dimension of D. D and S may be specified by an id or path name </li>
+<li>Detach scale (D, i, scale) – detach scale from the ith dimension of D. </li>
+<li>Iterate through scales of (D, i) – get each scale attached. </li>
+<li>Get the number of scales of (D, i) </li>
+<li>Get the ith scale of D </li>
+<li>Set/Get name (S) – set/get the name about dimension scale S.</li>
+</ul>
+<p>The API also defines operations for dimension labels: </p><ul>
+<li>Set/Get label (D, i) – set/get the label for ith dimension of D.</li>
+</ul>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_create"></a>
+Create new Dimension Scale with Initial Values</h3>
+<ol type="1">
+<li>Create dataset with for the Dimension Scale with H5Dcreate and other standard HDF5 calls.</li>
+<li>Initialize the values of the Dimension Scale with H5Dwrite and other calls.</li>
+<li>Convert the dataset to a Dimension Scale with H5DSmake_scale.</li>
+<li>Close the Dimension Scale when finished with H5Dclose.</li>
+</ol>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_attach"></a>
+Attach Dimension Scale to Dataset</h3>
+<ol type="1">
+<li>Create or open the Dataset, D, with H5Dopen, etc.</li>
+<li>Create or open the Dimension Scale dataset, S, with H5Dopen or as above.</li>
+<li>Attach the Dimension Scale S to dimension j of Dataset D with H5DSattach_scale</li>
+<li>When finished, close the Dimension Scale and Dataset with H5Dclose.</li>
+</ol>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_read"></a>
+Read Dimension Scale values</h3>
+<ol type="1">
+<li>Open the Dataset D, with H5Dopen</li>
+<li>Get the number of dimensions of D with H5Dget_space.</li>
+<li>Iterate through the scales of dimension i, locate the target scale, S (e.g., by its name).</li>
+<li>Get the datatype, dataspace, etc. of S with H5Dget_space, H5Dget_type, H5Sget_ndims, etc.</li>
+<li>Read the values of S into memory with H5Dread, e.g. into dscalebuff.</li>
+<li>When finished, close the S and other objects with H5Dclose etc.</li>
+<li>When finished, close the Dataset D with H5Dclose.</li>
+</ol>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_write"></a>
+Write or Update Dimension Scale values</h3>
+<ol type="1">
+<li>Open the Dimension Scale Dataset S with H5open</li>
+<li>Get the datatype, dataspace, etc. of S with H5Dget_space, H5Dget_type, H5Sget_ndims, etc.</li>
+<li>If needed, read the values of S into memory with H5Dread. Note, may read selected values using a selection.</li>
+<li>Write updated values to S with H5Dwrite. Note, may write selected values using a selection.</li>
+<li>When finished, close S and other objects with H5Dclose etc.</li>
+</ol>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_label"></a>
+Create a label for a dimension</h3>
+<ol type="1">
+<li>Open the Dataset D with H5open</li>
+<li>Add write a label for dimension i of D, with H5DSset_label.</li>
+<li>When finished, close the Dimension Scale Dataset and other objects with H5Dclose etc.</li>
+</ol>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_extend"></a>
+Extending a Dimension with a Dimension Scale attached</h3>
+<p>When an extendible Dataset has Dimension Scales, it is necessary to coordinate when the dimensions change size.</p><ol type="1">
+<li>Open the Dataset to be extended, with H5Dopen.</li>
+<li>Extend the dimension(s) with H5Dextend</li>
+<li>Iterate through the scales of each extended dimension. For each scale a. Extend the scale to the new size of the dimension with H5Dextend b. Write new values to the extended scale with H5Dwrite, etc. c. Close the Dimension Scale Dataset with H5Dclose if necessary.</li>
+<li>When finished, close the Dataset with H5Dclose</li>
+</ol>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_detach"></a>
+Detach Dimension Scale from Dataset</h3>
+<p>The detach operation removes an association between a dimension and a scale. It does not delete the Dimension Scale Dataset.</p><ol type="1">
+<li>Open the Dataset, D, with H5Dopen.</li>
+<li>Iterate through the scales of dimension i, locate the target scale, S (e.g., by its name).</li>
+<li>Detach the Dimension Scale S to dimension j of Dataset D with H5DSdetach_scale</li>
+<li>When finished, close the Dimension Scale and Dataset with H5Dclose.</li>
+</ol>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_del"></a>
+Delete a Dimension Scale Dataset</h3>
+<p>When it is necessary to delete a Dimension Scale Dataset, it is necessary to detach it from all dataset. This section outlines the necessary steps.</p><ol type="1">
+<li>Open the Dimension Scale to be deleted.</li>
+<li>Read the REFERENCE_LIST attribute into memory with H5Aread etc.</li>
+<li>For each entry in the list: a. Dereference the dataset reference b. Detach the scale with H5DSdetach_scale c. Close the dataset reference</li>
+<li>Delete the Dimension Scale Dataset</li>
+</ol>
+<h3><a class="anchor" id="subsubsec_dim_scales_api_model_clean"></a>
+Clean up Dimension Scales when deleting a Dataset</h3>
+<p>When it is necessary to delete a dataset that has scales attached, it is necessary to delete all the scales before deleting the dataset. Here is a sketch of the steps.</p><ol type="1">
+<li>Open the Dataset to be deleted, with H5Dopen.</li>
+<li>Iterate through the scales of each dimension of D</li>
+<li>For each scale, detach the Dimension Scale S from dimension j of Dataset D with H5DSdetach_scale</li>
+<li>Delete the Dataset, with H5Gunlink.</li>
+</ol>
+<h2><a class="anchor" id="subsec_dim_scales_ops"></a>
+Dimension Scale Operations</h2>
+<p>Attach dimension scales to datasets using <a class="el" href="group___h5_d_s.html#ga0560840eeab7366cfe0c07cc6b57fe4b" title="Attach dimension scale dsid to dimension idx of dataset did.">H5DSattach_scale</a> and detach with <a class="el" href="group___h5_d_s.html#gad4af4f5d5c880c5c93ca950cdf5a01fd" title="Detach dimension scale dsid from the dimension idx of dataset did.">H5DSdetach_scale</a>. Set and retrieve dimension scale names with <a class="el" href="group___h5_d_s.html#gaca0f37c36c4e1288d161d26daa3a41d3" title="Convert dataset dsid to a dimension scale, with optional name, dimname.">H5DSset_scale</a> and <a class="el" href="group___h5_d_s.html#ga704bbb7eb2c9696f0f2c84e0267e4ffa" title="Retrieves name of scale did into buffer name.">H5DSget_scale_name</a>. Query if a dataset is a dimension scale with <a class="el" href="group___h5_d_s.html#gaf6c043d90b502ecf96783e8f50cadcd5" title="Determines whether did is a Dimension Scale.">H5DSis_scale</a> and check attachments with <a class="el" href="group___h5_d_s.html#gad7bbd73a68b031f6ac4c305333b0c8b7" title="Report if dimension scale dsid is currently attached to dimension idx of dataset did.">H5DSis_attached</a>. Iterate through scales with <a class="el" href="group___h5_d_s.html#ga7cb78620d05e7dcb81a9f53a8cc496f5" title="Iterates the operation visitor through the scales attached to dimension dim.">H5DSiterate_scales</a>.</p>
+<p>Previous Chapter <a class="el" href="_h5_d_o__u_g.html#sec_hldo_direct_chunk">Direct Chunk Write Function</a> - Next Chapter <a class="el" href="_h5_i_m__u_g.html#sec_hl_images">HDF5 Images</a></p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

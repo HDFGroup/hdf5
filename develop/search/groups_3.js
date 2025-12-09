@@ -20,5 +20,6 @@ var searchData=
   ['dimension_20scales_20apis_20h5ds_17',['HDF5 Dimension Scales APIs (H5DS)',['../group___h5_d_s.html',1,'']]],
   ['dimension_20scales_20h5ds_20interface_18',['Fortran High Level Dimension Scales (H5DS) Interface',['../group___f_h5_d_s.html',1,'']]],
   ['driver_20features_19',['Virtual File Driver Features',['../group___h5_v_f_d.html',1,'']]],
-  ['dynamically_20loaded_20plugins_20h5pl_20',['Dynamically-loaded Plugins (H5PL)',['../group___h5_p_l.html',1,'']]]
+  ['drivers_20h5fd_20',['File Drivers (H5FD)',['../group___h5_f_d.html',1,'']]],
+  ['dynamically_20loaded_20plugins_20h5pl_21',['Dynamically-loaded Plugins (H5PL)',['../group___h5_p_l.html',1,'']]]
 ];

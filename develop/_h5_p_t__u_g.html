@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -142,8 +142,14 @@ $(function(){initNavTree('_h5_p_t__u_g.html',''); initResizable(true); });
 <div class="contents">
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
 <h1><a class="anchor" id="sec_hl_packet_table_api"></a>
-HDF5 Table APIs</h1>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo</a></b></dt><dd>Under Construction</dd></dl>
+HDF5 Packet Table APIs</h1>
+<h2><a class="anchor" id="subsec_hl_packet_intro"></a>
+Introduction</h2>
+<p>The HDF5 Packet Table API (H5PT) provides an interface for storing and retrieving fixed-length packets of data in append-only datasets. Packet tables are optimized for streaming data collection where records are added sequentially.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_p_t.html">HDF5 Packet Table APIs (H5PT)</a> Reference Manual</dd></dl>
+<h2><a class="anchor" id="subsec_hl_packet_ops"></a>
+Packet Table Operations</h2>
+<p>Create packet tables with <a class="el" href="group___h5_p_t.html#gadebf2e89c0d382bb6a97fbf3c35b3261" title="Creates a packet table to store fixed-length or variable-length packets.">H5PTcreate</a> or open existing ones with <a class="el" href="group___h5_p_t.html#ga5053a36ebe72f78820138495a0e359fb" title="Opens an existing packet table.">H5PTopen</a>. Append packets using <a class="el" href="group___h5_p_t.html#gaf889c2198653bd9bba6d82ba5020cd79" title="Appends packets to the end of a packet table.">H5PTappend</a> and read packets with <a class="el" href="group___h5_p_t.html#ga9c230c5e08e26dde4d62057e568ebb52" title="Reads a number of packets from a packet table.">H5PTread_packets</a>. Get the number of packets with <a class="el" href="group___h5_p_t.html#ga2ebf603409c2f4959d47261a4cf379d2" title="Returns the number of packets in a packet table.">H5PTget_num_packets</a>. Close with <a class="el" href="group___h5_p_t.html#ga972403e11e64729d8435c363b138ae94" title="Closes an open packet table.">H5PTclose</a>.</p>
 <p>Previous Chapter <a class="el" href="_h5_t_b__u_g.html#sec_hl_table_api">HDF5 Table APIs</a></p>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>

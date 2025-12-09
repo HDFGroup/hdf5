@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -143,7 +143,13 @@ $(function(){initNavTree('_h5_i_m__u_g.html',''); initResizable(true); });
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
 <h1><a class="anchor" id="sec_hl_images"></a>
 HDF5 Images</h1>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo</a></b></dt><dd>Under Construction</dd></dl>
+<h2><a class="anchor" id="subsec_hl_images_intro"></a>
+Introduction</h2>
+<p>The HDF5 Image API (H5IM) provides functions for storing and retrieving image data in HDF5 files. The API supports common image formats and includes functions for working with image attributes such as palettes.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_i_m.html">HDF5 Images API (H5IM)</a> Reference Manual</dd></dl>
+<h2><a class="anchor" id="subsec_hl_images_ops"></a>
+Image Operations</h2>
+<p>Create images with <a class="el" href="group___h5_i_m.html#gaed2cb8f411b58e6e48d596bba1d3b59b" title="Creates and writes an image.">H5IMmake_image_8bit</a> or <a class="el" href="group___h5_i_m.html#ga151b78eea0bff9872af78f950c93c862" title="Creates and writes a true color image.">H5IMmake_image_24bit</a>, and read them with <a class="el" href="group___h5_i_m.html#gaec44462e614bb5b93d5776ca27491488" title="Reads image data from disk.">H5IMread_image</a>. Check if a dataset is an image using <a class="el" href="group___h5_i_m.html#gadd8c46c44a11fa36116a0b7314f248a8" title="Inquires if a dataset is an image.">H5IMis_image</a>. Get image information with <a class="el" href="group___h5_i_m.html#gad1d25d015457bfa2f00faf0952cc1f75" title="Gets information about an image dataset (dimensions, interlace mode and number of associated palettes...">H5IMget_image_info</a>. Work with palettes using <a class="el" href="group___h5_i_m.html#gad6811d80238b25851cbde0475537b7d3" title="Creates and writes a palette.">H5IMmake_palette</a>, <a class="el" href="group___h5_i_m.html#gaa653878da63058bc7435f5ae7da8dc94" title="Attaches a palette to an image.">H5IMlink_palette</a>, <a class="el" href="group___h5_i_m.html#ga2c669d6a99cd1f3ea0d5005cd106f5dc" title="Gets information about a palette dataset (dimensions).">H5IMget_palette_info</a>, and <a class="el" href="group___h5_i_m.html#ga89882863675a88899c327026237aecef" title="Gets the palette dataset.">H5IMget_palette</a>.</p>
 <p>Previous Chapter <a class="el" href="_h5_d_s__u_g.html#sec_dim_scales_stand">HDF5 Standard for Dimension Scales</a> - Next Chapter <a class="el" href="_h5_l_t__u_g.html#sec_hl_lite_api">HDF5 Lite APIs</a></p>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>

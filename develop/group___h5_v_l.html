@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -144,7 +144,119 @@ $(function(){initNavTree('group___h5_v_l.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo</a></b></dt><dd>Describe the VOL plugin life cycle.</dd></dl>
+<p>Use the functions in this module to manage HDF5 Virtual Object Layer (VOL) connectors.</p>
+<p>VOL connectors provide an abstraction layer for storage operations, enabling HDF5 to work with different storage backends while maintaining the familiar HDF5 API. This module provides functions for registering, configuring, and managing VOL connector plugins.</p>
+<h3>VOL Connector Life Cycle</h3>
+<p>VOL connectors can be implemented as dynamically loaded plugins, statically linked libraries, or built into the HDF5 library itself. Throughout this documentation, "VOL connector" refers to the connector implementation regardless of how it is deployed.</p>
+<p>VOL connectors follow a well-defined life cycle from loading to cleanup:</p>
+<ol>
+<li>
+<p class="startli"><b>Discovery and Loading</b> </p><ul>
+<li>
+For dynamically loaded plugins: The library searches the plugin path (default: /usr/local/hdf5/lib/plugin on POSIX, ALLUSERSPROFILE%/hdf5/lib/plugin on Windows) </li>
+<li>
+Plugin path can be overridden using the <a class="el" href="_h5public_8h.html#a020d112b3c3251e7518461466777611d">HDF5_PLUGIN_PATH</a> environment variable </li>
+<li>
+For statically linked connectors: The connector is available immediately when the library loads </li>
+<li>
+For internal connectors: Built into the HDF5 library (e.g., the native VOL connector) </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Registration</b> </p><ul>
+<li>
+Before use, connectors must be registered with the library using: <ul>
+<li>
+<a class="el" href="group___h5_v_l_d_e_v.html#ga439c150299522a0e0f401a86d083097b" title="Registers a new VOL connector.">H5VLregister_connector()</a> - Registers a new VOL connector </li>
+<li>
+<a class="el" href="#gaf48d1225927e1e701656346b832ee6b1" title="Registers a new VOL connector by name.">H5VLregister_connector_by_name()</a> - Register by connector name </li>
+<li>
+<a class="el" href="#ga11e69930e47f654805a265f417412ea8" title="Registers a new VOL connector by value.">H5VLregister_connector_by_value()</a> - Register by connector-specific value </li>
+</ul>
+</li>
+<li>
+Registration loads the connector and returns an HDF5 identifier (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>) </li>
+<li>
+Many connectors provide initialization functions that handle registration automatically </li>
+<li>
+Registration can also occur automatically via the <a class="el" href="_h5public_8h.html#a8d21b0c065a27e1b6ea46efb966c7394">HDF5_VOL_CONNECTOR</a> environment variable </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Configuration</b> </p><ul>
+<li>
+The connector is set in a file access property list (fapl) using: <ul>
+<li>
+<a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0" title="Set the file VOL connector for a file access property list.">H5Pset_vol()</a> - Generic method using connector ID and optional configuration </li>
+<li>
+Connector-specific functions (e.g., H5Pset_fapl_&lt;name&gt;()) - Often more convenient </li>
+<li>
+<a class="el" href="_h5public_8h.html#a8d21b0c065a27e1b6ea46efb966c7394">HDF5_VOL_CONNECTOR</a> environment variable - Sets the default connector for all file opens </li>
+</ul>
+</li>
+<li>
+Configuration may include connector-specific parameters passed via info structs or parameter strings </li>
+<li>
+Parameter strings can be parsed using <a class="el" href="_h5_v_lconnector__passthru_8h.html#a458256651d397c69a113dd180f50411f">H5VLconnector_str_to_info()</a> </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Active Use</b> </p><ul>
+<li>
+When a file is opened or created with a configured fapl, the specified VOL connector handles all storage operations </li>
+<li>
+All API calls that manipulate storage (create, open, read, write, etc.) are forwarded to the connector's callbacks </li>
+<li>
+The connector remains active for the lifetime of all files opened with it </li>
+<li>
+Multiple different connectors can be active simultaneously for different files </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<p class="startli"><b>Query and Introspection</b> </p><ul>
+<li>
+<a class="el" href="group___f_a_p_l.html#ga5f133bdf09ca5a32622688d1ba5cc838" title="Returns the identifier of the current VOL connector.">H5Pget_vol_id()</a> retrieves the connector ID from a fapl </li>
+<li>
+<a class="el" href="group___f_a_p_l.html#gafc58db23c257cdcf2f0c1c3ae911ab0f" title="Returns a copy of the VOL information for a connector.">H5Pget_vol_info()</a> retrieves connector-specific configuration information </li>
+<li>
+<a class="el" href="#gaf326406d7733c0ab8d12118c13c78dfa" title="Retrieves a connector name for a VOL.">H5VLget_connector_name()</a> retrieves the connector's registered name </li>
+<li>
+<a class="el" href="#ga9be3c92e4430b9cf42a376534a47fcca" title="Tests whether a VOL class has been registered under a certain name.">H5VLis_connector_registered_by_name()</a> checks if a connector is registered by name </li>
+<li>
+<a class="el" href="#ga83ba8986ed68f67c41b492dfd273804b" title="Tests whether a VOL class has been registered for a given value.">H5VLis_connector_registered_by_value()</a> checks if a connector is registered by value </li>
+<li>
+<a class="el" href="#ga17ef00e528d99eda5879d749c2a12043" title="Determine if a VOL connector supports a particular optional callback operation.">H5VLquery_optional()</a> determines support for optional operations </li>
+</ul>
+<p class="endli"></p>
+</li>
+<li>
+<b>Cleanup and Unregistration</b> <ul>
+<li>
+Connector IDs can be closed using: <ul>
+<li>
+<a class="el" href="#gaffbdc22f724c2c818f3be3845145d73e" title="Removes a VOL connector identifier from the library.">H5VLunregister_connector()</a> - Unregister a connector </li>
+<li>
+<a class="el" href="#gaa3324ac7aedf9362b498226903288094" title="Closes a VOL connector identifier.">H5VLclose()</a> - Close a connector ID (same internal implementation) </li>
+</ul>
+</li>
+<li>
+The library maintains reference counts on connector IDs and will not actually close them until the reference count reaches zero </li>
+<li>
+It is safe to close connector IDs after use, even while files opened with that connector remain open </li>
+<li>
+The library automatically unloads all connectors when it shuts down </li>
+<li>
+The native VOL connector cannot be unloaded and is always available </li>
+<li>
+Connector-specific info structures should be freed using <a class="el" href="_h5_v_lconnector__passthru_8h.html#a0d7c204a3db83d5563b0be557a3a4571">H5VLfree_connector_info()</a> </li>
+</ul>
+</li>
+</ol>
+<dl class="section see"><dt>See also</dt><dd>H5VL_UG </dd></dl>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="groups" name="groups"></a>
 Topics</h2></td></tr>

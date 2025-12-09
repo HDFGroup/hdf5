@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,7 +141,70 @@ $(function(){initNavTree('_h5_z__u_g.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000018">Todo</a></b></dt><dd>Under Construction</dd></dl>
+<h1><a class="anchor" id="sec_filter"></a>
+The HDF5 Filter Interface</h1>
+<h2><a class="anchor" id="subsec_filter_intro"></a>
+Introduction</h2>
+<p>The HDF5 Filter interface (H5Z) provides a flexible pipeline mechanism for processing dataset data during I/O operations. Filters can perform data compression, error checking, data transformation, and other custom operations on dataset chunks.</p>
+<p>Filters operate on chunked datasets only (see <a class="el" href="_h5_d__u_g.html#subsec_dataset_filters">Using HDF5 Filters</a> for details on dataset chunking) and are applied independently to each chunk. Multiple filters can be chained together in a pipeline, where the output of one filter becomes the input to the next.</p>
+<h2><a class="anchor" id="subsec_filter_builtin"></a>
+Built-in Filters</h2>
+<p>HDF5 includes several standard filters:</p>
+<ul>
+<li><b>DEFLATE (gzip)</b>: General-purpose compression using the gzip algorithm (<a class="el" href="_h5_zpublic_8h.html#a9e802e9612b3647e7d3ffe4ce3b8dcce">H5Z_FILTER_DEFLATE</a>). Provides good compression ratios with moderate CPU usage.</li>
+</ul>
+<ul>
+<li><b>SZIP</b>: Compression algorithm designed for scientific data (<a class="el" href="_h5_zpublic_8h.html#a421d9941c68ebb776573baeb9aa77cd2">H5Z_FILTER_SZIP</a>). Offers better performance than DEFLATE for certain data patterns.</li>
+</ul>
+<ul>
+<li><b>SHUFFLE</b>: Rearranges byte order to improve compression (<a class="el" href="_h5_zpublic_8h.html#aa723f1a71601bf22c95620a490ecf1af">H5Z_FILTER_SHUFFLE</a>). Typically used before compression filters.</li>
+</ul>
+<ul>
+<li><b>FLETCHER32</b>: Computes and verifies checksums for error detection (<a class="el" href="_h5_zpublic_8h.html#a59ca894c9c2b99b1614b0c46a7407f1c">H5Z_FILTER_FLETCHER32</a>). Ensures data integrity.</li>
+</ul>
+<ul>
+<li><b>NBIT</b>: Lossless compression for datasets with unused bits (<a class="el" href="_h5_zpublic_8h.html#a8cc463fa1979bd4bfa0dd9aa6a41e49d">H5Z_FILTER_NBIT</a>).</li>
+</ul>
+<ul>
+<li><b>SCALEOFFSET</b>: Lossy compression using scaling and offset (<a class="el" href="_h5_zpublic_8h.html#a745d2ccb4f7712ed78ef5e562e27d2ca">H5Z_FILTER_SCALEOFFSET</a>).</li>
+</ul>
+<h2><a class="anchor" id="subsec_filter_usage"></a>
+Using Filters</h2>
+<p>Filters are configured through dataset creation property lists. Enable chunking first using <a class="el" href="group___d_c_p_l.html#ga3584d592e377da3604b7604e266dcf5b" title="Sets the size of the chunks used to store a chunked layout dataset.">H5Pset_chunk</a>, then add compression with functions like <a class="el" href="group___d_c_p_l.html#gaf1f569bfc54552bdb9317d2b63318a0d" title="Sets deflate (GNU gzip) compression method and compression level.">H5Pset_deflate</a>.</p>
+<h2><a class="anchor" id="subsec_filter_pipeline"></a>
+Filter Pipelines</h2>
+<p>Multiple filters can be combined in a pipeline. Filters are applied in the order they are added during write operations and in reverse order during read operations. Common pipelines combine <a class="el" href="group___d_c_p_l.html#ga31e09cb0bf2da2893eed8a72220e6521" title="Sets up use of the shuffle filter.">H5Pset_shuffle</a>, <a class="el" href="group___d_c_p_l.html#gaf1f569bfc54552bdb9317d2b63318a0d" title="Sets deflate (GNU gzip) compression method and compression level.">H5Pset_deflate</a>, and <a class="el" href="group___o_c_p_l.html#ga8bc81abfbd0393b0a46e121f817a3f81" title="Sets up use of the Fletcher32 checksum filter.">H5Pset_fletcher32</a>.</p>
+<h2><a class="anchor" id="subsec_filter_custom"></a>
+Custom Filters</h2>
+<p>Applications can create and register custom filters:</p>
+<ul>
+<li>Define a filter function with signature matching <a class="el" href="_h5_zdevelop_8h.html#a130d8964a46667029c7d3c14572577c6" title="The filter operation callback function, defining a filter&#39;s operation on data.">H5Z_func_t</a> </li>
+<li>Create a <a class="el" href="_h5version_8h.html#a3f702f77f3ab031d771be3b2b4bf4fba">H5Z_class_t</a> structure describing the filter </li>
+<li>Register the filter using <a class="el" href="group___h5_z.html#ga93145acc38c2c60d832b7a9b0123706b" title="Registers a new filter with the HDF5 library.">H5Zregister</a> </li>
+<li>Apply the filter using <a class="el" href="group___o_c_p_l.html#gae7ac4c110e9ec3fcf38966928b96cda3" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> with the filter ID</li>
+</ul>
+<p>Custom filters enable domain-specific data transformations, specialized compression algorithms, encryption, and other custom processing.</p>
+<h2><a class="anchor" id="subsec_filter_query"></a>
+Querying Filters</h2>
+<p>The H5Z interface provides functions to query available filters:</p>
+<ul>
+<li><a class="el" href="group___h5_z.html#ga3594e10d70739ccda55ebb55b17b50ee" title="Determines whether a filter is available.">H5Zfilter_avail</a> checks if a filter is available </li>
+<li><a class="el" href="group___h5_z.html#ga9ef800ceec249c8819492545def9adba" title="Retrieves information about a filter.">H5Zget_filter_info</a> retrieves information about a filter's capabilities </li>
+<li><a class="el" href="group___h5_z.html#ga6b8bcdde70c9256c50c7c62ba66380f8" title="Unregisters a filter.">H5Zunregister</a> removes a filter from the pipeline</li>
+</ul>
+<h2><a class="anchor" id="subsec_filter_plugins"></a>
+Filter Plugins</h2>
+<p>HDF5 supports dynamic loading of filter plugins, allowing filters to be added without recompiling applications. See <a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a> for details on creating and using filter plugins.</p>
+<h2><a class="anchor" id="subsec_filter_summary"></a>
+Summary</h2>
+<p>The H5Z filter interface provides: </p><ul>
+<li>Built-in compression and error checking filters </li>
+<li>Flexible filter pipeline mechanism </li>
+<li>Support for custom user-defined filters </li>
+<li>Dynamic filter plugin loading </li>
+<li>Per-chunk processing for optimal performance</li>
+</ul>
+<p>Filters are essential for reducing storage requirements and ensuring data integrity in HDF5 files while maintaining compatibility and performance.</p>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>
 </div></div><!-- contents -->

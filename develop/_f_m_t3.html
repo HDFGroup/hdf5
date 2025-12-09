@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -5042,11 +5042,11 @@ See <a class="el" href="#FMT3IndexInfoV2Btrees"><em>Version 2 B-tree</em></a> be
 <tr>
 <td align="left"><em>Single Chunk index</em> </td><td align="left">Address of the single chunk.  </td></tr>
 <tr>
-<td align="left"><em>Implicit index</em> </td><td align="left">Address of the array of dataset chunks.   </td></tr>
+<td align="left"><em>Implicit index</em> </td><td align="left">Address of the array of dataset chunks.  </td></tr>
 <tr>
 <td align="left"><em>Fixed Array index</em> </td><td align="left">Address of the index.  </td></tr>
 <tr>
-<td align="left"><em>Extensible Array index</em> </td><td align="left">Address of the index.   </td></tr>
+<td align="left"><em>Extensible Array index</em> </td><td align="left">Address of the index.  </td></tr>
 <tr>
 <td align="left"><em>Version 2 B-tree index</em> </td><td align="left">Address of the index.  </td></tr>
 </table>
@@ -5117,7 +5117,9 @@ Size of filtered chunk<sup>L</sup><br  />
 <tr>
 <th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
 <tr>
-<td>Max Bits </td><td>Index Elements </td><td>Min Pointers </td><td>Min Elements  </td><td colspan="2">Page Bits </td><td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em>  </td></tr>
+<td>Max Bits </td><td>Index Elements </td><td>Min Pointers </td><td>Min Elements  </td></tr>
+<tr>
+<td colspan="2">Page Bits </td><td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em>  </td></tr>
 </table>
 <table class="doxtable">
 <caption><b>Fields: Extensible Array Indexing Information</b></caption>
@@ -5164,7 +5166,7 @@ Size of filtered chunk<sup>L</sup><br  />
 <table class="doxtable">
 <caption><b>Layout: Virtual Storage Property Description</b></caption>
 <tr>
-<th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte &lt;&gt;byte  </th></tr>
+<th width="25%">byte </th><th width="25%">byte </th><th width="25%">byte </th><th>byte  </th></tr>
 <tr>
 <td colspan="4"><br  />
 Address<sup>O</sup><br  />
@@ -7938,7 +7940,7 @@ External File Name <em>(variable size)</em><br  />
 <td colspan="4"><br  />
 Dataspace Selection Information <em>(variable size)</em><br  />
 <br  />
-   </td></tr>
+  </td></tr>
 <tr>
 <td colspan="2">Length of Attribute Name  </td><td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em>  </td></tr>
 <tr>

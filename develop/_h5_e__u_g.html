@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -156,7 +156,42 @@ Error Handling Function Summaries</h2>
 <p>see <a class="el" href="group___h5_e.html">Error Handling (H5E)</a> reference manual</p>
 <h2><a class="anchor" id="subsec_error_program"></a>
 Programming Model for Error Handling</h2>
-<p>This section is under construction.</p>
+<p>The HDF5 error handling programming model provides a structured approach for detecting, reporting, and managing errors in applications. The model is based on error stacks that accumulate contextual information as errors propagate through the library call stack.</p>
+<h3><a class="anchor" id="subsubsec_error_program_model"></a>
+Basic Programming Model</h3>
+<p>Applications typically use one of two approaches for error handling:</p>
+<ul>
+<li><b>Automatic Error Handling</b>: By default, HDF5 automatically prints error information to stderr when errors occur. This is suitable for development and debugging but may not be appropriate for production applications.</li>
+</ul>
+<ul>
+<li><b>Custom Error Handling</b>: Applications can register custom error handling functions using <a class="el" href="group___h5_e.html#ga245383d63fba5c4282ce8e9ef8488702">H5Eset_auto</a> to gain full control over error reporting and recovery. Custom handlers can log errors, display messages to users, or implement application-specific recovery strategies.</li>
+</ul>
+<h3><a class="anchor" id="subsubsec_error_program_detection"></a>
+Error Detection</h3>
+<p>HDF5 functions indicate errors through their return values: </p><ul>
+<li>Functions returning <code><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></code> (identifiers) return a negative value on error </li>
+<li>Functions returning <code><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></code> (error codes) return a negative value on error </li>
+<li>Functions returning pointers return NULL on error </li>
+<li>Functions returning <code><a class="el" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></code> (tri-state) return negative on error, zero for false, positive for true</li>
+</ul>
+<p>Applications should check return values from all HDF5 API calls to detect errors.</p>
+<h3><a class="anchor" id="subsubsec_error_program_handling"></a>
+Error Handling Strategies</h3>
+<p>Common error handling strategies include:</p>
+<ul>
+<li><b>Print and Continue</b>: Use default error handling to print diagnostic information and continue execution where possible. This is the default behavior.</li>
+</ul>
+<ul>
+<li><b>Silent Error Handling</b>: Disable automatic error printing with <a class="el" href="group___h5_e.html#ga245383d63fba5c4282ce8e9ef8488702">H5Eset_auto(H5E_DEFAULT, NULL,
+NULL)</a> and check return values explicitly. This is common in production code.</li>
+</ul>
+<ul>
+<li><b>Custom Error Handler</b>: Install a custom error handler to implement application-specific error logging, user notification, or recovery procedures.</li>
+</ul>
+<ul>
+<li><b>Error Stack Inspection</b>: Walk the error stack with <a class="el" href="group___h5_e.html#ga565cd6c7b7a197f8954d821419aba0d0">H5Ewalk</a> to examine detailed error information and make programmatic decisions based on specific error conditions.</li>
+</ul>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#subsec_error_ops">Basic Error Handling Operations</a> for details on error stack operations and <a class="el" href="#subsec_error_adv">Advanced Error Handling Operations</a> for advanced error handling features including custom error classes and messages.</dd></dl>
 <h2><a class="anchor" id="subsec_error_ops"></a>
 Basic Error Handling Operations</h2>
 <p>Let us first try to understand the error stack. An error stack is a collection of error records. Error records can be pushed onto or popped off the error stack. By default, when an error occurs deep within the HDF5 Library, an error record is pushed onto an error stack and that function returns a failure indication. Its caller detects the failure, pushes another record onto the stack, and returns a failure indication. This continues until the API function called by the application returns a failure indication. The next API function being called will reset the error stack. All HDF5 Library error records belong to the same error class. For more information, see <a class="el" href="#subsec_error_adv">Advanced Error Handling Operations</a>.</p>

@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -143,8 +143,14 @@ $(function(){initNavTree('_h5_t_b__u_g.html',''); initResizable(true); });
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
 <h1><a class="anchor" id="sec_hl_table_api"></a>
 HDF5 Table APIs</h1>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo</a></b></dt><dd>Under Construction</dd></dl>
-<p>Previous Chapter <a class="el" href="_h5_l_t__u_g.html#sec_hl_lite_api">HDF5 Lite APIs</a> - Next Chapter <a class="el" href="_h5_p_t__u_g.html#sec_hl_packet_table_api">HDF5 Table APIs</a></p>
+<h2><a class="anchor" id="subsec_hl_table_intro"></a>
+Introduction</h2>
+<p>The HDF5 Table API (H5TB) provides functions for creating and manipulating HDF5 datasets as tables with named fields, similar to database tables or spreadsheets. Tables organize data in rows and columns, making them ideal for storing structured records.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_t_b.html">HDF5 Table APIs (H5TB)</a> Reference Manual</dd></dl>
+<h2><a class="anchor" id="subsec_hl_table_ops"></a>
+Table Operations</h2>
+<p>Create tables with <a class="el" href="group___h5_t_b.html#ga083cfcddd7624068dc028f68437009e4" title="Creates and writes a table.">H5TBmake_table</a>, append rows with <a class="el" href="group___h5_t_b.html#ga4a8c5e6eca7119562365e796cbddb869" title="Adds records to the end of the table.">H5TBappend_records</a>, write data with <a class="el" href="group___h5_t_b.html#ga55943628b2dfa001c679822bff0423b1" title="Overwrites records.">H5TBwrite_records</a>, and read with <a class="el" href="group___h5_t_b.html#ga84846ed25ee8cc57b89a842d566bc187" title="Reads records.">H5TBread_records</a>. Insert or delete records using <a class="el" href="group___h5_t_b.html#ga372a7ccb50846b8b93acfb3c31d38c75" title="Insert records.">H5TBinsert_record</a> and <a class="el" href="group___h5_t_b.html#ga2bc8caf57fcff335ada3bc35558afa36" title="Delete records.">H5TBdelete_record</a>. Add or delete fields with <a class="el" href="group___h5_t_b.html#ga26257e0f5cbdeb74b472b328f42c2aa3" title="Insert a new field into a table.">H5TBinsert_field</a> and <a class="el" href="group___h5_t_b.html#ga04b55d602ef44e5128389ec284d68b1d" title="Deletes a field from a table.">H5TBdelete_field</a>. Query table properties with <a class="el" href="group___h5_t_b.html#ga5c3e0a9f56f3d32d0ccd1ce5ea40ee73" title="Gets the table dimensions.">H5TBget_table_info</a> and <a class="el" href="group___h5_t_b.html#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info</a>.</p>
+<p>Previous Chapter <a class="el" href="_h5_l_t__u_g.html#sec_hl_lite_api">HDF5 Lite APIs</a> - Next Chapter <a class="el" href="_h5_p_t__u_g.html#sec_hl_packet_table_api">HDF5 Packet Table APIs</a></p>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>
 </div></div><!-- contents -->
