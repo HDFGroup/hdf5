@@ -4770,7 +4770,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *          The callbacks and their parameters, along with a struct and
  *          an \c ENUM required for their use, are described below.
  *
- *          <b>Callback struct and \c ENUM:</b>
+ *          <b>Callback struct and \TText{ENUM:}</b>
  *
  *          The callback functions set up by H5Pset_file_image_callbacks() use
  *          a struct and an \c ENUM that are defined as follows
