@@ -599,8 +599,8 @@ These five steps are described in detail below.
       executable is named "cmake-gui" and can be found where CMake was
       installed.
       Another option is to use the presets file, CMakePresets.json, to configure,
-      build, test, and package HDF5. See section X: Using CMakePresets.json for compiling
-      for use of that file. You can create a CMakeUserPresets.json file to create a
+      build, test, and package HDF5. See section XI: Creating Custom Preset Configurations for
+      compiling for use of that file. You can create a CMakeUserPresets.json file to create a
       specific configuration for your environment. Note that Visual Studio and XCode can
       use the presets files.
 
