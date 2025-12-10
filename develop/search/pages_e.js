@@ -29,9 +29,10 @@ var searchData=
   ['installations_26',['&lt;img src=&quot;Cmake_logo.svg&quot; alt=&quot;Cmake logo&quot; width=24&gt; CMake Installations',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
   ['instructions_20for_20parallel_20hdf5_27',['Installation Instructions for Parallel HDF5',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html',1,'']]],
   ['integration_28',['HDF5 Java Examples Maven Integration',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html',1,'']]],
-  ['introduction_20to_20hdf5_29',['Introduction to HDF5',['../_intro_h_d_f5.html',1,'']]],
-  ['introduction_20to_20parallel_20hdf5_30',['A Brief Introduction to Parallel HDF5',['../_intro_par_h_d_f5.html',1,'']]],
-  ['introduction_20to_20single_20writer_20multiple_20reader_20swmr_31',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]],
-  ['introduction_20to_20the_20virtual_20dataset_20vds_32',['Introduction to the Virtual Dataset - VDS',['../_v_d_s_t_n.html',1,'']]],
-  ['issues_33',['Issues',['../hdf5_chunk_issues.html',1,'Dataset Chunking Issues'],['../_l_b_prog.html',1,'Programming Issues']]]
+  ['introduction_29',['C++ API Introduction',['../h5_cpp_intro.html',1,'']]],
+  ['introduction_20to_20hdf5_30',['Introduction to HDF5',['../_intro_h_d_f5.html',1,'']]],
+  ['introduction_20to_20parallel_20hdf5_31',['A Brief Introduction to Parallel HDF5',['../_intro_par_h_d_f5.html',1,'']]],
+  ['introduction_20to_20single_20writer_20multiple_20reader_20swmr_32',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]],
+  ['introduction_20to_20the_20virtual_20dataset_20vds_33',['Introduction to the Virtual Dataset - VDS',['../_v_d_s_t_n.html',1,'']]],
+  ['issues_34',['Issues',['../hdf5_chunk_issues.html',1,'Dataset Chunking Issues'],['../_l_b_prog.html',1,'Programming Issues']]]
 ];

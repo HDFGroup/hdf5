@@ -8,5 +8,6 @@ var searchData=
   ['collectivemetadataio_2edox_5',['CollectiveMetadataIO.dox',['../_collective_metadata_i_o_8dox.html',1,'']]],
   ['cookbook_2edox_6',['Cookbook.dox',['../_cookbook_8dox.html',1,'']]],
   ['copyingcommited_2edox_7',['CopyingCommited.dox',['../_copying_commited_8dox.html',1,'']]],
-  ['core_5fmenu_2emd_8',['core_menu.md',['../core__menu_8md.html',1,'']]]
+  ['core_5fmenu_2emd_8',['core_menu.md',['../core__menu_8md.html',1,'']]],
+  ['cppapiintro_2edox_9',['CppAPIIntro.dox',['../_cpp_a_p_i_intro_8dox.html',1,'']]]
 ];

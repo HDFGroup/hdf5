@@ -16,8 +16,9 @@ var searchData=
   ['querying_20the_20address_20range_13',['Querying the Address Range',['../_v_f_l_t_n.html#subsec_vfl_address_query',1,'']]],
   ['quick_20overview_20of_20the_20fortran_20apis_14',['Quick overview of the Fortran APIs',['..//home/runner/work/hdf5/hdf5/hdfsrc/fortran/src/README.md#autotoc_md31',1,'']]],
   ['quick_20start_15',['Quick Start',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html#autotoc_md76',1,'']]],
-  ['quick_20start_20instructions_16',['3. Quick Start Instructions',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md272',1,'']]],
-  ['quickstart_17',['Quickstart',['../_h5_v_l__u_g.html#subsec_vol_quickstart',1,'']]],
-  ['quiz_18',['Learning the basics QUIZ',['../_l_b_quiz.html',1,'LearnBasics']]],
-  ['quiz_20with_20answers_19',['Learning the basics QUIZ with Answers',['../_l_b_quiz_answers.html',1,'LearnBasics']]]
+  ['quick_20start_20examples_16',['Quick Start Examples',['../h5_cpp_intro.html#cpp_examples',1,'']]],
+  ['quick_20start_20instructions_17',['3. Quick Start Instructions',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md272',1,'']]],
+  ['quickstart_18',['Quickstart',['../_h5_v_l__u_g.html#subsec_vol_quickstart',1,'']]],
+  ['quiz_19',['Learning the basics QUIZ',['../_l_b_quiz.html',1,'LearnBasics']]],
+  ['quiz_20with_20answers_20',['Learning the basics QUIZ with Answers',['../_l_b_quiz_answers.html',1,'LearnBasics']]]
 ];

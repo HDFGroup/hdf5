@@ -40,7 +40,7 @@ var searchData=
   ['map_20property_20lists_37',['Map Property Lists',['../_h5_m__u_g.html#subsec_map_plist',1,'']]],
   ['map_20storage_20to_20hdf5_20file_20objects_38',['Map Storage to HDF5 File Objects',['../_v_o_l__connector.html#subsecVOLMap',1,'']]],
   ['mapl_5fid_39',['mapl_id',['../union_h5_v_l__map__args__t.html#a7c872dfd6394d05d24593f1b5fbb6609',1,'H5VL_map_args_t']]],
-  ['mapping_40',['HDF5 VOL Data Mapping',['../_h5_m__u_g.html',1,'']]],
+  ['mapping_40',['Mapping',['../h5_cpp_intro.html#cpp_mapping',1,'C API to C++ Class Mapping'],['../_h5_m__u_g.html',1,'HDF5 VOL Data Mapping']]],
   ['mapping_20h5m_41',['VOL Mapping (H5M)',['../group___h5_m.html',1,'']]],
   ['mapping_20of_20vol_20callbacks_20to_20hdf5_20api_20calls_42',['Appendix A Mapping of VOL Callbacks to HDF5 API Calls',['../_v_o_l__connector.html#secVOLAppA',1,'']]],
   ['mapping_20options_43',['Mapping Options',['../api-compat-macros.html#app-options',1,'Application Mapping Options'],['../api-compat-macros.html#options',1,'Compatibility Macro Mapping Options'],['../api-compat-macros.html#fun-options',1,'Function Mapping Options'],['../api-compat-macros.html#lib-options',1,'Library Mapping Options']]],

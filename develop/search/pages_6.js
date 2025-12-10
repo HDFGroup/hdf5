@@ -31,12 +31,13 @@ var searchData=
   ['answers_28',['Learning the basics QUIZ with Answers',['../_l_b_quiz_answers.html',1,'LearnBasics']]],
   ['api_29',['API',['../_ex_a_p_i.html',1,'Examples by API'],['../_l_b_a_p_i.html',1,'The HDF5 API']]],
   ['api_20compatibility_20macros_30',['API Compatibility Macros',['../api-compat-macros.html',1,'']]],
-  ['api_20package_31',['HDF5 Java API Package',['../_h_d_f5_l_i_b.html',1,'']]],
-  ['applications_32',['Applications',['../collective_calls.html',1,'Collective Calling Requirements in Parallel HDF5 Applications'],['../_l_b_compiling.html',1,'Compiling HDF5 Applications'],['../_a_p_p_d_b_g.html',1,'Debugging HDF5 Applications'],['../_u_n_i_c_o_d_e.html',1,'Using UTF-8 Encoding in HDF5 Applications']]],
-  ['array_20conversion_33',['Java Array Conversion',['../_h_d_f_a_r_r_a_y.html',1,'']]],
-  ['arrays_20of_20numbers_34',['Native Arrays of Numbers',['../_h_d_f_n_a_t_i_v_e.html',1,'']]],
-  ['artifacts_35',['Using HDF5 Maven Artifacts',['../_c_b__maven_artifacts.html',1,'']]],
-  ['attribute_36',['Creating an Attribute',['../_l_b_attr_create.html',1,'LearnBasics']]],
-  ['attributes_37',['Attributes',['../_attributes.html',1,'Attributes'],['../_h5_a__u_g.html',1,'HDF5 Attributes']]],
-  ['author_20guide_38',['HDF5 Virtual Object Layer (VOL) Connector Author Guide',['../_v_o_l__connector.html',1,'']]]
+  ['api_20introduction_31',['C++ API Introduction',['../h5_cpp_intro.html',1,'']]],
+  ['api_20package_32',['HDF5 Java API Package',['../_h_d_f5_l_i_b.html',1,'']]],
+  ['applications_33',['Applications',['../collective_calls.html',1,'Collective Calling Requirements in Parallel HDF5 Applications'],['../_l_b_compiling.html',1,'Compiling HDF5 Applications'],['../_a_p_p_d_b_g.html',1,'Debugging HDF5 Applications'],['../_u_n_i_c_o_d_e.html',1,'Using UTF-8 Encoding in HDF5 Applications']]],
+  ['array_20conversion_34',['Java Array Conversion',['../_h_d_f_a_r_r_a_y.html',1,'']]],
+  ['arrays_20of_20numbers_35',['Native Arrays of Numbers',['../_h_d_f_n_a_t_i_v_e.html',1,'']]],
+  ['artifacts_36',['Using HDF5 Maven Artifacts',['../_c_b__maven_artifacts.html',1,'']]],
+  ['attribute_37',['Creating an Attribute',['../_l_b_attr_create.html',1,'LearnBasics']]],
+  ['attributes_38',['Attributes',['../_attributes.html',1,'Attributes'],['../_h5_a__u_g.html',1,'HDF5 Attributes']]],
+  ['author_20guide_39',['HDF5 Virtual Object Layer (VOL) Connector Author Guide',['../_v_o_l__connector.html',1,'']]]
 ];

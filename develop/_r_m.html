@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-09</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-10</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -236,6 +236,7 @@ $(function(){initNavTree('_r_m.html',''); initResizable(true); });
 </ul>
 <p><a class="anchor" id="cpp_c_api_note"></a></p><dl class="section attention"><dt>Attention</dt><dd><b>C++ Developers using HDF5 C-API functions beware:</b><br  />
  Several functions in this C-API take function pointers or callbacks as arguments. Examples include <a class="el" href="group___l_a_p_l.html#ga8850042eed51777866d7bd0d050cfdc2" title="Sets the external link traversal callback function in a link access property list.">H5Pset_elink_cb()</a>, <a class="el" href="group___d_x_p_l.html#ga10a80b29444d933da1aa2003f46cf003" title="Sets user-defined datatype conversion callback function.">H5Pset_type_conv_cb()</a>, <a class="el" href="group___c_o_n_v.html#ga9442478475a03357ee47fa035df0228a" title="Converts data from one specified datatype to another.">H5Tconvert()</a>, and <a class="el" href="group___h5_e.html#ga4ecc0f6a1ea5bb821373a5a7b8070655" title="Walks the specified error stack, calling the specified function.">H5Ewalk2()</a>. Application code must ensure that those callback functions return normally such to allow the HDF5 to manage its resources and maintain a consistent state. For instance, those functions must not use the C <code>setjmp</code> / <code>longjmp</code> mechanism to leave those callback functions. Within the context of C++, any exceptions thrown within the callback function must be caught, such as with a <code>catch(…)</code> statement. Any exception state can be placed within the provided user data function call arguments, and may be thrown again once the calling function has returned. Exceptions raised and not handled inside the callback are not supported as it might leave the HDF5 library in an inconsistent state. Similarly, using C++20 coroutines cannot be used as callbacks, since they do not support plain return statements. If a callback function yields execution to another C++20 coroutine calling HDF5 functions as well, this may lead to undefined behavior.</dd></dl>
+<dl class="section user"><dt>C++ API Guide</dt><dd>New to the HDF5 C++ API? See the <a class="el" href="h5_cpp_intro.html">C++ API Introduction</a> for an introduction, class mapping guide, and examples.</dd></dl>
 <dl class="section user"><dt>Don't like what you see? - You can help to improve this Reference Manual</dt><dd>Complete the survey linked near the top of this page!<br  />
  We treat documentation like code: Fork the <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a> !<br  />
  See the <a class="el" href="_r_m_t.html">Reference Manual (RM) Page Template</a> for general guidance.</dd></dl>
