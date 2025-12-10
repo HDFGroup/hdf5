@@ -339,18 +339,104 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
-# parse the full version number from H5public.h and include in H5_VERS_INFO
+# Read version from VERSION.txt
 #-----------------------------------------------------------------------------
-file (READ ${HDF5_SRC_DIR}/H5public.h _h5public_h_contents)
-string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
-    "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
-string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
-    "\\1" H5_VERS_MINOR ${_h5public_h_contents})
-string (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
-    "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
-string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._-]*)\".*$"
-    "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
-message (TRACE "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
+include(config/cmake/HDF5Version.cmake)
+HDF5_READ_VERSION()
+
+# Set project version
+set(HDF5_VERSION_MAJOR ${HDF5_VERS_MAJOR})
+set(HDF5_VERSION_MINOR ${HDF5_VERS_MINOR})
+set(HDF5_VERSION_PATCH ${HDF5_VERS_RELEASE})
+set(HDF5_VERSION "${HDF5_VERS_MAJOR}.${HDF5_VERS_MINOR}.${HDF5_VERS_RELEASE}")
+
+# Set H5_VERS_* variables for compatibility with existing code
+set(H5_VERS_MAJOR ${HDF5_VERS_MAJOR})
+set(H5_VERS_MINOR ${HDF5_VERS_MINOR})
+set(H5_VERS_RELEASE ${HDF5_VERS_RELEASE})
+set(H5_VERS_SUBRELEASE ${HDF5_VERS_SUBRELEASE})
+
+message (STATUS "HDF5 Version: ${HDF5_VERS_STR}")
+message (TRACE "VERSION: ${HDF5_VERS_MAJOR}.${HDF5_VERS_MINOR}.${HDF5_VERS_RELEASE}-${HDF5_VERS_SUBRELEASE}")
+
+#-----------------------------------------------------------------------------
+# Configure template files with version information
+#
+# NOTE: These files are checked into source control and should not be
+#       regenerated during normal builds. Only regenerate them when updating
+#       the version by:
+#         1. Using the helper script: bin/update-version.sh
+#         2. Passing -DHDF5_REGENERATE_VERSION_FILES=ON to CMake
+#
+#       After regenerating, review and commit all changed files.
+#-----------------------------------------------------------------------------
+option(HDF5_REGENERATE_VERSION_FILES "Regenerate version-templated files from VERSION.txt" OFF)
+mark_as_advanced(HDF5_REGENERATE_VERSION_FILES)
+
+if(HDF5_REGENERATE_VERSION_FILES)
+    message(STATUS "Regenerating version-templated files from VERSION.txt...")
+
+    configure_file(
+        "${HDF5_SOURCE_DIR}/src/H5public.h.in"
+        "${HDF5_SOURCE_DIR}/src/H5public.h"
+        @ONLY
+    )
+
+    configure_file(
+        "${HDF5_SOURCE_DIR}/README.md.in"
+        "${HDF5_SOURCE_DIR}/README.md"
+        @ONLY
+    )
+
+    configure_file(
+        "${HDF5_SOURCE_DIR}/release_docs/CHANGELOG.md.in"
+        "${HDF5_SOURCE_DIR}/release_docs/CHANGELOG.md"
+        @ONLY
+    )
+
+    configure_file(
+        "${HDF5_SOURCE_DIR}/config/cmake/scripts/HDF5config.cmake.in"
+        "${HDF5_SOURCE_DIR}/config/cmake/scripts/HDF5config.cmake"
+        @ONLY
+    )
+
+    configure_file(
+        "${HDF5_SOURCE_DIR}/config/examples/HDF5AsSubdirMacros.cmake.in"
+        "${HDF5_SOURCE_DIR}/config/examples/HDF5AsSubdirMacros.cmake"
+        @ONLY
+    )
+
+    # Java files - regenerate regardless of HDF5_BUILD_JAVA setting
+    # to ensure all version files stay in sync
+    configure_file(
+        "${HDF5_SOURCE_DIR}/java/hdf/hdf5lib/H5.java.in"
+        "${HDF5_SOURCE_DIR}/java/hdf/hdf5lib/H5.java"
+        @ONLY
+    )
+
+    configure_file(
+        "${HDF5_SOURCE_DIR}/java/test/TestH5.java.in"
+        "${HDF5_SOURCE_DIR}/java/test/TestH5.java"
+        @ONLY
+    )
+
+    configure_file(
+        "${HDF5_SOURCE_DIR}/java/src-jni/hdf/hdf5lib/H5.java.in"
+        "${HDF5_SOURCE_DIR}/java/src-jni/hdf/hdf5lib/H5.java"
+        @ONLY
+    )
+
+    configure_file(
+        "${HDF5_SOURCE_DIR}/java/src-jni/test/TestH5.java.in"
+        "${HDF5_SOURCE_DIR}/java/src-jni/test/TestH5.java"
+        @ONLY
+    )
+
+    message(WARNING "Version-templated files have been regenerated. "
+                    "Review changes with 'git diff' and commit if correct.")
+else()
+    message(STATUS "Using existing version-templated files (set HDF5_REGENERATE_VERSION_FILES=ON to regenerate)")
+endif()
 
 #-----------------------------------------------------------------------------
 # parse the full soversion number from config/lt_vers.am and include in H5_SOVERS_INFO

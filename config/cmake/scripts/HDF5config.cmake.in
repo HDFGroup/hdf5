@@ -38,11 +38,11 @@ cmake_minimum_required (VERSION 3.26)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "2.1.0")
-if ("" STREQUAL "")
+set (CTEST_SOURCE_VERSION "@HDF5_VERSION_PLAIN@")
+if ("@HDF5_VERS_SUBRELEASE@" STREQUAL "")
     set (CTEST_SOURCE_VERSEXT "")
 else ()
-    set (CTEST_SOURCE_VERSEXT "-")
+    set (CTEST_SOURCE_VERSEXT "-@HDF5_VERS_SUBRELEASE@")
 endif ()
 
 ##############################################################################
