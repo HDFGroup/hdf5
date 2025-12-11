@@ -512,8 +512,8 @@ set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
 set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
 set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
 # H5_LIBVER_DIR is used in HDF5Examples to compile examples from older hdf5 versions.
-# Because the range of minor version numbers exceded single digits, a 0 was needed for
-# the single digit minor numbers so that version 2.0 (200) will greater than version 
+# Because the range of minor version numbers exceeded single digits, a 0 was needed for
+# the single digit minor numbers so that version 2.0 (200) will be greater than version 
 # version 1.14 (114).
 if (H5_VERS_MINOR GREATER 9)
   set (H5_LIBVER_DIR ${H5_VERS_MAJOR}${H5_VERS_MINOR})
@@ -1203,7 +1203,7 @@ endif ()
 # Include filter plugins
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PLUGIN_SUPPORT)
-  if HDF5_DEFAULT_API_VERSION MATCHES "v16")
+  if (HDF5_DEFAULT_API_VERSION MATCHES "v16")
     set (HDF5_ENABLE_PLUGIN_SUPPORT OFF CACHE BOOL "" FORCE)
     message (VERBOSE "Filter PLUGINs cannot be used with 1.6 API")
   else ()

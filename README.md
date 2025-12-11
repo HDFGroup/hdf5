@@ -91,7 +91,7 @@ HDF5 does not follow a regular release schedule. Instead, updates are based on t
 introduction of new features and the resolution of bugs. However, we aim to have at
 least one annual release for each maintenance branch.
 
-> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) was merged into the "develop" branch on **March 10, 2025**. .
+> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) was merged into the "develop" branch on **March 10, 2025**.
 | Release | New Features |
 | ------- | ------------ |
 | 2.0.0 | Starting with HDF5 2.0, *only* the CMake build system is supported. Dropped the HDF5 <--> GIF tools, added complex number support, updated library defaults (cache sizes, etc.) |
