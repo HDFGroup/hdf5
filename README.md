@@ -5,7 +5,6 @@ HDF5 version 2.0.1 currently under development
 >
 > It's happened—the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
 >
-> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) was merged into the "develop" branch on **March 10, 2025**. Starting with HDF5 2.0, *only* the CMake build system is supported.
 
 ![HDF5 Logo][u3]
 
@@ -92,9 +91,10 @@ HDF5 does not follow a regular release schedule. Instead, updates are based on t
 introduction of new features and the resolution of bugs. However, we aim to have at
 least one annual release for each maintenance branch.
 
+> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) was merged into the "develop" branch on **March 10, 2025**. .
 | Release | New Features |
 | ------- | ------------ |
-| 2.0.0 | Drop Autotools support, drop the HDF5 <--> GIF tools, add complex number support, update library defaults (cache sizes, etc.) |
+| 2.0.0 | Starting with HDF5 2.0, *only* the CMake build system is supported. Dropped the HDF5 <--> GIF tools, added complex number support, updated library defaults (cache sizes, etc.) |
 | FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
 
 ### Release Progress

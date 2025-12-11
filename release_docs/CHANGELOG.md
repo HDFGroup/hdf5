@@ -4,7 +4,8 @@ HDF5 version 2.0.1 currently under development
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
 HDF5 release, platforms tested, and known problems in this release.
 
-For releases prior to version 2.0.0, please see the release.txt file and for more details check the HISTORY*.txt files in the HDF5 source.
+For changes in previous releases, please see the HISTORY*.txt files in the HDF5 source.
+
 
 # 🔗 Quick Links
 * [HDF5 documentation](https://support.hdfgroup.org/documentation/hdf5/latest/)

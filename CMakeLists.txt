@@ -52,10 +52,8 @@ if (POLICY CMP0127)
   cmake_policy (SET CMP0127 NEW)
 endif ()
 
-# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
-    cmake_policy(SET CMP0135 NEW)
-endif()
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake versions > 3.24:
+cmake_policy(SET CMP0135 NEW)
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
@@ -86,14 +84,8 @@ endif ()
 
 # Whether the most recently called project() command, in the current scope or above,
 # was in the top level CMakeLists.txt file.
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.21.0")
-  if(NOT PROJECT_IS_TOP_LEVEL)
-    set (HDF5_EXTERNALLY_CONFIGURED 1)
-  endif()
-else()
-  if (NOT CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
-    set (HDF5_EXTERNALLY_CONFIGURED 1)
-  endif()
+if(NOT PROJECT_IS_TOP_LEVEL)
+  set (HDF5_EXTERNALLY_CONFIGURED 1)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -519,14 +511,14 @@ set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
 set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
 set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
-if (H5_VERS_MAJOR GREATER 1)
-  if (H5_VERS_MINOR GREATER 9)
-    set (H5_LIBVER_DIR ${H5_VERS_MAJOR}${H5_VERS_MINOR})
-  else ()
-    set (H5_LIBVER_DIR ${H5_VERS_MAJOR}0${H5_VERS_MINOR})
-  endif()
-else ()
+# H5_LIBVER_DIR is used in HDF5Examples to compile examples from older hdf5 versions.
+# Because the range of minor version numbers exceded single digits, a 0 was needed for
+# the single digit minor numbers so that version 2.0 (200) will greater than version 
+# version 1.14 (114).
+if (H5_VERS_MINOR GREATER 9)
   set (H5_LIBVER_DIR ${H5_VERS_MAJOR}${H5_VERS_MINOR})
+else ()
+  set (H5_LIBVER_DIR ${H5_VERS_MAJOR}0${H5_VERS_MINOR})
 endif()
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
@@ -1211,7 +1203,7 @@ endif ()
 # Include filter plugins
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PLUGIN_SUPPORT)
-  if (${H5_LIBVER_DIR} EQUAL 16 OR HDF5_DEFAULT_API_VERSION MATCHES "v16")
+  if HDF5_DEFAULT_API_VERSION MATCHES "v16")
     set (HDF5_ENABLE_PLUGIN_SUPPORT OFF CACHE BOOL "" FORCE)
     message (VERBOSE "Filter PLUGINs cannot be used with 1.6 API")
   else ()
