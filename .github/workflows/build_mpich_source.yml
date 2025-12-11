@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install build-essential libtool libtool-bin
 
       - name: Get MPICH source
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: 'pmodels/mpich'
           path: 'mpich'
@@ -49,7 +49,7 @@ jobs:
 
       - name: Cache MPICH (GCC) installation
         id: cache-mpich-ubuntu-gcc
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ${{ runner.workspace }}/mpich
           key: ${{ runner.os }}-${{ runner.arch }}-gcc-mpich-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
@@ -88,7 +88,7 @@ jobs:
         run: tar -cvf mpich.tar -C ${{ runner.workspace }} mpich
 
       - name: Save MPICH installation artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: mpich
           path: mpich.tar

@@ -65,7 +65,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'MPICH' }}
 
       - name: Checkout HDF5
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Configure HDF5 with Subfiling VFD
         shell: bash

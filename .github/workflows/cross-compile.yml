@@ -38,13 +38,13 @@ jobs:
           sudo apt-get install gfortran-mingw-w64-x86-64-win32
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
+        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
           version: "1.13.2"
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       # CMAKE CONFIGURE
       - name: CMake Configure
@@ -96,7 +96,7 @@ jobs:
                ls -l ${{ runner.workspace }}/build
 
       - name: Save published binary (linux)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: tgz-ubuntu-2404_mingw64-${{ inputs.build_mode }}-binary
           path: ${{ runner.workspace }}/build/HDF5-*-win64.zip

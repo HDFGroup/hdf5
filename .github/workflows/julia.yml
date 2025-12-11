@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get HDF5 source
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Install Dependencies
         shell: bash
@@ -58,13 +58,13 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: Install julia
-        uses: julia-actions/setup-julia@latest
+        uses: julia-actions/setup-julia@5c9647d97b78a5debe5164e9eec09d653d29bd71 # latest
         with:
           version: '1.6'
           arch: 'x64'
 
       - name: Get julia hdf5 source
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: JuliaIO/HDF5.jl
           path: .
@@ -75,9 +75,9 @@ jobs:
           echo 'libhdf5 = "/tmp/lib/libhdf5.so"' >> LocalPreferences.toml
           echo 'libhdf5_hl = "/tmp/lib/libhdf5_hl.so"' >> LocalPreferences.toml
 
-      - uses: julia-actions/julia-buildpkg@latest
+      - uses: julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1 # latest
 
       - name: Julia Run Tests
-        uses: julia-actions/julia-runtest@latest
+        uses: julia-actions/julia-runtest@d60b785c6f2bdf4ebfb18b2b6f7d93b7dfb0efe3 # latest
         env:
           JULIA_DEBUG: Main

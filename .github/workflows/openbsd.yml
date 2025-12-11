@@ -38,10 +38,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Build and test on OpenBSD
-        uses: vmactions/openbsd-vm@v1
+        uses: vmactions/openbsd-vm@2e29de1eb150dfe1c9c97b84ff2b7896f14ca690 # v1
         with:
           release: ${{ matrix.openbsd-version }}
           usesh: true

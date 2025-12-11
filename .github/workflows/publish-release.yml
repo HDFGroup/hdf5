@@ -50,7 +50,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Get Sources
-        uses: actions/checkout@v6.0.0  # Updated to latest stable
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # Updated to latest stable v6.0.0
         with:
           fetch-depth: 0
           ref: '${{ github.head_ref || github.ref_name }}'
@@ -59,7 +59,7 @@ jobs:
         run: mkdir -p HDF5
 
       - name: Get HDF5 release assets
-        uses: robinraju/release-downloader@v1.12  # More reliable alternative
+        uses: robinraju/release-downloader@daf26c55d821e836577a15f77d86ddc078948b05 # More reliable alternative v1.12
         with:
           repository: HDFGroup/hdf5
           tag: ${{ inputs.use_tag }}
@@ -85,7 +85,7 @@ jobs:
 
       - name: Setup AWS CLI
         if: ${{ !inputs.dry_run }}
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

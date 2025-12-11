@@ -101,7 +101,7 @@ jobs:
 
       - name: Set up Java (if specified or FFM required)
         if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
         with:
           distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
           java-version: |
@@ -126,7 +126,7 @@ jobs:
           echo "CC=cl.exe" >> $GITHUB_ENV
 
       - name: Get HDF5 sources
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Setup jextract (FFM builds only)
         if: ${{ inputs.force_java_implementation == 'ffm' }}
@@ -263,7 +263,7 @@ jobs:
 
       - name: Set up Java (if specified or FFM required)
         if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
         with:
           distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
           java-version: |
@@ -288,7 +288,7 @@ jobs:
           echo "CC=cl.exe" >> $GITHUB_ENV
 
       - name: Get HDF5 sources
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Setup jextract (FFM builds only)
         if: ${{ inputs.force_java_implementation == 'ffm' }}
@@ -373,7 +373,7 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Windows)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
               name: zip-vs2022_cl-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
@@ -381,7 +381,7 @@ jobs:
         if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (linux)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
               name: tgz-ubuntu-2404_gcc-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
@@ -389,7 +389,7 @@ jobs:
         if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (Mac_latest)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
               name: tgz-macos14_clang-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
