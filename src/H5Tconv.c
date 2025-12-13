@@ -30,7 +30,6 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Tconv.h"     /* Datatype Conversions                     */
 #include "H5Tpkg.h"      /* Datatypes                                */
-#include "H5public.h"
 
 /****************/
 /* Local Macros */

@@ -17,7 +17,6 @@
 #define H5Tprivate_H
 
 /* Early typedefs to avoid circular dependencies */
-#include "H5public.h"
 typedef struct H5T_t H5T_t;
 
 /* Include package's public headers */
