@@ -641,7 +641,101 @@
 /**
  *\defgroup H5VL VOL connector (H5VL)
  *
- * \todo Describe the VOL plugin life cycle.
+ * Use the functions in this module to manage HDF5 Virtual Object Layer (VOL) connectors.
+ *
+ * VOL connectors provide an abstraction layer for storage operations, enabling HDF5 to work
+ * with different storage backends while maintaining the familiar HDF5 API. This module provides
+ * functions for registering, configuring, and managing VOL connector plugins.
+ *
+ * <h3>VOL Connector Life Cycle</h3>
+ *
+ * VOL connectors can be implemented as dynamically loaded plugins, statically linked libraries,
+ * or built into the HDF5 library itself. Throughout this documentation, "VOL connector" refers
+ * to the connector implementation regardless of how it is deployed.
+ *
+ * VOL connectors follow a well-defined life cycle from loading to cleanup:
+ *
+ * <ol>
+ * <li><b>Discovery and Loading</b>
+ *     <ul>
+ *     <li>For dynamically loaded plugins: The library searches the plugin path
+ *         (default: /usr/local/hdf5/lib/plugin on POSIX, %ALLUSERSPROFILE%/hdf5/lib/plugin on Windows)</li>
+ *     <li>Plugin path can be overridden using the #HDF5_PLUGIN_PATH environment variable</li>
+ *     <li>For statically linked connectors: The connector is available immediately when the library
+ *loads</li> <li>For internal connectors: Built into the HDF5 library (e.g., the native VOL connector)</li>
+ *     </ul>
+ * </li>
+ *
+ * <li><b>Registration</b>
+ *     <ul>
+ *     <li>Before use, connectors must be registered with the library using:
+ *         <ul>
+ *         <li>#H5VLregister_connector() - Registers a new VOL connector</li>
+ *         <li>#H5VLregister_connector_by_name() - Register by connector name</li>
+ *         <li>#H5VLregister_connector_by_value() - Register by connector-specific value</li>
+ *         </ul>
+ *     </li>
+ *     <li>Registration loads the connector and returns an HDF5 identifier (#hid_t)</li>
+ *     <li>Many connectors provide initialization functions that handle registration automatically</li>
+ *     <li>Registration can also occur automatically via the #HDF5_VOL_CONNECTOR environment variable</li>
+ *     </ul>
+ * </li>
+ *
+ * <li><b>Configuration</b>
+ *     <ul>
+ *     <li>The connector is set in a file access property list (fapl) using:
+ *         <ul>
+ *         <li>#H5Pset_vol() - Generic method using connector ID and optional configuration</li>
+ *         <li>Connector-specific functions (e.g., H5Pset_fapl_<name>()) - Often more convenient</li>
+ *         <li>#HDF5_VOL_CONNECTOR environment variable - Sets the default connector for all file opens</li>
+ *         </ul>
+ *     </li>
+ *     <li>Configuration may include connector-specific parameters passed via info structs or parameter
+ *strings</li> <li>Parameter strings can be parsed using #H5VLconnector_str_to_info()</li>
+ *     </ul>
+ * </li>
+ *
+ * <li><b>Active Use</b>
+ *     <ul>
+ *     <li>When a file is opened or created with a configured fapl, the specified VOL connector handles all
+ *         storage operations</li>
+ *     <li>All API calls that manipulate storage (create, open, read, write, etc.) are forwarded to the
+ *         connector's callbacks</li>
+ *     <li>The connector remains active for the lifetime of all files opened with it</li>
+ *     <li>Multiple different connectors can be active simultaneously for different files</li>
+ *     </ul>
+ * </li>
+ *
+ * <li><b>Query and Introspection</b>
+ *     <ul>
+ *     <li>#H5Pget_vol_id() retrieves the connector ID from a fapl</li>
+ *     <li>#H5Pget_vol_info() retrieves connector-specific configuration information</li>
+ *     <li>#H5VLget_connector_name() retrieves the connector's registered name</li>
+ *     <li>#H5VLis_connector_registered_by_name() checks if a connector is registered by name</li>
+ *     <li>#H5VLis_connector_registered_by_value() checks if a connector is registered by value</li>
+ *     <li>#H5VLquery_optional() determines support for optional operations</li>
+ *     </ul>
+ * </li>
+ *
+ * <li><b>Cleanup and Unregistration</b>
+ *     <ul>
+ *     <li>Connector IDs can be closed using:
+ *         <ul>
+ *         <li>#H5VLunregister_connector() - Unregister a connector</li>
+ *         <li>#H5VLclose() - Close a connector ID (same internal implementation)</li>
+ *         </ul>
+ *     </li>
+ *     <li>The library maintains reference counts on connector IDs and will not actually close them until
+ *         the reference count reaches zero</li>
+ *     <li>It is safe to close connector IDs after use, even while files opened with that connector remain
+ *open</li> <li>The library automatically unloads all connectors when it shuts down</li> <li>The native VOL
+ *connector cannot be unloaded and is always available</li> <li>Connector-specific info structures should be
+ *freed using #H5VLfree_connector_info()</li>
+ *     </ul>
+ * </li>
+ * </ol>
+ *
+ * @see H5VL_UG
  *
  * \defgroup ASYNC Asynchronous Functions
  * \brief List of the asynchronous functions.

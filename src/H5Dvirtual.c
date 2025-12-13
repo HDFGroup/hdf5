@@ -3387,7 +3387,7 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
     }
 
-    if (storage->tree) {
+    if (storage->tree && nelmts > 0) {
         /* Perform a spatial tree search to get a list of mappings
          * whose virtual selection intersects the IO operation */
         if (H5S_SELECT_BOUNDS(dset_info->file_space, min, max) < 0)
@@ -3633,7 +3633,7 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
     }
 
-    if (storage->tree) {
+    if (storage->tree && nelmts > 0) {
         /* Perform a spatial tree search to get a list of mappings
          * whose virtual selection intersects the IO operation */
         if (H5S_SELECT_BOUNDS(dset_info->file_space, min, max) < 0)

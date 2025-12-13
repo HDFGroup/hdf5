@@ -177,12 +177,15 @@
 #define H5FD_FEAT_MEMMANAGE 0x00010000
 
 /* ctl function definitions: */
-#define H5FD_CTL_OPC_RESERVED 512 /* Opcodes below this value are reserved for library use */
-#define H5FD_CTL_OPC_EXPER_MIN                                                                               \
-    H5FD_CTL_OPC_RESERVED /* Minimum opcode value available for experimental use                             \
-                           */
-#define H5FD_CTL_OPC_EXPER_MAX                                                                               \
-    (H5FD_CTL_OPC_RESERVED + 511) /* Maximum opcode value available for experimental use */
+
+/** Opcodes below this value are reserved for library use */
+#define H5FD_CTL_OPC_RESERVED 512
+
+/** Minimum opcode value available for experimental use */
+#define H5FD_CTL_OPC_EXPER_MIN H5FD_CTL_OPC_RESERVED
+
+/** Maximum opcode value available for experimental use */
+#define H5FD_CTL_OPC_EXPER_MAX (H5FD_CTL_OPC_RESERVED + 511)
 
 /* ctl function op codes: */
 #define H5FD_CTL_INVALID_OPCODE              0

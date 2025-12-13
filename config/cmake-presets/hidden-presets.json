@@ -95,7 +95,10 @@
     },
     {
       "name": "ci-Intel",
-      "hidden": true
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "config/toolchain/intel.cmake"
+      }
     },
     {
       "name": "ci-Fortran",

@@ -239,7 +239,6 @@
  *    <tr>
  *      <td>#H5Zunregister</td>
  *    </tr>
- *  </tbody>
  * </table>
  *
  * In addition, most deprecated functions fall into this category.

@@ -12,7 +12,7 @@
 
 /*
  * Purpose:     The IOC VFD implements a file driver which relays all the
- *              VFD calls to an underlying VFD, and send all the write calls to
+ *              VFD calls to an underlying VFD, and sends all the write calls to
  *              another underlying VFD. Maintains two files simultaneously.
  */
 
@@ -43,7 +43,7 @@ static bool H5FD_mpi_self_initialized_s = false;
 /* Pointer to value for MPI_TAG_UB */
 int *H5FD_IOC_tag_ub_val_ptr = NULL;
 
-/* The information of this ioc */
+/* The information of this IOC */
 typedef struct H5FD_ioc_t {
     H5FD_t            pub; /* public stuff, must be first    */
     int               fd;  /* the filesystem file descriptor */
@@ -305,7 +305,7 @@ done:
  * Function:    H5Pset_fapl_ioc
  *
  * Purpose:     Sets the file access property list to use the
- *              ioc driver.
+ *              IOC driver.
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
@@ -347,7 +347,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_ioc
  *
- * Purpose:     Returns information about the ioc file access property
+ * Purpose:     Returns information about the IOC file access property
  *              list through the structure config_out.
  *
  *              Will fail if config_out is received without pre-set valid

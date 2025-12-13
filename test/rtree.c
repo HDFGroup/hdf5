@@ -39,6 +39,7 @@ static const char *FILENAME[] = {"vds_rtree_src",       /* 0: Source file for VD
                                  "vds_rtree_dapl",      /* 1: DAPL test file */
                                  "vds_rtree_threshold", /* 2: Threshold test file */
                                  "vds_rtree_rw",        /* 3: Read/write test file */
+                                 "vds_rtree_empty",     /* 4: Empty slice test file */
                                  NULL};
 
 #define FILENAME_BUF_SIZE 1024
@@ -1019,6 +1020,155 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_vds_empty_slice
+ *
+ * Purpose:     Test zero-element read from virtual dataset with the r-tree enabled
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_vds_empty_slice(hid_t vds_fapl, hid_t src_fapl)
+{
+    hid_t   srcfile_id  = H5I_INVALID_HID;
+    hid_t   vdsfile_id  = H5I_INVALID_HID;
+    hid_t   raw_dset_id = H5I_INVALID_HID;
+    hid_t   vds_dset_id = H5I_INVALID_HID;
+    hid_t   src_space   = H5I_INVALID_HID;
+    hid_t   vds_space   = H5I_INVALID_HID;
+    hid_t   vds_sel     = H5I_INVALID_HID;
+    hid_t   mem_space   = H5I_INVALID_HID;
+    hid_t   file_space  = H5I_INVALID_HID;
+    hid_t   dcpl        = H5I_INVALID_HID;
+    hsize_t src_dim     = 1;
+    hsize_t vds_dim     = 100;
+    hsize_t start       = 0;
+    hsize_t count       = 0;
+    int     wdata       = 42;
+    int     read_buf    = -1;
+    char    srcfilename[FILENAME_BUF_SIZE];
+    char    srcfilename_map[FILENAME_BUF_SIZE];
+    char    vdsfilename[FILENAME_BUF_SIZE];
+    size_t  i;
+
+    TESTING("zero-element read from virtual dataset with r-tree");
+
+    /* Generate VFD-specific filenames */
+    h5_fixname(FILENAME[0], src_fapl, srcfilename, sizeof(srcfilename));
+    h5_fixname_printf(FILENAME[0], src_fapl, srcfilename_map, sizeof(srcfilename_map));
+    h5_fixname(FILENAME[4], vds_fapl, vdsfilename, sizeof(vdsfilename));
+
+    /* Create source file with single dataset */
+    if ((srcfile_id = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, src_fapl)) < 0)
+        FAIL_STACK_ERROR;
+    if ((src_space = H5Screate_simple(1, &src_dim, NULL)) < 0)
+        FAIL_STACK_ERROR;
+    if ((raw_dset_id = H5Dcreate2(srcfile_id, "src", H5T_NATIVE_INT, src_space, H5P_DEFAULT, H5P_DEFAULT,
+                                  H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dwrite(raw_dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((vdsfile_id = H5Fcreate(vdsfilename, H5F_ACC_TRUNC, H5P_DEFAULT, vds_fapl)) < 0)
+        FAIL_STACK_ERROR;
+    if ((vds_space = H5Screate_simple(1, &vds_dim, NULL)) < 0)
+        FAIL_STACK_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Add mappings and create VDS */
+    for (i = 0; i < vds_dim; i++) {
+        if ((vds_sel = H5Scopy(vds_space)) < 0)
+            FAIL_STACK_ERROR;
+        start = i;
+        count = 1;
+        if (H5Sselect_hyperslab(vds_sel, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+            FAIL_STACK_ERROR;
+        if (H5Pset_virtual(dcpl, vds_sel, srcfilename_map, "src", src_space) < 0)
+            FAIL_STACK_ERROR;
+        if (H5Sclose(vds_sel) < 0)
+            FAIL_STACK_ERROR;
+        vds_sel = H5I_INVALID_HID;
+    }
+
+    if ((vds_dset_id =
+             H5Dcreate2(vdsfile_id, "vds", H5T_NATIVE_INT, vds_space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Trigger tree initialization by reading a single element */
+    start = 0;
+    count = 1;
+    if ((mem_space = H5Screate_simple(1, &count, NULL)) < 0)
+        FAIL_STACK_ERROR;
+    if ((file_space = H5Dget_space(vds_dset_id)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sselect_hyperslab(file_space, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dread(vds_dset_id, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, &read_buf) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(mem_space) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(file_space) < 0)
+        FAIL_STACK_ERROR;
+    mem_space  = H5I_INVALID_HID;
+    file_space = H5I_INVALID_HID;
+
+    /* Attempt zero-element read */
+    count = 0;
+    if ((mem_space = H5Screate_simple(1, &count, NULL)) < 0)
+        FAIL_STACK_ERROR;
+    if ((file_space = H5Dget_space(vds_dset_id)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sselect_hyperslab(file_space, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dread(vds_dset_id, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, &read_buf) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Cleanup */
+    if (H5Sclose(mem_space) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(file_space) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(src_space) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(vds_space) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dclose(raw_dset_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dclose(vds_dset_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Fclose(srcfile_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Fclose(vdsfile_id) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(mem_space);
+        H5Sclose(file_space);
+        H5Sclose(src_space);
+        H5Sclose(vds_space);
+        H5Sclose(vds_sel);
+        H5Pclose(dcpl);
+        H5Dclose(raw_dset_id);
+        H5Dclose(vds_dset_id);
+        H5Fclose(srcfile_id);
+        H5Fclose(vdsfile_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the R-tree functionality
@@ -1062,10 +1212,11 @@ main(void)
 
     /* Test the mapping count threshold */
     nerrors += test_rtree_threshold(true, vds_fapl, src_fapl) < 0 ? 1 : 0;
-    // TODO - Fix failure
     nerrors += test_rtree_threshold(false, vds_fapl, src_fapl) < 0 ? 1 : 0;
     nerrors += test_rtree_rw(true, vds_fapl, src_fapl) < 0 ? 1 : 0;
     nerrors += test_rtree_rw(false, vds_fapl, src_fapl) < 0 ? 1 : 0;
+
+    nerrors += test_vds_empty_slice(vds_fapl, src_fapl) < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;
@@ -1076,12 +1227,16 @@ main(void)
     h5_fixname(FILENAME[2], vds_fapl, threshfilename, sizeof(threshfilename));
     h5_fixname(FILENAME[3], vds_fapl, rwfilename, sizeof(rwfilename));
 
+    char emptyfilename[FILENAME_BUF_SIZE];
+    h5_fixname(FILENAME[4], vds_fapl, emptyfilename, sizeof(emptyfilename));
+
     H5E_BEGIN_TRY
     {
         H5Fdelete(srcfilename, src_fapl);
         H5Fdelete(vfilename, vds_fapl);
         H5Fdelete(threshfilename, vds_fapl);
         H5Fdelete(rwfilename, vds_fapl);
+        H5Fdelete(emptyfilename, vds_fapl);
     }
     H5E_END_TRY;
 

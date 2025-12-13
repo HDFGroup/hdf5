@@ -5725,10 +5725,11 @@ make_external(hid_t fid)
 void
 gent_filters(void)
 {
-    hid_t fid;  /* file id */
-    hid_t dcpl; /* dataset creation property list */
-    hid_t sid;  /* dataspace ID */
-    hid_t tid;  /* datatype ID */
+    hid_t fid;     /* file id */
+    hid_t dcpl;    /* dataset creation property list */
+    hid_t sid;     /* dataspace ID */
+    hid_t tid;     /* datatype ID */
+    hid_t fapl_id; /* file access property list */
 #ifdef H5_HAVE_FILTER_SZIP
     unsigned szip_options_mask     = H5_SZIP_ALLOW_K13_OPTION_MASK | H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block = 4;
@@ -5746,8 +5747,14 @@ gent_filters(void)
         }
     }
 
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    assert(fapl_id >= 0);
+
+    ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    assert(ret >= 0);
+
     /* create a file */
-    fid = H5Fcreate(FILE44, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE44, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(fid >= 0);
 
     /* Check if we support comments in the current VOL connector */
@@ -6030,6 +6037,9 @@ gent_filters(void)
     ret = H5Pclose(dcpl);
     assert(ret >= 0);
 
+    ret = H5Pclose(fapl_id);
+    assert(ret >= 0);
+
     ret = H5Fclose(fid);
     assert(ret >= 0);
 }
@@ -6087,15 +6097,23 @@ set_local_myfilter(hid_t dcpl_id, hid_t H5_ATTR_UNUSED tid, hid_t H5_ATTR_UNUSED
 void
 gent_fcontents(void)
 {
-    hid_t                     fid;  /* file id */
-    hid_t                     gid1; /* group ID */
-    hid_t                     tid;  /* datatype ID */
+    hid_t                     fid;     /* file id */
+    hid_t                     gid1;    /* group ID */
+    hid_t                     tid;     /* datatype ID */
+    hid_t                     fapl_id; /* file access property list */
     hsize_t                   dims[1] = {4};
     int                       buf[4]  = {1, 2, 3, 4};
     int H5_ATTR_NDEBUG_UNUSED ret;
 
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    assert(fapl_id >= 0);
+
+    /* reference file has superblock version 0 */
+    ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    assert(ret >= 0);
+
     /* create a file */
-    fid = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(fid >= 0);
 
     write_dset(fid, 1, dims, "dset", H5T_STD_I32BE, H5T_NATIVE_INT, buf);
@@ -6173,10 +6191,13 @@ gent_fcontents(void)
     assert(ret >= 0);
 
     /* create a file for the bootblock test */
-    fid = H5Fcreate(FILE47, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE47, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(fid >= 0);
 
     ret = H5Fclose(fid);
+    assert(ret >= 0);
+
+    ret = H5Pclose(fapl_id);
     assert(ret >= 0);
 }
 
@@ -11175,6 +11196,7 @@ void
 gent_floatsattrs(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
+    hid_t   fapl_id = H5I_INVALID_HID;
     hid_t   tid     = H5I_INVALID_HID;
     hid_t   attr    = H5I_INVALID_HID;
     hid_t   dataset = H5I_INVALID_HID;
@@ -11211,7 +11233,11 @@ gent_floatsattrs(void)
     aset64  = calloc(F89_XDIM * F89_YDIM64, sizeof(double));
     aset128 = calloc(F89_XDIM * F89_YDIM128, sizeof(long double));
 
-    fid = H5Fcreate(FILE89, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+    H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+
+    fid = H5Fcreate(FILE89, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
     if ((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
         goto error;
@@ -11308,6 +11334,7 @@ gent_floatsattrs(void)
     H5Sclose(aspace);
     H5Sclose(space);
     H5Dclose(dataset);
+    H5Pclose(fapl_id);
 
 error:
     H5Fclose(fid);
@@ -13017,6 +13044,7 @@ gent_complex(void)
     hsize_t            varlen_dims[1] = {F95_XDIM};
     hsize_t            single_dims[2] = {1, 1};
     hid_t              fid            = H5I_INVALID_HID;
+    hid_t              fapl_id        = H5I_INVALID_HID;
     hid_t              dcpl_id        = H5I_INVALID_HID;
     hid_t              tid            = H5I_INVALID_HID;
     hid_t              complex_tid    = H5I_INVALID_HID;
@@ -13043,7 +13071,11 @@ gent_complex(void)
         hvl_t arr[F95_XDIM];
     } *dset_var_fc;
 
-    fid = H5Fcreate(FILE95, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+    H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+
+    fid = H5Fcreate(FILE95, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
     dims[0] = F95_XDIM;
     dims[1] = F95_YDIM;
@@ -13264,6 +13296,7 @@ gent_complex(void)
     H5Dclose(dataset);
 
     H5Sclose(space);
+    H5Pclose(fapl_id);
     H5Fclose(fid);
 }
 
@@ -13280,6 +13313,7 @@ gent_complex_be(void)
     hsize_t            varlen_dims[1] = {F96_XDIM};
     hsize_t            single_dims[2] = {1, 1};
     hid_t              fid            = H5I_INVALID_HID;
+    hid_t              fapl_id        = H5I_INVALID_HID;
     hid_t              dcpl_id        = H5I_INVALID_HID;
     hid_t              tid            = H5I_INVALID_HID;
     hid_t              complex_tid    = H5I_INVALID_HID;
@@ -13306,7 +13340,11 @@ gent_complex_be(void)
         hvl_t arr[F96_XDIM];
     } *dset_var_fc;
 
-    fid = H5Fcreate(FILE96, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+    H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+
+    fid = H5Fcreate(FILE96, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
     dims[0] = F96_XDIM;
     dims[1] = F96_YDIM;
@@ -13523,6 +13561,7 @@ gent_complex_be(void)
     H5Dclose(dataset);
 
     H5Sclose(space);
+    H5Pclose(fapl_id);
     H5Fclose(fid);
 }
 #endif

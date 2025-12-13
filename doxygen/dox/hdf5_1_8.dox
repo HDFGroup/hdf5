@@ -54,12 +54,13 @@ This section lists interface-level changes and other user-visible changes in beh
 \subsubsection subsubsec_rel_spec_18_change_22_new New and Changed Functions, Classes, Subroutines, Wrappers, and Macros
 <h4>In the C Interface (main library)</h4>
 The following are new C functions in this release:
-<table><thead><tr><th>Function</th><th>Description</th></tr></thead><tbody>
+<table>
+<tr><th>Function</th><th>Description</th></tr>
 <tr><td>#H5Pget_fapl_hdfs</td><td>Gets the information of the given Read-Only HDFS virtual file driver</td></tr>
 <tr><td>#H5Pget_fapl_ros3</td><td>Gets the information of the given Read-Only S3 virtual file driver</td></tr>
 <tr><td>#H5Pset_fapl_hdfs</td><td>Sets up Read-Only HDFS virtual file driver</td></tr>
 <tr><td>#H5Pset_fapl_ros3</td><td>Sets up Read-Only S3 virtual file driver</td></tr>
-</tbody></table>
+</table>
 
 <h4>In the C High Level Interface</h4>
 \li None.
@@ -225,13 +226,14 @@ The <code>\#ifdef VLPT_REMOVED</code> blocks have been removed from the packet t
 Changed shared library interface version numbers (soname)
 
 For HDF5 Release 1.8.17, the shared object version numbers have changed as follows.
-<table><thead><tr><th>Library</th><th>Release 1.8.16</th><th>Release 1.8.17</th><th>Reason for Change</th></tr></thead><tbody>
+<table>
+<tr><th>Library</th><th>Release 1.8.16</th><th>Release 1.8.17</th><th>Reason for Change</th></tr>
 <tr><td>HDF5 C Library</td><td>10.1.0</td><td>10.2.0</td><td>Added APIs</td></tr>
 <tr><td>HDF5 High-level C Library</td><td>10.0.2</td><td>10.1.0</td><td>Added APIs</td></tr>
 <tr><td>C++ Library</td><td>11.0.0</td><td>12.0.0</td><td>Changes in existing APIs</td></tr>
 <tr><td>High-level C++ Library</td><td>11.0.0</td><td>11.1.0</td><td>Added APIs</td></tr>
 <tr><td>All others</td><td>10.0.2</td><td>10.0.3</td><td>Code changes that did not result in interface changes</td></tr>
-</tbody></table>
+</table>
 
 <h4>Compatibility report for Release 1.8.17 versus Release 1.8.16</h4>
 The following interface compatibility report provides a full list of the changed symbols:
@@ -274,12 +276,13 @@ This function reports whether the linked version of the HDF5 Library was built w
     and #H5Pset_attr_creation_order/#H5Pget_attr_creation_order<br />
 
 The following wrappers were added to the class H5::ObjCreatPropList for the respective C functions:
-<table><thead><tr><th>C Function</th><th>C++ Wrapper</th></tr></thead><tbody>
+<table>
+<tr><th>C Function</th><th>C++ Wrapper</th></tr>
 <tr><td>#H5Pset_attr_phase_change</td><td>H5::ObjCreatPropList::setAttrPhaseChange</td></tr>
 <tr><td>#H5Pget_attr_phase_change</td><td>H5::ObjCreatPropList::getAttrPhaseChange</td></tr>
 <tr><td>#H5Pset_attr_creation_order</td><td>H5::ObjCreatPropList::setAttrCrtOrder</td></tr>
 <tr><td>#H5Pget_attr_creation_order</td><td>H5::ObjCreatPropList::getAttrCrtOrder</td></tr>
-</tbody></table>
+</table>
 
 <h4>Library Configuration</h4>
 \li Use of thread-safety with the HDF5 High-level Library has been declared unsupported in
@@ -316,12 +319,13 @@ changes specific to each wrapper library.
 
 <h4>Changed shared library interface version numbers (soname)</h4>
 For HDF5 Release 1.8.16, the shared object version numbers have changed as follows.
-<table><thead><tr><th>Library</th><th>Release 1.8.15</th><th>Release 1.8.16</th><th>Reason for Change</th></tr></thead><tbody>
+<table>
+<tr><th>Library</th><th>Release 1.8.15</th><th>Release 1.8.16</th><th>Reason for Change</th></tr>
 <tr><td>HDF5 Library</td><td>10.0.1</td><td>10.1.0</td><td>Added APIs</td></tr>
 <tr><td>C++ Library</td><td>10.0.1</td><td>11.0.0</td><td>Changes in existing APIs</td></tr>
 <tr><td>High-level C++ Library</td><td>10.0.1</td><td>11.0.0</td><td>Changes in existing APIs</td></tr>
 <tr><td>All others</td><td>10.0.1</td><td>10.0.2</td><td>Code changes that did not result in interface changes</td></tr>
-</tbody></table>
+</table>
 
 <h4>Compatibility report for Release 1.8.16 versus Release 1.8.15</h4>
 The following interface compatibility report provides a full list of the changed symbols:

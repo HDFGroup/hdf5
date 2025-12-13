@@ -159,7 +159,7 @@ you will see a detailed usage statement with examples of modifying a filter. The
 numerous filters that you can apply to a dataset:
 <table>
 <tr>
-<th>Filter<th></th>Options</th>
+<th>Filter</th><th>Options</th>
 </tr>
 <tr>
 <td>GZIP compression (levels 1-9)

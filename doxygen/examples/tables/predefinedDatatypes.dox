@@ -254,7 +254,6 @@
 <td>#H5T_C_S1</td>
 <td>String datatype in C (size defined in bytes rather than in bits)</td>
 </tr>
-</tr>
 <tr>
 <td>#H5T_FORTRAN_S1</td>
 <td>String datatype in Fortran (as defined for the HDF5 C library)</td>

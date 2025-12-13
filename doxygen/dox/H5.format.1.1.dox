@@ -1107,7 +1107,7 @@ variable-length datatype elements, etc).
 <tr align=center>
   <td>Version</td>
   <td colspan=3>Reserved</td>
-</td>
+</tr>
 <tr align=center>
   <td colspan=4>Collection Size<sup>L</sup></td>
 </tr>

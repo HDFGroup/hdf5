@@ -22,9 +22,21 @@ extern "C" {
  * Navigate back: \ref index "Main" / \ref UG
  * <hr>
  *
- * \section sec_hl_packet_table_api HDF5 Table APIs
+ * \section sec_hl_packet_table_api HDF5 Packet Table APIs
  *
- * @todo Under Construction
+ * \subsection subsec_hl_packet_intro Introduction
+ *
+ * The HDF5 Packet Table API (H5PT) provides an interface for storing and retrieving
+ * fixed-length packets of data in append-only datasets. Packet tables are optimized
+ * for streaming data collection where records are added sequentially.
+ *
+ * @see H5PT Reference Manual
+ *
+ * \subsection subsec_hl_packet_ops Packet Table Operations
+ *
+ * Create packet tables with #H5PTcreate or open existing ones with #H5PTopen. Append
+ * packets using #H5PTappend and read packets with #H5PTread_packets. Get the number
+ * of packets with #H5PTget_num_packets. Close with #H5PTclose.
  *
  * Previous Chapter \ref sec_hl_table_api
  *
