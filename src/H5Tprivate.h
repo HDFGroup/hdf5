@@ -17,6 +17,7 @@
 #define H5Tprivate_H
 
 /* Early typedefs to avoid circular dependencies */
+#include "H5public.h"
 typedef struct H5T_t H5T_t;
 
 /* Include package's public headers */
@@ -140,9 +141,6 @@ H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
 H5_DLL H5T_order_t H5T_get_order(const H5T_t *dt);
 H5_DLL size_t      H5T_get_precision(const H5T_t *dt);
 H5_DLL int         H5T_get_offset(const H5T_t *dt);
-
-/* Conversion check for atomic data types*/
-H5_DLL htri_t H5T_validate_atomic_conversion(const H5T_t *src, const H5T_t *dst);
 
 /* Fixed-point functions */
 H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
