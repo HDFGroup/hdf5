@@ -735,7 +735,7 @@ if (HDF5_BUILD_FORTRAN)
   # Get the max decimal precision in C, checking both long double and
   # __float128 (if available)
   #-----------------------------------------------------------------------------
-  if (NOT CMAKE_CROSSCOMPILING)
+  if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
     #-----------------------------------------------------------------------------
     # The provided CMake C macros don't provide a general compile/run function
     # so this one is used.
@@ -844,7 +844,7 @@ endif()
 #-----------------------------------------------------------------------------
 macro (H5ConversionTests TEST def msg)
   if (NOT DEFINED ${TEST})
-    if (NOT CMAKE_CROSSCOMPILING)
+    if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
       # Build and run the test code if not cross-compiling
       TRY_RUN (${TEST}_RUN   ${TEST}_COMPILE
           ${CMAKE_BINARY_DIR}

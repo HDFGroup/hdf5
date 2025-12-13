@@ -158,7 +158,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Determine the available KINDs for REALs and INTEGERs
 #-----------------------------------------------------------------------------
-if (NOT CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   if (${HAVE_ISO_FORTRAN_ENV})
     READ_SOURCE ("PROGRAM FC08_AVAIL_KINDS" "END PROGRAM FC08_AVAIL_KINDS" SOURCE_CODE)
   else ()
@@ -297,7 +297,7 @@ endif ()
 # **********
 # INTEGERS
 # **********
-if (NOT CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   string (REGEX REPLACE "," ";" VAR "${pac_validIntKinds}")
 
   foreach (KIND ${VAR})
@@ -343,7 +343,7 @@ message (VERBOSE "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_
 # **********
 # REALS
 # **********
-if (NOT CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   string (REGEX REPLACE "," ";" VAR "${pac_validRealKinds}")
 
   #find the maximum kind of the real
@@ -402,7 +402,7 @@ list (GET VAR ${_LEN} max_real_fortran_sizeof)
 #-----------------------------------------------------------------------------
 # Find sizeof of native kinds
 #-----------------------------------------------------------------------------
-if (NOT CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   set (PROG_SRC3
     "
          PROGRAM main

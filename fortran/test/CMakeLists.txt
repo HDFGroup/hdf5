@@ -103,24 +103,16 @@ if (HDF5_ENABLE_FORMATTERS)
 endif ()
 
 if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/tf_gen.F90")
-  message (STATUS "No pre-generated tf_gen.F90 file found - generating one")
-  if (CMAKE_CROSSCOMPILING)
-    add_custom_command (TARGET H5_test_buildiface POST_BUILD
-        BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/tf_gen.F90
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E env ${CROSSCOMPILING_PATH}
-        COMMAND    $<TARGET_FILE:H5_test_buildiface>
-        WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}
-        COMMENT "Generating the tf_gen.F90 static file"
-    )
-  else ()
-    add_custom_command (TARGET H5_test_buildiface POST_BUILD
-        BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/tf_gen.F90
-        COMMAND    $<TARGET_FILE:H5_test_buildiface>
-        WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}
-        COMMENT "Generating the tf_gen.F90 static file"
-    )
+  if (CMAKE_CROSSCOMPILING AND NOT CMAKE_CROSSCOMPILING_EMULATOR)
+    message (FATAL_ERROR "No pre-generated tf_gen.F90 file found - cannot generate without cross-compiling emulator")
   endif ()
+  message (STATUS "No pre-generated tf_gen.F90 file found - generating one")
+  add_custom_command (TARGET H5_test_buildiface POST_BUILD
+      BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/tf_gen.F90
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
+      WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}
+      COMMENT "Generating the tf_gen.F90 static file"
+  )
 else ()
   message (STATUS "Using existing pre-generated tf_gen.F90 file")
   add_custom_command (
