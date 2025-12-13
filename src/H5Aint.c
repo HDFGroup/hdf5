@@ -215,7 +215,7 @@ H5A_top_term_package(void)
         if (H5I_nmembers(H5I_ATTR) > 0) {
             (void)H5I_clear_type(H5I_ATTR, false, false);
             n++; /*H5I*/
-        } /* end if */
+        }        /* end if */
 
         /* Mark closed */
         if (0 == n)
@@ -798,8 +798,8 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
                 /* Copy the attribute data into the user's buffer */
                 H5MM_memcpy(buf, attr->shared->data, (dst_type_size * nelmts));
             } /* end else */
-        } /* end else */
-    } /* end if */
+        }     /* end else */
+    }         /* end if */
 
 done:
     /* Release resources */
@@ -1924,7 +1924,7 @@ H5A__attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip, hsize_t *l
                 assert("unknown attribute op type" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unsupported attribute op type");
-#endif /* NDEBUG */
+#endif    /* NDEBUG */
         } /* end switch */
 
         /* Increment the number of entries passed through */
@@ -2026,7 +2026,7 @@ H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo)
                 /* Retrieve # of attributes from object header */
                 ainfo->nattrs = oh->attr_msgs_seen;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Release resources */
@@ -2313,7 +2313,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, bool *recompute_size
             assert(attr_dst->shared->data_size == attr_src->shared->data_size);
             H5MM_memcpy(attr_dst->shared->data, attr_src->shared->data, attr_src->shared->data_size);
         } /* end else */
-    } /* end if(attr_src->shared->data) */
+    }     /* end if(attr_src->shared->data) */
 
     /* Copy the creation order */
     attr_dst->shared->crt_idx = attr_src->shared->crt_idx;
