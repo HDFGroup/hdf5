@@ -186,6 +186,9 @@ if (NOT TARGET "@HDF5_PACKAGE@")
     endif ()
   endif ()
   include (@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
+  if ( @BUILD_STATIC_LIBS@ )
+  include (@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets-static.cmake OPTIONAL)
+  endif ()
 endif ()
 
 # Handle default component(static) :

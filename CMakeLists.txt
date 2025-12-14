@@ -561,6 +561,7 @@ endif ()
 # which include hdf5 as a sub-project within their build tree
 #-----------------------------------------------------------------------------
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "")
+set_global_variable (HDF5_STATIC_LIBRARIES_TO_EXPORT "")
 set_global_variable (HDF5_UTILS_TO_EXPORT "")
 
 set (EXTERNAL_HEADER_LIST "")

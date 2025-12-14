@@ -65,6 +65,11 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   # Export all exported targets to the build tree for use by parent project
   #-----------------------------------------------------------------------------
   export (
+      TARGETS ${HDF5_STATIC_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
+      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets-static.cmake
+      NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+  )
+  export (
       TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
       FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
       NAMESPACE ${HDF_PACKAGE_NAMESPACE}
