@@ -53,6 +53,13 @@ endif ()
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (HDF5_EXPORTED_TARGETS)
     install (
+        EXPORT ${HDF5_EXPORTED_TARGETS}-static
+        DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets-static.cmake
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+        COMPONENT configinstall
+    )
+    install (
         EXPORT ${HDF5_EXPORTED_TARGETS}
         DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
         FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
