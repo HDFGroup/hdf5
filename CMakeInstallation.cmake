@@ -52,35 +52,43 @@ endif ()
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (HDF5_EXPORTED_TARGETS)
-    install (
-        EXPORT ${HDF5_EXPORTED_TARGETS}-static
-        DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets-static.cmake
-        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
-        COMPONENT configinstall
-    )
-    install (
-        EXPORT ${HDF5_EXPORTED_TARGETS}
-        DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
-        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
-        COMPONENT configinstall
-    )
+    if (BUILD_STATIC_LIBS)
+      install (
+          EXPORT ${HDF5_EXPORTED_TARGETS}-static
+          DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+          FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets-static.cmake
+          NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+          COMPONENT configinstall
+      )
+    endif ()
+    if (BUILD_SHARED_LIBS)
+      install (
+          EXPORT ${HDF5_EXPORTED_TARGETS}
+          DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+          FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+          NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+          COMPONENT configinstall
+      )
+    endif ()
   endif ()
 
   #-----------------------------------------------------------------------------
   # Export all exported targets to the build tree for use by parent project
   #-----------------------------------------------------------------------------
-  export (
-      TARGETS ${HDF5_STATIC_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
-      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets-static.cmake
-      NAMESPACE ${HDF_PACKAGE_NAMESPACE}
-  )
-  export (
-      TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
-      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
-      NAMESPACE ${HDF_PACKAGE_NAMESPACE}
-  )
+  if (BUILD_STATIC_LIBS)
+    export (
+        TARGETS ${HDF5_STATIC_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets-static.cmake
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+    )
+  endif ()
+  if (BUILD_SHARED_LIBS)
+    export (
+        TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
