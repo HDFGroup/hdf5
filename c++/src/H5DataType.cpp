@@ -526,7 +526,6 @@ DataType::find(const DataType &dest, H5T_cdata_t **pcdata) const
 ///                            values
 ///\param       background - IN: Optional background buffer
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
-///\return      Pointer to a suitable conversion function
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
 void

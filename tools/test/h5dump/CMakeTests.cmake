@@ -1124,7 +1124,8 @@ ADD_H5_TEST (tgrp_comments RESULT_CODE 0 --enable-error-stack TARGET_FILE tgrp_c
 # test the --filedriver flag
 ADD_H5_TEST (tsplit_file RESULT_CODE 0 --enable-error-stack --filedriver=split TARGET_FILE tsplit_file)
 ADD_H5_TEST (tfamily RESULT_CODE 0 --enable-error-stack --filedriver=family TARGET_FILE tfamily%05d.h5)
-ADD_H5_TEST (tmulti RESULT_CODE 0 --enable-error-stack --filedriver=multi TARGET_FILE tmulti)
+# Flagged as NATIVE_ONLY because the Cache VOL interacts badly with the multi VFD's EOA tracking
+ADD_H5_TEST (tmulti RESULT_CODE 0 --enable-error-stack --filedriver=multi TARGET_FILE tmulti NATIVE_ONLY)
 
 # test for files with group names which reach > 1024 bytes in size
 ADD_H5_TEST (tlarge_objname RESULT_CODE 0 --enable-error-stack -w157 TARGET_FILE tlarge_objname.h5)

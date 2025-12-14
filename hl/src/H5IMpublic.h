@@ -24,7 +24,20 @@ extern "C" {
  *
  * \section sec_hl_images HDF5 Images
  *
- * @todo Under Construction
+ * \subsection subsec_hl_images_intro Introduction
+ *
+ * The HDF5 Image API (H5IM) provides functions for storing and retrieving image data
+ * in HDF5 files. The API supports common image formats and includes functions for
+ * working with image attributes such as palettes.
+ *
+ * @see H5IM Reference Manual
+ *
+ * \subsection subsec_hl_images_ops Image Operations
+ *
+ * Create images with #H5IMmake_image_8bit or #H5IMmake_image_24bit, and read them with
+ * #H5IMread_image. Check if a dataset is an image using #H5IMis_image. Get image
+ * information with #H5IMget_image_info. Work with palettes using #H5IMmake_palette,
+ * #H5IMlink_palette, #H5IMget_palette_info, and #H5IMget_palette.
  *
  * Previous Chapter \ref sec_dim_scales_stand - Next Chapter \ref sec_hl_lite_api
  *

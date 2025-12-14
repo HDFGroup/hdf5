@@ -3,7 +3,7 @@
  * Navigate back: \ref index "Main" / \ref release_specific_info
  * <hr>
 
-\section sec_rel_spec_20 HDF5 Library and Tools 2.0
+\section sec_rel_spec_20 HDF5 Library and Tools 2.0.0
 
 \subsection subsec_rel_info Release Information
 
@@ -13,7 +13,7 @@
 Version
 </td>
 <td>
-HDF5 2.0
+HDF5 2.0.0
 </td>
 </tr>
 <tr>
@@ -64,7 +64,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-[API Compatibility Reports between 2.0 and 1.14.6](https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz)
+[API Compatibility Reports between 2.0.0 and 1.14.6](https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz)
 </td>
 </tr>
 <tr>
@@ -91,9 +91,10 @@ Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for b
 \li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
 \li wget –
 <div style="margin-left: 2em;">
-    `wget https://github.com/HDFGroup/hdf5/releases/download/2.N.N/<distribution>.tar.gz`<br>
+    `wget https://github.com/HDFGroup/hdf5/releases/download/${PACKAGEVERSION}/<distribution>.tar.gz`<br>
     `gzip -cd <distribution>.tar.gz | tar xvf -`
 </div>
+\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.0.0 for this release
 
 \subsection subsec_api_compat_reps Individual API Compatibility Reports
 

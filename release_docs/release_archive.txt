@@ -57,7 +57,7 @@ New Features
       an application with the library.
 
       Created MACRO EXTERNAL_HDF5_STATUS to convert between the old and new names.
-      The macro is in the config/examples/HDF5SubdirMacros.cmake file and can be
+      The macro is in the config/examples/HDF5AsSubdirMacros.cmake file and can be
       copied into a project's CMakeLists.txt file to provide backward compatibility.
 
     - CMake minimum version is now 3.26

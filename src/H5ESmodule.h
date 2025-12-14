@@ -30,11 +30,9 @@
  * Navigate back: \ref index "Main" / \ref UG
  * <hr>
  *
- * @todo Under Construction
- *
  * \section sec_async The HDF5 Event Set Interface
  *
- * \section subsec_async_intro Introduction
+ * \subsection subsec_async_intro Introduction
  * HDF5 provides asynchronous APIs for the HDF5 VOL connectors that support asynchronous HDF5
  * operations using the HDF5 Event Set (H5ES) API. This allows I/O to proceed in the background
  * while the application is performing other tasks.
@@ -51,7 +49,7 @@
  * </tr>
  * <tr>
  * <th>H5F</th>
- * <td>#H5Fcreate, #H5Fflush, #H5Fis_accessible, #H5Fopen, #H5Fclose
+ * <td>#H5Fcreate, #H5Fflush, #H5Fopen, #H5Fclose
  * </td>
  * </tr>
  * <tr>
@@ -82,7 +80,7 @@
  * </tr>
  * <tr>
  * <th>H5R</th>
- * <td>#H5Ropen_attr, #H5Ropen_object #H5Ropen_region, #H5Rdereference
+ * <td>#H5Ropen_attr, #H5Ropen_object, #H5Ropen_region
  * </td>
  * </tr>
  * <tr>
@@ -92,7 +90,7 @@
  * </tr>
  * <tr>
  * <th>H5T</th>
- * <td>#H5Tcommit, #H5Topen, #H5Tcopy, #H5Tclose
+ * <td>#H5Tcommit, #H5Topen, #H5Tclose
  * </td>
  * </tr>
  * </table>

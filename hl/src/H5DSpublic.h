@@ -526,15 +526,11 @@ extern "C" {
  *
  * These relationships are represented in the file by attributes of the Dataset D and the Dimension
  * Scale Datasets. Figure 5 shows the values that are stored for the DIMENSION_LIST attribute of
- * Dataset D. This
- * <table>
- * <tr>
- * <td>
+ * Dataset D.
+ *
  * \image html UML_Attribute.jpg "The UML model for an HDF5 attribute"
- * </td>
- * </tr>
- * </table>
- * attribute is a one-dimensional array with the HDF5 datatype variable length
+ *
+ * This attribute is a one-dimensional array with the HDF5 datatype variable length
  * #H5T_STD_REF_OBJ. Each row of the array is zero or more object references for Dimension Scale datasets.
  *
  * Table 6 shows the DIMENSION_LABELLIST for Dataset D. This is a one dimensional array with some empty
@@ -559,30 +555,11 @@ extern "C" {
  * an item from the table, because the entries at both ends of the association must be updated
  * at the same time.
  *
- * <table>
- * <tr>
- * <td>
  * \image html H5DS_fig3.png "Figure 3. Example dataset and scales."
- * </td>
- * </tr>
- * </table>
  *
- * <table>
- * <tr>
- * <td>
  * \image html H5DS_fig4.png "Figure 4. Example labels, names, and attached scales."
- * </td>
- * </tr>
- * </table>
  *
- * <table>
- * <tr>
- * <td>
- * \image html H5DS_fig5.png "Figure 5. The table of dimension references, stored as an attribute of the
- * Dataset."
- * </td>
- * </tr>
- * </table>
+ * \image html H5DS_fig5.png "Figure 5. The table of dimension references."
  *
  * <table><caption>Table 6. The table of dimension labels.</caption>
  * <tr>
@@ -750,10 +727,12 @@ extern "C" {
  *    3. For each scale, detach the Dimension Scale S from dimension j of Dataset D with H5DSdetach_scale
  *    4. Delete the Dataset, with H5Gunlink.
  *
- * \subsection subsec_dim_scales_api_func Programming API: H5DS
- *  @see H5DS Reference Manual
+ * \subsection subsec_dim_scales_ops Dimension Scale Operations
  *
- * @todo Under Construction
+ * Attach dimension scales to datasets using #H5DSattach_scale and detach with #H5DSdetach_scale.
+ * Set and retrieve dimension scale names with #H5DSset_scale and #H5DSget_scale_name. Query
+ * if a dataset is a dimension scale with #H5DSis_scale and check attachments with #H5DSis_attached.
+ * Iterate through scales with #H5DSiterate_scales.
  *
  * Previous Chapter \ref sec_hldo_direct_chunk - Next Chapter \ref sec_hl_images
  *

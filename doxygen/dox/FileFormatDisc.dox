@@ -849,7 +849,7 @@ Symbol 0:
     <!-- Object Header Message Flags -->
       <td><em>Flags:</em> 0x01</td>
     <!-- Reserved -->
-      <tdcolspan="3"><em>Reserved:</em> 0</td>
+      <td colspan="3"><em>Reserved:</em> 0</td>
     </tr>
     <tr align="center">
     <!-- Type Class and Version -->

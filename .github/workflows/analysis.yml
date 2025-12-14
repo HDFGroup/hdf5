@@ -74,7 +74,7 @@ jobs:
         ls ${{ runner.workspace }}/hdf5
 
     - name: Create options file (Linux_coverage)
-      uses: "DamianReeves/write-file-action@master"
+      uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
       with:
         path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
         write-mode: overwrite
@@ -113,7 +113,7 @@ jobs:
 
     # Save log files created by CTest script
     - name: Save log (Linux_coverage)
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
       with:
         name: clang-coverage-log
         path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -131,7 +131,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.8
+        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
         id: setup-clang
         with:
           env: true
@@ -175,7 +175,7 @@ jobs:
           ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux_Leak)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -214,7 +214,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_Leak)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: leak-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -232,7 +232,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.8
+        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
         id: setup-clang
         with:
           env: true
@@ -276,7 +276,7 @@ jobs:
           ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux_Address)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -315,7 +315,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_Address)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: address-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -333,7 +333,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.8
+        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
         id: setup-clang
         with:
           env: true
@@ -377,7 +377,7 @@ jobs:
           ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux_UndefinedBehavior)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -416,7 +416,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_UndefinedBehavior)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: undefined-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
