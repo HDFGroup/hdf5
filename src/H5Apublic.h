@@ -983,7 +983,7 @@ H5_DLL herr_t H5Arename_by_name_async(hid_t loc_id, const char *obj_name, const 
  *
  * \attr_id
  * \mem_type_id{type_id}
- * \param[out]  buf       Data to be written
+ * \param[in]  buf       Data to be written
  *
  * \return \herr_t
  *

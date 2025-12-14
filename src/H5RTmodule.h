@@ -22,7 +22,6 @@
  *      reporting macros.
  */
 #define H5RT_MODULE
-#define H5_MY_PKG_ERR  H5E_RTREE
 #define H5_MY_PKG_INIT NO
 
 #endif /* H5RTmodule_H */

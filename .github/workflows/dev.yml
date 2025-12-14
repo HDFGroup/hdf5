@@ -101,12 +101,12 @@ jobs:
         run: choco install ninja
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
+        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
           version: "1.13.2"
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.13.0
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Check CMake Version
         shell: bash
@@ -177,7 +177,7 @@ jobs:
         run: brew install ninja
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
+        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
           version: "1.13.2"
 
@@ -266,7 +266,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.8
+        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
         id: setup-clang
         with:
           env: true

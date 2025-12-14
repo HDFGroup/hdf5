@@ -74,7 +74,6 @@ CompType::CompType(size_t size) : DataType(H5T_COMPOUND, size)
 // Function:    CompType overloaded constructor
 ///\brief       Gets the compound datatype of the specified dataset.
 ///\param       dataset - IN: Dataset that this enum datatype associates with
-///\return      CompType instance
 ///\exception   H5::DataTypeIException
 //--------------------------------------------------------------------------
 CompType::CompType(const DataSet &dataset) : DataType()

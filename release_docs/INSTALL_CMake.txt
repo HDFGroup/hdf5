@@ -6,18 +6,19 @@
                      Table of Contents
 
 Section I:    Preconditions
-Section II:   Quick Step Building HDF5 Libraries with CMake Script Mode
-Section III:  Quick Step Building HDF5 Libraries with CMake Command Mode
-Section IV:   Further Considerations
-Section V:    Options for building HDF5 Libraries with CMake Command Line
-Section VI:   CMake option defaults for HDF5
-Section VII:  User Defined Options for HDF5 Libraries with CMake
-Section VIII: User Defined Compile Flags for HDF5 Libraries with CMake
-Section IX:   Considerations for Cross-Compiling
-Section X:    Using CMakePresets.json for Compiling
-Section XI:   Using the Library
-Section XII:  Using CMake Regex Options for Testing
-Section XIII: Java FFM Testing
+Section II:   RECOMMENDED: Quick Start with CMake Presets
+Section III:  Advanced: Building HDF5 Libraries with CMake Script Mode
+Section IV:   Advanced: Building HDF5 Libraries with CMake Command Mode
+Section V:    Further Considerations
+Section VI:   Options for building HDF5 Libraries with CMake Command Line
+Section VII:  CMake Option Defaults for HDF5
+Section VIII: User Defined Options for HDF5 Libraries with CMake
+Section IX:   User Defined Compile Flags for HDF5 Libraries with CMake
+Section X:    Considerations for Cross-Compiling
+Section XI:   Creating Custom Preset Configurations
+Section XII:  Using the Library
+Section XIII: Using CMake Regex Options for Testing
+Section XIV:  Java FFM Testing
 
 ************************************************************************
 
@@ -391,7 +392,7 @@ Notes: This short set of instructions is written for users who want to
 
 
 ========================================================================
-IV. Further Considerations
+V. Further Considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake from the Kitware
@@ -576,7 +577,7 @@ Notes: CMake in General
             CMAKE_INSTALL_PREFIX=/my/folder/to/install/to cmake ..
 
 ========================================================================
-V. Options for Building HDF5 Libraries with the CMake Command Line
+VI. Options for Building HDF5 Libraries with CMake Command Line
 ========================================================================
 
 To build the HDF5 Libraries with CMake, go through these five steps:
@@ -598,8 +599,8 @@ These five steps are described in detail below.
       executable is named "cmake-gui" and can be found where CMake was
       installed.
       Another option is to use the presets file, CMakePresets.json, to configure,
-      build, test, and package HDF5. See section X: Using CMakePresets.json for compiling
-      for use of that file. You can create a CMakeUserPresets.json file to create a
+      build, test, and package HDF5. See section XI: Creating Custom Preset Configurations for
+      compiling for use of that file. You can create a CMakeUserPresets.json file to create a
       specific configuration for your environment. Note that Visual Studio and XCode can
       use the presets files.
 
@@ -885,7 +886,7 @@ These five steps are described in detail below.
 
 
 ========================================================================
-VI. CMake Option Defaults for HDF5
+VII. CMake Option Defaults for HDF5
 ========================================================================
 
 In the options listed below, there are three columns of information:
@@ -1170,7 +1171,7 @@ NOTE:
        HDF5_BUILD_HL_LIB, HDF5_BUILD_CPP_LIB, HDF5_BUILD_FORTRAN, HDF5_BUILD_JAVA
 
 ========================================================================
-VII. User Defined Options for HDF5 Libraries with CMake
+VIII. User Defined Options for HDF5 Libraries with CMake
 ========================================================================
 
 Support for User Defined macros and options has been added. The file
@@ -1181,7 +1182,7 @@ Then enable the option to the CMake configuration, build and test process.
 
 
 ========================================================================
-VIII. User Defined Compile Flags for HDF5 Libraries with CMake
+IX. User Defined Compile Flags for HDF5 Libraries with CMake
 ========================================================================
 
 Custom compiler flags can be added by defining the CMAKE_C_FLAGS and
@@ -1204,7 +1205,7 @@ to CMAKE_C_FLAGS.
 
 
 ========================================================================
-IX:   Considerations for Cross-Compiling
+X:   Considerations for Cross-Compiling
 ========================================================================
 
 Cross-compiling has several consequences for CMake:

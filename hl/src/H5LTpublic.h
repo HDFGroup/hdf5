@@ -41,7 +41,30 @@ extern "C" {
  *
  * \section sec_hl_lite_api HDF5 Lite APIs
  *
- * @todo Under Construction
+ * \subsection subsec_hl_lite_intro Introduction
+ *
+ * The HDF5 Lite API (H5LT) provides simplified functions for common HDF5 operations, combining
+ * multiple low-level calls into single high-level functions. This reduces code complexity and
+ * makes HDF5 more accessible for straightforward data storage tasks.
+ *
+ * @see H5LT Reference Manual
+ *
+ * \subsection subsec_hl_lite_dataset Dataset Operations
+ *
+ * Create and access datasets with single function calls using type-specific functions like
+ * #H5LTmake_dataset_int, #H5LTmake_dataset_float, #H5LTread_dataset_int, etc. Query dataset
+ * properties with #H5LTget_dataset_ndims, #H5LTget_dataset_info, and #H5LTfind_dataset.
+ *
+ * \subsection subsec_hl_lite_attr Attribute Operations
+ *
+ * Set and read attributes using type-specific functions such as #H5LTset_attribute_int,
+ * #H5LTset_attribute_string, #H5LTget_attribute_int, etc. Query attribute information
+ * with #H5LTget_attribute_ndims and #H5LTget_attribute_info.
+ *
+ * \subsection subsec_hl_lite_util Utility Functions
+ *
+ * Convert between datatypes and text representations using #H5LTtext_to_dtype and #H5LTdtype_to_text.
+ * Validate paths with #H5LTpath_valid, and work with file images using #H5LTopen_file_image.
  *
  * Previous Chapter \ref sec_hl_images - Next Chapter \ref sec_hl_table_api
  *

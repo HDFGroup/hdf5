@@ -23,7 +23,6 @@
  */
 #define H5G_MODULE
 #define H5_MY_PKG      H5G
-#define H5_MY_PKG_ERR  H5E_SYM
 #define H5_MY_PKG_INIT YES
 
 /**  \page H5G_UG HDF5 Groups
@@ -415,7 +414,6 @@
  * <tr>
  * <td>#H5Lcreate_ud</td>
  * <td>Creates a link of a user-defined type.</td>
- * </tr>
  * </tr>
  * <tr>
  * <td>#H5Lget_val</td>

@@ -518,7 +518,7 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
  * \brief Retrieves the file name for a referenced object
  *
  * \param[in] ref_ptr  Pointer to reference to query
- * \param[in,out] name Buffer to place the file name of the reference
+ * \param[out] name Buffer to place the file name of the reference
  * \param[in] size     Size of the \p name buffer. When the size is passed in,
  *                     the \c NULL terminator needs to be included.
  *
@@ -542,7 +542,7 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *
  * \param[in] ref_ptr  Pointer to reference to query
  * \rapl_id
- * \param[in,out] name Buffer to place the object name of the reference
+ * \param[out] name Buffer to place the object name of the reference
  * \param[in] size     Size of the \p name buffer. When the size is passed in,
  *                     the \c NULL terminator needs to be included.
  *
@@ -581,7 +581,7 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  * \brief Retrieves the attribute name for a referenced object
  *
  * \param[in] ref_ptr  Pointer to reference to query
- * \param[in,out] name Buffer to place the attribute name of the reference
+ * \param[out] name Buffer to place the attribute name of the reference
  * \param[in] size     Size of the \p name buffer
  *
  * \return Returns the length of the name if successful, otherwise, a negative value.

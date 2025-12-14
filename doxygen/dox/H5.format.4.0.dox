@@ -8165,7 +8165,6 @@ information for the virtual layout class as well as indexing information for the
         <tr>
           <td align="left"><i>Implicit index</i></td>
           <td align="left">Address of the array of dataset chunks.</td>
-        </td>
         </tr>
         <tr>
           <td align="left"><i>Fixed Array index</i></td>
@@ -8174,7 +8173,6 @@ information for the virtual layout class as well as indexing information for the
         <tr>
           <td align="left"><i>Extensible Array index</i></td>
           <td align="left">Address of the index.</td>
-        </td>
         </tr>
         <tr>
           <td align="left"><i>Version 2 B-tree index</i></td>
@@ -8281,6 +8279,7 @@ The following information exists only when the chunk is filtered. In other words
   <td>Min Pointers</td>
   <td>Min Elements</td>
 </tr>
+<tr>
   <td colspan="2">Page Bits</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
@@ -8364,7 +8363,7 @@ The following information exists only when the chunk is filtered. In other words
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <>byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
@@ -12710,7 +12709,6 @@ Reference Block stored in the global heap:
 </tr>
 <tr>
   <td colspan="4"><br />Dataspace Selection Information <em>(variable size)</em><br /><br /></td>
-</td>
 </tr>
 <tr>
   <td colspan="2">Length of Attribute Name </td>

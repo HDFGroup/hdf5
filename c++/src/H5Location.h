@@ -82,9 +82,6 @@ class H5CPP_DLL H5Location : public IdComponent {
     // a file, an HDF5 object, or an attribute.
     void dereference(const H5Location &loc, const void *ref, H5R_type_t ref_type = H5R_OBJECT,
                      const PropList &plist = PropList::DEFAULT);
-    // Removed in 1.10.1, because H5Location is baseclass
-    // void dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const
-    // PropList& plist = PropList::DEFAULT);
 
     // Retrieves a dataspace with the region pointed to selected.
     DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
@@ -114,14 +111,6 @@ class H5CPP_DLL H5Location : public IdComponent {
                           const DSetAccPropList   &dapl         = DSetAccPropList::DEFAULT,
                           const LinkCreatPropList &lcpl         = LinkCreatPropList::DEFAULT) const;
 
-    // Deprecated to add LinkCreatPropList and DSetAccPropList - 1.10.3
-    // DataSet createDataSet(const char* name, const DataType& data_type, const DataSpace& data_space, const
-    // DSetCreatPropList& create_plist = DSetCreatPropList::DEFAULT) const; DataSet createDataSet(const
-    // H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList&
-    // create_plist = DSetCreatPropList::DEFAULT) const;
-
-    // Opens an existing dataset at this location.
-    // DSetAccPropList is added - 1.10.3
     DataSet openDataSet(const char *name, const DSetAccPropList &dapl = DSetAccPropList::DEFAULT) const;
     DataSet openDataSet(const H5std_string    &name,
                         const DSetAccPropList &dapl = DSetAccPropList::DEFAULT) const;
@@ -136,7 +125,6 @@ class H5CPP_DLL H5Location : public IdComponent {
     H5std_string getLinkval(const H5std_string &link_name, size_t size = 0) const;
 
     // Returns the number of objects in this group.
-    // Deprecated - moved to H5::Group in 1.10.2.
     hsize_t getNumObjs() const;
 
     // Retrieves the name of an object in this group, given the
@@ -301,15 +289,6 @@ class H5CPP_DLL H5Location : public IdComponent {
 
   protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-    // *** Deprecation warning ***
-    // The following two constructors are no longer appropriate after the
-    // data member "id" had been moved to the sub-classes.
-    // The copy constructor is a noop and is removed in 1.8.15 and the
-    // other will be removed from 1.10 release, and then from 1.8 if its
-    // removal does not raise any problems in two 1.10 releases.
-
-    // Creates a copy of an existing object giving the location id.
-    // H5Location(const hid_t loc_id);
 
     // Creates a reference to an HDF5 object or a dataset region.
     void p_reference(void *ref, const char *name, hid_t space_id, H5R_type_t ref_type) const;

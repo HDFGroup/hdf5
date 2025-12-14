@@ -22,6 +22,13 @@ extern "C" {
  * Navigate back: \ref index "Main" / \ref UG
  * <hr>
  *
+ * \section sec_hldo_intro Introduction
+ *
+ * The HDF5 Dataset Optimization (H5DO) interface provides high-performance functions for specialized
+ * dataset I/O operations that bypass standard HDF5 processing layers when appropriate.
+ *
+ * @see H5DO Reference Manual
+ *
  * Since version 1.10.3 these functions are deprecated in favor of #H5Dwrite_chunk and #H5Dread_chunk.
  *
  * \section sec_hldo_direct_chunk Direct Chunk Write Function

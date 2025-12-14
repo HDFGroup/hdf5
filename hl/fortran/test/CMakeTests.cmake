@@ -17,6 +17,7 @@
 ##############################################################################
 
 set (test_hl_fortran_CLEANFILES
+    doappend.h5
     dsetf1.h5
     dsetf2.h5
     dsetf3.h5

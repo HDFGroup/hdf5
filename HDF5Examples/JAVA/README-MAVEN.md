@@ -119,14 +119,15 @@ Tests the JNI (Java Native Interface) implementation, compatible with Java 11+.
 **What it does:**
 1. Downloads `hdf5-java-jni` artifact from Maven repository
 2. Verifies JAR contains HDF5 classes (not just dependencies)
-3. Compiles examples from `compat/` subdirectories
-4. Runs H5Ex_D_ReadWrite example
-5. Reports results with detailed summary
+3. Compiles all 55 HDF5 v2.0+ examples from `compat/` subdirectories
+4. Executes 12 comprehensive tests covering major HDF5 features
+5. Reports results with detailed pass/fail summary
 
 **Prerequisites:**
-- Java 11 or later
+- Java 21 or later (class version 65.0)
 - Maven 3.6.0 or later
 - GitHub authentication (for GitHub Packages)
+- Optional: HDF5 native libraries or `HDF5_HOME` for execution tests
 
 ### test-maven-ffm.sh - Test FFM Implementation
 
@@ -149,14 +150,17 @@ Tests the FFM (Foreign Function & Memory) implementation, requires Java 25+.
 **What it does:**
 1. Downloads `hdf5-java-ffm` artifact from Maven repository
 2. Verifies JAR contains FFM bindings (`org.hdfgroup.javahdf5.*`)
-3. Compiles examples from root directories (H5D, H5T, H5G, TUTR)
-4. Runs H5Ex_D_ReadWrite with native access enabled
-5. Reports results with detailed summary
+3. Compiles 52 HDF5 v2.0+ examples from `compat/` subdirectories
+4. Executes 12 comprehensive tests covering major HDF5 features
+5. Reports results with detailed pass/fail summary
+
+**Note:** 3 callback-based examples are excluded (H5Ex_G_Visit, H5Ex_G_Intermediate, H5Ex_G_Traverse) as FFM callback handling differs from JNI and these examples have not yet been adapted.
 
 **Prerequisites:**
-- Java 25 or later (FFM requires Java 25+)
+- Java 25 or later (class version 69.0)
 - Maven 3.6.0 or later
 - GitHub authentication (for GitHub Packages)
+- Optional: HDF5 native libraries or `HDF5_HOME` for execution tests
 
 ### Build Directory Pattern
 
@@ -346,7 +350,8 @@ brew install hdf5
 
 **Windows:**
 - Download pre-built binaries from [HDF Group Downloads](https://www.hdfgroup.org/downloads/hdf5/)
-- Add HDF5 `bin` directory to system PATH
+- Set `HDF5_HOME` environment variable to installation directory
+- Alternatively, add HDF5 `bin` directory to system PATH
 
 #### Option 2: Build HDF5 from Source
 
@@ -368,23 +373,49 @@ cmake --build build/ci-StdShar-GNUC-FFM
 sudo cmake --install build/ci-StdShar-GNUC-FFM
 ```
 
-#### Option 3: Use LD_LIBRARY_PATH (Linux/macOS)
+#### Option 3: Set HDF5_HOME (Recommended for Custom Installations)
 
-If HDF5 is installed in a non-standard location:
+If HDF5 is installed in a non-standard location, set `HDF5_HOME`:
 
+**Linux/macOS:**
 ```bash
-# Add HDF5 library directory to path
-export LD_LIBRARY_PATH=/path/to/hdf5/lib:$LD_LIBRARY_PATH
+# Point to HDF5 installation directory
+export HDF5_HOME=/path/to/hdf5/installation
 
-# For macOS
-export DYLD_LIBRARY_PATH=/path/to/hdf5/lib:$DYLD_LIBRARY_PATH
+# Then run examples (scripts automatically find libraries)
+cd HDF5Examples/JAVA
+./test-maven-jni.sh 2.0.1-SNAPSHOT
 
-# Then run examples
+# Or run Maven directly
 cd build/maven-test-jni
 mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
 ```
 
-#### Option 4: Specify Library Path in Java
+**Windows (PowerShell):**
+```powershell
+# Set HDF5_HOME environment variable
+$env:HDF5_HOME = "C:\path\to\hdf5\installation"
+
+# Run Maven examples
+cd build\maven-test-jni
+mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
+```
+
+**Windows (CMD):**
+```cmd
+REM Set HDF5_HOME environment variable
+set HDF5_HOME=C:\path\to\hdf5\installation
+
+REM Run Maven examples
+cd build\maven-test-jni
+mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
+```
+
+**Note:** The test scripts automatically add `${HDF5_HOME}/lib` (Unix) or `%HDF5_HOME%\bin` (Windows) to the library path.
+
+#### Option 4: Specify Library Path in Java (Advanced)
+
+**Note:** This is an advanced option. Prefer using `HDF5_HOME` (Option 3) instead.
 
 ```bash
 # Run with explicit library path

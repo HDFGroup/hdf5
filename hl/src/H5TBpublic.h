@@ -24,7 +24,20 @@ extern "C" {
  *
  * \section sec_hl_table_api HDF5 Table APIs
  *
- * @todo Under Construction
+ * \subsection subsec_hl_table_intro Introduction
+ *
+ * The HDF5 Table API (H5TB) provides functions for creating and manipulating HDF5 datasets
+ * as tables with named fields, similar to database tables or spreadsheets. Tables organize
+ * data in rows and columns, making them ideal for storing structured records.
+ *
+ * @see H5TB Reference Manual
+ *
+ * \subsection subsec_hl_table_ops Table Operations
+ *
+ * Create tables with #H5TBmake_table, append rows with #H5TBappend_records, write data with
+ * #H5TBwrite_records, and read with #H5TBread_records. Insert or delete records using
+ * #H5TBinsert_record and #H5TBdelete_record. Add or delete fields with #H5TBinsert_field
+ * and #H5TBdelete_field. Query table properties with #H5TBget_table_info and #H5TBget_field_info.
  *
  * Previous Chapter \ref sec_hl_lite_api - Next Chapter \ref sec_hl_packet_table_api
  *

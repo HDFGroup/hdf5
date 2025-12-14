@@ -492,37 +492,39 @@ typedef enum H5D_mpio_no_collective_cause_t {
 /**
  * Causes for H5Pget_no_selection_io_cause() property
  */
-#define H5D_SEL_IO_DISABLE_BY_API                                                                            \
-    (0x0001u) /**< Selection I/O was not performed because                                                   \
-                 the feature was disabled by the API */
-#define H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET                                                         \
-    (0x0002u) /**< Selection I/O was not performed because the                                               \
-                 dataset was neither contiguous nor chunked */
-#define H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER                                                                   \
-    (0x0004u) /**< Selection I/O was not performed because of                                                \
-                 sieve buffer for contiguous dataset */
-#define H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB                                                              \
-    (0x0008u) /**< Selection I/O was not performed because the VFD                                           \
-                 does not have vector or selection I/O callback */
-#define H5D_SEL_IO_PAGE_BUFFER                                                                               \
-    (0x0010u) /**< Selection I/O was not performed because of                                                \
-                 page buffer */
-#define H5D_SEL_IO_DATASET_FILTER                                                                            \
-    (0x0020u) /**< Selection I/O was not performed because of                                                \
-                 dataset filters */
-#define H5D_SEL_IO_CHUNK_CACHE                                                                               \
-    (0x0040u) /**< Selection I/O was not performed because of                                                \
-                 chunk cache */
-#define H5D_SEL_IO_TCONV_BUF_TOO_SMALL                                                                       \
-    (0x0080u) /**< Selection I/O was not performed because the                                               \
-                 type conversion buffer is too small */
-#define H5D_SEL_IO_BKG_BUF_TOO_SMALL                                                                         \
-    (0x0100u) /**< Selection I/O was not performed because the                                               \
-                 type conversion background buffer is too small */
-#define H5D_SEL_IO_DEFAULT_OFF                                                                               \
-    (0x0200u) /**< Selection I/O was not performed because the                                               \
-                   selection I/O mode is DEFAULT and the library                                             \
-                   chose it to be off for this case */
+
+/** Selection I/O was not performed because the feature was disabled by the API */
+#define H5D_SEL_IO_DISABLE_BY_API (0x0001u)
+
+/** Selection I/O was not performed because the dataset was neither contiguous nor chunked */
+#define H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET (0x0002u)
+
+/** Selection I/O was not performed because of sieve buffer for contiguous dataset */
+#define H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER (0x0004u)
+
+/** Selection I/O was not performed because the VFD does not have vector or selection I/O callback */
+#define H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB (0x0008u)
+
+/** Selection I/O was not performed because of page buffer */
+#define H5D_SEL_IO_PAGE_BUFFER (0x0010u)
+
+/** Selection I/O was not performed because of dataset filters */
+#define H5D_SEL_IO_DATASET_FILTER (0x0020u)
+
+/** Selection I/O was not performed because of chunk cache */
+#define H5D_SEL_IO_CHUNK_CACHE (0x0040u)
+
+/** Selection I/O was not performed because the type conversion buffer is too small */
+#define H5D_SEL_IO_TCONV_BUF_TOO_SMALL (0x0080u)
+
+/** Selection I/O was not performed because the type conversion background buffer is too small */
+#define H5D_SEL_IO_BKG_BUF_TOO_SMALL (0x0100u)
+
+/**
+ * Selection I/O was not performed because the selection I/O mode is DEFAULT
+ * and the library chose it to be off for this case
+ */
+#define H5D_SEL_IO_DEFAULT_OFF (0x0200u)
 
 /* Causes for H5D_MPIO_NO_SELECTION_IO */
 #define H5D_MPIO_NO_SELECTION_IO_CAUSES                                                                      \
@@ -4768,7 +4770,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *          The callbacks and their parameters, along with a struct and
  *          an \c ENUM required for their use, are described below.
  *
- *          <b>Callback struct and \c ENUM:</b>
+ *          <b>Callback struct and \TText{ENUM:}</b>
  *
  *          The callback functions set up by H5Pset_file_image_callbacks() use
  *          a struct and an \c ENUM that are defined as follows
@@ -7292,10 +7294,10 @@ H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_fil
  *        the dataset access property list
  *
  * \dapl_id
- * \param[in] dims     The number of elements for \p boundary
- * \param[in] boundary The dimension sizes used to determine the boundary
- * \param[in] func     The user-defined callback function
- * \param[in] udata    The user-defined input data
+ * \param[in] dims      The number of elements for \p boundary
+ * \param[out] boundary The dimension sizes used to determine the boundary
+ * \param[out] func     The user-defined callback function
+ * \param[out] udata    The user-defined input data
  *
  * \return \herr_t
  *

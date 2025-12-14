@@ -992,7 +992,7 @@ H5_DLL herr_t H5Dread_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_
  * \param[in] mem_space_id   Identifier of the memory dataspace
  * \param[in] file_space_id  Identifier of the dataset's dataspace in the file
  * \dxpl_id
- * \param[out] buf           Buffer with data to be written to the file
+ * \param[in] buf           Buffer with data to be written to the file
  *
  * \return \herr_t
  *
@@ -1249,7 +1249,7 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  * \param[in]  offset   Logical position of the chunk's first element in the
  *                      dataspace
  * \param[in,out]  filters  Mask for identifying the filters in use
- * \param[out]  buf     Buffer containing data to be read from the chunk
+ * \param[out]  buf     Buffer to receive data read from the chunk
  * \param[in,out]  buf_size   Size of buf in bytes
  *
  * \return \herr_t
@@ -1912,7 +1912,7 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void
  * \param[in]  offset   Logical position of the chunk's first element in the
  *                      dataspace
  * \param[in,out]  filters  Mask for identifying the filters in use
- * \param[out]  buf     Buffer containing data to be read from the chunk
+ * \param[out]  buf     Buffer to receive data read from the chunk
  *
  * \return \herr_t
  *

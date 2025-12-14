@@ -2047,7 +2047,7 @@ test_async_vol_props(void)
 
     /* Override possible environment variable & re-initialize default VOL connector */
     conn_env_str = getenv(HDF5_VOL_CONNECTOR);
-    if (conn_env_str) {
+    if (conn_env_str && *conn_env_str) {
         if (NULL == (conn_env_str = strdup(conn_env_str)))
             TEST_ERROR;
         if (HDunsetenv(HDF5_VOL_CONNECTOR) < 0)
@@ -2292,7 +2292,7 @@ test_get_vol_name(void)
     TESTING("getting connector name");
 
     conn_env_str = getenv(HDF5_VOL_CONNECTOR);
-    if (NULL == (conn_env_str = getenv("HDF5_VOL_CONNECTOR")))
+    if (!conn_env_str || *conn_env_str == '\0')
         conn_env_str = "native";
 
     /* Skip the connectors other than the native and pass_through connector */
