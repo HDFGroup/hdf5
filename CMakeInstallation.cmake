@@ -52,7 +52,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (HDF5_EXPORTED_TARGETS)
-    if (HDF5_BUILD_JAVA)
+    if (HDF5_ENABLE_JNI)
       install (
           EXPORT ${HDF5_EXPORTED_TARGETS}_java
           DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
@@ -84,7 +84,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   #-----------------------------------------------------------------------------
   # Export all exported targets to the build tree for use by parent project
   #-----------------------------------------------------------------------------
-  if (HDF5_BUILD_JAVA)
+  if (HDF5_ENABLE_JNI)
     export (
         TARGETS ${HDF5_JAVA_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
         FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_java-targets.cmake
