@@ -126,7 +126,7 @@ if (HDF5_EXPORTED_TARGETS)
         TARGETS
             ${install_targets_static}
         EXPORT
-            ${HDF5_EXPORTED_TARGETS}-static
+            ${HDF5_EXPORTED_TARGETS}_static
         LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hllibraries
         ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hllibraries
         RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hllibraries

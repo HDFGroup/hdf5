@@ -638,7 +638,7 @@ if (HDF5_EXPORTED_TARGETS)
 
     install (
         TARGETS ${install_targets_static}
-        EXPORT ${HDF5_EXPORTED_TARGETS}-static
+        EXPORT ${HDF5_EXPORTED_TARGETS}_static
         LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
         ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
         RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
