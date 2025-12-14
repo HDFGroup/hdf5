@@ -52,6 +52,15 @@ endif ()
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (HDF5_EXPORTED_TARGETS)
+    if (HDF5_BUILD_JAVA)
+      install (
+          EXPORT ${HDF5_EXPORTED_TARGETS}_java
+          DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+          FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_java-targets.cmake
+          NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+          COMPONENT configinstall
+      )
+    endif ()
     if (BUILD_STATIC_LIBS)
       install (
           EXPORT ${HDF5_EXPORTED_TARGETS}_static
