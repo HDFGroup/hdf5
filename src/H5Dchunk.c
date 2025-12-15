@@ -3105,6 +3105,16 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         ctg_io_info.dsets_info   = &ctg_dset_info;
         ctg_io_info.count        = 1;
 
+        /* Ensure dataset I/O sieve buffer is properly setup for when the contiguous
+         * dataset I/O routines are used for chunks. Force reset of sieve buffer here
+         * on each I/O until more advanced use cases like H5Dset_extent between writes
+         * and subsequent writes or reads can be supported.
+         */
+        dset_info->dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset_info->dset->oloc.file);
+        dset_info->dset->shared->cache.contig.sieve_loc      = HADDR_UNDEF;
+        dset_info->dset->shared->cache.contig.sieve_size     = 0;
+        assert(!dset_info->dset->shared->cache.contig.sieve_dirty); /* Any writes should have been flushed */
+
         /* Initialize temporary contiguous storage info */
         ctg_store.contig.dset_size = dset_info->dset->shared->layout.u.chunk.size;
 
@@ -3262,6 +3272,15 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     ctg_dset_info.layout_ops = *H5D_LOPS_CONTIG;
     ctg_io_info.dsets_info   = &ctg_dset_info;
     ctg_io_info.count        = 1;
+
+    /* Ensure dataset I/O sieve buffer is properly setup for when the contiguous
+     * dataset I/O routines are used for chunks. Force reset of sieve buffer here
+     * on each I/O until more advanced use cases like H5Dset_extent between writes
+     * and subsequent writes or reads can be supported.
+     */
+    dset_info->dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset_info->dset->oloc.file);
+    dset_info->dset->shared->cache.contig.sieve_loc      = HADDR_UNDEF;
+    dset_info->dset->shared->cache.contig.sieve_size     = 0;
 
     /* Initialize temporary contiguous storage info */
     ctg_store.contig.dset_size = dset_info->dset->shared->layout.u.chunk.size;
@@ -3599,11 +3618,23 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Advance to next chunk in list */
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);
         } /* end while */
-    }     /* end else */
+
+        /*
+         * Flush any data in sieve buffer - for now, don't keep data cached
+         * in sieve buffer between writes / writes and reads.
+         */
+        if (H5D__flush_sieve_buf(dset_info->dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer");
+    } /* end else */
 
 done:
     /* Cleanup on failure */
     if (ret_value < 0) {
+        /* Drop any unflushed sieve buffer data on failure - reads expect
+         * that sieve buffer will be clean
+         */
+        dset_info->dset->shared->cache.contig.sieve_dirty = false;
+
         if (chunk_mem_spaces != chunk_mem_spaces_local)
             chunk_mem_spaces = H5MM_xfree(chunk_mem_spaces);
         if (chunk_file_spaces != chunk_file_spaces_local)
@@ -3642,6 +3673,10 @@ H5D__chunk_flush(H5D_t *dset)
 
     /* Sanity check */
     assert(dset);
+
+    /* Flush any data in sieve buffer */
+    if (H5D__flush_sieve_buf(dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer");
 
     /* Loop over all entries in the chunk cache */
     for (ent = rdcc->head; ent; ent = next) {

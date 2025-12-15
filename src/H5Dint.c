@@ -1991,6 +1991,11 @@ H5D_close(H5D_t *dataset)
                         H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
                     dataset->shared->cache.chunk.single_piece_info = NULL;
                 } /* end if */
+
+                /* Free the data sieve buffer, if it's been allocated */
+                if (dataset->shared->cache.contig.sieve_buf)
+                    dataset->shared->cache.contig.sieve_buf =
+                        (unsigned char *)H5FL_BLK_FREE(sieve_buf, dataset->shared->cache.contig.sieve_buf);
                 break;
 
             case H5D_COMPACT:
