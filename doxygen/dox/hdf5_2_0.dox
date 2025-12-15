@@ -5,7 +5,7 @@
 
 \section sec_rel_spec_20 HDF5 Library and Tools 2.0.0
 
-\subsection subsec_rel_info Release Information
+\subsection subsec_rel_info_20 Release Information
 
 <table>
 <tr>
@@ -77,7 +77,7 @@ ABI/API Compatibility Reports between 2.0.0 and 1.14.6 [tar file](https://\RELUR
 </table>
 
 
-\subsection subsec_download Downloads
+\subsection subsec_download_20 Downloads
 
 Source code and binaries are available at:
 <a href="https://\RELURL/v2_0/v2_0_0/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html</a>
@@ -85,7 +85,7 @@ Source code and binaries are available at:
 Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with CMake.
 
 
-\subsection subsec_obtain_method Methods to obtain (gz file)
+\subsection subsec_obtain_method_20 Methods to obtain (gz file)
 
 \li firefox – Download file and then run:  `gzip <distribution>.tar.gz | tar xzf -`
 \li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
@@ -97,7 +97,7 @@ Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for b
 \li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.0.0 for this release
 
 
-\subsection subsec_dox_gen_doc Doxygen Generated Reference Manual
+\subsection subsec_dox_gen_doc_20 Doxygen Generated Reference Manual
 
 The new HDF5 documentation based on [Doxygen](https://www.doxygen.nl/index.html) is available \ref index "here".
 
