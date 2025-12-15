@@ -25,6 +25,17 @@
 #include "H5FDprivate.h" /* File Drivers                         */
 #include "H5VLprivate.h" /* Virtual Object Layer                 */
 
+/* Headers needed for digital signatures*/
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+#include <openssl/aes.h>
+#include <openssl/evp.h>
+#include <openssl/rsa.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#endif // H5_REQUIRE_DIGITAL_SIGNATURE
+
 /**************************/
 /* Library Private Macros */
 /**************************/
@@ -84,7 +95,16 @@ H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, const H5PL_key_t *key);
 H5_DLL herr_t      H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data);
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-// herr_t H5PL_gpg_verify_signature();
-#endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
+/* Plugin digital signature calls */
+H5_DLL char  *H5PL__get_sig_name_from_path(const char *path, const char *extension);
+H5_DLL int    H5PL__RSA_verify_signature(RSA *rsa, unsigned char *msg_hash, size_t msg_hash_len, const char *msg, size_t msg_len,
+                          int *authentic);
+H5_DLL RSA   *H5PL__create_public_RSA(const char *key);
+H5_DLL char  *H5PL__openSSL_read_file(const char *file_path, int *file_length);
+H5_DLL herr_t H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig,
+                                      const char *public_key);
+H5_DLL int    H5PL__check_filename(char *filename);
+H5_DLL int    H5PL__RSA_check_key(RSA *key);
+#endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
 #endif /* H5PLprivate_H */
