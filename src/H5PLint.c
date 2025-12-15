@@ -336,9 +336,9 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     herr_t                 ret_value = SUCCEED;
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-    char     *signature;
-    char     *publickey;
-    herr_t    verify_result;
+    char  *signature;
+    char  *publickey;
+    herr_t verify_result;
 
 #ifdef H5_HAVE_PARALLEL
     int       rank;
@@ -364,18 +364,18 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
         *plugin_type = H5PL_TYPE_ERROR;
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-#ifdef H5_HAVE_PARALLEL    
+#ifdef H5_HAVE_PARALLEL
     if (rank == root) {
-#endif // H5_HAVE_PARALLEL  
-    signature = H5PL__get_sig_name_from_path(path, "sig");
-    publickey = H5PL__get_sig_name_from_path(path, "key");
-    verify_result = H5PL__openssl_verify_signature(path, signature, publickey);
-    free(signature);
-    free(publickey);
+#endif // H5_HAVE_PARALLEL
+        signature     = H5PL__get_sig_name_from_path(path, "sig");
+        publickey     = H5PL__get_sig_name_from_path(path, "key");
+        verify_result = H5PL__openssl_verify_signature(path, signature, publickey);
+        free(signature);
+        free(publickey);
 #ifdef H5_HAVE_PARALLEL
     }
     MPI_Bcast(&verify_result, 1, MPI_INT, root, MPI_COMM_WORLD);
-#endif // H5_HAVE_PARALLEL  
+#endif // H5_HAVE_PARALLEL
     // printf("[%d]: After Bcast, verify_result is %d\n", rank, verify_result);
     if (verify_result < 0) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "verification check failed");
@@ -571,10 +571,10 @@ done:
 char *
 H5PL__get_sig_name_from_path(const char *path, const char *extension)
 {
-    char  *sig_name   = NULL; /* Signature filename with new extension */
-    char  *temp        = NULL; /* Pointer to last '.' in path */
-    size_t len;               /* Length of new filename */
-    char  *ret_value  = NULL; /* Return value */
+    char  *sig_name = NULL;  /* Signature filename with new extension */
+    char  *temp     = NULL;  /* Pointer to last '.' in path */
+    size_t len;              /* Length of new filename */
+    char  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -647,7 +647,7 @@ RSA *
 H5PL__create_public_RSA(const char *key)
 {
     RSA *rsa       = NULL; /* RSA public key structure */
-    BIO *key_bio    = NULL; /* BIO memory buffer for key */
+    BIO *key_bio   = NULL; /* BIO memory buffer for key */
     RSA *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -693,13 +693,13 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5PL__RSA_verify_signature(RSA *rsa, unsigned char *msg_hash, size_t msg_hash_len, const char *msg, size_t msg_len,
-                           int *authentic)
+H5PL__RSA_verify_signature(RSA *rsa, unsigned char *msg_hash, size_t msg_hash_len, const char *msg,
+                           size_t msg_len, int *authentic)
 {
-    EVP_PKEY   *pub_key      = NULL; /* EVP public key structure */
-    EVP_MD_CTX *verify_ctx   = NULL; /* Message digest context for verification */
-    int         auth_status;         /* Authentication status from OpenSSL */
-    int         ret_value = 1;       /* Return value */
+    EVP_PKEY   *pub_key    = NULL; /* EVP public key structure */
+    EVP_MD_CTX *verify_ctx = NULL; /* Message digest context for verification */
+    int         auth_status;       /* Authentication status from OpenSSL */
+    int         ret_value = 1;     /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -760,8 +760,8 @@ done:
 char *
 H5PL__openSSL_read_file(const char *file_path, int *file_length)
 {
-    char  *buffer    = NULL; /* Buffer to hold file contents */
-    FILE  *fd        = NULL; /* File descriptor */
+    char  *buffer = NULL;    /* Buffer to hold file contents */
+    FILE  *fd     = NULL;    /* File descriptor */
     long   file_size;        /* Size of file in bytes */
     size_t bytes_read;       /* Number of bytes read */
     char  *ret_value = NULL; /* Return value */
@@ -801,7 +801,7 @@ H5PL__openSSL_read_file(const char *file_path, int *file_length)
 
     /* Set output parameters */
     *file_length = (int)file_size;
-    ret_value   = buffer;
+    ret_value    = buffer;
 
 done:
     /* Clean up on error */
@@ -835,9 +835,9 @@ done:
 int
 H5PL__check_filename(char *filename)
 {
-    size_t len;              /* Length of filename */
-    size_t i;                /* Loop counter */
-    int    ret_value = 0;    /* Return value */
+    size_t len;           /* Length of filename */
+    size_t i;             /* Loop counter */
+    int    ret_value = 0; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -851,8 +851,7 @@ H5PL__check_filename(char *filename)
     len = strlen(filename);
 
     /* Check for directory traversal attempts (. or ..) */
-    if ((1 == len && '.' == filename[0]) ||
-        (2 == len && '.' == filename[0] && '.' == filename[1])) {
+    if ((1 == len && '.' == filename[0]) || (2 == len && '.' == filename[0] && '.' == filename[1])) {
         ret_value = 1;
         goto done;
     }
@@ -899,24 +898,24 @@ done:
 herr_t
 H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
 {
-    char   *publicKey        = NULL; /* Public key data */
-    int     keyLen;                  /* Length of public key */
-    char   *sig              = NULL; /* Signature data */
-    int     sigLen;                  /* Length of signature */
-    char   *data             = NULL; /* Plugin binary data */
-    int     dataLen;                 /* Length of plugin data */
-    int     authentic;               /* Authentication result */
-    size_t  maxPathLen;              /* Maximum path length */
-    char   *copied_file_name = NULL; /* Temporary copy filename */
-    char    sig_file_name[4096];     /* Signature file path */
-    char    copy_elf_file[4096];     /* Command to copy plugin */
-    char    dump_sig[4096];          /* Command to dump signature */
-    char    remove_sig[4096];        /* Command to remove signature */
-    char    delete_so[4096];         /* Command to delete temporary plugin copy */
-    char    delete_sig[4096];        /* Command to delete temporary signature file */
-    RSA    *publicRSA        = NULL; /* RSA public key structure */
-    int     result;                  /* Result from signature verification */
-    herr_t  ret_value        = SUCCEED; /* Return value */
+    char  *publicKey = NULL;        /* Public key data */
+    int    keyLen;                  /* Length of public key */
+    char  *sig = NULL;              /* Signature data */
+    int    sigLen;                  /* Length of signature */
+    char  *data = NULL;             /* Plugin binary data */
+    int    dataLen;                 /* Length of plugin data */
+    int    authentic;               /* Authentication result */
+    size_t maxPathLen;              /* Maximum path length */
+    char  *copied_file_name = NULL; /* Temporary copy filename */
+    char   sig_file_name[4096];     /* Signature file path */
+    char   copy_elf_file[4096];     /* Command to copy plugin */
+    char   dump_sig[4096];          /* Command to dump signature */
+    char   remove_sig[4096];        /* Command to remove signature */
+    char   delete_so[4096];         /* Command to delete temporary plugin copy */
+    char   delete_sig[4096];        /* Command to delete temporary signature file */
+    RSA   *publicRSA = NULL;        /* RSA public key structure */
+    int    result;                  /* Result from signature verification */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -974,8 +973,8 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "can't create RSA public key structure");
 
     /* Verify signature */
-    result = H5PL__RSA_verify_signature(publicRSA, (unsigned char *)sig, (size_t)sigLen, data, (size_t)dataLen,
-                                &authentic);
+    result = H5PL__RSA_verify_signature(publicRSA, (unsigned char *)sig, (size_t)sigLen, data,
+                                        (size_t)dataLen, &authentic);
 
     /* Check verification result */
     if (1 != authentic)
