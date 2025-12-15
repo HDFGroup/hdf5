@@ -64,7 +64,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-[API Compatibility Reports between 2.0.0 and 1.14.6](https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz)
+ABI/API Compatibility Reports between 2.0.0 and 1.14.6[tar file](https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/index.html)
 </td>
 </tr>
 <tr>
@@ -82,7 +82,7 @@ Additional Release Information
 Source code and binaries are available at:
 <a href="https://\RELURL/v2_0/v2_0_0/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html</a>
 
-Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with either CMake or Autotools.
+Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with CMake.
 
 
 \subsection subsec_obtain_method Methods to obtain (gz file)
@@ -95,16 +95,6 @@ Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for b
     `gzip -cd <distribution>.tar.gz | tar xvf -`
 </div>
 \li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.0.0 for this release
-
-\subsection subsec_api_compat_reps Individual API Compatibility Reports
-
-* [hdf5-2.0-hdf5_compat_report.html](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_compat_report.html) -- HTML C library ABI report file
-
-* [hdf5-2.0-hdf5_cpp_compat_report.html](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_cpp_compat_report.html) -- HTML CPP library ABI report file
-
-* [hdf5-2.0-hdf5_hl_compat_report.html](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-hdf5_hl_compat_report.html) -- HTML HL C library ABI report file
-
-* [hdf5-2.0-java_compat_report.html](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/hdf5-2.0.0-java_compat_report.html) -- HTML Java library ABI report file
 
 
 \subsection subsec_dox_gen_doc Doxygen Generated Reference Manual
