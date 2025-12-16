@@ -778,6 +778,21 @@ if (HDF5_ENABLE_HDFS)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to Require Digitally Signed plugins
+#-----------------------------------------------------------------------------
+option (HDF5_REQUIRE_SIGNED_PLUGINS "Require digitally signed plugins" ON)
+if (HDF5_REQUIRE_SIGNED_PLUGINS)
+  if (NOT WIN32)
+    add_compile_definitions(H5_REQUIRE_DIGITAL_SIGNATURE)
+    # link_libraries(gpgme)
+    # link_libraries(gpg-error)
+    link_libraries(ssl)
+    link_libraries(crypto)
+  endif ()
+endif ()
+message(VERBOSE "Digital signatures required for all plugins")
+
+#-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PARALLEL)
