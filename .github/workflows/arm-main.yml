@@ -52,6 +52,12 @@ jobs:
           which cmake
           cmake --version
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
       - name: Set environment for MSVC (Windows)
         run: |
           # Set these environment variables so CMake picks the correct compiler
@@ -73,6 +79,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA=ON \
             -DHDF5_BUILD_DOC:BOOL=ON \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
