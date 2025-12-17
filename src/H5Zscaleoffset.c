@@ -1626,7 +1626,7 @@ H5Z__scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, un
     FUNC_ENTER_PACKAGE
 
     if (*j >= buf_size)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, 0, "Buffer too short");
+        HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "Buffer too short");
 
     /* initialize value and bits of unsigned char to be copied */
     val = buffer[*j];
@@ -1648,7 +1648,7 @@ H5Z__scaleoffset_decompress_one_byte(unsigned char *data, size_t data_offset, un
         if (bits_to_copy == 0)
             goto done;
         else if (*j >= buf_size)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, 0, "Buffer too short");
+            HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "Buffer too short");
 
         val = buffer[*j];
         data[data_offset + k] |= (unsigned char)((unsigned)(val >> (*bits_to_fill - bits_to_copy)) &
@@ -1682,7 +1682,7 @@ H5Z__scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset, 
         for (k = (int)begin_i; k >= 0; k--)
             if (H5Z__scaleoffset_decompress_one_byte(data, data_offset, (unsigned)k, begin_i, buffer,
                                                      buf_size, j, bits_to_fill, p, dtype_len))
-                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, 0, "Atomic decompression failed");
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "Atomic decompression failed");
     }
     else { /* big endian */
         assert(p.mem_order == H5Z_SCALEOFFSET_ORDER_BE);
@@ -1692,7 +1692,7 @@ H5Z__scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset, 
         for (k = (int)begin_i; k <= (int)(p.size - 1); k++)
             if (H5Z__scaleoffset_decompress_one_byte(data, data_offset, (unsigned)k, begin_i, buffer,
                                                      buf_size, j, bits_to_fill, p, dtype_len))
-                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, 0, "Atomic decompression failed");
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "Atomic decompression failed");
     }
 
 done:
@@ -1722,7 +1722,7 @@ H5Z__scaleoffset_decompress(unsigned char *data, unsigned d_nelmts, unsigned cha
     /* decompress */
     for (i = 0; i < d_nelmts; i++)
         if (H5Z__scaleoffset_decompress_one_atomic(data, i * p.size, buffer, buf_size, &j, &bits_to_fill, p))
-            HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, 0, "Scaleoffset decompression failed");
+            HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "Scaleoffset decompression failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
