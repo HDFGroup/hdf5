@@ -24,12 +24,14 @@
 /*****************/
 
 /* Macros used to "unset" chunk cache configuration parameters */
-/** Default of chunk slots in the raw data chunk cache for this dataset.  See \ref H5Pset_chunk_cache for details. \since 1.8.3 */
+/** Default of chunk slots in the raw data chunk cache for this dataset.  See \ref H5Pset_chunk_cache for
+ * details. \since 1.8.3 */
 #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT SIZE_MAX
-/** Total size of the raw data chunk cache for this dataset.  See \ref H5Pset_chunk_cache for details. \since 1.8.3 */
+/** Total size of the raw data chunk cache for this dataset.  See \ref H5Pset_chunk_cache for details.
+ * \since 1.8.3 */
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
 /** Chunk preemption policy for this dataset.  See \ref H5Pset_chunk_cache for details. \since 1.8.3 */
-#define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0)
+#define H5D_CHUNK_CACHE_W0_DEFAULT (-1.0)
 
 /** Bit flags for the H5Pset/get_chunk_opts() \since 1.10.0 */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS (0x0002u)
@@ -57,10 +59,11 @@ typedef enum H5D_layout_t {
  * Types of chunk index data structures
  */
 typedef enum H5D_chunk_index_t {
-    H5D_CHUNK_IDX_BTREE = 0, /**< v1 B-tree index (default) \since 1.10.0                */
-    H5D_CHUNK_IDX_SINGLE =
-        1, /**< Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered & non-filtered) \since 1.10.0 */
-    H5D_CHUNK_IDX_NONE   = 2, /**< Implicit: No Index (#H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) \since 1.10.0 */
+    H5D_CHUNK_IDX_BTREE  = 0, /**< v1 B-tree index (default) \since 1.10.0                */
+    H5D_CHUNK_IDX_SINGLE = 1, /**< Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered &
+                                 non-filtered) \since 1.10.0 */
+    H5D_CHUNK_IDX_NONE =
+        2, /**< Implicit: No Index (#H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) \since 1.10.0 */
     H5D_CHUNK_IDX_FARRAY = 3, /**< Fixed array (for 0 unlimited dims) \since 1.10.0       */
     H5D_CHUNK_IDX_EARRAY = 4, /**< Extensible array (for 1 unlimited dim) \since 1.10.0   */
     H5D_CHUNK_IDX_BT2    = 5, /**< v2 B-tree index (for >1 unlimited dims) \since 1.10.0  */
@@ -1716,18 +1719,18 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
  */
 /* Property names for H5DOwrite_chunk */
 /** Direct chunk write flag \deprecated As H5DOwrite_chunk was deprecated */
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME     "direct_chunk_flag"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME "direct_chunk_flag"
 /** Direct chunk write filters flag \deprecated As H5DOwrite_chunk was deprecated */
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME  "direct_chunk_filters"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME "direct_chunk_filters"
 /** Direct chunk write offset flag \deprecated As H5DOwrite_chunk was deprecated */
-#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME   "direct_chunk_offset"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME "direct_chunk_offset"
 /** Direct chunk write datasize flag \deprecated As H5DOwrite_chunk was deprecated */
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME "direct_chunk_datasize"
 /* Property names for H5DOread_chunk */
 /** Direct chunk read flag \deprecated As H5DOread_chunk was deprecated */
-#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME    "direct_chunk_read_flag"
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME "direct_chunk_read_flag"
 /** Direct chunk read offset flag \deprecated As H5DOread_chunk was deprecated */
-#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME  "direct_chunk_read_offset"
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME "direct_chunk_read_offset"
 /** Direct chunk read filters flag \deprecated As H5DOread_chunk was deprecated */
 #define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME "direct_chunk_read_filters"
 
