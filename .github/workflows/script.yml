@@ -37,15 +37,15 @@ jobs:
         run: choco install ninja
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
+        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
           version: "1.13.2"
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.13.0
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -104,7 +104,7 @@ jobs:
         shell: pwsh
 
       - name: Create options file (Windows)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
             path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
             write-mode: overwrite
@@ -136,7 +136,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Windows_intel)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: cl-win-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -154,12 +154,12 @@ jobs:
           sudo apt-get install ninja-build graphviz curl
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
+        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -202,7 +202,7 @@ jobs:
             ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -234,7 +234,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
             name: gcc-ubuntu-log
             path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -250,7 +250,7 @@ jobs:
         run: brew install ninja curl
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@v1
+        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
           version: "1.13.2"
 
@@ -261,7 +261,7 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -273,7 +273,7 @@ jobs:
           cmake --version
 
       - name: Set up JDK 19
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -313,7 +313,7 @@ jobs:
 
       # symlinks the compiler executables to a common location 
       - name: Setup GNU Fortran
-        uses: fortran-lang/setup-fortran@v1
+        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
         id: setup-fortran
         with:
           compiler: gcc
@@ -324,7 +324,7 @@ jobs:
               ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (MacOS_latest)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -357,7 +357,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (MacOS_latest)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: macos-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -375,7 +375,7 @@ jobs:
           sudo apt-get install ninja-build doxygen
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -437,7 +437,7 @@ jobs:
               ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux S3)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -469,7 +469,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux S3)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: s3-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -486,14 +486,14 @@ jobs:
         run: choco install ninja
 
       - name: add oneAPI to env
-        uses: fortran-lang/setup-fortran@v1
+        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
         id: setup-fortran
         with:
           compiler: intel
           version: '2025.0'
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -546,7 +546,7 @@ jobs:
         shell: pwsh
 
       - name: Create options file (Windows_intel)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -583,7 +583,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Windows_intel)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: intel-win-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -601,14 +601,14 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add oneAPI to env
-        uses: fortran-lang/setup-fortran@v1
+        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
         id: setup-fortran
         with:
           compiler: intel
           version: '2025.0'
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -651,7 +651,7 @@ jobs:
           ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux_intel)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -686,7 +686,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_intel)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: intel-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -705,7 +705,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.8
+        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
         id: setup-clang
         with:
           env: true
@@ -718,7 +718,7 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -767,7 +767,7 @@ jobs:
           ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux_clang)
-        uses: "DamianReeves/write-file-action@master"
+        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -801,7 +801,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_clang)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: clang-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log

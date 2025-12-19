@@ -91,9 +91,10 @@ Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for b
 \li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
 \li wget –
 <div style="margin-left: 2em;">
-    `wget https://github.com/HDFGroup/hdf5/releases/download/2.N.N/<distribution>.tar.gz`<br>
+    `wget https://github.com/HDFGroup/hdf5/releases/download/${PACKAGEVERSION}/<distribution>.tar.gz`<br>
     `gzip -cd <distribution>.tar.gz | tar xvf -`
 </div>
+\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.0.0 for this release
 
 \subsection subsec_api_compat_reps Individual API Compatibility Reports
 

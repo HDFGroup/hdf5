@@ -113,6 +113,15 @@ Navigate back: \ref index "Main"
     </ul>
 \li \ref subsec_group_examples
 
+\ref sec_link
+\li \ref subsec_link_intro
+\li \ref subsec_link_types
+\li \ref subsec_link_create
+\li \ref subsec_link_ops
+\li \ref subsec_link_traverse
+\li \ref subsec_link_user
+\li \ref subsec_link_summary
+
 \ref sec_dataset
 \li \ref subsec_dataset_intro
 \li \ref subsec_dataset_function
@@ -228,6 +237,25 @@ Navigate back: \ref index "Main"
     </ul>
 \li \ref subsec_attribute_special
 
+\ref sec_object
+\li \ref subsec_object_intro
+\li \ref subsec_object_ops
+\li \ref subsec_object_visit
+\li \ref subsec_object_comments
+\li \ref subsec_object_refcount
+\li \ref subsec_object_cache
+\li \ref subsec_object_summary
+
+\ref sec_identifier
+\li \ref subsec_identifier_intro
+\li \ref subsec_identifier_types
+\li \ref subsec_identifier_refcount
+\li \ref subsec_identifier_valid
+\li \ref subsec_identifier_query
+\li \ref subsec_identifier_user
+\li \ref subsec_identifier_iteration
+\li \ref subsec_identifier_summary
+
 \ref sec_error
 \li \ref subsec_error_intro
 \li \ref subsec_error_program
@@ -265,6 +293,17 @@ Navigate back: \ref index "Main"
 \li \ref subsec_plist_H5P
 \li \ref subsec_plist_resources
 \li \ref subsec_plist_notes
+
+\ref sec_vfd
+\li \ref subsec_vfd_intro
+\li \ref subsec_vfd_purpose
+\li \ref subsec_vfd_drivers
+\li \ref subsec_vfd_selection
+\li \ref subsec_vfd_custom
+\li \ref subsec_vfd_parallel
+\li \ref subsec_vfd_performance
+\li \ref subsec_vfd_query
+\li \ref subsec_vfd_summary
 
 \ref sec_vol
 \li \ref subsec_vol_intro
@@ -338,10 +377,24 @@ Navigate back: \ref index "Main"
 \li \ref subsec_async_intro
 
 \ref sec_map
+\li \ref subsec_map_intro
+\li \ref subsec_map_lifecycle
+\li \ref subsec_map_plist
+\li \ref subsec_map_datatypes
+\li \ref subsec_map_example
+\li \ref subsec_map_notes
 
 \ref sec_reference
 
-\ref sec_filter_plugins
+\ref sec_filter
+\li \ref subsec_filter_intro
+\li \ref subsec_filter_builtin
+\li \ref subsec_filter_usage
+\li \ref subsec_filter_pipeline
+\li \ref subsec_filter_custom
+\li \ref subsec_filter_query
+\li \ref subsec_filter_plugins
+\li \ref subsec_filter_summary
 
 \section sec_hl HDF5 High Level APIs
 \li \ref H5DO_UG

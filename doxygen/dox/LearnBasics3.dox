@@ -868,6 +868,7 @@ libhdf5_fortran.lib
 libhdf5_hl.lib
 libhdf5.lib
 \endcode
+</td>
 </tr>
 </table>
 
@@ -919,6 +920,7 @@ hdf5_fortran.lib
 hdf5_hl.lib
 hdf5.lib
 \endcode
+</td>
 </tr>
 </table>
 

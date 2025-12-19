@@ -521,7 +521,6 @@ The library makes many types of allocation requests:
 <td>#H5FD_MEM_DRAW</td><td>An allocation request for the raw data of a dataset.
 </td>
 </tr>
-</tr>
 <tr>
 <td>#H5FD_MEM_GHEAP</td><td>An allocation request for a global heap collection. Global
 heaps are used to store certain types of references such as dataset region references.

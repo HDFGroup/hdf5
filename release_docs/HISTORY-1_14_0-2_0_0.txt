@@ -3,14 +3,425 @@ HDF5 History
 
 This file contains development history of the HDF5 1.14 branch
 
+07.      Release Information for hdf5-1.14.6
 06.      Release Information for hdf5-1.14.5
-05. 	 Release Information for hdf5-1.14.4
+05.      Release Information for hdf5-1.14.4
 04.      Release Information for hdf5-1.14.3
 03.      Release Information for hdf5-1.14.2
 02.      Release Information for hdf5-1.14.1
 01.      Release Information for hdf5-1.14.0
 
 [Search on the string '%%%%' for section breaks of each release.]
+
+%%%%1.14.6%%%%
+
+HDF5 version 1.14.6 released on 2025-02-04
+================================================================================
+
+
+INTRODUCTION
+============
+
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
+
+Note that documentation in the links below will be updated at the time of each
+final release.
+
+Links to HDF5 documentation can be found on:
+
+     https://support.hdfgroup.org/releases/hdf5/latest-docs.html
+
+The official HDF5 releases can be obtained from:
+
+     https://support.hdfgroup.org/downloads/index.html
+
+Changes from Release to Release and New Features in the HDF5-1.14.x release series
+can be found at:
+
+     https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+========
+
+- New Features
+- Support for new platforms and languages
+- Bug Fixes since HDF5-1.14.5
+- Platforms Tested
+- Known Problems
+- CMake vs. Autotools installations
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - The documentation in the source folder, doc, has been converted to doxygen files.
+
+    - Added support for native zlib-ng compression.
+
+      Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added
+      #ifdef around the compression function calls. Added including the correct
+      header file with the same #ifdef.
+
+
+    Library:
+    --------
+    -
+
+
+    Parallel Library:
+    -----------------
+    -
+
+
+    Fortran Library:
+    ----------------
+
+    -
+
+
+    C++ Library:
+    ------------
+    -
+
+
+    Java Library:
+    -------------
+    -
+
+
+    Tools:
+    ------
+    -
+
+
+    High-Level APIs:
+    ----------------
+    -
+
+
+    C Packet Table API:
+    -------------------
+    -
+
+
+    Internal header file:
+    ---------------------
+    -
+
+
+    Documentation:
+    --------------
+    -
+
+
+Support for new platforms, languages and compilers
+==================================================
+    -
+
+
+Bug Fixes since HDF5-1.14.5 release
+===================================
+    Library
+    -------
+    - Reverted a change to the library's handling of UTF-8 file names
+
+      A change was made in the HDF5 1.14.4 release to address some issues with 
+      the library's handling of code pages and file paths on Windows. This change
+      introduced other issues with the handling of UTF-8 file names that caused
+      breakage for software using the 1.14.4 and 1.14.5 releases of HDF5.
+
+      The change has been reverted for this release and will be addressed in a
+      different manner in a future release.
+
+      If you are using 1.14.4 or 1.14.5 and are happy with how UTF-8 file names
+      are handled in those versions, do not update to 1.14.6.
+
+      Reverted commit: eb0351efffe987a9c1882ccc9b03b5b0aec7f2dd
+
+
+    Java Library
+    ------------
+    -
+
+
+    Configuration
+    -------------
+    - When using a system installed zlib library, the shared library is expected to
+      be found in the system library path with the default HDF5_MODULE_MODE_ZLIB 
+      setting ON.
+
+      Setting the HDF5_MODULE_MODE_ZLIB option to OFF, the system installed zlib,
+      or an alternate installed zlib library, is expected to have a correct
+      zlib-config.cmake file.
+
+      Fixes #5155
+
+    - Use pre-installed libaec compression library
+
+      The CMake logic for finding the libaec compression library has been
+      modified for a system-installed version of the library. Two options
+      must be set;
+          HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
+          <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, PLUGIN.
+      Note that HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO disables building all
+      plugins and external libraries in-line with the HDF5 library.
+
+      In addition, the <LIB_PKG_NAME>_ROOT environment variables must be set,
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN.
+      Note that libaec is the expected name for using the libaec library in
+      place of original szip.
+
+      See INSTALL_CMake.txt for more detailed information.
+
+    - Removed the module search find_package for szip library
+    
+      There is not an szip module file to use, so the find_package only uses
+      find_package in config mode. The remaining choices are to either build szip 
+      with libaec inline, or find a system installed szip library built with CMake.
+
+
+    Tools
+    -----
+    -
+
+
+    Performance
+    -------------
+    -
+
+
+    Fortran API
+    -----------
+    -
+
+
+    High-Level Library
+    ------------------
+    -
+
+
+    Fortran High-Level APIs
+    -----------------------
+    -
+
+
+    Documentation
+    -------------
+    -
+
+
+    F90 APIs
+    --------
+    -
+
+
+    C++ APIs
+    --------
+    - 
+
+
+    Testing
+    -------
+    -
+
+
+Platforms Tested
+===================
+
+    - HDF5 is tested with the latest Linux, macOS and Windows versions that are
+      available on GitHub runners, with Clang, GCC and Intel compilers. As new
+      major versions become available, HDF5 will discontinue testing the older
+      version and add the new latest version to its list of compatible systems,
+      along with the previous version.  HDF5 is also tested on the HPC systems
+      and older versions listed below.  Test results may be viewed at the
+      "test results" link on the top level README page.  
+        
+
+    Linux 6.8.0-1010-aws             GNU gcc, gfortran, g++
+    #10-Ubuntu SMP 2024 x86_64       (Ubuntu 13.2.0-23ubuntu4) 13.2.0
+    GNU/Linux Ubuntu 24.04           Ubuntu clang version 18.1.3 (1ubuntu1)
+                                     Intel(R) oneAPI DPC++/C++ Compiler 2024.2.0
+                                     ifx (IFX) 2024.2.0 20240602
+                                     (cmake and autotools)
+
+    Linux 6.5.0-1018-aws             GNU gcc, gfortran, g++
+    #18-Ubuntu SMP x86_64 GNU/Linux  (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+    Ubuntu 22.04                     Ubuntu clang version 14.0.0-1ubuntu1
+                                     Intel(R) oneAPI DPC++/C++ Compiler 2024.0.2
+                                     ifx (IFX) 2024.0.2 20231213
+                                     (cmake and autotools)
+
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.28
+    #1 SMP x86_64 GNU/Linux              cce 18.0.1 17.0.1
+    (frontier)                           gcc/13.2
+                                     (cmake)
+
+    Linux-4.18.0-553.27.1.1toss.t4   openmpi/4.1.2
+    #1 SMP x86_64 GNU/Linux              clang 14.0.6
+    (corona, dane)                       GCC 12.1.1
+                                         Intel(R) oneAPI DPC++/C++ Compiler 2023.2.1
+                                         ifx (IFX) 2023.2.1
+
+    Linux 4.14.0-115.35.1.3chaos     spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 17.0.6
+    (vortex)                             GCC 12.2.1
+                                         nvhpc 24.1
+                                         XL 2023.06.28
+                                     (cmake)
+
+    Linux-4.14.0-115.35.1            spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 17.0.6, 18.1.8
+    (lassen)                             GCC 12.2.1
+                                         XL 2023.06.28, 2022.08.19
+                                     (cmake)
+
+    Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2019 w/ Intel (C/C++ only - cmake)
+                                    Visual Studio 2022 w/ clang 17.0.3
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2022 w/ Intel C/C++ oneAPI 2023 (cmake)
+                                    Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
+
+
+Known Problems
+==============
+
+ -  HDF5 compiled with Cray/CCE 18.0.1 fails these Fortran tests:
+        FORTRAN_fortranlib_test_F03
+        FORTRAN_testhdf5_fortran_1_8
+        HL_FORTRAN_f90_tstlite
+        MPI_TEST_FORT_async_test
+
+    See https://github.com/HDFGroup/hdf5/issues/5283
+
+ -  When building with the NAG Fortran compiler using the Autotools and libtool
+    2.4.2 or earlier, the -shared flag will be missing '-Wl,', which will cause
+    compilation to fail. This is due to a bug in libtool that was fixed in 2012
+    and released in 2.4.4 in 2014.
+
+ -  When the library detects and builds in support for the _Float16 datatype, an
+    issue has been observed on at least one MacOS 14 system where the library
+    fails to initialize due to not being able to detect the byte order of the
+    _Float16 type (https://github.com/HDFGroup/hdf5/issues/4310):
+
+        #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
+        major: Datatype
+        minor: Unable to initialize object
+
+    If this issue is encountered, support for the _Float16 type can be disabled
+    with a configuration option:
+
+        CMake:      HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16=OFF
+        Autotools:  --disable-nonstandard-feature-float16
+
+ -  When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
+    also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
+    in the following tests:
+
+        H5PLUGIN-filter_plugin
+        H5TEST-flush2
+        H5TEST-testhdf5-base
+        MPI_TEST_t_filters_parallel
+
+    Sporadic failures (even with lower -O levels):
+        Java JUnit-TestH5Pfapl
+        Java JUnit-TestH5D
+
+    Also, NVHPC will fail to compile the test/tselect.c test file with a compiler
+    error of 'use of undefined value' when the optimization level is -O2 or higher.
+
+    This is confirmed to be a bug in the nvc compiler that has been fixed as of
+    23.11. If you are using an affected version of the NVidia compiler, the
+    work-around is to set the optimization level to -O1.
+
+    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045
+
+ -  CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+
+ -  At present, metadata cache images may not be generated by parallel
+    applications. Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+ -  The subsetting option in ph5diff currently will fail and should be avoided.
+    The subsetting option works correctly in serial h5diff.
+
+ -  Flang Fortran compilation will fail (last check version 17) due to not yet
+    implemented: (1) derived type argument passed by value (H5VLff.F90),
+    and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
+
+ -  Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers
+    greater than version 16.0 due to a compiler bug. The latest version verified
+    as failing was version 17.0.
+
+ -  Several tests currently fail on certain platforms:
+        MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
+
+ -  File space may not be released when overwriting or deleting certain nested
+    variable length or reference types.
+
+ -  Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on Linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
+
+The issues with the gif tool are:
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
+These CVE issues have not yet been addressed and are avoided by not building
+the gif tool by default. Enable building the High-Level tools with these options:
+    autotools:   --enable-hlgiftools
+    cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
+
 
 %%%%1.14.5%%%%
 

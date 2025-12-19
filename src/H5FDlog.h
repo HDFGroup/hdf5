@@ -252,7 +252,6 @@ H5_DLLVAR hid_t H5FD_LOG_id_g;
  * <caption>Table2: Logging Output</caption>
  * <tr>
  * <th>Flag</th><th>VFD Call</th><th>Output and Comments</th>
- * </th>
  * </tr>
  * <tr>
  * <td>#H5FD_LOG_LOC_READ</td>
@@ -395,7 +394,6 @@ H5_DLLVAR hid_t H5FD_LOG_id_g;
  * See also: #H5FD_LOG_LOC_READ
  * </td>
  * </tr>
- * </tr>
  * <tr>
  * <td>#H5FD_LOG_TIME_WRITE</td>
  * <td>Close, Write</td>
@@ -448,7 +446,6 @@ H5_DLLVAR hid_t H5FD_LOG_id_g;
  * <caption>Table3: Flavors of logged data</caption>
  * <tr>
  * <th>Flavor</th><th>Description</th>
- * </th>
  * </tr>
  * <tr>
  * <td>#H5FD_MEM_NOLIST</td>

@@ -20,6 +20,7 @@ HDF5 version 2.0.1 currently under development
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
 [![OSS-Fuzz Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/hdf5.svg)](https://oss-fuzz-build-logs.storage.googleapis.com/index.html#hdf5)
 [![Link Checker Status](https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml/badge.svg)](https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17808614.svg)](https://doi.org/10.5281/zenodo.17808614)
 
 [HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
 
@@ -117,11 +118,8 @@ Periodically development code snapshots are provided at the following URL:
 
 Source packages for current and previous releases are located at:
 
-   hdf5 1.14 releases:
-   https://support.hdfgroup.org/releases/hdf5/v1_14/index.html
-
-   Archived releases:
-   https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
+   [Latest HDF5 release](https://github.com/HDFGroup/hdf5/releases)
+   [Previous releases](https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html)
 
 Maven artifacts for Java bindings and examples are available at:
 
