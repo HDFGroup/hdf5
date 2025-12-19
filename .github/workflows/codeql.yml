@@ -23,60 +23,48 @@ jobs:
     steps:
       - name: Install Dependencies (Linux)
         run: |
-          sudo gem install apt-spy2
-          sudo apt-spy2 check
-          sudo apt-spy2 fix --commit
-          sudo apt update
-          sudo apt upgrade
-          sudo apt-get install openmpi-bin openmpi-common mpi-default-dev
-          #sudo apt install mpich
+          sudo apt-get update
+          # Added zlib1g-dev and libaec-dev (szip) to enable filter code paths
+          sudo apt-get install -y \
+            openmpi-bin openmpi-common mpi-default-dev \
+            zlib1g-dev libaec-dev
+
           # Set env vars
-          echo "OS_NAME=linux" >> $GITHUB_ENV
           echo "CC=mpicc" >> $GITHUB_ENV
           echo "FC=mpif90" >> $GITHUB_ENV
           echo "F77=mpif90" >> $GITHUB_ENV
-          mpiexec_cmd="mpiexec --use-hwthread-cpus -n 4"
-          echo "MPIEXEC=$mpiexec_cmd" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v3
-        
-##################################
-# CONFIGURE HDF5
-##################################
 
-      - name: configure HDF5
+      - name: Configure HDF5
         run: |
-          mkdir build;cd build
+          mkdir build; cd build
           cmake -G "Unix Makefiles" \
             -DCMAKE_INSTALL_PREFIX=$PWD/hdf5 \
-            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
-            -DENABLE_EXTENDED_TESTS:BOOL=ON \
-            -DHDF5_BUILD_JAVA:BOOL=OFF \
-            -DBUILD_TESTING:BOOL=ON \
-            -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
-            -DHDF5_BUILD_DOC:BOOL=OFF \
-            -DHDF5_TEST_API:BOOL=OFF \
-            -DHDF5_BUILD_TOOLS:BOOL=ON \
-            -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=OFF \
-            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
-            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
-            -DBUILD_SHARED_LIBS:BOOL=ON \
-            -DBUILD_STATIC_LIBS:BOOL=ON \
+            -DCMAKE_BUILD_TYPE=Debug \
             -DHDF5_ENABLE_PARALLEL:BOOL=ON \
-            -DDHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+            -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+            -DHDF5_BUILD_TOOLS:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DBUILD_STATIC_LIBS:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DBUILD_TESTING:BOOL=OFF \
+            -DHDF5_BUILD_EXAMPLES:BOOL=OFF \
             ..
-
-##################################
-# CONFIGURE CodeQL
-##################################
-      
+            
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: c-cpp
           build-mode: manual
-
+          # Standard security-and-quality is usually sufficient
+          queries: +security-and-quality
+          
+          # Optional: If you trust your filtering, you can remove these
           config: |
              query-filters:
                - exclude:
@@ -84,20 +72,11 @@ jobs:
                - exclude:
                    id: cpp/short-global-name
 
-          queries: +security-and-quality
-
       - name: Build
         run: |
           cd build
-          cmake --build . --config Release
-          ctest -C Release
+          cmake --build . --config Debug
         shell: bash
-
-# NOTE: C/C++ does not support path-based filtering when using the manual build mode.
-# The "paths" and "paths-ignore" configuration properties will have no effect for this
-# language. If desired, you can use the advanced-security/filter-sarif Action to rewrite
-# the SARIF file to exclude alerts from these paths. For more information,
-# see https://github.com/advanced-security/filter-sarif
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -106,14 +85,15 @@ jobs:
           output: sarif-results
           upload: failure-only
 
+      # We keep the filter-sarif step just in case, but because we set 
+      # BUILD_TESTING=OFF, the resulting SARIF will be much cleaner naturally.
       - name: filter-sarif
         uses: advanced-security/filter-sarif@main
         with:
-          # filter out all test files
-          # filter out all testpar files
           patterns: |
             -**/test/**
             -**/testpar/**
+            -**/tools/test/**
           input: sarif-results/cpp.sarif
           output: sarif-results/cpp.sarif
 
@@ -121,10 +101,3 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: sarif-results/cpp.sarif
-
-      - name: Upload loc as a Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sarif-results
-          path: sarif-results
-          retention-days: 1
