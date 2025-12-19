@@ -193,7 +193,6 @@ test_error_compat(void)
     hid_t       sid = H5I_INVALID_HID;
     hsize_t     dims[2];
     H5E_auto1_t old_func1;
-    H5E_auto1_t default_func1; /* Save initial default for restoration */
     H5E_auto2_t old_func2;
     void       *old_data = NULL;
     herr_t      ret;
@@ -232,12 +231,8 @@ test_error_compat(void)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-    /* On Windows with DLLs, H5Eprint1 address may differ between DLL and executable,
-     * so just check that a function is set (non-NULL) rather than comparing exact pointer */
-    if (!old_func1)
+    if (!old_func1 || (H5E_auto1_t)H5Eprint1 != old_func1)
         TEST_ERROR;
-    /* Save the default function pointer for later restoration (Windows DLL compatibility) */
-    default_func1 = old_func1;
 
     /* This function changes the old-style printing function to be user_print1. */
     if (H5Eset_auto1((H5E_auto1_t)user_print1, stderr) < 0)
@@ -276,15 +271,11 @@ test_error_compat(void)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-    /* On Windows with DLLs, function pointer returned may differ from our local address,
-     * so just check that a function is set (non-NULL) rather than comparing exact pointer */
-    if (!old_func1)
+    if (!old_func1 || (H5E_auto1_t)user_print1 != old_func1)
         TEST_ERROR;
 
-    /* This function changes the new-style printing function back to the default H5Eprint1.
-     * Use the saved default_func1 pointer instead of casting H5Eprint1 directly, since on
-     * Windows with DLLs the library needs the exact pointer value it recognizes as default. */
-    if (H5Eset_auto1(default_func1, NULL) < 0)
+    /* This function changes the new-style printing function back to the default H5Eprint1. */
+    if (H5Eset_auto1((H5E_auto1_t)H5Eprint1, NULL) < 0)
         TEST_ERROR;
 
     /* This call should work because the H5Eset_auto1 above restored the default printing

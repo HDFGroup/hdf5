@@ -4990,10 +4990,7 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t
 {
     if (a->version != b->version)
         return (false);
-    /* Compare whether both report functions are enabled/disabled, not the exact pointer value
-     * (which can differ between DLL and executable on Windows)
-     */
-    else if ((a->rpt_fcn != NULL) != (b->rpt_fcn != NULL))
+    else if (a->rpt_fcn != b->rpt_fcn)
         return (false);
     else if (compare_init && (a->set_initial_size != b->set_initial_size))
         return (false);
