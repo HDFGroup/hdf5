@@ -24,7 +24,6 @@ jobs:
       - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
-          # Added zlib1g-dev and libaec-dev (szip) to enable filter code paths
           sudo apt-get install -y \
             openmpi-bin openmpi-common mpi-default-dev \
             zlib1g-dev libaec-dev
@@ -55,16 +54,14 @@ jobs:
             -DBUILD_TESTING:BOOL=OFF \
             -DHDF5_BUILD_EXAMPLES:BOOL=OFF \
             ..
-            
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: c-cpp
           build-mode: manual
-          # Standard security-and-quality is usually sufficient
           queries: +security-and-quality
           
-          # Optional: If you trust your filtering, you can remove these
           config: |
              query-filters:
                - exclude:
@@ -85,10 +82,8 @@ jobs:
           output: sarif-results
           upload: failure-only
 
-      # We keep the filter-sarif step just in case, but because we set 
-      # BUILD_TESTING=OFF, the resulting SARIF will be much cleaner naturally.
       - name: filter-sarif
-        uses: advanced-security/filter-sarif@main
+        uses: advanced-security/filter-sarif@v1
         with:
           patterns: |
             -**/test/**
