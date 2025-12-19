@@ -51,10 +51,13 @@ jobs:
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DBUILD_TESTING:BOOL=OFF \
             -DHDF5_BUILD_EXAMPLES:BOOL=OFF \
+            \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
             -DZLIB_INCLUDE_DIR=/usr/include \
             -DZLIB_LIBRARY=/usr/lib/x86_64-linux-gnu/libz.so \
+            \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+            -DHDF5_USE_LIBAEC:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON \
             -DSZIP_INCLUDE_DIR=/usr/include \
             -DSZIP_LIBRARY=/usr/lib/x86_64-linux-gnu/libsz.so \
