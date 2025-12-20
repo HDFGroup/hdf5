@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-19</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-20</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -809,7 +809,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Checks status of the dataset transfer property list (<b>DEPRECATED</b>) </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000071">Deprecated</a></b></dt><dd></dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000078">Deprecated</a></b></dt><dd></dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">plist_id</td><td>Identifier for the dataset transfer property list</td></tr>
@@ -1519,7 +1519,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000072">Deprecated</a></b></dt><dd>This function is deprecated as it no longer has any effect; compound datatype field preservation is now core functionality in the HDF5 library.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000079">Deprecated</a></b></dt><dd>This function is deprecated as it no longer has any effect; compound datatype field preservation is now core functionality in the HDF5 library.</dd></dl>
 <p><a class="el" href="#ga55445d27d058dadcd34fdba93344855e" title="Sets the dataset transfer property list status.">H5Pset_preserve()</a> sets the dataset transfer property list status to <code>1</code> or <code>0</code>.</p>
 <p>When reading or writing compound datatypes and the destination is partially initialized and the read/write is intended to initialize the other members, one must set this property to <code>1</code>. Otherwise the I/O pipeline treats the destination datapoints as completely uninitialized.</p>
 <dl class="section since"><dt>Since</dt><dd>1.0.0</dd></dl>

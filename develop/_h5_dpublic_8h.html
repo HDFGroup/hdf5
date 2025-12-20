@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-19</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-20</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -207,8 +207,8 @@ Enumerations</h2></td></tr>
 <tr class="separator:aab70b464cf3c5fc931dce0c4fe98b3d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35c293f0bba746ebc74a65c620b84fcf" id="r_a35c293f0bba746ebc74a65c620b84fcf"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35c293f0bba746ebc74a65c620b84fcf">H5D_chunk_index_t</a> { <br />
 &#160;&#160;<a class="el" href="#a35c293f0bba746ebc74a65c620b84fcfacbb8c7ec3a461d0924d49fe5efb8cbdc">H5D_CHUNK_IDX_BTREE</a> = 0
-, <a class="el" href="#a35c293f0bba746ebc74a65c620b84fcfa0ca010536251ce54a58662422a6905e6">H5D_CHUNK_IDX_SINGLE</a>
-, <a class="el" href="#a35c293f0bba746ebc74a65c620b84fcfaeb7474336d0e500a9b7f27a34a405808">H5D_CHUNK_IDX_NONE</a> = 2
+, <a class="el" href="#a35c293f0bba746ebc74a65c620b84fcfa0ca010536251ce54a58662422a6905e6">H5D_CHUNK_IDX_SINGLE</a> = 1
+, <a class="el" href="#a35c293f0bba746ebc74a65c620b84fcfaeb7474336d0e500a9b7f27a34a405808">H5D_CHUNK_IDX_NONE</a>
 , <a class="el" href="#a35c293f0bba746ebc74a65c620b84fcfa65de904e4db1f1f3680e54ddc646db9b">H5D_CHUNK_IDX_FARRAY</a> = 3
 , <br />
 &#160;&#160;<a class="el" href="#a35c293f0bba746ebc74a65c620b84fcfa180bacce30ac48940b01e7d5ba5dfe8e">H5D_CHUNK_IDX_EARRAY</a> = 4
@@ -405,6 +405,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Total size of the raw data chunk cache for this dataset. See <a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1">H5Pset_chunk_cache</a> for details. </p><dl class="section since"><dt>Since</dt><dd>1.8.3 </dd></dl>
 
 </div>
 </div>
@@ -419,6 +420,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Default of chunk slots in the raw data chunk cache for this dataset. See <a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1">H5Pset_chunk_cache</a> for details. </p><dl class="section since"><dt>Since</dt><dd>1.8.3 </dd></dl>
 
 </div>
 </div>
@@ -433,6 +435,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Chunk preemption policy for this dataset. See <a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1">H5Pset_chunk_cache</a> for details. </p><dl class="section since"><dt>Since</dt><dd>1.8.3 </dd></dl>
 
 </div>
 </div>
@@ -462,6 +465,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Direct chunk read filters flag </p><dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000021">Deprecated</a></b></dt><dd>As H5DOread_chunk was deprecated </dd></dl>
 
 </div>
 </div>
@@ -476,6 +480,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Direct chunk read flag </p><dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000019">Deprecated</a></b></dt><dd>As H5DOread_chunk was deprecated </dd></dl>
 
 </div>
 </div>
@@ -490,6 +495,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Direct chunk read offset flag </p><dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000020">Deprecated</a></b></dt><dd>As H5DOread_chunk was deprecated </dd></dl>
 
 </div>
 </div>
@@ -504,6 +510,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Direct chunk write datasize flag </p><dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000018">Deprecated</a></b></dt><dd>As H5DOwrite_chunk was deprecated </dd></dl>
 
 </div>
 </div>
@@ -518,6 +525,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Direct chunk write filters flag </p><dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000016">Deprecated</a></b></dt><dd>As H5DOwrite_chunk was deprecated </dd></dl>
 
 </div>
 </div>
@@ -532,6 +540,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Direct chunk write flag </p><dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000015">Deprecated</a></b></dt><dd>As H5DOwrite_chunk was deprecated </dd></dl>
 
 </div>
 </div>
@@ -546,6 +555,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Direct chunk write offset flag </p><dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000017">Deprecated</a></b></dt><dd>As H5DOwrite_chunk was deprecated </dd></dl>
 
 </div>
 </div>
@@ -712,15 +722,15 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Values for the space allocation time property </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2a15fd5e6df3db0a04509e348d9af0742e" name="aab70b464cf3c5fc931dce0c4fe98b3d2a15fd5e6df3db0a04509e348d9af0742e"></a>H5D_ALLOC_TIME_ERROR&#160;</td><td class="fielddoc"><p>Error </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2a15fd5e6df3db0a04509e348d9af0742e" name="aab70b464cf3c5fc931dce0c4fe98b3d2a15fd5e6df3db0a04509e348d9af0742e"></a>H5D_ALLOC_TIME_ERROR&#160;</td><td class="fielddoc"><p>Error </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2a1eb65ed3b5c64ab8cb783492b28b6903" name="aab70b464cf3c5fc931dce0c4fe98b3d2a1eb65ed3b5c64ab8cb783492b28b6903"></a>H5D_ALLOC_TIME_DEFAULT&#160;</td><td class="fielddoc"><p>Default (layout dependent) </p>
+<tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2a1eb65ed3b5c64ab8cb783492b28b6903" name="aab70b464cf3c5fc931dce0c4fe98b3d2a1eb65ed3b5c64ab8cb783492b28b6903"></a>H5D_ALLOC_TIME_DEFAULT&#160;</td><td class="fielddoc"><p>Default (layout dependent) </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2a3c461ed83e0af151ef8c44ec232368b6" name="aab70b464cf3c5fc931dce0c4fe98b3d2a3c461ed83e0af151ef8c44ec232368b6"></a>H5D_ALLOC_TIME_EARLY&#160;</td><td class="fielddoc"><p>Allocate on creation </p>
+<tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2a3c461ed83e0af151ef8c44ec232368b6" name="aab70b464cf3c5fc931dce0c4fe98b3d2a3c461ed83e0af151ef8c44ec232368b6"></a>H5D_ALLOC_TIME_EARLY&#160;</td><td class="fielddoc"><p>Allocate on creation </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2a7c5fcb6f9c8adecf455939c3d625b7e8" name="aab70b464cf3c5fc931dce0c4fe98b3d2a7c5fcb6f9c8adecf455939c3d625b7e8"></a>H5D_ALLOC_TIME_LATE&#160;</td><td class="fielddoc"><p>Allocate on first write </p>
+<tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2a7c5fcb6f9c8adecf455939c3d625b7e8" name="aab70b464cf3c5fc931dce0c4fe98b3d2a7c5fcb6f9c8adecf455939c3d625b7e8"></a>H5D_ALLOC_TIME_LATE&#160;</td><td class="fielddoc"><p>Allocate on first write </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636" name="aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636"></a>H5D_ALLOC_TIME_INCR&#160;</td><td class="fielddoc"><p>Allocate incrementally (by chunk) </p>
+<tr><td class="fieldname"><a id="aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636" name="aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636"></a>H5D_ALLOC_TIME_INCR&#160;</td><td class="fielddoc"><p>Allocate incrementally (by chunk) </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
 </table>
 
@@ -739,19 +749,19 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Types of chunk index data structures </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfacbb8c7ec3a461d0924d49fe5efb8cbdc" name="a35c293f0bba746ebc74a65c620b84fcfacbb8c7ec3a461d0924d49fe5efb8cbdc"></a>H5D_CHUNK_IDX_BTREE&#160;</td><td class="fielddoc"><p>v1 B-tree index (default) </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfacbb8c7ec3a461d0924d49fe5efb8cbdc" name="a35c293f0bba746ebc74a65c620b84fcfacbb8c7ec3a461d0924d49fe5efb8cbdc"></a>H5D_CHUNK_IDX_BTREE&#160;</td><td class="fielddoc"><p>v1 B-tree index (default) </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa0ca010536251ce54a58662422a6905e6" name="a35c293f0bba746ebc74a65c620b84fcfa0ca010536251ce54a58662422a6905e6"></a>H5D_CHUNK_IDX_SINGLE&#160;</td><td class="fielddoc"><p>Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered &amp; non-filtered) </p>
+<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa0ca010536251ce54a58662422a6905e6" name="a35c293f0bba746ebc74a65c620b84fcfa0ca010536251ce54a58662422a6905e6"></a>H5D_CHUNK_IDX_SINGLE&#160;</td><td class="fielddoc"><p>Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered &amp; non-filtered) </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfaeb7474336d0e500a9b7f27a34a405808" name="a35c293f0bba746ebc74a65c620b84fcfaeb7474336d0e500a9b7f27a34a405808"></a>H5D_CHUNK_IDX_NONE&#160;</td><td class="fielddoc"><p>Implicit: No Index (<a class="el" href="#aab70b464cf3c5fc931dce0c4fe98b3d2a3c461ed83e0af151ef8c44ec232368b6">H5D_ALLOC_TIME_EARLY</a>, non-filtered, fixed dims) </p>
+<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfaeb7474336d0e500a9b7f27a34a405808" name="a35c293f0bba746ebc74a65c620b84fcfaeb7474336d0e500a9b7f27a34a405808"></a>H5D_CHUNK_IDX_NONE&#160;</td><td class="fielddoc"><p>Implicit: No Index (<a class="el" href="#aab70b464cf3c5fc931dce0c4fe98b3d2a3c461ed83e0af151ef8c44ec232368b6">H5D_ALLOC_TIME_EARLY</a>, non-filtered, fixed dims) </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa65de904e4db1f1f3680e54ddc646db9b" name="a35c293f0bba746ebc74a65c620b84fcfa65de904e4db1f1f3680e54ddc646db9b"></a>H5D_CHUNK_IDX_FARRAY&#160;</td><td class="fielddoc"><p>Fixed array (for 0 unlimited dims) </p>
+<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa65de904e4db1f1f3680e54ddc646db9b" name="a35c293f0bba746ebc74a65c620b84fcfa65de904e4db1f1f3680e54ddc646db9b"></a>H5D_CHUNK_IDX_FARRAY&#160;</td><td class="fielddoc"><p>Fixed array (for 0 unlimited dims) </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa180bacce30ac48940b01e7d5ba5dfe8e" name="a35c293f0bba746ebc74a65c620b84fcfa180bacce30ac48940b01e7d5ba5dfe8e"></a>H5D_CHUNK_IDX_EARRAY&#160;</td><td class="fielddoc"><p>Extensible array (for 1 unlimited dim) </p>
+<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa180bacce30ac48940b01e7d5ba5dfe8e" name="a35c293f0bba746ebc74a65c620b84fcfa180bacce30ac48940b01e7d5ba5dfe8e"></a>H5D_CHUNK_IDX_EARRAY&#160;</td><td class="fielddoc"><p>Extensible array (for 1 unlimited dim) </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa62a7b0e5e50422b0c24a7b8e24bbe33e" name="a35c293f0bba746ebc74a65c620b84fcfa62a7b0e5e50422b0c24a7b8e24bbe33e"></a>H5D_CHUNK_IDX_BT2&#160;</td><td class="fielddoc"><p>v2 B-tree index (for &gt;1 unlimited dims) </p>
+<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa62a7b0e5e50422b0c24a7b8e24bbe33e" name="a35c293f0bba746ebc74a65c620b84fcfa62a7b0e5e50422b0c24a7b8e24bbe33e"></a>H5D_CHUNK_IDX_BT2&#160;</td><td class="fielddoc"><p>v2 B-tree index (for &gt;1 unlimited dims) </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa7f5864050dcc9bb997173c4832888bf3" name="a35c293f0bba746ebc74a65c620b84fcfa7f5864050dcc9bb997173c4832888bf3"></a>H5D_CHUNK_IDX_NTYPES&#160;</td><td class="fielddoc"><p>This one must be last! </p>
+<tr><td class="fieldname"><a id="a35c293f0bba746ebc74a65c620b84fcfa7f5864050dcc9bb997173c4832888bf3" name="a35c293f0bba746ebc74a65c620b84fcfa7f5864050dcc9bb997173c4832888bf3"></a>H5D_CHUNK_IDX_NTYPES&#160;</td><td class="fielddoc"><p>This one must be last! </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
 </table>
 
@@ -770,13 +780,13 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Values for time of writing fill value property </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aa39293626c4e68dd28b06c0dc84bde4aa34a6d29e6a30c005589056bb61e393a7" name="aa39293626c4e68dd28b06c0dc84bde4aa34a6d29e6a30c005589056bb61e393a7"></a>H5D_FILL_TIME_ERROR&#160;</td><td class="fielddoc"><p>Error </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aa39293626c4e68dd28b06c0dc84bde4aa34a6d29e6a30c005589056bb61e393a7" name="aa39293626c4e68dd28b06c0dc84bde4aa34a6d29e6a30c005589056bb61e393a7"></a>H5D_FILL_TIME_ERROR&#160;</td><td class="fielddoc"><p>Error </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="aa39293626c4e68dd28b06c0dc84bde4aadd7bb84666434f7d1dc642e94c68eb28" name="aa39293626c4e68dd28b06c0dc84bde4aadd7bb84666434f7d1dc642e94c68eb28"></a>H5D_FILL_TIME_ALLOC&#160;</td><td class="fielddoc"><p>Fill on allocation </p>
+<tr><td class="fieldname"><a id="aa39293626c4e68dd28b06c0dc84bde4aadd7bb84666434f7d1dc642e94c68eb28" name="aa39293626c4e68dd28b06c0dc84bde4aadd7bb84666434f7d1dc642e94c68eb28"></a>H5D_FILL_TIME_ALLOC&#160;</td><td class="fielddoc"><p>Fill on allocation </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="aa39293626c4e68dd28b06c0dc84bde4aaa87fbf4f3ebf96f2f3effe7bf46c1528" name="aa39293626c4e68dd28b06c0dc84bde4aaa87fbf4f3ebf96f2f3effe7bf46c1528"></a>H5D_FILL_TIME_NEVER&#160;</td><td class="fielddoc"><p>Never write fill values </p>
+<tr><td class="fieldname"><a id="aa39293626c4e68dd28b06c0dc84bde4aaa87fbf4f3ebf96f2f3effe7bf46c1528" name="aa39293626c4e68dd28b06c0dc84bde4aaa87fbf4f3ebf96f2f3effe7bf46c1528"></a>H5D_FILL_TIME_NEVER&#160;</td><td class="fielddoc"><p>Never write fill values </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72" name="aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72"></a>H5D_FILL_TIME_IFSET&#160;</td><td class="fielddoc"><p>Fill if fill-value was set </p>
+<tr><td class="fieldname"><a id="aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72" name="aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72"></a>H5D_FILL_TIME_IFSET&#160;</td><td class="fielddoc"><p>Fill if fill-value was set </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
 </table>
 
@@ -795,13 +805,13 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Values for fill value status </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a322c8263bd76fa5af8ff7636de5dfa23a73d0560685339037d9ee9df17005eb0b" name="a322c8263bd76fa5af8ff7636de5dfa23a73d0560685339037d9ee9df17005eb0b"></a>H5D_FILL_VALUE_ERROR&#160;</td><td class="fielddoc"><p>Error </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a322c8263bd76fa5af8ff7636de5dfa23a73d0560685339037d9ee9df17005eb0b" name="a322c8263bd76fa5af8ff7636de5dfa23a73d0560685339037d9ee9df17005eb0b"></a>H5D_FILL_VALUE_ERROR&#160;</td><td class="fielddoc"><p>Error </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a322c8263bd76fa5af8ff7636de5dfa23aadc673e3e3dd7ff5685a2d9dab24fb3f" name="a322c8263bd76fa5af8ff7636de5dfa23aadc673e3e3dd7ff5685a2d9dab24fb3f"></a>H5D_FILL_VALUE_UNDEFINED&#160;</td><td class="fielddoc"><p>No fill value defined </p>
+<tr><td class="fieldname"><a id="a322c8263bd76fa5af8ff7636de5dfa23aadc673e3e3dd7ff5685a2d9dab24fb3f" name="a322c8263bd76fa5af8ff7636de5dfa23aadc673e3e3dd7ff5685a2d9dab24fb3f"></a>H5D_FILL_VALUE_UNDEFINED&#160;</td><td class="fielddoc"><p>No fill value defined </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a322c8263bd76fa5af8ff7636de5dfa23aa117582dd3ab4b104ce04029f0c7756a" name="a322c8263bd76fa5af8ff7636de5dfa23aa117582dd3ab4b104ce04029f0c7756a"></a>H5D_FILL_VALUE_DEFAULT&#160;</td><td class="fielddoc"><p>Default fill-value </p>
+<tr><td class="fieldname"><a id="a322c8263bd76fa5af8ff7636de5dfa23aa117582dd3ab4b104ce04029f0c7756a" name="a322c8263bd76fa5af8ff7636de5dfa23aa117582dd3ab4b104ce04029f0c7756a"></a>H5D_FILL_VALUE_DEFAULT&#160;</td><td class="fielddoc"><p>Default fill-value </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a322c8263bd76fa5af8ff7636de5dfa23af1c5d380a1c5e48dabf4c0fea52a8bfe" name="a322c8263bd76fa5af8ff7636de5dfa23af1c5d380a1c5e48dabf4c0fea52a8bfe"></a>H5D_FILL_VALUE_USER_DEFINED&#160;</td><td class="fielddoc"><p>User-defined fill-value </p>
+<tr><td class="fieldname"><a id="a322c8263bd76fa5af8ff7636de5dfa23af1c5d380a1c5e48dabf4c0fea52a8bfe" name="a322c8263bd76fa5af8ff7636de5dfa23af1c5d380a1c5e48dabf4c0fea52a8bfe"></a>H5D_FILL_VALUE_USER_DEFINED&#160;</td><td class="fielddoc"><p>User-defined fill-value </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
 </table>
 
@@ -820,17 +830,17 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Values for the H5D_LAYOUT property </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06eaec7dcc2ce85ec87b9d9b77a0cc40fb64" name="a57e163d4c263b585ca2d904996f5e06eaec7dcc2ce85ec87b9d9b77a0cc40fb64"></a>H5D_LAYOUT_ERROR&#160;</td><td class="fielddoc"><p>error </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06eaec7dcc2ce85ec87b9d9b77a0cc40fb64" name="a57e163d4c263b585ca2d904996f5e06eaec7dcc2ce85ec87b9d9b77a0cc40fb64"></a>H5D_LAYOUT_ERROR&#160;</td><td class="fielddoc"><p>error </p><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06ea922bab7d90bea9d3a0bb9082e0ca334d" name="a57e163d4c263b585ca2d904996f5e06ea922bab7d90bea9d3a0bb9082e0ca334d"></a>H5D_COMPACT&#160;</td><td class="fielddoc"><p>raw data is small (&lt; 64KB) </p>
+<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06ea922bab7d90bea9d3a0bb9082e0ca334d" name="a57e163d4c263b585ca2d904996f5e06ea922bab7d90bea9d3a0bb9082e0ca334d"></a>H5D_COMPACT&#160;</td><td class="fielddoc"><p>raw data is small (&lt; 64KB) </p><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06ea6161acec1a11680d488b5bb8694c79f1" name="a57e163d4c263b585ca2d904996f5e06ea6161acec1a11680d488b5bb8694c79f1"></a>H5D_CONTIGUOUS&#160;</td><td class="fielddoc"><p>contiguous layout </p>
+<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06ea6161acec1a11680d488b5bb8694c79f1" name="a57e163d4c263b585ca2d904996f5e06ea6161acec1a11680d488b5bb8694c79f1"></a>H5D_CONTIGUOUS&#160;</td><td class="fielddoc"><p>contiguous layout </p><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06eadc846667d1f23d573964d22549e5f262" name="a57e163d4c263b585ca2d904996f5e06eadc846667d1f23d573964d22549e5f262"></a>H5D_CHUNKED&#160;</td><td class="fielddoc"><p>chunked or tiled layout </p>
+<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06eadc846667d1f23d573964d22549e5f262" name="a57e163d4c263b585ca2d904996f5e06eadc846667d1f23d573964d22549e5f262"></a>H5D_CHUNKED&#160;</td><td class="fielddoc"><p>chunked or tiled layout </p><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06ea5c213e4ca5ea394669873ce66f558ad4" name="a57e163d4c263b585ca2d904996f5e06ea5c213e4ca5ea394669873ce66f558ad4"></a>H5D_VIRTUAL&#160;</td><td class="fielddoc"><p>actual data is stored in other datasets </p>
+<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06ea5c213e4ca5ea394669873ce66f558ad4" name="a57e163d4c263b585ca2d904996f5e06ea5c213e4ca5ea394669873ce66f558ad4"></a>H5D_VIRTUAL&#160;</td><td class="fielddoc"><p>actual data is stored in other datasets </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06ea294b40c372988aaf2ab2de87a56daa06" name="a57e163d4c263b585ca2d904996f5e06ea294b40c372988aaf2ab2de87a56daa06"></a>H5D_NLAYOUTS&#160;</td><td class="fielddoc"><p>this one must be last! </p>
+<tr><td class="fieldname"><a id="a57e163d4c263b585ca2d904996f5e06ea294b40c372988aaf2ab2de87a56daa06" name="a57e163d4c263b585ca2d904996f5e06ea294b40c372988aaf2ab2de87a56daa06"></a>H5D_NLAYOUTS&#160;</td><td class="fielddoc"><p>this one must be last! </p><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 </td></tr>
 </table>
 
@@ -849,13 +859,13 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Values for the status of space allocation </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a28e60d50e4eaeef27130829f66e39c7aaed645d776643ba70ee55a48eacc372da" name="a28e60d50e4eaeef27130829f66e39c7aaed645d776643ba70ee55a48eacc372da"></a>H5D_SPACE_STATUS_ERROR&#160;</td><td class="fielddoc"><p>Error </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a28e60d50e4eaeef27130829f66e39c7aaed645d776643ba70ee55a48eacc372da" name="a28e60d50e4eaeef27130829f66e39c7aaed645d776643ba70ee55a48eacc372da"></a>H5D_SPACE_STATUS_ERROR&#160;</td><td class="fielddoc"><p>Error </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a28e60d50e4eaeef27130829f66e39c7aa6a5229283c1efde9b24cbe7de59190d5" name="a28e60d50e4eaeef27130829f66e39c7aa6a5229283c1efde9b24cbe7de59190d5"></a>H5D_SPACE_STATUS_NOT_ALLOCATED&#160;</td><td class="fielddoc"><p>Space has not been allocated for this dataset. </p>
+<tr><td class="fieldname"><a id="a28e60d50e4eaeef27130829f66e39c7aa6a5229283c1efde9b24cbe7de59190d5" name="a28e60d50e4eaeef27130829f66e39c7aa6a5229283c1efde9b24cbe7de59190d5"></a>H5D_SPACE_STATUS_NOT_ALLOCATED&#160;</td><td class="fielddoc"><p>Space has not been allocated for this dataset. </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a28e60d50e4eaeef27130829f66e39c7aad738ddae8a111c1ddd7a52e79f7689ec" name="a28e60d50e4eaeef27130829f66e39c7aad738ddae8a111c1ddd7a52e79f7689ec"></a>H5D_SPACE_STATUS_PART_ALLOCATED&#160;</td><td class="fielddoc"><p>Space has been partially allocated for this dataset. (Used only for datasets with chunked storage.) </p>
+<tr><td class="fieldname"><a id="a28e60d50e4eaeef27130829f66e39c7aad738ddae8a111c1ddd7a52e79f7689ec" name="a28e60d50e4eaeef27130829f66e39c7aad738ddae8a111c1ddd7a52e79f7689ec"></a>H5D_SPACE_STATUS_PART_ALLOCATED&#160;</td><td class="fielddoc"><p>Space has been partially allocated for this dataset. (Used only for datasets with chunked storage.) </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a28e60d50e4eaeef27130829f66e39c7aae40765b8e9931d87a5ae9a30029f1fa9" name="a28e60d50e4eaeef27130829f66e39c7aae40765b8e9931d87a5ae9a30029f1fa9"></a>H5D_SPACE_STATUS_ALLOCATED&#160;</td><td class="fielddoc"><p>Space has been allocated for this dataset. </p>
+<tr><td class="fieldname"><a id="a28e60d50e4eaeef27130829f66e39c7aae40765b8e9931d87a5ae9a30029f1fa9" name="a28e60d50e4eaeef27130829f66e39c7aae40765b8e9931d87a5ae9a30029f1fa9"></a>H5D_SPACE_STATUS_ALLOCATED&#160;</td><td class="fielddoc"><p>Space has been allocated for this dataset. </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
 </table>
 
@@ -874,11 +884,11 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Values for VDS bounds option </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a13217d859a956fababf5b139ac64b8a0a843bac047f5d1aa8b40cdfda3f4000a9" name="a13217d859a956fababf5b139ac64b8a0a843bac047f5d1aa8b40cdfda3f4000a9"></a>H5D_VDS_ERROR&#160;</td><td class="fielddoc"><p>Error </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a13217d859a956fababf5b139ac64b8a0a843bac047f5d1aa8b40cdfda3f4000a9" name="a13217d859a956fababf5b139ac64b8a0a843bac047f5d1aa8b40cdfda3f4000a9"></a>H5D_VDS_ERROR&#160;</td><td class="fielddoc"><p>Error </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a13217d859a956fababf5b139ac64b8a0af11d58c657429ca942108c4a54671bd1" name="a13217d859a956fababf5b139ac64b8a0af11d58c657429ca942108c4a54671bd1"></a>H5D_VDS_FIRST_MISSING&#160;</td><td class="fielddoc"><p>Include all data before the first missing mapped data </p>
+<tr><td class="fieldname"><a id="a13217d859a956fababf5b139ac64b8a0af11d58c657429ca942108c4a54671bd1" name="a13217d859a956fababf5b139ac64b8a0af11d58c657429ca942108c4a54671bd1"></a>H5D_VDS_FIRST_MISSING&#160;</td><td class="fielddoc"><p>Include all data before the first missing mapped data </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a13217d859a956fababf5b139ac64b8a0aa92ec0bc9e045a435ca2206018bc2211" name="a13217d859a956fababf5b139ac64b8a0aa92ec0bc9e045a435ca2206018bc2211"></a>H5D_VDS_LAST_AVAILABLE&#160;</td><td class="fielddoc"><p>Include all available mapped data </p>
+<tr><td class="fieldname"><a id="a13217d859a956fababf5b139ac64b8a0aa92ec0bc9e045a435ca2206018bc2211" name="a13217d859a956fababf5b139ac64b8a0aa92ec0bc9e045a435ca2206018bc2211"></a>H5D_VDS_LAST_AVAILABLE&#160;</td><td class="fielddoc"><p>Include all available mapped data </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 </td></tr>
 </table>
 

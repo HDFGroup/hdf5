@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-19</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-20</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -665,7 +665,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a dataset identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000015">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#gabf62045119f4e9c512d87d77f2f992df" title="Creates a new dataset and links it into the file.">H5Dcreate2()</a> or the macro <a class="el" href="#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000022">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#gabf62045119f4e9c512d87d77f2f992df" title="Creates a new dataset and links it into the file.">H5Dcreate2()</a> or the macro <a class="el" href="#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a>.</dd></dl>
 <p><a class="el" href="#ga6b86f2683ae6a78d48d33c45257744a2" title="Creates a dataset at the specified location.">H5Dcreate1()</a> creates a data set with a name, <code class="param">name</code>, in the location specified by the identifier <code class="param">loc_id</code>. <code class="param">loc_id</code> may be a file, group, dataset, named datatype or attribute. If an attribute, dataset, or named datatype is specified for <code class="param">loc_id</code> then the dataset will be created at the location where the attribute, dataset, or named datatype is attached.</p>
 <p><code class="param">name</code> can be a relative path based at <code class="param">loc_id</code> or an absolute path from the root of the file. Use of this function requires that any intermediate groups specified in the path already exist.</p>
 <p>The dataset's datatype and dataspace are specified by <code class="param">type_id</code> and <code class="param">space_id</code>, respectively. These are the datatype and dataspace of the dataset as it will exist in the file, which may differ from the datatype and dataspace in application memory.</p>
@@ -886,7 +886,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000017">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000024">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent()</a>.</dd></dl>
 <p><a class="el" href="#gac4c0ff57977b1f39c1055296e39cbe91" title="Extends a dataset.">H5Dextend()</a> verifies that the dataset is at least of size <code class="param">size</code>, extending it if necessary. The length of <code class="param">size</code> is the same as that of the dataspace of the dataset being changed.</p>
 <p>This function can be applied to the following datasets: </p><ul>
 <li>Any dataset with unlimited dimensions </li>
@@ -1615,7 +1615,7 @@ Applications sometimes write data only to portions of an allocated dataset. It i
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a dataset identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000016">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#ga04198c4cf0b849ed3a8921f6c7169ee2" title="Opens an existing dataset.">H5Dopen2()</a> or the macro <a class="el" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000023">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#ga04198c4cf0b849ed3a8921f6c7169ee2" title="Opens an existing dataset.">H5Dopen2()</a> or the macro <a class="el" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen()</a>.</dd></dl>
 <p><a class="el" href="#gabaf03a683e1da2c8dad6ba1010d55b81" title="Opens an existing dataset.">H5Dopen1()</a> opens an existing dataset for access at the location specified by <code class="param">loc_id</code>. <code class="param">loc_id</code> may be a file, group, dataset, named datatype or attribute. If an attribute, dataset, or named datatype is specified for loc_id then the dataset will be opened at the location where the attribute, dataset, or named datatype is attached. name is a dataset name and is used to identify the dataset in the file.</p>
 <p>A dataset opened with this function should be closed with <a class="el" href="#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a> when the dataset is no longer needed so that resource leaks will not develop.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function <a class="el" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen()</a> renamed to <a class="el" href="#gabaf03a683e1da2c8dad6ba1010d55b81" title="Opens an existing dataset.">H5Dopen1()</a> and deprecated in this release. </dd></dl>
@@ -1817,7 +1817,7 @@ Applications sometimes write data only to portions of an allocated dataset. It i
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000019">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> or the macro <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000026">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> or the macro <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk()</a>.</dd></dl>
 <p><a class="el" href="#gad3b9b3024ca4ab7eb7fe6872088398f3" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk1()</a> reads a raw data chunk as specified by its logical offset <code class="param">offset</code> in a chunked dataset <code class="param">dset_id</code> from the dataset in the file into the application memory buffer <code class="param">buf</code>. The data in <code class="param">buf</code> is read directly from the file bypassing the library's internal data transfer pipeline, including filters.</p>
 <p><code class="param">offset</code> is an array specifying the logical position of the first element of the chunk in the dataset's dataspace. The length of the <code class="param">offset</code> array must equal the number of dimensions, or rank, of the dataspace. The values in <code class="param">offset</code> must not exceed the dimension limits and must specify a point that falls on a dataset chunk boundary.</p>
 <p>The mask <code class="param">filters</code> indicates which filters were used when the chunk was written. A zero value (all bits 0) indicates that all enabled filters are applied on the chunk. A filter is skipped if the bit corresponding to the filter's position in the pipeline (0 ≤ position &lt; 32) is turned on.</p>
@@ -2188,7 +2188,7 @@ A call to <a class="el" href="#gad31e1e0129f4520c531ce524de2a056f" title="Change
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000018">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe" title="Reclaims the variable length (VL) datatype memory buffers.">H5Treclaim()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000025">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe" title="Reclaims the variable length (VL) datatype memory buffers.">H5Treclaim()</a>.</dd></dl>
 <p><a class="el" href="#ga222a2fd93868e2524b2e42c3c6146119" title="Reclaims variable-length (VL) datatype memory buffers.">H5Dvlen_reclaim()</a> reclaims memory buffers created to store VL datatypes.</p>
 <p>The <code class="param">type_id</code> must be the datatype stored in the buffer. The <code class="param">space_id</code> describes the selection for the memory buffer to free the VL datatypes within. The <code class="param">dxpl_id</code> is the dataset transfer property list that was used for the I/O transfer to create the buffer. And <code class="param">buf</code> is the pointer to the buffer to be reclaimed.</p>
 <p>The VL structures (<a class="el" href="structhvl__t.html">hvl_t</a>) in the user's buffer are modified to zero out the VL information after the memory has been reclaimed.</p>
