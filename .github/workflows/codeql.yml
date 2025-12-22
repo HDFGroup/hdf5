@@ -58,7 +58,7 @@ jobs:
             \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
             -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON \
-            -DLIBAEC_DIR=/usr \
+            -Dlibaec_DIR=/usr \
             ..
 
       - name: Initialize CodeQL
