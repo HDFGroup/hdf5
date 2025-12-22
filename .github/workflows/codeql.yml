@@ -57,10 +57,8 @@ jobs:
             -DZLIB_LIBRARY=/usr/lib/x86_64-linux-gnu/libz.so \
             \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
-            -DHDF5_USE_LIBAEC:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON \
-            -DSZIP_INCLUDE_DIR=/usr/include \
-            -DSZIP_LIBRARY=/usr/lib/x86_64-linux-gnu/libsz.so \
+            -DLIBAEC_DIR=/usr \
             ..
 
       - name: Initialize CodeQL
