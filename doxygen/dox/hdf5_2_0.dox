@@ -80,7 +80,7 @@ Additional Release Information
 \subsection subsec_download Downloads
 
 Source code and binaries are available at:
-<a href="https://\RELURL/v2_0/v2_0_0/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/index.html</a>
+<a href="https://github.com/HDFGroup/hdf5/releases/tag/2.0.0">HDF5 2.0.0 on GitHub</a>
 
 Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with either CMake or Autotools.
 
