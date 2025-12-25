@@ -80,7 +80,7 @@ var searchData=
   ['objno_77',['objno',['../struct_h5_g__stat__t.html#a871980f2e438ab5b2d466163496b8d84',1,'H5G_stat_t']]],
   ['objs_78',['objs',['../structpack__opttbl__t.html#abd8ad9acc4237d1cb93b0936754be85d',1,'pack_opttbl_t']]],
   ['objversion_79',['objVersion',['../class_h5_1_1_h5_object.html#a7ef85ec76e25ccffe2807f0a174f4f1c',1,'H5::H5Object']]],
-  ['obtain_20gz_20file_80',['Methods to obtain (gz file)',['../rel_spec_20.html#subsec_obtain_method',1,'']]],
+  ['obtain_20gz_20file_80',['obtain gz file',['../rel_spec_114.html#subsec_obtain_method_114',1,'Methods to obtain (gz file)'],['../rel_spec_20.html#subsec_obtain_method_20',1,'Methods to obtain (gz file)']]],
   ['obtain_20tools_20and_20files_20optional_81',['Obtain Tools and Files (Optional)',['../_view_tools_command.html#secViewToolsCommandObtain',1,'']]],
   ['obtaining_20hdf5_20source_82',['2. Obtaining HDF5 Source',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md270',1,'']]],
   ['obtaining_20information_20regarding_20an_20object_20s_20attributes_83',['Obtaining Information Regarding an Object&apos;s Attributes',['../_h5_a__u_g.html#subsubsec_attribute_work_info',1,'']]],

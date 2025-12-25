@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-24</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-25</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,6 +141,47 @@ $(function(){initNavTree('rel_spec_114.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="release_specific_info.html">Release Specific Information</a> </p><hr  />
+<h1><a class="anchor" id="sec_rel_spec_114"></a>
+HDF5 Library and Tools 1.14.6</h1>
+<h2><a class="anchor" id="subsec_rel_info_114"></a>
+Release Information</h2>
+<table class="doxtable">
+<tr>
+<td style="background-color:#F5F5F5">Version  </td><td>HDF5 1.14.6   </td></tr>
+<tr>
+<td style="background-color:#F5F5F5">Release Date  </td><td>02/05/25   </td></tr>
+<tr>
+<td style="background-color:#F5F5F5">Additional Release Information  </td><td><a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1.14.6/release_docs/RELEASE.txt">RELEASE.txt</a>   </td></tr>
+<tr>
+<td style="background-color:#F5F5F5"></td><td><a class="el" href="#sec_rel_spec_114_migrate">Migrating from HDF5 1.12 to HDF5 1.14</a>   </td></tr>
+<tr>
+<td style="background-color:#F5F5F5"></td><td><a class="el" href="rel_spec_114_change.html#sec_rel_spec_114_change">Software Changes from Release to Release in HDF5 1.14</a>   </td></tr>
+<tr>
+<td style="background-color:#F5F5F5"></td><td><a class="el" href="#sec_rel_spec_114_feat">New Features in HDF5 Release 1.14</a>   </td></tr>
+<tr>
+<td style="background-color:#F5F5F5"></td><td><a href="https://www.hdfgroup.org/2025/02/05/release-of-hdf5-1-14-6-newsletter-205/">Newsletter Announcement</a>   </td></tr>
+<tr>
+<td style="background-color:#F5F5F5"></td><td>ABI/API compatibility reports between 1.14.6 and 1.14.5 <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_6/downloads/hdf5-1.14.6.html.abi.reports.tar.gz">tar file</a> or <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_6/downloads/compat_report/index.html">individual html files</a>   </td></tr>
+<tr>
+<td style="background-color:#F5F5F5"></td><td><a href="https://support.hdfgroup.org/documentation/hdf5/latest/">Doxygen generated Reference Manual</a>   </td></tr>
+</table>
+<h2><a class="anchor" id="subsec_download_114"></a>
+Downloads</h2>
+<p>Source code and binaries are available at: <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_6/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_6</a></p>
+<p>Please refer to <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL">Build instructions</a> for building with either CMake or Autotools.</p>
+<h2><a class="anchor" id="subsec_obtain_method_114"></a>
+Methods to obtain (gz file)</h2>
+<ul>
+<li>firefox – Download file and then run: <code>gzip &lt;distribution&gt;.tar.gz | tar xzf -</code> </li>
+<li>chrome – Download file and then run: <code>gzip -cd &lt;distribution&gt;.tar.gz | tar xvf -</code> </li>
+<li>wget – <div style="margin-left: 2em;"> <code>wget <a href="https://github.com/HDFGroup/hdf5/releases/download/">https://github.com/HDFGroup/hdf5/releases/download/</a>${PACKAGEVERSION}/&lt;distribution&gt;.tar.gz</code><br  />
+ <code>gzip -cd &lt;distribution&gt;.tar.gz | tar xvf -</code> </div> </li>
+<li><code>&lt;distribution&gt;</code> is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 1.14.6 for this release</li>
+</ul>
+<h2><a class="anchor" id="subsec_dox_gen_doc_114"></a>
+Doxygen Generated Reference Manual</h2>
+<p>The new HDF5 documentation based on <a href="https://www.doxygen.nl/index.html">Doxygen</a> is available <a class="el" href="index.html">here</a>.</p>
+<p>This documentation is WORK-IN-PROGRESS. Since this portion of the HDF5 documentation is now part of the source code, it gets the same treatment as code. In other words, issues, inaccuracies, corrections should be reported as issues in <a href="https://github.com/HDFGroup/hdf5/issues">GitHub</a>, and pull requests will be reviewed and accepted as any other code changes.</p>
 <h1><a class="anchor" id="sec_rel_spec_114_migrate"></a>
 Migrating from HDF5 1.12 to HDF5 1.14</h1>
 <h1><a class="anchor" id="autotoc_md16"></a>
