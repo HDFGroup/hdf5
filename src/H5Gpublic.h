@@ -524,17 +524,18 @@ H5_DLL herr_t H5Gclose_async(hid_t group_id, hid_t es_id);
 /* Macros */
 
 /* Link definitions */
-#define H5G_SAME_LOC   H5L_SAME_LOC
-#define H5G_LINK_ERROR H5L_TYPE_ERROR
-#define H5G_LINK_HARD  H5L_TYPE_HARD
-#define H5G_LINK_SOFT  H5L_TYPE_SOFT
-#define H5G_link_t     H5L_type_t
+#define H5G_SAME_LOC   H5L_SAME_LOC   /**< Indicates operation occurs on same location \since 1.6.0 */
+#define H5G_LINK_ERROR H5L_TYPE_ERROR /**< Invalid link type id \since 1.8.0 */
+#define H5G_LINK_HARD  H5L_TYPE_HARD  /**< Hard link id \since 1.8.0 */
+#define H5G_LINK_SOFT  H5L_TYPE_SOFT  /**< Soft link id \since 1.8.0 */
+#define H5G_link_t     H5L_type_t     /**< Link types \since 1.0.0 */
 
 /* Macros for types of objects in a group (see H5G_obj_t definition) */
-#define H5G_NTYPES      256 /* Max possible number of types	*/
-#define H5G_NLIBTYPES   8   /* Number of internal types	*/
+#define H5G_NTYPES      256           /**< Max possible number of types \since 1.0.0 */
+#define H5G_NLIBTYPES   8             /**< Number of internal types \since 1.2.0 */
 #define H5G_NUSERTYPES  (H5G_NTYPES - H5G_NLIBTYPES)
-#define H5G_USERTYPE(X) (8 + (X)) /* User defined types		*/
+                                      /**< Number of user-defined types \since 1.2.0 */
+#define H5G_USERTYPE(X) (8 + (X))     /**< User defined types \since 1.2.0 */
 
 /* Typedefs */
 
