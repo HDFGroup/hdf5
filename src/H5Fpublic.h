@@ -30,7 +30,7 @@
 #define H5F_ACC_TRUNC  (0x0002u) /**< Overwrite existing files \since 1.0.0    */
 #define H5F_ACC_EXCL   (0x0004u) /**< Fail if file already exists \since 1.0.0 */
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
-#define H5F_ACC_CREAT (0x0010u)  /**< Create non-existing files \since 1.4.0    */
+#define H5F_ACC_CREAT (0x0010u) /**< Create non-existing files \since 1.4.0    */
 
 /**
  * Indicates that this file is open for writing in a single-writer/multi-reader
