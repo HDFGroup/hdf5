@@ -6,6 +6,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build_and_test:
     strategy:
@@ -63,5 +66,5 @@ jobs:
       - name: Run Tests
         env:
           HDF5TestExpress: 0
-        run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -V -R H5TESTXPR
+        run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -R H5TESTXPR
         working-directory: ${{ runner.workspace }}/build

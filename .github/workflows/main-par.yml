@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   #
   # The GitHub runners are inadequate for running parallel HDF5 tests,
@@ -69,11 +72,11 @@ jobs:
       # RUN TESTS
       #
       - name: Run Tests
-        run: ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
         if: ${{ inputs.thread_safety != 'TS' }}
 
       - name: Run Parallel Tests
-        run: ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }} -V
+        run: ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
         if: ${{ inputs.thread_safety != 'TS' }}

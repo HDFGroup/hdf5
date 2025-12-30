@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build_and_test:
     name: Test HDF5 Log-based VOL connector
@@ -86,4 +89,4 @@ jobs:
         # in the future.
         if: false
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api" -E "parallel" .
+          ctest --build-config ${{ inputs.build_mode }} -R "h5_api" -E "parallel" .

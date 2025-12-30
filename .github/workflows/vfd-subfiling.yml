@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build_and_test:
     strategy:
@@ -95,5 +98,5 @@ jobs:
           # For now, just run the tests directly setup for use with the
           # Subfiling VFD. We can expand on this once the library's tests
           # are better separated into categories for VFD testing.
-          ctest --build-config ${{ inputs.build_mode }} -VV \
+          ctest --build-config ${{ inputs.build_mode }} \
               -R "MPI_TEST_t_subfiling_vfd|MPI_TEST_t_vfd|H5_ph5_subfiling"

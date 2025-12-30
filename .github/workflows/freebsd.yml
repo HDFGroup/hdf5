@@ -23,6 +23,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   freebsd-build-and-test:
     runs-on: ubuntu-latest
@@ -79,5 +82,5 @@ jobs:
             echo ""
 
             # Run tests
-            ctest . --parallel 2 -C Release -V
+            ctest . --parallel 2 -C Release
             echo ""

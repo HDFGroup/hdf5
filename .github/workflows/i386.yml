@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   i386_build_and_test:
     name: "i386 ${{ inputs.build_mode }}"
@@ -55,5 +58,5 @@ jobs:
       - name: Run Tests
         shell: alpine.sh --root {0}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -VV
+          ctest . --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: build

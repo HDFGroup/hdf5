@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   aocc_build_and_test:
     name: "aocc ${{ inputs.build_mode }}"
@@ -97,11 +100,11 @@ jobs:
       - name: Run Tests
         shell: bash
         run: |
-          ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Parallel Tests
         shell: bash
         run: |
-          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }} -V
+          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build

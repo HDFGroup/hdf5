@@ -7,6 +7,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel. We just have one job, but the matrix items defined below will
 # run in parallel.
@@ -69,12 +72,12 @@ jobs:
       # RUN TESTS
       - name: Run Tests
         run: |
-          ctest . --parallel 2 -C Debug -V -E "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
+          ctest . --parallel 2 -C Debug -E "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Expected to Fail Tests
         run: |
-          ctest . --parallel 2 -C Debug -V -R "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
+          ctest . --parallel 2 -C Debug -R "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
 
@@ -129,7 +132,7 @@ jobs:
       # RUN TESTS
       #
       - name: Run Tests
-        run: ctest . --parallel 2 -C Debug -V
+        run: ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_10:
@@ -183,7 +186,7 @@ jobs:
       # RUN TESTS
       #
       - name: Run Tests
-        run: ctest . --parallel 2 -C Debug -V
+        run: ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_12:
@@ -235,7 +238,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C Debug -V
+        run: ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_14:
@@ -287,7 +290,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C Debug -V
+        run: ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
   build_v2_0_linux:
@@ -340,7 +343,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C Debug -V
+        run: ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
   build_v2_0_win:
@@ -392,7 +395,7 @@ jobs:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
         run: |
-          ctest . --parallel 2 -C Debug -V
+          ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
   build_system_zlib:
@@ -449,7 +452,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C Debug -V
+        run: ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
   build_zlibng:
@@ -502,7 +505,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C Release -V
+        run: ctest . --parallel 2 -C Release
         working-directory: ${{ runner.workspace }}/build
 
   build_nofilter:
@@ -555,7 +558,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C Release -V
+        run: ctest . --parallel 2 -C Release
         working-directory: ${{ runner.workspace }}/build
 
   build_debug_werror:

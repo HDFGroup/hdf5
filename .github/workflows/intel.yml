@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   intel_oneapi_linux:
     name: "linux-oneapi ${{ inputs.build_mode }}"
@@ -63,7 +66,7 @@ jobs:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
   Intel_oneapi_windows:
@@ -108,5 +111,5 @@ jobs:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E tfloatsattrs
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -E tfloatsattrs
         working-directory: ${{ runner.workspace }}/build

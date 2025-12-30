@@ -31,6 +31,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 # Previous workflows must pass to get here so tag the commit that created the files
 jobs:
   create-tag:

@@ -30,6 +30,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   # NOTE: The aws-c-s3 library build is now handled by the parent workflow
   # that calls this workflow. The parent must call build-aws-c-s3.yml before
@@ -198,7 +201,7 @@ jobs:
         if: matrix.test_ros3 == 'ON'
         run: |
           # For now, just run S3 tests
-          ctest . -C ${{ inputs.build_mode }} -R "S3TEST" -V
+          ctest . -C ${{ inputs.build_mode }} -R "S3TEST"
         working-directory: ${{ runner.workspace }}/build
 
   # Build and test the ROS3 VFD using aws-c-s3 from source (Linux) or package managers (Windows/macOS)
@@ -360,7 +363,7 @@ jobs:
         if: matrix.test_ros3 == 'ON'
         run: |
           # For now, just run S3 tests
-          ctest . -C ${{ inputs.build_mode }} -R "S3TEST" -V
+          ctest . -C ${{ inputs.build_mode }} -R "S3TEST"
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package

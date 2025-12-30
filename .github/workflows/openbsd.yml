@@ -23,6 +23,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   openbsd-build-and-test:
     runs-on: ubuntu-latest

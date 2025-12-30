@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
 
   Build_and_test:
@@ -79,11 +82,11 @@ jobs:
 
       - name: Run Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "cache_api|dt_arith|err_compat"
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -E "cache_api|dt_arith|err_compat"
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Expected to Fail Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "cache_api|dt_arith|err_compat"
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -R "cache_api|dt_arith|err_compat"
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
