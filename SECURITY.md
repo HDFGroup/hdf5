@@ -129,7 +129,7 @@ When security fixes are released:
 
 1. **Release Announcement:** Security fixes are announced through GitHub releases and security advisories
 2. **Version Numbering:** Security patches are released as:
-   - Patch releases (e.g., 1.14.5 → 1.14.6) for the current major version
+   - Patch releases (e.g., 2.1.1 → 2.1.2) for the current major version
    - In exceptional cases, critical security fixes may be backported to recent prior versions at the maintainers' discretion
 3. **Upgrade Recommendations:**
    - **Critical vulnerabilities:** Upgrade immediately
