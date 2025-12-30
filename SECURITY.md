@@ -11,12 +11,12 @@
 
 ## Supported Versions
 
-Security updates are provided only for the most recent version. We strongly advise all users to upgrade to the latest release to ensure they receive all current security patches.
+Security updates are provided only for the most recent release version. We strongly advise all users to upgrade to the latest release to ensure they receive all current security patches.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| Latest  | :white_check_mark: |
-| Older   | :x:                |
+| Version Category | Security Support |
+| ---------------- | ---------------- |
+| Latest Release   | Yes              |
+| Previous Releases| No               |
 
 ## Reporting a Vulnerability
 
