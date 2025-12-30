@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-30</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -168,9 +168,9 @@ Macros</h2></td></tr>
 <tr class="separator:a55f1f04ca997fe006ca614b7e8952a96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18c209cc76db59ae10d883c3f414f06d" id="r_a18c209cc76db59ae10d883c3f414f06d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18c209cc76db59ae10d883c3f414f06d">H5G_link_t</a>&#160;&#160;&#160;<a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48">H5L_type_t</a></td></tr>
 <tr class="separator:a18c209cc76db59ae10d883c3f414f06d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5fd5ae3dc1d26a261ad16627d12879ab" id="r_a5fd5ae3dc1d26a261ad16627d12879ab"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5fd5ae3dc1d26a261ad16627d12879ab">H5G_NLIBTYPES</a>&#160;&#160;&#160;8   /* Number of internal types	*/</td></tr>
+<tr class="memitem:a5fd5ae3dc1d26a261ad16627d12879ab" id="r_a5fd5ae3dc1d26a261ad16627d12879ab"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5fd5ae3dc1d26a261ad16627d12879ab">H5G_NLIBTYPES</a>&#160;&#160;&#160;8</td></tr>
 <tr class="separator:a5fd5ae3dc1d26a261ad16627d12879ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8287cad3627dc87ad3862ba604a3104" id="r_ac8287cad3627dc87ad3862ba604a3104"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8287cad3627dc87ad3862ba604a3104">H5G_NTYPES</a>&#160;&#160;&#160;256 /* Max possible number of types	*/</td></tr>
+<tr class="memitem:ac8287cad3627dc87ad3862ba604a3104" id="r_ac8287cad3627dc87ad3862ba604a3104"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8287cad3627dc87ad3862ba604a3104">H5G_NTYPES</a>&#160;&#160;&#160;256</td></tr>
 <tr class="separator:ac8287cad3627dc87ad3862ba604a3104"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac34e168f3699d8bb0e3b23f9bd8f56ff" id="r_ac34e168f3699d8bb0e3b23f9bd8f56ff"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac34e168f3699d8bb0e3b23f9bd8f56ff">H5G_NUSERTYPES</a>&#160;&#160;&#160;(<a class="el" href="#ac8287cad3627dc87ad3862ba604a3104">H5G_NTYPES</a> - <a class="el" href="#a5fd5ae3dc1d26a261ad16627d12879ab">H5G_NLIBTYPES</a>)</td></tr>
 <tr class="separator:ac34e168f3699d8bb0e3b23f9bd8f56ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -310,6 +310,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Invalid link type id </p><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -324,6 +325,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Hard link id </p><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -338,6 +340,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Soft link id </p><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -352,6 +355,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Link types </p><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -362,10 +366,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5G_NLIBTYPES&#160;&#160;&#160;8   /* Number of internal types	*/</td>
+          <td class="memname">#define H5G_NLIBTYPES&#160;&#160;&#160;8</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Number of internal types </p><dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -376,10 +381,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5G_NTYPES&#160;&#160;&#160;256 /* Max possible number of types	*/</td>
+          <td class="memname">#define H5G_NTYPES&#160;&#160;&#160;256</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Max possible number of types </p><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -394,6 +400,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Number of user-defined types </p><dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -408,6 +415,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Indicates operation occurs on same location </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -425,8 +433,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">(8 + (X)) <span class="comment">/* User defined types     */</span></div>
-</div><!-- fragment -->
+<b>Value:</b><div class="fragment"><div class="line">(8 + (X))</div>
+</div><!-- fragment --><p>User defined types </p><dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Typedef Documentation</h2>

@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-12-30</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -231,7 +231,7 @@ File free space managers</h2>
 <div class="line"><a class="code hl_function" href="group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963">H5Pset_file_space_page_size</a>(fcpl_id, 1048576);</div>
 <div class="line">...</div>
 <div class="line">hid_t file_id = <a class="code hl_function" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a>(<span class="stringliteral">&quot;file.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a>, fcpl_id, fapl_id);</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a9cc492c4b5c936e48716a8dab3691bccacd625bd864903e71132c9098929f5a0a"><div class="ttname"><a href="_h5_fpublic_8h.html#a9cc492c4b5c936e48716a8dab3691bccacd625bd864903e71132c9098929f5a0a">H5F_FSPACE_STRATEGY_PAGE</a></div><div class="ttdeci">@ H5F_FSPACE_STRATEGY_PAGE</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:200</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a9cc492c4b5c936e48716a8dab3691bccacd625bd864903e71132c9098929f5a0a"><div class="ttname"><a href="_h5_fpublic_8h.html#a9cc492c4b5c936e48716a8dab3691bccacd625bd864903e71132c9098929f5a0a">H5F_FSPACE_STRATEGY_PAGE</a></div><div class="ttdeci">@ H5F_FSPACE_STRATEGY_PAGE</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:198</div></div>
 <div class="ttc" id="a_h5_ppublic_8h_html_a206f334f1e6c973e1215a3148b45b977"><div class="ttname"><a href="_h5_ppublic_8h.html#a206f334f1e6c973e1215a3148b45b977">H5P_FILE_CREATE</a></div><div class="ttdeci">#define H5P_FILE_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:52</div></div>
 <div class="ttc" id="agroup___f_c_p_l_html_gad012d7f3c2f1e1999eb1770aae3a4963"><div class="ttname"><a href="group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963">H5Pset_file_space_page_size</a></div><div class="ttdeci">herr_t H5Pset_file_space_page_size(hid_t plist_id, hsize_t fsp_size)</div><div class="ttdoc">Sets the file space page size for a file creation property list.</div></div>
 <div class="ttc" id="agroup___f_c_p_l_html_gae9ed9b56f290d6d24421242f1c04914e"><div class="ttname"><a href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e">H5Pset_file_space_strategy</a></div><div class="ttdeci">herr_t H5Pset_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t strategy, bool persist, hsize_t threshold)</div><div class="ttdoc">Sets the file space handling strategy and persisting free-space values for a file creation property l...</div></div>
@@ -252,7 +252,7 @@ Runtime HDF5 Library version</h2>
 <div class="line"><a class="code hl_function" href="group___f_a_p_l.html#gacbe1724e7f70cd17ed687417a1d2a910">H5Pset_libver_bounds</a>(fapl_id, <a class="code hl_enumvalue" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0">H5F_LIBVER_LATEST</a>, <a class="code hl_enumvalue" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0">H5F_LIBVER_LATEST</a>);</div>
 <div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id = <a class="code hl_function" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a>(<span class="stringliteral">&quot;file.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, fapl_id);</div>
 <div class="line">...</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0"><div class="ttname"><a href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0">H5F_LIBVER_LATEST</a></div><div class="ttdeci">@ H5F_LIBVER_LATEST</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:189</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0"><div class="ttname"><a href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0">H5F_LIBVER_LATEST</a></div><div class="ttdeci">@ H5F_LIBVER_LATEST</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:187</div></div>
 <div class="ttc" id="agroup___f_a_p_l_html_gacbe1724e7f70cd17ed687417a1d2a910"><div class="ttname"><a href="group___f_a_p_l.html#gacbe1724e7f70cd17ed687417a1d2a910">H5Pset_libver_bounds</a></div><div class="ttdeci">herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_t high)</div><div class="ttdoc">Controls the range of library release versions used when creating objects in a file.</div></div>
 </div><!-- fragment --><hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
