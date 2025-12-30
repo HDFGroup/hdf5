@@ -13,8 +13,6 @@ permissions:
 
 env:
   CTEST_OUTPUT_ON_FAILURE: 1
-
-env:
   ADMIN_PASSWORD: admin
   ADMIN_USERNAME: admin
   USER_NAME: test_user1

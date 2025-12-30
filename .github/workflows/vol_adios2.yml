@@ -13,8 +13,6 @@ permissions:
 
 env:
   CTEST_OUTPUT_ON_FAILURE: 1
-
-env:
   ADIOS2_COMMIT: 3adf20a929b69c23312a6b5f3cccc49376df77e8
   ADIOS2_COMMIT_SHORT: 3adf20a
 
