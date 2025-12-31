@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   nvhpc_build_and_test:
     name: "nvhpc ${{ inputs.build_mode }}"
@@ -87,13 +90,13 @@ jobs:
       - name: Run Tests
         shell: bash
         run: |
-          ctest . -E "MPI_TEST|H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . -E "MPI_TEST|H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Expected To Fail Tests
         shell: bash
         run: |
-          ctest . -R "H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . -R "H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
 
@@ -101,5 +104,5 @@ jobs:
         shell: bash
         run: |
           export UCX_WARN_UNUSED_ENV_VARS=n
-          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }} -V
+          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build

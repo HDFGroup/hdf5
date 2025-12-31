@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   linux_build_and_test:
     name: "Linux Developer Mode Express Test Workflows"
@@ -86,7 +89,7 @@ jobs:
       - name: Run Tests
         env:
           HDF5TestExpress: 0
-        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
+        run: ctest . --parallel 2 -C Developer -R H5TESTXPR -E fheap
         working-directory: ${{ runner.workspace }}/build
 
   win_build_and_test:
@@ -164,7 +167,7 @@ jobs:
       - name: Run Tests
         env:
           HDF5TestExpress: 0
-        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
+        run: ctest . --parallel 2 -C Developer -R H5TESTXPR -E fheap
         working-directory: ${{ runner.workspace }}/build
 
   build_and_test_mac_latest:
@@ -250,7 +253,7 @@ jobs:
       - name: Run Tests
         env:
           HDF5TestExpress: 0
-        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
+        run: ctest . --parallel 2 -C Developer -R H5TESTXPR -E fheap
         working-directory: ${{ runner.workspace }}/build
 
   ####### clang builds
@@ -341,6 +344,6 @@ jobs:
       - name: Run Tests
         env:
           HDF5TestExpress: 0
-        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
+        run: ctest . --parallel 2 -C Developer -R H5TESTXPR -E fheap
         working-directory: ${{ runner.workspace }}/build
 

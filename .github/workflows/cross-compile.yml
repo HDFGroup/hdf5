@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build_and_test_linux:
     name: "Ubuntu mingw64-${{ inputs.build_mode }}"
@@ -78,12 +81,12 @@ jobs:
 
       # RUN TESTS
 #      - name: CMake Run Tests
-#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "err_compat|filenotclosed|swmr|cache_api"
+#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -E "err_compat|filenotclosed|swmr|cache_api"
 #        working-directory: ${{ runner.workspace }}/build
 
       # RUN Failing TESTS
 #      - name: CMake Run Tests
-#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "err_compat|filenotclosed|swmr|cache_api"
+#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -R "err_compat|filenotclosed|swmr|cache_api"
 #        working-directory: ${{ runner.workspace }}/build
 #        continue-on-error: true
 

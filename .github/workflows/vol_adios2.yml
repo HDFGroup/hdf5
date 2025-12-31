@@ -12,6 +12,7 @@ permissions:
   contents: read
 
 env:
+  CTEST_OUTPUT_ON_FAILURE: 1
   ADIOS2_COMMIT: 3adf20a929b69c23312a6b5f3cccc49376df77e8
   ADIOS2_COMMIT_SHORT: 3adf20a
 
@@ -116,4 +117,4 @@ jobs:
         # in the future.
         if: false
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api" -E "parallel" .
+          ctest --build-config ${{ inputs.build_mode }} -R "h5_api" -E "parallel" .

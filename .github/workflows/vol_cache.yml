@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build_and_test:
     strategy:
@@ -145,12 +148,12 @@ jobs:
       - name: Test HDF5 cache VOL connector with external tests
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_file$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_group$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset_async_api$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_write_multi$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_multdset$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_file$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_group$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_dataset$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_dataset_async_api$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_write_multi$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_multdset$" .
 
       - name: Test HDF5 cache VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build
@@ -161,4 +164,4 @@ jobs:
         # that this should be re-enabled in the future.
         if: ${{ ! matrix.async }}
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" -E "H5DIFF" .
+          ctest --build-config ${{ inputs.build_mode }} -R "HDF5_VOL_vol-cache" -E "H5DIFF" .

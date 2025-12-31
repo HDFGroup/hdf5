@@ -696,7 +696,7 @@ H5_DLL hid_t H5Gopen1(hid_t loc_id, const char *name);
  *          cur_name is \TText{./foo}, \p new_name is \TText{./x/y/bar}, and a
  *          request is made for \TText{./x/y/bar}, then the actual object looked
  *          up is \TText{./x/y/./foo}.
-
+ *
  * \version 1.8.0 Function deprecated in this release.
  *
  * \since 1.0.0

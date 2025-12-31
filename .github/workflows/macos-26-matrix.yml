@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
   cancel-in-progress: true
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build-test:
     strategy:
@@ -257,10 +260,10 @@ jobs:
         # Run tests with appropriate settings for each configuration
         if [[ "${{ matrix.parallel }}" == "ON" ]]; then
           # For parallel builds, limit concurrent tests
-          ctest . -C Release -V --parallel 1
+          ctest . -C Release --parallel 1
         else
           # For serial builds, can run more tests concurrently
-          ctest . -C Release -V --parallel 2
+          ctest . -C Release --parallel 2
         fi
       working-directory: ${{ runner.workspace }}/build
       env:
