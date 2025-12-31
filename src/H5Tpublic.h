@@ -203,7 +203,8 @@ typedef struct {
 /* Variable Length String information */
 /**
  * Indicate that a string is variable length (null-terminated in C, instead of
- * fixed length) \since 1.0.0
+ * fixed length)
+ * \since 1.0.0
  */
 #define H5T_VARIABLE SIZE_MAX
 
