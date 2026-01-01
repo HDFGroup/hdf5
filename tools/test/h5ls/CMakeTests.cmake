@@ -314,7 +314,6 @@ macro (ADD_H5_TEST testname)
     endif ()
 
     set_tests_properties (${vol_prefix}H5LS-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${vol_workdir}"
     )
 
@@ -353,7 +352,6 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
     if ("H5LS_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -386,7 +384,7 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   endif ()
   set_tests_properties (H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
       FIXTURES_REQUIRED h5ls_s3_proxy
-      ENVIRONMENT "${h5ls_s3tests_env};${CROSSCOMPILING_PATH}"
+      ENVIRONMENT "${h5ls_s3tests_env}"
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
   )
   if ("H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

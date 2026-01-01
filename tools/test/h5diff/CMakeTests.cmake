@@ -388,7 +388,7 @@ foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
   # Generate test files
   add_test (NAME ${external_vol_tgt}-h5diffgentest COMMAND $<TARGET_FILE:h5gentest> -h5diff)
   set_tests_properties (${external_vol_tgt}-h5diffgentest PROPERTIES
-      ENVIRONMENT "${vol_env};${CROSSCOMPILING_PATH}"
+      ENVIRONMENT "${vol_env}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles"
       FIXTURES_SETUP ${ext_vol_dir_name}-files
   )
@@ -580,7 +580,6 @@ macro (ADD_SH5_TEST testname)
     endif ()
     set_tests_properties (${vol_prefix}H5DIFF-${testname} PROPERTIES
         WORKING_DIRECTORY "${workdir}"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5DIFF-${testname} PROPERTIES
@@ -715,9 +714,6 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -D "TEST_ENV_VALUE=${ud_search_path}"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (${vol_prefix}H5DIFF_UD-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if ("${vol_prefix}H5DIFF_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (${vol_prefix}H5DIFF_UD-${testname} PROPERTIES DISABLED true)

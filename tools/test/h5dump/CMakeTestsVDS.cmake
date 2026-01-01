@@ -122,7 +122,6 @@ macro (ADD_H5_VDS_TEST resultfile resultcode)
     )
   endif ()
   set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
   )
   if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -135,7 +134,7 @@ macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME H5DUMP_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
     set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES
-        ENVIRONMENT "HDF5_VDS_PREFIX=${PROJECT_BINARY_DIR}/testfiles/vds/;${CROSSCOMPILING_PATH}"
+        ENVIRONMENT "HDF5_VDS_PREFIX=${PROJECT_BINARY_DIR}/testfiles/vds/"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
     )
     if (${resultcode})
@@ -158,7 +157,6 @@ macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
             -D "TEST_ENV_VALUE=${PROJECT_BINARY_DIR}/testfiles/vds/"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
-    set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES ENVIRONMENT "${CROSSCOMPILING_PATH}")
   endif ()
   if ("H5DUMP_PREFIX-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES DISABLED true)
@@ -170,7 +168,6 @@ macro (ADD_H5_VDS_LAYOUT resultfile resultcode)
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> -p ${ARGN})
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
     )
     if (${resultcode})
@@ -191,7 +188,6 @@ macro (ADD_H5_VDS_LAYOUT resultfile resultcode)
             -D "TEST_REFERENCE=${resultfile}.ddl"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES ENVIRONMENT "${CROSSCOMPILING_PATH}")
   endif ()
   if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
