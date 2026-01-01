@@ -27,7 +27,7 @@ jobs:
           sudo apt-get install libopenmpi-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           path: hdf5
 
@@ -67,14 +67,14 @@ jobs:
       # still test the connector against changes in HDF5.
       - name: Restore ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }}) installation cache
         id: cache-adios2
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
         with:
           path: ${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install
           key: ${{ runner.os }}-${{ runner.arch }}-adios2-${{ env.ADIOS2_COMMIT }}-${{ inputs.build_mode }}-cache
 
       - if: ${{ steps.cache-adios2.outputs.cache-hit != 'true' }}
         name: Checkout ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }})
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: ornladios/ADIOS2
           ref: ${{ env.ADIOS2_COMMIT }}
@@ -97,7 +97,7 @@ jobs:
           make -j2 install
 
       - name: Cache ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }}) installation
-        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v4
         if: ${{ steps.cache-adios2.outputs.cache-hit != 'true' }}
         with:
           path: ${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install

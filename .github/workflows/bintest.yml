@@ -51,7 +51,7 @@ jobs:
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}/hdf5
@@ -130,7 +130,7 @@ jobs:
           distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}
@@ -187,7 +187,7 @@ jobs:
           distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (MacOS_latest)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
           path: ${{ github.workspace }}
@@ -255,7 +255,7 @@ jobs:
           distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}
