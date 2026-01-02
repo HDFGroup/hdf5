@@ -36,7 +36,6 @@
  * Indicates that this file is open for writing in a single-writer/multi-reader
  * (SWMR) scenario. Note that the process(es) opening the file for reading must
  * open the file with #H5F_ACC_RDONLY and use the #H5F_ACC_SWMR_READ access flag.
- *
  * \since 1.10.0
  */
 #define H5F_ACC_SWMR_WRITE (0x0020u)
@@ -45,17 +44,16 @@
  * Indicates that this file is open for reading in a single-writer/multi-reader
  * (SWMR) scenario. Note that the process(es) opening the file for SWMR reading
  * must also open the file with the #H5F_ACC_RDONLY flag.
- *
  * \since 1.10.0
  */
 #define H5F_ACC_SWMR_READ (0x0040u)
 
 /**
  * Default file access
+ * \since 1.8.3
  *
  * \internal Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the parent file.
  * \internal ignore setting on lapl
- * \since 1.8.3
  */
 #define H5F_ACC_DEFAULT (0xffffu)
 
@@ -70,7 +68,9 @@
 
 /**
  * Restrict search to objects opened through current file ID (as opposed to
- * objects opened through any file ID accessing this file) \since 1.6.5 */
+ * objects opened through any file ID accessing this file)
+ * \since 1.6.5
+ */
 #define H5F_OBJ_LOCAL (0x0020u)
 
 /**

@@ -24,13 +24,24 @@
 /*****************/
 
 /* Macros used to "unset" chunk cache configuration parameters */
-/** Default of chunk slots in the raw data chunk cache for this dataset.  See \ref H5Pset_chunk_cache for
- * details. \since 1.8.3 */
+
+/**
+ * Default of chunk slots in the raw data chunk cache for this dataset.
+ * See \ref H5Pset_chunk_cache for details.
+ * \since 1.8.3
+ */
 #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT SIZE_MAX
-/** Total size of the raw data chunk cache for this dataset.  See \ref H5Pset_chunk_cache for details.
- * \since 1.8.3 */
+/**
+ * Total size of the raw data chunk cache for this dataset.
+ * See \ref H5Pset_chunk_cache for details.
+ * \since 1.8.3
+ */
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
-/** Chunk preemption policy for this dataset.  See \ref H5Pset_chunk_cache for details. \since 1.8.3 */
+/**
+ * Chunk preemption policy for this dataset.
+ * See \ref H5Pset_chunk_cache for details.
+ * \since 1.8.3
+ */
 #define H5D_CHUNK_CACHE_W0_DEFAULT (-1.0)
 
 /** Bit flags for the H5Pset/get_chunk_opts() \since 1.10.0 */
