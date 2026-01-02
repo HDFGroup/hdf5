@@ -62,7 +62,7 @@ typedef int H5Z_filter_t;
 /** No filter */
 #define H5Z_FILTER_NONE 0
 
-/** Neflation like gzip \since 1.0.0 */
+/** Deflation like gzip \since 1.0.0 */
 #define H5Z_FILTER_DEFLATE 1
 
 /** Shuffle the data \since 1.6.0 */
