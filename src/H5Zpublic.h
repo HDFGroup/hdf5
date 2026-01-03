@@ -86,7 +86,6 @@ typedef int H5Z_filter_t;
 /** Maximum filter id \since 1.0.0 */
 #define H5Z_FILTER_MAX 65535
 
-
 /* General macros */
 /**
  * Symbol to remove all filters in H5Premove_filter()
@@ -112,7 +111,6 @@ typedef int H5Z_filter_t;
 /** Filter is optional \since 1.0.0 */
 #define H5Z_FLAG_OPTIONAL 0x0001
 
-
 /* Additional flags for filter invocation (not stored) */
 /** Invocation flag mask \since 1.0.0 */
 #define H5Z_FLAG_INVMASK 0xff00
@@ -122,7 +120,6 @@ typedef int H5Z_filter_t;
 
 /** Skip EDC filters for read \since 1.6.0 */
 #define H5Z_FLAG_SKIP_EDC 0x0200
-
 
 /* Special parameters for szip compression
  *
