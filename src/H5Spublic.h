@@ -28,6 +28,7 @@
  * will be selected. In the case of a memory dataspace, this means that
  * the specified file dataspace will also be used for the memory dataspace.
  * Used in place of a file or memory dataspace @ref hid_t value.
+ * \since 1.0.0
  */
 #define H5S_ALL 0
 
@@ -47,10 +48,12 @@
  */
 #define H5S_PLIST 2
 
-#define H5S_UNLIMITED HSIZE_UNDEF /**< Value for 'unlimited' dimensions */
+/** Value for 'unlimited' dimensions \since 1.0.0 */
+#define H5S_UNLIMITED HSIZE_UNDEF
 
 /**
  * The maximum number of dimensions in a dataspace or array datatype
+ * \since 1.0.0
  */
 #define H5S_MAX_RANK 32
 

@@ -2876,7 +2876,7 @@ SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
 
   IMPLICIT NONE
 
-  ! Creates a simple "Data_in" consisting of the letters of the alphabet,
+  ! Create a simple "Data_in" consisting of the letters of the alphabet,
   ! one per line, with a control character.
 
   CHARACTER(len=10), DIMENSION(:) :: data_in

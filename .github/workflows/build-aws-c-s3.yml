@@ -52,14 +52,14 @@ jobs:
     steps:
       - name: Get aws-c-s3 sources (main)
         if: inputs.aws_c_s3_tag == ''
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-s3
           path: aws-c-s3
 
       - name: Get aws-c-s3 sources (tag)
         if: inputs.aws_c_s3_tag != ''
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-s3
           path: aws-c-s3
@@ -78,77 +78,77 @@ jobs:
 
       - name: Cache/Restore aws-c-s3 (GCC) installation
         id: cache-aws-c-s3-ubuntu-gcc
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
         with:
           path: ${{ runner.workspace }}/aws-c-s3-build
           key: ${{ runner.os }}-${{ runner.arch }}-gcc-aws-c-s3-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
 
       - name: Get aws-lc sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: aws/aws-lc
           path: aws-lc
 
       - name: Get s2n-tls sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: aws/s2n-tls
           path: s2n-tls
 
       - name: Get aws-c-common sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-common
           path: aws-c-common
 
       - name: Get aws-checksums sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-checksums
           path: aws-checksums
 
       - name: Get aws-c-cal sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-cal
           path: aws-c-cal
 
       - name: Get aws-c-io sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-io
           path: aws-c-io
 
       - name: Get aws-c-compression sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-compression
           path: aws-c-compression
 
       - name: Get aws-c-http sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-http
           path: aws-c-http
 
       - name: Get aws-c-sdkutils sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-sdkutils
           path: aws-c-sdkutils
 
       - name: Get aws-c-auth sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: awslabs/aws-c-auth
           path: aws-c-auth
@@ -247,7 +247,7 @@ jobs:
         run: tar -cvf libaws-c-s3.tar -C ${{ runner.workspace }} aws-c-s3-build
 
       - name: Save aws-c-s3 installation artifact
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
           name: libaws-c-s3-${{ inputs.build_mode }}
           path: libaws-c-s3.tar

@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build_and_test:
     strategy:
@@ -35,12 +38,12 @@ jobs:
           sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           path: hdf5
 
       - name: Checkout Argobots
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: pmodels/argobots
           path: abt
@@ -145,12 +148,12 @@ jobs:
       - name: Test HDF5 cache VOL connector with external tests
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_file$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_group$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset_async_api$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_write_multi$" .
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_multdset$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_file$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_group$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_dataset$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_dataset_async_api$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_write_multi$" .
+          ctest --build-config ${{ inputs.build_mode }} -R "^test_multdset$" .
 
       - name: Test HDF5 cache VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build
@@ -161,4 +164,4 @@ jobs:
         # that this should be re-enabled in the future.
         if: ${{ ! matrix.async }}
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" -E "H5DIFF" .
+          ctest --build-config ${{ inputs.build_mode }} -R "HDF5_VOL_vol-cache" -E "H5DIFF" .

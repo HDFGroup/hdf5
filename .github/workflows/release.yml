@@ -26,6 +26,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   log-the-inputs:
     runs-on: ubuntu-latest

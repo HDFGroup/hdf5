@@ -56,6 +56,35 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ## Library
 
+### Added predefined datatypes for FP6 data
+
+   Predefined datatypes have been added for FP6 data in E2M3 and E3M2 formats (https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+
+   The following new macros have been added:
+
+    - H5T_FLOAT_F6E2M3
+    - H5T_FLOAT_F6E3M2
+
+   These macros map to IDs of HDF5 datatypes representing a 6-bit floating-point datatype with 1 sign bit and either 2 exponent bits and 3 mantissa bits (E2M3 format) or 3 exponent bits and 2 mantissa bits (E3M2 format).
+
+   Note that support for a native FP6 datatype has not been added yet. This means that any datatype conversions to/from the new FP6 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP6 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches one of the above floating-point formats. In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
+
+### Added predefined datatype for FP4 data
+
+   A predefined datatype has been added for FP4 data in E2M1 format (https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+
+   The following new macro has been added:
+
+    - H5T_FLOAT_F4E2M1
+
+   This macro maps to the ID of an HDF5 datatype representing a 4-bit floating-point datatype with 1 sign bit, 2 exponent bits and 1 mantissa bit.
+
+   Note that support for a native FP4 datatype has not been added yet. This means that any datatype conversions to/from the new FP4 datatype will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP4 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format. In this case, the application can specify the above macro for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
+
 ## Parallel Library
 
 ## Fortran Library
@@ -124,6 +153,9 @@ Current test results are available [here](https://my.cdash.org/index.php?project
 
     H5T_FLOAT_F8E4M3
     H5T_FLOAT_F8E5M2
+    H5T_FLOAT_F6E2M3
+    H5T_FLOAT_F6E3M2
+    H5T_FLOAT_F4E2M1
 
    If possible, an application should perform I/O with these datatypes using an in-memory type that matches the specific floating-point format and perform explicit data conversion outside of HDF5, if necessary. Otherwise, read/written values should be verified to be correct.
 
@@ -149,7 +181,7 @@ Current test results are available [here](https://my.cdash.org/index.php?project
    - Java JUnit-TestH5Pfapl
    - Java JUnit-TestH5D
 
-  Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of 'use of undefined value' when the optimization level is -O2 or higher.
+  Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of `use of undefined value` when the optimization level is -O2 or higher.
 
    This is confirmed to be a [bug in the nvc compiler](https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045) that has been fixed as of 23.11. If you are using an affected version of the NVidia compiler, the work-around is to set the optimization level to -O1.
 

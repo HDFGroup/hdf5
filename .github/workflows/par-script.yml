@@ -30,6 +30,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   Build_parallel_windows:
     runs-on: windows-latest
@@ -38,7 +41,7 @@ jobs:
         mpi: [ 'msmpi', 'intelmpi']
     name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Install Dependencies (Windows)
         run: choco install ninja
@@ -59,7 +62,7 @@ jobs:
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@d0a3bf17a182b37921ff27a6737f9009ec76d3b6 # v1
+        uses: mpi4py/setup-mpi@8ac56ec7ab12f2dffdcf55ffaf50f1920ebcc004 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -84,7 +87,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -149,13 +152,13 @@ jobs:
       - name: Run CTest script (${{ matrix.mpi }})
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -O hdf5.log
         shell: bash
         continue-on-error: true
 
       # Save log files created by CTest script
       - name: Save log (${{ matrix.mpi }})
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
           name: windows-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -188,7 +191,7 @@ jobs:
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@d0a3bf17a182b37921ff27a6737f9009ec76d3b6 # v1
+        uses: mpi4py/setup-mpi@8ac56ec7ab12f2dffdcf55ffaf50f1920ebcc004 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -213,7 +216,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (${{ matrix.mpi }})
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -269,13 +272,13 @@ jobs:
       - name: Run CTest script (${{ matrix.mpi }})
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -O hdf5.log
         shell: bash
         continue-on-error: true
 
       # Save log files created by CTest script
       - name: Save log (${{ matrix.mpi }})
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
           name: linux-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -287,7 +290,7 @@ jobs:
         mpi: [ 'mpich', 'openmpi']
     name: "Parallel ${{ matrix.mpi }} macos-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja
@@ -299,7 +302,7 @@ jobs:
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@d0a3bf17a182b37921ff27a6737f9009ec76d3b6 # v1
+        uses: mpi4py/setup-mpi@8ac56ec7ab12f2dffdcf55ffaf50f1920ebcc004 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -323,7 +326,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (${{ matrix.mpi }})
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -379,13 +382,13 @@ jobs:
       - name: Run CTest script (${{ matrix.mpi }})
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -O hdf5.log
         shell: bash
         continue-on-error: true
 
       # Save log files created by CTest script
       - name: Save log (${{ matrix.mpi }})
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
           name: macos-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log

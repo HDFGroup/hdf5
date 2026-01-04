@@ -12,13 +12,16 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   intel_oneapi_linux:
     name: "linux-oneapi ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
       - name: Get Sources (Linux)
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Install Dependencies (Linux)
         shell: bash
@@ -63,7 +66,7 @@ jobs:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
   Intel_oneapi_windows:
@@ -71,7 +74,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Get Sources (Windows)
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Install Dependencies (Windows)
         run: choco install ninja
@@ -108,5 +111,5 @@ jobs:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E tfloatsattrs
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -E tfloatsattrs
         working-directory: ${{ runner.workspace }}/build

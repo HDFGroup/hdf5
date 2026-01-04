@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build_and_test:
     name: Test HDF5 external passthrough VOL connector
@@ -22,12 +25,12 @@ jobs:
           sudo apt-get install libopenmpi-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           path: hdf5
 
       - name: Checkout vol-external-passthrough
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: hpc-io/vol-external-passthrough
           path: vol-external-passthrough
@@ -61,4 +64,4 @@ jobs:
       - name: Test HDF5 external passthrough VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-external-passthrough" .
+          ctest --build-config ${{ inputs.build_mode }} -R "HDF5_VOL_vol-external-passthrough" .

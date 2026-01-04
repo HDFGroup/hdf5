@@ -24,9 +24,14 @@
 /*****************/
 
 /* Macros used to "unset" chunk cache configuration parameters */
+/** Default of chunk slots in the raw data chunk cache for this dataset.  See \ref H5Pset_chunk_cache for
+ * details. \since 1.8.3 */
 #define H5D_CHUNK_CACHE_NSLOTS_DEFAULT SIZE_MAX
+/** Total size of the raw data chunk cache for this dataset.  See \ref H5Pset_chunk_cache for details.
+ * \since 1.8.3 */
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
-#define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0)
+/** Chunk preemption policy for this dataset.  See \ref H5Pset_chunk_cache for details. \since 1.8.3 */
+#define H5D_CHUNK_CACHE_W0_DEFAULT (-1.0)
 
 /** Bit flags for the H5Pset/get_chunk_opts() \since 1.10.0 */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS (0x0002u)
@@ -40,12 +45,12 @@
  * Values for the H5D_LAYOUT property
  */
 typedef enum H5D_layout_t {
-    H5D_LAYOUT_ERROR = -1, /**< error */
-    H5D_COMPACT      = 0,  /**< raw data is small (< 64KB) */
-    H5D_CONTIGUOUS   = 1,  /**< contiguous layout */
-    H5D_CHUNKED      = 2,  /**< chunked or tiled layout */
-    H5D_VIRTUAL      = 3,  /**< actual data is stored in other datasets */
-    H5D_NLAYOUTS     = 4   /**< this one must be last! */
+    H5D_LAYOUT_ERROR = -1, /**< error \since 1.0.0 */
+    H5D_COMPACT      = 0,  /**< raw data is small (< 64KB) \since 1.0.0 */
+    H5D_CONTIGUOUS   = 1,  /**< contiguous layout \since 1.0.0 */
+    H5D_CHUNKED      = 2,  /**< chunked or tiled layout \since 1.0.0 */
+    H5D_VIRTUAL      = 3,  /**< actual data is stored in other datasets \since 1.10.0 */
+    H5D_NLAYOUTS     = 4   /**< this one must be last! \since 1.0.0 */
 } H5D_layout_t;
 //! <!-- [H5D_layout_t_snip] -->
 
@@ -54,14 +59,15 @@ typedef enum H5D_layout_t {
  * Types of chunk index data structures
  */
 typedef enum H5D_chunk_index_t {
-    H5D_CHUNK_IDX_BTREE = 0, /**< v1 B-tree index (default)                */
-    H5D_CHUNK_IDX_SINGLE =
-        1, /**< Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered & non-filtered) */
-    H5D_CHUNK_IDX_NONE   = 2, /**< Implicit: No Index (#H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) */
-    H5D_CHUNK_IDX_FARRAY = 3, /**< Fixed array (for 0 unlimited dims)       */
-    H5D_CHUNK_IDX_EARRAY = 4, /**< Extensible array (for 1 unlimited dim)   */
-    H5D_CHUNK_IDX_BT2    = 5, /**< v2 B-tree index (for >1 unlimited dims)  */
-    H5D_CHUNK_IDX_NTYPES      /**< This one must be last!                   */
+    H5D_CHUNK_IDX_BTREE  = 0, /**< v1 B-tree index (default) \since 1.10.0                */
+    H5D_CHUNK_IDX_SINGLE = 1, /**< Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered &
+                                 non-filtered) \since 1.10.0 */
+    H5D_CHUNK_IDX_NONE =
+        2, /**< Implicit: No Index (#H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) \since 1.10.0 */
+    H5D_CHUNK_IDX_FARRAY = 3, /**< Fixed array (for 0 unlimited dims) \since 1.10.0       */
+    H5D_CHUNK_IDX_EARRAY = 4, /**< Extensible array (for 1 unlimited dim) \since 1.10.0   */
+    H5D_CHUNK_IDX_BT2    = 5, /**< v2 B-tree index (for >1 unlimited dims) \since 1.10.0  */
+    H5D_CHUNK_IDX_NTYPES      /**< This one must be last! \since 1.10.0                   */
 } H5D_chunk_index_t;
 //! <!-- [H5D_chunk_index_t_snip] -->
 
@@ -70,11 +76,11 @@ typedef enum H5D_chunk_index_t {
  * Values for the space allocation time property
  */
 typedef enum H5D_alloc_time_t {
-    H5D_ALLOC_TIME_ERROR   = -1, /**< Error */
-    H5D_ALLOC_TIME_DEFAULT = 0,  /**< Default (layout dependent) */
-    H5D_ALLOC_TIME_EARLY   = 1,  /**< Allocate on creation */
-    H5D_ALLOC_TIME_LATE    = 2,  /**< Allocate on first write */
-    H5D_ALLOC_TIME_INCR    = 3   /**< Allocate incrementally (by chunk) */
+    H5D_ALLOC_TIME_ERROR   = -1, /**< Error \since 1.6.0 */
+    H5D_ALLOC_TIME_DEFAULT = 0,  /**< Default (layout dependent) \since 1.6.0 */
+    H5D_ALLOC_TIME_EARLY   = 1,  /**< Allocate on creation \since 1.6.0 */
+    H5D_ALLOC_TIME_LATE    = 2,  /**< Allocate on first write \since 1.6.0 */
+    H5D_ALLOC_TIME_INCR    = 3   /**< Allocate incrementally (by chunk) \since 1.6.0 */
 } H5D_alloc_time_t;
 //! <!-- [H5D_alloc_time_t_snip] -->
 
@@ -83,11 +89,11 @@ typedef enum H5D_alloc_time_t {
  * Values for the status of space allocation
  */
 typedef enum H5D_space_status_t {
-    H5D_SPACE_STATUS_ERROR          = -1, /**< Error */
-    H5D_SPACE_STATUS_NOT_ALLOCATED  = 0,  /**< Space has not been allocated for this dataset. */
+    H5D_SPACE_STATUS_ERROR          = -1, /**< Error \since 1.6.0 */
+    H5D_SPACE_STATUS_NOT_ALLOCATED  = 0,  /**< Space has not been allocated for this dataset. \since 1.6.0 */
     H5D_SPACE_STATUS_PART_ALLOCATED = 1,  /**< Space has been partially allocated for this dataset.
-                                               (Used only for datasets with chunked storage.) */
-    H5D_SPACE_STATUS_ALLOCATED = 2        /**< Space has been allocated for this dataset. */
+                                               (Used only for datasets with chunked storage.) \since 1.6.0 */
+    H5D_SPACE_STATUS_ALLOCATED = 2        /**< Space has been allocated for this dataset. \since 1.6.0 */
 } H5D_space_status_t;
 //! <!-- [H5D_space_status_t_snip] -->
 
@@ -96,10 +102,10 @@ typedef enum H5D_space_status_t {
  * Values for time of writing fill value property
  */
 typedef enum H5D_fill_time_t {
-    H5D_FILL_TIME_ERROR = -1, /**< Error */
-    H5D_FILL_TIME_ALLOC = 0,  /**< Fill on allocation */
-    H5D_FILL_TIME_NEVER = 1,  /**< Never write fill values */
-    H5D_FILL_TIME_IFSET = 2   /**< Fill if fill-value was set */
+    H5D_FILL_TIME_ERROR = -1, /**< Error \since 1.6.0 */
+    H5D_FILL_TIME_ALLOC = 0,  /**< Fill on allocation \since 1.6.0 */
+    H5D_FILL_TIME_NEVER = 1,  /**< Never write fill values \since 1.6.0 */
+    H5D_FILL_TIME_IFSET = 2   /**< Fill if fill-value was set \since 1.6.0 */
 } H5D_fill_time_t;
 //! <!-- [H5D_fill_time_t_snip] -->
 
@@ -108,10 +114,10 @@ typedef enum H5D_fill_time_t {
  * Values for fill value status
  */
 typedef enum H5D_fill_value_t {
-    H5D_FILL_VALUE_ERROR        = -1, /**< Error */
-    H5D_FILL_VALUE_UNDEFINED    = 0,  /**< No fill value defined */
-    H5D_FILL_VALUE_DEFAULT      = 1,  /**< Default fill-value */
-    H5D_FILL_VALUE_USER_DEFINED = 2   /**< User-defined fill-value */
+    H5D_FILL_VALUE_ERROR        = -1, /**< Error \since 1.6.0 */
+    H5D_FILL_VALUE_UNDEFINED    = 0,  /**< No fill value defined \since 1.6.0 */
+    H5D_FILL_VALUE_DEFAULT      = 1,  /**< Default fill-value \since 1.6.0 */
+    H5D_FILL_VALUE_USER_DEFINED = 2   /**< User-defined fill-value \since 1.6.0 */
 } H5D_fill_value_t;
 //! <!-- [H5D_fill_value_t_snip] -->
 
@@ -120,9 +126,9 @@ typedef enum H5D_fill_value_t {
  * Values for VDS bounds option
  */
 typedef enum H5D_vds_view_t {
-    H5D_VDS_ERROR          = -1, /**< Error */
-    H5D_VDS_FIRST_MISSING  = 0,  /**< Include all data before the first missing mapped data */
-    H5D_VDS_LAST_AVAILABLE = 1   /**< Include all available mapped data */
+    H5D_VDS_ERROR          = -1, /**< Error \since 1.10.0 */
+    H5D_VDS_FIRST_MISSING  = 0,  /**< Include all data before the first missing mapped data \since 1.10.0 */
+    H5D_VDS_LAST_AVAILABLE = 1   /**< Include all available mapped data \since 1.10.0 */
 } H5D_vds_view_t;
 //! <!-- [H5D_vds_view_t_snip] -->
 
@@ -1712,13 +1718,20 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
  * These symbols are no longer used in the library.
  */
 /* Property names for H5DOwrite_chunk */
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME     "direct_chunk_flag"
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME  "direct_chunk_filters"
-#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME   "direct_chunk_offset"
+/** Direct chunk write flag \deprecated As H5DOwrite_chunk was deprecated */
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME "direct_chunk_flag"
+/** Direct chunk write filters flag \deprecated As H5DOwrite_chunk was deprecated */
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME "direct_chunk_filters"
+/** Direct chunk write offset flag \deprecated As H5DOwrite_chunk was deprecated */
+#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME "direct_chunk_offset"
+/** Direct chunk write datasize flag \deprecated As H5DOwrite_chunk was deprecated */
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME "direct_chunk_datasize"
 /* Property names for H5DOread_chunk */
-#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME    "direct_chunk_read_flag"
-#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME  "direct_chunk_read_offset"
+/** Direct chunk read flag \deprecated As H5DOread_chunk was deprecated */
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME "direct_chunk_read_flag"
+/** Direct chunk read offset flag \deprecated As H5DOread_chunk was deprecated */
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME "direct_chunk_read_offset"
+/** Direct chunk read filters flag \deprecated As H5DOread_chunk was deprecated */
 #define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME "direct_chunk_read_filters"
 
 /* Typedefs */
