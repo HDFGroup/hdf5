@@ -851,6 +851,10 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
 
     FUNC_ENTER_API((-1))
 
+    /* If size is zero, treat as length query and do not write, even a '\0' */
+    if (name && size == 0)
+        name = NULL;
+
     /* Get the object pointer */
     if (NULL == (vol_obj = H5VL_vol_object(id)))
         HGOTO_ERROR(H5E_ID, H5E_BADTYPE, (-1), "invalid identifier");
