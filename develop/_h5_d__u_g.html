@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-03</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -1803,7 +1803,7 @@ For floating-point data, the minimum value of the dataset should be calculated a
 <div class="line">  <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
 <div class="ttc" id="agroup___d_c_p_l_html_ga5c10165b670e0e984db431aee818cc7e"><div class="ttname"><a href="group___d_c_p_l.html#ga5c10165b670e0e984db431aee818cc7e">H5Pset_scaleoffset</a></div><div class="ttdeci">herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor)</div><div class="ttdoc">Sets up the use of the scale-offset filter.</div></div>
-<div class="ttc" id="agroup___s_c_a_l_e_o_f_f_s_e_t_html_gga53d85c0570e17f6e1ddbf569462b1516a9fc45fdf1844739c145130e8c324a3a3"><div class="ttname"><a href="group___s_c_a_l_e_o_f_f_s_e_t.html#gga53d85c0570e17f6e1ddbf569462b1516a9fc45fdf1844739c145130e8c324a3a3">H5Z_SO_INT</a></div><div class="ttdeci">@ H5Z_SO_INT</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:259</div></div>
+<div class="ttc" id="agroup___s_c_a_l_e_o_f_f_s_e_t_html_gga53d85c0570e17f6e1ddbf569462b1516a9fc45fdf1844739c145130e8c324a3a3"><div class="ttname"><a href="group___s_c_a_l_e_o_f_f_s_e_t.html#gga53d85c0570e17f6e1ddbf569462b1516a9fc45fdf1844739c145130e8c324a3a3">H5Z_SO_INT</a></div><div class="ttdeci">@ H5Z_SO_INT</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:255</div></div>
 </div><!-- fragment --><p>The following code example illustrates the use of the scale-offset filter (set for variable minimum-bits method) for writing and reading floating-point data.</p>
 <p><em>Scale-offset compression floating-point data</em> </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;hdf5.h&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;stdlib.h&quot;</span></div>
@@ -1918,7 +1918,7 @@ For floating-point data, the minimum value of the dataset should be calculated a
 <div class="line"> </div>
 <div class="line">  <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="agroup___s_c_a_l_e_o_f_f_s_e_t_html_gga53d85c0570e17f6e1ddbf569462b1516aa3d402f72492b3f34929fb2b99805adb"><div class="ttname"><a href="group___s_c_a_l_e_o_f_f_s_e_t.html#gga53d85c0570e17f6e1ddbf569462b1516aa3d402f72492b3f34929fb2b99805adb">H5Z_SO_FLOAT_DSCALE</a></div><div class="ttdeci">@ H5Z_SO_FLOAT_DSCALE</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:257</div></div>
+<div class="ttc" id="agroup___s_c_a_l_e_o_f_f_s_e_t_html_gga53d85c0570e17f6e1ddbf569462b1516aa3d402f72492b3f34929fb2b99805adb"><div class="ttname"><a href="group___s_c_a_l_e_o_f_f_s_e_t.html#gga53d85c0570e17f6e1ddbf569462b1516aa3d402f72492b3f34929fb2b99805adb">H5Z_SO_FLOAT_DSCALE</a></div><div class="ttdeci">@ H5Z_SO_FLOAT_DSCALE</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:253</div></div>
 </div><!-- fragment --><h4>Limitations</h4>
 <p>For floating-point data handling, there are some algorithmic limitations to the GRiB data packing mechanism: </p><ol>
 <li>
@@ -2017,7 +2017,7 @@ Using the SZip Filter</h3>
 <div class="line">    <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a> (file);</div>
 <div class="line">  }</div>
 <div class="ttc" id="agroup___d_c_p_l_html_ga37de4b6071a94574cfab5cd6de9c3fc6"><div class="ttname"><a href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6">H5Pset_szip</a></div><div class="ttdeci">herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)</div><div class="ttdoc">Sets up use of the SZIP compression filter.</div></div>
-<div class="ttc" id="agroup___s_z_i_p_html_ga688fde8106225adf9e6ccd2a168dec74"><div class="ttname"><a href="group___s_z_i_p.html#ga688fde8106225adf9e6ccd2a168dec74">H5_SZIP_NN_OPTION_MASK</a></div><div class="ttdeci">#define H5_SZIP_NN_OPTION_MASK</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:184</div></div>
+<div class="ttc" id="agroup___s_z_i_p_html_ga688fde8106225adf9e6ccd2a168dec74"><div class="ttname"><a href="group___s_z_i_p.html#ga688fde8106225adf9e6ccd2a168dec74">H5_SZIP_NN_OPTION_MASK</a></div><div class="ttdeci">#define H5_SZIP_NN_OPTION_MASK</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:167</div></div>
 </div><!-- fragment --><p>Details of the required and optional parameters are provided in the H5Pset_szip entry in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</p>
 <p>Software distribution: Starting with Release 1.6.0, HDF5 has been distributed with Szip enabled, making it easier to use Szip compression. The software is distributed as follows:</p><ul>
 <li>Pre-compiled HDF5 binaries are provided with the Szip encoder enabled.</li>

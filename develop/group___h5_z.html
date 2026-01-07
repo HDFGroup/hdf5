@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-03</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -360,7 +360,7 @@ Functions</h2></td></tr>
 <td><a class="el" href="_h5_zpublic_8h.html#a4dead61ceb139a3f97505d6e52eb1b8a">H5Z_FILTER_CONFIG_DECODE_ENABLED</a> </td><td>Decoding is enabled for this filter </td></tr>
 </table>
 <p>A bitwise AND of the returned <code class="param">filter_config_flags</code> and a valid filter configuration flag will reveal whether the related configuration option is available. For example, if the value of </p><div class="fragment"><div class="line"><a class="code hl_define" href="_h5_zpublic_8h.html#ac4ec01a86fdac6619c7c3c1fcf3bf86a">H5Z_FILTER_CONFIG_ENCODE_ENABLED</a> &amp; filter_config_flags</div>
-<div class="ttc" id="a_h5_zpublic_8h_html_ac4ec01a86fdac6619c7c3c1fcf3bf86a"><div class="ttname"><a href="_h5_zpublic_8h.html#ac4ec01a86fdac6619c7c3c1fcf3bf86a">H5Z_FILTER_CONFIG_ENCODE_ENABLED</a></div><div class="ttdeci">#define H5Z_FILTER_CONFIG_ENCODE_ENABLED</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:274</div></div>
+<div class="ttc" id="a_h5_zpublic_8h_html_ac4ec01a86fdac6619c7c3c1fcf3bf86a"><div class="ttname"><a href="_h5_zpublic_8h.html#ac4ec01a86fdac6619c7c3c1fcf3bf86a">H5Z_FILTER_CONFIG_ENCODE_ENABLED</a></div><div class="ttdeci">#define H5Z_FILTER_CONFIG_ENCODE_ENABLED</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:270</div></div>
 </div><!-- fragment --><p> is true, i.e., greater than 0 (zero), the queried filter is configured to encode data; if the value is <code>false</code>, i.e., equal to 0 (zero), the filter is not so configured.</p>
 <p>If a filter is not encode-enabled, the corresponding <code>H5Pset_*</code> function will return an error if the filter is added to a dataset creation property list (which is required if the filter is to be used to encode that dataset). For example, if the <a class="el" href="_h5_zpublic_8h.html#ac4ec01a86fdac6619c7c3c1fcf3bf86a">H5Z_FILTER_CONFIG_ENCODE_ENABLED</a> flag is not returned for the SZIP filter, <a class="el" href="_h5_zpublic_8h.html#a421d9941c68ebb776573baeb9aa77cd2">H5Z_FILTER_SZIP</a>, a call to <a class="el" href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6" title="Sets up use of the SZIP compression filter.">H5Pset_szip()</a> will fail.</p>
 <p>If a filter is not decode-enabled, the application will not be able to read an existing file encoded with that filter.</p>
