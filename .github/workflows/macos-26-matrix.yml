@@ -223,10 +223,10 @@ jobs:
         fi
 
         # Set Java environment if needed
-        if [[ "${{ matrix.java }}" == "ON" ]]; then
-          export JAVA_HOME=$(/usr/libexec/java_home)
-          CMAKE_OPTS="$CMAKE_OPTS -DJAVA_HOME=$JAVA_HOME"
-        fi
+#        if [[ "${{ matrix.java }}" == "ON" ]]; then
+#          export JAVA_HOME=$(/usr/libexec/java_home)
+#          CMAKE_OPTS="$CMAKE_OPTS -DJAVA_HOME=$JAVA_HOME"
+#        fi
 
         # Set Fortran compiler if needed
         if [[ "${{ matrix.fortran }}" == "ON" ]]; then
