@@ -17,9 +17,30 @@
 # and build it.  The HDF5 options should be set after the FetchContent_Declare command and before
 # the add_subdirectory command..
 macro (EXTERNAL_HDF5_LIBRARY compress_type)
-  set (HDF5_VERSION "2.0.1")
-  set (HDF5_VERSEXT "")
-  set (HDF5_VERSION_MAJOR "2.0")
+  #-----------------------------------------------------------------------------
+  # Version is extracted from H5public.h
+  # If not set in parent scope, read it from H5public.h now
+  #-----------------------------------------------------------------------------
+  if (NOT DEFINED H5_VERS_MAJOR)
+    # Read version from H5public.h if not already set
+    file (READ ${CMAKE_CURRENT_LIST_DIR}/../../src/H5public.h _h5public_h_contents)
+    string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
+        "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
+    string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
+        "\\1" H5_VERS_MINOR ${_h5public_h_contents})
+    string (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
+        "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
+    string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._-]*)\".*$"
+        "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
+  endif ()
+
+  set (HDF5_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
+  if (H5_VERS_SUBRELEASE)
+    set (HDF5_VERSEXT "-${H5_VERS_SUBRELEASE}")
+  else ()
+    set (HDF5_VERSEXT "")
+  endif ()
+  set (HDF5_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
   set (HDF5LIB_TGZ_NAME "hdf5.tar.gz" CACHE STRING "Use HDF5LIB from compressed file" FORCE)
   set (HDF5LIB_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5/releases/download/snapshot" CACHE STRING "Use HDF5LIB from original location" FORCE)
   set (HDF5LIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for HDF5LIB FetchContent" FORCE)

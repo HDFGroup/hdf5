@@ -74,14 +74,24 @@
  * For pre-releases like \c snap0. Empty string for official releases.
  */
 #define H5_VERS_SUBRELEASE ""
+
+/* Derived version strings - automatically generated from the above */
 /**
- * Short version string
+ * Short version string - automatically derived from H5_VERS_MAJOR/MINOR/RELEASE/SUBRELEASE
  */
-#define H5_VERS_STR "2.0.1"
+#define H5_VERS_STR_HELPER(major, minor, release) #major "." #minor "." #release
+#define H5_VERS_STR_CONCAT(major, minor, release, sub) \
+    H5_VERS_STR_HELPER(major, minor, release) sub
+#define H5_VERS_STR H5_VERS_STR_CONCAT(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE, H5_VERS_SUBRELEASE)
+
 /**
- * Full version string
+ * Full version string - automatically derived from H5_VERS_MAJOR/MINOR/RELEASE/SUBRELEASE
  */
-#define H5_VERS_INFO "HDF5 library version: 2.0.1"
+#define H5_VERS_INFO_HELPER(major, minor, release) \
+    "HDF5 library version: " #major "." #minor "." #release
+#define H5_VERS_INFO_CONCAT(major, minor, release, sub) \
+    H5_VERS_INFO_HELPER(major, minor, release) sub
+#define H5_VERS_INFO H5_VERS_INFO_CONCAT(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE, H5_VERS_SUBRELEASE)
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 

@@ -38,8 +38,29 @@ cmake_minimum_required (VERSION 3.26)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "2.0.1")
-set (CTEST_SOURCE_VERSEXT "")
+#-----------------------------------------------------------------------------
+# Version is extracted from H5public.h at configure time
+# If not set in parent scope, read it from H5public.h now
+#-----------------------------------------------------------------------------
+if (NOT DEFINED H5_VERS_MAJOR)
+  # Read version from H5public.h if not already set
+  file (READ ${CTEST_SCRIPT_DIRECTORY}/../src/H5public.h _h5public_h_contents)
+  string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
+      "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
+  string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
+      "\\1" H5_VERS_MINOR ${_h5public_h_contents})
+  string (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
+      "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
+  string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._-]*)\".*$"
+      "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
+endif ()
+
+set (CTEST_SOURCE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
+if (H5_VERS_SUBRELEASE)
+  set (CTEST_SOURCE_VERSEXT "-${H5_VERS_SUBRELEASE}")
+else ()
+  set (CTEST_SOURCE_VERSEXT "")
+endif ()
 
 ##############################################################################
 # handle input parameters to script.

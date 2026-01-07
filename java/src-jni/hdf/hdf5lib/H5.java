@@ -271,9 +271,11 @@ public class H5 implements java.io.Serializable {
      * <li>LIB_VERSION[1]: The minor version of the library.</li>
      * <li>LIB_VERSION[2]: The release number of the library.</li>
      * </ul>
-     * Make sure to update the versions number when a different library is used.
+     * NOTE: This version is automatically synchronized with H5public.h via the auto-generated
+     *       H5Version class. To update the version, edit src/H5public.h (H5_VERS_MAJOR,
+     *       H5_VERS_MINOR, H5_VERS_RELEASE). Do NOT manually edit the version numbers.
      */
-    public final static int LIB_VERSION[] = {2, 0, 1};
+    public final static int LIB_VERSION[] = {H5Version.MAJOR, H5Version.MINOR, H5Version.RELEASE};
 
     /**
      * @ingroup JH5
