@@ -188,6 +188,12 @@ jobs:
           brew install mpich
         fi
 
+        - name: Setup Java 25
+          uses: actions/setup-java@v4
+          with:
+            distribution: 'temurin'
+            java-version: '25-ea' # or '25' if available
+
 
     - name: Get Sources
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -252,7 +258,13 @@ jobs:
       shell: bash
 
     - name: Build
-      run: cmake --build . --config Release --parallel 2
+      run:
+        [[ "${{ matrix.java }}" == "ON" ]]; then
+          # DO NOT run export JAVA_HOME=$(/usr/libexec/java_home) here!
+          # Just use the $JAVA_HOME that setup-java already set:
+          CMAKE_OPTS="$CMAKE_OPTS -DJAVA_HOME=$JAVA_HOME"
+        fi
+        cmake --build . --config Release --parallel 2
       working-directory: ${{ runner.workspace }}/build
 
     - name: Test
