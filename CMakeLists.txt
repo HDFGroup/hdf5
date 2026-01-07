@@ -781,52 +781,48 @@ endif ()
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PARALLEL)
-  find_package (MPI REQUIRED)
-  if (MPI_C_FOUND)
-    set (H5_HAVE_PARALLEL 1)
+  find_package (MPI REQUIRED COMPONENTS C)
+  set (H5_HAVE_PARALLEL 1)
 
-    # Require MPI standard 3.0 and greater
-    if (MPI_VERSION LESS 3)
-      message (FATAL_ERROR "HDF5 requires MPI standard 3.0 or greater")
-    endif ()
-
-    # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
-    # and once set, they are cached as false and not regenerated
-    set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")
-    set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
-    # Used by Fortran + MPI
-    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
-    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
-
-    # Used by Parallel Compression feature
-    set (PARALLEL_FILTERED_WRITES ON)
-    CHECK_SYMBOL_EXISTS (MPI_Ibarrier "mpi.h" H5_HAVE_MPI_Ibarrier)
-    CHECK_SYMBOL_EXISTS (MPI_Issend "mpi.h" H5_HAVE_MPI_Issend)
-    CHECK_SYMBOL_EXISTS (MPI_Iprobe "mpi.h" H5_HAVE_MPI_Iprobe)
-    CHECK_SYMBOL_EXISTS (MPI_Irecv "mpi.h" H5_HAVE_MPI_Irecv)
-    if (H5_HAVE_MPI_Ibarrier AND H5_HAVE_MPI_Issend AND H5_HAVE_MPI_Iprobe AND H5_HAVE_MPI_Irecv)
-      set (H5_HAVE_PARALLEL_FILTERED_WRITES 1)
-    else ()
-      message (WARNING "The MPI_Ibarrier/MPI_Issend/MPI_Iprobe/MPI_Irecv functions could not be located.
-               Parallel writes of filtered data will be disabled.")
-      set (PARALLEL_FILTERED_WRITES OFF)
-    endif ()
-
-    # Used by big I/O feature
-    set (LARGE_PARALLEL_IO ON)
-    CHECK_SYMBOL_EXISTS (MPI_Get_elements_x "mpi.h" H5_HAVE_MPI_Get_elements_x)
-    CHECK_SYMBOL_EXISTS (MPI_Type_size_x "mpi.h" H5_HAVE_MPI_Type_size_x)
-    if (NOT H5_HAVE_MPI_Get_elements_x OR NOT H5_HAVE_MPI_Type_size_x)
-      message (WARNING "The MPI_Get_elements_x and/or MPI_Type_size_x functions could not be located.
-               Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
-      set (LARGE_PARALLEL_IO OFF)
-    endif ()
-
-    # Used by Subfiling VFD feature
-    CHECK_SYMBOL_EXISTS (MPI_Comm_split_type "mpi.h" H5_HAVE_MPI_Comm_split_type)
-  else ()
-    message (FATAL_ERROR "Parallel libraries not found")
+  # Require MPI standard 3.0 and greater
+  if (MPI_VERSION LESS 3)
+    message (FATAL_ERROR "HDF5 requires MPI standard 3.0 or greater")
   endif ()
+
+  # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
+  # and once set, they are cached as false and not regenerated
+  set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")
+  set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
+  # Used by Fortran + MPI
+  CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
+  CHECK_SYMBOL_EXISTS (MPI_Info_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+
+  # Used by Parallel Compression feature
+  set (PARALLEL_FILTERED_WRITES ON)
+  CHECK_SYMBOL_EXISTS (MPI_Ibarrier "mpi.h" H5_HAVE_MPI_Ibarrier)
+  CHECK_SYMBOL_EXISTS (MPI_Issend "mpi.h" H5_HAVE_MPI_Issend)
+  CHECK_SYMBOL_EXISTS (MPI_Iprobe "mpi.h" H5_HAVE_MPI_Iprobe)
+  CHECK_SYMBOL_EXISTS (MPI_Irecv "mpi.h" H5_HAVE_MPI_Irecv)
+  if (H5_HAVE_MPI_Ibarrier AND H5_HAVE_MPI_Issend AND H5_HAVE_MPI_Iprobe AND H5_HAVE_MPI_Irecv)
+    set (H5_HAVE_PARALLEL_FILTERED_WRITES 1)
+  else ()
+    message (WARNING "The MPI_Ibarrier/MPI_Issend/MPI_Iprobe/MPI_Irecv functions could not be located.
+             Parallel writes of filtered data will be disabled.")
+    set (PARALLEL_FILTERED_WRITES OFF)
+  endif ()
+
+  # Used by big I/O feature
+  set (LARGE_PARALLEL_IO ON)
+  CHECK_SYMBOL_EXISTS (MPI_Get_elements_x "mpi.h" H5_HAVE_MPI_Get_elements_x)
+  CHECK_SYMBOL_EXISTS (MPI_Type_size_x "mpi.h" H5_HAVE_MPI_Type_size_x)
+  if (NOT H5_HAVE_MPI_Get_elements_x OR NOT H5_HAVE_MPI_Type_size_x)
+    message (WARNING "The MPI_Get_elements_x and/or MPI_Type_size_x functions could not be located.
+             Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
+    set (LARGE_PARALLEL_IO OFF)
+  endif ()
+
+  # Used by Subfiling VFD feature
+  CHECK_SYMBOL_EXISTS (MPI_Comm_split_type "mpi.h" H5_HAVE_MPI_Comm_split_type)
 endif ()
 
 # Parallel IO usage requires MPI to be Linked and Included
@@ -1090,7 +1086,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to override the compiler for h5cc
 #-----------------------------------------------------------------------------
-if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+if (HDF5_ENABLE_PARALLEL)
   set (_HDF5_H5CC_C_COMPILER ${MPI_C_COMPILER})
 else ()
   set (_HDF5_H5CC_C_COMPILER ${CMAKE_C_COMPILER})
