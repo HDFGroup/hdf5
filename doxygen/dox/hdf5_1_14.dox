@@ -3,6 +3,108 @@
  * Navigate back: \ref index "Main" / \ref release_specific_info
  * <hr>
 
+
+\section sec_rel_spec_114 HDF5 Library and Tools 1.14.6
+
+\subsection subsec_rel_info_114 Release Information
+
+<table>
+<tr>
+<td style="background-color:#F5F5F5">
+Version
+</td>
+<td>
+HDF5 1.14.6
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+Release Date
+</td>
+<td>
+02/05/25
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+Additional Release Information
+</td>
+<td>
+<a href="https://\SRCURL114/release_docs/RELEASE.txt">RELEASE.txt</a>
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+\ref sec_rel_spec_114_migrate
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+\ref sec_rel_spec_114_change
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+\ref sec_rel_spec_114_feat
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+[Newsletter Announcement](https://www.hdfgroup.org/2025/02/05/release-of-hdf5-1-14-6-newsletter-205/)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+ABI/API compatibility reports between 1.14.6 and 1.14.5 [tar file](https://\RELURL/v1_14/v1_14_6/downloads/hdf5-1.14.6.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/v1_14/v1_14_6/downloads/compat_report/index.html)
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+</td>
+<td>
+[Doxygen generated Reference Manual](https://support.hdfgroup.org/documentation/hdf5/latest/)
+</td>
+</tr>
+</table>
+
+
+\subsection subsec_download_114 Downloads
+
+Source code and binaries are available at:
+<a href="https://\RELURL/v1_14/v1_14_6/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_6</a>
+
+Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with either CMake or Autotools.
+
+
+\subsection subsec_obtain_method_114 Methods to obtain (gz file)
+
+\li firefox – Download file and then run:  `gzip <distribution>.tar.gz | tar xzf -`
+\li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
+\li wget –
+<div style="margin-left: 2em;">
+    `wget https://github.com/HDFGroup/hdf5/releases/download/${PACKAGEVERSION}/<distribution>.tar.gz`<br>
+    `gzip -cd <distribution>.tar.gz | tar xvf -`
+</div>
+\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 1.14.6 for this release
+
+
+\subsection subsec_dox_gen_doc_114 Doxygen Generated Reference Manual
+
+The new HDF5 documentation based on [Doxygen](https://www.doxygen.nl/index.html) is available \ref index "here".
+
+This documentation is WORK-IN-PROGRESS.
+Since this portion of the HDF5 documentation is now part of the source code, it gets the same treatment as code. In other words, issues, inaccuracies, corrections should be reported as issues in [GitHub](https://github.com/HDFGroup/hdf5/issues), and pull requests will be reviewed and accepted as any other code changes.
+
 \section sec_rel_spec_114_migrate Migrating from HDF5 1.12 to HDF5 1.14
 # Migrating to HDF5 1.14 from Previous Versions of HDF5
 

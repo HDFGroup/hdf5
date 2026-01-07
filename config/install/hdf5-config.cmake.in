@@ -16,6 +16,8 @@
 #-----------------------------------------------------------------------------
 @PACKAGE_INIT@
 
+include(CMakeFindDependencyMacro)
+
 string(TOUPPER @HDF5_PACKAGE@ HDF5_PACKAGE_NAME)
 
 set (${HDF5_PACKAGE_NAME}_VALID_COMPONENTS
@@ -93,12 +95,12 @@ if (${HDF5_PACKAGE_NAME}_PROVIDES_PARALLEL)
   set (${HDF5_PACKAGE_NAME}_PROVIDES_LARGE_PARALLEL_IO        @LARGE_PARALLEL_IO@)
 
   enable_language(C) # for MPI::MPI_C
-  find_package(MPI QUIET REQUIRED)
+  find_dependency(MPI QUIET REQUIRED)
 endif ()
 
 if (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package(Threads QUIET REQUIRED)
+  find_dependency(Threads QUIET REQUIRED)
 endif ()
 
 if (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA AND ${HDF5_PACKAGE_NAME}_PROVIDES_JNI)
@@ -124,16 +126,16 @@ if (${HDF5_PACKAGE_NAME}_PROVIDES_ZLIB_SUPPORT)
   if (NOT @ZLIB_USE_EXTERNAL@)
     if (@HDF5_MODULE_MODE_ZLIB@)
       # Expect that the default shared library is expected with FindZLIB.cmake
-      find_package (ZLIB MODULE)
+      find_dependency (ZLIB MODULE)
     else ()
-      find_package (ZLIB NAMES @Z_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @ZLIB_SEARCH_TYPE@)
+      find_dependency (ZLIB NAMES @Z_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @ZLIB_SEARCH_TYPE@)
     endif ()
   endif ()
 endif ()
 
 if (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT)
   if (NOT @SZIP_USE_EXTERNAL@)
-    find_package (LIBAEC NAMES @LIBAEC_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
+    find_dependency (LIBAEC NAMES @LIBAEC_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
   endif ()
 endif ()
 

@@ -29,6 +29,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
 jobs:
   build_and_test_win:
     name: "Windows MSVC-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
@@ -52,6 +55,12 @@ jobs:
           which cmake
           cmake --version
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
       - name: Set environment for MSVC (Windows)
         run: |
           # Set these environment variables so CMake picks the correct compiler
@@ -60,7 +69,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -73,6 +82,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA=ON \
             -DHDF5_BUILD_DOC:BOOL=ON \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
@@ -138,7 +148,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
@@ -151,7 +161,7 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Windows)
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
@@ -175,7 +185,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -250,7 +260,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
@@ -262,7 +272,7 @@ jobs:
                ls -l ${{ runner.workspace }}/build
 
       - name: Save published binary (linux)
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
           name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
           path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
@@ -295,7 +305,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -376,7 +386,7 @@ jobs:
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
@@ -394,7 +404,7 @@ jobs:
               ls -l ${{ runner.workspace }}/build
 
       - name: Save published binary (Mac_latest)
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
               name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz

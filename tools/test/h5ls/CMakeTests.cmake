@@ -41,6 +41,8 @@ set (LIST_HDF5_TEST_FILES
     textlink.h5
     textlinksrc.h5
     textlinktar.h5
+    tfloat4.h5
+    tfloat6.h5
     tfloat8.h5
     tfloat16.h5
     tfloat16_be.h5
@@ -101,6 +103,8 @@ set (LIST_OTHER_TEST_FILES
     textlinksrc-7-old.ls
     textlinksrc-nodangle-1.ls
     textlinksrc-nodangle-2.ls
+    tfloat4.ls
+    tfloat6.ls
     tfloat8.ls
     tfloat16.ls
     tfloat16_nosupport.ls
@@ -509,6 +513,12 @@ ADD_H5_TEST (tbfloat16_be RESULT_CODE 0 -w80 -v tbfloat16_be.h5)
 
 # test for FP8 types
 ADD_H5_TEST (tfloat8 RESULT_CODE 0 -w80 -v tfloat8.h5)
+
+# test for FP6 types
+ADD_H5_TEST (tfloat6 RESULT_CODE 0 -w80 -v tfloat6.h5)
+
+# test for FP4 type
+ADD_H5_TEST (tfloat4 RESULT_CODE 0 -w80 -v tfloat4.h5)
 
 # tests for complex numbers
 if (${${HDF_PREFIX}_HAVE_COMPLEX_NUMBERS})

@@ -307,6 +307,15 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             UINT16DECODE(*pp, dt->shared->u.atomic.offset);
             UINT16DECODE(*pp, dt->shared->u.atomic.prec);
+
+            /* Sanity checks */
+            if (dt->shared->u.atomic.offset >= (dt->shared->size * 8))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "bitfield offset out of bounds");
+            if (0 == dt->shared->u.atomic.prec)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "bitfield precision is zero");
+            if (((dt->shared->u.atomic.offset + dt->shared->u.atomic.prec) - 1) >= (dt->shared->size * 8))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "bitfield offset+precision out of bounds");
+
             break;
 
         case H5T_OPAQUE: {

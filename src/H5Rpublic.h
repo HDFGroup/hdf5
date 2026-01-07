@@ -30,7 +30,7 @@
 #define H5R_DSET_REG_REF_BUF_SIZE (sizeof(haddr_t) + 4)
 
 /**
- * Default reference buffer size.
+ * Default reference buffer size. \since 1.12.0
  *
  * \internal Note! Be careful with the sizes of the references because they
  *           should really depend on the run-time values in the file.

@@ -428,11 +428,30 @@
  *
  ****************************************************************************/
 
+/**
+ * Current version number of the metadata cache configuration structure
+ * \since 1.8.0
+ */
 #define H5AC__CURR_CACHE_CONFIG_VERSION 1
-#define H5AC__MAX_TRACE_FILE_NAME_LEN   1024
-
+/**
+ * Maximum allowed length (in characters) of a metadata cache trace file name
+ * \since 1.8.0
+ */
+#define H5AC__MAX_TRACE_FILE_NAME_LEN 1024
+/**
+ * Only process 0 performs metadata writes to disk; other processes retain dirty
+ * metadata and mark entries clean only after process 0 flushes them and broadcasts
+ * the results at a sync point.
+ * \since 1.8.6
+ */
 #define H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY 0
-#define H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED    1
+/**
+ * Process 0 determines which metadata entries to flush, but the actual writes are
+ * distributed across processes at a sync point, with coordination ensuring each
+ * entry is flushed exactly once and marked clean everywhere.
+ * \since 1.8.6
+ */
+#define H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED 1
 
 /**
  * H5AC_cache_config_t is a public structure intended for use in public APIs.
@@ -717,6 +736,10 @@ typedef struct H5AC_cache_config_t {
 } H5AC_cache_config_t;
 //! <!-- [H5AC_cache_config_t_snip] -->
 
+/**
+ * Current version number of the metadata cache image configuration structure
+ * \since 1.10.1
+ */
 #define H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION 1
 
 /**

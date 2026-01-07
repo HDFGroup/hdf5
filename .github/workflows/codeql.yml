@@ -1,0 +1,100 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+  schedule:
+    - cron: "16 7 * * 0"
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Install Dependencies (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            openmpi-bin openmpi-common mpi-default-dev \
+            zlib1g-dev libaec-dev
+
+          # Set env vars
+          echo "CC=mpicc" >> $GITHUB_ENV
+          echo "FC=mpif90" >> $GITHUB_ENV
+          echo "F77=mpif90" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configure HDF5
+        run: |
+          mkdir build; cd build
+          cmake -G "Unix Makefiles" \
+            -DCMAKE_INSTALL_PREFIX=$PWD/hdf5 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+            -DHDF5_BUILD_TOOLS:BOOL=ON \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DBUILD_STATIC_LIBS:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DBUILD_TESTING:BOOL=OFF \
+            -DHDF5_BUILD_EXAMPLES:BOOL=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DZLIB_INCLUDE_DIR=/usr/include \
+            -DZLIB_LIBRARY=/usr/lib/x86_64-linux-gnu/libz.so \
+            ..
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: c-cpp
+          build-mode: manual
+          queries: +security-and-quality
+          
+          config: |
+             query-filters:
+               - exclude:
+                   id: cpp/toctou-race-condition
+               - exclude:
+                   id: cpp/short-global-name
+
+      - name: Build
+        run: |
+          cd build
+          cmake --build . --config Debug
+        shell: bash
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:c-cpp"
+          output: sarif-results
+          upload: failure-only
+
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@v1
+        with:
+          patterns: |
+            -**/test/**
+            -**/testpar/**
+            -**/tools/test/**
+          input: sarif-results/cpp.sarif
+          output: sarif-results/cpp.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: sarif-results/cpp.sarif

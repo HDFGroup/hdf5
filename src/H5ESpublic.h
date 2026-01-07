@@ -26,7 +26,8 @@
 
 /**
  * Default value for "no event set" / synchronous execution. Used in
- * place of a @ref hid_t identifier. \since 1.14.0
+ * place of a @ref hid_t identifier.
+ * \since 1.14.0
  */
 #define H5ES_NONE 0
 
@@ -37,7 +38,8 @@
 
 /**
  * Don't wait for operations to complete, just check their status.
- * (This allows @ref H5ESwait to behave like a 'test' operation) \since 1.14.0
+ * (This allows @ref H5ESwait to behave like a 'test' operation)
+ * \since 1.14.0
  */
 #define H5ES_WAIT_NONE (0)
 
