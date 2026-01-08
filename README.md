@@ -1,12 +1,3 @@
-HDF5 version 2.0.1 currently under development
-
-> [!WARNING]
-> **Heads Up: HDF5 Dropped Autotools March 10th**
->
-> It's happened—the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
->
-> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) was merged into the "develop" branch on **March 10, 2025**. Starting with HDF5 2.0, *only* the CMake build system is supported.
-
 ![HDF5 Logo][u3]
 
 [![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/call-workflows.yml?branch=develop&label=HDF5%20develop%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/call-workflows.yml?query=branch%3Adevelop)
@@ -92,23 +83,20 @@ HDF5 does not follow a regular release schedule. Instead, updates are based on t
 introduction of new features and the resolution of bugs. However, we aim to have at
 least one annual release for each maintenance branch.
 
-| Release | New Features |
-| ------- | ------------ |
-| 2.0.0 | Drop Autotools support, drop the HDF5 <--> GIF tools, add complex number support, update library defaults (cache sizes, etc.) |
-| FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
-
 ### Release Progress
 
-[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-progress-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+[![Release Blocker Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/GIST_ID/raw/release-blocker-hdf5.json)](https://github.com/HDFGroup/hdf5/projects/39)
 
-The badge above shows the current progress of release-blocking issues with colors that reflect completion status:
+[![Release Must Do Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/GIST_ID/raw/release-mustdo-hdf5.json)](https://github.com/HDFGroup/hdf5/projects/39)
 
-- **🟢 Green (90%+)**:  Readying for Deployment - most blockers completed
-- **🟡 Yellow (60-89%)**:  Nearing Completion - on track for release
-- **🟠 Orange (40-59%)**:  In Development - attention needed
-- **🔴 Red (<40%)**:  Initial Phase - significant blockers remain
+The badges above show the current progress of **release-blocking** and **must-do** issues with colors that reflect completion status:
 
-Click the badge to view the detailed project board with current release-blocking issues.
+- **🟢 Green (90%+)**: Readying for Deployment - most issues completed
+- **🟡 Yellow (60-89%)**: Nearing Completion - on track for release
+- **🟠 Orange (40-59%)**: In Development - attention needed
+- **🔴 Red (<40%)**: Initial Phase - significant issues remain
+
+Click the badges to view the detailed project board with current release items.
 
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------

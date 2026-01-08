@@ -1,4 +1,6 @@
-HDF5 version 2.0.1 currently under development
+***
+
+v2.0.0 --- November 10 , 2025
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous

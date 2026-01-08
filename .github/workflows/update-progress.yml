@@ -115,12 +115,23 @@ jobs:
           exit 1
         fi
         
+        # Extract blocker and must-do counts
+        BLOCKER_DONE=$(grep "^blocker_done=" progress_output.txt | cut -d'=' -f2 | head -1)
+        BLOCKER_TOTAL=$(grep "^blocker_total=" progress_output.txt | cut -d'=' -f2 | head -1)
+        MUSTDO_DONE=$(grep "^mustdo_done=" progress_output.txt | cut -d'=' -f2 | head -1)
+        MUSTDO_TOTAL=$(grep "^mustdo_total=" progress_output.txt | cut -d'=' -f2 | head -1)
+
         # Set outputs for use in subsequent steps
         echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
         echo "done=$DONE" >> $GITHUB_OUTPUT
         echo "total=$TOTAL" >> $GITHUB_OUTPUT
-        
+        echo "blocker_done=$BLOCKER_DONE" >> $GITHUB_OUTPUT
+        echo "blocker_total=$BLOCKER_TOTAL" >> $GITHUB_OUTPUT
+        echo "mustdo_done=$MUSTDO_DONE" >> $GITHUB_OUTPUT
+        echo "mustdo_total=$MUSTDO_TOTAL" >> $GITHUB_OUTPUT
+
         echo "::notice::Progress calculation successful: ${PERCENTAGE}% (${DONE}/${TOTAL})"
+        echo "::notice::  Blockers: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, Must Do: ${MUSTDO_DONE}/${MUSTDO_TOTAL}"
         
         # Clean up
         rm -f progress_output.txt
@@ -138,6 +149,10 @@ jobs:
         PERCENTAGE="${{ steps.progress.outputs.percentage }}"
         DONE="${{ steps.progress.outputs.done }}"
         TOTAL="${{ steps.progress.outputs.total }}"
+        BLOCKER_DONE="${{ steps.progress.outputs.blocker_done }}"
+        BLOCKER_TOTAL="${{ steps.progress.outputs.blocker_total }}"
+        MUSTDO_DONE="${{ steps.progress.outputs.mustdo_done }}"
+        MUSTDO_TOTAL="${{ steps.progress.outputs.mustdo_total }}"
         
         echo "::notice::Updating badge with: ${PERCENTAGE}% (${DONE}/${TOTAL})"
         
@@ -159,39 +174,90 @@ jobs:
         fi
         
         echo "::notice title=Release Progress::${PERCENTAGE}% Complete (${DONE}/${TOTAL}) - ${STATUS}"
-        
-        # Create badge JSON for shields.io endpoint with proper escaping (\($done)/\($total))
-        BADGE_JSON=$(jq -n \
-          --arg percentage "$PERCENTAGE" \
-          --arg done "$DONE" \
-          --arg total "$TOTAL" \
-          --arg color "$COLOR" \
+
+        # Calculate percentages for each category
+        BLOCKER_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($BLOCKER_DONE / $BLOCKER_TOTAL * 100)}" 2>/dev/null || echo "0")
+        MUSTDO_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($MUSTDO_DONE / $MUSTDO_TOTAL * 100)}" 2>/dev/null || echo "0")
+
+        # Determine colors for each badge
+        BLOCKER_PERCENTAGE_INT="${BLOCKER_PERCENTAGE%.*}"
+        if [ "$BLOCKER_PERCENTAGE_INT" -ge 90 ]; then
+          BLOCKER_COLOR="brightgreen"
+        elif [ "$BLOCKER_PERCENTAGE_INT" -ge 60 ]; then
+          BLOCKER_COLOR="yellow"
+        elif [ "$BLOCKER_PERCENTAGE_INT" -ge 40 ]; then
+          BLOCKER_COLOR="orange"
+        else
+          BLOCKER_COLOR="red"
+        fi
+
+        MUSTDO_PERCENTAGE_INT="${MUSTDO_PERCENTAGE%.*}"
+        if [ "$MUSTDO_PERCENTAGE_INT" -ge 90 ]; then
+          MUSTDO_COLOR="brightgreen"
+        elif [ "$MUSTDO_PERCENTAGE_INT" -ge 60 ]; then
+          MUSTDO_COLOR="yellow"
+        elif [ "$MUSTDO_PERCENTAGE_INT" -ge 40 ]; then
+          MUSTDO_COLOR="orange"
+        else
+          MUSTDO_COLOR="red"
+        fi
+
+        # Create blocker badge JSON
+        BLOCKER_BADGE_JSON=$(jq -n \
+          --arg percentage "$BLOCKER_PERCENTAGE" \
+          --arg done "$BLOCKER_DONE" \
+          --arg total "$BLOCKER_TOTAL" \
+          --arg color "$BLOCKER_COLOR" \
           '{
             "schemaVersion": 1,
-            "label": "Release Progress",
-            "message": "\($percentage)%",
+            "label": "Release Blockers",
+            "message": "\($done)/\($total) (\($percentage)%)",
             "color": $color,
             "style": "flat-square"
           }')
-          
-        # Validate JSON was created successfully
-        if [ -z "$BADGE_JSON" ] || ! echo "$BADGE_JSON" | jq empty 2>/dev/null; then
-          echo "::error::Failed to generate valid badge JSON"
+
+        # Create must-do badge JSON
+        MUSTDO_BADGE_JSON=$(jq -n \
+          --arg percentage "$MUSTDO_PERCENTAGE" \
+          --arg done "$MUSTDO_DONE" \
+          --arg total "$MUSTDO_TOTAL" \
+          --arg color "$MUSTDO_COLOR" \
+          '{
+            "schemaVersion": 1,
+            "label": "Release Must Do",
+            "message": "\($done)/\($total) (\($percentage)%)",
+            "color": $color,
+            "style": "flat-square"
+          }')
+
+        # Validate JSONs were created successfully
+        if [ -z "$BLOCKER_BADGE_JSON" ] || ! echo "$BLOCKER_BADGE_JSON" | jq empty 2>/dev/null; then
+          echo "::error::Failed to generate valid blocker badge JSON"
           exit 1
         fi
-          
-        # The filename in the Gist must match the one created manually
-        GIST_NAME="release-progress-${GITHUB_REPOSITORY##*/}.json"
-        echo "::notice::Updating Gist file: $GIST_NAME"
-        
-        # Create the request payload
+        if [ -z "$MUSTDO_BADGE_JSON" ] || ! echo "$MUSTDO_BADGE_JSON" | jq empty 2>/dev/null; then
+          echo "::error::Failed to generate valid must-do badge JSON"
+          exit 1
+        fi
+
+        # The filenames in the Gist
+        BLOCKER_GIST_NAME="release-blocker-${GITHUB_REPOSITORY##*/}.json"
+        MUSTDO_GIST_NAME="release-mustdo-${GITHUB_REPOSITORY##*/}.json"
+        echo "::notice::Updating Gist files: $BLOCKER_GIST_NAME, $MUSTDO_GIST_NAME"
+
+        # Create the request payload with both files
         REQUEST_PAYLOAD=$(jq -n \
-          --arg filename "$GIST_NAME" \
-          --argjson content "$BADGE_JSON" \
+          --arg blocker_filename "$BLOCKER_GIST_NAME" \
+          --arg mustdo_filename "$MUSTDO_GIST_NAME" \
+          --argjson blocker_content "$BLOCKER_BADGE_JSON" \
+          --argjson mustdo_content "$MUSTDO_BADGE_JSON" \
           '{
             "files": {
-              ($filename): {
-                "content": ($content | tostring)
+              ($blocker_filename): {
+                "content": ($blocker_content | tostring)
+              },
+              ($mustdo_filename): {
+                "content": ($mustdo_content | tostring)
               }
             }
           }')
@@ -216,30 +282,45 @@ jobs:
         fi
         
         echo "::notice::Gist updated successfully"
-        
-        # Generate badge URL for use in README
-        BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${GIST_NAME}"
+
+        # Generate badge URLs for use in README
+        BLOCKER_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${BLOCKER_GIST_NAME}"
+        MUSTDO_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${MUSTDO_GIST_NAME}"
         PROJECT_URL="https://github.com/${GITHUB_REPOSITORY}/projects/39"
-        
-        echo "::notice::Badge URL generated: $BADGE_URL"
-        echo "badge_url=$BADGE_URL" >> $GITHUB_OUTPUT
+
+        echo "::notice::Blocker Badge URL: $BLOCKER_BADGE_URL"
+        echo "::notice::Must-Do Badge URL: $MUSTDO_BADGE_URL"
+        echo "blocker_badge_url=$BLOCKER_BADGE_URL" >> $GITHUB_OUTPUT
+        echo "mustdo_badge_url=$MUSTDO_BADGE_URL" >> $GITHUB_OUTPUT
         echo "project_url=$PROJECT_URL" >> $GITHUB_OUTPUT
-          
+
         # Create enhanced step summary
         echo "## 📊 Release Progress: ${PERCENTAGE}%" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
-        echo "**Progress:** ${DONE} of ${TOTAL} release blockers completed" >> $GITHUB_STEP_SUMMARY
-        echo "**Badge Color:** ${COLOR}" >> $GITHUB_STEP_SUMMARY
+        echo "**Overall Progress:** ${DONE} of ${TOTAL} items completed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🚫 Release Blockers" >> $GITHUB_STEP_SUMMARY
+        echo "**Progress:** ${BLOCKER_DONE} of ${BLOCKER_TOTAL} completed (${BLOCKER_PERCENTAGE}%)" >> $GITHUB_STEP_SUMMARY
+        echo "**Badge Color:** ${BLOCKER_COLOR}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### ✅ Release Must Do" >> $GITHUB_STEP_SUMMARY
+        echo "**Progress:** ${MUSTDO_DONE} of ${MUSTDO_TOTAL} completed (${MUSTDO_PERCENTAGE}%)" >> $GITHUB_STEP_SUMMARY
+        echo "**Badge Color:** ${MUSTDO_COLOR}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Gist ID:** ${GIST_ID}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Badge URLs" >> $GITHUB_STEP_SUMMARY
-        echo "**Markdown:** \`[![Release Progress](${BADGE_URL})](${PROJECT_URL})\`" >> $GITHUB_STEP_SUMMARY
-        echo "**Image Only:** \`![Release Progress](${BADGE_URL})\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Blocker Markdown:** \`[![Release Blocker Progress](${BLOCKER_BADGE_URL})](${PROJECT_URL})\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Must-Do Markdown:** \`[![Release Must Do Progress](${MUSTDO_BADGE_URL})](${PROJECT_URL})\`" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Badge JSON Preview" >> $GITHUB_STEP_SUMMARY
         echo '```json' >> $GITHUB_STEP_SUMMARY
-        echo "$BADGE_JSON" >> $GITHUB_STEP_SUMMARY
+        echo "// Blocker Badge" >> $GITHUB_STEP_SUMMARY
+        echo "$BLOCKER_BADGE_JSON" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "// Must-Do Badge" >> $GITHUB_STEP_SUMMARY
+        echo "$MUSTDO_BADGE_JSON" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
         
     - name: Cleanup on failure

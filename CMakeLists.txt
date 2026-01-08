@@ -353,23 +353,6 @@ string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._-]*
 message (TRACE "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
 
 #-----------------------------------------------------------------------------
-# Configure version-dependent files from H5public.h (single source of truth)
-#-----------------------------------------------------------------------------
-# Set up subrelease string variants for different file types
-if (H5_VERS_SUBRELEASE)
-  set (H5_VERS_SUBRELEASE_DOC "-${H5_VERS_SUBRELEASE}")
-else ()
-  set (H5_VERS_SUBRELEASE_DOC "")
-endif ()
-
-# Configure README.md
-configure_file (${HDF5_SOURCE_DIR}/README.md.in ${HDF5_SOURCE_DIR}/README.md @ONLY)
-
-# Configure CHANGELOG.md
-configure_file (${HDF5_SOURCE_DIR}/release_docs/CHANGELOG.md.in
-                ${HDF5_SOURCE_DIR}/release_docs/CHANGELOG.md @ONLY)
-
-#-----------------------------------------------------------------------------
 # parse the full soversion number from config/lt_vers.am and include in H5_SOVERS_INFO
 #-----------------------------------------------------------------------------
 file (READ ${HDF_CONFIG_DIR}/lt_vers.am _lt_vers_am_contents)

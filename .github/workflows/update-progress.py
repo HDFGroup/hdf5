@@ -89,22 +89,25 @@ class GitHubProjectTracker:
     
     def fetch_release_blocker_stats(self) -> Dict[str, int]:
         """
-        Fetches release blocker statistics from the GitHub project.
-        
+        Fetches release blocker and must-do statistics from the GitHub project.
+
         Returns:
-            Dict with 'total', 'done', and 'percentage' keys
+            Dict with 'total', 'done', 'percentage', 'blocker_total', 'blocker_done',
+            'mustdo_total', 'mustdo_done' keys
         """
-        total = 0
-        done = 0
+        blocker_total = 0
+        blocker_done = 0
+        mustdo_total = 0
+        mustdo_done = 0
         cursor = None
-        
+
         while True:
             variables = {
                 "owner": self.owner,
                 "projectNumber": self.project_number,
                 "cursor": cursor
             }
-            
+
             try:
                 response = requests.post(
                     self.api_url,
@@ -114,40 +117,52 @@ class GitHubProjectTracker:
                 )
                 response.raise_for_status()
                 result = response.json()
-                
+
                 if "errors" in result:
                     raise Exception(f"GraphQL errors: {result['errors']}")
-                    
+
             except requests.RequestException as e:
                 raise Exception(f"API request failed: {e}")
-            
+
             # Parse response
             project = result.get("data", {}).get("organization", {}).get("projectV2", {})
             items = project.get("items", {})
-            
+
             for item in items.get("nodes", []):
                 if not item.get("content"):
                     continue
-                    
+
                 fields = self._parse_item_fields(item)
-                
-                if fields.get("Release gating") == "Release_Blocker":
-                    total += 1
-                    if fields.get("Status") == "Done":
-                        done += 1
-            
+                release_gating = fields.get("Release gating", "")
+                status = fields.get("Status", "")
+
+                if release_gating == "Release_Blocker":
+                    blocker_total += 1
+                    if status == "Done":
+                        blocker_done += 1
+                elif release_gating == "Release_Must Do":
+                    mustdo_total += 1
+                    if status == "Done":
+                        mustdo_done += 1
+
             # Check for next page
             page_info = items.get("pageInfo", {})
             if not page_info.get("hasNextPage", False):
                 break
             cursor = page_info.get("endCursor")
-        
+
+        total = blocker_total + mustdo_total
+        done = blocker_done + mustdo_done
         percentage = round((done / total * 100), 1) if total > 0 else 0
-        
+
         return {
             'total': total,
             'done': done,
-            'percentage': percentage
+            'percentage': percentage,
+            'blocker_total': blocker_total,
+            'blocker_done': blocker_done,
+            'mustdo_total': mustdo_total,
+            'mustdo_done': mustdo_done
         }
 
 
@@ -172,11 +187,17 @@ def main():
                 f.write(f"percentage={stats['percentage']}\n")
                 f.write(f"done={stats['done']}\n")
                 f.write(f"total={stats['total']}\n")
-        
+                f.write(f"blocker_total={stats['blocker_total']}\n")
+                f.write(f"blocker_done={stats['blocker_done']}\n")
+                f.write(f"mustdo_total={stats['mustdo_total']}\n")
+                f.write(f"mustdo_done={stats['mustdo_done']}\n")
+
         # Also output to stdout for local testing
         print(f"percentage={stats['percentage']}")
         print(f"Calculated progress: {stats['percentage']}%")
         print(f"Done / Total: {stats['done']} / {stats['total']}")
+        print(f"Blockers: {stats['blocker_done']} / {stats['blocker_total']}")
+        print(f"Must Do: {stats['mustdo_done']} / {stats['mustdo_total']}")
         
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
