@@ -4,7 +4,7 @@
 
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17808614.svg)](https://doi.org/10.5281/zenodo.17808614)
-[![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/main.yml?query=branch%3Adevelop)
+[![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/call-workflows.yml?branch=develop&label=CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/call-workflows.yml?query=branch%3Adevelop)
 
 </div>
 
