@@ -2,8 +2,9 @@ name: macOS-26 Matrix Testing
 
 on:
    workflow_dispatch:
-   schedule:
-     - cron: "0 9 * * *"
+
+#schedule:
+# - cron: "0 9 * * *"
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
