@@ -258,8 +258,9 @@ jobs:
 
     - name: Build
       run:
-        [[ "${{ matrix.java }}" == "ON" ]]; then
+        if [[ "${{ matrix.java }}" == "ON" ]]; then
           # DO NOT run export JAVA_HOME=$(/usr/libexec/java_home) here!
+
           # Just use the $JAVA_HOME that setup-java already set:
           CMAKE_OPTS="$CMAKE_OPTS -DJAVA_HOME=$JAVA_HOME"
         fi
@@ -280,6 +281,7 @@ jobs:
       env:
         # Set test timeout
         CTEST_TIMEOUT: 3600
+
 
     - name: Upload Test Results
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
