@@ -5,8 +5,6 @@
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17808614.svg)](https://doi.org/10.5281/zenodo.17808614)
 [![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/call-workflows.yml?branch=develop&label=CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/call-workflows.yml?query=branch%3Adevelop)
-[![Release Blockers](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/a4fbdde293677bf3f63f3cfd3aef6b44/raw/release-blockers.json)](https://github.com/orgs/HDFGroup/projects/39)
-[![Release Must Do](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/8a077a919d048ce5dc9f56350bec10bc/raw/release-mustdo.json)](https://github.com/orgs/HDFGroup/projects/39)
 
 </div>
 
@@ -96,9 +94,9 @@ least one annual release for each maintenance branch.
 
 ### Release Progress
 
-[![Release Blocker Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/GIST_ID/raw/release-blocker-hdf5.json)](https://github.com/HDFGroup/hdf5/projects/39)
+[![Release Blockers](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/a4fbdde293677bf3f63f3cfd3aef6b44/raw/release-blockers.json)](https://github.com/orgs/HDFGroup/projects/39)
 
-[![Release Must Do Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/GIST_ID/raw/release-mustdo-hdf5.json)](https://github.com/HDFGroup/hdf5/projects/39)
+[![Release Must Do](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/8a077a919d048ce5dc9f56350bec10bc/raw/release-mustdo.json)](https://github.com/orgs/HDFGroup/projects/39)
 
 The badges above show the current progress of **release-blocking** and **must-do** issues with colors that reflect completion status:
 
