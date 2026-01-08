@@ -112,11 +112,10 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ## Library
 
-### Fixes security issue GHSA-5c6x-jmgf-f5vc
+### Fixes security issue
 
    H5Iget_name() allows passing NULL when querying the object name length. However, a misuse of the function by passing a non-NULL buffer with size == 0 will result in undefined behavior.  The function is now fixed to treat (name != NULL, size == 0) as a length-only query to eliminate Valgrind noise.
 
-Fixes GitHub #GHSA-5c6x-jmgf-f5vc
 
 ## Java Library
 
