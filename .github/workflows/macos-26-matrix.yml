@@ -227,12 +227,6 @@ jobs:
           CMAKE_OPTS="$CMAKE_OPTS -DPLUGIN_USE_LOCALCONTENT=OFF"
         fi
 
-        # Set Java environment if needed
-#        if [[ "${{ matrix.java }}" == "ON" ]]; then
-#          export JAVA_HOME=$(/usr/libexec/java_home)
-#          CMAKE_OPTS="$CMAKE_OPTS -DJAVA_HOME=$JAVA_HOME"
-#        fi
-
         # Set Fortran compiler if needed
         if [[ "${{ matrix.fortran }}" == "ON" ]]; then
           CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=gfortran-15"
@@ -257,14 +251,7 @@ jobs:
       shell: bash
 
     - name: Build
-      run: |
-        if [[ "${{ matrix.java }}" == "ON" ]]; then
-          # DO NOT run export JAVA_HOME=$(/usr/libexec/java_home) here!
-
-          # Just use the $JAVA_HOME that setup-java already set:
-          CMAKE_OPTS="$CMAKE_OPTS -DJAVA_HOME=$JAVA_HOME"
-        fi
-        cmake --build . --config Release --parallel 2
+      run: cmake --build . --config Release --parallel 2
       working-directory: ${{ runner.workspace }}/build
 
     - name: Test
