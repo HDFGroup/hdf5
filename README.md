@@ -122,30 +122,7 @@ Click the badges to view the detailed project board with current release items.
 
 ## Java Maven Artifacts
 
-Maven artifacts for Java bindings and examples are available at:
-
-- **GitHub Packages**: https://maven.pkg.github.com/HDFGroup/hdf5
-- **Maven Central** (coming soon): https://central.sonatype.com/artifact/org.hdfgroup/hdf5-java
-
-### Available Artifacts
-
-```xml
-<!-- HDF5 Java bindings with platform-specific JARs -->
-<dependency>
-  <groupId>org.hdfgroup</groupId>
-  <artifactId>hdf5-java</artifactId>
-</dependency>
-
-<!-- Complete collection of Java examples (platform-independent) -->
-<dependency>
-  <groupId>org.hdfgroup</groupId>
-  <artifactId>hdf5-java-examples</artifactId>
-</dependency>
-```
-
-**Supported Platforms**: linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64
-
-See [HDF5Examples/JAVA/README-MAVEN.md](HDF5Examples/JAVA/README-MAVEN.md) for complete usage instructions.
+HDF5 Java bindings and examples are available as Maven artifacts. For detailed usage instructions including dependency configuration, repository setup, and platform-specific builds, see [HDF5Examples/JAVA/README-MAVEN.md](HDF5Examples/JAVA/README-MAVEN.md).
 
 ## Contributing
 
