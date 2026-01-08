@@ -74,9 +74,11 @@
  * For pre-releases like \c snap0. Empty string for official releases.
  *
  * \warning IMPORTANT: This MUST be a string literal (quoted), not an unquoted value.
- *          Valid:   #define H5_VERS_SUBRELEASE ""
- *          Valid:   #define H5_VERS_SUBRELEASE "-snap0"
- *          Invalid: #define H5_VERS_SUBRELEASE -snap0
+ * @code
+ *   Valid:   #define H5_VERS_SUBRELEASE ""
+ *   Valid:   #define H5_VERS_SUBRELEASE "-snap0"
+ *   Invalid: #define H5_VERS_SUBRELEASE -snap0
+ * @endcode
  */
 #define H5_VERS_SUBRELEASE ""
 
