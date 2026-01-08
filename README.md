@@ -1,21 +1,16 @@
+<div align="center">
+
 ![HDF5 Logo][u3]
 
-[![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/call-workflows.yml?branch=develop&label=HDF5%20develop%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/call-workflows.yml?query=branch%3Adevelop)
-[![HDF5 develop daily build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/daily-schedule.yml?branch=develop&label=HDF5%20develop%20daily%20build)](https://github.com/HDFGroup/hdf5/actions/workflows/daily-schedule.yml?query=branch%3Adevelop)
-[![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions/workflows/hdfeos5.yml?query=branch%3Adevelop)
-[![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop)
-[![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop)
-[![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop)
-[![HDF5 VOL connectors build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vol.yml?branch=develop&label=HDF5-VOL)](https://github.com/HDFGroup/hdf5/actions/workflows/vol.yml?query=branch%3Adevelop)
-[![HDF5 VFD build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vfd.yml?branch=develop&label=HDF5-VFD)](https://github.com/HDFGroup/hdf5/actions/workflows/vfd.yml?query=branch%3Adevelop)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
-[![OSS-Fuzz Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/hdf5.svg)](https://oss-fuzz-build-logs.storage.googleapis.com/index.html#hdf5)
-[![Link Checker Status](https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml/badge.svg)](https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17808614.svg)](https://doi.org/10.5281/zenodo.17808614)
+[![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/call-workflows.yml?branch=develop&label=CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/call-workflows.yml?query=branch%3Adevelop)
 
-[HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
+</div>
 
-*Please refer to the release_docs/INSTALL file for installation/usage instructions.*
+---
+
+## What is HDF5?
 
 This repository contains a high-performance library's source code and a file format
 specification that implements the HDF5® data model. The model has been adopted across
@@ -24,60 +19,74 @@ in science, engineering, and research communities worldwide.
 
 The HDF Group is the developer, maintainer, and steward of HDF5 software. Find more
 information about The HDF Group, the HDF5 Community, and other HDF5 software projects,
-tools, and services at [The HDF Group's website](https://www.hdfgroup.org/). 
+tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
-DOCUMENTATION
--------------
+## Quick Start
+
+📖 **New to HDF5?** Start with the [INSTALL](release_docs/INSTALL) guide for compilation and installation instructions.
+
+🚀 **Ready to build?** See [INSTALL_CMAKE](release_docs/INSTALL_CMAKE) for CMake-based builds.
+
+⚡ **Running on HPC?** Check out [README_HPC.md](release_docs/README_HPC.md) for parallel HDF5 configuration.
+
+## Table of Contents
+
+- [What is HDF5?](#what-is-hdf5)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [Help and Support](#help-and-support)
+- [Forum and News](#forum-and-news)
+- [Release Schedule](#release-schedule)
+- [Downloads and Source Code](#downloads-and-source-code)
+- [Java Maven Artifacts](#java-maven-artifacts)
+- [Contributing](#contributing)
+- [How to Cite HDF5](#how-to-cite-hdf5)
+- [Build Status](#build-status)
+
+## Documentation
+
 Documentation for all HDF software is available at:
-
-   https://support.hdfgroup.org/documentation/index.html
-
-The latest documentation for the HDF5 library can be found at:
-
-   https://support.hdfgroup.org/documentation/hdf5/latest
+- **All HDF Documentation**: https://support.hdfgroup.org/documentation/index.html
+- **Latest HDF5 Library**: https://support.hdfgroup.org/documentation/hdf5/latest
 
 See the [CHANGELOG.md][u1] file in the [release_docs/][u4] directory for information specific
 to the features and updates included in this release of the library.
 
-Several more files are located within the [release_docs/][u4] directory with specific
-details for several common platforms and configurations.
-- INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
-- INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
-- README_HPC.md - instructions for building and configuring Parallel HDF5 on HPC systems
-- INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
-- USING_HDF5_CMake - Build and Install HDF5 Applications with CMake
-- USING_CMake_Examples - Build and Test HDF5 Examples with CMake
+### Platform-Specific Guides
 
+Several files in the [release_docs/][u4] directory provide platform-specific details:
 
+| File | Description |
+|------|-------------|
+| [INSTALL](release_docs/INSTALL) | General compilation and installation instructions (start here) |
+| [INSTALL_CMAKE](release_docs/INSTALL_CMAKE) | Building with CMake |
+| [README_HPC.md](release_docs/README_HPC.md) | Building and configuring Parallel HDF5 on HPC systems |
+| [INSTALL_Windows](release_docs/INSTALL_Windows) | Windows installation |
+| [INSTALL_Cygwin](release_docs/INSTALL_Cygwin) | Cygwin installation |
+| [USING_HDF5_CMake](release_docs/USING_HDF5_CMake) | Building HDF5 applications with CMake |
+| [USING_CMake_Examples](release_docs/USING_CMake_Examples) | Building and testing HDF5 examples with CMake |
 
-HELP AND SUPPORT
-----------------
-The HDF Group staffs a free Help Desk accessible at [https://help.hdfgroup.org](https://help.hdfgroup.org) and also monitors the [Forum](https://forum.hdfgroup.org). Our free support service is community-based and handled as time allows. We’ll do our best to respond to your question as soon as possible, but please note that response times may vary depending on the complexity of the issue and staff availability.
+## Help and Support
+
+The HDF Group staffs a free Help Desk accessible at https://help.hdfgroup.org and also monitors the [Forum](https://forum.hdfgroup.org). Our free support service is community-based and handled as time allows. We'll do our best to respond to your question as soon as possible, but please note that response times may vary depending on the complexity of the issue and staff availability.
 
 If you're interested in guaranteed response and resolution times, a dedicated technical account manager, and more benefits (all while supporting the open-source work of The HDF Group), please check out [Priority Support](https://www.hdfgroup.org/solutions/priority-support/).
 
+## Forum and News
 
-
-FORUM and NEWS
---------------
 The [HDF Forum](https://forum.hdfgroup.org) is provided for public announcements, technical questions, and discussions
 of interest to the general HDF5 Community.
 
-   - News and Announcements
-   https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group
-
-   - HDF5 Topics
-   https://forum.hdfgroup.org/c/hdf5
+- [News and Announcements](https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group)
+- [HDF5 Topics](https://forum.hdfgroup.org/c/hdf5)
 
 These forums are provided as an open and public service for searching and reading.
 Posting requires completing a simple registration and allows one to join in the
-conversation.  Please read the [instructions](https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
-) for more information on how to get started.
+conversation. Please read the [quickstart guide](https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum) for more information on how to get started.
 
-RELEASE SCHEDULE
-----------------
+## Release Schedule
 
-![HDF5 release schedule][u2] 
+![HDF5 release schedule][u2]
 
 HDF5 does not follow a regular release schedule. Instead, updates are based on the
 introduction of new features and the resolution of bugs. However, we aim to have at
@@ -91,45 +100,107 @@ least one annual release for each maintenance branch.
 
 The badges above show the current progress of **release-blocking** and **must-do** issues with colors that reflect completion status:
 
-- **🟢 Green (90%+)**: Readying for Deployment - most issues completed
-- **🟡 Yellow (60-89%)**: Nearing Completion - on track for release
-- **🟠 Orange (40-59%)**: In Development - attention needed
-- **🔴 Red (<40%)**: Initial Phase - significant issues remain
+- 🟢 **Green (90%+)**: Readying for Deployment - most issues completed
+- 🟡 **Yellow (60-89%)**: Nearing Completion - on track for release
+- 🟠 **Orange (40-59%)**: In Development - attention needed
+- 🔴 **Red (<40%)**: Initial Phase - significant issues remain
 
 Click the badges to view the detailed project board with current release items.
 
-SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
---------------------------------------------
-Periodically development code snapshots are provided at the following URL:
+## Downloads and Source Code
 
-   https://github.com/HDFGroup/hdf5/releases/tag/snapshot
+### Snapshots and Releases
 
-Source packages for current and previous releases are located at:
+- **Development Snapshots**: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
+- **Latest Release**: https://github.com/HDFGroup/hdf5/releases
+- **Previous Releases**: https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
+- **Development Code**: https://github.com/HDFGroup/hdf5.git
 
-   [Latest HDF5 release](https://github.com/HDFGroup/hdf5/releases)
-   [Previous releases](https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html)
+### HPC Testing Results
+
+[View HPC configure/build/test results on CDash](https://my.cdash.org/index.php?project=HDF5)
+
+## Java Maven Artifacts
 
 Maven artifacts for Java bindings and examples are available at:
 
-   GitHub Packages:
-   https://maven.pkg.github.com/HDFGroup/hdf5
+- **GitHub Packages**: https://maven.pkg.github.com/HDFGroup/hdf5
+- **Maven Central** (coming soon): https://central.sonatype.com/artifact/org.hdfgroup/hdf5-java
 
-   Maven Central (coming soon):
-   https://central.sonatype.com/artifact/org.hdfgroup/hdf5-java
+### Available Artifacts
 
-Java Examples Maven Integration:
-   - **org.hdfgroup:hdf5-java** - HDF5 Java bindings with platform-specific JARs (linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64)
-   - **org.hdfgroup:hdf5-java-examples** - Complete collection of Java examples (platform-independent)
-   - Cross-platform CI/CD testing and deployment
-   - Comprehensive Maven integration with automated testing
-   - See HDF5Examples/JAVA/README-MAVEN.md for complete usage instructions
+```xml
+<!-- HDF5 Java bindings with platform-specific JARs -->
+<dependency>
+  <groupId>org.hdfgroup</groupId>
+  <artifactId>hdf5-java</artifactId>
+</dependency>
 
-Development code is available at our Github location:
+<!-- Complete collection of Java examples (platform-independent) -->
+<dependency>
+  <groupId>org.hdfgroup</groupId>
+  <artifactId>hdf5-java-examples</artifactId>
+</dependency>
+```
 
-   https://github.com/HDFGroup/hdf5.git
+**Supported Platforms**: linux-x86_64, windows-x86_64, macos-x86_64, macos-aarch64
+
+See [HDF5Examples/JAVA/README-MAVEN.md](HDF5Examples/JAVA/README-MAVEN.md) for complete usage instructions.
+
+## Contributing
+
+We welcome contributions to HDF5! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
+
+### How to Contribute
+
+1. **Report Issues**: Use our [GitHub Issues](https://github.com/HDFGroup/hdf5/issues) to report bugs or request features
+2. **Submit Pull Requests**: Fork the repository, make your changes, and submit a PR
+3. **Join Discussions**: Participate in the [HDF Forum](https://forum.hdfgroup.org)
+
+For detailed contribution guidelines, please contact us through the [Help Desk](https://help.hdfgroup.org).
+
+## How to Cite HDF5
+
+If you use HDF5 in your research, please cite it using the DOI:
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17808614.svg)](https://doi.org/10.5281/zenodo.17808614)
+
+**Citation Format**:
+```
+The HDF Group. (2024). Hierarchical Data Format, version 5 (Version [version]).
+Zenodo. https://doi.org/10.5281/zenodo.17808614
+```
+
+Replace `[version]` with the specific version you used.
+
+## Build Status
+
+<details>
+<summary>Click to expand detailed build status</summary>
+
+### Continuous Integration
+
+[![HDF5 develop daily build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/daily-schedule.yml?branch=develop&label=Daily%20Build)](https://github.com/HDFGroup/hdf5/actions/workflows/daily-schedule.yml?query=branch%3Adevelop)
+[![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE%20Tests)](https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop)
+[![OSS-Fuzz Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/hdf5.svg)](https://oss-fuzz-build-logs.storage.googleapis.com/index.html#hdf5)
+[![Link Checker Status](https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml/badge.svg)](https://github.com/HDFGroup/hdf5/actions/workflows/linkchecker.yml)
+
+### Integration Testing
+
+[![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions/workflows/hdfeos5.yml?query=branch%3Adevelop)
+[![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop)
+[![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop)
+
+### VOL and VFD Testing
+
+[![HDF5 VOL connectors build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vol.yml?branch=develop&label=VOL%20Connectors)](https://github.com/HDFGroup/hdf5/actions/workflows/vol.yml?query=branch%3Adevelop)
+[![HDF5 VFD build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vfd.yml?branch=develop&label=VFD%20Tests)](https://github.com/HDFGroup/hdf5/actions/workflows/vfd.yml?query=branch%3Adevelop)
+
+</details>
+
+---
 
 [u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md
 [u2]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/img/release-schedule.png
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/doxygen/img/HDF5.png
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
-
