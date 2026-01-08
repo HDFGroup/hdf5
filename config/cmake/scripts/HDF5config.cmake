@@ -43,16 +43,13 @@ cmake_minimum_required (VERSION 3.26)
 # If not set in parent scope, read it from H5public.h now
 #-----------------------------------------------------------------------------
 if (NOT DEFINED H5_VERS_MAJOR)
-  # Read version from H5public.h if not already set
-  file (READ ${CTEST_SCRIPT_DIRECTORY}/../src/H5public.h _h5public_h_contents)
-  string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
-      "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
-  string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
-      "\\1" H5_VERS_MINOR ${_h5public_h_contents})
-  string (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
-      "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
-  string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._-]*)\".*$"
-      "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
+  # Use shared version parsing module
+  include(${CTEST_SCRIPT_DIRECTORY}/../HDF5VersionParsing.cmake)
+  parse_hdf5_version("${CTEST_SCRIPT_DIRECTORY}/../src/H5public.h"
+                     MAJOR_VAR H5_VERS_MAJOR
+                     MINOR_VAR H5_VERS_MINOR
+                     RELEASE_VAR H5_VERS_RELEASE
+                     SUBRELEASE_VAR H5_VERS_SUBRELEASE)
 endif ()
 
 set (CTEST_SOURCE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")

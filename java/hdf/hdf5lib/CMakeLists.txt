@@ -105,9 +105,10 @@ set (HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES
 #-----------------------------------------------------------------------------
 # Generate H5Version.java with version information from H5public.h
 # This ensures the Java version constants match the C library version
+# Uses shared template from config/cmake/templates/
 #-----------------------------------------------------------------------------
 configure_file (
-    ${CMAKE_CURRENT_SOURCE_DIR}/H5Version.java.in
+    ${HDF5_SOURCE_DIR}/config/cmake/templates/H5Version.java.in
     ${CMAKE_CURRENT_BINARY_DIR}/H5Version.java
     @ONLY
 )

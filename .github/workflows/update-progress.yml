@@ -175,60 +175,54 @@ jobs:
         
         echo "::notice title=Release Progress::${PERCENTAGE}% Complete (${DONE}/${TOTAL}) - ${STATUS}"
 
+        # Function to determine badge color based on percentage
+        get_badge_color() {
+          local percentage_int="${1%.*}"
+          if [ "$percentage_int" -ge 90 ]; then
+            echo "brightgreen"
+          elif [ "$percentage_int" -ge 60 ]; then
+            echo "yellow"
+          elif [ "$percentage_int" -ge 40 ]; then
+            echo "orange"
+          else
+            echo "red"
+          fi
+        }
+
+        # Function to create badge JSON
+        create_badge_json() {
+          local label="$1"
+          local done="$2"
+          local total="$3"
+          local percentage="$4"
+          local color="$5"
+
+          jq -n \
+            --arg label "$label" \
+            --arg percentage "$percentage" \
+            --arg done "$done" \
+            --arg total "$total" \
+            --arg color "$color" \
+            '{
+              "schemaVersion": 1,
+              "label": $label,
+              "message": "\($done)/\($total) (\($percentage)%)",
+              "color": $color,
+              "style": "flat-square"
+            }'
+        }
+
         # Calculate percentages for each category
         BLOCKER_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($BLOCKER_DONE / $BLOCKER_TOTAL * 100)}" 2>/dev/null || echo "0")
         MUSTDO_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($MUSTDO_DONE / $MUSTDO_TOTAL * 100)}" 2>/dev/null || echo "0")
 
-        # Determine colors for each badge
-        BLOCKER_PERCENTAGE_INT="${BLOCKER_PERCENTAGE%.*}"
-        if [ "$BLOCKER_PERCENTAGE_INT" -ge 90 ]; then
-          BLOCKER_COLOR="brightgreen"
-        elif [ "$BLOCKER_PERCENTAGE_INT" -ge 60 ]; then
-          BLOCKER_COLOR="yellow"
-        elif [ "$BLOCKER_PERCENTAGE_INT" -ge 40 ]; then
-          BLOCKER_COLOR="orange"
-        else
-          BLOCKER_COLOR="red"
-        fi
+        # Determine colors using the shared function
+        BLOCKER_COLOR=$(get_badge_color "$BLOCKER_PERCENTAGE")
+        MUSTDO_COLOR=$(get_badge_color "$MUSTDO_PERCENTAGE")
 
-        MUSTDO_PERCENTAGE_INT="${MUSTDO_PERCENTAGE%.*}"
-        if [ "$MUSTDO_PERCENTAGE_INT" -ge 90 ]; then
-          MUSTDO_COLOR="brightgreen"
-        elif [ "$MUSTDO_PERCENTAGE_INT" -ge 60 ]; then
-          MUSTDO_COLOR="yellow"
-        elif [ "$MUSTDO_PERCENTAGE_INT" -ge 40 ]; then
-          MUSTDO_COLOR="orange"
-        else
-          MUSTDO_COLOR="red"
-        fi
-
-        # Create blocker badge JSON
-        BLOCKER_BADGE_JSON=$(jq -n \
-          --arg percentage "$BLOCKER_PERCENTAGE" \
-          --arg done "$BLOCKER_DONE" \
-          --arg total "$BLOCKER_TOTAL" \
-          --arg color "$BLOCKER_COLOR" \
-          '{
-            "schemaVersion": 1,
-            "label": "Release Blockers",
-            "message": "\($done)/\($total) (\($percentage)%)",
-            "color": $color,
-            "style": "flat-square"
-          }')
-
-        # Create must-do badge JSON
-        MUSTDO_BADGE_JSON=$(jq -n \
-          --arg percentage "$MUSTDO_PERCENTAGE" \
-          --arg done "$MUSTDO_DONE" \
-          --arg total "$MUSTDO_TOTAL" \
-          --arg color "$MUSTDO_COLOR" \
-          '{
-            "schemaVersion": 1,
-            "label": "Release Must Do",
-            "message": "\($done)/\($total) (\($percentage)%)",
-            "color": $color,
-            "style": "flat-square"
-          }')
+        # Create badge JSONs using the shared function
+        BLOCKER_BADGE_JSON=$(create_badge_json "Release Blockers" "$BLOCKER_DONE" "$BLOCKER_TOTAL" "$BLOCKER_PERCENTAGE" "$BLOCKER_COLOR")
+        MUSTDO_BADGE_JSON=$(create_badge_json "Release Must Do" "$MUSTDO_DONE" "$MUSTDO_TOTAL" "$MUSTDO_PERCENTAGE" "$MUSTDO_COLOR")
 
         # Validate JSONs were created successfully
         if [ -z "$BLOCKER_BADGE_JSON" ] || ! echo "$BLOCKER_BADGE_JSON" | jq empty 2>/dev/null; then

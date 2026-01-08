@@ -7,9 +7,22 @@ Fetches release blocker issues from the HDF5 project and calculates completion p
 import requests
 from typing import Dict, Any, Optional
 
+# Configuration: Expected field names in GitHub Project
+# Update these if the project field names change
+FIELD_RELEASE_GATING = "Release gating"
+FIELD_STATUS = "Status"
+
+# Expected values for Release gating field
+VALUE_RELEASE_BLOCKER = "Release_Blocker"
+VALUE_RELEASE_MUST_DO = "Release_Must Do"
+
+# Expected value for Status field when an item is completed
+VALUE_STATUS_DONE = "Done"
+
+
 class GitHubProjectTracker:
     """Tracks release blocker progress in GitHub projects."""
-    
+
     def __init__(self, token: str, owner: str, project_number: int):
         self.api_url = "https://api.github.com/graphql"
         self.headers = {
@@ -101,6 +114,10 @@ class GitHubProjectTracker:
         mustdo_done = 0
         cursor = None
 
+        # Track if we've seen the expected fields at least once
+        seen_release_gating = False
+        seen_status = False
+
         while True:
             variables = {
                 "owner": self.owner,
@@ -133,16 +150,23 @@ class GitHubProjectTracker:
                     continue
 
                 fields = self._parse_item_fields(item)
-                release_gating = fields.get("Release gating", "")
-                status = fields.get("Status", "")
 
-                if release_gating == "Release_Blocker":
+                # Validate expected fields exist
+                if FIELD_RELEASE_GATING in fields:
+                    seen_release_gating = True
+                if FIELD_STATUS in fields:
+                    seen_status = True
+
+                release_gating = fields.get(FIELD_RELEASE_GATING, "")
+                status = fields.get(FIELD_STATUS, "")
+
+                if release_gating == VALUE_RELEASE_BLOCKER:
                     blocker_total += 1
-                    if status == "Done":
+                    if status == VALUE_STATUS_DONE:
                         blocker_done += 1
-                elif release_gating == "Release_Must Do":
+                elif release_gating == VALUE_RELEASE_MUST_DO:
                     mustdo_total += 1
-                    if status == "Done":
+                    if status == VALUE_STATUS_DONE:
                         mustdo_done += 1
 
             # Check for next page
@@ -150,6 +174,16 @@ class GitHubProjectTracker:
             if not page_info.get("hasNextPage", False):
                 break
             cursor = page_info.get("endCursor")
+
+        # Validate that expected fields were found
+        if not seen_release_gating:
+            import sys
+            print(f"WARNING: '{FIELD_RELEASE_GATING}' field not found in any project items. "
+                  f"Field may have been renamed or project structure changed.", file=sys.stderr)
+        if not seen_status:
+            import sys
+            print(f"WARNING: '{FIELD_STATUS}' field not found in any project items. "
+                  f"Field may have been renamed or project structure changed.", file=sys.stderr)
 
         total = blocker_total + mustdo_total
         done = blocker_done + mustdo_done
