@@ -23,11 +23,11 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 ## Quick Start
 
-📖 **New to HDF5?** Start with the [INSTALL](release_docs/INSTALL) guide for compilation and installation instructions.
+- **New to HDF5?** Start with the [INSTALL](release_docs/INSTALL) guide for compilation and installation instructions.
 
-🚀 **Ready to build?** See [INSTALL_CMake.txt](release_docs/INSTALL_CMake.txt) for CMake-based builds.
+- **Ready to build?** See [INSTALL_CMake.txt](release_docs/INSTALL_CMake.txt) for CMake-based builds.
 
-⚡ **Running on HPC?** Check out [README_HPC.md](release_docs/README_HPC.md) for parallel HDF5 configuration.
+- **Running on HPC?** Check out [README_HPC.md](release_docs/README_HPC.md) for parallel HDF5 configuration.
 
 ## Table of Contents
 
