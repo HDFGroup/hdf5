@@ -257,7 +257,7 @@ jobs:
       shell: bash
 
     - name: Build
-      run:
+      run: |
         if [[ "${{ matrix.java }}" == "ON" ]]; then
           # DO NOT run export JAVA_HOME=$(/usr/libexec/java_home) here!
 
