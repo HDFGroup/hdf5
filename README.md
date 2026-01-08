@@ -4,7 +4,7 @@
 
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17808614.svg)](https://doi.org/10.5281/zenodo.17808614)
-[![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/call-workflows.yml?branch=develop&label=CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/call-workflows.yml?query=branch%3Adevelop)
+[![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/main.yml?query=branch%3Adevelop)
 
 </div>
 
@@ -25,7 +25,7 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 📖 **New to HDF5?** Start with the [INSTALL](release_docs/INSTALL) guide for compilation and installation instructions.
 
-🚀 **Ready to build?** See [INSTALL_CMAKE](release_docs/INSTALL_CMAKE) for CMake-based builds.
+🚀 **Ready to build?** See [INSTALL_CMake.txt](release_docs/INSTALL_CMake.txt) for CMake-based builds.
 
 ⚡ **Running on HPC?** Check out [README_HPC.md](release_docs/README_HPC.md) for parallel HDF5 configuration.
 
@@ -59,12 +59,12 @@ Several files in the [release_docs/][u4] directory provide platform-specific det
 | File | Description |
 |------|-------------|
 | [INSTALL](release_docs/INSTALL) | General compilation and installation instructions (start here) |
-| [INSTALL_CMAKE](release_docs/INSTALL_CMAKE) | Building with CMake |
+| [INSTALL_CMake.txt](release_docs/INSTALL_CMake.txt) | Building with CMake |
 | [README_HPC.md](release_docs/README_HPC.md) | Building and configuring Parallel HDF5 on HPC systems |
-| [INSTALL_Windows](release_docs/INSTALL_Windows) | Windows installation |
-| [INSTALL_Cygwin](release_docs/INSTALL_Cygwin) | Cygwin installation |
-| [USING_HDF5_CMake](release_docs/USING_HDF5_CMake) | Building HDF5 applications with CMake |
-| [USING_CMake_Examples](release_docs/USING_CMake_Examples) | Building and testing HDF5 examples with CMake |
+| [INSTALL_Windows.txt](release_docs/INSTALL_Windows.txt) | Windows installation |
+| [INSTALL_Cygwin.txt](release_docs/INSTALL_Cygwin.txt) | Cygwin installation |
+| [USING_HDF5_CMake.txt](release_docs/USING_HDF5_CMake.txt) | Building HDF5 applications with CMake |
+| [USING_CMake_Examples.txt](release_docs/USING_CMake_Examples.txt) | Building and testing HDF5 examples with CMake |
 
 ## Help and Support
 
@@ -161,17 +161,9 @@ For detailed contribution guidelines, please contact us through the [Help Desk](
 
 ## How to Cite HDF5
 
-If you use HDF5 in your research, please cite it using the DOI:
+If you use HDF5 in your research, please cite it. This repository includes a [`CITATION.cff`](CITATION.cff) file containing standard citation metadata.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17808614.svg)](https://doi.org/10.5281/zenodo.17808614)
-
-**Citation Format**:
-```
-The HDF Group. (2024). Hierarchical Data Format, version 5 (Version [version]).
-Zenodo. https://doi.org/10.5281/zenodo.17808614
-```
-
-Replace `[version]` with the specific version you used.
+**Quick DOI:** [10.5281/zenodo.17808614](https://doi.org/10.5281/zenodo.17808614)
 
 ## Build Status
 
