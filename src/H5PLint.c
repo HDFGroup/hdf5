@@ -325,6 +325,19 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     H5PL_key_t             tmp_key;
     herr_t                 ret_value = SUCCEED;
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    char  *signature;
+    char  *publickey;
+    herr_t verify_result;
+
+#ifdef H5_HAVE_PARALLEL
+    int       rank;
+    const int root = 0;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif // H5_HAVE_PARALLEL
+#endif // H5_REQUIRE_DIGITAL_SIGNATURE
+
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
@@ -339,6 +352,27 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     *plugin_info = NULL;
     if (plugin_type)
         *plugin_type = H5PL_TYPE_ERROR;
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+#ifdef H5_HAVE_PARALLEL
+    if (rank == root) {
+#endif // H5_HAVE_PARALLEL
+        signature     = H5PL__get_sig_name_from_path(path, "sig");
+        publickey     = H5PL__get_sig_name_from_path(path, "key");
+        verify_result = H5PL__openssl_verify_signature(path, signature, publickey);
+        free(signature);
+        free(publickey);
+#ifdef H5_HAVE_PARALLEL
+    }
+    MPI_Bcast(&verify_result, 1, MPI_INT, root, MPI_COMM_WORLD);
+#endif // H5_HAVE_PARALLEL
+    if (verify_result < 0) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "verification check failed");
+    }
+#ifdef H5_HAVE_PARALLEL
+    MPI_Finalize();
+#endif // H5_HAVE_PARALLEL
+#endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
     /* There are different reasons why a library can't be open, e.g. wrong architecture.
      * If we can't open the library, just return.
@@ -453,7 +487,6 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
                     *plugin_type = H5PL_TYPE_VFD;
                 *plugin_info = cls;
             }
-
             break;
         }
 
@@ -520,3 +553,441 @@ H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_dat
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_iterate() */
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__get_sig_name_from_path
+ *
+ * Purpose:     Find signature file using path
+ *
+ * Return:      Success:    Signature file with path
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+
+char *
+H5PL__get_sig_name_from_path(const char *path, const char *extension)
+{
+    char  *sig_name = NULL;  /* Signature filename with new extension */
+    char  *temp     = NULL;  /* Pointer to last '.' in path */
+    size_t len;              /* Length of new filename */
+    char  *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    assert(path);
+    assert(extension);
+
+    /* Calculate length needed: path + extension (without original extension) */
+    len = strlen(path) + strlen(extension);
+
+    /* Allocate memory for new filename */
+    if (NULL == (sig_name = (char *)H5MM_calloc(len + 1)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, NULL, "can't allocate space for signature filename");
+
+    /* Copy path to new string */
+    strcpy(sig_name, path);
+
+    /* Find last occurrence of '.' to replace extension */
+    if (NULL == (temp = strrchr(sig_name, '.')))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, NULL, "no extension found in path");
+
+    /* Replace extension (skip the '.') */
+    strcpy(temp + 1, extension);
+
+    /* Set return value */
+    ret_value = sig_name;
+
+done:
+    if (NULL == ret_value)
+        sig_name = (char *)H5MM_xfree(sig_name);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__get_sig_name_from_path */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__RSA_check_key
+ *
+ * Purpose:     Validate that an RSA key is not NULL
+ *
+ * Return:      1 if key is valid
+ *              0 if key is NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5PL__RSA_check_key(RSA *key)
+{
+    int ret_value = 1; /* Return value */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Check if key is NULL */
+    if (NULL == key)
+        ret_value = 0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__RSA_check_key() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__create_public_RSA
+ *
+ * Purpose:     Create an RSA public key structure from a PEM-formatted key string
+ *
+ * Return:      Success:    Pointer to RSA public key structure
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+RSA *
+H5PL__create_public_RSA(const char *key)
+{
+    RSA *rsa       = NULL; /* RSA public key structure */
+    BIO *key_bio   = NULL; /* BIO memory buffer for key */
+    RSA *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    assert(key);
+
+    /* Create a BIO memory buffer from the key string */
+    if (NULL == (key_bio = BIO_new_mem_buf((void *)key, -1)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, NULL, "can't create BIO memory buffer");
+
+    /* Read the public key from the BIO buffer */
+    if (NULL == (rsa = PEM_read_bio_RSA_PUBKEY(key_bio, &rsa, NULL, NULL)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "can't read RSA public key from buffer");
+
+    /* Validate the RSA key */
+    if (1 != H5PL__RSA_check_key(rsa))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, NULL, "RSA key validation failed");
+
+    /* Set return value */
+    ret_value = rsa;
+
+done:
+    /* Clean up on error */
+    if (NULL == ret_value && NULL != rsa) {
+        RSA_free(rsa);
+        rsa = NULL;
+    }
+    if (NULL != key_bio)
+        BIO_free(key_bio);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__create_public_RSA() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__RSA_verify_signature
+ *
+ * Purpose:     Verify an RSA signature using SHA-256 digest
+ *
+ * Return:      1 if verification completed (check authentic for result)
+ *              0 if verification process failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5PL__RSA_verify_signature(RSA *rsa, unsigned char *msg_hash, size_t msg_hash_len, const char *msg,
+                           size_t msg_len, int *authentic)
+{
+    EVP_PKEY   *pub_key    = NULL; /* EVP public key structure */
+    EVP_MD_CTX *verify_ctx = NULL; /* Message digest context for verification */
+    int         auth_status;       /* Authentication status from OpenSSL */
+    int         ret_value = 1;     /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    assert(rsa);
+    assert(msg_hash);
+    assert(msg);
+    assert(authentic);
+
+    /* Initialize output parameter */
+    *authentic = 0;
+
+    /* Create EVP_PKEY structure and assign RSA key to it */
+    if (NULL == (pub_key = EVP_PKEY_new()))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, 0, "can't create EVP_PKEY structure");
+    EVP_PKEY_assign_RSA(pub_key, rsa);
+
+    /* Create message digest context */
+    if (NULL == (verify_ctx = EVP_MD_CTX_create()))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, 0, "can't create message digest context");
+
+    /* Initialize digest verification with SHA-256 */
+    if (EVP_DigestVerifyInit(verify_ctx, NULL, EVP_sha256(), NULL, pub_key) <= 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, 0, "can't initialize digest verification");
+
+    /* Update digest with message data */
+    if (EVP_DigestVerifyUpdate(verify_ctx, msg, msg_len) <= 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, 0, "can't update digest with message data");
+
+    /* Finalize verification and check signature */
+    auth_status = EVP_DigestVerifyFinal(verify_ctx, msg_hash, msg_hash_len);
+
+    if (1 == auth_status)
+        *authentic = 1;
+    else if (0 == auth_status)
+        *authentic = 0;
+    else
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, 0, "digest verification final failed");
+
+done:
+    /* Clean up OpenSSL resources */
+    if (NULL != verify_ctx)
+        EVP_MD_CTX_free(verify_ctx);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__RSA_verify_signature() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__openSSL_read_file
+ *
+ * Purpose:     Read entire file into memory buffer
+ *
+ * Return:      Success:    Pointer to buffer containing file contents
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5PL__openSSL_read_file(const char *file_path, int *file_length)
+{
+    char  *buffer = NULL;    /* Buffer to hold file contents */
+    FILE  *fd     = NULL;    /* File descriptor */
+    long   file_size;        /* Size of file in bytes */
+    size_t bytes_read;       /* Number of bytes read */
+    char  *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    assert(file_path);
+    assert(file_length);
+
+    /* Initialize output parameter */
+    *file_length = 0;
+
+    /* Open file for reading in binary mode */
+    if (NULL == (fd = fopen(file_path, "rb")))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, NULL, "can't open file for reading");
+
+    /* Seek to end of file to determine size */
+    if (fseek(fd, 0, SEEK_END) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "can't seek to end of file");
+
+    /* Get current file position (file size) */
+    if ((file_size = ftell(fd)) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "can't get file size");
+
+    /* Seek back to beginning of file */
+    if (fseek(fd, 0, SEEK_SET) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "can't seek to beginning of file");
+
+    /* Allocate buffer for file contents */
+    if (NULL == (buffer = (char *)H5MM_malloc((size_t)file_size)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, NULL, "can't allocate buffer for file contents");
+
+    /* Read file contents into buffer */
+    if ((bytes_read = fread(buffer, 1, (size_t)file_size, fd)) != (size_t)file_size)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, NULL, "can't read file contents");
+
+    /* Set output parameters */
+    *file_length = (int)file_size;
+    ret_value    = buffer;
+
+done:
+    /* Clean up on error */
+    if (NULL == ret_value && NULL != buffer)
+        buffer = (char *)H5MM_xfree(buffer);
+
+    /* Close file if open */
+    if (NULL != fd)
+        fclose(fd);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__openSSL_read_file() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__check_filename
+ *
+ * Purpose:     Validate filename for security issues
+ *
+ *              Checks for:
+ *              - NULL or empty filenames
+ *              - Directory traversal attempts (. and ..)
+ *              - Filenames exceeding 255 characters
+ *              - Path separators (/) or null bytes
+ *              - Control characters
+ *
+ * Return:      1 if filename is invalid
+ *              0 if filename is valid
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5PL__check_filename(char *filename)
+{
+    size_t len;           /* Length of filename */
+    size_t i;             /* Loop counter */
+    int    ret_value = 0; /* Return value */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Check for NULL or empty filename */
+    if (NULL == filename || '\0' == filename[0]) {
+        ret_value = 1;
+        goto done;
+    }
+
+    /* Get length of filename */
+    len = strlen(filename);
+
+    /* Check for directory traversal attempts (. or ..) */
+    if ((1 == len && '.' == filename[0]) || (2 == len && '.' == filename[0] && '.' == filename[1])) {
+        ret_value = 1;
+        goto done;
+    }
+
+    /* Check for filename length exceeding maximum (255 characters) */
+    if (len > 255) {
+        ret_value = 1;
+        goto done;
+    }
+
+    /* Check each character for invalid content */
+    for (i = 0; i < len; i++) {
+        unsigned char c = (unsigned char)filename[i];
+
+        /* Check for null byte */
+        if ('\0' == c) {
+            ret_value = 1;
+            goto done;
+        }
+
+        /* Check for control characters */
+        if (iscntrl((int)c)) {
+            ret_value = 1;
+            goto done;
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__check_filename() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__openssl_verify_signature
+ *
+ * Purpose:     Verify digital signature of a plugin using OpenSSL
+ *
+ *              Extracts the signature from the plugin binary, verifies it
+ *              against the plugin contents using the provided public key.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
+{
+    char  *publicKey = NULL;        /* Public key data */
+    int    keyLen;                  /* Length of public key */
+    char  *sig = NULL;              /* Signature data */
+    int    sigLen;                  /* Length of signature */
+    char  *data = NULL;             /* Plugin binary data */
+    int    dataLen;                 /* Length of plugin data */
+    int    authentic;               /* Authentication result */
+    size_t maxPathLen;              /* Maximum path length */
+    char  *copied_file_name = NULL; /* Temporary copy filename */
+    char   sig_file_name[4096];     /* Signature file path */
+    char   copy_elf_file[4096];     /* Command to copy plugin */
+    char   dump_sig[4096];          /* Command to dump signature */
+    char   remove_sig[4096];        /* Command to remove signature */
+    char   delete_so[4096];         /* Command to delete temporary plugin copy */
+    char   delete_sig[4096];        /* Command to delete temporary signature file */
+    RSA   *publicRSA = NULL;        /* RSA public key structure */
+    int    result;                  /* Result from signature verification */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    assert(plugin_name);
+    assert(plugin_sig);
+    assert(public_key);
+
+    /* Set maximum path length */
+    maxPathLen = 4095;
+
+    /* Read public key from file */
+    if (NULL == (publicKey = H5PL__openSSL_read_file(public_key, &keyLen)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "can't read public key file");
+
+    /* Generate temporary filename for plugin copy */
+    if (NULL == (copied_file_name = H5PL__get_sig_name_from_path(plugin_sig, "copy")))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't generate temporary filename");
+
+    /* Construct path for extracted signature file */
+    snprintf(sig_file_name, maxPathLen, "%s.sig", copied_file_name);
+
+    /* Construct shell commands for signature extraction */
+    snprintf(copy_elf_file, maxPathLen, "cp %s %s", plugin_name, copied_file_name);
+
+    /* Build commands to extract and remove signature section */
+    snprintf(dump_sig, maxPathLen, "objcopy %s --dump-section sig=%s", copied_file_name, sig_file_name);
+    snprintf(remove_sig, maxPathLen, "objcopy %s --remove-section=sig", copied_file_name);
+
+    /* Execute commands to extract signature from plugin binary */
+    system(copy_elf_file);
+    system(dump_sig);
+    system(remove_sig);
+
+    /* Read extracted signature */
+    if (NULL == (sig = H5PL__openSSL_read_file(sig_file_name, &sigLen)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "can't read signature file");
+
+    /* Read plugin binary data (with signature removed) */
+    if (NULL == (data = H5PL__openSSL_read_file(copied_file_name, &dataLen)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "can't read plugin data file");
+
+    /* Clean up temporary files */
+    snprintf(delete_so, maxPathLen, "rm %s", copied_file_name);
+    snprintf(delete_sig, maxPathLen, "rm %s", sig_file_name);
+    system(delete_so);
+    system(delete_sig);
+
+    /* Create RSA public key structure from key data */
+    if (NULL == (publicRSA = H5PL__create_public_RSA(publicKey)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "can't create RSA public key structure");
+
+    /* Verify signature */
+    result = H5PL__RSA_verify_signature(publicRSA, (unsigned char *)sig, (size_t)sigLen, data,
+                                        (size_t)dataLen, &authentic);
+
+    /* Check verification result */
+    if (1 != authentic)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "plugin signature verification failed");
+
+done:
+    /* Clean up allocated resources */
+    if (NULL != copied_file_name)
+        copied_file_name = (char *)H5MM_xfree(copied_file_name);
+    if (NULL != publicKey)
+        publicKey = (char *)H5MM_xfree(publicKey);
+    if (NULL != sig)
+        sig = (char *)H5MM_xfree(sig);
+    if (NULL != data)
+        data = (char *)H5MM_xfree(data);
+    if (NULL != publicRSA)
+        RSA_free(publicRSA);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__openssl_verify_signature */
+
+#endif // H5_REQUIRE_DIGITAL_SIGNATURE
