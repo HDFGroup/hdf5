@@ -956,7 +956,6 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     if (NULL == (data = H5PL__openSSL_read_file(copied_file_name, &dataLen)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "can't read plugin data file");
 
-
     /* Clean up temporary files */
     snprintf(delete_so, maxPathLen, "rm %s", copied_file_name);
     snprintf(delete_sig, maxPathLen, "rm %s", sig_file_name);
@@ -970,7 +969,6 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     /* Verify signature */
     result = H5PL__RSA_verify_signature(publicRSA, (unsigned char *)sig, (size_t)sigLen, data,
                                         (size_t)dataLen, &authentic);
-                            
 
     /* Check verification result */
     if (1 != authentic)
