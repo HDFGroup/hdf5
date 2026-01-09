@@ -366,7 +366,6 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     }
     MPI_Bcast(&verify_result, 1, MPI_INT, root, MPI_COMM_WORLD);
 #endif // H5_HAVE_PARALLEL
-    // printf("[%d]: After Bcast, verify_result is %d\n", rank, verify_result);
     if (verify_result < 0) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "verification check failed");
     }
@@ -865,8 +864,8 @@ H5PL__check_filename(char *filename)
     for (i = 0; i < len; i++) {
         unsigned char c = (unsigned char)filename[i];
 
-        /* Check for path separator or null byte */
-        if ('/' == c || '\0' == c) {
+        /* Check for null byte */
+        if ('\0' == c) {
             ret_value = 1;
             goto done;
         }
@@ -940,10 +939,6 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     /* Construct shell commands for signature extraction */
     snprintf(copy_elf_file, maxPathLen, "cp %s %s", plugin_name, copied_file_name);
 
-    /* Validate constructed command for security */
-    if (H5PL__check_filename(copy_elf_file))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "invalid filename in command");
-
     /* Build commands to extract and remove signature section */
     snprintf(dump_sig, maxPathLen, "objcopy %s --dump-section sig=%s", copied_file_name, sig_file_name);
     snprintf(remove_sig, maxPathLen, "objcopy %s --remove-section=sig", copied_file_name);
@@ -961,6 +956,7 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     if (NULL == (data = H5PL__openSSL_read_file(copied_file_name, &dataLen)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "can't read plugin data file");
 
+
     /* Clean up temporary files */
     snprintf(delete_so, maxPathLen, "rm %s", copied_file_name);
     snprintf(delete_sig, maxPathLen, "rm %s", sig_file_name);
@@ -974,6 +970,7 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     /* Verify signature */
     result = H5PL__RSA_verify_signature(publicRSA, (unsigned char *)sig, (size_t)sigLen, data,
                                         (size_t)dataLen, &authentic);
+                            
 
     /* Check verification result */
     if (1 != authentic)
