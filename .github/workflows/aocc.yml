@@ -9,6 +9,10 @@ on:
         required: true
         type: string
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 
@@ -20,9 +24,9 @@ jobs:
     name: "aocc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     env:
-      AOCCVERDOT: "5.0.0"
-      AOCCVERDASH: "5-0"
-      MPIVERDOT: "5.0.7"
+      AOCCVERDOT: "5.1.0"
+      AOCCVERDASH: "5-1"
+      MPIVERDOT: "5.0.9"
       #MPIVERUND: Change is needed in the lines below.
 
     steps:
