@@ -31,6 +31,7 @@ jobs:
 
           # Set env vars
           echo "CC=mpicc" >> $GITHUB_ENV
+          echo "CXX=mpic++" >> $GITHUB_ENV          
           echo "FC=mpif90" >> $GITHUB_ENV
           echo "F77=mpif90" >> $GITHUB_ENV
 
@@ -48,6 +49,8 @@ jobs:
             -DHDF5_BUILD_TOOLS:BOOL=ON \
             -DBUILD_SHARED_LIBS:BOOL=ON \
             -DBUILD_STATIC_LIBS:BOOL=OFF \
+            -DHDF5_ALLOW_UNSUPPORTED=ON \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DBUILD_TESTING:BOOL=OFF \
