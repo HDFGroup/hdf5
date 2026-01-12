@@ -17,13 +17,15 @@ HDF5Examples/JAVA/
 
 ## Maven Artifact Usage
 
+**Note:** In the examples below, replace `X.Y.Z` with the specific HDF5 version you are using (e.g., `2.1.0`).
+
 ### Using Examples as Dependency
 
 ```xml
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java-examples</artifactId>
-    <version>2.0.0</version>
+    <version>X.Y.Z</version>
 </dependency>
 ```
 
@@ -36,7 +38,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0</version>
+    <version>X.Y.Z</version>
     <classifier>linux-x86_64</classifier>
 </dependency>
 
@@ -44,7 +46,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0</version>
+    <version>X.Y.Z</version>
     <classifier>windows-x86_64</classifier>
 </dependency>
 
@@ -52,7 +54,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0</version>
+    <version>X.Y.Z</version>
     <classifier>macos-x86_64</classifier>
 </dependency>
 
@@ -60,7 +62,7 @@ The examples depend on platform-specific HDF5 Java libraries:
 <dependency>
     <groupId>org.hdfgroup</groupId>
     <artifactId>hdf5-java</artifactId>
-    <version>2.0.0</version>
+    <version>X.Y.Z</version>
     <classifier>macos-aarch64</classifier>
 </dependency>
 ```
@@ -107,13 +109,13 @@ Tests the JNI (Java Native Interface) implementation, compatible with Java 11+.
 **Examples:**
 ```bash
 # Test latest snapshot from HDFGroup
-./test-maven-jni.sh 2.0.1-SNAPSHOT
+./test-maven-jni.sh X.Y.Z-SNAPSHOT
 
 # Test specific version from custom repository
-./test-maven-jni.sh 2.0.0 https://maven.pkg.github.com/myorg/hdf5
+./test-maven-jni.sh X.Y.Z https://maven.pkg.github.com/myorg/hdf5
 
 # Use custom build directory
-./test-maven-jni.sh 2.0.1-SNAPSHOT https://maven.pkg.github.com/HDFGroup/hdf5 /tmp/test
+./test-maven-jni.sh X.Y.Z-SNAPSHOT https://maven.pkg.github.com/HDFGroup/hdf5 /tmp/test
 ```
 
 **What it does:**
@@ -141,10 +143,10 @@ Tests the FFM (Foreign Function & Memory) implementation, requires Java 25+.
 **Examples:**
 ```bash
 # Test FFM snapshot
-./test-maven-ffm.sh 2.0.1-SNAPSHOT
+./test-maven-ffm.sh X.Y.Z-SNAPSHOT
 
 # Test specific version
-./test-maven-ffm.sh 2.0.0-3 https://maven.pkg.github.com/HDFGroup/hdf5
+./test-maven-ffm.sh X.Y.Z-3 https://maven.pkg.github.com/HDFGroup/hdf5
 ```
 
 **What it does:**
@@ -384,7 +386,7 @@ export HDF5_HOME=/path/to/hdf5/installation
 
 # Then run examples (scripts automatically find libraries)
 cd HDF5Examples/JAVA
-./test-maven-jni.sh 2.0.1-SNAPSHOT
+./test-maven-jni.sh X.Y.Z-SNAPSHOT
 
 # Or run Maven directly
 cd build/maven-test-jni
@@ -420,7 +422,7 @@ mvn exec:java -Dexec.mainClass="H5Ex_D_ReadWrite" -f pom-examples.xml
 ```bash
 # Run with explicit library path
 java -Djava.library.path=/path/to/hdf5/lib \
-     -cp "target/classes:~/.m2/repository/org/hdfgroup/hdf5-java-jni/2.0.1-SNAPSHOT/*" \
+     -cp "target/classes:~/.m2/repository/org/hdfgroup/hdf5-java-jni/X.Y.Z-SNAPSHOT/*" \
      H5Ex_D_ReadWrite
 ```
 
