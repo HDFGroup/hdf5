@@ -780,7 +780,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to Require Digitally Signed plugins
 #-----------------------------------------------------------------------------
-option (HDF5_REQUIRE_SIGNED_PLUGINS "Require digitally signed plugins" ON)
+option (HDF5_REQUIRE_SIGNED_PLUGINS "Require digitally signed plugins" OFF)
 if (HDF5_REQUIRE_SIGNED_PLUGINS)
   if (NOT WIN32)
     add_compile_definitions(H5_REQUIRE_DIGITAL_SIGNATURE)
