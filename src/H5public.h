@@ -72,7 +72,6 @@
 #define H5_VERS_RELEASE 0
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
- *
  */
 /*
  * IMPORTANT: This MUST be a string literal (quoted), not an unquoted value.
