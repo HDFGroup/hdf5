@@ -125,7 +125,7 @@ This generates `target/hdf5-java-examples-{version}.jar` containing all compiled
 We provide scripts to verify the integrity of Maven artifacts against these examples. These scripts simulate a clean environment to ensure the JARs are structured correctly.
 
 ### Script: `test-maven-jni.sh` (Standard)
-Tests the JNI implementation (Java 11+).
+Tests the JNI implementation (Requires Java 11+).
 
 **Usage:**
 ```bash
