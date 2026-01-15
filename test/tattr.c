@@ -5955,6 +5955,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, bool use_i
     char       tmpname[NAME_BUF_SIZE]; /* Temporary attribute name */
     H5A_info_t ainfo;                  /* Attribute info struct */
     int        old_nerrs;              /* Number of errors when entering this check */
+    char       *zero_size_buf;         /* Buffer of zero size to test non-null buffer calls */
     herr_t     ret;                    /* Generic return value */
 
     /* Retrieve the current # of reported errors */
@@ -5979,6 +5980,14 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, bool use_i
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if (strcmp(attrname, tmpname) != 0)
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
+
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
+    zero_size_buf = (char*)malloc(0);
+    name_len = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n,
+                                  zero_size_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+    CHECK(name_len, FAIL, "H5Aget_name_by_idx");
+    VERIFY(name_len, NAME_BUF_SIZE-1, "H5Aget_name_by_idx");
+    free(zero_size_buf);
 
     /* Don't test "native" order if there is no creation order index, since
      *  there's not a good way to easily predict the attribute's order in the name

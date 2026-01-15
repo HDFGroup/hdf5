@@ -2411,6 +2411,7 @@ test_file_getname(void)
     hsize_t dims[TESTA_RANK] = {TESTA_NX, TESTA_NY};
     char    name[TESTA_NAME_BUF_SIZE];
     ssize_t name_len;
+    char       *zero_size_buf;         /* Buffer of zero size to test non-null buffer calls */
     herr_t  ret; /* Generic return value */
 
     /* Output message about test being performed */
@@ -2425,6 +2426,13 @@ test_file_getname(void)
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY_STR(name, FILE1, "H5Fget_name");
     VERIFY(name_len, strlen(FILE1), "H5Fget_name");
+
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
+    zero_size_buf = (char*)malloc(0);
+    name_len = H5Fget_name(file_id, zero_size_buf, 0);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY(name_len, strlen(FILE1), "H5Fget_name");
+    free(zero_size_buf);
 
     /* Create a group in the root group */
     group_id = H5Gcreate2(file_id, TESTA_GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
