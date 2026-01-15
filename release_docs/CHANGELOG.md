@@ -112,9 +112,10 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ## Library
 
-### Fixes security issue
+### Fixes potential security issues
 
-   H5Iget_name() allows passing NULL when querying the object name length. However, a misuse of the function by passing a non-NULL buffer with size == 0 will result in undefined behavior.  The function is now fixed to treat (name != NULL, size == 0) as a length-only query to eliminate Valgrind noise.
+   The get_name API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
+   These functions are now fixed to treat (buffer != NULL, size == 0) as a length-only query to eliminate Valgrind error of invalid write.
 
 
 ## Java Library
