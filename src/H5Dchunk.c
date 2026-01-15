@@ -7034,7 +7034,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
                 const H5S_extent_t *ds_extent_src, H5T_t *dt_src, const H5O_pline_t *pline_src,
                 H5O_copy_t *cpy_info)
 {
-    H5D_chunk_it_ud3_t udata;                       /* User data for iteration callback */
+    H5D_chunk_it_ud3_t udata = {0};                 /* User data for iteration callback */
     H5D_chk_idx_info_t idx_info_dst;                /* Dest. chunked index info */
     H5D_chk_idx_info_t idx_info_src;                /* Source chunked index info */
     int                sndims;                      /* Rank of dataspace */
@@ -7202,7 +7202,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
 
     /* Initialize the callback structure for the source */
-    memset(&udata, 0, sizeof udata);
     udata.common.layout    = &layout_src->u.chunk;
     udata.common.storage   = &layout_src->storage.u.chunk;
     udata.file_src         = f_src;
@@ -7253,11 +7252,11 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
         } /* end for */
     }
 
+done:
     /* I/O buffers may have been re-allocated */
     buf = udata.buf;
     bkg = udata.bkg;
 
-done:
     if (dt_dst && (H5T_close(dt_dst) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_mem && (H5T_close(dt_mem) < 0))

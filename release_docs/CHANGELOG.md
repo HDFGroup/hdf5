@@ -112,6 +112,16 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ## Library
 
+### Fixed a double-free bug in H5D__chunk_copy
+
+   Fixed a double-free bug in the internal H5D__chunk_copy() function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
+
+   Fixes GitHub issues [#6123](https://github.com/HDFGroup/hdf5/issues/6123)
+                       [#6124](https://github.com/HDFGroup/hdf5/issues/6124)
+                       [#6125](https://github.com/HDFGroup/hdf5/issues/6125)
+                       [#6126](https://github.com/HDFGroup/hdf5/issues/6126)
+                       [#6133](https://github.com/HDFGroup/hdf5/issues/6133)
+
 ## Java Library
 
 ## Configuration
