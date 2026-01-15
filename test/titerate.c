@@ -894,8 +894,8 @@ test_grp_memb_funcs(hid_t fapl)
     VERIFY(ginfo.nlinks, (NDATASETS + 2), "H5Gget_info");
 
     for (i = 0; i < (int)ginfo.nlinks; i++) {
-        H5O_info2_t oinfo;          /* Object info */
-        char        *zero_size_buf; /* Buffer of zero size to test non-null buffer calls */
+        H5O_info2_t oinfo;         /* Object info */
+        char       *zero_size_buf; /* Buffer of zero size to test non-null buffer calls */
 
         /* Test with NULL for name, to query length */
         name_len = H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, NULL,
@@ -910,9 +910,9 @@ test_grp_memb_funcs(hid_t fapl)
         VERIFY(ret, name_len, "H5Lget_name_by_idx");
 
         /* Test with zero-size buffer for name, to query length */
-        zero_size_buf = (char*)malloc(0);
-        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i,
-                                      zero_size_buf, 0, H5P_DEFAULT);
+        zero_size_buf = (char *)malloc(0);
+        ret           = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i,
+                                                   zero_size_buf, 0, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Lget_name_by_idx");
         VERIFY(ret, name_len, "H5Lget_name_by_idx");
         free(zero_size_buf);
