@@ -2412,6 +2412,7 @@ test_file_getname(void)
     char    name[TESTA_NAME_BUF_SIZE];
     ssize_t name_len;
     char   *zero_size_buf; /* Buffer of zero size to test non-null buffer calls */
+    size_t  zero_size = 0; /* Variable to eliminate warning -Walloc-zero */
     herr_t  ret;           /* Generic return value */
 
     /* Output message about test being performed */
@@ -2428,7 +2429,7 @@ test_file_getname(void)
     VERIFY(name_len, strlen(FILE1), "H5Fget_name");
 
     /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
-    zero_size_buf = (char *)malloc(0);
+    zero_size_buf = (char *)malloc(zero_size);
     name_len      = H5Fget_name(file_id, zero_size_buf, 0);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY(name_len, strlen(FILE1), "H5Fget_name");

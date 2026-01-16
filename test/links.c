@@ -1992,6 +1992,8 @@ test_deprec(hid_t fapl, bool new_format)
     char       tmpstr[1024];
     int        len = 0;       /* Length of comment */
     char      *zero_size_buf; /* Buffer of zero size to test non-null buffer calls */
+    size_t     zero_size = 0; /* Variable to eliminate warning -Walloc-zero */
+    ssize_t    namelen = 0;   /* Length of object name, temporary var to verify */
     herr_t     status;        /* Generic return value */
 
     if (new_format)
@@ -2054,10 +2056,11 @@ test_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
-    zero_size_buf = (char *)malloc(0);
-    len           = (int)H5Gget_objname_by_idx(group1_id, (hsize_t)1, zero_size_buf, 0);
-    CHECK(len, FAIL, "H5Gget_objname_by_idx");
-    VERIFY(len, sizeof(tmpstr) - 1, "H5Gget_objname_by_idx");
+    zero_size_buf = (char *)malloc(zero_size);
+    if ((namelen = H5Gget_objname_by_idx(group1_id, (hsize_t)0, zero_size_buf, 0)) < 0)
+        FAIL_STACK_ERROR;
+    if ((size_t)namelen != strlen(tmpstr))
+        TEST_ERROR;
     free(zero_size_buf);
 
     /* Test getting the type for objects */

@@ -1018,9 +1018,9 @@ done:
  *                - if 'size' > 0: writes up to 'size' bytes into the buffer
  *                  (including null terminator) and returns the actual length
  *                  of the name (excluding null terminator).
- *                - if 'size' == 0: treats the call as length query, does not                   * write
- *anything to the buffer (not even a null terminator), and returns the actual length of the name (excluding
- *null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
  *
  *              When 'buf' is NULL: does not write anything regardless of 'size'
  *              and returns the actual length of the name (excluding null terminator).
@@ -1097,9 +1097,9 @@ done:
  *                - if 'size' > 0: writes up to 'size' bytes into the buffer
  *                  (including null terminator) and returns the actual length
  *                  of the name (excluding null terminator).
- *                - if 'size' == 0: treats the call as length query, does not                   * write
- *anything to the buffer (not even a null terminator), and returns the actual length of the name (excluding
- *null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
  *
  *              When 'buf' is NULL: does not write anything regardless of 'size'
  *              and returns the actual length of the name (excluding null terminator).
@@ -1183,9 +1183,9 @@ done:
  *                - if 'size' > 0: writes up to 'size' bytes into the buffer
  *                  (including null terminator) and returns the actual length
  *                  of the name (excluding null terminator).
- *                - if 'size' == 0: treats the call as length query, does not                   * write
- *anything to the buffer (not even a null terminator), and returns the actual length of the name (excluding
- *null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
  *
  *              When 'buf' is NULL: does not write anything regardless of 'size'
  *              and returns the actual length of the name (excluding null terminator).
