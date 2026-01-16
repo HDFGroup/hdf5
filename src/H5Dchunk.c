@@ -409,6 +409,9 @@ H5FL_BLK_DEFINE_STATIC(chunk);
 /* Declare extern free list to manage the H5S_sel_iter_t struct */
 H5FL_EXTERN(H5S_sel_iter_t);
 
+/* Declare the external PQ free list for the sieve buffer information */
+H5FL_BLK_EXTERN(sieve_buf);
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_direct_write
  *
@@ -3110,10 +3113,10 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
          * on each I/O until more advanced use cases like H5Dset_extent between writes
          * and subsequent writes or reads can be supported.
          */
-        dset_info->dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset_info->dset->oloc.file);
-        dset_info->dset->shared->cache.contig.sieve_loc      = HADDR_UNDEF;
-        dset_info->dset->shared->cache.contig.sieve_size     = 0;
-        assert(!dset_info->dset->shared->cache.contig.sieve_dirty); /* Any writes should have been flushed */
+        dset_info->dset->shared->cache.sieve.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset_info->dset->oloc.file);
+        dset_info->dset->shared->cache.sieve.sieve_loc      = HADDR_UNDEF;
+        dset_info->dset->shared->cache.sieve.sieve_size     = 0;
+        assert(!dset_info->dset->shared->cache.sieve.sieve_dirty); /* Any writes should have been flushed */
 
         /* Initialize temporary contiguous storage info */
         ctg_store.contig.dset_size = dset_info->dset->shared->layout.u.chunk.size;
@@ -3211,6 +3214,14 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     }     /* end else */
 
 done:
+    /* Free dataset sieve buffer and reset cached fields */
+    if (dset_info->dset->shared->cache.sieve.sieve_buf) {
+        dset_info->dset->shared->cache.sieve.sieve_loc  = HADDR_UNDEF;
+        dset_info->dset->shared->cache.sieve.sieve_size = 0;
+        dset_info->dset->shared->cache.sieve.sieve_buf =
+            (unsigned char *)H5FL_BLK_FREE(sieve_buf, dset_info->dset->shared->cache.sieve.sieve_buf);
+    }
+
     /* Cleanup on failure */
     if (ret_value < 0) {
         if (chunk_mem_spaces != chunk_mem_spaces_local)
@@ -3278,9 +3289,9 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
      * on each I/O until more advanced use cases like H5Dset_extent between writes
      * and subsequent writes or reads can be supported.
      */
-    dset_info->dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset_info->dset->oloc.file);
-    dset_info->dset->shared->cache.contig.sieve_loc      = HADDR_UNDEF;
-    dset_info->dset->shared->cache.contig.sieve_size     = 0;
+    dset_info->dset->shared->cache.sieve.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset_info->dset->oloc.file);
+    dset_info->dset->shared->cache.sieve.sieve_loc      = HADDR_UNDEF;
+    dset_info->dset->shared->cache.sieve.sieve_size     = 0;
 
     /* Initialize temporary contiguous storage info */
     ctg_store.contig.dset_size = dset_info->dset->shared->layout.u.chunk.size;
@@ -3628,13 +3639,22 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     } /* end else */
 
 done:
-    /* Cleanup on failure */
-    if (ret_value < 0) {
+    /* Free dataset sieve buffer and reset cached fields */
+    if (dset_info->dset->shared->cache.sieve.sieve_buf) {
+        dset_info->dset->shared->cache.sieve.sieve_loc  = HADDR_UNDEF;
+        dset_info->dset->shared->cache.sieve.sieve_size = 0;
+
         /* Drop any unflushed sieve buffer data on failure - reads expect
          * that sieve buffer will be clean
          */
-        dset_info->dset->shared->cache.contig.sieve_dirty = false;
+        dset_info->dset->shared->cache.sieve.sieve_dirty = false;
 
+        dset_info->dset->shared->cache.sieve.sieve_buf =
+            (unsigned char *)H5FL_BLK_FREE(sieve_buf, dset_info->dset->shared->cache.sieve.sieve_buf);
+    }
+
+    /* Cleanup on failure */
+    if (ret_value < 0) {
         if (chunk_mem_spaces != chunk_mem_spaces_local)
             chunk_mem_spaces = H5MM_xfree(chunk_mem_spaces);
         if (chunk_file_spaces != chunk_file_spaces_local)

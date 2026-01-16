@@ -159,7 +159,7 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
     /* Get the sieve buffer size for this dataset - the smaller of the dataset size and
      * the sieve buffer size from the FAPL is used
      */
-    dset->shared->cache.contig.sieve_buf_size =
+    dset->shared->cache.sieve.sieve_buf_size =
         MIN(dset->shared->layout.storage.u.contig.size, H5F_SIEVE_BUF_SIZE(f));
 
 done:

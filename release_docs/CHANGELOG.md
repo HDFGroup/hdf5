@@ -81,15 +81,15 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ### Fixed a performance issue with chunked dataset I/O
 
-   When dataset chunks are too large to be placed in the dataset chunk cache, the library falls back
-   to an alternative approach for I/O on dataset chunks. An issue with the logic in this approach
-   prevented chunked dataset I/O from making use of the library's data sieve buffer I/O optimization
-   functionality. For chunk shapes that are non-contiguous with the memory layout of a buffer, this
-   could result in severely degraded I/O performance, with the worst-case behavior causing I/O to be
-   performed on a single data element at a time.
+   When dataset chunks are unable to be placed in the dataset chunk cache (for example, if a chunk
+   is too large), the library falls back to an alternative approach for I/O on dataset chunks. An
+   issue with the logic in this approach prevented chunked dataset I/O from making use of the library's
+   data sieve buffer I/O optimization functionality. For chunk shapes that are non-contiguous with
+   the memory layout of a buffer, this could result in severely degraded I/O performance, with the
+   worst-case behavior causing I/O to be performed on a single data element at a time.
 
-   The data sieve buffer functionality has been properly re-enabled in these cases and will be used
-   as long as the underlying Virtual File Driver supports data sieving.
+   The data sieve buffer functionality has been extended to cover the case of uncached chunks and
+   will be used as long as the underlying Virtual File Driver supports data sieving.
 
 ## Java Library
 
