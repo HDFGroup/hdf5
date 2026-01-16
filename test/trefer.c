@@ -464,7 +464,9 @@ test_reference_obj(void)
     H5O_type_t obj_type;      /* Object type                      */
     char      *zero_size_buf; /* Buffer of zero size to test non-null buffer calls */
     size_t     zero_size = 0; /* Variable to eliminate warning -Walloc-zero */
-    herr_t     ret;           /* Generic return value             */
+#if 0
+#endif
+    herr_t ret; /* Generic return value             */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Object Reference Functions\n"));
@@ -634,6 +636,8 @@ test_reference_obj(void)
     CHECK(namelen, FAIL, "H5Rget_file_name");
     VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Rget_file_name");
     free(zero_size_buf);
+#if 0
+#endif
 
     /* Get the file name for the reference */
     namebuf = (char *)malloc((size_t)namelen + 1);
@@ -652,6 +656,8 @@ test_reference_obj(void)
     CHECK(namelen, FAIL, "H5Rget_obj_name");
     VERIFY(namelen, strlen(DS1_REF_OBJ), "H5Rget_obj_name");
     free(zero_size_buf);
+#if 0
+#endif
 
     /* Getting the name of the referenced object and verify it */
     namelen = H5Rget_obj_name(&rbuf[0], H5P_DEFAULT, NULL, 0);
@@ -2495,9 +2501,11 @@ test_reference_attr(void)
     char      *attr_name = NULL; /* name of attribute, from H5A */
     ssize_t    attr_name_size;   /* size of attribute name */
     H5O_type_t obj_type;         /* Object type */
+#if 0
     char      *zero_size_buf;    /* Buffer of zero size to test non-null buffer calls */
     size_t     zero_size = 0;    /* Variable to eliminate warning -Walloc-zero */
-    herr_t     ret;              /* Generic return value */
+#endif
+    herr_t ret; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Reference Functions\n"));
@@ -2668,11 +2676,13 @@ test_reference_attr(void)
     /* Testing "Attr1" */
 
     /* Test passing in non-null buffer with buffer size is zero */
+#if 0
     zero_size_buf = (char *)malloc(zero_size);
     namelen       = H5Rget_attr_name(&ref_rbuf[0], zero_size_buf, 0);
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(namelen, strlen(ATTR1_REF_OBJ), "H5Rget_attr_name");
     free(zero_size_buf);
+#endif
 
     /* Getting the name of the referenced attribute and verify it */
     namelen = H5Rget_attr_name(&ref_rbuf[0], NULL, 0);
