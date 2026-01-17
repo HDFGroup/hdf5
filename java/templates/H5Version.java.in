@@ -22,6 +22,7 @@ package hdf.hdf5lib;
  *   H5_VERS_MAJOR
  *   H5_VERS_MINOR
  *   H5_VERS_RELEASE
+ *   H5_VERS_SUBRELEASE
  */
 public class H5Version {
     /** Major version number */
@@ -33,6 +34,9 @@ public class H5Version {
     /** Release number */
     public static final int RELEASE = @H5_VERS_RELEASE@;
 
-    /** Version string */
-    public static final String VERSION = "@H5_VERS_MAJOR@.@H5_VERS_MINOR@.@H5_VERS_RELEASE@";
+    /** Subrelease string (e.g., "-snap0" or empty string for releases) */
+    public static final String SUBRELEASE = "@H5_VERS_SUBRELEASE@";
+
+    /** Full version string matching the native library version */
+    public static final String VERSION = "@H5_VERS_MAJOR@.@H5_VERS_MINOR@.@H5_VERS_RELEASE@@H5_VERS_SUBRELEASE@";
 }
