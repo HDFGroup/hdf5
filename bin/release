@@ -44,13 +44,12 @@ set_version()
     fi
 
     # Update H5public.h
+    # Note: H5_VERS_STR and H5_VERS_INFO are automatically derived from the base version macros
     sed -i.bak \
         -e "s/^\(#define H5_VERS_MAJOR[[:space:]]*\)[0-9]*/\1$major/" \
         -e "s/^\(#define H5_VERS_MINOR[[:space:]]*\)[0-9]*/\1$minor/" \
         -e "s/^\(#define H5_VERS_RELEASE[[:space:]]*\)[0-9]*/\1$release/" \
         -e "s/^\(#define H5_VERS_SUBRELEASE[[:space:]]*\)\".*\"/\1\"$subrelease\"/" \
-        -e "s/^\(#define H5_VERS_STR[[:space:]]*\)\".*\"/\1\"$new_vers\"/" \
-        -e "s/^\(#define H5_VERS_INFO[[:space:]]*\)\"HDF5 library version:.*\"/\1\"HDF5 library version: $new_vers\"/" \
         src/H5public.h
 
     rm -f src/H5public.h.bak
