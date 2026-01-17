@@ -106,7 +106,7 @@ jobs:
         id: version
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          echo "SOURCE_TAG=$(bin/h5vers)" >> $GITHUB_OUTPUT
+          echo "SOURCE_TAG=$(grep '#define H5_VERS_STR' src/H5public.h | sed 's/.*"\(.*\)".*/\1/')" >> $GITHUB_OUTPUT
 
       - name: Set file base name
         id: set-file-base

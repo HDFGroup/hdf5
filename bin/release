@@ -15,6 +15,47 @@
 
 # Function definitions
 #
+# Function to get version from H5public.h
+get_version()
+{
+    grep '#define H5_VERS_STR' src/H5public.h | sed 's/.*"\(.*\)".*/\1/'
+}
+
+# Function to set version in H5public.h
+# Usage: set_version "2.0.1-of20250116"
+set_version()
+{
+    if [ $# -ne 1 ]; then
+        echo "usage: set_version <version_string>"
+        return 1
+    fi
+
+    new_vers=$1
+
+    # Parse version string (format: major.minor.release or major.minor.release-subrelease)
+    major=$(echo $new_vers | sed 's/^\([0-9]*\)\..*/\1/')
+    minor=$(echo $new_vers | sed 's/^[0-9]*\.\([0-9]*\)\..*/\1/')
+    release=$(echo $new_vers | sed 's/^[0-9]*\.[0-9]*\.\([0-9]*\).*/\1/')
+    subrelease=$(echo $new_vers | sed 's/^[0-9]*\.[0-9]*\.[0-9]*-*\(.*\)/\1/')
+
+    # If subrelease is same as new_vers, there was no subrelease part
+    if [ "$subrelease" = "$new_vers" ]; then
+        subrelease=""
+    fi
+
+    # Update H5public.h
+    sed -i.bak \
+        -e "s/^\(#define H5_VERS_MAJOR[[:space:]]*\)[0-9]*/\1$major/" \
+        -e "s/^\(#define H5_VERS_MINOR[[:space:]]*\)[0-9]*/\1$minor/" \
+        -e "s/^\(#define H5_VERS_RELEASE[[:space:]]*\)[0-9]*/\1$release/" \
+        -e "s/^\(#define H5_VERS_SUBRELEASE[[:space:]]*\)\".*\"/\1\"$subrelease\"/" \
+        -e "s/^\(#define H5_VERS_STR[[:space:]]*\)\".*\"/\1\"$new_vers\"/" \
+        -e "s/^\(#define H5_VERS_INFO[[:space:]]*\)\"HDF5 library version:.*\"/\1\"HDF5 library version: $new_vers\"/" \
+        src/H5public.h
+
+    rm -f src/H5public.h.bak
+}
+
 # Print Usage page
 USAGE()
 {
@@ -139,7 +180,7 @@ tar2zip()
 
 # Defaults
 DEST=releases
-VERS=`perl bin/h5vers`
+VERS=$(get_version)
 VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
@@ -156,7 +197,7 @@ RESTORE_VERSION()
         echo restoring version information back to $VERS_OLD
         rm -f config/lt_vers.am
         cp $tmpdir/lt_vers.am config/lt_vers.am
-        bin/h5vers -s $VERS_OLD
+        set_version $VERS_OLD
         VERS_OLD=
     fi
 }
@@ -219,10 +260,9 @@ if [ X$pmode = Xyes ]; then
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
     # Set version information to m.n.r-of$today.
-    # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-of$today
     echo Private release of $VERS
-    bin/h5vers -s $VERS
+    set_version $VERS
 fi
 
 if [ X$revmode = Xyes ]; then
@@ -236,12 +276,11 @@ if [ X$revmode = Xyes ]; then
     fi
     revision=`git rev-parse --short HEAD`
     # Set version information to m.n.r-r$revision.
-    # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-$revision
     echo Private release of $VERS
     HDF5_VERS=hdf5-$BRANCHNAME-$revision
     echo file base of $HDF5_VERS
-    bin/h5vers -s $VERS
+    set_version $VERS
     # use a generic directory name for revision releases
     HDF5_IN_VERS=hdfsrc
 else

@@ -27,9 +27,8 @@ LT_VERS_REVISION = 0
 ## version.
 ##
 ## 4. If the source changes but there are no API changes, increment
-## LT_VERS_REVISION.  This will happen automatically when
-## bin/h5vers is run, but doing it manually shouldn't hurt
-## anything.
+## LT_VERS_REVISION. This should be done manually when updating the
+## version in src/H5public.h.
 ##
 ## Note that this versioning system doesn't attempt to handle
 ## the effects of the H5_V1_x_COMPAT flag.
