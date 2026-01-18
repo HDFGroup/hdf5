@@ -5955,12 +5955,10 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, bool use_i
     char       tmpname[NAME_BUF_SIZE]; /* Temporary attribute name */
     H5A_info_t ainfo;                  /* Attribute info struct */
     int        old_nerrs;              /* Number of errors when entering this check */
-#if 0
     ssize_t    name_len;               /* Length of attribute name     */
     char      *zero_size_buf;          /* Buffer of zero size to test non-null buffer calls */
     size_t     zero_size = 0;          /* Variable to eliminate warning -Walloc-zero */
-#endif
-    herr_t ret; /* Generic return value */
+    herr_t     ret;                    /* Generic return value */
 
     /* Retrieve the current # of reported errors */
     old_nerrs = GetTestNumErrs();
@@ -5985,15 +5983,13 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, bool use_i
     if (strcmp(attrname, tmpname) != 0)
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
 
-        /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
-#if 0
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
     zero_size_buf = (char *)malloc(zero_size);
-    name_len      = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, zero_size_buf,
-                                       (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+    name_len =
+        H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, zero_size_buf, 0, H5P_DEFAULT);
     CHECK(name_len, FAIL, "H5Aget_name_by_idx");
     VERIFY(name_len, strlen(attrname), "H5Aget_name_by_idx");
     free(zero_size_buf);
-#endif
 
     /* Don't test "native" order if there is no creation order index, since
      *  there's not a good way to easily predict the attribute's order in the name

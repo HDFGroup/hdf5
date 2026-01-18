@@ -1994,9 +1994,7 @@ test_deprec(hid_t fapl, bool new_format)
     char      *zero_size_buf; /* Buffer of zero size to test non-null buffer calls */
     size_t     zero_size = 0; /* Variable to eliminate warning -Walloc-zero */
     ssize_t    name_len  = 0; /* Length of object name, temporary var to verify */
-#if 0
-#endif
-    herr_t status; /* Generic return value */
+    herr_t     status;        /* Generic return value */
 
     if (new_format)
         TESTING("backwards compatibility (w/new group format)");
@@ -2064,8 +2062,6 @@ test_deprec(hid_t fapl, bool new_format)
     if ((size_t)name_len != strlen(tmpstr))
         TEST_ERROR;
     free(zero_size_buf);
-#if 0
-#endif
 
     /* Test getting the type for objects */
     if ((obj_type = H5Gget_objtype_by_idx(group1_id, (hsize_t)0)) < 0)
