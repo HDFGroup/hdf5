@@ -130,29 +130,33 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #ifdef H5_HAVE_FILTER_SZIP
 #define DSET_CAN_APPLY_SZIP_NAME "can_apply_szip"
 #endif /* H5_HAVE_FILTER_SZIP */
-#define DSET_SET_LOCAL_NAME            "set_local"
-#define DSET_SET_LOCAL_NAME_2          "set_local_2"
-#define DSET_ONEBYTE_SHUF_NAME         "onebyte_shuffle"
-#define DSET_NBIT_INT_NAME             "nbit_int"
-#define DSET_NBIT_FLOAT_NAME           "nbit_float"
-#define DSET_NBIT_DOUBLE_NAME          "nbit_double"
-#define DSET_NBIT_ARRAY_NAME           "nbit_array"
-#define DSET_NBIT_COMPOUND_NAME        "nbit_compound"
-#define DSET_NBIT_COMPOUND_NAME_2      "nbit_compound_2"
-#define DSET_NBIT_COMPOUND_NAME_3      "nbit_compound_3"
-#define DSET_NBIT_INT_SIZE_NAME        "nbit_int_size"
-#define DSET_NBIT_FLT_SIZE_NAME        "nbit_flt_size"
-#define DSET_SCALEOFFSET_INT_NAME      "scaleoffset_int"
-#define DSET_SCALEOFFSET_INT_NAME_2    "scaleoffset_int_2"
-#define DSET_SCALEOFFSET_FLOAT_NAME    "scaleoffset_float"
-#define DSET_SCALEOFFSET_FLOAT_NAME_2  "scaleoffset_float_2"
-#define DSET_SCALEOFFSET_DOUBLE_NAME   "scaleoffset_double"
-#define DSET_SCALEOFFSET_DOUBLE_NAME_2 "scaleoffset_double_2"
-#define DSET_COMPARE_DCPL_NAME         "compare_dcpl"
-#define DSET_COMPARE_DCPL_NAME_2       "compare_dcpl_2"
-#define DSET_COPY_DCPL_NAME_1          "copy_dcpl_1"
-#define DSET_COPY_DCPL_NAME_2          "copy_dcpl_2"
-#define COPY_DCPL_EXTFILE_NAME         "ext_file"
+#define DSET_SET_LOCAL_NAME                 "set_local"
+#define DSET_SET_LOCAL_NAME_2               "set_local_2"
+#define DSET_CAN_APPLY_SKIPS_CBS_NAME       "can_apply_skips_cbs"
+#define DSET_CAN_APPLY_SKIPS_CBS_VLEN_NAME  "can_apply_skips_cbs_vlen"
+#define DSET_SET_LOCAL_UPDATES_CD_NAME      "set_local_updates_cd"
+#define DSET_SET_LOCAL_UPDATES_CD_VLEN_NAME "set_local_updates_cd_vlen"
+#define DSET_ONEBYTE_SHUF_NAME              "onebyte_shuffle"
+#define DSET_NBIT_INT_NAME                  "nbit_int"
+#define DSET_NBIT_FLOAT_NAME                "nbit_float"
+#define DSET_NBIT_DOUBLE_NAME               "nbit_double"
+#define DSET_NBIT_ARRAY_NAME                "nbit_array"
+#define DSET_NBIT_COMPOUND_NAME             "nbit_compound"
+#define DSET_NBIT_COMPOUND_NAME_2           "nbit_compound_2"
+#define DSET_NBIT_COMPOUND_NAME_3           "nbit_compound_3"
+#define DSET_NBIT_INT_SIZE_NAME             "nbit_int_size"
+#define DSET_NBIT_FLT_SIZE_NAME             "nbit_flt_size"
+#define DSET_SCALEOFFSET_INT_NAME           "scaleoffset_int"
+#define DSET_SCALEOFFSET_INT_NAME_2         "scaleoffset_int_2"
+#define DSET_SCALEOFFSET_FLOAT_NAME         "scaleoffset_float"
+#define DSET_SCALEOFFSET_FLOAT_NAME_2       "scaleoffset_float_2"
+#define DSET_SCALEOFFSET_DOUBLE_NAME        "scaleoffset_double"
+#define DSET_SCALEOFFSET_DOUBLE_NAME_2      "scaleoffset_double_2"
+#define DSET_COMPARE_DCPL_NAME              "compare_dcpl"
+#define DSET_COMPARE_DCPL_NAME_2            "compare_dcpl_2"
+#define DSET_COPY_DCPL_NAME_1               "copy_dcpl_1"
+#define DSET_COPY_DCPL_NAME_2               "copy_dcpl_2"
+#define COPY_DCPL_EXTFILE_NAME              "ext_file"
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #define DSET_DEPREC_NAME         "deprecated"
 #define DSET_DEPREC_NAME_CHUNKED "deprecated_chunked"
@@ -187,10 +191,12 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #define H5Z_FILTER_DEPREC 309
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-#define H5Z_FILTER_EXPAND          310
-#define H5Z_FILTER_CAN_APPLY_TEST2 311
-#define H5Z_FILTER_COUNT           312
-#define H5Z_FILTER_EXPAND2         313
+#define H5Z_FILTER_EXPAND           310
+#define H5Z_FILTER_CAN_APPLY_TEST2  311
+#define H5Z_FILTER_COUNT            312
+#define H5Z_FILTER_EXPAND2          313
+#define H5Z_FILTER_BOGUS4           314
+#define H5Z_FILTER_UPDATE_CD_VALUES 315
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32 0
@@ -203,6 +209,9 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define BOGUS2_PARAM_1     13 /* (No particular meaning, just for checking value) */
 #define BOGUS2_PARAM_2     35 /* (No particular meaning, just for checking value) */
 #define BOGUS2_ALL_NPARMS  4  /* Total number of parameter = permanent + "local" parameters */
+
+/* Parameters for the H5Z_FILTER_UPDATE_CD_VALUES filter */
+#define UPDATED_CD_VALUE 42
 
 /* Dimensionality for conversion buffer test */
 #define DIM1 100  /* Dim. Size of data member # 1 */
@@ -329,6 +338,13 @@ static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts, const unsigned
                             size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_bogus3(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                             size_t nbytes, size_t *buf_size, void **buf);
+static htri_t can_apply_bogus4(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t set_local_bogus4(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t filter_bogus4(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                            size_t nbytes, size_t *buf_size, void **buf);
+static herr_t set_local_update_cd_values(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t filter_update_cd_values(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                      size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                              size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_expand(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
@@ -1914,6 +1930,102 @@ filter_bogus3(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts
     return 0;
 } /* end filter_bogus3() */
 
+/*------------------------------------------------------------------------
+ * Function:  can_apply_bogus4
+ *
+ * Purpose:   A 'can apply' callback that always returns 0 (do not apply).
+ *
+ * Return:    0
+ *------------------------------------------------------------------------
+ */
+static htri_t
+can_apply_bogus4(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
+{
+    return 0;
+} /* end can_apply_bogus4() */
+
+/*---------------------------------------------------------------------
+ * Function:  set_local_bogus4
+ *
+ * Purpose:   A bogus 'set local' callback that crashes if ever called.
+ *---------------------------------------------------------------------
+ */
+static herr_t
+set_local_bogus4(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
+{
+    assert(0);
+    return -1;
+} /* end set_local_bogus4() */
+
+/*-------------------------------------------------------------------
+ * Function:  filter_bogus4
+ *
+ * Purpose:   A bogus compression method that crashes if ever called.
+ *-------------------------------------------------------------------
+ */
+static size_t
+filter_bogus4(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+              const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
+              size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    assert(0);
+    return 0;
+} /* end filter_bogus4() */
+
+/*-------------------------------------------------------------------------
+ * Function:  set_local_update_cd_values
+ *
+ * Purpose:   A 'set local' callback that modifies cd_values.
+ *            This mocks the behaviour of hdf5_blosc and HDF5_Blosc2,
+ *            which rely on this functionality.
+ *
+ * Return:    Success:    non-negative
+ *            Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+set_local_update_cd_values(hid_t dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
+{
+    unsigned flags;         /* Filter flags */
+    size_t   cd_nelmts = 1; /* Number of filter parameters */
+    unsigned cd_values[1];  /* Filter parameters */
+
+    /* Get the filter's current parameters */
+    if (H5Pget_filter_by_id2(dcpl_id, H5Z_FILTER_UPDATE_CD_VALUES, &flags, &cd_nelmts, cd_values, (size_t)0,
+                             NULL, NULL) < 0)
+        return (FAIL);
+
+    /* Modify parameter to indicate set_local was called */
+    assert(cd_values[0] == 0);
+    cd_values[0] = UPDATED_CD_VALUE;
+
+    /* Modify the filter's parameters for this dataset */
+    if (H5Pmodify_filter(dcpl_id, H5Z_FILTER_UPDATE_CD_VALUES, flags, cd_nelmts, cd_values) < 0)
+        return (FAIL);
+
+    return (SUCCEED);
+} /* end set_local_update_cd_values() */
+
+/*-------------------------------------------------------------------------
+ * Function:  filter_update_cd_values
+ *
+ * Purpose:   A filter function that verifies cd_values was modified by
+ *            set_local_update_cd_values
+ *
+ * Return:    Success:    Data chunk size
+ *            Failure:    0
+ *-------------------------------------------------------------------------
+ */
+static size_t
+filter_update_cd_values(unsigned int H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned int *cd_values,
+                        size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    /* Verify that set_local modified cd_values */
+    assert(cd_nelmts == 1);
+    assert(cd_values[0] == UPDATED_CD_VALUE);
+    return nbytes;
+} /* end filter_update_cd_values() */
+
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_CORRUPT[1] = {{
     H5Z_CLASS_T_VERS,   /* H5Z_class_t version */
@@ -1923,6 +2035,28 @@ const H5Z_class2_t H5Z_CORRUPT[1] = {{
     NULL,               /* The "can apply" callback     */
     NULL,               /* The "set local" callback     */
     filter_corrupt,     /* The actual filter function    */
+}};
+
+/* A filter where can_apply always returns 0 and both set_local and filter crash;
+   it should quietly succeed as long as it is optional.
+ */
+const H5Z_class2_t H5Z_CAN_APPLY_BOGUS4[1] = {{
+    H5Z_CLASS_T_VERS, H5Z_FILTER_BOGUS4, /* Filter id number             */
+    1, 1, "can_apply_bogus4",            /* Filter name for debugging    */
+    can_apply_bogus4,                    /* The "can apply" callback     */
+    set_local_bogus4,                    /* The "set local" callback     */
+    filter_bogus4,                       /* The actual filter function   */
+}};
+
+/* A filter where set_local updates the cd_values and filter tests that
+   cd_values was updated
+ */
+const H5Z_class2_t H5Z_SET_LOCAL_UPDATE_CD_VALUES[1] = {{
+    H5Z_CLASS_T_VERS, H5Z_FILTER_UPDATE_CD_VALUES, /* Filter id number             */
+    1, 1, "set_local_update_cd_values",            /* Filter name for debugging    */
+    NULL,                                          /* The "can apply" callback     */
+    set_local_update_cd_values,                    /* The "set local" callback     */
+    filter_update_cd_values,                       /* The actual filter function   */
 }};
 
 /*-------------------------------------------------------------------------
@@ -17753,6 +17887,650 @@ error:
 } /* end test_vds_shared_strings() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_can_apply_skips_cbs
+ *
+ * Purpose:     Test that, when the can_apply callback returns 0
+ *              (do not apply) for an optional filter, both the set_local
+ *              and the actual filter callbacks are completely skipped.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_can_apply_skips_cbs(hid_t file)
+{
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
+    int           wdata[1]      = {42};            /* Write buffer */
+    int           rdata[1]      = {0};             /* Read buffer */
+
+    TESTING("dataset filter 'can apply' callback skips further cbs");
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dcpl\n", __LINE__);
+        goto error;
+    }
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set chunk sizes\n", __LINE__);
+        goto error;
+    }
+    if (H5Zregister(H5Z_CAN_APPLY_BOGUS4) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't register filter\n", __LINE__);
+        goto error;
+    }
+    if (H5Pset_filter(dcpl, H5Z_FILTER_BOGUS4, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set filter\n", __LINE__);
+        goto error;
+    }
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataspace\n", __LINE__);
+        goto error;
+    }
+
+    /* Create new dataset with fixed-width integer type */
+    /* (Filter should not be applied because can_apply returns false) */
+    if ((dsid = H5Dcreate2(file, DSET_CAN_APPLY_SKIPS_CBS_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                           H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Write data */
+    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error writing dataset data\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error flushing file\n", __LINE__);
+        goto error;
+    }
+
+    /* Re-open dataset */
+    if ((dsid = H5Dopen2(file, DSET_CAN_APPLY_SKIPS_CBS_NAME, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Read data back */
+    if (H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error reading dataset data\n", __LINE__);
+        goto error;
+    }
+
+    /* Compare data */
+    if (wdata[0] != rdata[0]) {
+        H5_FAILED();
+        printf("    Line %d: Read different values than written.\n", __LINE__);
+        printf("    At original: %d\n", wdata[0]);
+        printf("    At returned: %d\n", rdata[0]);
+        goto error;
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataspace\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dcpl\n", __LINE__);
+        goto error;
+    }
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_can_apply_skips_cbs() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_can_apply_skips_cbs_vlen
+ *
+ * Purpose:     Test that, when the can_apply callback returns 0
+ *              (do not apply) for an optional filter, both the set_local
+ *              and the actual filter callbacks are completely skipped.
+ *
+ *              This test tests the interaction of the above filter with
+ *              variable-length datatypes.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_can_apply_skips_cbs_vlen(hid_t file)
+{
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t         dtype         = H5I_INVALID_HID; /* Datatype ID */
+    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
+    const char   *wdata         = "test string";   /* Write buffer */
+    char         *rdata         = NULL;            /* Read buffer */
+
+    TESTING("dataset filter 'can apply' callback skips further cbs with variable-length strings");
+
+    /* Define variable-length (NULL-terminated) UTF-8 string datatype */
+    if ((dtype = H5Tcopy(H5T_C_S1)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't copy datatype\n", __LINE__);
+        goto error;
+    }
+    if (H5Tset_size(dtype, H5T_VARIABLE) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set datatype size\n", __LINE__);
+        goto error;
+    }
+    /* Optional but recommended: store as UTF-8 strings */
+    if (H5Tset_cset(dtype, H5T_CSET_UTF8) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set datatype character set\n", __LINE__);
+        goto error;
+    }
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dcpl\n", __LINE__);
+        goto error;
+    }
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set chunk sizes\n", __LINE__);
+        goto error;
+    }
+    if (H5Zregister(H5Z_CAN_APPLY_BOGUS4) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't register filter\n", __LINE__);
+        goto error;
+    }
+    if (H5Pset_filter(dcpl, H5Z_FILTER_BOGUS4, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set filter\n", __LINE__);
+        goto error;
+    }
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataspace\n", __LINE__);
+        goto error;
+    }
+
+    /* Create new dataset with variable-length string type */
+    /* (Filter should not be applied because can_apply returns false for vlen types) */
+    if ((dsid = H5Dcreate2(file, DSET_CAN_APPLY_SKIPS_CBS_VLEN_NAME, dtype, sid, H5P_DEFAULT, dcpl,
+                           H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Write data */
+    if (H5Dwrite(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error writing dataset data\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error flushing file\n", __LINE__);
+        goto error;
+    }
+
+    /* Re-open dataset */
+    if ((dsid = H5Dopen2(file, DSET_CAN_APPLY_SKIPS_CBS_VLEN_NAME, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Read data back */
+    if (H5Dread(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error reading dataset data\n", __LINE__);
+        goto error;
+    }
+
+    /* Compare data */
+    if (strcmp(wdata, rdata) != 0) {
+        H5_FAILED();
+        printf("    Line %d: Read different values than written.\n", __LINE__);
+        printf("    At original: %s\n", wdata);
+        printf("    At returned: %s\n", rdata);
+        goto error;
+    }
+
+    /* Reclaim read buffer memory */
+    if (H5Treclaim(dtype, sid, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error reclaiming memory\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataspace\n", __LINE__);
+        goto error;
+    }
+
+    /* Close datatype */
+    if (H5Tclose(dtype) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close datatype\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dcpl\n", __LINE__);
+        goto error;
+    }
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Tclose(dtype);
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_can_apply_skips_cbs_vlen() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_set_local_updates_cd
+ *
+ * Purpose:     Tests a set_local callback that updates the cd_values before
+ *              executing the filter.
+ *              This test mocks hdf5_blosc and HDF5_BLOSC2, both of which
+ *              rely on set_local to update cd_values before filter is executed.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_set_local_updates_cd(hid_t file)
+{
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
+    unsigned      cd_values[1]  = {0};             /* Parameters for vlen filter */
+    int           wdata[1]      = {42};            /* Write buffer */
+    int           rdata[1]      = {0};             /* Read buffer */
+
+    TESTING("dataset filter 'set local' callback updates cd");
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dcpl\n", __LINE__);
+        goto error;
+    }
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set chunk sizes\n", __LINE__);
+        goto error;
+    }
+    if (H5Zregister(H5Z_SET_LOCAL_UPDATE_CD_VALUES) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't register filter\n", __LINE__);
+        goto error;
+    }
+    if (H5Pset_filter(dcpl, H5Z_FILTER_UPDATE_CD_VALUES, H5Z_FLAG_OPTIONAL, (size_t)1, cd_values) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set filter\n", __LINE__);
+        goto error;
+    }
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataspace\n", __LINE__);
+        goto error;
+    }
+
+    /* Create new dataset with fixed-width integer type */
+    if ((dsid = H5Dcreate2(file, DSET_SET_LOCAL_UPDATES_CD_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                           H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Write data (this triggers set_local and then the filter) */
+    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error writing dataset data\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error flushing file\n", __LINE__);
+        goto error;
+    }
+
+    /* Re-open dataset */
+    if ((dsid = H5Dopen2(file, DSET_SET_LOCAL_UPDATES_CD_NAME, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Read data back */
+    if (H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error reading dataset data\n", __LINE__);
+        goto error;
+    }
+
+    /* Compare data */
+    if (wdata[0] != rdata[0]) {
+        H5_FAILED();
+        printf("    Line %d: Read different values than written.\n", __LINE__);
+        printf("    At original: %d\n", wdata[0]);
+        printf("    At returned: %d\n", rdata[0]);
+        goto error;
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataspace\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dcpl\n", __LINE__);
+        goto error;
+    }
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_set_local_updates_cd() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_set_local_updates_cd_vlen
+ *
+ * Purpose:     Tests a set_local callback that updates the cd_values before
+ *              executing the filter.
+ *              This test mocks hdf5_blosc and HDF5_BLOSC2, both of which
+ *              rely on set_local to update cd_values before filter is executed.
+ *
+ *              This test tests the interaction of the above filter with
+ *              variable-length datatypes.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_set_local_updates_cd_vlen(hid_t file)
+{
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t         dtype         = H5I_INVALID_HID; /* Datatype ID */
+    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
+    unsigned      cd_values[1]  = {0};             /* Parameters for vlen filter */
+    const char   *wdata         = "test string";   /* Write buffer */
+    char         *rdata         = NULL;            /* Read buffer */
+
+    TESTING("dataset filter 'set local' callback updates cd with variable-length strings");
+
+    /* Define variable-length (NULL-terminated) UTF-8 string datatype */
+    if ((dtype = H5Tcopy(H5T_C_S1)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't copy datatype\n", __LINE__);
+        goto error;
+    }
+    if (H5Tset_size(dtype, H5T_VARIABLE) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set datatype size\n", __LINE__);
+        goto error;
+    }
+    /* Optional but recommended: store as UTF-8 strings */
+    if (H5Tset_cset(dtype, H5T_CSET_UTF8) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set character set\n", __LINE__);
+        goto error;
+    }
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dcpl\n", __LINE__);
+        goto error;
+    }
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set chunk sizes\n", __LINE__);
+        goto error;
+    }
+    if (H5Zregister(H5Z_SET_LOCAL_UPDATE_CD_VALUES) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't register filter\n", __LINE__);
+        goto error;
+    }
+    if (H5Pset_filter(dcpl, H5Z_FILTER_UPDATE_CD_VALUES, H5Z_FLAG_OPTIONAL, (size_t)1, cd_values) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set vlen filter\n", __LINE__);
+        goto error;
+    }
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataspace\n", __LINE__);
+        goto error;
+    }
+
+    /* Create new dataset */
+    if ((dsid = H5Dcreate2(file, DSET_SET_LOCAL_UPDATES_CD_VLEN_NAME, dtype, sid, H5P_DEFAULT, dcpl,
+                           H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Write data (this triggers set_local and then the filter) */
+    if (H5Dwrite(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error writing dataset data\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error flushing file\n", __LINE__);
+        goto error;
+    }
+
+    /* Re-open dataset */
+    if ((dsid = H5Dopen2(file, DSET_SET_LOCAL_UPDATES_CD_VLEN_NAME, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Read data back */
+    if (H5Dread(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error reading dataset data\n", __LINE__);
+        goto error;
+    }
+
+    /* Compare data */
+    if (strcmp(wdata, rdata) != 0) {
+        H5_FAILED();
+        printf("    Line %d: Read different values than written.\n", __LINE__);
+        printf("    At original: %s\n", wdata);
+        printf("    At returned: %s\n", rdata);
+        goto error;
+    }
+
+    /* Reclaim read buffer memory */
+    if (H5Treclaim(dtype, sid, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error reclaiming memory\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataspace\n", __LINE__);
+        goto error;
+    }
+
+    /* Close datatype */
+    if (H5Tclose(dtype) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close datatype\n", __LINE__);
+        goto error;
+    }
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dcpl\n", __LINE__);
+        goto error;
+    }
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Tclose(dtype);
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_set_local_updates_cd_vlen() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the dataset interface (H5D)
@@ -17935,6 +18713,10 @@ main(void)
                 nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
                 nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
                 nerrors += (test_set_local(fapl) < 0 ? 1 : 0);
+                nerrors += (test_can_apply_skips_cbs(file) < 0 ? 1 : 0);
+                nerrors += (test_can_apply_skips_cbs_vlen(file) < 0 ? 1 : 0);
+                nerrors += (test_set_local_updates_cd(file) < 0 ? 1 : 0);
+                nerrors += (test_set_local_updates_cd_vlen(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply_szip(file) < 0 ? 1 : 0);
                 nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
                 nerrors += (test_copy_dcpl(file, fapl) < 0 ? 1 : 0);
