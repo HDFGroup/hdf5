@@ -13,21 +13,17 @@
 
 # Make a release of hdf5.
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Function definitions
+#
+# Function to get version from H5public.h
+get_version()
+{
+    local major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | awk '{print $3}')
+    local minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
+    local release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
+    local subrelease=$(grep '^#define H5_VERS_SUBRELEASE' src/H5public.h | cut -d'"' -f2)
 
-# Source the shared version extraction utility
-# This provides get_full_version() and get_version_component() functions
-if [ -f "$SCRIPT_DIR/get_version.sh" ]; then
-    source "$SCRIPT_DIR/get_version.sh"
-else
-    echo "ERROR: Required script $SCRIPT_DIR/get_version.sh not found" >&2
-    exit 1
-fi
-
-# Compatibility alias for existing code
-get_version() {
-    get_full_version
+    echo "${major}.${minor}.${release}${subrelease}"
 }
 
 # Function to set version in H5public.h
