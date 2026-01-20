@@ -95,12 +95,6 @@
 #define H5_VERS_STR_CONCAT(major, minor, release, sub) H5_VERS_STR_HELPER(major, minor, release) sub
 #define H5_VERS_STR                                    H5_VERS_STR_CONCAT(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE, H5_VERS_SUBRELEASE)
 
-/*
- * Compile-time check: Ensure H5_VERS_SUBRELEASE is a string literal.
- * If H5_VERS_SUBRELEASE is not properly quoted (e.g., -snap0 instead of "-snap0"),
- * this line will cause a compilation error, catching the mistake early.
- */
-typedef char H5_vers_subrelease_must_be_quoted_string_literal[sizeof("" H5_VERS_SUBRELEASE) > 0 ? 1 : -1];
 
 /**
  * Full version string - automatically derived from H5_VERS_STR

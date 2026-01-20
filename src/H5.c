@@ -162,6 +162,9 @@ H5_init_library(void)
     /* Make sure we picked a good type for ssize_t if it wasn't present */
     HDcompile_assert(sizeof(size_t) == sizeof(ssize_t));
 
+    /* Compile-time check: Ensure H5_VERS_SUBRELEASE is a string literal */
+    HDcompile_assert(sizeof("" H5_VERS_SUBRELEASE) > 0);
+
 #ifdef H5_HAVE_PARALLEL
     {
         int mpi_initialized;
