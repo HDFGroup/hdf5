@@ -1,6 +1,4 @@
-***
-
-v2.0.0 --- November 10 , 2025
+v2.1.0 --- January X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
