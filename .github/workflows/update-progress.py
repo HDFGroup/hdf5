@@ -7,6 +7,16 @@ Fetches release blocker issues from the HDF5 project and calculates completion p
 import requests
 from typing import Dict, Any, Optional
 
+
+class ProjectFieldMissingError(Exception):
+    """Raised when a critical project field is missing or renamed."""
+    pass
+
+
+class ProjectDataError(Exception):
+    """Raised when project data is invalid or incomplete."""
+    pass
+
 # Configuration: Expected field names in GitHub Project
 # Update these if the project field names change
 FIELD_RELEASE_GATING = "Release gating"
@@ -175,19 +185,50 @@ class GitHubProjectTracker:
                 break
             cursor = page_info.get("endCursor")
 
-        # Validate that expected fields were found
+        # Validate that expected fields were found - FAIL HARD if missing
+        # This prevents false positives where field renames would cause 0 blockers to be reported
         if not seen_release_gating:
             import sys
-            print(f"WARNING: '{FIELD_RELEASE_GATING}' field not found in any project items. "
-                  f"Field may have been renamed or project structure changed.", file=sys.stderr)
+            print(f"ERROR: Critical field '{FIELD_RELEASE_GATING}' not found in any project items.",
+                  file=sys.stderr)
+            print("This field is required to identify release blockers and must-do items.",
+                  file=sys.stderr)
+            print("Possible causes:", file=sys.stderr)
+            print(f"  1. Field '{FIELD_RELEASE_GATING}' was renamed in the project", file=sys.stderr)
+            print("  2. Project structure changed", file=sys.stderr)
+            print("  3. Project is empty or inaccessible", file=sys.stderr)
+            print("Action required: Update FIELD_RELEASE_GATING constant in this script.", file=sys.stderr)
+            raise ProjectFieldMissingError(f"Critical field '{FIELD_RELEASE_GATING}' not found")
+
         if not seen_status:
             import sys
-            print(f"WARNING: '{FIELD_STATUS}' field not found in any project items. "
-                  f"Field may have been renamed or project structure changed.", file=sys.stderr)
+            print(f"ERROR: Critical field '{FIELD_STATUS}' not found in any project items.",
+                  file=sys.stderr)
+            print("This field is required to determine completion status.", file=sys.stderr)
+            print("Possible causes:", file=sys.stderr)
+            print(f"  1. Field '{FIELD_STATUS}' was renamed in the project", file=sys.stderr)
+            print("  2. Project structure changed", file=sys.stderr)
+            print("  3. Project is empty or inaccessible", file=sys.stderr)
+            print("Action required: Update FIELD_STATUS constant in this script.", file=sys.stderr)
+            raise ProjectFieldMissingError(f"Critical field '{FIELD_STATUS}' not found")
 
         total = blocker_total + mustdo_total
         done = blocker_done + mustdo_done
-        percentage = round((done / total * 100), 1) if total > 0 else 0
+
+        # Validate that we found at least some items
+        # If total is 0, either the project is empty or field matching failed
+        if total == 0:
+            import sys
+            print("ERROR: No release blocker or must-do items found (total=0).", file=sys.stderr)
+            print("This likely indicates:", file=sys.stderr)
+            print(f"  1. The '{FIELD_RELEASE_GATING}' field values changed", file=sys.stderr)
+            print(f"     Expected values: '{VALUE_RELEASE_BLOCKER}' or '{VALUE_RELEASE_MUST_DO}'", file=sys.stderr)
+            print("  2. Project has no items with these field values", file=sys.stderr)
+            print("  3. Field matching logic needs to be updated", file=sys.stderr)
+            print("Refusing to report 0% or 100% with no items to prevent false positives.", file=sys.stderr)
+            raise ProjectDataError("No release items found - refusing to report false completion status")
+
+        percentage = round((done / total * 100), 1)
 
         return {
             'total': total,
