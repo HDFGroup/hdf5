@@ -4,6 +4,9 @@ GitHub Project Release Blocker Progress Tracker
 Fetches release blocker issues from the HDF5 project and calculates completion percentage.
 """
 
+import os
+import sys
+
 import requests
 from typing import Dict, Any, Optional
 
@@ -188,7 +191,6 @@ class GitHubProjectTracker:
         # Validate that expected fields were found - FAIL HARD if missing
         # This prevents false positives where field renames would cause 0 blockers to be reported
         if not seen_release_gating:
-            import sys
             print(f"ERROR: Critical field '{FIELD_RELEASE_GATING}' not found in any project items.",
                   file=sys.stderr)
             print("This field is required to identify release blockers and must-do items.",
@@ -201,7 +203,6 @@ class GitHubProjectTracker:
             raise ProjectFieldMissingError(f"Critical field '{FIELD_RELEASE_GATING}' not found")
 
         if not seen_status:
-            import sys
             print(f"ERROR: Critical field '{FIELD_STATUS}' not found in any project items.",
                   file=sys.stderr)
             print("This field is required to determine completion status.", file=sys.stderr)
@@ -218,7 +219,6 @@ class GitHubProjectTracker:
         # Validate that we found at least some items
         # If total is 0, either the project is empty or field matching failed
         if total == 0:
-            import sys
             print("ERROR: No release blocker or must-do items found (total=0).", file=sys.stderr)
             print("This likely indicates:", file=sys.stderr)
             print(f"  1. The '{FIELD_RELEASE_GATING}' field values changed", file=sys.stderr)
@@ -243,9 +243,6 @@ class GitHubProjectTracker:
 
 def main():
     """Main function to run the tracker."""
-    import os
-    import sys
-    
     # Configuration - can be overridden by environment variables
     TOKEN = os.getenv("GITHUB_TOKEN")
     OWNER = os.getenv("GITHUB_OWNER", "HDFGroup")
