@@ -95,7 +95,6 @@
 #define H5_VERS_STR_CONCAT(major, minor, release, sub) H5_VERS_STR_HELPER(major, minor, release) sub
 #define H5_VERS_STR                                    H5_VERS_STR_CONCAT(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE, H5_VERS_SUBRELEASE)
 
-
 /**
  * Full version string - automatically derived from H5_VERS_STR
  */
