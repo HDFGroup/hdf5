@@ -16,9 +16,14 @@
 # Function definitions
 #
 # Function to get version from H5public.h
+# Extracts version components and constructs version string
 get_version()
 {
-    grep '#define H5_VERS_STR' src/H5public.h | sed 's/.*"\(.*\)".*/\1/'
+    major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | sed 's/^#define H5_VERS_MAJOR[[:space:]]*\([0-9]*\).*/\1/')
+    minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | sed 's/^#define H5_VERS_MINOR[[:space:]]*\([0-9]*\).*/\1/')
+    release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | sed 's/^#define H5_VERS_RELEASE[[:space:]]*\([0-9]*\).*/\1/')
+    subrelease=$(grep '^#define H5_VERS_SUBRELEASE' src/H5public.h | sed 's/^#define H5_VERS_SUBRELEASE[[:space:]]*"\(.*\)".*/\1/')
+    echo "${major}.${minor}.${release}${subrelease}"
 }
 
 # Function to set version in H5public.h
