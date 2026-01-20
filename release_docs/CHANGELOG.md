@@ -21,7 +21,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.0.1
+# 🔆 Executive Summary: HDF5 Version 2.1.0
 
 ## Performance Enhancements:
 
@@ -45,7 +45,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
   
 ## Acknowledgements: 
 
-We would like to thank the many HDF5 community members who contributed to HDF5 2.0.
+We would like to thank the many HDF5 community members who contributed to this release of HDF5.
 
 # ⚠️ Breaking Changes
 
@@ -62,12 +62,12 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ### Added predefined datatypes for FP6 data
 
-   Predefined datatypes have been added for FP6 data in E2M3 and E3M2 formats (https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+   Predefined datatypes have been added for FP6 data in [E2M3 and E3M2 formats](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
 
    The following new macros have been added:
 
-    - H5T_FLOAT_F6E2M3
-    - H5T_FLOAT_F6E3M2
+   - `H5T_FLOAT_F6E2M3`
+   - `H5T_FLOAT_F6E3M2`
 
    These macros map to IDs of HDF5 datatypes representing a 6-bit floating-point datatype with 1 sign bit and either 2 exponent bits and 3 mantissa bits (E2M3 format) or 3 exponent bits and 2 mantissa bits (E3M2 format).
 
@@ -77,11 +77,11 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ### Added predefined datatype for FP4 data
 
-   A predefined datatype has been added for FP4 data in E2M1 format (https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+   A predefined datatype has been added for FP4 data in [E2M1 format](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
 
    The following new macro has been added:
 
-    - H5T_FLOAT_F4E2M1
+   - `H5T_FLOAT_F4E2M1`
 
    This macro maps to the ID of an HDF5 datatype representing a 4-bit floating-point datatype with 1 sign bit, 2 exponent bits and 1 mantissa bit.
 
