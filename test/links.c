@@ -154,6 +154,9 @@ static const char *FILENAME[] = {"links0",
 #define TIMESTAMP_GROUP_1 "timestamp1"
 #define TIMESTAMP_GROUP_2 "timestamp2"
 
+/* Used by test_deprec() */
+#define NON_NULL_BUF      "NON_NULL_BUF"
+
 /* Link iteration struct */
 typedef struct {
     H5_iter_order_t order;     /* Direction of iteration */
@@ -1986,14 +1989,14 @@ test_deprec(hid_t fapl, bool new_format)
     hid_t      group3_id = H5I_INVALID_HID;
     hid_t      group4_id = H5I_INVALID_HID;
     H5G_stat_t sb_hard1, sb_hard2, sb_soft1, sb_soft2;
-    H5G_obj_t  obj_type; /* Object type */
-    hsize_t    num_objs; /* Number of objects in a group */
+    H5G_obj_t  obj_type;  /* Object type */
+    hsize_t    num_objs;  /* Number of objects in a group */
     char       filename[1024];
     char       tmpstr[1024];
-    int        len             = 0;      /* Length of comment */
-    char       non_null_buf[1] = {'\0'}; /* Buffer to test non-null buffer calls */
-    ssize_t    name_len        = 0;      /* Length of object name, temporary var to verify */
-    herr_t     status;                   /* Generic return value */
+    int        len = 0;          /* Length of comment */
+    char       non_null_buf[80]; /* Buffer to test non-null buffer calls */
+    ssize_t    name_len;         /* Length of name */
+    herr_t     status;           /* Generic return value */
 
     if (new_format)
         TESTING("backwards compatibility (w/new group format)");
@@ -2055,9 +2058,12 @@ test_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
+    strcpy(non_null_buf, NON_NULL_BUF);
     if ((name_len = H5Gget_objname_by_idx(group1_id, (hsize_t)0, non_null_buf, 0)) < 0)
         FAIL_STACK_ERROR;
     if ((size_t)name_len != strlen(tmpstr))
+        TEST_ERROR;
+    if ((strcmp(non_null_buf, NON_NULL_BUF) != 0))
         TEST_ERROR;
 
     /* Test getting the type for objects */

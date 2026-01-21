@@ -148,6 +148,7 @@ static float attr_data5 = -5.123F; /* Test data for 5th attribute */
 
 /* Used by test_attr_info_null_info_pointer() */
 #define GET_INFO_NULL_POINTER_ATTR_NAME "NullInfoPointerAttr"
+#define NON_NULL_BUF                    "NON_NULL_BUF"
 
 /* Used by test_attr_rename_invalid_name() */
 #define INVALID_RENAME_TEST_ATTR_NAME     "InvalidRenameTestAttr"
@@ -5956,7 +5957,6 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, bool use_i
     H5A_info_t ainfo;                    /* Attribute info struct */
     int        old_nerrs;                /* Number of errors when entering this check */
     ssize_t    name_len;                 /* Length of attribute name     */
-    char       non_null_buf[1] = {'\0'}; /* Buffer to test non-null buffer calls */
     herr_t     ret;                      /* Generic return value */
 
     /* Retrieve the current # of reported errors */
@@ -5981,12 +5981,6 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, bool use_i
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if (strcmp(attrname, tmpname) != 0)
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
-
-    /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
-    name_len =
-        H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, non_null_buf, 0, H5P_DEFAULT);
-    CHECK(name_len, FAIL, "H5Aget_name_by_idx");
-    VERIFY(name_len, strlen(attrname), "H5Aget_name_by_idx");
 
     /* Don't test "native" order if there is no creation order index, since
      *  there's not a good way to easily predict the attribute's order in the name
@@ -6534,10 +6528,13 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
 
 /***************************************************************
 **
-**  test_attr_get_name_invalid_buf(): A test to ensure that
-**      passing a NULL buffer to H5Aget_name(_by_idx) when
+**  test_attr_get_name_invalid_buf(): A test to ensure that:
+**    - passing a NULL buffer to H5Aget_name(_by_idx) when
 **      the 'size' parameter is non-zero doesn't cause bad
 **      behavior.
+**    - passing a non-NULL buffer to H5Aget_name(_by_idx)
+**      when the 'size' parameter is zero treats as a length
+**      query call.
 **
 ****************************************************************/
 static void
@@ -6547,6 +6544,8 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     hid_t   fid;
     hid_t   attr;
     hid_t   sid;
+    char    non_null_buf[80]; /* Buffer to test non-null buffer calls */
+    ssize_t namelen;          /* Length of attribute name */
 
     /* Create dataspace for attribute */
     sid = H5Screate(H5S_SCALAR);
@@ -6576,6 +6575,20 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     H5E_END_TRY
 
     VERIFY(err_ret, FAIL, "H5Aget_name_by_idx");
+
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
+    strcpy(non_null_buf, NON_NULL_BUF);
+    namelen =
+        H5Aget_name(attr, (size_t)0, non_null_buf);
+    CHECK(namelen, FAIL, "H5Aget_name");
+    VERIFY(namelen, (ssize_t)strlen(GET_NAME_INVALID_BUF_TEST_ATTR_NAME), "H5Aget_name");
+    VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Aget_name");
+
+    namelen =
+        H5Aget_name_by_idx(fid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, non_null_buf, 0, H5P_DEFAULT);
+    CHECK(namelen, FAIL, "H5Aget_name_by_idx");
+    VERIFY(namelen, (ssize_t)strlen(GET_NAME_INVALID_BUF_TEST_ATTR_NAME), "H5Aget_name_by_idx");
+    VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Aget_name_by_idx");
 
     /* Close dataspace */
     err_ret = H5Sclose(sid);
