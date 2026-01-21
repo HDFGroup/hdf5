@@ -148,7 +148,7 @@
 #define FILE_INCR_FILESIZE "tfile_incr_filesize"
 
 /* Used by test_file_getname() */
-#define NON_NULL_BUF    "NON_NULL_BUF"
+#define NON_NULL_BUF "NON_NULL_BUF"
 
 /* Files created under 1.6 branch and 1.8 branch--used in test_filespace_compatible() */
 static const char *OLD_FILENAME[] = {
@@ -2432,7 +2432,7 @@ test_file_getname(void)
 
     /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
     strcpy(non_null_buf, NON_NULL_BUF);
-    name_len      = H5Fget_name(file_id, non_null_buf, 0);
+    name_len = H5Fget_name(file_id, non_null_buf, 0);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY(name_len, strlen(FILE1), "H5Fget_name");
     VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Fget_name");

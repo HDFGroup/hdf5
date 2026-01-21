@@ -40,7 +40,7 @@
 #define SPACE1_DIM1 4
 
 /* Used by test_reference_obj() and test_reference_attr() */
-#define NON_NULL_BUF    "NON_NULL_BUF"
+#define NON_NULL_BUF "NON_NULL_BUF"
 
 typedef enum { RET_ZERO, RET_TWO, RET_CHANGE, RET_CHANGE2 } iter_enum;
 
@@ -914,7 +914,8 @@ test_grp_memb_funcs(hid_t fapl)
 
         /* Test with non-null buffer for name and 0 for size */
         strcpy(non_null_buf, NON_NULL_BUF);
-        ret           = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, non_null_buf, 0, H5P_DEFAULT);
+        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i,
+                                         non_null_buf, 0, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Lget_name_by_idx");
         VERIFY(ret, name_len, "H5Lget_name_by_idx");
         VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Lget_name_by_idx");
