@@ -179,9 +179,13 @@ target_include_directories(${ZLIB_LIB_TARGET}
     PRIVATE "${CMAKE_BINARY_DIR}"
     PUBLIC "${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}"
 )
-if (MSVC AND CMAKE_CL_64)
-  set_target_properties (${ZLIB_LIB_TARGET} PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x64")
-endif ()
+if (MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+  if (CMAKE_C_COMPILER_ARCHITECTURE_ID MATCHES "ARM64")
+    set_target_properties(${ZLIB_LIB_TARGET} PROPERTIES STATIC_LIBRARY_FLAGS "/machine:ARM64")
+  else()
+    set_target_properties(${ZLIB_LIB_TARGET} PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x64")
+  endif()
+endif()
 set_target_properties(${ZLIB_LIB_TARGET} PROPERTIES
     PUBLIC_HEADER ""
     LINKER_LANGUAGE C
