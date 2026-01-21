@@ -1990,9 +1990,9 @@ test_deprec(hid_t fapl, bool new_format)
     hsize_t    num_objs; /* Number of objects in a group */
     char       filename[1024];
     char       tmpstr[1024];
-    int        len = 0;                  /* Length of comment */
+    int        len             = 0;      /* Length of comment */
     char       non_null_buf[1] = {'\0'}; /* Buffer to test non-null buffer calls */
-    ssize_t    name_len  = 0;            /* Length of object name, temporary var to verify */
+    ssize_t    name_len        = 0;      /* Length of object name, temporary var to verify */
     herr_t     status;                   /* Generic return value */
 
     if (new_format)
