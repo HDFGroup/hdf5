@@ -458,13 +458,12 @@ test_reference_obj(void)
         *rbuf;          /* buffer read from disk            */
     H5R_ref_t *wbuf_cp; /* copy buffer                      */
     unsigned  *ibuf, *obuf;
-    unsigned   i, j;          /* Counters                         */
-    ssize_t    namelen;       /* String buffer size return value  */
-    char      *namebuf;       /* Buffer for attribute's or dataset's name */
-    H5O_type_t obj_type;      /* Object type                      */
-    char      *zero_size_buf; /* Buffer of zero size to test non-null buffer calls */
-    size_t     zero_size = 0; /* Variable to eliminate warning -Walloc-zero */
-    herr_t     ret;           /* Generic return value             */
+    unsigned   i, j;                     /* Counters                                 */
+    ssize_t    namelen;                  /* String buffer size return value          */
+    char      *namebuf;                  /* Buffer for attribute's or dataset's name */
+    H5O_type_t obj_type;                 /* Object type                              */
+    char       non_null_buf[1] = {'\0'}; /* Buffer to test non-null buffer calls     */
+    herr_t     ret;                      /* Generic return value                     */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Object Reference Functions\n"));
@@ -629,11 +628,9 @@ test_reference_obj(void)
     VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Rget_file_name");
 
     /* Test passing in non-null buffer with buffer size is zero */
-    zero_size_buf = (char *)malloc(zero_size);
-    namelen       = H5Rget_file_name(&rbuf[0], zero_size_buf, 0);
+    namelen       = H5Rget_file_name(&rbuf[0], non_null_buf, 0);
     CHECK(namelen, FAIL, "H5Rget_file_name");
     VERIFY(namelen, strlen(FILE_REF_OBJ), "H5Rget_file_name");
-    free(zero_size_buf);
 
     /* Get the file name for the reference */
     namebuf = (char *)malloc((size_t)namelen + 1);
@@ -647,11 +644,9 @@ test_reference_obj(void)
     /* Testing Dataset1 */
 
     /* Test passing in non-null buffer with buffer size is zero */
-    zero_size_buf = (char *)malloc(zero_size);
-    namelen       = H5Rget_obj_name(&rbuf[0], H5P_DEFAULT, zero_size_buf, 0);
+    namelen       = H5Rget_obj_name(&rbuf[0], H5P_DEFAULT, non_null_buf, 0);
     CHECK(namelen, FAIL, "H5Rget_obj_name");
     VERIFY(namelen, strlen(DS1_REF_OBJ), "H5Rget_obj_name");
-    free(zero_size_buf);
 
     /* Getting the name of the referenced object and verify it */
     namelen = H5Rget_obj_name(&rbuf[0], H5P_DEFAULT, NULL, 0);
@@ -2495,8 +2490,7 @@ test_reference_attr(void)
     char      *attr_name = NULL; /* name of attribute, from H5A */
     ssize_t    attr_name_size;   /* size of attribute name */
     H5O_type_t obj_type;         /* Object type */
-    char      *zero_size_buf;    /* Buffer of zero size to test non-null buffer calls */
-    size_t     zero_size = 0;    /* Variable to eliminate warning -Walloc-zero */
+    char       non_null_buf[1] = {'\0'}; /* Buffer to test non-null buffer calls */
     herr_t     ret;              /* Generic return value */
 
     /* Output message about test being performed */
@@ -2668,11 +2662,9 @@ test_reference_attr(void)
     /* Testing "Attr1" */
 
     /* Test passing in non-null buffer with buffer size is zero */
-    zero_size_buf = (char *)malloc(zero_size);
-    namelen       = H5Rget_attr_name(&ref_rbuf[0], zero_size_buf, 0);
+    namelen       = H5Rget_attr_name(&ref_rbuf[0], non_null_buf, 0);
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(namelen, strlen(ATTR1_REF_OBJ), "H5Rget_attr_name");
-    free(zero_size_buf);
 
     /* Getting the name of the referenced attribute and verify it */
     namelen = H5Rget_attr_name(&ref_rbuf[0], NULL, 0);
