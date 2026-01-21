@@ -5953,11 +5953,11 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
 static int
 attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, bool use_index)
 {
-    char       tmpname[NAME_BUF_SIZE];   /* Temporary attribute name */
-    H5A_info_t ainfo;                    /* Attribute info struct */
-    int        old_nerrs;                /* Number of errors when entering this check */
-    ssize_t    name_len;                 /* Length of attribute name     */
-    herr_t     ret;                      /* Generic return value */
+    char       tmpname[NAME_BUF_SIZE]; /* Temporary attribute name */
+    H5A_info_t ainfo;                  /* Attribute info struct */
+    int        old_nerrs;              /* Number of errors when entering this check */
+    ssize_t    name_len;               /* Length of attribute name     */
+    herr_t     ret;                    /* Generic return value */
 
     /* Retrieve the current # of reported errors */
     old_nerrs = GetTestNumErrs();
@@ -6578,14 +6578,12 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
 
     /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
     strcpy(non_null_buf, NON_NULL_BUF);
-    namelen =
-        H5Aget_name(attr, (size_t)0, non_null_buf);
+    namelen = H5Aget_name(attr, (size_t)0, non_null_buf);
     CHECK(namelen, FAIL, "H5Aget_name");
     VERIFY(namelen, (ssize_t)strlen(GET_NAME_INVALID_BUF_TEST_ATTR_NAME), "H5Aget_name");
     VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Aget_name");
 
-    namelen =
-        H5Aget_name_by_idx(fid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, non_null_buf, 0, H5P_DEFAULT);
+    namelen = H5Aget_name_by_idx(fid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, non_null_buf, 0, H5P_DEFAULT);
     CHECK(namelen, FAIL, "H5Aget_name_by_idx");
     VERIFY(namelen, (ssize_t)strlen(GET_NAME_INVALID_BUF_TEST_ATTR_NAME), "H5Aget_name_by_idx");
     VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Aget_name_by_idx");

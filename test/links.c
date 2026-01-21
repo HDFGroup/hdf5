@@ -155,7 +155,7 @@ static const char *FILENAME[] = {"links0",
 #define TIMESTAMP_GROUP_2 "timestamp2"
 
 /* Used by test_deprec() */
-#define NON_NULL_BUF      "NON_NULL_BUF"
+#define NON_NULL_BUF "NON_NULL_BUF"
 
 /* Link iteration struct */
 typedef struct {
@@ -1989,8 +1989,8 @@ test_deprec(hid_t fapl, bool new_format)
     hid_t      group3_id = H5I_INVALID_HID;
     hid_t      group4_id = H5I_INVALID_HID;
     H5G_stat_t sb_hard1, sb_hard2, sb_soft1, sb_soft2;
-    H5G_obj_t  obj_type;  /* Object type */
-    hsize_t    num_objs;  /* Number of objects in a group */
+    H5G_obj_t  obj_type; /* Object type */
+    hsize_t    num_objs; /* Number of objects in a group */
     char       filename[1024];
     char       tmpstr[1024];
     int        len = 0;          /* Length of comment */

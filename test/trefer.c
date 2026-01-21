@@ -89,7 +89,7 @@ typedef struct s2_t {
 #define MAX_ITER_READ   MAX_ITER_CREATE
 
 /* Used by test_reference_obj() and test_reference_attr() */
-#define NON_NULL_BUF    "NON_NULL_BUF"
+#define NON_NULL_BUF "NON_NULL_BUF"
 
 /****************************************************************
 **
@@ -461,12 +461,12 @@ test_reference_obj(void)
         *rbuf;          /* buffer read from disk            */
     H5R_ref_t *wbuf_cp; /* copy buffer                      */
     unsigned  *ibuf, *obuf;
-    unsigned   i, j;       /* Counters                                 */
-    ssize_t    namelen;    /* String buffer size return value          */
-    char      *namebuf;    /* Buffer for attribute's or dataset's name */
-    H5O_type_t obj_type;   /* Object type                              */
-    char non_null_buf[80]; /* Buffer to test non-null buffer calls */
-    herr_t     ret;                      /* Generic return value                     */
+    unsigned   i, j;             /* Counters                                 */
+    ssize_t    namelen;          /* String buffer size return value          */
+    char      *namebuf;          /* Buffer for attribute's or dataset's name */
+    H5O_type_t obj_type;         /* Object type                              */
+    char       non_null_buf[80]; /* Buffer to test non-null buffer calls */
+    herr_t     ret;              /* Generic return value                     */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Object Reference Functions\n"));
@@ -2496,7 +2496,7 @@ test_reference_attr(void)
     char      *attr_name = NULL; /* name of attribute, from H5A */
     ssize_t    attr_name_size;   /* size of attribute name */
     H5O_type_t obj_type;         /* Object type */
-    char non_null_buf[80];       /* Buffer to test non-null buffer calls */
+    char       non_null_buf[80]; /* Buffer to test non-null buffer calls */
     herr_t     ret;              /* Generic return value */
 
     /* Output message about test being performed */
@@ -2669,7 +2669,7 @@ test_reference_attr(void)
 
     /* Test passing in non-null buffer with buffer size is zero */
     strcpy(non_null_buf, NON_NULL_BUF);
-    namelen       = H5Rget_attr_name(&ref_rbuf[0], non_null_buf, 0);
+    namelen = H5Rget_attr_name(&ref_rbuf[0], non_null_buf, 0);
     CHECK(namelen, FAIL, "H5Rget_attr_name");
     VERIFY(namelen, strlen(ATTR1_REF_OBJ), "H5Rget_attr_name");
     VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Rget_attr_name");
