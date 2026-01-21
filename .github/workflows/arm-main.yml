@@ -161,7 +161,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
-              path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
+              path: ${{ runner.workspace }}/build/HDF5-*-winarm64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.save_binary != 'skip') }}
 

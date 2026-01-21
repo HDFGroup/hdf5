@@ -229,6 +229,178 @@ jobs:
               path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
+  build_and_test_win_arm64:
+  # Windows ARM64 w/ MSVC (Native)
+  #
+    name: "Windows MSVC ARM64 CTest"
+    runs-on: windows-11-arm
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (Windows ARM64)
+        run: choco install ninja
+
+      - name: Get Sources
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        with:
+          arch: arm64
+
+      - name: Install CMake
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: 'aarch64'
+
+      - name: Set environment for MSVC ARM64 (Windows)
+        run: |
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Set file base name (Windows ARM64)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows ARM64)
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v6
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows ARM64)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows ARM64)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Install TrustedSigning (Windows ARM64)
+        run: |
+            Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+            .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.86 -x
+        shell: pwsh
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@b8e77fa01397ca39cc4a6198cc29a3be5481afef # v1.2.3
+        with:
+            name: "credentials.json"
+            dir: '${{ steps.set-file-base.outputs.SOURCE_BASE }}'
+            json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Install WiX v3.14
+        run: |
+          Invoke-WebRequest -Uri https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -OutFile wix314-binaries.zip
+          Expand-Archive -Path wix314-binaries.zip -DestinationPath C:\wix314
+          echo "C:\wix314" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "WIX=C:\wix314" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        shell: pwsh
+
+      - name: Run CTest (Windows ARM64)
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/arm64
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC-ARM64 --fresh
+        shell: bash
+
+      - name: Sign files with Trusted Signing
+        uses: azure/trusted-signing-action@1d365fec12862c4aa68fcac418143d73f0cea293 # v0.5.11
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-ARM64
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Publish binary (Windows ARM64)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-ARM64/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-ARM64/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build"
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.zip hdf5
+        shell: pwsh
+
+      - name: Publish msi binary (Windows ARM64)
+        id: publish-ctest-msi-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildmsi"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-ARM64/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.msi -Include *.msi
+        shell: pwsh
+
+      - name: List files in the space (Windows ARM64)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows ARM64)
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        with:
+              name: zip-vs2022_cl_arm64-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published msi binary (Windows ARM64)
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        with:
+              name: msi-vs2022_cl_arm64-binary
+              path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.msi
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
   build_and_test_linux:
   # Linux (Ubuntu) w/ gcc
   #
