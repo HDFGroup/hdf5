@@ -84,28 +84,52 @@ create_badge_json() {
   local percentage="$4"
   local color="$5"
 
+  # Handle N/A case (when percentage is -1)
+  local message
+  if [ "$total" -eq 0 ] || [ "$percentage" = "-1.0" ]; then
+    message="N/A"
+  else
+    message="$done/$total ($percentage%)"
+  fi
+
   jq -n \
     --arg label "$label" \
-    --arg percentage "$percentage" \
-    --arg done "$done" \
-    --arg total "$total" \
+    --arg message "$message" \
     --arg color "$color" \
     '{
       "schemaVersion": 1,
       "label": $label,
-      "message": "\($done)/\($total) (\($percentage)%)",
+      "message": $message,
       "color": $color,
       "style": "flat-square"
     }'
 }
 
 # Calculate percentages for each category
-BLOCKER_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($BLOCKER_DONE / $BLOCKER_TOTAL * 100)}" 2>/dev/null || echo "0")
-MUSTDO_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($MUSTDO_DONE / $MUSTDO_TOTAL * 100)}" 2>/dev/null || echo "0")
+if [ "$BLOCKER_TOTAL" -eq 0 ]; then
+  BLOCKER_PERCENTAGE="-1.0"
+else
+  BLOCKER_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($BLOCKER_DONE / $BLOCKER_TOTAL * 100)}")
+fi
 
-# Determine colors using the shared function
-BLOCKER_COLOR=$(get_badge_color "$BLOCKER_PERCENTAGE")
-MUSTDO_COLOR=$(get_badge_color "$MUSTDO_PERCENTAGE")
+if [ "$MUSTDO_TOTAL" -eq 0 ]; then
+  MUSTDO_PERCENTAGE="-1.0"
+else
+  MUSTDO_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($MUSTDO_DONE / $MUSTDO_TOTAL * 100)}")
+fi
+
+# Determine colors using the shared function (use lightgrey for N/A)
+if [ "$BLOCKER_PERCENTAGE" = "-1.0" ]; then
+  BLOCKER_COLOR="lightgrey"
+else
+  BLOCKER_COLOR=$(get_badge_color "$BLOCKER_PERCENTAGE")
+fi
+
+if [ "$MUSTDO_PERCENTAGE" = "-1.0" ]; then
+  MUSTDO_COLOR="lightgrey"
+else
+  MUSTDO_COLOR=$(get_badge_color "$MUSTDO_PERCENTAGE")
+fi
 
 # Determine badge labels - include version if available
 if [ -n "${VERSION:-}" ] && [ "$VERSION" != "all" ]; then

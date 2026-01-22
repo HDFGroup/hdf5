@@ -241,9 +241,10 @@ class GitHubProjectTracker:
         # If total is 0, either the project is empty or field matching failed
         if total == 0:
             if self.milestone_filter:
-                print(f"WARNING: No release blocker or must-do items found for milestone '{self.milestone_filter}'.", file=sys.stderr)
-                print("This may be expected if all items are completed or no items exist for this milestone.", file=sys.stderr)
-                # Don't fail - allow 0/0 when filtering by milestone
+                print(f"INFO: No release blocker or must-do items found for milestone '{self.milestone_filter}'.", file=sys.stderr)
+                print("This may be expected if no items exist for this milestone yet.", file=sys.stderr)
+                # Don't fail - return N/A indicators when filtering by milestone with no items
+                percentage = -1.0  # Use -1 to indicate N/A
             else:
                 print("ERROR: No release blocker or must-do items found (total=0).", file=sys.stderr)
                 print("This likely indicates:", file=sys.stderr)
@@ -253,8 +254,8 @@ class GitHubProjectTracker:
                 print("  3. Field matching logic needs to be updated", file=sys.stderr)
                 print("Refusing to report 0% or 100% with no items to prevent false positives.", file=sys.stderr)
                 raise ProjectDataError("No release items found - refusing to report false completion status")
-
-        percentage = round((done / total * 100), 1) if total > 0 else 100.0
+        else:
+            percentage = round((done / total * 100), 1)
 
         return {
             'total': total,
