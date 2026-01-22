@@ -15,6 +15,7 @@
 #   BLOCKER_TOTAL - Total number of blockers
 #   MUSTDO_DONE - Number of completed must-dos
 #   MUSTDO_TOTAL - Total number of must-dos
+#   VERSION - Version string (e.g., "2.1") - optional
 #
 
 set -euo pipefail
@@ -106,9 +107,18 @@ MUSTDO_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($MUSTDO_DONE / $MUSTDO_TOTAL *
 BLOCKER_COLOR=$(get_badge_color "$BLOCKER_PERCENTAGE")
 MUSTDO_COLOR=$(get_badge_color "$MUSTDO_PERCENTAGE")
 
+# Determine badge labels - include version if available
+if [ -n "${VERSION:-}" ] && [ "$VERSION" != "all" ]; then
+  BLOCKER_LABEL="${VERSION} Release Blockers"
+  MUSTDO_LABEL="${VERSION} Release Must Do"
+else
+  BLOCKER_LABEL="Release Blockers"
+  MUSTDO_LABEL="Release Must Do"
+fi
+
 # Create badge JSONs using the shared function
-BLOCKER_BADGE_JSON=$(create_badge_json "Release Blockers" "$BLOCKER_DONE" "$BLOCKER_TOTAL" "$BLOCKER_PERCENTAGE" "$BLOCKER_COLOR")
-MUSTDO_BADGE_JSON=$(create_badge_json "Release Must Do" "$MUSTDO_DONE" "$MUSTDO_TOTAL" "$MUSTDO_PERCENTAGE" "$MUSTDO_COLOR")
+BLOCKER_BADGE_JSON=$(create_badge_json "$BLOCKER_LABEL" "$BLOCKER_DONE" "$BLOCKER_TOTAL" "$BLOCKER_PERCENTAGE" "$BLOCKER_COLOR")
+MUSTDO_BADGE_JSON=$(create_badge_json "$MUSTDO_LABEL" "$MUSTDO_DONE" "$MUSTDO_TOTAL" "$MUSTDO_PERCENTAGE" "$MUSTDO_COLOR")
 
 # Validate JSONs were created successfully
 if [ -z "$BLOCKER_BADGE_JSON" ] || ! echo "$BLOCKER_BADGE_JSON" | jq empty 2>/dev/null; then

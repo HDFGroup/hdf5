@@ -336,6 +336,7 @@ def main():
                 f.write(f"blocker_done={stats['blocker_done']}\n")
                 f.write(f"mustdo_total={stats['mustdo_total']}\n")
                 f.write(f"mustdo_done={stats['mustdo_done']}\n")
+                f.write(f"version={MILESTONE_FILTER or 'all'}\n")
 
         # Also output to stdout for local testing
         print(f"percentage={stats['percentage']}")
@@ -343,10 +344,13 @@ def main():
         print(f"blocker_total={stats['blocker_total']}")
         print(f"mustdo_done={stats['mustdo_done']}")
         print(f"mustdo_total={stats['mustdo_total']}")
+        print(f"version={MILESTONE_FILTER or 'all'}")
         print(f"Calculated progress: {stats['percentage']}%")
         print(f"Done / Total: {stats['done']} / {stats['total']}")
         print(f"Blockers: {stats['blocker_done']} / {stats['blocker_total']}")
         print(f"Must Do: {stats['mustdo_done']} / {stats['mustdo_total']}")
+        if MILESTONE_FILTER:
+            print(f"Milestone filter: {MILESTONE_FILTER}")
         
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
