@@ -32,11 +32,15 @@ VALUE_RELEASE_MUST_DO = "Release_Must Do"
 # Expected value for Status field when an item is completed
 VALUE_STATUS_DONE = "Done"
 
+# Milestone filtering
+# Set to None to include all milestones, or specify a version like "2.1" to filter
+DEFAULT_MILESTONE_FILTER = None  # Will be set from environment or H5public.h
+
 
 class GitHubProjectTracker:
     """Tracks release blocker progress in GitHub projects."""
 
-    def __init__(self, token: str, owner: str, project_number: int):
+    def __init__(self, token: str, owner: str, project_number: int, milestone_filter: Optional[str] = None):
         self.api_url = "https://api.github.com/graphql"
         self.headers = {
             "Authorization": f"bearer {token}",
@@ -44,6 +48,7 @@ class GitHubProjectTracker:
         }
         self.owner = owner
         self.project_number = project_number
+        self.milestone_filter = milestone_filter
         
     def _get_query(self) -> str:
         """Returns the GraphQL query for fetching project items."""
@@ -75,7 +80,12 @@ class GitHubProjectTracker:
                       }
                     }
                   }
-                  content { ... on Issue { id, title, url } }
+                  content {
+                    ... on Issue {
+                      id, title, url
+                      milestone { title }
+                    }
+                  }
                 }
               }
             }
@@ -162,6 +172,17 @@ class GitHubProjectTracker:
                 if not item.get("content"):
                     continue
 
+                # Check milestone filter if configured
+                content = item.get("content", {})
+                milestone = content.get("milestone", {})
+                milestone_title = milestone.get("title", "") if milestone else ""
+
+                # Skip if milestone filter is set and doesn't match
+                if self.milestone_filter:
+                    # Match milestone versions like "2.1" with milestones like "2.1.0" or "HDF5 2.1"
+                    if not (milestone_title and self.milestone_filter in milestone_title):
+                        continue
+
                 fields = self._parse_item_fields(item)
 
                 # Validate expected fields exist
@@ -219,16 +240,21 @@ class GitHubProjectTracker:
         # Validate that we found at least some items
         # If total is 0, either the project is empty or field matching failed
         if total == 0:
-            print("ERROR: No release blocker or must-do items found (total=0).", file=sys.stderr)
-            print("This likely indicates:", file=sys.stderr)
-            print(f"  1. The '{FIELD_RELEASE_GATING}' field values changed", file=sys.stderr)
-            print(f"     Expected values: '{VALUE_RELEASE_BLOCKER}' or '{VALUE_RELEASE_MUST_DO}'", file=sys.stderr)
-            print("  2. Project has no items with these field values", file=sys.stderr)
-            print("  3. Field matching logic needs to be updated", file=sys.stderr)
-            print("Refusing to report 0% or 100% with no items to prevent false positives.", file=sys.stderr)
-            raise ProjectDataError("No release items found - refusing to report false completion status")
+            if self.milestone_filter:
+                print(f"WARNING: No release blocker or must-do items found for milestone '{self.milestone_filter}'.", file=sys.stderr)
+                print("This may be expected if all items are completed or no items exist for this milestone.", file=sys.stderr)
+                # Don't fail - allow 0/0 when filtering by milestone
+            else:
+                print("ERROR: No release blocker or must-do items found (total=0).", file=sys.stderr)
+                print("This likely indicates:", file=sys.stderr)
+                print(f"  1. The '{FIELD_RELEASE_GATING}' field values changed", file=sys.stderr)
+                print(f"     Expected values: '{VALUE_RELEASE_BLOCKER}' or '{VALUE_RELEASE_MUST_DO}'", file=sys.stderr)
+                print("  2. Project has no items with these field values", file=sys.stderr)
+                print("  3. Field matching logic needs to be updated", file=sys.stderr)
+                print("Refusing to report 0% or 100% with no items to prevent false positives.", file=sys.stderr)
+                raise ProjectDataError("No release items found - refusing to report false completion status")
 
-        percentage = round((done / total * 100), 1)
+        percentage = round((done / total * 100), 1) if total > 0 else 100.0
 
         return {
             'total': total,
@@ -241,15 +267,62 @@ class GitHubProjectTracker:
         }
 
 
+def get_hdf5_version_from_header(header_path: str = "../../src/H5public.h") -> Optional[str]:
+    """
+    Extract HDF5 major.minor version from H5public.h
+    Returns version string like "2.1" or None if not found.
+    """
+    try:
+        # Try multiple possible paths relative to the script location
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        possible_paths = [
+            os.path.join(script_dir, header_path),
+            os.path.join(script_dir, "../../src/H5public.h"),
+            "src/H5public.h",
+            "../../src/H5public.h"
+        ]
+
+        for path in possible_paths:
+            if os.path.exists(path):
+                with open(path, 'r') as f:
+                    major = None
+                    minor = None
+                    for line in f:
+                        if '#define H5_VERS_MAJOR' in line:
+                            major = line.split()[-1]
+                        elif '#define H5_VERS_MINOR' in line:
+                            minor = line.split()[-1]
+                        if major and minor:
+                            return f"{major}.{minor}"
+                break
+    except Exception as e:
+        print(f"Warning: Could not read version from H5public.h: {e}", file=sys.stderr)
+
+    return None
+
+
 def main():
     """Main function to run the tracker."""
     # Configuration - can be overridden by environment variables
     TOKEN = os.getenv("GITHUB_TOKEN")
     OWNER = os.getenv("GITHUB_OWNER", "HDFGroup")
     PROJECT_NUMBER = int(os.getenv("GITHUB_PROJECT_NUMBER", "39"))
-    
+
+    # Milestone filtering - can be set via env var or auto-detected from H5public.h
+    MILESTONE_FILTER = os.getenv("MILESTONE_FILTER")
+    if MILESTONE_FILTER is None:
+        # Try to auto-detect from H5public.h
+        MILESTONE_FILTER = get_hdf5_version_from_header()
+        if MILESTONE_FILTER:
+            print(f"Auto-detected milestone filter from H5public.h: {MILESTONE_FILTER}", file=sys.stderr)
+
+    if MILESTONE_FILTER:
+        print(f"Filtering by milestone: {MILESTONE_FILTER}", file=sys.stderr)
+    else:
+        print("No milestone filter - counting all release items", file=sys.stderr)
+
     try:
-        tracker = GitHubProjectTracker(TOKEN, OWNER, PROJECT_NUMBER)
+        tracker = GitHubProjectTracker(TOKEN, OWNER, PROJECT_NUMBER, MILESTONE_FILTER)
         stats = tracker.fetch_release_blocker_stats()
         
         # Output for GitHub Actions
