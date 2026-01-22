@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-22</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -177,23 +177,21 @@ C API to C++ Class Mapping</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">H5P (Property Lists)   </td><td class="markdownTableBodyNone"><a class="el" href="class_h5_1_1_prop_list.html" title="Class PropList inherits from IdComponent and provides wrappers for the HDF5 generic property list.">H5::PropList</a> + subclasses   </td><td class="markdownTableBodyNone">Configuration parameters    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">H5L/H5O (Links/Objects)   </td><td class="markdownTableBodyNone">H5::Location   </td><td class="markdownTableBodyNone">Management of links and objects    </td></tr>
+<td class="markdownTableBodyNone">H5L/H5O (Links/Objects)   </td><td class="markdownTableBodyNone"><a class="el" href="class_h5_1_1_h5_location.html" title="H5Location is an abstract base class, added in version 1.8.12.">H5::H5Location</a>   </td><td class="markdownTableBodyNone">Management of links and objects    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">H5E (Errors)   </td><td class="markdownTableBodyNone"><a class="el" href="class_h5_1_1_exception.html" title="Exception provides wrappers of HDF5 error handling functions.">H5::Exception</a>   </td><td class="markdownTableBodyNone">Error reporting   </td></tr>
 </table>
 <h2><a class="anchor" id="cpp_examples"></a>
 Quick Start Examples</h2>
 <ul>
-<li>Creating groups and datasets: <a href="https://\CPPEXS/h5tutr_crtgrp.cpp">h5tutr_crtgrp.cpp</a> <a href="https://\CPPEXS/h5tutr_crtdat.cpp">h5tutr_crtdat.cpp</a></li>
-<li>Writing/Reading data <a href="https://\CPPEXS/h5tutr_rdwt.cpp">h5tutr_rdwt.cpp</a> <a href="https://\CPPEXS/h5tutr_subset.cpp">h5tutr_subset.cpp</a></li>
-<li>Working with attributes <a href="https://\CPPEXS/h5tutr_crtatt.cpp">h5tutr_crtatt.cpp</a></li>
-<li>Extendible datasets <a href="https://\CPPEXS/h5tutr_extend.cpp">h5tutr_extend.cpp</a></li>
-<li>Chunked/Compressed datasets <a href="https://\CPPEXS/h5tutr_cmprss.cpp">h5tutr_cmprss.cpp</a></li>
+<li>Creating groups and datasets: <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/CXX/TUTR/h5tutr_crtgrp.cpp">h5tutr_crtgrp.cpp</a> <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/CXX/TUTR/h5tutr_crtdat.cpp">h5tutr_crtdat.cpp</a></li>
+<li>Writing/Reading data <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/CXX/TUTR/h5tutr_rdwt.cpp">h5tutr_rdwt.cpp</a> <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/CXX/TUTR/h5tutr_subset.cpp">h5tutr_subset.cpp</a></li>
+<li>Working with attributes <a href="https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/CXX/TUTR/h5tutr_crtatt.cpp">h5tutr_crtatt.cpp</a></li>
 </ul>
-<p>See the See <a class="el" href="_l_b_examples.html">Examples from Learning the Basics</a> for additional examples.</p>
+<p>See the <a class="el" href="_l_b_examples.html">Examples from Learning the Basics</a> for additional examples.</p>
 <h2><a class="anchor" id="cpp_building"></a>
 Building Applications</h2>
-<p>Please refer to the release_docs/INSTALL_CMake.txt file under the top directory of the HDF5 source code or <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt on GitHub for information about installing, building, and testing the C++ API.</a></p>
+<p>Please refer to the release_docs/INSTALL_CMake.txt file under the top directory of the HDF5 source code or <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> on GitHub for information about installing, building, and testing the C++ API.</p>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> </p>
 </div></div><!-- contents -->
