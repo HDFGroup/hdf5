@@ -84,10 +84,10 @@ create_badge_json() {
   local percentage="$4"
   local color="$5"
 
-  # Handle N/A case (when percentage is -1)
+  # Handle 0/0 case (when percentage is -1 or total is 0)
   local message
   if [ "$total" -eq 0 ] || [ "$percentage" = "-1.0" ]; then
-    message="N/A"
+    message="0/0"
   else
     message="$done/$total ($percentage%)"
   fi
