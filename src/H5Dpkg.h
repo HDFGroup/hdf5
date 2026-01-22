@@ -433,6 +433,14 @@ typedef struct H5D_chunk_ud_t {
     hsize_t     chunk_idx;        /* Chunk index for EA, FA indexing */
 } H5D_chunk_ud_t;
 
+/* Custom chunk info structure for optimized parallel I/O operations */
+typedef struct H5D_chunk_info_light_t {
+    H5D_piece_info_t *chunk_info;
+    haddr_t offset;
+    hsize_t length;
+    unsigned filter_mask;
+} H5D_chunk_info_light_t;
+
 /* Typedef for "generic" chunk callbacks */
 typedef int (*H5D_chunk_cb_func_t)(const H5D_chunk_rec_t *chunk_rec, void *udata);
 
