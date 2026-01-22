@@ -98,7 +98,9 @@ least one annual release for each maintenance branch.
 
 [![Release Must Do](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-mustdo-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
-The badges above show the current progress of **release-blocking** and **must-do** issues with colors that reflect completion status:
+[![Release Nice to Have](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-nicetohave-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+
+The badges above show the current progress of **release-blocking**, **must-do**, and **nice-to-have** issues with colors that reflect completion status:
 
 - 🟢 **Green (90%+)**: Readying for Deployment - most issues completed
 - 🟡 **Yellow (60-89%)**: Nearing Completion - on track for release

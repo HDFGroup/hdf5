@@ -28,6 +28,7 @@ FIELD_STATUS = "Status"
 # Expected values for Release gating field
 VALUE_RELEASE_BLOCKER = "Release_Blocker"
 VALUE_RELEASE_MUST_DO = "Release_Must Do"
+VALUE_RELEASE_NICE_TO_HAVE = "Release_Nice to Have"
 
 # Expected value for Status field when an item is completed
 VALUE_STATUS_DONE = "Done"
@@ -125,16 +126,18 @@ class GitHubProjectTracker:
     
     def fetch_release_blocker_stats(self) -> Dict[str, int]:
         """
-        Fetches release blocker and must-do statistics from the GitHub project.
+        Fetches release blocker, must-do, and nice-to-have statistics from the GitHub project.
 
         Returns:
             Dict with 'total', 'done', 'percentage', 'blocker_total', 'blocker_done',
-            'mustdo_total', 'mustdo_done' keys
+            'mustdo_total', 'mustdo_done', 'nicetohave_total', 'nicetohave_done' keys
         """
         blocker_total = 0
         blocker_done = 0
         mustdo_total = 0
         mustdo_done = 0
+        nicetohave_total = 0
+        nicetohave_done = 0
         cursor = None
 
         # Track if we've seen the expected fields at least once
@@ -202,6 +205,10 @@ class GitHubProjectTracker:
                     mustdo_total += 1
                     if status == VALUE_STATUS_DONE:
                         mustdo_done += 1
+                elif release_gating == VALUE_RELEASE_NICE_TO_HAVE:
+                    nicetohave_total += 1
+                    if status == VALUE_STATUS_DONE:
+                        nicetohave_done += 1
 
             # Check for next page
             page_info = items.get("pageInfo", {})
@@ -264,7 +271,9 @@ class GitHubProjectTracker:
             'blocker_total': blocker_total,
             'blocker_done': blocker_done,
             'mustdo_total': mustdo_total,
-            'mustdo_done': mustdo_done
+            'mustdo_done': mustdo_done,
+            'nicetohave_total': nicetohave_total,
+            'nicetohave_done': nicetohave_done
         }
 
 
@@ -337,6 +346,8 @@ def main():
                 f.write(f"blocker_done={stats['blocker_done']}\n")
                 f.write(f"mustdo_total={stats['mustdo_total']}\n")
                 f.write(f"mustdo_done={stats['mustdo_done']}\n")
+                f.write(f"nicetohave_total={stats['nicetohave_total']}\n")
+                f.write(f"nicetohave_done={stats['nicetohave_done']}\n")
                 f.write(f"version={MILESTONE_FILTER or 'all'}\n")
 
         # Also output to stdout for local testing
@@ -345,11 +356,14 @@ def main():
         print(f"blocker_total={stats['blocker_total']}")
         print(f"mustdo_done={stats['mustdo_done']}")
         print(f"mustdo_total={stats['mustdo_total']}")
+        print(f"nicetohave_done={stats['nicetohave_done']}")
+        print(f"nicetohave_total={stats['nicetohave_total']}")
         print(f"version={MILESTONE_FILTER or 'all'}")
         print(f"Calculated progress: {stats['percentage']}%")
         print(f"Done / Total: {stats['done']} / {stats['total']}")
         print(f"Blockers: {stats['blocker_done']} / {stats['blocker_total']}")
         print(f"Must Do: {stats['mustdo_done']} / {stats['mustdo_total']}")
+        print(f"Nice to Have: {stats['nicetohave_done']} / {stats['nicetohave_total']}")
         if MILESTONE_FILTER:
             print(f"Milestone filter: {MILESTONE_FILTER}")
         
