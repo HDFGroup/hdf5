@@ -266,6 +266,10 @@ def main():
 
         # Also output to stdout for local testing
         print(f"percentage={stats['percentage']}")
+        print(f"blocker_done={stats['blocker_done']}")
+        print(f"blocker_total={stats['blocker_total']}")
+        print(f"mustdo_done={stats['mustdo_done']}")
+        print(f"mustdo_total={stats['mustdo_total']}")
         print(f"Calculated progress: {stats['percentage']}%")
         print(f"Done / Total: {stats['done']} / {stats['total']}")
         print(f"Blockers: {stats['blocker_done']} / {stats['blocker_total']}")

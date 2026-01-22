@@ -94,9 +94,9 @@ least one annual release for each maintenance branch.
 
 ### Release Progress
 
-[![Release Blockers](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/a4fbdde293677bf3f63f3cfd3aef6b44/raw/release-blockers.json)](https://github.com/orgs/HDFGroup/projects/39)
+[![Release Blockers](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/a4fbdde293677bf3f63f3cfd3aef6b44/raw/release-blockers.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
-[![Release Must Do](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/8a077a919d048ce5dc9f56350bec10bc/raw/release-mustdo.json)](https://github.com/orgs/HDFGroup/projects/39)
+[![Release Must Do](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/8a077a919d048ce5dc9f56350bec10bc/raw/release-mustdo.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
 The badges above show the current progress of **release-blocking** and **must-do** issues with colors that reflect completion status:
 
