@@ -94,7 +94,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
 6. Change the **release preparation branch**'s version number to X.Y.Z by editing [src/H5public.h][u11]:
     - `$ git checkout hdf5_X_Y_Z;`
     - Edit `src/H5public.h` to update version defines: `H5_VERS_MAJOR`, `H5_VERS_MINOR`, `H5_VERS_RELEASE`, `H5_VERS_SUBRELEASE`, `H5_VERS_STR`, and `H5_VERS_INFO`
-    - `$ git commit -m "Updated release preparation branch version number to X.Y.Z.1"`
+    - `$ git commit -m "Updated release preparation branch version number to X.Y.Z"`
     - `$ git push` 
 7. ** OBSOLETE CURRENTLY **
    Update default configuration mode
