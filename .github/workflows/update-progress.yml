@@ -115,11 +115,14 @@ jobs:
           exit 1
         fi
         
-        # Extract blocker and must-do counts
+        # Extract blocker, must-do, and nice-to-have counts
         BLOCKER_DONE=$(grep "^blocker_done=" progress_output.txt | cut -d'=' -f2 | head -1)
         BLOCKER_TOTAL=$(grep "^blocker_total=" progress_output.txt | cut -d'=' -f2 | head -1)
         MUSTDO_DONE=$(grep "^mustdo_done=" progress_output.txt | cut -d'=' -f2 | head -1)
         MUSTDO_TOTAL=$(grep "^mustdo_total=" progress_output.txt | cut -d'=' -f2 | head -1)
+        NICETOHAVE_DONE=$(grep "^nicetohave_done=" progress_output.txt | cut -d'=' -f2 | head -1)
+        NICETOHAVE_TOTAL=$(grep "^nicetohave_total=" progress_output.txt | cut -d'=' -f2 | head -1)
+        VERSION=$(grep "^version=" progress_output.txt | cut -d'=' -f2 | head -1)
 
         # Set outputs for use in subsequent steps
         echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
@@ -129,9 +132,12 @@ jobs:
         echo "blocker_total=$BLOCKER_TOTAL" >> $GITHUB_OUTPUT
         echo "mustdo_done=$MUSTDO_DONE" >> $GITHUB_OUTPUT
         echo "mustdo_total=$MUSTDO_TOTAL" >> $GITHUB_OUTPUT
+        echo "nicetohave_done=$NICETOHAVE_DONE" >> $GITHUB_OUTPUT
+        echo "nicetohave_total=$NICETOHAVE_TOTAL" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
 
         echo "::notice::Progress calculation successful: ${PERCENTAGE}% (${DONE}/${TOTAL})"
-        echo "::notice::  Blockers: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, Must Do: ${MUSTDO_DONE}/${MUSTDO_TOTAL}"
+        echo "::notice::  Version: ${VERSION}, Blockers: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, Must Do: ${MUSTDO_DONE}/${MUSTDO_TOTAL}, Nice to Have: ${NICETOHAVE_DONE}/${NICETOHAVE_TOTAL}"
         
         # Clean up
         rm -f progress_output.txt
@@ -152,6 +158,9 @@ jobs:
         BLOCKER_TOTAL: ${{ steps.progress.outputs.blocker_total }}
         MUSTDO_DONE: ${{ steps.progress.outputs.mustdo_done }}
         MUSTDO_TOTAL: ${{ steps.progress.outputs.mustdo_total }}
+        NICETOHAVE_DONE: ${{ steps.progress.outputs.nicetohave_done }}
+        NICETOHAVE_TOTAL: ${{ steps.progress.outputs.nicetohave_total }}
+        VERSION: ${{ steps.progress.outputs.version }}
       run: |
         # Execute dedicated badge generation script
         # This separates concerns: YAML orchestrates, scripts implement logic

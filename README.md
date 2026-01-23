@@ -94,11 +94,13 @@ least one annual release for each maintenance branch.
 
 ### Release Progress
 
-[![Release Blockers](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/a4fbdde293677bf3f63f3cfd3aef6b44/raw/release-blockers.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+[![Release Blockers](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-blocker-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
-[![Release Must Do](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/brtnfld/8a077a919d048ce5dc9f56350bec10bc/raw/release-mustdo.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+[![Release Must Do](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-mustdo-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
-The badges above show the current progress of **release-blocking** and **must-do** issues with colors that reflect completion status:
+[![Release Nice to Have](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-nicetohave-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+
+The badges above show the current progress of **release-blocking**, **must-do**, and **nice-to-have** issues with colors that reflect completion status:
 
 - 🟢 **Green (90%+)**: Readying for Deployment - most issues completed
 - 🟡 **Yellow (60-89%)**: Nearing Completion - on track for release
