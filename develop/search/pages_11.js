@@ -5,7 +5,7 @@ var searchData=
   ['manual_20rm_20page_20template_2',['Reference Manual (RM) Page Template',['../_r_m_t.html',1,'']]],
   ['mapping_3',['HDF5 VOL Data Mapping',['../_h5_m__u_g.html',1,'']]],
   ['maven_20artifacts_4',['Using HDF5 Maven Artifacts',['../_c_b__maven_artifacts.html',1,'']]],
-  ['maven_20integration_5',['HDF5 Java Examples Maven Integration',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html',1,'']]],
+  ['maven_20integration_5',['HDF5 Java Examples &amp; Maven Integration',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html',1,'']]],
   ['may_20generate_20metadata_20reads_6',['Functions with No Access Property List Parameter that May Generate Metadata Reads',['../maybe_metadata_reads.html',1,'']]],
   ['memory_20allocated_20by_20the_20hdf5_20library_7',['Freeing Memory Allocated by the HDF5 Library',['../freeing_memory.html',1,'']]],
   ['metadata_20cache_20configuration_8',['Metadata Cache Configuration',['../_h5_a_c-cache-config-t.html',1,'']]],

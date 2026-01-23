@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-22</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-23</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -186,76 +186,6 @@ Files</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="icondoc"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h_d_f5_8_f90.html">HDF5.F90</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>This directory contains Fortran APIs for HDF5 Library functionality. A complete list of implemented Fortran subroutines can be found in the HDF5 Reference Manual.</p>
-<h1><a class="anchor" id="autotoc_md30"></a>
-About the source code organization</h1>
-<p>The Fortran APIs are organized in modules parallel to the HDF5 Interfaces. Each module is in a separate file with the name H5*ff.F90. Corresponding C stubs are in the H5*f.c files. For example, the Fortran File APIs are in the file <a class="el" href="_h5_fff_8_f90.html">H5Fff.F90</a>, and the corresponding C stubs are in the file H5Ff.c.</p>
-<p>Each module contains Fortran definitions of the constants, interfaces to the subroutines if needed, and the subroutines themselves.</p>
-<p>It is crucial for users to use constant names in their programs instead of the numerical values, as the constant names have values which are subject to change without notice.</p>
-<h1><a class="anchor" id="autotoc_md31"></a>
-Quick overview of the Fortran APIs</h1>
-<ul>
-<li>An in-depth description of each Fortran API and its parameters can be found in the HDF5 Reference Manual. They tend to be summarized from the C descriptions.</li>
-<li>The Fortran APIs come in the form of Fortran subroutines.</li>
-<li>Each Fortran subroutine name is derived from the corresponding C function name by adding "_f" to the name. For example, the name of the C function to create an HDF5 file is H5Fcreate; the corresponding Fortran subroutine is h5fcreate_f.</li>
-<li><p class="startli">The parameter list for each Fortran subroutine usually has two more parameters than the corresponding C function. These additional parameters typically hold the return value and an error code. The order of the Fortran subroutine parameters may differ from the order of the C function parameters.</p>
-<p class="startli">The Fortran subroutine parameters are usually listed in the following order:</p><ul>
-<li>required input parameters,</li>
-<li>output parameters, including return value and error code, and optional input parameters.</li>
-</ul>
-<p class="startli">For example, the C function to create a dataset has the following prototype: </p><pre class="fragment">hid_t H5Dcreate2(hid_it loc_id, char *name, hid_t type_id,
-      hid_t space_id, hid_t link_creation_prp, hid_t dset_creation_prp,
-      hid_t dset_access_prop);
-</pre><p class="startli">The corresponding Fortran subroutine has the following form: </p><pre class="fragment">SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, &amp;
-hdferr, dset_creation_prp, link_creation_prp, dset_access_prop)
-</pre><p class="startli">The first four parameters of the Fortran subroutine correspond to the parameters of the C function. The fifth parameter, dset_id, is an output parameter containing a valid dataset identifier, and the sixth output parameter, hdferr, indicates successful completion. The error code descriptions can be found in the subroutine descriptions of the Reference Manual. The last three input parameters are optional and can be omitted, in which case default values will be used.</p>
-</li>
-<li><p class="startli">Parameters to the Fortran subroutines typically include predefined datatypes (see the build-time generated file <a class="el" href="_h5fortran__types_8_f90.html">H5fortran_types.F90</a> for a complete listing): </p><pre class="fragment"> INTEGER(HID_T)      compares with hid_t type in HDF5 C APIs
- INTEGER(HSIZE_T)    compares with hsize_t in HDF5 C APIs
- INTEGER(HSSIZE_T)   compares with hssize_t in HDF5 C APIs
- INTEGER(SIZE_T)     compares with the C size_t type
-</pre><p class="startli">These integer types usually correspond to 4- or 8-byte integers, depending on the Fortran compiler and corresponding HDF5 C library definitions.</p>
-</li>
-<li>Before calling HDF5 Fortran subroutines, each Fortran application must initialize Fortran datatypes by calling the h5open_f subroutine. After all calls to the HDF5 Fortran Library, the application should call the h5close_f subroutine.</li>
-<li>All public APIs for the Reference Manual have Doxygen descriptions and should use parameter aliases when possible.</li>
-<li>When a C application reads data stored by a Fortran program, the data appears to be transposed. This is because C and Fortran have different storage orders (row-major and column-major, respectively). For instance, if a Fortran program writes a 4x6 two-dimensional dataset to a file, a C program will read it into memory as a 6x4 two-dimensional dataset. The HDF5 C utilities h5dump and h5ls display transposed data if it was written from a Fortran program.</li>
-<li>It is important to note that in Fortran, the indexing of arrays starts at 1.</li>
-</ul>
-<h1><a class="anchor" id="autotoc_md32"></a>
-FOR DEVELOPERS</h1>
-<ul>
-<li><p class="startli">The build system generates APIs compatible with Fortran 90 to handle the backward compatibility of the older F90 APIs. During the configuration process, the build system determines all valid integer and real KINDs, as well as the maximum decimal precision for reals and floats in both Fortran and C. To determine all the available kinds, the Fortran program <em>PROGRAM FC_AVAIL_KINDS</em> is used, which is located in <a class="el" href="aclocal__fc_8f90.html">aclocal_fc.f90</a>. The available KINDs are stored in H5config_f.inc, a file processed during configuration time from H5config_f.inc.in. Each program in m4/aclocal_fc.f90 is enclosed with a "!---START-----+" line and a "!---END-------+" line, which are used as markers to isolate each test program for the build systems.</p>
-<p class="startli">The valid KINDs for integers and reals that are stored in H5config_f.inc are used in the <a class="el" href="_h5__buildiface_8_f90.html">H5_buildiface.F90</a> file located in the fortran/src directory. During the build process, <a class="el" href="_h5__buildiface_8_f90.html">H5_buildiface.F90</a> generates all the valid F90 KIND interfaces for the following APIs: h5awrite_f, h5aread_f, h5dwrite_f, h5dread_f, h5pset_ﬁll_value_f, h5pget_ﬁll_value_f, h5pset_f, h5pget_f, h5pregister_f, and h5pinsert_f. These APIs can handle up to and including rank seven arrays for all the found KINDs. Again, it's important to note that no new Fortran APIs should be added to <a class="el" href="_h5__buildiface_8_f90.html">H5_buildiface.F90</a> since new Fortran APIs should not use F90 specification but should instead use F2003. The source file generated by <a class="el" href="_h5__buildiface_8_f90.html">H5_buildiface.F90</a> is <a class="el" href="_h5__gen_8_f90.html">H5_gen.F90</a>, which is the Fortran module H5_GEN, Figure 1. This module is included in the HDF5 module <a class="el" href="_h_d_f5_8_f90.html">HDF5.F90</a>.</p>
-</li>
-</ul>
-<div class="image">
-<object type="image/svg+xml" data="FortBuildFlow.svg" style="pointer-events: none;"></object>
-<div class="caption">
-Figure 1: During the configure and build phases, Fortran files are generated and compiled. This overview explains the flow steps of the build process.</div></div>
-    <h2><a class="anchor" id="autotoc_md33"></a>
-Procedure to add a new function</h2>
-<dl class="section important"><dt>Important</dt><dd>The use of C stubs (H5*f.c) is no longer recommended. The C APIs should now be called from Fortran wrappers. C wrappers description exists for maintenance purposes and to create and understand alternative development options.</dd></dl>
-<ol type="1">
-<li>Edit the fortran/src/H5*ff.F90 file</li>
-<li>Edit the fortran/src/H5*f.c file</li>
-<li>Edit the fortran/src/H5f90proto.h file</li>
-<li>Add the new function to fortran/src/hdf5_fortrandll.def.in</li>
-</ol>
-<h2><a class="anchor" id="autotoc_md34"></a>
-Procedure for passing C variables to Fortran</h2>
-<p>(1) Find the C struct name you are interested in: </p><pre class="fragment">    (a) src/H5public.h if it is a generic type, i.e. H5_*
-        or
-    (b) src/H5*public.h if is a specific type, i.e. H5*_
-</pre><p>(2) Put that structure into an array that will be passed to Fortran in: </p><pre class="fragment">    (a) fortran/src/H5_f.c (add to the h5init_flags_c subroutine)
-    (b) edit fortran/src/H5f90proto.h and edit h5init_flags_c interface call
-</pre><p>(3) Edit the function call in <a class="el" href="_h5__ff_8_f90.html">fortran/src/H5_ff.F90</a> </p><pre class="fragment">    (a) edit the call:  FUNCTION h5init_flags_c
-    (b) edit h5init_flags_c call in h5open_f to match the number of arguments being passed
-</pre><p>(4) Add the size of the array and array to <a class="el" href="_h5f90global_8_f90.html">fortran/src/H5f90global.F90</a>, it must match the size found in H5_f.c</p>
-<dl class="section note"><dt>Note</dt><dd>To add a default C value argument, do steps (2a) and (4).</dd></dl>
-<h2><a class="anchor" id="autotoc_md35"></a>
-Procedure for adding a new file to the repository</h2>
-<p>Add the name of the file to the: (1) CMakeLists.txt located in the same directory as the new file. </p>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

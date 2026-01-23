@@ -24,13 +24,11 @@ var searchData=
   ['specification_20version_203_200_21',['HDF5 File Format Specification Version 3.0',['../_f_m_t3.html',1,'']]],
   ['specification_20version_204_200_22',['HDF5 File Format Specification Version 4.0',['../_f_m_t4.html',1,'']]],
   ['specifications_23',['Specifications',['../_s_p_e_c.html',1,'']]],
-  ['src_20cmake_5flogo_20svg_20alt_20cmake_20logo_20width_2024_20cmake_20installations_24',['&lt;img src=&quot;Cmake_logo.svg&quot; alt=&quot;Cmake logo&quot; width=24&gt; CMake Installations',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
-  ['started_20with_20hdf5_25',['Getting Started with HDF5',['../_getting_started.html',1,'']]],
-  ['storage_20layout_26',['Dataset Storage Layout',['../_l_b_dset_layout.html',1,'LearnBasics']]],
-  ['structure_27',['HDF5 Data Model and File Structure',['../_h5_d_m__u_g.html',1,'']]],
-  ['subset_20of_20a_20dataset_28',['Reading From or Writing To a Subset of a Dataset',['../_l_b_dset_sub_r_w.html',1,'LearnBasics']]],
-  ['summary_29',['HDF5 Build System Summary',['../md_release__docs_2_build_system_notes.html',1,'']]],
-  ['svg_20alt_20cmake_20logo_20width_2024_20cmake_20installations_30',['&lt;img src=&quot;Cmake_logo.svg&quot; alt=&quot;Cmake logo&quot; width=24&gt; CMake Installations',['../md_release__docs_2_autotools_to_c_make_options.html',1,'']]],
-  ['swmr_31',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]],
-  ['system_20summary_32',['HDF5 Build System Summary',['../md_release__docs_2_build_system_notes.html',1,'']]]
+  ['started_20with_20hdf5_24',['Getting Started with HDF5',['../_getting_started.html',1,'']]],
+  ['storage_20layout_25',['Dataset Storage Layout',['../_l_b_dset_layout.html',1,'LearnBasics']]],
+  ['structure_26',['HDF5 Data Model and File Structure',['../_h5_d_m__u_g.html',1,'']]],
+  ['subset_20of_20a_20dataset_27',['Reading From or Writing To a Subset of a Dataset',['../_l_b_dset_sub_r_w.html',1,'LearnBasics']]],
+  ['summary_28',['HDF5 Build System Summary',['../md_release__docs_2_build_system_notes.html',1,'']]],
+  ['swmr_29',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]],
+  ['system_20summary_30',['HDF5 Build System Summary',['../md_release__docs_2_build_system_notes.html',1,'']]]
 ];

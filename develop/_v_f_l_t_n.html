@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-22</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-23</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -198,7 +198,7 @@ Creating and Opening Files</h2>
 <div class="line">    ....</div>
 <div class="line">}</div>
 <div class="ttc" id="a_h5_f_dsec2_8h_html_a15ae1f958e1cf11cb239916d76b10606"><div class="ttname"><a href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a></div><div class="ttdeci">#define H5FD_SEC2</div><div class="ttdef"><b>Definition</b> H5FDsec2.h:24</div></div>
-<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:355</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:372</div></div>
 <div class="ttc" id="agroup___f_a_p_l_html_ga43a733fe9723dd15f5ad7abda909a1b8"><div class="ttname"><a href="group___f_a_p_l.html#ga43a733fe9723dd15f5ad7abda909a1b8">H5Pget_driver</a></div><div class="ttdeci">hid_t H5Pget_driver(hid_t plist_id)</div><div class="ttdoc">Returns low-lever driver identifier.</div></div>
 <div class="ttc" id="agroup___f_a_p_l_html_ga9195cb7b6c33ed8947486669702a4375"><div class="ttname"><a href="group___f_a_p_l.html#ga9195cb7b6c33ed8947486669702a4375">H5Pget_fapl_family</a></div><div class="ttdeci">herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size, hid_t *memb_fapl_id)</div><div class="ttdoc">Returns file access property list information.</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="subsec_vfl_use_per"></a>
@@ -254,7 +254,7 @@ Mode Functions</h2>
 <div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span>H5FD_family_dxpl_t {</div>
 <div class="line">    <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>       memb_dxpl_id;   <span class="comment">//data xfer property list of each member</span></div>
 <div class="line">} H5FD_family_dxpl_t;</div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:304</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:321</div></div>
 </div><!-- fragment --><p> n order to copy or free one of these structures the member file access or data transfer properties must also be copied or freed. This is done by providing a copy and close function for each structure:</p>
 <p>Example: The file access property list copy and close functions for the family driver: </p><div class="fragment"><div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> *</div>
 <div class="line">H5FD_family_fapl_copy(<span class="keyword">const</span> <span class="keywordtype">void</span> *_old_fa)</div>
@@ -276,7 +276,7 @@ Mode Functions</h2>
 <div class="line">    free(fa);</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:252</div></div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:269</div></div>
 <div class="ttc" id="agroup___p_l_c_r_html_gad2663ccbcbf76b96cde4c104588ae21b"><div class="ttname"><a href="group___p_l_c_r.html#gad2663ccbcbf76b96cde4c104588ae21b">H5Pcopy</a></div><div class="ttdeci">hid_t H5Pcopy(hid_t plist_id)</div><div class="ttdoc">Copies an existing property list to create a new property list.</div></div>
 </div><!-- fragment --><p>Generally when a file is created or opened the file access properties for the driver are copied into the file pointer which is returned and they may be modified from their original value (for instance, the file family driver modifies the member size property when opening an existing family). In order to support the <a class="el" href="group___h5_f.html#ga359585c49f82f5199178777b39e780f4" title="Returns a file access property list identifier.">H5Fget_access_plist</a> function the driver must provide a fapl_get callback which creates a copy of the driver-specific properties based on a particular file.</p>
 <p>Example: The file family driver copies the member size file access property list into the return value: </p><div class="fragment"><div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> *</div>
@@ -370,7 +370,7 @@ Open Files</h2>
 <div class="ttc" id="a_h5_fpublic_8h_html_a402673dec5c537b27a49a9a8bd6140b4"><div class="ttname"><a href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a></div><div class="ttdeci">#define H5F_ACC_RDWR</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:29</div></div>
 <div class="ttc" id="a_h5_fpublic_8h_html_a5f311bcbc21086812e8b754f6354262b"><div class="ttname"><a href="_h5_fpublic_8h.html#a5f311bcbc21086812e8b754f6354262b">H5F_ACC_CREAT</a></div><div class="ttdeci">#define H5F_ACC_CREAT</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:33</div></div>
 <div class="ttc" id="a_h5_fpublic_8h_html_a7a47250dc1435705233dca7297ba3d90"><div class="ttname"><a href="_h5_fpublic_8h.html#a7a47250dc1435705233dca7297ba3d90">H5F_ACC_EXCL</a></div><div class="ttdeci">#define H5F_ACC_EXCL</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:31</div></div>
-<div class="ttc" id="a_h5public_8h_html_a676244a60b85ee8bbd111afd4a8fce3c"><div class="ttname"><a href="_h5public_8h.html#a676244a60b85ee8bbd111afd4a8fce3c">HADDR_UNDEF</a></div><div class="ttdeci">#define HADDR_UNDEF</div><div class="ttdef"><b>Definition</b> H5public.h:367</div></div>
+<div class="ttc" id="a_h5public_8h_html_a676244a60b85ee8bbd111afd4a8fce3c"><div class="ttname"><a href="_h5public_8h.html#a676244a60b85ee8bbd111afd4a8fce3c">HADDR_UNDEF</a></div><div class="ttdeci">#define HADDR_UNDEF</div><div class="ttdef"><b>Definition</b> H5public.h:384</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="subsec_vfl_imp_close"></a>
 Closing Files</h2>
 <p>Closing a file simply means that all cached data should be flushed to the next lower layer, the file should be closed at the next lower layer, and all file-related data structures should be freed. All information needed by the close function is already present in the file handle. </p><table class="doxtable">

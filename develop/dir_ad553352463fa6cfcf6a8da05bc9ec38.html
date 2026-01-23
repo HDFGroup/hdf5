@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-22</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-01-23</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -146,43 +146,6 @@ Directories</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="iconfclosed"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_21ddf1890bed88db1a7e2182c88a8865.html">JAVA</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>HDF5 Examples</p>
-<p><em>Please refer to the Using_CMake.txt file for CMake instructions.</em></p>
-<p>Note that this HDF5Examples directory structure is also provided as a stand-alone project distributed with library binaries as well as compiled and tested during a HDF5 Library build.</p>
-<p>This repository contains a high-performance library's example code that demonstrate the HDF5® data model API. The HDF5® data model has been adopted across many industries and this implementation has become a de facto data management standard in science, engineering, and research communities worldwide.</p>
-<p>The HDF Group is the developer, maintainer, and steward of HDF5 software. Find more information about The HDF Group, the HDF5 Community, and other HDF5 software projects, tools, and services at <a href="https://www.hdfgroup.org/">The HDF Group's website</a>.</p>
-<p>We suggest using the presets method with CMake for building the examples. However, if you prefer to use the h5cc pkg-config wrappers, you can use the following commands to build the examples: </p><pre class="fragment">export HDF5_HOME="hdf5 installation root"
-export PKG_CONFIG_PATH="$HDF5_HOME/lib/pkgconfig"
-export LD_LIBRARY_PATH="$HDF5_HOME/lib:$LD_LIBRARY_PATH"
-export PATH="$HDF5_HOME/bin:$PATH"
-</pre><p>Then, you can compile the examples with: </p><pre class="fragment">h5cc -o example1 example1.c
-h5c++ -o example2 example2.cpp
-h5fc -o example3 example3.f90
-</pre><p>For Java examples with Maven integration, see the <a class="el" href="_r_e_a_d_m_e-_m_a_v_e_n_8md.html">JAVA/README-MAVEN.md</a> file for complete instructions on using the <code>org.hdfgroup:hdf5-java-examples</code> Maven artifact.</p>
-<p>The test-pc.sh script can test the examples with the h5*cc pkg-config wrappers with: cd &lt;path to examples&gt; export HDF5_HOME="hdf5 installation root"; sh ./test-pc.sh &lt;path to examples&gt; &lt;path to build dir&gt; . Notice that period (.) at the end of the command is important, it tells the script to use the current directory as the source directory.</p>
-<h2><a class="anchor" id="autotoc_md82"></a>
-HELP AND SUPPORT</h2>
-<p>Information regarding Help Desk and Support services is available at</p>
-<p><a href="https://help.hdfgroup.org">https://help.hdfgroup.org</a></p>
-<h2><a class="anchor" id="autotoc_md83"></a>
-FORUM and NEWS</h2>
-<p>The <a href="https://forum.hdfgroup.org">HDF Forum</a> is provided for public announcements and discussions of interest to the general HDF5 Community.</p>
-<ul>
-<li>News and Announcements <a href="https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group">https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group</a></li>
-<li>HDF5 Topics <a href="https://forum.hdfgroup.org/c/hdf5">https://forum.hdfgroup.org/c/hdf5</a></li>
-</ul>
-<p>These forums are provided as an open and public service for searching and reading. Posting requires completing a simple registration and allows one to join in the conversation. Please read the <a href="https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum">instructions</a> pertaining to the Forum's use and configuration.</p>
-<h2><a class="anchor" id="autotoc_md84"></a>
-HDF5 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE</h2>
-<p>Full Documentation and Programming Resources for this HDF5 can be found at</p>
-<p><a href="https://support.hdfgroup.org/documentation/index.html">https://support.hdfgroup.org/documentation/index.html</a></p>
-<p>Periodically development code snapshots are provided at the following URL:</p>
-<p><a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot">https://github.com/HDFGroup/hdf5/releases/tag/snapshot</a></p>
-<p>Source packages for current and previous releases are located at:</p>
-<p><a href="https://github.com/HDFGroup/hdf5/releases">Latest HDF5 release</a> <a href="https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html">Previous releases</a></p>
-<p>Development code is available at our Github location:</p>
-<p><a href="https://github.com/HDFGroup/hdf5.git">https://github.com/HDFGroup/hdf5.git</a> </p>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

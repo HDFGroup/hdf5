@@ -79,7 +79,7 @@ var searchData=
   ['hdf5_20identifiers_76',['HDF5 Identifiers',['../_h5_i__u_g.html',1,'']]],
   ['hdf5_20image_20and_20palette_20specification_20version_201_202_77',['HDF5 Image and Palette Specification Version 1.2',['../_i_m_g.html',1,'']]],
   ['hdf5_20java_20api_20package_78',['HDF5 Java API Package',['../_h_d_f5_l_i_b.html',1,'']]],
-  ['hdf5_20java_20examples_20maven_20integration_79',['HDF5 Java Examples Maven Integration',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html',1,'']]],
+  ['hdf5_20java_20examples_20maven_20integration_79',['HDF5 Java Examples &amp; Maven Integration',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html',1,'']]],
   ['hdf5_20library_80',['Freeing Memory Allocated by the HDF5 Library',['../freeing_memory.html',1,'']]],
   ['hdf5_20library_20and_20programming_20model_81',['HDF5 Library and Programming Model',['../_h5__u_g.html',1,'']]],
   ['hdf5_20library_20code_20conventions_82',['HDF5 Library Code Conventions',['../_c_o_d_e_c_o_n_v.html',1,'']]],
