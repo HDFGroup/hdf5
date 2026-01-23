@@ -111,9 +111,10 @@ function(parse_hdf5_version H5PUBLIC_H_PATH)
     set(${PARSE_VER_SUBRELEASE_VAR} ${_parsed_value} PARENT_SCOPE)
   endif()
 
-  # Clean up temporary variables
+  # Clean up temporary variables and macros
   unset(_h5_vers_lines)
   unset(_h5_vers_multiline_string)
   unset(_match)
   unset(_parsed_value)
+  unset(_parse_version_component)
 endfunction()
