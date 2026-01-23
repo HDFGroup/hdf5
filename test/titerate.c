@@ -916,8 +916,8 @@ test_grp_memb_funcs(hid_t fapl)
         /* Test with non-null buffer for name and 0 for size */
         strcpy(non_null_buf, NON_NULL_BUF);
         buf_ptr = &non_null_buf[4];
-        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i,
-                                         buf_ptr, 0, H5P_DEFAULT);
+        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, buf_ptr, 0,
+                                         H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Lget_name_by_idx");
         VERIFY(ret, name_len, "H5Lget_name_by_idx");
         VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Lget_name_by_idx");
