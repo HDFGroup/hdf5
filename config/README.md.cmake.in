@@ -74,7 +74,6 @@ add "-VV" to the ctest command. The output should show;
 For more information see USING_CMake_Examples.txt in the install folder.
 ===========================================================================
 
-Documentation for this release can be found at the following URL:
-    https://support.hdfgroup.org/releases/hdf5/v@H5_VERS_MAJOR@_@H5_VERS_MINOR@/v@H5_VERS_MAJOR@_@H5_VERS_MINOR@_@H5_VERS_RELEASE@/documentation/doxygen/index.html
+Documentation to download for this release can be found as hdf5-\<version\>.doxygen.zip in https://github.com/HDFGroup/hdf5/releases.  Documentation for the latest development version can be seen at https://support.hdfgroup.org/documentation/hdf5/latest/
 
 Bugs should be reported to help@hdfgroup.org.

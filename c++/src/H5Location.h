@@ -24,7 +24,6 @@ namespace H5 {
     It provides a collection of wrappers for the C functions that take a
     location identifier to specify the HDF5 object.  The location identifier
     can be either file, group, dataset, attribute, or named datatype.
-    Wrappers for H5A functions stay in H5Object.
 */
 // Inheritance: IdComponent
 class H5CPP_DLL H5Location : public IdComponent {

@@ -156,8 +156,11 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
     tmp_size = (hsize_t)stmp_size * dt_size;
     H5_CHECKED_ASSIGN(dset->shared->layout.storage.u.contig.size, hsize_t, tmp_size, hssize_t);
 
-    /* Get the sieve buffer size for this dataset */
-    dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(f);
+    /* Get the sieve buffer size for this dataset - the smaller of the dataset size and
+     * the sieve buffer size from the FAPL is used
+     */
+    dset->shared->cache.sieve.sieve_buf_size =
+        MIN(dset->shared->layout.storage.u.contig.size, H5F_SIEVE_BUF_SIZE(f));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

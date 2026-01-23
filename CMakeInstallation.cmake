@@ -151,6 +151,15 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Add CMake Find modules to installation
+#-----------------------------------------------------------------------------
+install (
+    FILES ${CMAKE_SOURCE_DIR}/config/cmake/Findlibaec.cmake
+    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
+    COMPONENT configinstall
+)
+
+#-----------------------------------------------------------------------------
 # Configure the libhdf5.settings file with library info
 #-----------------------------------------------------------------------------
 if (H5_WORDS_BIGENDIAN)

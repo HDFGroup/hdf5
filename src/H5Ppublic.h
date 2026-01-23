@@ -5405,8 +5405,8 @@ H5_DLL herr_t H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *
  *          the dataset being read in for hyperslab selections boosts
  *          performance by quite a bit.
  *
- *          The default value is set to 64KB, indicating that file I/O for raw
- *          data reads and writes will occur in at least 64KB blocks. Setting
+ *          The default value is set to 64KiB, indicating that file I/O for raw
+ *          data reads and writes will occur in at least 64KiB blocks. Setting
  *          the value to zero (\TText{0}) with this API function will turn off
  *          the data sieving, even if the VFL driver attempts to use that
  *          strategy.

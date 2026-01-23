@@ -9,7 +9,6 @@
 |`genparser`|Creates the flex/bison-based parser files in the high-level library|
 |`h5cc.in`|Input file from which h5cc is created|
 |`h5redeploy.in`|Input file from which h5redeploy is created|
-|`h5vers`|Updates the library version number|
 |`make_err`|Generates the H5E header files|
 |`make_vers`|Generates H5version.h|
 |`make_overflow`|Generates H5overflow.h|
