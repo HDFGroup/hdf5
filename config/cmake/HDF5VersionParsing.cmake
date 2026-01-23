@@ -84,26 +84,36 @@ function(parse_hdf5_version H5PUBLIC_H_PATH)
   string(REPLACE ";" "\n" _h5_vers_multiline_string "${_h5_vers_lines}")
 
   # Helper macro for parsing version components
-  macro(_parse_version_component component_name pattern var_name)
+  # Note: This macro sets a local variable named _parsed_value, which the
+  # calling function is responsible for promoting to PARENT_SCOPE.
+  # This design makes the scope handling explicit and clear.
+  macro(_parse_version_component component_name pattern)
     string(REGEX MATCH "${component_name}[ \t]+${pattern}" _match "${_h5_vers_multiline_string}")
-    if(NOT DEFINED CMAKE_MATCH_1)
+    if(NOT _match)
       message(FATAL_ERROR "Failed to parse ${component_name} from ${H5PUBLIC_H_PATH}")
     endif()
-    set(${var_name} ${CMAKE_MATCH_1} PARENT_SCOPE)
+    set(_parsed_value ${CMAKE_MATCH_1})
   endmacro()
 
   # Extract version numbers using helper macro
-  _parse_version_component("H5_VERS_MAJOR" "([0-9]+)" ${PARSE_VER_MAJOR_VAR})
-  _parse_version_component("H5_VERS_MINOR" "([0-9]+)" ${PARSE_VER_MINOR_VAR})
-  _parse_version_component("H5_VERS_RELEASE" "([0-9]+)" ${PARSE_VER_RELEASE_VAR})
+  _parse_version_component("H5_VERS_MAJOR" "([0-9]+)")
+  set(${PARSE_VER_MAJOR_VAR} ${_parsed_value} PARENT_SCOPE)
+
+  _parse_version_component("H5_VERS_MINOR" "([0-9]+)")
+  set(${PARSE_VER_MINOR_VAR} ${_parsed_value} PARENT_SCOPE)
+
+  _parse_version_component("H5_VERS_RELEASE" "([0-9]+)")
+  set(${PARSE_VER_RELEASE_VAR} ${_parsed_value} PARENT_SCOPE)
 
   # Extract subrelease if requested
   if(PARSE_VER_SUBRELEASE_VAR)
-    _parse_version_component("H5_VERS_SUBRELEASE" "\"([^\"]*)\"" ${PARSE_VER_SUBRELEASE_VAR})
+    _parse_version_component("H5_VERS_SUBRELEASE" "\"([^\"]*)\"")
+    set(${PARSE_VER_SUBRELEASE_VAR} ${_parsed_value} PARENT_SCOPE)
   endif()
 
   # Clean up temporary variables
   unset(_h5_vers_lines)
   unset(_h5_vers_multiline_string)
   unset(_match)
+  unset(_parsed_value)
 endfunction()
