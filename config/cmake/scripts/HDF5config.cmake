@@ -43,13 +43,19 @@ cmake_minimum_required (VERSION 3.26)
 # If not set in parent scope, read it from H5public.h now
 #-----------------------------------------------------------------------------
 if (NOT DEFINED H5_VERS_MAJOR)
+  # Resolve the real path of this script to handle symlinks correctly
+  get_filename_component(_hdf5config_real_dir "${CMAKE_CURRENT_LIST_FILE}" REALPATH)
+  get_filename_component(_hdf5config_real_dir "${_hdf5config_real_dir}" DIRECTORY)
+
   # Use shared version parsing module
-  include(${CMAKE_CURRENT_LIST_DIR}/../HDF5VersionParsing.cmake)
-  parse_hdf5_version("${CMAKE_CURRENT_LIST_DIR}/../../src/H5public.h"
+  include(${_hdf5config_real_dir}/../HDF5VersionParsing.cmake)
+  parse_hdf5_version("${_hdf5config_real_dir}/../../src/H5public.h"
                      MAJOR_VAR H5_VERS_MAJOR
                      MINOR_VAR H5_VERS_MINOR
                      RELEASE_VAR H5_VERS_RELEASE
                      SUBRELEASE_VAR H5_VERS_SUBRELEASE)
+
+  unset(_hdf5config_real_dir)
 endif ()
 
 set (CTEST_SOURCE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
