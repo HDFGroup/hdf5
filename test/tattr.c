@@ -6545,6 +6545,7 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     hid_t   attr;
     hid_t   sid;
     char    non_null_buf[80]; /* Buffer to test non-null buffer calls */
+    char   *buf_ptr;          /* To pass mid-string */
     ssize_t namelen;          /* Length of attribute name */
 
     /* Create dataspace for attribute */
@@ -6576,9 +6577,11 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
 
     VERIFY(err_ret, FAIL, "H5Aget_name_by_idx");
 
-    /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name
+       size and the buffer is not modified */
     strcpy(non_null_buf, NON_NULL_BUF);
-    namelen = H5Aget_name(attr, (size_t)0, non_null_buf);
+    buf_ptr = &non_null_buf[4];
+    namelen = H5Aget_name(attr, (size_t)0, buf_ptr);
     CHECK(namelen, FAIL, "H5Aget_name");
     VERIFY(namelen, (ssize_t)strlen(GET_NAME_INVALID_BUF_TEST_ATTR_NAME), "H5Aget_name");
     VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Aget_name");

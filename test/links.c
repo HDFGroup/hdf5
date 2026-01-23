@@ -1995,6 +1995,7 @@ test_deprec(hid_t fapl, bool new_format)
     char       tmpstr[1024];
     int        len = 0;          /* Length of comment */
     char       non_null_buf[80]; /* Buffer to test non-null buffer calls */
+    char      *buf_ptr;          /* To pass mid-string */
     ssize_t    name_len;         /* Length of name */
     herr_t     status;           /* Generic return value */
 
@@ -2057,9 +2058,11 @@ test_deprec(hid_t fapl, bool new_format)
     if (len >= 0)
         TEST_ERROR;
 
-    /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name
+       size and the buffer is not modified */
     strcpy(non_null_buf, NON_NULL_BUF);
-    if ((name_len = H5Gget_objname_by_idx(group1_id, (hsize_t)0, non_null_buf, 0)) < 0)
+    buf_ptr = &non_null_buf[4];
+    if ((name_len = H5Gget_objname_by_idx(group1_id, (hsize_t)0, buf_ptr, 0)) < 0)
         FAIL_STACK_ERROR;
     if ((size_t)name_len != strlen(tmpstr))
         TEST_ERROR;

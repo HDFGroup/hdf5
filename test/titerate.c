@@ -899,6 +899,7 @@ test_grp_memb_funcs(hid_t fapl)
     for (i = 0; i < (int)ginfo.nlinks; i++) {
         H5O_info2_t oinfo;            /* Object info */
         char        non_null_buf[80]; /* Buffer to test non-null buffer calls */
+        char       *buf_ptr;          /* To pass mid-string */
 
         /* Test with NULL for name, to query length */
         name_len = H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, NULL,
@@ -914,8 +915,9 @@ test_grp_memb_funcs(hid_t fapl)
 
         /* Test with non-null buffer for name and 0 for size */
         strcpy(non_null_buf, NON_NULL_BUF);
+        buf_ptr = &non_null_buf[4];
         ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i,
-                                         non_null_buf, 0, H5P_DEFAULT);
+                                         buf_ptr, 0, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Lget_name_by_idx");
         VERIFY(ret, name_len, "H5Lget_name_by_idx");
         VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Lget_name_by_idx");

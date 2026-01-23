@@ -2415,6 +2415,7 @@ test_file_getname(void)
     char    name[TESTA_NAME_BUF_SIZE];
     ssize_t name_len;
     char    non_null_buf[80]; /* Buffer to test non-null buffer calls */
+    char   *buf_ptr;          /* To pass mid-string */
     herr_t  ret;              /* Generic return value */
 
     /* Output message about test being performed */
@@ -2430,9 +2431,11 @@ test_file_getname(void)
     VERIFY_STR(name, FILE1, "H5Fget_name");
     VERIFY(name_len, strlen(FILE1), "H5Fget_name");
 
-    /* Verify that passing a non-null buffer with size 0 still returns the correct name size */
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name
+       size and the buffer is not modified */
     strcpy(non_null_buf, NON_NULL_BUF);
-    name_len = H5Fget_name(file_id, non_null_buf, 0);
+    buf_ptr = &non_null_buf[4];
+    name_len = H5Fget_name(file_id, buf_ptr, 0);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY(name_len, strlen(FILE1), "H5Fget_name");
     VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Fget_name");
