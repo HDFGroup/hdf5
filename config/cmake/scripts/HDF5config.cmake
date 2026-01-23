@@ -47,15 +47,25 @@ if (NOT DEFINED H5_VERS_MAJOR)
   get_filename_component(_hdf5config_real_dir "${CMAKE_CURRENT_LIST_FILE}" REALPATH)
   get_filename_component(_hdf5config_real_dir "${_hdf5config_real_dir}" DIRECTORY)
 
+  # Validate the computed path
+  if(NOT EXISTS "${_hdf5config_real_dir}")
+    message(FATAL_ERROR "Failed to resolve directory from ${CMAKE_CURRENT_LIST_FILE}")
+  endif()
+
+  # Compute source root from this script location to avoid fragile relative paths
+  # This script is in config/cmake/scripts/, so go up to project root
+  get_filename_component(_hdf5_source_root "${_hdf5config_real_dir}/../../.." REALPATH)
+
   # Use shared version parsing module
   include(${_hdf5config_real_dir}/../HDF5VersionParsing.cmake)
-  parse_hdf5_version("${_hdf5config_real_dir}/../../src/H5public.h"
+  parse_hdf5_version("${_hdf5_source_root}/src/H5public.h"
                      MAJOR_VAR H5_VERS_MAJOR
                      MINOR_VAR H5_VERS_MINOR
                      RELEASE_VAR H5_VERS_RELEASE
                      SUBRELEASE_VAR H5_VERS_SUBRELEASE)
 
   unset(_hdf5config_real_dir)
+  unset(_hdf5_source_root)
 endif ()
 
 set (CTEST_SOURCE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
