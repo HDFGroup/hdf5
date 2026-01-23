@@ -44,8 +44,8 @@ cmake_minimum_required (VERSION 3.26)
 #-----------------------------------------------------------------------------
 if (NOT DEFINED H5_VERS_MAJOR)
   # Use shared version parsing module
-  include(${CTEST_SCRIPT_DIRECTORY}/../HDF5VersionParsing.cmake)
-  parse_hdf5_version("${CTEST_SCRIPT_DIRECTORY}/../../src/H5public.h"
+  include(${CMAKE_CURRENT_LIST_DIR}/../HDF5VersionParsing.cmake)
+  parse_hdf5_version("${CMAKE_CURRENT_LIST_DIR}/../../src/H5public.h"
                      MAJOR_VAR H5_VERS_MAJOR
                      MINOR_VAR H5_VERS_MINOR
                      RELEASE_VAR H5_VERS_RELEASE
