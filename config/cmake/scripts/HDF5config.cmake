@@ -43,9 +43,9 @@ cmake_minimum_required (VERSION 3.26)
 # If not set in parent scope, read it from H5public.h now
 #-----------------------------------------------------------------------------
 if (NOT DEFINED H5_VERS_MAJOR)
-  # Resolve the real directory of this script to handle symlinks correctly
-  get_filename_component(_hdf5config_real_dir "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
-  get_filename_component(_hdf5config_real_dir "${_hdf5config_real_dir}" REALPATH)
+  # Resolve the real path of this script to handle symlinks correctly
+  get_filename_component(_hdf5config_real_dir "${CMAKE_CURRENT_LIST_FILE}" REALPATH)
+  get_filename_component(_hdf5config_real_dir "${_hdf5config_real_dir}" DIRECTORY)
 
   # Validate the computed path
   if(NOT EXISTS "${_hdf5config_real_dir}")
