@@ -1331,6 +1331,7 @@ H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_
 {
     unsigned char       *dst;                   /* Destination buffer pointer */
     const unsigned char *src;                   /* Source buffer pointer */
+    const unsigned char *_src_end;              /* End of source buffer pointer */
     hsize_t *max_dst_off_ptr, *max_src_off_ptr; /* Pointers to max. source and destination offset locations */
     hsize_t *dst_off_ptr, *src_off_ptr;         /* Pointers to source and destination offset arrays */
     size_t  *dst_len_ptr, *src_len_ptr;         /* Pointers to source and destination length arrays */
@@ -1370,12 +1371,7 @@ H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_
     /* Compute buffer offsets */
     dst = (unsigned char *)_dst + *dst_off_ptr;
     src = (const unsigned char *)_src + *src_off_ptr;
-
-    /* Check if src buffer size is less than expected */
-    if (src_alloc_size > 0) {
-        if (src_alloc_size < tmp_src_len)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTOPERATE, FAIL, "src buffer size is less than expected");
-    }
+    _src_end = (const unsigned char *)_src + src_alloc_size;
 
     /* Work through the sequences */
     /* (Choose smallest sequence available initially) */
@@ -1385,6 +1381,8 @@ H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_
 src_smaller:
         acc_len = 0;
         do {
+            if (H5_IS_BUFFER_OVERFLOW(src, tmp_src_len, _src_end))
+                HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, (-1), "src buffer overflow");
             /* Copy data */
             H5MM_memcpy(dst, src, tmp_src_len);
 
@@ -1428,6 +1426,8 @@ src_smaller:
 dst_smaller:
         acc_len = 0;
         do {
+            if (H5_IS_BUFFER_OVERFLOW(src, tmp_dst_len, _src_end))
+                HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, (-1), "src buffer overflow");
             /* Copy data */
             H5MM_memcpy(dst, src, tmp_dst_len);
 
@@ -1471,6 +1471,8 @@ dst_smaller:
 equal:
         acc_len = 0;
         do {
+            if (H5_IS_BUFFER_OVERFLOW(src, tmp_dst_len, _src_end))
+                HGOTO_ERROR(H5E_INTERNAL, H5E_OVERFLOW, (-1), "src buffer overflow");
             /* Copy data */
             H5MM_memcpy(dst, src, tmp_dst_len);
 

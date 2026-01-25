@@ -273,7 +273,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *src_space, size_t elmt_size,
+H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, size_t src_buf_size, H5S_t *src_space, size_t elmt_size,
                   size_t nelmts)
 {
     H5S_sel_iter_t *dst_sel_iter      = NULL;  /* Destination dataspace iteration info */
@@ -326,7 +326,7 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
         /* Perform vectorized memcpy from src_buf to dst_buf */
         if ((bytes_copied =
                  H5VM_memcpyvv(dst_buf, dst_nseq, &curr_dst_seq, &single_dst_len, &single_dst_off, src_buf,
-                               src_nseq, &curr_src_seq, &single_src_len, &single_src_off, 0)) < 0)
+                               src_nseq, &curr_src_seq, &single_src_len, &single_src_off, src_buf_size)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
         assert(((size_t)bytes_copied % elmt_size) == 0);
@@ -401,7 +401,7 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
 
             /* Perform vectorized memcpy from src_buf to dst_buf */
             if ((bytes_copied = H5VM_memcpyvv(dst_buf, dst_nseq, &curr_dst_seq, dst_len, dst_off, src_buf,
-                                              src_nseq, &curr_src_seq, src_len, src_off, 0)) < 0)
+                                              src_nseq, &curr_src_seq, src_len, src_off, src_buf_size)) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
             /* Decrement number of elements left to process */

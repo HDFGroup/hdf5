@@ -136,6 +136,7 @@ typedef struct H5D_rdcc_ent_t {
     H5F_block_t            chunk_block;              /*offset/length of chunk in file        */
     hsize_t                chunk_idx;                /*index of chunk in dataset             */
     uint8_t               *chunk;                    /*the unfiltered chunk data        */
+    size_t                 chunk_size;               /*size of the unfiltered chunk data        */
     unsigned               idx;                      /*index in hash table            */
     struct H5D_rdcc_ent_t *next;                     /*next item in doubly-linked list    */
     struct H5D_rdcc_ent_t *prev;                     /*previous item in doubly-linked list    */
@@ -4010,6 +4011,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool reset)
                  */
                 point_of_no_return = true;
                 ent->chunk         = NULL;
+                ent->chunk_size    = 0;
             } /* end else */
             H5_CHECKED_ASSIGN(nbytes, size_t, udata.chunk_block.length, hsize_t);
             if (H5Z_pipeline(&(dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), err_detect,
@@ -4096,11 +4098,13 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool reset)
         point_of_no_return = false;
         if (buf == ent->chunk)
             buf = NULL;
-        if (ent->chunk != NULL)
+        if (ent->chunk != NULL) {
             ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
                                                          ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
                                                               ? NULL
                                                               : &(dset->shared->dcpl_cache.pline)));
+            ent->chunk_size = 0;
+        } /* end if */
     } /* end if */
 
 done:
@@ -4115,11 +4119,13 @@ done:
      * list.
      */
     if (ret_value < 0 && point_of_no_return)
-        if (ent->chunk)
+        if (ent->chunk) {
             ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
                                                          ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
                                                               ? NULL
                                                               : &(dset->shared->dcpl_cache.pline)));
+            ent->chunk_size = 0;
+        } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_flush_entry() */
@@ -4155,11 +4161,13 @@ H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool flush)
     } /* end if */
     else {
         /* Don't flush, just free chunk */
-        if (ent->chunk != NULL)
+        if (ent->chunk != NULL) {
             ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
                                                          ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
                                                               ? NULL
                                                               : &(dset->shared->dcpl_cache.pline)));
+            ent->chunk_size = 0;
+        } /* end if */
     } /* end else */
 
     /* Unlink from list */
@@ -4343,6 +4351,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
     H5D_rdcc_t         *rdcc;                    /*raw data chunk cache*/
     H5D_rdcc_ent_t     *ent;                     /*cache entry        */
     size_t              chunk_size;              /*size of a chunk    */
+    size_t              ret_alloc_size  = 0;     /*size of allocated chunk    */
     bool                disable_filters = false; /* Whether to disable filters (when adding to cache) */
     void               *chunk           = NULL;  /*the file chunk    */
     void               *ret_value       = NULL;  /* Return value         */
@@ -4357,9 +4366,6 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
     assert(dset);
     assert(udata);
     assert(!(udata->new_unfilt_chunk && prev_unfilt_chunk));
-
-    /* Initialize return */
-    *alloc_chunk_size = 0;
 
     /* Set convenience pointers */
     pline     = &(dset->shared->dcpl_cache.pline);
@@ -4420,9 +4426,11 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for raw data chunk");
+                ret_alloc_size = chunk_size;
                 H5MM_memcpy(chunk, ent->chunk, chunk_size);
                 ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
                 ent->chunk = (uint8_t *)chunk;
+                ent->chunk_size = chunk_size;
                 chunk      = NULL;
 
                 /* Mark the chunk as having filters disabled as well as "newly
@@ -4446,10 +4454,12 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for raw data chunk");
+                ret_alloc_size = chunk_size;
                 H5MM_memcpy(chunk, ent->chunk, chunk_size);
 
                 ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
                 ent->chunk = (uint8_t *)chunk;
+                ent->chunk_size = chunk_size;
                 chunk      = NULL;
 
                 /* Mark the chunk as having filters enabled */
@@ -4526,6 +4536,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
             if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
+            ret_alloc_size = chunk_size;
 
             /* In the case that some dataset functions look through this data,
              * clear it to all 0s. */
@@ -4548,7 +4559,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                                                           (udata->new_unfilt_chunk ? old_pline : pline))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for raw data chunk");
-                *alloc_chunk_size = my_chunk_alloc;
+                ret_alloc_size = my_chunk_alloc;
                 if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, chunk_addr,
                                           my_chunk_alloc, chunk) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk");
@@ -4566,7 +4577,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                     if (H5Z_pipeline(old_pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), err_detect,
                                      filter_cb, &my_chunk_alloc, &buf_alloc, &chunk) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, NULL, "data pipeline read failed");
-                    *alloc_chunk_size = 0;
+                    ret_alloc_size = buf_alloc;
 
                     /* Reallocate chunk if necessary */
                     if (udata->new_unfilt_chunk) {
@@ -4577,6 +4588,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                         "memory allocation failed for raw data chunk");
                         } /* end if */
+                        ret_alloc_size = my_chunk_alloc;
                         H5MM_memcpy(chunk, tmp_chunk, chunk_size);
                         (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
                     } /* end if */
@@ -4596,6 +4608,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for raw data chunk");
+                ret_alloc_size = chunk_size;
 
                 if (H5P_is_fill_value_defined(fill, &fill_status) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined");
@@ -4662,6 +4675,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 H5_CHECKED_ASSIGN(ent->rd_count, uint32_t, chunk_size, size_t);
                 H5_CHECKED_ASSIGN(ent->wr_count, uint32_t, chunk_size, size_t);
                 ent->chunk = (uint8_t *)chunk;
+                ent->chunk_size = ret_alloc_size;
 
                 /* Add it to the cache */
                 assert(NULL == rdcc->slot[udata->idx_hint]);
@@ -4695,6 +4709,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
         assert(!ent->locked);
         ent->locked = true;
         chunk       = ent->chunk;
+        ret_alloc_size = ent->chunk_size;
     } /* end if */
     else
         /*
@@ -4705,6 +4720,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
         udata->idx_hint = UINT_MAX;
 
     /* Set return value */
+    *alloc_chunk_size = ret_alloc_size;
     ret_value = chunk;
 
 done:

@@ -292,6 +292,7 @@ H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     FUNC_ENTER_PACKAGE_NOERR
 
     dinfo->store->compact.buf               = dinfo->dset->shared->layout.storage.u.compact.buf;
+    dinfo->store->compact.size              = dinfo->dset->shared->layout.storage.u.compact.size;
     dinfo->store->compact.dirty             = &dinfo->dset->shared->layout.storage.u.compact.dirty;
     dinfo->layout_io_info.contig_piece_info = NULL;
 
@@ -449,7 +450,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dse
         /* Use the vectorized memory copy routine to do actual work */
         if ((ret_value = H5VM_memcpyvv(dset_info->store->compact.buf, dset_max_nseq, dset_curr_seq,
                                        dset_size_arr, dset_offset_arr, dset_info->buf.cvp, mem_max_nseq,
-                                       mem_curr_seq, mem_size_arr, mem_offset_arr, 0)) < 0)
+                                       mem_curr_seq, mem_size_arr, mem_offset_arr, SIZE_MAX)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
     }
 
