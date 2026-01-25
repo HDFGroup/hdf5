@@ -273,8 +273,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, size_t src_buf_size, H5S_t *src_space, size_t elmt_size,
-                  size_t nelmts)
+H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, size_t src_buf_size, H5S_t *src_space,
+                  size_t elmt_size, size_t nelmts)
 {
     H5S_sel_iter_t *dst_sel_iter      = NULL;  /* Destination dataspace iteration info */
     H5S_sel_iter_t *src_sel_iter      = NULL;  /* Source dataspace iteration info */

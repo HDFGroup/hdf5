@@ -4099,13 +4099,13 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool reset)
         if (buf == ent->chunk)
             buf = NULL;
         if (ent->chunk != NULL) {
-            ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
-                                                         ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
-                                                              ? NULL
-                                                              : &(dset->shared->dcpl_cache.pline)));
+            ent->chunk      = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
+                                                              ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
+                                                                   ? NULL
+                                                                   : &(dset->shared->dcpl_cache.pline)));
             ent->chunk_size = 0;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Free the temp buffer only if it's different than the entry chunk */
@@ -4120,10 +4120,10 @@ done:
      */
     if (ret_value < 0 && point_of_no_return)
         if (ent->chunk) {
-            ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
-                                                         ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
-                                                              ? NULL
-                                                              : &(dset->shared->dcpl_cache.pline)));
+            ent->chunk      = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
+                                                              ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
+                                                                   ? NULL
+                                                                   : &(dset->shared->dcpl_cache.pline)));
             ent->chunk_size = 0;
         } /* end if */
 
@@ -4162,13 +4162,13 @@ H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool flush)
     else {
         /* Don't flush, just free chunk */
         if (ent->chunk != NULL) {
-            ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
-                                                         ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
-                                                              ? NULL
-                                                              : &(dset->shared->dcpl_cache.pline)));
+            ent->chunk      = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk,
+                                                              ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)
+                                                                   ? NULL
+                                                                   : &(dset->shared->dcpl_cache.pline)));
             ent->chunk_size = 0;
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
     /* Unlink from list */
     if (ent->prev)
@@ -4428,10 +4428,10 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                                 "memory allocation failed for raw data chunk");
                 ret_alloc_size = chunk_size;
                 H5MM_memcpy(chunk, ent->chunk, chunk_size);
-                ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
-                ent->chunk = (uint8_t *)chunk;
+                ent->chunk      = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
+                ent->chunk      = (uint8_t *)chunk;
                 ent->chunk_size = chunk_size;
-                chunk      = NULL;
+                chunk           = NULL;
 
                 /* Mark the chunk as having filters disabled as well as "newly
                  * disabled" so it is inserted on flush */
@@ -4457,10 +4457,10 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 ret_alloc_size = chunk_size;
                 H5MM_memcpy(chunk, ent->chunk, chunk_size);
 
-                ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
-                ent->chunk = (uint8_t *)chunk;
+                ent->chunk      = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
+                ent->chunk      = (uint8_t *)chunk;
                 ent->chunk_size = chunk_size;
-                chunk      = NULL;
+                chunk           = NULL;
 
                 /* Mark the chunk as having filters enabled */
                 ent->edge_chunk_state &= ~(H5D_RDCC_DISABLE_FILTERS | H5D_RDCC_NEWLY_DISABLED_FILTERS);
@@ -4674,7 +4674,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 H5MM_memcpy(ent->scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
                 H5_CHECKED_ASSIGN(ent->rd_count, uint32_t, chunk_size, size_t);
                 H5_CHECKED_ASSIGN(ent->wr_count, uint32_t, chunk_size, size_t);
-                ent->chunk = (uint8_t *)chunk;
+                ent->chunk      = (uint8_t *)chunk;
                 ent->chunk_size = ret_alloc_size;
 
                 /* Add it to the cache */
@@ -4707,8 +4707,8 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
     /* Lock the chunk into the cache */
     if (ent) {
         assert(!ent->locked);
-        ent->locked = true;
-        chunk       = ent->chunk;
+        ent->locked    = true;
+        chunk          = ent->chunk;
         ret_alloc_size = ent->chunk_size;
     } /* end if */
     else
@@ -4721,7 +4721,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
     /* Set return value */
     *alloc_chunk_size = ret_alloc_size;
-    ret_value = chunk;
+    ret_value         = chunk;
 
 done:
     /* Release the fill buffer info, if it's been initialized */

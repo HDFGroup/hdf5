@@ -1369,8 +1369,8 @@ H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_
     max_src_off_ptr = src_off_arr + src_max_nseq;
 
     /* Compute buffer offsets */
-    dst = (unsigned char *)_dst + *dst_off_ptr;
-    src = (const unsigned char *)_src + *src_off_ptr;
+    dst      = (unsigned char *)_dst + *dst_off_ptr;
+    src      = (const unsigned char *)_src + *src_off_ptr;
     _src_end = (const unsigned char *)_src + src_alloc_size;
 
     /* Work through the sequences */

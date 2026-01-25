@@ -4625,8 +4625,8 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
         iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
 
         if (H5D_select_io_mem(chunk_info->dset_info->buf.vp, chunk_info->mspace, chunk_entry->buf,
-                              chunk_entry->chunk_buf_size, chunk_info->fspace, chunk_info->dset_info->type_info.src_type_size,
-                              (size_t)iter_nelmts) < 0)
+                              chunk_entry->chunk_buf_size, chunk_info->fspace,
+                              chunk_info->dset_info->type_info.src_type_size, (size_t)iter_nelmts) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't copy chunk data to read buffer");
     }
 
@@ -4846,7 +4846,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
         iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace);
 
-        if (H5D_select_io_mem(chunk_entry->buf, chunk_info->fspace, chunk_info->dset_info->buf.cvp, SIZE_MAX, 
+        if (H5D_select_io_mem(chunk_entry->buf, chunk_info->fspace, chunk_info->dset_info->buf.cvp, SIZE_MAX,
                               chunk_info->mspace, chunk_info->dset_info->type_info.dst_type_size,
                               (size_t)iter_nelmts) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't copy chunk data to write buffer");
