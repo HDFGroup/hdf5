@@ -827,19 +827,20 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode array parent type");
 
             /* Check for multiplication overflow */
-            if (dt->shared->parent->shared->size > 0 && 
+            if (dt->shared->parent->shared->size > 0 &&
                 dt->shared->u.array.nelem > SIZE_MAX / dt->shared->parent->shared->size)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, 
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL,
                             "array datatype size calculation would overflow");
-    
+
             expected_size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
-    
+
             /* Verify the stored size matches the calculated size */
             if (dt->shared->size != expected_size)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL,
-                            "array datatype size mismatch: expected %zu (element_size=%zu * nelem=%zu), got %zu",
-                            expected_size, dt->shared->parent->shared->size, 
-                            dt->shared->u.array.nelem, dt->shared->size);
+                HGOTO_ERROR(
+                    H5E_DATATYPE, H5E_BADVALUE, FAIL,
+                    "array datatype size mismatch: expected %zu (element_size=%zu * nelem=%zu), got %zu",
+                    expected_size, dt->shared->parent->shared->size, dt->shared->u.array.nelem,
+                    dt->shared->size);
 
             /* Check if the parent of this array has a version greater than the
              * array itself. */
