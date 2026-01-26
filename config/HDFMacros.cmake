@@ -450,17 +450,7 @@ macro (HDF_DIR_PATHS package_prefix)
       set (${package_prefix}_INSTALL_DATA_DIR ${CMAKE_INSTALL_DATADIR})
     endif ()
     if (NOT ${package_prefix}_INSTALL_CMAKE_DIR)
-      # CMake config install directory:
-      # - Frameworks: <framework>/Resources/CMake/
-      # - Windows (not Cygwin): cmake/
-      # - Linux/Unix/Cygwin: ${CMAKE_INSTALL_LIBDIR}/cmake/<package_name>/
-      if (${package_prefix}_BUILD_FRAMEWORKS)
-        set (${package_prefix}_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX}/${${package_prefix}_PACKAGE_NAME_LOWER}.framework/Resources/CMake)
-      elseif (WIN32 AND NOT CYGWIN)
-        set (${package_prefix}_INSTALL_CMAKE_DIR cmake)
-      else ()
-        set (${package_prefix}_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${${package_prefix}_PACKAGE_NAME_LOWER})
-      endif ()
+      set (${package_prefix}_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${${package_prefix}_PACKAGE_NAME_LOWER})
     endif ()
     if (NOT ${package_prefix}_INSTALL_DOC_DIR)
       set (${package_prefix}_INSTALL_DOC_DIR ${CMAKE_INSTALL_DOCDIR})
