@@ -8,3 +8,5 @@ position        dset1           dset1           difference
 [ 1 1 ]          1               1.001           0.001          
 [ 2 1 ]          0               1               1              
 5 differences found
+Files do not have the same set of objects.
+Use -v for a list of objects.

@@ -562,14 +562,14 @@ typedef struct H5D_rdcc_t {
     unsigned scaled_encode_bits[H5S_MAX_RANK]; /* The number of bits needed to encode the scaled dim sizes */
 } H5D_rdcc_t;
 
-/* The raw data contiguous data cache */
-typedef struct H5D_rdcdc_t {
+/* Information about the dataset sieve buffer */
+typedef struct H5D_sieve_buf_t {
     unsigned char *sieve_buf;      /* Buffer to hold data sieve buffer */
     haddr_t        sieve_loc;      /* File location (offset) of the data sieve buffer */
     size_t         sieve_size;     /* Size of the data sieve buffer used (in bytes) */
     size_t         sieve_buf_size; /* Size of the data sieve buffer allocated (in bytes) */
     bool           sieve_dirty;    /* Flag to indicate that the data sieve buffer is dirty */
-} H5D_rdcdc_t;
+} H5D_sieve_buf_t;
 
 /*
  * A dataset is made of two layers, an H5D_t struct that is unique to
@@ -598,12 +598,8 @@ struct H5D_shared_t {
 
     /* Buffered/cached information for types of raw data storage*/
     struct {
-        H5D_rdcdc_t contig; /* Information about contiguous data */
-                            /* (Note that the "contig" cache
-                             * information can be used by a chunked
-                             * dataset in certain circumstances)
-                             */
-        H5D_rdcc_t chunk;   /* Information about chunked data */
+        H5D_sieve_buf_t sieve; /* Information about dataset sieve buffer */
+        H5D_rdcc_t      chunk; /* Information about chunked data */
     } cache;
 
     H5D_append_flush_t append_flush;   /* Append flush property information */

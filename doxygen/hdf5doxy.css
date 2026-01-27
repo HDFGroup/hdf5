@@ -276,3 +276,14 @@ div[style*="background:#FFDDDD"] a:hover {
   color: #1976D2 !important; /* Lighter blue on hover */
   text-decoration: none;
 }
+
+/* Style the C++ diagrams */
+/* Make inheritance diagram header look clickable */
+.dynheader {
+    cursor: pointer;
+    color: #0066cc;
+}
+
+.dynheader:hover {
+    text-decoration: underline;
+}

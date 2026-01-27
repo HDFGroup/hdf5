@@ -65,23 +65,40 @@
 /**
  * For minor interface/format changes
  */
-#define H5_VERS_MINOR 0
+#define H5_VERS_MINOR 1
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 1
+#define H5_VERS_RELEASE 0
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
+/*
+ * IMPORTANT: This MUST be a string literal (quoted), not an unquoted value.
+ *
+ *   Valid:   #define H5_VERS_SUBRELEASE ""
+ *   Valid:   #define H5_VERS_SUBRELEASE "-snap0"
+ *   Invalid: #define H5_VERS_SUBRELEASE -snap0
+ *
+ */
 #define H5_VERS_SUBRELEASE ""
+
+/* Derived version strings - automatically generated from the above */
 /**
- * Short version string
+ * Short version string - automatically derived from H5_VERS_MAJOR/MINOR/RELEASE/SUBRELEASE
+ *
+ * This macro uses C preprocessor string concatenation. The H5_VERS_MAJOR, H5_VERS_MINOR,
+ * and H5_VERS_RELEASE values are stringified and concatenated with dots, then concatenated
+ * with H5_VERS_SUBRELEASE (which must already be a string literal).
  */
-#define H5_VERS_STR "2.0.1"
+#define H5_VERS_STR_HELPER(major, minor, release)      #major "." #minor "." #release
+#define H5_VERS_STR_CONCAT(major, minor, release, sub) H5_VERS_STR_HELPER(major, minor, release) sub
+#define H5_VERS_STR                                    H5_VERS_STR_CONCAT(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE, H5_VERS_SUBRELEASE)
+
 /**
- * Full version string
+ * Full version string - automatically derived from H5_VERS_STR
  */
-#define H5_VERS_INFO "HDF5 library version: 2.0.1"
+#define H5_VERS_INFO "HDF5 library version: " H5_VERS_STR
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 

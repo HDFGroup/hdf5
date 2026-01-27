@@ -15,6 +15,102 @@
 
 # Function definitions
 #
+# Function to get version from H5public.h
+get_version()
+{
+    local major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | awk '{print $3}')
+    local minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
+    local release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
+    local subrelease=$(grep '^#define H5_VERS_SUBRELEASE' src/H5public.h | cut -d'"' -f2)
+
+    echo "${major}.${minor}.${release}${subrelease}"
+}
+
+# Function to set version in H5public.h
+# Usage: set_version "2.0.1-of20250116"
+set_version()
+{
+    if [ $# -ne 1 ]; then
+        echo "usage: set_version <version_string>"
+        return 1
+    fi
+
+    new_vers=$1
+
+    # Validate version string format
+    if ! echo "$new_vers" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._-]+)?$'; then
+        echo "Error: Invalid version format '$new_vers'. Expected format: major.minor.release[-subrelease]"
+        return 1
+    fi
+
+    # Parse version string (format: major.minor.release or major.minor.release-subrelease)
+    major=$(echo $new_vers | sed 's/^\([0-9]*\)\..*/\1/')
+    minor=$(echo $new_vers | sed 's/^[0-9]*\.\([0-9]*\)\..*/\1/')
+    release=$(echo $new_vers | sed 's/^[0-9]*\.[0-9]*\.\([0-9]*\).*/\1/')
+    # Note: subrelease includes the leading dash (e.g., "-snap0") to match H5_VERS_STR concatenation
+    subrelease=$(echo $new_vers | sed 's/^[0-9]*\.[0-9]*\.[0-9]*\(.*\)/\1/')
+
+    # If subrelease is same as new_vers, there was no subrelease part
+    if [ "$subrelease" = "$new_vers" ]; then
+        subrelease=""
+    fi
+
+    # Validate that all components were extracted
+    if [ -z "$major" ] || [ -z "$minor" ] || [ -z "$release" ]; then
+        echo "Error: Failed to parse version components from '$new_vers'"
+        echo "  major=$major, minor=$minor, release=$release, subrelease=$subrelease"
+        return 1
+    fi
+
+    # Verify H5public.h exists and has the expected defines
+    if [ ! -f src/H5public.h ]; then
+        echo "Error: src/H5public.h not found"
+        return 1
+    fi
+
+    for def in H5_VERS_MAJOR H5_VERS_MINOR H5_VERS_RELEASE H5_VERS_SUBRELEASE; do
+        if ! grep -q "^#define $def" src/H5public.h; then
+            echo "Error: #define $def not found in src/H5public.h"
+            return 1
+        fi
+    done
+
+    # Update H5public.h
+    # Note: H5_VERS_STR and H5_VERS_INFO are automatically derived from the base version macros
+    sed -i.bak \
+        -e "s/^\(#define H5_VERS_MAJOR[[:space:]]*\)[0-9]*/\1$major/" \
+        -e "s/^\(#define H5_VERS_MINOR[[:space:]]*\)[0-9]*/\1$minor/" \
+        -e "s/^\(#define H5_VERS_RELEASE[[:space:]]*\)[0-9]*/\1$release/" \
+        -e "s/^\(#define H5_VERS_SUBRELEASE[[:space:]]*\)\".*\"/\1\"$subrelease\"/" \
+        src/H5public.h
+
+    if [ $? -ne 0 ]; then
+        echo "Error: sed command failed"
+        mv src/H5public.h.bak src/H5public.h 2>/dev/null
+        return 1
+    fi
+
+    # Verify the changes were applied correctly
+    new_major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | sed 's/^#define H5_VERS_MAJOR[[:space:]]*\([0-9]*\).*/\1/')
+    new_minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | sed 's/^#define H5_VERS_MINOR[[:space:]]*\([0-9]*\).*/\1/')
+    new_release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | sed 's/^#define H5_VERS_RELEASE[[:space:]]*\([0-9]*\).*/\1/')
+    new_subrelease=$(grep '^#define H5_VERS_SUBRELEASE' src/H5public.h | sed 's/^#define H5_VERS_SUBRELEASE[[:space:]]*"\(.*\)".*/\1/')
+
+    if [ "$new_major" != "$major" ] || [ "$new_minor" != "$minor" ] || \
+       [ "$new_release" != "$release" ] || [ "$new_subrelease" != "$subrelease" ]; then
+        echo "Error: Version update verification failed"
+        echo "  Expected: major=$major, minor=$minor, release=$release, subrelease=$subrelease"
+        echo "  Got:      major=$new_major, minor=$new_minor, release=$new_release, subrelease=$new_subrelease"
+        mv src/H5public.h.bak src/H5public.h
+        return 1
+    fi
+
+    # Success - remove backup
+    rm -f src/H5public.h.bak
+    echo "Successfully updated version to $new_vers"
+    return 0
+}
+
 # Print Usage page
 USAGE()
 {
@@ -139,7 +235,7 @@ tar2zip()
 
 # Defaults
 DEST=releases
-VERS=`perl bin/h5vers`
+VERS=$(get_version)
 VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
@@ -156,7 +252,7 @@ RESTORE_VERSION()
         echo restoring version information back to $VERS_OLD
         rm -f config/lt_vers.am
         cp $tmpdir/lt_vers.am config/lt_vers.am
-        bin/h5vers -s $VERS_OLD
+        set_version $VERS_OLD
         VERS_OLD=
     fi
 }
@@ -219,10 +315,9 @@ if [ X$pmode = Xyes ]; then
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
     # Set version information to m.n.r-of$today.
-    # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-of$today
     echo Private release of $VERS
-    bin/h5vers -s $VERS
+    set_version $VERS
 fi
 
 if [ X$revmode = Xyes ]; then
@@ -236,12 +331,11 @@ if [ X$revmode = Xyes ]; then
     fi
     revision=`git rev-parse --short HEAD`
     # Set version information to m.n.r-r$revision.
-    # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-$revision
     echo Private release of $VERS
     HDF5_VERS=hdf5-$BRANCHNAME-$revision
     echo file base of $HDF5_VERS
-    bin/h5vers -s $VERS
+    set_version $VERS
     # use a generic directory name for revision releases
     HDF5_IN_VERS=hdfsrc
 else

@@ -1013,8 +1013,23 @@ done:
  * Purpose:     Given a reference to some object, determine a file name of the
  *              object located into.
  *
- * Return:      Non-negative length of the path on success / -1 on failure
+ * Description:
+ *              When 'buf' is non-NULL:
+ *                - if 'size' > 0: writes up to 'size' bytes into the buffer
+ *                  (including null terminator) and returns the actual length
+ *                  of the name (excluding null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
  *
+ *              When 'buf' is NULL: does not write anything regardless of 'size'
+ *              and returns the actual length of the name (excluding null terminator).
+ *
+ *              On error, the buffer is unchanged and the function returns
+ *              a negative value.
+ *
+ * Return:      Success:    The length of the name (excluding null terminator)
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1031,6 +1046,10 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     if (H5R__get_type((const H5R_ref_priv_t *)ref_ptr) <= H5R_BADTYPE ||
         H5R__get_type((const H5R_ref_priv_t *)ref_ptr) >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type");
+
+    /* If buffer size is zero, treat as length query and do not write, even a '\0' */
+    if (buf && size == 0)
+        buf = NULL;
 
     /* Get name */
     if (H5I_INVALID_HID == (loc_id = H5R__get_loc_id((const H5R_ref_priv_t *)ref_ptr))) {
@@ -1073,6 +1092,21 @@ done:
  * Purpose:     Given a reference to some object, determine a path to the
  *              object referenced in the file.
  *
+ * Description:
+ *              When 'buf' is non-NULL:
+ *                - if 'size' > 0: writes up to 'size' bytes into the buffer
+ *                  (including null terminator) and returns the actual length
+ *                  of the name (excluding null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
+ *
+ *              When 'buf' is NULL: does not write anything regardless of 'size'
+ *              and returns the actual length of the name (excluding null terminator).
+ *
+ *              On error, the buffer is unchanged and the function returns
+ *              a negative value.
+ *
  * Return:      Non-negative length of the path on success / -1 on failure
  *
  *-------------------------------------------------------------------------
@@ -1098,6 +1132,10 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type");
     if (rapl_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a property list");
+
+    /* If buffer size is zero, treat as length query and do not write, even a '\0' */
+    if (buf && size == 0)
+        buf = NULL;
 
     /* Retrieve loc_id from reference */
     if (H5I_INVALID_HID == (loc_id = H5R__get_loc_id((const H5R_ref_priv_t *)ref_ptr)))
@@ -1140,6 +1178,21 @@ done:
  *
  * Purpose:     Given a reference to some attribute, determine its name.
  *
+ * Description:
+ *              When 'buf' is non-NULL:
+ *                - if 'size' > 0: writes up to 'size' bytes into the buffer
+ *                  (including null terminator) and returns the actual length
+ *                  of the name (excluding null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
+ *
+ *              When 'buf' is NULL: does not write anything regardless of 'size'
+ *              and returns the actual length of the name (excluding null terminator).
+ *
+ *              On error, the buffer is unchanged and the function returns
+ *              a negative value.
+ *
  * Return:      Non-negative length of the path on success / -1 on failure
  *
  *-------------------------------------------------------------------------
@@ -1156,6 +1209,10 @@ H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference pointer");
     if (H5R__get_type((const H5R_ref_priv_t *)ref_ptr) != H5R_ATTR)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type");
+
+    /* If buffer size is zero, treat as length query and do not write, even a '\0' */
+    if (buf && size == 0)
+        buf = NULL;
 
     /* Get attribute name */
     if ((ret_value = H5R__get_attr_name((const H5R_ref_priv_t *)ref_ptr, buf, size)) < 0)

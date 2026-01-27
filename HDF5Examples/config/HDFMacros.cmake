@@ -173,15 +173,6 @@ macro (HDF_DIR_PATHS package_prefix)
     set (CMAKE_PREFIX_PATH ${ADDITIONAL_CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
   endif ()
 
-  #set the default debug suffix for all library targets
-  if(NOT CMAKE_DEBUG_POSTFIX)
-    if (WIN32)
-      set (CMAKE_DEBUG_POSTFIX "_D")
-    else ()
-      set (CMAKE_DEBUG_POSTFIX "_debug")
-    endif ()
-  endif ()
-
   SET_HDF_BUILD_TYPE()
 
   SET_HDF_OUTPUT_DIRS(${package_prefix})

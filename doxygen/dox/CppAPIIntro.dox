@@ -33,22 +33,20 @@ The C++ classes closely mirror the HDF5 C API modules:
 | H5F (Files) | H5::H5File | File access and management |
 | H5G (Groups) | H5::Group | Hierarchical organization |
 | H5P (Property Lists) | H5::PropList + subclasses | Configuration parameters |
-| H5L/H5O (Links/Objects) | H5::Location | Management of links and objects |
+| H5L/H5O (Links/Objects) | H5::H5Location | Management of links and objects |
 | H5E (Errors) | H5::Exception | Error reporting |
 
 \subsection cpp_examples Quick Start Examples
 
-- Creating groups and datasets: <a href="https://\CPPEXS/h5tutr_crtgrp.cpp">h5tutr_crtgrp.cpp</a> <a href="https://\CPPEXS/h5tutr_crtdat.cpp">h5tutr_crtdat.cpp</a>
-- Writing/Reading data <a href="https://\CPPEXS/h5tutr_rdwt.cpp">h5tutr_rdwt.cpp</a> <a href="https://\CPPEXS/h5tutr_subset.cpp">h5tutr_subset.cpp</a>
-- Working with attributes <a href="https://\CPPEXS/h5tutr_crtatt.cpp">h5tutr_crtatt.cpp</a>
-- Extendible datasets <a href="https://\CPPEXS/h5tutr_extend.cpp">h5tutr_extend.cpp</a>
-- Chunked/Compressed datasets <a href="https://\CPPEXS/h5tutr_cmprss.cpp">h5tutr_cmprss.cpp</a>
+- Creating groups and datasets: <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_crtgrp.cpp">h5tutr_crtgrp.cpp</a> <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_crtdat.cpp">h5tutr_crtdat.cpp</a>
+- Writing/Reading data <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_rdwt.cpp">h5tutr_rdwt.cpp</a> <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_subset.cpp">h5tutr_subset.cpp</a>
+- Working with attributes <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_crtatt.cpp">h5tutr_crtatt.cpp</a>
 
-See the See \ref LBExamples for additional examples.
+See the \ref LBExamples for additional examples.
 
 \subsection cpp_building Building Applications
 
-Please refer to the release_docs/INSTALL_CMake.txt file under the top directory of the HDF5 source code or <a href="https://\SRCURL/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt on GitHub for information about installing, building, and testing the C++ API.</a>
+Please refer to the release_docs/INSTALL_CMake.txt file under the top directory of the HDF5 source code or <a href="https://\SRCURL/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> on GitHub for information about installing, building, and testing the C++ API.
 
 
 <hr>

@@ -106,7 +106,11 @@ jobs:
         id: version
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          echo "SOURCE_TAG=$(bin/h5vers)" >> $GITHUB_OUTPUT
+          major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | awk '{print $3}')
+          minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
+          release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
+          subrelease=$(grep '^#define H5_VERS_SUBRELEASE' src/H5public.h | cut -d'"' -f2)
+          echo "SOURCE_TAG=${major}.${minor}.${release}${subrelease}" >> $GITHUB_OUTPUT
 
       - name: Set file base name
         id: set-file-base

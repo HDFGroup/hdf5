@@ -804,6 +804,7 @@ EXCLUDE_PATTERNS       = */fortran/test/* \
                          */hl/fortran/src/*.h \
                          */HDF5Examples/FORTRAN/* \
                          */sanitizer/* \
+                         */README.md \
                          */CONTRIBUTING.md \
                          */CHANGELOG.md \
                          */HISTORY-*.md
