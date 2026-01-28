@@ -1,4 +1,4 @@
-# <img src="Cmake_logo.svg" alt="Cmake logo" width=24> CMake Installations
+# CMake Installations
 
 CMake produces the following set of folders; bin, include, lib and share. The LICENSE and CHANGELOG.md file are placed in the share folder.
 

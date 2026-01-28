@@ -1962,13 +1962,15 @@ H5D_close(H5D_t *dataset)
          */
         dataset->shared->closing = true;
 
+        /* Free the data sieve buffer, if it's been allocated */
+        if (dataset->shared->cache.sieve.sieve_buf)
+            dataset->shared->cache.sieve.sieve_buf =
+                (unsigned char *)H5FL_BLK_FREE(sieve_buf, dataset->shared->cache.sieve.sieve_buf);
+
         /* Free cached information for each kind of dataset */
         switch (dataset->shared->layout.type) {
             case H5D_CONTIGUOUS:
-                /* Free the data sieve buffer, if it's been allocated */
-                if (dataset->shared->cache.contig.sieve_buf)
-                    dataset->shared->cache.contig.sieve_buf =
-                        (unsigned char *)H5FL_BLK_FREE(sieve_buf, dataset->shared->cache.contig.sieve_buf);
+                /* Nothing special to do */
                 break;
 
             case H5D_CHUNKED:
@@ -1991,6 +1993,7 @@ H5D_close(H5D_t *dataset)
                         H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
                     dataset->shared->cache.chunk.single_piece_info = NULL;
                 } /* end if */
+
                 break;
 
             case H5D_COMPACT:
@@ -2156,15 +2159,13 @@ H5D_mult_refresh_close(hid_t dset_id)
     assert(dataset->shared->fo_count > 0);
 
     if (dataset->shared->fo_count > 1) {
+        /* Free the data sieve buffer, if it's been allocated */
+        if (dataset->shared->cache.sieve.sieve_buf)
+            dataset->shared->cache.sieve.sieve_buf =
+                (unsigned char *)H5FL_BLK_FREE(sieve_buf, dataset->shared->cache.sieve.sieve_buf);
+
         /* Free cached information for each kind of dataset */
         switch (dataset->shared->layout.type) {
-            case H5D_CONTIGUOUS:
-                /* Free the data sieve buffer, if it's been allocated */
-                if (dataset->shared->cache.contig.sieve_buf)
-                    dataset->shared->cache.contig.sieve_buf =
-                        (unsigned char *)H5FL_BLK_FREE(sieve_buf, dataset->shared->cache.contig.sieve_buf);
-                break;
-
             case H5D_CHUNKED:
                 /* Check for skip list for iterating over chunks during I/O to close */
                 if (dataset->shared->cache.chunk.sel_chunks) {
@@ -2187,6 +2188,7 @@ H5D_mult_refresh_close(hid_t dset_id)
                 } /* end if */
                 break;
 
+            case H5D_CONTIGUOUS:
             case H5D_COMPACT:
             case H5D_VIRTUAL:
                 /* Nothing special to do (info freed in the layout destroy) */
@@ -3250,18 +3252,18 @@ H5D__flush_sieve_buf(H5D_t *dataset)
     assert(dataset);
 
     /* Flush the raw data buffer, if we have a dirty one */
-    if (dataset->shared->cache.contig.sieve_buf && dataset->shared->cache.contig.sieve_dirty) {
+    if (dataset->shared->cache.sieve.sieve_buf && dataset->shared->cache.sieve.sieve_dirty) {
         assert(dataset->shared->layout.type !=
                H5D_COMPACT); /* We should never have a sieve buffer for compact storage */
 
         /* Write dirty data sieve buffer to file */
         if (H5F_shared_block_write(
-                H5F_SHARED(dataset->oloc.file), H5FD_MEM_DRAW, dataset->shared->cache.contig.sieve_loc,
-                dataset->shared->cache.contig.sieve_size, dataset->shared->cache.contig.sieve_buf) < 0)
+                H5F_SHARED(dataset->oloc.file), H5FD_MEM_DRAW, dataset->shared->cache.sieve.sieve_loc,
+                dataset->shared->cache.sieve.sieve_size, dataset->shared->cache.sieve.sieve_buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
 
         /* Reset sieve buffer dirty flag */
-        dataset->shared->cache.contig.sieve_dirty = false;
+        dataset->shared->cache.sieve.sieve_dirty = false;
     } /* end if */
 
 done:

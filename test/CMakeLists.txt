@@ -375,6 +375,7 @@ set (H5_EXPRESS_TESTS
     rtree
     objcopy_ref
     objcopy
+    io_perf
 )
 
 set (H5_TESTS

@@ -10,37 +10,36 @@ projectscale monthly
 Project starts 2023-01-01
 
 [1.8] starts 2023-01-01 and lasts 5 weeks
-[1.8.23] happens 2023-01-31
+[1.8.23 (EOL)] happens 2023-01-31
 [1.8] is colored in #F76969
 
 [1.10] starts 2023-01-01 and lasts 39 weeks
 [1.10.10] happens 2023-03-31
-[1.10.11] happens 2023-09-30
-[1.10.11] displays on same row as [1.10.10]
+[1.10.11 (EOL)] happens 2023-09-30
+[1.10.11 (EOL)] displays on same row as [1.10.10]
 [1.10] is colored in #F6DD60
 
 [1.12] starts 2023-01-01 and lasts 48 weeks
-[1.12.3] happens 2023-11-30
+[1.12.3 (EOL)] happens 2023-11-30
 [1.12] is colored in #88CCEE
 
 [1.14] starts at 2023-01-01 and lasts 110 weeks
 [1.14.1] happens at 2023-04-30
 [1.14.2] happens at 2023-08-31
 [1.14.3] happens at 2023-10-31
-[1.14.4.2] happens at 2024-04-15
-[1.14.4.3] happens at 2024-05-22
 [1.14.5] happens at 2024-09-30
-[1.14.6] happens at 2025-01-30
+[1.14.6 (EOL)] happens at 2025-01-30
 [1.14.1] displays on same row as [1.14.1]
 [1.14.2] displays on same row as [1.14.1]
 [1.14.3] displays on same row as [1.14.1]
-[1.14.4.2] displays on same row as [1.14.1]
-[1.14.5] displays on same row as [1.14.1]
-[1.14.6] displays on same row as [1.14.1]
+[1.14.5] displays on same row as [1.14.1] 
+[1.14.6 (EOL)] displays on same row as [1.14.1]
 [1.14] is colored in #B187CF
 
-[2.0] starts at 2024-09-30 and lasts 64 weeks
+[2.0 Active] starts at 2024-09-30 and lasts 85 weeks
 [2.0.0] happens at 2025-09-30
-[2.0] is colored in #02BFA0
+[2.1.0] happens at 2026-1-30
+[2.1.0] displays on same row as [2.0.0]
+[2.0 Active] is colored in #02BFA0
 
 @endgantt

@@ -1,4 +1,4 @@
-HDF5 version 2.0.1 currently under development
+v2.1.0 --- January X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -21,7 +21,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.0.1
+# 🔆 Executive Summary: HDF5 Version 2.1.0
 
 ## Performance Enhancements:
 
@@ -45,7 +45,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
   
 ## Acknowledgements: 
 
-We would like to thank the many HDF5 community members who contributed to HDF5 2.0.
+We would like to thank the many HDF5 community members who contributed to this release of HDF5.
 
 # ⚠️ Breaking Changes
 
@@ -62,12 +62,12 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ### Added predefined datatypes for FP6 data
 
-   Predefined datatypes have been added for FP6 data in E2M3 and E3M2 formats (https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+   Predefined datatypes have been added for FP6 data in [E2M3 and E3M2 formats](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
 
    The following new macros have been added:
 
-    - H5T_FLOAT_F6E2M3
-    - H5T_FLOAT_F6E3M2
+   - `H5T_FLOAT_F6E2M3`
+   - `H5T_FLOAT_F6E3M2`
 
    These macros map to IDs of HDF5 datatypes representing a 6-bit floating-point datatype with 1 sign bit and either 2 exponent bits and 3 mantissa bits (E2M3 format) or 3 exponent bits and 2 mantissa bits (E3M2 format).
 
@@ -77,11 +77,11 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
 ### Added predefined datatype for FP4 data
 
-   A predefined datatype has been added for FP4 data in E2M1 format (https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+   A predefined datatype has been added for FP4 data in [E2M1 format](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
 
    The following new macro has been added:
 
-    - H5T_FLOAT_F4E2M1
+   - `H5T_FLOAT_F4E2M1`
 
    This macro maps to the ID of an HDF5 datatype representing a 4-bit floating-point datatype with 1 sign bit, 2 exponent bits and 1 mantissa bit.
 
@@ -111,6 +111,32 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed a double-free bug in H5D__chunk_copy
+
+   Fixed a double-free bug in the internal H5D__chunk_copy() function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
+
+   Fixes GitHub issues [#6123](https://github.com/HDFGroup/hdf5/issues/6123)
+                       [#6124](https://github.com/HDFGroup/hdf5/issues/6124)
+                       [#6125](https://github.com/HDFGroup/hdf5/issues/6125)
+                       [#6126](https://github.com/HDFGroup/hdf5/issues/6126)
+                       [#6133](https://github.com/HDFGroup/hdf5/issues/6133)
+### Fixes potential security issues
+
+   The get_name API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
+   These functions are now fixed to treat (buffer != NULL, size == 0) as a length-only query to eliminate Valgrind error of invalid write.
+
+### Fixed a performance issue with chunked dataset I/O
+
+   When dataset chunks are unable to be placed in the dataset chunk cache (for example, if a chunk
+   is too large), the library falls back to an alternative approach for I/O on dataset chunks. An
+   issue with the logic in this approach prevented chunked dataset I/O from making use of the library's
+   data sieve buffer I/O optimization functionality. For chunk shapes that are non-contiguous with
+   the memory layout of a buffer, this could result in severely degraded I/O performance, with the
+   worst-case behavior causing I/O to be performed on a single data element at a time.
+
+   The data sieve buffer functionality has been extended to cover the case of uncached chunks and
+   will be used as long as the underlying Virtual File Driver supports data sieving.
 
 ## Java Library
 
