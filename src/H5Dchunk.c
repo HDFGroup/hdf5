@@ -4823,7 +4823,9 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 H5_CHECKED_ASSIGN(chunk_nbytes, size_t, chunk_disk_size, hsize_t);
                 H5_CHECKED_ASSIGN(buf_alloc, size_t, chunk_disk_size, hsize_t);
 
-                /* Ideally we should allocate a buffer at least as large as chunk_size, to give the filter the opportunity to avoid doing a realloc when uncompressing. This causes problems now, however, and needs more investigation. -NAF */
+                /* Ideally we should allocate a buffer at least as large as chunk_size, to give the filter the
+                 * opportunity to avoid doing a realloc when uncompressing. This causes problems now, however,
+                 * and needs more investigation. -NAF */
 
                 /* Allocate chunk buffer */
                 if (NULL ==
