@@ -4749,12 +4749,12 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
         } /* end if */
     }     /* end if */
     else {
-        haddr_t chunk_addr;  /* Address of chunk on disk */
-        hsize_t chunk_alloc; /* Length of chunk on disk */
+        haddr_t chunk_addr;      /* Address of chunk on disk */
+        hsize_t chunk_disk_size; /* Length of chunk on disk */
 
         /* Save the chunk info so the cache stays consistent */
-        chunk_addr  = udata->chunk_block.offset;
-        chunk_alloc = udata->chunk_block.length;
+        chunk_addr      = udata->chunk_block.offset;
+        chunk_disk_size = udata->chunk_block.length;
 
         /* Check if we should disable filters on this chunk */
         if (pline->nused) {
@@ -4786,6 +4786,10 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
             }     /* end if */
         }         /* end if */
 
+        /* If the chunk on disk is unfiltered, verify the index returned the correct size for the chunk */
+        if (H5_UNLIKELY((chunk_disk_size != (hsize_t)chunk_size) && H5_addr_defined(chunk_addr) && (!old_pline || !old_pline->nused)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "incorrect chunk size returned from index for unfiltered chunk");
+
         if (relax) {
             /*
              * Not in the cache, but we're about to overwrite the whole thing
@@ -4810,23 +4814,30 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
             /* Check if the chunk exists on disk */
             if (H5_addr_defined(chunk_addr)) {
-                size_t my_chunk_alloc; /* Allocated buffer size */
-                size_t buf_alloc;      /* [Re-]allocated buffer size */
+                size_t chunk_nbytes; /* Length of the chunk in memory */
+                size_t buf_alloc;    /* [Re-]allocated chunk buffer size */
 
                 /* Assign above variables and check for overflow */
-                H5_CHECKED_ASSIGN(my_chunk_alloc, size_t, chunk_alloc, hsize_t);
-                H5_CHECKED_ASSIGN(buf_alloc, size_t, chunk_alloc, hsize_t);
+                H5_CHECKED_ASSIGN(chunk_nbytes, size_t, chunk_disk_size, hsize_t);
+                H5_CHECKED_ASSIGN(buf_alloc, size_t, chunk_disk_size, hsize_t);
 
                 /* Chunk size on disk isn't [likely] the same size as the final chunk
                  * size in memory, so allocate memory big enough. */
-                if (NULL == (chunk = H5D__chunk_mem_alloc(my_chunk_alloc,
+                if (chunk_size > buf_alloc)
+                    buf_alloc = chunk_size;
+
+                /* Allocate chunk buffer */
+                if (NULL == (chunk = H5D__chunk_mem_alloc(buf_alloc,
                                                           (udata->new_unfilt_chunk ? old_pline : pline))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for raw data chunk");
+
+                /* Read chunk from disk */
                 if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, chunk_addr,
-                                          my_chunk_alloc, chunk) < 0)
+                                          chunk_disk_size, chunk) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk");
 
+                /* Unfilter chunk */
                 if (old_pline && old_pline->nused) {
                     H5Z_EDC_t err_detect; /* Error detection info */
                     H5Z_cb_t  filter_cb;  /* I/O filter callback function */
@@ -4837,15 +4848,16 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                     if (H5CX_get_filter_cb(&filter_cb) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get I/O filter callback function");
 
+                    /* Perform filter pipeline */
                     if (H5Z_pipeline(old_pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), err_detect,
-                                     filter_cb, &my_chunk_alloc, &buf_alloc, &chunk) < 0)
+                                     filter_cb, &chunk_nbytes, &buf_alloc, &chunk) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, NULL, "data pipeline read failed");
 
                     /* Reallocate chunk if necessary */
                     if (udata->new_unfilt_chunk) {
                         void *tmp_chunk = chunk;
 
-                        if (NULL == (chunk = H5D__chunk_mem_alloc(my_chunk_alloc, pline))) {
+                        if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_nbytes, pline))) {
                             (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                         "memory allocation failed for raw data chunk");
@@ -4854,6 +4866,10 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                         (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
                     } /* end if */
                 }     /* end if */
+
+                /* Assert that the chunk is the correct size and the buffer is big enough */
+                assert(chunk_nbytes == chunk_size);
+                assert(buf_alloc >= chunk_size);
 
                 /* Increment # of cache misses */
                 rdcc->stats.nmisses++;
@@ -4864,8 +4880,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 /* Sanity check */
                 assert(fill->alloc_time != H5D_ALLOC_TIME_EARLY);
 
-                /* Chunk size on disk isn't [likely] the same size as the final chunk
-                 * size in memory, so allocate memory big enough. */
+                /* Allocate chunk buffer large enough to hold an unfiltered (in cache) chunk */
                 if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for raw data chunk");
@@ -4929,7 +4944,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
                 /* Initialize the new entry */
                 ent->chunk_block.offset = chunk_addr;
-                ent->chunk_block.length = chunk_alloc;
+                ent->chunk_block.length = chunk_disk_size;
                 ent->chunk_idx          = udata->chunk_idx;
                 H5MM_memcpy(ent->scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
                 H5_CHECKED_ASSIGN(ent->rd_count, hsize_t, chunk_size, size_t);

@@ -112,6 +112,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a potential buffer overflow
+
+   For unfiltered dataset chunks, the size on disk should be constant for all chunks in a dataset. In some cases the size of each chunk is stored even in this case where it can be inferred from the chunk dimensions and datatype. The code previously assumed this stored size was equal to the inferred size, leading to a mismatch in the expected and actual buffer size. Modified the library to throw an error if the size does not match the expected size.
+
+   Fixes CVE-2025-44904
+
 ### Fixed a double-free bug in H5D__chunk_copy
 
    Fixed a double-free bug in the internal H5D__chunk_copy() function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
