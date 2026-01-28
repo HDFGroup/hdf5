@@ -97,8 +97,8 @@ jobs:
 
       - name: Copy script files for the space (Windows)
         run: |
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake -Destination ${{ runner.workspace }}/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake -Destination ${{ runner.workspace }}/hdf5/
+          New-Item -ItemType SymbolicLink -Path ${{ runner.workspace }}/hdf5/CTestScript.cmake -Target ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          New-Item -ItemType SymbolicLink -Path ${{ runner.workspace }}/hdf5/HDF5config.cmake -Target ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
         shell: pwsh
 
       - name: List files for the hdf5 (Windows)
@@ -197,8 +197,8 @@ jobs:
 
       - name: Copy script files for the space (Linux)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
 
       - name: List files for the hdf5 (Linux)
         run: |
@@ -311,8 +311,8 @@ jobs:
 
       - name: Copy script files for the space (MacOS_latest)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
 
       # symlinks the compiler executables to a common location 
       - name: Setup GNU Fortran
@@ -432,8 +432,8 @@ jobs:
 
       - name: Copy script files for the space (Linux S3)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
 
       - name: List files for the hdf5 (Linux S3)
         run: |
@@ -539,8 +539,8 @@ jobs:
 
       - name: Copy script files for the space (Windows_intel)
         run: |
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake -Destination ${{ runner.workspace }}/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake -Destination ${{ runner.workspace }}/hdf5/
+          New-Item -ItemType SymbolicLink -Path ${{ runner.workspace }}/hdf5/CTestScript.cmake -Target ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          New-Item -ItemType SymbolicLink -Path ${{ runner.workspace }}/hdf5/HDF5config.cmake -Target ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
         shell: pwsh
 
       - name: List files for the hdf5 (Windows_intel)
@@ -646,8 +646,8 @@ jobs:
 
       - name: Copy script files for the space (Linux_intel)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
 
       - name: List files for the hdf5 (Linux_Linux)
         run: |
@@ -762,8 +762,8 @@ jobs:
 
       - name: Copy script files for the space (Linux_clang)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
 
       - name: List files for the hdf5 (Linux_clang)
         run: |

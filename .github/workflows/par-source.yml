@@ -115,8 +115,8 @@ jobs:
 
       - name: Copy script files for the space (OpenMPI)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
 
       - name: List files for the hdf5 (OpenMPI)
         run: |
@@ -237,8 +237,8 @@ jobs:
 
       - name: Copy script files for the space (MPICH)
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
 
       - name: List files for the hdf5 (MPICH)
         run: |
