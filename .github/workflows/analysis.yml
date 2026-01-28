@@ -271,8 +271,8 @@ jobs:
 
       - name: Copy script files for the space (Linux_Address)
         run: |
-        ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
-        ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
+          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
+          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
 
       - name: List files for the hdf5 (Linux_Address)
         run: |
