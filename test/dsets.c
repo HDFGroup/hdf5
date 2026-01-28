@@ -18191,7 +18191,6 @@ test_deflate_vlen(hid_t file)
     hid_t         dtype         = H5I_INVALID_HID; /* Datatype ID */
     const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
     const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
-    unsigned      cd_values[1]  = {0};             /* Parameters for vlen filter */
     const char   *wdata         = "test string";   /* Write buffer */
     char         *rdata         = NULL;            /* Read buffer */
 
