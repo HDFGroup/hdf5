@@ -7,13 +7,8 @@ if (NOT DEFINED FILE OR NOT DEFINED SOURCE)
   message(FATAL_ERROR "FILE and SOURCE must be defined")
 endif ()
 
-# Copy the source file
-file(COPY ${SOURCE} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-get_filename_component(filename ${SOURCE} NAME)
-set(temp_file "${CMAKE_CURRENT_BINARY_DIR}/${filename}")
-
-# Read the file
-file(READ ${temp_file} content HEX)
+# Read the source file directly
+file(READ ${SOURCE} content HEX)
 
 # Modify a byte in the middle of the file (before the signature)
 # This simulates tampering with the plugin binary

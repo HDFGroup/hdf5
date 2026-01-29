@@ -384,9 +384,16 @@ main(void)
     printf("========================================\n");
     printf("\n");
 
+    /* Initialize HDF5 library before using any HDF5 functions */
+    if (H5open() < 0) {
+        fprintf(stderr, "ERROR: Cannot initialize HDF5 library\n");
+        return EXIT_FAILURE;
+    }
+
     /* Set up environment for keystore */
     if (HDsetenv("HDF5_PLUGIN_KEYSTORE", TEST_KEYSTORE_DIR, 1) != 0) {
         fprintf(stderr, "ERROR: Cannot set HDF5_PLUGIN_KEYSTORE environment variable\n");
+        H5close();
         return EXIT_FAILURE;
     }
 
@@ -407,6 +414,9 @@ main(void)
     printf("Tests Failed: %d\n", tests_failed);
     printf("Total Tests:  %d\n", tests_passed + tests_failed);
     printf("\n");
+
+    /* Clean up HDF5 library resources */
+    H5close();
 
     if (tests_failed == 0) {
         printf("ALL TESTS PASSED!\n");
