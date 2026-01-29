@@ -32,6 +32,11 @@ jobs:
     name: "Ubuntu GCC Coverage"
     runs-on: ubuntu-latest
     steps:
+    - name: Get Actions
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        sparse-checkout: .github/actions
+
     - name: Install Dependencies (Linux_coverage)
       run: |
         sudo apt update
@@ -67,10 +72,10 @@ jobs:
     - name: Uncompress source (Linux_coverage)
       run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-    - name: Link script files for the space (Linux_coverage)
-      run: |
-        ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
-        ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
+    - name: Symlink script files for the space (Linux_coverage)
+      uses: ./.github/actions/symlink-ctest-scripts
+      with:
+        source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
     - name: List files for the hdf5 (Linux_coverage)
       run: |
@@ -128,6 +133,11 @@ jobs:
     name: "Ubuntu Clang LeakSanitizer"
     runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
       - name: Install Dependencies (Linux_Leak)
         run: |
           sudo apt update
@@ -168,10 +178,10 @@ jobs:
       - name: Uncompress source (Linux_Leak)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Link script files for the space (Linux_Leak)
-        run: |
-          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
-          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
+      - name: Symlink script files for the space (Linux_Leak)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_Leak)
         run: |
@@ -229,6 +239,11 @@ jobs:
     name: "Ubuntu Clang AddressSanitizer"
     runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
       - name: Install Dependencies (Linux_Address)
         run: |
           sudo apt update
@@ -269,10 +284,10 @@ jobs:
       - name: Uncompress source (Linux_Address)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Link script files for the space (Linux_Address)
-        run: |
-          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
-          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
+      - name: Symlink script files for the space (Linux_Address)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_Address)
         run: |
@@ -330,6 +345,11 @@ jobs:
     name: "Ubuntu Clang UndefinedBehaviorSanitizer"
     runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
       - name: Install Dependencies (Linux_UndefinedBehavior)
         run: |
           sudo apt update
@@ -370,10 +390,10 @@ jobs:
       - name: Uncompress source (Linux_UndefinedBehavior)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (Linux_UndefinedBehavior)
-        run: |
-          ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
-          ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
+      - name: Symlink script files for the space (Linux_UndefinedBehavior)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_UndefinedBehavior)
         run: |
