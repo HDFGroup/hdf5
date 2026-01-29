@@ -19,6 +19,9 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+
+/* Declare as friend of H5PL package to access package-private functions */
+#define H5PL_FRIEND
 #include "H5PLpkg.h"   /* For H5PL__verify_signature_appended() */
 #include "H5PLsig.h"   /* For signature structures */
 #include "H5MMprivate.h"
