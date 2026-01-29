@@ -12,12 +12,14 @@ runs:
       if: runner.os != 'Windows'
       shell: bash
       run: |
-        ln -s ${{ github.workspace }}/${{ inputs.source-base }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5/CTestScript.cmake
-        ln -s ${{ github.workspace }}/${{ inputs.source-base }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5/HDF5config.cmake
+        mkdir -p ${{ runner.workspace }}/hdf5
+        ln -sf ${{ github.workspace }}/${{ inputs.source-base }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5/CTestScript.cmake
+        ln -sf ${{ github.workspace }}/${{ inputs.source-base }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5/HDF5config.cmake
 
     - name: Create symlinks (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        New-Item -ItemType SymbolicLink -Path ${{ runner.workspace }}/hdf5/CTestScript.cmake -Target ${{ github.workspace }}/${{ inputs.source-base }}/config/cmake/scripts/CTestScript.cmake
-        New-Item -ItemType SymbolicLink -Path ${{ runner.workspace }}/hdf5/HDF5config.cmake -Target ${{ github.workspace }}/${{ inputs.source-base }}/config/cmake/scripts/HDF5config.cmake
+        New-Item -ItemType Directory -Path ${{ runner.workspace }}/hdf5 -Force | Out-Null
+        New-Item -ItemType SymbolicLink -Path ${{ runner.workspace }}/hdf5/CTestScript.cmake -Target ${{ github.workspace }}/${{ inputs.source-base }}/config/cmake/scripts/CTestScript.cmake -Force
+        New-Item -ItemType SymbolicLink -Path ${{ runner.workspace }}/hdf5/HDF5config.cmake -Target ${{ github.workspace }}/${{ inputs.source-base }}/config/cmake/scripts/HDF5config.cmake -Force
