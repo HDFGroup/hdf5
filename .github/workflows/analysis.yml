@@ -30,7 +30,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc + coverage
   #
     name: "Ubuntu GCC Coverage"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
     - name: Install Dependencies (Linux_coverage)
       run: |
@@ -67,7 +67,7 @@ jobs:
     - name: Uncompress source (Linux_coverage)
       run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-    - name: Copy script files for the space (Linux_coverage)
+    - name: Link script files for the space (Linux_coverage)
       run: |
         ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
         ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
@@ -126,7 +126,7 @@ jobs:
   # Linux (Ubuntu) w/ clang + LeakSanitizer
   #
     name: "Ubuntu Clang LeakSanitizer"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies (Linux_Leak)
         run: |
@@ -168,7 +168,7 @@ jobs:
       - name: Uncompress source (Linux_Leak)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (Linux_Leak)
+      - name: Link script files for the space (Linux_Leak)
         run: |
           ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
           ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
@@ -227,7 +227,7 @@ jobs:
   # Linux (Ubuntu) w/ clang + AddressSanitizer
   #
     name: "Ubuntu Clang AddressSanitizer"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies (Linux_Address)
         run: |
@@ -269,7 +269,7 @@ jobs:
       - name: Uncompress source (Linux_Address)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (Linux_Address)
+      - name: Link script files for the space (Linux_Address)
         run: |
           ln -s  ${{ runner.workspace }}/hdf5//CTestScript.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake
           ln -s ${{ runner.workspace }}/hdf5/HDF5config.cmake ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake
@@ -328,7 +328,7 @@ jobs:
   # Linux (Ubuntu) w/ clang + UndefinedBehaviorSanitizer
   #
     name: "Ubuntu Clang UndefinedBehaviorSanitizer"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies (Linux_UndefinedBehavior)
         run: |
