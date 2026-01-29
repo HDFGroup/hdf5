@@ -1388,11 +1388,18 @@ set (_PKG_CONFIG_REQUIRES_PRIVATE)
 function(resolve_imported_target target_name output_var)
   set(resolved "")
 
+  if (HDF5_ENABLE_PKG_CONFIG_DEBUG)
+    message(STATUS "Resolving imported target: ${target_name}")
+  endif()
+
   # Strategy 1: Try IMPORTED_LIBNAME (most reliable)
   if (TARGET ${target_name})
     get_target_property(imported_libname ${target_name} IMPORTED_LIBNAME)
     if (imported_libname AND NOT imported_libname MATCHES "NOTFOUND")
       set(resolved "-l${imported_libname}")
+      if (HDF5_ENABLE_PKG_CONFIG_DEBUG)
+        message(STATUS "  Strategy 1 (IMPORTED_LIBNAME): ${resolved}")
+      endif()
     endif()
   endif()
 
@@ -1408,10 +1415,42 @@ function(resolve_imported_target target_name output_var)
     endif()
 
     if (target_location AND NOT target_location MATCHES "NOTFOUND")
-      get_filename_component(lib_filename ${target_location} NAME_WE)
-      # Remove 'lib' prefix if present (Unix convention)
-      string(REGEX REPLACE "^lib" "" lib_filename "${lib_filename}")
-      set(resolved "-l${lib_filename}")
+      if (HDF5_ENABLE_PKG_CONFIG_DEBUG)
+        message(STATUS "  IMPORTED_LOCATION: ${target_location}")
+      endif()
+
+      # Check if this is an absolute path to a static library
+      # Static libraries need special handling for pkg-config
+      if (IS_ABSOLUTE "${target_location}")
+        get_filename_component(lib_ext ${target_location} EXT)
+
+        # For static libraries (.a on Unix, .lib on Windows), use full path
+        # This prevents linker from finding wrong version in standard paths
+        if (lib_ext MATCHES "\\.(a|lib)$")
+          set(resolved "${target_location}")
+          if (HDF5_ENABLE_PKG_CONFIG_DEBUG)
+            message(STATUS "  Strategy 2 (static lib full path): ${resolved}")
+          endif()
+        else()
+          # For shared libraries, extract library name and use -l flag
+          # This allows linker to find library via standard search paths
+          get_filename_component(lib_filename ${target_location} NAME_WE)
+          # Remove 'lib' prefix if present (Unix convention)
+          string(REGEX REPLACE "^lib" "" lib_filename "${lib_filename}")
+          set(resolved "-l${lib_filename}")
+          if (HDF5_ENABLE_PKG_CONFIG_DEBUG)
+            message(STATUS "  Strategy 2 (shared lib): ${resolved}")
+          endif()
+        endif()
+      else()
+        # Relative path or library name - use -l flag
+        get_filename_component(lib_filename ${target_location} NAME_WE)
+        string(REGEX REPLACE "^lib" "" lib_filename "${lib_filename}")
+        set(resolved "-l${lib_filename}")
+        if (HDF5_ENABLE_PKG_CONFIG_DEBUG)
+          message(STATUS "  Strategy 2 (relative path): ${resolved}")
+        endif()
+      endif()
     endif()
   endif()
 
@@ -1423,6 +1462,18 @@ function(resolve_imported_target target_name output_var)
       set(resolved "-lcrypto")
     elseif (target_name STREQUAL "Threads::Threads")
       set(resolved "-lpthread")
+    endif()
+
+    if (resolved AND HDF5_ENABLE_PKG_CONFIG_DEBUG)
+      message(STATUS "  Strategy 3 (hardcoded mapping): ${resolved}")
+    endif()
+  endif()
+
+  if (HDF5_ENABLE_PKG_CONFIG_DEBUG)
+    if (resolved)
+      message(STATUS "  Final result: ${resolved}")
+    else()
+      message(WARNING "  Could not resolve target ${target_name}")
     endif()
   endif()
 

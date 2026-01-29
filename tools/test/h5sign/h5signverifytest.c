@@ -382,7 +382,7 @@ main(void)
     printf("\n");
 
     /* Set up environment for keystore */
-    if (setenv("HDF5_PLUGIN_KEYSTORE", TEST_KEYSTORE_DIR, 1) != 0) {
+    if (HDsetenv("HDF5_PLUGIN_KEYSTORE", TEST_KEYSTORE_DIR, 1) != 0) {
         fprintf(stderr, "ERROR: Cannot set HDF5_PLUGIN_KEYSTORE environment variable\n");
         return EXIT_FAILURE;
     }

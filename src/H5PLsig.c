@@ -63,6 +63,17 @@ static size_t                 H5PL_keystore_count_g       = 0;
 static size_t                 H5PL_keystore_capacity_g    = 0;
 static bool                   H5PL_keystore_initialized_g = false;
 
+/* Revocation list for blocking specific signatures */
+#define H5PL_SIGNATURE_HASH_SIZE 32 /* SHA-256 = 32 bytes */
+typedef struct H5PL_revoked_signature_t {
+    unsigned char hash[H5PL_SIGNATURE_HASH_SIZE]; /* SHA-256 hash of signature */
+} H5PL_revoked_signature_t;
+
+static H5PL_revoked_signature_t *H5PL_revoked_sigs_g             = NULL;
+static size_t                    H5PL_revoked_sigs_count_g       = 0;
+static size_t                    H5PL_revoked_sigs_capacity_g    = 0;
+static bool                      H5PL_revoked_sigs_initialized_g = false;
+
 /* Signature verification cache entry */
 typedef struct H5PL_signature_cache_entry_t {
     char  *path;     /* Plugin file path */
@@ -671,12 +682,23 @@ H5PL__init_keystore(void)
     H5PL_keystore_capacity_g    = 0;
     H5PL_keystore_initialized_g = true;
 
+    /* Initialize revocation list */
+    H5PL_revoked_sigs_g             = NULL;
+    H5PL_revoked_sigs_count_g       = 0;
+    H5PL_revoked_sigs_capacity_g    = 0;
+    H5PL_revoked_sigs_initialized_g = true;
+
     /* 1. Check environment variable (highest priority) */
     if (NULL != (env_keystore = getenv("HDF5_PLUGIN_KEYSTORE"))) {
         if (H5PL__load_keys_from_directory(env_keystore) < 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s",
                         env_keystore);
         keys_loaded = true;
+
+        /* Load revoked signatures from same directory */
+        if (H5PL__load_revoked_signatures(env_keystore) < 0) {
+            /* Non-fatal - continue even if revoked signatures fail to load */
+        }
     }
 
 /* 2. Check CMake-configured directory */
@@ -691,6 +713,11 @@ H5PL__init_keystore(void)
             }
             else {
                 keys_loaded = true;
+
+                /* Load revoked signatures from same directory */
+                if (H5PL__load_revoked_signatures(H5PL_KEYSTORE_DIR) < 0) {
+                    /* Non-fatal - continue even if revoked signatures fail to load */
+                }
             }
         }
     }
@@ -746,6 +773,9 @@ H5PL__init_keystore(void)
             fprintf(stderr, "  [%zu] %s\n", i + 1, H5PL_keystore_g[i].source);
         }
     }
+    if (H5PL_revoked_sigs_count_g > 0) {
+        fprintf(stderr, "  Revoked signatures loaded: %zu\n", H5PL_revoked_sigs_count_g);
+    }
 #endif
 
 done:
@@ -767,6 +797,154 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__init_keystore() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__load_revoked_signatures
+ *
+ * Purpose:     Load revoked signature hashes from blocklist file
+ *
+ *              File format: One SHA-256 hash per line (64 hex chars)
+ *              Comments start with '#', empty lines ignored
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__load_revoked_signatures(const char *keystore_dir)
+{
+    char    filepath[4096];
+    FILE   *fp        = NULL;
+    char    line[256];
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(keystore_dir);
+
+    /* Build path to revoked signatures file */
+    if (snprintf(filepath, sizeof(filepath), "%s/revoked_signatures.txt", keystore_dir) >= (int)sizeof(filepath))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "revoked signatures file path too long");
+
+    /* Try to open revoked signatures file (optional - not an error if missing) */
+    if (NULL == (fp = fopen(filepath, "r"))) {
+        /* File doesn't exist - not an error, just means no revoked signatures */
+        HGOTO_DONE(SUCCEED);
+    }
+
+    /* Read file line by line */
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        unsigned char hash[H5PL_SIGNATURE_HASH_SIZE];
+        size_t        line_len;
+        char         *trimmed;
+
+        /* Trim whitespace */
+        trimmed = line;
+        while (*trimmed == ' ' || *trimmed == '\t')
+            trimmed++;
+
+        line_len = strlen(trimmed);
+        while (line_len > 0 && (trimmed[line_len - 1] == '\n' || trimmed[line_len - 1] == '\r' ||
+                                 trimmed[line_len - 1] == ' ' || trimmed[line_len - 1] == '\t')) {
+            trimmed[line_len - 1] = '\0';
+            line_len--;
+        }
+
+        /* Skip empty lines and comments */
+        if (line_len == 0 || trimmed[0] == '#')
+            continue;
+
+        /* Parse hex string (must be exactly 64 hex characters for SHA-256) */
+        if (line_len != H5PL_SIGNATURE_HASH_SIZE * 2) {
+            fprintf(stderr, "WARNING: Ignoring invalid revoked signature hash (expected 64 hex chars): %s\n",
+                    trimmed);
+            continue;
+        }
+
+        /* Convert hex string to bytes */
+        for (size_t i = 0; i < H5PL_SIGNATURE_HASH_SIZE; i++) {
+            int byte;
+            if (sscanf(trimmed + (i * 2), "%2x", &byte) != 1) {
+                fprintf(stderr, "WARNING: Invalid hex in revoked signature hash: %s\n", trimmed);
+                goto continue_loop;
+            }
+            hash[i] = (unsigned char)byte;
+        }
+
+        /* Expand revoked signatures array if needed */
+        if (H5PL_revoked_sigs_count_g >= H5PL_revoked_sigs_capacity_g) {
+            size_t new_capacity = H5PL_revoked_sigs_capacity_g == 0 ? 8 : H5PL_revoked_sigs_capacity_g * 2;
+            H5PL_revoked_signature_t *new_array =
+                (H5PL_revoked_signature_t *)H5MM_realloc(H5PL_revoked_sigs_g,
+                                                          new_capacity * sizeof(H5PL_revoked_signature_t));
+
+            if (NULL == new_array)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot expand revoked signatures array");
+
+            H5PL_revoked_sigs_g          = new_array;
+            H5PL_revoked_sigs_capacity_g = new_capacity;
+        }
+
+        /* Add hash to revoked list */
+        memcpy(H5PL_revoked_sigs_g[H5PL_revoked_sigs_count_g].hash, hash, H5PL_SIGNATURE_HASH_SIZE);
+        H5PL_revoked_sigs_count_g++;
+
+    continue_loop:
+        continue;
+    }
+
+done:
+    if (fp)
+        fclose(fp);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__load_revoked_signatures() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__is_signature_revoked
+ *
+ * Purpose:     Check if a signature hash is in the revocation list
+ *
+ * Return:      true if revoked, false otherwise
+ *-------------------------------------------------------------------------
+ */
+static bool
+H5PL__is_signature_revoked(const unsigned char *signature, size_t signature_len)
+{
+    unsigned char hash[H5PL_SIGNATURE_HASH_SIZE];
+    EVP_MD_CTX   *mdctx     = NULL;
+    bool          ret_value = false;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    assert(signature);
+
+    /* Compute SHA-256 hash of signature */
+    if (NULL == (mdctx = EVP_MD_CTX_new()))
+        HGOTO_DONE(false);
+
+    if (1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL))
+        HGOTO_DONE(false);
+
+    if (1 != EVP_DigestUpdate(mdctx, signature, signature_len))
+        HGOTO_DONE(false);
+
+    if (1 != EVP_DigestFinal_ex(mdctx, hash, NULL))
+        HGOTO_DONE(false);
+
+    /* Check if hash is in revoked list */
+    for (size_t i = 0; i < H5PL_revoked_sigs_count_g; i++) {
+        if (memcmp(hash, H5PL_revoked_sigs_g[i].hash, H5PL_SIGNATURE_HASH_SIZE) == 0) {
+            ret_value = true;
+            HGOTO_DONE(true);
+        }
+    }
+
+done:
+    if (mdctx)
+        EVP_MD_CTX_free(mdctx);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__is_signature_revoked() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__check_signature_cache
@@ -1015,9 +1193,34 @@ H5PL__verify_signature_appended(const char *plugin_path)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "cannot initialize keystore");
     }
 
+    /* Check if signature is revoked (blocklist) */
+    if (H5PL__is_signature_revoked(signature, footer.signature_length)) {
+        /* Signature is in revocation list - reject immediately */
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "plugin signature is revoked (blocklisted)\n"
+                    "  Plugin: %s\n"
+                    "  This specific plugin version has been revoked and will not be loaded\n"
+                    "  Reason: Signature hash found in revocation list\n"
+                    "\n"
+                    "Action required:\n"
+                    "  - Remove this plugin from your system\n"
+                    "  - Contact plugin developer for updated version\n"
+                    "  - Check HDF5_PLUGIN_KEYSTORE/revoked_signatures.txt for details",
+                    plugin_path);
+    }
+
     /* Must have at least one key */
     if (H5PL_keystore_count_g == 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore is empty - no keys available for verification");
+
+    /* Allocate buffer for binary data (read once, verify with all keys) */
+    if (NULL == (binary_data = (unsigned char *)H5MM_malloc(binary_size)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot allocate binary data buffer (%zu bytes)",
+                    binary_size);
+
+    /* Read binary data once for multi-key verification (optimization) */
+    if (H5PL__read_file_data(fd, 0, binary_data, binary_size, plugin_path) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read binary data for verification");
 
     /* Try verifying with each key in keystore (OR logic - first match wins) */
     {
@@ -1066,52 +1269,18 @@ H5PL__verify_signature_appended(const char *plugin_path)
                 continue;
             }
 
-            /* Hash binary data in chunks */
-#define H5PL_HASH_CHUNK_SIZE ((size_t)(64 * 1024))
+            /* Hash binary data (already loaded in memory) */
+            if (1 != EVP_DigestVerifyUpdate(mdctx, binary_data, binary_size)) {
+                /* Track failure for diagnostics */
+                keys_update_failed++;
+                if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
+                    first_failure_reason = H5PL_VERIFY_REASON_UPDATE_FAILED;
 
-            /* Allocate chunk buffer */
-            if (binary_data == NULL) {
-                if (NULL == (binary_data = (unsigned char *)H5MM_malloc(H5PL_HASH_CHUNK_SIZE)))
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot allocate hash chunk buffer");
-            }
-
-            /* Process binary data in chunks */
-            {
-                size_t  remaining      = binary_size;
-                HDoff_t current_offset = 0;
-                bool    hash_ok        = true;
-
-                while (remaining > 0) {
-                    size_t chunk_size = (remaining > H5PL_HASH_CHUNK_SIZE) ? H5PL_HASH_CHUNK_SIZE : remaining;
-
-                    /* Read chunk from file */
-                    if (H5PL__read_file_data(fd, current_offset, binary_data, chunk_size, plugin_path) < 0)
-                        HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL,
-                                    "cannot read binary chunk at offset %llu",
-                                    (unsigned long long)current_offset);
-
-                    /* Update hash with chunk data */
-                    if (1 != EVP_DigestVerifyUpdate(mdctx, binary_data, chunk_size)) {
-                        hash_ok = false;
-                        break;
-                    }
-
-                    remaining -= chunk_size;
-                    current_offset += (HDoff_t)chunk_size;
-                }
-
-                if (!hash_ok) {
-                    /* Track failure for diagnostics */
-                    keys_update_failed++;
-                    if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                        first_failure_reason = H5PL_VERIFY_REASON_UPDATE_FAILED;
-
-                    /* Clean up and try next key */
-                    EVP_MD_CTX_free(mdctx);
-                    mdctx = NULL;
-                    ERR_clear_error();
-                    continue;
-                }
+                /* Clean up and try next key */
+                EVP_MD_CTX_free(mdctx);
+                mdctx = NULL;
+                ERR_clear_error();
+                continue;
             }
 
             /* Finalize verification */
@@ -1142,8 +1311,6 @@ H5PL__verify_signature_appended(const char *plugin_path)
             /* Clear OpenSSL errors before trying next key */
             ERR_clear_error();
         }
-
-#undef H5PL_HASH_CHUNK_SIZE
 
         /* Close file now that we're done reading */
         HDclose(fd);
