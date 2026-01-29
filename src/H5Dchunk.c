@@ -6897,8 +6897,10 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     }
 
     /* If the chunk on disk is unfiltered, verify the index returned the correct size for the chunk */
-    if (H5_UNLIKELY((nbytes != udata->src_chunk_size) && H5_addr_defined(chunk_rec->chunk_addr) && !must_filter))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, H5_ITER_ERROR, "incorrect chunk size returned from index for unfiltered chunk");
+    if (H5_UNLIKELY((nbytes != udata->src_chunk_size) && H5_addr_defined(chunk_rec->chunk_addr) &&
+                    !must_filter))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, H5_ITER_ERROR,
+                    "incorrect chunk size returned from index for unfiltered chunk");
 
     /* Check parameter for type conversion */
     if (udata->do_convert) {
@@ -6987,7 +6989,8 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* Make sure the chunk is the correct size after being unfiltered */
         if (H5_UNLIKELY(nbytes != udata->src_chunk_size))
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, H5_ITER_ERROR, "chunk size is incorrect after being unfiltered");
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, H5_ITER_ERROR,
+                        "chunk size is incorrect after being unfiltered");
     } /* end if */
 
     /* Perform datatype conversion, if necessary */
@@ -7184,12 +7187,12 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
 
     /* If there's a VLEN source datatype, set up type conversion information */
     if (H5T_detect_class(dt_src, H5T_VLEN, false) > 0) {
-        size_t   mem_dt_size; /* Memory datatype size */
-        size_t   tmp_dt_size; /* Temp. datatype size */
-        size_t   max_dt_size; /* Max datatype size */
+        size_t   mem_dt_size;     /* Memory datatype size */
+        size_t   tmp_dt_size;     /* Temp. datatype size */
+        size_t   max_dt_size;     /* Max datatype size */
         size_t   max_dst_dt_size; /* Max destination atatype size */
-        hsize_t  buf_dim;     /* Dimension for buffer */
-        uint64_t nelmts_64;   /* nelmts as a uint64_t */
+        hsize_t  buf_dim;         /* Dimension for buffer */
+        uint64_t nelmts_64;       /* nelmts as a uint64_t */
         unsigned u;
 
         /* create a memory copy of the variable-length datatype */
@@ -7218,7 +7221,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
         max_dt_size = MAX(max_dt_size, mem_dt_size);
         if (0 == (tmp_dt_size = H5T_get_size(dt_dst)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size");
-        max_dt_size = MAX(max_dt_size, tmp_dt_size);
+        max_dt_size     = MAX(max_dt_size, tmp_dt_size);
         max_dst_dt_size = MAX(max_dst_dt_size, tmp_dt_size);
 
         /* Compute the number of elements per chunk */
@@ -7253,7 +7256,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
         } /* end if */
 
         H5_CHECKED_ASSIGN(buf_size, size_t, layout_src->u.chunk.size, hsize_t);
-        bkg_size = buf_size;
+        bkg_size         = buf_size;
         reclaim_buf_size = 0;
     } /* end else */
 
