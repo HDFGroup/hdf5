@@ -4856,7 +4856,8 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
                     /* Make sure the chunk is the correct size after being unfiltered */
                     if (chunk_nbytes != chunk_size)
-                        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "chunk size is incorrect after being unfiltered");
+                        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
+                                    "chunk size is incorrect after being unfiltered");
 
                     /* Reallocate chunk if necessary */
                     if (udata->new_unfilt_chunk) {
