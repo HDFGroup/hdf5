@@ -24,10 +24,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions            */
-#include "H5Eprivate.h" /* Error handling               */
-#include "H5PLpkg.h"    /* Plugin                       */
-#include "H5Zprivate.h" /* Filter pipeline              */
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Eprivate.h"  /* Error handling               */
+#include "H5PLpkg.h"     /* Plugin                       */
+#include "H5Zprivate.h"  /* Filter pipeline              */
+#include "H5CXprivate.h" /* API Contexts                 */
+#ifdef H5_HAVE_PARALLEL
+#include "H5FDmpio.h"   /* MPI I/O file driver          */
+#include "H5Fprivate.h" /* File access                  */
+#endif
 
 /****************/
 /* Local Macros */
@@ -40,6 +45,10 @@
 /********************/
 /* Local Prototypes */
 /********************/
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+static herr_t H5PL__verify_plugin_signature(const char *path);
+#endif
 
 /*********************/
 /* Package Variables */
@@ -195,6 +204,12 @@ H5PL_term_package(void)
         if (H5PL__close_path_table() < 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing search path table");
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+        /* Clean up cached signature verification resources */
+        if (H5PL__cleanup_signature_cache() < 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem cleaning up signature cache");
+#endif
+
         /* Mark the interface as uninitialized */
         if (0 == ret_value)
             H5_PKG_INIT_VAR = false;
@@ -279,6 +294,40 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_load() */
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__verify_plugin_signature
+ *
+ * Purpose:     Verify plugin digital signature
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__verify_plugin_signature(const char *path)
+{
+    herr_t verify_result = SUCCEED;
+    herr_t ret_value     = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Check args */
+    assert(path);
+
+#ifdef H5_HAVE_PARALLEL
+    /* Each rank verifies independently */
+    verify_result = H5PL__verify_signature_appended(path);
+#else
+    verify_result = H5PL__verify_signature_appended(path);
+#endif
+
+    if (verify_result < 0)
+        ret_value = FAIL;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__verify_plugin_signature() */
+#endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__open
  *
@@ -339,6 +388,12 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     *plugin_info = NULL;
     if (plugin_type)
         *plugin_type = H5PL_TYPE_ERROR;
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    /* Verify plugin signature before loading */
+    if (H5PL__verify_plugin_signature(path) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "plugin signature verification failed for: %s", path);
+#endif
 
     /* There are different reasons why a library can't be open, e.g. wrong architecture.
      * If we can't open the library, just return.
@@ -453,7 +508,6 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
                     *plugin_type = H5PL_TYPE_VFD;
                 *plugin_info = cls;
             }
-
             break;
         }
 

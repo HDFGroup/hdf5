@@ -156,4 +156,10 @@ H5_DLL herr_t H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_itera
 H5_DLL herr_t H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, bool *found /*out*/,
                                               const void **plugin_info /*out*/);
 
+/* Digital signature verification */
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+H5_DLL herr_t H5PL__verify_signature_appended(const char *plugin_path);
+H5_DLL herr_t H5PL__cleanup_signature_cache(void);
+#endif
+
 #endif /* H5PLpkg_H */

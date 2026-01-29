@@ -38,6 +38,9 @@ jobs:
     runs-on: windows-11-arm
     if: ${{ inputs.build_mode != 'Debug' }}
     steps:
+      - name: Check OpenSSL Version (Windows)
+        run: openssl version
+
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:

@@ -1001,6 +1001,24 @@ if (BUILD_SHARED_LIBS)
   if ("H5PLUGIN-filter_plugin" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES DISABLED true)
   endif ()
+
+  # Add plugin signature verification test (only when signature verification is enabled)
+  if (HDF5_REQUIRE_SIGNED_PLUGINS)
+    add_test (NAME H5PLUGIN-signature-verification COMMAND $<TARGET_FILE:test_plugin_signature>)
+    if (WIN32)
+      set (H5SIGN_PATH "${CMAKE_TEST_OUTPUT_DIRECTORY};$ENV{PATH}")
+    else ()
+      set (H5SIGN_PATH "${CMAKE_TEST_OUTPUT_DIRECTORY}:$ENV{PATH}")
+    endif ()
+    set_tests_properties (H5PLUGIN-signature-verification PROPERTIES
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR};HDF5_TEST_PRIVATE_KEY=${HDF5_TEST_BINARY_DIR}/private.pem;PATH=${H5SIGN_PATH};${CROSSCOMPILING_PATH}"
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+        LABELS "H5PLUGIN"
+    )
+    if ("H5PLUGIN-signature-verification" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5PLUGIN-signature-verification PROPERTIES DISABLED true)
+    endif ()
+  endif ()
 endif ()
 
 option (HDF5_TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
