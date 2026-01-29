@@ -22,8 +22,8 @@
 
 /* Declare as friend of H5PL package to access package-private functions */
 #define H5PL_FRIEND
-#include "H5PLpkg.h"   /* For H5PL__verify_signature_appended() */
-#include "H5PLsig.h"   /* For signature structures */
+#include "H5PLpkg.h" /* For H5PL__verify_signature_appended() */
+#include "H5PLsig.h" /* For signature structures */
 #include "H5MMprivate.h"
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
@@ -32,12 +32,12 @@
 #include <time.h>
 
 /* Test file names */
-#define TEST_PLUGIN_SIGNED    "plugin_signed.so"
-#define TEST_PLUGIN_UNSIGNED  "plugin_unsigned.so"
-#define TEST_PLUGIN_TAMPERED  "plugin_tampered.so"
-#define TEST_PLUGIN_CACHE     "plugin_cache_test.so"
-#define TEST_PUBLIC_KEY       "test_public.pem"
-#define TEST_KEYSTORE_DIR     "test_keystore"
+#define TEST_PLUGIN_SIGNED   "plugin_signed.so"
+#define TEST_PLUGIN_UNSIGNED "plugin_unsigned.so"
+#define TEST_PLUGIN_TAMPERED "plugin_tampered.so"
+#define TEST_PLUGIN_CACHE    "plugin_cache_test.so"
+#define TEST_PUBLIC_KEY      "test_public.pem"
+#define TEST_KEYSTORE_DIR    "test_keystore"
 
 /* Test counters */
 static int tests_passed = 0;
@@ -218,9 +218,9 @@ test_signature_cache_invalidation(void)
 
     /* Copy TEST_PLUGIN_SIGNED to temp_plugin */
     {
-        FILE          *src, *dst;
-        unsigned char  buffer[4096];
-        size_t         bytes;
+        FILE         *src, *dst;
+        unsigned char buffer[4096];
+        size_t        bytes;
 
         if (NULL == (src = fopen(TEST_PLUGIN_SIGNED, "rb"))) {
             printf("FAILED\n");

@@ -828,11 +828,11 @@ done:
 static herr_t
 H5PL__load_revoked_signatures(const char *keystore_dir)
 {
-    char   *filepath  = NULL;
-    FILE   *fp        = NULL;
-    char    line[256];
-    size_t  path_len;
-    herr_t  ret_value = SUCCEED;
+    char  *filepath = NULL;
+    FILE  *fp       = NULL;
+    char   line[256];
+    size_t path_len;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -865,7 +865,7 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
 
         line_len = strlen(trimmed);
         while (line_len > 0 && (trimmed[line_len - 1] == '\n' || trimmed[line_len - 1] == '\r' ||
-                                 trimmed[line_len - 1] == ' ' || trimmed[line_len - 1] == '\t')) {
+                                trimmed[line_len - 1] == ' ' || trimmed[line_len - 1] == '\t')) {
             trimmed[line_len - 1] = '\0';
             line_len--;
         }
@@ -894,9 +894,8 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
         /* Expand revoked signatures array if needed */
         if (H5PL_revoked_sigs_count_g >= H5PL_revoked_sigs_capacity_g) {
             size_t new_capacity = H5PL_revoked_sigs_capacity_g == 0 ? 8 : H5PL_revoked_sigs_capacity_g * 2;
-            H5PL_revoked_signature_t *new_array =
-                (H5PL_revoked_signature_t *)H5MM_realloc(H5PL_revoked_sigs_g,
-                                                          new_capacity * sizeof(H5PL_revoked_signature_t));
+            H5PL_revoked_signature_t *new_array = (H5PL_revoked_signature_t *)H5MM_realloc(
+                H5PL_revoked_sigs_g, new_capacity * sizeof(H5PL_revoked_signature_t));
 
             if (NULL == new_array)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot expand revoked signatures array");
@@ -909,7 +908,7 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
         memcpy(H5PL_revoked_sigs_g[H5PL_revoked_sigs_count_g].hash, hash, H5PL_SIGNATURE_HASH_SIZE);
         H5PL_revoked_sigs_count_g++;
 
-    continue_loop:
+continue_loop:
         continue;
     }
 
