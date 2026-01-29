@@ -18214,7 +18214,7 @@ test_deflate_vlen(hid_t file)
         TEST_ERROR;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if (H5Pset_filter(dcpl, H5Z_FILTER_DEFLATE, H5Z_FLAG_MANDATORY, (size_t)1, cd_values) < 0)
+    if (H5Pset_filter(dcpl, H5Z_FILTER_DEFLATE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
         TEST_ERROR;
 #else
     SKIPPED();
