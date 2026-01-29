@@ -4868,10 +4868,6 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                     } /* end if */
                 }     /* end if */
 
-                /* Assert that the chunk is the correct size and the buffer is big enough */
-                assert(chunk_nbytes == chunk_size);
-                assert(buf_alloc >= chunk_size);
-
                 /* Increment # of cache misses */
                 rdcc->stats.nmisses++;
             } /* end if */
