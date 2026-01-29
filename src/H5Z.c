@@ -1491,14 +1491,8 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 *nbytes = *buf_size;
                 failed |= (unsigned)1 << idx;
             }
-            else {
-                /* Make sure returned new_nbytes is consistent with the returned buffer size */
-                if (*buf_size < new_nbytes)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "buffer size is too small after filter callback");
-
-                /* Update nbytes */
+            else
                 *nbytes = new_nbytes;
-            }
         }
     }
     else if (pline)
@@ -1567,14 +1561,8 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 }
                 failed |= (unsigned)1 << idx;
             }
-            else {
-                /* Make sure returned new_nbytes is consistent with the returned buffer size */
-                if (*buf_size < new_nbytes)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "buffer size is too small after filter callback");
-
-                /* Update nbytes */
+            else
                 *nbytes = new_nbytes;
-            }
         } /* end for */
     }
 
