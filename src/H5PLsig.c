@@ -104,6 +104,12 @@ typedef enum {
     H5PL_VERIFY_REASON_CRYPTO_ERROR   /* EVP_DigestVerifyFinal = -1 (OpenSSL error) */
 } H5PL_verify_failure_reason_t;
 
+/*********************/
+/* Local Prototypes  */
+/*********************/
+static herr_t H5PL__load_revoked_signatures(const char *keystore_dir);
+static bool   H5PL__is_signature_revoked(const unsigned char *signature, size_t signature_len);
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__read_file_data
  *
@@ -597,9 +603,10 @@ H5PL__load_keys_from_directory(const char *dir_path)
 
         /* Iterate through directory entries */
         while (NULL != (entry = readdir(dir))) {
-            char      file_path[4096];
-            EVP_PKEY *key     = NULL;
-            size_t    namelen = strlen(entry->d_name);
+            char     *file_path = NULL;
+            EVP_PKEY *key       = NULL;
+            size_t    namelen   = strlen(entry->d_name);
+            size_t    path_len;
 
             /* Skip . and .. */
             if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
@@ -610,21 +617,26 @@ H5PL__load_keys_from_directory(const char *dir_path)
                 continue;
 
             /* Build full path */
-            if (dirlen + namelen + 2 > sizeof(file_path))
-                continue; /* Path too long, skip */
+            path_len = dirlen + namelen + 2;
+            if (NULL == (file_path = (char *)H5MM_malloc(path_len))) {
+                fprintf(stderr, "WARNING: Cannot allocate path buffer for %s\n", entry->d_name);
+                continue;
+            }
 
-            snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, entry->d_name);
+            snprintf(file_path, path_len, "%s/%s", dir_path, entry->d_name);
 
             /* Skip symlinks */
             {
                 h5_stat_t file_stat;
                 if (HDlstat(file_path, &file_stat) < 0) {
                     fprintf(stderr, "WARNING: Cannot stat key file %s: %s\n", file_path, strerror(errno));
+                    H5MM_xfree(file_path);
                     continue;
                 }
 
                 if (S_ISLNK(file_stat.st_mode)) {
                     fprintf(stderr, "WARNING: Skipping symlink %s (security policy)\n", file_path);
+                    H5MM_xfree(file_path);
                     continue;
                 }
             }
@@ -634,12 +646,16 @@ H5PL__load_keys_from_directory(const char *dir_path)
                 /* Add to keystore */
                 if (H5PL__add_key_to_keystore(key, file_path) < 0) {
                     EVP_PKEY_free(key);
+                    H5MM_xfree(file_path);
                     closedir(dir);
                     HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add key to keystore");
                 }
                 /* Key ownership transferred to keystore */
             }
             /* Skip files that fail to load (invalid PEM, etc.) */
+
+            /* Clean up file path */
+            H5MM_xfree(file_path);
         }
 
         closedir(dir);
@@ -812,9 +828,10 @@ done:
 static herr_t
 H5PL__load_revoked_signatures(const char *keystore_dir)
 {
-    char    filepath[4096];
+    char   *filepath  = NULL;
     FILE   *fp        = NULL;
     char    line[256];
+    size_t  path_len;
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -822,7 +839,11 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
     assert(keystore_dir);
 
     /* Build path to revoked signatures file */
-    if (snprintf(filepath, sizeof(filepath), "%s/revoked_signatures.txt", keystore_dir) >= (int)sizeof(filepath))
+    path_len = strlen(keystore_dir) + strlen("/revoked_signatures.txt") + 1;
+    if (NULL == (filepath = (char *)H5MM_malloc(path_len)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot allocate filepath buffer");
+
+    if (snprintf(filepath, path_len, "%s/revoked_signatures.txt", keystore_dir) >= (int)path_len)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "revoked signatures file path too long");
 
     /* Try to open revoked signatures file (optional - not an error if missing) */
@@ -862,7 +883,7 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
 
         /* Convert hex string to bytes */
         for (size_t i = 0; i < H5PL_SIGNATURE_HASH_SIZE; i++) {
-            int byte;
+            unsigned int byte;
             if (sscanf(trimmed + (i * 2), "%2x", &byte) != 1) {
                 fprintf(stderr, "WARNING: Invalid hex in revoked signature hash: %s\n", trimmed);
                 goto continue_loop;
@@ -895,6 +916,8 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
 done:
     if (fp)
         fclose(fp);
+    if (filepath)
+        H5MM_xfree(filepath);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__load_revoked_signatures() */
