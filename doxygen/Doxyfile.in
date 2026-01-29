@@ -807,6 +807,7 @@ EXCLUDE_PATTERNS       = */fortran/test/* \
                          */README.md \
                          */CONTRIBUTING.md \
                          */CHANGELOG.md \
+                         */release_docs/PLUGIN_SIGNATURE_README.md \
                          */HISTORY-*.md
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
