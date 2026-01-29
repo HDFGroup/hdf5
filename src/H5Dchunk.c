@@ -211,13 +211,15 @@ typedef struct H5D_chunk_it_ud2_t {
 
 /* Callback info for iteration to copy data */
 typedef struct H5D_chunk_it_ud3_t {
-    H5D_chunk_common_ud_t common;       /* Common info for B-tree user data (must be first) */
-    H5F_t                *file_src;     /* Source file for copy */
-    H5D_chk_idx_info_t   *idx_info_dst; /* Dest. chunk index info object */
-    void                 *buf;          /* Buffer to hold chunk data for read/write */
-    void                 *bkg;          /* Buffer for background information during type conversion */
-    size_t                buf_size;     /* Buffer size */
-    bool                  do_convert;   /* Whether to perform type conversions */
+    H5D_chunk_common_ud_t common;         /* Common info for B-tree user data (must be first) */
+    H5F_t                *file_src;       /* Source file for copy */
+    H5D_chk_idx_info_t   *idx_info_dst;   /* Dest. chunk index info object */
+    void                 *buf;            /* Buffer to hold chunk data for read/write */
+    void                 *bkg;            /* Buffer for background information during type conversion */
+    size_t                buf_size;       /* Buffer size */
+    size_t                bkg_size;       /* Background buffer size */
+    size_t                src_chunk_size; /* Size of (unfiltered) chunk in source file */
+    bool                  do_convert;     /* Whether to perform type conversions */
 
     /* needed for converting variable-length data */
     const H5T_t *dt_src;           /* Source datatype */
@@ -4842,7 +4844,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, NULL, "data pipeline read failed");
 
                     /* Make sure the chunk is the correct size after being unfiltered */
-                    if (chunk_nbytes != chunk_size)
+                    if (my_chunk_alloc != chunk_size)
                         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
                                     "chunk size is incorrect after being unfiltered");
 
@@ -6890,6 +6892,10 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             must_filter = false;
     }
 
+    /* If the chunk on disk is unfiltered, verify the index returned the correct size for the chunk */
+    if (H5_UNLIKELY((nbytes != udata->src_chunk_size) && H5_addr_defined(chunk_rec->chunk_addr) && !must_filter))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, H5_ITER_ERROR, "incorrect chunk size returned from index for unfiltered chunk");
+
     /* Check parameter for type conversion */
     if (udata->do_convert) {
         if (H5T_detect_class(dt_src, H5T_VLEN, false) > 0)
@@ -6976,8 +6982,8 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed");
 
         /* Make sure the chunk is the correct size after being unfiltered */
-        if (H5_UNLIKELY(chunk_nbytes != chunk_size))
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "chunk size is incorrect after being unfiltered");
+        if (H5_UNLIKELY(nbytes != udata->src_chunk_size))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, H5_ITER_ERROR, "chunk size is incorrect after being unfiltered");
     } /* end if */
 
     /* Perform datatype conversion, if necessary */
@@ -6998,7 +7004,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         H5MM_memcpy(reclaim_buf, buf, reclaim_buf_size);
 
         /* Set background buffer to all zeros */
-        memset(bkg, 0, buf_size);
+        memset(bkg, 0, udata->bkg_size);
 
         /* Convert from memory to destination file */
         if (H5T_convert(tpath_mem_dst, dt_mem, dt_dst, udata->nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
@@ -7019,7 +7025,8 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         } /* end if */
 
         /* After fix ref, copy the new reference elements to the buffer to write out */
-        H5MM_memcpy(buf, bkg, buf_size);
+        assert(nbytes <= udata->bkg_size);
+        H5MM_memcpy(buf, bkg, nbytes);
     } /* end if */
 
     /* Set up destination chunk callback information for insertion */
@@ -7103,8 +7110,8 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     H5T_t             *dt_dst        = NULL;        /* Destination datatype */
     H5T_t             *dt_mem        = NULL;        /* Memory datatype */
     size_t             buf_size;                    /* Size of copy buffer */
+    size_t             bkg_size;                    /* Size of background buffer */
     size_t             reclaim_buf_size;            /* Size of reclaim buffer */
-    size_t             src_chunk_size;              /* Size of (unfiltered) chunk in source file */
     void              *buf             = NULL;      /* Buffer for copying data */
     void              *bkg             = NULL;      /* Buffer for background during type conversion */
     void              *reclaim_buf     = NULL;      /* Buffer for reclaiming data */
@@ -7175,7 +7182,8 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     if (H5T_detect_class(dt_src, H5T_VLEN, false) > 0) {
         size_t   mem_dt_size; /* Memory datatype size */
         size_t   tmp_dt_size; /* Temp. datatype size */
-        size_t   max_dt_size; /* Max atatype size */
+        size_t   max_dt_size; /* Max datatype size */
+        size_t   max_dst_dt_size; /* Max destination atatype size */
         hsize_t  buf_dim;     /* Dimension for buffer */
         uint64_t nelmts_64;   /* nelmts as a uint64_t */
         unsigned u;
@@ -7224,7 +7232,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
 
         /* Set initial buffer sizes */
         buf_size         = nelmts * max_dt_size;
-        bkg_size         = nelmts * max_dst_dt_sizel
+        bkg_size         = nelmts * max_dst_dt_size;
         reclaim_buf_size = nelmts * mem_dt_size;
 
         /* Allocate memory for reclaim buf */
@@ -7244,8 +7252,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
         bkg_size = buf_size;
         reclaim_buf_size = 0;
     } /* end else */
-
-    /* Calculate 
 
     /* Set up conversion buffer, if appropriate */
     if (do_convert) {
@@ -7288,7 +7294,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     udata.cpy_info         = cpy_info;
     udata.chunk_in_cache   = false;
     udata.chunk            = NULL;
-    H5_CHECKED_ASSIGN(udata.src_chunk_size, size_t, layout_src->u.chunk.size);
+    H5_CHECKED_ASSIGN(udata.src_chunk_size, size_t, layout_src->u.chunk.size, hsize_t);
 
     /* Iterate over chunks to copy data */
     if ((layout_src->storage.u.chunk.ops->iterate)(&idx_info_src, H5D__chunk_copy_cb, &udata) < 0)
