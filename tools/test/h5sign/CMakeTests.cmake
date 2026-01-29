@@ -243,9 +243,9 @@ if (OPENSSL_EXECUTABLE)
   add_test (
     NAME H5SIGN-verify-create-tampered
     COMMAND ${CMAKE_COMMAND}
-      -DFILE="${PROJECT_BINARY_DIR}/testfiles/plugin_tampered.so"
-      -DSOURCE="${PROJECT_BINARY_DIR}/testfiles/plugin_signed.so"
-      -P "${HDF5_TOOLS_TEST_H5SIGN_SOURCE_DIR}/CreateTamperedPlugin.cmake"
+      -DFILE=${PROJECT_BINARY_DIR}/testfiles/plugin_tampered.so
+      -DSOURCE=${PROJECT_BINARY_DIR}/testfiles/plugin_signed.so
+      -P ${HDF5_TOOLS_TEST_H5SIGN_SOURCE_DIR}/CreateTamperedPlugin.cmake
   )
   set_tests_properties (H5SIGN-verify-create-tampered PROPERTIES
     DEPENDS H5SIGN-verify-rename-signed
