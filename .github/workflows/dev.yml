@@ -261,7 +261,7 @@ jobs:
     # Linux (Ubuntu) w/ clang
     #
     name: "Ubuntu Clang"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies (Linux_clang)
         run: |
