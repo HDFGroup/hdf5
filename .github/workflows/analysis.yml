@@ -141,7 +141,7 @@ jobs:
       - name: Install Dependencies (Linux_Leak)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
@@ -247,7 +247,7 @@ jobs:
       - name: Install Dependencies (Linux_Address)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
@@ -353,7 +353,7 @@ jobs:
       - name: Install Dependencies (Linux_UndefinedBehavior)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8

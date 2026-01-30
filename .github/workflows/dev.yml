@@ -266,7 +266,7 @@ jobs:
       - name: Install Dependencies (Linux_clang)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
