@@ -7267,7 +7267,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
         /* Check for reference datatype and no expanding references & clear background buffer */
         if (!cpy_info->expand_ref && ((H5T_get_class(dt_src, false) == H5T_REFERENCE) && (f_src != f_dst)))
             /* Reset value to zero */
-            memset(udata.bkg, 0, bkf_size);
+            memset(udata.bkg, 0, bkg_size);
     } /* end if */
 
     /* Allocate memory for copying the chunk */
