@@ -265,7 +265,7 @@ jobs:
     steps:
       - name: Install Dependencies (Linux_clang)
         run: |
-          sudo apt update
+          sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
