@@ -18186,18 +18186,18 @@ error:
 static herr_t
 test_deflate_vlen(hid_t file)
 {
-    hid_t          dsid          = H5I_INVALID_HID;  /* Dataset ID */
-    hid_t          sid           = H5I_INVALID_HID;  /* Dataspace ID */
-    hid_t          dcpl          = H5I_INVALID_HID;  /* Dataset creation property list ID */
-    hid_t          dtype         = H5I_INVALID_HID;  /* Datatype ID */
+    hid_t          dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t          sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t          dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t          dtype         = H5I_INVALID_HID; /* Datatype ID */
     size_t         cd_nelmts     = 1;
-    const unsigned cd_values[1]  = {9};              /* Compression level */
-    const hsize_t  dims[1]       = {2};              /* Dataspace dimensions */
-    const hsize_t  chunk_dims[1] = {2};              /* Chunk dimensions */
+    const unsigned cd_values[1]  = {9}; /* Compression level */
+    const hsize_t  dims[1]       = {2}; /* Dataspace dimensions */
+    const hsize_t  chunk_dims[1] = {2}; /* Chunk dimensions */
     char           wdata0[500];
     char           wdata1[300];
-    char          *wdata[2]      = {wdata0, wdata1}; /* Write buffer */
-    char          *rdata[2]      = {NULL, NULL};     /* Read buffer */
+    char          *wdata[2] = {wdata0, wdata1}; /* Write buffer */
+    char          *rdata[2] = {NULL, NULL};     /* Read buffer */
     size_t         i;
 
     TESTING("dataset deflate filter with variable-length data");
@@ -18219,9 +18219,11 @@ test_deflate_vlen(hid_t file)
        actually being applied; the caveat is that we must use highly compressible
        test data.
      */
-    for (i = 0; i < 499; i++) wdata0[i] = 'A';
+    for (i = 0; i < 499; i++)
+        wdata0[i] = 'A';
     wdata0[499] = '\0';
-    for (i = 0; i < 299; i++) wdata1[i] = 'B';
+    for (i = 0; i < 299; i++)
+        wdata1[i] = 'B';
     wdata1[299] = '\0';
 
     /* Define variable-length (NULL-terminated) UTF-8 string datatype */
@@ -18299,11 +18301,12 @@ error:
     H5E_END_TRY
     return FAIL;
 #else  /* H5_HAVE_FILTER_DEFLATE */
-static herr_t test_deflate_vlen(hid_t H5_ATTR_UNUSED file)
+static herr_t
+test_deflate_vlen(hid_t H5_ATTR_UNUSED file)
 {
     SKIPPED();
     return SUCCEED;
-#endif  /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 } /* end test_deflate_vlen() */
 
 /*-------------------------------------------------------------------------
