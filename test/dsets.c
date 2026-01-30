@@ -18182,19 +18182,47 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_FILTER_DEFLATE
 static herr_t
 test_deflate_vlen(hid_t file)
 {
-    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
-    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
-    hid_t         dtype         = H5I_INVALID_HID; /* Datatype ID */
-    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
-    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
-    const char   *wdata         = "test string";   /* Write buffer */
-    char         *rdata         = NULL;            /* Read buffer */
+    hid_t          dsid          = H5I_INVALID_HID;  /* Dataset ID */
+    hid_t          sid           = H5I_INVALID_HID;  /* Dataspace ID */
+    hid_t          dcpl          = H5I_INVALID_HID;  /* Dataset creation property list ID */
+    hid_t          dtype         = H5I_INVALID_HID;  /* Datatype ID */
+    size_t         cd_nelmts     = 1;
+    const unsigned cd_values[1]  = {9};              /* Compression level */
+    const hsize_t  dims[1]       = {2};              /* Dataspace dimensions */
+    const hsize_t  chunk_dims[1] = {2};              /* Chunk dimensions */
+    char           wdata0[500];
+    char           wdata1[300];
+    char          *wdata[2]      = {wdata0, wdata1}; /* Write buffer */
+    char          *rdata[2]      = {NULL, NULL};     /* Read buffer */
+    size_t         i;
 
-    TESTING("dataset deflate filter with variable-length strings");
+    TESTING("dataset deflate filter with variable-length data");
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Note: filters can only be applied to chunked datasets */
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_filter(dcpl, H5Z_FILTER_DEFLATE, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values) < 0)
+        TEST_ERROR;
+
+    /* The deflate filter() callback returns failure for chunks where the compressed
+       output is larger than the uncompressed input, so in production the filter must
+       must always be optional. Above, we set it as mandatory to make sure that it is
+       actually being applied; the caveat is that we must use highly compressible
+       test data.
+     */
+    for (i = 0; i < 499; i++) wdata0[i] = 'A';
+    wdata0[499] = '\0';
+    for (i = 0; i < 299; i++) wdata1[i] = 'B';
+    wdata1[299] = '\0';
 
     /* Define variable-length (NULL-terminated) UTF-8 string datatype */
     if ((dtype = H5Tcopy(H5T_C_S1)) < 0)
@@ -18205,21 +18233,6 @@ test_deflate_vlen(hid_t file)
     if (H5Tset_cset(dtype, H5T_CSET_UTF8) < 0)
         TEST_ERROR;
 
-    /* Create dcpl with special filter */
-    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR;
-
-    /* Note: filters can only be applied to chunked datasets */
-    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
-        TEST_ERROR;
-
-#ifdef H5_HAVE_FILTER_DEFLATE
-    if (H5Pset_filter(dcpl, H5Z_FILTER_DEFLATE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
-        TEST_ERROR;
-#else
-    SKIPPED();
-#endif
-
     /* Create the data space */
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         TEST_ERROR;
@@ -18229,7 +18242,7 @@ test_deflate_vlen(hid_t file)
         TEST_ERROR;
 
     /* Write data (this triggers set_local and then the filter) */
-    if (H5Dwrite(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+    if (H5Dwrite(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
         TEST_ERROR;
 
     /* Close dataset */
@@ -18245,15 +18258,15 @@ test_deflate_vlen(hid_t file)
         TEST_ERROR;
 
     /* Read data back */
-    if (H5Dread(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
+    if (H5Dread(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR;
 
     /* Compare data */
-    if (strcmp(wdata, rdata) != 0)
+    if (strcmp(wdata[0], rdata[0]) != 0 || strcmp(wdata[1], rdata[1]) != 0)
         TEST_ERROR;
 
     /* Reclaim read buffer memory */
-    if (H5Treclaim(dtype, sid, H5P_DEFAULT, &rdata) < 0)
+    if (H5Treclaim(dtype, sid, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR;
 
     /* Close dataset */
@@ -18285,6 +18298,12 @@ error:
     }
     H5E_END_TRY
     return FAIL;
+#else  /* H5_HAVE_FILTER_DEFLATE */
+static herr_t test_deflate_vlen(hid_t H5_ATTR_UNUSED file)
+{
+    SKIPPED();
+    return SUCCEED;
+#endif  /* H5_HAVE_FILTER_DEFLATE */
 } /* end test_deflate_vlen() */
 
 /*-------------------------------------------------------------------------
