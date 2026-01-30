@@ -18304,6 +18304,7 @@ error:
 static herr_t
 test_deflate_vlen(hid_t H5_ATTR_UNUSED file)
 {
+    TESTING("dataset deflate filter with variable-length data");
     SKIPPED();
     return SUCCEED;
 #endif /* H5_HAVE_FILTER_DEFLATE */
