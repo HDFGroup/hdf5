@@ -737,7 +737,7 @@ jobs:
 
       - name: Install Dependencies (Linux_clang)
         run: |
-          sudo apt update
+          sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
@@ -746,12 +746,6 @@ jobs:
         with:
           env: true
           version: '18.1'
-
-      - name: check clang version
-        shell: bash
-        run: |
-          which clang
-          clang -v
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
