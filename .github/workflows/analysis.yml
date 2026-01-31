@@ -143,12 +143,12 @@ jobs:
           sudo apt update
           sudo apt-get install ninja-build doxygen graphviz curl
 
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
-        id: setup-clang
-        with:
-          env: true
-          version: '18.1'
+#      - name: add clang to env
+#        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
+#        id: setup-clang
+#        with:
+#          env: true
+#          version: '18.1'
 
       - name: Set file base name (Linux_Leak)
         id: set-file-base
@@ -249,12 +249,12 @@ jobs:
           sudo apt update
           sudo apt-get install ninja-build doxygen graphviz curl
 
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
-        id: setup-clang
-        with:
-          env: true
-          version: '18.1'
+#      - name: add clang to env
+#        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
+#        id: setup-clang
+#        with:
+#          env: true
+#          version: '18.1'
 
       - name: Set file base name (Linux_Address)
         id: set-file-base
@@ -355,12 +355,12 @@ jobs:
           sudo apt update
           sudo apt-get install ninja-build doxygen graphviz curl
 
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
-        id: setup-clang
-        with:
-          env: true
-          version: '18.1'
+#  - name: add clang to env
+#       uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
+#       id: setup-clang
+#       with:
+#         env: true
+#         version: '18.1'
 
       - name: Set file base name (Linux_UndefinedBehavior)
         id: set-file-base
