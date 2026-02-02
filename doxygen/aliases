@@ -279,7 +279,6 @@ ALIASES += ref_vol_doc="VOL documentation"
 # RFCs
 ################################################################################
 
-ALIASES += ref_rfc20250114="<a href=\"https://\RFCWIP/HDF5_Library/Signed_Plugins/RFC-signed-plugins-v1.pdf\">Adding support for digitally signed plugins to HDF5</a>"
 ALIASES += ref_rfc20240422="<a href=\"https://\RFCWIP/HDF5_Library/WriteAheadLog/RFC_WriteAheadLog.pdf\">Write-Ahead Log</a>"
 ALIASES += ref_rfc20240129="<a href=\"https://\RFCURL/RFC__Adding_support_for_16_bit_floating_point_and_Complex_number_datatypes_to_HDF5.pdf\">Adding support for 16-bit floating point and Complex number datatypes to HDF</a>"
 # Same RFC, but complex number datatypes was delayed to 2.0
