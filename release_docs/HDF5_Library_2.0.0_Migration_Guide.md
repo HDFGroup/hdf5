@@ -3,8 +3,8 @@
 ## Myth busters up front
 
 - [Upgrading HDF5 upgrades my files in-place and breaks my archive](#myth-upgrading-hdf5-upgrades-my-files-in-place-and-breaks-my-archive)
-- [2.0 means I must rewrite my entire application](#myth-20-means-i-must-rewrite-my-entire-application)
-- [All files written by 2.0 are unreadable by 1.x](#myth-all-files-written-by-20-are-unreadable-by-1x)
+- [2.0.0 means I must rewrite my entire application](#myth-200-means-i-must-rewrite-my-entire-application)
+- [All files written by 2.0.0 are unreadable by 1.x](#myth-all-files-written-by-200-are-unreadable-by-1x)
 - [If something breaks, it must be the file format](#myth-if-something-breaks-it-must-be-the-file-format)
 
 ## Introduction
@@ -16,13 +16,13 @@ With few exceptions, the recommendations in this guide apply to the 1.x family o
 
 ## What HDF5 2.0.0 means (and what it doesn’t)
 
-### “2.0” does not mean “your existing HDF5 files are obsolete”
+### “2.0.0” does not mean “your existing HDF5 files are obsolete”
 
 HDF5’s compatibility story is mostly about **file format compatibility**, and HDF5 provides a forward/backward compatibility guarantee in plain terms: the latest library can read files created by earlier versions, and older libraries can read newer files *as long as the file doesn’t use features introduced later*.
 
-### “2.0” does mean “expect *some* API/ABI churn”
+### “2.0.0” does mean “expect *some* API/ABI churn”
 
-HDF5 2.0 introduces new APIs and behavioral changes, and *some* APIs were removed or had signatures changed.
+HDF5 2.0.0 introduces new APIs and behavioral changes, and *some* APIs were removed or had signatures changed.
 That said, most users can avoid code edits initially by using the **API Compatibility Macros**, which were created specifically to reduce migration pain.
 
 ## The three kinds of compatibility you should care about
@@ -66,11 +66,11 @@ This guide includes checks to catch that early.
 
 ### Step 2: Are you a “plain HDF5 API user,” or do you touch advanced internals?
 
-Most users are “plain API” users and won’t hit removals. But if you use VOL/VFD internals or niche calls, skim the removed API list; some functions were removed in 2.0.
+Most users are “plain API” users and won’t hit removals. But if you use VOL/VFD internals or niche calls, skim the removed API list; some functions were removed in 2.0.0.
 
 ### Step 3: Do you build HDF5 from source?
 
-If yes, be aware HDF5 2.0 transitioned to **CMake-only builds**.
+If yes, be aware HDF5 2.0.0 transitioned to **CMake-only builds**.
 (Autotools is no longer used in HDF5 itself.)
 Your *application* can still use whatever build system you want.
 
@@ -110,7 +110,7 @@ Use this when you’re planning the change (before installing anything).
 
 - [ ] Identify the **oldest reader** that must open files you create (your own tools, collaborators, archived pipelines, vendor software, etc.).
 - [ ] If you need **< 1.8 compatibility**, plan to set `H5Pset_libver_bounds()` for file creation.
-- [ ] Decide whether you will allow **new 2.0-only features** (e.g., complex datatypes). If you need older readers, avoid those features or use established conventions.
+- [ ] Decide whether you will allow **new 2.0.0-only features** (e.g., complex datatypes). If you need older readers, avoid those features or use established conventions.
 
 ### Application inventory
 
@@ -120,7 +120,7 @@ Use this when you’re planning the change (before installing anything).
   - shared vs static HDF5
   - MPI/parallel HDF5 usage
   - compression filters/plugins
-- [ ] Identify whether you call any of these (known 2.0 signature changes):
+- [ ] Identify whether you call any of these (known 2.0.0 signature changes):
 
   - `H5Dread_chunk()`, `H5Tdecode()`, `H5Iregister_type()`
 - [ ] Identify whether you call any of the removed APIs (advanced users):
@@ -143,7 +143,7 @@ Use this when you’re planning the change (before installing anything).
 
 - [ ] Compile with the appropriate `H5_USE_*_API` application mapping:
 
-  - default behavior in 2.0 is effectively `H5_USE_200_API` (v200).
+  - default behavior in 2.0.0 is effectively `H5_USE_200_API` (v200).
   - use `H5_USE_114_API`, `H5_USE_110_API`, etc. to “pin” to the API level your code expects.
 - [ ] If you’re unsure what the installed library’s default API mapping is, check `libhdf5.settings` (it records things like “Default API mapping: v200” and whether deprecated symbols are enabled).
 - [ ] If you’re on Windows and using shared libraries, ensure you set `H5_BUILT_AS_DYNAMIC_LIB` in your application build.
@@ -201,7 +201,7 @@ target_compile_definitions(my_app PRIVATE H5_USE_114_API)
 
 ### Example 2: Fixing a signature change cleanly (H5Dread_chunk)
 
-In 2.0, `H5Dread_chunk()` has a signature change (and maps to the new signature by default unless you configure older mappings).
+In 2.0.0, `H5Dread_chunk()` has a signature change (and maps to the new signature by default unless you configure older mappings).
 
 What to do in practice:
 
@@ -242,18 +242,18 @@ hid_t file = H5Fcreate("out.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
 The forum announcement about the defaults explicitly calls out using `H5Pset_libver_bounds()` to ensure backward compatibility when needed.
 
-**Important caveat:** if you adopt **2.0-only features** (like the new complex datatype class), older HDF5 versions will not be able to read them.
+**Important caveat:** if you adopt **2.0.0-only features** (like the new complex datatype class), older HDF5 versions will not be able to read them.
 So: “set bounds” + “avoid incompatible features” go together if you truly need older-reader support.
 
 ### Example 4: “It doesn’t compile”: removed APIs
 
-If your build breaks with missing symbols, check whether you use APIs that were removed in 2.0. The release-specific “software changes” page lists removed public APIs, including several VOL-related functions and `H5FDperform_init()`.
+If your build breaks with missing symbols, check whether you use APIs that were removed in 2.0.0. The release-specific “software changes” page lists removed public APIs, including several VOL-related functions and `H5FDperform_init()`.
 
 Practical approach:
 
 1. Identify the missing symbol(s).
 2. Confirm they’re in the removed list.
-3. Search for the recommended replacements in the 2.0 reference/manual and release notes (some removals reflect internal refactors; you may need to change approach rather than rename a call).
+3. Search for the recommended replacements in the 2.0.0 reference/manual and release notes (some removals reflect internal refactors; you may need to change approach rather than rename a call).
 
 ## Myths and confusion to clear up
 
@@ -262,11 +262,11 @@ Practical approach:
 Reality: opening old files with a new library is a normal use case; the HDF5 library’s compatibility guarantee is designed for this.
 The main way you “break” compatibility is by **writing new files with newer features** and expecting older readers to understand them.
 
-### Myth: “2.0 means I must rewrite my entire application”
+### Myth: “2.0.0 means I must rewrite my entire application”
 
 Reality: you usually don’t. The API compatibility macros exist specifically to avoid large-scale edits and provide a bridge from old APIs to new ones.
 
-### Myth: “All files written by 2.0 are unreadable by 1.x”
+### Myth: “All files written by 2.0.0 are unreadable by 1.x”
 
 Reality: by default, 2.0.0 writes files using the 1.8-era format and those files are expected to be readable by HDF5 1.8.0 and newer.
 If you need older compatibility, explicitly set bounds.
