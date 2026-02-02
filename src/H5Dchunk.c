@@ -7103,8 +7103,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     H5T_t             *dt_mem        = NULL;        /* Memory datatype */
     size_t             buf_size;                    /* Size of copy buffer */
     size_t             reclaim_buf_size;            /* Size of reclaim buffer */
-    void              *buf             = NULL;      /* Buffer for copying data */
-    void              *bkg             = NULL;      /* Buffer for background during type conversion */
     void              *reclaim_buf     = NULL;      /* Buffer for reclaiming data */
     H5S_t             *buf_space       = NULL;      /* Dataspace describing buffer */
     size_t             nelmts          = 0;         /* Number of elements in buffer */
@@ -7243,17 +7241,17 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     /* Set up conversion buffer, if appropriate */
     if (do_convert) {
         /* Allocate background memory for converting the chunk */
-        if (NULL == (bkg = H5MM_malloc(buf_size)))
+        if (NULL == (udata.bkg = H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
 
         /* Check for reference datatype and no expanding references & clear background buffer */
         if (!cpy_info->expand_ref && ((H5T_get_class(dt_src, false) == H5T_REFERENCE) && (f_src != f_dst)))
             /* Reset value to zero */
-            memset(bkg, 0, buf_size);
+            memset(udata.bkg, 0, buf_size);
     } /* end if */
 
     /* Allocate memory for copying the chunk */
-    if (NULL == (buf = H5MM_malloc(buf_size)))
+    if (NULL == (udata.buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
 
     /* Initialize the callback structure for the source */
@@ -7261,8 +7259,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     udata.common.storage   = &layout_src->storage.u.chunk;
     udata.file_src         = f_src;
     udata.idx_info_dst     = &idx_info_dst;
-    udata.buf              = buf;
-    udata.bkg              = bkg;
     udata.buf_size         = buf_size;
     udata.dt_src           = dt_src;
     udata.dt_dst           = dt_dst;
@@ -7308,22 +7304,16 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     }
 
 done:
-    /* I/O buffers may have been re-allocated */
-    buf = udata.buf;
-    bkg = udata.bkg;
-
     if (dt_dst && (H5T_close(dt_dst) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (dt_mem && (H5T_close(dt_mem) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (buf_space && H5S_close(buf_space) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary dataspace");
-    if (buf)
-        H5MM_xfree(buf);
-    if (bkg)
-        H5MM_xfree(bkg);
-    if (reclaim_buf)
-        H5MM_xfree(reclaim_buf);
+
+    H5MM_xfree(udata.buf);
+    H5MM_xfree(udata.bkg);
+    H5MM_xfree(reclaim_buf);
 
     /* Clean up any index information */
     if (copy_setup_done)
