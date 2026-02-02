@@ -112,6 +112,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a potential out of bound read
+
+   When a file is corrupted such that an array datatype's size, the number of elements, and the element size are not in agreement, it can trigger an out of bounds read.  A check has been added to detect such situation.
+
 ### Fixed a performance issue with chunked dataset I/O
 
    When dataset chunks are unable to be placed in the dataset chunk cache (for example, if a chunk
