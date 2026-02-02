@@ -268,13 +268,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz curl
 
-# - name: add clang to env
-#        uses: KyleMayes/install-llvm-action@ebc0426251bc40c7cd31162802432c68818ab8f0 # v2.0.9
-#        id: setup-clang
-#        with:
-#          env: true
-#          version: '18.1'
-
       - name: Check Clang Version
         shell: bash
         run: |
@@ -334,6 +327,8 @@ jobs:
                -DHDF5_BUILD_DOC=OFF \
                -DLIBAEC_USE_LOCALCONTENT=OFF \
                -DZLIB_USE_LOCALCONTENT=OFF \
+               -DCMAKE_C_COMPILER:STRING=clang \
+               -DCMAKE_CXX_COMPILER:STRING=clang++ \
                -DHDF_TEST_EXPRESS=0 \
                ${{ github.workspace }}/hdfsrc
 

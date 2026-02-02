@@ -740,13 +740,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build doxygen graphviz curl
 
-##      - name: add clang to env
-##       uses: KyleMayes/install-llvm-action@ebc0426251bc40c7cd31162802432c68818ab8f0 # v2.0.9
-##       id: setup-clang
-##       with:
-##         env: true
-##         version: '18.1'
-
       - name: check clang version
         shell: bash
         run: |
@@ -827,6 +820,8 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_C_COMPILER:STRING=clang")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_CXX_COMPILER:STRING=clang++")
 
       - name: Run CTest (Linux_clang)
         run: |
