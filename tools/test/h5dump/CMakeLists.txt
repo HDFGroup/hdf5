@@ -40,6 +40,24 @@ if (BUILD_SHARED_LIBS)
             "$<TARGET_FILE:${H5DUMP_TOOL_PLUGIN_LIB_TARGET}>"
             "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5DUMP_TOOL_PLUGIN_LIB_TARGET}>"
   )
+
+  #-----------------------------------------------------------------------------
+  # Sign the plugin if signature verification is enabled
+  #-----------------------------------------------------------------------------
+  if (HDF5_REQUIRE_SIGNED_PLUGINS)
+    # Ensure h5sign is built before the plugin target
+    add_dependencies (${H5DUMP_TOOL_PLUGIN_LIB_TARGET} h5sign)
+
+    add_custom_command (
+        TARGET     ${H5DUMP_TOOL_PLUGIN_LIB_TARGET}
+        POST_BUILD
+        COMMAND    $<TARGET_FILE:h5sign>
+        ARGS       -p "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5DUMP_TOOL_PLUGIN_LIB_TARGET}>"
+                   -k "${CMAKE_BINARY_DIR}/private.pem"
+        DEPENDS    h5sign
+        COMMENT    "Signing test plugin ${H5DUMP_TOOL_PLUGIN_LIB_TARGET} for signature verification"
+    )
+  endif ()
 endif ()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
