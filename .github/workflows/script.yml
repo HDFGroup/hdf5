@@ -45,7 +45,7 @@ jobs:
         run: choco install ninja
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
+        uses: ssciwr/doxygen-install@ad81ff239f3be5262e2577abce2d728c426fcc59 # v1
         with:
           version: "1.13.2"
 
@@ -53,7 +53,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -166,12 +166,12 @@ jobs:
           sudo apt-get install ninja-build graphviz curl
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
+        uses: ssciwr/doxygen-install@ad81ff239f3be5262e2577abce2d728c426fcc59 # v1
         with:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -267,7 +267,7 @@ jobs:
         run: brew install ninja curl
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
+        uses: ssciwr/doxygen-install@ad81ff239f3be5262e2577abce2d728c426fcc59 # v1
         with:
           version: "1.13.2"
 
@@ -278,7 +278,7 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -397,7 +397,7 @@ jobs:
           sudo apt-get install ninja-build doxygen
 
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -520,7 +520,7 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -639,7 +639,7 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -747,7 +747,7 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest

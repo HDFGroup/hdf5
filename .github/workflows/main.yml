@@ -156,12 +156,12 @@ jobs:
         if: ${{ matrix.ostype == 'macos' }}
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
+        uses: ssciwr/doxygen-install@ad81ff239f3be5262e2577abce2d728c426fcc59 # v1
         with:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest

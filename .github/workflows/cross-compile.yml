@@ -41,7 +41,7 @@ jobs:
           sudo apt-get install gfortran-mingw-w64-x86-64-win32
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
+        uses: ssciwr/doxygen-install@ad81ff239f3be5262e2577abce2d728c426fcc59 # v1
         with:
           version: "1.13.2"
 
