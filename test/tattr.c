@@ -148,6 +148,7 @@ static float attr_data5 = -5.123F; /* Test data for 5th attribute */
 
 /* Used by test_attr_info_null_info_pointer() */
 #define GET_INFO_NULL_POINTER_ATTR_NAME "NullInfoPointerAttr"
+#define NON_NULL_BUF                    "NON_NULL_BUF"
 
 /* Used by test_attr_rename_invalid_name() */
 #define INVALID_RENAME_TEST_ATTR_NAME     "InvalidRenameTestAttr"
@@ -6526,10 +6527,13 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
 
 /***************************************************************
 **
-**  test_attr_get_name_invalid_buf(): A test to ensure that
-**      passing a NULL buffer to H5Aget_name(_by_idx) when
+**  test_attr_get_name_invalid_buf(): A test to ensure that:
+**    - passing a NULL buffer to H5Aget_name(_by_idx) when
 **      the 'size' parameter is non-zero doesn't cause bad
 **      behavior.
+**    - passing a non-NULL buffer to H5Aget_name(_by_idx)
+**      when the 'size' parameter is zero treats as a length
+**      query call.
 **
 ****************************************************************/
 static void
@@ -6539,6 +6543,9 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     hid_t   fid;
     hid_t   attr;
     hid_t   sid;
+    char    non_null_buf[80]; /* Buffer to test non-null buffer calls */
+    char   *buf_ptr;          /* To pass mid-string */
+    ssize_t namelen;          /* Length of attribute name */
 
     /* Create dataspace for attribute */
     sid = H5Screate(H5S_SCALAR);
@@ -6568,6 +6575,20 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     H5E_END_TRY
 
     VERIFY(err_ret, FAIL, "H5Aget_name_by_idx");
+
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name
+       size and the buffer is not modified */
+    strcpy(non_null_buf, NON_NULL_BUF);
+    buf_ptr = &non_null_buf[4];
+    namelen = H5Aget_name(attr, (size_t)0, buf_ptr);
+    CHECK(namelen, FAIL, "H5Aget_name");
+    VERIFY(namelen, (ssize_t)strlen(GET_NAME_INVALID_BUF_TEST_ATTR_NAME), "H5Aget_name");
+    VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Aget_name");
+
+    namelen = H5Aget_name_by_idx(fid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, buf_ptr, 0, H5P_DEFAULT);
+    CHECK(namelen, FAIL, "H5Aget_name_by_idx");
+    VERIFY(namelen, (ssize_t)strlen(GET_NAME_INVALID_BUF_TEST_ATTR_NAME), "H5Aget_name_by_idx");
+    VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Aget_name_by_idx");
 
     /* Close dataspace */
     err_ret = H5Sclose(sid);

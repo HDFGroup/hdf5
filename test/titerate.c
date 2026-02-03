@@ -39,6 +39,9 @@
 #define SPACE1_RANK 1
 #define SPACE1_DIM1 4
 
+/* Used by test_reference_obj() and test_reference_attr() */
+#define NON_NULL_BUF "NON_NULL_BUF"
+
 typedef enum { RET_ZERO, RET_TWO, RET_CHANGE, RET_CHANGE2 } iter_enum;
 
 /* Custom group iteration callback data */
@@ -894,7 +897,9 @@ test_grp_memb_funcs(hid_t fapl)
     VERIFY(ginfo.nlinks, (NDATASETS + 2), "H5Gget_info");
 
     for (i = 0; i < (int)ginfo.nlinks; i++) {
-        H5O_info2_t oinfo; /* Object info */
+        H5O_info2_t oinfo;            /* Object info */
+        char        non_null_buf[80]; /* Buffer to test non-null buffer calls */
+        char       *buf_ptr;          /* To pass mid-string */
 
         /* Test with NULL for name, to query length */
         name_len = H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, NULL,
@@ -907,6 +912,15 @@ test_grp_memb_funcs(hid_t fapl)
 
         /* Double-check that the length is the same */
         VERIFY(ret, name_len, "H5Lget_name_by_idx");
+
+        /* Test with non-null buffer for name and 0 for size */
+        strcpy(non_null_buf, NON_NULL_BUF);
+        buf_ptr = &non_null_buf[4];
+        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, buf_ptr, 0,
+                                         H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Lget_name_by_idx");
+        VERIFY(ret, name_len, "H5Lget_name_by_idx");
+        VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Lget_name_by_idx");
 
         /* Keep a copy of the dataset names around for later */
         obj_names[i] = strdup(dataset_name);

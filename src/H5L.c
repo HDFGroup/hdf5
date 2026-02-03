@@ -1478,6 +1478,10 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
 
     FUNC_ENTER_API((-1))
 
+    /* If name size is zero, treat as length query and do not write, even a '\0' */
+    if (name && size == 0)
+        name = NULL;
+
     /* Check arguments */
     if (!group_name || !*group_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "no name specified");

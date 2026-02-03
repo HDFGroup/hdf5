@@ -115,6 +115,25 @@ We would like to thank the many HDF5 community members who contributed to this r
 ### Fixed a potential out of bound read
 
    When a file is corrupted such that an array datatype's size, the number of elements, and the element size are not in agreement, it can trigger an out of bounds read.  A check has been added to detect such situation.
+### Fixed a potential buffer overflow
+
+   For unfiltered dataset chunks, the size on disk should be constant for all chunks in a dataset. In some cases the size of each chunk is stored even in this case where it can be inferred from the chunk dimensions and datatype. The code previously assumed this stored size was equal to the inferred size, leading to a mismatch in the expected and actual buffer size. Modified the library to throw an error if the size does not match the expected size.
+
+   Fixes CVE-2025-44904
+
+### Fixed a double-free bug in H5D__chunk_copy
+
+   Fixed a double-free bug in the internal H5D__chunk_copy() function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
+
+   Fixes GitHub issues [#6123](https://github.com/HDFGroup/hdf5/issues/6123)
+                       [#6124](https://github.com/HDFGroup/hdf5/issues/6124)
+                       [#6125](https://github.com/HDFGroup/hdf5/issues/6125)
+                       [#6126](https://github.com/HDFGroup/hdf5/issues/6126)
+                       [#6133](https://github.com/HDFGroup/hdf5/issues/6133)
+### Fixes potential security issues
+
+   The get_name API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
+   These functions are now fixed to treat (buffer != NULL, size == 0) as a length-only query to eliminate Valgrind error of invalid write.
 
 ### Fixed a performance issue with chunked dataset I/O
 

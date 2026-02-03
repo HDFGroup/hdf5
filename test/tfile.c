@@ -147,6 +147,9 @@
 /* Declaration for test_incr_filesize() */
 #define FILE_INCR_FILESIZE "tfile_incr_filesize"
 
+/* Used by test_file_getname() */
+#define NON_NULL_BUF "NON_NULL_BUF"
+
 /* Files created under 1.6 branch and 1.8 branch--used in test_filespace_compatible() */
 static const char *OLD_FILENAME[] = {
     "filespace_1_6.h5", /* 1.6 HDF5 file */
@@ -2411,7 +2414,9 @@ test_file_getname(void)
     hsize_t dims[TESTA_RANK] = {TESTA_NX, TESTA_NY};
     char    name[TESTA_NAME_BUF_SIZE];
     ssize_t name_len;
-    herr_t  ret; /* Generic return value */
+    char    non_null_buf[80]; /* Buffer to test non-null buffer calls */
+    char   *buf_ptr;          /* To pass mid-string */
+    herr_t  ret;              /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing H5Fget_name() functionality\n"));
@@ -2425,6 +2430,15 @@ test_file_getname(void)
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY_STR(name, FILE1, "H5Fget_name");
     VERIFY(name_len, strlen(FILE1), "H5Fget_name");
+
+    /* Verify that passing a non-null buffer with size 0 still returns the correct name
+       size and the buffer is not modified */
+    strcpy(non_null_buf, NON_NULL_BUF);
+    buf_ptr  = &non_null_buf[4];
+    name_len = H5Fget_name(file_id, buf_ptr, 0);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY(name_len, strlen(FILE1), "H5Fget_name");
+    VERIFY(strcmp(non_null_buf, NON_NULL_BUF), 0, "H5Fget_name");
 
     /* Create a group in the root group */
     group_id = H5Gcreate2(file_id, TESTA_GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
