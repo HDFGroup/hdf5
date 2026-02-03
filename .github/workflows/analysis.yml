@@ -30,8 +30,13 @@ jobs:
   # Linux (Ubuntu) w/ gcc + coverage
   #
     name: "Ubuntu GCC Coverage"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
+    - name: Get Actions
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        sparse-checkout: .github/actions
+
     - name: Install Dependencies (Linux_coverage)
       run: |
         sudo apt update
@@ -67,10 +72,10 @@ jobs:
     - name: Uncompress source (Linux_coverage)
       run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-    - name: Copy script files for the space (Linux_coverage)
-      run: |
-        cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-        cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+    - name: Symlink script files for the space (Linux_coverage)
+      uses: ./.github/actions/symlink-ctest-scripts
+      with:
+        source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
     - name: List files for the hdf5 (Linux_coverage)
       run: |
@@ -126,19 +131,17 @@ jobs:
   # Linux (Ubuntu) w/ clang + LeakSanitizer
   #
     name: "Ubuntu Clang LeakSanitizer"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
       - name: Install Dependencies (Linux_Leak)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
-
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
-        id: setup-clang
-        with:
-          env: true
-          version: '18.1'
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: Set file base name (Linux_Leak)
         id: set-file-base
@@ -168,10 +171,10 @@ jobs:
       - name: Uncompress source (Linux_Leak)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (Linux_Leak)
-        run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+      - name: Symlink script files for the space (Linux_Leak)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_Leak)
         run: |
@@ -207,6 +210,8 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_C_COMPILER:STRING=clang")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_CXX_COMPILER:STRING=clang++")
 
       - name: Run CTest (Linux_Leak)
         run: |
@@ -227,19 +232,17 @@ jobs:
   # Linux (Ubuntu) w/ clang + AddressSanitizer
   #
     name: "Ubuntu Clang AddressSanitizer"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
       - name: Install Dependencies (Linux_Address)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
-
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
-        id: setup-clang
-        with:
-          env: true
-          version: '18.1'
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: Set file base name (Linux_Address)
         id: set-file-base
@@ -269,10 +272,10 @@ jobs:
       - name: Uncompress source (Linux_Address)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (Linux_Address)
-        run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+      - name: Symlink script files for the space (Linux_Address)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_Address)
         run: |
@@ -308,6 +311,8 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_C_COMPILER:STRING=clang")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_CXX_COMPILER:STRING=clang++")
 
       - name: Run CTest (Linux_Address)
         run: |
@@ -328,19 +333,17 @@ jobs:
   # Linux (Ubuntu) w/ clang + UndefinedBehaviorSanitizer
   #
     name: "Ubuntu Clang UndefinedBehaviorSanitizer"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
       - name: Install Dependencies (Linux_UndefinedBehavior)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
-
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
-        id: setup-clang
-        with:
-          env: true
-          version: '18.1'
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: Set file base name (Linux_UndefinedBehavior)
         id: set-file-base
@@ -370,10 +373,10 @@ jobs:
       - name: Uncompress source (Linux_UndefinedBehavior)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (Linux_UndefinedBehavior)
-        run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+      - name: Symlink script files for the space (Linux_UndefinedBehavior)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_UndefinedBehavior)
         run: |
@@ -409,6 +412,8 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_C_COMPILER:STRING=clang")
+              set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_CXX_COMPILER:STRING=clang++")
 
       - name: Run CTest (Linux_UndefinedBehavior)
         run: |

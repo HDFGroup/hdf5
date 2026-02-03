@@ -51,6 +51,11 @@ jobs:
     name: "Parallel OpenMPI GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
       - name: Install Linux Dependencies (OpenMPI)
         run: |
           sudo apt-get update
@@ -113,10 +118,10 @@ jobs:
       - name: Uncompress source (OpenMPI)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (OpenMPI)
-        run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+      - name: Symlink script files for the space (OpenMPI)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (OpenMPI)
         run: |
@@ -235,10 +240,10 @@ jobs:
       - name: Uncompress source (MPICH)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (MPICH)
-        run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+      - name: Symlink script files for the space (MPICH)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (MPICH)
         run: |
