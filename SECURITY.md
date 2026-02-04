@@ -33,9 +33,9 @@ We adhere to a specific support matrix for security updates. We strongly advise 
 
 | Version Line | Status | Security Support Level |
 | :--- | :--- | :--- |
-| **Latest Major (X.*.*)** | ✅ **Active** | Full security support. Patches are released for Critical, High, and Medium severity issues. |
-| **Previous Major (X.Y-1)** | ⚠️ **Maintenance** | Critical security fixes only (**at maintainer discretion**). |
-| **Older Versions** | ❌ **EOL** | End of Life. No security patches will be backported. |
+| **Latest Major (X.*.*)** | **Active** | Full security support. Patches are released for Critical, High, and Medium severity issues. |
+| **Previous Major (X.Y-1)** | **Maintenance** | Critical security fixes only (**at maintainer discretion**). |
+| **Older Versions** | **EOL** | End of Life. No security patches will be backported. |
 
 ### End of Life (EOL) Policy
 We provide a minimum **6-month notice** before a Major version line enters EOL status. These announcements are made via our [GitHub Discussions](https://github.com/HDFGroup/hdf5/discussions).
