@@ -88,7 +88,7 @@ We adhere to a standard **90-day disclosure deadline**. Public disclosure occurs
 
 ### CVE Issuance
 For vulnerabilities that meet CVE criteria (exploitable by untrusted input, memory corruption, DoS, etc.), we will:
-1.  Request a CVE identifier from GitHub's CNA.
+1.  Request a CVE identifier from GitHub's CVE Numbering Authority.
 2.  Publish CVE details to NVD, GitHub Security Advisories, and Release Notes.
 
 ## Security Patch Management
