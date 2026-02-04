@@ -535,14 +535,13 @@ H5PL__validate_directory_permissions(const char *dir_path)
     }
 
     /* Create SIDs for "Everyone", "Users", and "Authenticated Users" groups */
-    if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0,
-                                  &pSidEveryone)) {
+    if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pSidEveryone)) {
         LocalFree(pSD);
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Everyone SID");
     }
 
-    if (!AllocateAndInitializeSid(&SIDAuthNT, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_USERS, 0, 0,
-                                  0, 0, 0, 0, &pSidUsers)) {
+    if (!AllocateAndInitializeSid(&SIDAuthNT, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_USERS, 0, 0, 0,
+                                  0, 0, 0, &pSidUsers)) {
         FreeSid(pSidEveryone);
         LocalFree(pSD);
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Users SID");
@@ -806,7 +805,7 @@ H5PL__is_keystore_locked(void)
     if (HDstat(H5PL_SIG_LOCK_FILE_PATH, &st) == 0) {
         ret_value = true;
         H5PL_SIG_DEBUG_PRINT("HDF5 KeyStore: Environment variable override disabled by %s\n",
-                              H5PL_SIG_LOCK_FILE_PATH);
+                             H5PL_SIG_LOCK_FILE_PATH);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -908,8 +907,7 @@ H5PL__init_keystore(void)
 
     /* Must have at least one key */
     if (!keys_loaded || H5PL_keystore_count_g == 0) {
-        const char *attempted_source =
-            env_keystore ? env_keystore : H5PL_SIG_KEYSTORE_DIR_STR;
+        const char *attempted_source = env_keystore ? env_keystore : H5PL_SIG_KEYSTORE_DIR_STR;
 
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
                     "no valid public keys found for plugin signature verification\n"
