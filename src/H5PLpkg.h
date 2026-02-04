@@ -108,6 +108,34 @@ typedef H5PL_type_t (*H5PL_get_plugin_type_t)(void);
 typedef const void *(*H5PL_get_plugin_info_t)(void);
 #endif /* H5_HAVE_WIN32_API */
 
+/************************************/
+/* Digital Signature Platform Macros */
+/************************************/
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+
+/* Lock file path for disabling environment variable keystore override */
+#ifdef H5_HAVE_WIN32_API
+#define H5PL_SIG_LOCK_FILE_PATH "C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore"
+#else
+#define H5PL_SIG_LOCK_FILE_PATH "/etc/hdf5/lock_keystore"
+#endif
+
+/* Keystore directory string for error messages */
+#ifdef H5PL_KEYSTORE_DIR
+#define H5PL_SIG_KEYSTORE_DIR_STR H5PL_KEYSTORE_DIR
+#else
+#define H5PL_SIG_KEYSTORE_DIR_STR "(not configured)"
+#endif
+
+/* Debug logging for keystore operations (enable via CMake: HDF5_PLUGIN_KEYSTORE_DEBUG) */
+#ifdef H5PL_DEBUG_KEYSTORE
+#define H5PL_SIG_DEBUG_PRINT(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define H5PL_SIG_DEBUG_PRINT(...) /* no-op */
+#endif
+
+#endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/

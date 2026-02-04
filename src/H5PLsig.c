@@ -457,6 +457,7 @@ done:
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
+#ifndef H5_HAVE_WIN32_API
 static herr_t
 H5PL__validate_directory_permissions(const char *dir_path)
 {
@@ -475,7 +476,6 @@ H5PL__validate_directory_permissions(const char *dir_path)
     if (!S_ISDIR(st.st_mode))
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore path is not a directory: %s", dir_path);
 
-#ifndef H5_HAVE_WIN32_API
     /* Reject world-writable directories */
     if (st.st_mode & S_IWOTH)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
@@ -483,119 +483,139 @@ H5PL__validate_directory_permissions(const char *dir_path)
                     "This allows unprivileged users to add malicious keys.\n"
                     "Fix with: chmod o-w %s",
                     (unsigned)(st.st_mode & 0777), dir_path, dir_path);
-#else
-    /* Windows ACL-based permission checking */
-    {
-        PSECURITY_DESCRIPTOR     pSD           = NULL;
-        PACL                     pDACL         = NULL;
-        PSID                     pSidEveryone  = NULL;
-        PSID                     pSidUsers     = NULL;
-        PSID                     pSidAuthUsers = NULL;
-        SID_IDENTIFIER_AUTHORITY SIDAuthWorld  = SECURITY_WORLD_SID_AUTHORITY;
-        SID_IDENTIFIER_AUTHORITY SIDAuthNT     = SECURITY_NT_AUTHORITY;
-        DWORD                    dwRes         = 0;
-        TRUSTEE                  trusteeEveryone;
-        TRUSTEE                  trusteeUsers;
-        TRUSTEE                  trusteeAuthUsers;
-        ACCESS_MASK              everyoneAccess       = 0;
-        ACCESS_MASK              usersAccess          = 0;
-        ACCESS_MASK              authUsersAccess      = 0;
-        BOOL                     hasUnsafePermissions = FALSE;
-
-        /* Get the security descriptor for the directory */
-        dwRes = GetNamedSecurityInfoA(dir_path, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pDACL,
-                                      NULL, &pSD);
-
-        if (dwRes != ERROR_SUCCESS) {
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL,
-                        "SECURITY ERROR: Cannot retrieve ACL information for KeyStore directory: %s\n"
-                        "  Error code: %lu",
-                        dir_path, (unsigned long)dwRes);
-        }
-
-        /* Create SIDs for "Everyone", "Users", and "Authenticated Users" groups */
-        if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0,
-                                      &pSidEveryone)) {
-            LocalFree(pSD);
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Everyone SID");
-        }
-
-        if (!AllocateAndInitializeSid(&SIDAuthNT, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_USERS, 0,
-                                      0, 0, 0, 0, 0, &pSidUsers)) {
-            FreeSid(pSidEveryone);
-            LocalFree(pSD);
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Users SID");
-        }
-
-        if (!AllocateAndInitializeSid(&SIDAuthNT, 1, SECURITY_AUTHENTICATED_USER_RID, 0, 0, 0, 0, 0, 0, 0,
-                                      &pSidAuthUsers)) {
-            FreeSid(pSidEveryone);
-            FreeSid(pSidUsers);
-            LocalFree(pSD);
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL,
-                        "SECURITY ERROR: Cannot create Authenticated Users SID");
-        }
-
-        /* Check effective permissions for "Everyone", "Users", and "Authenticated Users" groups */
-        BuildTrusteeWithSidA(&trusteeEveryone, pSidEveryone);
-        BuildTrusteeWithSidA(&trusteeUsers, pSidUsers);
-        BuildTrusteeWithSidA(&trusteeAuthUsers, pSidAuthUsers);
-
-        dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeEveryone, &everyoneAccess);
-        if (dwRes == ERROR_SUCCESS) {
-            /* Check if Everyone has write access (FILE_WRITE_DATA, FILE_ADD_FILE, etc.) */
-            if (everyoneAccess &
-                (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
-                hasUnsafePermissions = TRUE;
-            }
-        }
-
-        dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeUsers, &usersAccess);
-        if (dwRes == ERROR_SUCCESS) {
-            /* Check if Users group has write access */
-            if (usersAccess &
-                (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
-                hasUnsafePermissions = TRUE;
-            }
-        }
-
-        dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeAuthUsers, &authUsersAccess);
-        if (dwRes == ERROR_SUCCESS) {
-            /* Check if Authenticated Users group has write access */
-            if (authUsersAccess &
-                (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
-                hasUnsafePermissions = TRUE;
-            }
-        }
-
-        /* Clean up Windows security resources */
-        FreeSid(pSidEveryone);
-        FreeSid(pSidUsers);
-        FreeSid(pSidAuthUsers);
-        LocalFree(pSD);
-
-        /* SECURITY: Fail if directory has unsafe permissions */
-        if (hasUnsafePermissions) {
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                        "SECURITY ERROR: KeyStore directory has insecure ACL permissions: %s\n"
-                        "  The directory is writable by non-administrators.\n"
-                        "  Everyone access: 0x%lx\n"
-                        "  Users access: 0x%lx\n"
-                        "  Authenticated Users access: 0x%lx\n"
-                        "  This allows unprivileged users to inject malicious keys.\n"
-                        "  Fix: Use system-protected paths like:\n"
-                        "    C:\\Program Files\\HDF_Group\\HDF5\\trusted_keys\n"
-                        "  Or configure directory ACLs to allow write access only for Administrators:\n"
-                        "    icacls \"%s\" /inheritance:r /grant Administrators:F",
-                        dir_path, (unsigned long)everyoneAccess, (unsigned long)usersAccess,
-                        (unsigned long)authUsersAccess, dir_path);
-        }
-    }
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__validate_directory_permissions() */
+#else  /* H5_HAVE_WIN32_API */
+static herr_t
+H5PL__validate_directory_permissions(const char *dir_path)
+{
+    h5_stat_t                st;
+    PSECURITY_DESCRIPTOR     pSD           = NULL;
+    PACL                     pDACL         = NULL;
+    PSID                     pSidEveryone  = NULL;
+    PSID                     pSidUsers     = NULL;
+    PSID                     pSidAuthUsers = NULL;
+    SID_IDENTIFIER_AUTHORITY SIDAuthWorld  = SECURITY_WORLD_SID_AUTHORITY;
+    SID_IDENTIFIER_AUTHORITY SIDAuthNT     = SECURITY_NT_AUTHORITY;
+    DWORD                    dwRes         = 0;
+    TRUSTEE                  trusteeEveryone;
+    TRUSTEE                  trusteeUsers;
+    TRUSTEE                  trusteeAuthUsers;
+    ACCESS_MASK              everyoneAccess       = 0;
+    ACCESS_MASK              usersAccess          = 0;
+    ACCESS_MASK              authUsersAccess      = 0;
+    BOOL                     hasUnsafePermissions = FALSE;
+    herr_t                   ret_value            = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(dir_path);
+
+    /* Check if directory exists and get permissions */
+    if (HDstat(dir_path, &st) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot stat keystore directory: %s", dir_path);
+
+    /* Verify it's a directory */
+    if (!S_ISDIR(st.st_mode))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore path is not a directory: %s", dir_path);
+
+    /* Windows ACL-based permission checking */
+
+    /* Get the security descriptor for the directory */
+    dwRes = GetNamedSecurityInfoA(dir_path, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pDACL,
+                                  NULL, &pSD);
+
+    if (dwRes != ERROR_SUCCESS) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL,
+                    "SECURITY ERROR: Cannot retrieve ACL information for KeyStore directory: %s\n"
+                    "  Error code: %lu",
+                    dir_path, (unsigned long)dwRes);
+    }
+
+    /* Create SIDs for "Everyone", "Users", and "Authenticated Users" groups */
+    if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0,
+                                  &pSidEveryone)) {
+        LocalFree(pSD);
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Everyone SID");
+    }
+
+    if (!AllocateAndInitializeSid(&SIDAuthNT, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_USERS, 0, 0,
+                                  0, 0, 0, 0, &pSidUsers)) {
+        FreeSid(pSidEveryone);
+        LocalFree(pSD);
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Users SID");
+    }
+
+    if (!AllocateAndInitializeSid(&SIDAuthNT, 1, SECURITY_AUTHENTICATED_USER_RID, 0, 0, 0, 0, 0, 0, 0,
+                                  &pSidAuthUsers)) {
+        FreeSid(pSidEveryone);
+        FreeSid(pSidUsers);
+        LocalFree(pSD);
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL,
+                    "SECURITY ERROR: Cannot create Authenticated Users SID");
+    }
+
+    /* Check effective permissions for "Everyone", "Users", and "Authenticated Users" groups */
+    BuildTrusteeWithSidA(&trusteeEveryone, pSidEveryone);
+    BuildTrusteeWithSidA(&trusteeUsers, pSidUsers);
+    BuildTrusteeWithSidA(&trusteeAuthUsers, pSidAuthUsers);
+
+    dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeEveryone, &everyoneAccess);
+    if (dwRes == ERROR_SUCCESS) {
+        /* Check if Everyone has write access (FILE_WRITE_DATA, FILE_ADD_FILE, etc.) */
+        if (everyoneAccess &
+            (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
+            hasUnsafePermissions = TRUE;
+        }
+    }
+
+    dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeUsers, &usersAccess);
+    if (dwRes == ERROR_SUCCESS) {
+        /* Check if Users group has write access */
+        if (usersAccess &
+            (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
+            hasUnsafePermissions = TRUE;
+        }
+    }
+
+    dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeAuthUsers, &authUsersAccess);
+    if (dwRes == ERROR_SUCCESS) {
+        /* Check if Authenticated Users group has write access */
+        if (authUsersAccess &
+            (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
+            hasUnsafePermissions = TRUE;
+        }
+    }
+
+    /* Clean up Windows security resources */
+    FreeSid(pSidEveryone);
+    FreeSid(pSidUsers);
+    FreeSid(pSidAuthUsers);
+    LocalFree(pSD);
+
+    /* SECURITY: Fail if directory has unsafe permissions */
+    if (hasUnsafePermissions) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "SECURITY ERROR: KeyStore directory has insecure ACL permissions: %s\n"
+                    "  The directory is writable by non-administrators.\n"
+                    "  Everyone access: 0x%lx\n"
+                    "  Users access: 0x%lx\n"
+                    "  Authenticated Users access: 0x%lx\n"
+                    "  This allows unprivileged users to inject malicious keys.\n"
+                    "  Fix: Use system-protected paths like:\n"
+                    "    C:\\Program Files\\HDF_Group\\HDF5\\trusted_keys\n"
+                    "  Or configure directory ACLs to allow write access only for Administrators:\n"
+                    "    icacls \"%s\" /inheritance:r /grant Administrators:F",
+                    dir_path, (unsigned long)everyoneAccess, (unsigned long)usersAccess,
+                    (unsigned long)authUsersAccess, dir_path);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__validate_directory_permissions() */
+#endif /* H5_HAVE_WIN32_API */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__load_keys_from_directory
@@ -606,15 +626,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_HAVE_WIN32_API
 static herr_t
 H5PL__load_keys_from_directory(const char *dir_path)
 {
-#ifdef H5_HAVE_WIN32_API
-    H5PL_HANDLE dir_handle = INVALID_HANDLE_VALUE;
-#else
-    H5PL_HANDLE dir_handle = NULL;
-#endif
-    herr_t ret_value = SUCCEED;
+    DIR           *dir       = NULL;
+    struct dirent *entry     = NULL;
+    size_t         dirlen    = 0;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -624,7 +643,91 @@ H5PL__load_keys_from_directory(const char *dir_path)
     if (H5PL__validate_directory_permissions(dir_path) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore directory validation failed");
 
-#ifdef H5_HAVE_WIN32_API
+    /* Open directory */
+    if (NULL == (dir = opendir(dir_path))) {
+        /* Non-existent directory is an error */
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "cannot open keystore directory: %s", dir_path);
+    }
+
+    dirlen = strlen(dir_path);
+
+    /* Iterate through directory entries */
+    while (NULL != (entry = readdir(dir))) {
+        char     *file_path = NULL;
+        EVP_PKEY *key       = NULL;
+        size_t    namelen   = strlen(entry->d_name);
+        size_t    path_len;
+
+        /* Skip . and .. */
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        /* Only process .pem files */
+        if (namelen < 5 || strcmp(entry->d_name + namelen - 4, ".pem") != 0)
+            continue;
+
+        /* Build full path */
+        path_len = dirlen + namelen + 2;
+        if (NULL == (file_path = (char *)H5MM_malloc(path_len))) {
+            fprintf(stderr, "WARNING: Cannot allocate path buffer for %s\n", entry->d_name);
+            continue;
+        }
+
+        snprintf(file_path, path_len, "%s/%s", dir_path, entry->d_name);
+
+        /* Skip symlinks */
+        {
+            h5_stat_t file_stat;
+            if (HDlstat(file_path, &file_stat) < 0) {
+                fprintf(stderr, "WARNING: Cannot stat key file %s: %s\n", file_path, strerror(errno));
+                H5MM_xfree(file_path);
+                continue;
+            }
+
+            if (S_ISLNK(file_stat.st_mode)) {
+                fprintf(stderr, "WARNING: Skipping symlink %s (security policy)\n", file_path);
+                H5MM_xfree(file_path);
+                continue;
+            }
+        }
+
+        /* Try to load key */
+        if (NULL != (key = H5PL__create_public_RSA_from_file(file_path))) {
+            /* Add to keystore */
+            if (H5PL__add_key_to_keystore(key, file_path) < 0) {
+                EVP_PKEY_free(key);
+                H5MM_xfree(file_path);
+                closedir(dir);
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add key to keystore");
+            }
+            /* Key ownership transferred to keystore */
+        }
+        /* Skip files that fail to load (invalid PEM, etc.) */
+
+        /* Clean up file path */
+        H5MM_xfree(file_path);
+    }
+
+    closedir(dir);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__load_keys_from_directory() */
+#else  /* H5_HAVE_WIN32_API */
+static herr_t
+H5PL__load_keys_from_directory(const char *dir_path)
+{
+    HANDLE dir_handle = INVALID_HANDLE_VALUE;
+    herr_t ret_value  = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(dir_path);
+
+    /* Validate directory permissions */
+    if (H5PL__validate_directory_permissions(dir_path) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore directory validation failed");
+
     {
         WIN32_FIND_DATAA find_data;
         char             search_pattern[MAX_PATH];
@@ -666,89 +769,14 @@ H5PL__load_keys_from_directory(const char *dir_path)
 
         } while (FindNextFileA(dir_handle, &find_data) != 0);
     }
-#else
-    {
-        DIR           *dir    = NULL;
-        struct dirent *entry  = NULL;
-        size_t         dirlen = 0;
-
-        /* Open directory */
-        if (NULL == (dir = opendir(dir_path))) {
-            /* Non-existent directory is an error */
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "cannot open keystore directory: %s", dir_path);
-        }
-
-        dirlen = strlen(dir_path);
-
-        /* Iterate through directory entries */
-        while (NULL != (entry = readdir(dir))) {
-            char     *file_path = NULL;
-            EVP_PKEY *key       = NULL;
-            size_t    namelen   = strlen(entry->d_name);
-            size_t    path_len;
-
-            /* Skip . and .. */
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-                continue;
-
-            /* Only process .pem files */
-            if (namelen < 5 || strcmp(entry->d_name + namelen - 4, ".pem") != 0)
-                continue;
-
-            /* Build full path */
-            path_len = dirlen + namelen + 2;
-            if (NULL == (file_path = (char *)H5MM_malloc(path_len))) {
-                fprintf(stderr, "WARNING: Cannot allocate path buffer for %s\n", entry->d_name);
-                continue;
-            }
-
-            snprintf(file_path, path_len, "%s/%s", dir_path, entry->d_name);
-
-            /* Skip symlinks */
-            {
-                h5_stat_t file_stat;
-                if (HDlstat(file_path, &file_stat) < 0) {
-                    fprintf(stderr, "WARNING: Cannot stat key file %s: %s\n", file_path, strerror(errno));
-                    H5MM_xfree(file_path);
-                    continue;
-                }
-
-                if (S_ISLNK(file_stat.st_mode)) {
-                    fprintf(stderr, "WARNING: Skipping symlink %s (security policy)\n", file_path);
-                    H5MM_xfree(file_path);
-                    continue;
-                }
-            }
-
-            /* Try to load key */
-            if (NULL != (key = H5PL__create_public_RSA_from_file(file_path))) {
-                /* Add to keystore */
-                if (H5PL__add_key_to_keystore(key, file_path) < 0) {
-                    EVP_PKEY_free(key);
-                    H5MM_xfree(file_path);
-                    closedir(dir);
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add key to keystore");
-                }
-                /* Key ownership transferred to keystore */
-            }
-            /* Skip files that fail to load (invalid PEM, etc.) */
-
-            /* Clean up file path */
-            H5MM_xfree(file_path);
-        }
-
-        closedir(dir);
-    }
-#endif
 
 done:
-#ifdef H5_HAVE_WIN32_API
     if (dir_handle != INVALID_HANDLE_VALUE)
         FindClose(dir_handle);
-#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__load_keys_from_directory() */
+#endif /* H5_HAVE_WIN32_API */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__is_keystore_locked
@@ -775,24 +803,11 @@ H5PL__is_keystore_locked(void)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#ifndef H5_HAVE_WIN32_API
-    /* Unix/Linux: Check for /etc/hdf5/lock_keystore */
-    if (HDstat("/etc/hdf5/lock_keystore", &st) == 0) {
+    if (HDstat(H5PL_SIG_LOCK_FILE_PATH, &st) == 0) {
         ret_value = true;
-#ifdef H5PL_DEBUG_KEYSTORE
-        fprintf(stderr, "HDF5 KeyStore: Environment variable override disabled by /etc/hdf5/lock_keystore\n");
-#endif
+        H5PL_SIG_DEBUG_PRINT("HDF5 KeyStore: Environment variable override disabled by %s\n",
+                              H5PL_SIG_LOCK_FILE_PATH);
     }
-#else
-    /* Windows: Check for C:\ProgramData\HDF_Group\HDF5\lock_keystore */
-    if (HDstat("C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore", &st) == 0) {
-        ret_value = true;
-#ifdef H5PL_DEBUG_KEYSTORE
-        fprintf(stderr, "HDF5 KeyStore: Environment variable override disabled by "
-                        "C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore\n");
-#endif
-    }
-#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__is_keystore_locked() */
@@ -846,12 +861,10 @@ H5PL__init_keystore(void)
             }
         }
     }
-#ifdef H5PL_DEBUG_KEYSTORE
     else {
-        fprintf(stderr,
-                "HDF5 KeyStore: Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)\n");
+        H5PL_SIG_DEBUG_PRINT(
+            "HDF5 KeyStore: Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)\n");
     }
-#endif
 #else
     /* Environment variable override disabled at compile time (security hardening) */
     env_keystore = NULL; /* Suppress unused variable warning */
@@ -895,13 +908,8 @@ H5PL__init_keystore(void)
 
     /* Must have at least one key */
     if (!keys_loaded || H5PL_keystore_count_g == 0) {
-        const char *attempted_source = env_keystore ? env_keystore :
-#ifdef H5PL_KEYSTORE_DIR
-                                                    H5PL_KEYSTORE_DIR
-#else
-                                                    "(none configured)"
-#endif
-            ;
+        const char *attempted_source =
+            env_keystore ? env_keystore : H5PL_SIG_KEYSTORE_DIR_STR;
 
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
                     "no valid public keys found for plugin signature verification\n"
@@ -923,14 +931,14 @@ H5PL__init_keystore(void)
 #ifdef H5PL_DEBUG_KEYSTORE
     /* Optional debug output (enable via compile-time flag) */
     if (H5PL_keystore_count_g > 0) {
-        fprintf(stderr, "HDF5 Plugin KeyStore initialized:\n");
-        fprintf(stderr, "  Keys loaded: %zu\n", H5PL_keystore_count_g);
+        H5PL_SIG_DEBUG_PRINT("HDF5 Plugin KeyStore initialized:\n");
+        H5PL_SIG_DEBUG_PRINT("  Keys loaded: %zu\n", H5PL_keystore_count_g);
         for (size_t i = 0; i < H5PL_keystore_count_g; i++) {
-            fprintf(stderr, "  [%zu] %s\n", i + 1, H5PL_keystore_g[i].source);
+            H5PL_SIG_DEBUG_PRINT("  [%zu] %s\n", i + 1, H5PL_keystore_g[i].source);
         }
     }
     if (H5PL_revoked_sigs_count_g > 0) {
-        fprintf(stderr, "  Revoked signatures loaded: %zu\n", H5PL_revoked_sigs_count_g);
+        H5PL_SIG_DEBUG_PRINT("  Revoked signatures loaded: %zu\n", H5PL_revoked_sigs_count_g);
     }
 #endif
 
@@ -1718,13 +1726,8 @@ H5PL__verify_signature_appended(const char *plugin_path)
 
             /* Get KeyStore path for error message */
             const char *keystore_path = getenv("HDF5_PLUGIN_KEYSTORE");
-            if (keystore_path == NULL) {
-#ifdef H5PL_KEYSTORE_DIR
-                keystore_path = H5PL_KEYSTORE_DIR;
-#else
-                keystore_path = "(not configured - using embedded key)";
-#endif
-            }
+            if (keystore_path == NULL)
+                keystore_path = H5PL_SIG_KEYSTORE_DIR_STR;
 
             HGOTO_ERROR(
                 H5E_PLUGIN, H5E_BADVALUE, FAIL,
