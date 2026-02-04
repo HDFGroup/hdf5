@@ -3,8 +3,12 @@ name: "CodeQL"
 on:
   push:
     branches: [ "develop" ]
+    paths-ignore:
+      - '**.md'
   pull_request:
     branches: [ "develop" ]
+    paths-ignore:
+      - '**.md'
   schedule:
     - cron: "16 7 * * 0"
   workflow_dispatch:  # Allow manual triggering
