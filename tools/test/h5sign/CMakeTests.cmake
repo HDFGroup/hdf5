@@ -109,7 +109,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-sign_medium_verbose PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public"
+    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-unsigned"
   )
 
   # Test 5: Sign a large plugin
