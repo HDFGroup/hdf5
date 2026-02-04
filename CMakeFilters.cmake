@@ -235,7 +235,7 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
             # Libaec::aec and libsz::sz are ALIAS targets if libaec is built via CMake
             get_target_property(AEC_ALIASED ${AEC_TARGET} ALIASED_TARGET)
             if(AEC_ALIASED)
-                set(AEC_TARGET ${AEC_ALIASED})
+              set(AEC_TARGET ${AEC_ALIASED})
             endif()
             set_target_properties(${AEC_TARGET} PROPERTIES OUTPUT_NAME ${libname})
           endforeach()
