@@ -189,12 +189,6 @@
 /* Define to 1 if you have the `dl' library (-ldl). */
 #cmakedefine H5_HAVE_LIBDL @H5_HAVE_LIBDL@
 
-/* Define to 1 if you have the `gpgme' library (-lgpgme). */
-//#cmakedefine H5_HAVE_GPGME @H5_HAVE_GPGME@
-
-/* Define to 1 if you have the `gpg-error' library (-lgpg-error). */
-//#cmakedefine H5_HAVE_GPG-ERROR @H5_HAVE_GPG-ERROR@
-
 /* Proceed to build with libhdfs */
 #cmakedefine H5_HAVE_LIBHDFS @H5_HAVE_LIBHDFS@
 

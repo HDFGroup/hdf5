@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5LS C)
 
+# Include plugin signing helper function
+include(${HDF5_SOURCE_DIR}/config/cmake/SignPlugin.cmake)
+
 # CMake configuration for building and testing the h5ls tool
 # Configures dynamic plugin library for h5ls if shared builds are enabled
 # Sets up include directories, linking, and formatting for plugin targets
@@ -45,20 +48,7 @@ if (BUILD_SHARED_LIBS)
   #-----------------------------------------------------------------------------
   # Sign the plugin if signature verification is enabled
   #-----------------------------------------------------------------------------
-  if (HDF5_REQUIRE_SIGNED_PLUGINS)
-    # Ensure h5sign is built before the plugin target
-    add_dependencies (${H5LS_TOOL_PLUGIN_LIB_TARGET} h5sign)
-
-    add_custom_command (
-        TARGET     ${H5LS_TOOL_PLUGIN_LIB_TARGET}
-        POST_BUILD
-        COMMAND    $<TARGET_FILE:h5sign>
-        ARGS       -p "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5LS_TOOL_PLUGIN_LIB_TARGET}>"
-                   -k "${CMAKE_BINARY_DIR}/private.pem"
-        DEPENDS    h5sign
-        COMMENT    "Signing test plugin ${H5LS_TOOL_PLUGIN_LIB_TARGET} for signature verification"
-    )
-  endif ()
+  sign_plugin_target(${H5LS_TOOL_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/plugins")
 endif ()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)

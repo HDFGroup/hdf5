@@ -50,10 +50,6 @@
 /* Name of tool */
 #define PROGRAMNAME "h5sign"
 
-/* Hash algorithm for signing (SHA-256) */
-#define HASH_ALGORITHM    EVP_sha256()
-#define HASH_ALGORITHM_ID H5PL_SIG_ALGO_SHA256
-
 /* Maximum plugin file size (1GB - prevents unreasonable allocations) */
 #define MAX_PLUGIN_SIZE ((hsize_t)(1024ULL * 1024ULL * 1024ULL))
 
@@ -63,16 +59,18 @@
 /* Global options */
 static char *plugin_file  = NULL;
 static char *privkey_file = NULL;
+static char *opt_algorithm = NULL;
 static int   opt_verbose  = 0;
 
 /*
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char            *s_opts   = "hp:k:vV";
+static const char            *s_opts   = "hp:k:a:vV";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"plugin", require_arg, 'p'},
                                           {"key", require_arg, 'k'},
+                                          {"algorithm", require_arg, 'a'},
                                           {"verbose", no_arg, 'v'},
                                           {NULL, 0, '\0'}};
 
@@ -97,6 +95,9 @@ usage(const char *prog)
     fprintf(rawoutstream, "  -k, --key <file>        RSA private key in PEM format\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "OTHER OPTIONS\n");
+    fprintf(rawoutstream, "  -a, --algorithm <alg>   Hash algorithm: sha256, sha384, sha512,\n");
+    fprintf(rawoutstream, "                          sha256-pss, sha384-pss, sha512-pss\n");
+    fprintf(rawoutstream, "                          (default: sha256)\n");
     fprintf(rawoutstream, "  -v, --verbose           Verbose output (show signature details)\n");
     fprintf(rawoutstream, "  -h, --help              Print this help message\n");
     fprintf(rawoutstream, "  -V                      Print HDF5 library version\n");
@@ -106,15 +107,18 @@ usage(const char *prog)
     fprintf(rawoutstream, "  allows HDF5 to verify the plugin's authenticity when loading.\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "  The plugin file is modified in-place by appending:\n");
-    fprintf(rawoutstream, "    1. RSA signature of the plugin binary (SHA-256 hash)\n");
+    fprintf(rawoutstream, "    1. RSA signature of the plugin binary (configurable hash algorithm)\n");
     fprintf(rawoutstream, "    2. Footer with signature metadata and magic number\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "  The binary loader ignores trailing data, so the signed plugin\n");
     fprintf(rawoutstream, "  loads normally on all platforms.\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "EXAMPLES\n");
-    fprintf(rawoutstream, "  # Sign a plugin with a private key\n");
+    fprintf(rawoutstream, "  # Sign a plugin with a private key (default SHA-256)\n");
     fprintf(rawoutstream, "  %s -p libmyplugin.so -k private.pem\n", prog);
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "  # Sign with SHA-512 hash algorithm\n");
+    fprintf(rawoutstream, "  %s -p libmyplugin.so -k private.pem -a sha512\n", prog);
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "  # Sign with verbose output\n");
     fprintf(rawoutstream, "  %s -p libmyplugin.so -k private.pem -v\n", prog);
@@ -153,6 +157,8 @@ leave(int ret)
         free(plugin_file);
     if (privkey_file)
         free(privkey_file);
+    if (opt_algorithm)
+        free(opt_algorithm);
 
     h5tools_close();
     exit(ret);
@@ -184,6 +190,11 @@ parse_command_line(int argc, const char *const *argv)
                 if (privkey_file)
                     free(privkey_file);
                 privkey_file = strdup(H5_optarg);
+                break;
+            case 'a':
+                if (opt_algorithm)
+                    free(opt_algorithm);
+                opt_algorithm = strdup(H5_optarg);
                 break;
             case 'v':
                 opt_verbose = 1;
@@ -274,9 +285,54 @@ done:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    parse_algorithm_name
+ *
+ * Purpose:     Parse algorithm name string and return corresponding
+ *              EVP_MD and algorithm ID
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+parse_algorithm_name(const char *name, const EVP_MD **md_out, uint8_t *algo_id_out)
+{
+    if (HDstrcasecmp(name, "sha256") == 0) {
+        *md_out     = EVP_sha256();
+        *algo_id_out = H5PL_SIG_ALGO_SHA256;
+    }
+    else if (HDstrcasecmp(name, "sha384") == 0) {
+        *md_out     = EVP_sha384();
+        *algo_id_out = H5PL_SIG_ALGO_SHA384;
+    }
+    else if (HDstrcasecmp(name, "sha512") == 0) {
+        *md_out     = EVP_sha512();
+        *algo_id_out = H5PL_SIG_ALGO_SHA512;
+    }
+    else if (HDstrcasecmp(name, "sha256-pss") == 0) {
+        *md_out     = EVP_sha256();
+        *algo_id_out = H5PL_SIG_ALGO_SHA256_PSS;
+    }
+    else if (HDstrcasecmp(name, "sha384-pss") == 0) {
+        *md_out     = EVP_sha384();
+        *algo_id_out = H5PL_SIG_ALGO_SHA384_PSS;
+    }
+    else if (HDstrcasecmp(name, "sha512-pss") == 0) {
+        *md_out     = EVP_sha512();
+        *algo_id_out = H5PL_SIG_ALGO_SHA512_PSS;
+    }
+    else {
+        fprintf(rawerrorstream, "Error: Unknown algorithm '%s'\n", name);
+        fprintf(rawerrorstream, "Supported: sha256, sha384, sha512, sha256-pss, sha384-pss, sha512-pss\n");
+        return FAIL;
+    }
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    sign_plugin_file
  *
- * Purpose:     Sign a plugin file by computing SHA-256 hash and creating
+ * Purpose:     Sign a plugin file by computing hash and creating
  *              RSA signature, then appending signature and footer to file
  *
  * Return:      Success: SUCCEED
@@ -284,7 +340,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key)
+sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *hash_algorithm,
+                 uint8_t algorithm_id)
 {
     int               fd = -1;
     h5_stat_t         st;
@@ -347,14 +404,36 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key)
         goto done;
     }
 
-    /* Initialize signing context with SHA-256 */
-    if (1 != EVP_DigestSignInit(mdctx, &pkey_ctx, HASH_ALGORITHM, NULL, private_key)) {
+    /* Initialize signing context with selected hash algorithm */
+    if (1 != EVP_DigestSignInit(mdctx, &pkey_ctx, hash_algorithm, NULL, private_key)) {
         unsigned long ssl_err = ERR_get_error();
         char          err_buf[256];
         ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
         fprintf(rawerrorstream, "Error: Cannot initialize signing context: %s\n", err_buf);
         ret_value = FAIL;
         goto done;
+    }
+
+    /* Configure PSS padding if needed */
+    if (algorithm_id == H5PL_SIG_ALGO_SHA256_PSS || algorithm_id == H5PL_SIG_ALGO_SHA384_PSS ||
+        algorithm_id == H5PL_SIG_ALGO_SHA512_PSS) {
+        if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
+            unsigned long ssl_err = ERR_get_error();
+            char          err_buf[256];
+            ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
+            fprintf(rawerrorstream, "Error: Cannot set PSS padding: %s\n", err_buf);
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_DIGEST)) {
+            unsigned long ssl_err = ERR_get_error();
+            char          err_buf[256];
+            ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
+            fprintf(rawerrorstream, "Error: Cannot set PSS salt length: %s\n", err_buf);
+            ret_value = FAIL;
+            goto done;
+        }
     }
 
     /* Allocate buffer for reading file in chunks */
@@ -496,7 +575,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key)
         /* Encode signature length as little-endian uint32 */
         UINT32ENCODE(p, (uint32_t)sig_len);
         /* Encode algorithm ID (1 byte) */
-        *p++ = HASH_ALGORITHM_ID;
+        *p++ = algorithm_id;
         /* Encode format version (1 byte, v1.0 = 1) */
         *p++ = 1;
         /* Encode reserved bytes (2 bytes, must be 0) */
@@ -544,7 +623,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key)
             break;
     }
     fprintf(rawoutstream, "  Signature size: %zu bytes\n", sig_len);
-    fprintf(rawoutstream, "  Footer size:    8 bytes\n");
+    fprintf(rawoutstream, "  Footer size:    %d bytes\n", H5PL_SIG_FOOTER_SIZE);
     fprintf(rawoutstream, "  Final size:     %llu bytes\n",
             (unsigned long long)(file_size + sig_len + H5PL_SIG_FOOTER_SIZE));
     fprintf(rawoutstream, "\n");
@@ -579,8 +658,10 @@ done:
 int
 main(int argc, char *argv[])
 {
-    EVP_PKEY *private_key = NULL;
-    int       ret_value   = EXIT_SUCCESS;
+    EVP_PKEY      *private_key    = NULL;
+    const EVP_MD  *hash_algorithm = NULL;
+    uint8_t        algorithm_id   = 0;
+    int            ret_value      = EXIT_SUCCESS;
 
     /* Initialize HDF5 tools infrastructure */
     h5tools_setprogname(PROGRAMNAME);
@@ -598,6 +679,21 @@ main(int argc, char *argv[])
     fprintf(rawoutstream, "HDF5 Plugin Signature Tool\n");
     fprintf(rawoutstream, "===========================\n\n");
 
+    /* Parse algorithm option or use default */
+    if (opt_algorithm) {
+        if (parse_algorithm_name(opt_algorithm, &hash_algorithm, &algorithm_id) < 0) {
+            ret_value = EXIT_FAILURE;
+            goto done;
+        }
+        fprintf(rawoutstream, "Using hash algorithm: %s\n", opt_algorithm);
+    }
+    else {
+        /* Default: SHA-256 with PKCS1 */
+        hash_algorithm = EVP_sha256();
+        algorithm_id   = H5PL_SIG_ALGO_SHA256;
+        fprintf(rawoutstream, "Using default hash algorithm: sha256\n");
+    }
+
     /* Read private key */
     fprintf(rawoutstream, "Reading private key from '%s'...\n", privkey_file);
     if (NULL == (private_key = read_private_key(privkey_file))) {
@@ -608,7 +704,7 @@ main(int argc, char *argv[])
 
     /* Sign the plugin */
     fprintf(rawoutstream, "Signing plugin '%s'...\n\n", plugin_file);
-    if (sign_plugin_file(plugin_file, private_key) < 0) {
+    if (sign_plugin_file(plugin_file, private_key, hash_algorithm, algorithm_id) < 0) {
         ret_value = EXIT_FAILURE;
         goto done;
     }

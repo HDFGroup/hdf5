@@ -7,6 +7,9 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_TEST C)
 
+# Include plugin signing helper function
+include(${HDF5_SOURCE_DIR}/config/cmake/SignPlugin.cmake)
+
 #-----------------------------------------------------------------------------
 # Generate the H5srcdir_str.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
@@ -236,20 +239,7 @@ if (BUILD_SHARED_LIBS)
     #-----------------------------------------------------------------------------
     # Sign the filter plugin if signature verification is enabled
     #-----------------------------------------------------------------------------
-    if (HDF5_REQUIRE_SIGNED_PLUGINS)
-      # Ensure h5sign is built before the plugin target
-      add_dependencies (${HDF5_TEST_PLUGIN_TARGET} h5sign)
-
-      add_custom_command (
-          TARGET     ${HDF5_TEST_PLUGIN_TARGET}
-          POST_BUILD
-          COMMAND    $<TARGET_FILE:h5sign>
-          ARGS       -p "${CMAKE_BINARY_DIR}/filter_plugin_dir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
-                     -k "${CMAKE_BINARY_DIR}/private.pem"
-          DEPENDS    h5sign
-          COMMENT    "Signing test plugin ${HDF5_TEST_PLUGIN_TARGET} for signature verification"
-      )
-    endif ()
+    sign_plugin_target(${HDF5_TEST_PLUGIN_TARGET} "${CMAKE_BINARY_DIR}/filter_plugin_dir1")
   endforeach ()
 
   foreach (plugin_name ${FILTER_PLUGINS_FOR_DIR2})
@@ -286,20 +276,7 @@ if (BUILD_SHARED_LIBS)
     #-----------------------------------------------------------------------------
     # Sign the filter plugin if signature verification is enabled
     #-----------------------------------------------------------------------------
-    if (HDF5_REQUIRE_SIGNED_PLUGINS)
-      # Ensure h5sign is built before the plugin target
-      add_dependencies (${HDF5_TEST_PLUGIN_TARGET} h5sign)
-
-      add_custom_command (
-          TARGET     ${HDF5_TEST_PLUGIN_TARGET}
-          POST_BUILD
-          COMMAND    $<TARGET_FILE:h5sign>
-          ARGS       -p "${CMAKE_BINARY_DIR}/filter_plugin_dir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
-                     -k "${CMAKE_BINARY_DIR}/private.pem"
-          DEPENDS    h5sign
-          COMMENT    "Signing test plugin ${HDF5_TEST_PLUGIN_TARGET} for signature verification"
-      )
-    endif ()
+    sign_plugin_target(${HDF5_TEST_PLUGIN_TARGET} "${CMAKE_BINARY_DIR}/filter_plugin_dir2")
   endforeach ()
 
   #################################################################################
@@ -348,20 +325,7 @@ if (BUILD_SHARED_LIBS)
     #-----------------------------------------------------------------------------
     # Sign the VFD plugin if signature verification is enabled
     #-----------------------------------------------------------------------------
-    if (HDF5_REQUIRE_SIGNED_PLUGINS)
-      # Ensure h5sign is built before the plugin target
-      add_dependencies (${HDF5_VFD_PLUGIN_LIB_TARGET} h5sign)
-
-      add_custom_command (
-          TARGET     ${HDF5_VFD_PLUGIN_LIB_TARGET}
-          POST_BUILD
-          COMMAND    $<TARGET_FILE:h5sign>
-          ARGS       -p "${CMAKE_BINARY_DIR}/null_vfd_plugin_dir/$<TARGET_FILE_NAME:${HDF5_VFD_PLUGIN_LIB_TARGET}>"
-                     -k "${CMAKE_BINARY_DIR}/private.pem"
-          DEPENDS    h5sign
-          COMMENT    "Signing test VFD plugin ${HDF5_VFD_PLUGIN_LIB_TARGET} for signature verification"
-      )
-    endif ()
+    sign_plugin_target(${HDF5_VFD_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/null_vfd_plugin_dir")
   endforeach ()
 
   #################################################################################
@@ -410,20 +374,7 @@ if (BUILD_SHARED_LIBS)
     #-----------------------------------------------------------------------------
     # Sign the VOL plugin if signature verification is enabled
     #-----------------------------------------------------------------------------
-    if (HDF5_REQUIRE_SIGNED_PLUGINS)
-      # Ensure h5sign is built before the plugin target
-      add_dependencies (${HDF5_VOL_PLUGIN_LIB_TARGET} h5sign)
-
-      add_custom_command (
-          TARGET     ${HDF5_VOL_PLUGIN_LIB_TARGET}
-          POST_BUILD
-          COMMAND    $<TARGET_FILE:h5sign>
-          ARGS       -p "${CMAKE_BINARY_DIR}/null_vol_plugin_dir/$<TARGET_FILE_NAME:${HDF5_VOL_PLUGIN_LIB_TARGET}>"
-                     -k "${CMAKE_BINARY_DIR}/private.pem"
-          DEPENDS    h5sign
-          COMMENT    "Signing test VOL plugin ${HDF5_VOL_PLUGIN_LIB_TARGET} for signature verification"
-      )
-    endif ()
+    sign_plugin_target(${HDF5_VOL_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/null_vol_plugin_dir")
   endforeach ()
 endif ()
 

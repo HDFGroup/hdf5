@@ -791,6 +791,10 @@ option (HDF5_REQUIRE_SIGNED_PLUGINS "Require digitally signed plugins" OFF)
 # KeyStore directory for multiple trusted public keys (recommended)
 set(HDF5_PLUGIN_KEYSTORE_DIR "" CACHE PATH
     "Directory containing trusted public keys (.pem files) for plugin verification")
+# Security Note: For production deployments where environment variables may be
+# controllable by untrusted users (e.g., HPC clusters, multi-tenant systems),
+# consider enabling HDF5_LOCK_PLUGIN_KEYSTORE to prevent runtime override of
+# the keystore directory via the HDF5_PLUGIN_KEYSTORE environment variable.
 
 # Path to public key file for plugin signature verification (backward compatibility)
 set(HDF5_PLUGIN_PUBLIC_KEY_FILE "" CACHE FILEPATH
@@ -798,6 +802,10 @@ set(HDF5_PLUGIN_PUBLIC_KEY_FILE "" CACHE FILEPATH
 
 # Debug output for KeyStore (helps troubleshoot key loading issues)
 option(HDF5_PLUGIN_KEYSTORE_DEBUG "Enable debug output for plugin KeyStore initialization" OFF)
+
+# Security: Disable environment variable override (prevents runtime keystore redirection)
+option(HDF5_LOCK_PLUGIN_KEYSTORE "Disable HDF5_PLUGIN_KEYSTORE environment variable override (security hardening)" OFF)
+mark_as_advanced(HDF5_LOCK_PLUGIN_KEYSTORE)
 
 if (HDF5_REQUIRE_SIGNED_PLUGINS)
   # Find OpenSSL for RSA signature verification
@@ -930,6 +938,12 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
   if (HDF5_PLUGIN_KEYSTORE_DEBUG)
     add_compile_definitions(H5PL_DEBUG_KEYSTORE)
     message(STATUS "Plugin KeyStore debug output: ENABLED")
+  endif ()
+
+  # Security: Disable environment variable override if requested
+  if (HDF5_LOCK_PLUGIN_KEYSTORE)
+    add_compile_definitions(H5PL_DISABLE_ENV_KEYSTORE)
+    message(STATUS "HDF5_PLUGIN_KEYSTORE environment variable override: DISABLED (security hardening)")
   endif ()
 
   # Add OpenSSL to link libraries for the HDF5 library

@@ -156,14 +156,22 @@ append_bad_signature(const char *plugin_path)
 
     /* Write footer with correct format but pointing to bad signature */
     footer.signature_length = sizeof(bad_signature);
+    footer.algorithm_id     = H5PL_SIG_ALGO_SHA256;
+    footer.format_version   = 1;
+    footer.reserved         = 0;
     footer.magic            = H5PL_SIG_MAGIC;
 
-    /* Encode footer in little-endian (as expected by verification code) */
+    /* Encode footer in little-endian (as expected by verification code)
+     * On-disk layout (12 bytes): [sig_len:4][algo_id:1][format_ver:1][reserved:2][magic:4]
+     */
     {
-        unsigned char  footer_bytes[8];
+        unsigned char  footer_bytes[H5PL_SIG_FOOTER_SIZE];
         unsigned char *p = footer_bytes;
 
         UINT32ENCODE(p, footer.signature_length);
+        *p++ = footer.algorithm_id;
+        *p++ = footer.format_version;
+        UINT16ENCODE(p, footer.reserved);
         UINT32ENCODE(p, footer.magic);
 
         if (HDwrite(fd, footer_bytes, sizeof(footer_bytes)) < 0) {
@@ -189,7 +197,7 @@ static herr_t
 append_corrupt_footer(const char *plugin_path)
 {
     int            fd;
-    unsigned char  footer_bytes[8];
+    unsigned char  footer_bytes[H5PL_SIG_FOOTER_SIZE];
     unsigned char *p         = footer_bytes;
     herr_t         ret_value = SUCCEED;
 
@@ -198,9 +206,14 @@ append_corrupt_footer(const char *plugin_path)
         return FAIL;
     }
 
-    /* Write footer with wrong magic number */
-    UINT32ENCODE(p, 256);        /* Signature length */
-    UINT32ENCODE(p, 0xDEADBEEF); /* Wrong magic */
+    /* Write footer with wrong magic number
+     * On-disk layout (12 bytes): [sig_len:4][algo_id:1][format_ver:1][reserved:2][magic:4]
+     */
+    UINT32ENCODE(p, (uint32_t)256);  /* Signature length */
+    *p++ = H5PL_SIG_ALGO_SHA256;     /* Algorithm ID */
+    *p++ = 1;                        /* Format version */
+    UINT16ENCODE(p, (uint16_t)0);    /* Reserved */
+    UINT32ENCODE(p, 0xDEADBEEF);     /* Wrong magic */
 
     if (HDwrite(fd, footer_bytes, sizeof(footer_bytes)) < 0) {
         fprintf(stderr, "Failed to write corrupt footer\n");
