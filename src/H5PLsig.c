@@ -476,13 +476,16 @@ H5PL__validate_directory_permissions(const char *dir_path)
         PACL                     pDACL        = NULL;
         PSID                     pSidEveryone = NULL;
         PSID                     pSidUsers    = NULL;
+        PSID                     pSidAuthUsers = NULL;
         SID_IDENTIFIER_AUTHORITY SIDAuthWorld = SECURITY_WORLD_SID_AUTHORITY;
         SID_IDENTIFIER_AUTHORITY SIDAuthNT    = SECURITY_NT_AUTHORITY;
         DWORD                    dwRes        = 0;
         TRUSTEE                  trusteeEveryone;
         TRUSTEE                  trusteeUsers;
+        TRUSTEE                  trusteeAuthUsers;
         ACCESS_MASK              everyoneAccess       = 0;
         ACCESS_MASK              usersAccess          = 0;
+        ACCESS_MASK              authUsersAccess      = 0;
         BOOL                     hasUnsafePermissions = FALSE;
 
         /* Get the security descriptor for the directory */
@@ -496,7 +499,7 @@ H5PL__validate_directory_permissions(const char *dir_path)
                         dir_path, (unsigned long)dwRes);
         }
 
-        /* Create SIDs for "Everyone" and "Users" groups */
+        /* Create SIDs for "Everyone", "Users", and "Authenticated Users" groups */
         if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0,
                                       &pSidEveryone)) {
             LocalFree(pSD);
@@ -510,9 +513,19 @@ H5PL__validate_directory_permissions(const char *dir_path)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Users SID");
         }
 
-        /* Check effective permissions for "Everyone" and "Users" groups */
+        if (!AllocateAndInitializeSid(&SIDAuthNT, 1, SECURITY_AUTHENTICATED_USER_RID, 0, 0, 0, 0, 0, 0, 0,
+                                      &pSidAuthUsers)) {
+            FreeSid(pSidEveryone);
+            FreeSid(pSidUsers);
+            LocalFree(pSD);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL,
+                        "SECURITY ERROR: Cannot create Authenticated Users SID");
+        }
+
+        /* Check effective permissions for "Everyone", "Users", and "Authenticated Users" groups */
         BuildTrusteeWithSidA(&trusteeEveryone, pSidEveryone);
         BuildTrusteeWithSidA(&trusteeUsers, pSidUsers);
+        BuildTrusteeWithSidA(&trusteeAuthUsers, pSidAuthUsers);
 
         dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeEveryone, &everyoneAccess);
         if (dwRes == ERROR_SUCCESS) {
@@ -532,9 +545,19 @@ H5PL__validate_directory_permissions(const char *dir_path)
             }
         }
 
+        dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeAuthUsers, &authUsersAccess);
+        if (dwRes == ERROR_SUCCESS) {
+            /* Check if Authenticated Users group has write access */
+            if (authUsersAccess &
+                (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
+                hasUnsafePermissions = TRUE;
+            }
+        }
+
         /* Clean up Windows security resources */
         FreeSid(pSidEveryone);
         FreeSid(pSidUsers);
+        FreeSid(pSidAuthUsers);
         LocalFree(pSD);
 
         /* SECURITY: Fail if directory has unsafe permissions */
@@ -544,12 +567,14 @@ H5PL__validate_directory_permissions(const char *dir_path)
                         "  The directory is writable by non-administrators.\n"
                         "  Everyone access: 0x%lx\n"
                         "  Users access: 0x%lx\n"
+                        "  Authenticated Users access: 0x%lx\n"
                         "  This allows unprivileged users to inject malicious keys.\n"
                         "  Fix: Use system-protected paths like:\n"
                         "    C:\\Program Files\\HDF_Group\\HDF5\\trusted_keys\n"
                         "  Or configure directory ACLs to allow write access only for Administrators:\n"
                         "    icacls \"%s\" /inheritance:r /grant Administrators:F",
-                        dir_path, (unsigned long)everyoneAccess, (unsigned long)usersAccess, dir_path);
+                        dir_path, (unsigned long)everyoneAccess, (unsigned long)usersAccess,
+                        (unsigned long)authUsersAccess, dir_path);
         }
     }
 #endif

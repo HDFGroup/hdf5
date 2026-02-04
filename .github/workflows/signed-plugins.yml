@@ -72,6 +72,10 @@ jobs:
 
     - name: Configure CMake
       run: |
+        EXTRA_FLAGS=""
+        if [ "${{ matrix.config.parallel }}" == "ON" ]; then
+          EXTRA_FLAGS="-DMPIEXEC_PREFLAGS=--oversubscribe"
+        fi
         cmake -B build \
           -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
           -DHDF5_REQUIRE_SIGNED_PLUGINS:BOOL=ON \
@@ -82,7 +86,8 @@ jobs:
           -DBUILD_TESTING:BOOL=ON \
           -DHDF5_BUILD_TOOLS:BOOL=ON \
           -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
-          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
+          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+          $EXTRA_FLAGS
 
     - name: Copy private key to build directory
       run: |
@@ -166,6 +171,7 @@ jobs:
           -DHDF5_REQUIRE_SIGNED_PLUGINS:BOOL=ON \
           -DHDF5_PLUGIN_PUBLIC_KEY_FILE="${PWD}/ci-test-public.pem" \
           -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+          -DMPIEXEC_PREFLAGS=--oversubscribe \
           -DBUILD_SHARED_LIBS:BOOL=ON \
           -DBUILD_TESTING:BOOL=ON \
           -DHDF5_BUILD_TOOLS:BOOL=ON \

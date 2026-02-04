@@ -25,11 +25,6 @@
 #include "H5FDprivate.h" /* File Drivers                         */
 #include "H5VLprivate.h" /* Virtual Object Layer                 */
 
-/* Digital signature support is implemented in H5PLsig.c, which includes
- * the necessary OpenSSL headers internally. No OpenSSL types are exposed
- * in this private header.
- */
-
 /**************************/
 /* Library Private Macros */
 /**************************/

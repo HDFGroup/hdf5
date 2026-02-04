@@ -308,9 +308,6 @@ export HDF5_PLUGIN_KEYSTORE=~/.hdf5/keystore
 # Try opening a file that uses the plugin
 # If successful, you should see no errors
 h5dump -H file_using_plugin.h5
-
-# For verbose verification output (if available)
-HDF5_PLUGIN_DEBUG=1 h5dump -H file_using_plugin.h5
 ```
 
 ### Step 5: Use HDF5 Normally
@@ -979,19 +976,16 @@ The current system makes conscious trade-offs:
    sha256sum my_plugin.so
    # Compare with checksum published on release page
 
-   # 3. Verify signature (HDF5 does this automatically, but can test manually)
-   h5sign -v my_plugin.so -k $HDF5_PLUGIN_KEYSTORE/developer_public.pem
+   # 3. Verify the public key is in your keystore
+   ls -la $HDF5_PLUGIN_KEYSTORE/developer_public.pem
 
-   # 4. Install only if BOTH checks pass
+   # 4. Install the plugin (HDF5 will verify signature automatically at load time)
    sudo cp my_plugin.so /usr/local/hdf5/lib/plugin/
    ```
 
    **Monitoring and Logging:**
    ```bash
-   # Enable verification logging (if needed)
-   export HDF5_PLUGIN_DEBUG=1
-
-   # Monitor for verification failures
+   # Monitor for verification failures in system logs
    grep "signature verification failed" /var/log/syslog
 
    # Check which plugins are loaded
@@ -1057,7 +1051,7 @@ The current system makes conscious trade-offs:
    # Email: security@hdfgroup.org
    ```
 
-3. **Keystore Directory Permissions**
+5. **Keystore Directory Permissions**
 
    Unix/Linux/macOS:
    ```bash
@@ -1115,7 +1109,7 @@ openssl rsa -pubin -in developer_public.pem -outform DER | sha256sum
 
 # 4. Check if plugin was actually signed
 hexdump -C my_plugin.so | tail -20
-# Look for H5PLSIG magic number: 53 49 47 35 4C 50 48
+# Look for HDF5 magic number at the end: 48 44 46 35
 ```
 
 #### 3. "SECURITY ERROR: keystore directory is world-writable"
@@ -1148,8 +1142,9 @@ chmod 700 $HDF5_PLUGIN_KEYSTORE
 
 **Solution**:
 ```bash
-# Check if plugin was signed
-h5sign --verify my_plugin.so
+# Check if plugin has signature magic number at the end
+hexdump -C my_plugin.so | tail -20
+# Look for HDF5 magic number: 48 44 46 35
 
 # If unsigned, sign it:
 h5sign -p my_plugin.so -k private_key.pem
@@ -1174,15 +1169,7 @@ source ~/.bashrc
 
 ### Getting Detailed Diagnostics
 
-Enable debug output for troubleshooting:
-
-```bash
-# Enable HDF5 plugin debugging
-export HDF5_PLUGIN_DEBUG=1
-
-# Run your application
-h5dump file.h5
-```
+For detailed diagnostics, check system logs or application error output. The HDF5 library provides detailed error messages when signature verification fails.
 
 ### Verification Test Suite
 
@@ -1218,7 +1205,7 @@ Signed plugins have this structure:
 │   - Algorithm ID (1B)       │
 │   - Format version (1B)     │
 │   - Reserved (2B)           │
-│   - Magic: H5PLSIG (4B)     │
+│   - Magic: HDF5 (4B)        │
 └─────────────────────────────┘
 ```
 
@@ -1275,7 +1262,7 @@ The signature system supports multiple algorithms:
 ## FAQ
 
 **Q: Do I need to sign plugins?**
-A: Only if your HDF5 library was built with `H5_REQUIRE_DIGITAL_SIGNATURE` enabled. Otherwise, signing is optional but recommended for security.
+A: Only if your HDF5 library was built with the CMake option `HDF5_REQUIRE_SIGNED_PLUGINS` enabled (which defines `H5_REQUIRE_DIGITAL_SIGNATURE` at compile time). Otherwise, signing is optional but recommended for security.
 
 **Q: Can I use the same key for multiple plugins?**
 A: Yes! You can use one key pair to sign all your plugins. Users only need your single public key.
