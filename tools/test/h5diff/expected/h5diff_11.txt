@@ -1,2 +1,4 @@
 dataset: </g1/dset1> and </g1/dset1>
 5 differences found
+Files do not have the same set of objects.
+Use -v for a list of objects.

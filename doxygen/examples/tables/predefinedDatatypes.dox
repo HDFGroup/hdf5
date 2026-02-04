@@ -66,6 +66,10 @@
 <td>#H5T_FLOAT_F6E3M2</td>
 <td>6-bit FP6 E3M2 (3 exponent bits, 2 mantissa bits) floating point</td>
 </tr>
+<tr>
+<td>#H5T_FLOAT_F4E2M1</td>
+<td>4-bit FP4 E2M1 (2 exponent bits, 1 mantissa bit) floating point</td>
+</tr>
 </table>
 //! [predefined_alt_float_datatypes_table]
  *

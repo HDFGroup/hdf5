@@ -26,7 +26,7 @@ jobs:
           #mpich
 
       - name: Checkout HDF5
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           path: hdf5
 
@@ -59,7 +59,7 @@ jobs:
           echo "PATH=${{ runner.workspace }}/hdf5_build/bin:${PATH}" >> $GITHUB_ENV
 
       - name: Checkout Log-based VOL
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: HDFGroup/vol-log-based
           path: vol-log-based

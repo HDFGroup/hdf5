@@ -3367,6 +3367,27 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
+    else if (!strcmp(buffer, "H5T_FLOAT_F4E2M1")) {
+        in->inputSize                      = 4;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("FLOAT")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
     else if (!strcmp(buffer, "H5T_VAX_F32")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
@@ -4224,6 +4245,25 @@ createOutputDataType(struct Input *in)
 
                 case 8:
                     switch (in->outputSize) {
+                        case 4:
+                            switch (in->outputByteOrder) {
+                                case -1:
+                                case 0:
+                                    new_type = H5Tcopy(H5T_FLOAT_F4E2M1);
+                                    /* Though not very useful, set order to BE as expected */
+                                    H5Tset_order(new_type, H5T_ORDER_BE);
+                                    break;
+
+                                case 1:
+                                    new_type = H5Tcopy(H5T_FLOAT_F4E2M1);
+                                    break;
+
+                                default:
+                                    (void)fprintf(stderr, "%s", err3);
+                                    return (-1);
+                            }
+                            break;
+
                         case 6:
                             /*
                              * NOTE: h5import does not currently have a way to specify
@@ -4679,6 +4719,20 @@ createInputDataType(struct Input *in)
 
                     case 8:
                         switch (in->inputSize) {
+                            case 4:
+                                switch (in->outputByteOrder) {
+                                    case -1:
+                                    case 0:
+                                    case 1:
+                                        new_type = H5Tcopy(H5T_FLOAT_F4E2M1);
+                                        break;
+
+                                    default:
+                                        (void)fprintf(stderr, "%s", err3);
+                                        return (-1);
+                                }
+                                break;
+
                             case 6:
                                 /*
                                  * NOTE: h5import does not currently have a way to specify

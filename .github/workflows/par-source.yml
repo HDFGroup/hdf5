@@ -51,6 +51,11 @@ jobs:
     name: "Parallel OpenMPI GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
       - name: Install Linux Dependencies (OpenMPI)
         run: |
           sudo apt-get update
@@ -58,7 +63,7 @@ jobs:
           sudo apt install libaec0 libaec-dev
 
       - name: Get MPI installation (OpenMPI)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: openmpi
 
@@ -100,7 +105,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (OpenMPI)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -113,10 +118,10 @@ jobs:
       - name: Uncompress source (OpenMPI)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (OpenMPI)
-        run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+      - name: Symlink script files for the space (OpenMPI)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (OpenMPI)
         run: |
@@ -160,7 +165,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (OpenMPI)
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
           name: openmpi-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -171,7 +176,7 @@ jobs:
     name: "Parallel Mpich GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Install Linux Dependencies (MPICH)
         run: |
@@ -180,7 +185,7 @@ jobs:
           sudo apt install libaec0 libaec-dev
 
       - name: Get MPI installation (MPICH)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: mpich
 
@@ -222,7 +227,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MPICH)
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -235,10 +240,10 @@ jobs:
       - name: Uncompress source (MPICH)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Copy script files for the space (MPICH)
-        run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+      - name: Symlink script files for the space (MPICH)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (MPICH)
         run: |
@@ -282,7 +287,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (MPICH)
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
         with:
           name: mpich-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log

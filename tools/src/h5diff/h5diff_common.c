@@ -491,6 +491,7 @@ print_info(diff_opt_t *opts)
         printf("No common objects found. Files are not comparable.\n");
         if (!opts->mode_verbose)
             printf("Use -v for a list of objects.\n");
+        return;
     }
 
     if (opts->not_cmp == 1) {
@@ -503,6 +504,11 @@ print_info(diff_opt_t *opts)
             else
                 printf("Use -c for a list of objects.\n");
         }
+    }
+
+    if (opts->contents == 0 && !opts->mode_verbose) {
+        printf("Files do not have the same set of objects.\n");
+        printf("Use -v for a list of objects.\n");
     }
 }
 

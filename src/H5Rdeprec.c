@@ -741,9 +741,23 @@ done:
  * Purpose:     Given a reference to some object, determine a path to the
  *              object referenced in the file.
  *
- * Return:      Success:    Non-negative length of the path
- *              Failure:    -1
+ * Description:
+ *              When 'name' is non-NULL:
+ *                - if 'size' > 0: writes up to 'size' bytes into the buffer
+ *                  (including null terminator) and returns the actual length
+ *                  of the name (excluding null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
  *
+ *              When 'name' is NULL: does not write anything regardless of 'size'
+ *              and returns the actual length of the path (excluding null terminator).
+ *
+ *              On error, the buffer is unchanged and the function returns
+ *              a negative value.
+ *
+ * Return:      Success:    The length of the path (excluding null terminator)
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -765,6 +779,10 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name /*out*/, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference pointer");
     if (ref_type != H5R_OBJECT1 && ref_type != H5R_DATASET_REGION1)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type");
+
+    /* If buffer size is zero, treat as length query and do not write, even a '\0' */
+    if (name && size == 0)
+        name = NULL;
 
     /* Get the VOL object */
     if (NULL == (vol_obj = H5VL_vol_object(id)))

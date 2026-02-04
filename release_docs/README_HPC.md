@@ -79,7 +79,7 @@ For release or snapshot tar files, extract them to your working directory.
 
 > **Note:** When using the ctest automated build method (Section 4), the source
 > directory should be named `hdf5-<version>`, where version uses format `1.xx.xx`
-> or `2.xx.xx`. Use `bin/h5vers` to determine the version string if needed.
+> or `2.xx.xx`. Check `H5_VERS_STR` in `src/H5public.h` to determine the version string if needed.
 
 ---
 

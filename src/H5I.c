@@ -824,19 +824,27 @@ done:
  *
  * Purpose:     Gets a name of an object from its ID.
  *
- * Return:      Success:    The length of the name
+ * Description:
+ *              When 'name' is non-NULL:
+ *                - if 'size' > 0: writes up to 'size' bytes into the buffer
+ *                  (including null terminator) and returns the actual length
+ *                  of the name (excluding null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
  *
- *              Failure:    -1
+ *              When 'name' is NULL: does not write anything regardless of 'size'
+ *              and returns the actual length of the name (excluding null terminator).
+ *
+ *              On error, the buffer is unchanged and the function returns
+ *              a negative value.
+ *
+ * Return:      Success:    The length of the name (excluding null terminator)
+ *              Failure:    Negative
  *
  * Notes:
- *  If 'name' is non-NULL then write up to 'size' bytes into that
- *  buffer and always return the length of the entry name.
- *  Otherwise 'size' is ignored and the function does not store the name,
- *  just returning the number of characters required to store the name.
- *  If an error occurs then the buffer pointed to by 'name' (NULL or non-NULL)
- *  is unchanged and the function returns a negative value.
- *  If a zero is returned for the name's length, then there is no name
- *  associated with the ID.
+ *              If a zero is returned for the name's length, then there is no name
+ *              associated with the ID.
  *
  *-------------------------------------------------------------------------
  */
@@ -850,6 +858,10 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
     ssize_t                ret_value    = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
+
+    /* If name size is zero, treat as length query and do not write, even a '\0' */
+    if (name && size == 0)
+        name = NULL;
 
     /* Get the object pointer */
     if (NULL == (vol_obj = H5VL_vol_object(id)))

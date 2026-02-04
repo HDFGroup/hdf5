@@ -188,9 +188,8 @@ jobs:
           brew install mpich
         fi
 
-
     - name: Get Sources
-      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
     - name: Configure
       run: |
@@ -220,12 +219,6 @@ jobs:
           CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PLUGIN_SUPPORT=ON"
           CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ALLOW_EXTERNAL_SUPPORT=TGZ"
           CMAKE_OPTS="$CMAKE_OPTS -DPLUGIN_USE_LOCALCONTENT=OFF"
-        fi
-
-        # Set Java environment if needed
-        if [[ "${{ matrix.java }}" == "ON" ]]; then
-          export JAVA_HOME=$(/usr/libexec/java_home)
-          CMAKE_OPTS="$CMAKE_OPTS -DJAVA_HOME=$JAVA_HOME"
         fi
 
         # Set Fortran compiler if needed
@@ -271,7 +264,7 @@ jobs:
         CTEST_TIMEOUT: 3600
 
     - name: Upload Test Results
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
       if: always()
       with:
         name: test-results-${{ matrix.name }}

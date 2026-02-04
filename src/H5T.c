@@ -225,6 +225,21 @@
         dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;                                                       \
     }
 
+/* Define the code templates for standard FP4 E2M1 4-bit floats for the "GUTS" in the H5T_INIT_TYPE macro */
+#define H5T_INIT_TYPE_FLOAT4E2M1_CORE                                                                        \
+    {                                                                                                        \
+        H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_LE) /* Simply pick LE here */                                     \
+        dt->shared->u.atomic.prec      = 4;                                                                  \
+        dt->shared->u.atomic.u.f.sign  = 3;                                                                  \
+        dt->shared->u.atomic.u.f.epos  = 1;                                                                  \
+        dt->shared->u.atomic.u.f.esize = 2;                                                                  \
+        dt->shared->u.atomic.u.f.ebias = 0x1;                                                                \
+        dt->shared->u.atomic.u.f.mpos  = 0;                                                                  \
+        dt->shared->u.atomic.u.f.msize = 1;                                                                  \
+        dt->shared->u.atomic.u.f.norm  = H5T_NORM_IMPLIED;                                                   \
+        dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;                                                       \
+    }
+
 /* Define the code templates for standard floats for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_FLOAT_COMMON(ENDIANNESS)                                                               \
     {                                                                                                        \
@@ -521,6 +536,7 @@ hid_t H5T_FLOAT_F8E4M3_g     = H5I_INVALID_HID;
 hid_t H5T_FLOAT_F8E5M2_g     = H5I_INVALID_HID;
 hid_t H5T_FLOAT_F6E2M3_g     = H5I_INVALID_HID;
 hid_t H5T_FLOAT_F6E3M2_g     = H5I_INVALID_HID;
+hid_t H5T_FLOAT_F4E2M1_g     = H5I_INVALID_HID;
 
 hid_t H5T_COMPLEX_IEEE_F16BE_g = H5I_INVALID_HID;
 hid_t H5T_COMPLEX_IEEE_F16LE_g = H5I_INVALID_HID;
@@ -1198,6 +1214,9 @@ H5T__init_package(void)
 
     /* 6-bit FP6 E3M2 float type */
     H5T_INIT_TYPE(FLOAT6E3M2, H5T_FLOAT_F6E3M2_g, COPY, native_double, SET, 1)
+
+    /* 4-bit FP4 E2M1 float type */
+    H5T_INIT_TYPE(FLOAT4E2M1, H5T_FLOAT_F4E2M1_g, COPY, native_double, SET, 1)
 
     /*------------------------------------------------------------
      * VAX Types
@@ -2300,6 +2319,7 @@ H5T_top_term_package(void)
             H5T_FLOAT_F8E5M2_g     = H5I_INVALID_HID;
             H5T_FLOAT_F6E2M3_g     = H5I_INVALID_HID;
             H5T_FLOAT_F6E3M2_g     = H5I_INVALID_HID;
+            H5T_FLOAT_F4E2M1_g     = H5I_INVALID_HID;
 
             H5T_COMPLEX_IEEE_F16BE_g = H5I_INVALID_HID;
             H5T_COMPLEX_IEEE_F16LE_g = H5I_INVALID_HID;

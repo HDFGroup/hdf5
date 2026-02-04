@@ -409,6 +409,9 @@ H5FL_BLK_DEFINE_STATIC(chunk);
 /* Declare extern free list to manage the H5S_sel_iter_t struct */
 H5FL_EXTERN(H5S_sel_iter_t);
 
+/* Declare the external PQ free list for the sieve buffer information */
+H5FL_BLK_EXTERN(sieve_buf);
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_direct_write
  *
@@ -3105,6 +3108,16 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         ctg_io_info.dsets_info   = &ctg_dset_info;
         ctg_io_info.count        = 1;
 
+        /* Ensure dataset I/O sieve buffer is properly setup for when the contiguous
+         * dataset I/O routines are used for chunks. Force reset of sieve buffer here
+         * on each I/O until more advanced use cases like H5Dset_extent between writes
+         * and subsequent writes or reads can be supported.
+         */
+        dset_info->dset->shared->cache.sieve.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset_info->dset->oloc.file);
+        dset_info->dset->shared->cache.sieve.sieve_loc      = HADDR_UNDEF;
+        dset_info->dset->shared->cache.sieve.sieve_size     = 0;
+        assert(!dset_info->dset->shared->cache.sieve.sieve_dirty); /* Any writes should have been flushed */
+
         /* Initialize temporary contiguous storage info */
         ctg_store.contig.dset_size = dset_info->dset->shared->layout.u.chunk.size;
 
@@ -3201,6 +3214,14 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     }     /* end else */
 
 done:
+    /* Free dataset sieve buffer and reset cached fields */
+    if (dset_info->dset->shared->cache.sieve.sieve_buf) {
+        dset_info->dset->shared->cache.sieve.sieve_loc  = HADDR_UNDEF;
+        dset_info->dset->shared->cache.sieve.sieve_size = 0;
+        dset_info->dset->shared->cache.sieve.sieve_buf =
+            (unsigned char *)H5FL_BLK_FREE(sieve_buf, dset_info->dset->shared->cache.sieve.sieve_buf);
+    }
+
     /* Cleanup on failure */
     if (ret_value < 0) {
         if (chunk_mem_spaces != chunk_mem_spaces_local)
@@ -3262,6 +3283,15 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     ctg_dset_info.layout_ops = *H5D_LOPS_CONTIG;
     ctg_io_info.dsets_info   = &ctg_dset_info;
     ctg_io_info.count        = 1;
+
+    /* Ensure dataset I/O sieve buffer is properly setup for when the contiguous
+     * dataset I/O routines are used for chunks. Force reset of sieve buffer here
+     * on each I/O until more advanced use cases like H5Dset_extent between writes
+     * and subsequent writes or reads can be supported.
+     */
+    dset_info->dset->shared->cache.sieve.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset_info->dset->oloc.file);
+    dset_info->dset->shared->cache.sieve.sieve_loc      = HADDR_UNDEF;
+    dset_info->dset->shared->cache.sieve.sieve_size     = 0;
 
     /* Initialize temporary contiguous storage info */
     ctg_store.contig.dset_size = dset_info->dset->shared->layout.u.chunk.size;
@@ -3599,9 +3629,30 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Advance to next chunk in list */
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);
         } /* end while */
-    }     /* end else */
+
+        /*
+         * Flush any data in sieve buffer - for now, don't keep data cached
+         * in sieve buffer between writes / writes and reads.
+         */
+        if (H5D__flush_sieve_buf(dset_info->dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer");
+    } /* end else */
 
 done:
+    /* Free dataset sieve buffer and reset cached fields */
+    if (dset_info->dset->shared->cache.sieve.sieve_buf) {
+        dset_info->dset->shared->cache.sieve.sieve_loc  = HADDR_UNDEF;
+        dset_info->dset->shared->cache.sieve.sieve_size = 0;
+
+        /* Drop any unflushed sieve buffer data on failure - reads expect
+         * that sieve buffer will be clean
+         */
+        dset_info->dset->shared->cache.sieve.sieve_dirty = false;
+
+        dset_info->dset->shared->cache.sieve.sieve_buf =
+            (unsigned char *)H5FL_BLK_FREE(sieve_buf, dset_info->dset->shared->cache.sieve.sieve_buf);
+    }
+
     /* Cleanup on failure */
     if (ret_value < 0) {
         if (chunk_mem_spaces != chunk_mem_spaces_local)
@@ -3642,6 +3693,10 @@ H5D__chunk_flush(H5D_t *dset)
 
     /* Sanity check */
     assert(dset);
+
+    /* Flush any data in sieve buffer */
+    if (H5D__flush_sieve_buf(dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer");
 
     /* Loop over all entries in the chunk cache */
     for (ent = rdcc->head; ent; ent = next) {
@@ -4694,12 +4749,12 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
         } /* end if */
     }     /* end if */
     else {
-        haddr_t chunk_addr;  /* Address of chunk on disk */
-        hsize_t chunk_alloc; /* Length of chunk on disk */
+        haddr_t chunk_addr;      /* Address of chunk on disk */
+        hsize_t chunk_disk_size; /* Length of chunk on disk */
 
         /* Save the chunk info so the cache stays consistent */
-        chunk_addr  = udata->chunk_block.offset;
-        chunk_alloc = udata->chunk_block.length;
+        chunk_addr      = udata->chunk_block.offset;
+        chunk_disk_size = udata->chunk_block.length;
 
         /* Check if we should disable filters on this chunk */
         if (pline->nused) {
@@ -4731,6 +4786,12 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
             }     /* end if */
         }         /* end if */
 
+        /* If the chunk on disk is unfiltered, verify the index returned the correct size for the chunk */
+        if (H5_UNLIKELY((chunk_disk_size != (hsize_t)chunk_size) && H5_addr_defined(chunk_addr) &&
+                        (!old_pline || !old_pline->nused)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
+                        "incorrect chunk size returned from index for unfiltered chunk");
+
         if (relax) {
             /*
              * Not in the cache, but we're about to overwrite the whole thing
@@ -4755,23 +4816,29 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
             /* Check if the chunk exists on disk */
             if (H5_addr_defined(chunk_addr)) {
-                size_t my_chunk_alloc; /* Allocated buffer size */
-                size_t buf_alloc;      /* [Re-]allocated buffer size */
+                size_t chunk_nbytes; /* Length of the chunk in memory */
+                size_t buf_alloc;    /* [Re-]allocated chunk buffer size */
 
                 /* Assign above variables and check for overflow */
-                H5_CHECKED_ASSIGN(my_chunk_alloc, size_t, chunk_alloc, hsize_t);
-                H5_CHECKED_ASSIGN(buf_alloc, size_t, chunk_alloc, hsize_t);
+                H5_CHECKED_ASSIGN(chunk_nbytes, size_t, chunk_disk_size, hsize_t);
+                H5_CHECKED_ASSIGN(buf_alloc, size_t, chunk_disk_size, hsize_t);
 
-                /* Chunk size on disk isn't [likely] the same size as the final chunk
-                 * size in memory, so allocate memory big enough. */
-                if (NULL == (chunk = H5D__chunk_mem_alloc(my_chunk_alloc,
-                                                          (udata->new_unfilt_chunk ? old_pline : pline))))
+                /* Ideally we should allocate a buffer at least as large as chunk_size, to give the filter the
+                 * opportunity to avoid doing a realloc when uncompressing. This causes problems now, however,
+                 * and needs more investigation. -NAF */
+
+                /* Allocate chunk buffer */
+                if (NULL ==
+                    (chunk = H5D__chunk_mem_alloc(buf_alloc, (udata->new_unfilt_chunk ? old_pline : pline))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for raw data chunk");
+
+                /* Read chunk from disk */
                 if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, chunk_addr,
-                                          my_chunk_alloc, chunk) < 0)
+                                          chunk_disk_size, chunk) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk");
 
+                /* Unfilter chunk */
                 if (old_pline && old_pline->nused) {
                     H5Z_EDC_t err_detect; /* Error detection info */
                     H5Z_cb_t  filter_cb;  /* I/O filter callback function */
@@ -4782,15 +4849,16 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                     if (H5CX_get_filter_cb(&filter_cb) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get I/O filter callback function");
 
+                    /* Perform filter pipeline */
                     if (H5Z_pipeline(old_pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), err_detect,
-                                     filter_cb, &my_chunk_alloc, &buf_alloc, &chunk) < 0)
+                                     filter_cb, &chunk_nbytes, &buf_alloc, &chunk) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, NULL, "data pipeline read failed");
 
                     /* Reallocate chunk if necessary */
                     if (udata->new_unfilt_chunk) {
                         void *tmp_chunk = chunk;
 
-                        if (NULL == (chunk = H5D__chunk_mem_alloc(my_chunk_alloc, pline))) {
+                        if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_nbytes, pline))) {
                             (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                         "memory allocation failed for raw data chunk");
@@ -4809,8 +4877,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 /* Sanity check */
                 assert(fill->alloc_time != H5D_ALLOC_TIME_EARLY);
 
-                /* Chunk size on disk isn't [likely] the same size as the final chunk
-                 * size in memory, so allocate memory big enough. */
+                /* Allocate chunk buffer large enough to hold an unfiltered (in cache) chunk */
                 if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for raw data chunk");
@@ -4874,7 +4941,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
                 /* Initialize the new entry */
                 ent->chunk_block.offset = chunk_addr;
-                ent->chunk_block.length = chunk_alloc;
+                ent->chunk_block.length = chunk_disk_size;
                 ent->chunk_idx          = udata->chunk_idx;
                 H5MM_memcpy(ent->scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
                 H5_CHECKED_ASSIGN(ent->rd_count, hsize_t, chunk_size, size_t);
@@ -7034,7 +7101,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
                 const H5S_extent_t *ds_extent_src, H5T_t *dt_src, const H5O_pline_t *pline_src,
                 H5O_copy_t *cpy_info)
 {
-    H5D_chunk_it_ud3_t udata;                       /* User data for iteration callback */
+    H5D_chunk_it_ud3_t udata = {0};                 /* User data for iteration callback */
     H5D_chk_idx_info_t idx_info_dst;                /* Dest. chunked index info */
     H5D_chk_idx_info_t idx_info_src;                /* Source chunked index info */
     int                sndims;                      /* Rank of dataspace */
@@ -7048,8 +7115,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     H5T_t             *dt_mem        = NULL;        /* Memory datatype */
     size_t             buf_size;                    /* Size of copy buffer */
     size_t             reclaim_buf_size;            /* Size of reclaim buffer */
-    void              *buf             = NULL;      /* Buffer for copying data */
-    void              *bkg             = NULL;      /* Buffer for background during type conversion */
     void              *reclaim_buf     = NULL;      /* Buffer for reclaiming data */
     H5S_t             *buf_space       = NULL;      /* Dataspace describing buffer */
     size_t             nelmts          = 0;         /* Number of elements in buffer */
@@ -7188,27 +7253,24 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
     /* Set up conversion buffer, if appropriate */
     if (do_convert) {
         /* Allocate background memory for converting the chunk */
-        if (NULL == (bkg = H5MM_malloc(buf_size)))
+        if (NULL == (udata.bkg = H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
 
         /* Check for reference datatype and no expanding references & clear background buffer */
         if (!cpy_info->expand_ref && ((H5T_get_class(dt_src, false) == H5T_REFERENCE) && (f_src != f_dst)))
             /* Reset value to zero */
-            memset(bkg, 0, buf_size);
+            memset(udata.bkg, 0, buf_size);
     } /* end if */
 
     /* Allocate memory for copying the chunk */
-    if (NULL == (buf = H5MM_malloc(buf_size)))
+    if (NULL == (udata.buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
 
     /* Initialize the callback structure for the source */
-    memset(&udata, 0, sizeof udata);
     udata.common.layout    = &layout_src->u.chunk;
     udata.common.storage   = &layout_src->storage.u.chunk;
     udata.file_src         = f_src;
     udata.idx_info_dst     = &idx_info_dst;
-    udata.buf              = buf;
-    udata.bkg              = bkg;
     udata.buf_size         = buf_size;
     udata.dt_src           = dt_src;
     udata.dt_dst           = dt_dst;
@@ -7253,10 +7315,6 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
         } /* end for */
     }
 
-    /* I/O buffers may have been re-allocated */
-    buf = udata.buf;
-    bkg = udata.bkg;
-
 done:
     if (dt_dst && (H5T_close(dt_dst) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
@@ -7264,12 +7322,10 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary datatype");
     if (buf_space && H5S_close(buf_space) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary dataspace");
-    if (buf)
-        H5MM_xfree(buf);
-    if (bkg)
-        H5MM_xfree(bkg);
-    if (reclaim_buf)
-        H5MM_xfree(reclaim_buf);
+
+    H5MM_xfree(udata.buf);
+    H5MM_xfree(udata.bkg);
+    H5MM_xfree(reclaim_buf);
 
     /* Clean up any index information */
     if (copy_setup_done)

@@ -350,6 +350,12 @@ string (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
 string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._-]*)\".*$"
     "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
+# Validate that H5_VERS_SUBRELEASE was properly extracted (must be a quoted string in H5public.h)
+if (H5_VERS_SUBRELEASE STREQUAL _h5public_h_contents)
+  message (FATAL_ERROR "Failed to extract H5_VERS_SUBRELEASE from src/H5public.h. "
+                       "Ensure H5_VERS_SUBRELEASE is defined as a quoted string literal, "
+                       "e.g., #define H5_VERS_SUBRELEASE \"\" or #define H5_VERS_SUBRELEASE \"-snap0\"")
+endif ()
 message (TRACE "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
 
 #-----------------------------------------------------------------------------
