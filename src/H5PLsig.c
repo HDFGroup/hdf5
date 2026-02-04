@@ -472,14 +472,14 @@ H5PL__validate_directory_permissions(const char *dir_path)
 #else
     /* Windows ACL-based permission checking */
     {
-        PSECURITY_DESCRIPTOR     pSD          = NULL;
-        PACL                     pDACL        = NULL;
-        PSID                     pSidEveryone = NULL;
-        PSID                     pSidUsers    = NULL;
+        PSECURITY_DESCRIPTOR     pSD           = NULL;
+        PACL                     pDACL         = NULL;
+        PSID                     pSidEveryone  = NULL;
+        PSID                     pSidUsers     = NULL;
         PSID                     pSidAuthUsers = NULL;
-        SID_IDENTIFIER_AUTHORITY SIDAuthWorld = SECURITY_WORLD_SID_AUTHORITY;
-        SID_IDENTIFIER_AUTHORITY SIDAuthNT    = SECURITY_NT_AUTHORITY;
-        DWORD                    dwRes        = 0;
+        SID_IDENTIFIER_AUTHORITY SIDAuthWorld  = SECURITY_WORLD_SID_AUTHORITY;
+        SID_IDENTIFIER_AUTHORITY SIDAuthNT     = SECURITY_NT_AUTHORITY;
+        DWORD                    dwRes         = 0;
         TRUSTEE                  trusteeEveryone;
         TRUSTEE                  trusteeUsers;
         TRUSTEE                  trusteeAuthUsers;
