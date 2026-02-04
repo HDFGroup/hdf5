@@ -57,22 +57,19 @@
 #define HASH_CHUNK_SIZE ((size_t)(64 * 1024))
 
 /* Global options */
-static char *plugin_file  = NULL;
-static char *privkey_file = NULL;
+static char *plugin_file   = NULL;
+static char *privkey_file  = NULL;
 static char *opt_algorithm = NULL;
-static int   opt_verbose  = 0;
+static int   opt_verbose   = 0;
 
 /*
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
 static const char            *s_opts   = "hp:k:a:vV";
-static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
-                                          {"plugin", require_arg, 'p'},
-                                          {"key", require_arg, 'k'},
-                                          {"algorithm", require_arg, 'a'},
-                                          {"verbose", no_arg, 'v'},
-                                          {NULL, 0, '\0'}};
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},     {"plugin", require_arg, 'p'},
+                                          {"key", require_arg, 'k'}, {"algorithm", require_arg, 'a'},
+                                          {"verbose", no_arg, 'v'},  {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -298,27 +295,27 @@ static herr_t
 parse_algorithm_name(const char *name, const EVP_MD **md_out, uint8_t *algo_id_out)
 {
     if (HDstrcasecmp(name, "sha256") == 0) {
-        *md_out     = EVP_sha256();
+        *md_out      = EVP_sha256();
         *algo_id_out = H5PL_SIG_ALGO_SHA256;
     }
     else if (HDstrcasecmp(name, "sha384") == 0) {
-        *md_out     = EVP_sha384();
+        *md_out      = EVP_sha384();
         *algo_id_out = H5PL_SIG_ALGO_SHA384;
     }
     else if (HDstrcasecmp(name, "sha512") == 0) {
-        *md_out     = EVP_sha512();
+        *md_out      = EVP_sha512();
         *algo_id_out = H5PL_SIG_ALGO_SHA512;
     }
     else if (HDstrcasecmp(name, "sha256-pss") == 0) {
-        *md_out     = EVP_sha256();
+        *md_out      = EVP_sha256();
         *algo_id_out = H5PL_SIG_ALGO_SHA256_PSS;
     }
     else if (HDstrcasecmp(name, "sha384-pss") == 0) {
-        *md_out     = EVP_sha384();
+        *md_out      = EVP_sha384();
         *algo_id_out = H5PL_SIG_ALGO_SHA384_PSS;
     }
     else if (HDstrcasecmp(name, "sha512-pss") == 0) {
-        *md_out     = EVP_sha512();
+        *md_out      = EVP_sha512();
         *algo_id_out = H5PL_SIG_ALGO_SHA512_PSS;
     }
     else {
@@ -658,10 +655,10 @@ done:
 int
 main(int argc, char *argv[])
 {
-    EVP_PKEY      *private_key    = NULL;
-    const EVP_MD  *hash_algorithm = NULL;
-    uint8_t        algorithm_id   = 0;
-    int            ret_value      = EXIT_SUCCESS;
+    EVP_PKEY     *private_key    = NULL;
+    const EVP_MD *hash_algorithm = NULL;
+    uint8_t       algorithm_id   = 0;
+    int           ret_value      = EXIT_SUCCESS;
 
     /* Initialize HDF5 tools infrastructure */
     h5tools_setprogname(PROGRAMNAME);

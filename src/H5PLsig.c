@@ -1150,11 +1150,11 @@ H5PL__verify_with_chunked_io(int fd, HDoff_t binary_size, const unsigned char *s
                              const EVP_MD *hash_algorithm, EVP_PKEY *public_key, uint8_t algorithm_id,
                              const char *plugin_path)
 {
-    EVP_MD_CTX    *mdctx     = NULL;
-    EVP_PKEY_CTX  *pkey_ctx  = NULL;
-    unsigned char *chunk_buf = NULL;
+    EVP_MD_CTX    *mdctx      = NULL;
+    EVP_PKEY_CTX  *pkey_ctx   = NULL;
+    unsigned char *chunk_buf  = NULL;
     HDoff_t        bytes_read = 0;
-    int            ret_value = -1;
+    int            ret_value  = -1;
 
     FUNC_ENTER_PACKAGE
 
@@ -1185,10 +1185,9 @@ H5PL__verify_with_chunked_io(int fd, HDoff_t binary_size, const unsigned char *s
 
     /* Read and hash file in chunks */
     while (bytes_read < binary_size) {
-        size_t chunk_size =
-            (size_t)((binary_size - bytes_read) > (HDoff_t)H5PL_VERIFY_CHUNK_SIZE
-                         ? H5PL_VERIFY_CHUNK_SIZE
-                         : (size_t)(binary_size - bytes_read));
+        size_t chunk_size = (size_t)((binary_size - bytes_read) > (HDoff_t)H5PL_VERIFY_CHUNK_SIZE
+                                         ? H5PL_VERIFY_CHUNK_SIZE
+                                         : (size_t)(binary_size - bytes_read));
 
         if (H5PL__read_file_data(fd, bytes_read, chunk_buf, chunk_size, plugin_path) < 0) {
             ret_value = -1;
@@ -1374,13 +1373,13 @@ H5PL__verify_signature_appended(const char *plugin_path)
     /* Try verifying with each key in keystore (OR logic - first match wins) */
     {
         size_t                       key_idx;
-        bool                         verified             = false;
-        const EVP_MD                *hash_algorithm       = NULL;
-        H5PL_verify_failure_reason_t first_failure_reason = H5PL_VERIFY_REASON_UNKNOWN;
-        size_t                       keys_init_failed     = 0;
-        size_t                       keys_update_failed   = 0;
-        size_t                       keys_crypto_invalid  = 0;
-        size_t                       keys_crypto_error    = 0;
+        bool                         verified                = false;
+        const EVP_MD                *hash_algorithm          = NULL;
+        H5PL_verify_failure_reason_t first_failure_reason    = H5PL_VERIFY_REASON_UNKNOWN;
+        size_t                       keys_init_failed        = 0;
+        size_t                       keys_update_failed      = 0;
+        size_t                       keys_crypto_invalid     = 0;
+        size_t                       keys_crypto_error       = 0;
         bool                         use_memory_optimization = false;
 
         /* Get hash algorithm from footer (crypto-agile verification) */
@@ -1395,8 +1394,8 @@ H5PL__verify_signature_appended(const char *plugin_path)
         if (use_memory_optimization) {
             /* Small file + multiple keys: read once, verify with all keys */
             if (NULL == (binary_data = (unsigned char *)H5MM_malloc(binary_size)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL,
-                            "cannot allocate binary data buffer (%zu bytes)", binary_size);
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot allocate binary data buffer (%zu bytes)",
+                            binary_size);
 
             if (H5PL__read_file_data(fd, 0, binary_data, binary_size, plugin_path) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read binary data for verification");
@@ -1512,9 +1511,9 @@ H5PL__verify_signature_appended(const char *plugin_path)
             for (key_idx = 0; key_idx < H5PL_keystore_count_g; key_idx++) {
                 public_key = H5PL_keystore_g[key_idx].key;
 
-                verify_result =
-                    H5PL__verify_with_chunked_io(fd, (HDoff_t)binary_size, signature, footer.signature_length,
-                                                 hash_algorithm, public_key, footer.algorithm_id, plugin_path);
+                verify_result = H5PL__verify_with_chunked_io(fd, (HDoff_t)binary_size, signature,
+                                                             footer.signature_length, hash_algorithm,
+                                                             public_key, footer.algorithm_id, plugin_path);
 
                 if (verify_result == 1) {
                     /* SUCCESS! Signature verified with this key */
@@ -1632,25 +1631,26 @@ H5PL__verify_signature_appended(const char *plugin_path)
 #endif
             }
 
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                        "plugin signature verification failed\n"
-                        "  Plugin: %s\n"
-                        "  Keys tried: %zu [%s]\n"
-                        "  - Init failed: %zu\n"
-                        "  - Update failed: %zu\n"
-                        "  - Crypto invalid: %zu\n"
-                        "  - Crypto error: %zu\n"
-                        "%s"
-                        "\n"
-                        "  KeyStore: %s\n"
-                        "\n"
-                        "  Next steps:\n"
-                        "    1. Verify plugin was signed correctly (check signature algorithm compatibility)\n"
-                        "    2. Check KeyStore directory contains correct public keys\n"
-                        "    3. Contact plugin developer for correct public key\n"
-                        "    4. Verify file integrity (checksums, re-download if needed)\n",
-                        plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed, keys_update_failed,
-                        keys_crypto_invalid, keys_crypto_error, diagnostic ? diagnostic : "", keystore_path);
+            HGOTO_ERROR(
+                H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                "plugin signature verification failed\n"
+                "  Plugin: %s\n"
+                "  Keys tried: %zu [%s]\n"
+                "  - Init failed: %zu\n"
+                "  - Update failed: %zu\n"
+                "  - Crypto invalid: %zu\n"
+                "  - Crypto error: %zu\n"
+                "%s"
+                "\n"
+                "  KeyStore: %s\n"
+                "\n"
+                "  Next steps:\n"
+                "    1. Verify plugin was signed correctly (check signature algorithm compatibility)\n"
+                "    2. Check KeyStore directory contains correct public keys\n"
+                "    3. Contact plugin developer for correct public key\n"
+                "    4. Verify file integrity (checksums, re-download if needed)\n",
+                plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed, keys_update_failed,
+                keys_crypto_invalid, keys_crypto_error, diagnostic ? diagnostic : "", keystore_path);
         }
         else {
             /* Cache the successful verification result for future lookups */

@@ -209,11 +209,11 @@ append_corrupt_footer(const char *plugin_path)
     /* Write footer with wrong magic number
      * On-disk layout (12 bytes): [sig_len:4][algo_id:1][format_ver:1][reserved:2][magic:4]
      */
-    UINT32ENCODE(p, (uint32_t)256);  /* Signature length */
-    *p++ = H5PL_SIG_ALGO_SHA256;     /* Algorithm ID */
-    *p++ = 1;                        /* Format version */
-    UINT16ENCODE(p, (uint16_t)0);    /* Reserved */
-    UINT32ENCODE(p, 0xDEADBEEF);     /* Wrong magic */
+    UINT32ENCODE(p, (uint32_t)256); /* Signature length */
+    *p++ = H5PL_SIG_ALGO_SHA256;    /* Algorithm ID */
+    *p++ = 1;                       /* Format version */
+    UINT16ENCODE(p, (uint16_t)0);   /* Reserved */
+    UINT32ENCODE(p, 0xDEADBEEF);    /* Wrong magic */
 
     if (HDwrite(fd, footer_bytes, sizeof(footer_bytes)) < 0) {
         fprintf(stderr, "Failed to write corrupt footer\n");
