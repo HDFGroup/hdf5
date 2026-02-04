@@ -61,6 +61,15 @@
  *
  * If plugin loading is ever made to bypass the global lock, these data structures will
  * require explicit mutex protection or atomic operations.
+ *
+ * TODO: If H5PL__load is ever refactored to support fine-grained locking or lock-free
+ *       concurrent plugin loading, wrap these static globals in a struct protected by
+ *       a dedicated mutex (e.g., H5PL_sig_lock_g). This affects:
+ *       - H5PL_keystore_g and related counters (lines 73-76)
+ *       - H5PL_revoked_sigs_g and related counters (lines 84-87)
+ *       - H5PL_sig_cache_g and related counters (lines 97-99)
+ *       All read/write operations on these variables must be synchronized if the
+ *       global library lock is removed or bypassed for plugin operations.
  */
 
 /* KeyStore entry for storing multiple trusted public keys */
@@ -69,7 +78,9 @@ typedef struct H5PL_keystore_entry_t {
     char     *source; /* Key source (filename or "embedded") for debugging */
 } H5PL_keystore_entry_t;
 
-/* KeyStore for signature verification */
+/* KeyStore for signature verification
+ * TODO (Thread Safety): Requires mutex protection if global lock is removed
+ */
 static H5PL_keystore_entry_t *H5PL_keystore_g             = NULL;
 static size_t                 H5PL_keystore_count_g       = 0;
 static size_t                 H5PL_keystore_capacity_g    = 0;
@@ -81,6 +92,7 @@ typedef struct H5PL_revoked_signature_t {
     unsigned char hash[H5PL_SIGNATURE_HASH_SIZE]; /* SHA-256 hash of signature */
 } H5PL_revoked_signature_t;
 
+/* TODO (Thread Safety): Requires mutex protection if global lock is removed */
 static H5PL_revoked_signature_t *H5PL_revoked_sigs_g             = NULL;
 static size_t                    H5PL_revoked_sigs_count_g       = 0;
 static size_t                    H5PL_revoked_sigs_capacity_g    = 0;
@@ -93,7 +105,9 @@ typedef struct H5PL_signature_cache_entry_t {
     bool   verified; /* Verification status (true=success, false=failure) */
 } H5PL_signature_cache_entry_t;
 
-/* Signature verification cache */
+/* Signature verification cache
+ * TODO (Thread Safety): Requires mutex protection if global lock is removed
+ */
 static H5PL_signature_cache_entry_t *H5PL_sig_cache_g          = NULL;
 static size_t                        H5PL_sig_cache_count_g    = 0;
 static size_t                        H5PL_sig_cache_capacity_g = 0;
@@ -110,8 +124,8 @@ static size_t                        H5PL_sig_cache_capacity_g = 0;
 /* Maximum plugin file size (1GB - prevents unreasonable allocations) */
 #define H5PL_MAX_PLUGIN_SIZE ((HDoff_t)(1024 * 1024 * 1024))
 
-/* I/O chunk size for verification (64KB - matches h5sign) */
-#define H5PL_VERIFY_CHUNK_SIZE ((size_t)(64 * 1024))
+/* I/O chunk size for verification (1MB - optimized for modern I/O subsystems) */
+#define H5PL_VERIFY_CHUNK_SIZE ((size_t)(1024 * 1024))
 
 /* Memory threshold for multi-key optimization (16MB) */
 #define H5PL_MEMORY_THRESHOLD ((size_t)(16 * 1024 * 1024))
@@ -737,6 +751,54 @@ done:
 } /* end H5PL__load_keys_from_directory() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5PL__is_keystore_locked
+ *
+ * Purpose:     Check if keystore environment variable override is locked
+ *              by presence of system lock file
+ *
+ *              Lock file locations:
+ *              - Unix/Linux: /etc/hdf5/lock_keystore
+ *              - Windows: C:\ProgramData\HDF_Group\HDF5\lock_keystore
+ *
+ *              This allows system administrators to disable the
+ *              HDF5_PLUGIN_KEYSTORE environment variable on pre-built
+ *              binaries without recompiling HDF5.
+ *
+ * Return:      true if locked, false otherwise
+ *-------------------------------------------------------------------------
+ */
+static bool
+H5PL__is_keystore_locked(void)
+{
+    h5_stat_t st;
+    bool      ret_value = false;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+#ifndef H5_HAVE_WIN32_API
+    /* Unix/Linux: Check for /etc/hdf5/lock_keystore */
+    if (HDstat("/etc/hdf5/lock_keystore", &st) == 0) {
+        ret_value = true;
+#ifdef H5PL_DEBUG_KEYSTORE
+        fprintf(stderr, "HDF5 KeyStore: Environment variable override disabled by /etc/hdf5/lock_keystore\n");
+#endif
+    }
+#else
+    /* Windows: Check for C:\ProgramData\HDF_Group\HDF5\lock_keystore */
+    if (HDstat("C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore", &st) == 0) {
+        ret_value = true;
+#ifdef H5PL_DEBUG_KEYSTORE
+        fprintf(stderr,
+                "HDF5 KeyStore: Environment variable override disabled by "
+                "C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore\n");
+#endif
+    }
+#endif
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__is_keystore_locked() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5PL__init_keystore
  *
  * Purpose:     Initialize keystore
@@ -771,17 +833,25 @@ H5PL__init_keystore(void)
 
     /* 1. Check environment variable (highest priority) */
 #ifndef H5PL_DISABLE_ENV_KEYSTORE
-    if (NULL != (env_keystore = getenv("HDF5_PLUGIN_KEYSTORE"))) {
-        if (H5PL__load_keys_from_directory(env_keystore) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s",
-                        env_keystore);
-        keys_loaded = true;
+    /* Check if environment variable override is locked by runtime lock file */
+    if (!H5PL__is_keystore_locked()) {
+        if (NULL != (env_keystore = getenv("HDF5_PLUGIN_KEYSTORE"))) {
+            if (H5PL__load_keys_from_directory(env_keystore) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s",
+                            env_keystore);
+            keys_loaded = true;
 
-        /* Load revoked signatures from same directory */
-        if (H5PL__load_revoked_signatures(env_keystore) < 0) {
-            /* Non-fatal - continue even if revoked signatures fail to load */
+            /* Load revoked signatures from same directory */
+            if (H5PL__load_revoked_signatures(env_keystore) < 0) {
+                /* Non-fatal - continue even if revoked signatures fail to load */
+            }
         }
     }
+#ifdef H5PL_DEBUG_KEYSTORE
+    else {
+        fprintf(stderr, "HDF5 KeyStore: Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)\n");
+    }
+#endif
 #else
     /* Environment variable override disabled at compile time (security hardening) */
     env_keystore = NULL; /* Suppress unused variable warning */

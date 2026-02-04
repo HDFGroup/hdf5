@@ -793,8 +793,11 @@ set(HDF5_PLUGIN_KEYSTORE_DIR "" CACHE PATH
     "Directory containing trusted public keys (.pem files) for plugin verification")
 # Security Note: For production deployments where environment variables may be
 # controllable by untrusted users (e.g., HPC clusters, multi-tenant systems),
-# consider enabling HDF5_LOCK_PLUGIN_KEYSTORE to prevent runtime override of
-# the keystore directory via the HDF5_PLUGIN_KEYSTORE environment variable.
+# you can prevent runtime override of the keystore directory via:
+#   1. Compile-time: Enable HDF5_LOCK_PLUGIN_KEYSTORE (requires rebuild)
+#   2. Runtime: Create lock file (works with pre-built binaries):
+#      - Unix/Linux: /etc/hdf5/lock_keystore
+#      - Windows: C:\ProgramData\HDF_Group\HDF5\lock_keystore
 
 # Path to public key file for plugin signature verification (backward compatibility)
 set(HDF5_PLUGIN_PUBLIC_KEY_FILE "" CACHE FILEPATH
@@ -804,6 +807,9 @@ set(HDF5_PLUGIN_PUBLIC_KEY_FILE "" CACHE FILEPATH
 option(HDF5_PLUGIN_KEYSTORE_DEBUG "Enable debug output for plugin KeyStore initialization" OFF)
 
 # Security: Disable environment variable override (prevents runtime keystore redirection)
+# Note: Sysadmins can also lock the keystore at runtime without recompiling by
+# creating a lock file (/etc/hdf5/lock_keystore on Unix, or
+# C:\ProgramData\HDF_Group\HDF5\lock_keystore on Windows).
 option(HDF5_LOCK_PLUGIN_KEYSTORE "Disable HDF5_PLUGIN_KEYSTORE environment variable override (security hardening)" OFF)
 mark_as_advanced(HDF5_LOCK_PLUGIN_KEYSTORE)
 

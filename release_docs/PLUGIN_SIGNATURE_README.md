@@ -1067,6 +1067,52 @@ The current system makes conscious trade-offs:
    - Ensure keystore directory is not world-writable
    - Use NTFS permissions to restrict write access
 
+6. **Environment Variable Security (Production Deployments)**
+
+   In multi-tenant or HPC environments where untrusted users can control environment variables, you can lock the keystore location to prevent them from overriding `HDF5_PLUGIN_KEYSTORE` with a malicious keystore.
+
+   **Runtime Lock (No Recompilation Required):**
+   ```bash
+   # Unix/Linux: Create lock file to disable environment variable override
+   sudo mkdir -p /etc/hdf5
+   sudo touch /etc/hdf5/lock_keystore
+
+   # Windows: Create lock file
+   mkdir "C:\ProgramData\HDF_Group\HDF5"
+   type nul > "C:\ProgramData\HDF_Group\HDF5\lock_keystore"
+   ```
+
+   **Compile-Time Lock (Requires Rebuild):**
+   ```bash
+   # Configure HDF5 with locked keystore (completely disables env var)
+   cmake -DHDF5_LOCK_PLUGIN_KEYSTORE=ON \
+         -DHDF5_PLUGIN_KEYSTORE_DIR=/etc/hdf5/keystore \
+         /path/to/hdf5/source
+   ```
+
+   **When to Use:**
+   - ✅ HPC clusters with untrusted users
+   - ✅ Multi-tenant systems
+   - ✅ Production servers with strict security requirements
+   - ✅ Pre-built binaries distributed to security-critical environments
+
+   **How It Works:**
+   1. If lock file exists, `HDF5_PLUGIN_KEYSTORE` environment variable is ignored
+   2. HDF5 will only use the compile-time configured keystore (`HDF5_PLUGIN_KEYSTORE_DIR`)
+   3. Prevents privilege escalation via keystore override attacks
+   4. System administrators can apply this to pre-built HDF5 libraries without recompilation
+
+   **Verification:**
+   ```bash
+   # Test that environment variable is ignored after locking
+   export HDF5_PLUGIN_KEYSTORE=/tmp/fake_keystore
+
+   # Enable debug output to see which keystore is used
+   HDF5_PLUGIN_KEYSTORE_DEBUG=1 h5dump test_file.h5
+
+   # Expected output: "Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)"
+   ```
+
 ---
 
 ## Troubleshooting
