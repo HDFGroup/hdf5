@@ -788,9 +788,8 @@ H5PL__is_keystore_locked(void)
     if (HDstat("C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore", &st) == 0) {
         ret_value = true;
 #ifdef H5PL_DEBUG_KEYSTORE
-        fprintf(stderr,
-                "HDF5 KeyStore: Environment variable override disabled by "
-                "C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore\n");
+        fprintf(stderr, "HDF5 KeyStore: Environment variable override disabled by "
+                        "C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore\n");
 #endif
     }
 #endif
@@ -837,8 +836,8 @@ H5PL__init_keystore(void)
     if (!H5PL__is_keystore_locked()) {
         if (NULL != (env_keystore = getenv("HDF5_PLUGIN_KEYSTORE"))) {
             if (H5PL__load_keys_from_directory(env_keystore) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s",
-                            env_keystore);
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL,
+                            "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s", env_keystore);
             keys_loaded = true;
 
             /* Load revoked signatures from same directory */
@@ -849,7 +848,8 @@ H5PL__init_keystore(void)
     }
 #ifdef H5PL_DEBUG_KEYSTORE
     else {
-        fprintf(stderr, "HDF5 KeyStore: Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)\n");
+        fprintf(stderr,
+                "HDF5 KeyStore: Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)\n");
     }
 #endif
 #else
