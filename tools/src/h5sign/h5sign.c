@@ -605,18 +605,18 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     fprintf(rawoutstream, "  File:           %s\n", plugin_path);
     fprintf(rawoutstream, "  Original size:  %llu bytes\n", (unsigned long long)file_size);
     fprintf(rawoutstream, "  Hash algorithm: ");
-    switch (HASH_ALGORITHM_ID) {
+    switch (algorithm_id) {
         case H5PL_SIG_ALGO_SHA256:
-            fprintf(rawoutstream, "SHA-256 (0x%02X)\n", HASH_ALGORITHM_ID);
+            fprintf(rawoutstream, "SHA-256 (0x%02X)\n", algorithm_id);
             break;
         case H5PL_SIG_ALGO_SHA384:
-            fprintf(rawoutstream, "SHA-384 (0x%02X)\n", HASH_ALGORITHM_ID);
+            fprintf(rawoutstream, "SHA-384 (0x%02X)\n", algorithm_id);
             break;
         case H5PL_SIG_ALGO_SHA512:
-            fprintf(rawoutstream, "SHA-512 (0x%02X)\n", HASH_ALGORITHM_ID);
+            fprintf(rawoutstream, "SHA-512 (0x%02X)\n", algorithm_id);
             break;
         default:
-            fprintf(rawoutstream, "0x%02X\n", HASH_ALGORITHM_ID);
+            fprintf(rawoutstream, "0x%02X\n", algorithm_id);
             break;
     }
     fprintf(rawoutstream, "  Signature size: %zu bytes\n", sig_len);

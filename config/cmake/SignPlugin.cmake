@@ -46,7 +46,6 @@ function(sign_plugin_target TARGET PLUGIN_DIR)
       COMMAND $<TARGET_FILE:h5sign>
       ARGS -p "${PLUGIN_DIR}/$<TARGET_FILE_NAME:${TARGET}>"
            -k "${CMAKE_BINARY_DIR}/private.pem"
-      DEPENDS h5sign
       COMMENT "Signing test plugin ${TARGET} for signature verification"
     )
   endif()
