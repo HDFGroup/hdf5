@@ -1373,8 +1373,7 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
 
     /* Validate file size can contain signature and footer */
     if (file_size < (HDoff_t)(footer_out->signature_length + H5PL_SIG_FOOTER_SIZE))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "file too small to contain claimed signature and footer");
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "file too small to contain claimed signature and footer");
 
     /* Calculate binary data size */
     {
@@ -1390,9 +1389,10 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
 
         /* Check for overflow when casting to size_t */
         if (binary_size_off < 0 || (uint64_t)binary_size_off > (uint64_t)SIZE_MAX)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                        "plugin binary size %llu exceeds SIZE_MAX - file too large to verify on this platform",
-                        (unsigned long long)binary_size_off);
+            HGOTO_ERROR(
+                H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                "plugin binary size %llu exceeds SIZE_MAX - file too large to verify on this platform",
+                (unsigned long long)binary_size_off);
 
         *binary_size_out = (size_t)binary_size_off;
     }
@@ -1438,10 +1438,10 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
 
     /* Try each key in keystore (OR logic - first match wins) */
     for (size_t key_idx = 0; key_idx < H5PL_keystore_count_g; key_idx++) {
-        EVP_PKEY *public_key    = H5PL_keystore_g[key_idx].key;
-        int       verify_result = H5PL__verify_with_chunked_io(fd, (HDoff_t)binary_size, signature,
-                                                                footer->signature_length, hash_algorithm,
-                                                                public_key, footer->algorithm_id, plugin_path);
+        EVP_PKEY *public_key = H5PL_keystore_g[key_idx].key;
+        int       verify_result =
+            H5PL__verify_with_chunked_io(fd, (HDoff_t)binary_size, signature, footer->signature_length,
+                                         hash_algorithm, public_key, footer->algorithm_id, plugin_path);
 
         if (verify_result == 1) {
             /* SUCCESS! Signature verified with this key */
@@ -1570,9 +1570,9 @@ done:
 herr_t
 H5PL__verify_signature_appended(const char *plugin_path)
 {
-    int               fd          = -1;
+    int               fd = -1;
     h5_stat_t         st;
-    HDoff_t           file_size   = 0;
+    HDoff_t           file_size = 0;
     H5PL_sig_footer_t footer;
     unsigned char    *signature   = NULL;
     size_t            binary_size = 0;
