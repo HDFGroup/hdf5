@@ -22,7 +22,7 @@ We are interested in vulnerabilities that affect the confidentiality, integrity,
 *   **Self-Inflicted Misconfigurations:** Security issues arising from insecure application-level usage of the library (e.g., applications setting weak file permissions).
 *   **Third-Party Plugins:** Vulnerabilities in Filters, VOL (Virtual Object Layer) connectors or VFD (Virtual File Driver) plugins not maintained by The HDF Group. Please report these to the respective maintainers.
 *   **Experimental Features:** Features that are:
-    *   Enabled explicitly via build flags (e.g., `--enable-unsupported`).
+    *   Enabled explicitly via build flags (e.g., `HDF5_ALLOW_UNSUPPORTED`).
     *   Marked as "Experimental" or "Unsupported" in the official API documentation, or in the release notes.
 
 ## Supported Versions
@@ -142,12 +142,7 @@ To ensure supply chain integrity:
 - **SBOM:** We provide CycloneDX SBOM fragments for core, tools, and plugins where applicable.
 - **Build from Source:** General build instructions are available in [release_docs/INSTALL](release_docs/INSTALL).
 
-### TODO -CHECKINTO ::: Binary Hardening
-We aim to produce secure binaries by leveraging the security features of our build infrastructure.
-- **Compiler Flags:** Official binaries distributed via GitHub are built using standard compiler security options (e.g., stack protection) supported by the target platform and GitHub Actions environment.
-
 ### Testing Processes
-- **Sanitizers:** CI builds with ASan, MSan, and UBSan.
 - **Fuzzing:** Continuous fuzzing of file parsing and API entry points (OSS-Fuzz).
 - **Static Analysis:** Automated scanning for common vulnerability patterns.
 - **Code Review:** Peer review required for all changes.
