@@ -1108,7 +1108,8 @@ The current system makes conscious trade-offs:
    export HDF5_PLUGIN_KEYSTORE=/tmp/fake_keystore
 
    # Enable debug output to see which keystore is used
-   HDF5_PLUGIN_KEYSTORE_DEBUG=1 h5dump test_file.h5
+   export HDF5_DEBUG=PL
+   h5dump test_file.h5
 
    # Expected output: "Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)"
    ```

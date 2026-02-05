@@ -209,6 +209,7 @@ H5_init_library(void)
     H5_debug_g.pkg[H5_PKG_MM].name = "mm";
     H5_debug_g.pkg[H5_PKG_O].name  = "o";
     H5_debug_g.pkg[H5_PKG_P].name  = "p";
+    H5_debug_g.pkg[H5_PKG_PL].name = "pl";
     H5_debug_g.pkg[H5_PKG_S].name  = "s";
     H5_debug_g.pkg[H5_PKG_T].name  = "t";
     H5_debug_g.pkg[H5_PKG_V].name  = "v";

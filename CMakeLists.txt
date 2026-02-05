@@ -803,9 +803,6 @@ set(HDF5_PLUGIN_KEYSTORE_DIR "" CACHE PATH
 set(HDF5_PLUGIN_PUBLIC_KEY_FILE "" CACHE FILEPATH
     "Path to RSA public key (PEM format) for plugin signature verification (single key, backward compatibility)")
 
-# Debug output for KeyStore (helps troubleshoot key loading issues)
-option(HDF5_PLUGIN_KEYSTORE_DEBUG "Enable debug output for plugin KeyStore initialization" OFF)
-
 # Security: Disable environment variable override (prevents runtime keystore redirection)
 # Note: Sysadmins can also lock the keystore at runtime without recompiling by
 # creating a lock file (/etc/hdf5/lock_keystore on Unix, or
@@ -939,12 +936,6 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
 
   # Enable digital signature verification
   add_compile_definitions(H5_REQUIRE_DIGITAL_SIGNATURE)
-
-  # Enable debug output if requested
-  if (HDF5_PLUGIN_KEYSTORE_DEBUG)
-    add_compile_definitions(H5PL_DEBUG_KEYSTORE)
-    message(STATUS "Plugin KeyStore debug output: ENABLED")
-  endif ()
 
   # Security: Disable environment variable override if requested
   if (HDF5_LOCK_PLUGIN_KEYSTORE)

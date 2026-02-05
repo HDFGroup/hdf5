@@ -971,8 +971,6 @@ H5PL__init_keystore(void)
                     attempted_source);
     }
 
-#ifdef H5PL_DEBUG_KEYSTORE
-    /* Optional debug output (enable via compile-time flag) */
     if (H5PL_keystore_count_g > 0) {
         H5PL_SIG_DEBUG_PRINT("HDF5 Plugin KeyStore initialized:\n");
         H5PL_SIG_DEBUG_PRINT("  Keys loaded: %zu\n", H5PL_keystore_count_g);
@@ -983,7 +981,6 @@ H5PL__init_keystore(void)
     if (H5PL_revoked_sigs_count_g > 0) {
         H5PL_SIG_DEBUG_PRINT("  Revoked signatures loaded: %zu\n", H5PL_revoked_sigs_count_g);
     }
-#endif
 
 done:
     /* Cleanup on initialization failure */
@@ -1610,7 +1607,7 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
         else {
             diagnostic = "\n"
                          "  DIAGNOSIS: Unknown verification failure\n"
-                         "  - Enable HDF5_PLUGIN_KEYSTORE_DEBUG for detailed logging\n";
+                         "  - Enable debug output with: export HDF5_DEBUG=PL\n";
         }
 
         keystore_path = getenv("HDF5_PLUGIN_KEYSTORE");

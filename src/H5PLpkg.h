@@ -127,12 +127,13 @@ typedef const void *(*H5PL_get_plugin_info_t)(void);
 #define H5PL_SIG_KEYSTORE_DIR_STR "(not configured)"
 #endif
 
-/* Debug logging for keystore operations (enable via CMake: HDF5_PLUGIN_KEYSTORE_DEBUG) */
-#ifdef H5PL_DEBUG_KEYSTORE
-#define H5PL_SIG_DEBUG_PRINT(...) fprintf(stderr, __VA_ARGS__)
-#else
-#define H5PL_SIG_DEBUG_PRINT(...) /* no-op */
-#endif
+#define H5PL_SIG_DEBUG_PRINT(...)                                                                            \
+    do {                                                                                                     \
+        if (H5DEBUG(PL)) {                                                                                   \
+            fprintf(H5DEBUG(PL), __VA_ARGS__);                                                               \
+            fflush(H5DEBUG(PL));                                                                             \
+        }                                                                                                    \
+    } while (0)
 
 #endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
 
