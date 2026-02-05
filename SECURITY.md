@@ -31,11 +31,24 @@ We adhere to a specific support matrix for security updates. We strongly advise 
 
 **Current Version List:** For the exact version numbers currently supported (e.g., 1.14.x vs 1.12.x), please refer to our [Release Support Page](https://www.hdfgroup.org/solutions/hdf5) (or the `README.md` in this repository).
 
-| Version Line | Status | Security Support Level |
+| Branch | Example | Security Support |
 | :--- | :--- | :--- |
-| **Latest Major (X.*.*)** | **Active** | Full security support. Patches are released for Critical, High, and Medium severity issues. |
-| **Previous Major (X.Y-1)** | **Maintenance** | Critical security fixes only (**at maintainer discretion**). |
-| **Older Versions** | **EOL** | End of Life. No security patches will be backported. |
+| **Current Release** | 2.11.x | All severity levels (Critical, High, Medium) |
+| **Previous Major (if < 1 year old)** | 1.14.x | Critical vulnerabilities only (at maintainer discretion) |
+| **All Other Versions** | 2.0-2.10, <1.14 | None (EOL - End of Life) |
+
+### Support Model Example
+
+If the current release is **2.11.3**:
+- **2.11.x** (Active) - All security patches
+- **1.14.x** (Maintenance) - Critical vulnerabilities only
+- **2.0.x - 2.10.x** - EOL, no patches
+- **1.12.x and older** - EOL, no patches
+
+**Important:** We do not maintain every minor version. Users on intermediate releases (e.g., 2.7.x) must upgrade to a supported branch to receive security patches.
+
+### Upgrade Path
+Security patches are **NOT** backported to intermediate minor versions. Users must upgrade to a supported branch (current or previous major) to receive security updates.
 
 ### End of Life (EOL) Policy
 We provide a minimum **6-month notice** before a Major version line enters EOL status. These announcements are made via our [GitHub Discussions](https://github.com/HDFGroup/hdf5/discussions).
@@ -44,8 +57,8 @@ We provide a minimum **6-month notice** before a Major version line enters EOL s
 1.  **Development First:** Fixes are applied to the `develop` branch first.
 2.  **Backporting:**
     *   Fixes are backported to the current **Active** release branch.
-    *   **Critical** vulnerabilities may be backported to the **previous** major release branch.
-    *   We do not produce patches for EOL versions.
+    *   **Critical** vulnerabilities may be backported to the **previous** major release branch (if still in maintenance).
+    *   We do not produce patches for EOL versions or intermediate minor releases.
 
 ## Reporting a Vulnerability
 
@@ -84,7 +97,12 @@ To assist in triage, we define severity in the context of a file format library:
 *   **Medium/Low:** Denial of Service (DoS) or minor information leaks.
 
 ### Disclosure Deadline
-We adhere to a standard **90-day disclosure deadline**. Public disclosure occurs after a fix is released OR 90 days have elapsed, whichever comes first.
+We adhere to a standard **90-day disclosure deadline** that applies to all severity levels. Public disclosure occurs after a fix is released OR 90 days have elapsed, whichever comes first.
+
+**Clarification on Release Targets vs. Disclosure Deadline:**
+- The "Public Release Target" times in the table above (30 days for Critical, 60 days for High) are our **goals** for releasing fixes
+- However, the **90-day cap applies to all severities** - if we cannot release a fix within our target timeframe, public disclosure will still occur at 90 days maximum
+- Example: A Critical vulnerability targets a 30-day fix, but if unforeseen issues delay the fix, disclosure will occur at 90 days even if the fix is not ready
 
 ### CVE Issuance
 For vulnerabilities that meet CVE criteria (exploitable by untrusted input, memory corruption, DoS, etc.), we will:
@@ -122,7 +140,7 @@ To ensure supply chain integrity:
 - **Artifact Integrity:** All binaries and source tarballs distributed via GitHub Releases are generated with associated SHA-256 checksums.
 - **Verification:** Users should verify the hash of downloaded artifacts against the checksums provided on the [GitHub Releases](https://github.com/HDFGroup/hdf5/releases) page to ensure file integrity.
 - **SBOM:** We provide CycloneDX SBOM fragments for core, tools, and plugins where applicable.
-- **Reproducible Builds:** We provide instructions for reproducing build artifacts from source.
+- **Build from Source:** General build instructions are available in [release_docs/INSTALL](release_docs/INSTALL).
 
 ### TODO -CHECKINTO ::: Binary Hardening
 We aim to produce secure binaries by leveraging the security features of our build infrastructure.
@@ -137,6 +155,9 @@ We aim to produce secure binaries by leveraging the security features of our bui
 ## Security Researcher Recognition
 
 We value the security research community and recognize responsible disclosure.
+
+### Bug Bounty Program
+We do not currently offer a bug bounty program. However, we deeply appreciate responsible disclosure and will publicly acknowledge researchers who help improve HDF5 security.
 
 ### Hall of Thanks & Safe Harbor
 Researchers who responsibly disclose vulnerabilities will be credited in our advisories and release notes.
