@@ -684,7 +684,8 @@ H5PL__load_keys_from_directory(const char *dir_path)
 
             canonical_dir = HDrealpath(dir_path, NULL);
             if (NULL == canonical_dir) {
-                H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve keystore directory path: %s\n", strerror(errno));
+                H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve keystore directory path: %s\n",
+                                     strerror(errno));
                 H5MM_xfree(file_path);
                 continue;
             }
@@ -692,7 +693,8 @@ H5PL__load_keys_from_directory(const char *dir_path)
             canonical_file = HDrealpath(file_path, NULL);
             if (NULL == canonical_file) {
                 /* File might not exist yet in some cases, but for key files it must exist */
-                H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve key file path %s: %s\n", file_path, strerror(errno));
+                H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve key file path %s: %s\n", file_path,
+                                     strerror(errno));
                 free(canonical_dir);
                 H5MM_xfree(file_path);
                 continue;
@@ -1095,8 +1097,8 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
 
         /* Parse hex string (must be exactly 64 hex characters for SHA-256) */
         if (line_len != H5PL_SIGNATURE_HASH_SIZE * 2) {
-            H5PL_SIG_DEBUG_PRINT("WARNING: Ignoring invalid revoked signature hash (expected 64 hex chars): %s\n",
-                                 trimmed);
+            H5PL_SIG_DEBUG_PRINT(
+                "WARNING: Ignoring invalid revoked signature hash (expected 64 hex chars): %s\n", trimmed);
             continue;
         }
 
@@ -1430,8 +1432,7 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
 
     /* Validate format version */
     if (footer_out->format_version != H5PL_SIG_FORMAT_VERSION_CURRENT)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "unsupported signature format version %u (expected %u)",
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "unsupported signature format version %u (expected %u)",
                     (unsigned)footer_out->format_version, (unsigned)H5PL_SIG_FORMAT_VERSION_CURRENT);
 
     /* Validate algorithm ID */
