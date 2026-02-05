@@ -662,26 +662,72 @@ H5PL__load_keys_from_directory(const char *dir_path)
         if (namelen < 5 || strcmp(entry->d_name + namelen - 4, ".pem") != 0)
             continue;
 
+        /* Validate filename doesn't contain path separators (defense in depth) */
+        if (strchr(entry->d_name, '/') != NULL) {
+            H5PL_SIG_DEBUG_PRINT("WARNING: Skipping file with path separator in name: %s\n", entry->d_name);
+            continue;
+        }
+
         /* Build full path */
         path_len = dirlen + namelen + 2;
         if (NULL == (file_path = (char *)H5MM_malloc(path_len))) {
-            fprintf(stderr, "WARNING: Cannot allocate path buffer for %s\n", entry->d_name);
+            H5PL_SIG_DEBUG_PRINT("WARNING: Cannot allocate path buffer for %s\n", entry->d_name);
             continue;
         }
 
         snprintf(file_path, path_len, "%s/%s", dir_path, entry->d_name);
 
+        /* Canonicalize and verify path stays within keystore directory (path traversal protection) */
+        {
+            char *canonical_dir  = NULL;
+            char *canonical_file = NULL;
+
+            canonical_dir = HDrealpath(dir_path, NULL);
+            if (NULL == canonical_dir) {
+                H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve keystore directory path: %s\n", strerror(errno));
+                H5MM_xfree(file_path);
+                continue;
+            }
+
+            canonical_file = HDrealpath(file_path, NULL);
+            if (NULL == canonical_file) {
+                /* File might not exist yet in some cases, but for key files it must exist */
+                H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve key file path %s: %s\n", file_path, strerror(errno));
+                free(canonical_dir);
+                H5MM_xfree(file_path);
+                continue;
+            }
+
+            /* Verify canonical file path starts with canonical directory path */
+            {
+                size_t dir_len = strlen(canonical_dir);
+                if (strncmp(canonical_file, canonical_dir, dir_len) != 0 ||
+                    (canonical_file[dir_len] != '/' && canonical_file[dir_len] != '\0')) {
+                    H5PL_SIG_DEBUG_PRINT(
+                        "WARNING: Path traversal detected - %s resolves outside keystore directory\n",
+                        entry->d_name);
+                    free(canonical_dir);
+                    free(canonical_file);
+                    H5MM_xfree(file_path);
+                    continue;
+                }
+            }
+
+            free(canonical_dir);
+            free(canonical_file);
+        }
+
         /* Skip symlinks */
         {
             h5_stat_t file_stat;
             if (HDlstat(file_path, &file_stat) < 0) {
-                fprintf(stderr, "WARNING: Cannot stat key file %s: %s\n", file_path, strerror(errno));
+                H5PL_SIG_DEBUG_PRINT("WARNING: Cannot stat key file %s: %s\n", file_path, strerror(errno));
                 H5MM_xfree(file_path);
                 continue;
             }
 
             if (S_ISLNK(file_stat.st_mode)) {
-                fprintf(stderr, "WARNING: Skipping symlink %s (security policy)\n", file_path);
+                H5PL_SIG_DEBUG_PRINT("WARNING: Skipping symlink %s (security policy)\n", file_path);
                 H5MM_xfree(file_path);
                 continue;
             }
@@ -958,6 +1004,36 @@ done:
 } /* end H5PL__init_keystore() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5PL__parse_hex_hash
+ *
+ * Purpose:     Parse a hexadecimal string into a byte array
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__parse_hex_hash(const char *hex_string, unsigned char *hash)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(hex_string);
+    assert(hash);
+
+    /* Convert hex string to bytes */
+    for (size_t i = 0; i < H5PL_SIGNATURE_HASH_SIZE; i++) {
+        unsigned int byte;
+        if (sscanf(hex_string + (i * 2), "%2x", &byte) != 1)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "invalid hex character in hash string");
+        hash[i] = (unsigned char)byte;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__parse_hex_hash() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5PL__load_revoked_signatures
  *
  * Purpose:     Load revoked signature hashes from blocklist file
@@ -1019,19 +1095,15 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
 
         /* Parse hex string (must be exactly 64 hex characters for SHA-256) */
         if (line_len != H5PL_SIGNATURE_HASH_SIZE * 2) {
-            fprintf(stderr, "WARNING: Ignoring invalid revoked signature hash (expected 64 hex chars): %s\n",
-                    trimmed);
+            H5PL_SIG_DEBUG_PRINT("WARNING: Ignoring invalid revoked signature hash (expected 64 hex chars): %s\n",
+                                 trimmed);
             continue;
         }
 
         /* Convert hex string to bytes */
-        for (size_t i = 0; i < H5PL_SIGNATURE_HASH_SIZE; i++) {
-            unsigned int byte;
-            if (sscanf(trimmed + (i * 2), "%2x", &byte) != 1) {
-                fprintf(stderr, "WARNING: Invalid hex in revoked signature hash: %s\n", trimmed);
-                goto continue_loop;
-            }
-            hash[i] = (unsigned char)byte;
+        if (H5PL__parse_hex_hash(trimmed, hash) < 0) {
+            H5PL_SIG_DEBUG_PRINT("WARNING: Invalid hex in revoked signature hash: %s\n", trimmed);
+            continue;
         }
 
         /* Expand revoked signatures array if needed */
@@ -1050,9 +1122,6 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
         /* Add hash to revoked list */
         memcpy(H5PL_revoked_sigs_g[H5PL_revoked_sigs_count_g].hash, hash, H5PL_SIGNATURE_HASH_SIZE);
         H5PL_revoked_sigs_count_g++;
-
-continue_loop:
-        continue;
     }
 
     /* Sort the revocation list for binary search (improves O(n) to O(log n) lookup) */
@@ -1277,7 +1346,7 @@ H5PL__verify_with_chunked_io(int fd, HDoff_t binary_size, const unsigned char *s
         if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTSET, -1, "cannot set PSS padding");
 
-        if (1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_AUTO))
+        if (1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_DIGEST))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTSET, -1, "cannot set PSS salt length");
     }
 
@@ -1446,6 +1515,8 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
         if (verify_result == 1) {
             /* SUCCESS! Signature verified with this key */
             verified = true;
+            H5PL_SIG_DEBUG_PRINT("Plugin '%s' verified with key from: %s\n", plugin_path,
+                                 H5PL_keystore_g[key_idx].source);
             break;
         }
         else if (verify_result == 0) {

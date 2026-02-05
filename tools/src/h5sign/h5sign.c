@@ -349,10 +349,9 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     EVP_MD_CTX       *mdctx       = NULL;
     EVP_PKEY_CTX     *pkey_ctx    = NULL;
     H5PL_sig_footer_t footer;
-    herr_t            ret_value     = SUCCEED;
-    hsize_t           bytes_read    = 0;
-    hsize_t           total_to_read = 0;
-    int               append_fd     = -1;
+    herr_t            ret_value  = SUCCEED;
+    hsize_t           bytes_read = 0;
+    int               append_fd  = -1;
 
     /* Open plugin file for reading */
     if ((fd = HDopen(plugin_path, O_RDONLY, 0)) < 0) {
@@ -441,8 +440,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     }
 
     /* Read file in chunks and update hash */
-    total_to_read = file_size;
-    bytes_read    = 0;
+    bytes_read = 0;
 
     if (opt_verbose)
         fprintf(rawoutstream, "Computing SHA-256 hash...\n");

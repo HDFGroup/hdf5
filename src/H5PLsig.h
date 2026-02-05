@@ -54,7 +54,9 @@
  * On-disk layout (12 bytes, little-endian):
  *   [sig_len: 4][algo_id: 1][format_ver: 1][reserved: 2][magic: 4]
  *
- * Note: Always decode from byte buffer, never read directly into this struct.
+ * Note: Always decode from byte buffer using little-endian byte order.
+ *       Never read directly into this struct due to endianness portability
+ *       (the on-disk format is always little-endian, but host byte order varies).
  */
 typedef struct H5PL_sig_footer_t {
     uint32_t signature_length; /* Length of RSA signature in bytes */
