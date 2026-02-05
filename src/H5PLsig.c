@@ -127,9 +127,6 @@ static size_t                        H5PL_sig_cache_capacity_g = 0;
 /* I/O chunk size for verification (1MB - optimized for modern I/O subsystems) */
 #define H5PL_VERIFY_CHUNK_SIZE ((size_t)(1024 * 1024))
 
-/* Memory threshold for multi-key optimization (16MB) */
-#define H5PL_MEMORY_THRESHOLD ((size_t)(16 * 1024 * 1024))
-
 /* Signature verification failure reasons for detailed diagnostics */
 typedef enum {
     H5PL_VERIFY_REASON_UNKNOWN,       /* Unknown/uninitialized */
@@ -1317,6 +1314,252 @@ done:
 } /* end H5PL__verify_with_chunked_io() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5PL__read_and_validate_footer
+ *
+ * Purpose:     Read and validate the signature footer from a plugin file
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_path,
+                               H5PL_sig_footer_t *footer_out, size_t *binary_size_out)
+{
+    uint8_t  footer_buf[H5PL_SIG_FOOTER_SIZE];
+    uint8_t *p         = footer_buf;
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(fd >= 0);
+    assert(plugin_path);
+    assert(footer_out);
+    assert(binary_size_out);
+
+    /* File must be large enough for footer */
+    if (file_size < (HDoff_t)H5PL_SIG_FOOTER_SIZE)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "file too small to contain signature footer");
+
+    /* Read footer from end of file */
+    if (H5PL__read_file_data(fd, file_size - (HDoff_t)H5PL_SIG_FOOTER_SIZE, footer_buf, H5PL_SIG_FOOTER_SIZE,
+                             plugin_path) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read signature footer");
+
+    /* Decode footer (little-endian to native byte order) */
+    UINT32DECODE(p, footer_out->signature_length);
+    footer_out->algorithm_id   = *p++;
+    footer_out->format_version = *p++;
+    UINT16DECODE(p, footer_out->reserved);
+    UINT32DECODE(p, footer_out->magic);
+
+    /* Validate magic number */
+    if (footer_out->magic != H5PL_SIG_MAGIC)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "invalid signature magic number (expected 0x%08X, got 0x%08X) - "
+                    "not a signed HDF5 plugin or corrupted",
+                    (unsigned)H5PL_SIG_MAGIC, (unsigned)footer_out->magic);
+
+    /* Validate algorithm ID */
+    if (NULL == H5PL__get_hash_algorithm(footer_out->algorithm_id))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "unsupported or unknown hash algorithm ID 0x%02X in plugin signature",
+                    (unsigned)footer_out->algorithm_id);
+
+    /* Validate signature length */
+    if (footer_out->signature_length == 0 || footer_out->signature_length > H5PL_MAX_SIGNATURE_SIZE)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "invalid signature length %u bytes (valid range: 1-%u bytes)",
+                    footer_out->signature_length, H5PL_MAX_SIGNATURE_SIZE);
+
+    /* Validate file size can contain signature and footer */
+    if (file_size < (HDoff_t)(footer_out->signature_length + H5PL_SIG_FOOTER_SIZE))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "file too small to contain claimed signature and footer");
+
+    /* Calculate binary data size */
+    {
+        HDoff_t binary_size_off =
+            file_size - (HDoff_t)footer_out->signature_length - (HDoff_t)H5PL_SIG_FOOTER_SIZE;
+
+        /* Practical size limit: 1GB for plugin files */
+        if (binary_size_off > H5PL_MAX_PLUGIN_SIZE)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                        "plugin binary size %llu exceeds maximum allowed size (%llu bytes) - "
+                        "file too large to verify",
+                        (unsigned long long)binary_size_off, (unsigned long long)H5PL_MAX_PLUGIN_SIZE);
+
+        /* Check for overflow when casting to size_t */
+        if (binary_size_off < 0 || (uint64_t)binary_size_off > (uint64_t)SIZE_MAX)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                        "plugin binary size %llu exceeds SIZE_MAX - file too large to verify on this platform",
+                        (unsigned long long)binary_size_off);
+
+        *binary_size_out = (size_t)binary_size_off;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__read_and_validate_footer() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__verify_with_all_keys
+ *
+ * Purpose:     Try verifying signature with each key in the keystore
+ *
+ * Return:      SUCCEED if signature verified with at least one key
+ *              FAIL otherwise
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *signature,
+                           const H5PL_sig_footer_t *footer, const char *plugin_path)
+{
+    const EVP_MD                *hash_algorithm       = NULL;
+    H5PL_verify_failure_reason_t first_failure_reason = H5PL_VERIFY_REASON_UNKNOWN;
+    size_t                       keys_init_failed     = 0;
+    size_t                       keys_update_failed   = 0;
+    size_t                       keys_crypto_invalid  = 0;
+    size_t                       keys_crypto_error    = 0;
+    bool                         verified             = false;
+    herr_t                       ret_value            = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(fd >= 0);
+    assert(signature);
+    assert(footer);
+    assert(plugin_path);
+
+    /* Get hash algorithm from footer (crypto-agile verification) */
+    hash_algorithm = H5PL__get_hash_algorithm(footer->algorithm_id);
+    if (NULL == hash_algorithm)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "cannot get hash algorithm for ID 0x%02X",
+                    (unsigned)footer->algorithm_id);
+
+    /* Try each key in keystore (OR logic - first match wins) */
+    for (size_t key_idx = 0; key_idx < H5PL_keystore_count_g; key_idx++) {
+        EVP_PKEY *public_key    = H5PL_keystore_g[key_idx].key;
+        int       verify_result = H5PL__verify_with_chunked_io(fd, (HDoff_t)binary_size, signature,
+                                                                footer->signature_length, hash_algorithm,
+                                                                public_key, footer->algorithm_id, plugin_path);
+
+        if (verify_result == 1) {
+            /* SUCCESS! Signature verified with this key */
+            verified = true;
+            break;
+        }
+        else if (verify_result == 0) {
+            /* Signature is cryptographically invalid (hash mismatch) */
+            keys_crypto_invalid++;
+            if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
+                first_failure_reason = H5PL_VERIFY_REASON_INVALID_SIG;
+        }
+        else {
+            /* Error occurred - could be init, update, or crypto error */
+            keys_crypto_error++;
+            if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
+                first_failure_reason = H5PL_VERIFY_REASON_CRYPTO_ERROR;
+        }
+
+        /* Clear OpenSSL errors before trying next key */
+        ERR_clear_error();
+    }
+
+    if (!verified) {
+        /* Build informative error message with key sources for debugging */
+        char        key_sources[1024] = "";
+        size_t      remaining         = sizeof(key_sources);
+        char       *ptr               = key_sources;
+        const char *diagnostic        = NULL;
+        const char *keystore_path     = NULL;
+
+        for (size_t i = 0; i < H5PL_keystore_count_g; i++) {
+            const char *source  = H5PL_keystore_g[i].source ? H5PL_keystore_g[i].source : "unknown";
+            int         written = snprintf(ptr, remaining, "%s%s", (i > 0 ? ", " : ""), source);
+
+            if (written < 0 || (size_t)written >= remaining) {
+                if (remaining > 4)
+                    strcpy(ptr, "...");
+                break;
+            }
+            ptr += written;
+            remaining -= (size_t)written;
+        }
+
+        /* Build detailed diagnostic message based on failure pattern */
+        if (keys_init_failed == H5PL_keystore_count_g) {
+            diagnostic = "\n"
+                         "  DIAGNOSIS: All keys failed initialization (key type mismatch)\n"
+                         "  - Plugin signature algorithm may be incompatible with KeyStore keys\n"
+                         "  - Verify that KeyStore contains RSA keys matching the signature algorithm\n"
+                         "  - Check signature algorithm ID in plugin footer\n";
+        }
+        else if (keys_crypto_invalid == H5PL_keystore_count_g) {
+            diagnostic = "\n"
+                         "  DIAGNOSIS: Signature cryptographically invalid with ALL keys\n"
+                         "  - Plugin is either:\n"
+                         "    * Signed with a different key (not in KeyStore)\n"
+                         "    * Tampered after signing (binary modified)\n"
+                         "    * Corrupted during download/transfer (I/O error)\n"
+                         "  - Try:\n"
+                         "    * Obtain the correct public key from plugin developer\n"
+                         "    * Re-download the plugin file\n"
+                         "    * Verify file integrity (checksums)\n";
+        }
+        else if (keys_crypto_invalid > 0 && keys_crypto_invalid < H5PL_keystore_count_g) {
+            diagnostic = "\n"
+                         "  DIAGNOSIS: Signature failed with some keys (not all)\n"
+                         "  - Plugin may be signed with a key not in your KeyStore\n"
+                         "  - Add the correct public key to KeyStore directory\n";
+        }
+        else if (keys_update_failed > 0) {
+            diagnostic = "\n"
+                         "  DIAGNOSIS: Hash computation failed (I/O error)\n"
+                         "  - File may be corrupted or inaccessible\n"
+                         "  - Check file permissions and disk errors\n";
+        }
+        else if (keys_crypto_error > 0) {
+            diagnostic = "\n"
+                         "  DIAGNOSIS: OpenSSL internal error\n"
+                         "  - Check OpenSSL installation and configuration\n"
+                         "  - Review system logs for OpenSSL errors\n";
+        }
+        else {
+            diagnostic = "\n"
+                         "  DIAGNOSIS: Unknown verification failure\n"
+                         "  - Enable HDF5_PLUGIN_KEYSTORE_DEBUG for detailed logging\n";
+        }
+
+        keystore_path = getenv("HDF5_PLUGIN_KEYSTORE");
+        if (keystore_path == NULL)
+            keystore_path = H5PL_SIG_KEYSTORE_DIR_STR;
+
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "plugin signature verification failed\n"
+                    "  Plugin: %s\n"
+                    "  Keys tried: %zu [%s]\n"
+                    "  - Init failed: %zu\n"
+                    "  - Update failed: %zu\n"
+                    "  - Crypto invalid: %zu\n"
+                    "  - Crypto error: %zu\n"
+                    "%s"
+                    "\n"
+                    "  KeyStore: %s\n"
+                    "\n"
+                    "  Next steps:\n"
+                    "    1. Verify plugin was signed correctly (check signature algorithm compatibility)\n"
+                    "    2. Check KeyStore directory contains correct public keys\n"
+                    "    3. Contact plugin developer for correct public key\n"
+                    "    4. Verify file integrity (checksums, re-download if needed)\n",
+                    plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed, keys_update_failed,
+                    keys_crypto_invalid, keys_crypto_error, diagnostic ? diagnostic : "", keystore_path);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__verify_with_all_keys() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5PL__verify_signature_appended
  *
  * Purpose:     Verify plugin digital signature
@@ -1327,19 +1570,14 @@ done:
 herr_t
 H5PL__verify_signature_appended(const char *plugin_path)
 {
-    int               fd = -1;
+    int               fd          = -1;
     h5_stat_t         st;
-    HDoff_t           file_size = 0;
+    HDoff_t           file_size   = 0;
     H5PL_sig_footer_t footer;
-    unsigned char    *signature     = NULL;
-    unsigned char    *binary_data   = NULL;
-    size_t            binary_size   = 0;
-    EVP_PKEY         *public_key    = NULL;
-    EVP_MD_CTX       *mdctx         = NULL;
-    EVP_PKEY_CTX     *pkey_ctx      = NULL;
-    int               verify_result = 0;
-    herr_t            ret_value     = SUCCEED;
-    bool              cached_result = false;
+    unsigned char    *signature   = NULL;
+    size_t            binary_size = 0;
+    herr_t            ret_value   = SUCCEED;
+    bool              cached_result;
 
     FUNC_ENTER_PACKAGE
 
@@ -1347,101 +1585,32 @@ H5PL__verify_signature_appended(const char *plugin_path)
 
     /* Check signature cache first */
     if (H5PL__check_signature_cache(plugin_path, &cached_result) == SUCCEED) {
-        /* Cache hit! Return cached verification result */
-        if (cached_result) {
-            /* Previously verified successfully */
-            HGOTO_DONE(SUCCEED);
-        }
-        else {
-            /* Previously failed verification */
+        if (cached_result)
+            HGOTO_DONE(SUCCEED); /* Previously verified successfully */
+        else
             HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
                         "plugin signature verification failed (cached result): %s", plugin_path);
-        }
     }
 
     /* Cache miss or file modified - perform full verification */
 
-    /* Open plugin file for reading (HDopen handles O_BINARY automatically on Windows) */
+    /* Open plugin file */
     if ((fd = HDopen(plugin_path, O_RDONLY, 0)) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "cannot open plugin file");
 
-    /* Get file size using portable stat */
+    /* Get file size */
     if (HDfstat(fd, &st) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot get file size");
-
     file_size = (HDoff_t)st.st_size;
 
-    /* File must be large enough for footer */
-    if (file_size < (HDoff_t)H5PL_SIG_FOOTER_SIZE)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "file too small to contain signature footer");
+    /* Read and validate footer */
+    if (H5PL__read_and_validate_footer(fd, file_size, plugin_path, &footer, &binary_size) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read or validate signature footer");
 
-    /* Read footer from end of file */
-    {
-        uint8_t  footer_buf[H5PL_SIG_FOOTER_SIZE];
-        uint8_t *p = footer_buf;
-
-        if (H5PL__read_file_data(fd, file_size - (HDoff_t)H5PL_SIG_FOOTER_SIZE, footer_buf,
-                                 H5PL_SIG_FOOTER_SIZE, plugin_path) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read signature footer");
-
-        /* Decode footer (little-endian to native byte order) */
-        UINT32DECODE(p, footer.signature_length);
-        footer.algorithm_id   = *p++;
-        footer.format_version = *p++;
-        UINT16DECODE(p, footer.reserved);
-        UINT32DECODE(p, footer.magic);
-    }
-
-    /* Validate magic number */
-    if (footer.magic != H5PL_SIG_MAGIC)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "invalid signature magic number (expected 0x%08X, got 0x%08X) - "
-                    "not a signed HDF5 plugin or corrupted",
-                    (unsigned)H5PL_SIG_MAGIC, (unsigned)footer.magic);
-
-    /* Validate algorithm ID */
-    if (NULL == H5PL__get_hash_algorithm(footer.algorithm_id))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "unsupported or unknown hash algorithm ID 0x%02X in plugin signature",
-                    (unsigned)footer.algorithm_id);
-
-    /* Validate signature length */
-    if (footer.signature_length == 0 || footer.signature_length > H5PL_MAX_SIGNATURE_SIZE)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "invalid signature length %u bytes (valid range: 1-%u bytes)", footer.signature_length,
-                    H5PL_MAX_SIGNATURE_SIZE);
-
-    /* Validate file size */
-    if (file_size < (HDoff_t)(footer.signature_length + H5PL_SIG_FOOTER_SIZE))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "file too small to contain claimed signature and footer");
-
-    /* Calculate binary data size */
-    {
-        HDoff_t binary_size_off =
-            file_size - (HDoff_t)footer.signature_length - (HDoff_t)H5PL_SIG_FOOTER_SIZE;
-
-        /* Practical size limit: 1GB for plugin files (prevents unreasonable allocations) */
-        if (binary_size_off > H5PL_MAX_PLUGIN_SIZE)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                        "plugin binary size %llu exceeds maximum allowed size (%llu bytes) - "
-                        "file too large to verify",
-                        (unsigned long long)binary_size_off, (unsigned long long)H5PL_MAX_PLUGIN_SIZE);
-
-        /* Check for overflow when casting to size_t */
-        if (binary_size_off < 0 || (uint64_t)binary_size_off > (uint64_t)SIZE_MAX)
-            HGOTO_ERROR(
-                H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                "plugin binary size %llu exceeds SIZE_MAX - file too large to verify on this platform",
-                (unsigned long long)binary_size_off);
-
-        binary_size = (size_t)binary_size_off;
-    }
-
-    /* Allocate signature buffer */
+    /* Read signature data */
     if (NULL == (signature = (unsigned char *)H5MM_malloc(footer.signature_length)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot allocate signature buffer");
 
-    /* Read signature using safe I/O with EINTR retry and chunking */
     if (H5PL__read_file_data(fd, (HDoff_t)binary_size, signature, footer.signature_length, plugin_path) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read signature data");
 
@@ -1451,9 +1620,8 @@ H5PL__verify_signature_appended(const char *plugin_path)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "cannot initialize keystore");
     }
 
-    /* Check if signature is revoked (blocklist) */
-    if (H5PL__is_signature_revoked(signature, footer.signature_length)) {
-        /* Signature is in revocation list - reject immediately */
+    /* Check if signature is revoked */
+    if (H5PL__is_signature_revoked(signature, footer.signature_length))
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
                     "plugin signature is revoked (blocklisted)\n"
                     "  Plugin: %s\n"
@@ -1465,311 +1633,31 @@ H5PL__verify_signature_appended(const char *plugin_path)
                     "  - Contact plugin developer for updated version\n"
                     "  - Check HDF5_PLUGIN_KEYSTORE/revoked_signatures.txt for details",
                     plugin_path);
-    }
 
     /* Must have at least one key */
     if (H5PL_keystore_count_g == 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore is empty - no keys available for verification");
 
-    /* Try verifying with each key in keystore (OR logic - first match wins) */
-    {
-        size_t                       key_idx;
-        bool                         verified                = false;
-        const EVP_MD                *hash_algorithm          = NULL;
-        H5PL_verify_failure_reason_t first_failure_reason    = H5PL_VERIFY_REASON_UNKNOWN;
-        size_t                       keys_init_failed        = 0;
-        size_t                       keys_update_failed      = 0;
-        size_t                       keys_crypto_invalid     = 0;
-        size_t                       keys_crypto_error       = 0;
-        bool                         use_memory_optimization = false;
-
-        /* Get hash algorithm from footer (crypto-agile verification) */
-        hash_algorithm = H5PL__get_hash_algorithm(footer.algorithm_id);
-        if (NULL == hash_algorithm)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "cannot get hash algorithm for ID 0x%02X",
-                        (unsigned)footer.algorithm_id);
-
-        /* Choose verification strategy: memory optimization vs chunked I/O */
-        use_memory_optimization = (binary_size <= H5PL_MEMORY_THRESHOLD && H5PL_keystore_count_g > 1);
-
-        if (use_memory_optimization) {
-            /* Small file + multiple keys: read once, verify with all keys */
-            if (NULL == (binary_data = (unsigned char *)H5MM_malloc(binary_size)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot allocate binary data buffer (%zu bytes)",
-                            binary_size);
-
-            if (H5PL__read_file_data(fd, 0, binary_data, binary_size, plugin_path) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read binary data for verification");
-
-            /* Try each key with in-memory data */
-            for (key_idx = 0; key_idx < H5PL_keystore_count_g; key_idx++) {
-                public_key = H5PL_keystore_g[key_idx].key;
-
-                /* Create fresh message digest context for this key */
-                if (NULL == (mdctx = EVP_MD_CTX_new())) {
-                    unsigned long ssl_err = ERR_get_error();
-                    char          err_buf[256];
-                    ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "cannot create message digest context: %s",
-                                err_buf);
-                }
-
-                /* Initialize verification with algorithm from footer (crypto-agile) */
-                if (1 != EVP_DigestVerifyInit(mdctx, &pkey_ctx, hash_algorithm, NULL, public_key)) {
-                    unsigned long ssl_err = ERR_get_error();
-                    char          err_buf[256];
-                    ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-
-                    /* Track failure for diagnostics */
-                    keys_init_failed++;
-                    if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                        first_failure_reason = H5PL_VERIFY_REASON_INIT_FAILED;
-
-                    /* Clean up and try next key */
-                    EVP_MD_CTX_free(mdctx);
-                    mdctx = NULL;
-                    ERR_clear_error();
-                    continue;
-                }
-
-                /* Configure PSS padding if needed */
-                if (footer.algorithm_id == H5PL_SIG_ALGO_SHA256_PSS ||
-                    footer.algorithm_id == H5PL_SIG_ALGO_SHA384_PSS ||
-                    footer.algorithm_id == H5PL_SIG_ALGO_SHA512_PSS) {
-
-                    if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
-                        /* Track failure for diagnostics */
-                        keys_init_failed++;
-                        if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                            first_failure_reason = H5PL_VERIFY_REASON_INIT_FAILED;
-
-                        /* Clean up and try next key */
-                        EVP_MD_CTX_free(mdctx);
-                        mdctx = NULL;
-                        ERR_clear_error();
-                        continue;
-                    }
-
-                    if (1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_AUTO)) {
-                        /* Track failure for diagnostics */
-                        keys_init_failed++;
-                        if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                            first_failure_reason = H5PL_VERIFY_REASON_INIT_FAILED;
-
-                        /* Clean up and try next key */
-                        EVP_MD_CTX_free(mdctx);
-                        mdctx = NULL;
-                        ERR_clear_error();
-                        continue;
-                    }
-                }
-
-                /* Hash binary data (already loaded in memory) */
-                if (1 != EVP_DigestVerifyUpdate(mdctx, binary_data, binary_size)) {
-                    /* Track failure for diagnostics */
-                    keys_update_failed++;
-                    if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                        first_failure_reason = H5PL_VERIFY_REASON_UPDATE_FAILED;
-
-                    /* Clean up and try next key */
-                    EVP_MD_CTX_free(mdctx);
-                    mdctx = NULL;
-                    ERR_clear_error();
-                    continue;
-                }
-
-                /* Finalize verification */
-                verify_result = EVP_DigestVerifyFinal(mdctx, signature, (size_t)footer.signature_length);
-
-                /* Clean up context for this iteration */
-                EVP_MD_CTX_free(mdctx);
-                mdctx = NULL;
-
-                if (verify_result == 1) {
-                    /* SUCCESS! Signature verified with this key */
-                    verified = true;
-                    break;
-                }
-                else if (verify_result == 0) {
-                    /* Signature is cryptographically invalid (hash mismatch) */
-                    keys_crypto_invalid++;
-                    if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                        first_failure_reason = H5PL_VERIFY_REASON_INVALID_SIG;
-                }
-                else {
-                    /* Internal OpenSSL error (verify_result == -1) */
-                    keys_crypto_error++;
-                    if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                        first_failure_reason = H5PL_VERIFY_REASON_CRYPTO_ERROR;
-                }
-
-                /* Clear OpenSSL errors before trying next key */
-                ERR_clear_error();
-            }
-        }
-        else {
-            /* Large file OR single key: use chunked I/O per key */
-            for (key_idx = 0; key_idx < H5PL_keystore_count_g; key_idx++) {
-                public_key = H5PL_keystore_g[key_idx].key;
-
-                verify_result = H5PL__verify_with_chunked_io(fd, (HDoff_t)binary_size, signature,
-                                                             footer.signature_length, hash_algorithm,
-                                                             public_key, footer.algorithm_id, plugin_path);
-
-                if (verify_result == 1) {
-                    /* SUCCESS! Signature verified with this key */
-                    verified = true;
-                    break;
-                }
-                else if (verify_result == 0) {
-                    /* Signature is cryptographically invalid (hash mismatch) */
-                    keys_crypto_invalid++;
-                    if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                        first_failure_reason = H5PL_VERIFY_REASON_INVALID_SIG;
-                }
-                else {
-                    /* Error occurred - could be init, update, or crypto error */
-                    /* For simplicity, count as crypto error */
-                    keys_crypto_error++;
-                    if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                        first_failure_reason = H5PL_VERIFY_REASON_CRYPTO_ERROR;
-                }
-
-                /* Clear OpenSSL errors before trying next key */
-                ERR_clear_error();
-            }
-        }
-
-        /* Close file now that we're done reading */
-        HDclose(fd);
-        fd = -1;
-
-        /* Check if any key verified successfully */
-        if (!verified) {
-            /* Cache the failed verification result to avoid re-verification */
-            if (H5PL__update_signature_cache(plugin_path, false) < 0) {
-                /* Non-fatal: cache update failure shouldn't block error reporting */
-            }
-
-            /* Build informative error message with key sources for debugging */
-            char   key_sources[1024] = "";
-            size_t remaining         = sizeof(key_sources);
-            char  *ptr               = key_sources;
-
-            for (size_t i = 0; i < H5PL_keystore_count_g; i++) {
-                const char *source  = H5PL_keystore_g[i].source ? H5PL_keystore_g[i].source : "unknown";
-                int         written = snprintf(ptr, remaining, "%s%s", (i > 0 ? ", " : ""), source);
-
-                if (written < 0 || (size_t)written >= remaining) {
-                    /* Truncate with ellipsis if buffer is full */
-                    if (remaining > 4)
-                        strcpy(ptr, "...");
-                    break;
-                }
-
-                ptr += written;
-                remaining -= (size_t)written;
-            }
-
-            /* Build detailed diagnostic message based on failure pattern */
-            const char *diagnostic = NULL;
-            if (keys_init_failed == H5PL_keystore_count_g) {
-                /* ALL keys failed to initialize - key type mismatch */
-                diagnostic = "\n"
-                             "  DIAGNOSIS: All keys failed initialization (key type mismatch)\n"
-                             "  - Plugin signature algorithm may be incompatible with KeyStore keys\n"
-                             "  - Verify that KeyStore contains RSA keys matching the signature algorithm\n"
-                             "  - Check signature algorithm ID in plugin footer\n";
-            }
-            else if (keys_crypto_invalid == H5PL_keystore_count_g) {
-                /* ALL keys showed cryptographic signature mismatch */
-                diagnostic = "\n"
-                             "  DIAGNOSIS: Signature cryptographically invalid with ALL keys\n"
-                             "  - Plugin is either:\n"
-                             "    * Signed with a different key (not in KeyStore)\n"
-                             "    * Tampered after signing (binary modified)\n"
-                             "    * Corrupted during download/transfer (I/O error)\n"
-                             "  - Try:\n"
-                             "    * Obtain the correct public key from plugin developer\n"
-                             "    * Re-download the plugin file\n"
-                             "    * Verify file integrity (checksums)\n";
-            }
-            else if (keys_crypto_invalid > 0 && keys_crypto_invalid < H5PL_keystore_count_g) {
-                /* SOME keys showed signature mismatch (not all) */
-                diagnostic = "\n"
-                             "  DIAGNOSIS: Signature failed with some keys (not all)\n"
-                             "  - Plugin may be signed with a key not in your KeyStore\n"
-                             "  - Add the correct public key to KeyStore directory\n";
-            }
-            else if (keys_update_failed > 0) {
-                /* Hash update failed - possible I/O error */
-                diagnostic = "\n"
-                             "  DIAGNOSIS: Hash computation failed (I/O error)\n"
-                             "  - File may be corrupted or inaccessible\n"
-                             "  - Check file permissions and disk errors\n";
-            }
-            else if (keys_crypto_error > 0) {
-                /* OpenSSL internal error */
-                diagnostic = "\n"
-                             "  DIAGNOSIS: OpenSSL internal error\n"
-                             "  - Check OpenSSL installation and configuration\n"
-                             "  - Review system logs for OpenSSL errors\n";
-            }
-            else {
-                /* Unknown failure pattern */
-                diagnostic = "\n"
-                             "  DIAGNOSIS: Unknown verification failure\n"
-                             "  - Enable HDF5_PLUGIN_KEYSTORE_DEBUG for detailed logging\n";
-            }
-
-            /* Get KeyStore path for error message */
-            const char *keystore_path = getenv("HDF5_PLUGIN_KEYSTORE");
-            if (keystore_path == NULL)
-                keystore_path = H5PL_SIG_KEYSTORE_DIR_STR;
-
-            HGOTO_ERROR(
-                H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                "plugin signature verification failed\n"
-                "  Plugin: %s\n"
-                "  Keys tried: %zu [%s]\n"
-                "  - Init failed: %zu\n"
-                "  - Update failed: %zu\n"
-                "  - Crypto invalid: %zu\n"
-                "  - Crypto error: %zu\n"
-                "%s"
-                "\n"
-                "  KeyStore: %s\n"
-                "\n"
-                "  Next steps:\n"
-                "    1. Verify plugin was signed correctly (check signature algorithm compatibility)\n"
-                "    2. Check KeyStore directory contains correct public keys\n"
-                "    3. Contact plugin developer for correct public key\n"
-                "    4. Verify file integrity (checksums, re-download if needed)\n",
-                plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed, keys_update_failed,
-                keys_crypto_invalid, keys_crypto_error, diagnostic ? diagnostic : "", keystore_path);
-        }
-        else {
-            /* Cache the successful verification result for future lookups */
-            if (H5PL__update_signature_cache(plugin_path, true) < 0) {
-                /* Non-fatal: cache update failure shouldn't block successful verification */
-            }
-        }
+    /* Verify signature with all keys in keystore */
+    if (H5PL__verify_with_all_keys(fd, binary_size, signature, &footer, plugin_path) < 0) {
+        /* Cache the failed verification result */
+        H5PL__update_signature_cache(plugin_path, false);
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "signature verification failed");
     }
+
+    /* Cache the successful verification result */
+    H5PL__update_signature_cache(plugin_path, true);
+
+    /* Close file after verification */
+    HDclose(fd);
+    fd = -1;
 
 done:
     if (fd >= 0)
         HDclose(fd);
     if (signature)
         H5MM_xfree(signature);
-    if (binary_data)
-        H5MM_xfree(binary_data);
-    if (mdctx)
-        EVP_MD_CTX_free(mdctx);
-    /* Note: public_key points to a key in the keystore, so we don't free it here.
-     * All keystore keys will be freed in H5PL__cleanup_signature_cache() during package termination.
-     */
 
-    /* Clear any remaining OpenSSL errors from the error queue */
     ERR_clear_error();
 
     FUNC_LEAVE_NOAPI(ret_value)
