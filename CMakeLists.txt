@@ -891,7 +891,7 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
           "KeyStore directory exists but contains no .pem files: ${HDF5_PLUGIN_KEYSTORE_DIR}\n"
           "Add public key files before using HDF5.")
       else ()
-        message(STATUS "KeyStore directory: ${HDF5_PLUGIN_KEYSTORE_DIR} (${KEYSTORE_KEY_COUNT} key(s) found)")
+        message(VERBOSE "KeyStore directory: ${HDF5_PLUGIN_KEYSTORE_DIR} (${KEYSTORE_KEY_COUNT} key(s) found)")
       endif ()
     endif ()
 
@@ -931,7 +931,7 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
 
     # Security audit log
     string(LENGTH "${H5PL_PUBLIC_KEY_CONTENT}" KEY_LENGTH)
-    message(STATUS "Embedded public key: ${HDF5_PLUGIN_PUBLIC_KEY_FILE} (${KEY_LENGTH} bytes)")
+    message(VERBOSE "Embedded public key: ${HDF5_PLUGIN_PUBLIC_KEY_FILE} (${KEY_LENGTH} bytes)")
   endif ()
 
   # Enable digital signature verification
@@ -940,7 +940,7 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
   # Security: Disable environment variable override if requested
   if (HDF5_LOCK_PLUGIN_KEYSTORE)
     add_compile_definitions(H5PL_DISABLE_ENV_KEYSTORE)
-    message(STATUS "HDF5_PLUGIN_KEYSTORE environment variable override: DISABLED (security hardening)")
+    message(VERBOSE "HDF5_PLUGIN_KEYSTORE environment variable override: DISABLED (security hardening)")
   endif ()
 
   # Add OpenSSL to link libraries for the HDF5 library
@@ -953,15 +953,15 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
     list(APPEND LINK_LIBS Advapi32)
   endif ()
 
-  message(STATUS "Digital signature verification enabled (OpenSSL ${OPENSSL_VERSION})")
+  message(VERBOSE "Digital signature verification enabled (OpenSSL ${OPENSSL_VERSION})")
 
   # Print configuration summary
   if (HDF5_PLUGIN_KEYSTORE_DIR AND HDF5_PLUGIN_PUBLIC_KEY_FILE)
-    message(STATUS "Key sources: KeyStore directory + embedded fallback key")
+    message(VERBOSE "Key sources: KeyStore directory + embedded fallback key")
   elseif (HDF5_PLUGIN_KEYSTORE_DIR)
-    message(STATUS "Key sources: KeyStore directory only")
+    message(VERBOSE "Key sources: KeyStore directory only")
   else ()
-    message(STATUS "Key sources: Embedded public key only (backward compatibility mode)")
+    message(VERBOSE "Key sources: Embedded public key only (backward compatibility mode)")
   endif ()
 endif ()
 
