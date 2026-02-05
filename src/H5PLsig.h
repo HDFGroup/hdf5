@@ -36,6 +36,9 @@
 /* Magic number to identify HDF5 signed plugins */
 #define H5PL_SIG_MAGIC 0x48444635 /* "HDF5" in hex */
 
+/* Current signature format version */
+#define H5PL_SIG_FORMAT_VERSION_CURRENT 1
+
 /* Hash Algorithm Identifiers */
 #define H5PL_SIG_ALGO_SHA256     0x01 /* SHA-256 with RSA-PKCS1 (default) */
 #define H5PL_SIG_ALGO_SHA384     0x02 /* SHA-384 with RSA-PKCS1 */

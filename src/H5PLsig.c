@@ -1428,6 +1428,12 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
                     "not a signed HDF5 plugin or corrupted",
                     (unsigned)H5PL_SIG_MAGIC, (unsigned)footer_out->magic);
 
+    /* Validate format version */
+    if (footer_out->format_version != H5PL_SIG_FORMAT_VERSION_CURRENT)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "unsupported signature format version %u (expected %u)",
+                    (unsigned)footer_out->format_version, (unsigned)H5PL_SIG_FORMAT_VERSION_CURRENT);
+
     /* Validate algorithm ID */
     if (NULL == H5PL__get_hash_algorithm(footer_out->algorithm_id))
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
@@ -1440,14 +1446,19 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
                     "invalid signature length %u bytes (valid range: 1-%u bytes)",
                     footer_out->signature_length, H5PL_MAX_SIGNATURE_SIZE);
 
-    /* Validate file size can contain signature and footer */
-    if (file_size < (HDoff_t)(footer_out->signature_length + H5PL_SIG_FOOTER_SIZE))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "file too small to contain claimed signature and footer");
-
-    /* Calculate binary data size */
+    /* Calculate binary data size with overflow protection */
     {
-        HDoff_t binary_size_off =
-            file_size - (HDoff_t)footer_out->signature_length - (HDoff_t)H5PL_SIG_FOOTER_SIZE;
+        /* Use uint64_t to prevent any theoretical overflow in addition */
+        uint64_t sig_and_footer_size =
+            (uint64_t)footer_out->signature_length + (uint64_t)H5PL_SIG_FOOTER_SIZE;
+
+        /* Validate file size can contain signature and footer */
+        if (file_size < (HDoff_t)sig_and_footer_size)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                        "file too small to contain claimed signature and footer");
+
+        /* Calculate binary size - mathematically guaranteed non-negative after above check */
+        HDoff_t binary_size_off = file_size - (HDoff_t)sig_and_footer_size;
 
         /* Practical size limit: 1GB for plugin files */
         if (binary_size_off > H5PL_MAX_PLUGIN_SIZE)
