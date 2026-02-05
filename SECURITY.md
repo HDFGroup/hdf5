@@ -148,5 +148,7 @@ We support good-faith security research. We will not pursue legal action against
 - Act in good faith and follow this policy.
 
 ---
+
 **Last Updated:** 2026-02-04
+
 **Note:** The HDF Group maintains this project with community contributions. While we make every good faith effort to address security issues promptly, please understand that response times may vary based on available resources.
