@@ -69,7 +69,7 @@
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 0
+#define H5_VERS_RELEASE 1
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
