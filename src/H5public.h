@@ -65,11 +65,11 @@
 /**
  * For minor interface/format changes
  */
-#define H5_VERS_MINOR 1
+#define H5_VERS_MINOR 2
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 1
+#define H5_VERS_RELEASE 0
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
