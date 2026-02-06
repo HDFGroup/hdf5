@@ -112,6 +112,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed an issue where Subfiling VFD stub files weren't properly truncated
+
+   The stub file created by the Subfiling VFD wasn't being properly truncated when subfiles created by the VFD were truncated. This could result in the stub file not being readable when the EOF doesn't match the stored EOF value. While the stub file only contains HDF5 superblock metadata, the file could still be unreadable after an h5fuse operation fuses the VFD's subfiles back together and overwrites the stub file.
+
 ### Fixed a potential out of bound read
 
    When a file is corrupted such that an array datatype's size, the number of elements, and the element size are not in agreement, it can trigger an out of bounds read.  A check has been added to detect such situation.
