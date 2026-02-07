@@ -201,21 +201,21 @@ if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_E
   endif ()
   set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE INTERNAL "Maximum decimal precision for REALs in Fortran")
 
-  set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
-  set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
+  set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}" CACHE INTERNAL "Find available INTEGER KINDs for Fortran")
+  set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}" CACHE INTERNAL "Find available REAL KINDs for Fortran")
 
   list (GET PROG_OUTPUT 3 NUM_IKIND)
   list (GET PROG_OUTPUT 4 NUM_RKIND)
 
-  set (PAC_FORTRAN_NUM_INTEGER_KINDS "${NUM_IKIND}")
-  set (PAC_FORTRAN_NUM_REAL_KINDS "${NUM_RKIND}")
+  set (PAC_FORTRAN_NUM_INTEGER_KINDS "${NUM_IKIND}" CACHE INTERNAL "Number of valid integer kinds for Fortran")
+  set (PAC_FORTRAN_NUM_REAL_KINDS "${NUM_RKIND}" CACHE INTERNAL "Number of valid real kinds for Fortran")
 
   set (${HDF_PREFIX}_H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = ${NUM_IKIND}")
   set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/${pac_validIntKinds}/)")
 
   if (${HAVE_ISO_FORTRAN_ENV})
     list (GET PROG_OUTPUT 5 NUM_LKIND)
-    set (PAC_FORTRAN_NUM_LOGICAL_KINDS "${NUM_LKIND}")
+    set (PAC_FORTRAN_NUM_LOGICAL_KINDS "${NUM_LKIND}" CACHE INTERNAL "Find available LOGICAL KINDs for Fortran")
 
     list (GET PROG_OUTPUT 6 pac_validLogicalKinds)
     # If the list is empty then something went wrong.
@@ -223,7 +223,7 @@ if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_E
       message (FATAL_ERROR "Failed to find available LOGICAL KINDs for Fortran")
     endif ()
 
-    set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}")
+    set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}" CACHE INTERNAL "LOGICAL KINDS FOUND for Fortran")
     message (STATUS "....LOGICAL KINDS FOUND ${PAC_FC_ALL_LOGICAL_KINDS}")
   endif ()
 else ()
