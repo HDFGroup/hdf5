@@ -22,7 +22,7 @@ HDF5’s compatibility story is mostly about **file format compatibility**, and 
 
 ### “2.0.0” does mean “expect *some* API/ABI churn”
 
-HDF5 2.0.0 introduces new APIs and behavioral changes, and *some* APIs were removed or had signatures changed.
+HDF5 2.0.0 introduces new APIs and behavioral changes. While standard user APIs are preserved via compatibility macros, a small set of advanced developer APIs (specifically in the VOL layer) were removed entirely.
 That said, most users can avoid code edits initially by using the **API Compatibility Macros**, which were created specifically to reduce migration pain.
 
 ## The three kinds of compatibility you should care about
