@@ -3,7 +3,7 @@ name: Link Checker
 on:
   workflow_dispatch:
   push:
-    branches: [develop]
+  # branches: [ develop ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
