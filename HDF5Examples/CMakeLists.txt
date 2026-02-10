@@ -215,6 +215,7 @@ endif ()
 # Build examples
 #-----------------------------------------------------------------------------
 add_subdirectory (C)
+# Fortran MPI setup (find_package, link flags) is handled in FORTRAN/CMakeLists.txt
 if (H5EXAMPLE_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
   add_subdirectory (FORTRAN)
 endif ()

@@ -2,13 +2,10 @@ cmake_minimum_required (VERSION 3.26)
 PROJECT (HDF5Examples_F90 Fortran)
 
 # Parallel IO usage requires MPI to be linked and included
-# Find MPI Fortran components to populate MPI_Fortran_LIBRARIES
 if (H5_HAVE_PARALLEL)
   find_package(MPI REQUIRED COMPONENTS Fortran)
-  set (H5EXAMPLE_LINK_Fortran_LIBS ${H5EXAMPLE_LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
-  if (MPI_Fortran_LINK_FLAGS)
-    set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_Fortran_EXE_LINKER_FLAGS}")
-  endif ()
+  # Use imported target — carries include dirs, compile flags, and link flags transitively
+  list(APPEND H5EXAMPLE_LINK_Fortran_LIBS MPI::MPI_Fortran)
 endif ()
 
 #-----------------------------------------------------------------------------
