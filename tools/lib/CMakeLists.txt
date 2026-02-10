@@ -56,10 +56,9 @@ if (BUILD_STATIC_LIBS)
       PUBLIC ${HDF5_LIB_TARGET}
       PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
   )
-  set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_TOOLS_LIB_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_TOOLS_LIB_TARGET} ${HDF5_TOOLS_LIB_NAME} STATIC 0)
   set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES FOLDER libraries/tools)
-  set (install_targets ${HDF5_TOOLS_LIB_TARGET})
+  set (install_targets_static ${HDF5_TOOLS_LIB_TARGET})
 endif ()
 
 if (BUILD_SHARED_LIBS)
@@ -82,10 +81,9 @@ if (BUILD_SHARED_LIBS)
       PUBLIC ${HDF5_LIBSH_TARGET}
       PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
   )
-  set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_TOOLS_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TOOLS_LIB_NAME} SHARED "TOOLS")
   set_target_properties (${HDF5_TOOLS_LIBSH_TARGET} PROPERTIES FOLDER libraries/tools)
-  set (install_targets ${install_targets} ${HDF5_TOOLS_LIBSH_TARGET})
+  set (install_targets_shared ${HDF5_TOOLS_LIBSH_TARGET})
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -111,20 +109,32 @@ endif ()
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} toolslibraries)
+
+    install (
+        TARGETS
+            ${install_targets_shared}
+        EXPORT
+            ${HDF5_EXPORTED_TARGETS}
+        LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
+        ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolslibraries
+        FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT toolslibraries
+        INCLUDES DESTINATION include
+    )
   endif ()
   if (BUILD_STATIC_LIBS)
     INSTALL_TARGET_PDB (${HDF5_TOOLS_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} toolslibraries)
-  endif ()
 
-  install (
-      TARGETS
-          ${install_targets}
-      EXPORT
-          ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
-      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
-      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolslibraries
-      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT toolslibraries
-      INCLUDES DESTINATION include
-  )
+    install (
+        TARGETS
+            ${install_targets_static}
+        EXPORT
+            ${HDF5_EXPORTED_TARGETS}_static
+        LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
+        ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolslibraries
+        FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT toolslibraries
+        INCLUDES DESTINATION include
+    )
+  endif ()
 endif ()

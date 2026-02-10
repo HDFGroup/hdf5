@@ -561,13 +561,6 @@ if (NOT HDF5_EXPORTED_TARGETS)
   set (HDF5_EXPORTED_TARGETS "hdf5-targets")
 endif ()
 
-#-----------------------------------------------------------------------------
-# To include a library in the list exported by the project AT BUILD TIME,
-# add it to this variable. This is NOT used by Make Install, but for projects
-# which include hdf5 as a sub-project within their build tree
-#-----------------------------------------------------------------------------
-set_global_variable (HDF5_LIBRARIES_TO_EXPORT "")
-set_global_variable (HDF5_UTILS_TO_EXPORT "")
 
 set (EXTERNAL_HEADER_LIST "")
 set (EXTERNAL_LIBRARY_LIST "")

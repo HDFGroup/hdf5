@@ -21,7 +21,6 @@ else ()
 endif ()
 #set_target_properties (h5import PROPERTIES COMPILE_DEFINITIONS H5DEBUGIMPORT)
 set_target_properties (h5import PROPERTIES FOLDER tools)
-set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5import")
 
 set (H5_DEP_EXECUTABLES h5import)
 
