@@ -747,16 +747,10 @@ if (HDF5_BUILD_FORTRAN)
             ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
             ${SOURCE_CODE}
         )
-        if (CMAKE_VERSION VERSION_LESS 3.25)
-          set (_RUN_OUTPUT_VARIABLE "RUN_OUTPUT_VARIABLE")
-        else ()
-          set (_RUN_OUTPUT_VARIABLE  "RUN_OUTPUT_STDOUT_VARIABLE")
-        endif ()
-        TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
-            ${CMAKE_BINARY_DIR}
-            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
+        try_run (RUN_RESULT_VAR COMPILE_RESULT_VAR
+            SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
             COMPILE_OUTPUT_VARIABLE COMPILEOUT
-            ${_RUN_OUTPUT_VARIABLE} OUTPUT_VAR
+            RUN_OUTPUT_STDOUT_VARIABLE OUTPUT_VAR
         )
 
         set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
