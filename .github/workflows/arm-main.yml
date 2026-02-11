@@ -41,6 +41,11 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+        with:
+          version: '1.16.0'
+
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
         with:
@@ -74,9 +79,10 @@ jobs:
             -G "Visual Studio 17 2022" -A ARM64 \
             --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
             -DHDF5_BUILD_JAVA=ON \
-            -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=ON \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
             -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
