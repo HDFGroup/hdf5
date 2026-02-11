@@ -1137,8 +1137,8 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
-# check if Doxygen is installed
-  find_package (Doxygen)
+# check if Doxygen is installed (minimum version 1.16.0 required for Fortran cross-references)
+  find_package (Doxygen 1.16.0)
   if (DOXYGEN_FOUND)
     option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
     mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
@@ -1147,7 +1147,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     else ()
       set (HDF5_DOXY_WARNINGS "NO")
     endif ()
-    message (VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
+    message (STATUS "Found Doxygen version: ${DOXYGEN_VERSION}")
 
     # Set the default directory for the Java sources for doxygen
     if (Java_VERSION_STRING VERSION_GREATER_EQUAL "25.0.0")
@@ -1162,7 +1162,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 
     add_subdirectory (doxygen)
   else ()
-    message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
+    message (WARNING "Doxygen version 1.16.0 or higher is required to generate documentation (needed for Fortran cross-references)")
   endif ()
 endif ()
 
