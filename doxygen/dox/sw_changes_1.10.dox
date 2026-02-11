@@ -172,11 +172,11 @@ The following Fortran wrappers were added or changed:
 \li `h5fset_dset_no_attrs_hint_f` - Wrappers for the dataset object header minimization calls. See #H5Fset_dset_no_attrs_hint.
 \li `h5pget_dset_no_attrs_hint_f` - Wrappers for the dataset object header minimization calls. See #H5Pget_dset_no_attrs_hint.
 \li `h5pset_dset_no_attrs_hint_f` - Wrappers for the dataset object header minimization calls. See #H5Pset_dset_no_attrs_hint.
-\li <code>h5ovisit_f</code> - Added new Fortran 'fields' optional parameter. See #H5Ovisit2.
-\li <code>h5oget_info_by_name_f</code> - Added new Fortran 'fields' optional parameter. See #H5Oget_info_by_name2.
-\li <code>h5oget_info_f</code> - Added new Fortran 'fields' optional parameter. See #H5Oget_info2.
-\li <code>h5oget_info_by_idx_f</code> - Added new Fortran 'fields' optional parameter. See #H5Oget_info_by_idx2.
-\li <code>h5ovisit_by_name_f</code> - Added new Fortran 'fields' optional parameter. See #H5Ovisit_by_name2.
+\li \ref H5O::h5ovisit_f - Added new Fortran 'fields' optional parameter. See #H5Ovisit2.
+\li \ref H5O::h5oget_info_by_name_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info_by_name2.
+\li \ref H5O::h5oget_info_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info2.
+\li \ref H5O::h5oget_info_by_idx_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info_by_idx2.
+\li \ref H5O::h5ovisit_by_name_f - Added new Fortran 'fields' optional parameter. See #H5Ovisit_by_name2.
 
 
 The following Fortran utility function was added:
