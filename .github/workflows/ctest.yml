@@ -647,10 +647,18 @@ jobs:
     name: "Ubuntu gcc S3"
     runs-on: ubuntu-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux S3)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen
+          sudo apt-get install ninja-build
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
@@ -888,10 +896,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check-secret]
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux_intel)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
 
       - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1

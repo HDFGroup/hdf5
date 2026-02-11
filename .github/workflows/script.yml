@@ -391,10 +391,13 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux S3)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen
+          sudo apt-get install ninja-build
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
@@ -626,10 +629,13 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux_intel)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz curl
+          sudo apt-get install ninja-build graphviz curl
 
       - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
@@ -735,10 +741,13 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux_clang)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz curl
+          sudo apt-get install ninja-build graphviz curl
 
       - name: check clang version
         shell: bash

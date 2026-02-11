@@ -37,10 +37,13 @@ jobs:
       with:
         sparse-checkout: .github/actions
 
+    - name: Setup Doxygen
+      uses: ./.github/actions/setup-doxygen
+
     - name: Install Dependencies (Linux_coverage)
       run: |
         sudo apt update
-        sudo apt-get install ninja-build doxygen graphviz curl build-essential
+        sudo apt-get install ninja-build graphviz curl build-essential
         sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
         sudo apt-get install lcov -q -y
 
@@ -138,10 +141,13 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux_Leak)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl
+          sudo apt-get install ninja-build graphviz curl
 
       - name: Set file base name (Linux_Leak)
         id: set-file-base
@@ -239,10 +245,13 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux_Address)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl
+          sudo apt-get install ninja-build graphviz curl
 
       - name: Set file base name (Linux_Address)
         id: set-file-base
@@ -340,10 +349,13 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux_UndefinedBehavior)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl
+          sudo apt-get install ninja-build graphviz curl
 
       - name: Set file base name (Linux_UndefinedBehavior)
         id: set-file-base

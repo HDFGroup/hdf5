@@ -235,11 +235,21 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.determine-matrix.outputs.matrix) }}
     steps:
+      - name: Get Actions
+        if: ${{ runner.os == 'Linux' }}
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        if: ${{ runner.os == 'Linux' }}
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux)
         if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
 
       - name: Install Dependencies (macOS)
         if: ${{ runner.os == 'macOS' }}
