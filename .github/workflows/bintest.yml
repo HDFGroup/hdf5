@@ -113,13 +113,10 @@ jobs:
     name: "Ubuntu gcc Binary Test"
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build graphviz
+          sudo apt-get install ninja-build doxygen graphviz
 
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
@@ -241,13 +238,10 @@ jobs:
     name: "Ubuntu h5cc Binary Test"
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build graphviz
+          sudo apt-get install ninja-build doxygen graphviz
 
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5

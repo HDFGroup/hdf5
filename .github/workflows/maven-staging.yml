@@ -239,7 +239,7 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build graphviz
+          sudo apt-get install ninja-build doxygen graphviz
 
       - name: Install Dependencies (macOS)
         if: ${{ runner.os == 'macOS' }}
