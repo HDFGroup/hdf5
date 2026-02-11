@@ -261,19 +261,12 @@ jobs:
     # Linux (Ubuntu) w/ clang
     #
     name: "Ubuntu Clang"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies (Linux_clang)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
-
-      - name: add clang to env
-        uses: KyleMayes/install-llvm-action@98e68e10c96dffcb7bfed8b2144541a66b49aa02 # v2.0.8
-        id: setup-clang
-        with:
-          env: true
-          version: '18.1'
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: Check Clang Version
         shell: bash
@@ -334,6 +327,8 @@ jobs:
                -DHDF5_BUILD_DOC=OFF \
                -DLIBAEC_USE_LOCALCONTENT=OFF \
                -DZLIB_USE_LOCALCONTENT=OFF \
+               -DCMAKE_C_COMPILER:STRING=clang \
+               -DCMAKE_CXX_COMPILER:STRING=clang++ \
                -DHDF_TEST_EXPRESS=0 \
                ${{ github.workspace }}/hdfsrc
 
