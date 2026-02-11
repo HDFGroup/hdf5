@@ -1137,8 +1137,8 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
-# check if Doxygen is installed (minimum version 1.16.0 required for Fortran cross-references)
-  find_package (Doxygen 1.16.0)
+# check if Doxygen is installed
+  find_package (Doxygen)
   if (DOXYGEN_FOUND)
     option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
     mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
@@ -1162,7 +1162,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 
     add_subdirectory (doxygen)
   else ()
-    message (WARNING "Doxygen version 1.16.0 or higher is required to generate documentation (needed for Fortran cross-references)")
+    message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()
 endif ()
 

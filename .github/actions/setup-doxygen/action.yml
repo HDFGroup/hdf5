@@ -9,6 +9,6 @@ runs:
   using: 'composite'
   steps:
     - name: Install Doxygen
-      uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
+      uses: ssciwr/doxygen-install@ad81ff2dcb7f3050bc694ed5934f26a16da684d5 # v2.0.0
       with:
         version: ${{ inputs.version }}
