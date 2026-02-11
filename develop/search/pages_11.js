@@ -12,9 +12,10 @@ var searchData=
   ['metadata_20caching_20in_20hdf5_9',['Metadata Caching in HDF5',['../_t_n_m_d_c.html',1,'']]],
   ['metadata_20i_20o_10',['Collective Metadata I/O',['../collective_metadata_io.html',1,'']]],
   ['metadata_20reads_11',['Functions with No Access Property List Parameter that May Generate Metadata Reads',['../maybe_metadata_reads.html',1,'']]],
-  ['model_12',['HDF5 Library and Programming Model',['../_h5__u_g.html',1,'']]],
-  ['model_20and_20file_20structure_13',['HDF5 Data Model and File Structure',['../_h5_d_m__u_g.html',1,'']]],
-  ['model_20explained_14',['HDF5 Git Branching Model Explained',['../_b_r_a_n_c_h_e_x_p_l.html',1,'']]],
-  ['modified_20region_20writes_15',['Modified Region Writes',['../mod_region_writes.html',1,'']]],
-  ['multiple_20reader_20swmr_16',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]]
+  ['migration_20guide_12',['HDF5 2.0.0 Library Migration Guide',['../md_release__docs_2_h_d_f5___library__2_80_80___migration___guide.html',1,'']]],
+  ['model_13',['HDF5 Library and Programming Model',['../_h5__u_g.html',1,'']]],
+  ['model_20and_20file_20structure_14',['HDF5 Data Model and File Structure',['../_h5_d_m__u_g.html',1,'']]],
+  ['model_20explained_15',['HDF5 Git Branching Model Explained',['../_b_r_a_n_c_h_e_x_p_l.html',1,'']]],
+  ['modified_20region_20writes_16',['Modified Region Writes',['../mod_region_writes.html',1,'']]],
+  ['multiple_20reader_20swmr_17',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]]
 ];

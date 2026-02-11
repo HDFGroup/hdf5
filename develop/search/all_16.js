@@ -15,7 +15,8 @@ var searchData=
   ['keytable_12',['keytable',['../h5import_8h.html#af5e77ec8b8517673c92ade6e80ba2950',1,'h5import.h']]],
   ['keywords_13',['KEYWORDS',['../_h5_t_o_o_l__i_m__u_g.html#subsubsec_cltools_h5import_config_opt',1,'Optional KEYWORDS'],['../_h5_t_o_o_l__i_m__u_g.html#subsubsec_cltools_h5import_config_req',1,'Required KEYWORDS']]],
   ['keywords_14',['Values for keywords',['../_h5_t_o_o_l__i_m__u_g.html#subsubsec_cltools_h5import_config_val',1,'']]],
-  ['knights_20landing_20knl_20on_20cray_20xc40_15',['6.2. Historical Example: Knights Landing (KNL) on Cray XC40',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md233',1,'']]],
-  ['knl_20on_20cray_20xc40_16',['6.2. Historical Example: Knights Landing (KNL) on Cray XC40',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md233',1,'']]],
-  ['known_20platform_20notes_17',['8. Known Platform Notes',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md246',1,'']]]
+  ['kinds_20of_20compatibility_20you_20should_20care_20about_15',['The three kinds of compatibility you should care about',['../md_release__docs_2_h_d_f5___library__2_80_80___migration___guide.html#autotoc_md210',1,'']]],
+  ['knights_20landing_20knl_20on_20cray_20xc40_16',['6.2. Historical Example: Knights Landing (KNL) on Cray XC40',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md280',1,'']]],
+  ['knl_20on_20cray_20xc40_17',['6.2. Historical Example: Knights Landing (KNL) on Cray XC40',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md280',1,'']]],
+  ['known_20platform_20notes_18',['8. Known Platform Notes',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md293',1,'']]]
 ];

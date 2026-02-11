@@ -14,9 +14,11 @@ var searchData=
   ['querying_20filters_11',['Querying Filters',['../_h5_z__u_g.html#subsec_filter_query',1,'']]],
   ['querying_20identifiers_12',['Querying Identifiers',['../_h5_i__u_g.html#subsec_identifier_query',1,'']]],
   ['querying_20the_20address_20range_13',['Querying the Address Range',['../_v_f_l_t_n.html#subsec_vfl_address_query',1,'']]],
-  ['quick_20start_20examples_14',['Quick Start Examples',['../h5_cpp_intro.html#cpp_examples',1,'']]],
-  ['quick_20start_20instructions_15',['3. Quick Start Instructions',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md212',1,'']]],
-  ['quickstart_16',['Quickstart',['../_h5_v_l__u_g.html#subsec_vol_quickstart',1,'']]],
-  ['quiz_17',['Learning the basics QUIZ',['../_l_b_quiz.html',1,'LearnBasics']]],
-  ['quiz_20with_20answers_18',['Learning the basics QUIZ with Answers',['../_l_b_quiz_answers.html',1,'LearnBasics']]]
+  ['quick_20confidence_14',['Smoke tests (quick confidence)',['../md_release__docs_2_h_d_f5___library__2_80_80___migration___guide.html#autotoc_md229',1,'']]],
+  ['quick_20hits_15',['Troubleshooting quick hits',['../md_release__docs_2_h_d_f5___library__2_80_80___migration___guide.html#autotoc_md244',1,'']]],
+  ['quick_20start_20examples_16',['Quick Start Examples',['../h5_cpp_intro.html#cpp_examples',1,'']]],
+  ['quick_20start_20instructions_17',['3. Quick Start Instructions',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md259',1,'']]],
+  ['quickstart_18',['Quickstart',['../_h5_v_l__u_g.html#subsec_vol_quickstart',1,'']]],
+  ['quiz_19',['Learning the basics QUIZ',['../_l_b_quiz.html',1,'LearnBasics']]],
+  ['quiz_20with_20answers_20',['Learning the basics QUIZ with Answers',['../_l_b_quiz_answers.html',1,'LearnBasics']]]
 ];

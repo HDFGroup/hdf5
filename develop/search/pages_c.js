@@ -7,5 +7,5 @@ var searchData=
   ['group_4',['Creating an Group',['../_l_b_grp_create.html',1,'LearnBasics']]],
   ['groups_5',['Groups',['../_l_b_grp_dset.html',1,'Creating Datasets in Groups'],['../_h5_g__u_g.html',1,'HDF5 Groups']]],
   ['groups_20using_20absolute_20and_20relative_20names_6',['Creating Groups using Absolute and Relative Names',['../_l_b_grp_create_names.html',1,'LearnBasics']]],
-  ['guide_7',['Guide',['../_u_g.html',1,'HDF5 User Guide'],['../_v_o_l__connector.html',1,'HDF5 Virtual Object Layer (VOL) Connector Author Guide']]]
+  ['guide_7',['Guide',['../md_release__docs_2_h_d_f5___library__2_80_80___migration___guide.html',1,'HDF5 2.0.0 Library Migration Guide'],['../_u_g.html',1,'HDF5 User Guide'],['../_v_o_l__connector.html',1,'HDF5 Virtual Object Layer (VOL) Connector Author Guide']]]
 ];

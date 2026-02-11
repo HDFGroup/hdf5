@@ -7,8 +7,8 @@ var searchData=
   ['garbagecollect_4',['garbageCollect',['../class_h5_1_1_h5_library.html#a39d77be394445d2771dafe1cef483436',1,'H5::H5Library']]],
   ['gcpl_5fid_5',['gcpl_id',['../struct_h5_v_l__group__get__args__t.html#adaa50b67271240ed208c995eb2407245',1,'H5VL_group_get_args_t']]],
   ['general_6',['Java General',['../_ex_a_p_i.html#sec_exapi_java',1,'']]],
-  ['general_20_3a_7',['Description (General):',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md259',1,'']]],
-  ['general_20builds_8',['3.1. Using CMake Presets (Recommended for General Builds)',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md213',1,'']]],
+  ['general_20_3a_7',['Description (General):',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md306',1,'']]],
+  ['general_20builds_8',['3.1. Using CMake Presets (Recommended for General Builds)',['../md_release__docs_2_r_e_a_d_m_e___h_p_c.html#autotoc_md260',1,'']]],
   ['general_20configuration_9',['General Configuration',['../_t_n_m_d_c.html#gconfig',1,'']]],
   ['general_20configuration_20fields_10',['General configuration fields',['../_h5_a_c-cache-config-t.html#gcf',1,'']]],
   ['general_20h5_11',['Library General (H5)',['../group___h5.html',1,'']]],
@@ -239,7 +239,7 @@ var searchData=
   ['git_20branching_20model_20explained_236',['HDF5 Git Branching Model Explained',['../_b_r_a_n_c_h_e_x_p_l.html',1,'']]],
   ['github_20actions_20matrix_237',['GitHub Actions Matrix',['../md_release__docs_2_build_system_notes.html#autotoc_md184',1,'']]],
   ['github_20authentication_238',['GitHub Authentication',['../md__h_d_f5_examples_2_j_a_v_a_2_r_e_a_d_m_e-_m_a_v_e_n.html#autotoc_md44',1,'']]],
-  ['github_20com_20hdfgroup_20hdf5_20wiki_20hdf5_20version_20numbers_20and_20branch_20strategy_20hdf5_20versioning_20policy_20a_20consistent_20with_20semantic_20versioning_20rules_239',['6. Verify that HDF5 library version has been updated from the previous release according to &lt;a href=&quot;https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy&quot; &gt;HDF5 versioning policy&lt;/a&gt;, consistent with semantic versioning rules.',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md268',1,'']]],
+  ['github_20com_20hdfgroup_20hdf5_20wiki_20hdf5_20version_20numbers_20and_20branch_20strategy_20hdf5_20versioning_20policy_20a_20consistent_20with_20semantic_20versioning_20rules_239',['6. Verify that HDF5 library version has been updated from the previous release according to &lt;a href=&quot;https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy&quot; &gt;HDF5 versioning policy&lt;/a&gt;, consistent with semantic versioning rules.',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md315',1,'']]],
   ['global_20heap_240',['Global Heap',['../_f_m_t1.html#subsec_fmt1_group_globalheap',1,'Disk Format: Level 1E - Global Heap'],['../_f_m_t11.html#subsec_fmt11_infra_globalheap',1,'Disk Format: Level 1E - Global Heap'],['../_f_m_t2.html#subsec_fmt2_infra_globalheap',1,'III.E. Disk Format: Level 1E - Global Heap'],['../_f_m_t3.html#subsec_fmt3_infra_globalheap',1,'III.E. Disk Format: Level 1E - Global Heap'],['../_f_m_t4.html#subsec_fmt4_infra_globalheap',1,'III.E. Disk Format: Level 1E - Global Heap']]],
   ['global_20heap_20block_20for_20virtual_20datasets_241',['Global Heap Block for Virtual Datasets',['../_f_m_t3.html#subsec_fmt3_infra_globalheapvds',1,'III.F. Disk Format: Level 1F - Global Heap Block for Virtual Datasets'],['../_f_m_t4.html#subsec_fmt4_infra_globalheapvds',1,'III.F. Disk Format: Level 1F - Global Heap Block for Virtual Datasets']]],
   ['global_20key_20for_20per_20thread_20error_20stacks_242',['Global key for per-thread error stacks',['../thread-safe-lib.html#subsec_tsafe_global_key',1,'']]],
@@ -284,7 +284,7 @@ var searchData=
   ['grp_5fcompact_281',['grp_compact',['../structpack__opt__t.html#a1ffa4566febe7d3f43796bf8f9ca5de1',1,'pack_opt_t']]],
   ['grp_5fid_282',['grp_id',['../struct_h5_v_l__group__specific__args__t.html#a450c9c74199b4e8e327320e0f11e1a1b',1,'H5VL_group_specific_args_t']]],
   ['grp_5findexed_283',['grp_indexed',['../structpack__opt__t.html#a513f3e52e29748e03e22cc69385e13b3',1,'pack_opt_t']]],
-  ['guide_284',['Guide',['../_u_g.html',1,'HDF5 User Guide'],['../_v_o_l__connector.html',1,'HDF5 Virtual Object Layer (VOL) Connector Author Guide'],['../_s_w_m_r_t_n.html#subsubsec_swmr_doc_guide',1,'User Guide']]],
+  ['guide_284',['Guide',['../md_release__docs_2_h_d_f5___library__2_80_80___migration___guide.html',1,'HDF5 2.0.0 Library Migration Guide'],['../_u_g.html',1,'HDF5 User Guide'],['../_v_o_l__connector.html',1,'HDF5 Virtual Object Layer (VOL) Connector Author Guide'],['../_s_w_m_r_t_n.html#subsubsec_swmr_doc_guide',1,'User Guide']]],
   ['guidelines_285',['Enforcement Guidelines',['../md__c_o_d_e___o_f___c_o_n_d_u_c_t.html#autotoc_md6',1,'']]],
   ['gz_20file_286',['gz file',['../rel_spec_114.html#subsec_obtain_method_114',1,'Methods to obtain (gz file)'],['../rel_spec_20.html#subsec_obtain_method_20',1,'Methods to obtain (gz file)']]]
 ];
