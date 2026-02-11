@@ -561,6 +561,10 @@ if (NOT HDF5_EXPORTED_TARGETS)
   set (HDF5_EXPORTED_TARGETS "hdf5-targets")
 endif ()
 
+#-----------------------------------------------------------------------------
+# Used by hdf5-config.cmake.in to advertise available library targets
+#-----------------------------------------------------------------------------
+set_global_variable (HDF5_LIBRARIES_TO_EXPORT "")
 
 set (EXTERNAL_HEADER_LIST "")
 set (EXTERNAL_LIBRARY_LIST "")
