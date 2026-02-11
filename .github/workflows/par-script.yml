@@ -43,9 +43,6 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
@@ -172,9 +169,6 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (${{ matrix.mpi }})
         run: |
           sudo apt-get update
@@ -291,9 +285,6 @@ jobs:
     name: "Parallel ${{ matrix.mpi }} macos-${{ inputs.build_mode }}"
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
 
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja

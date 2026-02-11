@@ -113,14 +113,6 @@ jobs:
     name: "Ubuntu gcc Binary Test"
     runs-on: ubuntu-latest
     steps:
-      - name: Get Actions
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          sparse-checkout: .github/actions
-
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
@@ -181,7 +173,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Install Dependencies (MacOS_latest)
-        run: brew install ninja doxygen
+        run: brew install ninja
 
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
@@ -246,14 +238,6 @@ jobs:
     name: "Ubuntu h5cc Binary Test"
     runs-on: ubuntu-latest
     steps:
-      - name: Get Actions
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          sparse-checkout: .github/actions
-
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update

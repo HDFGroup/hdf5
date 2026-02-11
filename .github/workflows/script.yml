@@ -41,9 +41,6 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
@@ -158,9 +155,6 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
@@ -258,9 +252,6 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           sparse-checkout: .github/actions
-
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
 
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja curl
@@ -384,9 +375,6 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           sparse-checkout: .github/actions
-
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
 
       - name: Install Dependencies (Linux S3)
         run: |
@@ -623,9 +611,6 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
-
       - name: Install Dependencies (Linux_intel)
         run: |
           sudo apt-get update
@@ -734,9 +719,6 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           sparse-checkout: .github/actions
-
-      - name: Setup Doxygen
-        uses: ./.github/actions/setup-doxygen
 
       - name: Install Dependencies (Linux_clang)
         run: |
