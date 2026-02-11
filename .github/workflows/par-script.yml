@@ -43,13 +43,11 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Windows)
         run: choco install ninja
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
@@ -174,6 +172,9 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (${{ matrix.mpi }})
         run: |
           sudo apt-get update
@@ -181,11 +182,6 @@ jobs:
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           sudo apt install libaec0 libaec-dev
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
@@ -296,13 +292,11 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi

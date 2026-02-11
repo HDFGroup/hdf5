@@ -108,13 +108,16 @@ jobs:
 
     runs-on: windows-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Windows)
         run: choco install ninja
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -184,13 +187,16 @@ jobs:
     name: "MacOS Clang"
     runs-on: macos-latest
     steps:
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
 
       - name: Check Clang Version
         shell: bash

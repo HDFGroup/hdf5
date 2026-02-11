@@ -56,6 +56,9 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies (OpenMPI)
         run: |
           sudo apt-get update
@@ -78,11 +81,6 @@ jobs:
           echo "LD_LIBRARY_PATH=${{ runner.workspace }}/openmpi/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CC=${{ runner.workspace }}/openmpi/bin/mpicc" >> $GITHUB_ENV
           echo "FC=${{ runner.workspace }}/openmpi/bin/mpif90" >> $GITHUB_ENV
-
-      - name: Install Doxygen
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
@@ -178,6 +176,9 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies (MPICH)
         run: |
           sudo apt-get update
@@ -200,11 +201,6 @@ jobs:
           echo "LD_LIBRARY_PATH=${{ runner.workspace }}/mpich/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CC=${{ runner.workspace }}/mpich/bin/mpicc" >> $GITHUB_ENV
           echo "FC=${{ runner.workspace }}/mpich/bin/mpif90" >> $GITHUB_ENV
-
-      - name: Install Doxygen
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
