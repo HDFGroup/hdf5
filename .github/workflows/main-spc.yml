@@ -357,7 +357,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
-          version: "1.13.2"
+          version: "1.16.0"
 
       - name: install oneAPI (Windows)
         uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
