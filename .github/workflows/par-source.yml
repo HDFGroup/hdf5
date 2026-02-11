@@ -37,13 +37,11 @@ jobs:
   Build_openmpi_source:
     name: Build OpenMPI from source
     uses: ./.github/workflows/build_openmpi_source.yml
-    with:
       build_mode: ${{ inputs.build_mode }}
 
   Build_mpich_source:
     name: Build MPICH from source
     uses: ./.github/workflows/build_mpich_source.yml
-    with:
       build_mode: ${{ inputs.build_mode }}
 
   Build_parallel_src_openmpi:
@@ -53,7 +51,6 @@ jobs:
     steps:
       - name: Get Actions
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
           sparse-checkout: .github/actions
 
       - name: Install Linux Dependencies (OpenMPI)
@@ -64,7 +61,6 @@ jobs:
 
       - name: Get MPI installation (OpenMPI)
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
           name: openmpi
 
       - name: Untar MPI installation (OpenMPI)
@@ -80,13 +76,10 @@ jobs:
           echo "FC=${{ runner.workspace }}/openmpi/bin/mpif90" >> $GITHUB_ENV
 
       - name: Install Doxygen
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
+        uses: ./.github/actions/setup-doxygen
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
-        with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
 
@@ -106,7 +99,6 @@ jobs:
       # Get files created by release script
       - name: Get tgz-tarball (OpenMPI)
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
@@ -120,7 +112,6 @@ jobs:
 
       - name: Symlink script files for the space (OpenMPI)
         uses: ./.github/actions/symlink-ctest-scripts
-        with:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (OpenMPI)
@@ -129,7 +120,6 @@ jobs:
 
       - name: Create options file (OpenMPI)
         uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
-        with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
@@ -166,7 +156,6 @@ jobs:
       # Save log files created by CTest script
       - name: Save log (OpenMPI)
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
-        with:
           name: openmpi-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
@@ -186,7 +175,6 @@ jobs:
 
       - name: Get MPI installation (MPICH)
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
           name: mpich
 
       - name: Untar MPI installation (MPICH)
@@ -202,13 +190,10 @@ jobs:
           echo "FC=${{ runner.workspace }}/mpich/bin/mpif90" >> $GITHUB_ENV
 
       - name: Install Doxygen
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
+        uses: ./.github/actions/setup-doxygen
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
-        with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
 
@@ -228,7 +213,6 @@ jobs:
       # Get files created by release script
       - name: Get tgz-tarball (MPICH)
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
@@ -242,7 +226,6 @@ jobs:
 
       - name: Symlink script files for the space (MPICH)
         uses: ./.github/actions/symlink-ctest-scripts
-        with:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (MPICH)
@@ -251,7 +234,6 @@ jobs:
 
       - name: Create options file (MPICH)
         uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
-        with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
           contents: |
@@ -288,7 +270,6 @@ jobs:
       # Save log files created by CTest script
       - name: Save log (MPICH)
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
-        with:
           name: mpich-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

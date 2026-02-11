@@ -32,7 +32,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install libaec0 libaec-dev
            sudo apt install gcc-12 g++-12 gfortran-12
@@ -43,7 +43,6 @@ jobs:
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
@@ -104,9 +103,7 @@ jobs:
         run: choco install ninja
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
+        uses: ./.github/actions/setup-doxygen
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -134,7 +131,6 @@ jobs:
       # Get files created by release script
       - name: Get zip-tarball (Windows)
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
               name: zip-tarball
               path: ${{ github.workspace }}
 
@@ -180,9 +176,7 @@ jobs:
         run: brew install ninja
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
+        uses: ./.github/actions/setup-doxygen
 
       - name: Check Clang Version
         shell: bash
@@ -212,7 +206,6 @@ jobs:
       # Get files created by release script
       - name: Get tgz-tarball (MacOS_latest)
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
@@ -263,10 +256,13 @@ jobs:
     name: "Ubuntu Clang"
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Linux_clang)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz curl
+          sudo apt-get install ninja-build graphviz curl
 
       - name: Check Clang Version
         shell: bash
@@ -296,7 +292,6 @@ jobs:
       # Get files created by release script
       - name: Get tgz-tarball (Linux_clang)
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
           name: tgz-tarball
           path: ${{ github.workspace }}
 

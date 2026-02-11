@@ -30,7 +30,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
@@ -89,7 +89,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
@@ -143,7 +143,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
@@ -197,7 +197,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
@@ -249,7 +249,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           echo "CC=gcc-12" >> $GITHUB_ENV
@@ -301,7 +301,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           echo "CC=gcc-12" >> $GITHUB_ENV
@@ -355,16 +355,12 @@ jobs:
         run: choco install ninja
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
+        uses: ./.github/actions/setup-doxygen
 
       - name: install oneAPI (Windows)
         uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
         id: setup-fortran
-        with:
           compiler: intel
-          version: '2025.0'
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
@@ -406,7 +402,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12 zlib1g-dev 
           echo "CC=gcc-12" >> $GITHUB_ENV
@@ -463,7 +459,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           echo "CC=gcc-12" >> $GITHUB_ENV
@@ -516,7 +512,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           echo "CC=gcc-12" >> $GITHUB_ENV
@@ -569,7 +565,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
@@ -617,7 +613,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV

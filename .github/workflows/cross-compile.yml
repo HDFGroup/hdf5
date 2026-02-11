@@ -41,9 +41,7 @@ jobs:
           sudo apt-get install gfortran-mingw-w64-x86-64-win32
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
+        uses: ./.github/actions/setup-doxygen
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
@@ -100,7 +98,6 @@ jobs:
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
-        with:
           name: tgz-ubuntu-2404_mingw64-${{ inputs.build_mode }}-binary
           path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

@@ -156,13 +156,10 @@ jobs:
         if: ${{ matrix.ostype == 'macos' }}
 
       - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.16.0"
+        uses: ./.github/actions/setup-doxygen
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
-        with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
 
@@ -175,9 +172,7 @@ jobs:
       - name: Set up Java (if specified or FFM required)
         if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
-        with:
           distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
-          java-version: |
             ${{
               inputs.force_java_implementation == 'ffm' && '25' ||
               inputs.java_version == 'latest' && '24' ||
@@ -205,8 +200,6 @@ jobs:
       - name: Setup jextract (FFM builds only)
         if: ${{ inputs.force_java_implementation == 'ffm' }}
         uses: ./.github/actions/setup-jextract
-        with:
-          java-version: '25'
 
       # CONFIGURE
       - name: Configure
@@ -336,7 +329,6 @@ jobs:
       # Save files created by CTest script
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
-        with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
@@ -344,7 +336,6 @@ jobs:
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
-        with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
@@ -352,7 +343,6 @@ jobs:
 
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
-        with:
               name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
