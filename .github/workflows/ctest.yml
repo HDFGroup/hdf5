@@ -93,7 +93,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
-          version: "1.13.2"
+          version: "1.16.0"
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -249,7 +249,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
-          version: "1.13.2"
+          version: "1.16.0"
 
       - name: Install CMake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
@@ -422,7 +422,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
         with:
-          version: "1.13.2"
+          version: "1.16.0"
 
       - name: check clang version
         shell: bash
