@@ -168,19 +168,19 @@ The following C++ wrapper was added:
 
 <h4>In the Fortran API</h4>
 The following Fortran wrappers were added or changed:
-\li #h5f.h5fget_dset_no_attrs_hint_f - Wrappers for the dataset object header minimization calls. See #H5Fget_dset_no_attrs_hint.
-\li #h5f.h5fset_dset_no_attrs_hint_f - Wrappers for the dataset object header minimization calls. See #H5Fset_dset_no_attrs_hint.
-\li #h5p.h5pget_dset_no_attrs_hint_f - Wrappers for the dataset object header minimization calls. See #H5Pget_dset_no_attrs_hint.
-\li #h5p.h5pset_dset_no_attrs_hint_f - Wrappers for the dataset object header minimization calls. See #H5Pset_dset_no_attrs_hint.
-\li #h5o.h5ovisit_f - Added new Fortran 'fields' optional parameter. See #H5Ovisit2.
-\li #h5o.h5oget_info_by_name_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info_by_name2.
-\li #h5o.h5oget_info_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info2.
-\li #h5o.h5oget_info_by_idx_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info_by_idx2.
-\li #h5o.h5ovisit_by_name_f - Added new Fortran 'fields' optional parameter. See #H5Ovisit_by_name2.
+\li `h5fget_dset_no_attrs_hint_f` - Wrappers for the dataset object header minimization calls. See #H5Fget_dset_no_attrs_hint.
+\li `h5fset_dset_no_attrs_hint_f` - Wrappers for the dataset object header minimization calls. See #H5Fset_dset_no_attrs_hint.
+\li `h5pget_dset_no_attrs_hint_f` - Wrappers for the dataset object header minimization calls. See #H5Pget_dset_no_attrs_hint.
+\li `h5pset_dset_no_attrs_hint_f` - Wrappers for the dataset object header minimization calls. See #H5Pset_dset_no_attrs_hint.
+\li \ref h5o::h5ovisit_f - Added new Fortran 'fields' optional parameter. See #H5Ovisit2.
+\li \ref h5o::h5oget_info_by_name_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info_by_name2.
+\li \ref h5o::h5oget_info_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info2.
+\li \ref h5o::h5oget_info_by_idx_f - Added new Fortran 'fields' optional parameter. See #H5Oget_info_by_idx2.
+\li \ref h5o::h5ovisit_by_name_f - Added new Fortran 'fields' optional parameter. See #H5Ovisit_by_name2.
 
 
 The following Fortran utility function was added:
-\li #h5lib.h5gmtime - converts (C) <code>time_t</code> structure to Fortran DATE AND TIME storage format
+\li `h5gmtime` - converts (C) <code>time_t</code> structure to Fortran DATE AND TIME storage format
 
 A new Fortran derived type was added:
 \li c_h5o_info_t - This is interoperable with C's h5o_info_t. This is needed for callback functions which
@@ -442,13 +442,13 @@ page, we list each feature and its associated C functions and Fortran wrappers.
     raw data, but it does rewrite HDF5 metadata.
 
 <h4>Collective Metadata I/O:</h4>
-\li #H5Pset_coll_metadata_write and #h5p.h5pset_coll_metadata_write_f - Establishes I/O mode property setting,
+\li #H5Pset_coll_metadata_write and `h5pset_coll_metadata_write_f` - Establishes I/O mode property setting,
     collective or independent, for metadata writes.
-\li #H5Pget_coll_metadata_write and #h5p.h5pget_coll_metadata_write_f - Retrieves I/O mode property setting
+\li #H5Pget_coll_metadata_write and `h5pget_coll_metadata_write_f` - Retrieves I/O mode property setting
     for metadata writes.
-\li #H5Pset_all_coll_metadata_ops and #h5p.h5pset_all_coll_metadata_ops_f - Establishes I/O mode, collective
+\li #H5Pset_all_coll_metadata_ops and `h5pset_all_coll_metadata_ops_f` - Establishes I/O mode, collective
     or independent, for metadata read operations.
-\li #H5Pget_all_coll_metadata_ops and #h5p.h5pget_all_coll_metadata_ops_f - Retrieves I/O mode for metadata
+\li #H5Pget_all_coll_metadata_ops and `h5pget_all_coll_metadata_ops_f` - Retrieves I/O mode for metadata
     read operations.
 
 <h4>Fine-tuning the Metadata Cache:</h4>
@@ -486,34 +486,34 @@ when processing files employing the VDS feature:
     and handles the file and metadata appropriately.
 
 <h4>Virtual Dataset or VDS:</h4>
-\li #H5Pset_virtual and #h5p.h5pset_virtual_f - Sets the mapping between virtual and source datasets.
-\li #H5Pget_virtual_count and #h5p.h5pget_virtual_count_f - Retrieves the number of mappings for the
+\li #H5Pset_virtual and `h5pset_virtual_f` - Sets the mapping between virtual and source datasets.
+\li #H5Pget_virtual_count and `h5pget_virtual_count_f` - Retrieves the number of mappings for the
     virtual dataset.
-\li #H5Pget_virtual_vspace and #h5p.h5pget_virtual_vspace_f - Retrieves a dataspace identifier for the
+\li #H5Pget_virtual_vspace and `h5pget_virtual_vspace_f` - Retrieves a dataspace identifier for the
     selection within the virtual dataset used in the mapping.
-\li #H5Pget_virtual_srcspace and #h5p.h5pget_virtual_srcspace_f - Retrieves a dataspace identifier
+\li #H5Pget_virtual_srcspace and `h5pget_virtual_srcspace_f` - Retrieves a dataspace identifier
     for the selection within the source dataset used in the mapping.
-\li #H5Pget_virtual_dsetname and #h5p.h5pget_virtual_dsetname_f - Retrieves the name of a source
+\li #H5Pget_virtual_dsetname and `h5pget_virtual_dsetname_f` - Retrieves the name of a source
     dataset used in the mapping.
-\li #H5Pget_virtual_filename and #h5p.h5pget_virtual_filename_f - Retrieves the filename of a source
+\li #H5Pget_virtual_filename and `h5pget_virtual_filename_f` - Retrieves the filename of a source
     dataset used in the mapping.
-\li #H5Pset_virtual_printf_gap and #h5p.h5pset_virtual_printf_gap_f - Sets maximum number of missing
+\li #H5Pset_virtual_printf_gap and `h5pset_virtual_printf_gap_f` - Sets maximum number of missing
     source files and/or datasets with printf-style names when getting the extent of an unlimited virtual dataset.
-\li #H5Pget_virtual_printf_gap and #h5p.h5pget_virtual_printf_gap_f - Returns maximum number of missing
+\li #H5Pget_virtual_printf_gap and `h5pget_virtual_printf_gap_f` - Returns maximum number of missing
     source files and/or datasets with printf-style names when getting the extent for an unlimited virtual dataset.
-\li #H5Pset_virtual_view and #h5p.h5pset_virtual_view_f - Sets the view of the virtual dataset to include
+\li #H5Pset_virtual_view and `h5pset_virtual_view_f` - Sets the view of the virtual dataset to include
     or exclude missing mapped elements.
-\li #H5Pget_virtual_view and #h5p.h5pget_virtual_view_f - Retrieves the view of a virtual dataset.
+\li #H5Pget_virtual_view and `h5pget_virtual_view_f` - Retrieves the view of a virtual dataset.
 
 <h4>Supporting Functions:</h4>
-\li #H5Sis_regular_hyperslab and #h5s.h5sis_regular_hyperslab_f - Determines whether a hyperslab selection is regular.
-\li #H5Sget_regular_hyperslab and #h5s.h5sget_regular_hyperslab_f - Retrieves a regular hyperslab selection.
+\li #H5Sis_regular_hyperslab and `h5sis_regular_hyperslab_f` - Determines whether a hyperslab selection is regular.
+\li #H5Sget_regular_hyperslab and `h5sget_regular_hyperslab_f` - Retrieves a regular hyperslab selection.
 
 <h4>Modified Functions:</h4>
 The following pre-exising functions have been modified to understand virtual datasets.
-\li #H5Pset_layout and #h5p.h5pset_layout_f - Specifies the layout to be used for a dataset.
+\li #H5Pset_layout and `h5pset_layout_f` - Specifies the layout to be used for a dataset.
     Virtual dataset, #H5D_VIRTUAL, has been added to the list of layouts available through this function.
-\li #H5Pget_layout and #h5p.h5pget_layout_f - Retrieves the layout in use for a dataset.
+\li #H5Pget_layout and `h5pget_layout_f` - Retrieves the layout in use for a dataset.
     Virtual dataset, #H5D_VIRTUAL, has been added to the list of layouts.
 
 <h4>Partial Edge Chunks:</h4>

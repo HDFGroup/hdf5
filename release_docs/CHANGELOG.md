@@ -1,4 +1,4 @@
-v2.1.0 --- January X , 2026
+v2.2.0 --- January X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -21,7 +21,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.1.0
+# 🔆 Executive Summary: HDF5 Version 2.2.0
 
 ## Performance Enhancements:
 
@@ -36,6 +36,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 > - Transitioned to [CMake-only](CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
 > - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
 > - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
+> - The format of the GitHub tag for HDF5 releases has been changed to Major.Minor.Patch, consistent with the versioning policy change to follow the Semantic Versioning Specification described in this [Wiki page](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy).  The previous tag format hdf5_Major_Minor_Patch that was created in addition for the 2.0.0 and 2.1.0 releases will not be continued.   
 
 ## Enhanced Features:
 
@@ -60,35 +61,6 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
-### Added predefined datatypes for FP6 data
-
-   Predefined datatypes have been added for FP6 data in [E2M3 and E3M2 formats](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
-
-   The following new macros have been added:
-
-   - `H5T_FLOAT_F6E2M3`
-   - `H5T_FLOAT_F6E3M2`
-
-   These macros map to IDs of HDF5 datatypes representing a 6-bit floating-point datatype with 1 sign bit and either 2 exponent bits and 3 mantissa bits (E2M3 format) or 3 exponent bits and 2 mantissa bits (E3M2 format).
-
-   Note that support for a native FP6 datatype has not been added yet. This means that any datatype conversions to/from the new FP6 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP6 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches one of the above floating-point formats. In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
-
-   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
-
-### Added predefined datatype for FP4 data
-
-   A predefined datatype has been added for FP4 data in [E2M1 format](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
-
-   The following new macro has been added:
-
-   - `H5T_FLOAT_F4E2M1`
-
-   This macro maps to the ID of an HDF5 datatype representing a 4-bit floating-point datatype with 1 sign bit, 2 exponent bits and 1 mantissa bit.
-
-   Note that support for a native FP4 datatype has not been added yet. This means that any datatype conversions to/from the new FP4 datatype will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP4 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format. In this case, the application can specify the above macro for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
-
-   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
-
 ## Parallel Library
 
 ## Fortran Library
@@ -112,41 +84,6 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
-### Fixed a potential out of bound read
-
-   When a file is corrupted such that an array datatype's size, the number of elements, and the element size are not in agreement, it can trigger an out of bounds read.  A check has been added to detect such situation.
-### Fixed a potential buffer overflow
-
-   For unfiltered dataset chunks, the size on disk should be constant for all chunks in a dataset. In some cases the size of each chunk is stored even in this case where it can be inferred from the chunk dimensions and datatype. The code previously assumed this stored size was equal to the inferred size, leading to a mismatch in the expected and actual buffer size. Modified the library to throw an error if the size does not match the expected size.
-
-   Fixes CVE-2025-44904
-
-### Fixed a double-free bug in H5D__chunk_copy
-
-   Fixed a double-free bug in the internal H5D__chunk_copy() function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
-
-   Fixes GitHub issues [#6123](https://github.com/HDFGroup/hdf5/issues/6123)
-                       [#6124](https://github.com/HDFGroup/hdf5/issues/6124)
-                       [#6125](https://github.com/HDFGroup/hdf5/issues/6125)
-                       [#6126](https://github.com/HDFGroup/hdf5/issues/6126)
-                       [#6133](https://github.com/HDFGroup/hdf5/issues/6133)
-### Fixes potential security issues
-
-   The get_name API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
-   These functions are now fixed to treat (buffer != NULL, size == 0) as a length-only query to eliminate Valgrind error of invalid write.
-
-### Fixed a performance issue with chunked dataset I/O
-
-   When dataset chunks are unable to be placed in the dataset chunk cache (for example, if a chunk
-   is too large), the library falls back to an alternative approach for I/O on dataset chunks. An
-   issue with the logic in this approach prevented chunked dataset I/O from making use of the library's
-   data sieve buffer I/O optimization functionality. For chunk shapes that are non-contiguous with
-   the memory layout of a buffer, this could result in severely degraded I/O performance, with the
-   worst-case behavior causing I/O to be performed on a single data element at a time.
-
-   The data sieve buffer functionality has been extended to cover the case of uncached chunks and
-   will be used as long as the underlying Virtual File Driver supports data sieving.
-
 ## Java Library
 
 ## Configuration
@@ -158,12 +95,6 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## Fortran API
 
 ### Added Fortran wrappers for SWMR functionality
-
-   Added four new Fortran wrappers that provide direct access to SWMR (Single Writer Multiple Reader) C APIs:
-   - `h5fstart_swmr_write_f` - Enables SWMR writing mode for a file
-   - `h5dflush_f`            - Flushes dataset buffers to disk
-   - `h5pset_append_flush_f` - Sets append flush property values including optional callback function
-   - `h5pget_append_flush_f` - Retrieves append flush property values including callback function
 
 ## High-Level Library
 

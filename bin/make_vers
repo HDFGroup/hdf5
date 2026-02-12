@@ -479,6 +479,47 @@ sub create_public ($) {
 }
 
 ##############################################################################
+# Create the generated CMake file for Doxygen PREDEFINED macros
+#
+sub create_doxygen_cmake ($) {
+    my $prefix = shift;         # Get the prefix for the source file (e.g., "src/")
+    my $file = "H5version_doxygen.cmake";   # Name of file to generate
+
+    # Output to doxygen directory (relative to src/)
+    my $doxygen_dir = $prefix;
+    $doxygen_dir =~ s/src\/?$/doxygen\//;   # Replace "src/" with "doxygen/"
+
+    # Create doxygen directory if it doesn't exist
+    if ($doxygen_dir ne "" && ! -d $doxygen_dir) {
+        mkdir $doxygen_dir or die "unable to create directory: $doxygen_dir";
+    }
+
+    # Open new cmake file in doxygen directory
+    open CMAKE, ">${doxygen_dir}${file}" or die "unable to create doxygen cmake file: ${doxygen_dir}${file}";
+
+    # Create file contents
+    print CMAKE "# Generated automatically by bin/make_vers -- do not edit\n";
+    print CMAKE "# Add new versioned symbols to H5vers.txt file\n";
+    print CMAKE "#\n";
+    print CMAKE "# Doxygen PREDEFINED entries for versioned APIs\n";
+    print CMAKE "# These macros tell Doxygen which version each API name maps to,\n";
+    print CMAKE "# preventing \"multiple \@param documentation sections\" warnings\n";
+    print CMAKE "\n";
+    print CMAKE "list (APPEND _doxygen_predefined_entries\n";
+
+    # Add function version macros (sorted for consistency)
+    for my $name (sort keys %functions) {
+        my $vers = $functions{$name};
+        print CMAKE "  \"$name=$name$vers\"\n";
+    }
+
+    print CMAKE ")\n";
+
+    # Close cmake file
+    close CMAKE;
+}
+
+##############################################################################
 # Read symbol version file (given as command-line argument) in and process it
 # into internal data structures, then create header files.
 #
@@ -508,5 +549,7 @@ for $file (@ARGV) {
     # Create header files
     print "Generating 'H5version.h'\n";
     create_public($prefix);
+    print "Generating 'doxygen/H5version_doxygen.cmake'\n";
+    create_doxygen_cmake($prefix);
 }
 

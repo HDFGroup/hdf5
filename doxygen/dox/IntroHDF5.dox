@@ -268,13 +268,13 @@ are usually similar, see @ref HDF5LIB
 For example:
 <ul>
 <li>
-File Interface:<ul><li>#H5Fopen (C)</li><li>#h5f.h5fopen_f (FORTRAN)</li><li>H5.H5Fopen (Java)</li></ul>
+File Interface:<ul><li>#H5Fopen (C)</li><li>\ref h5f::h5fopen_f (FORTRAN)</li><li>H5.H5Fopen (Java)</li></ul>
 </li>
 <li>
-Dataset Interface:<ul><li>#H5Dopen (C)</li><li>#h5d.h5dopen_f (FORTRAN)</li><li>H5.H5Dopen (Java)</li></ul>
+Dataset Interface:<ul><li>#H5Dopen (C)</li><li>\ref h5d::h5dopen_f (FORTRAN)</li><li>H5.H5Dopen (Java)</li></ul>
 </li>
 <li>
-Dataspace interface:<ul><li>#H5Sclose (C)</li><li>#h5s.h5sclose_f (FORTRAN)</li><li>H5.H5Sclose (Java)</li></ul>
+Dataspace interface:<ul><li>#H5Sclose (C)</li><li>\ref h5s::h5sclose_f (FORTRAN)</li><li>H5.H5Sclose (Java)</li></ul>
 </li>
 </ul>
 The HDF5 Python APIs use methods associated with specific objects.
@@ -311,7 +311,7 @@ import numpy
 <li>
 <strong>FORTRAN</strong>:<br />
 <code>USE HDF5</code><br />
-and call #h5lib.h5open_f and #h5lib.h5close_f to initialize and close the HDF5 FORTRAN interface
+and call \ref h5lib::h5open_f and `h5close_f` to initialize and close the HDF5 FORTRAN interface
 </li>
 <li>
 <strong>Java</strong>:<br />
