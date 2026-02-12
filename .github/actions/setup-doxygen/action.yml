@@ -17,9 +17,12 @@ runs:
         mkdir doxygen-install-temp
         cd doxygen-install-temp
         # Try newer naming convention first (doxygen-VERSION.windows.x64.bin.zip)
-        if ! curl -kLSs "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/doxygen-${VERSION}.windows.x64.bin.zip" -o doxygen.zip; then
+        if curl -kLSsf "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/doxygen-${VERSION}.windows.x64.bin.zip" -o doxygen.zip; then
+          echo "Downloaded using newer naming convention"
+        else
           # Fall back to older naming convention (doxygen-VERSION.x64.bin.zip)
-          curl -kLSs "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/doxygen-${VERSION}.x64.bin.zip" -o doxygen.zip
+          echo "Trying older naming convention"
+          curl -kLSsf "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/doxygen-${VERSION}.x64.bin.zip" -o doxygen.zip
         fi
         unzip doxygen.zip
         cp * c:\\Windows || true
