@@ -133,7 +133,7 @@ import org.slf4j.LoggerFactory;
  * </tr>
  * <tr>
  * <td>void * <br />
- * (i.e., pointer to `Any')</td>
+ * (i.e., pointer to Any)</td>
  * <td>Special -- see @ref HDFARRAY</td>
  * </tr>
  * </table>
