@@ -719,7 +719,11 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = @DOXYGEN_INPUT_DIRECTORY@
+INPUT                  = @DOXYGEN_INPUT_DIRECTORY@ \
+                         @DOXYGEN_DIR@/examples/menus/core_menu.md \
+                         @DOXYGEN_DIR@/examples/menus/fortran_menu.md \
+                         @DOXYGEN_DIR@/examples/menus/high_level_menu.md \
+                         @DOXYGEN_DIR@/examples/menus/java_menu.md
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
@@ -758,7 +762,6 @@ FILE_PATTERNS  = H5*public.h H5*module.h H5*develop.h H5FD*.h \
                  @DOXYGEN_JAVA_DIR@/hdf/hdf5lib/exceptions/HDF*.java \
                  *.F90 \
                  *.dox \
-                 *.md \
                  h5copy.h h5diff_main.h h5dump.h h5format_convert.h h5import.h h5jam.h h5ls.h h5repack.h h5stat.h \
                  h5watch.h h5clear.h h5debug.h h5delete.h h5mkgrp.h h5repart.h \
                  @HDF5_CPP_SRC_DIR@/*.h \
@@ -777,7 +780,8 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which Doxygen is
 # run.
 
-EXCLUDE                = jsrc
+EXCLUDE                = jsrc \
+                         @DOXYGEN_DIR@/../config/toolchain
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -804,10 +808,7 @@ EXCLUDE_PATTERNS       = */fortran/test/* \
                          */hl/fortran/src/*.h \
                          */HDF5Examples/FORTRAN/* \
                          */sanitizer/* \
-                         */README.md \
-                         */CONTRIBUTING.md \
-                         */CHANGELOG.md \
-                         */HISTORY-*.md
+                         */H5fortran_types.F90
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
