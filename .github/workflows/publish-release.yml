@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       use_tag:
-        description: HDF5 Release version tag (e.g., v1.14.0)
+        description: HDF5 Release version tag (e.g., 2.0.0)
         type: string
         required: true
       file_name:

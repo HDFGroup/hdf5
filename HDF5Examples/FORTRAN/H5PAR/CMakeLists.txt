@@ -30,7 +30,6 @@ foreach (example_name ${examples})
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
   )
-  target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
   target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EXAMPLE_LINK_Fortran_LIBS})
   set_target_properties (${EXAMPLE_VARNAME}_f90_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)
 endforeach ()
