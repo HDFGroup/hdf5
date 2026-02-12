@@ -16,7 +16,11 @@ runs:
         VERSION_UNDERSCORE="${VERSION//./_}"
         mkdir doxygen-install-temp
         cd doxygen-install-temp
-        curl -kLSs "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/doxygen-${VERSION}.x64.bin.zip" -o doxygen.zip
+        # Try newer naming convention first (doxygen-VERSION.windows.x64.bin.zip)
+        if ! curl -kLSs "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/doxygen-${VERSION}.windows.x64.bin.zip" -o doxygen.zip; then
+          # Fall back to older naming convention (doxygen-VERSION.x64.bin.zip)
+          curl -kLSs "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/doxygen-${VERSION}.x64.bin.zip" -o doxygen.zip
+        fi
         unzip doxygen.zip
         cp * c:\\Windows || true
         cd ..
