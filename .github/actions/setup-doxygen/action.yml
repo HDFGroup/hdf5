@@ -29,8 +29,34 @@ runs:
         cd ..
         rm -rf doxygen-install-temp
 
-    - name: Install Doxygen (Linux/macOS)
-      if: runner.os != 'Windows'
-      uses: ssciwr/doxygen-install@f13be1686235deee0aeb6cdf56640170691dc96b # v1
-      with:
-        version: ${{ inputs.version }}
+    - name: Install Doxygen (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        VERSION_UNDERSCORE="${VERSION//./_}"
+        wget "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/doxygen-${VERSION}.linux.bin.tar.gz"
+        tar xzf "doxygen-${VERSION}.linux.bin.tar.gz"
+        cd "doxygen-${VERSION}"
+        sudo make install
+        cd ..
+        rm -rf "doxygen-${VERSION}"*
+
+    - name: Install Doxygen (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        VERSION_UNDERSCORE="${VERSION//./_}"
+        # Detect architecture
+        if [ "$(uname -m)" = "arm64" ]; then
+          DMG_FILE="Doxygen-${VERSION}-arm.dmg"
+        else
+          DMG_FILE="Doxygen-${VERSION}-intel.dmg"
+        fi
+        wget "https://github.com/doxygen/doxygen/releases/download/Release_${VERSION_UNDERSCORE}/${DMG_FILE}"
+        sudo hdiutil attach "${DMG_FILE}"
+        sudo cp /Volumes/Doxygen/Doxygen.app/Contents/Resources/doxygen /usr/local/bin/
+        sudo cp /Volumes/Doxygen/Doxygen.app/Contents/Resources/doxyindexer /usr/local/bin/
+        sudo hdiutil detach /Volumes/Doxygen
+        rm "${DMG_FILE}"
