@@ -34,20 +34,18 @@ jobs:
 #      - name: Verify Wine64 installation
 #        run: wine64 --version
 
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install MinGW64 Cross-Compiler
         run: |
           sudo apt update
           sudo apt-get install -y mingw-w64
           sudo apt-get install gfortran-mingw-w64-x86-64-win32
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.13.2"
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CMAKE CONFIGURE
       - name: CMake Configure

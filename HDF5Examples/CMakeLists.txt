@@ -143,17 +143,7 @@ if (${H5_LIBVER_DIR} GREATER 16)
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/FORTRAN" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/FORTRAN")
     option (H5EXAMPLE_BUILD_FORTRAN "Build examples FORTRAN support" OFF)
     if (H5EXAMPLE_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
-      enable_language(Fortran)
       set (H5EXAMPLE_LINK_Fortran_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS})
-
-      # Parallel IO usage requires MPI to be Linked and Included
-      if (H5_HAVE_PARALLEL)
-        find_package(MPI REQUIRED COMPONENTS Fortran)
-        set (H5EXAMPLE_LINK_Fortran_LIBS ${H5EXAMPLE_LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
-        if (MPI_Fortran_LINK_FLAGS)
-          set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
-        endif ()
-      endif ()
 
       configure_file (${H5EXAMPLE_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5D/h5_version.h @ONLY)
       configure_file (${H5EXAMPLE_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5G/h5_version.h @ONLY)
@@ -225,6 +215,7 @@ endif ()
 # Build examples
 #-----------------------------------------------------------------------------
 add_subdirectory (C)
+# Fortran MPI setup (find_package, link flags) is handled in FORTRAN/CMakeLists.txt
 if (H5EXAMPLE_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
   add_subdirectory (FORTRAN)
 endif ()
