@@ -1147,7 +1147,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     else ()
       set (HDF5_DOXY_WARNINGS "NO")
     endif ()
-    message (VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
+    message (STATUS "Found Doxygen version: ${DOXYGEN_VERSION}")
 
     # Set the default directory for the Java sources for doxygen
     if (Java_VERSION_STRING VERSION_GREATER_EQUAL "25.0.0")

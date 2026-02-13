@@ -151,7 +151,9 @@ CONTAINS
 SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: file_id
-#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+#ifdef H5_DOXYGEN
+  CHARACTER(LEN=:), ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: filenames
+#elif defined(H5_FORTRAN_HAVE_CHAR_ALLOC)
   CHARACTER(LEN=:), ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: filenames
 #else
   INTEGER, PARAMETER :: DEFAULT_MAX_LEN = 8192
@@ -160,6 +162,7 @@ SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdfer
   INTEGER(SIZE_T), INTENT(OUT) :: num_files
   INTEGER, INTENT(OUT) :: hdferr
 
+#ifndef H5_DOXYGEN
   TYPE(C_PTR) :: filenames_ptr
   INTEGER(C_SIZE_T) :: c_num_files
   INTEGER(C_INT) :: ret_val
@@ -275,6 +278,7 @@ SUBROUTINE h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdfer
   ! Free the C memory allocated by H5FDsubfiling_get_file_mapping
   ret_val = h5free_string_array_memory_c(filenames_ptr, c_num_files)
   ! Note: We ignore the return value of the free function since the main operation succeeded
+#endif
 
 END SUBROUTINE h5fdsubfiling_get_file_mapping_f
 

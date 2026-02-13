@@ -32,7 +32,7 @@ I. Preconditions
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
-      Windows or the *.sh on Linux). You can obtain pre-built binaries
+      Windows or the *.rpm or *.deb on Linux). You can obtain pre-built binaries
       from The HDF Group's website at www.hdfgroup.org.
 
    3. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=<install_path>

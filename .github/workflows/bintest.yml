@@ -116,7 +116,7 @@ jobs:
       - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
 
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
@@ -173,7 +173,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Install Dependencies (MacOS_latest)
-        run: brew install ninja doxygen
+        run: brew install ninja
 
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
@@ -241,7 +241,7 @@ jobs:
       - name: Install Dependencies (Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
 
       - name: Set up JDK ${{ inputs.java_version }}
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
