@@ -142,7 +142,6 @@ macro (ADD_H5_TEST testname)
           WORKING_DIRECTORY "${vol_workdir}"
           # h5delete will return an error code if targeted file does not exist - accept any result
           PASS_REGULAR_EXPRESSION "^$|"
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
 
       if (NOT "${vol}" STREQUAL "native")
@@ -166,7 +165,6 @@ macro (ADD_H5_TEST testname)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       set_tests_properties (${vol_prefix}H5MKGRP-${testname} PROPERTIES
           DEPENDS ${vol_prefix}H5MKGRP-${testname}-clear-objects
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
     endif()
 
@@ -192,7 +190,6 @@ macro (ADD_H5_TEST testname)
 
     set_tests_properties (${vol_prefix}H5MKGRP-${testname}-h5ls PROPERTIES
         DEPENDS ${vol_prefix}H5MKGRP-${testname}
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
 
     if (NOT "${vol}" STREQUAL "native")
@@ -208,7 +205,6 @@ macro (ADD_H5_TEST testname)
 
     set_tests_properties ("${vol_prefix}H5MKGRP-${testname}" PROPERTIES
         WORKING_DIRECTORY "${vol_workdir}"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
   endforeach () # per-VOL loop
 endmacro ()
@@ -217,7 +213,6 @@ macro (ADD_H5_CMP resultfile resultcode)
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND $<TARGET_FILE:h5mkgrp> ${ARGN})
     set_tests_properties (H5MKGRP_CMP-${resultfile} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
   else ()
@@ -240,7 +235,6 @@ macro (ADD_H5_CMP resultfile resultcode)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5MKGRP_CMP-${resultfile} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5MKGRP_CMP-${resultfile}-clear-objects
     )
     if ("H5MKGRP_CMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

@@ -198,7 +198,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       )
       set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname}-clean PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
     else ()
       add_test (
@@ -212,9 +211,6 @@ if (H5EXAMPLE_BUILD_TESTING)
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
               -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (last_test)
         set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${last_test})
@@ -235,7 +231,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-f90_${testname} PROPERTIES
             DEPENDS ${last_test}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
         set (last_test "${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}")
       endif ()
@@ -269,9 +264,6 @@ if (H5EXAMPLE_BUILD_TESTING)
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
               -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
       )
-      set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES}
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
-      )
       if (last_test)
         set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
@@ -291,7 +283,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-f90_${testname} PROPERTIES
             DEPENDS ${last_test}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
         set (last_test "${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}")
       endif ()
@@ -315,7 +306,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       add_test (NAME ${EXAMPLE_VARNAME}_f90_${testname} COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_f90_${testname}>)
       set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       add_test (
           NAME ${EXAMPLE_VARNAME}_f90_${testname}-clean
@@ -352,7 +342,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       endif ()
       set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (HDF5_PROVIDES_TOOLS)
         add_test (
@@ -369,7 +358,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}1 PROPERTIES
             DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}2
@@ -385,7 +373,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}2 PROPERTIES
             DEPENDS ${EXAMPLE_VARNAME}_H5DUMP-f90_${testname}1
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
       endif ()
     endif ()
@@ -414,7 +401,6 @@ if (H5EXAMPLE_BUILD_TESTING)
     endif ()
     set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES
         DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     add_test (
         NAME ${EXAMPLE_VARNAME}_f90_${testname}-clean

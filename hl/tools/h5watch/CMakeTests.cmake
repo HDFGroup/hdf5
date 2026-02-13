@@ -84,7 +84,6 @@ add_custom_target (H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH te
       set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if ("H5WATCH_ARGS-h5watch-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DISABLED true)
@@ -111,7 +110,6 @@ add_custom_target (H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH te
       set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if ("H5WATCH_ARGS-h5watch-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DISABLED true)
@@ -136,7 +134,6 @@ add_custom_target (H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH te
       set_tests_properties (H5WATCH-${resultfile} PROPERTIES
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if ("H5WATCH-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5WATCH-${resultfile} PROPERTIES DISABLED true)
@@ -159,7 +156,6 @@ add_test (
 )
 set_tests_properties (H5WATCH-SWMR_INCOMPAT PROPERTIES
     FIXTURES_SETUP swmr_vfd_check_compat
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 
 # Remove any output file left over from previous test run
@@ -202,7 +198,6 @@ add_test (NAME H5WATCH-h5watchgentest COMMAND $<TARGET_FILE:h5watchgentest>)
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     DEPENDS H5WATCH-clearall-objects
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_SETUP gen_test_watch)
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_REQUIRED swmr_vfd_check_compat)

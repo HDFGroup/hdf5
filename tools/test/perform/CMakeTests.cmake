@@ -65,7 +65,6 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_h5perf_serial PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
       FIXTURES_REQUIRED clear_perform
   )
@@ -88,7 +87,6 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_chunk PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       FIXTURES_REQUIRED clear_perform
   )
   if ("PERFORM_chunk" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -110,7 +108,6 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_iopipe PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       FIXTURES_REQUIRED clear_perform
   )
   if ("PERFORM_iopipe" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -132,7 +129,6 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_overhead PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       FIXTURES_REQUIRED clear_perform
   )
   if ("PERFORM_overhead" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -154,7 +150,6 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_perf_meta PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       FIXTURES_REQUIRED clear_perform
   )
   if ("PERFORM_perf_meta" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -176,7 +171,6 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_zip_perf_help PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       FIXTURES_REQUIRED clear_perform
   )
   if ("PERFORM_zip_perf_help" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -198,7 +192,6 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_zip_perf PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       DEPENDS "PERFORM_zip_perf_help"
       FIXTURES_REQUIRED clear_perform
   )
