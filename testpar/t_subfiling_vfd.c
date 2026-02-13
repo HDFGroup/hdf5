@@ -592,17 +592,21 @@ test_subfiling_get_file_mapping_ioc_selection(void)
             MPI_Allreduce(MPI_IN_PLACE, &validation_result, 1, MPI_INT, MPI_LAND, comm_g);
             VRFY(validation_result, "h5fuse validation succeeded for IOC selection");
 
-            if (config_filename) {
-                free(config_filename);
-            }
-
             cleanup_file_mapping_memory(filenames, len);
 
+            /* As the file has been fused, overwriting the stub file, delete the file
+             * using sec2 rather than subfiling. Delete the leftover config file normally.
+             */
             H5E_BEGIN_TRY
             {
-                H5Fdelete(filename, fapl_id);
+                H5Fdelete(filename, H5P_DEFAULT);
             }
             H5E_END_TRY
+
+            if (config_filename) {
+                HDremove(config_filename);
+                free(config_filename);
+            }
 
             VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
             CHECK_PASSED();
@@ -823,10 +827,6 @@ test_subfiling_get_file_mapping_with_io(void)
     MPI_Allreduce(MPI_IN_PLACE, &validation_result, 1, MPI_INT, MPI_LAND, comm_g);
     VRFY(validation_result, "h5fuse validation with I/O data succeeded");
 
-    if (config_filename) {
-        free(config_filename);
-    }
-
     /* All ranks participate in cleanup */
     cleanup_file_mapping_memory(filenames_before, len_before);
     cleanup_file_mapping_memory(filenames_after, len_after);
@@ -834,11 +834,19 @@ test_subfiling_get_file_mapping_with_io(void)
     /* Cleanup */
     free(write_buf);
 
+    /* As the file has been fused, overwriting the stub file, delete the file
+     * using sec2 rather than subfiling. Delete the leftover config file normally.
+     */
     H5E_BEGIN_TRY
     {
-        H5Fdelete(SUBF_FILENAME_IO, fapl_id);
+        H5Fdelete(SUBF_FILENAME_IO, H5P_DEFAULT);
     }
     H5E_END_TRY
+
+    if (config_filename) {
+        HDremove(config_filename);
+        free(config_filename);
+    }
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
@@ -1471,6 +1479,14 @@ test_stripe_sizes(void)
             subfile_ptr = fopen(tmp_filename, "r");
             VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
         }
+
+        /* Finally, replace HDF signature in file so it can be deleted properly */
+        write_addr = (haddr_t)0;
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + H5F_SIGNATURE_LEN) >= 0),
+             "H5FDset_eoa succeeded");
+        write_status =
+            H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, H5F_SIGNATURE_LEN, H5F_SIGNATURE);
+        VRFY((write_status >= 0), "H5FDwrite succeeded");
 
         VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
 
@@ -2167,6 +2183,13 @@ test_iovec_translation(void)
         /* Ensure file doesn't exist */
         subfile_ptr = fopen(tmp_filename, "r");
         VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
+
+        /* Finally, replace HDF signature in file so it can be deleted properly */
+        write_addr = (haddr_t)0;
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + H5F_SIGNATURE_LEN) >= 0),
+             "H5FDset_eoa succeeded");
+        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, H5F_SIGNATURE_LEN, H5F_SIGNATURE);
+        VRFY((status >= 0), "H5FDwrite succeeded");
 
         VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
 
