@@ -67,7 +67,7 @@ jobs:
       # still test the connector against changes in HDF5.
       - name: Restore ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }}) installation cache
         id: cache-adios2
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v4
         with:
           path: ${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install
           key: ${{ runner.os }}-${{ runner.arch }}-adios2-${{ env.ADIOS2_COMMIT }}-${{ inputs.build_mode }}-cache
@@ -97,7 +97,7 @@ jobs:
           make -j2 install
 
       - name: Cache ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }}) installation
-        uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v4
         if: ${{ steps.cache-adios2.outputs.cache-hit != 'true' }}
         with:
           path: ${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install
