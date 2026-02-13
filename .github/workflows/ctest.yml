@@ -241,6 +241,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build graphviz
 
+      - name: Get Actions
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install CMake
         uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
         with:
