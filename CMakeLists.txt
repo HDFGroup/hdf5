@@ -1439,4 +1439,58 @@ if (NOT TARGET doxygen)
   )
 endif ()
 
+#-----------------------------------------------------------------------------
+# Set LINK_LIBS_SETTINGS: linker-flag-formatted version of LINK_LIBS +
+# LINK_COMP_LIBS for the libhdf5.settings file.
+#-----------------------------------------------------------------------------
+if (NOT WIN32)
+  function (_hdf5_resolve_lib_to_flag lib out_var)
+    if (lib STREQUAL "Threads::Threads")
+      # Use CMAKE_THREAD_LIBS_INIT which contains the actual linker
+      # flag of "Threads::Threads" (e.g. "-lpthread" or "-pthread").
+      if (CMAKE_THREAD_LIBS_INIT)
+        set (${out_var} "${CMAKE_THREAD_LIBS_INIT}" PARENT_SCOPE)
+      else ()
+        set (${out_var} "" PARENT_SCOPE)
+      endif ()
+    elseif (TARGET ${lib})
+      # For zlib and libaec, CMakeFilters.cmake already sets OUTPUT_NAME on these targets
+      get_target_property (_oname ${lib} OUTPUT_NAME)
+      if (_oname)
+        set (${out_var} "-l${_oname}" PARENT_SCOPE)
+      else ()
+        # Last resort: strip namespace prefix and lowercase, e.g. "SomeLib::SomeLib" -> "somelib"
+        string (REGEX REPLACE ".*::" "" _short ${lib})
+        string (TOLOWER ${_short} _short)
+        set (${out_var} "-l${_short}" PARENT_SCOPE)
+      endif ()
+    elseif (lib MATCHES "^-")
+      # Already a linker flag (-lxxx), keep as-is
+      set (${out_var} "${lib}" PARENT_SCOPE)
+    else ()
+      # Plain library name (m, dl, rt, ...) -> add -l prefix
+      set (${out_var} "-l${lib}" PARENT_SCOPE)
+    endif ()
+  endfunction ()
+
+  set (LINK_LIBS_SETTINGS "")
+  foreach (_lib IN LISTS LINK_LIBS LINK_COMP_LIBS)
+    _hdf5_resolve_lib_to_flag ("${_lib}" _flag)
+    if (_flag)
+      list (APPEND LINK_LIBS_SETTINGS "${_flag}")
+    endif ()
+  endforeach ()
+
+  # Convert CMake semicolon-separated list to space-separated string so the settings
+  # file reads "-lm -ldl -lpthread -lz -lsz" instead of "-lm;-ldl;-lpthread;-lz;-lsz"
+  string (REPLACE ";" " " LINK_LIBS_SETTINGS "${LINK_LIBS_SETTINGS}")
+  message (VERBOSE "LINK_LIBS_SETTINGS=${LINK_LIBS_SETTINGS}")
+else ()
+  # Keep the original CMake-style which is the expected format on Windows.
+  set (LINK_LIBS_SETTINGS "${LINK_LIBS};${LINK_COMP_LIBS}")
+endif()
+
+#-----------------------------------------------------------------------------
+# Installation
+#-----------------------------------------------------------------------------
 include (CMakeInstallation.cmake)

@@ -26,7 +26,7 @@ Linking Options:
                         LDFLAGS: @CMAKE_SHARED_LINKER_FLAGS@
                      H5_LDFLAGS: @H5_LDFLAGS@
                      AM_LDFLAGS: @AM_LDFLAGS@
-                Extra libraries: @LINK_LIBS@
+                Extra libraries: @LINK_LIBS_SETTINGS@
                        Archiver: @CMAKE_AR@
                        AR_FLAGS:
                          Ranlib: @CMAKE_RANLIB@
