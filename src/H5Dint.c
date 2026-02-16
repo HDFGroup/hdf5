@@ -3735,8 +3735,11 @@ H5D_get_create_plist(const H5D_t *dset)
 
             /* Allocate a background buffer */
             bkg_size = MAX(H5T_GET_SIZE(copied_fill.type), H5T_GET_SIZE(dset->shared->type));
-            if (H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
+            if (H5T_path_bkg(tpath)) {
+                bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size);
+                if (NULL == bkg_buf)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
+            }
 
             /* Convert fill value */
             if (H5T_convert(tpath, dset->shared->type, dst_type, (size_t)1, (size_t)0, (size_t)0,
@@ -3877,8 +3880,11 @@ H5D_get_access_plist(const H5D_t *dset)
     }
     else {
         /* Get the default FAPL if necessary */
-        if (!def_dapl && NULL == (def_dapl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_ID_g)))
-            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a property list");
+        if (!def_dapl) {
+            def_dapl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_ID_g);
+            if (NULL == def_dapl)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a property list");
+        }
 
         /* Set the data cache number of slots to the value of the default FAPL */
         if (H5P_get(def_dapl, H5D_ACS_VDS_VIEW_NAME, &def_vds_view) < 0)

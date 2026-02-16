@@ -182,9 +182,11 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
             /* Allocate a background buffer, if necessary */
-            if (H5T_path_bkg(tpath) &&
-                NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, (size_t)nelmts * buf_size)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
+            if (H5T_path_bkg(tpath)) {
+                bkg_buf = H5FL_BLK_CALLOC(type_conv, (size_t)nelmts * buf_size);
+                if (NULL == bkg_buf)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
+            }
 
             /* Replicate the file's fill value into the temporary buffer */
             H5VM_array_fill(tmp_buf, fill, src_type_size, (size_t)nelmts);

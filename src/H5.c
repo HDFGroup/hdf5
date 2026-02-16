@@ -457,7 +457,8 @@ H5_term_library(void)
             if (pending == 0)
                 pending += DOWN(CX);
         } /* end if */
-    } while (pending && ntries++ < 100);
+        ntries++;
+    } while (pending && ntries < 100);
 
     if (pending) {
         /* Only display the error message if the user is interested in them. */
