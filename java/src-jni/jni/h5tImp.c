@@ -512,25 +512,25 @@ Java_hdf_hdf5lib_H5_H5Tget_1fields(JNIEnv *env, jclass clss, jlong type_id, jlon
         size_t    esize_t     = 0;
         size_t    mpos_t      = 0;
         size_t    msize_t     = 0;
-        long long fields_temp = *(&fieldsArray[0]);
+        long long fields_temp = fieldsArray[0];
         spos_t                = (size_t)fields_temp;
-        fields_temp           = *(&fieldsArray[1]);
+        fields_temp           = fieldsArray[1];
         epos_t                = (size_t)fields_temp;
-        fields_temp           = *(&fieldsArray[2]);
+        fields_temp           = fieldsArray[2];
         esize_t               = (size_t)fields_temp;
-        fields_temp           = *(&fieldsArray[3]);
+        fields_temp           = fieldsArray[3];
         mpos_t                = (size_t)fields_temp;
-        fields_temp           = *(&fieldsArray[4]);
+        fields_temp           = fieldsArray[4];
         msize_t               = (size_t)fields_temp;
 
         if ((status = H5Tget_fields((hid_t)type_id, &spos_t, &epos_t, &esize_t, &mpos_t, &msize_t)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
-        *(&fieldsArray[0]) = (jlong)spos_t;
-        *(&fieldsArray[1]) = (jlong)epos_t;
-        *(&fieldsArray[2]) = (jlong)esize_t;
-        *(&fieldsArray[3]) = (jlong)mpos_t;
-        *(&fieldsArray[4]) = (jlong)msize_t;
+        fieldsArray[0] = (jlong)spos_t;
+        fieldsArray[1] = (jlong)epos_t;
+        fieldsArray[2] = (jlong)esize_t;
+        fieldsArray[3] = (jlong)mpos_t;
+        fieldsArray[4] = (jlong)msize_t;
     } /* end direct cast special handling */
 
 done:
