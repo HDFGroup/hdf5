@@ -278,8 +278,11 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
      * passing it in as a pointer sets off a chain of impossible-to-resolve
      * const cast warnings.
      */
-    if (logfile != NULL && NULL == (fa.logfile = H5MM_xstrdup(logfile)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to copy log file name");
+    if (logfile != NULL) {
+        fa.logfile = H5MM_xstrdup(logfile);
+        if (NULL == fa.logfile)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to copy log file name");
+    }
 
     fa.flags    = flags;
     fa.buf_size = buf_size;

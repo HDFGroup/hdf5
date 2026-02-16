@@ -290,8 +290,11 @@ H5ES__insert(H5ES_t *es, H5VL_connector_t *connector, void *request_token, const
      */
     ev->op_info.api_name = caller;
     assert(ev->op_info.api_args == NULL);
-    if (api_args && NULL == (ev->op_info.api_args = H5MM_xstrdup(api_args)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine arguments");
+    if (api_args) {
+        ev->op_info.api_args = H5MM_xstrdup(api_args);
+        if (NULL == ev->op_info.api_args)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine arguments");
+    }
 
     /* Append fully initialized event onto the event set's 'active' list */
     H5ES__list_append(&es->active, ev);

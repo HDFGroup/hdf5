@@ -1788,10 +1788,16 @@ done:
         H5MM_xfree(chunk_mft_is_derived_array);
 
     /* Free the MPI buf and file types, if they were derived */
-    if (chunk_final_mtype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&chunk_final_mtype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if (chunk_final_ftype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&chunk_final_ftype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    if (chunk_final_mtype_is_derived) {
+        mpi_code = MPI_Type_free(&chunk_final_mtype);
+        if (MPI_SUCCESS != mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    }
+    if (chunk_final_ftype_is_derived) {
+        mpi_code = MPI_Type_free(&chunk_final_ftype);
+        if (MPI_SUCCESS != mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__link_piece_collective_io */
@@ -2634,10 +2640,16 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *di, H
 
 done:
     /* Free the MPI buf and file types, if they were derived */
-    if (mbt_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&mpi_buf_type)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if (mft_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&mpi_file_type)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    if (mbt_is_derived) {
+        mpi_code = MPI_Type_free(&mpi_buf_type);
+        if (MPI_SUCCESS != mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    }
+    if (mft_is_derived) {
+        mpi_code = MPI_Type_free(&mpi_file_type);
+        if (MPI_SUCCESS != mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    }
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);

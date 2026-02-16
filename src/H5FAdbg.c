@@ -215,9 +215,11 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                 hsize_t           nelmts_left; /* Remaining elements in the last data block page */
 
                 /* Check for last page */
-                if (((page_idx + 1) == dblock->npages) &&
-                    (nelmts_left = hdr->cparam.nelmts % dblock->dblk_page_nelmts))
-                    dblk_page_nelmts = (size_t)nelmts_left;
+                if ((page_idx + 1) == dblock->npages) {
+                    nelmts_left = hdr->cparam.nelmts % dblock->dblk_page_nelmts;
+                    if (nelmts_left)
+                        dblk_page_nelmts = (size_t)nelmts_left;
+                }
 
                 if (NULL == (dblk_page = H5FA__dblk_page_protect(hdr, dblk_page_addr, dblk_page_nelmts,
                                                                  H5AC__READ_ONLY_FLAG)))

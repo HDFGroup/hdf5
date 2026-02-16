@@ -1843,9 +1843,10 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                                     s_sizes, s_bufs) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request");
 
-        if ((NULL == (mpi_block_lengths = (int *)malloc((size_t)count * sizeof(int)))) ||
-            (NULL == (mpi_displacements = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint)))) ||
-            (NULL == (mpi_bufs = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint))))) {
+        mpi_block_lengths = (int *)malloc((size_t)count * sizeof(int));
+        mpi_displacements = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint));
+        mpi_bufs = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint));
+        if ((NULL == mpi_block_lengths) || (NULL == mpi_displacements) || (NULL == mpi_bufs)) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement");
         }
@@ -3290,10 +3291,16 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 
 done:
     /* Free the MPI buf and file types, if they were derived */
-    if (final_mtype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&final_mtype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
-    if (final_ftype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&final_ftype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+    if (final_mtype_is_derived) {
+        mpi_code = MPI_Type_free(&final_mtype);
+        if (MPI_SUCCESS != mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+    }
+    if (final_ftype_is_derived) {
+        mpi_code = MPI_Type_free(&final_ftype);
+        if (MPI_SUCCESS != mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+    }
 
     /* Cleanup dataspace arrays */
     if (s_mem_spaces)
@@ -3607,10 +3614,16 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
 done:
     /* Free the MPI buf and file types, if they were derived */
-    if (final_mtype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&final_mtype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
-    if (final_ftype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&final_ftype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+    if (final_mtype_is_derived) {
+        mpi_code = MPI_Type_free(&final_mtype);
+        if (MPI_SUCCESS != mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+    }
+    if (final_ftype_is_derived) {
+        mpi_code = MPI_Type_free(&final_ftype);
+        if (MPI_SUCCESS != mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+    }
 
     /* Cleanup dataspace arrays */
     if (s_mem_spaces)

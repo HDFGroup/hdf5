@@ -2754,11 +2754,12 @@ H5FD_sort_vector_io_req(bool *vector_was_sorted, uint32_t _count, H5FD_mem_t typ
         size_t fixed_size_index = count;
         size_t fixed_type_index = count;
 
-        if ((NULL == (*s_types_ptr = (H5FD_mem_t *)malloc(count * sizeof(H5FD_mem_t)))) ||
-            (NULL == (*s_addrs_ptr = (haddr_t *)malloc(count * sizeof(haddr_t)))) ||
-            (NULL == (*s_sizes_ptr = (size_t *)malloc(count * sizeof(size_t)))) ||
-            (NULL ==
-             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t))))) {
+        *s_types_ptr = (H5FD_mem_t *)malloc(count * sizeof(H5FD_mem_t));
+        *s_addrs_ptr = (haddr_t *)malloc(count * sizeof(haddr_t));
+        *s_sizes_ptr = (size_t *)malloc(count * sizeof(size_t));
+        *s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t));
+        if ((NULL == *s_types_ptr) || (NULL == *s_addrs_ptr) || (NULL == *s_sizes_ptr) ||
+            (NULL == *s_bufs_ptr)) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted vector(s)");
         }
@@ -2932,12 +2933,13 @@ H5FD_sort_selection_io_req(bool *selection_was_sorted, size_t count, hid_t mem_s
         size_t fixed_element_sizes_index = count;
         size_t fixed_bufs_index          = count;
 
-        if ((NULL == (*s_mem_space_ids_ptr = (hid_t *)malloc(count * sizeof(hid_t)))) ||
-            (NULL == (*s_file_space_ids_ptr = (hid_t *)malloc(count * sizeof(hid_t)))) ||
-            (NULL == (*s_offsets_ptr = (haddr_t *)malloc(count * sizeof(haddr_t)))) ||
-            (NULL == (*s_element_sizes_ptr = (size_t *)malloc(count * sizeof(size_t)))) ||
-            (NULL ==
-             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t))))) {
+        *s_mem_space_ids_ptr = (hid_t *)malloc(count * sizeof(hid_t));
+        *s_file_space_ids_ptr = (hid_t *)malloc(count * sizeof(hid_t));
+        *s_offsets_ptr = (haddr_t *)malloc(count * sizeof(haddr_t));
+        *s_element_sizes_ptr = (size_t *)malloc(count * sizeof(size_t));
+        *s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t));
+        if ((NULL == *s_mem_space_ids_ptr) || (NULL == *s_file_space_ids_ptr) || (NULL == *s_offsets_ptr) ||
+            (NULL == *s_element_sizes_ptr) || (NULL == *s_bufs_ptr)) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted selection(s)");
         }
