@@ -100,9 +100,10 @@ static bool                      H5PL_revoked_sigs_initialized_g = false;
 
 /* Signature verification cache entry */
 typedef struct H5PL_signature_cache_entry_t {
-    char  *path;     /* Plugin file path */
-    time_t mtime;    /* File modification time */
-    bool   verified; /* Verification status (true=success, false=failure) */
+    char    *path;      /* Plugin file path */
+    time_t   mtime;     /* File modification time */
+    HDoff_t  file_size; /* File size (guards against mtime-preserving replacement) */
+    bool     verified;  /* Verification status (true=success, false=failure) */
 } H5PL_signature_cache_entry_t;
 
 /* Signature verification cache
@@ -1218,7 +1219,8 @@ H5PL__check_signature_cache(const char *plugin_path, bool *cached_result)
     for (size_t i = 0; i < H5PL_sig_cache_count_g; i++) {
         if (strcmp(H5PL_sig_cache_g[i].path, plugin_path) == 0) {
             /* Found cache entry - check if file has been modified */
-            if (H5PL_sig_cache_g[i].mtime == st.st_mtime) {
+            if (H5PL_sig_cache_g[i].mtime == st.st_mtime &&
+                H5PL_sig_cache_g[i].file_size == (HDoff_t)st.st_size) {
                 /* Cache hit! File unchanged, return cached result */
                 *cached_result = H5PL_sig_cache_g[i].verified;
                 ret_value      = SUCCEED;
@@ -1271,8 +1273,9 @@ H5PL__update_signature_cache(const char *plugin_path, bool verified)
 
     if (found) {
         /* Update existing entry */
-        H5PL_sig_cache_g[entry_idx].mtime    = st.st_mtime;
-        H5PL_sig_cache_g[entry_idx].verified = verified;
+        H5PL_sig_cache_g[entry_idx].mtime     = st.st_mtime;
+        H5PL_sig_cache_g[entry_idx].file_size = (HDoff_t)st.st_size;
+        H5PL_sig_cache_g[entry_idx].verified  = verified;
     }
     else {
         /* Add new entry - expand cache if needed */
@@ -1292,8 +1295,9 @@ H5PL__update_signature_cache(const char *plugin_path, bool verified)
         if (NULL == (H5PL_sig_cache_g[entry_idx].path = H5MM_strdup(plugin_path)))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot duplicate path for signature cache");
 
-        H5PL_sig_cache_g[entry_idx].mtime    = st.st_mtime;
-        H5PL_sig_cache_g[entry_idx].verified = verified;
+        H5PL_sig_cache_g[entry_idx].mtime     = st.st_mtime;
+        H5PL_sig_cache_g[entry_idx].file_size = (HDoff_t)st.st_size;
+        H5PL_sig_cache_g[entry_idx].verified  = verified;
         H5PL_sig_cache_count_g++;
     }
 
