@@ -230,7 +230,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *addr_p /*out
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
     assert(shared);
     bt->native = H5FL_BLK_MALLOC(native_block, shared->sizeof_keys);
-    bt->child = H5FL_SEQ_MALLOC(haddr_t, (size_t)shared->two_k);
+    bt->child  = H5FL_SEQ_MALLOC(haddr_t, (size_t)shared->two_k);
     if (NULL == bt->native || NULL == bt->child)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for B-tree root node");
     if (HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, (hsize_t)shared->sizeof_rnode)))
@@ -1773,7 +1773,7 @@ H5B__copy(const H5B_t *old_bt)
     memset(&new_node->cache_info, 0, sizeof(H5AC_info_t));
 
     new_node->native = H5FL_BLK_MALLOC(native_block, shared->sizeof_keys);
-    new_node->child = H5FL_SEQ_MALLOC(haddr_t, (size_t)shared->two_k);
+    new_node->child  = H5FL_SEQ_MALLOC(haddr_t, (size_t)shared->two_k);
     if (NULL == new_node->native || NULL == new_node->child)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree root node");
 

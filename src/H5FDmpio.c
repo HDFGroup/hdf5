@@ -1845,7 +1845,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
         mpi_block_lengths = (int *)malloc((size_t)count * sizeof(int));
         mpi_displacements = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint));
-        mpi_bufs = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint));
+        mpi_bufs          = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint));
         if ((NULL == mpi_block_lengths) || (NULL == mpi_displacements) || (NULL == mpi_bufs)) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement");
