@@ -456,7 +456,7 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifndef H5_HAVE_WIN32_API
-static herr_t
+herr_t
 H5PL__validate_directory_permissions(const char *dir_path)
 {
     h5_stat_t st;
@@ -486,7 +486,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__validate_directory_permissions() */
 #else  /* H5_HAVE_WIN32_API */
-static herr_t
+herr_t
 H5PL__validate_directory_permissions(const char *dir_path)
 {
     h5_stat_t                st;
