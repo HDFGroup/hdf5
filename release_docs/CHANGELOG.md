@@ -127,7 +127,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Fixed security issue [CVE-2025-2308](https://www.cve.org/CVERecord?id=CVE-2025-2308)
 
-   Fixed a critical vulnerability in the function `H5Z__scaleoffset_decompress_one_byte` of the component Scale-Offset Filter which culd lead to heap-based buffer overflow. 
+   Fixed a critical vulnerability in the function `H5Z__scaleoffset_decompress_one_byte` of the component Scale-Offset Filter which could lead to heap-based buffer overflow. 
 
 ### Fixed a double-free bug in `H5D__chunk_copy`
 
