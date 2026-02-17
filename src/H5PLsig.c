@@ -923,7 +923,7 @@ H5PL__init_keystore(void)
         if (HDstat(H5PL_KEYSTORE_DIR, &st) == 0) {
             /* Directory exists, try to load */
             if (H5PL__load_keys_from_directory(H5PL_KEYSTORE_DIR) < 0) {
-                /* Not a fatal error - fall through to embedded key */
+                /* Not a fatal error - continue and report error below */
             }
             else {
                 keys_loaded = true;
@@ -933,20 +933,6 @@ H5PL__init_keystore(void)
                     /* Non-fatal - continue even if revoked signatures fail to load */
                 }
             }
-        }
-    }
-#endif
-
-/* 3. Fallback to compile-time embedded key (backward compatibility) */
-#ifdef H5PL_PUBLIC_KEY_PEM
-    if (!keys_loaded) {
-        EVP_PKEY *embedded_key = H5PL__create_public_RSA_from_string(H5PL_PUBLIC_KEY_PEM);
-        if (NULL != embedded_key) {
-            if (H5PL__add_key_to_keystore(embedded_key, "embedded") < 0) {
-                EVP_PKEY_free(embedded_key);
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add embedded key to keystore");
-            }
-            keys_loaded = true;
         }
     }
 #endif
@@ -963,7 +949,6 @@ H5PL__init_keystore(void)
                     "Configure keys via:\n"
                     "  - Environment: export HDF5_PLUGIN_KEYSTORE=/path/to/keys\n"
                     "  - CMake: -DHDF5_PLUGIN_KEYSTORE_DIR=/path/to/keys\n"
-                    "  - Compile-time: -DHDF5_PLUGIN_PUBLIC_KEY_FILE=key.pem\n"
                     "\n"
                     "Verify:\n"
                     "  - Directory exists and is readable\n"

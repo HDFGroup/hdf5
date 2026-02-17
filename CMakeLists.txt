@@ -799,10 +799,6 @@ set(HDF5_PLUGIN_KEYSTORE_DIR "" CACHE PATH
 #      - Unix/Linux: /etc/hdf5/lock_keystore
 #      - Windows: C:\ProgramData\HDF_Group\HDF5\lock_keystore
 
-# Path to public key file for plugin signature verification (backward compatibility)
-set(HDF5_PLUGIN_PUBLIC_KEY_FILE "" CACHE FILEPATH
-    "Path to RSA public key (PEM format) for plugin signature verification (single key, backward compatibility)")
-
 # Security: Disable environment variable override (prevents runtime keystore redirection)
 # Note: Sysadmins can also lock the keystore at runtime without recompiling by
 # creating a lock file (/etc/hdf5/lock_keystore on Unix, or
@@ -845,18 +841,13 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
     message(STATUS "OpenSSL 3.0+ detected - all EVP_* APIs are compatible (not deprecated)")
   endif ()
 
-  # At least one key source must be configured
-  if (NOT HDF5_PLUGIN_KEYSTORE_DIR AND NOT HDF5_PLUGIN_PUBLIC_KEY_FILE)
+  # KeyStore directory must be configured
+  if (NOT HDF5_PLUGIN_KEYSTORE_DIR)
     message(FATAL_ERROR
-      "HDF5_REQUIRE_SIGNED_PLUGINS=ON requires either:\n"
+      "HDF5_REQUIRE_SIGNED_PLUGINS=ON requires KeyStore directory:\n"
+      "  -DHDF5_PLUGIN_KEYSTORE_DIR=/etc/hdf5/trusted_keys\n"
       "\n"
-      "  1. KeyStore directory (RECOMMENDED - supports multiple trusted keys):\n"
-      "     -DHDF5_PLUGIN_KEYSTORE_DIR=/etc/hdf5/trusted_keys\n"
-      "\n"
-      "  2. Single public key file (backward compatibility):\n"
-      "     -DHDF5_PLUGIN_PUBLIC_KEY_FILE=/path/to/public.pem\n"
-      "\n"
-      "KeyStore Approach (Recommended):\n"
+      "KeyStore Approach:\n"
       "  - Supports multiple trusted organizations (LLNL, ANL, HDFGroup)\n"
       "  - Add/remove keys without recompiling\n"
       "  - Runtime override via HDF5_PLUGIN_KEYSTORE environment variable\n"
@@ -899,41 +890,6 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
     add_compile_definitions(H5PL_KEYSTORE_DIR="${HDF5_PLUGIN_KEYSTORE_DIR}")
   endif ()
 
-  # Configure single public key file if provided (backward compatibility)
-  if (HDF5_PLUGIN_PUBLIC_KEY_FILE)
-    # Validate that the public key file exists
-    if (NOT EXISTS "${HDF5_PLUGIN_PUBLIC_KEY_FILE}")
-      message(FATAL_ERROR
-        "Public key file not found: ${HDF5_PLUGIN_PUBLIC_KEY_FILE}\n"
-        "Please check the path in HDF5_PLUGIN_PUBLIC_KEY_FILE")
-    endif ()
-
-    # Read the public key file
-    file(READ "${HDF5_PLUGIN_PUBLIC_KEY_FILE}" H5PL_PUBLIC_KEY_CONTENT)
-
-    # Validate basic PEM format
-    string(FIND "${H5PL_PUBLIC_KEY_CONTENT}" "-----BEGIN PUBLIC KEY-----" PEM_BEGIN_POS)
-    string(FIND "${H5PL_PUBLIC_KEY_CONTENT}" "-----END PUBLIC KEY-----" PEM_END_POS)
-
-    if (PEM_BEGIN_POS EQUAL -1 OR PEM_END_POS EQUAL -1)
-      message(FATAL_ERROR
-        "Invalid public key file: ${HDF5_PLUGIN_PUBLIC_KEY_FILE}\n"
-        "File must be in PEM format (-----BEGIN PUBLIC KEY----- ... -----END PUBLIC KEY-----)")
-    endif ()
-
-    # Escape the key content for C string literal
-    string(REPLACE "\\" "\\\\" H5PL_PUBLIC_KEY_CONTENT "${H5PL_PUBLIC_KEY_CONTENT}")
-    string(REPLACE "\"" "\\\"" H5PL_PUBLIC_KEY_CONTENT "${H5PL_PUBLIC_KEY_CONTENT}")
-    string(REPLACE "\n" "\\n" H5PL_PUBLIC_KEY_CONTENT "${H5PL_PUBLIC_KEY_CONTENT}")
-
-    # Define the public key as a compile definition
-    add_compile_definitions(H5PL_PUBLIC_KEY_PEM="${H5PL_PUBLIC_KEY_CONTENT}")
-
-    # Security audit log
-    string(LENGTH "${H5PL_PUBLIC_KEY_CONTENT}" KEY_LENGTH)
-    message(VERBOSE "Embedded public key: ${HDF5_PLUGIN_PUBLIC_KEY_FILE} (${KEY_LENGTH} bytes)")
-  endif ()
-
   # Enable digital signature verification
   add_compile_definitions(H5_REQUIRE_DIGITAL_SIGNATURE)
 
@@ -954,15 +910,7 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
   endif ()
 
   message(VERBOSE "Digital signature verification enabled (OpenSSL ${OPENSSL_VERSION})")
-
-  # Print configuration summary
-  if (HDF5_PLUGIN_KEYSTORE_DIR AND HDF5_PLUGIN_PUBLIC_KEY_FILE)
-    message(VERBOSE "Key sources: KeyStore directory + embedded fallback key")
-  elseif (HDF5_PLUGIN_KEYSTORE_DIR)
-    message(VERBOSE "Key sources: KeyStore directory only")
-  else ()
-    message(VERBOSE "Key sources: Embedded public key only (backward compatibility mode)")
-  endif ()
+  message(VERBOSE "Key sources: KeyStore directory only")
 endif ()
 
 #-----------------------------------------------------------------------------

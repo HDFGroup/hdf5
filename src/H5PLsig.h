@@ -77,7 +77,6 @@ typedef struct H5PL_sig_footer_t {
  * Key loading priority:
  *   1. Environment variable: HDF5_PLUGIN_KEYSTORE
  *   2. CMake-configured directory: HDF5_PLUGIN_KEYSTORE_DIR
- *   3. Compile-time embedded key: H5PL_PUBLIC_KEY_PEM
  */
 
 #endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
