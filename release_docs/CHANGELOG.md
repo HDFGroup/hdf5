@@ -129,7 +129,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixed a critical vulnerability in the function `H5Z__scaleoffset_decompress_one_byte` of the component Scale-Offset Filter which culd lead to heap-based buffer overflow. 
 
-### Fixed a double-free bug in H5D__chunk_copy
+### Fixed a double-free bug in `H5D__chunk_copy`
 
    Fixed a double-free bug in the internal `H5D__chunk_copy()` function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
 
@@ -140,7 +140,7 @@ We would like to thank the many HDF5 community members who contributed to this r
                        [#6133](https://github.com/HDFGroup/hdf5/issues/6133)
 ### Fixes potential security issues
 
-   The get_name API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
+   The `get_name` API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
    These functions are now fixed to treat (buffer != NULL, size == 0) as a length-only query to eliminate Valgrind error of invalid write.
 
 ### Fixed a performance issue with chunked dataset I/O
