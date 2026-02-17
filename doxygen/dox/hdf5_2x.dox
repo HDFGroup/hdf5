@@ -27,7 +27,7 @@
 Additional Release Information
 </td>
 <td>
-<a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a>
+<a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">Change log</a>
 </td>
 </tr>
 <tr>
@@ -55,7 +55,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-[Newsletter Announcement](https://www.hdfgroup.org/2025/11/10/release-of-hdf5-2-0-0-newsletter-207/)
+[Newsletter Announcement](https://www.hdfgroup.org/)
 </td>
 </tr>
 <tr>
@@ -80,7 +80,7 @@ ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://\RELURL
 Source code and binaries are available at:
 <a href="https://github.com/HDFGroup/hdf5/releases/tag/2.1.0">HDF5 2.1.0 on GitHub</a>
 
-Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with CMake.
+Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.1.0/release_docs/INSTALL) for building with CMake.
 
 
 \subsection subsec_obtain_method_2x Methods to obtain (gz file)
@@ -105,7 +105,7 @@ Since this portion of the HDF5 documentation is now part of the source code, it 
 
 \section sec_rel_spec_2x_migrate Migrating from HDF5 1.14 to HDF5 2.x
 
-This section highlights some changes that might affect migrating to HDF5.20, please refer to the \ref sec_rel_spec_2x_change or the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for detail.
+This section highlights some changes that might affect migrating to HDF5.20, please refer to the \ref sec_rel_spec_2x_change or the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">Change log</a> for detail.
 
 \li Default file format is now 1.8
 \li The file format has been updated to 4.0<a name="fileformat"></a>
@@ -113,10 +113,10 @@ This section highlights some changes that might affect migrating to HDF5.20, ple
     - `H5Dread_chunk()`<br>
     - `H5Tdecode()`<br>
     - `H5Iregister_type()`<br>
-\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for a complete description on this feature.
+\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">Change log</a> for a complete description on this feature.
 \li Significance in tools
     - The tool h5dump has a new option `--lformat` and its `XML` option is deprecated.
-    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for an explanation.
+    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">Change log</a> for an explanation.
 
 \section sec_rel_spec_2x_feat New Features in HDF5 Release 2.x
 
@@ -140,7 +140,7 @@ This section includes the new features introduced in the HDF5 2.x series:
 \li New predefined datatypes for
     - FP8 data in E4M3 and E5M2 formats (https://arxiv.org/abs/2209.05433), but not a native FP8 datatype.
     - little- and big-endian [bfloat16](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
-<br>Please refer to the <a href="https://\SRCURL/release_docs/CHANGELOG.md">CHANGELOG</a> for detail.
+<br>Please refer to the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG</a> for detail.
 
 \li Default chunk cache hash table size increased to 8191
 <br>In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
