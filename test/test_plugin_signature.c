@@ -518,7 +518,7 @@ setup_test_environment(void)
 
     /* Get test keys from environment or use defaults */
     if (getenv("HDF5_TEST_PRIVATE_KEY")) {
-        strncpy(test_private_key, getenv("HDF5_TEST_PRIVATE_KEY"), sizeof(test_private_key) - 1);
+        snprintf(test_private_key, sizeof(test_private_key), "%s", getenv("HDF5_TEST_PRIVATE_KEY"));
     }
     else {
         /* Try to find test keys in common locations */
@@ -526,7 +526,7 @@ setup_test_environment(void)
     }
 
     if (getenv("HDF5_TEST_PUBLIC_KEY")) {
-        strncpy(test_public_key, getenv("HDF5_TEST_PUBLIC_KEY"), sizeof(test_public_key) - 1);
+        snprintf(test_public_key, sizeof(test_public_key), "%s", getenv("HDF5_TEST_PUBLIC_KEY"));
     }
     else {
         snprintf(test_public_key, sizeof(test_public_key), "%s/ci-test-public.pem", H5_get_srcdir());

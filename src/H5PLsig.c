@@ -1548,7 +1548,7 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
 
             if (written < 0 || (size_t)written >= remaining) {
                 if (remaining > 4)
-                    strcpy(ptr, "...");
+                    memcpy(ptr, "...", 4); /* 4 = strlen("...") + 1 (NUL) */
                 break;
             }
             ptr += written;
