@@ -100,10 +100,10 @@ static bool                      H5PL_revoked_sigs_initialized_g = false;
 
 /* Signature verification cache entry */
 typedef struct H5PL_signature_cache_entry_t {
-    char    *path;      /* Plugin file path */
-    time_t   mtime;     /* File modification time */
-    HDoff_t  file_size; /* File size (guards against mtime-preserving replacement) */
-    bool     verified;  /* Verification status (true=success, false=failure) */
+    char   *path;      /* Plugin file path */
+    time_t  mtime;     /* File modification time */
+    HDoff_t file_size; /* File size (guards against mtime-preserving replacement) */
+    bool    verified;  /* Verification status (true=success, false=failure) */
 } H5PL_signature_cache_entry_t;
 
 /* Signature verification cache
