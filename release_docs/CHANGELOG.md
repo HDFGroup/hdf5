@@ -88,6 +88,11 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Removed force-setting of `ZLIB_USE_EXTERNAL` and `SZIP_USE_EXTERNAL` CMake variables to `ON`
+
+   When the CMake variable `HDF5_ALLOW_EXTERNAL_SUPPORT` is set to `GIT` or `TGZ`, the library's build process previously force-set the `ZLIB_USE_EXTERNAL` and `SZIP_USE_EXTERNAL` variables to `ON`. This prevented the ability to independently choose whether zlib and szip are built from system libraries or from external sources. These variables are no longer forced to `ON` in this case and can be set individually.
+
+
 ## Tools
 
 ## Performance
