@@ -618,7 +618,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     /* Reject plugins from world-writable directories */
     if (H5PL__validate_directory_permissions(plugin_path) < 0) {
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
         HGOTO_DONE(H5_ITER_CONT);
     }
 #endif
@@ -719,7 +719,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     /* Reject plugins from world-writable directories */
     if (H5PL__validate_directory_permissions(plugin_path) < 0) {
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
         HGOTO_DONE(H5_ITER_CONT);
     }
 #endif
@@ -871,7 +871,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     /* Reject plugins from world-writable directories */
     if (H5PL__validate_directory_permissions(dir) < 0) {
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
         HGOTO_DONE(SUCCEED);
     }
 #endif
@@ -962,7 +962,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     /* Reject plugins from world-writable directories */
     if (H5PL__validate_directory_permissions(dir) < 0) {
-        H5E_clear_stack(NULL);
+        H5E_clear_stack();
         HGOTO_DONE(SUCCEED);
     }
 #endif
