@@ -294,7 +294,7 @@ cleanup_file_mapping_memory(char **filenames, size_t len)
 /* Helper function to validate HDF5 file using h5fuse */
 static herr_t
 validate_file_with_h5fuse(const char *config_filename, char **subfile_names, size_t num_subfiles,
-                          const char *main_filename)
+                          const char *main_filename, const char *dset_name)
 {
     char  *h5fuse_cmd = NULL;
     char   subfile_list[2048];
@@ -372,59 +372,73 @@ validate_file_with_h5fuse(const char *config_filename, char **subfile_names, siz
     H5E_END_TRY;
 
     /* Open file with sec2 driver and verify the data */
-    {
+    if (dset_name) {
         hid_t   sec2_file_id = H5I_INVALID_HID;
         hid_t   dset_id      = H5I_INVALID_HID;
         hid_t   fspace_id    = H5I_INVALID_HID;
         void   *buf          = NULL;
-        hsize_t dset_dims[1];
+        hsize_t dset_dims[H5S_MAX_RANK];
         size_t  dset_size;
+        int     ndims;
 
-        H5E_BEGIN_TRY
-        {
-            sec2_file_id = H5Fopen(main_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-        }
-        H5E_END_TRY;
-
-        if (sec2_file_id >= 0) {
-
-            H5E_BEGIN_TRY
-            {
-                dset_id = H5Dopen2(sec2_file_id, "DSET", H5P_DEFAULT);
-            }
-            H5E_END_TRY;
-
-            if (dset_id >= 0) {
-                /* Get dataset dimensions */
-                fspace_id = H5Dget_space(dset_id);
-                if (fspace_id >= 0 && H5Sget_simple_extent_dims(fspace_id, dset_dims, NULL) >= 0) {
-                    dset_size = dset_dims[0] * sizeof(int);
-                    buf       = malloc(dset_size);
-
-                    if (buf) {
-                        /* Read the entire dataset */
-                        if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) >= 0) {
-                            printf("Successfully read dataset data from fused file\n");
-                            /* Note: Full data verification would require knowledge of the original data
-                             * pattern */
-                            /* For now, just verify we can read the data without errors */
-                        }
-                        free(buf);
-                    }
-
-                    if (fspace_id >= 0)
-                        H5Sclose(fspace_id);
-                }
-                H5Dclose(dset_id);
-            }
-
-            H5Fclose(sec2_file_id);
-        }
-        else {
+        sec2_file_id = H5Fopen(main_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        if (sec2_file_id < 0) {
             printf("ERROR: Could not re-open fused file with sec2 driver for data validation\n");
             ret_value = FAIL;
             goto done;
         }
+
+        dset_id = H5Dopen2(sec2_file_id, dset_name, H5P_DEFAULT);
+        if (dset_id < 0) {
+            printf("ERROR: Could not open dataset %s in fused file\n", dset_name);
+            ret_value = FAIL;
+            goto done;
+        }
+
+        /* Get dataset dimensions */
+        fspace_id = H5Dget_space(dset_id);
+        if (fspace_id < 0) {
+            printf("ERROR: Could not get dataspace for dataset %s in fused file\n", dset_name);
+            ret_value = FAIL;
+            goto done;
+        }
+
+        ndims = H5Sget_simple_extent_dims(fspace_id, dset_dims, NULL);
+        if (ndims < 0) {
+            printf("ERROR: Could not get dataspace dimensions for dataset %s in fused file\n", dset_name);
+            ret_value = FAIL;
+            goto done;
+        }
+
+        dset_size = 1;
+        for (int i = 0; i < ndims; i++)
+            dset_size *= dset_dims[i];
+        dset_size *= sizeof(int);
+
+        buf = malloc(dset_size);
+        if (!buf) {
+            printf("ERROR: Could not allocate buffer for verifying read for dataset %s in fused file\n",
+                   dset_name);
+            ret_value = FAIL;
+            goto done;
+        }
+
+        /* Read the entire dataset */
+        /* Note: Full data verification would require knowledge of the original data
+         * pattern. For now, just verify we can read the data without errors */
+        if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
+            printf("ERROR: Could not read from dataset %s in fused file\n", dset_name);
+            ret_value = FAIL;
+            goto done;
+        }
+
+        free(buf);
+
+        if (fspace_id >= 0)
+            H5Sclose(fspace_id);
+
+        H5Dclose(dset_id);
+        H5Fclose(sec2_file_id);
     }
 
 done:
@@ -583,8 +597,8 @@ test_subfiling_get_file_mapping_ioc_selection(void)
             int   validation_result = 1; /* Default to success */
             char *config_filename   = NULL;
             if (len > 0) {
-                config_filename   = find_config_file(filename);
-                ret               = validate_file_with_h5fuse(config_filename, filenames, len, filename);
+                config_filename = find_config_file(filename);
+                ret             = validate_file_with_h5fuse(config_filename, filenames, len, filename, NULL);
                 validation_result = (ret >= 0) ? 1 : 0;
             }
 
@@ -819,7 +833,8 @@ test_subfiling_get_file_mapping_with_io(void)
     char *config_filename   = NULL;
     if (len_after > 0) {
         config_filename = find_config_file(SUBF_FILENAME_IO);
-        ret = validate_file_with_h5fuse(config_filename, filenames_after, len_after, SUBF_FILENAME_IO);
+        ret = validate_file_with_h5fuse(config_filename, filenames_after, len_after, SUBF_FILENAME_IO,
+                                        "/dataset");
         validation_result = (ret >= 0) ? 1 : 0;
     }
 
