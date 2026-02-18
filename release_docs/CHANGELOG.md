@@ -116,15 +116,22 @@ We would like to thank the many HDF5 community members who contributed to this r
 ### Fixed a potential out of bound read
 
    When a file is corrupted such that an array datatype's size, the number of elements, and the element size are not in agreement, it can trigger an out of bounds read.  A check has been added to detect such situation.
-### Fixed a potential buffer overflow
+
+### Fixed security issue [CVE-2025-44904](https://www.cve.org/CVERecord?id=CVE-2025-44904)
 
    For unfiltered dataset chunks, the size on disk should be constant for all chunks in a dataset. In some cases the size of each chunk is stored even in this case where it can be inferred from the chunk dimensions and datatype. The code previously assumed this stored size was equal to the inferred size, leading to a mismatch in the expected and actual buffer size. Modified the library to throw an error if the size does not match the expected size.
 
-   Fixes CVE-2025-44904
+### Fixed security issue [CVE-2025-2309](https://www.cve.org/CVERecord?id=CVE-2025-2309)
 
-### Fixed a double-free bug in H5D__chunk_copy
+   Fixed a critical vulnerability in `H5T__bit_copy` of the component Type Conversion Logic which could lead to heap-based buffer overflow. 
 
-   Fixed a double-free bug in the internal H5D__chunk_copy() function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
+### Fixed security issue [CVE-2025-2308](https://www.cve.org/CVERecord?id=CVE-2025-2308)
+
+   Fixed a critical vulnerability in the function `H5Z__scaleoffset_decompress_one_byte` of the component Scale-Offset Filter which could lead to heap-based buffer overflow. 
+
+### Fixed a double-free bug in `H5D__chunk_copy`
+
+   Fixed a double-free bug in the internal `H5D__chunk_copy()` function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
 
    Fixes GitHub issues [#6123](https://github.com/HDFGroup/hdf5/issues/6123)
                        [#6124](https://github.com/HDFGroup/hdf5/issues/6124)
@@ -133,20 +140,14 @@ We would like to thank the many HDF5 community members who contributed to this r
                        [#6133](https://github.com/HDFGroup/hdf5/issues/6133)
 ### Fixes potential security issues
 
-   The get_name API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
+   The `get_name` API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
    These functions are now fixed to treat (buffer != NULL, size == 0) as a length-only query to eliminate Valgrind error of invalid write.
 
 ### Fixed a performance issue with chunked dataset I/O
 
-   When dataset chunks are unable to be placed in the dataset chunk cache (for example, if a chunk
-   is too large), the library falls back to an alternative approach for I/O on dataset chunks. An
-   issue with the logic in this approach prevented chunked dataset I/O from making use of the library's
-   data sieve buffer I/O optimization functionality. For chunk shapes that are non-contiguous with
-   the memory layout of a buffer, this could result in severely degraded I/O performance, with the
-   worst-case behavior causing I/O to be performed on a single data element at a time.
+   When dataset chunks are unable to be placed in the dataset chunk cache (for example, if a chunk is too large), the library falls back to an alternative approach for I/O on dataset chunks. An issue with the logic in this approach prevented chunked dataset I/O from making use of the library's data sieve buffer I/O optimization functionality. For chunk shapes that are non-contiguous with the memory layout of a buffer, this could result in severely degraded I/O performance, with the worst-case behavior causing I/O to be performed on a single data element at a time.
 
-   The data sieve buffer functionality has been extended to cover the case of uncached chunks and
-   will be used as long as the underlying Virtual File Driver supports data sieving.
+   The data sieve buffer functionality has been extended to cover the case of uncached chunks and will be used as long as the underlying Virtual File Driver supports data sieving.
 
 ## Java Library
 
@@ -191,17 +192,17 @@ Current test results are available [here](https://my.cdash.org/index.php?project
 
    When performing I/O operations using a non-IEEE floating-point format datatype, HDF5 may improperly convert some data values due to incomplete handling of non-IEEE types. Such types include the following pre-defined datatypes:
 
-    H5T_FLOAT_F8E4M3
-    H5T_FLOAT_F8E5M2
-    H5T_FLOAT_F6E2M3
-    H5T_FLOAT_F6E3M2
-    H5T_FLOAT_F4E2M1
+    `H5T_FLOAT_F8E4M3`<br>
+    `H5T_FLOAT_F8E5M2`<br>
+    `H5T_FLOAT_F6E2M3`<br>
+    `H5T_FLOAT_F6E3M2`<br>
+    `H5T_FLOAT_F4E2M1`
 
    If possible, an application should perform I/O with these datatypes using an in-memory type that matches the specific floating-point format and perform explicit data conversion outside of HDF5, if necessary. Otherwise, read/written values should be verified to be correct.
 
 - When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
 
-     #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
+     #5: H5Tinit_float.c line 308 in `H5T__fix_order()`: failed to detect byte order
      major: Datatype
      minor: Unable to initialize object
 
