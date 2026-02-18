@@ -32,7 +32,32 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_SEARCHENGINE_URL)
   set (DOXYGEN_STRIP_FROM_PATH ${HDF5_SOURCE_DIR})
   set (DOXYGEN_STRIP_FROM_INC_PATH ${HDF5_SOURCE_DIR})
-  set (DOXYGEN_PREDEFINED "H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN H5_HAVE_SUBFILING_VFD H5_HAVE_IOC_VFD H5_HAVE_MIRROR_VFD H5std_string=std::string H5G_link_t=H5L_type_t")
+  # Versioned API macros are added to PREDEFINED to give Doxygen a fixed
+  # expansion and prevent it from discovering the #defines in H5version.h,
+  # which otherwise causes "multiple @param documentation sections" warnings
+  # when the macro documentation (\def) and the function documentation both
+  # get associated with the same underlying function.
+  #
+  # The versioned API macros are auto-generated from src/H5vers.txt by the
+  # bin/make_vers script, which creates doxygen/H5version_doxygen.cmake.
+  # This ensures the Doxygen configuration stays synchronized with the
+  # actual default versions defined in src/H5version.h.
+  set (_doxygen_predefined_entries
+    H5_HAVE_DIRECT
+    H5_HAVE_LIBHDFS
+    H5_HAVE_MAP_API
+    H5_HAVE_PARALLEL
+    H5_HAVE_ROS3_VFD
+    H5_DOXYGEN
+    H5_HAVE_SUBFILING_VFD
+    H5_HAVE_IOC_VFD
+    H5_HAVE_MIRROR_VFD
+    "H5std_string=std::string"
+    "H5G_link_t=H5L_type_t"
+  )
+  # Load auto-generated versioned API macros from doxygen/H5version_doxygen.cmake
+  include(${HDF5_DOXYGEN_DIR}/H5version_doxygen.cmake)
+  list (JOIN _doxygen_predefined_entries " " DOXYGEN_PREDEFINED)
   set (DOXYGEN_WARN_AS_ERROR ${HDF5_DOXY_WARNINGS})
 
 # This configure and individual custom targets work together

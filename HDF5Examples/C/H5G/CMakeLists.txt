@@ -249,7 +249,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (HDF5_PROVIDES_TOOLS)
         add_test (
@@ -266,7 +265,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES
             DEPENDS ${EXAMPLE_VARNAME}_${testname}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
     endif ()
     endif ()
@@ -304,7 +302,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES
             DEPENDS ${EXAMPLE_VARNAME}_${testname}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
       endif ()
     endif ()
@@ -335,7 +332,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (HDF5_PROVIDES_TOOLS)
         add_test (
@@ -352,7 +348,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname}1 PROPERTIES
             DEPENDS ${EXAMPLE_VARNAME}_${testname}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}2
@@ -368,7 +363,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname}2 PROPERTIES
             DEPENDS ${EXAMPLE_VARNAME}_H5DUMP-${testname}1
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
       endif ()
     endif ()
@@ -397,7 +391,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
     endif ()
   endmacro ()

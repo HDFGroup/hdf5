@@ -639,7 +639,7 @@ H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  * \param[in] ref Reference to query
  *
  * \return Returns a valid object type if successful; otherwise returns a
- *         negative value (#H5G_UNKNOWN).
+ *         negative value (\c H5G_UNKNOWN).
  *
  * \deprecated This function has been renamed from H5Rget_obj_type() and is
  *             deprecated in favor of the macro H5Rget_obj_type() or the

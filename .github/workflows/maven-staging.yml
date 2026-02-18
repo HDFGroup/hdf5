@@ -239,18 +239,17 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
 
       - name: Install Dependencies (macOS)
         if: ${{ runner.os == 'macOS' }}
         run: |
-          brew install ninja doxygen graphviz
+          brew install ninja graphviz
 
       - name: Install Dependencies (Windows)
         if: ${{ runner.os == 'Windows' }}
         run: |
           choco install ninja
-          choco install doxygen.install
           choco install graphviz
 
       - name: Enable Developer Command Prompt (Windows)
@@ -809,7 +808,7 @@ jobs:
         continue-on-error: true
 
       - name: Cache Maven dependencies
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}

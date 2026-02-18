@@ -334,8 +334,6 @@ function(target_code_coverage TARGET_NAME)
         # this target serially.
         add_custom_target (
           ccov-run-${target_code_coverage_COVERAGE_TARGET_NAME}
-          COMMAND  ${CMAKE_COMMAND}
-          ARGS     -E env ${CROSSCOMPILING_PATH}
           COMMAND
             ${CMAKE_COMMAND} -E env
             ${target_code_coverage_PRE_ARGS}
@@ -417,8 +415,6 @@ function(target_code_coverage TARGET_NAME)
         # Run the executable, generating coverage information
         add_custom_target (
           ccov-run-${target_code_coverage_COVERAGE_TARGET_NAME}
-          COMMAND  ${CMAKE_COMMAND}
-          ARGS     -E env ${CROSSCOMPILING_PATH}
           COMMAND
             ${target_code_coverage_PRE_ARGS}
             $<TARGET_FILE:${TARGET_NAME}> ${target_code_coverage_ARGS}
@@ -447,8 +443,6 @@ function(target_code_coverage TARGET_NAME)
             ccov-capture-${target_code_coverage_COVERAGE_TARGET_NAME}
             COMMAND ${CMAKE_COMMAND} -E remove -f ${COVERAGE_INFO}
             COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --zerocounters
-            COMMAND ${CMAKE_COMMAND}
-            ARGS    -E env ${CROSSCOMPILING_PATH}
             COMMAND
               ${target_code_coverage_PRE_ARGS}
               $<TARGET_FILE:${TARGET_NAME}> ${target_code_coverage_ARGS}
@@ -463,8 +457,6 @@ function(target_code_coverage TARGET_NAME)
             ccov-capture-${target_code_coverage_COVERAGE_TARGET_NAME}
             COMMAND ${CMAKE_COMMAND} -E rm -f ${COVERAGE_INFO}
             COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --zerocounters
-            COMMAND ${CMAKE_COMMAND}
-            ARGS    -E env ${CROSSCOMPILING_PATH}
             COMMAND
               ${target_code_coverage_PRE_ARGS}
               $<TARGET_FILE:${TARGET_NAME}> ${target_code_coverage_ARGS}

@@ -85,7 +85,6 @@ add_test (
     COMMAND $<TARGET_FILE:h5repart> -m 20000 family_file%05d.h5 fst_family%05d.h5
 )
 set_tests_properties (H5REPART-h5repart_20K PROPERTIES
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
     FIXTURES_REQUIRED clear_testrepart
 )
 if ("H5REPART-h5repart_20K" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -98,7 +97,6 @@ add_test (
     COMMAND $<TARGET_FILE:h5repart> -m 5k family_file%05d.h5 scd_family%05d.h5
 )
 set_tests_properties (H5REPART-h5repart_5K PROPERTIES
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
     FIXTURES_REQUIRED clear_testrepart
 )
 if ("H5REPART-h5repart_5K" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -111,7 +109,6 @@ add_test (
     COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_single family_file%05d.h5 family_to_single.h5
 )
 set_tests_properties (H5REPART-h5repart_single PROPERTIES
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
     FIXTURES_REQUIRED clear_testrepart
 )
 if ("H5REPART-h5repart_single" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -124,7 +121,6 @@ add_test (
     COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5
 )
 set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
     FIXTURES_REQUIRED clear_testrepart
 )
 if ("H5REPART-h5repart_sec2" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -137,7 +133,6 @@ add_test (
     COMMAND $<TARGET_FILE:h5repart_test>
 )
 set_tests_properties (H5REPART-h5repart_test PROPERTIES
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
     DEPENDS "H5REPART-h5repart_20K;H5REPART-h5repart_5K;H5REPART-h5repart_single;H5REPART-h5repart_sec2"
     FIXTURES_REQUIRED clear_testrepart
 )

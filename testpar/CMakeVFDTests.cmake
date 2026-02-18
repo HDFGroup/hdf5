@@ -43,7 +43,7 @@ macro (ADD_VFD_TEST vfdname resultcode)
                 -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (MPI_TEST_VFD-${vfdname}-${h5_test} PROPERTIES
-            ENVIRONMENT "srcdir=${HDF5_TEST_PAR_BINARY_DIR}/${vfdname};${CROSSCOMPILING_PATH}"
+            ENVIRONMENT "srcdir=${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}"
             WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}
         )
         if ("MPI_TEST_VFD-${vfdname}-${h5_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
