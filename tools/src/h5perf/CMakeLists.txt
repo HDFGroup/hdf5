@@ -23,6 +23,7 @@ else ()
   target_link_libraries (h5perf_serial PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (h5perf_serial PROPERTIES FOLDER perform)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5perf_serial")
 
 set (H5_DEP_EXECUTABLES h5perf_serial)
 
@@ -48,6 +49,7 @@ if (H5_HAVE_PARALLEL)
     target_link_libraries (h5perf PRIVATE ${LINK_LIBS} ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
   endif ()
   set_target_properties (h5perf PROPERTIES FOLDER perform)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5perf")
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5perf)
 

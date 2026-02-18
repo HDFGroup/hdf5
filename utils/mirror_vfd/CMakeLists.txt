@@ -24,6 +24,7 @@ else ()
   target_link_libraries (mirror_server PRIVATE ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (mirror_server PROPERTIES FOLDER utils)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};mirror_server")
 set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} mirror_server)
 
 #-----------------------------------------------------------------------------
@@ -48,6 +49,7 @@ else ()
   target_link_libraries (mirror_server_stop PRIVATE ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (mirror_server_stop PROPERTIES FOLDER utils)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};mirror_server_stop")
 set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} mirror_server_stop)
 
 #-----------------------------------------------------------------------------

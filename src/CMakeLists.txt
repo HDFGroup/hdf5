@@ -1348,11 +1348,16 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_STATIC_LIBS)
     INSTALL_TARGET_PDB (${HDF5_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} libraries)
 
+    if (BUILD_SHARED_LIBS)
+      set (_static_export ${HDF5_EXPORTED_TARGETS}_static)
+    else ()
+      set (_static_export ${HDF5_EXPORTED_TARGETS})
+    endif ()
     install (
         TARGETS
             ${install_targets_static}
         EXPORT
-            ${HDF5_EXPORTED_TARGETS}_static
+            ${_static_export}
         LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
         ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
         RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries

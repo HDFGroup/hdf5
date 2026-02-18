@@ -26,6 +26,7 @@ else ()
   target_link_libraries (h5diff PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (h5diff PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff")
 
 set (H5_DEP_EXECUTABLES h5diff)
 
@@ -54,6 +55,7 @@ if (H5_HAVE_PARALLEL)
     target_link_libraries (ph5diff PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
   endif ()
   set_target_properties (ph5diff PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};ph5diff")
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} ph5diff)
 endif ()
 

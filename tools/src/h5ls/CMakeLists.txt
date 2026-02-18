@@ -22,6 +22,7 @@ else ()
   target_link_libraries (h5ls PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (h5ls PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5ls")
 
 set (H5_DEP_EXECUTABLES h5ls)
 

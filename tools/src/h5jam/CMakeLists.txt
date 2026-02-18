@@ -20,6 +20,7 @@ else ()
   target_link_libraries (h5jam PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (h5jam PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5jam")
 
 add_executable (h5unjam ${HDF5_TOOLS_SRC_H5JAM_SOURCE_DIR}/h5unjam.c)
 target_include_directories (h5unjam PRIVATE "${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -31,6 +32,7 @@ else ()
   target_link_libraries (h5unjam PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (h5unjam PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5unjam")
 
 set (H5_DEP_EXECUTABLES
     h5jam

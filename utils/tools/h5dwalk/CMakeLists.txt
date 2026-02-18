@@ -18,6 +18,7 @@ else ()
   target_link_libraries (h5dwalk PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${MFU_LIBRARY} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
 endif ()
 set_target_properties (h5dwalk PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5dwalk")
 
 set (H5_DEP_EXECUTABLES h5dwalk)
 

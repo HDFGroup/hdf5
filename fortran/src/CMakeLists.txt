@@ -636,9 +636,14 @@ if (HDF5_EXPORTED_TARGETS)
     INSTALL_TARGET_PDB (${HDF5_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
 
+    if (BUILD_SHARED_LIBS)
+      set (_static_export ${HDF5_EXPORTED_TARGETS}_static)
+    else ()
+      set (_static_export ${HDF5_EXPORTED_TARGETS})
+    endif ()
     install (
         TARGETS ${install_targets_static}
-        EXPORT ${HDF5_EXPORTED_TARGETS}_static
+        EXPORT ${_static_export}
         LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
         ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
         RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
