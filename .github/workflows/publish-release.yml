@@ -34,8 +34,8 @@ jobs:
         run: |
           set -euo pipefail
           echo "Validating inputs..."
-          if [[ ! "${{ inputs.use_tag }}" =~ ^hdf5[_-][0-9]+[._][0-9]+[._][0-9]+([._][0-9]+)?(-.*)?$ ]]; then
-            echo "❌ Invalid tag format. Expected: hdf5_X.Y.Z, hdf5-X_Y_Z, or hdf5_X.Y.Z.W"
+          if [[ ! "${{ inputs.use_tag }}" =~ ^[0-9]+[._][0-9]+[._][0-9]+([._][0-9]+)?(-.*)?$ ]]; then
+            echo "❌ Invalid tag format. Expected:  X.Y.Z or X.Y.Z-*"
             exit 1
           fi
           if [[ "${{ inputs.target_dir }}" == *".."* ]] || [[ "${{ inputs.target_dir }}" == /* ]]; then
