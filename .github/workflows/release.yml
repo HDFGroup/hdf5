@@ -99,7 +99,6 @@ jobs:
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
-      draft: true
 
   call-workflow-maven-staging:
     needs: [log-the-inputs, call-workflow-tarball]
