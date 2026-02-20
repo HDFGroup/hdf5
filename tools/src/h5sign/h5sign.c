@@ -255,11 +255,19 @@ read_private_key(const char *keyfile)
     EVP_PKEY *pkey     = NULL;
     EVP_PKEY *ret_pkey = NULL;
 
+    /* Open key file */
+    if (NULL == (fp = fopen(keyfile, "r"))) {
+        fprintf(rawerrorstream, "Error: Cannot open private key file '%s': %s\n", keyfile, strerror(errno));
+        goto done;
+    }
+
 #ifndef H5_HAVE_WIN32_API
-    /* Verify key file has secure permissions (must not be group- or world-readable) */
+    /* Verify key file has secure permissions using the open descriptor to avoid TOCTOU.
+     * fstat on the fd inspects the exact file we opened, not whatever the path resolves
+     * to at check time (which could differ if a symlink is swapped between stat and fopen). */
     {
         h5_stat_t key_stat;
-        if (HDstat(keyfile, &key_stat) == 0) {
+        if (HDfstat(fileno(fp), &key_stat) == 0) {
             if (key_stat.st_mode & (S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) {
                 fprintf(rawerrorstream, "Error: Private key file '%s' has insecure permissions (%03o)\n",
                         keyfile, (unsigned)(key_stat.st_mode & 0777));
@@ -270,24 +278,24 @@ read_private_key(const char *keyfile)
     }
 #endif
 
-    /* Open key file */
-    if (NULL == (fp = fopen(keyfile, "r"))) {
-        fprintf(rawerrorstream, "Error: Cannot open private key file '%s': %s\n", keyfile, strerror(errno));
-        goto done;
-    }
-
     /* Read private key using OpenSSL's PEM reader */
     if (NULL == (pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL))) {
         unsigned long ssl_err = ERR_get_error();
         char          err_buf[256];
         ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
         fprintf(rawerrorstream, "Error: Cannot read private key from '%s': %s\n", keyfile, err_buf);
-        fprintf(rawerrorstream, "       Make sure the file is in PEM format.\n");
+        fprintf(rawerrorstream, "       Make sure the file is in PEM format and is not passphrase-protected.\n");
         goto done;
     }
 
-    /* Verify it's an RSA key */
+    /* Verify it's an RSA key.
+     * EVP_PKEY_is_a() is the preferred API on OpenSSL 3.0+; fall back to
+     * EVP_PKEY_base_id() for older versions to avoid deprecation warnings. */
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    if (!EVP_PKEY_is_a(pkey, "RSA") && !EVP_PKEY_is_a(pkey, "RSA-PSS")) {
+#else
     if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA && EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA_PSS) {
+#endif
         fprintf(rawerrorstream, "Error: Key file '%s' is not an RSA key\n", keyfile);
         fprintf(rawerrorstream, "       Only RSA keys are supported for plugin signing.\n");
         goto done;
@@ -588,9 +596,20 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         fprintf(rawoutstream, "Signature length: %zu bytes\n", sig_len);
     }
 
-    /* Seek to end of file to append signature (fd kept open from hashing — no TOCTOU) */
-    if (HDlseek(fd, 0, SEEK_END) < 0) {
-        fprintf(rawerrorstream, "Error: Cannot seek to end of plugin file '%s': %s\n", plugin_path,
+    /* Truncate the file to exactly file_size bytes before appending.
+     * If any concurrent writer extended the file during hashing, SEEK_END would
+     * place us past the extra data, producing a signature that covers fewer bytes
+     * than the binary.  Truncating to the size we hashed guarantees that the
+     * signature is appended at precisely the byte we expect. */
+    if (HDftruncate(fd, (HDoff_t)file_size) < 0) {
+        fprintf(rawerrorstream, "Error: Cannot truncate plugin file '%s': %s\n", plugin_path,
+                strerror(errno));
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (HDlseek(fd, (HDoff_t)file_size, SEEK_SET) < 0) {
+        fprintf(rawerrorstream, "Error: Cannot seek in plugin file '%s': %s\n", plugin_path,
                 strerror(errno));
         ret_value = FAIL;
         goto done;
@@ -611,6 +630,8 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
             if (write_result <= 0) {
                 fprintf(rawerrorstream, "Error: Cannot write signature to '%s': %s\n", plugin_path,
                         strerror(errno));
+                /* Attempt rollback: restore file to its pre-signing state */
+                (void)HDftruncate(fd, (HDoff_t)file_size);
                 ret_value = FAIL;
                 goto done;
             }
@@ -640,16 +661,30 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         /* Encode magic number as little-endian uint32 */
         UINT32ENCODE(p, H5PL_SIG_MAGIC);
 
-        /* Write footer to file */
-        h5_posix_io_ret_t write_result = 0;
-        do {
-            write_result = HDwrite(fd, footer_buf, sizeof(footer_buf));
-        } while (-1 == write_result && EINTR == errno);
+        /* Write footer to file (loop handles partial writes uniformly with signature write) */
+        {
+            size_t            footer_written = 0;
+            const size_t      footer_total   = sizeof(footer_buf);
+            unsigned char    *footer_ptr     = footer_buf;
+            h5_posix_io_ret_t write_result   = 0;
 
-        if (write_result != sizeof(footer_buf)) {
-            fprintf(rawerrorstream, "Error: Cannot write footer to '%s': %s\n", plugin_path, strerror(errno));
-            ret_value = FAIL;
-            goto done;
+            while (footer_written < footer_total) {
+                do {
+                    write_result = HDwrite(fd, footer_ptr, footer_total - footer_written);
+                } while (-1 == write_result && EINTR == errno);
+
+                if (write_result <= 0) {
+                    fprintf(rawerrorstream, "Error: Cannot write footer to '%s': %s\n", plugin_path,
+                            strerror(errno));
+                    /* Attempt rollback: restore file to its pre-signing state */
+                    (void)HDftruncate(fd, (HDoff_t)file_size);
+                    ret_value = FAIL;
+                    goto done;
+                }
+
+                footer_written += (size_t)write_result;
+                footer_ptr += write_result;
+            }
         }
     }
 
