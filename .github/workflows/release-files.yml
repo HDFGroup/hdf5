@@ -265,6 +265,7 @@ jobs:
         with:
           tag_name: "${{ steps.create_release_tag_name.outputs.TAG_BASE }}"
           name: "HDF5 Release ${{ inputs.use_tag }}"
+          draft: true
           prerelease: false
           body_path: description.txt
           files: |
