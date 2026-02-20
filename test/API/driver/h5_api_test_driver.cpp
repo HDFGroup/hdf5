@@ -21,16 +21,16 @@
 #include <cstdlib>
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
-# include <unistd.h>
-# include <sys/wait.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #endif
 
 #include <h5_api_test_sys/RegularExpression.hxx>
 #include <h5_api_test_sys/SystemTools.hxx>
 
-using std::vector;
-using std::string;
 using std::cerr;
+using std::string;
+using std::vector;
 
 // The main function as this class should only be used by this program
 int
@@ -43,22 +43,22 @@ main(int argc, char *argv[])
 //----------------------------------------------------------------------------
 H5APITestDriver::H5APITestDriver()
 {
-    this->ClientArgStart = 0;
-    this->ClientArgCount = 0;
+    this->ClientArgStart       = 0;
+    this->ClientArgCount       = 0;
     this->ClientHelperArgStart = 0;
     this->ClientHelperArgCount = 0;
-    this->ClientInitArgStart = 0;
-    this->ClientInitArgCount = 0;
-    this->ServerArgStart = 0;
-    this->ServerArgCount = 0;
-    this->AllowErrorInOutput = false;
+    this->ClientInitArgStart   = 0;
+    this->ClientInitArgCount   = 0;
+    this->ServerArgStart       = 0;
+    this->ServerArgCount       = 0;
+    this->AllowErrorInOutput   = false;
     // try to make sure that this times out before dart so it can kill all the processes
-    this->TimeOut = DART_TESTING_TIMEOUT - 10.0;
-    this->ServerExitTimeOut = 2; /* 2 seconds timeout for server to exit */
-    this->ClientHelper = false;
-    this->ClientInit = false;
-    this->TestServer = false;
-    this->TestSerial = false;
+    this->TimeOut            = DART_TESTING_TIMEOUT - 10.0;
+    this->ServerExitTimeOut  = 2; /* 2 seconds timeout for server to exit */
+    this->ClientHelper       = false;
+    this->ClientInit         = false;
+    this->TestServer         = false;
+    this->TestSerial         = false;
     this->IgnoreServerResult = false;
 }
 
@@ -71,7 +71,7 @@ H5APITestDriver::~H5APITestDriver()
 void
 H5APITestDriver::SeparateArguments(const char *str, vector<string> &flags)
 {
-    string arg = str;
+    string            arg  = str;
     string::size_type pos1 = 0;
     string::size_type pos2 = arg.find_first_of(" ;");
     if (pos2 == arg.npos) {
@@ -105,29 +105,29 @@ H5APITestDriver::CollectConfiguredOptions()
 #endif
     int maxNumProc = 1;
 
-# ifdef MPIEXEC_MAX_NUMPROCS
+#ifdef MPIEXEC_MAX_NUMPROCS
     if (!this->TestSerial)
         maxNumProc = MPIEXEC_MAX_NUMPROCS;
-# endif
-# ifdef MPIEXEC_NUMPROC_FLAG
+#endif
+#ifdef MPIEXEC_NUMPROC_FLAG
     this->MPINumProcessFlag = MPIEXEC_NUMPROC_FLAG;
-# endif
-# ifdef MPIEXEC_PREFLAGS
+#endif
+#ifdef MPIEXEC_PREFLAGS
     this->SeparateArguments(MPIEXEC_PREFLAGS, this->MPIClientPreFlags);
-# endif
-# ifdef MPIEXEC_POSTFLAGS
+#endif
+#ifdef MPIEXEC_POSTFLAGS
     this->SeparateArguments(MPIEXEC_POSTFLAGS, this->MPIClientPostFlags);
-# endif
-# ifdef MPIEXEC_SERVER_PREFLAGS
+#endif
+#ifdef MPIEXEC_SERVER_PREFLAGS
     this->SeparateArguments(MPIEXEC_SERVER_PREFLAGS, this->MPIServerPreFlags);
 #else
     this->MPIServerPreFlags = this->MPIClientPreFlags;
-# endif
-# ifdef MPIEXEC_SERVER_POSTFLAGS
+#endif
+#ifdef MPIEXEC_SERVER_POSTFLAGS
     this->SeparateArguments(MPIEXEC_SERVER_POSTFLAGS, this->MPIServerPostFlags);
 #else
     this->MPIServerPostFlags = this->MPIClientPostFlags;
-# endif
+#endif
     std::stringstream ss;
     ss << maxNumProc;
     this->MPIServerNumProcessFlag = "1";
@@ -139,12 +139,10 @@ H5APITestDriver::CollectConfiguredOptions()
 static string
 FixExecutablePath(const string &path)
 {
-#ifdef  CMAKE_INTDIR
-    string parent_dir =
-    h5_api_test_sys::SystemTools::GetFilenamePath(path.c_str());
+#ifdef CMAKE_INTDIR
+    string parent_dir = h5_api_test_sys::SystemTools::GetFilenamePath(path.c_str());
 
-    string filename =
-    h5_api_test_sys::SystemTools::GetFilenameName(path);
+    string filename = h5_api_test_sys::SystemTools::GetFilenameName(path);
 
     if (!h5_api_test_sys::SystemTools::StringEndsWith(parent_dir.c_str(), CMAKE_INTDIR)) {
         parent_dir += "/" CMAKE_INTDIR;
@@ -160,44 +158,44 @@ int
 H5APITestDriver::ProcessCommandLine(int argc, char *argv[])
 {
     int *ArgCountP = NULL;
-    int i;
+    int  i;
     for (i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--client") == 0) {
             this->ClientExecutable = ::FixExecutablePath(argv[i + 1]);
             ++i; /* Skip executable */
             this->ClientArgStart = i + 1;
             this->ClientArgCount = this->ClientArgStart;
-            ArgCountP = &this->ClientArgCount;
+            ArgCountP            = &this->ClientArgCount;
             continue;
         }
         if (strcmp(argv[i], "--client-helper") == 0) {
             std::cerr << "Client Helper" << std::endl;
-            this->ClientHelper = true;
+            this->ClientHelper           = true;
             this->ClientHelperExecutable = ::FixExecutablePath(argv[i + 1]);
             ++i; /* Skip executable */
             this->ClientHelperArgStart = i + 1;
             this->ClientHelperArgCount = this->ClientHelperArgStart;
-            ArgCountP = &this->ClientHelperArgCount;
+            ArgCountP                  = &this->ClientHelperArgCount;
             continue;
         }
         if (strcmp(argv[i], "--client-init") == 0) {
             std::cerr << "Client Init" << std::endl;
-            this->ClientInit = true;
+            this->ClientInit           = true;
             this->ClientInitExecutable = ::FixExecutablePath(argv[i + 1]);
             ++i; /* Skip executable */
             this->ClientInitArgStart = i + 1;
             this->ClientInitArgCount = this->ClientInitArgStart;
-            ArgCountP = &this->ClientInitArgCount;
+            ArgCountP                = &this->ClientInitArgCount;
             continue;
         }
         if (strcmp(argv[i], "--server") == 0) {
             std::cerr << "Test Server" << std::endl;
-            this->TestServer = true;
+            this->TestServer       = true;
             this->ServerExecutable = ::FixExecutablePath(argv[i + 1]);
             ++i; /* Skip executable */
             this->ServerArgStart = i + 1;
             this->ServerArgCount = this->ServerArgStart;
-            ArgCountP = &this->ServerArgCount;
+            ArgCountP            = &this->ServerArgCount;
             continue;
         }
         if (strcmp(argv[i], "--timeout") == 0) {
@@ -208,15 +206,15 @@ H5APITestDriver::ProcessCommandLine(int argc, char *argv[])
         }
         if (strncmp(argv[i], "--allow-errors", strlen("--allow-errors")) == 0) {
             this->AllowErrorInOutput = true;
-            std::cerr << "The allow errors in output flag was set to " <<
-                this->AllowErrorInOutput << std::endl;
+            std::cerr << "The allow errors in output flag was set to " << this->AllowErrorInOutput
+                      << std::endl;
             ArgCountP = NULL;
             continue;
         }
         if (strncmp(argv[i], "--allow-server-errors", strlen("--allow-server-errors")) == 0) {
             this->IgnoreServerResult = true;
-            std::cerr << "The allow server errors in output flag was set to " <<
-                this->IgnoreServerResult << std::endl;
+            std::cerr << "The allow server errors in output flag was set to " << this->IgnoreServerResult
+                      << std::endl;
             ArgCountP = NULL;
             continue;
         }
@@ -235,9 +233,9 @@ H5APITestDriver::ProcessCommandLine(int argc, char *argv[])
 
 //----------------------------------------------------------------------------
 void
-H5APITestDriver::CreateCommandLine(vector<const char*> &commandLine,
-    const char *cmd, int isServer, int isHelper, const char *numProc, int argStart,
-    int argCount, char *argv[])
+H5APITestDriver::CreateCommandLine(vector<const char *> &commandLine, const char *cmd, int isServer,
+                                   int isHelper, const char *numProc, int argStart, int argCount,
+                                   char *argv[])
 {
     if (!isServer && this->ClientEnvVars.size()) {
         for (unsigned int i = 0; i < this->ClientEnvVars.size(); ++i)
@@ -280,8 +278,8 @@ H5APITestDriver::CreateCommandLine(vector<const char*> &commandLine,
 
 //----------------------------------------------------------------------------
 int
-H5APITestDriver::StartServer(h5_api_test_sysProcess *server, const char *name,
-    vector<char> &out, vector<char> &err)
+H5APITestDriver::StartServer(h5_api_test_sysProcess *server, const char *name, vector<char> &out,
+                             vector<char> &err)
 {
     if (!server)
         return 1;
@@ -289,20 +287,20 @@ H5APITestDriver::StartServer(h5_api_test_sysProcess *server, const char *name,
     cerr << "H5APITestDriver: starting process " << name << "\n";
     h5_api_test_sysProcess_SetTimeout(server, this->TimeOut);
     h5_api_test_sysProcess_Execute(server);
-    int foundWaiting = 0;
+    int    foundWaiting = 0;
     string output;
     while (!foundWaiting) {
-        int pipe = this->WaitForAndPrintLine(name, server, output, 100.0, out,
-            err, H5_API_TEST_SERVER_START_MSG, &foundWaiting);
-        if (pipe == h5_api_test_sysProcess_Pipe_None
-            || pipe == h5_api_test_sysProcess_Pipe_Timeout) {
+        int pipe = this->WaitForAndPrintLine(name, server, output, 100.0, out, err,
+                                             H5_API_TEST_SERVER_START_MSG, &foundWaiting);
+        if (pipe == h5_api_test_sysProcess_Pipe_None || pipe == h5_api_test_sysProcess_Pipe_Timeout) {
             break;
         }
     }
     if (foundWaiting) {
         cerr << "H5APITestDriver: " << name << " successfully started.\n";
         return 1;
-    } else {
+    }
+    else {
         cerr << "H5APITestDriver: " << name << " never started.\n";
         h5_api_test_sysProcess_Kill(server);
         return 0;
@@ -311,8 +309,8 @@ H5APITestDriver::StartServer(h5_api_test_sysProcess *server, const char *name,
 
 //----------------------------------------------------------------------------
 int
-H5APITestDriver::StartClientHelper(h5_api_test_sysProcess *client,
-    const char *name, vector<char> &out, vector<char> &err)
+H5APITestDriver::StartClientHelper(h5_api_test_sysProcess *client, const char *name, vector<char> &out,
+                                   vector<char> &err)
 {
     if (!client)
         return 1;
@@ -320,20 +318,20 @@ H5APITestDriver::StartClientHelper(h5_api_test_sysProcess *client,
     cerr << "H5APITestDriver: starting process " << name << "\n";
     h5_api_test_sysProcess_SetTimeout(client, this->TimeOut);
     h5_api_test_sysProcess_Execute(client);
-    int foundWaiting = 0;
+    int    foundWaiting = 0;
     string output;
     while (!foundWaiting) {
-        int pipe = this->WaitForAndPrintLine(name, client, output, 100.0, out,
-            err, H5_API_TEST_CLIENT_HELPER_START_MSG, &foundWaiting);
-        if (pipe == h5_api_test_sysProcess_Pipe_None
-            || pipe == h5_api_test_sysProcess_Pipe_Timeout) {
+        int pipe = this->WaitForAndPrintLine(name, client, output, 100.0, out, err,
+                                             H5_API_TEST_CLIENT_HELPER_START_MSG, &foundWaiting);
+        if (pipe == h5_api_test_sysProcess_Pipe_None || pipe == h5_api_test_sysProcess_Pipe_Timeout) {
             break;
         }
     }
     if (foundWaiting) {
         cerr << "H5APITestDriver: " << name << " successfully started.\n";
         return 1;
-    } else {
+    }
+    else {
         cerr << "H5APITestDriver: " << name << " never started.\n";
         h5_api_test_sysProcess_Kill(client);
         return 0;
@@ -342,8 +340,8 @@ H5APITestDriver::StartClientHelper(h5_api_test_sysProcess *client,
 
 //----------------------------------------------------------------------------
 int
-H5APITestDriver::StartClientInit(h5_api_test_sysProcess *client,
-    const char *name, vector<char> &out, vector<char> &err)
+H5APITestDriver::StartClientInit(h5_api_test_sysProcess *client, const char *name, vector<char> &out,
+                                 vector<char> &err)
 {
     if (!client)
         return 1;
@@ -351,19 +349,17 @@ H5APITestDriver::StartClientInit(h5_api_test_sysProcess *client,
     cerr << "H5APITestDriver: starting process " << name << "\n";
     h5_api_test_sysProcess_SetTimeout(client, this->TimeOut);
     h5_api_test_sysProcess_Execute(client);
-    int foundToken = 0;
+    int    foundToken = 0;
     string output, token;
     while (!foundToken) {
-        int pipe = this->WaitForAndPrintLine(name, client, output, 100.0, out,
-            err, NULL, NULL);
-        if (pipe == h5_api_test_sysProcess_Pipe_None
-            || pipe == h5_api_test_sysProcess_Pipe_Timeout) {
+        int pipe = this->WaitForAndPrintLine(name, client, output, 100.0, out, err, NULL, NULL);
+        if (pipe == h5_api_test_sysProcess_Pipe_None || pipe == h5_api_test_sysProcess_Pipe_Timeout) {
             break;
         }
         if (this->OutputStringHasToken(name, H5_API_TEST_CLIENT_INIT_TOKEN_REGEX, output, token)) {
             foundToken = 1;
-            this->ClientTokenVar = std::string(H5_API_TEST_CLIENT_INIT_TOKEN_VAR)
-                + std::string("=") + std::string(token);
+            this->ClientTokenVar =
+                std::string(H5_API_TEST_CLIENT_INIT_TOKEN_VAR) + std::string("=") + std::string(token);
             break;
         }
     }
@@ -371,7 +367,8 @@ H5APITestDriver::StartClientInit(h5_api_test_sysProcess *client,
     if (foundToken) {
         cerr << "H5APITestDriver: " << name << " token: " << token << " was found.\n";
         return 1;
-    } else {
+    }
+    else {
         cerr << "H5APITestDriver: " << name << " token was not found.\n";
         return 0;
     }
@@ -387,11 +384,11 @@ H5APITestDriver::StartClient(h5_api_test_sysProcess *client, const char *name)
     cerr << "H5APITestDriver: starting process " << name << "\n";
     h5_api_test_sysProcess_SetTimeout(client, this->TimeOut);
     h5_api_test_sysProcess_Execute(client);
-    if (h5_api_test_sysProcess_GetState(client)
-        == h5_api_test_sysProcess_State_Executing) {
+    if (h5_api_test_sysProcess_GetState(client) == h5_api_test_sysProcess_State_Executing) {
         cerr << "H5APITestDriver: " << name << " successfully started.\n";
         return 1;
-    } else {
+    }
+    else {
         this->ReportStatus(client, name);
         h5_api_test_sysProcess_Kill(client);
         return 0;
@@ -413,20 +410,31 @@ H5APITestDriver::Stop(h5_api_test_sysProcess *p, const char *name)
 int
 H5APITestDriver::OutputStringHasError(const char *pname, string &output)
 {
-    const char* possibleMPIErrors[] = {"error", "Error", "Missing:",
-        "core dumped", "process in local group is dead", "Segmentation fault",
-        "erroneous", "ERROR:", "Error:",
-        "mpirun can *only* be used with MPI programs", "due to signal",
-        "failure", "abnormal termination", "failed", "FAILED", "Failed", 0};
+    const char *possibleMPIErrors[] = {"error",
+                                       "Error",
+                                       "Missing:",
+                                       "core dumped",
+                                       "process in local group is dead",
+                                       "Segmentation fault",
+                                       "erroneous",
+                                       "ERROR:",
+                                       "Error:",
+                                       "mpirun can *only* be used with MPI programs",
+                                       "due to signal",
+                                       "failure",
+                                       "abnormal termination",
+                                       "failed",
+                                       "FAILED",
+                                       "Failed",
+                                       0};
 
-    const char* nonErrors[] = {
-        "Memcheck, a memory error detector",  //valgrind
-        0};
+    const char *nonErrors[] = {"Memcheck, a memory error detector", // valgrind
+                               0};
 
     if (this->AllowErrorInOutput)
         return 0;
 
-    vector<string> lines;
+    vector<string>           lines;
     vector<string>::iterator it;
     h5_api_test_sys::SystemTools::Split(output.c_str(), lines);
 
@@ -439,16 +447,14 @@ H5APITestDriver::OutputStringHasError(const char *pname, string &output)
                 for (j = 0; nonErrors[j]; ++j) {
                     if (it->find(nonErrors[j]) != it->npos) {
                         found = 0;
-                        cerr << "Non error \"" << it->c_str()
-                            << "\" suppressed " << std::endl;
+                        cerr << "Non error \"" << it->c_str() << "\" suppressed " << std::endl;
                     }
                 }
                 if (found) {
-                    cerr
-                        << "H5APITestDriver: ***** Test will fail, because the string: \""
-                        << possibleMPIErrors[i]
-                        << "\"\nH5APITestDriver: ***** was found in the following output from the "
-                        << pname << ":\n\"" << it->c_str() << "\"\n";
+                    cerr << "H5APITestDriver: ***** Test will fail, because the string: \""
+                         << possibleMPIErrors[i]
+                         << "\"\nH5APITestDriver: ***** was found in the following output from the " << pname
+                         << ":\n\"" << it->c_str() << "\"\n";
                     return 1;
                 }
             }
@@ -459,10 +465,9 @@ H5APITestDriver::OutputStringHasError(const char *pname, string &output)
 
 //----------------------------------------------------------------------------
 int
-H5APITestDriver::OutputStringHasToken(const char *pname, const char *regex,
-    string &output, string &token)
+H5APITestDriver::OutputStringHasToken(const char *pname, const char *regex, string &output, string &token)
 {
-    vector<string> lines;
+    vector<string>           lines;
     vector<string>::iterator it;
     h5_api_test_sys::SystemTools::Split(output.c_str(), lines);
     h5_api_test_sys::RegularExpression re(regex);
@@ -478,30 +483,31 @@ H5APITestDriver::OutputStringHasToken(const char *pname, const char *regex,
 }
 
 //----------------------------------------------------------------------------
-#define H5_API_CLEAN_PROCESSES do {      \
-  h5_api_test_sysProcess_Delete(client); \
-  h5_api_test_sysProcess_Delete(client_helper); \
-  h5_api_test_sysProcess_Delete(client_init); \
-  h5_api_test_sysProcess_Delete(server); \
-} while (0)
+#define H5_API_CLEAN_PROCESSES                                                                               \
+    do {                                                                                                     \
+        h5_api_test_sysProcess_Delete(client);                                                               \
+        h5_api_test_sysProcess_Delete(client_helper);                                                        \
+        h5_api_test_sysProcess_Delete(client_init);                                                          \
+        h5_api_test_sysProcess_Delete(server);                                                               \
+    } while (0)
 
-#define H5_API_EXECUTE_CMD(cmd) do {                              \
-    if (strlen(cmd) > 0) {                                      \
-        std::vector<std::string> commands =                     \
-            h5_api_test_sys::SystemTools::SplitString(cmd, ';');  \
-        for (unsigned int cc = 0; cc < commands.size(); cc++) { \
-            std::string command = commands[cc];                 \
-            if (command.size() > 0) {                           \
-                std::cout << command.c_str() << std::endl;      \
-                system(command.c_str());                        \
-            }                                                   \
-        }                                                       \
-    }                                                           \
-} while (0)
+#define H5_API_EXECUTE_CMD(cmd)                                                                              \
+    do {                                                                                                     \
+        if (strlen(cmd) > 0) {                                                                               \
+            std::vector<std::string> commands = h5_api_test_sys::SystemTools::SplitString(cmd, ';');         \
+            for (unsigned int cc = 0; cc < commands.size(); cc++) {                                          \
+                std::string command = commands[cc];                                                          \
+                if (command.size() > 0) {                                                                    \
+                    std::cout << command.c_str() << std::endl;                                               \
+                    system(command.c_str());                                                                 \
+                }                                                                                            \
+            }                                                                                                \
+        }                                                                                                    \
+    } while (0)
 
 //----------------------------------------------------------------------------
 int
-H5APITestDriver::Main(int argc, char* argv[])
+H5APITestDriver::Main(int argc, char *argv[])
 {
 #ifdef H5_API_TEST_INIT_COMMAND
     // run user-specified commands before initialization.
@@ -515,17 +521,17 @@ H5APITestDriver::Main(int argc, char* argv[])
 
     // mpi code
     // Allocate process managers.
-    h5_api_test_sysProcess *server = 0;
-    h5_api_test_sysProcess *client = 0;
+    h5_api_test_sysProcess *server        = 0;
+    h5_api_test_sysProcess *client        = 0;
     h5_api_test_sysProcess *client_helper = 0;
-    h5_api_test_sysProcess *client_init = 0;
+    h5_api_test_sysProcess *client_init   = 0;
 
     if (this->TestServer) {
         server = h5_api_test_sysProcess_New();
         if (!server) {
             H5_API_CLEAN_PROCESSES;
             cerr << "H5APITestDriver: Cannot allocate h5_api_test_sysProcess to "
-                "run the server.\n";
+                    "run the server.\n";
             return 1;
         }
     }
@@ -534,7 +540,7 @@ H5APITestDriver::Main(int argc, char* argv[])
         if (!client_helper) {
             H5API_CLEAN_PROCESSES;
             cerr << "H5APITestDriver: Cannot allocate h5_api_test_sysProcess to "
-                "run the client helper.\n";
+                    "run the client helper.\n";
             return 1;
         }
     }
@@ -543,7 +549,7 @@ H5APITestDriver::Main(int argc, char* argv[])
         if (!client_init) {
             H5_API_CLEAN_PROCESSES;
             cerr << "H5APITestDriver: Cannot allocate h5_api_test_sysProcess to "
-                "run the client init.\n";
+                    "run the client init.\n";
             return 1;
         }
     }
@@ -551,7 +557,7 @@ H5APITestDriver::Main(int argc, char* argv[])
     if (!client) {
         H5_API_CLEAN_PROCESSES;
         cerr << "H5APITestDriver: Cannot allocate h5_api_test_sysProcess to "
-            "run the client.\n";
+                "run the client.\n";
         return 1;
     }
 
@@ -566,40 +572,36 @@ H5APITestDriver::Main(int argc, char* argv[])
 
     vector<const char *> serverCommand;
     if (server) {
-        const char* serverExe = this->ServerExecutable.c_str();
+        const char *serverExe = this->ServerExecutable.c_str();
 
-        this->CreateCommandLine(serverCommand, serverExe, 1, 0,
-            this->MPIServerNumProcessFlag.c_str(), this->ServerArgStart,
-            this->ServerArgCount, argv);
+        this->CreateCommandLine(serverCommand, serverExe, 1, 0, this->MPIServerNumProcessFlag.c_str(),
+                                this->ServerArgStart, this->ServerArgCount, argv);
         this->ReportCommand(&serverCommand[0], "server");
         h5_api_test_sysProcess_SetCommand(server, &serverCommand[0]);
-        h5_api_test_sysProcess_SetWorkingDirectory(server,
-            this->GetDirectory(serverExe).c_str());
+        h5_api_test_sysProcess_SetWorkingDirectory(server, this->GetDirectory(serverExe).c_str());
     }
 
     vector<const char *> clientHelperCommand;
     if (client_helper) {
         // Construct the client helper process command line.
         const char *clientHelperExe = this->ClientHelperExecutable.c_str();
-        this->CreateCommandLine(clientHelperCommand, clientHelperExe, 0, 1,
-            "1", this->ClientHelperArgStart,
-            this->ClientHelperArgCount, argv);
+        this->CreateCommandLine(clientHelperCommand, clientHelperExe, 0, 1, "1", this->ClientHelperArgStart,
+                                this->ClientHelperArgCount, argv);
         this->ReportCommand(&clientHelperCommand[0], "client_helper");
         h5_api_test_sysProcess_SetCommand(client_helper, &clientHelperCommand[0]);
         h5_api_test_sysProcess_SetWorkingDirectory(client_helper,
-            this->GetDirectory(clientHelperExe).c_str());
+                                                   this->GetDirectory(clientHelperExe).c_str());
     }
 
     vector<const char *> clientInitCommand;
     if (client_init) {
         // Construct the client helper process command line.
         const char *clientInitExe = this->ClientInitExecutable.c_str();
-        this->CreateCommandLine(clientInitCommand, clientInitExe, 0, 1,
-            "1", this->ClientInitArgStart, this->ClientInitArgCount, argv);
+        this->CreateCommandLine(clientInitCommand, clientInitExe, 0, 1, "1", this->ClientInitArgStart,
+                                this->ClientInitArgCount, argv);
         this->ReportCommand(&clientInitCommand[0], "client_init");
         h5_api_test_sysProcess_SetCommand(client_init, &clientInitCommand[0]);
-        h5_api_test_sysProcess_SetWorkingDirectory(client_init,
-            this->GetDirectory(clientInitExe).c_str());
+        h5_api_test_sysProcess_SetWorkingDirectory(client_init, this->GetDirectory(clientInitExe).c_str());
     }
 
     // Start the server if there is one
@@ -610,8 +612,7 @@ H5APITestDriver::Main(int argc, char* argv[])
     }
 
     // Start the client helper here if there is one
-    if (!this->StartClientHelper(client_helper, "client_helper",
-        ClientHelperStdOut, ClientHelperStdErr)) {
+    if (!this->StartClientHelper(client_helper, "client_helper", ClientHelperStdOut, ClientHelperStdErr)) {
         cerr << "H5APITestDriver: Client Helper never started.\n";
         this->Stop(server, "server");
 #ifdef H5_API_TEST_SERVER_EXIT_COMMAND
@@ -622,8 +623,7 @@ H5APITestDriver::Main(int argc, char* argv[])
     }
 
     // Start the client init here if there is one
-    if (!this->StartClientInit(client_init, "client_init",
-        ClientInitStdOut, ClientInitStdErr)) {
+    if (!this->StartClientInit(client_init, "client_init", ClientInitStdOut, ClientInitStdErr)) {
         cerr << "H5APITestDriver: Client Init never started.\n";
         this->Stop(server, "server");
 #ifdef H5_API_TEST_SERVER_EXIT_COMMAND
@@ -639,14 +639,12 @@ H5APITestDriver::Main(int argc, char* argv[])
 
     // Construct the client process command line.
     vector<const char *> clientCommand;
-    const char *clientExe = this->ClientExecutable.c_str();
-    this->CreateCommandLine(clientCommand, clientExe, 0, 0,
-        this->MPIClientNumProcessFlag.c_str(), this->ClientArgStart,
-        this->ClientArgCount, argv);
+    const char          *clientExe = this->ClientExecutable.c_str();
+    this->CreateCommandLine(clientCommand, clientExe, 0, 0, this->MPIClientNumProcessFlag.c_str(),
+                            this->ClientArgStart, this->ClientArgCount, argv);
     this->ReportCommand(&clientCommand[0], "client");
     h5_api_test_sysProcess_SetCommand(client, &clientCommand[0]);
-    h5_api_test_sysProcess_SetWorkingDirectory(client,
-        this->GetDirectory(clientExe).c_str());
+    h5_api_test_sysProcess_SetWorkingDirectory(client, this->GetDirectory(clientExe).c_str());
 
     // Now run the client
     if (!this->StartClient(client, "client")) {
@@ -661,19 +659,18 @@ H5APITestDriver::Main(int argc, char* argv[])
     int clientPipe = 1;
 
     string output;
-    int mpiError = 0;
+    int    mpiError = 0;
     while (clientPipe) {
-        clientPipe = this->WaitForAndPrintLine("client", client, output, 0.1,
-            ClientStdOut, ClientStdErr, NULL, NULL);
+        clientPipe =
+            this->WaitForAndPrintLine("client", client, output, 0.1, ClientStdOut, ClientStdErr, NULL, NULL);
         if (!mpiError && this->OutputStringHasError("client", output)) {
             mpiError = 1;
         }
         // If client has died, we wait for output from the server processes
         // for this->ServerExitTimeOut, then we'll kill the servers, if needed.
         double timeout = (clientPipe) ? 0 : this->ServerExitTimeOut;
-        output = "";
-        this->WaitForAndPrintLine("server", server, output, timeout,
-            ServerStdOut, ServerStdErr, NULL, NULL);
+        output         = "";
+        this->WaitForAndPrintLine("server", server, output, timeout, ServerStdOut, ServerStdErr, NULL, NULL);
         if (!mpiError && this->OutputStringHasError("server", output)) {
             mpiError = 1;
         }
@@ -718,9 +715,8 @@ H5APITestDriver::Main(int argc, char* argv[])
         return serverResult;
 
     if (mpiError) {
-        cerr
-            << "H5VLTestDriver: Error string found in output, H5APITestDriver returning "
-            << mpiError << "\n";
+        cerr << "H5VLTestDriver: Error string found in output, H5APITestDriver returning " << mpiError
+             << "\n";
         return mpiError;
     }
 
@@ -730,10 +726,10 @@ H5APITestDriver::Main(int argc, char* argv[])
 
 //----------------------------------------------------------------------------
 void
-H5APITestDriver::ReportCommand(const char * const *command, const char *name)
+H5APITestDriver::ReportCommand(const char *const *command, const char *name)
 {
     cerr << "H5APITestDriver: " << name << " command is:\n";
-    for (const char * const *c = command; *c; ++c)
+    for (const char *const *c = command; *c; ++c)
         cerr << " \"" << *c << "\"";
     cerr << "\n";
 }
@@ -746,75 +742,58 @@ H5APITestDriver::ReportStatus(h5_api_test_sysProcess *process, const char *name)
     switch (h5_api_test_sysProcess_GetState(process)) {
         case h5_api_test_sysProcess_State_Starting: {
             cerr << "H5APITestDriver: Never started " << name << " process.\n";
-        }
-            break;
+        } break;
         case h5_api_test_sysProcess_State_Error: {
-            cerr << "H5APITestDriver: Error executing " << name << " process: "
-                << h5_api_test_sysProcess_GetErrorString(process) << "\n";
-        }
-            break;
+            cerr << "H5APITestDriver: Error executing " << name
+                 << " process: " << h5_api_test_sysProcess_GetErrorString(process) << "\n";
+        } break;
         case h5_api_test_sysProcess_State_Exception: {
-            cerr << "H5APITestDriver: " << name
-                << " process exited with an exception: ";
+            cerr << "H5APITestDriver: " << name << " process exited with an exception: ";
             switch (h5_api_test_sysProcess_GetExitException(process)) {
                 case h5_api_test_sysProcess_Exception_None: {
                     cerr << "None";
-                }
-                    break;
+                } break;
                 case h5_api_test_sysProcess_Exception_Fault: {
                     cerr << "Segmentation fault";
-                }
-                    break;
+                } break;
                 case h5_api_test_sysProcess_Exception_Illegal: {
                     cerr << "Illegal instruction";
-                }
-                    break;
+                } break;
                 case h5_api_test_sysProcess_Exception_Interrupt: {
                     cerr << "Interrupted by user";
-                }
-                    break;
+                } break;
                 case h5_api_test_sysProcess_Exception_Numerical: {
                     cerr << "Numerical exception";
-                }
-                    break;
+                } break;
                 case h5_api_test_sysProcess_Exception_Other: {
                     cerr << "Unknown";
-                }
-                    break;
+                } break;
             }
             cerr << "\n";
-        }
-            break;
+        } break;
         case h5_api_test_sysProcess_State_Executing: {
-            cerr << "H5APITestDriver: Never terminated " << name
-                << " process.\n";
-        }
-            break;
+            cerr << "H5APITestDriver: Never terminated " << name << " process.\n";
+        } break;
         case h5_api_test_sysProcess_State_Exited: {
             result = h5_api_test_sysProcess_GetExitValue(process);
-            cerr << "H5APITestDriver: " << name << " process exited with code "
-                << result << "\n";
-        }
-            break;
+            cerr << "H5APITestDriver: " << name << " process exited with code " << result << "\n";
+        } break;
         case h5_api_test_sysProcess_State_Expired: {
-            cerr << "H5APITestDriver: killed " << name
-                << " process due to timeout.\n";
-        }
-            break;
+            cerr << "H5APITestDriver: killed " << name << " process due to timeout.\n";
+        } break;
         case h5_api_test_sysProcess_State_Killed: {
             cerr << "H5APITestDriver: killed " << name << " process.\n";
-        }
-            break;
+        } break;
     }
     return result;
 }
 
 //----------------------------------------------------------------------------
 int
-H5APITestDriver::WaitForLine(h5_api_test_sysProcess *process, string &line,
-    double timeout, vector<char> &out, vector<char> &err)
+H5APITestDriver::WaitForLine(h5_api_test_sysProcess *process, string &line, double timeout, vector<char> &out,
+                             vector<char> &err)
 {
-    line = "";
+    line                           = "";
     vector<char>::iterator outiter = out.begin();
     vector<char>::iterator erriter = err.begin();
     while (1) {
@@ -822,7 +801,8 @@ H5APITestDriver::WaitForLine(h5_api_test_sysProcess *process, string &line,
         for (; outiter != out.end(); ++outiter) {
             if ((*outiter == '\r') && ((outiter + 1) == out.end())) {
                 break;
-            } else if (*outiter == '\n' || *outiter == '\0') {
+            }
+            else if (*outiter == '\n' || *outiter == '\0') {
                 int length = outiter - out.begin();
                 if (length > 1 && *(outiter - 1) == '\r')
                     --length;
@@ -837,7 +817,8 @@ H5APITestDriver::WaitForLine(h5_api_test_sysProcess *process, string &line,
         for (; erriter != err.end(); ++erriter) {
             if ((*erriter == '\r') && ((erriter + 1) == err.end())) {
                 break;
-            } else if (*erriter == '\n' || *erriter == '\0') {
+            }
+            else if (*erriter == '\n' || *erriter == '\0') {
                 int length = erriter - err.begin();
                 if (length > 1 && *(erriter - 1) == '\r')
                     --length;
@@ -849,34 +830,38 @@ H5APITestDriver::WaitForLine(h5_api_test_sysProcess *process, string &line,
         }
 
         // No newlines found.  Wait for more data from the process.
-        int length;
+        int   length;
         char *data;
-        int pipe = h5_api_test_sysProcess_WaitForData(process, &data, &length,
-            &timeout);
+        int   pipe = h5_api_test_sysProcess_WaitForData(process, &data, &length, &timeout);
         if (pipe == h5_api_test_sysProcess_Pipe_Timeout) {
             // Timeout has been exceeded.
             return pipe;
-        } else if (pipe == h5_api_test_sysProcess_Pipe_STDOUT) {
+        }
+        else if (pipe == h5_api_test_sysProcess_Pipe_STDOUT) {
             // Append to the stdout buffer.
             vector<char>::size_type size = out.size();
             out.insert(out.end(), data, data + length);
             outiter = out.begin() + size;
-        } else if (pipe == h5_api_test_sysProcess_Pipe_STDERR) {
+        }
+        else if (pipe == h5_api_test_sysProcess_Pipe_STDERR) {
             // Append to the stderr buffer.
             vector<char>::size_type size = err.size();
             err.insert(err.end(), data, data + length);
             erriter = err.begin() + size;
-        } else if (pipe == h5_api_test_sysProcess_Pipe_None) {
+        }
+        else if (pipe == h5_api_test_sysProcess_Pipe_None) {
             // Both stdout and stderr pipes have broken.  Return leftover data.
             if (!out.empty()) {
                 line.append(&out[0], outiter - out.begin());
                 out.erase(out.begin(), out.end());
                 return h5_api_test_sysProcess_Pipe_STDOUT;
-            } else if (!err.empty()) {
+            }
+            else if (!err.empty()) {
                 line.append(&err[0], erriter - err.begin());
                 err.erase(err.begin(), err.end());
                 return h5_api_test_sysProcess_Pipe_STDERR;
-            } else {
+            }
+            else {
                 return h5_api_test_sysProcess_Pipe_None;
             }
         }
@@ -899,14 +884,12 @@ H5APITestDriver::PrintLine(const char *pname, const char *line)
 
 //----------------------------------------------------------------------------
 int
-H5APITestDriver::WaitForAndPrintLine(const char *pname,
-    h5_api_test_sysProcess *process, string &line, double timeout,
-    vector<char> &out, vector<char> &err, const char *waitMsg,
-    int *foundWaiting)
+H5APITestDriver::WaitForAndPrintLine(const char *pname, h5_api_test_sysProcess *process, string &line,
+                                     double timeout, vector<char> &out, vector<char> &err,
+                                     const char *waitMsg, int *foundWaiting)
 {
     int pipe = this->WaitForLine(process, line, timeout, out, err);
-    if (pipe == h5_api_test_sysProcess_Pipe_STDOUT
-        || pipe == h5_api_test_sysProcess_Pipe_STDERR) {
+    if (pipe == h5_api_test_sysProcess_Pipe_STDOUT || pipe == h5_api_test_sysProcess_Pipe_STDERR) {
         this->PrintLine(pname, line.c_str());
         if (foundWaiting && (line.find(waitMsg) != line.npos))
             *foundWaiting = 1;
