@@ -182,16 +182,28 @@ parse_command_line(int argc, const char *const *argv)
                 if (plugin_file)
                     free(plugin_file);
                 plugin_file = strdup(H5_optarg);
+                if (!plugin_file) {
+                    fprintf(rawerrorstream, "Error: Out of memory\n");
+                    leave(EXIT_FAILURE);
+                }
                 break;
             case 'k':
                 if (privkey_file)
                     free(privkey_file);
                 privkey_file = strdup(H5_optarg);
+                if (!privkey_file) {
+                    fprintf(rawerrorstream, "Error: Out of memory\n");
+                    leave(EXIT_FAILURE);
+                }
                 break;
             case 'a':
                 if (opt_algorithm)
                     free(opt_algorithm);
                 opt_algorithm = strdup(H5_optarg);
+                if (!opt_algorithm) {
+                    fprintf(rawerrorstream, "Error: Out of memory\n");
+                    leave(EXIT_FAILURE);
+                }
                 break;
             case 'v':
                 opt_verbose = 1;
@@ -243,6 +255,21 @@ read_private_key(const char *keyfile)
     EVP_PKEY *pkey     = NULL;
     EVP_PKEY *ret_pkey = NULL;
 
+#ifndef H5_HAVE_WIN32_API
+    /* Verify key file has secure permissions (must not be group- or world-readable) */
+    {
+        h5_stat_t key_stat;
+        if (HDstat(keyfile, &key_stat) == 0) {
+            if (key_stat.st_mode & (S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) {
+                fprintf(rawerrorstream, "Error: Private key file '%s' has insecure permissions (%03o)\n",
+                        keyfile, (unsigned)(key_stat.st_mode & 0777));
+                fprintf(rawerrorstream, "       Fix with: chmod 600 '%s'\n", keyfile);
+                goto done;
+            }
+        }
+    }
+#endif
+
     /* Open key file */
     if (NULL == (fp = fopen(keyfile, "r"))) {
         fprintf(rawerrorstream, "Error: Cannot open private key file '%s': %s\n", keyfile, strerror(errno));
@@ -264,6 +291,16 @@ read_private_key(const char *keyfile)
         fprintf(rawerrorstream, "Error: Key file '%s' is not an RSA key\n", keyfile);
         fprintf(rawerrorstream, "       Only RSA keys are supported for plugin signing.\n");
         goto done;
+    }
+
+    /* Enforce minimum RSA key size (2048-bit minimum; 4096-bit recommended) */
+    {
+        int key_bits = EVP_PKEY_get_bits(pkey);
+        if (key_bits < 2048) {
+            fprintf(rawerrorstream, "Error: RSA key in '%s' is too small (%d bits)\n", keyfile, key_bits);
+            fprintf(rawerrorstream, "       Minimum required: 2048 bits (4096-bit recommended)\n");
+            goto done;
+        }
     }
 
     ret_pkey = pkey;
@@ -351,10 +388,11 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     H5PL_sig_footer_t footer;
     herr_t            ret_value  = SUCCEED;
     hsize_t           bytes_read = 0;
-    int               append_fd  = -1;
 
-    /* Open plugin file for reading */
-    if ((fd = HDopen(plugin_path, O_RDONLY, 0)) < 0) {
+    /* Open plugin file for reading and writing.
+     * Keeping a single fd open throughout hashing and appending eliminates
+     * the TOCTOU window that would exist if we closed and reopened the file. */
+    if ((fd = HDopen(plugin_path, O_RDWR, 0)) < 0) {
         fprintf(rawerrorstream, "Error: Cannot open plugin file '%s': %s\n", plugin_path, strerror(errno));
         ret_value = FAIL;
         goto done;
@@ -383,6 +421,34 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
                 (unsigned long long)MAX_PLUGIN_SIZE);
         ret_value = FAIL;
         goto done;
+    }
+
+    /* Detect already-signed files: check for HDF5 magic number in the last footer bytes */
+    if (file_size >= (hsize_t)H5PL_SIG_FOOTER_SIZE) {
+        uint8_t  check_buf[H5PL_SIG_FOOTER_SIZE];
+        uint32_t existing_magic = 0;
+
+        if (HDlseek(fd, (HDoff_t)(file_size - (hsize_t)H5PL_SIG_FOOTER_SIZE), SEEK_SET) >= 0) {
+            h5_posix_io_ret_t nr = HDread(fd, check_buf, H5PL_SIG_FOOTER_SIZE);
+            if (nr == (h5_posix_io_ret_t)H5PL_SIG_FOOTER_SIZE) {
+                uint8_t *cp = check_buf + 8; /* magic lives at bytes 8-11 of the footer */
+                UINT32DECODE(cp, existing_magic);
+                if (existing_magic == H5PL_SIG_MAGIC) {
+                    fprintf(rawerrorstream, "Error: Plugin file '%s' is already signed\n", plugin_path);
+                    fprintf(rawerrorstream, "       To re-sign, start from the original unsigned binary\n");
+                    ret_value = FAIL;
+                    goto done;
+                }
+            }
+        }
+
+        /* Seek back to the beginning for hashing */
+        if (HDlseek(fd, 0, SEEK_SET) < 0) {
+            fprintf(rawerrorstream, "Error: Cannot seek in plugin file '%s': %s\n", plugin_path,
+                    strerror(errno));
+            ret_value = FAIL;
+            goto done;
+        }
     }
 
     if (opt_verbose) {
@@ -481,10 +547,6 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         bytes_read += (hsize_t)read_result;
     }
 
-    /* Close read file descriptor */
-    HDclose(fd);
-    fd = -1;
-
     if (opt_verbose)
         fprintf(rawoutstream, "Hash computed successfully\n");
 
@@ -526,9 +588,9 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         fprintf(rawoutstream, "Signature length: %zu bytes\n", sig_len);
     }
 
-    /* Open file for appending */
-    if ((append_fd = HDopen(plugin_path, O_WRONLY | O_APPEND, 0)) < 0) {
-        fprintf(rawerrorstream, "Error: Cannot open plugin file for appending '%s': %s\n", plugin_path,
+    /* Seek to end of file to append signature (fd kept open from hashing — no TOCTOU) */
+    if (HDlseek(fd, 0, SEEK_END) < 0) {
+        fprintf(rawerrorstream, "Error: Cannot seek to end of plugin file '%s': %s\n", plugin_path,
                 strerror(errno));
         ret_value = FAIL;
         goto done;
@@ -543,10 +605,10 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 
         while (written < sig_len) {
             do {
-                write_result = HDwrite(append_fd, write_ptr, to_write);
+                write_result = HDwrite(fd, write_ptr, to_write);
             } while (-1 == write_result && EINTR == errno);
 
-            if (write_result < 0) {
+            if (write_result <= 0) {
                 fprintf(rawerrorstream, "Error: Cannot write signature to '%s': %s\n", plugin_path,
                         strerror(errno));
                 ret_value = FAIL;
@@ -581,7 +643,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         /* Write footer to file */
         h5_posix_io_ret_t write_result = 0;
         do {
-            write_result = HDwrite(append_fd, footer_buf, sizeof(footer_buf));
+            write_result = HDwrite(fd, footer_buf, sizeof(footer_buf));
         } while (-1 == write_result && EINTR == errno);
 
         if (write_result != sizeof(footer_buf)) {
@@ -591,9 +653,9 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         }
     }
 
-    /* Close append file descriptor */
-    HDclose(append_fd);
-    append_fd = -1;
+    /* Close file descriptor */
+    HDclose(fd);
+    fd = -1;
 
     if (opt_verbose)
         fprintf(rawoutstream, "Footer written successfully\n");
@@ -626,8 +688,6 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 done:
     if (fd >= 0)
         HDclose(fd);
-    if (append_fd >= 0)
-        HDclose(append_fd);
     if (hash_buffer)
         free(hash_buffer);
     if (signature)
