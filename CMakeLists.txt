@@ -549,7 +549,6 @@ include (${HDF_CONFIG_DIR}/HDFMacros.cmake)
 
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
-include (${HDF_RESOURCES_DIR}/HDFLibMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5PluginMacros.cmake)
 include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
@@ -961,9 +960,7 @@ include (config/CacheURLs.cmake)
 #-----------------------------------------------------------------------------
 # Include filter (zlib, szip, etc.) macros
 #-----------------------------------------------------------------------------
-if (HDF5_ENABLE_ZLIB_SUPPORT OR HDF5_ENABLE_SZIP_SUPPORT)
-  include (CMakeFilters.cmake)
-endif ()
+include (CMakeFilters.cmake)
 
 #-----------------------------------------------------------------------------
 # Include external VOL connectors

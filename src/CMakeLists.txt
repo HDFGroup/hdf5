@@ -1267,6 +1267,14 @@ if (BUILD_STATIC_LIBS)
   H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} STATIC 0)
   set_target_properties (${HDF5_LIB_TARGET} PROPERTIES FOLDER libraries)
 
+  # If building Zlib or Szip from source, add a dependency on their build process
+  # so they get built before the main library target does
+  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT|TGZ")
+    if ((ZLIB_USE_EXTERNAL AND H5_ZLIB_FOUND) OR (SZIP_USE_EXTERNAL AND H5_SZIP_FOUND))
+      add_dependencies (${HDF5_LIB_TARGET} ${LINK_COMP_LIBS})
+    endif ()
+  endif ()
+
   set (install_targets_static ${HDF5_LIB_TARGET})
 endif ()
 
@@ -1295,6 +1303,14 @@ if (BUILD_SHARED_LIBS)
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_LIBSH_TARGET} ${HDF5_LIB_NAME} SHARED "LIB")
   set_target_properties (${HDF5_LIBSH_TARGET} PROPERTIES FOLDER libraries)
+
+  # If building Zlib or Szip from source, add a dependency on their build process
+  # so they get built before the main library target does
+  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT|TGZ")
+    if ((ZLIB_USE_EXTERNAL AND H5_ZLIB_FOUND) OR (SZIP_USE_EXTERNAL AND H5_SZIP_FOUND))
+      add_dependencies (${HDF5_LIBSH_TARGET} ${LINK_COMP_LIBS})
+    endif ()
+  endif ()
 
   set (install_targets_shared ${HDF5_LIBSH_TARGET})
 endif ()

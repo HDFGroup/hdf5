@@ -35,14 +35,13 @@
 option (PLUGIN_USE_EXTERNAL "Use External Library Building for filter PLUGIN else search" OFF)
 cmake_dependent_option (PLUGIN_USE_LOCALCONTENT "Use local file for PLUGIN FetchContent" OFF PLUGIN_USE_EXTERNAL OFF)
 
-include (ExternalProject)
+# -----------------------------------------------------------------------------
+# the FetchContent module is needed for building filter plugins from source
+include (FetchContent)
 
 # -----------------------------------------------------------------------------
 # Option for enabling filter plugin support by building the plugins from external sources
 # -----------------------------------------------------------------------------
-#option (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)" "NO")
-set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)")
-set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   set (PLUGIN_USE_EXTERNAL ON CACHE BOOL "Use External Library Building for PLUGIN else search" FORCE)
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")

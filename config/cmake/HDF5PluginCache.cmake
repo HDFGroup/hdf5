@@ -34,7 +34,7 @@ set (H5PL_HDF5_REPACK_EXECUTABLE $<TARGET_FILE:h5repack> CACHE STRING "HDF5 h5re
 
 # Allow external support for plugins (e.g., GIT or TGZ), defaulting to HDF5 setting if not defined
 if (NOT DEFINED H5PL_ALLOW_EXTERNAL_SUPPORT)
-  set (H5PL_ALLOW_EXTERNAL_SUPPORT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+  set (H5PL_ALLOW_EXTERNAL_SUPPORT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" CACHE STRING "If not set to NO, specifies where to obtain sources when building or using external libraries (NO GIT TGZ)" FORCE)
 endif ()
 
 # If using GIT for external support, disable certain plugins (BitGroom, JPEG, LZF)

@@ -90,3 +90,13 @@ option (HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples" ON)
 
 option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
 
+#################################
+# Options with multiple choices #
+#################################
+set (allow_external_support_types "NO" "GIT" "TGZ")
+set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "If not set to NO, specifies where to obtain sources when building or using external libraries (NO GIT TGZ)")
+set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS ${allow_external_support_types})
+if (NOT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" IN_LIST allow_external_support_types)
+  message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be set to one of ${allow_external_support_types}")
+endif ()
+
