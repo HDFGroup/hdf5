@@ -20,7 +20,7 @@ jobs:
   Build_and_test:
 
     # The type of runner that the job will run on
-    runs-on: windows-latest
+    runs-on: ${{ matrix.sys == 'clangarm64' && 'windows-11-arm' || 'windows-latest' }}
     strategy:
       matrix:
         include:
@@ -28,6 +28,7 @@ jobs:
           - { icon: '🟦', sys: mingw64 }
           - { icon: '🟨', sys: ucrt64  }
           - { icon: '🟧', sys: clang64 }
+          - { icon: '🟪', sys: clangarm64 }
     name: ${{ matrix.icon }} MSYS2-${{ matrix.sys }}-${{ inputs.build_mode }}
     defaults:
       run:
