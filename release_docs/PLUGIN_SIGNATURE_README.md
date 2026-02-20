@@ -1,6 +1,7 @@
 # HDF5 Plugin Digital Signature Guide
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Quick Start](#quick-start)
 3. [For Plugin Developers](#for-plugin-developers)
@@ -23,7 +24,7 @@ HDF5 plugin digital signatures provide cryptographic verification of plugin auth
 
 ### Key Features
 
-✅ RSA-based digital signatures (2048-bit or higher recommended)
+✅ RSA-based digital signatures (4096-bit recommended, 2048-bit minimum)
 ✅ Multiple hash algorithms (SHA-256, SHA-384, SHA-512)
 ✅ PSS padding support for enhanced security
 ✅ Multi-key keystore (accept plugins from multiple trusted developers)
@@ -86,6 +87,7 @@ chmod 600 my_private_key.pem
 ```
 
 **IMPORTANT**: Store `my_private_key.pem` securely:
+
 - Use a password manager or secure vault
 - Never commit it to version control
 - Never share it publicly
@@ -125,32 +127,54 @@ h5sign -p my_filter_plugin.so -k my_private_key.pem -v
 ```
 
 **What happens**:
-1. h5sign computes a SHA-256 hash of your plugin binary
+
+1. h5sign computes a SHA-512 hash of your plugin binary
 2. Signs the hash with your private key using RSA
 3. Appends the signature and metadata to the end of the plugin file
 
 **Output**:
-```
-Signing plugin: my_filter_plugin.so
-  Original size: 45,632 bytes
+
+```text
+HDF5 Plugin Signature Tool
+===========================
+
+Using default hash algorithm: sha512
+Reading private key from 'my_private_key.pem'...
+Private key loaded successfully
+
+Signing plugin 'my_filter_plugin.so'...
+
+Plugin signed successfully!
+  File:           my_filter_plugin.so
+  Original size:  45,632 bytes
+  Hash algorithm: SHA-512 (0x03)
   Signature size: 512 bytes
-  Algorithm: SHA-256 with RSA
-  Total size: 46,160 bytes
-Successfully signed: my_filter_plugin.so
+  Footer size:    12 bytes
+  Final size:     46,156 bytes
+
+SECURITY REMINDERS:
+  - Keep your private key secure (chmod 600 my_private_key.pem)
+  - Never share or commit your private key
+  - Test the signed plugin before deployment
 ```
 
 ### Step 4: Verify Your Signature (Optional but Recommended)
 
-Test that the signature works before distributing:
+Test that the signature was applied by inspecting the end of the plugin file:
 
 ```bash
-# Set up a temporary keystore
-mkdir -p /tmp/test_keystore
-cp my_public_key.pem /tmp/test_keystore/
+# The last 12 bytes are the footer; the last 4 bytes are the magic number
+# On-disk the magic 0x48444635 is stored little-endian, so the bytes appear as: 35 46 44 48
+hexdump -C my_filter_plugin.so | tail -5
+# Look for the byte sequence "35 46 44 48" in the last line
 
-# Run the verification test
-HDF5_PLUGIN_KEYSTORE=/tmp/test_keystore h5signverifytest
+# To do a quick sanity-check with OpenSSL, verify the signature manually:
+openssl dgst -sha512 -verify my_public_key.pem \
+  -signature <(dd if=my_filter_plugin.so bs=1 skip=<original_size> count=512 2>/dev/null) \
+  <(dd if=my_filter_plugin.so bs=1 count=<original_size> 2>/dev/null)
 ```
+
+> **Note**: `h5signverifytest` is an internal HDF5 test harness, not a general-purpose verification tool. It uses hardcoded test filenames and requires pre-generated test data — do not use it to verify your own plugins.
 
 ### Step 5: Distribute Your Plugin
 
@@ -162,21 +186,24 @@ Provide users with:
 
 #### Example Distribution README
 
-```markdown
+````markdown
 # MyFilter Plugin Installation
 
 ## Files
+
 - my_filter_plugin.so - The signed plugin binary
 - my_public_key.pem - Public key for signature verification
 
 ## Installation
 
 1. Copy the plugin to your HDF5 plugin directory:
+
    ```bash
    cp my_filter_plugin.so /usr/local/hdf5/lib/plugin/
    ```
 
 2. Set up signature verification:
+
    ```bash
    mkdir -p ~/.hdf5/keystore
    cp my_public_key.pem ~/.hdf5/keystore/
@@ -184,27 +211,29 @@ Provide users with:
    ```
 
 3. Test the plugin:
+
    ```bash
    # Your test command here
    ```
-```
+
+````
 
 ### Advanced: Using Different Hash Algorithms
 
 The `h5sign` tool supports multiple algorithms:
 
 ```bash
-# SHA-256 (default, recommended for most cases)
-h5sign -p plugin.so -k private.pem -a sha256
+# SHA-512 (default, strongest)
+h5sign -p plugin.so -k private.pem
 
-# SHA-384 (stronger, slightly larger signature)
+# SHA-384 (strong, slightly smaller signature)
 h5sign -p plugin.so -k private.pem -a sha384
 
-# SHA-512 (strongest, largest signature)
-h5sign -p plugin.so -k private.pem -a sha512
+# SHA-256 (good, smallest signature)
+h5sign -p plugin.so -k private.pem -a sha256
 
 # PSS padding (enhanced security)
-h5sign -p plugin.so -k private.pem -a sha256-pss
+h5sign -p plugin.so -k private.pem -a sha512-pss
 ```
 
 ---
@@ -214,12 +243,14 @@ h5sign -p plugin.so -k private.pem -a sha256-pss
 ### Step 1: Obtain the Public Key
 
 Get the public key from your plugin developer through a trusted channel:
+
 - Official website (HTTPS)
 - Package manager
 - Direct communication with developer
 - Official source code repository
 
 **Verify the key authenticity** (if possible):
+
 - Check SHA-256 fingerprint published on developer's website
 - Verify PGP signature on the key file
 - Contact developer to confirm fingerprint
@@ -249,6 +280,7 @@ export HDF5_PLUGIN_KEYSTORE=~/.hdf5/keystore
 ```
 
 Add to your shell profile (`.bashrc`, `.zshrc`, etc.):
+
 ```bash
 echo 'export HDF5_PLUGIN_KEYSTORE=~/.hdf5/keystore' >> ~/.bashrc
 ```
@@ -285,7 +317,7 @@ export HDF5_PLUGIN_KEYSTORE=/path/to/my_project/keystore
 Copy the signed plugin to your HDF5 plugin directory:
 
 ```bash
-# Find your HDF5 plugin directory
+# Find your HDF5 plugin directory (h5cc may not be present in all installations)
 h5cc -showconfig | grep "Default plugin path"
 
 # Common locations:
@@ -364,9 +396,10 @@ HDF5 will try all keys and accept the plugin if ANY key verifies successfully.
 
 Air-gapped environments are systems isolated from external networks (including the internet) for security purposes. These are common in classified, high-security, or critical infrastructure environments.
 
-### Overview
+### Air-Gap Overview
 
 Plugin signatures work seamlessly in air-gapped environments since:
+
 - ✅ No internet connectivity required for signing or verification
 - ✅ All cryptographic operations are performed locally using OpenSSL
 - ✅ Keys and plugins are transferred via approved physical media
@@ -396,12 +429,14 @@ chmod 600 my_private_key.pem
 Transfer unsigned plugin binaries to the air-gapped signing system using approved methods:
 
 **Approved Transfer Methods**:
+
 1. **Write-once media**: CD-R, DVD-R (cannot be modified after burning)
 2. **Inspected USB drives**: Sanitized, scanned for malware
 3. **Dedicated data diodes**: One-way transfer devices
 4. **Secure file transfer protocols**: When connecting isolated networks temporarily
 
 **Security Checklist**:
+
 ```bash
 # On development system (may be internet-connected)
 # 1. Build plugin
@@ -436,6 +471,7 @@ sha256sum my_plugin.so > my_plugin.so.signed.sha256
 Transfer the signed plugin and public key back to distribution system:
 
 **Files to transfer OUT of air-gapped environment**:
+
 - `my_plugin.so` (now signed)
 - `my_plugin.so.signed.sha256` (checksum)
 - `my_public_key.pem` (for distribution to users)
@@ -503,6 +539,7 @@ Since you can't download the key from a website, use out-of-band verification:
 **Recommended Methods**:
 
 1. **Published Fingerprint**: Compare key fingerprint with value published in official documentation received through approved channels
+
    ```bash
    openssl rsa -pubin -in my_public_key.pem -outform DER | sha256sum
    # Compare output with published fingerprint
@@ -534,7 +571,7 @@ echo 'export HDF5_PLUGIN_KEYSTORE=/etc/hdf5/keystore' | sudo tee /etc/profile.d/
 #### Step 4: Install Signed Plugin
 
 ```bash
-# Find HDF5 plugin directory
+# Find HDF5 plugin directory (h5cc may not be present in all installations)
 h5cc -showconfig | grep "Default plugin path"
 
 # Install plugin
@@ -561,24 +598,28 @@ h5dump -H test_file_using_plugin.h5
 #### Key Management in Air-Gapped Environments
 
 1. **Dedicated Signing System**
+
    - Use a dedicated, air-gapped workstation for all signing operations
    - Never connect this system to any network
    - Physical security: locked room, access controls, audit logs
    - Minimal software: Only OpenSSL, h5sign, and essential OS components
 
 2. **Private Key Storage**
+
    - Store on encrypted volume with passphrase
    - Consider HSM for critical keys (e.g., FIPS 140-2 Level 3+)
    - Backup keys to encrypted offline media stored in physically separate location
    - Implement key split custody (key parts held by different people)
 
 3. **Transfer Media Security**
+
    - Use write-once media (CD-R, DVD-R) when possible
    - Scan all incoming media for malware before use
    - Sanitize all outgoing media
    - Maintain log of all transfers (what, when, who, why)
 
 4. **Public Key Distribution**
+
    - Include key fingerprints in printed, signed documentation
    - Publish fingerprints through multiple independent channels
    - Consider using your organization's internal PKI
@@ -587,7 +628,8 @@ h5dump -H test_file_using_plugin.h5
 #### Operational Procedures
 
 **Plugin Update Workflow**:
-```
+
+```text
 [Development Network]
     → Build plugin
     → Generate checksum
@@ -613,6 +655,7 @@ h5dump -H test_file_using_plugin.h5
 ```
 
 **Emergency Key Rotation** (e.g., suspected compromise):
+
 ```bash
 # On air-gapped signing system:
 # 1. Generate new key pair
@@ -642,23 +685,27 @@ sudo cp my_new_public_key.pem /etc/hdf5/keystore/
 For regulated air-gapped environments:
 
 1. **Signing Audit Trail**
+
    ```bash
    # On signing system, maintain signature log
    echo "$(date -Iseconds) | $USER | $PLUGIN | $(sha256sum $PLUGIN)" >> /var/log/h5sign/signatures.log
    ```
 
 2. **Installation Verification**
+
    ```bash
    # On user systems, log successful verifications
    # (HDF5 library can log verification events to syslog if enabled)
    ```
 
 3. **Periodic Key Audits**
+
    - Quarterly review of keystores across all air-gapped sites
    - Verify only approved keys are present
    - Check for unauthorized modifications
 
 4. **Compliance Documentation**
+
    - Maintain records of all key generation events
    - Document chain of custody for signing keys
    - Keep transfer logs for all plugin distributions
@@ -668,6 +715,7 @@ For regulated air-gapped environments:
 **Issue**: Cannot verify key fingerprint (no internet access)
 
 **Solution**:
+
 - Request fingerprint via official communication channel (classified email, courier, etc.)
 - Cross-reference with printed documentation received with physical media
 - Contact security office for verification through approved process
@@ -675,6 +723,7 @@ For regulated air-gapped environments:
 **Issue**: Transfer media fails integrity check
 
 **Solution**:
+
 ```bash
 # DO NOT INSTALL if integrity check fails
 # Request new distribution via approved channels
@@ -684,6 +733,7 @@ For regulated air-gapped environments:
 **Issue**: Need to update OpenSSL but air-gapped
 
 **Solution**:
+
 ```bash
 # Download OpenSSL on internet-connected system
 # Transfer via approved method
@@ -697,6 +747,7 @@ sudo rpm -ivh openssl-*.rpm  # RHEL/CentOS
 ### Air-Gap Checklist
 
 **Developer Checklist**:
+
 - [ ] Generate keys on dedicated air-gapped signing system
 - [ ] Never connect signing system to any network
 - [ ] Verify checksums before and after signing
@@ -706,6 +757,7 @@ sudo rpm -ivh openssl-*.rpm  # RHEL/CentOS
 - [ ] Document and publish key fingerprints through approved channels
 
 **User Checklist**:
+
 - [ ] Verify package integrity using provided checksums
 - [ ] Verify public key fingerprint through out-of-band method
 - [ ] Use system-wide keystore with proper permissions
@@ -725,6 +777,7 @@ HDF5 plugin signatures use **RSA-based digital signatures** with **multi-key tru
 #### What This System Protects Against
 
 ✅ **Fully Protected:**
+
 - **Malicious unsigned plugins**: Blocks execution of plugins without valid signatures
 - **Tampered plugins**: Detects any modification to signed plugin binaries
 - **Supply chain attacks**: Prevents loading of plugins from untrusted sources (if keys are protected)
@@ -735,28 +788,32 @@ HDF5 plugin signatures use **RSA-based digital signatures** with **multi-key tru
 ⚠️ **Not Protected (By Design):**
 
 1. **No Automatic Revocation**
+
    - **Issue**: If a developer's private key is compromised, there's no automatic way to revoke it
    - **Response**: Manual removal from keystore + community notification
    - **Timeline**: Days to weeks (vs. instant with PKI/CRL)
    - **Mitigation**: Strong key protection, regular key rotation, incident response plan
 
 2. **No Rollback Protection**
+
    - **Issue**: System doesn't enforce version constraints (could load old vulnerable version)
    - **Mitigation**: Use trusted distribution channels (GitHub releases), verify checksums, maintain version policies
    - **Note**: Signature proves authenticity, not freshness
 
 3. **No Expiration Dates**
+
    - **Issue**: Signed plugins remain valid indefinitely
    - **Mitigation**: Regular plugin updates, organizational policies for maximum plugin age
 
 4. **Manual Trust Management**
+
    - **Issue**: Users must manually add/remove trusted keys from keystore
    - **Mitigation**: Clear documentation, automation scripts, periodic keystore audits
 
 #### Threat Coverage Comparison
 
 | Attack Vector | Protected? | How? |
-|---------------|-----------|------|
+| --------------- | ----------- | ------ |
 | Unsigned malicious plugin | ✅ Yes | Signature required |
 | Modified legitimate plugin | ✅ Yes | Signature invalidates |
 | Plugin from untrusted source | ✅ Yes | KeyStore verification |
@@ -771,7 +828,7 @@ HDF5 plugin signatures use **RSA-based digital signatures** with **multi-key tru
 The current system makes conscious trade-offs:
 
 | Feature | Current (RSA + KeyStore) | Full PKI/CA |
-|---------|-------------------------|-------------|
+| ------- | ------------------------- | ----------- |
 | Operational cost | $0/year | $50K-120K/year |
 | Staffing | 0 FTE | 0.5-1 FTE |
 | Air-gap support | Perfect | Difficult |
@@ -780,6 +837,7 @@ The current system makes conscious trade-offs:
 | Maintenance | Minimal | Significant |
 
 **Decision Rationale:**
+
 - HDF5 plugin ecosystem is small (~20-30 plugins)
 - No incidents requiring revocation to date
 - Air-gapped environments are common (CRL problematic)
@@ -787,6 +845,7 @@ The current system makes conscious trade-offs:
 - Primary threats (malicious/tampered plugins) are fully mitigated
 
 **Escalation Triggers** (when to consider PKI):
+
 - Key compromise incident occurs
 - Multiple security vulnerabilities in plugins
 - Regulatory requirements mandate revocation capability
@@ -806,11 +865,12 @@ The current system makes conscious trade-offs:
 
 ---
 
-### For Plugin Developers
+### Developer Security
 
 1. **Private Key Security**
 
    **Storage Best Practices:**
+
    ```bash
    # Generate key with strong passphrase
    openssl genrsa -aes256 -out private.pem 4096
@@ -830,7 +890,8 @@ The current system makes conscious trade-offs:
    ```
 
    **Key Rotation Policy:**
-   ```bash
+
+   ```text
    # Rotate every 1-2 years, or immediately if:
    # - Developer leaves organization
    # - System compromise suspected
@@ -847,6 +908,7 @@ The current system makes conscious trade-offs:
    ```
 
 2. **Build Environment Security**
+
    - ✅ Sign plugins on a trusted, isolated system (air-gapped preferred)
    - ✅ Verify build toolchain integrity (verify compiler, dependencies)
    - ✅ Use reproducible builds when possible
@@ -857,6 +919,7 @@ The current system makes conscious trade-offs:
 3. **Distribution Security**
 
    **Secure Distribution Checklist:**
+
    ```bash
    # 1. Sign the plugin
    h5sign -p my_plugin.so -k private.pem -v
@@ -878,6 +941,7 @@ The current system makes conscious trade-offs:
    ```
 
    **Additional Measures:**
+
    - ✅ Use HTTPS for all downloads
    - ✅ Provide checksums alongside plugins (SHA-256 minimum)
    - ✅ Publish public key fingerprint on multiple channels (website, README, DNS TXT record)
@@ -888,7 +952,8 @@ The current system makes conscious trade-offs:
 4. **Incident Response Plan**
 
    **If Private Key Compromised:**
-   ```
+
+   ```text
    Hour 0:    Discovery
               - Immediately stop using compromised key
               - Alert security team
@@ -911,11 +976,12 @@ The current system makes conscious trade-offs:
               - Update security procedures
    ```
 
-### For Plugin Users
+### User Security
 
 1. **Keystore Security**
 
    **Verifying Public Key Authenticity (Critical!):**
+
    ```bash
    # NEVER trust a public key without verification!
    # Use out-of-band verification methods:
@@ -936,6 +1002,7 @@ The current system makes conscious trade-offs:
    ```
 
    **Keystore Management:**
+
    ```bash
    # Periodic audit (quarterly recommended)
    ls -lh $HDF5_PLUGIN_KEYSTORE/
@@ -968,6 +1035,7 @@ The current system makes conscious trade-offs:
 2. **Plugin Verification Best Practices**
 
    **Download and Verify Workflow:**
+
    ```bash
    # 1. Download from trusted source (HTTPS)
    wget https://github.com/DEVELOPER/plugin/releases/download/v1.0.0/my_plugin.so
@@ -984,6 +1052,7 @@ The current system makes conscious trade-offs:
    ```
 
    **Monitoring and Logging:**
+
    ```bash
    # Monitor for verification failures in system logs
    grep "signature verification failed" /var/log/syslog
@@ -1003,6 +1072,7 @@ The current system makes conscious trade-offs:
 3. **Version and Update Management**
 
    **Maintain Approved Plugin List:**
+
    ```bash
    # Create approved plugins manifest
    # /etc/hdf5/approved-plugins.txt
@@ -1029,6 +1099,7 @@ The current system makes conscious trade-offs:
    ```
 
    **Update Policy:**
+
    - Review plugin updates monthly
    - Test updates in staging before production
    - Subscribe to security advisories for plugins you use
@@ -1037,6 +1108,7 @@ The current system makes conscious trade-offs:
 4. **Security Incident Response**
 
    **If Suspicious Plugin Detected:**
+
    ```bash
    # 1. Immediately remove from plugin directory
    sudo rm /usr/local/hdf5/lib/plugin/suspicious_plugin.so
@@ -1054,6 +1126,7 @@ The current system makes conscious trade-offs:
 5. **Keystore Directory Permissions**
 
    Unix/Linux/macOS:
+
    ```bash
    # User keystore: only you can write
    chmod 700 ~/.hdf5/keystore
@@ -1064,6 +1137,7 @@ The current system makes conscious trade-offs:
    ```
 
    Windows:
+
    - Ensure keystore directory is not world-writable
    - Use NTFS permissions to restrict write access
 
@@ -1072,6 +1146,7 @@ The current system makes conscious trade-offs:
    In multi-tenant or HPC environments where untrusted users can control environment variables, you can lock the keystore location to prevent them from overriding `HDF5_PLUGIN_KEYSTORE` with a malicious keystore.
 
    **Runtime Lock (No Recompilation Required):**
+
    ```bash
    # Unix/Linux: Create lock file to disable environment variable override
    sudo mkdir -p /etc/hdf5
@@ -1083,6 +1158,7 @@ The current system makes conscious trade-offs:
    ```
 
    **Compile-Time Lock (Requires Rebuild):**
+
    ```bash
    # Configure HDF5 with locked keystore (completely disables env var)
    cmake -DHDF5_LOCK_PLUGIN_KEYSTORE=ON \
@@ -1091,27 +1167,30 @@ The current system makes conscious trade-offs:
    ```
 
    **When to Use:**
+
    - ✅ HPC clusters with untrusted users
    - ✅ Multi-tenant systems
    - ✅ Production servers with strict security requirements
    - ✅ Pre-built binaries distributed to security-critical environments
 
    **How It Works:**
-   1. If lock file exists, `HDF5_PLUGIN_KEYSTORE` environment variable is ignored
-   2. HDF5 will only use the compile-time configured keystore (`HDF5_PLUGIN_KEYSTORE_DIR`)
+
+   1. Without a lock file: `HDF5_PLUGIN_KEYSTORE` env var is tried first; if it successfully loads keys, the compile-time `HDF5_PLUGIN_KEYSTORE_DIR` is **not** also tried (it is not a fallback)
+   2. With a lock file: `HDF5_PLUGIN_KEYSTORE` env var is ignored entirely; only `HDF5_PLUGIN_KEYSTORE_DIR` is used
    3. Prevents privilege escalation via keystore override attacks
    4. System administrators can apply this to pre-built HDF5 libraries without recompilation
 
    **Verification:**
+
    ```bash
    # Test that environment variable is ignored after locking
    export HDF5_PLUGIN_KEYSTORE=/tmp/fake_keystore
 
    # Enable debug output to see which keystore is used
-   export HDF5_DEBUG=PL
+   export HDF5_DEBUG=pl
    h5dump test_file.h5
 
-   # Expected output: "Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)"
+   # Expected output: "HDF5 KeyStore: Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)"
    ```
 
 ---
@@ -1125,6 +1204,7 @@ The current system makes conscious trade-offs:
 **Cause**: No public keys found in keystore directory.
 
 **Solution**:
+
 ```bash
 # Check keystore directory
 ls -la $HDF5_PLUGIN_KEYSTORE
@@ -1134,14 +1214,16 @@ ls -la $HDF5_PLUGIN_KEYSTORE
 cp developer_public.pem $HDF5_PLUGIN_KEYSTORE/
 ```
 
-#### 2. "plugin signature verification failed - signature cryptographically invalid with ALL keys"
+#### 2. "plugin signature verification failed"
 
 **Possible causes**:
+
 - Plugin was tampered with
 - Wrong public key in keystore
 - Plugin corrupted during download
 
 **Solution**:
+
 ```bash
 # 1. Re-download the plugin
 wget https://developer.com/plugins/my_plugin.so
@@ -1156,7 +1238,7 @@ openssl rsa -pubin -in developer_public.pem -outform DER | sha256sum
 
 # 4. Check if plugin was actually signed
 hexdump -C my_plugin.so | tail -20
-# Look for HDF5 magic number at the end: 48 44 46 35
+# Look for HDF5 magic number at the end (little-endian: 35 46 44 48)
 ```
 
 #### 3. "SECURITY ERROR: keystore directory is world-writable"
@@ -1164,6 +1246,7 @@ hexdump -C my_plugin.so | tail -20
 **Cause**: Insecure permissions on keystore directory.
 
 **Solution**:
+
 ```bash
 # Fix permissions (Unix/Linux/macOS)
 chmod 755 $HDF5_PLUGIN_KEYSTORE
@@ -1176,9 +1259,11 @@ chmod 700 $HDF5_PLUGIN_KEYSTORE
 **Cause**: Signature cache not working, or very large plugin.
 
 **Solution**:
+
 - Verification is cached after first load (instant on subsequent loads)
 - First verification of large plugins may take a few seconds
 - Check file modification time isn't changing unexpectedly:
+
   ```bash
   stat my_plugin.so
   ```
@@ -1188,6 +1273,7 @@ chmod 700 $HDF5_PLUGIN_KEYSTORE
 **Cause**: Plugin is not signed, or signature was stripped.
 
 **Solution**:
+
 ```bash
 # Check if plugin has signature magic number at the end
 hexdump -C my_plugin.so | tail -20
@@ -1202,6 +1288,7 @@ h5sign -p my_plugin.so -k private_key.pem
 **Symptoms**: Errors about missing keystore, even though directory exists.
 
 **Solution**:
+
 ```bash
 # Verify environment variable is set
 echo $HDF5_PLUGIN_KEYSTORE
@@ -1220,16 +1307,17 @@ For detailed diagnostics, check system logs or application error output. The HDF
 
 ### Verification Test Suite
 
-Run the comprehensive test suite to verify your setup:
+`h5signverifytest` is the HDF5 internal test harness for the plugin signature system. It is intended for HDF5 developers, not end users. It uses hardcoded test filenames generated by `h5signgentest` and will fail if run outside the HDF5 build tree.
+
+To run the internal tests (HDF5 developers only):
 
 ```bash
-# Build test suite
+# Build and run from the HDF5 build directory
 cd hdf5/build
-make h5signverifytest
-
-# Run tests
+make h5signgentest h5signverifytest
 cd tools/test/h5sign
-./h5signverifytest
+./h5signgentest    # generates test plugins
+./h5signverifytest # verifies them
 ```
 
 ---
@@ -1240,12 +1328,12 @@ cd tools/test/h5sign
 
 Signed plugins have this structure:
 
-```
+```text
 ┌─────────────────────────────┐
 │   Original Plugin Binary    │
 │         (unchanged)         │
 ├─────────────────────────────┤
-│   RSA Signature (256-512B)  │
+│   RSA Signature (256-1024B) │
 ├─────────────────────────────┤
 │   Footer (12 bytes):        │
 │   - Signature length (4B)   │
@@ -1259,19 +1347,19 @@ Signed plugins have this structure:
 ### Supported Algorithms
 
 | Algorithm | Hash | Padding | Signature Size | Security Level |
-|-----------|------|---------|----------------|----------------|
-| SHA-256   | SHA-256 | PKCS#1 v1.5 | 256-512 bytes | Good (recommended) |
-| SHA-384   | SHA-384 | PKCS#1 v1.5 | 256-512 bytes | Better |
-| SHA-512   | SHA-512 | PKCS#1 v1.5 | 256-512 bytes | Best |
-| SHA-256-PSS | SHA-256 | PSS | 256-512 bytes | Enhanced security |
-| SHA-384-PSS | SHA-384 | PSS | 256-512 bytes | Enhanced security |
-| SHA-512-PSS | SHA-512 | PSS | 256-512 bytes | Maximum security |
+| --------- | ---- | ------- | -------------- | -------------- |
+| SHA-256 | SHA-256 | PKCS#1 v1.5 | 256-1024 bytes | Good |
+| SHA-384 | SHA-384 | PKCS#1 v1.5 | 256-1024 bytes | Better |
+| SHA-512 | SHA-512 | PKCS#1 v1.5 | 256-1024 bytes | Best (default) |
+| SHA-256-PSS | SHA-256 | PSS | 256-1024 bytes | Enhanced security |
+| SHA-384-PSS | SHA-384 | PSS | 256-1024 bytes | Enhanced security |
+| SHA-512-PSS | SHA-512 | PSS | 256-1024 bytes | Maximum security |
 
 ### Signature Cache
 
 HDF5 caches verification results for performance:
 
-- **Cache key**: Plugin path + file modification time
+- **Cache key**: Plugin path + file modification time + file size
 - **Cache invalidation**: Automatic when plugin file is modified
 - **Cache scope**: Per-process (not persisted across runs)
 - **Cache benefits**:
@@ -1279,7 +1367,8 @@ HDF5 caches verification results for performance:
   - Cached load: <1ms (instant)
 
 Cache behavior:
-```
+
+```text
 Load #1 → Full verification (slow) → Cache result
 Load #2 → Cache hit (instant) → Skip verification
 Plugin modified → Cache invalidated
@@ -1289,16 +1378,17 @@ Load #3 → Full verification (slow) → Update cache
 ### Performance Impact
 
 | Operation | Time (First Load) | Time (Cached) |
-|-----------|------------------|---------------|
-| 1 MB plugin | ~50ms | <1ms |
-| 10 MB plugin | ~200ms | <1ms |
-| 100 MB plugin | ~1500ms | <1ms |
+| --------- | ----------------- | ------------- |
+| 1 MB plugin | ~5ms | <1ms |
+| 10 MB plugin | ~10ms | <1ms |
+| 100 MB plugin | ~80ms | <1ms |
 
-*Note: Times are approximate and depend on hardware.*
+*Note: First-load time is dominated by I/O to read the plugin file for hashing, plus a constant ~1–5ms for the RSA signature operation. Cached loads skip all cryptographic work. Times are approximate and depend on hardware and storage speed.*
 
 ### Crypto-Agility
 
 The signature system supports multiple algorithms:
+
 - Algorithm is stored in the signature footer
 - Verifier reads the algorithm from the footer
 - No recompilation needed to support new algorithms
@@ -1309,7 +1399,7 @@ The signature system supports multiple algorithms:
 ## FAQ
 
 **Q: Do I need to sign plugins?**
-A: Only if your HDF5 library was built with the CMake option `HDF5_REQUIRE_SIGNED_PLUGINS` enabled (which defines `H5_REQUIRE_DIGITAL_SIGNATURE` at compile time). Otherwise, signing is optional but recommended for security.
+A: Only if your HDF5 library was built with the CMake option `HDF5_REQUIRE_SIGNED_PLUGINS` enabled (which defines `H5_REQUIRE_DIGITAL_SIGNATURE` at compile time). Otherwise, signing is optional but recommended for security. Note that `HDF5_REQUIRE_SIGNED_PLUGINS=ON` also requires `-DHDF5_PLUGIN_KEYSTORE_DIR=<path>` to be specified at configure time, or the build will fail.
 
 **Q: Can I use the same key for multiple plugins?**
 A: Yes! You can use one key pair to sign all your plugins. Users only need your single public key.
@@ -1330,7 +1420,7 @@ A: Generate a new key pair immediately, sign all plugins with the new key, notif
 A: Yes, use the verification test tool with a temporary keystore (see "Step 4: Verify Your Signature" in the developer section).
 
 **Q: Does signing increase plugin size significantly?**
-A: Minimal impact: ~512 bytes for the signature + 12 bytes footer (typically <0.1% for most plugins).
+A: Minimal impact: 256–512 bytes for the signature (depends on RSA key size: 256 bytes for 2048-bit, 512 bytes for 4096-bit) + 12 bytes footer (typically <0.1% for most plugins).
 
 **Q: Are signatures platform-specific?**
 A: No! A signed Linux plugin remains signed if you copy it to Windows or macOS (though the plugin code itself may not be compatible across platforms).
@@ -1357,10 +1447,10 @@ A: Generate new keys on your air-gapped signing system, re-sign all plugins with
 
 ## Additional Resources
 
-- **HDF5 Plugin Documentation**: https://portal.hdfgroup.org/display/support/Registered+Filter+Plugins
-- **OpenSSL Documentation**: https://www.openssl.org/docs/
-- **RSA Key Generation Best Practices**: https://www.keylength.com/
-- **HDF5 Security**: Contact security@hdfgroup.org for security issues
+- **HDF5 Plugin Documentation**: <https://portal.hdfgroup.org/display/support/Registered+Filter+Plugins>
+- **OpenSSL Documentation**: <https://www.openssl.org/docs/>
+- **RSA Key Generation Best Practices**: <https://www.keylength.com/>
+- **HDF5 Security**: Contact <security@hdfgroup.org> for security issues
 
 ---
 
@@ -1371,7 +1461,7 @@ For issues with plugin signatures:
 1. Check the [Troubleshooting](#troubleshooting) section above
 2. Review HDF5 logs with debug output enabled
 3. Contact your plugin developer for plugin-specific issues
-4. Report HDF5 library issues: https://github.com/HDFGroup/hdf5/issues
+4. Report HDF5 library issues: <https://github.com/HDFGroup/hdf5/issues>
 
 ---
 

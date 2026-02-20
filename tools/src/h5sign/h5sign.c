@@ -94,7 +94,7 @@ usage(const char *prog)
     fprintf(rawoutstream, "OTHER OPTIONS\n");
     fprintf(rawoutstream, "  -a, --algorithm <alg>   Hash algorithm: sha256, sha384, sha512,\n");
     fprintf(rawoutstream, "                          sha256-pss, sha384-pss, sha512-pss\n");
-    fprintf(rawoutstream, "                          (default: sha256)\n");
+    fprintf(rawoutstream, "                          (default: sha512)\n");
     fprintf(rawoutstream, "  -v, --verbose           Verbose output (show signature details)\n");
     fprintf(rawoutstream, "  -h, --help              Print this help message\n");
     fprintf(rawoutstream, "  -V                      Print HDF5 library version\n");
@@ -111,18 +111,18 @@ usage(const char *prog)
     fprintf(rawoutstream, "  loads normally on all platforms.\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "EXAMPLES\n");
-    fprintf(rawoutstream, "  # Sign a plugin with a private key (default SHA-256)\n");
+    fprintf(rawoutstream, "  # Sign a plugin with a private key (default SHA-512)\n");
     fprintf(rawoutstream, "  %s -p libmyplugin.so -k private.pem\n", prog);
     fprintf(rawoutstream, "\n");
-    fprintf(rawoutstream, "  # Sign with SHA-512 hash algorithm\n");
-    fprintf(rawoutstream, "  %s -p libmyplugin.so -k private.pem -a sha512\n", prog);
+    fprintf(rawoutstream, "  # Sign with SHA-256 hash algorithm\n");
+    fprintf(rawoutstream, "  %s -p libmyplugin.so -k private.pem -a sha256\n", prog);
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "  # Sign with verbose output\n");
     fprintf(rawoutstream, "  %s -p libmyplugin.so -k private.pem -v\n", prog);
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "KEY GENERATION\n");
     fprintf(rawoutstream, "  To generate an RSA key pair:\n");
-    fprintf(rawoutstream, "    openssl genrsa -out private.pem 2048\n");
+    fprintf(rawoutstream, "    openssl genrsa -out private.pem 4096\n");
     fprintf(rawoutstream, "    openssl rsa -in private.pem -pubout -out public.pem\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "  Keep the private key secure! Use the public key when building HDF5\n");
@@ -443,7 +443,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     bytes_read = 0;
 
     if (opt_verbose)
-        fprintf(rawoutstream, "Computing SHA-256 hash...\n");
+        fprintf(rawoutstream, "Computing %s hash...\n", EVP_MD_get0_name(hash_algorithm));
 
     while (bytes_read < file_size) {
         size_t chunk_size =
@@ -683,10 +683,10 @@ main(int argc, char *argv[])
         fprintf(rawoutstream, "Using hash algorithm: %s\n", opt_algorithm);
     }
     else {
-        /* Default: SHA-256 with PKCS1 */
-        hash_algorithm = EVP_sha256();
-        algorithm_id   = H5PL_SIG_ALGO_SHA256;
-        fprintf(rawoutstream, "Using default hash algorithm: sha256\n");
+        /* Default: SHA-512 with PKCS1 */
+        hash_algorithm = EVP_sha512();
+        algorithm_id   = H5PL_SIG_ALGO_SHA512;
+        fprintf(rawoutstream, "Using default hash algorithm: sha512\n");
     }
 
     /* Read private key */

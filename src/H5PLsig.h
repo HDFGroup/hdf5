@@ -40,9 +40,9 @@
 #define H5PL_SIG_FORMAT_VERSION_CURRENT 1
 
 /* Hash Algorithm Identifiers */
-#define H5PL_SIG_ALGO_SHA256     0x01 /* SHA-256 with RSA-PKCS1 (default) */
+#define H5PL_SIG_ALGO_SHA256     0x01 /* SHA-256 with RSA-PKCS1 */
 #define H5PL_SIG_ALGO_SHA384     0x02 /* SHA-384 with RSA-PKCS1 */
-#define H5PL_SIG_ALGO_SHA512     0x03 /* SHA-512 with RSA-PKCS1 */
+#define H5PL_SIG_ALGO_SHA512     0x03 /* SHA-512 with RSA-PKCS1 (default) */
 #define H5PL_SIG_ALGO_SHA256_PSS 0x11 /* SHA-256 with RSA-PSS */
 #define H5PL_SIG_ALGO_SHA384_PSS 0x12 /* SHA-384 with RSA-PSS */
 #define H5PL_SIG_ALGO_SHA512_PSS 0x13 /* SHA-512 with RSA-PSS */
