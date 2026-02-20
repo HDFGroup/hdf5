@@ -10,7 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "h5_api_test_driver.hxx"
+#include "h5_api_test_driver.h"
 
 #include "H5_api_test_config.h"
 
