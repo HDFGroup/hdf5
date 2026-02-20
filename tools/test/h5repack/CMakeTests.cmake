@@ -311,7 +311,6 @@ macro (ADD_HELP_TEST testname resultcode)
     )
   endif ()
   set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   if ("H5REPACK-h5repack-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -516,7 +515,7 @@ macro (ADD_H5_TEST testname)
     # First, populate VOL info to be passed to tests
     if (${vol_idx} EQUAL 0)
       set (vol "native")
-      set (vol_env "${CROSSCOMPILING_PATH}")
+      set (vol_env "")
       set (vol_prefix "")
       # Avoid names of the form XXX_BINARY_DIR due to collision risk
       set (BINARY_DIR_VOL "${PROJECT_BINARY_DIR}")
@@ -648,7 +647,6 @@ macro (ADD_H5_TEST testname)
         )
         set_tests_properties (${DIFF_TESTNAME} PROPERTIES
             DEPENDS ${REPACK_TESTNAME}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
             WORKING_DIRECTORY "${BINARY_DIR_VOL}"
         )
         if ("${DIFF_TESTNAME}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -808,7 +806,6 @@ macro (ADD_H5_VERIFY_VDS testname testtype resultcode testfile testdset testfilt
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects
       )
@@ -827,7 +824,6 @@ macro (ADD_H5_VERIFY_VDS testname testtype resultcode testfile testdset testfilt
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname}
       )
@@ -857,7 +853,6 @@ macro (ADD_H5_VERIFY_SUPERBLOCK testname testfile lowbound highbound superblock)
         COMMAND $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
     )
     set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects
     )
     if ("H5REPACK_VERIFY_SUPERBLOCK-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -878,7 +873,6 @@ macro (ADD_H5_VERIFY_SUPERBLOCK testname testfile lowbound highbound superblock)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}
     )
     if ("H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -904,7 +898,6 @@ macro (ADD_H5_VERIFY_INVALIDBOUNDS testname resultcode lowbound highbound)
         COMMAND $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
     )
     set_tests_properties (ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects
         WILL_FAIL "true"
     )
@@ -931,7 +924,6 @@ macro (ADD_H5_VERIFY_USERBLOCK testname userblocksize testfile)
         COMMAND $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
     )
     set_tests_properties (H5REPACK_VERIFY_USERBLOCK-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_VERIFY_USERBLOCK-${testname}-clear-objects
     )
     if ("H5REPACK_VERIFY_USERBLOCK-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -952,7 +944,6 @@ macro (ADD_H5_VERIFY_USERBLOCK testname userblocksize testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5REPACK_VERIFY_USERBLOCK-${testname}_DMP PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_VERIFY_USERBLOCK-${testname}
     )
     if ("H5REPACK_VERIFY_USERBLOCK-${testname}_DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -981,7 +972,6 @@ macro (ADD_H5_TEST_META testname testfile)
         COMMAND $<TARGET_FILE:h5repack> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5
     )
     set_tests_properties (H5REPACK_META-${testname}_N PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_META-${testname}-clear-objects
     )
     if ("H5REPACK_META-${testname}_N" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -999,7 +989,6 @@ macro (ADD_H5_TEST_META testname testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5REPACK_META-${testname}_N_DFF PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_META-${testname}_N
     )
     if ("H5REPACK_META-${testname}_N_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -1010,7 +999,6 @@ macro (ADD_H5_TEST_META testname testfile)
         COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5
     )
     set_tests_properties (H5REPACK_META-${testname}_M PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_META-${testname}_N_DFF
     )
     if ("H5REPACK_META-${testname}_M" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -1028,7 +1016,6 @@ macro (ADD_H5_TEST_META testname testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5REPACK_META-${testname}_M_DFF PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_META-${testname}_M
     )
     if ("H5REPACK_META-${testname}_M_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -1082,7 +1069,6 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5REPACK_UD-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5REPACK_UD-${testname}-clear-objects
     )
     if ("H5REPACK_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -1104,7 +1090,6 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           DEPENDS H5REPACK_UD-${testname}
       )
       if ("H5REPACK_UD-${testname}-h5dump" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -1168,7 +1153,6 @@ macro (ADD_H5_EXTERNAL_TEST testname testtype testfile)
           COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
       )
       set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF1 PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5REPACK_EXTERNAL-${testname}_CPY
       )
@@ -1181,7 +1165,6 @@ macro (ADD_H5_EXTERNAL_TEST testname testtype testfile)
           COMMAND $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5
       )
       set_tests_properties (H5REPACK_EXTERNAL-${testname} PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5REPACK_EXTERNAL-${testname}_DFF1
       )
@@ -1194,7 +1177,6 @@ macro (ADD_H5_EXTERNAL_TEST testname testtype testfile)
           COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
       )
       set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF2 PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5REPACK_EXTERNAL-${testname}
       )
@@ -1206,7 +1188,6 @@ macro (ADD_H5_EXTERNAL_TEST testname testtype testfile)
           COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
       )
       set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF3 PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5REPACK_EXTERNAL-${testname}_DFF2
       )
@@ -1231,7 +1212,6 @@ macro (ADD_H5_EXTERNAL_TEST testname testtype testfile)
           COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
       )
       set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF4 PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5REPACK_EXTERNAL-${testname}_DATA_RMV
       )
@@ -1244,7 +1224,6 @@ macro (ADD_H5_EXTERNAL_TEST testname testtype testfile)
           COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
       )
       set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF_FAIL PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5REPACK_EXTERNAL-${testname}_DFF4
           WILL_FAIL "true"
@@ -1319,14 +1298,12 @@ else ()
 endif ()
 set_tests_properties (H5REPACK-testh5repack_detect_szip PROPERTIES
     DEPENDS H5REPACK-h5repack-${testname}
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 set (last_test "H5REPACK-testh5repack_detect_szip")
 
 #  add_test (NAME H5REPACK-h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
 #  set_tests_properties (H5REPACK-h5repacktest PROPERTIES
 #    DEPENDS H5REPACK-testh5repack_detect_szip
-#    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 #  )
 #  set (last_test "H5REPACK-h5repacktest")
 #
@@ -1777,7 +1754,6 @@ add_test (
 )
 set_tests_properties (H5REPACK-HDFFV-10590 PROPERTIES
     WILL_FAIL "true"
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 
 # test CVE-2018-14460 fix
@@ -1787,7 +1763,6 @@ add_test (
 )
 set_tests_properties (H5REPACK-HDFFV-11223 PROPERTIES
     WILL_FAIL "true"
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 
 # tests for metadata block size option ('-M')

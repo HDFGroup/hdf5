@@ -544,7 +544,7 @@ H5_DLL herr_t H5Gclose_async(hid_t group_id, hid_t es_id);
  * An object has a certain type. The first few numbers are reserved for use
  * internally by HDF5. Users may add their own types with higher values.  The
  * values are never stored in the file -- they only exist while an application
- * is running.  An object may satisfy the `isa' function for more than one type.
+ * is running.  An object may satisfy the `isa` function for more than one type.
  *
  * \deprecated
  */

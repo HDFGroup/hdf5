@@ -54,6 +54,9 @@ set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
 ########################
 # compression options
 ########################
+set (ZLIB_USE_EXTERNAL ON CACHE BOOL "Use External Library Building for ZLIB" FORCE)
+set (SZIP_USE_EXTERNAL ON CACHE BOOL "Use External Library Building for SZIP" FORCE)
+
 set (HDF5_USE_ZLIB_STATIC ON CACHE BOOL "Use static zlib library" FORCE)
 set (HDF5_USE_LIBAEC_STATIC ON CACHE BOOL "Use static AEC library" FORCE)
 

@@ -103,7 +103,7 @@ add_custom_target (HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by H
                   -P "${HDF_RESOURCES_DIR}/volTest.cmake"
           )
           set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
-              ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};${CROSSCOMPILING_PATH}"
+              ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
               WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
           )
           if ("VOL-${volname}-${voltest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -127,7 +127,7 @@ add_custom_target (HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by H
                 -P "${HDF_RESOURCES_DIR}/volTest.cmake"
         )
         set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
-            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};${CROSSCOMPILING_PATH}"
+            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
         )
         if ("VOL-${volname}-${voltest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -146,7 +146,7 @@ add_custom_target (HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by H
               -P "${HDF_RESOURCES_DIR}/volTest.cmake"
       )
       set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};${CROSSCOMPILING_PATH}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
       if ("VOL-${volname}-${voltest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -164,7 +164,7 @@ add_custom_target (HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by H
               -D "TEST_VOL:STRING=${volinfo}"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_OUTPUT=${volname}-${voltest}.out"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${volname};${CROSSCOMPILING_PATH}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${volname}"
               -P "${HDF_RESOURCES_DIR}/volTest.cmake"
       )
       set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
@@ -216,7 +216,7 @@ add_custom_target (HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by H
       )
       set_tests_properties (VOL-${volname}-fheap PROPERTIES
           TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};${CROSSCOMPILING_PATH}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
       if ("VOL-${volname}-fheap" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

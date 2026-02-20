@@ -39,7 +39,7 @@ typedef enum H5T_cmd_t {
 } H5T_cmd_t;
 
 /**
- * How is the `bkg' buffer used by the conversion function?
+ * How is the `bkg` buffer used by the conversion function?
  */
 typedef enum H5T_bkg_t {
     H5T_BKG_NO   = 0, /**< background buffer is not needed, send NULL */

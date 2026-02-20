@@ -390,7 +390,7 @@ Release 1.8.17 if their removal causes no problems.
 
 <h4>In the Fortran Interface</h4>
 The following Fortran 2003 API has been added:
-\li #h5t.h5tenum_insert_f
+\li \ref h5t::h5tenum_insert_f
 
 Operation of the new Fortran 2003 version of this API is more consistent with the operation of
 the C API than was the Fortran 90 version.
@@ -566,12 +566,12 @@ Additional overloads to the class Attribute to get an attribute's name for conve
 The following new Fortran subroutines have been added:
 
 Fortran2003 subroutines:
-\li #h5p.h5pset_file_image_f
-\li #h5p.h5pget_file_image_f
-\li #h5f.h5fget_file_image_f (Added in Release 1.8.11, but not documented at that time.)
+\li \ref h5p::h5pset_file_image_f
+\li \ref h5p::h5pget_file_image_f
+\li \ref h5f::h5fget_file_image_f (Added in Release 1.8.11, but not documented at that time.)
 
 The following Fortran subroutine has been changed:
-\li #h5p.h5pset_chunk_cache_f - The values of the constants H5D_CHUNK_CACHE_NSLOTS_DFLT_F
+\li \ref h5p::h5pset_chunk_cache_f - The values of the constants H5D_CHUNK_CACHE_NSLOTS_DFLT_F
     and H5D_CHUNK_CACHE_NBYTES_DFLT_F have been changed to INTEGER(KIND=size_t).
 
 <h4>Other New Features</h4>
@@ -752,21 +752,21 @@ transition from HDF5 Release 1.8.10 to Release 1.8.11.
 <h4>The following new Fortran subroutines have been added</h4>
 
 <strong>Fortran90 subroutines</strong>:
-\li #h5o.h5odecr_refcount_f
-\li #h5o.h5oexists_by_name_f
-\li #h5o.h5oget_comment_f
-\li #h5o.h5oget_comment_by_name_f
-\li #h5o.h5oincr_refcount_f
-\li #h5o.h5oopen_by_idx_f
-\li #h5o.h5oset_comment_f
-\li #h5o.h5oset_comment_by_name_f
+\li \ref h5o::h5odecr_refcount_f
+\li \ref h5o::h5oexists_by_name_f
+\li \ref h5o::h5oget_comment_f
+\li \ref h5o::h5oget_comment_by_name_f
+\li \ref h5o::h5oincr_refcount_f
+\li \ref h5o::h5oopen_by_idx_f
+\li \ref h5o::h5oset_comment_f
+\li \ref h5o::h5oset_comment_by_name_f
 
 h5oclose_f was introduced in HDF5 Release 1.8.8 but remained undocumented until this release.
 
 Fortran2003 subroutines:
-\li #h5o.h5oget_info_f
-\li #h5o.h5oget_info_by_idx_f
-\li #h5o.h5ovisit_by_name_f
+\li \ref h5o::h5oget_info_f
+\li \ref h5o::h5oget_info_by_idx_f
+\li \ref h5o::h5ovisit_by_name_f
 
 <h4>New Feature: Dynamically Loaded Filters</h4>
 HDF5 now detects and dynamically loads external filters, reducing the need for an application to
@@ -797,7 +797,7 @@ The return value of the following high-level C function has changed:
     returned size of of the dimension scale name (bug fix).
 
 <h4>In the Fortran subroutines</h4>
-\li #h5p.h5pset_external_f and #h5p.h5pget_external_f - the type of the offset parameter has changed to
+\li \ref h5p::h5pset_external_f and \ref h5p::h5pget_external_f - the type of the offset parameter has changed to
     INTEGER(KIND=OFF_T) to support 8-byte integers, matching the C type definition of off_t.
 \li The HDF5 Library now supports data conversion from enumeration to integer and floating-point
     numeric datatypes.
@@ -828,7 +828,7 @@ transition from HDF5 Release 1.8.9 to Release 1.8.10.
 \li H5Pget_mpio_no_collective_cause
 
 <strong>The following new Fortran subroutine has been added</strong>:
-\li #h5p.h5pget_mpio_actual_io_mode_f
+\li \ref h5p::h5pget_mpio_actual_io_mode_f
 
 The syntax of the following high-level C function has changed:
 \li H5TBAget_fill - This function's return type has been changed to h5tri_t. A return value of 1
@@ -848,7 +848,7 @@ the transition from HDF5 Release 1.8.8 to Release 1.8.9.
 A new high level C function and Fortran subroutine were added to HDF5 Lite (H5LT) to determine
 whether an HDF5 path is correct and resolves to a valid HDF5 object:
 \li h5LTpath_valid
-\li #h5lt.h5ltpath_valid_f
+\li `h5ltpath_valid_f`
 
 The new file image operations feature consists of the following functions and their associated
 callbacks, struct, and ENUM. This feature enables an application to load a file into memory
@@ -896,8 +896,8 @@ for those who may have missed its introduction:
 
 <h4>New Fortran Subroutines</h4>
 The following Fortran subroutines have been added in this release:
-\li #h5lt.h5ltpath_valid_f
-\li #h5o.h5ocopy_f
+\li `h5ltpath_valid_f`
+\li \ref h5o::h5ocopy_f
 \li h5fset_mpi_atomicity_f
 \li h5fget_mpi_atomicity_f
 
@@ -905,7 +905,7 @@ Where a subroutine is part of a new HDF5 feature, that feature is described abov
 
 <h4>Fortran Subroutine with Changed Behavior</h4>
 The content of the buffer returned by the following Fortran subroutine has changed as noted:
-\li #h5lt.h5ltget_attribute_string_f - If the returned buffer requires padding, #h5lt.h5ltget_attribute_string_f
+\li `h5ltget_attribute_string_f` - If the returned buffer requires padding, `h5ltget_attribute_string_f`
     now employs space padding; this buffer was previously returned with a C NULL terminator.
 
 <h4>Command-line Utilities with New Options and/or Changed Behavior</h4>
@@ -957,13 +957,13 @@ Terminology:
 
 <h4>New Fortran 2003-only subroutines</h4>
 New subroutines available only in Fortran 2003 environments:
-\li #h5d.h5dvlen_reclaim_f
-\li #h5e.h5eset_auto_f
-\li #h5l.h5literate_by_name_f
-\li #h5l.h5literate_f
-\li #h5o.h5ovisit_f
-\li #h5o.h5oget_info_by_name_f
-\li #h5t.h5tconvert_f
+\li \ref h5d::h5dvlen_reclaim_f
+\li \ref h5e::h5eset_auto_f
+\li \ref h5l::h5literate_by_name_f
+\li \ref h5l::h5literate_f
+\li \ref h5o::h5ovisit_f
+\li \ref h5o::h5oget_info_by_name_f
+\li \ref h5t::h5tconvert_f
 
 <h4>Subroutines with Fortran 90 versions and extended features in Fortran 2003 environments</h4>
 Subroutines in this section have extended support in Fortran 2003 environments, but are new or unchanged in Fortran 90 environments.
@@ -971,44 +971,44 @@ Subroutines in this section have extended support in Fortran 2003 environments, 
 All existing Fortran 90 subroutines, including those not mentioned below, are available in both Fortran 90 and Fortran 2003 environments.
 
 Subroutines with support for the derived type C_PTR in Fortran 2003 environments:
-\li #h5p.h5pget_f
-\li #h5p.h5pget_fill_value_f
-\li #h5p.h5pinsert_f
-\li #h5p.h5pregister_f
-\li #h5p.h5pset_f
-\li #h5p.h5pset_fill_value_f
-\li #h5r.h5rcreate_f
+\li \ref h5p::h5pget_f
+\li \ref h5p::h5pget_fill_value_f
+\li \ref h5p::h5pinsert_f
+\li \ref h5p::h5pregister_f
+\li \ref h5p::h5pset_f
+\li \ref h5p::h5pset_fill_value_f
+\li \ref h5r::h5rcreate_f
 \li h5rdereference_f
-\li #h5r.h5rget_name_f
-\li #h5r.h5rget_object_type_f
+\li \ref h5r::h5rget_name_f
+\li \ref h5r::h5rget_object_type_f
 
 Subroutines with support for the derived type C_PTR and a changed signature in Fortran 2003 environments:
-\li #h5a.h5aread_f
-\li #h5a.h5awrite_f
-\li #h5d.h5dread_f
-\li #h5d.h5dwrite_f
+\li \ref h5a::h5aread_f
+\li \ref h5a::h5awrite_f
+\li \ref h5d::h5dread_f
+\li \ref h5d::h5dwrite_f
 
 Subroutine with additional optional parameters in Fortran 2003 environments:
-\li #h5p.h5pcreate_class_f
+\li \ref h5p::h5pcreate_class_f
 
 <h4>New and updated Fortran 90 subroutines</h4>
 New Fortran 90 subroutines:
-\li #h5p.h5pset_nbit_f
-\li #h5p.h5pset_scaleoffset_f
+\li \ref h5p::h5pset_nbit_f
+\li \ref h5p::h5pset_scaleoffset_f
 
 Updated Fortran 90 subroutines:
-\li #h5lib.h5open_f
-\li #h5lib.h5close_f - has been modified in this release to close only the HDF5 Fortran
+\li \ref h5lib::h5open_f
+\li `h5close_f` - has been modified in this release to close only the HDF5 Fortran
     Library interface; it no longer closes the underlying HDF5 Library.
-\li #h5lib.h5check_version_f
-\li #h5lib.h5get_libversion_f
-\li #h5lib.h5garbage_collect_f
-\li #h5lib.h5dont_atexit_f
+\li `h5check_version_f`
+\li \ref h5lib::h5get_libversion_f
+\li \ref h5lib::h5garbage_collect_f
+\li \ref h5lib::h5dont_atexit_f
 
 <h4>New Fortran utility functions and derived types</h4>
 New Fortran utility functions:
-\li #h5lib.h5offsetof         Available only in Fortran 2003 environments.
-\li #h5lib.h5kind_to_type     Available in either Fortran environment.
+\li <code>h5offsetof</code>         Available only in Fortran 2003 environments.
+\li `h5kind_to_type`     Available in either Fortran environment.
 
 New Fortran derived types in Fortran 2003 environments:
 \li hvl_t              Described in New Features.
@@ -1016,15 +1016,15 @@ New Fortran derived types in Fortran 2003 environments:
 
 <h4>New high level Fortran interface</h4>
 New Fortran subroutines in the HDF5 Dimension Scale high-level interface, H5DS:
-\li #h5ds.h5dsset_scale_f
-\li #h5ds.h5dsattach_scale_f
-\li #h5ds.h5dsdetach_scale_f
-\li #h5ds.h5dsis_attached_f
-\li #h5ds.h5dsis_scale_f
-\li #h5ds.h5dsset_label_f
-\li #h5ds.h5dsget_label_f
-\li #h5ds.h5dsget_scale_name_f
-\li #h5ds.h5dsget_num_scales_f
+\li `h5dsset_scale_f`
+\li `h5dsattach_scale_f`
+\li `h5dsdetach_scale_f`
+\li `h5dsis_attached_f`
+\li `h5dsis_scale_f`
+\li `h5dsset_label_f`
+\li `h5dsget_label_f`
+\li `h5dsget_scale_name_f`
+\li `h5dsget_num_scales_f`
 
 These subtroutines are available in both Fortran 90 and Fortran 2003 environments.
 
@@ -1123,15 +1123,15 @@ Two new flags have been added:
 Several <code>h5ltmake_dataset\*\_f</code> and <code>h5ltread_dataset\*\_f</code> subroutines have
 been modified to allow them to create or read arrays of up to seven dimensions. They had previously
 been limited to three dimensions.
-\li #h5lt.h5ltmake_dataset_f
+\li `h5ltmake_dataset_f`
 \li .h5ltmake_dataset_int_f
 \li .h5ltmake_dataset_float_f
 \li h5ltmake_dataset_double_f
-\li #h5lt.h5ltread_dataset_f
+\li `h5ltread_dataset_f`
 \li h5ltread_dataset_int_f
 \li h5ltread_dataset_float_f
 \li h5ltread_dataset_double_f
-\li #h5tb.h5tbget_field_info_f has a new maxlen_out parameter. This parameter is optional.
+\li `h5tbget_field_info_f` has a new maxlen_out parameter. This parameter is optional.
 
 <h4>Command-line Utilities with New Options</h4>
 \ref sec_cltools_h5diff has a new verbose with levels option to display additional attribute information:
@@ -1281,8 +1281,8 @@ The overloaded forms of the following C++ member functions are new in this relea
 
 <h4>Fortran Subroutines with Changed Interface</h4>
 The link type parameter values associated with the following Fortran subroutines have changed in this release:
-\li #h5l.h5lget_info_f
-\li #h5l.h5lget_info_by_idx_f
+\li \ref h5l::h5lget_info_f
+\li \ref h5l::h5lget_info_by_idx_f
 
 Valid values for the parameter link_type have changed to the following:
 \li     H5L_TYPE_HARD_F
@@ -1334,9 +1334,9 @@ The function has also been changed to suppress the warning message entirely if
 
 <h4>Fortran Subroutines with Changed Syntax</h4>
 The following Fortran subroutines have changed syntax in this release:
-\li #h5l.h5lget_info_f - The type of the parameter address has changed from INTEGER to INTEGER(HADDR_T).
+\li \ref h5l::h5lget_info_f - The type of the parameter address has changed from INTEGER to INTEGER(HADDR_T).
     (This note added on 13 January 2010.)
-\li #h5l.h5lget_info_by_idx_f - <code>h5lget_info_by_idx_f (loc_id, group_name, index_field, order, n,
+\li \ref h5l::h5lget_info_by_idx_f - <code>h5lget_info_by_idx_f (loc_id, group_name, index_field, order, n,
     &link_type, f_corder_valid, corder, cset, address, val_size, &hdferr, lapl_id)</code> - The
     parameters link_type, address, and val_size have been added; the parameter data_size has been removed.
 
@@ -1378,10 +1378,10 @@ The following C functions are new for this release and are documented in the HDF
 
 <h4>Fortran Subroutines</h4>
 The following subroutines are new in this release:
-\li #h5d.h5dget_access_plist_f
-\li #h5i.h5iis_valid_f
-\li #h5p.h5pset_chunk_cache_f
-\li #h5p.h5pget_chunk_cache_f
+\li \ref h5d::h5dget_access_plist_f
+\li \ref h5i::h5iis_valid_f
+\li \ref h5p::h5pset_chunk_cache_f
+\li \ref h5p::h5pget_chunk_cache_f
 
 <h4>Function with Changed Behavior</h4>
 \li H5set_free_list_limits
@@ -1422,7 +1422,7 @@ The following C functions are new for this release and are documented in the \re
 <h4>Fortran Subroutine</h4>
 
 The following subroutine is new in this release:
-\li #h5t.h5tget_native_type_f
+\li \ref h5t::h5tget_native_type_f
 
 <h4>New C++ Wrappers</h4>
 A number of C++ wrappers were added/removed.  See RELEASE.txt for details.
@@ -1436,9 +1436,9 @@ The following function syntaxes have changed; the affected return values and par
 
 <h4>Changed Fortran Subroutines</h4>
 The optional parameter mounted has been added to the following subroutines:
-\li #h5g.h5gget_info_f
-\li #h5g.h5gget_info_by_idx_f
-\li #h5g.h5gget_info_by_name_f
+\li \ref h5g::h5gget_info_f
+\li \ref h5g::h5gget_info_by_idx_f
+\li \ref h5g::h5gget_info_by_name_f
 
 <strong>Changed Data Structure</strong>
 \li H5G_info_t - A mounted filed has been added to the H5G_info_t struct.
@@ -1519,108 +1519,108 @@ There are no new C functions for Release 1.8.1.
 <h4>Fortran subroutines</h4>
 The following Fortran subroutines are new for Release 1.8.1 and are documented in the HDF5 Reference Manual.
 \b H5A
-\li #h5a.h5acreate_f
-\li #h5a.h5acreate_by_name_f
-\li #h5a.h5adelete_by_idx_f
-\li #h5a.h5adelete_by_name_f
-\li #h5a.h5aexists_f
-\li #h5a.h5aexists_by_name_f
-\li #h5a.h5aget_create_plist_f
-\li #h5a.h5aget_info_f
-\li #h5a.h5aget_info_by_idx_f
-\li #h5a.h5aget_info_by_name_f
-\li #h5a.h5aget_name_by_idx_f
-\li #h5a.h5aget_storage_size_f
-\li #h5a.h5aopen_f
-\li #h5a.h5aopen_by_idx_f
-\li #h5a.h5aopen_by_name_f
-\li #h5a.h5arename_f
-\li #h5a.h5arename_by_name_f
+\li \ref h5a::h5acreate_f
+\li \ref h5a::h5acreate_by_name_f
+\li \ref h5a::h5adelete_by_idx_f
+\li \ref h5a::h5adelete_by_name_f
+\li \ref h5a::h5aexists_f
+\li \ref h5a::h5aexists_by_name_f
+\li \ref h5a::h5aget_create_plist_f
+\li \ref h5a::h5aget_info_f
+\li \ref h5a::h5aget_info_by_idx_f
+\li \ref h5a::h5aget_info_by_name_f
+\li \ref h5a::h5aget_name_by_idx_f
+\li \ref h5a::h5aget_storage_size_f
+\li \ref h5a::h5aopen_f
+\li \ref h5a::h5aopen_by_idx_f
+\li \ref h5a::h5aopen_by_name_f
+\li \ref h5a::h5arename_f
+\li \ref h5a::h5arename_by_name_f
 
 \b H5D
-\li #h5d.h5dcreate_anon_f
-\li #h5d.h5dcreate_f
-\li #h5d.h5dopen_f
-\li #h5d.h5dset_extent_f
+\li \ref h5d::h5dcreate_anon_f
+\li \ref h5d::h5dcreate_f
+\li \ref h5d::h5dopen_f
+\li `h5dset_extent_f`
 
 \b H5G
-\li #h5g.h5gcreate_anon_f
-\li #h5g.h5gcreate_f
-\li #h5g.h5gget_create_plist_f
-\li #h5g.h5gget_info_f
-\li #h5g.h5gget_info_by_idx_f
-\li #h5g.h5gget_info_by_name_f
-\li #h5g.h5gopen_f
+\li \ref h5g::h5gcreate_anon_f
+\li \ref h5g::h5gcreate_f
+\li \ref h5g::h5gget_create_plist_f
+\li \ref h5g::h5gget_info_f
+\li \ref h5g::h5gget_info_by_idx_f
+\li \ref h5g::h5gget_info_by_name_f
+\li \ref h5g::h5gopen_f
 
 \b H5L
-\li #h5l.h5lcopy_f
-\li #h5l.h5lcreate_external_f
-\li #h5l.h5lcreate_hard_f
-\li #h5l.h5lcreate_soft_f
-\li #h5l.h5ldelete_f
-\li #h5l.h5ldelete_by_idx_f
-\li #h5l.h5lexists_f
-\li #h5l.h5lget_info_f
-\li #h5l.h5lget_info_by_idx_f
-\li #h5l.h5lget_name_by_idx_f
-\li #h5l.h5lmove_f
+\li \ref h5l::h5lcopy_f
+\li \ref h5l::h5lcreate_external_f
+\li \ref h5l::h5lcreate_hard_f
+\li \ref h5l::h5lcreate_soft_f
+\li \ref h5l::h5ldelete_f
+\li \ref h5l::h5ldelete_by_idx_f
+\li \ref h5l::h5lexists_f
+\li \ref h5l::h5lget_info_f
+\li \ref h5l::h5lget_info_by_idx_f
+\li \ref h5l::h5lget_name_by_idx_f
+\li \ref h5l::h5lmove_f
 
 \b H5O
-\li #h5o.h5olink_f
-\li #h5o.h5oopen_f
+\li \ref h5o::h5olink_f
+\li \ref h5o::h5oopen_f
 
 \b H5P
-\li #h5p.h5pget_attr_creation_order_f
-\li #h5p.h5pget_attr_phase_change_f
-\li #h5p.h5pget_char_encoding_f
-\li #h5p.h5pget_copy_object_f
-\li #h5p.h5pget_create_inter_group_f
-\li #h5p.h5pget_data_transform_f
+\li \ref h5p::h5pget_attr_creation_order_f
+\li \ref h5p::h5pget_attr_phase_change_f
+\li \ref h5p::h5pget_char_encoding_f
+\li \ref h5p::h5pget_copy_object_f
+\li \ref h5p::h5pget_create_inter_group_f
+\li \ref h5p::h5pget_data_transform_f
 \li h5pget_elink_prefix_f
-\li #h5p.h5pget_est_link_info_f
-\li #h5p.h5pget_fapl_direct_f
-\li #h5p.h5pget_link_creation_order_f
-\li #h5p.h5pget_link_phase_change_f
-\li #h5p.h5pget_local_heap_size_hint_f
-\li #h5p.h5pget_nlinks_f
-\li #h5p.h5pget_obj_track_times_f
+\li \ref h5p::h5pget_est_link_info_f
+\li \ref h5p::h5pget_fapl_direct_f
+\li \ref h5p::h5pget_link_creation_order_f
+\li \ref h5p::h5pget_link_phase_change_f
+\li \ref h5p::h5pget_local_heap_size_hint_f
+\li \ref h5p::h5pget_nlinks_f
+\li \ref h5p::h5pget_obj_track_times_f
 \li h5pget_shared_mesg_index_f
 \li h5pget_shared_mesg_nindexes_f
-\li #h5p.h5pset_attr_creation_order_f
-\li #h5p.h5pset_attr_phase_change_f
-\li #h5p.h5pset_char_encoding_f
-\li #h5p.h5pset_copy_object_f
-\li #h5p.h5pset_create_inter_group_f
-\li #h5p.h5pset_data_transform_f
+\li \ref h5p::h5pset_attr_creation_order_f
+\li \ref h5p::h5pset_attr_phase_change_f
+\li \ref h5p::h5pset_char_encoding_f
+\li \ref h5p::h5pset_copy_object_f
+\li \ref h5p::h5pset_create_inter_group_f
+\li \ref h5p::h5pset_data_transform_f
 \li h5pset_elink_prefix_f
-\li #h5p.h5pset_est_link_info_f
-\li #h5p.h5pset_fapl_direct_f
-\li #h5p.h5pset_libver_bounds_f
-\li #h5p.h5pset_link_creation_order_f
-\li #h5p.h5pset_link_phase_change_f
-\li #h5p.h5pset_local_heap_size_hint_f
-\li #h5p.h5pset_obj_track_times_f
-\li #h5p.h5pset_nbit_f
-\li #h5p.h5pset_nlinks_f
-\li #h5p.h5pset_scaleoffset_f
+\li \ref h5p::h5pset_est_link_info_f
+\li \ref h5p::h5pset_fapl_direct_f
+\li \ref h5p::h5pset_libver_bounds_f
+\li \ref h5p::h5pset_link_creation_order_f
+\li \ref h5p::h5pset_link_phase_change_f
+\li \ref h5p::h5pset_local_heap_size_hint_f
+\li \ref h5p::h5pset_obj_track_times_f
+\li \ref h5p::h5pset_nbit_f
+\li \ref h5p::h5pset_nlinks_f
+\li \ref h5p::h5pset_scaleoffset_f
 
 \b H5R
-\li #h5r.h5rget_name_f
+\li \ref h5r::h5rget_name_f
 
 \b H5S
-\li #h5s.h5sdecode_f
-\li #h5s.h5sencode_f
-\li #h5s.h5sextent_equal_f
+\li \ref h5s::h5sdecode_f
+\li \ref h5s::h5sencode_f
+\li \ref h5s::h5sextent_equal_f
 
 \b H5T
-\li #h5t.h5tcommit_anon_f
-\li #h5t.h5tcommit_f
-\li #h5t.h5tcommitted_f
-\li #h5t.h5tcompiler_conv_f
-\li #h5t.h5tdecode_f
-\li #h5t.h5tencode_f
-\li #h5t.h5tget_create_plist_f
-\li #h5t.h5topen_f
+\li \ref h5t::h5tcommit_anon_f
+\li \ref h5t::h5tcommit_f
+\li \ref h5t::h5tcommitted_f
+\li \ref h5t::h5tcompiler_conv_f
+\li \ref h5t::h5tdecode_f
+\li \ref h5t::h5tencode_f
+\li \ref h5t::h5tget_create_plist_f
+\li \ref h5t::h5topen_f
 
 <h4>C++ wrappers</h4>
 There are no new C++ wrappers for Release 1.8.1.
@@ -2131,13 +2131,13 @@ Symbols and preset values associated with the following functions, subroutines o
         <li>#H5Z_FILTER_SCALEOFFSET</li></ul>
 
 Fortran90 subroutines:
-\li     #h5p.h5pget_filter_f
-\li     #h5p.h5pget_filter_by_id_f
-\li     #h5p.h5pmodify_filter_f
-\li     #h5p.h5premove_filter_f
-\li     #h5p.h5pset_filter_f
-\li     #h5z.h5zfilter_avail_f
-\li     #h5z.h5zget_filter_info_f - Two new filter identifiers are available for the filter or filter_id parameters:<ul>
+\li     \ref h5p::h5pget_filter_f
+\li     \ref h5p::h5pget_filter_by_id_f
+\li     \ref h5p::h5pmodify_filter_f
+\li     \ref h5p::h5premove_filter_f
+\li     \ref h5p::h5pset_filter_f
+\li     \ref h5z::h5zfilter_avail_f
+\li     \ref h5z::h5zget_filter_info_f - Two new filter identifiers are available for the filter or filter_id parameters:<ul>
         <li>H5Z_FILTER_NBIT_F</li>
         <li>H5Z_FILTER_SCALEOFFSET_F</li></ul>
 

@@ -132,7 +132,6 @@ macro (ADD_H5_PBITS_TEST resultfile resultcode result_errcheck)
     endif ()
   endif ()
   set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits"
   )
   if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
