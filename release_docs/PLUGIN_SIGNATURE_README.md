@@ -218,6 +218,78 @@ Provide users with:
 
 ````
 
+### Advanced: Passphrase-Protected Private Keys
+
+You can generate a private key encrypted with a passphrase for an additional layer of
+protection. If the key file is ever copied or stolen, the attacker cannot use it without
+the passphrase.
+
+#### Generating a Passphrase-Protected Key
+
+```bash
+# Generate a 4096-bit RSA key encrypted with AES-256
+# OpenSSL will prompt you to set a passphrase
+openssl genrsa -aes256 -out private_enc.pem 4096
+
+# Extract the public key (public key is never encrypted)
+openssl rsa -in private_enc.pem -pubout -out my_public_key.pem
+```
+
+#### Using a Passphrase-Protected Key with h5sign
+
+h5sign passes `NULL` as the OpenSSL password callback, which causes OpenSSL to use
+its default behavior: **prompt the terminal for the passphrase**.
+
+**Interactive use** (terminal present) — works automatically:
+
+```bash
+h5sign -p my_plugin.so -k private_enc.pem
+# OpenSSL will prompt:
+#   Enter PEM pass phrase: ****
+```
+
+**Non-interactive use** (CI/CD pipelines, scripts, shell redirection) — the terminal
+prompt has nowhere to go, so OpenSSL fails with a `bad decrypt` or
+`Could not read private key` error.
+
+The recommended workaround for automation is to decrypt to a temporary file, sign,
+and then securely delete it:
+
+```bash
+# 1. Decrypt to a temp file (permissions set before writing)
+TMPKEY=$(mktemp)
+chmod 600 "$TMPKEY"
+openssl rsa -in private_enc.pem -out "$TMPKEY" -passin env:KEY_PASSPHRASE
+
+# 2. Sign the plugin
+h5sign -p my_plugin.so -k "$TMPKEY"
+
+# 3. Securely delete the temporary plaintext key
+shred -vfz -n 3 "$TMPKEY" 2>/dev/null || rm -f "$TMPKEY"
+unset TMPKEY
+```
+
+Store the passphrase as a CI secret (e.g., GitHub Actions `secrets.KEY_PASSPHRASE`)
+and never log or echo it.
+
+#### Trade-offs
+
+| Approach | Protection at rest | Works non-interactively | Complexity |
+| --- | --- | --- | --- |
+| Unprotected key (`chmod 600`) | Filesystem permissions only | ✅ Yes | Low |
+| Passphrase-protected key | Passphrase + filesystem | ⚠️ Requires temp-file workaround | Medium |
+| HSM | Hardware-enforced | ✅ Yes (with PKCS#11) | High |
+
+**Recommendation**: For developer workstations, a passphrase-protected key is a good
+default. For CI/CD pipelines, store either an unprotected key or the passphrase as a
+protected secret, and ensure the signing host itself is trusted.
+
+> **Note**: h5sign enforces that the key file is not group- or world-readable
+> (`chmod 600`). This check is performed on the open file descriptor to prevent
+> TOCTOU attacks. Both encrypted and unencrypted keys must satisfy this requirement.
+
+---
+
 ### Advanced: Using Different Hash Algorithms
 
 The `h5sign` tool supports multiple algorithms:
