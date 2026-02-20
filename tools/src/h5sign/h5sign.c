@@ -285,7 +285,8 @@ read_private_key(const char *keyfile)
         ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
         fprintf(rawerrorstream, "Error: Cannot read private key from '%s': %s\n", keyfile, err_buf);
         fprintf(rawerrorstream, "       Make sure the file is in PEM format.\n");
-        fprintf(rawerrorstream, "       If the key is passphrase-protected, re-run interactively so OpenSSL\n");
+        fprintf(rawerrorstream,
+                "       If the key is passphrase-protected, re-run interactively so OpenSSL\n");
         fprintf(rawerrorstream, "       can prompt for the passphrase (non-interactive use will fail).\n");
         goto done;
     }
@@ -611,8 +612,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     }
 
     if (HDlseek(fd, (HDoff_t)file_size, SEEK_SET) < 0) {
-        fprintf(rawerrorstream, "Error: Cannot seek in plugin file '%s': %s\n", plugin_path,
-                strerror(errno));
+        fprintf(rawerrorstream, "Error: Cannot seek in plugin file '%s': %s\n", plugin_path, strerror(errno));
         ret_value = FAIL;
         goto done;
     }
