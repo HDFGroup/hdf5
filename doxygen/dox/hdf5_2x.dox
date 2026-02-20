@@ -62,7 +62,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://\RELURL/v2_1/v2_1_0/downloads/hdf5-2.1.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/v2_1/v2_1_0/downloads/compat_report/index.html)
+ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://\RELURL/2.1.0/downloads/hdf5-2.1.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/2.1.0/downloads/compat_report/index.html)
 </td>
 </tr>
 <tr>
@@ -138,9 +138,25 @@ This section includes the new features introduced in the HDF5 2.x series:
 \li Support for chunks larger than 4 GiB using 64 bit addressing.
 
 \li New predefined datatypes for
-    - FP8 data in E4M3 and E5M2 formats (https://arxiv.org/abs/2209.05433), but not a native FP8 datatype.
-    - little- and big-endian [bfloat16](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
-<br>Please refer to the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG</a> for detail.
+
+<table>
+<tr>
+  <td rowspan="2">2.1.0</td>
+  <td>FP6 data in E2M3 and E3M2 formats</td>
+  <td rowspan="2">For details, please see the Software Changes section of \ref subsubsec_rel_spec_2x_change_21versus20</td>
+</tr>
+<tr>
+  <td>FP4 data in E2M1 format</td>
+</tr>
+<tr>
+  <td rowspan="2">2.0.0</td>
+  <td>FP8 data in E4M3 and E5M2 formats (<a href="https://arxiv.org/abs/2209.05433">https://arxiv.org/abs/2209.05433</a>), but not a native FP8 datatype</td>
+  <td rowspan="2">For details, please see the Software Changes section of \ref subsubsec_rel_spec_2x_change_20versus14_6</td>
+</tr>
+<tr>
+  <td>little- and big-endian bfloat16 data</td>
+</tr>
+</table>
 
 \li Default chunk cache hash table size increased to 8191
 <br>In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
