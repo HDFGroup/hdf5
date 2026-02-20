@@ -5,7 +5,7 @@ var searchData=
   ['advanced_20link_20functions_2',['Advanced Link Functions',['../group___h5_l_a.html',1,'']]],
   ['alpha_3',['DEC Alpha',['../group___p_d_t_a_l_p_h_a.html',1,'']]],
   ['alternative_20floating_20point_20datatypes_4',['Alternative Floating Point Datatypes',['../group___p_d_t_a_l_t_f_l_o_a_t.html',1,'']]],
-  ['amd_20intel_5',['AMD &amp;amp; INTEL',['../group___p_d_t_x86.html',1,'']]],
+  ['amd_20intel_5',['AMD &amp; INTEL',['../group___p_d_t_x86.html',1,'']]],
   ['and_20enumeration_20datatypes_6',['Compound and Enumeration Datatypes',['../group___c_o_m_p_e_n_u_m.html',1,'']]],
   ['api_20h5im_7',['HDF5 Images API (H5IM)',['../group___h5_i_m.html',1,'']]],
   ['apis_20h5do_8',['HDF5 Optimizations APIs (H5DO)',['../group___h5_d_o.html',1,'']]],
