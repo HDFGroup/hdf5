@@ -284,7 +284,9 @@ read_private_key(const char *keyfile)
         char          err_buf[256];
         ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
         fprintf(rawerrorstream, "Error: Cannot read private key from '%s': %s\n", keyfile, err_buf);
-        fprintf(rawerrorstream, "       Make sure the file is in PEM format and is not passphrase-protected.\n");
+        fprintf(rawerrorstream, "       Make sure the file is in PEM format.\n");
+        fprintf(rawerrorstream, "       If the key is passphrase-protected, re-run interactively so OpenSSL\n");
+        fprintf(rawerrorstream, "       can prompt for the passphrase (non-interactive use will fail).\n");
         goto done;
     }
 
