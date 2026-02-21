@@ -68,9 +68,12 @@ static int   opt_force     = 0;
  * parameters.
  */
 static const char            *s_opts   = "hp:k:a:fvV";
-static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},      {"plugin", require_arg, 'p'},
-                                          {"key", require_arg, 'k'},  {"algorithm", require_arg, 'a'},
-                                          {"force", no_arg, 'f'},     {"verbose", no_arg, 'v'},
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
+                                          {"plugin", require_arg, 'p'},
+                                          {"key", require_arg, 'k'},
+                                          {"algorithm", require_arg, 'a'},
+                                          {"force", no_arg, 'f'},
+                                          {"verbose", no_arg, 'v'},
                                           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
@@ -97,7 +100,7 @@ usage(const char *prog)
     fprintf(rawoutstream, "  -a, --algorithm <alg>   Hash algorithm: sha256, sha384, sha512,\n");
     fprintf(rawoutstream, "                          sha256-pss, sha384-pss, sha512-pss\n");
     fprintf(rawoutstream, "                          (default: sha512)\n");
-  fprintf(rawoutstream, "  -f, --force             Re-sign an already-signed plugin by stripping\n");
+    fprintf(rawoutstream, "  -f, --force             Re-sign an already-signed plugin by stripping\n");
     fprintf(rawoutstream, "                          the existing signature before signing\n");
     fprintf(rawoutstream, "  -v, --verbose           Verbose output (show signature details)\n");
     fprintf(rawoutstream, "  -h, --help              Print this help message\n");
@@ -472,9 +475,8 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 
                         if (existing_sig_len == 0 ||
                             (hsize_t)existing_sig_len + (hsize_t)H5PL_SIG_FOOTER_SIZE > file_size) {
-                            fprintf(rawerrorstream,
-                                    "Error: Corrupt signature footer in '%s' (sig_len=%u)\n", plugin_path,
-                                    existing_sig_len);
+                            fprintf(rawerrorstream, "Error: Corrupt signature footer in '%s' (sig_len=%u)\n",
+                                    plugin_path, existing_sig_len);
                             ret_value = FAIL;
                             goto done;
                         }
@@ -482,9 +484,8 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
                         binary_size = file_size - (hsize_t)existing_sig_len - (hsize_t)H5PL_SIG_FOOTER_SIZE;
 
                         if (HDftruncate(fd, (HDoff_t)binary_size) < 0) {
-                            fprintf(rawerrorstream,
-                                    "Error: Cannot strip existing signature from '%s': %s\n", plugin_path,
-                                    strerror(errno));
+                            fprintf(rawerrorstream, "Error: Cannot strip existing signature from '%s': %s\n",
+                                    plugin_path, strerror(errno));
                             ret_value = FAIL;
                             goto done;
                         }
