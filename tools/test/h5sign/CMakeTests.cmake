@@ -93,13 +93,15 @@ if (OPENSSL_EXECUTABLE)
   )
 
   # Test 3: Sign a small plugin
+  # Note: depends on verify-copy-small-for-signing to ensure the unsigned copy
+  # is preserved before this test signs plugin_small.so in-place.
   add_test (
     NAME H5SIGN-sign_small
     COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_small.so -k test_private.pem
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-sign_small PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public"
+    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-small-for-signing"
   )
 
   # Test 4: Sign a medium plugin with verbose output
@@ -113,16 +115,39 @@ if (OPENSSL_EXECUTABLE)
   )
 
   # Test 5: Sign a large plugin
+  # Note: depends on verify-copy-large-for-signing to ensure the unsigned copy
+  # is preserved before this test signs plugin_large.so in-place.
   add_test (
     NAME H5SIGN-sign_large
     COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_large.so -k test_private.pem
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-sign_large PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public"
+    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-large-for-signing"
   )
 
-  # Test 6: Error test - missing plugin file
+  # Test 6: Re-sign an already-signed plugin using --force
+  add_test (
+    NAME H5SIGN-resign_force
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_small.so -k test_private.pem -f
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+  set_tests_properties (H5SIGN-resign_force PROPERTIES
+    DEPENDS H5SIGN-sign_small
+  )
+
+  # Test 7: Error test - already-signed plugin without --force
+  add_test (
+    NAME H5SIGN-error_already_signed
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_small.so -k test_private.pem
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+  set_tests_properties (H5SIGN-error_already_signed PROPERTIES
+    DEPENDS H5SIGN-sign_small
+    WILL_FAIL "true"
+  )
+
+  # Test 9: Error test - missing plugin file
   add_test (
     NAME H5SIGN-error_no_plugin
     COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -k test_private.pem
@@ -132,7 +157,7 @@ if (OPENSSL_EXECUTABLE)
     WILL_FAIL "true"
   )
 
-  # Test 7: Error test - missing key file
+  # Test 10: Error test - missing key file
   add_test (
     NAME H5SIGN-error_no_key
     COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_small.so
@@ -142,7 +167,7 @@ if (OPENSSL_EXECUTABLE)
     WILL_FAIL "true"
   )
 
-  # Test 8: Error test - nonexistent plugin file
+  # Test 11: Error test - nonexistent plugin file
   add_test (
     NAME H5SIGN-error_bad_plugin
     COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p nonexistent.so -k test_private.pem
@@ -153,7 +178,7 @@ if (OPENSSL_EXECUTABLE)
     WILL_FAIL "true"
   )
 
-  # Test 9: Error test - nonexistent key file
+  # Test 12: Error test - nonexistent key file
   add_test (
     NAME H5SIGN-error_bad_key
     COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_small.so -k nonexistent.pem
@@ -189,26 +214,6 @@ if (OPENSSL_EXECUTABLE)
     DEPENDS H5SIGN-verify-setup-keystore
   )
 
-  # Sign test plugins for verification tests
-  add_test (
-    NAME H5SIGN-verify-sign-plugins
-    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_small.so -k test_private.pem
-    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-  )
-  set_tests_properties (H5SIGN-verify-sign-plugins PROPERTIES
-    DEPENDS "H5SIGN-verify-copy-pubkey;H5SIGN-gentest"
-  )
-
-  # Rename signed plugin for verification test
-  add_test (
-    NAME H5SIGN-verify-rename-signed
-    COMMAND ${CMAKE_COMMAND} -E copy plugin_small.so plugin_signed.so
-    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-  )
-  set_tests_properties (H5SIGN-verify-rename-signed PROPERTIES
-    DEPENDS H5SIGN-verify-sign-plugins
-  )
-
   # Create unsigned plugin for negative test
   add_test (
     NAME H5SIGN-verify-copy-unsigned
@@ -219,20 +224,62 @@ if (OPENSSL_EXECUTABLE)
     DEPENDS H5SIGN-gentest
   )
 
-  # Sign plugin for cache test
+  # Copy plugin_small.so to a private file for the verification sign test,
+  # so it does not conflict with H5SIGN-sign_small which signs the same file.
+  add_test (
+    NAME H5SIGN-verify-copy-small-for-signing
+    COMMAND ${CMAKE_COMMAND} -E copy plugin_small.so plugin_small_to_sign.so
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+  set_tests_properties (H5SIGN-verify-copy-small-for-signing PROPERTIES
+    DEPENDS "H5SIGN-gentest;H5SIGN-verify-copy-pubkey"
+  )
+
+  # Sign the private copy of the small plugin for verification tests
+  add_test (
+    NAME H5SIGN-verify-sign-plugins
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_small_to_sign.so -k test_private.pem
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+  set_tests_properties (H5SIGN-verify-sign-plugins PROPERTIES
+    DEPENDS H5SIGN-verify-copy-small-for-signing
+  )
+
+  # Rename signed plugin for verification test
+  add_test (
+    NAME H5SIGN-verify-rename-signed
+    COMMAND ${CMAKE_COMMAND} -E copy plugin_small_to_sign.so plugin_signed.so
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+  set_tests_properties (H5SIGN-verify-rename-signed PROPERTIES
+    DEPENDS H5SIGN-verify-sign-plugins
+  )
+
+  # Copy plugin_large.so to a private file for the cache sign test,
+  # so it does not conflict with H5SIGN-sign_large which signs the same file.
+  add_test (
+    NAME H5SIGN-verify-copy-large-for-signing
+    COMMAND ${CMAKE_COMMAND} -E copy plugin_large.so plugin_large_to_sign.so
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+  set_tests_properties (H5SIGN-verify-copy-large-for-signing PROPERTIES
+    DEPENDS "H5SIGN-gentest;H5SIGN-verify-copy-pubkey"
+  )
+
+  # Sign the private copy of the large plugin for cache tests
   add_test (
     NAME H5SIGN-verify-sign-cache-test
-    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_large.so -k test_private.pem
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5sign> -p plugin_large_to_sign.so -k test_private.pem
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-sign-cache-test PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-verify-copy-pubkey"
+    DEPENDS H5SIGN-verify-copy-large-for-signing
   )
 
   # Rename signed plugin for cache test
   add_test (
     NAME H5SIGN-verify-rename-cache-test
-    COMMAND ${CMAKE_COMMAND} -E copy plugin_large.so plugin_cache_test.so
+    COMMAND ${CMAKE_COMMAND} -E copy plugin_large_to_sign.so plugin_cache_test.so
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-rename-cache-test PROPERTIES

@@ -1737,7 +1737,7 @@ done:
  *
  * Purpose:     Clean up keystore and signature cache
  *
- * Return:      SUCCEED/FAIL
+ * Return:      SUCCEED
  *-------------------------------------------------------------------------
  */
 herr_t

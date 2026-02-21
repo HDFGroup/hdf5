@@ -24,15 +24,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions            */
-#include "H5Eprivate.h"  /* Error handling               */
-#include "H5PLpkg.h"     /* Plugin                       */
-#include "H5Zprivate.h"  /* Filter pipeline              */
-#include "H5CXprivate.h" /* API Contexts                 */
-#ifdef H5_HAVE_PARALLEL
-#include "H5FDmpio.h"   /* MPI I/O file driver          */
-#include "H5Fprivate.h" /* File access                  */
-#endif
+#include "H5private.h"  /* Generic Functions            */
+#include "H5Eprivate.h" /* Error handling               */
+#include "H5PLpkg.h"    /* Plugin                       */
+#include "H5Zprivate.h" /* Filter pipeline              */
 
 /****************/
 /* Local Macros */
@@ -314,7 +309,6 @@ H5PL__verify_plugin_signature(const char *path)
     /* Check args */
     assert(path);
 
-    /* Verify signature (all ranks verify independently in parallel mode) */
     verify_result = H5PL__verify_signature_appended(path);
 
     if (verify_result < 0)
