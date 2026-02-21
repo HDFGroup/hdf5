@@ -143,7 +143,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-error_already_signed PROPERTIES
-    DEPENDS H5SIGN-sign_small
+    DEPENDS "H5SIGN-sign_small;H5SIGN-resign_force"
     WILL_FAIL "true"
   )
 
