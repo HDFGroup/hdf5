@@ -43,7 +43,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}
@@ -206,7 +206,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}
@@ -325,7 +325,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}

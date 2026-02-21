@@ -122,7 +122,6 @@ macro (ADD_H5_OUTPUT testname resultfile resultcode testfile)
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           DEPENDS H5FC-${testname}-${testfile}-tmpfile
       )
       if ("H5FC-${testname}-${testfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -142,7 +141,6 @@ macro (ADD_H5_OUTPUT testname resultfile resultcode testfile)
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC-${testname}-${testfile}-NA PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           DEPENDS H5FC-${testname}-${testfile}-tmpfile
       )
       if ("H5FC-${testname}-${testfile}-NA" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -185,7 +183,6 @@ macro (ADD_H5_NOERR_OUTPUT testname resultfile resultcode testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5FC-${testname}-${testfile}-tmpfile
     )
     if ("H5FC-${testname}-${testfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -228,7 +225,6 @@ macro (ADD_H5_MASK_OUTPUT testname resultfile resultcode result_errcheck testfil
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5FC-${testname}-${testfile}-tmpfile
     )
     if ("H5FC-${testname}-${testfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -283,7 +279,6 @@ macro (ADD_H5_TEST testname resultcode testfile)
     )
     set_tests_properties (H5FC-${testname} PROPERTIES
         DEPENDS "H5FC-${testname}-tmpfile"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         FIXTURES_REQUIRED clear_H5FC-${testname}
     )
     if ("H5FC-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -301,7 +296,6 @@ macro (ADD_H5_CHECK_IDX dependtest testname)
     )
     set_tests_properties (H5FC_CHECK_IDX-${dependtest}-${testname} PROPERTIES
         DEPENDS "H5FC-${dependtest}"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         FIXTURES_REQUIRED clear_H5FC-${dependtest}
     )
     if ("H5FC_CHECK_IDX-${dependtest}-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -337,7 +331,6 @@ macro (ADD_H5_TEST_CHECK_IDX testname resultcode testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5FC_TEST_CHECK_IDX-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5FC_TEST_CHECK_IDX-${testname}-tmpfile"
     )
     if ("H5FC_TEST_CHECK_IDX-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -348,7 +341,6 @@ macro (ADD_H5_TEST_CHECK_IDX testname resultcode testfile)
         COMMAND $<TARGET_FILE:h5fc_chk_idx> ./testfiles/${testname}-tmp.h5 ${ARGN}
     )
     set_tests_properties (H5FC_TEST_CHECK_IDX-${testname}-check PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5FC_TEST_CHECK_IDX-${testname}"
     )
     if ("H5FC_TEST_CHECK_IDX-${testname}-check" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -392,7 +384,6 @@ macro (ADD_H5_H5DUMP_CHECK testname)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5FC_H5DUMP_CHECK-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5FC_H5DUMP_CHECK-${testname}-tmpfile"
     )
     if ("H5FC_H5DUMP_CHECK-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -410,7 +401,6 @@ macro (ADD_H5_H5DUMP_CHECK testname)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5FC_H5DUMP_CHECK-${testname}-dump PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS "H5FC_H5DUMP_CHECK-${testname}"
     )
     if ("H5FC_H5DUMP_CHECK-${testname}-dump" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

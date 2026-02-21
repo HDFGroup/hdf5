@@ -37,7 +37,6 @@ macro (ADD_VFD_TEST vfdname resultcode)
     )
     set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES
         TIMEOUT ${CTEST_SHORT_TIMEOUT}
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if ("CPP_VFD-${vfdname}-cpp_testhdf5" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES DISABLED true)
