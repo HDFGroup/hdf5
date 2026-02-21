@@ -17,9 +17,10 @@ ALIASES += DWNURL="\RELURL/downloads/latest"
 ALIASES += RFCURL="\DOCURL/rfc"
 ALIASES += AEXURL="\HDFURL/archive/support/ftp/HDF5/examples"
 ALIASES += RFCWIP="github.com/HDFGroup/hdf5doc/tree/master/RFCs"
-#branch name (develop, hdf5_2_0_0)
+# URL for source develop
 ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop"
-ALIASES += SRCURL114="github.com/HDFGroup/hdf5/blob/hdf5_1.14.6"
+# URL for source of all other branches
+ALIASES += SRCURLALL="github.com/HDFGroup/hdf5/blob"
 #Other projects that contribute to HDF5
 ALIASES += PRJURL="\HDFURL/archive/support/projects"
 ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/master"
