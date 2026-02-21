@@ -3,7 +3,7 @@
  * Navigate back: \ref index "Main" / \ref release_specific_info
  * <hr>
 
-\section sec_rel_spec_2x HDF5 Library and Tools 2.1.0
+\section sec_rel_spec_2x HDF5 Library and Tools 2.2.0
 
 \subsection subsec_rel_info_2x Release Information
 
@@ -27,7 +27,7 @@
 Additional Release Information
 </td>
 <td>
-<a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">Change log</a>
+<a href="https://\SRCURLALL/hdf5_2.2.0/release_docs/CHANGELOG.md">Change log</a>
 </td>
 </tr>
 <tr>
@@ -62,7 +62,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://\RELURL/2.1.0/downloads/hdf5-2.1.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/2.1.0/downloads/compat_report/index.html)
+ABI/API Compatibility Reports between 2.2.0 and 2.1.0 [tar file](https://\RELURL/2.2.0/downloads/hdf5-2.2.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/2.2.0/downloads/compat_report/index.html)
 </td>
 </tr>
 <tr>
@@ -78,9 +78,9 @@ ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://\RELURL
 \subsection subsec_download_2x Downloads
 
 Source code and binaries are available at:
-<a href="https://github.com/HDFGroup/hdf5/releases/tag/2.1.0">HDF5 2.1.0 on GitHub</a>
+<a href="https://github.com/HDFGroup/hdf5/releases/tag/2.2.0">HDF5 2.2.0 on GitHub</a>
 
-Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.1.0/release_docs/INSTALL) for building with CMake.
+Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.2.0/release_docs/INSTALL) for building with CMake.
 
 
 \subsection subsec_obtain_method_2x Methods to obtain (gz file)
@@ -92,7 +92,7 @@ Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.1.0/release_docs/
     `wget https://github.com/HDFGroup/hdf5/releases/download/${PACKAGEVERSION}/<distribution>.tar.gz`<br>
     `gzip -cd <distribution>.tar.gz | tar xvf -`
 </div>
-\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.1.0 for this release
+\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.2.0 for this release
 
 
 \subsection subsec_dox_gen_doc_2x Doxygen Generated Reference Manual
@@ -105,7 +105,7 @@ Since this portion of the HDF5 documentation is now part of the source code, it 
 
 \section sec_rel_spec_2x_migrate Migrating from HDF5 1.14 to HDF5 2.x
 
-This section highlights some changes that might affect migrating to HDF5.20, please refer to the \ref sec_rel_spec_2x_change or the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">Change log</a> for detail.
+This section highlights some changes that might affect migrating to HDF5.20, please refer to the \ref sec_rel_spec_2x_change or the <a href="https://\SRCURLALL/hdf5_2.2.0/release_docs/CHANGELOG.md">Change log</a> for detail.
 
 \li Default file format is now 1.8
 \li The file format has been updated to 4.0<a name="fileformat"></a>
@@ -113,10 +113,10 @@ This section highlights some changes that might affect migrating to HDF5.20, ple
     - `H5Dread_chunk()`<br>
     - `H5Tdecode()`<br>
     - `H5Iregister_type()`<br>
-\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">Change log</a> for a complete description on this feature.
+\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURLALL/hdf5_2.2.0/release_docs/CHANGELOG.md">Change log</a> for a complete description on this feature.
 \li Significance in tools
     - The tool h5dump has a new option `--lformat` and its `XML` option is deprecated.
-    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">Change log</a> for an explanation.
+    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURLALL/hdf5_2.2.0/release_docs/CHANGELOG.md">Change log</a> for an explanation.
 
 \section sec_rel_spec_2x_feat New Features in HDF5 Release 2.x
 
