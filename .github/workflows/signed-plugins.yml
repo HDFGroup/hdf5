@@ -208,7 +208,7 @@ jobs:
     - name: Verify signature verification code exists
       run: |
         echo "Checking signature verification implementation..."
-        grep -A 3 "Verify signature" src/H5PLint.c
+        grep -A 3 "Verify plugin signature" src/H5PLint.c
         echo "All ranks verify independently in both serial and parallel modes"
 
     - name: Run comprehensive tests
