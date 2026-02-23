@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Install Cygwin
-        uses: cygwin/cygwin-install-action@7d2dc1e241644c3318bed9ec74115d1929baa681 # master
+        uses: cygwin/cygwin-install-action@2566376092c4e280f21131be027af3f5bb2420a4 # master
         with:
           packages: cmake gcc-fortran make ninja zlib-devel flex bison perl
 
@@ -74,10 +74,10 @@ jobs:
         run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
         shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
 
-      - name: Copy script files for the space (Cygwin)
-        run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+      - name: Symlink script files for the space (Cygwin)
+        uses: ./.github/actions/symlink-ctest-scripts
+        with:
+          source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Cygwin)
         run: |

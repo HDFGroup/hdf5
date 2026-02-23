@@ -1353,6 +1353,8 @@ endif ()
 #-----------------------------------------------------------------------------
 # Create pkgconfig files
 #-----------------------------------------------------------------------------
+include (${HDF_CONFIG_DIR}/HDF5Pkgconfig.cmake)
+
 set (_PKG_CONFIG_PREFIX ${CMAKE_INSTALL_PREFIX})
 set (_PKG_CONFIG_EXEC_PREFIX \${prefix})
 set (_PKG_CONFIG_LIBDIR \${exec_prefix}/${HDF5_INSTALL_LIB_DIR})
@@ -1366,96 +1368,28 @@ if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
 endif ()
 
 set (_PKG_CONFIG_EXTRA_CFLAGS)
-set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
+set (_PKG_CONFIG_LIBS "-l${PKG_CONFIG_LIBNAME}")
 set (_PKG_CONFIG_REQUIRES)
 set (_PKG_CONFIG_LIBS_PRIVATE)
 set (_PKG_CONFIG_REQUIRES_PRIVATE)
 
-# Process LINK_LIBS and LINK_COMP_LIBS for private dependencies
-# to add to pkg-config files. Note that, for simplicity, the below
-# assumes dependency libraries don't have pkg-config support.
-foreach (lib ${LINK_LIBS})
-  # If this is a regular library, add it to the list of
-  # libraries for the Libs.private field. Otherwise, do
-  # special processing for library targets.
-  if (NOT TARGET ${lib})
-    # Avoid generator expressions related to flags for now.
-    # A more complete solution will be needed in order to
-    # correctly evaluate these.
-    string (GENEX_STRIP "${lib}" lib_genex_stripped)
-    if ("${lib}" STREQUAL "${lib_genex_stripped}")
-      set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${lib}")
-    endif ()
-
-    continue ()
-  endif ()
-
-  # If the target isn't an imported target, it's probably
-  # one that we created ourselves and set the OUTPUT_NAME
-  # property for. This is a fragile assumption, but should
-  # work for now. If the library is an imported target, we
-  # have to do more special processing.
-  get_target_property (lib_is_imported ${lib} IMPORTED)
-  if (NOT lib_is_imported)
-    get_target_property (libname ${lib} OUTPUT_NAME)
-    if (NOT "${libname}" MATCHES "libname-NOTFOUND")
-      set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libname}")
-    else ()
-      message (WARNING "library name not retrieved for library ${lib}")
-    endif ()
-
-    continue ()
-  endif ()
-
-  # Attempt to retrieve anything needed from the imported target
-  get_target_property (lib_interface_compile_opts ${lib} INTERFACE_COMPILE_OPTIONS)
-  if (lib_interface_compile_opts)
-    foreach (compile_opt ${lib_interface_compile_opts})
-      # Avoid generator expressions related to flags for now.
-      # A more complete solution will be needed in order to
-      # correctly evaluate these.
-      string (GENEX_STRIP "${compile_opt}" compile_opt_genex_stripped)
-      if ("${compile_opt}" STREQUAL "${compile_opt_genex_stripped}")
-        set (_PKG_CONFIG_EXTRA_CFLAGS "${_PKG_CONFIG_EXTRA_CFLAGS} ${compile_opt}")
-      endif ()
-    endforeach ()
-  endif ()
-
-  # For now, naively assume that any libraries listed are in the form
-  # -llibname and can be directly added to the pkg-config files. This
-  # is not always the case and more sophisticated processing of libraries
-  # will be needed eventually.
-  get_target_property (lib_interface_link_libs ${lib} INTERFACE_LINK_LIBRARIES)
-  if (lib_interface_link_libs)
-    foreach (interface_link_lib ${lib_interface_link_libs})
-      set (lib_namespace_substr -1)
-
-      # Simple heuristic to filter out library dependencies of a target
-      # that are targets themselves. More complex processing is needed
-      # here to get the full list of libraries to be linked.
-      string (FIND "${interface_link_lib}" "::" lib_namespace_substr)
-      if (NOT lib_namespace_substr EQUAL -1)
-        message (WARNING "filtered out library dependency ${interface_link_lib} of library ${lib} when generating pkg-config file")
-        continue ()
-      endif ()
-
-      # Avoid generator expressions related to flags for now.
-      # A more complete solution will be needed in order to
-      # correctly evaluate these.
-      string (GENEX_STRIP "${interface_link_lib}" interface_link_lib_genex_stripped)
-      if ("${interface_link_lib}" STREQUAL "${interface_link_lib_genex_stripped}")
-        set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} ${interface_link_lib}")
-      endif ()
-    endforeach()
+# Process LINK_LIBS and LINK_COMP_LIBS for dependencies to add to pkg-config
+# files. Note that, for simplicity, the below assumes dependency libraries
+# don't have pkg-config support.
+unset (pkg_config_lib_list)
+foreach (lib ${LINK_LIBS} ${LINK_COMP_LIBS})
+  # Get library flags for pkg-config files; ignore cflags as these should
+  # be private library dependencies
+  extract_lib_pkgconfig_info (${lib} lib_dep_flags lib_cflags lib_skipped)
+  if (NOT lib_skipped AND lib_dep_flags)
+    list (APPEND pkg_config_lib_list "${lib_dep_flags}")
   endif ()
 endforeach ()
 
-# The settings for the compression libs depends on if they have pkconfig support
-# Assuming they don't
-foreach (libs ${LINK_COMP_LIBS})
-  get_target_property (libname ${libs} OUTPUT_NAME)
-  set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libname}")
-endforeach ()
+# Convert flag lists into strings for pkg-config files
+list (REMOVE_DUPLICATES pkg_config_lib_list)
+string (REPLACE ";" " " pkg_config_lib_list "${pkg_config_lib_list}")
+set (_PKG_CONFIG_LIBS_PRIVATE "${pkg_config_lib_list}")
 
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.pc.in

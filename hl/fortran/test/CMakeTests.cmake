@@ -67,7 +67,6 @@ macro (ADD_H5_FORTRAN_TEST file)
   set_tests_properties (HL_FORTRAN_f90_${file} PROPERTIES
       FIXTURES_REQUIRED clear_HL_FORTRAN_test
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
   )
   if ("HL_FORTRAN_f90_${file}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (HL_FORTRAN_f90_${file} PROPERTIES DISABLED true)

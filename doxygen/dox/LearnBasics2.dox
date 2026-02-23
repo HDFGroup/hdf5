@@ -155,14 +155,14 @@ For details on compiling an HDF5 application:
 #H5Gcreate creates a group at the location specified by a location identifier and a name. The location identifier
 can be a file identifier or a group identifier and the name can be relative or absolute.
 
-The first #H5Gcreate/#h5g.h5gcreate_f creates the group <code style="background-color:whitesmoke;">MyGroup</code>
+The first #H5Gcreate/\ref h5g::h5gcreate_f creates the group <code style="background-color:whitesmoke;">MyGroup</code>
 in the root group of the specified file.
 
-The second #H5Gcreate/#h5g.h5gcreate_f creates the group <code style="background-color:whitesmoke;">Group_A</code>
+The second #H5Gcreate/\ref h5g::h5gcreate_f creates the group <code style="background-color:whitesmoke;">Group_A</code>
 in the group <code style="background-color:whitesmoke;">MyGroup</code> in the root group of the specified
 file. Note that the parent group (<code style="background-color:whitesmoke;">MyGroup</code>) already exists.
 
-The third #H5Gcreate/#h5g.h5gcreate_f creates the group <code style="background-color:whitesmoke;">Group_B</code> in the specified group.
+The third #H5Gcreate/\ref h5g::h5gcreate_f creates the group <code style="background-color:whitesmoke;">Group_B</code> in the specified group.
 
 \subsection secLBGrpCreateNamesExCont File Contents
 

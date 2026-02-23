@@ -64,7 +64,7 @@ foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
   add_test(NAME ${external_vol_tgt}-h5copygentest COMMAND $<TARGET_FILE:h5gentest> --h5copy)
 
   set_tests_properties (${external_vol_tgt}-h5copygentest PROPERTIES
-      ENVIRONMENT "${vol_env};${CROSSCOMPILING_PATH}"
+      ENVIRONMENT "${vol_env}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles"
       FIXTURES_SETUP ${external_vol_tgt}-files
   )
@@ -198,7 +198,6 @@ macro (ADD_H5_TEST testname)
     set_tests_properties (${vol_prefix}H5COPY-${testname}-clear-objects PROPERTIES
         # h5delete will return an error code if targeted file does not exist - accept any result
         PASS_REGULAR_EXPRESSION "^$|"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5COPY-${testname}-clear-objects PROPERTIES
@@ -219,7 +218,6 @@ macro (ADD_H5_TEST testname)
       )
       set_tests_properties (${vol_prefix}H5COPY-${testname}-prefill PROPERTIES
           DEPENDS ${vol_prefix}H5COPY-${testname}-clear-objects
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (NOT "${vol}" STREQUAL "native")
         set_tests_properties (${vol_prefix}H5COPY-${testname}-prefill PROPERTIES
@@ -263,7 +261,6 @@ macro (ADD_H5_TEST testname)
     endif ()
     set_tests_properties (${vol_prefix}H5COPY-${testname} PROPERTIES DEPENDS
         "${vol_prefix}H5COPY-${testname}-clear-objects;${prefill_dep}"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5COPY-${testname} PROPERTIES
@@ -284,7 +281,6 @@ macro (ADD_H5_TEST testname)
       )
       set_tests_properties (${vol_prefix}H5COPY-${testname}-DIFF PROPERTIES
           DEPENDS ${vol_prefix}H5COPY-${testname}
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (NOT "${vol}" STREQUAL "native")
         set_tests_properties (${vol_prefix}H5COPY-${testname}-DIFF PROPERTIES
@@ -309,7 +305,6 @@ macro (ADD_H5_TEST testname)
     set_tests_properties (${vol_prefix}H5COPY-${testname}-clean-objects PROPERTIES
         # h5delete will return an error code if targeted file does not exist - accept any result
         PASS_REGULAR_EXPRESSION "^$|"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5COPY-${testname}-clean-objects PROPERTIES
@@ -368,7 +363,6 @@ macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname c
       set_tests_properties (${vol_prefix}H5COPY_UD-${testname}-clear-objects PROPERTIES
           # h5delete will return an error code if targeted file does not exist - accept any result
           PASS_REGULAR_EXPRESSION "^$|"
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (NOT "${vol}" STREQUAL "native")
         set_tests_properties (${vol_prefix}H5COPY_UD-${testname}-clear-objects PROPERTIES
@@ -402,7 +396,6 @@ macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname c
       )
       set_tests_properties (${vol_prefix}H5COPY_UD-${testname} PROPERTIES
           DEPENDS ${vol_prefix}H5COPY_UD-${testname}-clear-objects
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (NOT "${vol}" STREQUAL "native")
         set_tests_properties (${vol_prefix}H5COPY_UD-${testname} PROPERTIES
@@ -431,7 +424,6 @@ macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname c
       )
       set_tests_properties (${vol_prefix}H5COPY_UD-${testname}-DIFF PROPERTIES
           DEPENDS ${vol_prefix}H5COPY_UD-${testname}
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
 
       if (NOT "${vol}" STREQUAL "native")
@@ -511,7 +503,6 @@ macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstna
       set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname}-clear-objects PROPERTIES
           # h5delete will return an error code if targeted file does not exist - accept any result
           PASS_REGULAR_EXPRESSION "^$|"
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (NOT "${vol}" STREQUAL "native")
         set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname}-clear-objects PROPERTIES
@@ -548,7 +539,6 @@ macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstna
       )
       set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname} PROPERTIES
           DEPENDS ${vol_prefix}H5COPY_UD_ERR-${testname}-clear-objects
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (NOT "${vol}" STREQUAL "native")
         set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname} PROPERTIES
@@ -577,7 +567,6 @@ macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstna
       )
       set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname}-DIFF PROPERTIES
           DEPENDS ${vol_prefix}H5COPY_UD_ERR-${testname}
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (NOT "${vol}" STREQUAL "native")
         set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname}-DIFF PROPERTIES
@@ -597,7 +586,6 @@ macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstna
       set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname}-clean-objects PROPERTIES
           # h5delete will return an error code if targeted file does not exist - accept any result
           PASS_REGULAR_EXPRESSION "^$|"
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname}-clean-objects PROPERTIES
           DEPENDS ${vol_prefix}H5COPY_UD_ERR-${testname}-DIFF
@@ -657,7 +645,6 @@ macro (ADD_SIMPLE_TEST resultfile resultcode)
     endif ()
     set_tests_properties (${vol_prefix}H5COPY-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if (NOT "${vol}" STREQUAL "native")
       set_tests_properties (${vol_prefix}H5COPY-${resultfile} PROPERTIES

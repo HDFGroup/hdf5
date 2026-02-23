@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
       - name: Install oneAPI (Linux)

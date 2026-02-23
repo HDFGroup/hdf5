@@ -347,6 +347,16 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "description": "MSVC Standard Config for ARM64 (Release)",
+      "inherits": [
+        "ci-arm64-Release-MSVC",
+        "ci-CPP",
+        "ci-Java",
+        "ci-StdShar"
+      ]
+    },
+    {
       "name": "ci-StdShar-MSVC-FFM",
       "description": "MSVC Standard Config for x64 with Java FFM (Requires Java 25+) (Release)",
       "inherits": [
@@ -665,6 +675,14 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "description": "MSVC Standard Build for ARM64 (Release)",
+      "configurePreset": "ci-StdShar-MSVC-ARM64",
+      "inherits": [
+        "ci-arm64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-StdShar-MSVC-FFM",
       "description": "MSVC Standard Build for x64 with Java FFM (Requires Java 25+) (Release)",
       "configurePreset": "ci-StdShar-MSVC-FFM",
@@ -939,6 +957,13 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "configurePreset": "ci-StdShar-MSVC-ARM64",
+      "inherits": [
+        "ci-arm64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-StdShar-MSVC-FFM",
       "configurePreset": "ci-StdShar-MSVC-FFM",
       "inherits": [
@@ -1190,6 +1215,11 @@
       "inherits": "ci-x64-Release-MSVC"
     },
     {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "configurePreset": "ci-StdShar-MSVC-ARM64",
+      "inherits": "ci-arm64-Release-MSVC"
+    },
+    {
       "name": "ci-StdShar-MSVC-FFM",
       "configurePreset": "ci-StdShar-MSVC-FFM",
       "inherits": "ci-x64-Release-MSVC"
@@ -1329,6 +1359,27 @@
         {
           "type": "package",
           "name": "ci-StdShar-MSVC"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-MSVC-ARM64"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-MSVC-ARM64"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-MSVC-ARM64"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-MSVC-ARM64"
         }
       ]
     },

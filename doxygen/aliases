@@ -16,6 +16,7 @@ ALIASES += DWNURL="\RELURL/downloads/latest"
 # URL for RFCs
 ALIASES += RFCURL="\DOCURL/rfc"
 ALIASES += AEXURL="\HDFURL/archive/support/ftp/HDF5/examples"
+ALIASES += RFCWIP="github.com/HDFGroup/hdf5doc/tree/master/RFCs"
 #branch name (develop, hdf5_2_0_0)
 ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop"
 ALIASES += SRCURL114="github.com/HDFGroup/hdf5/blob/hdf5_1.14.6"
@@ -278,6 +279,7 @@ ALIASES += ref_vol_doc="VOL documentation"
 # RFCs
 ################################################################################
 
+ALIASES += ref_rfc20240422="<a href=\"https://\RFCWIP/HDF5_Library/WriteAheadLog/RFC_WriteAheadLog.pdf\">Write-Ahead Log</a>"
 ALIASES += ref_rfc20240129="<a href=\"https://\RFCURL/RFC__Adding_support_for_16_bit_floating_point_and_Complex_number_datatypes_to_HDF5.pdf\">Adding support for 16-bit floating point and Complex number datatypes to HDF</a>"
 # Same RFC, but complex number datatypes was delayed to 2.0
 ALIASES += ref_rfc20240129complex="<a href=\"https://\RFCURL/RFC__Adding_support_for_16_bit_floating_point_and_Complex_number_datatypes_to_HDF5.pdf\">Support for Complex number datatypes</a>"

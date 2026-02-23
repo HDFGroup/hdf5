@@ -228,7 +228,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname}-ERR PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       add_test (
           NAME ${EXAMPLE_VARNAME}_${testname}
@@ -254,7 +253,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
     endif ()
     set (last_test "${EXAMPLE_VARNAME}_${testname}")
@@ -313,7 +311,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       endif ()
       set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_${testname}
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       set (last_test "${EXAMPLE_VARNAME}_H5DUMP-${testname}")
     endif ()

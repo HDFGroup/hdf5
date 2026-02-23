@@ -176,26 +176,26 @@ list the specific new feature that they were added for.
 <strong>In the Fortran Interface (main library)</strong><br />
 Following are the new or changed APIs introduced in HDF5-1.12.0. Those introduced with a new feature
 list the specific new feature that they were added for.
-\li #h5f.h5fget_fileno_f - Retrieves a file's file number that uniquely identifies the open file
-\li #h5f.h5fis_accessible_f - Determines if a file can be opened with a given fapl
-\li #h5l.h5lget_info_f - The function h5lget_info_f is mapped to #H5Lget_info2.
-\li #h5l.h5lget_info_by_idx_f - The function h5lget_info_by_idx_f is mapped to #H5Lget_info_by_idx2.
-\li #h5l.h5literate_f - The function h5literate_f  is mapped to #H5Literate2.
-\li #h5l.h5literate_by_name_f - The function h5literate_by_name_f is mapped to #H5Literate_by_name2.
-\li #h5o.h5oopen_by_token_f - Opens an object in an HDF5 file using its VOL independent token
-\li #h5o.h5otoken_cmp_f - Compares two VOL connector object tokens
-\li #h5p.h5pget_vol_id_f - Returns the identifier of the current VOL connector
-\li #h5p.h5pset_vol_f - Set the file VOL connector for a file access property list
-\li #h5vl.h5vlclose_f - Closes a VOL connector identifier
-\li #h5vl.h5vlget_connector_id_f - Retrieves the VOL connector identifier for a given object identifier
-\li #h5vl.h5vlget_connector_id_by_name_f - Retrieves the identifier for a registered VOL connector name
-\li #h5vl.h5vlget_connector_id_by_value_f - Retrieves the identifier for a registered VOL connector value
-\li #h5vl.h5vlget_connector_name_f - Retrieves the connector name for the VOL associated with the object or file identifier
-\li #h5vl.h5vlis_connector_registered_by_name_f - Tests whether a VOL class has been registered or not for a connector name
-\li #h5vl.h5vlis_connector_registered_by_value_f - Tests whether a VOL class has been registered or not for a connector value
-\li #h5vl.h5vlregister_connector_by_name_f - Registers a new VOL connector by name
-\li #h5vl.h5vlregister_connector_by_value_f - Registers a new VOL connector by connector value
-\li #h5vl.h5vlunregister_connector_f - Removes a VOL connector identifier from the library
+\li \ref h5f::h5fget_fileno_f - Retrieves a file's file number that uniquely identifies the open file
+\li \ref h5f::h5fis_accessible_f - Determines if a file can be opened with a given fapl
+\li <code>h5lget_info_f</code> - The function h5lget_info_f is mapped to #H5Lget_info2.
+\li <code>h5lget_info_by_idx_f</code> - The function h5lget_info_by_idx_f is mapped to #H5Lget_info_by_idx2.
+\li \ref h5l::h5literate_f - The function h5literate_f  is mapped to #H5Literate2.
+\li \ref h5l::h5literate_by_name_f - The function h5literate_by_name_f is mapped to #H5Literate_by_name2.
+\li <code>h5oopen_by_token_f</code> - Opens an object in an HDF5 file using its VOL independent token
+\li <code>h5otoken_cmp_f</code> - Compares two VOL connector object tokens
+\li \ref h5p::h5pget_vol_id_f - Returns the identifier of the current VOL connector
+\li \ref h5p::h5pset_vol_f - Set the file VOL connector for a file access property list
+\li \ref h5vl::h5vlclose_f - Closes a VOL connector identifier
+\li \ref h5vl::h5vlget_connector_id_f - Retrieves the VOL connector identifier for a given object identifier
+\li \ref h5vl::h5vlget_connector_id_by_name_f - Retrieves the identifier for a registered VOL connector name
+\li \ref h5vl::h5vlget_connector_id_by_value_f - Retrieves the identifier for a registered VOL connector value
+\li \ref h5vl::h5vlget_connector_name_f - Retrieves the connector name for the VOL associated with the object or file identifier
+\li \ref h5vl::h5vlis_connector_registered_by_name_f - Tests whether a VOL class has been registered or not for a connector name
+\li \ref h5vl::h5vlis_connector_registered_by_value_f - Tests whether a VOL class has been registered or not for a connector value
+\li \ref h5vl::h5vlregister_connector_by_name_f - Registers a new VOL connector by name
+\li \ref h5vl::h5vlregister_connector_by_value_f - Registers a new VOL connector by connector value
+\li \ref h5vl::h5vlunregister_connector_f - Removes a VOL connector identifier from the library
 
 <h4>In the C++ Wrapper</h4>
 \li <code>H5File::getFileNum</code> - See #H5Fget_fileno

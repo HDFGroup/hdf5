@@ -207,7 +207,6 @@ macro (ADD_XML_H5_TEST resultfile resultcode)
     )
   endif ()
   set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml"
   )
   if ("H5DUMP_XML-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

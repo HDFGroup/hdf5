@@ -12,19 +12,25 @@
 
 # CMake settings for HDF5 Developer mode builds
 
-# Set CMake C++ flags based off of Debug build flags
+# Set initial CMake Developer build C flags based off of Debug build flags
+set (CMAKE_C_FLAGS_DEVELOPER "${CMAKE_C_FLAGS_DEBUG}" CACHE STRING
+  "Flags used by the C compiler during developer builds." FORCE
+)
+
+# Set initial CMake Developer build C++ flags based off of Debug build flags
 set (CMAKE_CXX_FLAGS_DEVELOPER ${CMAKE_CXX_FLAGS_DEBUG} CACHE STRING
   "Flags used by the C++ compiler during developer builds." FORCE
 )
 
-# Set CMake binary linker flags based off of Debug binary linker flags
+# Set initial CMake Developer build binary linker flags based off of Debug
+# binary linker flags
 set (CMAKE_EXE_LINKER_FLAGS_DEVELOPER ${CMAKE_EXE_LINKER_FLAGS_DEBUG}
   CACHE STRING "Flags used for linking binaries during developer builds."
   FORCE
 )
 
-# Set CMake shared library linker flags based off of Debug shared library
-# linker flags
+# Set initial CMake Developer build shared library linker flags based off
+# of Debug shared library linker flags
 set (CMAKE_SHARED_LINKER_FLAGS_DEVELOPER ${CMAKE_SHARED_LINKER_FLAGS_DEBUG}
   CACHE STRING "Flags used by the shared libraries linker during developer builds."
   FORCE

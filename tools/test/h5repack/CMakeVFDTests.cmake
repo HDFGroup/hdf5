@@ -79,7 +79,6 @@ macro (ADD_VFD_TEST vfdname resultcode)
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (H5REPACK_VFD-${vfdname}-h5repacktest PROPERTIES
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           DEPENDS H5REPACK_VFD-${vfdname}-h5repacktest-clear-objects
           TIMEOUT ${CTEST_SHORT_TIMEOUT}
       )

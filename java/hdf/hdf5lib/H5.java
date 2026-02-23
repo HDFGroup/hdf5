@@ -133,7 +133,7 @@ import org.slf4j.LoggerFactory;
  * </tr>
  * <tr>
  * <td>void * <br />
- * (i.e., pointer to `Any')</td>
+ * (i.e., pointer to Any)</td>
  * <td>Special -- see @ref HDFARRAY</td>
  * </tr>
  * </table>
@@ -194,11 +194,11 @@ import org.slf4j.LoggerFactory;
  * @endcode
  *
  * <p>
- * where ``void *'' means that the data may be any valid numeric type, and is a contiguous block of bytes that
+ * where "void *" means that the data may be any valid numeric type, and is a contiguous block of bytes that
  * is the data for a multi-dimensional array. The other parameters describe the dimensions, rank, and datatype
  * of the array ondisk (source) and in memory (destination).
  * <p>
- * For Java, this ``ANY'' is a problem, as the type of data must always be declared. Furthermore,
+ * For Java, this "ANY" is a problem, as the type of data must always be declared. Furthermore,
  * multidimensional arrays are definitely <i>not</i> laid out contiguously in memory. It would be infeasible
  * to declare a separate routine for every combination of number type and dimensionality. For that reason, the
  * @ref HDFARRAY <b>HDFArray</b> class is used to discover the type, shape, and
@@ -206,7 +206,7 @@ import org.slf4j.LoggerFactory;
  * static  C order.
  * <p>
  * The upshot is that any Java array of numbers (either primitive or sub-classes of type <b>Number</b>) can be
- * passed as an ``Object'', and the Java API will translate to and from the appropriate packed array of bytes
+ * passed as an "Object", and the Java API will translate to and from the appropriate packed array of bytes
  * needed by the C library. So the function above would be declared:
  *
  * @code

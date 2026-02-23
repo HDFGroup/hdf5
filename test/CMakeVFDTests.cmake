@@ -124,7 +124,7 @@ add_custom_target (HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by H
                   -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
           )
           set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-              ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};${CROSSCOMPILING_PATH}"
+              ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
               WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
           )
           if ("VFD-${vfdname}-${vfdtest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -148,7 +148,7 @@ add_custom_target (HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by H
                 -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};${CROSSCOMPILING_PATH}"
+            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
         )
         if ("VFD-${vfdname}-${vfdtest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -167,7 +167,7 @@ add_custom_target (HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by H
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};${CROSSCOMPILING_PATH}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
       if ("VFD-${vfdname}-${vfdtest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -189,7 +189,7 @@ add_custom_target (HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by H
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};${CROSSCOMPILING_PATH}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
       if ("VFD-${vfdname}-${vfdtest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -245,7 +245,7 @@ add_custom_target (HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by H
       )
       set_tests_properties (VFD-${vfdname}-fheap PROPERTIES
           TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};${CROSSCOMPILING_PATH}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
       if ("VFD-${vfdname}-fheap" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -273,7 +273,7 @@ add_custom_target (HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by H
 
     add_test (NAME H5PLUGIN-vfd_plugin COMMAND $<TARGET_FILE:vfd_plugin>)
     set_tests_properties (H5PLUGIN-vfd_plugin PROPERTIES
-        ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/null_vfd_plugin_dir;srcdir=${HDF5_TEST_BINARY_DIR};${CROSSCOMPILING_PATH}"
+        ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/null_vfd_plugin_dir;srcdir=${HDF5_TEST_BINARY_DIR}"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
     )
     if ("H5PLUGIN-vfd_plugin" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
