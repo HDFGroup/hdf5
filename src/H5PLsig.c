@@ -130,11 +130,10 @@ static size_t                        H5PL_sig_cache_capacity_g = 0;
 
 /* Signature verification failure reasons for detailed diagnostics */
 typedef enum {
-    H5PL_VERIFY_REASON_UNKNOWN,       /* Unknown/uninitialized */
-    H5PL_VERIFY_REASON_INIT_FAILED,   /* EVP_DigestVerifyInit failed (key incompatible) */
-    H5PL_VERIFY_REASON_UPDATE_FAILED, /* EVP_DigestVerifyUpdate failed (I/O error) */
-    H5PL_VERIFY_REASON_INVALID_SIG,   /* EVP_DigestVerifyFinal = 0 (signature mismatch) */
-    H5PL_VERIFY_REASON_CRYPTO_ERROR   /* EVP_DigestVerifyFinal = -1 (OpenSSL error) */
+    H5PL_VERIFY_REASON_UNKNOWN,      /* Unknown/uninitialized */
+    H5PL_VERIFY_REASON_INIT_FAILED,  /* EVP_PKEY_verify_init or context setup failed */
+    H5PL_VERIFY_REASON_INVALID_SIG,  /* EVP_PKEY_verify = 0 (signature mismatch) */
+    H5PL_VERIFY_REASON_CRYPTO_ERROR  /* EVP_PKEY_verify = -1 (OpenSSL error) */
 } H5PL_verify_failure_reason_t;
 
 /*********************/
@@ -1250,52 +1249,44 @@ done:
 } /* end H5PL__update_signature_cache() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5PL__verify_with_chunked_io
+ * Function:    H5PL__hash_file_binary
  *
- * Purpose:     Verify signature using chunked I/O to minimize memory usage
+ * Purpose:     Compute the message digest of the plugin binary data.
+ *              Reads the first binary_size bytes of fd in 1MB chunks
+ *              and feeds them into hash_algorithm.  The raw digest is
+ *              written to digest_out (caller must supply EVP_MAX_MD_SIZE
+ *              bytes) and its byte length to digest_len_out.
  *
- * Return:      1 = signature valid
- *              0 = signature invalid
- *             -1 = error occurred
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static int
-H5PL__verify_with_chunked_io(int fd, HDoff_t binary_size, const unsigned char *signature, size_t sig_len,
-                             const EVP_MD *hash_algorithm, EVP_PKEY *public_key, uint8_t algorithm_id,
-                             const char *plugin_path)
+static herr_t
+H5PL__hash_file_binary(int fd, HDoff_t binary_size, const EVP_MD *hash_algorithm,
+                       unsigned char *digest_out, unsigned int *digest_len_out, const char *plugin_path)
 {
-    EVP_MD_CTX    *mdctx      = NULL;
-    EVP_PKEY_CTX  *pkey_ctx   = NULL;
-    unsigned char *chunk_buf  = NULL;
+    EVP_MD_CTX    *mdctx     = NULL;
+    unsigned char *chunk_buf = NULL;
     HDoff_t        bytes_read = 0;
-    int            ret_value  = -1;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
+    assert(fd >= 0);
+    assert(hash_algorithm);
+    assert(digest_out);
+    assert(digest_len_out);
+    assert(plugin_path);
+
     /* Allocate chunk buffer */
     if (NULL == (chunk_buf = (unsigned char *)H5MM_malloc(H5PL_VERIFY_CHUNK_SIZE)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, -1, "cannot allocate chunk buffer");
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot allocate chunk buffer for hashing");
 
-    /* Create digest context */
+    /* Create and initialize digest context */
     if (NULL == (mdctx = EVP_MD_CTX_new()))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, -1, "cannot create digest context");
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "cannot create digest context");
 
-    /* Initialize verification */
-    if (1 != EVP_DigestVerifyInit(mdctx, &pkey_ctx, hash_algorithm, NULL, public_key)) {
-        ret_value = -1;
-        goto done;
-    }
-
-    /* Configure PSS padding if needed */
-    if (algorithm_id == H5PL_SIG_ALGO_SHA256_PSS || algorithm_id == H5PL_SIG_ALGO_SHA384_PSS ||
-        algorithm_id == H5PL_SIG_ALGO_SHA512_PSS) {
-
-        if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING))
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTSET, -1, "cannot set PSS padding");
-
-        if (1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_DIGEST))
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTSET, -1, "cannot set PSS salt length");
-    }
+    if (1 != EVP_DigestInit_ex(mdctx, hash_algorithm, NULL))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "cannot initialize digest context");
 
     /* Read and hash file in chunks */
     while (bytes_read < binary_size) {
@@ -1303,21 +1294,18 @@ H5PL__verify_with_chunked_io(int fd, HDoff_t binary_size, const unsigned char *s
                                          ? H5PL_VERIFY_CHUNK_SIZE
                                          : (size_t)(binary_size - bytes_read));
 
-        if (H5PL__read_file_data(fd, bytes_read, chunk_buf, chunk_size, plugin_path) < 0) {
-            ret_value = -1;
-            goto done;
-        }
+        if (H5PL__read_file_data(fd, bytes_read, chunk_buf, chunk_size, plugin_path) < 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read plugin data for hashing");
 
-        if (1 != EVP_DigestVerifyUpdate(mdctx, chunk_buf, chunk_size)) {
-            ret_value = -1;
-            goto done;
-        }
+        if (1 != EVP_DigestUpdate(mdctx, chunk_buf, chunk_size))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot update digest");
 
         bytes_read += (HDoff_t)chunk_size;
     }
 
-    /* Finalize verification */
-    ret_value = EVP_DigestVerifyFinal(mdctx, signature, sig_len);
+    /* Finalize digest */
+    if (1 != EVP_DigestFinal_ex(mdctx, digest_out, digest_len_out))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot finalize digest");
 
 done:
     if (chunk_buf)
@@ -1327,7 +1315,7 @@ done:
     ERR_clear_error();
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__verify_with_chunked_io() */
+} /* end H5PL__hash_file_binary() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__read_and_validate_footer
@@ -1430,7 +1418,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5PL__verify_with_all_keys
  *
- * Purpose:     Try verifying signature with each key in the keystore
+ * Purpose:     Try verifying the plugin signature with each key in the
+ *              keystore.  The binary is hashed exactly once; the digest
+ *              is then checked against the stored signature for every
+ *              key using EVP_PKEY_verify (no per-key file re-read).
  *
  * Return:      SUCCEED if signature verified with at least one key
  *              FAIL otherwise
@@ -1441,9 +1432,10 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
                            const H5PL_sig_footer_t *footer, const char *plugin_path)
 {
     const EVP_MD                *hash_algorithm       = NULL;
+    unsigned char                digest[EVP_MAX_MD_SIZE];
+    unsigned int                 digest_len           = 0;
     H5PL_verify_failure_reason_t first_failure_reason = H5PL_VERIFY_REASON_UNKNOWN;
     size_t                       keys_init_failed     = 0;
-    size_t                       keys_update_failed   = 0;
     size_t                       keys_crypto_invalid  = 0;
     size_t                       keys_crypto_error    = 0;
     bool                         verified             = false;
@@ -1462,35 +1454,75 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "cannot get hash algorithm for ID 0x%02X",
                     (unsigned)footer->algorithm_id);
 
+    /* Hash the binary exactly once - shared across all key verification attempts */
+    if (H5PL__hash_file_binary(fd, (HDoff_t)binary_size, hash_algorithm, digest, &digest_len,
+                               plugin_path) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot compute hash of plugin binary");
+
     /* Try each key in keystore (OR logic - first match wins) */
     for (size_t key_idx = 0; key_idx < H5PL_keystore_count_g; key_idx++) {
-        EVP_PKEY *public_key = H5PL_keystore_g[key_idx].key;
-        int       verify_result =
-            H5PL__verify_with_chunked_io(fd, (HDoff_t)binary_size, signature, footer->signature_length,
-                                         hash_algorithm, public_key, footer->algorithm_id, plugin_path);
+        EVP_PKEY     *public_key    = H5PL_keystore_g[key_idx].key;
+        EVP_PKEY_CTX *pkey_ctx      = NULL;
+        int           verify_result = -1;
+
+        /* Create per-key verification context */
+        if (NULL == (pkey_ctx = EVP_PKEY_CTX_new(public_key, NULL))) {
+            keys_init_failed++;
+            ERR_clear_error();
+            continue;
+        }
+
+        if (1 != EVP_PKEY_verify_init(pkey_ctx)) {
+            keys_init_failed++;
+            EVP_PKEY_CTX_free(pkey_ctx);
+            ERR_clear_error();
+            continue;
+        }
+
+        /* Bind hash algorithm to the context */
+        if (1 != EVP_PKEY_CTX_set_signature_md(pkey_ctx, hash_algorithm)) {
+            keys_init_failed++;
+            EVP_PKEY_CTX_free(pkey_ctx);
+            ERR_clear_error();
+            continue;
+        }
+
+        /* Configure PSS padding if needed */
+        if (footer->algorithm_id == H5PL_SIG_ALGO_SHA256_PSS ||
+            footer->algorithm_id == H5PL_SIG_ALGO_SHA384_PSS ||
+            footer->algorithm_id == H5PL_SIG_ALGO_SHA512_PSS) {
+            if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) ||
+                1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_DIGEST)) {
+                keys_init_failed++;
+                EVP_PKEY_CTX_free(pkey_ctx);
+                ERR_clear_error();
+                continue;
+            }
+        }
+
+        /* Verify pre-computed digest against the stored signature */
+        verify_result =
+            EVP_PKEY_verify(pkey_ctx, signature, footer->signature_length, digest, (size_t)digest_len);
+        EVP_PKEY_CTX_free(pkey_ctx);
+        ERR_clear_error();
 
         if (verify_result == 1) {
-            /* SUCCESS! Signature verified with this key */
+            /* SUCCESS - signature matches this key */
             verified = true;
             H5PL_SIG_DEBUG_PRINT("Plugin '%s' verified with key from: %s\n", plugin_path,
                                  H5PL_keystore_g[key_idx].source);
             break;
         }
         else if (verify_result == 0) {
-            /* Signature is cryptographically invalid (hash mismatch) */
             keys_crypto_invalid++;
             if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
                 first_failure_reason = H5PL_VERIFY_REASON_INVALID_SIG;
         }
         else {
-            /* Error occurred - could be init, update, or crypto error */
             keys_crypto_error++;
             if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
                 first_failure_reason = H5PL_VERIFY_REASON_CRYPTO_ERROR;
         }
-
-        /* Clear OpenSSL errors before trying next key */
-        ERR_clear_error();
     }
 
     if (!verified) {
@@ -1540,12 +1572,6 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
                          "  - Plugin may be signed with a key not in your KeyStore\n"
                          "  - Add the correct public key to KeyStore directory\n";
         }
-        else if (keys_update_failed > 0) {
-            diagnostic = "\n"
-                         "  DIAGNOSIS: Hash computation failed (I/O error)\n"
-                         "  - File may be corrupted or inaccessible\n"
-                         "  - Check file permissions and disk errors\n";
-        }
         else if (keys_crypto_error > 0) {
             diagnostic = "\n"
                          "  DIAGNOSIS: OpenSSL internal error\n"
@@ -1567,7 +1593,6 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
                     "  Plugin: %s\n"
                     "  Keys tried: %zu [%s]\n"
                     "  - Init failed: %zu\n"
-                    "  - Update failed: %zu\n"
                     "  - Crypto invalid: %zu\n"
                     "  - Crypto error: %zu\n"
                     "%s"
@@ -1579,7 +1604,7 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
                     "    2. Check KeyStore directory contains correct public keys\n"
                     "    3. Contact plugin developer for correct public key\n"
                     "    4. Verify file integrity (checksums, re-download if needed)\n",
-                    plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed, keys_update_failed,
+                    plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed,
                     keys_crypto_invalid, keys_crypto_error, diagnostic ? diagnostic : "", keystore_path);
     }
 
