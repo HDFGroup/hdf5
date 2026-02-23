@@ -52,6 +52,11 @@
 /* Signature footer on-disk size (12 bytes) */
 #define H5PL_SIG_FOOTER_SIZE 12
 
+/* Maximum RSA signature size in bytes.
+ * A 4096-bit RSA key produces a 512-byte signature; 1024 bytes allows
+ * headroom for 8192-bit keys.  Used by both the signer and verifier. */
+#define H5PL_MAX_SIGNATURE_SIZE 1024
+
 /* Signature footer structure
  *
  * On-disk layout (12 bytes, little-endian):

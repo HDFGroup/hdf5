@@ -119,9 +119,6 @@ static size_t                        H5PL_sig_cache_capacity_g = 0;
 /* Initial capacity for signature cache */
 #define H5PL_SIG_CACHE_INITIAL_CAPACITY 8
 
-/* Maximum signature size (1024 bytes) */
-#define H5PL_MAX_SIGNATURE_SIZE 1024
-
 /* Maximum plugin file size (1GB - prevents unreasonable allocations) */
 #define H5PL_MAX_PLUGIN_SIZE ((HDoff_t)(1024 * 1024 * 1024))
 
@@ -208,7 +205,7 @@ H5PL__read_file_data(int fd, HDoff_t offset, void *buf, size_t size, const char 
 #else
             bytes_read = HDread(fd, read_ptr, bytes_in);
             if (bytes_read > 0)
-                offset += bytes_read;
+                offset += bytes_read; /* track offset for error reporting */
 #endif /* H5_HAVE_PREADWRITE */
         } while (-1 == bytes_read && EINTR == errno);
 
@@ -924,10 +921,15 @@ H5PL__init_keystore(void)
     /* Must have at least one key */
     if (!keys_loaded || H5PL_keystore_count_g == 0) {
         const char *attempted_source = env_keystore ? env_keystore : H5PL_SIG_KEYSTORE_DIR_STR;
+        bool        keystore_configured = (env_keystore != NULL);
+
+#ifdef H5PL_KEYSTORE_DIR
+        keystore_configured = true;
+#endif
 
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
                     "no valid public keys found for plugin signature verification\n"
-                    "  Attempted to load from: %s\n"
+                    "  %s%s\n"
                     "  Keys found: 0\n"
                     "\n"
                     "Configure keys via:\n"
@@ -938,7 +940,8 @@ H5PL__init_keystore(void)
                     "  - Directory exists and is readable\n"
                     "  - Directory contains .pem files\n"
                     "  - .pem files are valid RSA public keys",
-                    attempted_source);
+                    keystore_configured ? "Attempted to load from: " : "No keystore configured",
+                    keystore_configured ? attempted_source : "");
     }
 
     if (H5PL_keystore_count_g > 0) {

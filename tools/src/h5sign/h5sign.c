@@ -619,8 +619,9 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         goto done;
     }
 
-    if (sig_len == 0 || sig_len > 8192) {
-        fprintf(rawerrorstream, "Error: Invalid signature length: %zu bytes\n", sig_len);
+    if (sig_len == 0 || sig_len > H5PL_MAX_SIGNATURE_SIZE) {
+        fprintf(rawerrorstream, "Error: Invalid signature length: %zu bytes (max %d)\n", sig_len,
+                H5PL_MAX_SIGNATURE_SIZE);
         ret_value = FAIL;
         goto done;
     }
