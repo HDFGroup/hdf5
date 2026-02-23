@@ -115,8 +115,9 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define DSET_SHUF_DEF_FLET_NAME   "shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2 "shuffle+deflate+fletcher32_2"
 #endif
-#define DSET_OPTIONAL_SCALAR "dataset_with_scalar_space"
-#define DSET_OPTIONAL_NULL   "dataset_with_null_space"
+#define DSET_OPTIONAL_SCALAR  "dataset_with_scalar_space"
+#define DSET_OPTIONAL_SCALAR2 "dataset_with_scalar_space2"
+#define DSET_OPTIONAL_NULL    "dataset_with_null_space"
 #ifdef H5_HAVE_FILTER_SZIP
 #define DSET_SZIP_NAME             "szip"
 #define DSET_SHUF_SZIP_FLET_NAME   "shuffle+szip+fletcher32"
@@ -6720,6 +6721,82 @@ error:
 } /* end test_can_apply2() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_optional_filters
+ *
+ * Purpose:     Tests that H5Dcreate2 will not fail when a combination of
+ *              type, space, etc... doesn't work for a filter and filter is
+ *              optional. This test uses the real DEFLATE filter.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_optional_filters(hid_t file)
+{
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+    hid_t        dsid         = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        sid          = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        strtid       = H5I_INVALID_HID; /* Datatype ID for string */
+    hid_t        dcplid       = H5I_INVALID_HID; /* Dataspace creation property list ID */
+
+    TESTING("dataset with optional filters");
+
+    /* Create dcpl with special filter */
+    if ((dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Create the datatype */
+    if ((strtid = H5Tcreate(H5T_STRING, H5T_VARIABLE)) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    if ((sid = H5Screate(H5S_SCALAR)) < 0)
+        TEST_ERROR;
+
+    /* The filter is optional. */
+    if (H5Pset_filter(dcplid, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < 0)
+        TEST_ERROR;
+
+    /* Create dataset with optional filter */
+    if ((dsid = H5Dcreate2(file, DSET_OPTIONAL_SCALAR, strtid, sid, H5P_DEFAULT, dcplid, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close datatype */
+    if (H5Tclose(strtid) < 0)
+        TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcplid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcplid);
+        H5Tclose(strtid);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_optional_filters() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_optional_filters_scalar
  *
  * Purpose:     Tests that a filter is quietly skipped for scalar datasets
@@ -6758,7 +6835,7 @@ test_optional_filters_scalar(hid_t file)
         TEST_ERROR;
 
     /* Create dataset with optional filter */
-    if ((dsid = H5Dcreate2(file, DSET_OPTIONAL_SCALAR, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcplid,
+    if ((dsid = H5Dcreate2(file, DSET_OPTIONAL_SCALAR2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcplid,
                            H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -6775,7 +6852,7 @@ test_optional_filters_scalar(hid_t file)
         TEST_ERROR;
 
     /* Reopen the dataset */
-    if ((dsid = H5Dopen2(file, DSET_OPTIONAL_SCALAR, H5P_DEFAULT)) < 0)
+    if ((dsid = H5Dopen2(file, DSET_OPTIONAL_SCALAR2, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Read data back */
@@ -18513,6 +18590,7 @@ main(void)
 
                 nerrors += (test_can_apply(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
+                nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
                 nerrors += (test_optional_filters_scalar(file) < 0 ? 1 : 0);
                 nerrors += (test_optional_filters_null(file) < 0 ? 1 : 0);
                 nerrors += (test_set_local(fapl) < 0 ? 1 : 0);
