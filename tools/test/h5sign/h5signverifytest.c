@@ -273,7 +273,7 @@ test_signature_cache_invalidation(void)
     }
 
     /* Modify the file (touch to update mtime) */
-    sleep(2); /* Ensure mtime changes */
+    HDsleep(2); /* Ensure mtime changes */
 
     if (NULL == (fp = fopen(temp_plugin, "ab"))) {
         printf("FAILED\n");
