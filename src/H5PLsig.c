@@ -823,7 +823,6 @@ done:
 } /* end H5PL__load_keys_from_directory() */
 #endif /* H5_HAVE_WIN32_API */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5PL__init_keystore
  *
@@ -861,8 +860,8 @@ H5PL__init_keystore(void)
 #ifndef H5PL_DISABLE_ENV_KEYSTORE
     if (NULL != (env_keystore = getenv("HDF5_PLUGIN_KEYSTORE"))) {
         if (H5PL__load_keys_from_directory(env_keystore) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL,
-                        "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s", env_keystore);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s",
+                        env_keystore);
         keys_loaded = true;
 
         /* Load revoked signatures from same directory */
