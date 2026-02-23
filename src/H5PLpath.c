@@ -695,7 +695,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__path_table_iterate_process_path() */
-#else /* H5_HAVE_WIN32_API */
+#else  /* H5_HAVE_WIN32_API */
 static herr_t
 H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type_t iter_type,
                                       H5PL_iterate_t iter_op, void *op_data)
@@ -926,7 +926,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find_plugin_in_path() */
-#else /* H5_HAVE_WIN32_API */
+#else  /* H5_HAVE_WIN32_API */
 static herr_t
 H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found, const char *dir,
                           const void **plugin_info)

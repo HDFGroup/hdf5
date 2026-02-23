@@ -130,10 +130,10 @@ static size_t                        H5PL_sig_cache_capacity_g = 0;
 
 /* Signature verification failure reasons for detailed diagnostics */
 typedef enum {
-    H5PL_VERIFY_REASON_UNKNOWN,      /* Unknown/uninitialized */
-    H5PL_VERIFY_REASON_INIT_FAILED,  /* EVP_PKEY_verify_init or context setup failed */
-    H5PL_VERIFY_REASON_INVALID_SIG,  /* EVP_PKEY_verify = 0 (signature mismatch) */
-    H5PL_VERIFY_REASON_CRYPTO_ERROR  /* EVP_PKEY_verify = -1 (OpenSSL error) */
+    H5PL_VERIFY_REASON_UNKNOWN,     /* Unknown/uninitialized */
+    H5PL_VERIFY_REASON_INIT_FAILED, /* EVP_PKEY_verify_init or context setup failed */
+    H5PL_VERIFY_REASON_INVALID_SIG, /* EVP_PKEY_verify = 0 (signature mismatch) */
+    H5PL_VERIFY_REASON_CRYPTO_ERROR /* EVP_PKEY_verify = -1 (OpenSSL error) */
 } H5PL_verify_failure_reason_t;
 
 /*********************/
@@ -1288,13 +1288,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PL__hash_file_binary(int fd, HDoff_t binary_size, const EVP_MD *hash_algorithm,
-                       unsigned char *digest_out, unsigned int *digest_len_out, const char *plugin_path)
+H5PL__hash_file_binary(int fd, HDoff_t binary_size, const EVP_MD *hash_algorithm, unsigned char *digest_out,
+                       unsigned int *digest_len_out, const char *plugin_path)
 {
-    EVP_MD_CTX    *mdctx     = NULL;
-    unsigned char *chunk_buf = NULL;
+    EVP_MD_CTX    *mdctx      = NULL;
+    unsigned char *chunk_buf  = NULL;
     HDoff_t        bytes_read = 0;
-    herr_t         ret_value = SUCCEED;
+    herr_t         ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1458,7 +1458,7 @@ static herr_t
 H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *signature,
                            const H5PL_sig_footer_t *footer, const char *plugin_path)
 {
-    const EVP_MD                *hash_algorithm       = NULL;
+    const EVP_MD                *hash_algorithm = NULL;
     unsigned char                digest[EVP_MAX_MD_SIZE];
     unsigned int                 digest_len           = 0;
     H5PL_verify_failure_reason_t first_failure_reason = H5PL_VERIFY_REASON_UNKNOWN;
@@ -1482,8 +1482,8 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
                     (unsigned)footer->algorithm_id);
 
     /* Hash the binary exactly once - shared across all key verification attempts */
-    if (H5PL__hash_file_binary(fd, (HDoff_t)binary_size, hash_algorithm, digest, &digest_len,
-                               plugin_path) < 0)
+    if (H5PL__hash_file_binary(fd, (HDoff_t)binary_size, hash_algorithm, digest, &digest_len, plugin_path) <
+        0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot compute hash of plugin binary");
 
     /* Try each key in keystore (OR logic - first match wins) */
@@ -1631,8 +1631,8 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
                     "    2. Check KeyStore directory contains correct public keys\n"
                     "    3. Contact plugin developer for correct public key\n"
                     "    4. Verify file integrity (checksums, re-download if needed)\n",
-                    plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed,
-                    keys_crypto_invalid, keys_crypto_error, diagnostic ? diagnostic : "", keystore_path);
+                    plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed, keys_crypto_invalid,
+                    keys_crypto_error, diagnostic ? diagnostic : "", keystore_path);
     }
 
 done:
