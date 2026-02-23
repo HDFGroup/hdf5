@@ -94,7 +94,6 @@ macro (ADD_H5_CMP testname resultfile resultcode)
             -D "TEST_REFERENCE=${resultfile}.ddl"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
-    set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES ENVIRONMENT "${CROSSCOMPILING_PATH}")
     if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DISABLED true)
     endif ()
@@ -120,7 +119,6 @@ macro (ADD_H5_ERR_CMP testname resultfile resultcode result_errcheck)
             -D "TEST_SKIP_COMPARE=true"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
-    set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES ENVIRONMENT "${CROSSCOMPILING_PATH}")
     if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DISABLED true)
     endif ()
@@ -157,7 +155,6 @@ macro (ADD_H5_CMP_WITH_COPY testname resultcode resultfile testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5CLEAR_CMP-copy_${testname}
     )
     if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -193,7 +190,6 @@ macro (ADD_H5_ERR_CMP_WITH_COPY testname resultcode resultfile testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5CLEAR_CMP-copy_${testname}
     )
     if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -209,7 +205,6 @@ macro (ADD_H5_RETTEST testname resultcode)
         COMMAND $<TARGET_FILE:h5clear> ${ARGN}
     )
     set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
         WILL_FAIL "${resultcode}"
     )
@@ -245,7 +240,6 @@ macro (ADD_H5_FILESIZE_TEST testname resultcode resultfile incr_size)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_before_size PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5CLEAR_FILESIZE_TEST-copy_${testname}
     )
     if ("H5CLEAR_FILESIZE_CMP-${testname}_before_size" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -263,7 +257,6 @@ macro (ADD_H5_FILESIZE_TEST testname resultcode resultfile incr_size)
         )
     endif ()
     set_tests_properties (H5CLEAR_FILESIZE_INCR-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
         WILL_FAIL "${resultcode}"
         DEPENDS H5CLEAR_FILESIZE_CMP-${testname}_before_size
@@ -283,7 +276,6 @@ macro (ADD_H5_FILESIZE_TEST testname resultcode resultfile incr_size)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_after_size PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5CLEAR_FILESIZE_INCR-${testname}
     )
     if ("H5CLEAR_FILESIZE_CMP-${testname}_after_size" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -321,7 +313,6 @@ macro (ADD_H5_FILESIZE_FAIL_TEST testname resultcode resultfile incr_size)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname}
     )
     if ("H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -339,7 +330,6 @@ macro (ADD_H5_FILESIZE_FAIL_TEST testname resultcode resultfile incr_size)
         )
     endif ()
     set_tests_properties (H5CLEAR_FILESIZE_FAIL_INCR-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
         DEPENDS H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size
     )
@@ -358,7 +348,6 @@ macro (ADD_H5_FILESIZE_FAIL_TEST testname resultcode resultfile incr_size)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5CLEAR_FILESIZE_FAIL_INCR-${testname}
     )
     if ("H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -382,7 +371,6 @@ macro (ADD_H5_TEST testname testfile resultcode)
         COMMAND $<TARGET_FILE:clear_open_chk> ${testfile}.h5
     )
     set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WILL_FAIL "${resultcode}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
         DEPENDS H5CLEAR-clr_open_chk-copy_${testname}.h5
@@ -397,7 +385,6 @@ macro (ADD_H5_TEST testname testfile resultcode)
         COMMAND $<TARGET_FILE:h5clear> -s ${testfile}.h5
     )
     set_tests_properties (H5CLEAR-h5clr-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5CLEAR-clr_open_chk-${testname}_${resultcode}
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
@@ -409,7 +396,6 @@ macro (ADD_H5_TEST testname testfile resultcode)
         COMMAND $<TARGET_FILE:clear_open_chk> ${testfile}.h5
     )
     set_tests_properties (H5CLEAR-clr_open_chk-${testname} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         DEPENDS H5CLEAR-h5clr-${testname}
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )

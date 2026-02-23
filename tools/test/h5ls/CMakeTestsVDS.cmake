@@ -102,7 +102,6 @@ macro (ADD_H5_VDS_TEST resultfile resultcode)
     )
   endif ()
   set_tests_properties (H5LS-${resultfile} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
   )
   if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -115,7 +114,7 @@ macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME H5LS_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
     set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES
-        ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN};${CROSSCOMPILING_PATH}"
+        ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
     if ("${resultcode}" STREQUAL "1")
@@ -137,7 +136,6 @@ macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
     )
   endif ()
     set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
   if ("H5LS_PREFIX-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

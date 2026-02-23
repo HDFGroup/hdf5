@@ -179,10 +179,6 @@ set (${HDF5_PACKAGE_NAME}_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 # project which has already built hdf5 as a subproject
 #-----------------------------------------------------------------------------
 if (NOT TARGET "@HDF5_PACKAGE@")
-  # Vendored dependency targets: required if HDF5 was built with them,
-  # since HDF5 targets have them in INTERFACE_LINK_LIBRARIES.
-  # If these files are missing the installation is broken and CMake will
-  # issue a FATAL_ERROR from include().
   if (${HDF5_PACKAGE_NAME}_PROVIDES_ZLIB_SUPPORT)
     if (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND @ZLIB_USE_EXTERNAL@)
       include ("@PACKAGE_SHARE_INSTALL_DIR@/@ZLIB_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake")
@@ -193,42 +189,22 @@ if (NOT TARGET "@HDF5_PACKAGE@")
       include ("@PACKAGE_SHARE_INSTALL_DIR@/@LIBAEC_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake")
     endif ()
   endif ()
-
-  # Core targets file: must exist for a functional HDF5 installation.
   include ("@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake")
-
-  # Static targets are in a separate file when both static and shared are
-  # provided. If the file is missing (e.g. distros that only ship shared
-  # libraries), clear PROVIDES_STATIC_LIBS and remove static entries from
-  # the export list so the component resolution loop below does not falsely
-  # claim static targets are available. Users requesting
-  # REQUIRED COMPONENTS static will get a clear error from
-  # check_required_components().
+  # OPTIONAL: some packages ship HDF5 in such a way that the static and
+  # Java targets files may not be available.
   if (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS AND ${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS)
-    set (_hdf5_static_targets "@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@_static-targets.cmake")
-    if (EXISTS "${_hdf5_static_targets}")
-      include ("${_hdf5_static_targets}")
-    else ()
-      set (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS FALSE)
-      list (FILTER ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES EXCLUDE REGEX "-static$")
+    include ("@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@_static-targets.cmake" OPTIONAL RESULT_VARIABLE _hdf5_static_loaded)
+    if (NOT _hdf5_static_loaded)
+      set (${CMAKE_FIND_PACKAGE_NAME}_static_FOUND FALSE)
     endif ()
-    unset (_hdf5_static_targets)
+    unset (_hdf5_static_loaded)
   endif ()
-
-  # Java targets are an optional component. If missing, clear PROVIDES_JAVA
-  # and remove java from the export list so the component resolution loop
-  # below does not falsely claim it is available. The
-  # check_required_components() call at the end of this file will catch
-  # this if the user specified REQUIRED COMPONENTS Java.
   if (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA)
-    set (_hdf5_java_targets "@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@_java-targets.cmake")
-    if (EXISTS "${_hdf5_java_targets}")
-      include ("${_hdf5_java_targets}")
-    else ()
-      set (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA FALSE)
-      list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "hdf5_java")
+    include ("@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@_java-targets.cmake" OPTIONAL RESULT_VARIABLE _hdf5_java_loaded)
+    if (NOT _hdf5_java_loaded)
+      set (${CMAKE_FIND_PACKAGE_NAME}_Java_FOUND FALSE)
     endif ()
-    unset (_hdf5_java_targets)
+    unset (_hdf5_java_loaded)
   endif ()
 endif ()
 

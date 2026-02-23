@@ -48,7 +48,6 @@ macro (ADD_H5_TEST resultfile resultcode)
     )
   endif ()
   set_tests_properties (H5DWALK-${resultfile} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
 endmacro ()

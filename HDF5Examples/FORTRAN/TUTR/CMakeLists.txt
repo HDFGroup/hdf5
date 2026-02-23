@@ -106,7 +106,6 @@ if (H5EXAMPLE_BUILD_TESTING)
     endif ()
     set_tests_properties (${EXAMPLE_VARNAME}_f90_tutr_${testname} PROPERTIES
         FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_f90_tutr
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if (last_test)
       set_tests_properties (${EXAMPLE_VARNAME}_f90_tutr_${testname} PROPERTIES DEPENDS ${last_test})

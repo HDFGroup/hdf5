@@ -30,5 +30,5 @@ endif()
 
 include_directories(${hdf5_kwsys_BINARY_DIR})
 
-add_executable(h5_api_test_driver h5_api_test_driver.cxx)
+add_executable(h5_api_test_driver h5_api_test_driver.cpp)
 target_link_libraries(h5_api_test_driver h5_api_test_sys)

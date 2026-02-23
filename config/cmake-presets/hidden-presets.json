@@ -168,6 +168,28 @@
       ]
     },
     {
+      "name": "ci-arm64-Debug-MSVC",
+      "description": "MSVC for ARM64 (Debug)",
+      "hidden": true,
+      "inherits": [
+        "ci-base",
+        "ci-arm64",
+        "ci-Debug",
+        "ci-MSVC"
+      ]
+    },
+    {
+      "name": "ci-arm64-Release-MSVC",
+      "description": "MSVC for ARM64 (Release)",
+      "hidden": true,
+      "inherits": [
+        "ci-base",
+        "ci-arm64",
+        "ci-Release",
+        "ci-MSVC"
+      ]
+    },
+    {
       "name": "ci-x64-Debug-Clang",
       "description": "Clang/LLVM for x64 (Debug)",
       "hidden": true,
@@ -351,6 +373,24 @@
       "configuration": "RelWithDebInfo"
     },
     {
+      "name": "ci-arm64-Debug-MSVC",
+      "configurePreset": "ci-arm64-Debug-MSVC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ],
+      "configuration": "Debug"
+    },
+    {
+      "name": "ci-arm64-Release-MSVC",
+      "configurePreset": "ci-arm64-Release-MSVC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ],
+      "configuration": "RelWithDebInfo"
+    },
+    {
       "name": "ci-x64-Debug-Clang",
       "configurePreset": "ci-x64-Debug-Clang",
       "hidden": true,
@@ -508,6 +548,24 @@
       "configuration": "RelWithDebInfo"
     },
     {
+      "name": "ci-arm64-Debug-MSVC",
+      "configurePreset": "ci-arm64-Debug-MSVC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ],
+      "configuration": "Debug"
+    },
+    {
+      "name": "ci-arm64-Release-MSVC",
+      "configurePreset": "ci-arm64-Release-MSVC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ],
+      "configuration": "RelWithDebInfo"
+    },
+    {
       "name": "ci-x64-Debug-Clang",
       "configurePreset": "ci-x64-Debug-Clang",
       "hidden": true,
@@ -638,6 +696,13 @@
     {
       "name": "ci-x64-Release-MSVC",
       "configurePreset": "ci-x64-Release-MSVC",
+      "hidden": true,
+      "inherits": "ci-base",
+      "configurations": ["RelWithDebInfo"]
+    },
+    {
+      "name": "ci-arm64-Release-MSVC",
+      "configurePreset": "ci-arm64-Release-MSVC",
       "hidden": true,
       "inherits": "ci-base",
       "configurations": ["RelWithDebInfo"]

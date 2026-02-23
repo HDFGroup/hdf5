@@ -51,22 +51,16 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         "${SOURCE_CODE}"
     )
-    if (CMAKE_VERSION VERSION_LESS 3.25)
-      set (_RUN_OUTPUT_VARIABLE "RUN_OUTPUT_VARIABLE")
-    else ()
-      set (_RUN_OUTPUT_VARIABLE  "RUN_OUTPUT_STDOUT_VARIABLE")
-    endif ()
     if (${FUNCTION_NAME} STREQUAL "SIZEOF NATIVE KINDs")
         set (TMP_CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
     else ()
         set (TMP_CMAKE_Fortran_FLAGS "")
     endif ()
-    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
+    try_run (RUN_RESULT_VAR COMPILE_RESULT_VAR
+        SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         CMAKE_FLAGS "${TMP_CMAKE_Fortran_FLAGS}"
         LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
-        ${_RUN_OUTPUT_VARIABLE} OUTPUT_VAR
+        RUN_OUTPUT_STDOUT_VARIABLE OUTPUT_VAR
     )
     set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
@@ -158,7 +152,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Determine the available KINDs for REALs and INTEGERs
 #-----------------------------------------------------------------------------
-if (NOT CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   if (${HAVE_ISO_FORTRAN_ENV})
     READ_SOURCE ("PROGRAM FC08_AVAIL_KINDS" "END PROGRAM FC08_AVAIL_KINDS" SOURCE_CODE)
   else ()
@@ -201,21 +195,21 @@ if (NOT CMAKE_CROSSCOMPILING)
   endif ()
   set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE INTERNAL "Maximum decimal precision for REALs in Fortran")
 
-  set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
-  set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
+  set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}" CACHE INTERNAL "Find available INTEGER KINDs for Fortran")
+  set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}" CACHE INTERNAL "Find available REAL KINDs for Fortran")
 
   list (GET PROG_OUTPUT 3 NUM_IKIND)
   list (GET PROG_OUTPUT 4 NUM_RKIND)
 
-  set (PAC_FORTRAN_NUM_INTEGER_KINDS "${NUM_IKIND}")
-  set (PAC_FORTRAN_NUM_REAL_KINDS "${NUM_RKIND}")
+  set (PAC_FORTRAN_NUM_INTEGER_KINDS "${NUM_IKIND}" CACHE INTERNAL "Number of valid integer kinds for Fortran")
+  set (PAC_FORTRAN_NUM_REAL_KINDS "${NUM_RKIND}" CACHE INTERNAL "Number of valid real kinds for Fortran")
 
   set (${HDF_PREFIX}_H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = ${NUM_IKIND}")
   set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/${pac_validIntKinds}/)")
 
   if (${HAVE_ISO_FORTRAN_ENV})
     list (GET PROG_OUTPUT 5 NUM_LKIND)
-    set (PAC_FORTRAN_NUM_LOGICAL_KINDS "${NUM_LKIND}")
+    set (PAC_FORTRAN_NUM_LOGICAL_KINDS "${NUM_LKIND}" CACHE INTERNAL "Find available LOGICAL KINDs for Fortran")
 
     list (GET PROG_OUTPUT 6 pac_validLogicalKinds)
     # If the list is empty then something went wrong.
@@ -223,7 +217,7 @@ if (NOT CMAKE_CROSSCOMPILING)
       message (FATAL_ERROR "Failed to find available LOGICAL KINDs for Fortran")
     endif ()
 
-    set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}")
+    set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}" CACHE INTERNAL "LOGICAL KINDS FOUND for Fortran")
     message (STATUS "....LOGICAL KINDS FOUND ${PAC_FC_ALL_LOGICAL_KINDS}")
   endif ()
 else ()
@@ -297,7 +291,7 @@ endif ()
 # **********
 # INTEGERS
 # **********
-if (NOT CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   string (REGEX REPLACE "," ";" VAR "${pac_validIntKinds}")
 
   foreach (KIND ${VAR})
@@ -343,7 +337,7 @@ message (VERBOSE "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_
 # **********
 # REALS
 # **********
-if (NOT CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   string (REGEX REPLACE "," ";" VAR "${pac_validRealKinds}")
 
   #find the maximum kind of the real
@@ -402,7 +396,7 @@ list (GET VAR ${_LEN} max_real_fortran_sizeof)
 #-----------------------------------------------------------------------------
 # Find sizeof of native kinds
 #-----------------------------------------------------------------------------
-if (NOT CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   set (PROG_SRC3
     "
          PROGRAM main
