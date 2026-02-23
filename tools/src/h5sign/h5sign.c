@@ -398,16 +398,16 @@ static herr_t
 sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *hash_algorithm,
                  uint8_t algorithm_id)
 {
-    int               fd = -1;
-    h5_stat_t         st;
-    hsize_t           file_size   = 0;
-    unsigned char    *hash_buffer = NULL;
-    unsigned char    *signature   = NULL;
-    size_t            sig_len     = 0;
-    EVP_MD_CTX       *mdctx       = NULL;
-    EVP_PKEY_CTX     *pkey_ctx    = NULL;
-    herr_t            ret_value  = SUCCEED;
-    hsize_t           bytes_read = 0;
+    int            fd = -1;
+    h5_stat_t      st;
+    hsize_t        file_size   = 0;
+    unsigned char *hash_buffer = NULL;
+    unsigned char *signature   = NULL;
+    size_t         sig_len     = 0;
+    EVP_MD_CTX    *mdctx       = NULL;
+    EVP_PKEY_CTX  *pkey_ctx    = NULL;
+    herr_t         ret_value   = SUCCEED;
+    hsize_t        bytes_read  = 0;
 
     /* Open plugin file for reading and writing.
      * Keeping a single fd open throughout hashing and appending eliminates

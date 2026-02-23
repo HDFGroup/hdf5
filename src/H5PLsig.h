@@ -57,8 +57,7 @@
 #define H5PL_SIG_FOOTER_SIZE 12
 
 /* True when algo id selects an RSA-PSS padding variant */
-#define H5PL_SIG_ALGO_IS_PSS(id)                                                                             \
-    ((id) >= H5PL_SIG_ALGO_SHA256_PSS && (id) <= H5PL_SIG_ALGO_SHA512_PSS)
+#define H5PL_SIG_ALGO_IS_PSS(id) ((id) >= H5PL_SIG_ALGO_SHA256_PSS && (id) <= H5PL_SIG_ALGO_SHA512_PSS)
 
 /* Maximum RSA signature size in bytes.
  * A 4096-bit RSA key produces a 512-byte signature; 1024 bytes allows

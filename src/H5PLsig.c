@@ -920,7 +920,7 @@ H5PL__init_keystore(void)
 
     /* Must have at least one key */
     if (!keys_loaded || H5PL_keystore_count_g == 0) {
-        const char *attempted_source = env_keystore ? env_keystore : H5PL_SIG_KEYSTORE_DIR_STR;
+        const char *attempted_source    = env_keystore ? env_keystore : H5PL_SIG_KEYSTORE_DIR_STR;
         bool        keystore_configured = (env_keystore != NULL);
 
 #ifdef H5PL_KEYSTORE_DIR
