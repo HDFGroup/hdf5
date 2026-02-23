@@ -1073,7 +1073,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Z_ignore_filters(hid_t dcpl_id, const H5_ATTR_UNUSED H5T_t *type, const H5S_t *space)
+H5Z_ignore_filters(hid_t dcpl_id, void H5_ATTR_UNUSED *type, const H5S_t *space)
 {
     H5P_genplist_t *dc_plist;          /* Dataset creation property list object */
     H5O_pline_t     pline;             /* Object's I/O pipeline information */
