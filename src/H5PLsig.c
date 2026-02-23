@@ -282,66 +282,6 @@ H5PL__get_hash_algorithm(uint8_t algorithm_id)
 } /* end H5PL__get_hash_algorithm() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5PL__create_public_RSA_from_string
- *
- * Purpose:     Create EVP public key from PEM string
- *
- * Return:      Success: Pointer to EVP_PKEY
- *              Failure: NULL
- *-------------------------------------------------------------------------
- */
-static EVP_PKEY *
-H5PL__create_public_RSA_from_string(const char *key_string)
-{
-    BIO      *key_bio   = NULL;
-    EVP_PKEY *pkey      = NULL;
-    EVP_PKEY *ret_value = NULL;
-
-    FUNC_ENTER_PACKAGE
-
-    assert(key_string);
-
-    /* Create BIO from string */
-    if (NULL == (key_bio = BIO_new_mem_buf(key_string, -1))) {
-        unsigned long ssl_err = ERR_get_error();
-        char          err_buf[256];
-        ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, NULL, "cannot create BIO from key string: %s", err_buf);
-    }
-
-    /* Read public key using modern EVP API */
-    if (NULL == (pkey = PEM_read_bio_PUBKEY(key_bio, NULL, NULL, NULL))) {
-        unsigned long ssl_err = ERR_get_error();
-        char          err_buf[256];
-        ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "cannot read public key from BIO: %s", err_buf);
-    }
-
-    /* Validate key type - only RSA keys are supported */
-    {
-        int key_type = EVP_PKEY_base_id(pkey);
-        if (key_type != EVP_PKEY_RSA && key_type != EVP_PKEY_RSA_PSS) {
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, NULL, "unsupported key type (expected RSA, got type %d)",
-                        key_type);
-        }
-    }
-
-    ret_value = pkey;
-    pkey      = NULL; /* Prevent cleanup */
-
-done:
-    if (key_bio)
-        BIO_free(key_bio);
-    if (pkey)
-        EVP_PKEY_free(pkey);
-
-    /* Clear any remaining OpenSSL errors from the error queue */
-    ERR_clear_error();
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__create_public_RSA_from_string() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5PL__add_key_to_keystore
  *
  * Purpose:     Add a public key to the keystore with source tracking
@@ -407,7 +347,7 @@ H5PL__create_public_RSA_from_file(const char *file_path)
     EVP_PKEY *pkey      = NULL;
     EVP_PKEY *ret_value = NULL;
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     assert(file_path);
 
@@ -718,7 +658,7 @@ H5PL__load_keys_from_directory(const char *dir_path)
                 /* File might not exist yet in some cases, but for key files it must exist */
                 H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve key file path %s: %s\n", file_path,
                                      strerror(errno));
-                HDfree(canonical_dir);
+                free(canonical_dir);
                 H5MM_xfree(file_path);
                 continue;
             }
@@ -731,15 +671,15 @@ H5PL__load_keys_from_directory(const char *dir_path)
                     H5PL_SIG_DEBUG_PRINT(
                         "WARNING: Path traversal detected - %s resolves outside keystore directory\n",
                         entry->d_name);
-                    HDfree(canonical_dir);
-                    HDfree(canonical_file);
+                    free(canonical_dir);
+                    free(canonical_file);
                     H5MM_xfree(file_path);
                     continue;
                 }
             }
 
-            HDfree(canonical_dir);
-            HDfree(canonical_file);
+            free(canonical_dir);
+            free(canonical_file);
         }
 
         /* Skip symlinks */
@@ -1060,7 +1000,7 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
         unsigned char hash[H5PL_SIGNATURE_HASH_SIZE];
         size_t        line_len;
         char         *trimmed;
-        hbool_t       line_truncated = FALSE;
+        bool          line_truncated = false;
 
         /* Detect truncated reads: fgets fills the buffer without finding a
          * newline, meaning the physical line exceeds sizeof(line)-1 chars.
@@ -1069,7 +1009,7 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
          * for a valid 64-hex-char hash. */
         if (strchr(line, '\n') == NULL && !feof(fp)) {
             int ch;
-            line_truncated = TRUE;
+            line_truncated = true;
             while ((ch = fgetc(fp)) != EOF && ch != '\n')
                 ;
         }
@@ -1439,10 +1379,6 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
 
     /* Calculate binary data size with overflow protection */
     {
-        /* The cast to size_t below is safe as long as size_t is at least 32 bits,
-         * which is guaranteed by the H5PL_MAX_PLUGIN_SIZE (1GB) check that follows. */
-        H5_STATIC_ASSERT(sizeof(size_t) >= 4);
-
         /* Use uint64_t to prevent any theoretical overflow in addition */
         uint64_t sig_and_footer_size =
             (uint64_t)footer_out->signature_length + (uint64_t)H5PL_SIG_FOOTER_SIZE;
