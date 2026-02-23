@@ -399,8 +399,8 @@ H5PL__expand_path_table(void)
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     /* Expand permission cache to match */
-    if (NULL == (H5PL_path_perms_g =
-                     (int8_t *)H5MM_realloc(H5PL_path_perms_g, (size_t)H5PL_path_capacity_g * sizeof(int8_t))))
+    if (NULL == (H5PL_path_perms_g = (int8_t *)H5MM_realloc(H5PL_path_perms_g,
+                                                            (size_t)H5PL_path_capacity_g * sizeof(int8_t))))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL,
                     "allocating additional memory for path permissions cache failed");
     /* Initialize new entries to unchecked (-1) */
