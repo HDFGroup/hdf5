@@ -1181,7 +1181,6 @@ H5PL__is_signature_revoked(const unsigned char *signature, size_t signature_len)
 
         if (NULL != bsearch(&key, H5PL_revoked_sigs_g, H5PL_revoked_sigs_count_g,
                             sizeof(H5PL_revoked_signature_t), H5PL__compare_signature_hashes)) {
-            ret_value = true;
             HGOTO_DONE(true);
         }
     }
