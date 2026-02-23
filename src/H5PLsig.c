@@ -705,7 +705,7 @@ H5PL__load_keys_from_directory(const char *dir_path)
                 /* File might not exist yet in some cases, but for key files it must exist */
                 H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve key file path %s: %s\n", file_path,
                                      strerror(errno));
-                free(canonical_dir);
+                HDfree(canonical_dir);
                 H5MM_xfree(file_path);
                 continue;
             }
@@ -718,15 +718,15 @@ H5PL__load_keys_from_directory(const char *dir_path)
                     H5PL_SIG_DEBUG_PRINT(
                         "WARNING: Path traversal detected - %s resolves outside keystore directory\n",
                         entry->d_name);
-                    free(canonical_dir);
-                    free(canonical_file);
+                    HDfree(canonical_dir);
+                    HDfree(canonical_file);
                     H5MM_xfree(file_path);
                     continue;
                 }
             }
 
-            free(canonical_dir);
-            free(canonical_file);
+            HDfree(canonical_dir);
+            HDfree(canonical_file);
         }
 
         /* Skip symlinks */
