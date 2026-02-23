@@ -572,6 +572,13 @@ H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, 
     FUNC_ENTER_PACKAGE
 
     for (u = 0; (u < H5PL_num_paths_g) && (ret_value == H5_ITER_CONT); u++) {
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+        /* Skip world-writable directories - unsafe to load plugins from */
+        if (H5PL__validate_directory_permissions(H5PL_paths_g[u]) < 0) {
+            H5E_clear_stack();
+            continue;
+        }
+#endif
         if ((ret_value =
                  H5PL__path_table_iterate_process_path(H5PL_paths_g[u], iter_type, iter_op, op_data)) < 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_BADITER, H5_ITER_ERROR,
@@ -614,14 +621,6 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
 
     assert(plugin_path);
     assert(iter_op);
-
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-    /* Reject plugins from world-writable directories */
-    if (H5PL__validate_directory_permissions(plugin_path) < 0) {
-        H5E_clear_stack();
-        HGOTO_DONE(H5_ITER_CONT);
-    }
-#endif
 
     /* Open the directory - skip the path if the directory can't be opened */
     if (!(dirp = HDopendir(plugin_path)))
@@ -716,14 +715,6 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
     assert(plugin_path);
     assert(iter_op);
 
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-    /* Reject plugins from world-writable directories */
-    if (H5PL__validate_directory_permissions(plugin_path) < 0) {
-        H5E_clear_stack();
-        HGOTO_DONE(H5_ITER_CONT);
-    }
-#endif
-
     /* Specify a file mask. *.* = We want everything! -
      * skip the path if the directory can't be opened */
     snprintf(service, sizeof(service), "%s\\*.dll", plugin_path);
@@ -815,7 +806,13 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, bool 
 
     /* Loop over the paths in the table, checking for an appropriate plugin */
     for (u = 0; u < H5PL_num_paths_g; u++) {
-
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+        /* Skip world-writable directories - unsafe to load plugins from */
+        if (H5PL__validate_directory_permissions(H5PL_paths_g[u]) < 0) {
+            H5E_clear_stack();
+            continue;
+        }
+#endif
         /* Search for the plugin in this path */
         if (H5PL__find_plugin_in_path(search_params, found, H5PL_paths_g[u], plugin_info) < 0)
             HERROR(H5E_PLUGIN, H5E_CANTGET, "search in path %s encountered an error", H5PL_paths_g[u]);
@@ -867,14 +864,6 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found
 
     /* Initialize the found parameter */
     *found = false;
-
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-    /* Reject plugins from world-writable directories */
-    if (H5PL__validate_directory_permissions(dir) < 0) {
-        H5E_clear_stack();
-        HGOTO_DONE(SUCCEED);
-    }
-#endif
 
     /* Open the directory */
     if (!(dirp = HDopendir(dir)))
@@ -958,14 +947,6 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found
 
     /* Initialize the found parameter */
     *found = false;
-
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-    /* Reject plugins from world-writable directories */
-    if (H5PL__validate_directory_permissions(dir) < 0) {
-        H5E_clear_stack();
-        HGOTO_DONE(SUCCEED);
-    }
-#endif
 
     /* Specify a file mask. *.* = We want everything! */
     snprintf(service, sizeof(service), "%s\\*.dll", dir);
