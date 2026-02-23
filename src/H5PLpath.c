@@ -88,6 +88,13 @@ static unsigned H5PL_num_paths_g = 0;
 /* The capacity of the path table */
 static unsigned H5PL_path_capacity_g = H5PL_INITIAL_PATH_CAPACITY;
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+/* Cached directory permission validation results for each path entry.
+ * Values: -1 = not yet checked, 0 = validation failed, 1 = validation passed.
+ * Invalidated when the corresponding path is inserted, replaced, or removed. */
+static int8_t *H5PL_path_perms_g = NULL;
+#endif
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__insert_at()
  *
@@ -133,6 +140,9 @@ H5PL__insert_at(const char *path, unsigned int idx)
 
     /* Insert the copy of the search path into the table at the specified index */
     H5PL_paths_g[idx] = path_copy;
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    H5PL_path_perms_g[idx] = -1; /* Mark as unchecked */
+#endif
     H5PL_num_paths_g++;
 
 done:
@@ -161,10 +171,17 @@ H5PL__make_space_at(unsigned int idx)
     assert(idx < H5PL_path_capacity_g);
 
     /* Copy the paths back to make a space  */
-    for (u = H5PL_num_paths_g; u > idx; u--)
+    for (u = H5PL_num_paths_g; u > idx; u--) {
         H5PL_paths_g[u] = H5PL_paths_g[u - 1];
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+        H5PL_path_perms_g[u] = H5PL_path_perms_g[u - 1];
+#endif
+    }
 
     H5PL_paths_g[idx] = NULL;
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    H5PL_path_perms_g[idx] = -1;
+#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__make_space_at() */
@@ -211,6 +228,9 @@ H5PL__replace_at(const char *path, unsigned int idx)
 
     /* Copy the search path into the table at the specified index */
     H5PL_paths_g[idx] = path_copy;
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    H5PL_path_perms_g[idx] = -1; /* Mark as unchecked */
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -245,6 +265,13 @@ H5PL__create_path_table(void)
     if (NULL == (H5PL_paths_g = (char **)H5MM_calloc((size_t)H5PL_path_capacity_g * sizeof(char *))))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path table");
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    /* Allocate permission cache (-1 = unchecked for all entries) */
+    if (NULL == (H5PL_path_perms_g = (int8_t *)H5MM_malloc((size_t)H5PL_path_capacity_g * sizeof(int8_t))))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path permissions cache");
+    memset(H5PL_path_perms_g, -1, (size_t)H5PL_path_capacity_g * sizeof(int8_t));
+#endif
+
     /* Retrieve paths from HDF5_PLUGIN_PATH if the user sets it
      * or from the default paths if it isn't set.
      */
@@ -277,6 +304,10 @@ done:
     if (FAIL == ret_value) {
         if (H5PL_paths_g)
             H5PL_paths_g = (char **)H5MM_xfree(H5PL_paths_g);
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+        if (H5PL_path_perms_g)
+            H5PL_path_perms_g = (int8_t *)H5MM_xfree(H5PL_path_perms_g);
+#endif
         H5PL_path_capacity_g = 0;
     }
 
@@ -308,6 +339,11 @@ H5PL__close_path_table(void)
 
     /* Free path table */
     H5PL_paths_g = (char **)H5MM_xfree(H5PL_paths_g);
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    /* Free permission cache */
+    H5PL_path_perms_g = (int8_t *)H5MM_xfree(H5PL_path_perms_g);
+#endif
 
     /* Reset values */
     H5PL_num_paths_g = 0;
@@ -360,6 +396,17 @@ H5PL__expand_path_table(void)
 
     /* Initialize the new memory */
     memset(H5PL_paths_g + H5PL_num_paths_g, 0, (size_t)H5PL_PATH_CAPACITY_ADD * sizeof(char *));
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    /* Expand permission cache to match */
+    if (NULL == (H5PL_path_perms_g =
+                     (int8_t *)H5MM_realloc(H5PL_path_perms_g, (size_t)H5PL_path_capacity_g * sizeof(int8_t))))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL,
+                    "allocating additional memory for path permissions cache failed");
+    /* Initialize new entries to unchecked (-1) */
+    memset(H5PL_path_perms_g + (H5PL_path_capacity_g - H5PL_PATH_CAPACITY_ADD), -1,
+           (size_t)H5PL_PATH_CAPACITY_ADD * sizeof(int8_t));
+#endif
 
 done:
     /* Set the path capacity back if there were problems */
@@ -514,11 +561,18 @@ H5PL__remove_path(unsigned int idx)
     H5PL_paths_g[idx] = (char *)H5MM_xfree(H5PL_paths_g[idx]);
 
     /* Shift the paths down to close the gap */
-    for (u = idx; u < H5PL_num_paths_g; u++)
+    for (u = idx; u < H5PL_num_paths_g; u++) {
         H5PL_paths_g[u] = H5PL_paths_g[u + 1];
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+        H5PL_path_perms_g[u] = H5PL_path_perms_g[u + 1];
+#endif
+    }
 
     /* Set the (former) last path to NULL */
     H5PL_paths_g[H5PL_num_paths_g] = NULL;
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    H5PL_path_perms_g[H5PL_num_paths_g] = -1;
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -573,11 +627,15 @@ H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, 
 
     for (u = 0; (u < H5PL_num_paths_g) && (ret_value == H5_ITER_CONT); u++) {
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-        /* Skip world-writable directories - unsafe to load plugins from */
-        if (H5PL__validate_directory_permissions(H5PL_paths_g[u]) < 0) {
-            H5E_clear_stack();
-            continue;
+        /* Skip directories with unsafe permissions (cached after first check) */
+        if (H5PL_path_perms_g[u] == -1) {
+            H5PL_path_perms_g[u] =
+                (int8_t)(H5PL__validate_directory_permissions(H5PL_paths_g[u]) < 0 ? 0 : 1);
+            if (H5PL_path_perms_g[u] == 0)
+                H5E_clear_stack();
         }
+        if (H5PL_path_perms_g[u] == 0)
+            continue;
 #endif
         if ((ret_value =
                  H5PL__path_table_iterate_process_path(H5PL_paths_g[u], iter_type, iter_op, op_data)) < 0)
@@ -807,11 +865,15 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, bool 
     /* Loop over the paths in the table, checking for an appropriate plugin */
     for (u = 0; u < H5PL_num_paths_g; u++) {
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-        /* Skip world-writable directories - unsafe to load plugins from */
-        if (H5PL__validate_directory_permissions(H5PL_paths_g[u]) < 0) {
-            H5E_clear_stack();
-            continue;
+        /* Skip directories with unsafe permissions (cached after first check) */
+        if (H5PL_path_perms_g[u] == -1) {
+            H5PL_path_perms_g[u] =
+                (int8_t)(H5PL__validate_directory_permissions(H5PL_paths_g[u]) < 0 ? 0 : 1);
+            if (H5PL_path_perms_g[u] == 0)
+                H5E_clear_stack();
         }
+        if (H5PL_path_perms_g[u] == 0)
+            continue;
 #endif
         /* Search for the plugin in this path */
         if (H5PL__find_plugin_in_path(search_params, found, H5PL_paths_g[u], plugin_info) < 0)

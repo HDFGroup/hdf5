@@ -377,13 +377,17 @@ H5PL__add_key_to_keystore(EVP_PKEY *key, const char *source)
         H5PL_keystore_capacity_g = new_capacity;
     }
 
-    /* Add key to keystore */
-    H5PL_keystore_g[H5PL_keystore_count_g].key = key;
+    /* Duplicate source string before committing the entry, so a strdup
+     * failure doesn't leave an orphaned key pointer in the array. */
+    {
+        char *dup_source = H5MM_strdup(source);
+        if (NULL == dup_source)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot duplicate key source string");
 
-    if (NULL == (H5PL_keystore_g[H5PL_keystore_count_g].source = H5MM_strdup(source)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot duplicate key source string");
-
-    H5PL_keystore_count_g++;
+        H5PL_keystore_g[H5PL_keystore_count_g].key    = key;
+        H5PL_keystore_g[H5PL_keystore_count_g].source = dup_source;
+        H5PL_keystore_count_g++;
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -576,6 +580,10 @@ H5PL__validate_directory_permissions(const char *dir_path)
             hasUnsafePermissions = TRUE;
         }
     }
+    else {
+        /* Fail closed: if we cannot determine permissions, treat as unsafe */
+        hasUnsafePermissions = TRUE;
+    }
 
     dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeUsers, &usersAccess);
     if (dwRes == ERROR_SUCCESS) {
@@ -585,6 +593,10 @@ H5PL__validate_directory_permissions(const char *dir_path)
             hasUnsafePermissions = TRUE;
         }
     }
+    else {
+        /* Fail closed: if we cannot determine permissions, treat as unsafe */
+        hasUnsafePermissions = TRUE;
+    }
 
     dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeAuthUsers, &authUsersAccess);
     if (dwRes == ERROR_SUCCESS) {
@@ -593,6 +605,10 @@ H5PL__validate_directory_permissions(const char *dir_path)
             (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
             hasUnsafePermissions = TRUE;
         }
+    }
+    else {
+        /* Fail closed: if we cannot determine permissions, treat as unsafe */
+        hasUnsafePermissions = TRUE;
     }
 
     /* Clean up Windows security resources */
@@ -938,19 +954,31 @@ H5PL__init_keystore(void)
 
 done:
     /* Cleanup on initialization failure */
-    if (ret_value < 0 && H5PL_keystore_g) {
-        size_t i;
-        /* Free all keys that were added before failure */
-        for (i = 0; i < H5PL_keystore_count_g; i++) {
-            if (H5PL_keystore_g[i].key)
-                EVP_PKEY_free(H5PL_keystore_g[i].key);
-            if (H5PL_keystore_g[i].source)
-                H5MM_xfree(H5PL_keystore_g[i].source);
+    if (ret_value < 0) {
+        if (H5PL_keystore_g) {
+            size_t i;
+            /* Free all keys that were added before failure */
+            for (i = 0; i < H5PL_keystore_count_g; i++) {
+                if (H5PL_keystore_g[i].key)
+                    EVP_PKEY_free(H5PL_keystore_g[i].key);
+                if (H5PL_keystore_g[i].source)
+                    H5MM_xfree(H5PL_keystore_g[i].source);
+            }
+            H5MM_xfree(H5PL_keystore_g);
+            H5PL_keystore_g          = NULL;
+            H5PL_keystore_count_g    = 0;
+            H5PL_keystore_capacity_g = 0;
         }
-        H5MM_xfree(H5PL_keystore_g);
-        H5PL_keystore_g          = NULL;
-        H5PL_keystore_count_g    = 0;
-        H5PL_keystore_capacity_g = 0;
+
+        /* Free revocation list allocated before failure */
+        if (H5PL_revoked_sigs_g) {
+            H5MM_xfree(H5PL_revoked_sigs_g);
+            H5PL_revoked_sigs_g          = NULL;
+            H5PL_revoked_sigs_count_g    = 0;
+            H5PL_revoked_sigs_capacity_g = 0;
+        }
+        H5PL_keystore_initialized_g     = false;
+        H5PL_revoked_sigs_initialized_g = false;
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1409,6 +1437,10 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
 
     /* Calculate binary data size with overflow protection */
     {
+        /* The cast to size_t below is safe as long as size_t is at least 32 bits,
+         * which is guaranteed by the H5PL_MAX_PLUGIN_SIZE (1GB) check that follows. */
+        H5_STATIC_ASSERT(sizeof(size_t) >= 4);
+
         /* Use uint64_t to prevent any theoretical overflow in addition */
         uint64_t sig_and_footer_size =
             (uint64_t)footer_out->signature_length + (uint64_t)H5PL_SIG_FOOTER_SIZE;
@@ -1772,6 +1804,15 @@ H5PL__cleanup_signature_cache(void)
         H5PL_keystore_count_g       = 0;
         H5PL_keystore_capacity_g    = 0;
         H5PL_keystore_initialized_g = false;
+    }
+
+    /* Free revocation list */
+    if (H5PL_revoked_sigs_initialized_g) {
+        H5MM_xfree(H5PL_revoked_sigs_g);
+        H5PL_revoked_sigs_g             = NULL;
+        H5PL_revoked_sigs_count_g       = 0;
+        H5PL_revoked_sigs_capacity_g    = 0;
+        H5PL_revoked_sigs_initialized_g = false;
     }
 
     /* Free all entries in the signature verification cache */
