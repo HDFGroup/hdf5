@@ -113,13 +113,6 @@ typedef const void *(*H5PL_get_plugin_info_t)(void);
 /************************************/
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
 
-/* Lock file path for disabling environment variable keystore override */
-#ifdef H5_HAVE_WIN32_API
-#define H5PL_SIG_LOCK_FILE_PATH "C:\\ProgramData\\HDF_Group\\HDF5\\lock_keystore"
-#else
-#define H5PL_SIG_LOCK_FILE_PATH "/etc/hdf5/lock_keystore"
-#endif
-
 /* Keystore directory string for error messages */
 #ifdef H5PL_KEYSTORE_DIR
 #define H5PL_SIG_KEYSTORE_DIR_STR H5PL_KEYSTORE_DIR

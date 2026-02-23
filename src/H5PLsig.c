@@ -823,39 +823,6 @@ done:
 } /* end H5PL__load_keys_from_directory() */
 #endif /* H5_HAVE_WIN32_API */
 
-/*-------------------------------------------------------------------------
- * Function:    H5PL__is_keystore_locked
- *
- * Purpose:     Check if keystore environment variable override is locked
- *              by presence of system lock file
- *
- *              Lock file locations:
- *              - Unix/Linux: /etc/hdf5/lock_keystore
- *              - Windows: C:\ProgramData\HDF_Group\HDF5\lock_keystore
- *
- *              This allows system administrators to disable the
- *              HDF5_PLUGIN_KEYSTORE environment variable on pre-built
- *              binaries without recompiling HDF5.
- *
- * Return:      true if locked, false otherwise
- *-------------------------------------------------------------------------
- */
-static bool
-H5PL__is_keystore_locked(void)
-{
-    h5_stat_t st;
-    bool      ret_value = false;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    if (HDstat(H5PL_SIG_LOCK_FILE_PATH, &st) == 0) {
-        ret_value = true;
-        H5PL_SIG_DEBUG_PRINT("HDF5 KeyStore: Environment variable override disabled by %s\n",
-                             H5PL_SIG_LOCK_FILE_PATH);
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__is_keystore_locked() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__init_keystore
@@ -892,23 +859,16 @@ H5PL__init_keystore(void)
 
     /* 1. Check environment variable (highest priority) */
 #ifndef H5PL_DISABLE_ENV_KEYSTORE
-    /* Check if environment variable override is locked by runtime lock file */
-    if (!H5PL__is_keystore_locked()) {
-        if (NULL != (env_keystore = getenv("HDF5_PLUGIN_KEYSTORE"))) {
-            if (H5PL__load_keys_from_directory(env_keystore) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL,
-                            "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s", env_keystore);
-            keys_loaded = true;
+    if (NULL != (env_keystore = getenv("HDF5_PLUGIN_KEYSTORE"))) {
+        if (H5PL__load_keys_from_directory(env_keystore) < 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL,
+                        "failed to load keys from HDF5_PLUGIN_KEYSTORE: %s", env_keystore);
+        keys_loaded = true;
 
-            /* Load revoked signatures from same directory */
-            if (H5PL__load_revoked_signatures(env_keystore) < 0) {
-                /* Non-fatal - continue even if revoked signatures fail to load */
-            }
+        /* Load revoked signatures from same directory */
+        if (H5PL__load_revoked_signatures(env_keystore) < 0) {
+            /* Non-fatal - continue even if revoked signatures fail to load */
         }
-    }
-    else {
-        H5PL_SIG_DEBUG_PRINT(
-            "HDF5 KeyStore: Skipping HDF5_PLUGIN_KEYSTORE environment variable (locked by sysadmin)\n");
     }
 #else
     /* Environment variable override disabled at compile time (security hardening) */
