@@ -41,10 +41,6 @@
 /* Local Prototypes */
 /********************/
 
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-static herr_t H5PL__verify_plugin_signature(const char *path);
-#endif
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -289,35 +285,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_load() */
 
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-/*-------------------------------------------------------------------------
- * Function:    H5PL__verify_plugin_signature
- *
- * Purpose:     Verify plugin digital signature
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5PL__verify_plugin_signature(const char *path)
-{
-    herr_t verify_result = SUCCEED;
-    herr_t ret_value     = SUCCEED;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Check args */
-    assert(path);
-
-    verify_result = H5PL__verify_signature_appended(path);
-
-    if (verify_result < 0)
-        ret_value = FAIL;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__verify_plugin_signature() */
-#endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
-
 /*-------------------------------------------------------------------------
  * Function:    H5PL__open
  *
@@ -381,7 +348,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     /* Verify plugin signature before loading */
-    if (H5PL__verify_plugin_signature(path) < 0)
+    if (H5PL__verify_signature_appended(path) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "plugin signature verification failed for: %s", path);
 #endif
 
