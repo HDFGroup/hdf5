@@ -76,7 +76,9 @@
         "HDF5_USE_ZLIB_STATIC": "ON",
         "HDF5_USE_LIBAEC_STATIC": "ON",
         "HDF5_ENABLE_SZIP_SUPPORT": "ON",
-        "HDF5_ENABLE_ZLIB_SUPPORT": "ON"
+        "HDF5_ENABLE_ZLIB_SUPPORT": "ON",
+        "ZLIB_USE_EXTERNAL": "ON",
+        "SZIP_USE_EXTERNAL": "ON"
       }
     },
     {
