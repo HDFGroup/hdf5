@@ -1549,9 +1549,7 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
         }
 
         /* Configure PSS padding if needed */
-        if (footer->algorithm_id == H5PL_SIG_ALGO_SHA256_PSS ||
-            footer->algorithm_id == H5PL_SIG_ALGO_SHA384_PSS ||
-            footer->algorithm_id == H5PL_SIG_ALGO_SHA512_PSS) {
+        if (H5PL_SIG_ALGO_IS_PSS(footer->algorithm_id)) {
             if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) ||
                 1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_DIGEST)) {
                 keys_init_failed++;

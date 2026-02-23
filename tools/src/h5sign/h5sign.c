@@ -451,7 +451,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         if (HDlseek(fd, (HDoff_t)(file_size - (hsize_t)H5PL_SIG_FOOTER_SIZE), SEEK_SET) >= 0) {
             h5_posix_io_ret_t nr = HDread(fd, check_buf, H5PL_SIG_FOOTER_SIZE);
             if (nr == (h5_posix_io_ret_t)H5PL_SIG_FOOTER_SIZE) {
-                uint8_t *cp = check_buf + 8; /* magic lives at bytes 8-11 of the footer */
+                uint8_t *cp = check_buf + H5PL_SIG_FOOTER_MAGIC_OFFSET;
                 UINT32DECODE(cp, existing_magic);
                 if (existing_magic == H5PL_SIG_MAGIC) {
                     if (!opt_force) {
@@ -535,8 +535,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     }
 
     /* Configure PSS padding if needed */
-    if (algorithm_id == H5PL_SIG_ALGO_SHA256_PSS || algorithm_id == H5PL_SIG_ALGO_SHA384_PSS ||
-        algorithm_id == H5PL_SIG_ALGO_SHA512_PSS) {
+    if (H5PL_SIG_ALGO_IS_PSS(algorithm_id)) {
         if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
             unsigned long ssl_err = ERR_get_error();
             char          err_buf[256];
@@ -759,6 +758,15 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
             break;
         case H5PL_SIG_ALGO_SHA512:
             fprintf(rawoutstream, "SHA-512 (0x%02X)\n", algorithm_id);
+            break;
+        case H5PL_SIG_ALGO_SHA256_PSS:
+            fprintf(rawoutstream, "SHA-256/RSA-PSS (0x%02X)\n", algorithm_id);
+            break;
+        case H5PL_SIG_ALGO_SHA384_PSS:
+            fprintf(rawoutstream, "SHA-384/RSA-PSS (0x%02X)\n", algorithm_id);
+            break;
+        case H5PL_SIG_ALGO_SHA512_PSS:
+            fprintf(rawoutstream, "SHA-512/RSA-PSS (0x%02X)\n", algorithm_id);
             break;
         default:
             fprintf(rawoutstream, "0x%02X\n", algorithm_id);

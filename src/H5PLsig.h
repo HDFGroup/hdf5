@@ -49,8 +49,16 @@
 #define H5PL_SIG_ALGO_SHA3_256   0x20 /* SHA3-256 (future) */
 #define H5PL_SIG_ALGO_BLAKE3     0x30 /* BLAKE3 (future) */
 
+/* Byte offset of the magic field within the footer buffer.
+ * Layout: [sig_len: 4][algo_id: 1][format_ver: 1][reserved: 2][magic: 4] */
+#define H5PL_SIG_FOOTER_MAGIC_OFFSET (4U + 1U + 1U + 2U)
+
 /* Signature footer on-disk size (12 bytes) */
 #define H5PL_SIG_FOOTER_SIZE 12
+
+/* True when algo id selects an RSA-PSS padding variant */
+#define H5PL_SIG_ALGO_IS_PSS(id)                                                                             \
+    ((id) >= H5PL_SIG_ALGO_SHA256_PSS && (id) <= H5PL_SIG_ALGO_SHA512_PSS)
 
 /* Maximum RSA signature size in bytes.
  * A 4096-bit RSA key produces a 512-byte signature; 1024 bytes allows
