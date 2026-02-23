@@ -406,7 +406,6 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     size_t            sig_len     = 0;
     EVP_MD_CTX       *mdctx       = NULL;
     EVP_PKEY_CTX     *pkey_ctx    = NULL;
-    H5PL_sig_footer_t footer;
     herr_t            ret_value  = SUCCEED;
     hsize_t           bytes_read = 0;
 
