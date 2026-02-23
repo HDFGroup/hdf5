@@ -135,10 +135,10 @@ if (${HDF5_PACKAGE_NAME}_PROVIDES_ZLIB_SUPPORT)
   endif ()
 endif ()
 
-if (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT)
-  if (NOT @SZIP_USE_EXTERNAL@)
-    find_dependency (@LIBAEC_PACKAGE_NAME@ OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
-  endif ()
+# If szip/libaec support was enabled and libaec was found on the system at build
+# time, locate libaec to propagate the dependency
+if (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT AND NOT @SZIP_USE_EXTERNAL@)
+  find_dependency (@LIBAEC_PACKAGE_NAME@ OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -184,10 +184,22 @@ if (NOT TARGET "@HDF5_PACKAGE@")
       include ("@PACKAGE_SHARE_INSTALL_DIR@/@ZLIB_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake")
     endif ()
   endif ()
-  if (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT)
-    if (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND @SZIP_USE_EXTERNAL@)
-      include ("@PACKAGE_SHARE_INSTALL_DIR@/@LIBAEC_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake")
+  # If szip/libaec support was enabled and libaec was built from an external source,
+  # include the installed CMake targets file so the targets are available
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT AND @SZIP_USE_EXTERNAL@)
+    if (@HDF5_USE_LIBAEC_STATIC@)
+      set (_libaec_targets_file_name "@PACKAGE_SHARE_INSTALL_DIR@/@LIBAEC_PACKAGE_NAME@@HDF_PACKAGE_EXT@_static-targets.cmake")
+    else ()
+      set (_libaec_targets_file_name "@PACKAGE_SHARE_INSTALL_DIR@/@LIBAEC_PACKAGE_NAME@@HDF_PACKAGE_EXT@_shared-targets.cmake")
     endif ()
+    include ("${_libaec_targets_file_name}" OPTIONAL RESULT_VARIABLE _libaec_loaded)
+    if (NOT _libaec_loaded)
+      set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+      set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "Couldn't locate libaec targets file ${_libaec_targets_file_name}")
+      unset (_libaec_loaded)
+      return ()
+    endif ()
+    unset (_libaec_loaded)
   endif ()
   include ("@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake")
   # OPTIONAL: some packages ship HDF5 in such a way that the static and

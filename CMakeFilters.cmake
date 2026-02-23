@@ -188,10 +188,13 @@ function (external_zlib_library)
     )
   endif ()
 
-  message (VERBOSE "Filter HDF5_ZLIB will be built from source ${ZLIB_URL}")
+  message (STATUS "Filter HDF5_ZLIB will be built from source ${ZLIB_URL}")
+  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR NOT ZLIB_USE_LOCALCONTENT)
+    message (VERBOSE "Fetching and configuring filter HDF5_ZLIB")
+  endif ()
 
   # Make ZLIB available for the build
-  FetchContent_MakeAvailable(HDF5_ZLIB)
+  FetchContent_MakeAvailable (HDF5_ZLIB)
 
   # Optionally add namespace alias for static zlib
   if (HDF_PACKAGE_NAMESPACE)
@@ -310,7 +313,11 @@ function (system_szip_library)
   endif ()
 endfunction ()
 
-# Function to retrieve libaec/szip from external source (if necessary) and add it to the build process
+# Function to retrieve libaec/szip from external source (if necessary) and add it
+# to the build process
+# NOTE: This function does NOT patch upstream libaec and will need maintenance for
+# any changes in the CMake target names, installed configuration files, etc. in new
+# releases.
 function (external_szip_library)
   if (NOT HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT|TGZ")
     message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be 'GIT' or 'TGZ' when SZIP_USE_EXTERNAL is ON (Current setting: ${HDF5_ALLOW_EXTERNAL_SUPPORT})")
@@ -325,13 +332,12 @@ function (external_szip_library)
     set (SZIP_URL ${LIBAEC_GIT_URL} CACHE STRING "Path to szip git repository")
     set (SZIP_BRANCH ${LIBAEC_GIT_BRANCH})
 
+    message (STATUS "Filter libaec will be built from source ${SZIP_URL} (branch ${SZIP_BRANCH})")
+
     # Instruct FetchContent to retrieve libaec from GIT and patch CMakeLists.txt
     FetchContent_Declare (SZIP
         GIT_REPOSITORY ${SZIP_URL}
         GIT_TAG ${SZIP_BRANCH}
-        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-            ${HDF_RESOURCES_DIR}/LIBAEC/CMakeLists.txt
-            <SOURCE_DIR>/CMakeLists.txt
     )
   else () # HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ"
     if (NOT DEFINED TGZPATH)
@@ -350,34 +356,92 @@ function (external_szip_library)
       message (FATAL_ERROR "Filter SZIP file ${SZIP_URL} not found")
     endif ()
 
+    if (NOT LIBAEC_USE_LOCALCONTENT)
+      message (STATUS "Filter libaec will be built from source ${SZIP_URL}")
+    endif ()
+
     # Instruct FetchContent to retrieve libaec from .tgz file and patch CMakeLists.txt
     FetchContent_Declare (SZIP
         URL ${SZIP_URL}
         URL_HASH ""
-        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-            ${HDF_RESOURCES_DIR}/LIBAEC/CMakeLists.txt
-            <SOURCE_DIR>/CMakeLists.txt
     )
   endif ()
 
-  message (VERBOSE "Filter libaec will be built from source ${SZIP_URL}")
+  # Set libaec shared/static library building based off of preference variable
+  if (HDF5_USE_LIBAEC_STATIC)
+    set (BUILD_SHARED_LIBS OFF)
+    set (BUILD_STATIC_LIBS ON)
+  else ()
+    set (BUILD_SHARED_LIBS ON)
+    set (BUILD_STATIC_LIBS OFF)
+  endif ()
+
+  # Include libaec packaging logic and override installation of files
+  # into the library's CMake install directory
+  set (libaec_INSTALL_CMAKEDIR "${HDF5_INSTALL_CMAKE_DIR}" CACHE INTERNAL "")
+  set (libaec_INCLUDE_PACKAGING ON CACHE INTERNAL "")
+
+  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR NOT LIBAEC_USE_LOCALCONTENT)
+    message (VERBOSE "Fetching and configuring filter libaec")
+  else ()
+    message (VERBOSE "Configuring filter libaec")
+  endif ()
 
   # Make SZIP (libaec) available for the build
-  FetchContent_MakeAvailable(SZIP)
+  FetchContent_MakeAvailable (SZIP)
 
-  # Optionally add namespace aliases for static szaec and aec
-  if (HDF_PACKAGE_NAMESPACE)
-    add_library (${HDF_PACKAGE_NAMESPACE}szaec-static ALIAS szaec-static)
-    add_library (${HDF_PACKAGE_NAMESPACE}aec-static ALIAS aec-static)
+  # Set expected target names, based on shared/static preference
+  # NOTE: These must be maintained with new releases of upstream libaec in
+  # order to avoid having to patch the source when exporting targets.
+  if (BUILD_STATIC_LIBS)
+    set (h5_aec_target_name aec-static)
+    set (h5_aec_objects_target_name aec-static-objects)
+    set (h5_sz_target_name sz-static)
+    set (h5_sz_objects_target_name sz-static-objects)
+    set (h5_aec_export_file_name "libaec_static-targets.cmake")
+  else ()
+    set (h5_aec_target_name aec-shared)
+    set (h5_aec_objects_target_name aec-shared-objects)
+    set (h5_sz_target_name sz-shared)
+    set (h5_sz_objects_target_name sz-shared-objects)
+    set (h5_aec_export_file_name "libaec_shared-targets.cmake")
   endif ()
-  set (H5_SZIP_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}szaec-static;${HDF_PACKAGE_NAMESPACE}aec-static")
+  set (libaec_targets
+    "${h5_aec_target_name}" "${h5_aec_objects_target_name}"
+    "${h5_sz_target_name}" "${h5_sz_objects_target_name}"
+  )
+  foreach (libaec_target ${libaec_targets})
+    if (NOT TARGET ${libaec_target})
+      message (FATAL_ERROR "Expected target ${libaec_target} is missing from build of external libaec")
+    endif ()
+  endforeach ()
+
+  # Optionally add namespace aliases for szaec and aec
+  if (HDF_PACKAGE_NAMESPACE)
+    add_library (${HDF_PACKAGE_NAMESPACE}${h5_aec_target_name} ALIAS ${h5_aec_target_name})
+    add_library (${HDF_PACKAGE_NAMESPACE}${h5_sz_target_name} ALIAS ${h5_sz_target_name})
+  endif ()
+
+  set (H5_SZIP_LIBRARY "${HDF_PACKAGE_NAMESPACE}${h5_aec_target_name};${HDF_PACKAGE_NAMESPACE}${h5_sz_target_name}")
 
   # Set include directories for generated and source headers
   set (H5_SZIP_INCLUDE_DIR_GEN "${szip_BINARY_DIR}" PARENT_SCOPE)
   set (H5_SZIP_INCLUDE_DIR "${szip_SOURCE_DIR}/include" PARENT_SCOPE)
   set (H5_SZIP_INCLUDE_DIRS ${H5_SZIP_INCLUDE_DIR_GEN} ${H5_SZIP_INCLUDE_DIR} PARENT_SCOPE)
 
-  set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${H5_SZIP_STATIC_LIBRARY} PARENT_SCOPE)
+  set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${H5_SZIP_LIBRARY} PARENT_SCOPE)
+
+  # If built as a sub-project or if cross-compiling, export all exported
+  # targets to the build tree. Append to main targets file but keep
+  # "libaec::" namespace from upstream.
+  if (HDF5_EXTERNALLY_CONFIGURED OR CMAKE_CROSSCOMPILING)
+    export (
+      TARGETS ${libaec_targets}
+      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+      NAMESPACE libaec::
+      APPEND
+    )
+  endif ()
 
   set (H5_SZIP_FOUND TRUE PARENT_SCOPE)
 endfunction ()
