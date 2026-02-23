@@ -1029,6 +1029,23 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
         unsigned char hash[H5PL_SIGNATURE_HASH_SIZE];
         size_t        line_len;
         char         *trimmed;
+        hbool_t       line_truncated = FALSE;
+
+        /* Detect truncated reads: fgets fills the buffer without finding a
+         * newline, meaning the physical line exceeds sizeof(line)-1 chars.
+         * Drain the remainder so the next fgets starts on a fresh line, then
+         * skip this chunk — a trailing fragment could otherwise be mistaken
+         * for a valid 64-hex-char hash. */
+        if (strchr(line, '\n') == NULL && !feof(fp)) {
+            int ch;
+            line_truncated = TRUE;
+            while ((ch = fgetc(fp)) != EOF && ch != '\n')
+                ;
+        }
+        if (line_truncated) {
+            H5PL_SIG_DEBUG_PRINT("WARNING: Skipping oversized line in revoked signatures file\n");
+            continue;
+        }
 
         /* Trim whitespace */
         trimmed = line;
