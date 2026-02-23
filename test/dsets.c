@@ -2025,9 +2025,9 @@ static size_t
 filter_update_cd(unsigned int H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned int *cd_values,
                  size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
-    // Note: don't return 0, as 0 causes hdf5 to quietly skip
-    // the filter when it is optional.
-    assert(cd_nelmts == 1 && cd_values[0] == 42);
+    if (cd_nelmts != 1 || cd_values[0] != 42)
+        // This makes the test fail because the filter is mandatory
+        return 0;
     return nbytes;
 } /* end filter_update_cd() */
 
