@@ -6745,6 +6745,9 @@ test_optional_filters_scalar(hid_t file)
     if ((dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
 
+    if (H5Zregister(H5Z_DO_NOT_RUN) < 0)
+        TEST_ERROR;
+
     /* The filter is optional. Test that callbacks are never invoked. */
     count_dnr_calls = 0;
     if (H5Pset_filter(dcplid, H5Z_FILTER_DO_NOT_RUN, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
@@ -6834,6 +6837,9 @@ test_optional_filters_null(hid_t file)
 
     /* Create dcpl with special filter */
     if ((dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Zregister(H5Z_DO_NOT_RUN) < 0)
         TEST_ERROR;
 
     /* The filter is optional. Test that callbacks are never invoked. */
