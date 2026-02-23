@@ -194,7 +194,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define H5Z_FILTER_CAN_APPLY_TEST2 311
 #define H5Z_FILTER_COUNT           312
 #define H5Z_FILTER_EXPAND2         313
-#define H5Z_FILTER_CRASH           314
+#define H5Z_FILTER_DO_NOT_RUN      314
 #define H5Z_FILTER_UPDATE_CD       315
 
 /* Flags for testing filters */
@@ -300,6 +300,7 @@ double **check_dbl            = NULL;
 double  *check_dbl_data       = NULL;
 size_t   count_nbytes_read    = 0;
 size_t   count_nbytes_written = 0;
+size_t   count_dnr_calls      = 0;
 
 /* Temporary buffer dimensions */
 #define DSET_TMP_DIM1 50
@@ -334,10 +335,10 @@ static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts, const unsigned
                             size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_bogus3(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                             size_t nbytes, size_t *buf_size, void **buf);
-static htri_t can_apply_crash(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static herr_t set_local_crash(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static size_t filter_crash(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
-                           size_t *buf_size, void **buf);
+static htri_t can_apply_do_not_run(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t set_local_do_not_run(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t filter_do_not_run(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                size_t nbytes, size_t *buf_size, void **buf);
 static herr_t set_local_update_cd(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t filter_update_cd(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                size_t nbytes, size_t *buf_size, void **buf);
@@ -1927,45 +1928,50 @@ filter_bogus3(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts
 } /* end filter_bogus3() */
 
 /*------------------------------------------------------------------------
- * Function:  can_apply_crash
+ * Function:  can_apply_do_not_run
  *
- * Purpose:   A 'can apply' callback that crashes if ever called.
+ * Purpose:   A 'can apply' callback that lets the calling test detect
+ *            if it's been executed
  *------------------------------------------------------------------------
  */
 static htri_t
-can_apply_crash(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
+can_apply_do_not_run(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id,
+                     hid_t H5_ATTR_UNUSED space_id)
 {
-    assert(0);
+    count_dnr_calls += 1;
     return FAIL;
-} /* end can_apply_crash() */
+} /* end can_apply_do_not_run() */
 
 /*---------------------------------------------------------------------
- * Function:  set_local_crash
+ * Function:  set_local_do_not_run
  *
- * Purpose:   A 'set local' callback that crashes if ever called.
+ * Purpose:   A 'set local' callback that lets the calling test detect
+ *            if it's been executed
  *---------------------------------------------------------------------
  */
 static herr_t
-set_local_crash(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
+set_local_do_not_run(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id,
+                     hid_t H5_ATTR_UNUSED space_id)
 {
-    assert(0);
+    count_dnr_calls += 1;
     return FAIL;
-} /* end set_local_crash() */
+} /* end set_local_do_not_run() */
 
-/*-------------------------------------------------------------------
- * Function:  filter_crash
+/*------------------------------------------------------------------
+ * Function:  filter_do_not_run
  *
- * Purpose:   A 'filter' callback that crashes if ever called.
- *-------------------------------------------------------------------
+ * Purpose:   A 'filter' callback that lets the calling test detect
+ *            if it's been executed
+ *------------------------------------------------------------------
  */
 static size_t
-filter_crash(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-             const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
-             size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+filter_do_not_run(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                  const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
+                  size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
-    assert(0);
+    count_dnr_calls += 1;
     return 0;
-} /* end filter_crash() */
+} /* end filter_do_not_run() */
 
 /*-------------------------------------------------------------------------
  * Function:  set_local_update_cd
@@ -2036,13 +2042,15 @@ const H5Z_class2_t H5Z_CORRUPT[1] = {{
     filter_corrupt,     /* The actual filter function    */
 }};
 
-/* A filter where all callbacks crash if ever invoked */
-const H5Z_class2_t H5Z_CRASH[1] = {{
-    H5Z_CLASS_T_VERS, H5Z_FILTER_CRASH, /* Filter id number             */
-    1, 1, "can_apply_crash",            /* Filter name for debugging    */
-    can_apply_crash,                    /* The "can apply" callback     */
-    set_local_crash,                    /* The "set local" callback     */
-    filter_crash,                       /* The actual filter function   */
+/* A filter where callbacks let the calling test notice if they've been run
+   through a global variable
+ */
+const H5Z_class2_t H5Z_DO_NOT_RUN[1] = {{
+    H5Z_CLASS_T_VERS, H5Z_FILTER_DO_NOT_RUN, /* Filter id number             */
+    1, 1, "do_not_run",                      /* Filter name for debugging    */
+    can_apply_do_not_run,                    /* The "can apply" callback     */
+    set_local_do_not_run,                    /* The "set local" callback     */
+    filter_do_not_run,                       /* The actual filter function   */
 }};
 
 /* A filter where set_local updates the cd_values and filter tests that
@@ -6737,8 +6745,9 @@ test_optional_filters_scalar(hid_t file)
     if ((dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
 
-    /* The filter is optional. Callbacks will crash if ever invoked. */
-    if (H5Pset_filter(dcplid, H5Z_FILTER_CRASH, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
+    /* The filter is optional. Test that callbacks are never invoked. */
+    count_dnr_calls = 0;
+    if (H5Pset_filter(dcplid, H5Z_FILTER_DO_NOT_RUN, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
         TEST_ERROR;
 
     /* Create the data space */
@@ -6786,6 +6795,9 @@ test_optional_filters_scalar(hid_t file)
     if (H5Pclose(dcplid) < 0)
         TEST_ERROR;
 
+    if (count_dnr_calls)
+        TEST_ERROR;
+
     PASSED();
     return SUCCEED;
 
@@ -6824,8 +6836,9 @@ test_optional_filters_null(hid_t file)
     if ((dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
 
-    /* The filter is optional. Callbacks will crash if ever invoked. */
-    if (H5Pset_filter(dcplid, H5Z_FILTER_CRASH, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
+    /* The filter is optional. Test that callbacks are never invoked. */
+    count_dnr_calls = 0;
+    if (H5Pset_filter(dcplid, H5Z_FILTER_DO_NOT_RUN, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
         TEST_ERROR;
 
     /* Create the data space */
@@ -6867,6 +6880,9 @@ test_optional_filters_null(hid_t file)
 
     /* Close dataset creation property list */
     if (H5Pclose(dcplid) < 0)
+        TEST_ERROR;
+
+    if (count_dnr_calls)
         TEST_ERROR;
 
     PASSED();
