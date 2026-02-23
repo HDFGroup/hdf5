@@ -531,6 +531,16 @@ H5PL__validate_directory_permissions(const char *dir_path)
                     dir_path, (unsigned long)dwRes);
     }
 
+    /* A NULL DACL means unrestricted access for everyone — inherently insecure */
+    if (pDACL == NULL) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "SECURITY ERROR: KeyStore directory has a NULL DACL (unrestricted access): %s\n"
+                    "  A NULL DACL grants full access to all users and is not permitted for a KeyStore.\n"
+                    "  Fix: Configure explicit ACLs to allow write access only for Administrators:\n"
+                    "    icacls \"%s\" /inheritance:r /grant Administrators:F",
+                    dir_path, dir_path);
+    }
+
     /* Create SIDs for "Everyone", "Users", and "Authenticated Users" groups */
     if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pSidEveryone)) {
         LocalFree(pSD);
