@@ -68,6 +68,15 @@ function (extract_lib_pkgconfig_info
   unset (library_deps_list)
   unset (library_cflags_list)
 
+  # Get the message logging level so that we can show developer warnings
+  # only if the logging level is VERBOSE or DEBUG. While a bit odd to do
+  # in this way, the below warnings about generator expressions are fairly
+  # verbose and won't be of interest to most.
+  cmake_language (GET_MESSAGE_LOG_LEVEL cmake_msg_log_level)
+  if (cmake_msg_log_level MATCHES "VERBOSE|DEBUG")
+    set (show_dev_warnings TRUE)
+  endif ()
+
   # Get current project build configuration type in case we need to map
   # to an imported target's config-specific properties. To be safe for
   # now, avoid processing libraries when using a multi-config generator
@@ -81,7 +90,9 @@ function (extract_lib_pkgconfig_info
   if (is_multiconfig_gen)
     list (LENGTH CMAKE_CONFIGURATION_TYPES num_configs)
     if (num_configs GREATER "1")
-      message (AUTHOR_WARNING "Cannot generate pkg-config files correctly for multi-config generators")
+      if (show_dev_warnings)
+        message (AUTHOR_WARNING "Cannot generate pkg-config files correctly for multi-config generators")
+      endif ()
       set (${_lib_skipped_outvar} TRUE PARENT_SCOPE)
       return ()
     elseif (num_configs EQUAL "1")
@@ -103,7 +114,9 @@ function (extract_lib_pkgconfig_info
     # solution will be needed in order to correctly evaluate these.
     string (GENEX_STRIP "${library}" library_genex_stripped)
     if (NOT "${library}" STREQUAL "${library_genex_stripped}")
-      message (AUTHOR_WARNING "Not processing CMake generator expression for library ${library} for pkg-config files")
+      if (show_dev_warnings)
+        message (AUTHOR_WARNING "Not processing CMake generator expression for library ${library} for pkg-config files")
+      endif ()
       set (${_lib_skipped_outvar} TRUE PARENT_SCOPE)
       return ()
     endif ()
@@ -127,7 +140,9 @@ function (extract_lib_pkgconfig_info
       # solution will be needed in order to correctly evaluate these.
       string (GENEX_STRIP "${include_dir}" include_dir_genex_stripped)
       if (NOT "${include_dir}" STREQUAL "${include_dir_genex_stripped}")
-        message (AUTHOR_WARNING "Not processing CMake generator expression ${include_dir} for library ${library} for pkg-config files")
+        if (show_dev_warnings)
+          message (AUTHOR_WARNING "Not processing CMake generator expression ${include_dir} for library ${library} for pkg-config files")
+        endif ()
         continue ()
       endif ()
 
@@ -146,7 +161,9 @@ function (extract_lib_pkgconfig_info
       # solution will be needed in order to correctly evaluate these.
       string (GENEX_STRIP "${compile_opt}" compile_opt_genex_stripped)
       if (NOT "${compile_opt}" STREQUAL "${compile_opt_genex_stripped}")
-        message (AUTHOR_WARNING "Not processing CMake generator expression ${compile_opt} for library ${library} for pkg-config files")
+        if (show_dev_warnings)
+          message (AUTHOR_WARNING "Not processing CMake generator expression ${compile_opt} for library ${library} for pkg-config files")
+        endif ()
         continue ()
       endif ()
 
@@ -161,7 +178,9 @@ function (extract_lib_pkgconfig_info
       # solution will be needed in order to correctly evaluate these.
       string (GENEX_STRIP "${compile_def}" compile_def_genex_stripped)
       if (NOT "${compile_def}" STREQUAL "${compile_def_genex_stripped}")
-        message (AUTHOR_WARNING "Not processing CMake generator expression ${compile_def} for library ${library} for pkg-config files")
+        if (show_dev_warnings)
+          message (AUTHOR_WARNING "Not processing CMake generator expression ${compile_def} for library ${library} for pkg-config files")
+        endif ()
         continue ()
       endif ()
 
@@ -210,7 +229,9 @@ function (extract_lib_pkgconfig_info
       # solution will be needed in order to correctly evaluate these.
       string (GENEX_STRIP "${lib_path}" lib_path_genex_stripped)
       if (NOT "${lib_path}" STREQUAL "${lib_path_genex_stripped}")
-        message (AUTHOR_WARNING "Not processing CMake generator expression ${lib_path} for library ${library} for pkg-config files")
+        if (show_dev_warnings)
+          message (AUTHOR_WARNING "Not processing CMake generator expression ${lib_path} for library ${library} for pkg-config files")
+        endif ()
         set (${_lib_skipped_outvar} TRUE PARENT_SCOPE)
         return ()
       endif ()
@@ -231,7 +252,9 @@ function (extract_lib_pkgconfig_info
       # solution will be needed in order to correctly evaluate these.
       string (GENEX_STRIP "${lib_outname}" lib_outname_genex_stripped)
       if (NOT "${lib_outname}" STREQUAL "${lib_outname_genex_stripped}")
-        message (AUTHOR_WARNING "Not processing CMake generator expression ${lib_outname} for library ${library} for pkg-config files")
+        if (show_dev_warnings)
+          message (AUTHOR_WARNING "Not processing CMake generator expression ${lib_outname} for library ${library} for pkg-config files")
+        endif ()
         set (${_lib_skipped_outvar} TRUE PARENT_SCOPE)
         return ()
       endif ()
@@ -249,7 +272,9 @@ function (extract_lib_pkgconfig_info
     # it's assumed that non-imported targets without a valid name of some sort won't
     # be needed in a pkg-config file; they are silently skipped.
     if (lib_is_imported AND NOT lib_type STREQUAL "INTERFACE_LIBRARY")
-      message (AUTHOR_WARNING "Couldn't obtain a valid name for library ${library} for pkg-config files")
+      if (show_dev_warnings)
+        message (AUTHOR_WARNING "Couldn't obtain a valid name for library ${library} for pkg-config files")
+      endif ()
     endif ()
 
     # Targets of type INTERFACE_LIBRARY are still processed for their compile
