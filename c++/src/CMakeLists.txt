@@ -96,7 +96,7 @@ if (BUILD_STATIC_LIBS)
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIB_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_CPP_LIB_TARGET} ${HDF5_CPP_LIB_NAME} STATIC 0)
   set_target_properties (${HDF5_CPP_LIB_TARGET} PROPERTIES FOLDER libraries/cpp)
-  set (install_targets ${HDF5_CPP_LIB_TARGET})
+  set (install_targets_static ${HDF5_CPP_LIB_TARGET})
 endif ()
 
 if (BUILD_SHARED_LIBS)
@@ -122,7 +122,7 @@ if (BUILD_SHARED_LIBS)
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_CPP_LIBSH_TARGET} ${HDF5_CPP_LIB_NAME} SHARED "CXX")
   set_target_properties (${HDF5_CPP_LIBSH_TARGET} PROPERTIES FOLDER libraries/cpp)
-  set (install_targets ${install_targets} ${HDF5_CPP_LIBSH_TARGET})
+  set (install_targets_shared ${HDF5_CPP_LIBSH_TARGET})
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -154,22 +154,39 @@ install (
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_CPP_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} cpplibraries)
+
+    install (
+        TARGETS
+            ${install_targets_shared}
+        EXPORT
+            ${HDF5_EXPORTED_TARGETS}
+        LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries
+        ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT cpplibraries
+        FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT cpplibraries
+        INCLUDES DESTINATION include
+    )
   endif ()
   if (BUILD_STATIC_LIBS)
     INSTALL_TARGET_PDB (${HDF5_CPP_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} cpplibraries)
-  endif ()
 
-  install (
-      TARGETS
-          ${install_targets}
-      EXPORT
-          ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries
-      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries
-      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT cpplibraries
-      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT cpplibraries
-      INCLUDES DESTINATION include
-  )
+    if (BUILD_SHARED_LIBS)
+      set (_static_export ${HDF5_EXPORTED_TARGETS}_static)
+    else ()
+      set (_static_export ${HDF5_EXPORTED_TARGETS})
+    endif ()
+    install (
+        TARGETS
+            ${install_targets_static}
+        EXPORT
+            ${_static_export}
+        LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries
+        ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT cpplibraries
+        FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT cpplibraries
+        INCLUDES DESTINATION include
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

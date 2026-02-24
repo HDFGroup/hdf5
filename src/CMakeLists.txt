@@ -1267,7 +1267,7 @@ if (BUILD_STATIC_LIBS)
   H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} STATIC 0)
   set_target_properties (${HDF5_LIB_TARGET} PROPERTIES FOLDER libraries)
 
-  set (install_targets ${HDF5_LIB_TARGET})
+  set (install_targets_static ${HDF5_LIB_TARGET})
 endif ()
 
 if (BUILD_SHARED_LIBS)
@@ -1296,7 +1296,7 @@ if (BUILD_SHARED_LIBS)
   H5_SET_LIB_OPTIONS (${HDF5_LIBSH_TARGET} ${HDF5_LIB_NAME} SHARED "LIB")
   set_target_properties (${HDF5_LIBSH_TARGET} PROPERTIES FOLDER libraries)
 
-  set (install_targets ${install_targets} ${HDF5_LIBSH_TARGET})
+  set (install_targets_shared ${HDF5_LIBSH_TARGET})
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -1332,22 +1332,39 @@ endif ()
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} libraries)
+
+    install (
+        TARGETS
+            ${install_targets_shared}
+        EXPORT
+            ${HDF5_EXPORTED_TARGETS}
+        LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
+        ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
+        FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT libraries
+        INCLUDES DESTINATION include
+    )
   endif ()
   if (BUILD_STATIC_LIBS)
     INSTALL_TARGET_PDB (${HDF5_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} libraries)
-  endif ()
 
-  install (
-      TARGETS
-          ${install_targets}
-      EXPORT
-          ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
-      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
-      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
-      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT libraries
-      INCLUDES DESTINATION include
-  )
+    if (BUILD_SHARED_LIBS)
+      set (_static_export ${HDF5_EXPORTED_TARGETS}_static)
+    else ()
+      set (_static_export ${HDF5_EXPORTED_TARGETS})
+    endif ()
+    install (
+        TARGETS
+            ${install_targets_static}
+        EXPORT
+            ${_static_export}
+        LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
+        ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
+        FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT libraries
+        INCLUDES DESTINATION include
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
