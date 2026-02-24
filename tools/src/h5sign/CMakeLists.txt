@@ -11,9 +11,6 @@ project (HDF5_TOOLS_SRC_H5SIGN C)
 # Find OpenSSL (required for RSA signing)
 # --------------------------------------------------------------------
 find_package(OpenSSL REQUIRED)
-if (NOT OPENSSL_FOUND)
-  message(FATAL_ERROR "OpenSSL is required to build h5sign but was not found")
-endif ()
 
 # --------------------------------------------------------------------
 # Add the h5sign executable

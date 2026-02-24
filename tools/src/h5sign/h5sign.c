@@ -19,9 +19,12 @@
  *           File format after signing:
  *             [ Plugin Binary ] [ RSA Signature ] [ Footer ]
  *
- *           Footer contains:
- *             - Signature length (4 bytes, little-endian)
- *             - Magic number 0x48444635 "HDF5" (4 bytes, little-endian)
+ *           Footer (12 bytes, little-endian):
+ *             - Signature length  (4 bytes)
+ *             - Algorithm ID      (1 byte)
+ *             - Format version    (1 byte)
+ *             - Reserved          (2 bytes)
+ *             - Magic number 0x48444635 "HDF5" (4 bytes)
  *
  *           The plugin binary loader ignores trailing data, so signed plugins
  *           load normally on all platforms.
@@ -169,6 +172,23 @@ leave(int ret)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    report_openssl_error
+ *
+ * Purpose:     Print an OpenSSL error message with context
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+report_openssl_error(const char *context)
+{
+    unsigned long ssl_err = ERR_get_error();
+    char          err_buf[256];
+    ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
+    fprintf(rawerrorstream, "Error: %s: %s\n", context, err_buf);
+}
+
+/*-------------------------------------------------------------------------
  * Function:    parse_command_line
  *
  * Purpose:     Parse command line arguments
@@ -290,10 +310,8 @@ read_private_key(const char *keyfile)
 
     /* Read private key using OpenSSL's PEM reader */
     if (NULL == (pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL))) {
-        unsigned long ssl_err = ERR_get_error();
-        char          err_buf[256];
-        ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-        fprintf(rawerrorstream, "Error: Cannot read private key from '%s': %s\n", keyfile, err_buf);
+        report_openssl_error("Cannot read private key");
+        fprintf(rawerrorstream, "       Key file: '%s'\n", keyfile);
         fprintf(rawerrorstream, "       Make sure the file is in PEM format.\n");
         fprintf(rawerrorstream,
                 "       If the key is passphrase-protected, re-run interactively so OpenSSL\n");
@@ -314,9 +332,12 @@ read_private_key(const char *keyfile)
         goto done;
     }
 
-    /* Enforce minimum RSA key size (2048-bit minimum; 4096-bit recommended) */
+    /* Enforce minimum RSA key size (2048-bit minimum; 4096-bit recommended)
+     * Use EVP_PKEY_bits() for OpenSSL 1.1.x compatibility; EVP_PKEY_get_bits()
+     * was introduced in OpenSSL 3.0 and EVP_PKEY_bits() remains available as
+     * a backward-compatible alias. */
     {
-        int key_bits = EVP_PKEY_get_bits(pkey);
+        int key_bits = EVP_PKEY_bits(pkey);
         if (key_bits < 2048) {
             fprintf(rawerrorstream, "Error: RSA key in '%s' is too small (%d bits)\n", keyfile, key_bits);
             fprintf(rawerrorstream, "       Minimum required: 2048 bits (4096-bit recommended)\n");
@@ -339,6 +360,51 @@ done:
     return ret_pkey;
 }
 
+/*
+ * Algorithm lookup table: maps CLI name / algorithm ID to display name
+ * and OpenSSL EVP_MD getter.  Shared by parse_algorithm_name() and the
+ * success-message printer in sign_plugin_file().
+ */
+typedef const EVP_MD *(*evp_md_getter_t)(void);
+
+typedef struct {
+    const char     *cli_name;     /* Name accepted on the command line */
+    const char     *display_name; /* Human-readable name for messages */
+    uint8_t         algo_id;      /* H5PL_SIG_ALGO_* constant */
+    evp_md_getter_t md_getter;    /* OpenSSL EVP_MD factory function */
+} h5sign_algo_entry_t;
+
+/* clang-format off */
+static const h5sign_algo_entry_t algo_table[] = {
+    {"sha256",     "SHA-256",         H5PL_SIG_ALGO_SHA256,     EVP_sha256},
+    {"sha384",     "SHA-384",         H5PL_SIG_ALGO_SHA384,     EVP_sha384},
+    {"sha512",     "SHA-512",         H5PL_SIG_ALGO_SHA512,     EVP_sha512},
+    {"sha256-pss", "SHA-256/RSA-PSS", H5PL_SIG_ALGO_SHA256_PSS, EVP_sha256},
+    {"sha384-pss", "SHA-384/RSA-PSS", H5PL_SIG_ALGO_SHA384_PSS, EVP_sha384},
+    {"sha512-pss", "SHA-512/RSA-PSS", H5PL_SIG_ALGO_SHA512_PSS, EVP_sha512},
+};
+/* clang-format on */
+
+static const size_t algo_table_size = sizeof(algo_table) / sizeof(algo_table[0]);
+
+/*-------------------------------------------------------------------------
+ * Function:    algo_display_name
+ *
+ * Purpose:     Return the display name for a given algorithm ID
+ *
+ * Return:      Display name string, or NULL if unknown
+ *-------------------------------------------------------------------------
+ */
+static const char *
+algo_display_name(uint8_t algo_id)
+{
+    for (size_t i = 0; i < algo_table_size; i++) {
+        if (algo_table[i].algo_id == algo_id)
+            return algo_table[i].display_name;
+    }
+    return NULL;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    parse_algorithm_name
  *
@@ -352,36 +418,17 @@ done:
 static herr_t
 parse_algorithm_name(const char *name, const EVP_MD **md_out, uint8_t *algo_id_out)
 {
-    if (HDstrcasecmp(name, "sha256") == 0) {
-        *md_out      = EVP_sha256();
-        *algo_id_out = H5PL_SIG_ALGO_SHA256;
+    for (size_t i = 0; i < algo_table_size; i++) {
+        if (HDstrcasecmp(name, algo_table[i].cli_name) == 0) {
+            *md_out      = algo_table[i].md_getter();
+            *algo_id_out = algo_table[i].algo_id;
+            return SUCCEED;
+        }
     }
-    else if (HDstrcasecmp(name, "sha384") == 0) {
-        *md_out      = EVP_sha384();
-        *algo_id_out = H5PL_SIG_ALGO_SHA384;
-    }
-    else if (HDstrcasecmp(name, "sha512") == 0) {
-        *md_out      = EVP_sha512();
-        *algo_id_out = H5PL_SIG_ALGO_SHA512;
-    }
-    else if (HDstrcasecmp(name, "sha256-pss") == 0) {
-        *md_out      = EVP_sha256();
-        *algo_id_out = H5PL_SIG_ALGO_SHA256_PSS;
-    }
-    else if (HDstrcasecmp(name, "sha384-pss") == 0) {
-        *md_out      = EVP_sha384();
-        *algo_id_out = H5PL_SIG_ALGO_SHA384_PSS;
-    }
-    else if (HDstrcasecmp(name, "sha512-pss") == 0) {
-        *md_out      = EVP_sha512();
-        *algo_id_out = H5PL_SIG_ALGO_SHA512_PSS;
-    }
-    else {
-        fprintf(rawerrorstream, "Error: Unknown algorithm '%s'\n", name);
-        fprintf(rawerrorstream, "Supported: sha256, sha384, sha512, sha256-pss, sha384-pss, sha512-pss\n");
-        return FAIL;
-    }
-    return SUCCEED;
+
+    fprintf(rawerrorstream, "Error: Unknown algorithm '%s'\n", name);
+    fprintf(rawerrorstream, "Supported: sha256, sha384, sha512, sha256-pss, sha384-pss, sha512-pss\n");
+    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -516,20 +563,14 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 
     /* Create message digest context */
     if (NULL == (mdctx = EVP_MD_CTX_new())) {
-        unsigned long ssl_err = ERR_get_error();
-        char          err_buf[256];
-        ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-        fprintf(rawerrorstream, "Error: Cannot create message digest context: %s\n", err_buf);
+        report_openssl_error("Cannot create message digest context");
         ret_value = FAIL;
         goto done;
     }
 
     /* Initialize signing context with selected hash algorithm */
     if (1 != EVP_DigestSignInit(mdctx, &pkey_ctx, hash_algorithm, NULL, private_key)) {
-        unsigned long ssl_err = ERR_get_error();
-        char          err_buf[256];
-        ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-        fprintf(rawerrorstream, "Error: Cannot initialize signing context: %s\n", err_buf);
+        report_openssl_error("Cannot initialize signing context");
         ret_value = FAIL;
         goto done;
     }
@@ -537,19 +578,13 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     /* Configure PSS padding if needed */
     if (H5PL_SIG_ALGO_IS_PSS(algorithm_id)) {
         if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
-            unsigned long ssl_err = ERR_get_error();
-            char          err_buf[256];
-            ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-            fprintf(rawerrorstream, "Error: Cannot set PSS padding: %s\n", err_buf);
+            report_openssl_error("Cannot set PSS padding");
             ret_value = FAIL;
             goto done;
         }
 
         if (1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_DIGEST)) {
-            unsigned long ssl_err = ERR_get_error();
-            char          err_buf[256];
-            ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-            fprintf(rawerrorstream, "Error: Cannot set PSS salt length: %s\n", err_buf);
+            report_openssl_error("Cannot set PSS salt length");
             ret_value = FAIL;
             goto done;
         }
@@ -566,7 +601,13 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     bytes_read = 0;
 
     if (opt_verbose)
+        /* EVP_MD_get0_name() requires OpenSSL 3.0+; fall back to OBJ_nid2sn()
+         * for OpenSSL 1.1.x compatibility. */
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
         fprintf(rawoutstream, "Computing %s hash...\n", EVP_MD_get0_name(hash_algorithm));
+#else
+        fprintf(rawoutstream, "Computing %s hash...\n", OBJ_nid2sn(EVP_MD_type(hash_algorithm)));
+#endif
 
     while (bytes_read < file_size) {
         size_t chunk_size =
@@ -593,10 +634,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 
         /* Update hash with chunk */
         if (1 != EVP_DigestSignUpdate(mdctx, hash_buffer, (size_t)read_result)) {
-            unsigned long ssl_err = ERR_get_error();
-            char          err_buf[256];
-            ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-            fprintf(rawerrorstream, "Error: Cannot update hash: %s\n", err_buf);
+            report_openssl_error("Cannot update hash");
             ret_value = FAIL;
             goto done;
         }
@@ -609,10 +647,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 
     /* Get signature length */
     if (1 != EVP_DigestSignFinal(mdctx, NULL, &sig_len)) {
-        unsigned long ssl_err = ERR_get_error();
-        char          err_buf[256];
-        ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-        fprintf(rawerrorstream, "Error: Cannot get signature length: %s\n", err_buf);
+        report_openssl_error("Cannot get signature length");
         ret_value = FAIL;
         goto done;
     }
@@ -633,10 +668,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 
     /* Compute signature */
     if (1 != EVP_DigestSignFinal(mdctx, signature, &sig_len)) {
-        unsigned long ssl_err = ERR_get_error();
-        char          err_buf[256];
-        ERR_error_string_n(ssl_err, err_buf, sizeof(err_buf));
-        fprintf(rawerrorstream, "Error: Cannot compute signature: %s\n", err_buf);
+        report_openssl_error("Cannot compute signature");
         ret_value = FAIL;
         goto done;
     }
@@ -748,29 +780,12 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     fprintf(rawoutstream, "\nPlugin signed successfully!\n");
     fprintf(rawoutstream, "  File:           %s\n", plugin_path);
     fprintf(rawoutstream, "  Original size:  %llu bytes\n", (unsigned long long)file_size);
-    fprintf(rawoutstream, "  Hash algorithm: ");
-    switch (algorithm_id) {
-        case H5PL_SIG_ALGO_SHA256:
-            fprintf(rawoutstream, "SHA-256 (0x%02X)\n", algorithm_id);
-            break;
-        case H5PL_SIG_ALGO_SHA384:
-            fprintf(rawoutstream, "SHA-384 (0x%02X)\n", algorithm_id);
-            break;
-        case H5PL_SIG_ALGO_SHA512:
-            fprintf(rawoutstream, "SHA-512 (0x%02X)\n", algorithm_id);
-            break;
-        case H5PL_SIG_ALGO_SHA256_PSS:
-            fprintf(rawoutstream, "SHA-256/RSA-PSS (0x%02X)\n", algorithm_id);
-            break;
-        case H5PL_SIG_ALGO_SHA384_PSS:
-            fprintf(rawoutstream, "SHA-384/RSA-PSS (0x%02X)\n", algorithm_id);
-            break;
-        case H5PL_SIG_ALGO_SHA512_PSS:
-            fprintf(rawoutstream, "SHA-512/RSA-PSS (0x%02X)\n", algorithm_id);
-            break;
-        default:
-            fprintf(rawoutstream, "0x%02X\n", algorithm_id);
-            break;
+    {
+        const char *algo_name = algo_display_name(algorithm_id);
+        if (algo_name)
+            fprintf(rawoutstream, "  Hash algorithm: %s (0x%02X)\n", algo_name, algorithm_id);
+        else
+            fprintf(rawoutstream, "  Hash algorithm: 0x%02X\n", algorithm_id);
     }
     fprintf(rawoutstream, "  Signature size: %zu bytes\n", sig_len);
     fprintf(rawoutstream, "  Footer size:    %d bytes\n", H5PL_SIG_FOOTER_SIZE);

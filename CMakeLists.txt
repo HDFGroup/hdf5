@@ -900,8 +900,8 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
   endif ()
 
   # Add OpenSSL to link libraries for the HDF5 library
-  # Use target-based linking for proper dependency management
-  list(APPEND LINK_LIBS OpenSSL::SSL OpenSSL::Crypto)
+  # Only libcrypto is needed (EVP, PEM, BIO, ERR APIs); libssl (TLS) is not used
+  list(APPEND LINK_LIBS OpenSSL::Crypto)
 
   # Add Windows security libraries for ACL checking (GetNamedSecurityInfoA, etc.)
   # These are used in H5PLsig.c for KeyStore directory permission validation

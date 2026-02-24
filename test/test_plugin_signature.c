@@ -106,8 +106,8 @@ sign_plugin_file(const char *plugin_path, const char *private_key_path)
     int    result;
     herr_t ret_value = SUCCEED;
 
-    /* Build command to sign the plugin using h5sign tool */
-    snprintf(cmd, sizeof(cmd), "h5sign -p %s -k %s 2>&1", plugin_path, private_key_path);
+    /* Build command to sign the plugin using h5sign tool (quote paths for safety) */
+    snprintf(cmd, sizeof(cmd), "h5sign -p \"%s\" -k \"%s\" 2>&1", plugin_path, private_key_path);
 
     result = system(cmd);
     if (result != 0) {

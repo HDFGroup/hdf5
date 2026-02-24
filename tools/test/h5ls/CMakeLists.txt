@@ -1,9 +1,6 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5LS C)
 
-# Include plugin signing helper function
-include(${HDF5_SOURCE_DIR}/config/cmake/SignPlugin.cmake)
-
 # CMake configuration for building and testing the h5ls tool
 # Configures dynamic plugin library for h5ls if shared builds are enabled
 # Sets up include directories, linking, and formatting for plugin targets

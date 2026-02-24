@@ -93,6 +93,27 @@ static unsigned H5PL_path_capacity_g = H5PL_INITIAL_PATH_CAPACITY;
  * Values: -1 = not yet checked, 0 = validation failed, 1 = validation passed.
  * Invalidated when the corresponding path is inserted, replaced, or removed. */
 static int8_t *H5PL_path_perms_g = NULL;
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__check_path_perms_cached
+ *
+ * Purpose:     Check (and cache) whether a plugin path directory has
+ *              permissions that are safe for signature verification.
+ *
+ * Return:      true if directory is safe, false if unsafe or check failed
+ *-------------------------------------------------------------------------
+ */
+static inline bool
+H5PL__check_path_perms_cached(unsigned int idx)
+{
+    if (H5PL_path_perms_g[idx] == -1) {
+        H5PL_path_perms_g[idx] =
+            (int8_t)(H5PL__validate_directory_permissions(H5PL_paths_g[idx]) < 0 ? 0 : 1);
+        if (H5PL_path_perms_g[idx] == 0)
+            H5E_clear_stack();
+    }
+    return (H5PL_path_perms_g[idx] != 0);
+} /* end H5PL__check_path_perms_cached() */
 #endif
 
 /*-------------------------------------------------------------------------
@@ -628,13 +649,7 @@ H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, 
     for (u = 0; (u < H5PL_num_paths_g) && (ret_value == H5_ITER_CONT); u++) {
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
         /* Skip directories with unsafe permissions (cached after first check) */
-        if (H5PL_path_perms_g[u] == -1) {
-            H5PL_path_perms_g[u] =
-                (int8_t)(H5PL__validate_directory_permissions(H5PL_paths_g[u]) < 0 ? 0 : 1);
-            if (H5PL_path_perms_g[u] == 0)
-                H5E_clear_stack();
-        }
-        if (H5PL_path_perms_g[u] == 0)
+        if (!H5PL__check_path_perms_cached(u))
             continue;
 #endif
         if ((ret_value =
@@ -866,13 +881,7 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, bool 
     for (u = 0; u < H5PL_num_paths_g; u++) {
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
         /* Skip directories with unsafe permissions (cached after first check) */
-        if (H5PL_path_perms_g[u] == -1) {
-            H5PL_path_perms_g[u] =
-                (int8_t)(H5PL__validate_directory_permissions(H5PL_paths_g[u]) < 0 ? 0 : 1);
-            if (H5PL_path_perms_g[u] == 0)
-                H5E_clear_stack();
-        }
-        if (H5PL_path_perms_g[u] == 0)
+        if (!H5PL__check_path_perms_cached(u))
             continue;
 #endif
         /* Search for the plugin in this path */

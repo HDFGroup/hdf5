@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST C)
 
+# Include plugin signing helper function (used by tool test subdirectories)
+include(${HDF5_SOURCE_DIR}/config/cmake/SignPlugin.cmake)
+
 set (HDF5_TOOLS
   h5copy
   h5diff

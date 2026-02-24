@@ -266,14 +266,21 @@ H5PL__get_hash_algorithm(uint8_t algorithm_id)
             ret_value = EVP_sha512();
             break;
 
-            /* Future algorithms can be added here:
-            case H5PL_SIG_ALGO_SHA3_256:
-                ret_value = EVP_sha3_256();
-                break;
-            */
+        case H5PL_SIG_ALGO_SHA3_256:
+            /* SHA3-256 is reserved for a future HDF5 release */
+            H5PL_SIG_DEBUG_PRINT("Algorithm SHA3-256 (0x%02X) is reserved for future use\n",
+                                 algorithm_id);
+            ret_value = NULL;
+            break;
+
+        case H5PL_SIG_ALGO_BLAKE3:
+            /* BLAKE3 is reserved for a future HDF5 release */
+            H5PL_SIG_DEBUG_PRINT("Algorithm BLAKE3 (0x%02X) is reserved for future use\n", algorithm_id);
+            ret_value = NULL;
+            break;
 
         default:
-            /* Unknown algorithm - return NULL */
+            /* Completely unknown algorithm - return NULL */
             ret_value = NULL;
             break;
     }
@@ -483,26 +490,17 @@ H5PL__validate_directory_permissions(const char *dir_path)
     }
 
     /* Create SIDs for "Everyone", "Users", and "Authenticated Users" groups */
-    if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pSidEveryone)) {
-        LocalFree(pSD);
+    if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pSidEveryone))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Everyone SID");
-    }
 
     if (!AllocateAndInitializeSid(&SIDAuthNT, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_USERS, 0, 0, 0,
-                                  0, 0, 0, &pSidUsers)) {
-        FreeSid(pSidEveryone);
-        LocalFree(pSD);
+                                  0, 0, 0, &pSidUsers))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Users SID");
-    }
 
     if (!AllocateAndInitializeSid(&SIDAuthNT, 1, SECURITY_AUTHENTICATED_USER_RID, 0, 0, 0, 0, 0, 0, 0,
-                                  &pSidAuthUsers)) {
-        FreeSid(pSidEveryone);
-        FreeSid(pSidUsers);
-        LocalFree(pSD);
+                                  &pSidAuthUsers))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL,
                     "SECURITY ERROR: Cannot create Authenticated Users SID");
-    }
 
     /* Check effective permissions for "Everyone", "Users", and "Authenticated Users" groups */
     BuildTrusteeWithSidA(&trusteeEveryone, pSidEveryone);
@@ -548,12 +546,6 @@ H5PL__validate_directory_permissions(const char *dir_path)
         hasUnsafePermissions = TRUE;
     }
 
-    /* Clean up Windows security resources */
-    FreeSid(pSidEveryone);
-    FreeSid(pSidUsers);
-    FreeSid(pSidAuthUsers);
-    LocalFree(pSD);
-
     /* SECURITY: Fail if directory has unsafe permissions */
     if (hasUnsafePermissions) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
@@ -572,6 +564,16 @@ H5PL__validate_directory_permissions(const char *dir_path)
     }
 
 done:
+    /* Centralized cleanup of Windows security resources (NULL-safe guards) */
+    if (pSidEveryone)
+        FreeSid(pSidEveryone);
+    if (pSidUsers)
+        FreeSid(pSidUsers);
+    if (pSidAuthUsers)
+        FreeSid(pSidAuthUsers);
+    if (pSD)
+        LocalFree(pSD);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__validate_directory_permissions() */
 #endif /* H5_HAVE_WIN32_API */
@@ -844,7 +846,11 @@ H5PL__init_keystore(void)
         if (HDstat(H5PL_KEYSTORE_DIR, &st) == 0) {
             /* Directory exists, try to load */
             if (H5PL__load_keys_from_directory(H5PL_KEYSTORE_DIR) < 0) {
-                /* Not a fatal error - continue and report error below */
+                /* Not immediately fatal - log the specific reason and fall through
+                 * to the generic "no valid public keys" error which provides guidance. */
+                H5PL_SIG_DEBUG_PRINT("WARNING: Failed to load keys from configured keystore: %s\n",
+                                     H5PL_KEYSTORE_DIR);
+                H5E_clear_stack(); /* Clear so the generic error below is the top-level error */
             }
             else {
                 keys_loaded = true;
@@ -1366,10 +1372,18 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
                     (unsigned)footer_out->format_version, (unsigned)H5PL_SIG_FORMAT_VERSION_CURRENT);
 
     /* Validate algorithm ID */
-    if (NULL == H5PL__get_hash_algorithm(footer_out->algorithm_id))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "unsupported or unknown hash algorithm ID 0x%02X in plugin signature",
-                    (unsigned)footer_out->algorithm_id);
+    if (NULL == H5PL__get_hash_algorithm(footer_out->algorithm_id)) {
+        if (footer_out->algorithm_id == H5PL_SIG_ALGO_SHA3_256 ||
+            footer_out->algorithm_id == H5PL_SIG_ALGO_BLAKE3)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                        "algorithm ID 0x%02X is reserved for a future HDF5 release - "
+                        "upgrade HDF5 to verify this plugin",
+                        (unsigned)footer_out->algorithm_id);
+        else
+            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                        "unsupported or unknown hash algorithm ID 0x%02X in plugin signature",
+                        (unsigned)footer_out->algorithm_id);
+    }
 
     /* Validate signature length */
     if (footer_out->signature_length == 0 || footer_out->signature_length > H5PL_MAX_SIGNATURE_SIZE)
@@ -1688,13 +1702,20 @@ H5PL__verify_signature_appended(const char *plugin_path)
 
     /* Verify signature with all keys in keystore */
     if (H5PL__verify_with_all_keys(fd, binary_size, signature, &footer, plugin_path) < 0) {
-        /* Cache the failed verification result */
-        H5PL__update_signature_cache(plugin_path, false);
+        /* Cache the failed verification result (non-fatal if cache update fails) */
+        if (H5PL__update_signature_cache(plugin_path, false) < 0) {
+            H5PL_SIG_DEBUG_PRINT("WARNING: Failed to cache negative verification result for %s\n",
+                                 plugin_path);
+            H5E_clear_stack();
+        }
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "signature verification failed");
     }
 
-    /* Cache the successful verification result */
-    H5PL__update_signature_cache(plugin_path, true);
+    /* Cache the successful verification result (non-fatal if cache update fails) */
+    if (H5PL__update_signature_cache(plugin_path, true) < 0) {
+        H5PL_SIG_DEBUG_PRINT("WARNING: Failed to cache positive verification result for %s\n", plugin_path);
+        H5E_clear_stack();
+    }
 
     /* Close file after verification */
     HDclose(fd);
