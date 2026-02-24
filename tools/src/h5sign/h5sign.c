@@ -601,8 +601,8 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     bytes_read = 0;
 
     if (opt_verbose)
-        /* EVP_MD_get0_name() requires OpenSSL 3.0+; fall back to OBJ_nid2sn()
-         * for OpenSSL 1.1.x compatibility. */
+    /* EVP_MD_get0_name() requires OpenSSL 3.0+; fall back to OBJ_nid2sn()
+     * for OpenSSL 1.1.x compatibility. */
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
         fprintf(rawoutstream, "Computing %s hash...\n", EVP_MD_get0_name(hash_algorithm));
 #else

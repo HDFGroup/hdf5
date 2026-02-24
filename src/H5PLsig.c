@@ -268,8 +268,7 @@ H5PL__get_hash_algorithm(uint8_t algorithm_id)
 
         case H5PL_SIG_ALGO_SHA3_256:
             /* SHA3-256 is reserved for a future HDF5 release */
-            H5PL_SIG_DEBUG_PRINT("Algorithm SHA3-256 (0x%02X) is reserved for future use\n",
-                                 algorithm_id);
+            H5PL_SIG_DEBUG_PRINT("Algorithm SHA3-256 (0x%02X) is reserved for future use\n", algorithm_id);
             ret_value = NULL;
             break;
 
