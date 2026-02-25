@@ -1478,9 +1478,9 @@ if (DOXYGEN_FOUND)
   set (_hdf5lib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5lib_doc.stamp)
 
   # Use add_custom_command with a stamp file so that CMake can perform a
-  # timestamp-based up-to-date check.  The previous add_custom_target(... ALL
-  # COMMAND ...) approach unconditionally invoked Doxygen on every build
-  # because custom targets are always considered out-of-date.
+  # timestamp-based up-to-date check.  A bare add_custom_target(... COMMAND ...)
+  # would unconditionally invoke Doxygen on every build because custom targets
+  # are always considered out-of-date.
   add_custom_command (
     OUTPUT  ${_hdf5lib_doc_stamp}
     COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
@@ -1493,7 +1493,10 @@ if (DOXYGEN_FOUND)
     VERBATIM
   )
 
-  add_custom_target (hdf5lib_doc ALL DEPENDS ${_hdf5lib_doc_stamp})
+  # Not part of ALL — documentation is built on demand via the "doxygen" target
+  # (e.g. cmake --build . --target doxygen).  HDF5_BUILD_DOC already gates
+  # whether this infrastructure is configured at all.
+  add_custom_target (hdf5lib_doc DEPENDS ${_hdf5lib_doc_stamp})
 
   if (NOT TARGET doxygen)
     add_custom_target (doxygen)
