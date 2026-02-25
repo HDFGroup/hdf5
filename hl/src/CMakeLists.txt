@@ -177,16 +177,16 @@ install (
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
   # Collect HL Doxygen input files for dependency tracking.
-  # See corresponding note in src/CMakeLists.txt regarding the file(GLOB_RECURSE)
-  # trade-off for documentation inputs.
-  file (GLOB_RECURSE _hdf5hllib_doxy_inputs
-    ${HDF5_HL_SRC_DIR}/H5*public.h
-    ${HDF5_HL_SRC_DIR}/H5*module.h
-    ${HDF5_DOXYGEN_DIR}/dox/*.dox
-    ${HDF5_DOXYGEN_DIR}/*.html
-    ${HDF5_DOXYGEN_DIR}/*.css
-    ${HDF5_DOXYGEN_DIR}/*.xml
-    ${HDF5_DOXYGEN_DIR}/*.js
+  # CONFIGURE_DEPENDS ensures that adding or removing a file matching these
+  # patterns will automatically trigger a CMake re-configure.
+  file (GLOB_RECURSE _hdf5hllib_doxy_inputs CONFIGURE_DEPENDS
+    "${HDF5_HL_SRC_DIR}/H5*public.h"
+    "${HDF5_HL_SRC_DIR}/H5*module.h"
+    "${HDF5_DOXYGEN_DIR}/dox/*.dox"
+    "${HDF5_DOXYGEN_DIR}/*.html"
+    "${HDF5_DOXYGEN_DIR}/*.css"
+    "${HDF5_DOXYGEN_DIR}/*.xml"
+    "${HDF5_DOXYGEN_DIR}/*.js"
   )
 
   set (_hdf5hllib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5hllib_doc.stamp)

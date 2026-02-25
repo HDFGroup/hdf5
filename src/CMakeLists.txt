@@ -1455,27 +1455,24 @@ if (DOXYGEN_FOUND)
   # Collect Doxygen input files for dependency tracking so that Doxygen only
   # re-runs when a relevant file has actually changed.  The glob patterns here
   # mirror the FILE_PATTERNS in Doxyfile.in for the core library.
-  #
-  # NOTE: file(GLOB_RECURSE) is evaluated at configure time, so newly added
-  # files will not trigger a rebuild until the next CMake configure.  This is
-  # an acceptable trade-off for documentation inputs — explicitly listing
-  # hundreds of public headers would be impractical to maintain.
-  file (GLOB_RECURSE _hdf5lib_doxy_inputs
-    ${HDF5_SRC_DIR}/H5*public.h
-    ${HDF5_SRC_DIR}/H5*module.h
-    ${HDF5_SRC_DIR}/H5*develop.h
-    ${HDF5_SRC_DIR}/H5FD*.h
-    ${HDF5_SRC_DIR}/H5VLconnector.h
-    ${HDF5_SRC_DIR}/H5VLconnector_passthru.h
-    ${HDF5_SRC_DIR}/H5VLnative.h
-    ${HDF5_SRC_DIR}/H5PLextern.h
-    ${HDF5_SRC_DIR}/H5Zdevelop.h
-    ${HDF5_SRC_DIR}/H5version.h
-    ${HDF5_DOXYGEN_DIR}/dox/*.dox
-    ${HDF5_DOXYGEN_DIR}/*.html
-    ${HDF5_DOXYGEN_DIR}/*.css
-    ${HDF5_DOXYGEN_DIR}/*.xml
-    ${HDF5_DOXYGEN_DIR}/*.js
+  # CONFIGURE_DEPENDS ensures that adding or removing a file matching these
+  # patterns will automatically trigger a CMake re-configure.
+  file (GLOB_RECURSE _hdf5lib_doxy_inputs CONFIGURE_DEPENDS
+    "${HDF5_SRC_DIR}/H5*public.h"
+    "${HDF5_SRC_DIR}/H5*module.h"
+    "${HDF5_SRC_DIR}/H5*develop.h"
+    "${HDF5_SRC_DIR}/H5FD*.h"
+    "${HDF5_SRC_DIR}/H5VLconnector.h"
+    "${HDF5_SRC_DIR}/H5VLconnector_passthru.h"
+    "${HDF5_SRC_DIR}/H5VLnative.h"
+    "${HDF5_SRC_DIR}/H5PLextern.h"
+    "${HDF5_SRC_DIR}/H5Zdevelop.h"
+    "${HDF5_SRC_DIR}/H5version.h"
+    "${HDF5_DOXYGEN_DIR}/dox/*.dox"
+    "${HDF5_DOXYGEN_DIR}/*.html"
+    "${HDF5_DOXYGEN_DIR}/*.css"
+    "${HDF5_DOXYGEN_DIR}/*.xml"
+    "${HDF5_DOXYGEN_DIR}/*.js"
   )
 
   set (_hdf5lib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5lib_doc.stamp)
