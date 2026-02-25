@@ -204,8 +204,8 @@ if (DOXYGEN_FOUND)
     VERBATIM
   )
 
-  # Not part of ALL — build docs on demand via "cmake --build . --target doxygen".
-  add_custom_target (hdf5hllib_doc DEPENDS ${_hdf5hllib_doc_stamp})
+  # Part of ALL when HDF5_BUILD_DOC=ON; stamp file prevents redundant rebuilds.
+  add_custom_target (hdf5hllib_doc ALL DEPENDS ${_hdf5hllib_doc_stamp})
 
   if (NOT TARGET doxygen)
     add_custom_target (doxygen)

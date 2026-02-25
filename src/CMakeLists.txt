@@ -1493,10 +1493,11 @@ if (DOXYGEN_FOUND)
     VERBATIM
   )
 
-  # Not part of ALL — documentation is built on demand via the "doxygen" target
-  # (e.g. cmake --build . --target doxygen).  HDF5_BUILD_DOC already gates
-  # whether this infrastructure is configured at all.
-  add_custom_target (hdf5lib_doc DEPENDS ${_hdf5lib_doc_stamp})
+  # Part of ALL so that HDF5_BUILD_DOC=ON builds docs during a normal build.
+  # The stamp-file dependency ensures Doxygen is only re-invoked when an input
+  # file has changed.  Docs can also be built independently of compilation via
+  # the umbrella target: cmake --build . --target doxygen
+  add_custom_target (hdf5lib_doc ALL DEPENDS ${_hdf5lib_doc_stamp})
 
   if (NOT TARGET doxygen)
     add_custom_target (doxygen)
