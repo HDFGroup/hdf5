@@ -77,24 +77,54 @@ function (extract_lib_pkgconfig_info
     set (show_dev_warnings TRUE)
   endif ()
 
+  # Determine if we are building with MSVC
+  if (MSVC)
+    set (_pkgconfig_is_msvc TRUE)
+  else ()
+    set (_pkgconfig_is_msvc FALSE)
+  endif ()
+
   # Get current project build configuration type in case we need to map
-  # to an imported target's config-specific properties. To be safe for
-  # now, avoid processing libraries when using a multi-config generator
-  # with more than one configuration. pkg-config files are currently
-  # generated at configure time, but the build configuration type is
-  # determined at build time. If mapping between the current build
-  # configuration type and a list of imported library locations (based
-  # on the current build configuration type) is needed later on, this
-  # function will be unable to properly do so.
+  # to an imported target's config-specific properties.
+  #
+  # For multi-config generators (e.g. Visual Studio, Ninja Multi-Config),
+  # the build configuration type is determined at build time rather than
+  # configure time. Since pkg-config files are generated at configure time,
+  # we select a preferred configuration from CMAKE_CONFIGURATION_TYPES to
+  # use for resolving imported target locations. The preference order is:
+  #   Release > RelWithDebInfo > MinSizeRel > Debug
+  # This allows pkg-config files to be generated for multi-config generators
+  # (most notably MSVC's Visual Studio generator) instead of being skipped
+  # entirely.
   get_cmake_property (is_multiconfig_gen GENERATOR_IS_MULTI_CONFIG)
   if (is_multiconfig_gen)
     list (LENGTH CMAKE_CONFIGURATION_TYPES num_configs)
     if (num_configs GREATER "1")
-      if (show_dev_warnings)
-        message (AUTHOR_WARNING "Cannot generate pkg-config files correctly for multi-config generators")
+      # Select a preferred configuration from the available configurations.
+      # Release is preferred since pkg-config is typically used in deployment
+      # scenarios where release libraries are desired.
+      set (_preferred_config_order Release RelWithDebInfo MinSizeRel Debug)
+      unset (project_build_config)
+      foreach (_pref_config IN LISTS _preferred_config_order)
+        list (FIND CMAKE_CONFIGURATION_TYPES "${_pref_config}" _pref_config_idx)
+        if (NOT _pref_config_idx EQUAL -1)
+          set (project_build_config "${_pref_config}")
+          break ()
+        endif ()
+      endforeach ()
+
+      # Fallback: use the first available configuration if none of the
+      # preferred configurations are available
+      if (NOT DEFINED project_build_config)
+        list (GET CMAKE_CONFIGURATION_TYPES 0 project_build_config)
       endif ()
-      set (${_lib_skipped_outvar} TRUE PARENT_SCOPE)
-      return ()
+
+      if (show_dev_warnings)
+        message (AUTHOR_WARNING
+          "Multi-config generator detected with configurations: ${CMAKE_CONFIGURATION_TYPES}. "
+          "Using '${project_build_config}' configuration for pkg-config file generation."
+        )
+      endif ()
     elseif (num_configs EQUAL "1")
       set (project_build_config "${CMAKE_CONFIGURATION_TYPES}")
     else ()
@@ -121,7 +151,17 @@ function (extract_lib_pkgconfig_info
       return ()
     endif ()
 
-    if (IS_ABSOLUTE "${library}" OR "${library}" MATCHES "^-")
+    if (IS_ABSOLUTE "${library}")
+      # For absolute library paths, decompose into -L<dir> -l<name> form
+      # so that the resulting pkg-config file is more portable and works
+      # correctly with pkg-config consumers on all platforms.
+      cmake_path (GET library PARENT_PATH _lib_dir)
+      cmake_path (GET library STEM _lib_stem)
+      if (NOT _pkgconfig_is_msvc)
+        string (REGEX REPLACE "^lib" "" _lib_stem "${_lib_stem}")
+      endif ()
+      list (APPEND library_deps_list "-L${_lib_dir}" "-l${_lib_stem}")
+    elseif ("${library}" MATCHES "^-")
       list (APPEND library_deps_list "${library}")
     else ()
       list (APPEND library_deps_list "-l${library}")
@@ -190,6 +230,7 @@ function (extract_lib_pkgconfig_info
 
   # Determine appropriate flags for linking against library
   unset (lib_name)
+  unset (lib_dir)
   get_target_property (lib_is_imported ${library} IMPORTED)
   get_target_property (lib_type ${library} TYPE)
   if (lib_is_imported AND NOT lib_type STREQUAL "INTERFACE_LIBRARY")
@@ -214,6 +255,24 @@ function (extract_lib_pkgconfig_info
         if (NOT lib_path)
           get_target_property (lib_path ${library} IMPORTED_LOCATION_${project_build_config})
         endif ()
+
+        # If no matching configuration was found, try a fallback order that
+        # is appropriate for the selected build configuration type. This
+        # handles the case where an imported library only provides a subset
+        # of configurations (e.g. only Release and Debug).
+        if (NOT lib_path)
+          if (project_build_config_upper MATCHES "RELEASE|RELWITHDEBINFO|MINSIZEREL")
+            set (_fallback_configs RELEASE RELWITHDEBINFO MINSIZEREL DEBUG)
+          else ()
+            set (_fallback_configs DEBUG RELWITHDEBINFO MINSIZEREL RELEASE)
+          endif ()
+          foreach (_fb_config IN LISTS _fallback_configs)
+            get_target_property (lib_path ${library} IMPORTED_LOCATION_${_fb_config})
+            if (lib_path)
+              break ()
+            endif ()
+          endforeach ()
+        endif ()
       endif () # Assume 0 configurations is a problem with the library's configuration; move on 
     endif ()
     if (NOT lib_path)
@@ -223,7 +282,8 @@ function (extract_lib_pkgconfig_info
       get_target_property (lib_path ${library} LOCATION)
     endif ()
 
-    # Get base library name without extensions
+    # Get base library name without extensions, and extract the directory
+    # for use in -L flags
     if (lib_path)
       # Avoid generator expressions in library locations for now. A more complete
       # solution will be needed in order to correctly evaluate these.
@@ -237,6 +297,7 @@ function (extract_lib_pkgconfig_info
       endif ()
 
       cmake_path (GET lib_path STEM lib_name)
+      cmake_path (GET lib_path PARENT_PATH lib_dir)
     endif ()
   endif ()
 
@@ -264,7 +325,12 @@ function (extract_lib_pkgconfig_info
   endif ()
 
   if (lib_name)
-    string (REGEX REPLACE "^lib" "" lib_name "${lib_name}")
+    # On MSVC, pkgconf translates -la directly to a.lib, so the "lib"
+    # prefix shouldn't be replaced (if there is)
+    if (NOT _pkgconfig_is_msvc)
+      string (REGEX REPLACE "^lib" "" lib_name "${lib_name}")
+    endif ()
+
     list (APPEND library_deps_list "-l${lib_name}")
   else ()
     # Issue a warning for non-interface imported targets that we couldn't obtain a
