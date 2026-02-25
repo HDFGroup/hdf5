@@ -113,6 +113,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a problem with using filters with variable length datatypes
+
+   When using data filters with a dataset with a variable length datatype, the library would not invoke the filters' can_apply and set_local callbacks. This has been addressed and the library will now make those callbacks no matter what the datatype is.
+
 ### Fixed a potential out of bound read
 
    When a file is corrupted such that an array datatype's size, the number of elements, and the element size are not in agreement, it can trigger an out of bounds read.  A check has been added to detect such situation.
