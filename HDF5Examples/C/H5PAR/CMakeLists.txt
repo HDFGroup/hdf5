@@ -22,30 +22,32 @@ foreach (example_name ${examples})
 endforeach ()
 
 if (H5EXAMPLE_BUILD_TESTING)
-  macro (ADD_GREP_TEST testname mumprocs)
-    add_test (
-        NAME ${EXAMPLE_VARNAME}_${testname}-clearall
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            ${testname}.h5
-    )
-    if (last_test)
-      set_tests_properties (${EXAMPLE_VARNAME}_${testname}-clearall PROPERTIES DEPENDS ${last_test})
+  macro (ADD_GREP_TEST testname numprocs)
+    if (MPIEXEC_MAX_NUMPROCS GREATER_EQUAL "${numprocs}")
+      add_test (
+          NAME ${EXAMPLE_VARNAME}_${testname}-clearall
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${testname}.h5
+      )
+      if (last_test)
+        set_tests_properties (${EXAMPLE_VARNAME}_${testname}-clearall PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (NAME MPI_TEST_${EXAMPLE_VARNAME}_${testname} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${numprocs};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${EXAMPLE_VARNAME}_${testname}>;${MPIEXEC_POSTFLAGS}"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=${testname}.out"
+          -D "TEST_GREP_COMPARE=TRUE"
+          -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
+          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
+          -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
+      )
+      set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
+      set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_${testname}")
     endif ()
-    add_test (NAME MPI_TEST_${EXAMPLE_VARNAME}_${testname} COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${mumprocs};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${EXAMPLE_VARNAME}_${testname}>;${MPIEXEC_POSTFLAGS}"
-        -D "TEST_ARGS:STRING="
-        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -D "TEST_EXPECT=0"
-        -D "TEST_SKIP_COMPARE=TRUE"
-        -D "TEST_OUTPUT=${testname}.out"
-        -D "TEST_GREP_COMPARE=TRUE"
-        -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
-        -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-        -P "${H5EXAMPLE_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
-    set (last_test "MPI_TEST_${EXAMPLE_VARNAME}_${testname}")
   endmacro ()
 
   # Ensure that 24 is a multiple of the number of processes.
