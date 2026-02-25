@@ -1452,49 +1452,31 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-  # Collect Doxygen input files for dependency tracking so that Doxygen only
-  # re-runs when a relevant file has actually changed.
-  #
-  # Core C headers use the explicit lists already maintained in this file
-  # (H5_PUBLIC_HEADERS, H5_GENERATED_HEADERS) to avoid filesystem globbing.
-  # Bindings in sibling subdirectories (C++, Fortran, Java) use narrow,
-  # directory-scoped globs because their source lists are not in scope here.
-  # These globs do NOT use CONFIGURE_DEPENDS — adding/removing a file in
-  # those directories requires a manual CMake re-run, but edits to existing
-  # files still correctly trigger the stamp-file rebuild.
+  # 1. Gather explicit core headers (zero cost to incremental builds).
+  #    These variables are already maintained in this file.
   set (_hdf5lib_doxy_inputs
-    # Core C public and generated headers (explicit, no glob needed)
     ${H5_PUBLIC_HEADERS}
     ${H5_GENERATED_HEADERS}
-    # Tool headers
-    "${HDF5_TOOLS_SRC_DIR}/h5copy/h5copy.h"
-    "${HDF5_TOOLS_SRC_DIR}/h5diff/h5diff_main.h"
-    "${HDF5_TOOLS_SRC_DIR}/h5dump/h5dump.h"
-    "${HDF5_TOOLS_SRC_DIR}/h5format_convert/h5format_convert.h"
-    "${HDF5_TOOLS_SRC_DIR}/h5import/h5import.h"
-    "${HDF5_TOOLS_SRC_DIR}/h5jam/h5jam.h"
-    "${HDF5_TOOLS_SRC_DIR}/h5ls/h5ls.h"
-    "${HDF5_TOOLS_SRC_DIR}/h5repack/h5repack.h"
-    "${HDF5_TOOLS_SRC_DIR}/h5stat/h5stat.h"
-    "${HDF5_TOOLS_SRC_DIR}/misc/h5clear.h"
-    "${HDF5_TOOLS_SRC_DIR}/misc/h5debug.h"
-    "${HDF5_TOOLS_SRC_DIR}/misc/h5delete.h"
-    "${HDF5_TOOLS_SRC_DIR}/misc/h5mkgrp.h"
-    "${HDF5_TOOLS_SRC_DIR}/misc/h5repart.h"
   )
-  # Bindings whose source lists live in sibling subdirectory scopes.
-  # Narrow globs over small, specific directories (not tree-wide scans).
-  file (GLOB _hdf5lib_doxy_bindings
+
+  # 2. Add narrow, directory-specific globs for encapsulated languages
+  #    and tool headers whose source lists live in sibling subdirectory
+  #    scopes and are not visible here.  No CONFIGURE_DEPENDS — avoids
+  #    the Ninja/Make re-evaluation penalty on every null build.  Adding
+  #    a *new* file requires a manual CMake re-run; edits to existing
+  #    files correctly trigger the stamp-file rebuild.
+  file (GLOB _hdf5lib_doxy_lang_inputs
     "${HDF5_F90_SRC_DIR}/src/*.F90"
     "${HDF5_CPP_SRC_DIR}/*.h"
     "${HDF5_CPP_SRC_DIR}/*.cpp"
     "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5*.java"
     "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF*.java"
     "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF*.java"
+    "${HDF5_TOOLS_SRC_DIR}/*/*.h"
   )
-  list (APPEND _hdf5lib_doxy_inputs ${_hdf5lib_doxy_bindings})
-  # Shared doxygen content inputs (defined in top-level CMakeLists.txt)
-  list (APPEND _hdf5lib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
+
+  # 3. Merge with shared doxygen content inputs (defined in top-level CMakeLists.txt).
+  list (APPEND _hdf5lib_doxy_inputs ${_hdf5lib_doxy_lang_inputs} ${HDF5_DOXYGEN_CONTENT_INPUTS})
 
   set (_hdf5lib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5lib_doc.stamp)
 
