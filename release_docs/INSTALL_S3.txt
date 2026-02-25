@@ -149,7 +149,7 @@ Note:
 IV. Building HDF5 with the ROS3 VFD enabled
 ========================================================================
 
-HDF5 uses CMake's find_package() mechanism to locate the aws-c-library,
+HDF5 uses CMake's find_package() mechanism to locate the aws-c-s3 library,
 so as long as it is installed to a standard location, the CMake option
 HDF5_ENABLE_ROS3_VFD=ON simply needs to be passed when configuring HDF5
 in order to enable the ROS3 VFD, as in:
