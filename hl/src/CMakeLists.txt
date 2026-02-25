@@ -176,23 +176,35 @@ install (
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-# This cmake function requires that the non-default doxyfile settings are provided with set (DOXYGEN_xxx) commands
-# In addition the doxyfile aliases @INCLUDE option is not supported and would need to be provided in a set (DOXYGEN_ALIASES) command.
-#  doxygen_add_docs (hdf5lib_doc
-##      ${HL_SOURCES} ${HL_HEADERS} ${HDF5_DOXYGEN_DIR}/dox
-#      ${DOXYGEN_INPUT_DIRECTORY}
-#      ALL
-#      WORKING_DIRECTORY ${HDF5_HL_SRC_DIR}
-#      COMMENT "Generating HDF5 HL library Source Documentation"
-#  )
+  # Collect HL Doxygen input files for dependency tracking.
+  # See corresponding note in src/CMakeLists.txt regarding the file(GLOB_RECURSE)
+  # trade-off for documentation inputs.
+  file (GLOB_RECURSE _hdf5hllib_doxy_inputs
+    ${HDF5_HL_SRC_DIR}/H5*public.h
+    ${HDF5_HL_SRC_DIR}/H5*module.h
+    ${HDF5_DOXYGEN_DIR}/dox/*.dox
+    ${HDF5_DOXYGEN_DIR}/*.html
+    ${HDF5_DOXYGEN_DIR}/*.css
+    ${HDF5_DOXYGEN_DIR}/*.xml
+    ${HDF5_DOXYGEN_DIR}/*.js
+  )
 
-# This custom target and doxygen/configure work together
-  # Replace variables inside @@ with the current values
-  add_custom_target (hdf5hllib_doc ALL
-        COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY ${HDF5_HL_SRC_DIR}
-        COMMENT "Generating HDF5 HL library Source API documentation with Doxygen"
-        VERBATIM )
+  set (_hdf5hllib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5hllib_doc.stamp)
+
+  # Stamp-file pattern: Doxygen is only re-invoked when an input file is
+  # newer than the stamp.  See src/CMakeLists.txt for the detailed rationale.
+  add_custom_command (
+    OUTPUT  ${_hdf5hllib_doc_stamp}
+    COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
+    COMMAND ${CMAKE_COMMAND} -E touch ${_hdf5hllib_doc_stamp}
+    DEPENDS ${_hdf5hllib_doxy_inputs}
+            ${HDF5_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY ${HDF5_HL_SRC_DIR}
+    COMMENT "Generating HDF5 HL library Source API documentation with Doxygen"
+    VERBATIM
+  )
+
+  add_custom_target (hdf5hllib_doc ALL DEPENDS ${_hdf5hllib_doc_stamp})
 
   if (NOT TARGET doxygen)
     add_custom_target (doxygen)

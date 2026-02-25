@@ -1452,14 +1452,51 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-  # This custom target and doxygen/configure work together
-  # Replace variables inside @@ with the current values
-  add_custom_target (hdf5lib_doc ALL
-        COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-        DEPENDS ${HDF5_SRC_BINARY_DIR}/H5build_settings.c
-        WORKING_DIRECTORY ${HDF5_SRC_DIR}
-        COMMENT "Generating HDF5 library Source API documentation with Doxygen"
-        VERBATIM )
+  # Collect Doxygen input files for dependency tracking so that Doxygen only
+  # re-runs when a relevant file has actually changed.  The glob patterns here
+  # mirror the FILE_PATTERNS in Doxyfile.in for the core library.
+  #
+  # NOTE: file(GLOB_RECURSE) is evaluated at configure time, so newly added
+  # files will not trigger a rebuild until the next CMake configure.  This is
+  # an acceptable trade-off for documentation inputs — explicitly listing
+  # hundreds of public headers would be impractical to maintain.
+  file (GLOB_RECURSE _hdf5lib_doxy_inputs
+    ${HDF5_SRC_DIR}/H5*public.h
+    ${HDF5_SRC_DIR}/H5*module.h
+    ${HDF5_SRC_DIR}/H5*develop.h
+    ${HDF5_SRC_DIR}/H5FD*.h
+    ${HDF5_SRC_DIR}/H5VLconnector.h
+    ${HDF5_SRC_DIR}/H5VLconnector_passthru.h
+    ${HDF5_SRC_DIR}/H5VLnative.h
+    ${HDF5_SRC_DIR}/H5PLextern.h
+    ${HDF5_SRC_DIR}/H5Zdevelop.h
+    ${HDF5_SRC_DIR}/H5version.h
+    ${HDF5_DOXYGEN_DIR}/dox/*.dox
+    ${HDF5_DOXYGEN_DIR}/*.html
+    ${HDF5_DOXYGEN_DIR}/*.css
+    ${HDF5_DOXYGEN_DIR}/*.xml
+    ${HDF5_DOXYGEN_DIR}/*.js
+  )
+
+  set (_hdf5lib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5lib_doc.stamp)
+
+  # Use add_custom_command with a stamp file so that CMake can perform a
+  # timestamp-based up-to-date check.  The previous add_custom_target(... ALL
+  # COMMAND ...) approach unconditionally invoked Doxygen on every build
+  # because custom targets are always considered out-of-date.
+  add_custom_command (
+    OUTPUT  ${_hdf5lib_doc_stamp}
+    COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
+    COMMAND ${CMAKE_COMMAND} -E touch ${_hdf5lib_doc_stamp}
+    DEPENDS ${_hdf5lib_doxy_inputs}
+            ${HDF5_SRC_BINARY_DIR}/H5build_settings.c
+            ${HDF5_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY ${HDF5_SRC_DIR}
+    COMMENT "Generating HDF5 library Source API documentation with Doxygen"
+    VERBATIM
+  )
+
+  add_custom_target (hdf5lib_doc ALL DEPENDS ${_hdf5lib_doc_stamp})
 
   if (NOT TARGET doxygen)
     add_custom_target (doxygen)
