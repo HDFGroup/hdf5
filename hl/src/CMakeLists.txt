@@ -180,13 +180,20 @@ if (DOXYGEN_FOUND)
   # CONFIGURE_DEPENDS ensures that adding or removing a file matching these
   # patterns will automatically trigger a CMake re-configure.
   file (GLOB_RECURSE _hdf5hllib_doxy_inputs CONFIGURE_DEPENDS
+    # HL public headers
     "${HDF5_HL_SRC_DIR}/H5*public.h"
     "${HDF5_HL_SRC_DIR}/H5*module.h"
+    # HL Fortran sources
+    "${HDF5_SOURCE_DIR}/hl/fortran/src/*.F90"
+    # HL tool headers (h5watch is the only HL tool with a documented header)
+    "${HDF5_HL_TOOLS_DIR}/h5watch/h5watch.h"
+    # Doxygen content and configuration
     "${HDF5_DOXYGEN_DIR}/dox/*.dox"
     "${HDF5_DOXYGEN_DIR}/*.html"
     "${HDF5_DOXYGEN_DIR}/*.css"
     "${HDF5_DOXYGEN_DIR}/*.xml"
     "${HDF5_DOXYGEN_DIR}/*.js"
+    "${HDF5_DOXYGEN_DIR}/examples/menus/*.md"
   )
 
   set (_hdf5hllib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5hllib_doc.stamp)

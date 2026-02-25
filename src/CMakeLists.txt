@@ -1458,6 +1458,7 @@ if (DOXYGEN_FOUND)
   # CONFIGURE_DEPENDS ensures that adding or removing a file matching these
   # patterns will automatically trigger a CMake re-configure.
   file (GLOB_RECURSE _hdf5lib_doxy_inputs CONFIGURE_DEPENDS
+    # Core C public/develop/module headers
     "${HDF5_SRC_DIR}/H5*public.h"
     "${HDF5_SRC_DIR}/H5*module.h"
     "${HDF5_SRC_DIR}/H5*develop.h"
@@ -1468,11 +1469,37 @@ if (DOXYGEN_FOUND)
     "${HDF5_SRC_DIR}/H5PLextern.h"
     "${HDF5_SRC_DIR}/H5Zdevelop.h"
     "${HDF5_SRC_DIR}/H5version.h"
+    # Fortran sources (*.F90, excluding test/examples/generated via EXCLUDE_PATTERNS)
+    "${HDF5_F90_SRC_DIR}/src/*.F90"
+    # C++ headers and sources
+    "${HDF5_CPP_SRC_DIR}/*.h"
+    "${HDF5_CPP_SRC_DIR}/*.cpp"
+    # Java sources
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5*.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF*.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF*.java"
+    # Tool headers
+    "${HDF5_TOOLS_SRC_DIR}/h5copy/h5copy.h"
+    "${HDF5_TOOLS_SRC_DIR}/h5diff/h5diff_main.h"
+    "${HDF5_TOOLS_SRC_DIR}/h5dump/h5dump.h"
+    "${HDF5_TOOLS_SRC_DIR}/h5format_convert/h5format_convert.h"
+    "${HDF5_TOOLS_SRC_DIR}/h5import/h5import.h"
+    "${HDF5_TOOLS_SRC_DIR}/h5jam/h5jam.h"
+    "${HDF5_TOOLS_SRC_DIR}/h5ls/h5ls.h"
+    "${HDF5_TOOLS_SRC_DIR}/h5repack/h5repack.h"
+    "${HDF5_TOOLS_SRC_DIR}/h5stat/h5stat.h"
+    "${HDF5_TOOLS_SRC_DIR}/misc/h5clear.h"
+    "${HDF5_TOOLS_SRC_DIR}/misc/h5debug.h"
+    "${HDF5_TOOLS_SRC_DIR}/misc/h5delete.h"
+    "${HDF5_TOOLS_SRC_DIR}/misc/h5mkgrp.h"
+    "${HDF5_TOOLS_SRC_DIR}/misc/h5repart.h"
+    # Doxygen content and configuration
     "${HDF5_DOXYGEN_DIR}/dox/*.dox"
     "${HDF5_DOXYGEN_DIR}/*.html"
     "${HDF5_DOXYGEN_DIR}/*.css"
     "${HDF5_DOXYGEN_DIR}/*.xml"
     "${HDF5_DOXYGEN_DIR}/*.js"
+    "${HDF5_DOXYGEN_DIR}/examples/menus/*.md"
   )
 
   set (_hdf5lib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5lib_doc.stamp)
