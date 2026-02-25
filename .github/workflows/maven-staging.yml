@@ -1308,58 +1308,6 @@ jobs:
             HDF5Examples/JAVA/*/*.h5
           retention-days: 7
 
-  comment-pr:
-    name: Comment on Pull Request
-    runs-on: ubuntu-latest
-    needs: [detect-changes, determine-matrix, build-maven-artifacts, test-maven-deployment]
-    if: ${{ github.event_name == 'pull_request' && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.result == 'success' && needs.test-maven-deployment.result == 'success' }}
-    steps:
-      - name: Generate comment body
-        id: comment
-        run: |
-          COMMENT="## ✅ Maven Staging Tests Passed
-
-          Maven artifacts successfully generated and validated.
-
-          Ready for Maven deployment to GitHub Packages."
-
-          echo "comment<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMENT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Comment on PR
-        # Skip commenting if running from a fork due to permission restrictions
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            try {
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: process.env.COMMENT_BODY
-              });
-              console.log('✅ Comment posted successfully');
-            } catch (error) {
-              console.log('❌ Failed to post comment:', error.message);
-              console.log('This may be due to insufficient permissions or fork restrictions');
-              // Don't fail the workflow if commenting fails
-            }
-        env:
-          COMMENT_BODY: ${{ steps.comment.outputs.comment }}
-
-      - name: Output test results (fallback)
-        if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
-        run: |
-          echo "==========================================="
-          echo "✅ Maven Staging Tests Passed"
-          echo "Maven artifacts successfully generated and validated"
-          echo "Ready for Maven deployment to GitHub Packages"
-          echo "==========================================="
-          echo "Note: Running from fork - PR comment skipped due to permission restrictions"
-
   cleanup:
     name: Cleanup Staging Artifacts
     runs-on: ubuntu-latest
