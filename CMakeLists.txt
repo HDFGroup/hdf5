@@ -1118,26 +1118,12 @@ if (HDF5_BUILD_JAVA)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Add the HDF5 Library Target to the build
-#-----------------------------------------------------------------------------
-add_subdirectory (src)
-
-if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-  if ((H5_ZLIB_FOUND AND ZLIB_USE_EXTERNAL) OR (H5_SZIP_FOUND AND SZIP_USE_EXTERNAL))
-    if (BUILD_STATIC_LIBS)
-      add_dependencies (${HDF5_LIB_TARGET} ${LINK_COMP_LIBS})
-    endif ()
-    if (BUILD_SHARED_LIBS)
-      add_dependencies (${HDF5_LIBSH_TARGET} ${LINK_COMP_LIBS})
-    endif ()
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
 # Option to build documentation
+# NOTE: This block must appear before add_subdirectory(src) so that
+# DOXYGEN_FOUND and related variables are visible in src/CMakeLists.txt
+# and all subsequent subdirectories that define doc targets.
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
-# check if Doxygen is installed
   find_package (Doxygen)
   if (DOXYGEN_FOUND)
     option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
@@ -1153,16 +1139,43 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     if (Java_VERSION_STRING VERSION_GREATER_EQUAL "25.0.0")
       if (HDF5_ENABLE_JNI)
         set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
-     else ()
+      else ()
         set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
       endif ()
     else ()
       set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
     endif ()
 
+    # Doxygen content and configuration files shared by all doc targets.
+    # Defined here once to avoid duplication in src/ and hl/src/.
+    file (GLOB_RECURSE HDF5_DOXYGEN_CONTENT_INPUTS CONFIGURE_DEPENDS
+      "${HDF5_DOXYGEN_DIR}/dox/*.dox"
+      "${HDF5_DOXYGEN_DIR}/*.html"
+      "${HDF5_DOXYGEN_DIR}/*.css"
+      "${HDF5_DOXYGEN_DIR}/*.xml"
+      "${HDF5_DOXYGEN_DIR}/*.js"
+      "${HDF5_DOXYGEN_DIR}/examples/menus/*.md"
+    )
+
     add_subdirectory (doxygen)
   else ()
     message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add the HDF5 Library Target to the build
+#-----------------------------------------------------------------------------
+add_subdirectory (src)
+
+if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
+  if ((H5_ZLIB_FOUND AND ZLIB_USE_EXTERNAL) OR (H5_SZIP_FOUND AND SZIP_USE_EXTERNAL))
+    if (BUILD_STATIC_LIBS)
+      add_dependencies (${HDF5_LIB_TARGET} ${LINK_COMP_LIBS})
+    endif ()
+    if (BUILD_SHARED_LIBS)
+      add_dependencies (${HDF5_LIBSH_TARGET} ${LINK_COMP_LIBS})
+    endif ()
   endif ()
 endif ()
 

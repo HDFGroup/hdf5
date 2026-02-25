@@ -1493,14 +1493,9 @@ if (DOXYGEN_FOUND)
     "${HDF5_TOOLS_SRC_DIR}/misc/h5delete.h"
     "${HDF5_TOOLS_SRC_DIR}/misc/h5mkgrp.h"
     "${HDF5_TOOLS_SRC_DIR}/misc/h5repart.h"
-    # Doxygen content and configuration
-    "${HDF5_DOXYGEN_DIR}/dox/*.dox"
-    "${HDF5_DOXYGEN_DIR}/*.html"
-    "${HDF5_DOXYGEN_DIR}/*.css"
-    "${HDF5_DOXYGEN_DIR}/*.xml"
-    "${HDF5_DOXYGEN_DIR}/*.js"
-    "${HDF5_DOXYGEN_DIR}/examples/menus/*.md"
   )
+  # Append shared doxygen content inputs (defined in top-level CMakeLists.txt)
+  list (APPEND _hdf5lib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
 
   set (_hdf5lib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5lib_doc.stamp)
 

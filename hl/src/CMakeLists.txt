@@ -187,14 +187,9 @@ if (DOXYGEN_FOUND)
     "${HDF5_SOURCE_DIR}/hl/fortran/src/*.F90"
     # HL tool headers (h5watch is the only HL tool with a documented header)
     "${HDF5_HL_TOOLS_DIR}/h5watch/h5watch.h"
-    # Doxygen content and configuration
-    "${HDF5_DOXYGEN_DIR}/dox/*.dox"
-    "${HDF5_DOXYGEN_DIR}/*.html"
-    "${HDF5_DOXYGEN_DIR}/*.css"
-    "${HDF5_DOXYGEN_DIR}/*.xml"
-    "${HDF5_DOXYGEN_DIR}/*.js"
-    "${HDF5_DOXYGEN_DIR}/examples/menus/*.md"
   )
+  # Append shared doxygen content inputs (defined in top-level CMakeLists.txt)
+  list (APPEND _hdf5hllib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
 
   set (_hdf5hllib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5hllib_doc.stamp)
 
