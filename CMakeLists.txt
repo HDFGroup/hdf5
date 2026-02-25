@@ -1148,7 +1148,10 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 
     # Doxygen content and configuration files shared by all doc targets.
     # Defined here once to avoid duplication in src/ and hl/src/.
-    file (GLOB_RECURSE HDF5_DOXYGEN_CONTENT_INPUTS CONFIGURE_DEPENDS
+    # No CONFIGURE_DEPENDS — these files change rarely in structure and
+    # adding/removing one is not worth penalizing every null build.
+    # Edits to existing files still correctly trigger the stamp-file rebuild.
+    file (GLOB HDF5_DOXYGEN_CONTENT_INPUTS
       "${HDF5_DOXYGEN_DIR}/dox/*.dox"
       "${HDF5_DOXYGEN_DIR}/*.html"
       "${HDF5_DOXYGEN_DIR}/*.css"

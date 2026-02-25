@@ -177,18 +177,15 @@ install (
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
   # Collect HL Doxygen input files for dependency tracking.
-  # CONFIGURE_DEPENDS ensures that adding or removing a file matching these
-  # patterns will automatically trigger a CMake re-configure.
-  file (GLOB_RECURSE _hdf5hllib_doxy_inputs CONFIGURE_DEPENDS
-    # HL public headers
-    "${HDF5_HL_SRC_DIR}/H5*public.h"
-    "${HDF5_HL_SRC_DIR}/H5*module.h"
-    # HL Fortran sources
-    "${HDF5_SOURCE_DIR}/hl/fortran/src/*.F90"
-    # HL tool headers (h5watch is the only HL tool with a documented header)
+  # HL_HEADERS is the explicit list already maintained in this file.
+  set (_hdf5hllib_doxy_inputs
+    ${HL_HEADERS}
     "${HDF5_HL_TOOLS_DIR}/h5watch/h5watch.h"
   )
-  # Append shared doxygen content inputs (defined in top-level CMakeLists.txt)
+  # HL Fortran sources live in a sibling subdirectory scope; narrow glob.
+  file (GLOB _hdf5hllib_doxy_fortran "${HDF5_SOURCE_DIR}/hl/fortran/src/*.F90")
+  list (APPEND _hdf5hllib_doxy_inputs ${_hdf5hllib_doxy_fortran})
+  # Shared doxygen content inputs (defined in top-level CMakeLists.txt)
   list (APPEND _hdf5hllib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
 
   set (_hdf5hllib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5hllib_doc.stamp)

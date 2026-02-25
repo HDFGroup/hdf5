@@ -1453,31 +1453,19 @@ endif ()
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
   # Collect Doxygen input files for dependency tracking so that Doxygen only
-  # re-runs when a relevant file has actually changed.  The glob patterns here
-  # mirror the FILE_PATTERNS in Doxyfile.in for the core library.
-  # CONFIGURE_DEPENDS ensures that adding or removing a file matching these
-  # patterns will automatically trigger a CMake re-configure.
-  file (GLOB_RECURSE _hdf5lib_doxy_inputs CONFIGURE_DEPENDS
-    # Core C public/develop/module headers
-    "${HDF5_SRC_DIR}/H5*public.h"
-    "${HDF5_SRC_DIR}/H5*module.h"
-    "${HDF5_SRC_DIR}/H5*develop.h"
-    "${HDF5_SRC_DIR}/H5FD*.h"
-    "${HDF5_SRC_DIR}/H5VLconnector.h"
-    "${HDF5_SRC_DIR}/H5VLconnector_passthru.h"
-    "${HDF5_SRC_DIR}/H5VLnative.h"
-    "${HDF5_SRC_DIR}/H5PLextern.h"
-    "${HDF5_SRC_DIR}/H5Zdevelop.h"
-    "${HDF5_SRC_DIR}/H5version.h"
-    # Fortran sources (*.F90, excluding test/examples/generated via EXCLUDE_PATTERNS)
-    "${HDF5_F90_SRC_DIR}/src/*.F90"
-    # C++ headers and sources
-    "${HDF5_CPP_SRC_DIR}/*.h"
-    "${HDF5_CPP_SRC_DIR}/*.cpp"
-    # Java sources
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5*.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF*.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF*.java"
+  # re-runs when a relevant file has actually changed.
+  #
+  # Core C headers use the explicit lists already maintained in this file
+  # (H5_PUBLIC_HEADERS, H5_GENERATED_HEADERS) to avoid filesystem globbing.
+  # Bindings in sibling subdirectories (C++, Fortran, Java) use narrow,
+  # directory-scoped globs because their source lists are not in scope here.
+  # These globs do NOT use CONFIGURE_DEPENDS — adding/removing a file in
+  # those directories requires a manual CMake re-run, but edits to existing
+  # files still correctly trigger the stamp-file rebuild.
+  set (_hdf5lib_doxy_inputs
+    # Core C public and generated headers (explicit, no glob needed)
+    ${H5_PUBLIC_HEADERS}
+    ${H5_GENERATED_HEADERS}
     # Tool headers
     "${HDF5_TOOLS_SRC_DIR}/h5copy/h5copy.h"
     "${HDF5_TOOLS_SRC_DIR}/h5diff/h5diff_main.h"
@@ -1494,7 +1482,18 @@ if (DOXYGEN_FOUND)
     "${HDF5_TOOLS_SRC_DIR}/misc/h5mkgrp.h"
     "${HDF5_TOOLS_SRC_DIR}/misc/h5repart.h"
   )
-  # Append shared doxygen content inputs (defined in top-level CMakeLists.txt)
+  # Bindings whose source lists live in sibling subdirectory scopes.
+  # Narrow globs over small, specific directories (not tree-wide scans).
+  file (GLOB _hdf5lib_doxy_bindings
+    "${HDF5_F90_SRC_DIR}/src/*.F90"
+    "${HDF5_CPP_SRC_DIR}/*.h"
+    "${HDF5_CPP_SRC_DIR}/*.cpp"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5*.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF*.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF*.java"
+  )
+  list (APPEND _hdf5lib_doxy_inputs ${_hdf5lib_doxy_bindings})
+  # Shared doxygen content inputs (defined in top-level CMakeLists.txt)
   list (APPEND _hdf5lib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
 
   set (_hdf5lib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5lib_doc.stamp)
