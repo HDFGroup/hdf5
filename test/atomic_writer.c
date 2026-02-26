@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#if !defined(WIN32) && !defined(__MINGW32__)
+#if !defined(WIN32) && !defined(__MINGW32__) && !defined(_WIN32)
 
 #include <fcntl.h>
 #include <unistd.h>
