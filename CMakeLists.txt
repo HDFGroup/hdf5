@@ -789,8 +789,6 @@ if (HDF5_ENABLE_PARALLEL)
     message (FATAL_ERROR "HDF5 requires MPI standard 3.0 or greater")
   endif ()
 
-  # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
-  # and once set, they are cached as false and not regenerated
   set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")
   set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
   # Used by Fortran + MPI
