@@ -91,7 +91,7 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
 
     3.1 FAQ
 
-    Community support forum available, please see:
+    A community support forum is available; please see:
 
        https://forum.hdfgroup.org/c/hdf5/8
 

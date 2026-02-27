@@ -59,6 +59,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    A new `Findlibaec.cmake` CMake module has been added. This module is intended to locate libaec on the system for SZIP support in HDF5 when libaec was built with Autotools instead of CMake. When SZIP support is enabled in HDF5 with the `HDF5_ENABLE_SZIP_SUPPORT` option, this module will first check for an existing CMake-built libaec and use that if it's available. Otherwise, the module will heuristically search for libaec on the system. If necessary, the module can be hinted toward a particular libaec installation by setting the CMake variable `libaec_ROOT` to point to a directory. If it is known that a CMake-built libaec installation exists on the system in a non-standard location, the CMake variable `libaec_DIR` can instead be set to a directory containing a `libaec-config.cmake` file to cause the module to prefer that libaec installation.
 
+### Refactored CMake library export mechanism
+
+   The CMake build system now uses separate export targets for different library types: static libraries use `${HDF5_EXPORTED_TARGETS}_static`, Java libraries use `${HDF5_EXPORTED_TARGETS}_java`, and shared libraries continue using the main `${HDF5_EXPORTED_TARGETS}`. The generated `hdf5-config.cmake` file conditionally includes the appropriate target files (`hdf5-targets_static.cmake` and `hdf5-targets_java.cmake`), allowing downstream projects to selectively link against specific library variants. This refactoring improves build system maintainability and applies consistently across all HDF5 components (core, C++, Fortran, high-level APIs, tools, and Java JNI).
+
 ## Library
 
 ## Parallel Library
