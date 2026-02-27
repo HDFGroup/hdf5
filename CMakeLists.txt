@@ -1406,17 +1406,17 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
   # -----------------------------------------------------------------------
   # hdf5lib_doc: single documentation target for the entire HDF5 API
   # -----------------------------------------------------------------------
-  set (_hdf5lib_doc_stamp "${HDF5_SRC_BINARY_DIR}/$<CONFIG>/hdf5lib_doc.stamp")
+  # Make the stamp file config-agnostic so multi-config generators (VS,
+  # Xcode, Ninja Multi-Config) deduplicate the custom command and only run
+  # Doxygen once.  Doxygen writes to a single, config-agnostic output
+  # directory, so per-config stamps would race over the same HTML files.
+  set (_hdf5lib_doc_stamp "${HDF5_SRC_BINARY_DIR}/hdf5lib_doc.stamp")
 
   # Use add_custom_command with a stamp file so that CMake can perform a
   # timestamp-based up-to-date check.  A bare add_custom_target(... COMMAND
   # ...) would unconditionally invoke Doxygen on every build.
-  # The stamp is placed under a per-configuration subdirectory so that
-  # multi-config generators (Visual Studio, Xcode, Ninja Multi-Config) do not
-  # race over a shared stamp file when building Debug and Release in parallel.
   add_custom_command (
     OUTPUT  "${_hdf5lib_doc_stamp}"
-    COMMAND ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${_hdf5lib_doc_stamp}>"
     COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
     COMMAND ${CMAKE_COMMAND} -E touch "${_hdf5lib_doc_stamp}"
     DEPENDS ${_hdf5_doxy_inputs}
