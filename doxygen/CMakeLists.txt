@@ -75,8 +75,4 @@ if (DOXYGEN_FOUND)
       COMPONENT hdfdocuments
   )
 
-  if (NOT TARGET doxygen)
-    add_custom_target (doxygen)
-  endif ()
-
 endif ()

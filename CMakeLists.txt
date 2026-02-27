@@ -1163,6 +1163,12 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
       "${HDF5_DOXYGEN_DIR}/*.md"
     )
 
+    # Define the umbrella doxygen target once, here, so that ownership is
+    # unambiguous.  Subdirectories and the end-of-file doc block add
+    # dependencies to it; the fallback at the bottom of this file handles
+    # the case where Doxygen is not found or HDF5_BUILD_DOC is OFF.
+    add_custom_target (doxygen)
+
     add_subdirectory (doxygen)
   else ()
     message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
@@ -1337,7 +1343,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR
 endif ()
 
 #-----------------------------------------------------------------------------
-# Define Doxygen documentation targets
+# Define Doxygen documentation target
 # This block must appear AFTER all add_subdirectory() calls so that every
 # language/tool subdirectory has had the opportunity to append its sources
 # to the HDF5_DOXYGEN_LIB_INPUTS and HDF5_DOXYGEN_HL_INPUTS global
@@ -1348,48 +1354,57 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
   # -----------------------------------------------------------------------
   # Retrieve explicitly tracked source lists contributed by subdirectories.
   # -----------------------------------------------------------------------
-  get_property (_hdf5lib_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_LIB_INPUTS)
+  get_property (_hdf5_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_LIB_INPUTS)
 
-  # Java sources: enumerated explicitly using DOXYGEN_JAVA_DIR (set above in
-  # the HDF5_BUILD_DOC block) so the correct path is used regardless of
-  # whether the JNI or pure-Java tree was selected.
-  list (APPEND _hdf5lib_doxy_inputs
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF5Constants.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDFArray.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDFNativeData.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5Exception.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5IdException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5AttributeException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5BtreeException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataFiltersException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DatasetInterfaceException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataspaceInterfaceException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataStorageException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DatatypeInterfaceException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ExternalFileListException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FileInterfaceException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FunctionArgumentException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5HeapException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5InternalErrorException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5JavaException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5LibraryException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5LowLevelIOException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5MetaDataCacheException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ObjectHeaderException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5PropertyListInterfaceException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ReferenceException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java"
-  )
+  # Merge HL inputs when the HL library is enabled — there is only one
+  # Doxyfile / output directory, so a single Doxygen invocation covers both.
+  if (HDF5_BUILD_HL_LIB)
+    get_property (_hdf5_hl_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_HL_INPUTS)
+    list (APPEND _hdf5_doxy_inputs ${_hdf5_hl_doxy_inputs})
+  endif ()
 
-  # Shared doxygen content inputs (*.dox, *.html, *.css, etc.) are appended
-  # last so the DEPENDS list is readable with source files first.
-  list (APPEND _hdf5lib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
+  # Java sources: only when Java bindings are enabled.  DOXYGEN_JAVA_DIR
+  # (set in the HDF5_BUILD_DOC block above) selects the correct path
+  # regardless of whether the JNI or pure-Java tree was chosen.
+  if (HDF5_BUILD_JAVA)
+    list (APPEND _hdf5_doxy_inputs
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF5Constants.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDFArray.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDFNativeData.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5Exception.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5IdException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5AttributeException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5BtreeException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataFiltersException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DatasetInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataspaceInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataStorageException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DatatypeInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ExternalFileListException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FileInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FunctionArgumentException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5HeapException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5InternalErrorException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5JavaException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5LibraryException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5LowLevelIOException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5MetaDataCacheException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ObjectHeaderException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5PropertyListInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ReferenceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java"
+    )
+  endif ()
+
+  # Shared doxygen content inputs (*.dox, *.html, *.css, etc.) — defined
+  # earlier in the HDF5_BUILD_DOC block via file(GLOB_RECURSE).
+  list (APPEND _hdf5_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
 
   # -----------------------------------------------------------------------
-  # hdf5lib_doc: main HDF5 library documentation target
+  # hdf5lib_doc: single documentation target for the entire HDF5 API
   # -----------------------------------------------------------------------
   set (_hdf5lib_doc_stamp "${HDF5_SRC_BINARY_DIR}/$<CONFIG>/hdf5lib_doc.stamp")
 
@@ -1404,10 +1419,10 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
     COMMAND ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${_hdf5lib_doc_stamp}>"
     COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
     COMMAND ${CMAKE_COMMAND} -E touch "${_hdf5lib_doc_stamp}"
-    DEPENDS ${_hdf5lib_doxy_inputs}
+    DEPENDS ${_hdf5_doxy_inputs}
             ${HDF5_BINARY_DIR}/Doxyfile
     WORKING_DIRECTORY "${HDF5_SOURCE_DIR}"
-    COMMENT "Generating HDF5 library Source API documentation with Doxygen"
+    COMMENT "Generating HDF5 API documentation with Doxygen"
     VERBATIM
   )
 
@@ -1415,38 +1430,9 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
   # SOURCES exposes the dependency list in IDE project trees (CLion, VS, Xcode).
   add_custom_target (hdf5lib_doc ALL
     DEPENDS "${_hdf5lib_doc_stamp}"
-    SOURCES ${_hdf5lib_doxy_inputs}
+    SOURCES ${_hdf5_doxy_inputs}
   )
   add_dependencies (doxygen hdf5lib_doc)
-
-  # -----------------------------------------------------------------------
-  # hdf5hllib_doc: HL library documentation target (optional)
-  # -----------------------------------------------------------------------
-  if (HDF5_BUILD_HL_LIB)
-    get_property (_hdf5hllib_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_HL_INPUTS)
-    list (APPEND _hdf5hllib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
-
-    set (_hdf5hllib_doc_stamp "${HDF5_HL_SRC_BINARY_DIR}/$<CONFIG>/hdf5hllib_doc.stamp")
-
-    add_custom_command (
-      OUTPUT  "${_hdf5hllib_doc_stamp}"
-      COMMAND ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${_hdf5hllib_doc_stamp}>"
-      COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-      COMMAND ${CMAKE_COMMAND} -E touch "${_hdf5hllib_doc_stamp}"
-      DEPENDS ${_hdf5hllib_doxy_inputs}
-              ${HDF5_BINARY_DIR}/Doxyfile
-      WORKING_DIRECTORY "${HDF5_SOURCE_DIR}"
-      COMMENT "Generating HDF5 HL library Source API documentation with Doxygen"
-      VERBATIM
-    )
-
-    # SOURCES exposes the dependency list in IDE project trees (CLion, VS, Xcode).
-    add_custom_target (hdf5hllib_doc ALL
-      DEPENDS "${_hdf5hllib_doc_stamp}"
-      SOURCES ${_hdf5hllib_doxy_inputs}
-    )
-    add_dependencies (doxygen hdf5hllib_doc)
-  endif ()
 
 endif ()
 
