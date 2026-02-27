@@ -1151,13 +1151,16 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     # Ninja/Make to re-run CMake when a file is added or removed from these
     # directories.  The per-null-build cost of checking small, stable
     # documentation directories is negligible compared to source code globs.
-    file (GLOB HDF5_DOXYGEN_CONTENT_INPUTS CONFIGURE_DEPENDS
-      "${HDF5_DOXYGEN_DIR}/dox/*.dox"
+    # GLOB_RECURSE is required so that files added inside subdirectories
+    # (e.g. dox/cookbook/, dox/high_level/, examples/tables/) also trigger
+    # CMake re-configuration.
+    file (GLOB_RECURSE HDF5_DOXYGEN_CONTENT_INPUTS CONFIGURE_DEPENDS
+      "${HDF5_DOXYGEN_DIR}/*.dox"
       "${HDF5_DOXYGEN_DIR}/*.html"
       "${HDF5_DOXYGEN_DIR}/*.css"
       "${HDF5_DOXYGEN_DIR}/*.xml"
       "${HDF5_DOXYGEN_DIR}/*.js"
-      "${HDF5_DOXYGEN_DIR}/examples/menus/*.md"
+      "${HDF5_DOXYGEN_DIR}/*.md"
     )
 
     add_subdirectory (doxygen)
@@ -1388,24 +1391,32 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
   # -----------------------------------------------------------------------
   # hdf5lib_doc: main HDF5 library documentation target
   # -----------------------------------------------------------------------
-  set (_hdf5lib_doc_stamp ${HDF5_SRC_BINARY_DIR}/hdf5lib_doc.stamp)
+  set (_hdf5lib_doc_stamp "${HDF5_SRC_BINARY_DIR}/$<CONFIG>/hdf5lib_doc.stamp")
 
   # Use add_custom_command with a stamp file so that CMake can perform a
   # timestamp-based up-to-date check.  A bare add_custom_target(... COMMAND
   # ...) would unconditionally invoke Doxygen on every build.
+  # The stamp is placed under a per-configuration subdirectory so that
+  # multi-config generators (Visual Studio, Xcode, Ninja Multi-Config) do not
+  # race over a shared stamp file when building Debug and Release in parallel.
   add_custom_command (
-    OUTPUT  ${_hdf5lib_doc_stamp}
+    OUTPUT  "${_hdf5lib_doc_stamp}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${_hdf5lib_doc_stamp}>"
     COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-    COMMAND ${CMAKE_COMMAND} -E touch ${_hdf5lib_doc_stamp}
+    COMMAND ${CMAKE_COMMAND} -E touch "${_hdf5lib_doc_stamp}"
     DEPENDS ${_hdf5lib_doxy_inputs}
             ${HDF5_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${HDF5_SRC_DIR}
+    WORKING_DIRECTORY "${HDF5_SOURCE_DIR}"
     COMMENT "Generating HDF5 library Source API documentation with Doxygen"
     VERBATIM
   )
 
   # Part of ALL so that HDF5_BUILD_DOC=ON builds docs during a normal build.
-  add_custom_target (hdf5lib_doc ALL DEPENDS ${_hdf5lib_doc_stamp})
+  # SOURCES exposes the dependency list in IDE project trees (CLion, VS, Xcode).
+  add_custom_target (hdf5lib_doc ALL
+    DEPENDS "${_hdf5lib_doc_stamp}"
+    SOURCES ${_hdf5lib_doxy_inputs}
+  )
   add_dependencies (doxygen hdf5lib_doc)
 
   # -----------------------------------------------------------------------
@@ -1415,23 +1426,37 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
     get_property (_hdf5hllib_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_HL_INPUTS)
     list (APPEND _hdf5hllib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
 
-    set (_hdf5hllib_doc_stamp ${HDF5_HL_SRC_BINARY_DIR}/hdf5hllib_doc.stamp)
+    set (_hdf5hllib_doc_stamp "${HDF5_HL_SRC_BINARY_DIR}/$<CONFIG>/hdf5hllib_doc.stamp")
 
     add_custom_command (
-      OUTPUT  ${_hdf5hllib_doc_stamp}
+      OUTPUT  "${_hdf5hllib_doc_stamp}"
+      COMMAND ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${_hdf5hllib_doc_stamp}>"
       COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-      COMMAND ${CMAKE_COMMAND} -E touch ${_hdf5hllib_doc_stamp}
+      COMMAND ${CMAKE_COMMAND} -E touch "${_hdf5hllib_doc_stamp}"
       DEPENDS ${_hdf5hllib_doxy_inputs}
               ${HDF5_BINARY_DIR}/Doxyfile
-      WORKING_DIRECTORY ${HDF5_HL_SRC_DIR}
+      WORKING_DIRECTORY "${HDF5_SOURCE_DIR}"
       COMMENT "Generating HDF5 HL library Source API documentation with Doxygen"
       VERBATIM
     )
 
-    add_custom_target (hdf5hllib_doc ALL DEPENDS ${_hdf5hllib_doc_stamp})
+    # SOURCES exposes the dependency list in IDE project trees (CLion, VS, Xcode).
+    add_custom_target (hdf5hllib_doc ALL
+      DEPENDS "${_hdf5hllib_doc_stamp}"
+      SOURCES ${_hdf5hllib_doxy_inputs}
+    )
     add_dependencies (doxygen hdf5hllib_doc)
   endif ()
 
+endif ()
+
+# Always define the umbrella doxygen target so that scripts and IDEs can
+# unconditionally reference it (e.g. cmake --build . --target doxygen).
+# When HDF5_BUILD_DOC=OFF or Doxygen is absent this becomes a no-op.
+if (NOT TARGET doxygen)
+  add_custom_target (doxygen
+    COMMENT "Doxygen documentation not enabled (HDF5_BUILD_DOC=OFF or Doxygen not found)"
+  )
 endif ()
 
 include (CMakeInstallation.cmake)
