@@ -176,39 +176,12 @@ install (
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-  # Collect HL Doxygen input files for dependency tracking.
-  # HL_HEADERS is the explicit list already maintained in this file.
-  set (_hdf5hllib_doxy_inputs
+  # Contribute HL public headers to the global property that the top-level
+  # hdf5hllib_doc target reads.  The target itself is defined at the very end
+  # of the top-level CMakeLists.txt so that hl/fortran/src can also append its
+  # F90 sources to HDF5_DOXYGEN_HL_INPUTS before the target is created.
+  set_property (GLOBAL APPEND PROPERTY HDF5_DOXYGEN_HL_INPUTS
     ${HL_HEADERS}
     "${HDF5_HL_TOOLS_DIR}/h5watch/h5watch.h"
   )
-  # HL Fortran sources live in a sibling subdirectory scope; narrow glob.
-  file (GLOB _hdf5hllib_doxy_fortran "${HDF5_SOURCE_DIR}/hl/fortran/src/*.F90")
-  list (APPEND _hdf5hllib_doxy_inputs ${_hdf5hllib_doxy_fortran})
-  # Shared doxygen content inputs (defined in top-level CMakeLists.txt)
-  list (APPEND _hdf5hllib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
-
-  set (_hdf5hllib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5hllib_doc.stamp)
-
-  # Stamp-file pattern: Doxygen is only re-invoked when an input file is
-  # newer than the stamp.  See src/CMakeLists.txt for the detailed rationale.
-  add_custom_command (
-    OUTPUT  ${_hdf5hllib_doc_stamp}
-    COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-    COMMAND ${CMAKE_COMMAND} -E touch ${_hdf5hllib_doc_stamp}
-    DEPENDS ${_hdf5hllib_doxy_inputs}
-            ${HDF5_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${HDF5_HL_SRC_DIR}
-    COMMENT "Generating HDF5 HL library Source API documentation with Doxygen"
-    VERBATIM
-  )
-
-  # Part of ALL when HDF5_BUILD_DOC=ON; stamp file prevents redundant rebuilds.
-  add_custom_target (hdf5hllib_doc ALL DEPENDS ${_hdf5hllib_doc_stamp})
-
-  if (NOT TARGET doxygen)
-    add_custom_target (doxygen)
-  endif ()
-
-  add_dependencies (doxygen hdf5hllib_doc)
 endif ()

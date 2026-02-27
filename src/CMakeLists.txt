@@ -1452,60 +1452,15 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-  # 1. Gather explicit core headers (zero cost to incremental builds).
-  #    These variables are already maintained in this file.
-  set (_hdf5lib_doxy_inputs
+  # Contribute the core library headers and the H5build_settings.c generated
+  # file to the global property that the top-level doc target reads.  The
+  # hdf5lib_doc target itself is defined at the very end of the top-level
+  # CMakeLists.txt, after all language-binding subdirectories (c++, fortran,
+  # java, tools) have been processed and have appended their own sources to
+  # HDF5_DOXYGEN_LIB_INPUTS.  This eliminates the need for file(GLOB) here.
+  set_property (GLOBAL APPEND PROPERTY HDF5_DOXYGEN_LIB_INPUTS
     ${H5_PUBLIC_HEADERS}
     ${H5_GENERATED_HEADERS}
+    ${HDF5_SRC_BINARY_DIR}/H5build_settings.c
   )
-
-  # 2. Add narrow, directory-specific globs for encapsulated languages
-  #    and tool headers whose source lists live in sibling subdirectory
-  #    scopes and are not visible here.  No CONFIGURE_DEPENDS — avoids
-  #    the Ninja/Make re-evaluation penalty on every null build.  Adding
-  #    a *new* file requires a manual CMake re-run; edits to existing
-  #    files correctly trigger the stamp-file rebuild.
-  file (GLOB _hdf5lib_doxy_lang_inputs
-    "${HDF5_F90_SRC_DIR}/src/*.F90"
-    "${HDF5_CPP_SRC_DIR}/*.h"
-    "${HDF5_CPP_SRC_DIR}/*.cpp"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5*.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF*.java"
-    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF*.java"
-    "${HDF5_TOOLS_SRC_DIR}/*/*.h"
-  )
-
-  # 3. Merge with shared doxygen content inputs (defined in top-level CMakeLists.txt).
-  list (APPEND _hdf5lib_doxy_inputs ${_hdf5lib_doxy_lang_inputs} ${HDF5_DOXYGEN_CONTENT_INPUTS})
-
-  set (_hdf5lib_doc_stamp ${CMAKE_CURRENT_BINARY_DIR}/hdf5lib_doc.stamp)
-
-  # Use add_custom_command with a stamp file so that CMake can perform a
-  # timestamp-based up-to-date check.  A bare add_custom_target(... COMMAND ...)
-  # would unconditionally invoke Doxygen on every build because custom targets
-  # are always considered out-of-date.
-  add_custom_command (
-    OUTPUT  ${_hdf5lib_doc_stamp}
-    COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-    COMMAND ${CMAKE_COMMAND} -E touch ${_hdf5lib_doc_stamp}
-    DEPENDS ${_hdf5lib_doxy_inputs}
-            ${HDF5_SRC_BINARY_DIR}/H5build_settings.c
-            ${HDF5_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${HDF5_SRC_DIR}
-    COMMENT "Generating HDF5 library Source API documentation with Doxygen"
-    VERBATIM
-  )
-
-  # Part of ALL so that HDF5_BUILD_DOC=ON builds docs during a normal build.
-  # The stamp-file dependency ensures Doxygen is only re-invoked when an input
-  # file has changed.  Docs can also be built independently of compilation via
-  # the umbrella target: cmake --build . --target doxygen
-  add_custom_target (hdf5lib_doc ALL DEPENDS ${_hdf5lib_doc_stamp})
-
-  if (NOT TARGET doxygen)
-    add_custom_target (doxygen)
-  endif ()
-
-  add_dependencies (doxygen hdf5lib_doc)
-
 endif ()

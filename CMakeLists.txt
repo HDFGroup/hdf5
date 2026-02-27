@@ -1147,11 +1147,11 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     endif ()
 
     # Doxygen content and configuration files shared by all doc targets.
-    # Defined here once to avoid duplication in src/ and hl/src/.
-    # No CONFIGURE_DEPENDS — these files change rarely in structure and
-    # adding/removing one is not worth penalizing every null build.
-    # Edits to existing files still correctly trigger the stamp-file rebuild.
-    file (GLOB HDF5_DOXYGEN_CONTENT_INPUTS
+    # Defined here once to avoid duplication.  CONFIGURE_DEPENDS tells
+    # Ninja/Make to re-run CMake when a file is added or removed from these
+    # directories.  The per-null-build cost of checking small, stable
+    # documentation directories is negligible compared to source code globs.
+    file (GLOB HDF5_DOXYGEN_CONTENT_INPUTS CONFIGURE_DEPENDS
       "${HDF5_DOXYGEN_DIR}/dox/*.dox"
       "${HDF5_DOXYGEN_DIR}/*.html"
       "${HDF5_DOXYGEN_DIR}/*.css"
@@ -1331,6 +1331,107 @@ if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR
     set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})
     add_subdirectory (HDF5Examples)
   endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Define Doxygen documentation targets
+# This block must appear AFTER all add_subdirectory() calls so that every
+# language/tool subdirectory has had the opportunity to append its sources
+# to the HDF5_DOXYGEN_LIB_INPUTS and HDF5_DOXYGEN_HL_INPUTS global
+# properties via set_property(GLOBAL APPEND ...).
+#-----------------------------------------------------------------------------
+if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
+
+  # -----------------------------------------------------------------------
+  # Retrieve explicitly tracked source lists contributed by subdirectories.
+  # -----------------------------------------------------------------------
+  get_property (_hdf5lib_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_LIB_INPUTS)
+
+  # Java sources: enumerated explicitly using DOXYGEN_JAVA_DIR (set above in
+  # the HDF5_BUILD_DOC block) so the correct path is used regardless of
+  # whether the JNI or pure-Java tree was selected.
+  list (APPEND _hdf5lib_doxy_inputs
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF5Constants.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDFArray.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDFNativeData.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5Exception.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5IdException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5AttributeException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5BtreeException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataFiltersException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DatasetInterfaceException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataspaceInterfaceException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataStorageException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DatatypeInterfaceException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ExternalFileListException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FileInterfaceException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FunctionArgumentException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5HeapException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5InternalErrorException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5JavaException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5LibraryException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5LowLevelIOException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5MetaDataCacheException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ObjectHeaderException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5PropertyListInterfaceException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ReferenceException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java"
+    "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java"
+  )
+
+  # Shared doxygen content inputs (*.dox, *.html, *.css, etc.) are appended
+  # last so the DEPENDS list is readable with source files first.
+  list (APPEND _hdf5lib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
+
+  # -----------------------------------------------------------------------
+  # hdf5lib_doc: main HDF5 library documentation target
+  # -----------------------------------------------------------------------
+  set (_hdf5lib_doc_stamp ${HDF5_SRC_BINARY_DIR}/hdf5lib_doc.stamp)
+
+  # Use add_custom_command with a stamp file so that CMake can perform a
+  # timestamp-based up-to-date check.  A bare add_custom_target(... COMMAND
+  # ...) would unconditionally invoke Doxygen on every build.
+  add_custom_command (
+    OUTPUT  ${_hdf5lib_doc_stamp}
+    COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
+    COMMAND ${CMAKE_COMMAND} -E touch ${_hdf5lib_doc_stamp}
+    DEPENDS ${_hdf5lib_doxy_inputs}
+            ${HDF5_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY ${HDF5_SRC_DIR}
+    COMMENT "Generating HDF5 library Source API documentation with Doxygen"
+    VERBATIM
+  )
+
+  # Part of ALL so that HDF5_BUILD_DOC=ON builds docs during a normal build.
+  add_custom_target (hdf5lib_doc ALL DEPENDS ${_hdf5lib_doc_stamp})
+  add_dependencies (doxygen hdf5lib_doc)
+
+  # -----------------------------------------------------------------------
+  # hdf5hllib_doc: HL library documentation target (optional)
+  # -----------------------------------------------------------------------
+  if (HDF5_BUILD_HL_LIB)
+    get_property (_hdf5hllib_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_HL_INPUTS)
+    list (APPEND _hdf5hllib_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
+
+    set (_hdf5hllib_doc_stamp ${HDF5_HL_SRC_BINARY_DIR}/hdf5hllib_doc.stamp)
+
+    add_custom_command (
+      OUTPUT  ${_hdf5hllib_doc_stamp}
+      COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
+      COMMAND ${CMAKE_COMMAND} -E touch ${_hdf5hllib_doc_stamp}
+      DEPENDS ${_hdf5hllib_doxy_inputs}
+              ${HDF5_BINARY_DIR}/Doxyfile
+      WORKING_DIRECTORY ${HDF5_HL_SRC_DIR}
+      COMMENT "Generating HDF5 HL library Source API documentation with Doxygen"
+      VERBATIM
+    )
+
+    add_custom_target (hdf5hllib_doc ALL DEPENDS ${_hdf5hllib_doc_stamp})
+    add_dependencies (doxygen hdf5hllib_doc)
+  endif ()
+
 endif ()
 
 include (CMakeInstallation.cmake)
