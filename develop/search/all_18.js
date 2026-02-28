@@ -123,7 +123,7 @@ var searchData=
   ['new_20features_20in_20hdf5_20release_201_2010_120',['New Features in HDF5 Release 1.10',['../rel_spec_110.html#sec_rel_spec_110_feat',1,'']]],
   ['new_20features_20in_20hdf5_20release_201_2012_121',['New Features in HDF5 Release 1.12',['../rel_spec_112.html#sec_rel_spec_112_feat',1,'']]],
   ['new_20features_20in_20hdf5_20release_201_2014_122',['New Features in HDF5 Release 1.14',['../rel_spec_114.html#sec_rel_spec_114_feat',1,'']]],
-  ['new_20features_20in_20hdf5_20release_202_200_123',['New Features in HDF5 Release 2.0',['../rel_spec_20.html#sec_rel_spec_20_feat',1,'']]],
+  ['new_20features_20in_20hdf5_20release_202_20x_123',['New Features in HDF5 Release 2.x',['../rel_spec_2x.html#sec_rel_spec_2x_feat',1,'']]],
   ['new_20features_20introduced_20in_20hdf5_201_2010_200_124',['New Features Introduced in HDF5 1.10.0',['../rel_spec_110.html#subsec_rel_spec_110_feat_new_0',1,'']]],
   ['new_20features_20introduced_20in_20hdf5_201_2010_201_125',['New Features Introduced in HDF5 1.10.1',['../rel_spec_110.html#subsec_rel_spec_110_feat_new_1',1,'']]],
   ['new_20features_20introduced_20in_20hdf5_201_2010_202_126',['New Features Introduced in HDF5 1.10.2',['../rel_spec_110.html#subsec_rel_spec_110_feat_new_2',1,'']]],
