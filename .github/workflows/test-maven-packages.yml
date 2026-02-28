@@ -185,6 +185,35 @@ jobs:
             # Release version - use version as-is
             JAR_FILENAME="${ARTIFACT_ID}-${VERSION}-${PLATFORM_CLASSIFIER}.jar"
             POM_FILENAME="${ARTIFACT_ID}-${VERSION}.pom"
+
+            # For release versions, wait for GitHub Packages to propagate before downloading.
+            # SNAPSHOT versions use the metadata retry above for this purpose; release
+            # versions need an equivalent check using the artifact-level maven-metadata.xml,
+            # which lists all published versions and is updated when a new release is pushed.
+            echo "Verifying release artifact is available on GitHub Packages..."
+            ARTIFACT_META_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/maven-metadata.xml"
+            RETRY_COUNT=0
+            MAX_RETRIES=12
+            RETRY_DELAY=10
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$ARTIFACT_META_URL" \
+                   -o /tmp/artifact-metadata.xml 2>/dev/null && \
+                 grep -q "<version>${VERSION}</version>" /tmp/artifact-metadata.xml 2>/dev/null; then
+                echo "✅ Release version ${VERSION} is available in GitHub Packages"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES: Version ${VERSION} not yet available. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
+                  sleep $RETRY_DELAY
+                else
+                  echo "::error::Release artifact version ${VERSION} not available in GitHub Packages after $MAX_RETRIES attempts"
+                  echo "::error::Checked: $ARTIFACT_META_URL"
+                  exit 1
+                fi
+              fi
+            done
           fi
 
           # Download JAR and POM with retry
@@ -446,6 +475,35 @@ jobs:
             # Release version - use version as-is
             JAR_FILENAME="${ARTIFACT_ID}-${VERSION}-${PLATFORM_CLASSIFIER}.jar"
             POM_FILENAME="${ARTIFACT_ID}-${VERSION}.pom"
+
+            # For release versions, wait for GitHub Packages to propagate before downloading.
+            # SNAPSHOT versions use the metadata retry above for this purpose; release
+            # versions need an equivalent check using the artifact-level maven-metadata.xml,
+            # which lists all published versions and is updated when a new release is pushed.
+            echo "Verifying release artifact is available on GitHub Packages..."
+            ARTIFACT_META_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/maven-metadata.xml"
+            RETRY_COUNT=0
+            MAX_RETRIES=12
+            RETRY_DELAY=10
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$ARTIFACT_META_URL" \
+                   -o /tmp/artifact-metadata.xml 2>/dev/null && \
+                 grep -q "<version>${VERSION}</version>" /tmp/artifact-metadata.xml 2>/dev/null; then
+                echo "✅ Release version ${VERSION} is available in GitHub Packages"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES: Version ${VERSION} not yet available. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
+                  sleep $RETRY_DELAY
+                else
+                  echo "::error::Release artifact version ${VERSION} not available in GitHub Packages after $MAX_RETRIES attempts"
+                  echo "::error::Checked: $ARTIFACT_META_URL"
+                  exit 1
+                fi
+              fi
+            done
           fi
 
           # Download JAR and POM with retry
