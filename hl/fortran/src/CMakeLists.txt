@@ -409,7 +409,7 @@ install (
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
   # Contribute the HL Fortran F90 sources to the HL library documentation
-  # input list.  The hdf5hllib_doc target is defined at the end of the
+  # input list. The hdf5hllib_doc target is defined at the end of the
   # top-level CMakeLists.txt, after this subdirectory is processed.
   set_property (GLOBAL APPEND PROPERTY HDF5_DOXYGEN_HL_INPUTS
     ${HDF5_HL_F90_F_BASE_SOURCES}

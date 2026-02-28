@@ -6,10 +6,10 @@ project (HDF5_TOOLS_SRC C)
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
   # Contribute tool public headers to the main library documentation input
-  # list.  Headers are enumerated explicitly here, mirroring the explicit
+  # list. Headers are enumerated explicitly here, mirroring the explicit
   # source lists used elsewhere, so that adding a new tool header is tracked
   # by version control and does not require an explanation of why GLOB was
-  # used.  CMAKE_CURRENT_SOURCE_DIR is set to tools/src/ at this point.
+  # used. CMAKE_CURRENT_SOURCE_DIR is set to tools/src/ at this point.
   set_property (GLOBAL APPEND PROPERTY HDF5_DOXYGEN_LIB_INPUTS
     ${CMAKE_CURRENT_SOURCE_DIR}/h5copy/h5copy.h
     ${CMAKE_CURRENT_SOURCE_DIR}/h5diff/h5diff_common.h

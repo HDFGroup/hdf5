@@ -1147,9 +1147,9 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     endif ()
 
     # Doxygen content and configuration files shared by all doc targets.
-    # Defined here once to avoid duplication.  CONFIGURE_DEPENDS tells
+    # Defined here once to avoid duplication. CONFIGURE_DEPENDS tells
     # Ninja/Make to re-run CMake when a file is added or removed from these
-    # directories.  The per-null-build cost of checking small, stable
+    # directories. The per-null-build cost of checking small, stable
     # documentation directories is negligible compared to source code globs.
     # GLOB_RECURSE is required so that files added inside subdirectories
     # (e.g. dox/cookbook/, dox/high_level/, examples/tables/) also trigger
@@ -1164,7 +1164,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     )
 
     # Define the umbrella doxygen target once, here, so that ownership is
-    # unambiguous.  Subdirectories and the end-of-file doc block add
+    # unambiguous. Subdirectories and the end-of-file doc block add
     # dependencies to it; the fallback at the bottom of this file handles
     # the case where Doxygen is not found or HDF5_BUILD_DOC is OFF.
     add_custom_target (doxygen)
@@ -1363,7 +1363,7 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
     list (APPEND _hdf5_doxy_inputs ${_hdf5_hl_doxy_inputs})
   endif ()
 
-  # Java sources: only when Java bindings are enabled.  DOXYGEN_JAVA_DIR
+  # Java sources: only when Java bindings are enabled. DOXYGEN_JAVA_DIR
   # (set in the HDF5_BUILD_DOC block above) selects the correct path
   # regardless of whether the JNI or pure-Java tree was chosen.
   if (HDF5_BUILD_JAVA)
@@ -1408,12 +1408,12 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
   # -----------------------------------------------------------------------
   # Make the stamp file config-agnostic so multi-config generators (VS,
   # Xcode, Ninja Multi-Config) deduplicate the custom command and only run
-  # Doxygen once.  Doxygen writes to a single, config-agnostic output
+  # Doxygen once. Doxygen writes to a single, config-agnostic output
   # directory, so per-config stamps would race over the same HTML files.
   set (_hdf5lib_doc_stamp "${HDF5_SRC_BINARY_DIR}/hdf5lib_doc.stamp")
 
   # Use add_custom_command with a stamp file so that CMake can perform a
-  # timestamp-based up-to-date check.  A bare add_custom_target(... COMMAND
+  # timestamp-based up-to-date check. A bare add_custom_target(... COMMAND
   # ...) would unconditionally invoke Doxygen on every build.
   add_custom_command (
     OUTPUT  "${_hdf5lib_doc_stamp}"

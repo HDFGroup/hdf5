@@ -241,7 +241,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
   # Contribute C++ sources and headers to the main library documentation
-  # input list.  The hdf5lib_doc target is defined at the end of the top-level
+  # input list. The hdf5lib_doc target is defined at the end of the top-level
   # CMakeLists.txt, after this subdirectory is processed, so get_property()
   # there will see these entries.
   set_property (GLOBAL APPEND PROPERTY HDF5_DOXYGEN_LIB_INPUTS
