@@ -333,7 +333,7 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Windows)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
@@ -341,7 +341,7 @@ jobs:
         if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (linux)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
@@ -349,7 +349,7 @@ jobs:
         if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (Mac_latest)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
               name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz

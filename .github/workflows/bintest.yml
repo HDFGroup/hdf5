@@ -51,7 +51,7 @@ jobs:
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}/hdf5
@@ -130,7 +130,7 @@ jobs:
           distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}
@@ -187,7 +187,7 @@ jobs:
           distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (MacOS_latest)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
           path: ${{ github.workspace }}
@@ -216,7 +216,7 @@ jobs:
 
       # symlinks the compiler executables to a common location 
       - name: Setup GNU Fortran
-        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
+        uses: fortran-lang/setup-fortran@2a1b9c55897d827a9dfeb114408f3615e53b2b72 # v1
         id: setup-fortran
         with:
           compiler: gcc
@@ -255,7 +255,7 @@ jobs:
           distribution: ${{ inputs.save_binary == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ github.workspace }}
