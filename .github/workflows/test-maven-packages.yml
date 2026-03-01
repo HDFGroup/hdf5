@@ -200,12 +200,12 @@ jobs:
               if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$ARTIFACT_META_URL" \
                    -o /tmp/artifact-metadata.xml 2>/dev/null && \
                  grep -q "<version>${VERSION}</version>" /tmp/artifact-metadata.xml 2>/dev/null; then
-                echo "✅ Release version ${VERSION} is available in GitHub Packages"
+                echo "Release version ${VERSION} is available in GitHub Packages"
                 break
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
                 if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                  echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES: Version ${VERSION} not yet available. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
+                  echo "Attempt $RETRY_COUNT/$MAX_RETRIES: Version ${VERSION} not yet available. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
                   sleep $RETRY_DELAY
                 else
                   echo "::error::Release artifact version ${VERSION} not available in GitHub Packages after $MAX_RETRIES attempts"
@@ -490,12 +490,12 @@ jobs:
               if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$ARTIFACT_META_URL" \
                    -o /tmp/artifact-metadata.xml 2>/dev/null && \
                  grep -q "<version>${VERSION}</version>" /tmp/artifact-metadata.xml 2>/dev/null; then
-                echo "✅ Release version ${VERSION} is available in GitHub Packages"
+                echo "Release version ${VERSION} is available in GitHub Packages"
                 break
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
                 if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                  echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES: Version ${VERSION} not yet available. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
+                  echo "Attempt $RETRY_COUNT/$MAX_RETRIES: Version ${VERSION} not yet available. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
                   sleep $RETRY_DELAY
                 else
                   echo "::error::Release artifact version ${VERSION} not available in GitHub Packages after $MAX_RETRIES attempts"
