@@ -2529,8 +2529,8 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td colspan="4">Object Index</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
-    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
 <caption><strong>Fields: Global Heap ID</strong></caption>
@@ -2547,6 +2547,12 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td>This field is the index of the data object within the global heap collection.</td>
 </tr>
 </table>
+
+\note When used in @ref subsec_fmt4_dataobject_storage "Data Object Data Storage",
+each Global Heap ID is preceded by additional fields not shown in the layout above.
+For variable-length data, a 4-byte unsigned integer sequence length precedes each Global Heap ID.
+For reference data, a 2-byte encoding header and a 4-byte unsigned integer encoded size
+precede each Global Heap ID.
 
 \subsection subsec_fmt4_infra_globalheapvds III.F. Disk Format: Level 1F - Global Heap Block for Virtual Datasets
 The layout for the global heap block used with virtual datasets is described below. For more information
@@ -10507,8 +10513,12 @@ they are specifically defined as being stored in a different machine format with
 information from the datatype header message. This means that each architecture will need to
 [potentially] byte-swap data values into the internal representation for that particular machine.
 
-Data with a variable-length datatype is stored in the global heap of the HDF5 file. Global heap
-identifiers are stored in the data object storage.
+Data with a variable-length datatype is stored in the global heap of the HDF5 file. Each element in
+the data object storage is represented as a 4-byte unsigned integer sequence length followed by a
+@ref FMT4GlobalHeapID "Global Heap ID" that identifies the heap object containing the actual
+variable-length data. The sequence length indicates the number of base-type elements in the
+variable-length sequence and is always stored as a 4-byte unsigned integer, regardless of the
+&ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 Data whose elements are composed of reference datatypes are stored in several different ways depending
 on the particular reference type involved. Object pointers are just stored as the offset of the
