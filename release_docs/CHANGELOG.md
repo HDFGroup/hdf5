@@ -1,4 +1,4 @@
-v2.1.0 --- February 10, 2026
+HDF5 version 2.1.0 released on 2026-03-02
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -23,20 +23,15 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 # 🔆 Executive Summary: HDF5 Version 2.1.0
 
+> [!IMPORTANT]
+>
+> - The format of the GitHub tag for HDF5 releases has been changed to Major.Minor.Patch, consistent with the versioning policy change to follow the Semantic Versioning Specification described in this [Wiki page](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy).  The previous tag format hdf5_Major_Minor_Patch that was created in addition for HDF5 2.0.0 and this release will not be continued.
+
 ## Performance Enhancements:
 
 
 ## Significant Advancements:
 
-
-## Updated Foundation:
-
-> [!IMPORTANT]
->
-> - Transitioned to [CMake-only](CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
-> - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
-> - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
-> - The format of the GitHub tag for HDF5 releases has been changed to Major.Minor.Patch, consistent with the versioning policy change to follow the Semantic Versioning Specification described in this [Wiki page](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy).  The previous tag format hdf5_Major_Minor_Patch that was created in addition for HDF5 2.0.0 and this releases will not be continued.
 
 ## Enhanced Features:
 
