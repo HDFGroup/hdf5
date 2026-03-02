@@ -78,7 +78,7 @@ var searchData=
   ['objno_75',['objno',['../struct_h5_g__stat__t.html#a871980f2e438ab5b2d466163496b8d84',1,'H5G_stat_t']]],
   ['objs_76',['objs',['../structpack__opttbl__t.html#abd8ad9acc4237d1cb93b0936754be85d',1,'pack_opttbl_t']]],
   ['objversion_77',['objVersion',['../class_h5_1_1_h5_object.html#a7ef85ec76e25ccffe2807f0a174f4f1c',1,'H5::H5Object']]],
-  ['obtain_20gz_20file_78',['obtain gz file',['../rel_spec_114.html#subsec_obtain_method_114',1,'Methods to obtain (gz file)'],['../rel_spec_20.html#subsec_obtain_method_20',1,'Methods to obtain (gz file)']]],
+  ['obtain_20gz_20file_78',['obtain gz file',['../rel_spec_114.html#subsec_obtain_method_114',1,'Methods to obtain (gz file)'],['../rel_spec_2x.html#subsec_obtain_method_2x',1,'Methods to obtain (gz file)']]],
   ['obtain_20tools_20and_20files_20optional_79',['Obtain Tools and Files (Optional)',['../_view_tools_command.html#secViewToolsCommandObtain',1,'']]],
   ['obtaining_20information_20regarding_20an_20object_20s_20attributes_80',['Obtaining Information Regarding an Object&apos;s Attributes',['../_h5_a__u_g.html#subsubsec_attribute_work_info',1,'']]],
   ['of_20a_20dataset_81',['of a Dataset',['../_l_b_dset_layout.html#secLBDsetLayoutDesc',1,'Description of a Dataset'],['../_h5__u_g.html#subsubsec_program_model_partial',1,'Reading and Writing a Portion of a Dataset'],['../_l_b_dset_sub_r_w.html',1,'Reading From or Writing To a Subset of a Dataset'],['../_h5_d__u_g.html#subsubsec_dataset_program_read',1,'Retrieve the Properties of a Dataset']]],
