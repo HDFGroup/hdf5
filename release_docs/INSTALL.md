@@ -91,7 +91,7 @@ The above example will create a `build` folder in the source parent directory, w
 
 ### 4.3. Customization
 
-See the HDF5 documentation for more on presets, especially the presets section in the `release_docs/INSTALL_CMake.txt` file.
+See the HDF5 documentation for more on presets, especially the presets section in the [release_docs/INSTALL_CMake.md](./INSTALL_CMake.md) file.
 
 ### 4.4. See Also
 
