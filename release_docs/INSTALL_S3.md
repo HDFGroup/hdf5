@@ -54,19 +54,19 @@ If you are unable to obtain the `aws-c-s3` library from a package manager or oth
 
 ```bash
 # Only if building on Linux:
-git clone [https://github.com/aws/aws-lc.git](https://github.com/aws/aws-lc.git)
-git clone [https://github.com/aws/s2n-tls.git](https://github.com/aws/s2n-tls.git)
+git clone https://github.com/aws/aws-lc.git
+git clone https://github.com/aws/s2n-tls.git
 
 # All platforms:
-git clone [https://github.com/awslabs/aws-c-common.git](https://github.com/awslabs/aws-c-common.git)
-git clone [https://github.com/awslabs/aws-checksums.git](https://github.com/awslabs/aws-checksums.git)
-git clone [https://github.com/awslabs/aws-c-cal.git](https://github.com/awslabs/aws-c-cal.git)
-git clone [https://github.com/awslabs/aws-c-io.git](https://github.com/awslabs/aws-c-io.git)
-git clone [https://github.com/awslabs/aws-c-compression.git](https://github.com/awslabs/aws-c-compression.git)
-git clone [https://github.com/awslabs/aws-c-http.git](https://github.com/awslabs/aws-c-http.git)
-git clone [https://github.com/awslabs/aws-c-sdkutils.git](https://github.com/awslabs/aws-c-sdkutils.git)
-git clone [https://github.com/awslabs/aws-c-auth.git](https://github.com/awslabs/aws-c-auth.git)
-git clone [https://github.com/awslabs/aws-c-s3.git](https://github.com/awslabs/aws-c-s3.git)
+git clone https://github.com/awslabs/aws-c-common.git
+git clone https://github.com/awslabs/aws-checksums.git
+git clone https://github.com/awslabs/aws-c-cal.git
+git clone https://github.com/awslabs/aws-c-io.git
+git clone https://github.com/awslabs/aws-c-compression.git
+git clone https://github.com/awslabs/aws-c-http.git
+git clone https://github.com/awslabs/aws-c-sdkutils.git
+git clone https://github.com/awslabs/aws-c-auth.git
+git clone https://github.com/awslabs/aws-c-s3.git
 ```
 
 ### 2. Build `aws-c-s3` and its dependencies
