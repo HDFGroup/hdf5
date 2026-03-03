@@ -58,13 +58,13 @@ Several files in the [release_docs/][u4] directory provide platform-specific det
 
 | File | Description |
 |------|-------------|
-| [INSTALL](release_docs/INSTALL) | General compilation and installation instructions (start here) |
-| [INSTALL_CMake.txt](release_docs/INSTALL_CMake.txt) | Building with CMake |
+| [INSTALL](release_docs/INSTALL.md) | General compilation and installation instructions (start here) |
+| [INSTALL_CMake.md](release_docs/INSTALL_CMake.md) | Building with CMake |
 | [README_HPC.md](release_docs/README_HPC.md) | Building and configuring Parallel HDF5 on HPC systems |
-| [INSTALL_Windows.txt](release_docs/INSTALL_Windows.txt) | Windows installation |
-| [INSTALL_Cygwin.txt](release_docs/INSTALL_Cygwin.txt) | Cygwin installation |
-| [USING_HDF5_CMake.txt](release_docs/USING_HDF5_CMake.txt) | Building HDF5 applications with CMake |
-| [USING_CMake_Examples.txt](release_docs/USING_CMake_Examples.txt) | Building and testing HDF5 examples with CMake |
+| [INSTALL_Windows.md](release_docs/INSTALL_Windows.md) | Windows installation |
+| [INSTALL_Cygwin.md](release_docs/INSTALL_Cygwin.md) | Cygwin installation |
+| [USING_HDF5_CMake.md](release_docs/USING_HDF5_CMake.md) | Building HDF5 applications with CMake |
+| [USING_CMake_Examples.md](release_docs/USING_CMake_Examples.md) | Building and testing HDF5 examples with CMake |
 
 ## Help and Support
 
