@@ -177,6 +177,11 @@ install (
     DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
     COMPONENT configinstall
 )
+install (
+    FILES ${CMAKE_SOURCE_DIR}/config/cmake/FindZLIBNG.cmake
+    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
+    COMPONENT configinstall
+)
 
 #-----------------------------------------------------------------------------
 # Configure the libhdf5.settings file with library info

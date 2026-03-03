@@ -13,27 +13,39 @@
 ########################
 # compression options
 ########################
+set (ZLIB_VERSION "1.3.1" CACHE INTERNAL "Version of zlib to use when building from external source")
 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package")
 mark_as_advanced (ZLIB_PACKAGE_NAME)
-set (ZLIB_TGZ_NAME "zlib-1.3.1.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file")
-set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3.1" CACHE STRING "Use ZLIB from original location")
+set (ZLIB_TGZ_NAME "zlib-${ZLIB_VERSION}.tar.gz" CACHE STRING "Base name of zlib compressed file")
+set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v${ZLIB_VERSION}" CACHE STRING "URL to retrieve external zlib compressed file from")
 mark_as_advanced (ZLIB_TGZ_NAME)
 mark_as_advanced (ZLIB_TGZ_ORIGPATH)
-set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository")
-set (ZLIB_GIT_BRANCH "develop" CACHE STRING "")
+set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "GIT URL to retrieve external zlib source from")
+set (ZLIB_GIT_TAG "${ZLIB_VERSION}" CACHE STRING "GIT tag to retrieve external zlib source from")
 mark_as_advanced (ZLIB_GIT_URL)
-mark_as_advanced (ZLIB_GIT_BRANCH)
+mark_as_advanced (ZLIB_GIT_TAG)
+# DEPRECATED
+unset (ZLIB_GIT_BRANCH)
+if (DEFINED ZLIB_GIT_BRANCH)
+  message (DEPRECATION "ZLIB_GIT_BRANCH has been deprecated in favor of ZLIB_GIT_TAG")
+endif ()
 
-set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package")
+set (ZLIBNG_VERSION "2.3.3" CACHE INTERNAL "Version of zlib-ng to use when building from external source")
+set (ZLIBNG_PACKAGE_NAME "ZLIBNG" CACHE STRING "Name of zlib-ng package")
 mark_as_advanced (ZLIBNG_PACKAGE_NAME)
-set (ZLIBNG_TGZ_NAME "2.2.4.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file")
-set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "Use ZLIBNG from original location")
+set (ZLIBNG_TGZ_NAME "${ZLIBNG_VERSION}.tar.gz" CACHE STRING "Base name of zlib-ng compressed file")
+set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "URL to retrieve external zlib-ng compressed file from")
 mark_as_advanced (ZLIBNG_TGZ_NAME)
 mark_as_advanced (ZLIBNG_TGZ_ORIGPATH)
-set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "Use ZLIBNG from  GitHub repository")
-set (ZLIBNG_GIT_BRANCH "develop" CACHE STRING "")
+set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "GIT URL to retrieve external zlib-ng source from")
+set (ZLIBNG_GIT_TAG "${ZLIBNG_VERSION}" CACHE STRING "GIT tag to retrieve external zlib-ng source from")
 mark_as_advanced (ZLIBNG_GIT_URL)
-mark_as_advanced (ZLIBNG_GIT_BRANCH)
+mark_as_advanced (ZLIBNG_GIT_TAG)
+# DEPRECATED
+unset (ZLIBNG_GIT_BRANCH)
+if (DEFINED ZLIBNG_GIT_BRANCH)
+  message (DEPRECATION "ZLIBNG_GIT_BRANCH has been deprecated in favor of ZLIBNG_GIT_TAG")
+endif ()
 
 set (LIBAEC_VERSION "1.1.6" CACHE INTERNAL "Version of LIBAEC to use when building from external source")
 set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package")
@@ -43,9 +55,14 @@ set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/do
 mark_as_advanced (LIBAEC_TGZ_NAME)
 mark_as_advanced (LIBAEC_TGZ_ORIGPATH)
 set (LIBAEC_GIT_URL "https://github.com/MathisRosenhauer/libaec.git" CACHE STRING "GIT URL to retrieve external LIBAEC source from")
-set (LIBAEC_GIT_BRANCH "v${LIBAEC_VERSION}" CACHE STRING "")
+set (LIBAEC_GIT_TAG "v${LIBAEC_VERSION}" CACHE STRING "GIT tag to retrieve external LIBAEC source from")
 mark_as_advanced (LIBAEC_GIT_URL)
-mark_as_advanced (LIBAEC_GIT_BRANCH)
+mark_as_advanced (LIBAEC_GIT_TAG)
+# DEPRECATED
+unset (LIBAEC_GIT_BRANCH)
+if (DEFINED LIBAEC_GIT_BRANCH)
+  message (DEPRECATION "LIBAEC_GIT_BRANCH has been deprecated in favor of LIBAEC_GIT_TAG")
+endif ()
 
 ########################
 # API test options

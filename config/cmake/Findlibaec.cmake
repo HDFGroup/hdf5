@@ -81,7 +81,11 @@ mark_as_advanced (libaec_DIR)
 # If a libaec-config.cmake file is available for use, prefer that
 if (libaec_FOUND)
   find_package_handle_standard_args (libaec HANDLE_COMPONENTS CONFIG_MODE)
-  message (VERBOSE "Found existing libaec CMake configuration file at ${libaec_DIR}")
+  if (DEFINED libaec_DIR AND NOT libaec_DIR STREQUAL "libaec_DIR-NOTFOUND")
+    message (VERBOSE "Found existing libaec CMake configuration file at ${libaec_DIR}")
+  else ()
+    message (VERBOSE "Found existing libaec CMake configuration file")
+  endif ()
 
   # Set variables that this module returns
   if (TARGET libaec::aec)
