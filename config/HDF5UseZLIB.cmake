@@ -123,7 +123,7 @@ function (external_zlib_library)
     endif ()
 
     if (ZLIB_USE_LOCALCONTENT AND NOT EXISTS "${ZLIB_URL}")
-      message (FATAL_ERROR "Filter zlib file ${ZLIB_URL} not found")
+      message (FATAL_ERROR "Filter zlib file ${ZLIB_URL} not found (try setting TGZPATH to a directory containing ${ZLIB_TGZ_NAME})")
     endif ()
 
     message (STATUS "Filter zlib will be built from source ${ZLIB_URL}")
@@ -200,13 +200,14 @@ function (external_zlib_library)
     endif ()
   endforeach ()
 
-  # Optionally add namespace alias for targets
-  if (HDF_PACKAGE_NAMESPACE)
-    foreach (zlib_target ${zlib_targets})
-      if (NOT TARGET ${HDF_PACKAGE_NAMESPACE}${zlib_target})
-        add_library (${HDF_PACKAGE_NAMESPACE}${zlib_target} ALIAS ${zlib_target})
-      endif ()
-    endforeach ()
+  # Optionally add namespace alias for base non-aliased targets
+  if (HDF5_USE_ZLIB_STATIC)
+    set (zlib_base_target zlibstatic)
+  else ()
+    set (zlib_base_target zlib)
+  endif ()
+  if (HDF_PACKAGE_NAMESPACE AND NOT TARGET ${HDF_PACKAGE_NAMESPACE}${zlib_base_target})
+    add_library (${HDF_PACKAGE_NAMESPACE}${zlib_base_target} ALIAS ${zlib_base_target})
   endif ()
 
   set (H5_ZLIB_HEADER "zlib.h" PARENT_SCOPE)
@@ -216,11 +217,7 @@ function (external_zlib_library)
   set (H5_ZLIB_INCLUDE_DIR "${hdf5_zlib_SOURCE_DIR}" PARENT_SCOPE)
   set (H5_ZLIB_INCLUDE_DIRS ${H5_ZLIB_INCLUDE_DIR_GEN} ${H5_ZLIB_INCLUDE_DIR} PARENT_SCOPE)
 
-  if (HDF5_USE_ZLIB_STATIC)
-    set (H5_ZLIB_LIBRARY "${HDF_PACKAGE_NAMESPACE}ZLIB::ZLIBSTATIC")
-  else ()
-    set (H5_ZLIB_LIBRARY "${HDF_PACKAGE_NAMESPACE}ZLIB::ZLIB")
-  endif ()
+  set (H5_ZLIB_LIBRARY "${HDF_PACKAGE_NAMESPACE}${zlib_base_target}")
   set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${H5_ZLIB_LIBRARY} PARENT_SCOPE)
 
   # If built as a sub-project or if cross-compiling, export all exported
@@ -229,7 +226,7 @@ function (external_zlib_library)
   if (HDF5_EXTERNALLY_CONFIGURED OR CMAKE_CROSSCOMPILING)
     # NOTE: The export namespace should be maintained with upstream zlib
     export (
-      TARGETS ${zlib_targets}
+      TARGETS ${zlib_base_target}
       FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
       NAMESPACE ZLIB::
       APPEND
@@ -390,7 +387,7 @@ function (external_zlib_ng_library)
     endif ()
 
     if (ZLIB_USE_LOCALCONTENT AND NOT EXISTS "${ZLIBNG_URL}")
-      message (FATAL_ERROR "Filter zlib-ng file ${ZLIBNG_URL} not found")
+      message (FATAL_ERROR "Filter zlib-ng file ${ZLIBNG_URL} not found (try setting TGZPATH to a directory containing ${ZLIBNG_TGZ_NAME})")
     endif ()
 
     message (STATUS "Filter zlib-ng will be built from source ${ZLIBNG_URL}")

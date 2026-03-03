@@ -121,7 +121,7 @@ function (external_szip_library)
     endif ()
 
     if (LIBAEC_USE_LOCALCONTENT AND NOT EXISTS "${SZIP_URL}")
-      message (FATAL_ERROR "Filter SZIP file ${SZIP_URL} not found")
+      message (FATAL_ERROR "Filter SZIP file ${SZIP_URL} not found (try setting TGZPATH to a directory containing ${LIBAEC_TGZ_NAME})")
     endif ()
 
     message (STATUS "Filter libaec will be built from source ${SZIP_URL}")
@@ -142,8 +142,9 @@ function (external_szip_library)
     set (BUILD_STATIC_LIBS OFF)
   endif ()
 
-  # Include libaec packaging logic and override installation of files
-  # into the library's CMake install directory
+  # Set libaec options for build. Include libaec packaging logic and override
+  # installation of files into the library's CMake install directory
+  set (BUILD_TESTING OFF)
   set (libaec_INSTALL_CMAKEDIR "${HDF5_INSTALL_CMAKE_DIR}" CACHE INTERNAL "")
   set (libaec_INCLUDE_PACKAGING ON CACHE INTERNAL "")
 
