@@ -76,13 +76,16 @@ function (system_zlib_library)
   endif ()
 endfunction ()
 
-# Function to retrieve zlib from external source (if necessary) and add it to the build process
+# Function to retrieve zlib from external source (if necessary) and add it to
+# the build process
+#
+# NOTE: This function does NOT patch upstream zlib and will need maintenance for
+# any changes in the CMake target names, installed configuration files, etc. in new
+# releases.
 function (external_zlib_library)
   if (NOT HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT|TGZ")
     message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be 'GIT' or 'TGZ' when ZLIB_USE_EXTERNAL is ON (Current setting: ${HDF5_ALLOW_EXTERNAL_SUPPORT})")
   endif ()
-
-  set (zlib_folder "ZLIB")
 
   # Setup for FetchContent
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
@@ -99,20 +102,12 @@ function (external_zlib_library)
       set (ZLIB_TAG ${ZLIB_GIT_TAG})
     endif ()
 
-    # Use a different CMakeLists for 'develop' branch to patch zlib
-    if (${ZLIB_TAG} MATCHES "develop")
-      set (ZLIB_FILE "devCMakeLists")
-    else ()
-      set (ZLIB_FILE "CMakeLists")
-    endif ()
+    message (STATUS "Filter zlib will be built from source ${ZLIB_URL} (tag ${ZLIB_TAG})")
 
-    # Instruct FetchContent to retrieve ZLIB from GIT and patch CMakeLists.txt
+    # Instruct FetchContent to retrieve ZLIB from GIT
     FetchContent_Declare (HDF5_ZLIB
         GIT_REPOSITORY ${ZLIB_URL}
         GIT_TAG ${ZLIB_TAG}
-        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-            ${HDF_RESOURCES_DIR}/${zlib_folder}/${ZLIB_FILE}.txt
-            <SOURCE_DIR>/CMakeLists.txt
     )
   else () # HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ"
     if (NOT DEFINED TGZPATH)
@@ -128,32 +123,91 @@ function (external_zlib_library)
     endif ()
 
     if (ZLIB_USE_LOCALCONTENT AND NOT EXISTS "${ZLIB_URL}")
-      message (FATAL_ERROR "Filter ZLIB file ${ZLIB_URL} not found")
+      message (FATAL_ERROR "Filter zlib file ${ZLIB_URL} not found")
     endif ()
+
+    message (STATUS "Filter zlib will be built from source ${ZLIB_URL}")
 
     # Instruct FetchContent to retrieve ZLIB from .tgz file and patch CMakeLists.txt
     FetchContent_Declare (HDF5_ZLIB
         URL ${ZLIB_URL}
         URL_HASH ""
-        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-            ${HDF_RESOURCES_DIR}/${zlib_folder}/CMakeLists.txt
-            <SOURCE_DIR>/CMakeLists.txt
     )
   endif ()
 
-  message (STATUS "Filter HDF5_ZLIB will be built from source ${ZLIB_URL}")
-  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR NOT ZLIB_USE_LOCALCONTENT)
-    message (VERBOSE "Fetching and configuring filter HDF5_ZLIB")
+  # Set zlib shared/static library building based off of preference variable
+  if (HDF5_USE_ZLIB_STATIC)
+    set (BUILD_SHARED_LIBS OFF)
+    set (ZLIB_BUILD_SHARED OFF)
+    set (BUILD_STATIC_LIBS ON)
+    set (ZLIB_BUILD_STATIC ON)
+  else ()
+    set (BUILD_SHARED_LIBS ON)
+    set (ZLIB_BUILD_SHARED ON)
+    set (BUILD_STATIC_LIBS OFF)
+    set (ZLIB_BUILD_STATIC OFF)
   endif ()
 
-  # Make ZLIB available for the build
+  # Set zlib options for build
+  set (CMAKE_INSTALL_BINDIR ${${HDF5_PACKAGE_NAME}_INSTALL_BIN_DIR})
+  set (CMAKE_INSTALL_LIBDIR ${${HDF5_PACKAGE_NAME}_INSTALL_LIB_DIR})
+  set (CMAKE_INSTALL_INCLUDEDIR ${${HDF5_PACKAGE_NAME}_INSTALL_INCLUDE_DIR})
+  set (CMAKE_INSTALL_DOCDIR ${${HDF5_PACKAGE_NAME}_INSTALL_DOC_DIR})
+  set (ZLIB_BUILD_TESTING OFF)
+  set (ZLIB_INSTALL ON)
+
+  # Set variables for use in HDF5 CMake configuration file when locating
+  # the installed CMake files, as they may not be in the same location as
+  # our targets file
+  set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_NAME "zlib")
+  set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_NAME "zlib" PARENT_SCOPE)
+  set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_NAME}" PARENT_SCOPE)
+
+  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR NOT ZLIB_USE_LOCALCONTENT)
+    message (VERBOSE "Fetching and configuring filter zlib")
+  else ()
+    message (VERBOSE "Configuring filter zlib")
+  endif ()
+
+  # Make zlib available for the build
   FetchContent_MakeAvailable (HDF5_ZLIB)
 
-  # Optionally add namespace alias for static zlib
-  if (HDF_PACKAGE_NAMESPACE)
-    add_library (${HDF_PACKAGE_NAMESPACE}zlib-static ALIAS zlib-static)
+  # Hide zlib-ng-specific items from the GUI by default
+  mark_as_advanced (ZLIB_BUILD_ADA)
+  mark_as_advanced (ZLIB_BUILD_BLAST)
+  mark_as_advanced (ZLIB_BUILD_IOSTREAM3)
+  mark_as_advanced (ZLIB_BUILD_MINIZIP)
+  mark_as_advanced (ZLIB_BUILD_PUFF)
+  mark_as_advanced (ZLIB_BUILD_SHARED)
+  mark_as_advanced (ZLIB_BUILD_STATIC)
+  mark_as_advanced (ZLIB_BUILD_TESTING)
+  mark_as_advanced (ZLIB_INSTALL)
+  mark_as_advanced (ZLIB_WITH_CRC32VX)
+  mark_as_advanced (ZLIB_WITH_GVMAT64)
+  mark_as_advanced (ZLIB_WITH_INFBACK9)
+
+  # Set expected target names, based on shared/static preference
+  # NOTE: These must be maintained with new releases of upstream zlib in
+  # order to avoid having to patch the source when exporting targets.
+  if (HDF5_USE_ZLIB_STATIC)
+    set (zlib_targets ZLIB::ZLIBSTATIC)
+  else ()
+    set (zlib_targets ZLIB::ZLIB)
   endif ()
-  set (H5_ZLIB_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}zlib-static")
+  foreach (zlib_target ${zlib_targets})
+    if (NOT TARGET ${zlib_target})
+      message (FATAL_ERROR "Expected target ${zlib_target} is missing from build of external zlib")
+    endif ()
+  endforeach ()
+
+  # Optionally add namespace alias for targets
+  if (HDF_PACKAGE_NAMESPACE)
+    foreach (zlib_target ${zlib_targets})
+      if (NOT TARGET ${HDF_PACKAGE_NAMESPACE}${zlib_target})
+        add_library (${HDF_PACKAGE_NAMESPACE}${zlib_target} ALIAS ${zlib_target})
+      endif ()
+    endforeach ()
+  endif ()
 
   set (H5_ZLIB_HEADER "zlib.h" PARENT_SCOPE)
 
@@ -162,7 +216,25 @@ function (external_zlib_library)
   set (H5_ZLIB_INCLUDE_DIR "${hdf5_zlib_SOURCE_DIR}" PARENT_SCOPE)
   set (H5_ZLIB_INCLUDE_DIRS ${H5_ZLIB_INCLUDE_DIR_GEN} ${H5_ZLIB_INCLUDE_DIR} PARENT_SCOPE)
 
-  set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${H5_ZLIB_STATIC_LIBRARY} PARENT_SCOPE)
+  if (HDF5_USE_ZLIB_STATIC)
+    set (H5_ZLIB_LIBRARY "${HDF_PACKAGE_NAMESPACE}ZLIB::ZLIBSTATIC")
+  else ()
+    set (H5_ZLIB_LIBRARY "${HDF_PACKAGE_NAMESPACE}ZLIB::ZLIB")
+  endif ()
+  set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${H5_ZLIB_LIBRARY} PARENT_SCOPE)
+
+  # If built as a sub-project or if cross-compiling, export all exported
+  # targets to the build tree. Append to main targets file but keep
+  # namespace from upstream.
+  if (HDF5_EXTERNALLY_CONFIGURED OR CMAKE_CROSSCOMPILING)
+    # NOTE: The export namespace should be maintained with upstream zlib
+    export (
+      TARGETS ${zlib_targets}
+      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ZLIB::
+      APPEND
+    )
+  endif ()
 
   set (H5_ZLIB_FOUND TRUE PARENT_SCOPE)
 endfunction ()
@@ -345,7 +417,7 @@ function (external_zlib_ng_library)
   set (CMAKE_INSTALL_INCLUDEDIR ${${HDF5_PACKAGE_NAME}_INSTALL_INCLUDE_DIR})
   set (BUILD_TESTING OFF)
 
-  # Set variables for use in hdf5 CMake configuration file when locating
+  # Set variables for use in HDF5 CMake configuration file when locating
   # the installed targets file, as it may not be in the same location as
   # our targets file
   if (ZLIB_COMPAT)
