@@ -12,7 +12,9 @@
 The [HDF5 library version 2.0.0](https://www.hdfgroup.org/2025/11/10/release-of-hdf5-2-0-0-newsletter-207/) was released on **November 10, 2025**.
 This guide is written for “ordinary” HDF5 users: people who have real applications and workflows, want the upgrade to be boring, and mainly need clarity on **risk, compatibility, and a practical upgrade plan**.
 
-With few exceptions, the recommendations in this guide apply to the 1.x family of releases. However, if you are contemplating an HDF5 library upgrade, our recommendation is to move directly to 2.0.0 to take advantage of the latest features and improvements.
+With few exceptions, the recommendations in this guide apply to the 1.x family of releases. However, if you are contemplating an HDF5 library upgrade, our recommendation is to move directly to 2.0.0 to take advantage of the latest features and improvements. 
+
+Transitioning large-scale legacy systems to HDF5 2.0.0 can be complex. The HDF Group offers [consulting](https://www.hdfgroup.org/solutions/consulting/) to assist with architectural reviews and automated code migration. [Contact us](https://www.hdfgroup.org/contact-us/) to learn more.
 
 ## What HDF5 2.0.0 means (and what it doesn’t)
 
@@ -240,7 +242,7 @@ H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
 hid_t file = H5Fcreate("out.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 ```
 
-The forum announcement about the defaults explicitly calls out using `H5Pset_libver_bounds()` to ensure backward compatibility when needed.
+The [forum announcement](https://forum.hdfgroup.org/t/changes-in-file-format-defaults-coming-in-hdf5-2-0/13553) about the defaults explicitly calls out using `H5Pset_libver_bounds()` to ensure backward compatibility when needed.
 
 **Important caveat:** if you adopt **2.0.0-only features** (like the new complex datatype class), older HDF5 versions will not be able to read them.
 So: “set bounds” + “avoid incompatible features” go together if you truly need older-reader support.
@@ -313,4 +315,4 @@ If you want an opinionated plan that reduces fear:
 
 ## Acknowledgments
 
-This material is based upon work supported by the National Science Foundation under Federal Award No. 2534078. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
+This material is based upon work supported by the U.S. National Science Foundation under Federal Award No. 2534078. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
