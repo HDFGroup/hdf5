@@ -115,13 +115,11 @@ jobs:
           exit 1
         fi
         
-        # Extract blocker, must-do, and nice-to-have counts
+        # Extract critical and high priority counts
         BLOCKER_DONE=$(grep "^blocker_done=" progress_output.txt | cut -d'=' -f2 | head -1)
         BLOCKER_TOTAL=$(grep "^blocker_total=" progress_output.txt | cut -d'=' -f2 | head -1)
         MUSTDO_DONE=$(grep "^mustdo_done=" progress_output.txt | cut -d'=' -f2 | head -1)
         MUSTDO_TOTAL=$(grep "^mustdo_total=" progress_output.txt | cut -d'=' -f2 | head -1)
-        NICETOHAVE_DONE=$(grep "^nicetohave_done=" progress_output.txt | cut -d'=' -f2 | head -1)
-        NICETOHAVE_TOTAL=$(grep "^nicetohave_total=" progress_output.txt | cut -d'=' -f2 | head -1)
         VERSION=$(grep "^version=" progress_output.txt | cut -d'=' -f2 | head -1)
 
         # Set outputs for use in subsequent steps
@@ -132,12 +130,10 @@ jobs:
         echo "blocker_total=$BLOCKER_TOTAL" >> $GITHUB_OUTPUT
         echo "mustdo_done=$MUSTDO_DONE" >> $GITHUB_OUTPUT
         echo "mustdo_total=$MUSTDO_TOTAL" >> $GITHUB_OUTPUT
-        echo "nicetohave_done=$NICETOHAVE_DONE" >> $GITHUB_OUTPUT
-        echo "nicetohave_total=$NICETOHAVE_TOTAL" >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
         echo "::notice::Progress calculation successful: ${PERCENTAGE}% (${DONE}/${TOTAL})"
-        echo "::notice::  Version: ${VERSION}, Blockers: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, Must Do: ${MUSTDO_DONE}/${MUSTDO_TOTAL}, Nice to Have: ${NICETOHAVE_DONE}/${NICETOHAVE_TOTAL}"
+        echo "::notice::  Version: ${VERSION}, Critical Priority: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, High Priority: ${MUSTDO_DONE}/${MUSTDO_TOTAL}"
         
         # Clean up
         rm -f progress_output.txt
@@ -158,17 +154,52 @@ jobs:
         BLOCKER_TOTAL: ${{ steps.progress.outputs.blocker_total }}
         MUSTDO_DONE: ${{ steps.progress.outputs.mustdo_done }}
         MUSTDO_TOTAL: ${{ steps.progress.outputs.mustdo_total }}
-        NICETOHAVE_DONE: ${{ steps.progress.outputs.nicetohave_done }}
-        NICETOHAVE_TOTAL: ${{ steps.progress.outputs.nicetohave_total }}
         VERSION: ${{ steps.progress.outputs.version }}
       run: |
         # Execute dedicated badge generation script
         # This separates concerns: YAML orchestrates, scripts implement logic
         bash .github/workflows/update-badge.sh
-        
-    - name: Cleanup on failure
+
+    - name: Update failure badge on error
       if: failure()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+        GIST_ID: ${{ secrets.GIST_ID }}
       run: |
-        echo "::warning::Workflow failed - cleaning up temporary files"
         rm -f progress_output.txt
-        echo "::notice::Check the logs above for specific error details"
+        echo "::warning::Workflow failed - updating badges to FAILURE state"
+
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+        BLOCKER_GIST_NAME="release-blocker-${REPO_NAME}.json"
+        MUSTDO_GIST_NAME="release-mustdo-${REPO_NAME}.json"
+
+        FAILURE_BADGE=$(jq -n '{
+          "schemaVersion": 1,
+          "label": "Release Progress",
+          "message": "FAILURE",
+          "color": "BF00FF",
+          "style": "flat-square"
+        }')
+
+        REQUEST_PAYLOAD=$(jq -n \
+          --arg blocker_filename "$BLOCKER_GIST_NAME" \
+          --arg mustdo_filename "$MUSTDO_GIST_NAME" \
+          --argjson content "$FAILURE_BADGE" \
+          '{
+            "files": {
+              ($blocker_filename): { "content": ($content | tostring) },
+              ($mustdo_filename): { "content": ($content | tostring) }
+            }
+          }')
+
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -L -X PATCH \
+          -H "Authorization: token ${GITHUB_TOKEN}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/gists/${GIST_ID}" \
+          -d "$REQUEST_PAYLOAD")
+
+        if [ "$HTTP_CODE" != "200" ]; then
+          echo "::warning::Failed to update failure badges (HTTP $HTTP_CODE)"
+        else
+          echo "::notice::Failure badges updated successfully"
+        fi
