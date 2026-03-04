@@ -38,7 +38,7 @@ DEFAULT_MILESTONE_FILTER = None  # Will be set from environment or H5public.h
 
 
 class GitHubProjectTracker:
-    """Tracks release blocker progress in GitHub projects."""
+    """Tracks priority issue progress in GitHub projects."""
 
     def __init__(self, token: str, owner: str, project_number: int, milestone_filter: Optional[str] = None):
         self.api_url = "https://api.github.com/graphql"
