@@ -23,8 +23,8 @@ See \ref api-compat-macros for details of HDF5 versions when considering upgradi
 \li \ref subsubsec_rel_spec_2x_change_21versus20
 \li \ref subsubsec_rel_spec_2x_change_20versus14_6
 
-The Change log (a.k.a. the RELEASE.txt prior to release 2.x) also lists changes made to the library, but these notes tend to be more at a more detail-oriented level. It includes new features, bugs fixed, supported configuration features, platforms on which the library has been tested, and known problems.
-The change log files are listed in each release section and can be found at the top level of
+The CHANGELOG.md file (a.k.a. RELEASE.txt prior to release 2.x) also lists changes made to the library, but these notes tend to be more at a more detail-oriented level. It includes new features, bugs fixed, supported configuration features, platforms on which the library has been tested, and known problems.
+The CHANGELOG.md files are listed in each release section and can be found at the top level of
 the HDF5 source code tree in the release_docs directory.
 
 \subsubsection subsubsec_rel_spec_2x_change_22versus21 Release 2.2.0 versus Release 2.1.0
