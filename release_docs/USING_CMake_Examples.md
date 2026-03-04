@@ -2,7 +2,7 @@
 
 > **Notes:** This short instruction is written for users who want to quickly test the installation of HDF5 by using the CMake tools to build and test the HDF5 Examples. The following instructions will show the default usage and then present common changes for non-default installations.
 >
-> For more information, see the `USING_HDF5_CMake.txt` file. More information about using CMake can be found at the Kitware site, [www.cmake.org](https://www.cmake.org).
+> For more information, see the [USING_HDF5_CMake.md](./USING_HDF5_CMake.md) file. More information about using CMake can be found at the Kitware site, [www.cmake.org](https://www.cmake.org).
 
 ---
 

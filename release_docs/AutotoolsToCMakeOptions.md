@@ -20,7 +20,7 @@ CMake builds include a number of CMake specific files for support of CMake's fin
 
 ## Introduction
 The table below shows the equivalent CMake build options that match those from Autotools. See the
-release_docs/INSTALL_CMake.txt file for more information on the CMake build system and options.
+[release_docs/INSTALL_CMake.md](./INSTALL_CMake.md) file for more information on the CMake build system and options.
 
 ## Autotools to CMake Options
 | Autotools Build Options | CMake Build Options | Notes |
@@ -86,4 +86,3 @@ release_docs/INSTALL_CMake.txt file for more information on the CMake build syst
 | examplesdir[--with-examplesdir=location], [Specify path for examples [default="DATAROOTDIR/hdf5_examples"]] |  |  |
 | libmfu[--with-libmfu=DIR], [Use the libmfu library [default=no]] |  |  |
 | pthread[--with-pthread=DIR][Specify alternative path to Pthreads library] | Handled by HDF5_THREADS_ENABLED |  |
-

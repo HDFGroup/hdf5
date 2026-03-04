@@ -1,6 +1,6 @@
 # Build and Testing Instructions for HDF5's ROS3 VFD
 
-> **NOTE:** HDF5 2.0 and later requires CMake for building. See [INSTALL_CMake.txt](./INSTALL_CMake.md) for complete build instructions using CMake Presets.
+> **NOTE:** HDF5 2.0 and later requires CMake for building. See [INSTALL_CMake.md](./INSTALL_CMake.md) for complete build instructions using CMake Presets.
 
 ---
 

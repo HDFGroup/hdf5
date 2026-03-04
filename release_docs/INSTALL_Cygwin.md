@@ -69,7 +69,7 @@ The following standard utilities are also required to build and test HDF5:
 
 #### 2.4 Alternate Build Process
 
-Download the CMake package and follow the notes in the `INSTALL_CMake.txt` file to build HDF5 with the CMake utilities.
+Download the CMake package and follow the notes in the [INSTALL_CMake.md](./INSTALL_CMake.md) file to build HDF5 with the CMake utilities.
 
 ---
 
@@ -106,7 +106,7 @@ export FC=gfortran
 ```
 
 ### 4. Follow build and test steps
-Follow build and test steps in the `INSTALL_CMake.txt` file.
+Follow build and test steps in the [INSTALL_CMake.md](./INSTALL_CMake.md) file.
 
 ### 5. Check installed HDF5 library
 After installation, go to your installation directory. There should be three subdirectories: `bin`, `include`, and `lib`.
