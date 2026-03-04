@@ -143,7 +143,7 @@ This section includes the new features introduced in the HDF5 2.x series:
 <tr>
   <td rowspan="2">2.1.0</td>
   <td>FP6 data in E2M3 and E3M2 formats</td>
-  <td rowspan="2">For details, please see the Software Changes section of \ref subsubsec_rel_spec_2x_change_21versus20</td>
+  <td rowspan="2">For details, please see the Software Changes section of \ref subsubsec_rel_spec_2x_change_21versus20.</td>
 </tr>
 <tr>
   <td>FP4 data in E2M1 format</td>
@@ -151,7 +151,7 @@ This section includes the new features introduced in the HDF5 2.x series:
 <tr>
   <td rowspan="2">2.0.0</td>
   <td>FP8 data in E4M3 and E5M2 formats (<a href="https://arxiv.org/abs/2209.05433">https://arxiv.org/abs/2209.05433</a>), but not a native FP8 datatype</td>
-  <td rowspan="2">For details, please see the Software Changes section of \ref subsubsec_rel_spec_2x_change_20versus14_6</td>
+  <td rowspan="2">For details, please see the Software Changes section of \ref subsubsec_rel_spec_2x_change_20versus14_6.</td>
 </tr>
 <tr>
   <td>little- and big-endian bfloat16 data</td>
