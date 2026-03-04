@@ -1,27 +1,25 @@
-/** \page rel_spec_20 Release Specific Information for HDF5 2.0
+/** \page rel_spec_2x Release Specific Information for HDF5 2.x
  *
  * Navigate back: \ref index "Main" / \ref release_specific_info
  * <hr>
 
-\section sec_rel_spec_20 HDF5 Library and Tools 2.0.0
+\section sec_rel_spec_2x HDF5 Library and Tools 2.1.0
 
-\subsection subsec_rel_info_20 Release Information
+\subsection subsec_rel_info_2x Release Information
 
 <table>
 <tr>
-<td style="background-color:#F5F5F5">
-Version
+<td style="background-color:#FFFFFF">
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/HDFGroup/hdf5?label=Version&color=white)
 </td>
 <td>
-HDF5 2.0.0
 </td>
 </tr>
 <tr>
-<td style="background-color:#F5F5F5">
-Release Date
+<td style="background-color:#FFFFFF">
+![GitHub Release Date](https://img.shields.io/badge/dynamic/json?label=Released&query=$.published_at&url=https://api.github.com/repos/HDFGroup/hdf5/releases/latest&color=white)
 </td>
 <td>
-11/10/25
 </td>
 </tr>
 <tr>
@@ -29,42 +27,42 @@ Release Date
 Additional Release Information
 </td>
 <td>
-<a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a>
+<a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG.md</a>
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-\ref sec_rel_spec_20_migrate
+\ref sec_rel_spec_2x_migrate
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-\ref sec_rel_spec_20_change
+\ref sec_rel_spec_2x_change
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-\ref sec_rel_spec_20_feat
+\ref sec_rel_spec_2x_feat
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-[Newsletter Announcement](https://www.hdfgroup.org/2025/11/10/release-of-hdf5-2-0-0-newsletter-207/)
+[Newsletter Announcement](https://www.hdfgroup.org/)
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-ABI/API Compatibility Reports between 2.0.0 and 1.14.6 [tar file](https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/v2_0/v2_0_0/downloads/compat_report/index.html)
+ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://\RELURL/2.1.0/downloads/hdf5-2.1.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/2.1.0/downloads/compat_report/index.html)
 </td>
 </tr>
 <tr>
@@ -77,15 +75,15 @@ ABI/API Compatibility Reports between 2.0.0 and 1.14.6 [tar file](https://\RELUR
 </table>
 
 
-\subsection subsec_download_20 Downloads
+\subsection subsec_download_2x Downloads
 
 Source code and binaries are available at:
-<a href="https://github.com/HDFGroup/hdf5/releases/tag/2.0.0">HDF5 2.0.0 on GitHub</a>
+<a href="https://github.com/HDFGroup/hdf5/releases/tag/2.1.0">HDF5 2.1.0 on GitHub</a>
 
-Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with CMake.
+Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.1.0/release_docs/INSTALL) for building with CMake.
 
 
-\subsection subsec_obtain_method_20 Methods to obtain (gz file)
+\subsection subsec_obtain_method_2x Methods to obtain (gz file)
 
 \li firefox – Download file and then run:  `gzip <distribution>.tar.gz | tar xzf -`
 \li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
@@ -94,10 +92,10 @@ Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for b
     `wget https://github.com/HDFGroup/hdf5/releases/download/${PACKAGEVERSION}/<distribution>.tar.gz`<br>
     `gzip -cd <distribution>.tar.gz | tar xvf -`
 </div>
-\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.0.0 for this release
+\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.1.0 for this release
 
 
-\subsection subsec_dox_gen_doc_20 Doxygen Generated Reference Manual
+\subsection subsec_dox_gen_doc_2x Doxygen Generated Reference Manual
 
 The new HDF5 documentation based on [Doxygen](https://www.doxygen.nl/index.html) is available \ref index "here".
 
@@ -105,9 +103,9 @@ This documentation is WORK-IN-PROGRESS.
 
 Since this portion of the HDF5 documentation is now part of the source code, it gets the same treatment as code. In other words, issues, inaccuracies, corrections should be reported as issues in [GitHub](https://github.com/HDFGroup/hdf5/issues), and pull requests will be reviewed and accepted as any other code changes.
 
-\section sec_rel_spec_20_migrate Migrating from HDF5 1.14 to HDF5 2.0
+\section sec_rel_spec_2x_migrate Migrating from HDF5 1.14 to HDF5 2.x
 
-This section highlights some changes that might affect migrating to HDF5.20, please refer to the \ref sec_rel_spec_20_change or the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for detail.
+This section highlights some changes that might affect migrating to HDF5 2.x, please refer to the \ref sec_rel_spec_2x_change or the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for detail.
 
 \li Default file format is now 1.8
 \li The file format has been updated to 4.0<a name="fileformat"></a>
@@ -115,14 +113,14 @@ This section highlights some changes that might affect migrating to HDF5.20, ple
     - `H5Dread_chunk()`<br>
     - `H5Tdecode()`<br>
     - `H5Iregister_type()`<br>
-\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for a complete description on this feature.
+\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for a complete description on this feature.
 \li Significance in tools
     - The tool h5dump has a new option `--lformat` and its `XML` option is deprecated.
-    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> for an explanation.
+    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for an explanation.
 
-\section sec_rel_spec_20_feat New Features in HDF5 Release 2.0
+\section sec_rel_spec_2x_feat New Features in HDF5 Release 2.x
 
-This section includes the new features introduced in the HDF5 2.0 series:
+This section includes the new features introduced in the HDF5 2.x series:
 
 \li \ref_rfc20240129complex
 <br>Support for the C99 `float _Complex`, `double _Complex` and `long double _Complex` (with MSVC, `_Fcomplex`, `_Dcomplex` and `_Lcomplex`) types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications).<br />
@@ -140,14 +138,30 @@ This section includes the new features introduced in the HDF5 2.0 series:
 \li Support for chunks larger than 4 GiB using 64 bit addressing.
 
 \li New predefined datatypes for
-    - FP8 data in E4M3 and E5M2 formats (https://arxiv.org/abs/2209.05433), but not a native FP8 datatype.
-    - little- and big-endian [bfloat16](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format) data.
-<br>Please refer to the <a href="https://\SRCURL/release_docs/CHANGELOG.md">CHANGELOG</a> for detail.
+
+<table>
+<tr>
+  <td rowspan="2">2.1.0</td>
+  <td>FP6 data in E2M3 and E3M2 formats</td>
+  <td rowspan="2">For details, please see the Software Changes section of \ref subsubsec_rel_spec_2x_change_21versus20.</td>
+</tr>
+<tr>
+  <td>FP4 data in E2M1 format</td>
+</tr>
+<tr>
+  <td rowspan="2">2.0.0</td>
+  <td>FP8 data in E4M3 and E5M2 formats (<a href="https://arxiv.org/abs/2209.05433">https://arxiv.org/abs/2209.05433</a>), but not a native FP8 datatype</td>
+  <td rowspan="2">For details, please see the Software Changes section of \ref subsubsec_rel_spec_2x_change_20versus14_6.</td>
+</tr>
+<tr>
+  <td>little- and big-endian bfloat16 data</td>
+</tr>
+</table>
 
 \li Default chunk cache hash table size increased to 8191
 <br>In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
 
-\ref sec_rel_spec_20_change
+\ref sec_rel_spec_2x_change
 
  *
  * <hr>
