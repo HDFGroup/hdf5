@@ -3,7 +3,7 @@
 ![HDF5 Logo][u3]
 
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.17808614-blue)](https://doi.org/10.5281/zenodo.17808614)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.17808558-blue)](https://doi.org/10.5281/zenodo.17808558)
 [![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/call-workflows.yml?branch=develop&label=CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/call-workflows.yml?query=branch%3Adevelop)
 
 </div>
@@ -140,7 +140,7 @@ For detailed contribution guidelines, please contact us through the [Help Desk](
 
 If you use HDF5 in your research, please cite it. This repository includes a [`CITATION.cff`](CITATION.cff) file containing standard citation metadata.
 
-**Quick DOI:** [10.5281/zenodo.17808614](https://doi.org/10.5281/zenodo.17808614)
+**Quick DOI:** [10.5281/zenodo.17808558](https://doi.org/10.5281/zenodo.17808558)
 
 ## Build Status
 
