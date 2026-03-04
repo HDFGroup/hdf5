@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.16.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>HDF5: Release Specific Information for HDF5 2.x</title>
+<title>HDF5: Release Specific Information for HDF5 2.0</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-03</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-04</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -105,7 +105,7 @@ $(function() { codefold.init(); });
   </div>
 </div>
 <script type="text/javascript">
-$(function(){initNavTree('rel_spec_2x_change.html','',''); });
+$(function(){initNavTree('rel_spec_20_change.html','',''); });
 </script>
 <div id="container">
 <div id="doc-content">
@@ -131,47 +131,31 @@ $(function(){initNavTree('rel_spec_2x_change.html','',''); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Release Specific Information for HDF5 2.x </div></div>
+  <div class="headertitle"><div class="title">Release Specific Information for HDF5 2.0 </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Navigate back: <a class="el" href="index.html" title="notitle">Main</a> / <a class="el" href="release_specific_info.html" title="Release Specific Information">Release Specific Information</a> / <a class="el" href="rel_spec_2x.html" title="Release Specific Information for HDF5 2.x">Release Specific Information for HDF5 2.x</a> </p><hr  />
-<h1 class="doxsection"><a class="anchor" id="sec_rel_spec_2x_change"></a>
-Software Changes from Release to Release in HDF5 2.x</h1>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html" title="notitle">Main</a> / <a class="el" href="release_specific_info.html" title="Release Specific Information">Release Specific Information</a> / <a class="el" href="rel_spec_20.html" title="Release Specific Information for HDF5 2.0">Release Specific Information for HDF5 2.0</a> </p><hr  />
+<h1 class="doxsection"><a class="anchor" id="sec_rel_spec_20_change"></a>
+Software Changes from Release to Release in HDF5 2.0</h1>
 <p>This page provides information on the changes that a maintenance developer needs to be aware of between successive releases of HDF5, such as: </p><ul>
 <li>New or changed features or tools </li>
 <li>Syntax and behavioral changes in the existing application programming interface (the API) </li>
 <li>Certain types of changes in configuration or build processes </li>
 <li>Note that bug fixes and performance enhancements in the C library are automatically picked up by the C++, Fortran, and Java libraries.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_2x_change_compat"></a>
+<h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_20_change_compat"></a>
 API Compatibility</h2>
-<p>See <a class="el" href="api-compat-macros.html" title="API Compatibility Macros">API Compatibility Macros</a> for details of HDF5 versions when considering upgrading to the later HDF5 release to take advantage of the library features and enhancements.</p>
-<ul>
-<li><a href="https://support.hdfgroup.org/releases/hdf5/2.1.0/downloads/hdf5-2.1.0.html.abi.reports.tar.gz">Compatibility reports for Release 2.1.0 versus Release 2.0.0</a> </li>
-<li><a href="https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz">Compatibility reports for Release 2.0.0 versus Release 1.14.6</a></li>
+<p>See <a class="el" href="api-compat-macros.html" title="API Compatibility Macros">API Compatibility Macros</a> for details on using HDF5 version 2.0 with previous releases. </p><ul>
+<li><a href="https://support.hdfgroup.org/releases/hdf5/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz">Compatibility reports for Release 2.0 versus Release 1.14.6</a></li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_2x_bw_releases"></a>
+<h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_20_bw_releases"></a>
 Differences between releases</h2>
 <ul>
-<li><a class="el" href="#subsubsec_rel_spec_2x_change_21versus20" title="Release 2.1.0 versus Release 2.0.0">Release 2.1.0 versus Release 2.0.0</a> </li>
-<li><a class="el" href="#subsubsec_rel_spec_2x_change_20versus14_6" title="Release 2.0.0 versus Release 1.14.6">Release 2.0.0 versus Release 1.14.6</a></li>
+<li><a class="el" href="#subsubsec_rel_spec_20_change_0versus14_6" title="Release 2.0 versus Release 1.14.6">Release 2.0 versus Release 1.14.6</a></li>
 </ul>
-<p>The Change log (a.k.a. the RELEASE.txt prior to release 2.x) also lists changes made to the library, but these notes tend to be more at a more detail-oriented level. It includes new features, bugs fixed, supported configuration features, platforms on which the library has been tested, and known problems. The change log files are listed in each release section and can be found at the top level of the HDF5 source code tree in the release_docs directory.</p>
-<h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_2x_change_21versus20"></a>
-Release 2.1.0 versus Release 2.0.0</h3>
-<p>List of new public APIs/Macros</p>
-<table class="doxtable">
-<tr>
-<th>Function/Constant</th><th>Description</th></tr>
-<tr>
-<td style="background-color:#F5F5F5"><a class="el" href="group___p_d_t_a_l_t_f_l_o_a_t.html#gaadc2005e8d8a6050cd9d0ffc1531374d">H5T_FLOAT_F6E2M3</a> </td><td>6-bit FP6 E2M3 (2 exponent bits, 3 mantissa bits) floating-point </td></tr>
-<tr>
-<td style="background-color:#F5F5F5"><a class="el" href="group___p_d_t_a_l_t_f_l_o_a_t.html#ga1ce111c9e0e8ab22acde631e2b6ee213">H5T_FLOAT_F6E3M2</a> </td><td>6-bit FP6 E3M2 (3 exponent bits, 2 mantissa bits) floating-point </td></tr>
-<tr>
-<td style="background-color:#F5F5F5"><a class="el" href="group___p_d_t_a_l_t_f_l_o_a_t.html#ga79510bbf529a08cf543edf0cdb984213">H5T_FLOAT_F4E2M1</a> </td><td>4-bit FP4 E2M1 (2 exponent bits, 1 mantissa bit) floating-point </td></tr>
-</table>
-<h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_2x_change_20versus14_6"></a>
-Release 2.0.0 versus Release 1.14.6</h3>
+<p>The <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md">Change log</a> (a.k.a. the RELEASE.txt prior to release 2.0) also lists changes made to the library, but these notes tend to be more at a more detail-oriented level. It include new features, bugs fixed, supported configuration features, platforms on which the library has been tested, and known problems. The change log files are listed in each release section and can be found at the top level of the HDF5 source code tree in the release_docs directory.</p>
+<h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_20_change_0versus14_6"></a>
+Release 2.0 versus Release 1.14.6</h3>
 <p>HDF5 version 2.0 provides a number of new C APIs and other user-visible changes in behavior in the transition from HDF5 Release 1.14.6 to Release 2.0. Some of those require the use of the API Compatibility Macros for the main library. In addition, some APIs have been removed or have had their signature change.</p>
 <ul>
 <li><span class="tt">#<a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></span> has been removed from public API calls <br  />
@@ -294,7 +278,7 @@ The hash_size parameter has not been used since early versions of HDF5 1.8, so i
 <td style="background-color:#F5F5F5">H5VLstart_lib_state() </td></tr>
 </table>
 <hr  />
-<p> Navigate back: <a class="el" href="index.html" title="notitle">Main</a> / <a class="el" href="release_specific_info.html" title="Release Specific Information">Release Specific Information</a> / <a class="el" href="rel_spec_2x.html" title="Release Specific Information for HDF5 2.x">Release Specific Information for HDF5 2.x</a> </p>
+<p> Navigate back: <a class="el" href="index.html" title="notitle">Main</a> / <a class="el" href="release_specific_info.html" title="Release Specific Information">Release Specific Information</a> / <a class="el" href="rel_spec_20.html" title="Release Specific Information for HDF5 2.0">Release Specific Information for HDF5 2.0</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

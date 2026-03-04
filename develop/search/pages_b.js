@@ -41,7 +41,7 @@ var searchData=
   ['behave_20in_20the_20absence_20of_20a_20filter_38',['How Does the HDF5 Library Behave in the Absence of a Filter',['../_comp_t_s.html#subsec_compts_notapp_behave',1,'']]],
   ['benefits_39',['Purpose and Benefits',['../_h5_f_d__u_g.html#subsec_vfd_purpose',1,'']]],
   ['between_20jni_20and_20ffm_40',['Migrating Between JNI and FFM',['../_c_b__maven_artifacts.html#subsec_maven_migration',1,'']]],
-  ['between_20releases_41',['Differences between releases',['../rel_spec_2x_change.html#subsec_rel_spec_2x_bw_releases',1,'']]],
+  ['between_20releases_41',['Differences between releases',['../rel_spec_20_change.html#subsec_rel_spec_20_bw_releases',1,'']]],
   ['between_20the_20hdf5_201_208_20and_20hdf5_201_2010_20releases_42',['What is the difference between the HDF5 1.8 and HDF5 1.10 releases ?',['../rel_spec_110.html#subsubsec_rel_spec_110_migrate_faq_1',1,'']]],
   ['binary_43',['Check the HDF5 Library’s Binary',['../_comp_t_s.html#subsubsec_compts_notapp_need_bin',1,'']]],
   ['binary_20file_44',['Output HDF5 Dataset into Binary File',['../_view_tools_convert.html#secViewToolsConvertBinary',1,'']]],
