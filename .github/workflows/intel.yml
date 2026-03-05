@@ -31,7 +31,7 @@ jobs:
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
       - name: Install oneAPI (Linux)
-        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
+        uses: fortran-lang/setup-fortran@2a1b9c55897d827a9dfeb114408f3615e53b2b72 # v1
         id: setup-fortran
         with:
           compiler: intel
@@ -80,7 +80,7 @@ jobs:
         run: choco install ninja
 
       - name: install oneAPI (Windows)
-        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
+        uses: fortran-lang/setup-fortran@2a1b9c55897d827a9dfeb114408f3615e53b2b72 # v1
         id: setup-fortran
         with:
           compiler: intel

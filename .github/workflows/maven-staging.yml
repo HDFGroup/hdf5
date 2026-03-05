@@ -642,14 +642,14 @@ jobs:
           fi
 
       - name: Upload Maven artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
           path: ${{ runner.workspace }}/maven-artifacts
           retention-days: 7
 
       - name: Upload HDF5 installation for testing
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: hdf5-install-${{ matrix.artifact-suffix }}
           path: ${{ runner.workspace }}/hdf5-install
@@ -670,7 +670,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Download all Maven artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v6
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
         with:
           pattern: maven-staging-artifacts-*
           path: ./artifacts
@@ -801,7 +801,7 @@ jobs:
           echo "Installed gtimeout: $(which gtimeout)"
 
       - name: Download Maven artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v6
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
         with:
           name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
           path: ./maven-artifacts/${{ matrix.platform }}
@@ -1298,7 +1298,7 @@ jobs:
 
       - name: Upload failure artifacts (Java Examples)
         if: steps.test-examples-unix.outputs.test-status == 'FAILED' || steps.test-examples-windows.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: java-examples-staging-failure-${{ matrix.platform }}-${{ github.run_id }}
           path: |

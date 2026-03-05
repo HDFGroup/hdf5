@@ -71,7 +71,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Download all Maven staging artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v6
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
         with:
           pattern: maven-staging-artifacts-*
           path: ./artifacts
@@ -152,7 +152,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Download HDF5 installation from workflow
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v6
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
         with:
           name: hdf5-install-linux-x86_64-jni
           path: ${{ runner.workspace }}/hdf5-install
@@ -177,7 +177,7 @@ jobs:
 
       - name: Upload test artifacts (JNI)
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: jni-test-results-${{ needs.build-maven-packages.outputs.version }}
           path: |
@@ -202,7 +202,7 @@ jobs:
           distribution: 'oracle'
 
       - name: Download HDF5 installation from workflow
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v6
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
         with:
           name: hdf5-install-linux-x86_64-ffm
           path: ${{ runner.workspace }}/hdf5-install
@@ -227,7 +227,7 @@ jobs:
 
       - name: Upload test artifacts (FFM)
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: ffm-test-results-${{ needs.build-maven-packages.outputs.version }}
           path: |

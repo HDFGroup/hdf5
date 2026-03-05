@@ -75,7 +75,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -138,7 +138,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Windows_intel)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: cl-win-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -181,7 +181,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -236,7 +236,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
             name: gcc-ubuntu-log
             path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -295,7 +295,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS_latest)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -315,7 +315,7 @@ jobs:
 
       # symlinks the compiler executables to a common location 
       - name: Setup GNU Fortran
-        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
+        uses: fortran-lang/setup-fortran@2a1b9c55897d827a9dfeb114408f3615e53b2b72 # v1
         id: setup-fortran
         with:
           compiler: gcc
@@ -359,7 +359,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (MacOS_latest)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: macos-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -388,7 +388,7 @@ jobs:
             ninjaVersion: latest
 
       - name: Install aws-c-s3 (Cached installation)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: libaws-c-s3-Release
 
@@ -421,7 +421,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux S3)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -476,7 +476,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux S3)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: s3-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -498,7 +498,7 @@ jobs:
         run: choco install ninja
 
       - name: add oneAPI to env
-        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
+        uses: fortran-lang/setup-fortran@2a1b9c55897d827a9dfeb114408f3615e53b2b72 # v1
         id: setup-fortran
         with:
           compiler: intel
@@ -526,7 +526,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows_intel)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -594,7 +594,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Windows_intel)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: intel-win-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -617,7 +617,7 @@ jobs:
           sudo apt-get install ninja-build graphviz curl
 
       - name: add oneAPI to env
-        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
+        uses: fortran-lang/setup-fortran@2a1b9c55897d827a9dfeb114408f3615e53b2b72 # v1
         id: setup-fortran
         with:
           compiler: intel
@@ -644,7 +644,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -702,7 +702,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_intel)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: intel-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -758,7 +758,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_clang)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: tgz-tarball
           path: ${{ github.workspace }}
@@ -817,7 +817,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_clang)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: clang-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log

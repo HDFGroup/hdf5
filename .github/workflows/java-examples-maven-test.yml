@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Download Maven artifacts (Linux)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: maven-staging-artifacts-linux-x86_64
           path: ./maven-artifacts
@@ -171,7 +171,7 @@ jobs:
 
       - name: Upload failure artifacts (Linux ${{ matrix.category }})
         if: steps.test-examples.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: java-examples-failure-linux-${{ matrix.category }}-${{ github.run_id }}
           path: |
@@ -193,7 +193,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Download Maven artifacts (Windows)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: maven-staging-artifacts-windows-x86_64
           path: ./maven-artifacts
@@ -291,7 +291,7 @@ jobs:
 
       - name: Upload failure artifacts (Windows ${{ matrix.category }})
         if: steps.test-examples.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: java-examples-failure-windows-${{ matrix.category }}-${{ github.run_id }}
           path: |
@@ -312,7 +312,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Download Maven artifacts (macOS aarch64)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: maven-staging-artifacts-macos-aarch64
           path: ./maven-artifacts
@@ -417,7 +417,7 @@ jobs:
 
       - name: Upload failure artifacts (macOS ${{ matrix.category }})
         if: steps.test-examples.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: java-examples-failure-macos-${{ matrix.category }}-${{ github.run_id }}
           path: |
@@ -467,7 +467,7 @@ jobs:
           echo "Test summary report generated"
 
       - name: Upload Test Summary
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: java-examples-test-summary-${{ github.run_id }}
           path: java-examples-test-summary.md

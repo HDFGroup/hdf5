@@ -247,7 +247,7 @@ jobs:
         run: tar -cvf libaws-c-s3.tar -C ${{ runner.workspace }} aws-c-s3-build
 
       - name: Save aws-c-s3 installation artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: libaws-c-s3-${{ inputs.build_mode }}
           path: libaws-c-s3.tar
