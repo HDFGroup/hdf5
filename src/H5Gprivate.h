@@ -165,7 +165,8 @@ typedef herr_t (*H5G_traverse_t)(H5G_loc_t *grp_loc /*in*/, const char *name,
                                  void *operator_data /*in,out*/, H5G_own_loc_t *own_loc /*out*/);
 
 /* Typedef for internal library object iteration/visit callback */
-typedef herr_t (*H5G_obj_iterate_t)(hid_t group, const char *name, const struct H5O_loc_t *obj_oloc, void *op_data);
+typedef herr_t (*H5G_obj_iterate_t)(hid_t group, const char *name, const struct H5O_loc_t *obj_oloc,
+                                    void *op_data);
 
 /* Describe kind of callback to make for each link */
 typedef enum H5G_link_iterate_op_type_t {

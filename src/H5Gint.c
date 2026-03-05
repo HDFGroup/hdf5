@@ -61,17 +61,17 @@ typedef struct {
 
 /* User data for recursive traversal over links from a group */
 typedef struct {
-    hid_t           gid;           /* The group ID for the starting group */
-    H5G_loc_t      *curr_loc;      /* Location of starting group */
-    H5_index_t      idx_type;      /* Index to use */
-    H5_iter_order_t order;         /* Iteration order within index */
-    H5SL_t         *visited;       /* Skip list for tracking visited nodes */
-    char           *path;          /* Path name of the link */
-    size_t          curr_path_len; /* Current length of the path in the buffer */
-    size_t          path_buf_size; /* Size of path buffer */
-    H5L_iterate2_t  link_op;       /* Application callback for link operations */
-    H5G_obj_iterate_t obj_op;      /* Library internal callback for object operations */
-    void           *op_data;       /* Application's op data */
+    hid_t             gid;           /* The group ID for the starting group */
+    H5G_loc_t        *curr_loc;      /* Location of starting group */
+    H5_index_t        idx_type;      /* Index to use */
+    H5_iter_order_t   order;         /* Iteration order within index */
+    H5SL_t           *visited;       /* Skip list for tracking visited nodes */
+    char             *path;          /* Path name of the link */
+    size_t            curr_path_len; /* Current length of the path in the buffer */
+    size_t            path_buf_size; /* Size of path buffer */
+    H5L_iterate2_t    link_op;       /* Application callback for link operations */
+    H5G_obj_iterate_t obj_op;        /* Library internal callback for object operations */
+    void             *op_data;       /* Application's op data */
 } H5G_iter_visit_ud_t;
 
 /********************/

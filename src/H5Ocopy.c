@@ -1348,7 +1348,7 @@ H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const 
 {
     H5O_copy_search_comm_dt_ud_t *udata =
         (H5O_copy_search_comm_dt_ud_t *)_udata; /* Skip list of dtypes in dest file */
-    herr_t     ret_value = H5_ITER_CONT;        /* Return value */
+    herr_t ret_value = H5_ITER_CONT;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1520,8 +1520,8 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
 
                 /* Traverse the destination file, adding committed datatypes to the skip
                  * list */
-                if (H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL, H5O__copy_search_comm_dt_cb,
-                              &udata) < 0)
+                if (H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL,
+                              H5O__copy_search_comm_dt_cb, &udata) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed");
                 cpy_info->dst_dt_list_complete = true;
             } /* end if */

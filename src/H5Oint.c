@@ -54,10 +54,10 @@
 
 /* User data for recursive traversal over objects from a group */
 typedef struct {
-    hid_t          obj_id;    /* The ID for the starting group */
-    H5O_iterate2_t op;        /* Application callback */
-    void          *op_data;   /* Application's op data */
-    unsigned       fields;    /* Selection of object info */
+    hid_t          obj_id;  /* The ID for the starting group */
+    H5O_iterate2_t op;      /* Application callback */
+    void          *op_data; /* Application's op data */
+    unsigned       fields;  /* Selection of object info */
 } H5O_iter_visit_ud_t;
 
 /********************/
@@ -2646,10 +2646,10 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
 
         /* Set up user data for visiting links */
-        udata.obj_id    = obj_id;
-        udata.op        = op;
-        udata.op_data   = op_data;
-        udata.fields    = fields;
+        udata.obj_id  = obj_id;
+        udata.op      = op;
+        udata.op_data = op_data;
+        udata.fields  = fields;
 
         /* Call internal group visitation routine */
         if ((ret_value = H5G_visit(&start_loc, ".", idx_type, order, NULL, H5O__visit_cb, &udata)) < 0)
