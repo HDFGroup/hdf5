@@ -156,7 +156,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
             indicated by the ctest command. If you wish to see more build and test information,
             add "-VV" to the ctest command. The output should show;
             100% tests passed, 0 tests failed out of 206 (all options).
-    - For more information see USING_CMake_Examples.md in the install folder.
+    - For more information see [USING_CMake_Examples.md][u17] in the install folder.
 16. Manual Testing (i.e. verifying correct test outcomes via visual inspection):
     - Inspect text documents for correct versions and names.
     - Inspect the doxygen files in the share/html directory open index.html .
@@ -230,3 +230,4 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
 [u16]: https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy
+[u17]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/USING_CMake_Examples.md
