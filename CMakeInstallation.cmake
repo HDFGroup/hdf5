@@ -223,7 +223,7 @@ if (HDF5_PACK_EXAMPLES)
   )
   install (
       FILES
-          ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
+          ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.md
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
@@ -264,32 +264,32 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   if (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
     set (release_files
-        ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.txt
+        ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.md
         ${HDF5_SOURCE_DIR}/release_docs/CHANGELOG.md
     )
     if (WIN32)
       set (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_VS.txt
+          ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_VS.md
       )
     endif ()
     if (HDF5_PACK_INSTALL_DOCS)
       set (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.txt
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.md
           ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
           ${HDF5_SOURCE_DIR}/release_docs/INSTALL
       )
       if (WIN32)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
+            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.md
         )
       endif ()
       if (CYGWIN)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
+            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.md
         )
       endif ()
       if (HDF5_ENABLE_PARALLEL)
