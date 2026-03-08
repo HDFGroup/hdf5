@@ -67,8 +67,8 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 - Java FFM bindings generated for the C library if Java 25+ available and JNI option is FALSE.
 - Enhanced Maven artifact deployment with comprehensive multi-platform support (Linux, Windows, macOS x86_64, macOS aarch64).
 - Complete Java examples Maven integration (`org.hdfgroup:hdf5-java-examples`) with cross-platform CI/CD testing.
-  
-## Acknowledgements: 
+
+## Acknowledgements:
 
 We would like to thank the many HDF5 community members who contributed to HDF5 2.0.
 
@@ -253,7 +253,7 @@ All other HDF5 library CMake options are prefixed with `HDF5_`
 ### Changed default chunk cache hash table size to 8191
 
    In order to reduce hash collisions and take advantage of modern memory capacity, the default hash table size for the chunk cache has been increased from 521 to 8191. This means the hash table will consume approximately 64 KiB per open dataset. This value can be changed with `H5Pset_cache()` or `H5Pset_chunk_cache()`. This value was chosen because it is a prime number close to 8K.
-     
+
 ### Updated default file format to 1.8
 
    By default, HDF5 will now use the 1.8 file format (`H5F_LIBVER_V18`). This provides improved performance and space efficiency, particularly with groups and links. This behavior can be overridden with `H5Pset_libver_bounds()`.
@@ -373,7 +373,7 @@ If the ROS3 VFD cannot determine an AWS region from one of these locations, an e
 
 New API functions `H5Pset_fapl_ros3_endpoint()` and `H5Pget_fapl_ros3_endpoint()` have been added for use with the ROS3 VFD. These functions set/get an alternate endpoint URL to use when opening files with the ROS3 VFD. This is useful in cases where the application needs to access files that are in a location other than the standard `s3.<region-code>.amazonaws.com`, which is what the ROS3 VFD uses when an alternate endpoint URL isn't specified. The ROS3 VFD also checks the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL` environment variables for an alternate endpoint URL if one isn't specified with `H5Pset_fapl_ros3_endpoint()`.
 
-Instructions for building the ROS3 VFD with the `aws-c-s3` library are in the [INSTALL_S3.txt](./INSTALL_S3.txt) file. The ROS3 VFD and information about the usage of the driver are described in the HDF5 user's guide.
+Instructions for building the ROS3 VFD with the `aws-c-s3` library are in the [INSTALL_S3.md](./INSTALL_S3.md) file. The ROS3 VFD and information about the usage of the driver are described in the HDF5 user's guide.
 
 ### Renamed some API decorations
 
@@ -647,7 +647,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
    Fixed a heap-based buffer overflow in H5F__accum_free caused by an integer overflow when calculating new_accum_size. Added validation in H5O__mdci_decode to detect and reject invalid values early, preventing the overflow condition.
 
    Fixes GitHub issue [#5380](https://github.com/HDFGroup/hdf5/issues/5380)
-  
+
 ### Fixed security issue [CVE-2025-7068](https://nvd.nist.gov/vuln/detail/CVE-2025-7068)
 
    Failures during the discard process on a metadata cache entry could cause the library to skip calling the callback to free the cache entry. This could result in resource leaks and issues with flushing and closing the metadata cache during file close. This has been fixed by noting errors during the discard process, but attempting to fully free a cache entry before signalling that an error has occurred.
@@ -735,7 +735,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
    Support for a new environment variable, `HDF5_PREFER_WINDOWS_CODE_PAGE`, was added in order to instruct HDF5 to prefer interpreting filenames according to the active Windows code page rather than assuming UTF-8 encoding. If this environment variable is set to "1" or "TRUE" (case-insensitive), the active code page will be preferred. If it is unset or set to "0" or "FALSE" (case-insensitive), UTF-8 will be preferred.
 
 ### Fixed an issue with caching in the ROS3 VFD
-   
+
    The ROS3 VFD uses a very simple caching mechanism that caches the first 16MiB of a file during file open and serves later reads from that cache if the offset + length falls within the cached range of bytes. Combinations of offset + length that extended exactly to the end of the cached range of bytes (for example, offset=0 and len=16777216) would end up not being served from the cache due to an incorrect range check. This has now been fixed.
 
 ### Fixed an error with `H5Fget_file_image()` with the latest file format
@@ -829,7 +829,7 @@ Added Fortran wrapper `h5fdsubfiling_get_file_mapping_f()` for the subfiling fil
 
    In addition, the `<LIB_PKG_NAME>_ROOT` environment variables must be set, where `<LIB_PKG_NAME>` is one of `ZLIB`, `ZLIBNG`, `SZIP`, `libaec`, `PLUGIN`. Note that libaec is the expected name for using the libaec library in place of original szip.
 
-   See INSTALL_CMake.txt for more detailed information.
+   See [INSTALL_CMake.md](./INSTALL_CMake.md) for more detailed information.
 
 ### Changed the zlib/szip compression find message to FATAL ERROR
 

@@ -46,7 +46,7 @@ See the \ref LBExamples for additional examples.
 
 \subsection cpp_building Building Applications
 
-Please refer to the release_docs/INSTALL_CMake.txt file under the top directory of the HDF5 source code or <a href="https://\SRCURL/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> on GitHub for information about installing, building, and testing the C++ API.
+Please refer to the release_docs/INSTALL_CMake.md file under the top directory of the HDF5 source code or <a href="https://\SRCURL/release_docs/INSTALL_CMake.md">INSTALL_CMake.md</a> on GitHub for information about installing, building, and testing the C++ API.
 
 
 <hr>

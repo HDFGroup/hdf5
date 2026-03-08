@@ -83,7 +83,7 @@ With CMake both libraries have to be explicitly enabled. The source code distrib
 Users can overwrite the defaults by using
  -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF
 with the “cmake –C” command. See the
-<a href="https://\SRCURL/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> file
+<a href="https://\SRCURL/release_docs/INSTALL_CMake.md">INSTALL_CMake.md</a> file
 under the release_docs directory in the HDF5 source distribution.
 
 If compression is not requested or found at configuration time, the compression method is not
@@ -158,7 +158,7 @@ To see how the library was configured and built, users should examine the <code>
 found in the lib directory of the HDF5 installation point and search for the lines that contain the <code>“I/O
 filters”</code> string. The <code>hdf5lib.settings</code> file is automatically generated at configuration time when
 the HDF5 Library is built with \b configure on Unix or with \b CMake on Unix and Windows, and it should
-contain the following lines: 
+contain the following lines:
 \code
     I/O filters (external): deflate(zlib),szip(encoder)
     I/O filters (internal): shuffle,fletcher32,nbit,scaleoffset
@@ -209,10 +209,10 @@ If a compression or internal filter was not configured, the corresponding lines 
 follows:
 \code
     // Define if support for deflate (zlib) filter is enabled
-    // #undef H5_HAVE_FILTER_DEFLATE 
+    // #undef H5_HAVE_FILTER_DEFLATE
 \endcode
 
-\subsubsection subsubsec_compts_notapp_need_bin Check the HDF5 Library’s Binary 
+\subsubsection subsubsec_compts_notapp_need_bin Check the HDF5 Library’s Binary
 The HDF5 Library’s binary contains summary output similar to what is stored in the
 <code>hdf5lib.settings</code> file. Users can run the Unix <code>“strings”</code> command to get information about the
 configured filters:
@@ -407,7 +407,7 @@ file, which was written with an HDF5 library that has the \b deflate filter conf
 We see output similar to \ref sec_cltools_h5dump output with the compression ratio at 163%.
 
 Now let’s compare this output with another dataset \b DS1, but this time the dataset was written with a
-program linked against an HDF5 library without the \b gzip filter present. 
+program linked against an HDF5 library without the \b gzip filter present.
 \code
     $ h5ls -vr h5ex_d_gzip.h5
     Opened "h5ex_d_gzip.h5" with sec2 driver.
@@ -489,7 +489,7 @@ The example program used to create the file discussed in this document is a modi
 program available at <a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_gzip.c">h5ex_d_gzip.c</a>. It
 was modified to have chunk dimensions not be factors of the
 dataset dimensions. Chunk dimensions were chosen for demonstration purposes only and are not
-recommended for real applications. 
+recommended for real applications.
 \code
     #include <stdlib.h>
 

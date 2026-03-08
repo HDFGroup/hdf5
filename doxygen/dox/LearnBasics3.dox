@@ -346,7 +346,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <ol>
 <li>Describe the purpose of each of the following HDF5 APIs:
 \code
-       H5A, H5D, H5E, H5F, H5G, H5T, H5Z 
+       H5A, H5D, H5E, H5F, H5G, H5T, H5Z
 \endcode
 </li>
 </ol>
@@ -469,7 +469,7 @@ Dataset: A multidimensional array of data elements, together with supporting met
 <ol>
 <li>Describe the purpose of each of the following HDF5 APIs:
 \code
-       H5A, H5D, H5E, H5F, H5G, H5T, H5Z 
+       H5A, H5D, H5E, H5F, H5G, H5T, H5Z
 \endcode
 <table>
 <tr>
@@ -697,14 +697,14 @@ is in the <code style="background-color:whitesmoke;">root</code> group. How woul
 <td>Access the group /foo and get the group ID. Access the group boo using the group ID obtained in Step 1.
 Access the dataset moo using the group ID obtained in Step 2.
 \code
-gid = H5Gopen (file_id, "/foo", 0); /* absolute path */ 
-gid1 = H5Gopen (gid, "boo", 0); /* relative path */ 
-did = H5Dopen (gid1, "moo"); /* relative path */ 
+gid = H5Gopen (file_id, "/foo", 0); /* absolute path */
+gid1 = H5Gopen (gid, "boo", 0); /* relative path */
+did = H5Dopen (gid1, "moo"); /* relative path */
 \endcode
 Access the group /foo and get the group ID. Access the dataset boo/moo with the group ID just obtained.
 \code
-gid = H5Gopen (file_id, "/foo", 0); /* absolute path */ 
-did = H5Dopen (gid, "boo/moo"); /* relative path */ 
+gid = H5Gopen (file_id, "/foo", 0); /* absolute path */
+did = H5Dopen (gid, "boo/moo"); /* relative path */
 \endcode
 Access the dataset with an absolute path.
 \code
@@ -761,7 +761,7 @@ Following are examples of compiling and running an application with the Unix com
    ./a.out
 
    h5cc -o myprog myprog.c
-   ./myprog 
+   ./myprog
 \endcode
 
 To see how the libraries linked in with a compile script were configured and built, use the
@@ -775,8 +775,9 @@ The h5cc, h5c++, and h5fc pkg-config compile scripts come with the HDF5 binary d
 libraries, and utilities) for the platforms we support. The h5c++ and h5fc utilities are ONLY present
 if the library was built with C++ and Fortran.
 
-<h4>USING_HDF5_CMake.txt:</h4>
-\verbinclude USING_HDF5_CMake.txt
+<h4>USING_HDF5_CMake.md:</h4>
+
+See <a href="https://\SRCURL/release_docs/USING_CMake_Examples.md">USING_CMake_Examples.md</a>.
 
 \section secLBCompilingVS Using Visual Studio
 
@@ -830,8 +831,8 @@ they are specified is important on Linux:
 <tr>
 <td>
 \code
-HDF5 High Level C++ APIs 
-HDF5 C++ Library  
+HDF5 High Level C++ APIs
+HDF5 C++ Library
 HDF5 High Level Fortran APIs
 HDF5 Fortran Library
 HDF5 High Level C APIs
@@ -883,8 +884,8 @@ libhdf5.lib
 <tr>
 <td>
 \code
-HDF5 High Level C++ APIs 
-HDF5 C++ Library  
+HDF5 High Level C++ APIs
+HDF5 C++ Library
 HDF5 High Level Fortran APIs
 HDF5 Fortran Library
 HDF5 High Level C APIs
@@ -971,7 +972,7 @@ or on WINDOWS you may need to add the path to the bin folder to PATH.
 \section secLBCompilingCMake Compiling an Application with CMake
 
 \subsection subsecLBCompilingCMakeScripts CMake Scripts for Building Applications
-See <a href="https://\SRCURL/release_docs/USING_CMake_Examples.txt">Using CMake to Build Applications</a> to build applications with different languages and options.
+See <a href="https://\SRCURL/release_docs/USING_CMake_Examples.md">Using CMake to Build Applications</a> to build applications with different languages and options.
 
 For a more complete script (and to help resolve issues) see the script provided with the HDF5 Examples project.
 
@@ -979,7 +980,7 @@ For a more complete script (and to help resolve issues) see the script provided 
 The installed HDF5 can be verified by compiling the HDF5 Examples project, included with the CMake built HDF5 binaries
 in the share folder or you can go to the <a href="https://\SRCURL/HDF5Examples">HDF5 Examples</a> in the HDF5 github repository.
 
-Go into the share directory and follow the instructions in <a href="https://\SRCURL/release_docs/USING_CMake_Examples.txt">Using CMake to Build Examples</a> to build the examples.
+Go into the share directory and follow the instructions in <a href="https://\SRCURL/release_docs/USING_CMake_Examples.md">Using CMake to Build Examples</a> to build the examples.
 
 In general, users must first set the HDF5_ROOT environment variable to the installed location of the CMake
 configuration files for HDF5.
@@ -997,17 +998,17 @@ For example, on Linux the following path might be set:
 \subsection subsecLBCompilingCMakeTroubless Troubleshooting CMake
 <h4>How do you use find_package with HDF5?</h4>
 To use find_package you will first need to make sure that HDF5_ROOT is set correctly. For setting this
-environment variable see the Preconditions in the USING_HDF5_CMake.txt file in the share directory.
+environment variable see the Preconditions in the <a href="https://\SRCURL/release_docs/USING_HDF5_CMake.md">USING_HDF5_CMake.md</a> file in the share directory.
 
 See the CMakeLists.txt file provided with these examples for how to use find_package with HDF5.
 
 Please note that the find_package invocation changed to require "shared" or "static":
 \code
       FIND_PACKAGE(HDF5 COMPONENTS C HL NO_MODULE REQUIRED shared)
-      FIND_PACKAGE(HDF5 COMPONENTS C HL NO_MODULE REQUIRED static)  
+      FIND_PACKAGE(HDF5 COMPONENTS C HL NO_MODULE REQUIRED static)
 \endcode
 
-Previously, the find_package invocation was: 
+Previously, the find_package invocation was:
 \code
       FIND_PACKAGE(HDF5 COMPONENTS C HL NO_MODULE REQUIRED)
 \endcode
@@ -1015,7 +1016,7 @@ Previously, the find_package invocation was:
 <h4>My platform/compiler is not included. Can I still use the configuration files?</h4>
 Yes, you can but you will have to edit the HDF5_Examples.cmake file and update the variable:
 \code
-   CTEST_CMAKE_GENERATOR  
+   CTEST_CMAKE_GENERATOR
 \endcode
 
 The generators for your platform can be seen by typing:
@@ -1034,9 +1035,9 @@ directory and re-run the build script. The output should be more verbose.
 If the error is still not clear, then check the log files. You will find those in the build directory.
 For example, on Unix the log files will be in:
 \code
-   build/Testing/Temporary/  
+   build/Testing/Temporary/
 \endcode
-There are log files for the configure, test, and build. 
+There are log files for the configure, test, and build.
 
 <hr>
 Previous Chapter \ref LBQuizAnswers
