@@ -191,6 +191,12 @@ if (BUILD_SHARED_LIBS)
       message(STATUS "  Private key: ${TEST_PRIVATE_KEY}")
       message(STATUS "  Public key: ${TEST_PUBLIC_KEY}")
     endif ()
+
+    # Create a test keystore directory containing the test public key
+    set(TEST_KEYSTORE_DIR "${CMAKE_BINARY_DIR}/test_keystore")
+    file(MAKE_DIRECTORY "${TEST_KEYSTORE_DIR}")
+    file(COPY_FILE "${TEST_PUBLIC_KEY}" "${TEST_KEYSTORE_DIR}/test_public.pem")
+    message(STATUS "Test keystore: ${TEST_KEYSTORE_DIR}")
   endif ()
 
   #-----------------------------------------------------------------------------
