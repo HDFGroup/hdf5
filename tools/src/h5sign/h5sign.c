@@ -317,35 +317,45 @@ parse_command_line(int argc, const char *const *argv)
 static EVP_PKEY *
 read_private_key(const char *keyfile)
 {
-    FILE     *fp       = NULL;
+    BIO      *bio      = NULL;
     EVP_PKEY *pkey     = NULL;
     EVP_PKEY *ret_pkey = NULL;
 
-    /* Open key file */
-    if (NULL == (fp = fopen(keyfile, "r"))) {
-        fprintf(rawerrorstream, "Error: Cannot open private key file '%s': %s\n", keyfile, strerror(errno));
-        goto done;
-    }
-
 #ifndef H5_HAVE_WIN32_API
-    /* Verify key file has secure permissions using the open descriptor to avoid TOCTOU.
-     * fstat on the fd inspects the exact file we opened, not whatever the path resolves
-     * to at check time (which could differ if a symlink is swapped between stat and fopen). */
+    /* Verify key file has secure permissions before reading.
+     * Open with fopen first for fstat, then close and use BIO for PEM read. */
     {
-        h5_stat_t key_stat;
-        if (HDfstat(fileno(fp), &key_stat) == 0) {
-            if (key_stat.st_mode & (S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) {
-                fprintf(rawerrorstream, "Error: Private key file '%s' has insecure permissions (%03o)\n",
-                        keyfile, (unsigned)(key_stat.st_mode & 0777));
-                fprintf(rawerrorstream, "       Fix with: chmod 600 '%s'\n", keyfile);
-                goto done;
+        FILE *fp = fopen(keyfile, "r");
+        if (NULL == fp) {
+            fprintf(rawerrorstream, "Error: Cannot open private key file '%s': %s\n", keyfile, strerror(errno));
+            goto done;
+        }
+        /* fstat on the fd inspects the exact file we opened, not whatever the path resolves
+         * to at check time (which could differ if a symlink is swapped between stat and fopen). */
+        {
+            h5_stat_t key_stat;
+            if (HDfstat(fileno(fp), &key_stat) == 0) {
+                if (key_stat.st_mode & (S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) {
+                    fprintf(rawerrorstream, "Error: Private key file '%s' has insecure permissions (%03o)\n",
+                            keyfile, (unsigned)(key_stat.st_mode & 0777));
+                    fprintf(rawerrorstream, "       Fix with: chmod 600 '%s'\n", keyfile);
+                    fclose(fp);
+                    goto done;
+                }
             }
         }
+        fclose(fp);
     }
 #endif
 
+    /* Open key file using BIO (avoids OPENSSL_Applink issue on Windows) */
+    if (NULL == (bio = BIO_new_file(keyfile, "r"))) {
+        fprintf(rawerrorstream, "Error: Cannot open private key file '%s'\n", keyfile);
+        goto done;
+    }
+
     /* Read private key using OpenSSL's PEM reader */
-    if (NULL == (pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL))) {
+    if (NULL == (pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL))) {
         report_openssl_error("Cannot read private key");
         fprintf(rawerrorstream, "       Key file: '%s'\n", keyfile);
         fprintf(rawerrorstream, "       Make sure the file is in PEM format.\n");
@@ -385,8 +395,8 @@ read_private_key(const char *keyfile)
     pkey     = NULL; /* Prevent cleanup */
 
 done:
-    if (fp)
-        fclose(fp);
+    if (bio)
+        BIO_free(bio);
     if (pkey)
         EVP_PKEY_free(pkey);
 

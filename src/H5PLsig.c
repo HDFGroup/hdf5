@@ -353,7 +353,7 @@ done:
 static EVP_PKEY *
 H5PL__create_public_RSA_from_file(const char *file_path)
 {
-    FILE     *key_file  = NULL;
+    BIO      *bio       = NULL;
     EVP_PKEY *pkey      = NULL;
     EVP_PKEY *ret_value = NULL;
 
@@ -361,14 +361,14 @@ H5PL__create_public_RSA_from_file(const char *file_path)
 
     assert(file_path);
 
-    /* Open key file */
-    if (NULL == (key_file = fopen(file_path, "r"))) {
+    /* Open key file using BIO (avoids OPENSSL_Applink issue on Windows) */
+    if (NULL == (bio = BIO_new_file(file_path, "r"))) {
         /* Don't error - just skip invalid files */
         goto done;
     }
 
     /* Read public key using modern EVP API */
-    if (NULL == (pkey = PEM_read_PUBKEY(key_file, NULL, NULL, NULL))) {
+    if (NULL == (pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL))) {
         /* Don't error - just skip invalid PEM files */
         goto done;
     }
@@ -386,8 +386,8 @@ H5PL__create_public_RSA_from_file(const char *file_path)
     pkey      = NULL; /* Prevent cleanup */
 
 done:
-    if (key_file)
-        fclose(key_file);
+    if (bio)
+        BIO_free(bio);
     if (pkey)
         EVP_PKEY_free(pkey);
 
