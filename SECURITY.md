@@ -3,6 +3,8 @@
 <!-- SHINE:CONTROL-SET=HDF5; VERSION=2026-02; REPO={owner}/{repo} -->
 <!-- SHINE:MAP=SHINE-HDF5-VULN-01, SHINE-HDF5-BUILD-03, SHINE-HDF5-DIST-02, SHINE-HDF5-PRIV-01 -->
 
+This document covers HDF5-specific security information. For the general HDF Group security governance framework — including vulnerability management processes, triage SLAs, disclosure timelines, build provenance standards, testing policies, and researcher safe harbor — see the [HDF Group Security & Sustainability Policies](https://ssp.hdfgroup.org/policy/).
+
 ## Security Scope
 
 HDF5 is a complex ecosystem involving core libraries, command-line tools, and a plugin architecture. To help researchers focus their efforts, we define the following scope for security reports.
@@ -62,65 +64,17 @@ We provide a minimum **6-month notice** before a Major version line enters EOL s
 
 ## Reporting a Vulnerability
 
-### Reporting Process
-
-If you discover a security vulnerability in HDF5, please report it privately. **Do not disclose it publicly.** This allows us to collaborate with you to address the issue before it is exposed to the public.
+If you discover a security vulnerability in HDF5, please report it privately. **Do not disclose it publicly.**
 
 **Primary Reporting Method:** Please report vulnerabilities via our [GitHub Security Advisory](https://github.com/HDFGroup/hdf5/security/advisories/new) page.
 
 **Alternative Contact:** If you cannot use GitHub Security Advisories, you may email us at: `security@hdfgroup.org`.
 
-### What to Include in Your Report
-To help us understand and address the vulnerability quickly, please include:
-- **Description:** A clear description of the vulnerability and its potential impact.
-- **Reproduction Steps:** Detailed steps to reproduce the issue.
-- **Affected Versions:** Which versions of HDF5 are affected.
-- **Proof of Concept:** Sample code, files (e.g., the malformed HDF5 file), or commands demonstrating the vulnerability.
-- **Proposed Fix:** If you have suggestions for fixing the issue, please include them.
+Please include a clear description, reproduction steps, affected versions, and a proof of concept (e.g., the malformed HDF5 file) if possible.
 
-## Severity, Triage, and SLAs
-
-We use CVSS v3.1 to assess severity. See our triage rubric for details. We distinguish between internal triage time and public release targets.
-
-| Severity | Internal Triage & Plan | Public Release Target |
-| :--- | :--- | :--- |
-| **Critical** | ≤ 5 Business Days | ≤ 30 Days (Expedited) |
-| **High** | ≤ 10 Business Days | ≤ 60 Days |
-| **Medium/Low** | Standard Cycle | Next Regular Release |
+For details on triage timelines, severity assessment (CVSS), disclosure deadlines, CVE issuance, and researcher safe harbor, see the [Vulnerability Management & Disclosure (PSIRT) Policy](https://ssp.hdfgroup.org/policy/Vulnerability%20Management%20%26%20Disclosure%20(PSIRT)%20Policy) and [Vulnerability Disclosure Policy](https://ssp.hdfgroup.org/policy/Vulnerability_Disclosure_Policy).
 
 <!-- SHINE:CONTROL=SHINE-HDF5-TRIAGE-02; RUBRIC=docs/security/severity-rubric.md -->
-
-### Severity Definitions (Context)
-To assist in triage, we define severity in the context of a file format library:
-*   **Critical (CVSS 9.0+):** Vulnerabilities exploitable remotely **without** user interaction (e.g., network service exposure) or issues leading to Privilege Escalation.
-*   **High (CVSS 7.0-8.9):** Remote Code Execution (RCE) or Memory Corruption that requires user interaction (e.g., a user must open a malicious HDF5 file).
-*   **Medium/Low:** Denial of Service (DoS) or minor information leaks.
-
-### Disclosure Deadline
-We adhere to a standard **90-day disclosure deadline** that applies to all severity levels. Public disclosure occurs after a fix is released OR 90 days have elapsed, whichever comes first.
-
-**Clarification on Release Targets vs. Disclosure Deadline:**
-- The "Public Release Target" times in the table above (30 days for Critical, 60 days for High) are our **goals** for releasing fixes
-- However, the **90-day cap applies to all severities** - if we cannot release a fix within our target timeframe, public disclosure will still occur at 90 days maximum
-- Example: A Critical vulnerability targets a 30-day fix, but if unforeseen issues delay the fix, disclosure will occur at 90 days even if the fix is not ready
-
-### CVE Issuance
-For vulnerabilities that meet CVE criteria (exploitable by untrusted input, memory corruption, DoS, etc.), we will:
-1.  Request a CVE identifier from GitHub's CVE Numbering Authority.
-2.  Publish CVE details to NVD, GitHub Security Advisories, and Release Notes.
-
-## Security Patch Management
-
-### Applying Security Updates
-
-1.  **Release Announcement:** Security fixes are announced through GitHub releases and security advisories.
-2.  **Version Numbering:** Security patches are generally released as patch releases (e.g., 1.14.0 → 1.14.1).
-3.  **Upgrade Recommendations:**
-    *   **Critical/High:** Upgrade immediately (or within 30 days).
-    *   **Medium/Low:** Upgrade during next maintenance window.
-
-### Emergency Security Releases
-For critical vulnerabilities actively being exploited, we may issue emergency releases outside the regular schedule. These will be clearly marked as security updates.
 
 ## Security Expectations & Limitations
 
@@ -135,36 +89,16 @@ For critical vulnerabilities actively being exploited, we may issue emergency re
 
 ## Security Development Practices
 
-### Build Provenance & Artifact Verification
-To ensure supply chain integrity:
-- **Artifact Integrity:** All binaries and source tarballs distributed via GitHub Releases are generated with associated SHA-256 checksums.
-- **Verification:** Users should verify the hash of downloaded artifacts against the checksums provided on the [GitHub Releases](https://github.com/HDFGroup/hdf5/releases) page to ensure file integrity.
+For the full HDF Group security development framework, see the [SSP Policies](https://ssp.hdfgroup.org/policy/), which cover [Secure SDLC & Code Review](https://ssp.hdfgroup.org/policy/Secure%20SDLC%20%26%20Code%20Review%20Policy), [Security Testing & Fuzzing](https://ssp.hdfgroup.org/policy/Security%20Testing%20%26%20Fuzzing%20Policy), and [Secure Build, Provenance, & Distribution](https://ssp.hdfgroup.org/policy/Secure%20Build%2C%20Provenance%2C%20%26%20Distribution%20Policy).
+
+HDF5-specific practices:
+- **Artifact Verification:** All binaries and source tarballs on [GitHub Releases](https://github.com/HDFGroup/hdf5/releases) include SHA-256 checksums. Users should verify downloaded artifacts against these checksums.
 - **SBOM:** We provide CycloneDX SBOM fragments for core, tools, and plugins where applicable.
+- **Fuzzing:** Continuous fuzzing of HDF5 file parsing and API entry points via OSS-Fuzz.
 - **Build from Source:** General build instructions are available in [release_docs/INSTALL](release_docs/INSTALL).
-
-### Testing Processes
-- **Fuzzing:** Continuous fuzzing of file parsing and API entry points (OSS-Fuzz).
-- **Static Analysis:** Automated scanning for common vulnerability patterns.
-- **Code Review:** Peer review required for all changes.
-
-## Security Researcher Recognition
-
-We value the security research community and recognize responsible disclosure.
-
-### Bug Bounty Program
-We do not currently offer a bug bounty program. However, we deeply appreciate responsible disclosure and will publicly acknowledge researchers who help improve HDF5 security.
-
-### Hall of Thanks & Safe Harbor
-Researchers who responsibly disclose vulnerabilities will be credited in our advisories and release notes.
-
-We support good-faith security research. We will not pursue legal action against researchers who:
-- Report vulnerabilities promptly and do not exploit them beyond proof-of-concept.
-- Do not perform denial of service attacks against production infrastructure.
-- Keep vulnerability details confidential until a fix is issued or the disclosure deadline passes.
-- Act in good faith and follow this policy.
 
 ---
 
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-03-09
 
 **Note:** The HDF Group maintains this project with community contributions. While we make every good faith effort to address security issues promptly, please understand that response times may vary based on available resources.
