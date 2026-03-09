@@ -90,8 +90,8 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
  *-------------------------------------------------------------------------
  */
 static herr_t
-write_with_retry(int fd, const unsigned char *data, size_t total, const char *what,
-                 const char *plugin_path, hsize_t rollback_size)
+write_with_retry(int fd, const unsigned char *data, size_t total, const char *what, const char *plugin_path,
+                 hsize_t rollback_size)
 {
     size_t written = 0;
 
@@ -102,7 +102,8 @@ write_with_retry(int fd, const unsigned char *data, size_t total, const char *wh
         } while (-1 == wr && EINTR == errno);
 
         if (wr <= 0) {
-            fprintf(rawerrorstream, "Error: Cannot write %s to '%s': %s\n", what, plugin_path, strerror(errno));
+            fprintf(rawerrorstream, "Error: Cannot write %s to '%s': %s\n", what, plugin_path,
+                    strerror(errno));
             /* Attempt rollback: restore file to its pre-signing state */
             (void)HDftruncate(fd, (HDoff_t)rollback_size);
             return FAIL;

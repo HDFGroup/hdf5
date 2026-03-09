@@ -446,10 +446,10 @@ done:
 static BOOL
 check_group_write_access(PACL pDACL, PSID pSid, ACCESS_MASK *access_out)
 {
-    TRUSTEE     trustee;
-    ACCESS_MASK access     = 0;
-    const ACCESS_MASK write_mask = FILE_WRITE_DATA | FILE_ADD_FILE |
-                                   FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER;
+    TRUSTEE           trustee;
+    ACCESS_MASK       access = 0;
+    const ACCESS_MASK write_mask =
+        FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER;
 
     BuildTrusteeWithSidA(&trustee, pSid);
     if (GetEffectiveRightsFromAclA(pDACL, &trustee, &access) != ERROR_SUCCESS) {
@@ -466,14 +466,14 @@ herr_t
 H5PL__validate_directory_permissions(const char *dir_path)
 {
     h5_stat_t                st;
-    PSECURITY_DESCRIPTOR     pSD           = NULL;
-    PACL                     pDACL         = NULL;
-    PSID                     pSidEveryone  = NULL;
-    PSID                     pSidUsers     = NULL;
-    PSID                     pSidAuthUsers = NULL;
-    SID_IDENTIFIER_AUTHORITY SIDAuthWorld  = SECURITY_WORLD_SID_AUTHORITY;
-    SID_IDENTIFIER_AUTHORITY SIDAuthNT     = SECURITY_NT_AUTHORITY;
-    DWORD                    dwRes         = 0;
+    PSECURITY_DESCRIPTOR     pSD                  = NULL;
+    PACL                     pDACL                = NULL;
+    PSID                     pSidEveryone         = NULL;
+    PSID                     pSidUsers            = NULL;
+    PSID                     pSidAuthUsers        = NULL;
+    SID_IDENTIFIER_AUTHORITY SIDAuthWorld         = SECURITY_WORLD_SID_AUTHORITY;
+    SID_IDENTIFIER_AUTHORITY SIDAuthNT            = SECURITY_NT_AUTHORITY;
+    DWORD                    dwRes                = 0;
     ACCESS_MASK              everyoneAccess       = 0;
     ACCESS_MASK              usersAccess          = 0;
     ACCESS_MASK              authUsersAccess      = 0;
@@ -1661,7 +1661,7 @@ H5PL__verify_signature_appended(const char *plugin_path)
     canonical_path = HDrealpath(plugin_path, NULL);
     if (canonical_path != NULL)
         plugin_path = canonical_path;
-    /* If realpath fails, fall through with original path */
+        /* If realpath fails, fall through with original path */
 #endif
 
     /* Check signature cache first */
