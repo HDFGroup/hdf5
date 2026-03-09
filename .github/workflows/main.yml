@@ -210,6 +210,15 @@ jobs:
         with:
           java-version: '25'
 
+      # Generate test RSA key pair for signed plugin verification (Linux only)
+      - name: Generate test RSA key pair
+        if: matrix.ostype == 'ubuntu'
+        run: |
+          openssl genrsa -out ci-test-private.pem 2048
+          openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
+          mkdir -p ci-keystore
+          cp ci-test-public.pem ci-keystore/
+
       # CONFIGURE
       - name: Configure
         run: |
@@ -241,6 +250,7 @@ jobs:
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
             -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
             -DHDF5_REQUIRE_SIGNED_PLUGINS:BOOL=${{ matrix.ostype == 'ubuntu' }} \
+            ${{ matrix.ostype == 'ubuntu' && format('-DHDF5_PLUGIN_KEYSTORE_DIR={0}/ci-keystore', github.workspace) || '' }} \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}

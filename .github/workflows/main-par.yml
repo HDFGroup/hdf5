@@ -39,6 +39,13 @@ jobs:
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
 
+      - name: Generate test RSA key pair
+        run: |
+          openssl genrsa -out ci-test-private.pem 2048
+          openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
+          mkdir -p ci-keystore
+          cp ci-test-public.pem ci-keystore/
+
       - name: Configure
         shell: bash
         run: |
@@ -62,6 +69,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_REQUIRE_SIGNED_PLUGINS:BOOL=ON \
+            -DHDF5_PLUGIN_KEYSTORE_DIR="${GITHUB_WORKSPACE}/ci-keystore" \
             $GITHUB_WORKSPACE
 
       # BUILD
