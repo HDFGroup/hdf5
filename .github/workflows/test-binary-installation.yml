@@ -12,7 +12,7 @@ on:
         description: 'Maven artifact version to test'
         type: string
         required: true
-        default: '2.0.0-SNAPSHOT'
+        default: '2.1.0-SNAPSHOT'
       maven_repository:
         description: 'Maven repository URL'
         type: string

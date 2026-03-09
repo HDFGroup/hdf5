@@ -555,19 +555,19 @@
  * so the h5o_info_t, etc. structs no longer contain native file format information
  * and the callbacks will need to match the non-deprecated, token-enabled versions.
  * <ul>
- * <li>@ref h5l.h5lget_info_f</li>
- * <li>@ref h5l.h5lget_info_by_idx_f</li>
- * <li>@ref h5l.h5literate_f</li>
- * <li>@ref h5l.h5literate_by_name_f</li>
- * <li>@ref h5o.h5oget_info_f</li>
- * <li>@ref h5o.h5oget_info_by_idx_f</li>
- * <li>@ref h5o.h5oget_info_by_name_f</li>
- * <li>@ref h5o.h5oopen_by_token_f</li>
- * <li>@ref h5o.h5ovisit_f</li>
- * <li>@ref h5o.h5ovisit_by_name_f</li>
+ * <li>\ref h5l::h5lget_info_f</li>
+ * <li>\ref h5l::h5lget_info_by_idx_f</li>
+ * <li>\ref h5l::h5literate_f</li>
+ * <li>\ref h5l::h5literate_by_name_f</li>
+ * <li>\ref h5o::h5oget_info_f</li>
+ * <li>\ref h5o::h5oget_info_by_idx_f</li>
+ * <li>\ref h5o::h5oget_info_by_name_f</li>
+ * <li>\ref h5o::h5oopen_by_token_f</li>
+ * <li>\ref h5o::h5ovisit_f</li>
+ * <li>\ref h5o::h5ovisit_by_name_f</li>
  * </ul>
  *
- * Additionally, \ref h5f.h5fis_hdf5_f was updated to use \ref H5Fis_accessible internally,
+ * Additionally, \ref h5f::h5fis_hdf5_f was updated to use \ref H5Fis_accessible internally,
  * though with the same caveat as the C++ implementation: the default fapl is
  * always passed in so arbitrary VOL connectors will only work if the default VOL
  * connector is changed via the environment variable.

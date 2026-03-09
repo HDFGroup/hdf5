@@ -1695,7 +1695,7 @@ H5Location::mount(const char *name, const H5File &child, const PropList &plist) 
     hid_t plist_id = plist.getId();
     hid_t child_id = child.getId();
 
-    // Call C routine H5Fmount to do the mouting
+    // Call C routine H5Fmount to do the mounting
     herr_t ret_value = H5Fmount(getId(), name, child_id, plist_id);
 
     // Raise exception if H5Fmount returns negative value
@@ -1723,7 +1723,7 @@ H5Location::mount(const H5std_string &name, const H5File &child, const PropList 
 void
 H5Location::unmount(const char *name) const
 {
-    // Call C routine H5Fmount to do the mouting
+    // Call C routine H5Funmount to do the unmounting
     herr_t ret_value = H5Funmount(getId(), name);
 
     // Raise exception if H5Funmount returns negative value

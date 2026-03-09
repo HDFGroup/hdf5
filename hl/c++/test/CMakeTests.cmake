@@ -44,7 +44,6 @@ else ()
 endif ()
 set_tests_properties (HL_CPP_ptableTest PROPERTIES
     DEPENDS HL_CPP_ptableTest-clear-objects
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 if ("HL_CPP_ptableTest" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (HL_CPP_ptableTest PROPERTIES DISABLED true)

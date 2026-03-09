@@ -52,6 +52,24 @@ endif ()
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (HDF5_EXPORTED_TARGETS)
+    if (HDF5_ENABLE_JNI)
+      install (
+          EXPORT ${HDF5_EXPORTED_TARGETS}_java
+          DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+          FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_java-targets.cmake
+          NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+          COMPONENT configinstall
+      )
+    endif ()
+    if (BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
+      install (
+          EXPORT ${HDF5_EXPORTED_TARGETS}_static
+          DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+          FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_static-targets.cmake
+          NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+          COMPONENT configinstall
+      )
+    endif ()
     install (
         EXPORT ${HDF5_EXPORTED_TARGETS}
         DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
@@ -61,15 +79,16 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     )
   endif ()
 
-  #-----------------------------------------------------------------------------
-  # Export all exported targets to the build tree for use by parent project
-  #-----------------------------------------------------------------------------
-  export (
-      TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
-      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
-      NAMESPACE ${HDF_PACKAGE_NAMESPACE}
-  )
 endif ()
+
+#-----------------------------------------------------------------------------
+# Export all exported targets to the build tree for use by parent project
+#-----------------------------------------------------------------------------
+export (
+    TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
+    FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+    NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+)
 
 #-----------------------------------------------------------------------------
 # Set includes needed for build
@@ -204,7 +223,7 @@ if (HDF5_PACK_EXAMPLES)
   )
   install (
       FILES
-          ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
+          ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.md
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
@@ -245,32 +264,32 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   if (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
     set (release_files
-        ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.txt
+        ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.md
         ${HDF5_SOURCE_DIR}/release_docs/CHANGELOG.md
     )
     if (WIN32)
       set (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_VS.txt
+          ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_VS.md
       )
     endif ()
     if (HDF5_PACK_INSTALL_DOCS)
       set (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.txt
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.md
           ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
           ${HDF5_SOURCE_DIR}/release_docs/INSTALL
       )
       if (WIN32)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
+            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.md
         )
       endif ()
       if (CYGWIN)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
+            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.md
         )
       endif ()
       if (HDF5_ENABLE_PARALLEL)
@@ -298,6 +317,9 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set (CPACK_PACKAGE_VERSION "${HDF5_PACKAGE_VERSION_STRING}")
   else ()
     set (CPACK_PACKAGE_VERSION "${HDF5_PACKAGE_VERSION}")
+  endif ()
+  if (CMAKE_C_COMPILER_ARCHITECTURE_ID MATCHES "ARM64")
+    set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-winarm64")
   endif ()
   set (CPACK_PACKAGE_VERSION_MAJOR "${HDF5_PACKAGE_VERSION_MAJOR}")
   set (CPACK_PACKAGE_VERSION_MINOR "${HDF5_PACKAGE_VERSION_MINOR}")

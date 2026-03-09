@@ -92,7 +92,6 @@ macro (ADD_VFD_H5DUMP_TEST vfdname resultfile resultcode)
     )
     set_tests_properties (H5DUMP_VFD-${vfdname}-${resultfile}-h5dump PROPERTIES
         TIMEOUT ${CTEST_SHORT_TIMEOUT}
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if ("H5DUMP_VFD-${vfdname}-${resultfile}-h5dump" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5DUMP_VFD-${vfdname}-${resultfile}-h5dump PROPERTIES DISABLED true)

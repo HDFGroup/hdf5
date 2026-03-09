@@ -94,20 +94,20 @@ Following are the new APIs introduced in HDF5-1.14.3.
 \li #H5Pget_actual_selection_io_mode - Retrieves the type(s) of I/O performed on raw data
 
 <h4>In the Fortran Interface</h4>
-\li #h5lib.h5get_free_list_sizes_f - Gets the current size of the free lists used to manage memory
-\li #h5d.h5dwrite_chunk_f - Writes a raw data chunk from a buffer directly to a dataset in a file
-\li #h5d.h5dread_chunk_f - Reads a raw data chunk directly from a dataset in a file into a buffer
-\li #h5f.h5fget_info_f - Retrieves global file information
-\li #h5l.h5lvisit_f - Recursively visits all links starting from a specified group
-\li #h5l.h5lvisit_by_name_f - Recursively visits all links starting from a specified group
-\li #h5p.h5pget_no_selection_io_cause_f - Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call
-\li #h5p.h5pget_mpio_no_collective_cause_f - Retrieves local and global causes that broke collective I/O on the last parallel I/O call
-\li #h5s.h5sselect_shape_same_f - Checks if two selections are the same shape
-\li #h5s.h5sselect_intersect_block_f - Checks if current selection intersects with a block
-\li #h5p.h5pget_file_space_page_size_f - Gets the file space page size for a file creation property list
-\li #h5p.h5pset_file_space_page_size_f - Sets the file space page size for a file creation property list
-\li #h5p.h5pget_file_space_strategy_f - Gets the file space handling strategy and persisting free-space values for a file creation property list
-\li #h5p.h5pset_file_space_strategy_f - Sets the file space handling strategy and persisting free-space values for a file creation property list
+\li `h5get_free_list_sizes_f` - Gets the current size of the free lists used to manage memory
+\li \ref h5d::h5dwrite_chunk_f - Writes a raw data chunk from a buffer directly to a dataset in a file
+\li \ref h5d::h5dread_chunk_f - Reads a raw data chunk directly from a dataset in a file into a buffer
+\li `h5fget_info_f` - Retrieves global file information
+\li \ref h5l::h5lvisit_f - Recursively visits all links starting from a specified group
+\li `h5lvisit_by_name_f` - Recursively visits all links starting from a specified group
+\li \ref h5p::h5pget_no_selection_io_cause_f - Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call
+\li \ref h5p::h5pget_mpio_no_collective_cause_f - Retrieves local and global causes that broke collective I/O on the last parallel I/O call
+\li `h5sselect_shape_same_f` - Checks if two selections are the same shape
+\li `h5sselect_intersect_block_f` - Checks if current selection intersects with a block
+\li \ref h5p::h5pget_file_space_page_size_f - Gets the file space page size for a file creation property list
+\li \ref h5p::h5pset_file_space_page_size_f - Sets the file space page size for a file creation property list
+\li \ref h5p::h5pget_file_space_strategy_f - Gets the file space handling strategy and persisting free-space values for a file creation property list
+\li `h5pset_file_space_strategy_f` - Sets the file space handling strategy and persisting free-space values for a file creation property list
 
 In addition, there are other new Fortran functions including the Fortran async APIs
 and the Fortran VOL capability definitions.
@@ -148,10 +148,10 @@ Following are the new APIs introduced in HDF5-1.14.1.
 \li #H5Pset_selection_io - Sets the selection I/O mode
 
 <h4>In the Fortran Interface</h4>
-\li #h5p.h5pget_modify_write_buf_f - Retrieves the "modify write buffer" property
-\li #h5p.h5pget_selection_io_f - Retrieves the selection I/O mode
-\li #h5p.h5pset_modify_write_buf_f - Allows the library to modify the contents of the write buffer
-\li #h5p.h5pset_selection_io_f - Sets the selection I/O mode
+\li \ref h5p::h5pget_modify_write_buf_f - Retrieves the "modify write buffer" property
+\li \ref h5p::h5pget_selection_io_f - Retrieves the selection I/O mode
+\li \ref h5p::h5pset_modify_write_buf_f - Allows the library to modify the contents of the write buffer
+\li \ref h5p::h5pset_selection_io_f - Sets the selection I/O mode
  
 
 \subsection subsec_rel_spec_114_change_0versus12_2 Release 1.14.0 versus Release 1.12.2

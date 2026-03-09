@@ -3,10 +3,10 @@
  * Navigate back: \ref index "Main"
  * <hr>
 
-\ref rel_spec_20
-\li \ref sec_rel_spec_20_feat
-\li \ref sec_rel_spec_20_change
-\li \ref sec_rel_spec_20_migrate
+\ref rel_spec_2x
+\li \ref sec_rel_spec_2x_feat
+\li \ref sec_rel_spec_2x_change
+\li \ref sec_rel_spec_2x_migrate
 
 \ref rel_spec_114
 \li \ref sec_rel_spec_114_feat

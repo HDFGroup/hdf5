@@ -55,7 +55,7 @@ it wrong could result in corrupt files or crashed readers, we decided to add
 a file locking scheme to help users get it right. Since this would also help
 prevent harmful accesses when SWMR is not in use, we decided to switch the
 file locking scheme on by default. This scheme has been carried forward into
-HDF5 1.12 and 1.14 (soon to be 2.0).
+HDF5 1.12 and later versions.
 
 Note that the current implementation of SWMR is only useful for appending to chunked
 datasets. Creating file objects like groups and datasets is not supported

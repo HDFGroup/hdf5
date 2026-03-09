@@ -25,7 +25,7 @@
 #include H5_ZLIB_HEADER /* "zlib.h" */
 #endif
 
-#if !defined(WIN32) && !defined(__MINGW32__)
+#if !defined(WIN32) && !defined(__MINGW32__) && !defined(_WIN32)
 
 #include <errno.h>
 #include <fcntl.h>

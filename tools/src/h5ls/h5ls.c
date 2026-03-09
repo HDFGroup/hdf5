@@ -183,7 +183,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "   -d, --data      Print the values of datasets\n");
     PRINTVALSTREAM(rawoutstream, "   --enable-error-stack\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                   Prints messages from the HDF5 error stack as they occur.\n");
+                   "                   Print messages from the HDF5 error stack as they occur.\n");
     PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
     PRINTVALSTREAM(rawoutstream,
                    "                   Follow symbolic links (soft links and external links)\n");

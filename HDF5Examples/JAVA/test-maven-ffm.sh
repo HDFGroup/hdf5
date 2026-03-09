@@ -11,8 +11,6 @@
 #   ./test-maven-ffm.sh 2.0.1-SNAPSHOT https://maven.pkg.github.com/HDFGroup/hdf5 /tmp/maven-test-ffm
 #
 
-set -e  # Exit on error
-
 # Determine source directory (where this script lives)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

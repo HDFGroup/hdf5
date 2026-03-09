@@ -34,20 +34,18 @@ jobs:
 #      - name: Verify Wine64 installation
 #        run: wine64 --version
 
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install MinGW64 Cross-Compiler
         run: |
           sudo apt update
           sudo apt-get install -y mingw-w64
           sudo apt-get install gfortran-mingw-w64-x86-64-win32
-
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.13.2"
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CMAKE CONFIGURE
       - name: CMake Configure
@@ -58,6 +56,7 @@ jobs:
              -G Ninja \
              --log-level=VERBOSE \
              -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/mingw64.cmake \
+             -DCMAKE_CROSSCOMPILING_EMULATOR:PATH=$GITHUB_WORKSPACE/config/toolchain/mingw-w64-x86-64-wine.sh \
              -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
              -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
              -DHDF5_BUILD_DOC:BOOL=ON \
@@ -99,7 +98,7 @@ jobs:
                ls -l ${{ runner.workspace }}/build
 
       - name: Save published binary (linux)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: tgz-ubuntu-2404_mingw64-${{ inputs.build_mode }}-binary
           path: ${{ runner.workspace }}/build/HDF5-*-win64.zip

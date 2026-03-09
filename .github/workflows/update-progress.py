@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-GitHub Project Release Blocker Progress Tracker
-Fetches release blocker issues from the HDF5 project and calculates completion percentage.
+GitHub Project Priority Issue Progress Tracker
+Fetches critical and high priority issues from the HDF5 project and calculates completion percentage.
 """
 
 import os
@@ -22,13 +22,12 @@ class ProjectDataError(Exception):
 
 # Configuration: Expected field names in GitHub Project
 # Update these if the project field names change
-FIELD_RELEASE_GATING = "Release gating"
+FIELD_PRIORITY = "Priority"
 FIELD_STATUS = "Status"
 
-# Expected values for Release gating field
-VALUE_RELEASE_BLOCKER = "Release_Blocker"
-VALUE_RELEASE_MUST_DO = "Release_Must Do"
-VALUE_RELEASE_NICE_TO_HAVE = "Release_Nice to Have"
+# Expected values for Priority field
+VALUE_CRITICAL = "P0 - Critical"
+VALUE_HIGH = "P1 - High"
 
 # Expected value for Status field when an item is completed
 VALUE_STATUS_DONE = "Done"
@@ -39,7 +38,7 @@ DEFAULT_MILESTONE_FILTER = None  # Will be set from environment or H5public.h
 
 
 class GitHubProjectTracker:
-    """Tracks release blocker progress in GitHub projects."""
+    """Tracks priority issue progress in GitHub projects."""
 
     def __init__(self, token: str, owner: str, project_number: int, milestone_filter: Optional[str] = None):
         self.api_url = "https://api.github.com/graphql"
@@ -126,22 +125,20 @@ class GitHubProjectTracker:
     
     def fetch_release_blocker_stats(self) -> Dict[str, int]:
         """
-        Fetches release blocker, must-do, and nice-to-have statistics from the GitHub project.
+        Fetches critical and high priority issue statistics from the GitHub project.
 
         Returns:
             Dict with 'total', 'done', 'percentage', 'blocker_total', 'blocker_done',
-            'mustdo_total', 'mustdo_done', 'nicetohave_total', 'nicetohave_done' keys
+            'mustdo_total', 'mustdo_done' keys
         """
         blocker_total = 0
         blocker_done = 0
         mustdo_total = 0
         mustdo_done = 0
-        nicetohave_total = 0
-        nicetohave_done = 0
         cursor = None
 
         # Track if we've seen the expected fields at least once
-        seen_release_gating = False
+        seen_priority = False
         seen_status = False
 
         while True:
@@ -189,26 +186,22 @@ class GitHubProjectTracker:
                 fields = self._parse_item_fields(item)
 
                 # Validate expected fields exist
-                if FIELD_RELEASE_GATING in fields:
-                    seen_release_gating = True
+                if FIELD_PRIORITY in fields:
+                    seen_priority = True
                 if FIELD_STATUS in fields:
                     seen_status = True
 
-                release_gating = fields.get(FIELD_RELEASE_GATING, "")
+                priority = fields.get(FIELD_PRIORITY, "")
                 status = fields.get(FIELD_STATUS, "")
 
-                if release_gating == VALUE_RELEASE_BLOCKER:
+                if priority == VALUE_CRITICAL:
                     blocker_total += 1
                     if status == VALUE_STATUS_DONE:
                         blocker_done += 1
-                elif release_gating == VALUE_RELEASE_MUST_DO:
+                elif priority == VALUE_HIGH:
                     mustdo_total += 1
                     if status == VALUE_STATUS_DONE:
                         mustdo_done += 1
-                elif release_gating == VALUE_RELEASE_NICE_TO_HAVE:
-                    nicetohave_total += 1
-                    if status == VALUE_STATUS_DONE:
-                        nicetohave_done += 1
 
             # Check for next page
             page_info = items.get("pageInfo", {})
@@ -217,18 +210,18 @@ class GitHubProjectTracker:
             cursor = page_info.get("endCursor")
 
         # Validate that expected fields were found - FAIL HARD if missing
-        # This prevents false positives where field renames would cause 0 blockers to be reported
-        if not seen_release_gating:
-            print(f"ERROR: Critical field '{FIELD_RELEASE_GATING}' not found in any project items.",
+        # This prevents false positives where field renames would cause 0 items to be reported
+        if not seen_priority:
+            print(f"ERROR: Critical field '{FIELD_PRIORITY}' not found in any project items.",
                   file=sys.stderr)
-            print("This field is required to identify release blockers and must-do items.",
+            print("This field is required to identify critical and high priority items.",
                   file=sys.stderr)
             print("Possible causes:", file=sys.stderr)
-            print(f"  1. Field '{FIELD_RELEASE_GATING}' was renamed in the project", file=sys.stderr)
+            print(f"  1. Field '{FIELD_PRIORITY}' was renamed in the project", file=sys.stderr)
             print("  2. Project structure changed", file=sys.stderr)
             print("  3. Project is empty or inaccessible", file=sys.stderr)
-            print("Action required: Update FIELD_RELEASE_GATING constant in this script.", file=sys.stderr)
-            raise ProjectFieldMissingError(f"Critical field '{FIELD_RELEASE_GATING}' not found")
+            print("Action required: Update FIELD_PRIORITY constant in this script.", file=sys.stderr)
+            raise ProjectFieldMissingError(f"Critical field '{FIELD_PRIORITY}' not found")
 
         if not seen_status:
             print(f"ERROR: Critical field '{FIELD_STATUS}' not found in any project items.",
@@ -248,19 +241,19 @@ class GitHubProjectTracker:
         # If total is 0, either the project is empty or field matching failed
         if total == 0:
             if self.milestone_filter:
-                print(f"INFO: No release blocker or must-do items found for milestone '{self.milestone_filter}'.", file=sys.stderr)
+                print(f"INFO: No critical or high priority items found for milestone '{self.milestone_filter}'.", file=sys.stderr)
                 print("This may be expected if no items exist for this milestone yet.", file=sys.stderr)
                 # Don't fail - return N/A indicators when filtering by milestone with no items
                 percentage = -1.0  # Use -1 to indicate N/A
             else:
-                print("ERROR: No release blocker or must-do items found (total=0).", file=sys.stderr)
+                print("ERROR: No critical or high priority items found (total=0).", file=sys.stderr)
                 print("This likely indicates:", file=sys.stderr)
-                print(f"  1. The '{FIELD_RELEASE_GATING}' field values changed", file=sys.stderr)
-                print(f"     Expected values: '{VALUE_RELEASE_BLOCKER}' or '{VALUE_RELEASE_MUST_DO}'", file=sys.stderr)
+                print(f"  1. The '{FIELD_PRIORITY}' field values changed", file=sys.stderr)
+                print(f"     Expected values: '{VALUE_CRITICAL}' or '{VALUE_HIGH}'", file=sys.stderr)
                 print("  2. Project has no items with these field values", file=sys.stderr)
                 print("  3. Field matching logic needs to be updated", file=sys.stderr)
                 print("Refusing to report 0% or 100% with no items to prevent false positives.", file=sys.stderr)
-                raise ProjectDataError("No release items found - refusing to report false completion status")
+                raise ProjectDataError("No priority items found - refusing to report false completion status")
         else:
             percentage = round((done / total * 100), 1)
 
@@ -271,9 +264,7 @@ class GitHubProjectTracker:
             'blocker_total': blocker_total,
             'blocker_done': blocker_done,
             'mustdo_total': mustdo_total,
-            'mustdo_done': mustdo_done,
-            'nicetohave_total': nicetohave_total,
-            'nicetohave_done': nicetohave_done
+            'mustdo_done': mustdo_done
         }
 
 
@@ -346,8 +337,6 @@ def main():
                 f.write(f"blocker_done={stats['blocker_done']}\n")
                 f.write(f"mustdo_total={stats['mustdo_total']}\n")
                 f.write(f"mustdo_done={stats['mustdo_done']}\n")
-                f.write(f"nicetohave_total={stats['nicetohave_total']}\n")
-                f.write(f"nicetohave_done={stats['nicetohave_done']}\n")
                 f.write(f"version={MILESTONE_FILTER or 'all'}\n")
 
         # Also output to stdout for local testing
@@ -356,14 +345,11 @@ def main():
         print(f"blocker_total={stats['blocker_total']}")
         print(f"mustdo_done={stats['mustdo_done']}")
         print(f"mustdo_total={stats['mustdo_total']}")
-        print(f"nicetohave_done={stats['nicetohave_done']}")
-        print(f"nicetohave_total={stats['nicetohave_total']}")
         print(f"version={MILESTONE_FILTER or 'all'}")
         print(f"Calculated progress: {stats['percentage']}%")
         print(f"Done / Total: {stats['done']} / {stats['total']}")
-        print(f"Blockers: {stats['blocker_done']} / {stats['blocker_total']}")
-        print(f"Must Do: {stats['mustdo_done']} / {stats['mustdo_total']}")
-        print(f"Nice to Have: {stats['nicetohave_done']} / {stats['nicetohave_total']}")
+        print(f"Critical Priority: {stats['blocker_done']} / {stats['blocker_total']}")
+        print(f"High Priority: {stats['mustdo_done']} / {stats['mustdo_total']}")
         if MILESTONE_FILTER:
             print(f"Milestone filter: {MILESTONE_FILTER}")
         

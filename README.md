@@ -3,7 +3,7 @@
 ![HDF5 Logo][u3]
 
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.17808614-blue)](https://doi.org/10.5281/zenodo.17808614)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.17808558-blue)](https://doi.org/10.5281/zenodo.17808558)
 [![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/call-workflows.yml?branch=develop&label=CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/call-workflows.yml?query=branch%3Adevelop)
 
 </div>
@@ -23,9 +23,9 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 ## Quick Start
 
-- **New to HDF5?** Start with the [INSTALL](release_docs/INSTALL) guide for compilation and installation instructions.
+- **New to HDF5?** Start with the [INSTALL.md](release_docs/INSTALL.md) guide for compilation and installation instructions.
 
-- **Ready to build?** See [INSTALL_CMake.txt](release_docs/INSTALL_CMake.txt) for CMake-based builds.
+- **Ready to build?** See [INSTALL_CMake.md](release_docs/INSTALL_CMake.md) for CMake-based builds.
 
 - **Running on HPC?** Check out [README_HPC.md](release_docs/README_HPC.md) for parallel HDF5 configuration.
 
@@ -58,13 +58,13 @@ Several files in the [release_docs/][u4] directory provide platform-specific det
 
 | File | Description |
 |------|-------------|
-| [INSTALL](release_docs/INSTALL) | General compilation and installation instructions (start here) |
-| [INSTALL_CMake.txt](release_docs/INSTALL_CMake.txt) | Building with CMake |
+| [INSTALL](release_docs/INSTALL.md) | General compilation and installation instructions (start here) |
+| [INSTALL_CMake.md](release_docs/INSTALL_CMake.md) | Building with CMake |
 | [README_HPC.md](release_docs/README_HPC.md) | Building and configuring Parallel HDF5 on HPC systems |
-| [INSTALL_Windows.txt](release_docs/INSTALL_Windows.txt) | Windows installation |
-| [INSTALL_Cygwin.txt](release_docs/INSTALL_Cygwin.txt) | Cygwin installation |
-| [USING_HDF5_CMake.txt](release_docs/USING_HDF5_CMake.txt) | Building HDF5 applications with CMake |
-| [USING_CMake_Examples.txt](release_docs/USING_CMake_Examples.txt) | Building and testing HDF5 examples with CMake |
+| [INSTALL_Windows.md](release_docs/INSTALL_Windows.md) | Windows installation |
+| [INSTALL_Cygwin.md](release_docs/INSTALL_Cygwin.md) | Cygwin installation |
+| [USING_HDF5_CMake.md](release_docs/USING_HDF5_CMake.md) | Building HDF5 applications with CMake |
+| [USING_CMake_Examples.md](release_docs/USING_CMake_Examples.md) | Building and testing HDF5 examples with CMake |
 
 ## Help and Support
 
@@ -94,13 +94,11 @@ least one annual release for each maintenance branch.
 
 ### Release Progress
 
-[![Release Blockers](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-blocker-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+[![Critical Priority](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-blocker-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
-[![Release Must Do](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-mustdo-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+[![High Priority](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-mustdo-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
-[![Release Nice to Have](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-nicetohave-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
-
-The badges above show the current progress of **release-blocking**, **must-do**, and **nice-to-have** issues with colors that reflect completion status:
+The badges above show the current progress of **critical** and **high priority** issues with colors that reflect completion status:
 
 - 🟢 **Green (90%+)**: Readying for Deployment - most issues completed
 - 🟡 **Yellow (60-89%)**: Nearing Completion - on track for release
@@ -142,7 +140,7 @@ For detailed contribution guidelines, please contact us through the [Help Desk](
 
 If you use HDF5 in your research, please cite it. This repository includes a [`CITATION.cff`](CITATION.cff) file containing standard citation metadata.
 
-**Quick DOI:** [10.5281/zenodo.17808614](https://doi.org/10.5281/zenodo.17808614)
+**Quick DOI:** [10.5281/zenodo.17808558](https://doi.org/10.5281/zenodo.17808558)
 
 ## Build Status
 

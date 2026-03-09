@@ -512,7 +512,6 @@ macro (ADD_HELP_TEST testname resultcode)
   endif ()
   set_tests_properties (H5DUMP-${testname} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
   )
   if ("H5DUMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP-${testname} PROPERTIES DISABLED true)
@@ -707,7 +706,7 @@ macro (ADD_H5_TEST testname)
     if (${vol_idx} EQUAL 0)
       set (vol "native")
       set (vol_prefix "")
-      set (vol_env "${CROSSCOMPILING_PATH}")
+      set (vol_env "")
       set (workdir "${PROJECT_BINARY_DIR}/testfiles/std")
     else ()
       # An external VOL connector
@@ -754,7 +753,6 @@ macro (ADD_H5_TEST testname)
       if (${ARG_RESULT_CODE})
         set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}
             PROPERTIES WILL_FAIL "true"
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
       endif ()
     else ()
@@ -807,7 +805,6 @@ macro (ADD_H5_TEST testname)
 
       set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname}-output-cmp PROPERTIES
           DEPENDS H5DUMP-${ctest_testname}
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
           WORKING_DIRECTORY "${workdir}"
       )
 
@@ -866,7 +863,6 @@ macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     )
     set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES
         DEPENDS H5DUMP-IMPORT-${resultfile}-clear-objects
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-IMPORT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -875,7 +871,6 @@ macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
     set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES
         DEPENDS H5DUMP-IMPORT-${resultfile}
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-IMPORT-h5import-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -884,7 +879,6 @@ macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
     set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES
         DEPENDS H5DUMP-IMPORT-h5import-${resultfile}
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-IMPORT-h5diff-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -920,7 +914,6 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5DUMP_UD-${testname}-${resultfile} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -956,7 +949,7 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   endif ()
   set_tests_properties (H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
       FIXTURES_REQUIRED h5dump_s3_proxy
-      ENVIRONMENT "${h5dump_s3tests_env};${CROSSCOMPILING_PATH}"
+      ENVIRONMENT "${h5dump_s3tests_env}"
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
   )
   if ("H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

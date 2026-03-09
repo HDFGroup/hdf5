@@ -1,9 +1,9 @@
-/** \page rel_spec_20_change Release Specific Information for HDF5 2.0
+/** \page rel_spec_2x_change Release Specific Information for HDF5 2.x
  *
- * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_20
+ * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_2x
  * <hr>
 
-\section sec_rel_spec_20_change Software Changes from Release to Release in HDF5 2.0
+\section sec_rel_spec_2x_change Software Changes from Release to Release in HDF5 2.x
 
 This page provides information on the changes that a maintenance developer needs to
 be aware of between successive releases of HDF5, such as:
@@ -12,18 +12,56 @@ be aware of between successive releases of HDF5, such as:
 \li Certain types of changes in configuration or build processes
 \li Note that bug fixes and performance enhancements in the C library are automatically picked up by the C++, Fortran, and Java libraries.
 
-\subsection subsec_rel_spec_20_change_compat API Compatibility
-See \ref api-compat-macros for details on using HDF5 version 2.0 with previous releases.
-\li <a href="https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz">Compatibility reports for Release 2.0 versus Release 1.14.6</a>
+\subsection subsec_rel_spec_2x_change_compat API Compatibility
+See \ref api-compat-macros for details of HDF5 versions when considering upgrading to the later HDF5 release to take advantage of the library features and enhancements.
 
-\subsection subsec_rel_spec_20_bw_releases Differences between releases
-\li \ref subsubsec_rel_spec_20_change_0versus14_6
+\li <a href="https://\RELURL/2.1.0/downloads/hdf5-2.1.0.html.abi.reports.tar.gz">Compatibility reports for Release 2.1.0 versus Release 2.0.0</a>
+\li <a href="https://\RELURL/v2_0/v2_0_0/downloads/hdf5-2.0.0.html.abi.reports.tar.gz">Compatibility reports for Release 2.0.0 versus Release 1.14.6</a>
 
-The <a href="https://\SRCURL/release_docs/CHANGELOG.md">Change log</a> (a.k.a. the RELEASE.txt prior to release 2.0) also lists changes made to the library, but these notes tend to be more at a more detail-oriented level. It include new features, bugs fixed, supported configuration features, platforms on which the library has been tested, and known problems.
-The change log files are listed in each release section and can be found at the top level of
+\subsection subsec_rel_spec_2x_bw_releases Differences between releases
+\li \ref subsubsec_rel_spec_2x_change_22versus21
+\li \ref subsubsec_rel_spec_2x_change_21versus20
+\li \ref subsubsec_rel_spec_2x_change_20versus14_6
+
+The CHANGELOG.md file (a.k.a. RELEASE.txt prior to release 2.x) also lists changes made to the library, but these notes tend to be more at a more detail-oriented level. It includes new features, bugs fixed, supported configuration features, platforms on which the library has been tested, and known problems.
+The CHANGELOG.md files are listed in each release section and can be found at the top level of
 the HDF5 source code tree in the release_docs directory.
 
-\subsubsection subsubsec_rel_spec_20_change_0versus14_6 Release 2.0 versus Release 1.14.6
+\subsubsection subsubsec_rel_spec_2x_change_22versus21 Release 2.2.0 versus Release 2.1.0
+
+\subsubsection subsubsec_rel_spec_2x_change_21versus20 Release 2.1.0 versus Release 2.0.0
+
+List of new public APIs/Macros
+
+<table>
+<tr><th>Function/Constant</th><th>Description</th></tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_FLOAT_F6E2M3
+</td>
+<td>
+6-bit FP6 E2M3 (2 exponent bits, 3 mantissa bits) floating-point
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_FLOAT_F6E3M2
+</td>
+<td>
+6-bit FP6 E3M2 (3 exponent bits, 2 mantissa bits) floating-point
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+#H5T_FLOAT_F4E2M1
+</td>
+<td>
+4-bit FP4 E2M1 (2 exponent bits, 1 mantissa bit) floating-point
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_rel_spec_2x_change_20versus14_6 Release 2.0.0 versus Release 1.14.6
 
 HDF5 version 2.0 provides a number of new C APIs and other user-visible changes in behavior in the transition from HDF5 Release 1.14.6 to Release 2.0.  Some of those require the use of the API Compatibility Macros for the main library. In addition, some APIs have been removed or have had their signature change.
 
@@ -337,5 +375,5 @@ H5VLstart_lib_state()
 
  *
  * <hr>
- * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_20
+ * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_2x
 */
