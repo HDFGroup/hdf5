@@ -131,12 +131,14 @@ jobs:
     - name: Build
       run: cmake --build build --parallel 4 --config ${{ matrix.config.build_type }}
 
-    - name: Copy OpenSSL DLLs to build directory (Windows)
+    - name: Copy OpenSSL DLLs and secure keystore (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
         Copy-Item "C:\Program Files\OpenSSL\bin\libcrypto-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
         Copy-Item "C:\Program Files\OpenSSL\bin\libssl-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
+        # Restrict test keystore ACLs so permission check passes
+        icacls build\test_keystore /inheritance:r /grant "${env:USERNAME}:(OI)(CI)F" /grant "Administrators:(OI)(CI)F"
 
     - name: Run Tests
       shell: bash
