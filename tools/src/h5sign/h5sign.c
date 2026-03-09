@@ -327,7 +327,8 @@ read_private_key(const char *keyfile)
     {
         FILE *fp = fopen(keyfile, "r");
         if (NULL == fp) {
-            fprintf(rawerrorstream, "Error: Cannot open private key file '%s': %s\n", keyfile, strerror(errno));
+            fprintf(rawerrorstream, "Error: Cannot open private key file '%s': %s\n", keyfile,
+                    strerror(errno));
             goto done;
         }
         /* fstat on the fd inspects the exact file we opened, not whatever the path resolves
