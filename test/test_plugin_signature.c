@@ -317,7 +317,7 @@ generate_rsa_keypair(int bits, const char *private_path, const char *public_path
  *-------------------------------------------------------------------------
  */
 static char *
-create_keystore_directory(const char *base_dir, const char *dir_name, mode_t permissions)
+create_keystore_directory(const char *base_dir, const char *dir_name, unsigned permissions)
 {
     char  full_path[1024];
     char *ret_value = NULL;
