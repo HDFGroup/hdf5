@@ -128,21 +128,6 @@ jobs:
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ runner.os == 'Linux' }} \
           $EXTRA_FLAGS
 
-    - name: Copy private key to build directory (Unix)
-      if: runner.os != 'Windows'
-      run: |
-        cp ci-test-private.pem build/private.pem
-        mkdir -p build/test
-        cp ci-test-private.pem build/test/private.pem
-
-    - name: Copy private key to build directory (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        Copy-Item ci-test-private.pem build/private.pem
-        New-Item -ItemType Directory -Force -Path build/test
-        Copy-Item ci-test-private.pem build/test/private.pem
-
     - name: Build
       run: cmake --build build --parallel 4 --config ${{ matrix.config.build_type }}
 

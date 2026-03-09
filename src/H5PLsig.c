@@ -45,6 +45,10 @@
 #include <sddl.h>
 #include <aclapi.h>
 #include <shlobj.h>
+/* S_ISDIR may not be defined on Windows */
+#ifndef S_ISDIR
+#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
+#endif
 #endif
 
 /*******************/
