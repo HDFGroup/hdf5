@@ -289,7 +289,11 @@ generate_rsa_keypair(int bits, const char *private_path, const char *public_path
     int  result;
 
     /* Generate private key */
+#ifdef H5_HAVE_WIN32_API
+    snprintf(cmd, sizeof(cmd), "openssl genrsa -out %s %d >NUL 2>&1", private_path, bits);
+#else
     snprintf(cmd, sizeof(cmd), "openssl genrsa -out %s %d 2>&1 >/dev/null", private_path, bits);
+#endif
     result = system(cmd);
     if (result != 0) {
         fprintf(stderr, "Failed to generate RSA-%d private key: %s\n", bits, private_path);
@@ -297,8 +301,12 @@ generate_rsa_keypair(int bits, const char *private_path, const char *public_path
     }
 
     /* Extract public key */
+#ifdef H5_HAVE_WIN32_API
+    snprintf(cmd, sizeof(cmd), "openssl rsa -in %s -pubout -out %s >NUL 2>&1", private_path, public_path);
+#else
     snprintf(cmd, sizeof(cmd), "openssl rsa -in %s -pubout -out %s 2>&1 >/dev/null", private_path,
              public_path);
+#endif
     result = system(cmd);
     if (result != 0) {
         fprintf(stderr, "Failed to extract RSA-%d public key: %s\n", bits, public_path);
@@ -419,10 +427,16 @@ create_corrupted_pem(const char *path, corruption_type_t type)
         case PEM_CORRUPT_WRONG_KEY_TYPE: {
             /* Generate ECDSA key instead of RSA */
             char cmd[2048];
+#ifdef H5_HAVE_WIN32_API
+            snprintf(cmd, sizeof(cmd),
+                     "openssl ecparam -genkey -name prime256v1 -noout | openssl ec -pubout -out %s >NUL 2>&1",
+                     path);
+#else
             snprintf(cmd, sizeof(cmd),
                      "openssl ecparam -genkey -name prime256v1 -noout | openssl ec -pubout -out %s 2>&1 "
                      ">/dev/null",
                      path);
+#endif
             if (system(cmd) != 0) {
                 /* If ECDSA generation fails, just write invalid RSA-like content */
                 const char fake_ecdsa[] =
@@ -596,11 +610,15 @@ cleanup_test_environment(void)
     char cmd[1024];
 
     /* Remove plugin directory (includes all KeyStore subdirectories) */
+#ifdef H5_HAVE_WIN32_API
+    snprintf(cmd, sizeof(cmd), "rmdir /s /q %s >NUL 2>&1", PLUGIN_DIR);
+    system(cmd);
+    system("del /q org*_*.pem test_*_4096.pem *_private.pem *_public.pem >NUL 2>&1");
+#else
     snprintf(cmd, sizeof(cmd), "rm -rf %s", PLUGIN_DIR);
     system(cmd);
-
-    /* Remove any generated key files from KeyStore tests */
     system("rm -f org*_*.pem test_*_4096.pem *_private.pem *_public.pem 2>/dev/null");
+#endif
 
     return SUCCEED;
 }

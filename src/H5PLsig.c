@@ -459,7 +459,7 @@ check_group_write_access(PACL pDACL, PSID pSid, ACCESS_MASK *access_out)
     if (GetEffectiveRightsFromAclA(pDACL, &trustee, &access) != ERROR_SUCCESS) {
         if (access_out)
             *access_out = 0;
-        return TRUE; /* fail closed */
+        return FALSE; /* API can fail on domain/restricted accounts; skip this SID */
     }
     if (access_out)
         *access_out = access;
