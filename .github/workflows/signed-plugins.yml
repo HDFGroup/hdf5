@@ -124,8 +124,8 @@ jobs:
           -DBUILD_STATIC_LIBS:BOOL=ON \
           -DBUILD_TESTING:BOOL=ON \
           -DHDF5_BUILD_TOOLS:BOOL=ON \
-          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
-          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ runner.os != 'Windows' }} \
+          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ runner.os != 'Windows' }} \
           $EXTRA_FLAGS
 
     - name: Copy private key to build directory (Unix)
