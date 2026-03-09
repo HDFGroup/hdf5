@@ -539,6 +539,8 @@ macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstna
             -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
             -D "TEST_ENV_VALUE=${ud_search_path}${CMAKE_SEP}${vol_plugin_path}"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+            $<$<BOOL:${HDF5_REQUIRE_SIGNED_PLUGINS}>:-D>
+            $<$<BOOL:${HDF5_REQUIRE_SIGNED_PLUGINS}>:TEST_KEYSTORE_DIR=${CMAKE_BINARY_DIR}/test_keystore>
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname} PROPERTIES
@@ -567,6 +569,8 @@ macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstna
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins${CMAKE_SEP}${vol_plugin_path}"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+              $<$<BOOL:${HDF5_REQUIRE_SIGNED_PLUGINS}>:-D>
+              $<$<BOOL:${HDF5_REQUIRE_SIGNED_PLUGINS}>:TEST_KEYSTORE_DIR=${CMAKE_BINARY_DIR}/test_keystore>
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${vol_prefix}H5COPY_UD_ERR-${testname}-DIFF PROPERTIES
