@@ -53,6 +53,9 @@ add_test (
   COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5signgentest>
   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
 )
+set_tests_properties (H5SIGN-gentest PROPERTIES
+  FIXTURES_SETUP H5SIGN_testfiles
+)
 
 # --------------------------------------------------------------------
 # Generate test RSA key pair
@@ -68,6 +71,7 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-genkey-private PROPERTIES
     DEPENDS H5SIGN-gentest
+    FIXTURES_SETUP H5SIGN_keys
   )
 
   # Generate public key
@@ -78,6 +82,7 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-genkey-public PROPERTIES
     DEPENDS H5SIGN-genkey-private
+    FIXTURES_SETUP H5SIGN_keys
   )
 
   # Test 1: Show help
@@ -102,6 +107,7 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-sign_small PROPERTIES
     DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-small-for-signing"
+    FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys"
   )
 
   # Test 4: Sign a medium plugin with verbose output
@@ -112,6 +118,7 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-sign_medium_verbose PROPERTIES
     DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-unsigned"
+    FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys"
   )
 
   # Test 5: Sign a large plugin
@@ -124,6 +131,7 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-sign_large PROPERTIES
     DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-large-for-signing"
+    FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys"
   )
 
   # Test 6: Re-sign an already-signed plugin using --force
