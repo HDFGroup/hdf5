@@ -120,7 +120,7 @@ static size_t                        H5PL_sig_cache_capacity_g = 0;
 #define H5PL_SIG_CACHE_INITIAL_CAPACITY 8
 
 /* Maximum plugin file size (1GB - prevents unreasonable allocations) */
-#define H5PL_MAX_PLUGIN_SIZE ((HDoff_t)(1024 * 1024 * 1024))
+#define H5PL_MAX_PLUGIN_SIZE ((HDoff_t)(1024LL * 1024LL * 1024LL))
 
 /* I/O chunk size for verification (1MB - optimized for modern I/O subsystems) */
 #define H5PL_VERIFY_CHUNK_SIZE ((size_t)(1024 * 1024))
@@ -432,6 +432,36 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__validate_directory_permissions() */
 #else  /* H5_HAVE_WIN32_API */
+
+/*-------------------------------------------------------------------------
+ * Function:    check_group_write_access
+ *
+ * Purpose:     Check whether a given SID has write access in a DACL.
+ *              Returns TRUE if write access is detected or if the check
+ *              fails (fail closed).
+ *
+ * Return:      TRUE if the group has write access (or on error), FALSE otherwise
+ *-------------------------------------------------------------------------
+ */
+static BOOL
+check_group_write_access(PACL pDACL, PSID pSid, ACCESS_MASK *access_out)
+{
+    TRUSTEE     trustee;
+    ACCESS_MASK access     = 0;
+    const ACCESS_MASK write_mask = FILE_WRITE_DATA | FILE_ADD_FILE |
+                                   FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER;
+
+    BuildTrusteeWithSidA(&trustee, pSid);
+    if (GetEffectiveRightsFromAclA(pDACL, &trustee, &access) != ERROR_SUCCESS) {
+        if (access_out)
+            *access_out = 0;
+        return TRUE; /* fail closed */
+    }
+    if (access_out)
+        *access_out = access;
+    return (access & write_mask) ? TRUE : FALSE;
+}
+
 herr_t
 H5PL__validate_directory_permissions(const char *dir_path)
 {
@@ -444,9 +474,6 @@ H5PL__validate_directory_permissions(const char *dir_path)
     SID_IDENTIFIER_AUTHORITY SIDAuthWorld  = SECURITY_WORLD_SID_AUTHORITY;
     SID_IDENTIFIER_AUTHORITY SIDAuthNT     = SECURITY_NT_AUTHORITY;
     DWORD                    dwRes         = 0;
-    TRUSTEE                  trusteeEveryone;
-    TRUSTEE                  trusteeUsers;
-    TRUSTEE                  trusteeAuthUsers;
     ACCESS_MASK              everyoneAccess       = 0;
     ACCESS_MASK              usersAccess          = 0;
     ACCESS_MASK              authUsersAccess      = 0;
@@ -502,48 +529,12 @@ H5PL__validate_directory_permissions(const char *dir_path)
                     "SECURITY ERROR: Cannot create Authenticated Users SID");
 
     /* Check effective permissions for "Everyone", "Users", and "Authenticated Users" groups */
-    BuildTrusteeWithSidA(&trusteeEveryone, pSidEveryone);
-    BuildTrusteeWithSidA(&trusteeUsers, pSidUsers);
-    BuildTrusteeWithSidA(&trusteeAuthUsers, pSidAuthUsers);
-
-    dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeEveryone, &everyoneAccess);
-    if (dwRes == ERROR_SUCCESS) {
-        /* Check if Everyone has write access (FILE_WRITE_DATA, FILE_ADD_FILE, etc.) */
-        if (everyoneAccess &
-            (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
-            hasUnsafePermissions = TRUE;
-        }
-    }
-    else {
-        /* Fail closed: if we cannot determine permissions, treat as unsafe */
+    if (check_group_write_access(pDACL, pSidEveryone, &everyoneAccess))
         hasUnsafePermissions = TRUE;
-    }
-
-    dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeUsers, &usersAccess);
-    if (dwRes == ERROR_SUCCESS) {
-        /* Check if Users group has write access */
-        if (usersAccess &
-            (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
-            hasUnsafePermissions = TRUE;
-        }
-    }
-    else {
-        /* Fail closed: if we cannot determine permissions, treat as unsafe */
+    if (check_group_write_access(pDACL, pSidUsers, &usersAccess))
         hasUnsafePermissions = TRUE;
-    }
-
-    dwRes = GetEffectiveRightsFromAclA(pDACL, &trusteeAuthUsers, &authUsersAccess);
-    if (dwRes == ERROR_SUCCESS) {
-        /* Check if Authenticated Users group has write access */
-        if (authUsersAccess &
-            (FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER)) {
-            hasUnsafePermissions = TRUE;
-        }
-    }
-    else {
-        /* Fail closed: if we cannot determine permissions, treat as unsafe */
+    if (check_group_write_access(pDACL, pSidAuthUsers, &authUsersAccess))
         hasUnsafePermissions = TRUE;
-    }
 
     /* SECURITY: Fail if directory has unsafe permissions */
     if (hasUnsafePermissions) {
@@ -751,18 +742,37 @@ H5PL__load_keys_from_directory(const char *dir_path)
 
         do {
             char      file_path[MAX_PATH];
+            char      canonical_dir[MAX_PATH];
+            char      canonical_file[MAX_PATH];
             EVP_PKEY *key = NULL;
 
             /* Skip directories */
             if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 continue;
 
+            /* Skip symlinks and reparse points (NTFS junctions, symlinks) */
+            if (find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+                continue;
+
             /* Build full path */
             snprintf(file_path, sizeof(file_path), "%s\\%s", dir_path, find_data.cFileName);
 
-            /* Skip symlinks and reparse points */
-            if (find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+            /* Path traversal protection: verify file resolves within the keystore directory */
+            if (GetFullPathNameA(dir_path, MAX_PATH, canonical_dir, NULL) == 0 ||
+                GetFullPathNameA(file_path, MAX_PATH, canonical_file, NULL) == 0) {
+                H5PL_SIG_DEBUG_PRINT("WARNING: Cannot resolve path for %s\n", find_data.cFileName);
                 continue;
+            }
+            {
+                size_t dir_len = strlen(canonical_dir);
+                if (_strnicmp(canonical_file, canonical_dir, dir_len) != 0 ||
+                    (canonical_file[dir_len] != '\\' && canonical_file[dir_len] != '\0')) {
+                    H5PL_SIG_DEBUG_PRINT(
+                        "WARNING: Path traversal detected - %s resolves outside keystore directory\n",
+                        find_data.cFileName);
+                    continue;
+                }
+            }
 
             /* Try to load key */
             if (NULL != (key = H5PL__create_public_RSA_from_file(file_path))) {
@@ -1160,7 +1170,8 @@ H5PL__check_signature_cache(const char *plugin_path, bool *cached_result)
     if (HDstat(plugin_path, &st) < 0)
         goto done; /* File stat failed - cache miss */
 
-    /* Search cache for matching entry */
+    /* Search cache for matching entry (linear scan is acceptable here
+     * because the number of loaded plugins per process is typically small) */
     for (size_t i = 0; i < H5PL_sig_cache_count_g; i++) {
         if (strcmp(H5PL_sig_cache_g[i].path, plugin_path) == 0) {
             /* Found cache entry - check if file has been modified */
@@ -1635,14 +1646,23 @@ H5PL__verify_signature_appended(const char *plugin_path)
     h5_stat_t         st;
     HDoff_t           file_size = 0;
     H5PL_sig_footer_t footer;
-    unsigned char    *signature   = NULL;
-    size_t            binary_size = 0;
-    herr_t            ret_value   = SUCCEED;
+    unsigned char    *signature      = NULL;
+    size_t            binary_size    = 0;
+    char             *canonical_path = NULL;
+    herr_t            ret_value      = SUCCEED;
     bool              cached_result;
 
     FUNC_ENTER_PACKAGE
 
     assert(plugin_path);
+
+#ifndef H5_HAVE_WIN32_API
+    /* Canonicalize path for consistent cache lookups (resolves symlinks, relative paths) */
+    canonical_path = HDrealpath(plugin_path, NULL);
+    if (canonical_path != NULL)
+        plugin_path = canonical_path;
+    /* If realpath fails, fall through with original path */
+#endif
 
     /* Check signature cache first */
     if (H5PL__check_signature_cache(plugin_path, &cached_result) == SUCCEED) {
@@ -1656,7 +1676,14 @@ H5PL__verify_signature_appended(const char *plugin_path)
     /* Cache miss or file modified - perform full verification */
 
     /* Open plugin file */
-    if ((fd = HDopen(plugin_path, O_RDONLY, 0)) < 0)
+    {
+        int open_flags = O_RDONLY;
+#ifdef O_CLOEXEC
+        open_flags |= O_CLOEXEC;
+#endif
+        fd = HDopen(plugin_path, open_flags, 0);
+    }
+    if (fd < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTOPENFILE, FAIL, "cannot open plugin file");
 
     /* Get file size */
@@ -1725,6 +1752,8 @@ done:
         HDclose(fd);
     if (signature)
         H5MM_xfree(signature);
+    if (canonical_path)
+        free(canonical_path); /* Allocated by realpath(), not H5MM */
 
     ERR_clear_error();
 

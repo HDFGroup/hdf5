@@ -80,6 +80,41 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
+ * Function:    write_with_retry
+ *
+ * Purpose:     Write data to a file descriptor, handling partial writes
+ *              and EINTR interrupts. On failure, truncate the file to
+ *              rollback_size to restore it to its pre-signing state.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+write_with_retry(int fd, const unsigned char *data, size_t total, const char *what,
+                 const char *plugin_path, hsize_t rollback_size)
+{
+    size_t written = 0;
+
+    while (written < total) {
+        h5_posix_io_ret_t wr;
+        do {
+            wr = HDwrite(fd, data + written, total - written);
+        } while (-1 == wr && EINTR == errno);
+
+        if (wr <= 0) {
+            fprintf(rawerrorstream, "Error: Cannot write %s to '%s': %s\n", what, plugin_path, strerror(errno));
+            /* Attempt rollback: restore file to its pre-signing state */
+            (void)HDftruncate(fd, (HDoff_t)rollback_size);
+            return FAIL;
+        }
+
+        written += (size_t)wr;
+    }
+
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    usage
  *
  * Purpose:     Print usage message
@@ -697,30 +732,9 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     }
 
     /* Append signature to file */
-    {
-        size_t            written      = 0;
-        size_t            to_write     = sig_len;
-        unsigned char    *write_ptr    = signature;
-        h5_posix_io_ret_t write_result = 0;
-
-        while (written < sig_len) {
-            do {
-                write_result = HDwrite(fd, write_ptr, to_write);
-            } while (-1 == write_result && EINTR == errno);
-
-            if (write_result <= 0) {
-                fprintf(rawerrorstream, "Error: Cannot write signature to '%s': %s\n", plugin_path,
-                        strerror(errno));
-                /* Attempt rollback: restore file to its pre-signing state */
-                (void)HDftruncate(fd, (HDoff_t)file_size);
-                ret_value = FAIL;
-                goto done;
-            }
-
-            written += (size_t)write_result;
-            write_ptr += write_result;
-            to_write -= (size_t)write_result;
-        }
+    if (write_with_retry(fd, signature, sig_len, "signature", plugin_path, file_size) < 0) {
+        ret_value = FAIL;
+        goto done;
     }
 
     if (opt_verbose)
@@ -742,30 +756,10 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         /* Encode magic number as little-endian uint32 */
         UINT32ENCODE(p, H5PL_SIG_MAGIC);
 
-        /* Write footer to file (loop handles partial writes uniformly with signature write) */
-        {
-            size_t            footer_written = 0;
-            const size_t      footer_total   = sizeof(footer_buf);
-            unsigned char    *footer_ptr     = footer_buf;
-            h5_posix_io_ret_t write_result   = 0;
-
-            while (footer_written < footer_total) {
-                do {
-                    write_result = HDwrite(fd, footer_ptr, footer_total - footer_written);
-                } while (-1 == write_result && EINTR == errno);
-
-                if (write_result <= 0) {
-                    fprintf(rawerrorstream, "Error: Cannot write footer to '%s': %s\n", plugin_path,
-                            strerror(errno));
-                    /* Attempt rollback: restore file to its pre-signing state */
-                    (void)HDftruncate(fd, (HDoff_t)file_size);
-                    ret_value = FAIL;
-                    goto done;
-                }
-
-                footer_written += (size_t)write_result;
-                footer_ptr += write_result;
-            }
+        /* Write footer to file */
+        if (write_with_retry(fd, footer_buf, sizeof(footer_buf), "footer", plugin_path, file_size) < 0) {
+            ret_value = FAIL;
+            goto done;
         }
     }
 

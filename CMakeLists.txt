@@ -793,16 +793,10 @@ set(HDF5_PLUGIN_KEYSTORE_DIR "" CACHE PATH
     "Directory containing trusted public keys (.pem files) for plugin verification")
 # Security Note: For production deployments where environment variables may be
 # controllable by untrusted users (e.g., HPC clusters, multi-tenant systems),
-# you can prevent runtime override of the keystore directory via:
-#   1. Compile-time: Enable HDF5_LOCK_PLUGIN_KEYSTORE (requires rebuild)
-#   2. Runtime: Create lock file (works with pre-built binaries):
-#      - Unix/Linux: /etc/hdf5/lock_keystore
-#      - Windows: C:\ProgramData\HDF_Group\HDF5\lock_keystore
+# you can prevent runtime override of the keystore directory by enabling
+# HDF5_LOCK_PLUGIN_KEYSTORE at compile time (requires rebuild).
 
 # Security: Disable environment variable override (prevents runtime keystore redirection)
-# Note: Sysadmins can also lock the keystore at runtime without recompiling by
-# creating a lock file (/etc/hdf5/lock_keystore on Unix, or
-# C:\ProgramData\HDF_Group\HDF5\lock_keystore on Windows).
 option(HDF5_LOCK_PLUGIN_KEYSTORE "Disable HDF5_PLUGIN_KEYSTORE environment variable override (security hardening)" OFF)
 mark_as_advanced(HDF5_LOCK_PLUGIN_KEYSTORE)
 
@@ -826,9 +820,9 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
       "available in OpenSSL 1.0.2 and earlier versions.\n"
       "\n"
       "Solutions:\n"
-      "  1. Upgrade to OpenSSL 1.1.0 or later (recommended)\n"
-      "     - OpenSSL 1.1.1 is LTS (supported until 2023-09-11)\n"
-      "     - OpenSSL 3.0+ is fully supported\n"
+      "  1. Upgrade to OpenSSL 3.0 or later (recommended)\n"
+      "     - OpenSSL 3.0 is LTS (supported until 2026-09-07)\n"
+      "     - OpenSSL 3.4+ is also supported\n"
       "  2. Use LibreSSL 2.7.0 or later (compatible alternative)\n"
       "  3. Disable signed plugins: -DHDF5_REQUIRE_SIGNED_PLUGINS=OFF\n"
       "\n"

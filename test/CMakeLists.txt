@@ -871,7 +871,7 @@ if (BUILD_SHARED_LIBS)
     set_target_properties (test_plugin_signature PROPERTIES FOLDER test)
 
     # Link OpenSSL for signature verification
-    target_link_libraries (test_plugin_signature PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+    target_link_libraries (test_plugin_signature PRIVATE OpenSSL::Crypto)
 
     #-----------------------------------------------------------------------------
     # Add Target to clang-format

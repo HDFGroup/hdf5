@@ -649,8 +649,11 @@ H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, 
     for (u = 0; (u < H5PL_num_paths_g) && (ret_value == H5_ITER_CONT); u++) {
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
         /* Skip directories with unsafe permissions (cached after first check) */
-        if (!H5PL__check_path_perms_cached(u))
+        if (!H5PL__check_path_perms_cached(u)) {
+            H5PL_SIG_DEBUG_PRINT("H5PL: skipping plugin path '%s' (unsafe directory permissions)\n",
+                                 H5PL_paths_g[u]);
             continue;
+        }
 #endif
         if ((ret_value =
                  H5PL__path_table_iterate_process_path(H5PL_paths_g[u], iter_type, iter_op, op_data)) < 0)
@@ -881,8 +884,11 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, bool 
     for (u = 0; u < H5PL_num_paths_g; u++) {
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
         /* Skip directories with unsafe permissions (cached after first check) */
-        if (!H5PL__check_path_perms_cached(u))
+        if (!H5PL__check_path_perms_cached(u)) {
+            H5PL_SIG_DEBUG_PRINT("H5PL: skipping plugin path '%s' (unsafe directory permissions)\n",
+                                 H5PL_paths_g[u]);
             continue;
+        }
 #endif
         /* Search for the plugin in this path */
         if (H5PL__find_plugin_in_path(search_params, found, H5PL_paths_g[u], plugin_info) < 0)
