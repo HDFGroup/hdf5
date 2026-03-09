@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -173,7 +173,7 @@ How the HDF5 Library Configuration May Miss a Compression Filter</h2>
 <p>The HDF5 Library uses external libraries for data compression. The two predefined compression methods are <b>gzip3</b> and <b>szip</b> or <b>libaec</b>, and these can be requested at the HDF5 Library configuration time (compile time). User-defined compression filters and the corresponding libraries are usually linked with an application or provided as a dynamically loaded library.</p>
 <p><b>Note</b> that the <b>libaec</b> library is a replacement for the original <b>szip</b> library. The <b>libaec</b> library is a freely available, open-source library that provides compression and decompression functionality and is compatible with the <b>szip</b> filter. The <b>libaec</b> library can be used as a drop-in replacement for the <b>szip</b>, but requires two libraries to be present on the system: <b>libaec.a(so,dylib,lib)</b> and <b>libsz.a(so,dylib,lib)</b>. Everywhere in this document, the term <b>szip</b> refers to the <b>szip</b> filter and the <b>libaec</b> library.</p>
 <p><b>gzip</b> and <b>szip</b> require the <b>libz.a(so,dylib,lib)</b> and <b>libsz.a(so,dylib,lib)/libaec</b>.a(so,dylib,lib) libraries, respectively, to be present on the system and to be enabled during HDF5 configuration with this CMake configure command: </p><div class="fragment"><div class="line">cmake -G <span class="stringliteral">&quot;Unix Makefiles&quot;</span> -DHDF5_ENABLE_ZLIB_SUPPORT=ON -DHDF5_ENABLE_SZIP_SUPPORT=ON -D&lt;other flags&gt;</div>
-</div><!-- fragment --><p> With CMake both libraries have to be explicitly enabled. The source code distribution’s <code>config/cmake/cacheinit.cmake</code> file will enable both filters along with setting other options. Users can overwrite the defaults by using -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF with the “cmake –C” command. See the <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> file under the release_docs directory in the HDF5 source distribution.</p>
+</div><!-- fragment --><p> With CMake both libraries have to be explicitly enabled. The source code distribution’s <code>config/cmake/cacheinit.cmake</code> file will enable both filters along with setting other options. Users can overwrite the defaults by using -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF with the “cmake –C” command. See the <a href="https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.md">INSTALL_CMake.md</a> file under the release_docs directory in the HDF5 source distribution.</p>
 <p>If compression is not requested or found at configuration time, the compression method is not registered with the library and cannot be applied when data is written or read. For example, the <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> tool will not be able to remove an <b>szip</b> compression filter from a dataset if the <b>szip</b> library was not configured into the library against which the tool was built. The next section discusses the behavior of the HDF5 Library in the absence of filters.</p>
 <h2 class="doxsection"><a class="anchor" id="subsec_compts_notapp_behave"></a>
 How Does the HDF5 Library Behave in the Absence of a Filter</h2>
@@ -227,7 +227,7 @@ Examine the H5pubconf.h Header File</h3>
 <div class="line"><span class="comment">// Define if support for Szip filter is enabled</span></div>
 <div class="line"><span class="preprocessor">#define H5_HAVE_FILTER_SZIP 1</span></div>
 </div><!-- fragment --><p> If a compression or internal filter was not configured, the corresponding lines will be commented out as follows: </p><div class="fragment"><div class="line"><span class="comment">// Define if support for deflate (zlib) filter is enabled</span></div>
-<div class="line"><span class="comment">// #undef H5_HAVE_FILTER_DEFLATE </span></div>
+<div class="line"><span class="comment">// #undef H5_HAVE_FILTER_DEFLATE</span></div>
 </div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="subsubsec_compts_notapp_need_bin"></a>
 Check the HDF5 Library’s Binary</h3>
 <p>The HDF5 Library’s binary contains summary output similar to what is stored in the <code>hdf5lib.settings</code> file. Users can run the Unix <code>“strings”</code> command to get information about the configured filters: </p><div class="fragment"><div class="line">% strings libhdf5.a(so) | grep <span class="stringliteral">&quot;I/O filters (&quot;</span></div>
