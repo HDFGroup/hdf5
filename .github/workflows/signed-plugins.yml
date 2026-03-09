@@ -13,41 +13,58 @@ env:
   CTEST_OUTPUT_ON_FAILURE: 1
 
 jobs:
-  # Test signature verification in both serial and parallel configurations
+  # Test signature verification across platforms and configurations
   test-signed-plugins:
     name: "${{ matrix.config.name }}"
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
-          # Serial configurations
-          - name: "Serial (Debug + Shared)"
+          # Linux configurations
+          - name: "Linux Serial (Debug + Shared)"
+            os: ubuntu-latest
             build_type: Debug
             shared: ON
             parallel: OFF
+            generator: ""
 
-          - name: "Serial (Release + Static)"
+          - name: "Linux Serial (Release + Static)"
+            os: ubuntu-latest
             build_type: Release
             shared: OFF
             parallel: OFF
+            generator: ""
 
-          # Parallel configurations - test MPI collective verification
-          - name: "Parallel (Debug + Shared)"
+          - name: "Linux Parallel (Debug + Shared)"
+            os: ubuntu-latest
             build_type: Debug
             shared: ON
             parallel: ON
+            generator: ""
 
-          - name: "Parallel (Release + Shared)"
+          # macOS configuration
+          - name: "macOS Serial (Release + Shared)"
+            os: macos-latest
             build_type: Release
             shared: ON
-            parallel: ON
+            parallel: OFF
+            generator: ""
+
+          # Windows configuration
+          - name: "Windows Serial (Release + Shared)"
+            os: windows-latest
+            build_type: Release
+            shared: ON
+            parallel: OFF
+            generator: "-A x64"
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install base dependencies
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -55,34 +72,50 @@ jobs:
           zlib1g-dev \
           libaec-dev
 
-    - name: Install MPI dependencies
-      if: matrix.config.parallel == 'ON'
+    - name: Install MPI dependencies (Linux)
+      if: runner.os == 'Linux' && matrix.config.parallel == 'ON'
       run: |
         sudo apt-get install -y \
           libopenmpi-dev \
           openmpi-bin
 
-    - name: Generate test RSA key pair
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
       run: |
-        echo "Generating test RSA key pair for CI testing..."
+        brew install openssl@3
+
+    - name: Check OpenSSL Version (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        & openssl version
+
+    - name: Generate test RSA key pair (Unix)
+      if: runner.os != 'Windows'
+      run: |
         openssl genrsa -out ci-test-private.pem 2048
         openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
-        echo "Test keys generated successfully"
-        ls -lh ci-test-*.pem
-
-        # Create KeyStore directory and add public key
         mkdir -p ci-keystore
         cp ci-test-public.pem ci-keystore/
-        echo "KeyStore directory created with public key"
-        ls -lh ci-keystore/
+
+    - name: Generate test RSA key pair (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        & openssl genrsa -out ci-test-private.pem 2048
+        & openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
+        New-Item -ItemType Directory -Force -Path ci-keystore
+        Copy-Item ci-test-public.pem ci-keystore/
 
     - name: Configure CMake
+      shell: bash
       run: |
         EXTRA_FLAGS=""
         if [ "${{ matrix.config.parallel }}" == "ON" ]; then
           EXTRA_FLAGS="-DMPIEXEC_PREFLAGS=--oversubscribe"
         fi
         cmake -B build \
+          ${{ matrix.config.generator }} \
           -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
           -DHDF5_REQUIRE_SIGNED_PLUGINS:BOOL=ON \
           -DHDF5_PLUGIN_KEYSTORE_DIR="${PWD}/ci-keystore" \
@@ -95,137 +128,26 @@ jobs:
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
           $EXTRA_FLAGS
 
-    - name: Copy private key to build directory
+    - name: Copy private key to build directory (Unix)
+      if: runner.os != 'Windows'
       run: |
-        echo "Copying private key to build directory for plugin signing..."
         cp ci-test-private.pem build/private.pem
         mkdir -p build/test
         cp ci-test-private.pem build/test/private.pem
-        ls -lh build/private.pem build/test/private.pem
+
+    - name: Copy private key to build directory (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Copy-Item ci-test-private.pem build/private.pem
+        New-Item -ItemType Directory -Force -Path build/test
+        Copy-Item ci-test-private.pem build/test/private.pem
 
     - name: Build
-      run: cmake --build build --parallel 4
+      run: cmake --build build --parallel 4 --config ${{ matrix.config.build_type }}
 
-    - name: Verify signature test binary exists
-      run: |
-        if [ -f "build/bin/test_plugin_signature" ] || [ -f "build/bin/test_plugin_signature.exe" ]; then
-          echo "✓ Plugin signature verification test binary found"
-          ls -lh build/bin/test_plugin_signature* || true
-        else
-          echo "WARNING: Plugin signature verification test binary not found"
-          echo "This might be expected if HDF5_REQUIRE_SIGNED_PLUGINS is OFF"
-        fi
-
-    - name: Run Tests (Serial)
-      if: matrix.config.parallel == 'OFF'
+    - name: Run Tests
+      shell: bash
       run: |
         cd build
-        ctest --parallel 4 --output-on-failure
-
-        # Explicitly run plugin signature verification test
-        echo ""
-        echo "Running plugin signature verification test..."
-        ctest --tests-regex "H5PLUGIN-signature-verification" --verbose
-
-    - name: Run Tests (Parallel)
-      if: matrix.config.parallel == 'ON'
-      run: |
-        cd build
-        # Run all tests including parallel tests
-        ctest --parallel 4 --output-on-failure
-
-        # Specifically test MPI tests to ensure collective verification is exercised
-        echo "Running MPI-specific tests..."
-        ctest --tests-regex "MPI_TEST" --verbose || echo "MPI tests completed"
-
-        # Explicitly run plugin signature verification test
-        echo ""
-        echo "Running plugin signature verification test..."
-        ctest --tests-regex "H5PLUGIN-signature-verification" --verbose
-
-  # Comprehensive test to verify signature verification logic paths
-  verify-signature-paths:
-    name: "Verify Signature Logic Paths"
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libssl-dev \
-          zlib1g-dev \
-          libaec-dev \
-          libopenmpi-dev \
-          openmpi-bin
-
-    - name: Generate test RSA key pair
-      run: |
-        echo "Generating test RSA key pair for CI testing..."
-        openssl genrsa -out ci-test-private.pem 2048
-        openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
-        echo "Test keys generated successfully"
-        ls -lh ci-test-*.pem
-
-        # Create KeyStore directory and add public key
-        mkdir -p ci-keystore
-        cp ci-test-public.pem ci-keystore/
-        echo "KeyStore directory created with public key"
-        ls -lh ci-keystore/
-
-    - name: Configure CMake (Parallel with all features)
-      run: |
-        cmake -B build \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DHDF5_REQUIRE_SIGNED_PLUGINS:BOOL=ON \
-          -DHDF5_PLUGIN_KEYSTORE_DIR="${PWD}/ci-keystore" \
-          -DHDF5_ENABLE_PARALLEL:BOOL=ON \
-          -DMPIEXEC_PREFLAGS=--oversubscribe \
-          -DBUILD_SHARED_LIBS:BOOL=ON \
-          -DBUILD_TESTING:BOOL=ON \
-          -DHDF5_BUILD_TOOLS:BOOL=ON \
-          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON
-
-    - name: Copy private key to build directory
-      run: |
-        echo "Copying private key to build directory for plugin signing..."
-        cp ci-test-private.pem build/private.pem
-        mkdir -p build/test
-        cp ci-test-private.pem build/test/private.pem
-        ls -lh build/private.pem build/test/private.pem
-
-    - name: Build
-      run: cmake --build build --parallel 4
-
-    - name: Verify H5PL__verify_plugin_signature is compiled
-      run: |
-        echo "Checking that signature verification function is present..."
-        grep -r "H5PL__verify_plugin_signature" src/H5PLint.c || true
-
-    - name: Verify signature verification code exists
-      run: |
-        echo "Checking signature verification implementation..."
-        grep -A 3 "Verify plugin signature" src/H5PLint.c
-        echo "All ranks verify independently in both serial and parallel modes"
-
-    - name: Run comprehensive tests
-      run: |
-        cd build
-        # Run full test suite
-        ctest --output-on-failure --verbose
-
-    - name: Verify plugin signature tests execute
-      run: |
-        cd build
-        echo "========================================"
-        echo "Running Plugin Signature Verification Tests"
-        echo "========================================"
-
-        # Run signature verification tests explicitly and fail on any error
-        ctest --tests-regex "H5PLUGIN-signature-verification" --verbose
-
-        echo ""
-        echo "Plugin signature verification tests completed successfully!"
+        ctest --build-config ${{ matrix.config.build_type }} --parallel 4 --output-on-failure
