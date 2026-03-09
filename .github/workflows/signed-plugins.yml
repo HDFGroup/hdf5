@@ -131,11 +131,15 @@ jobs:
     - name: Build
       run: cmake --build build --parallel 4 --config ${{ matrix.config.build_type }}
 
+    - name: Copy OpenSSL DLLs to build directory (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Copy-Item "C:\Program Files\OpenSSL\bin\libcrypto-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
+        Copy-Item "C:\Program Files\OpenSSL\bin\libssl-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
+
     - name: Run Tests
       shell: bash
       run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          export PATH="/c/Program Files/OpenSSL/bin:$PATH"
-        fi
         cd build
         ctest --build-config ${{ matrix.config.build_type }} --parallel 4 --output-on-failure
