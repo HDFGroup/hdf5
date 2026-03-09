@@ -128,7 +128,7 @@ function (external_zlib_library)
 
     message (STATUS "Filter zlib will be built from source ${ZLIB_URL}")
 
-    # Instruct FetchContent to retrieve ZLIB from .tgz file and patch CMakeLists.txt
+    # Instruct FetchContent to retrieve ZLIB from .tgz file
     FetchContent_Declare (HDF5_ZLIB
         URL ${ZLIB_URL}
         URL_HASH ""

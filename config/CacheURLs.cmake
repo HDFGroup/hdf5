@@ -75,17 +75,32 @@ mark_as_advanced (KWSYS_TGZ_NAME)
 ########################
 # filter plugin options
 ########################
-
-set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location")
-set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file")
-mark_as_advanced (PLUGIN_TGZ_ORIGPATH)
-mark_as_advanced (PLUGIN_TGZ_NAME)
-set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package")
-mark_as_advanced (PLUGIN_PACKAGE_NAME)
-set (PLUGIN_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF Group repository")
-set (PLUGIN_GIT_BRANCH "master" CACHE STRING "")
-mark_as_advanced (PLUGIN_GIT_URL)
-mark_as_advanced (PLUGIN_GIT_BRANCH)
+set (HDF5_FILTER_PLUGINS_PACKAGE_NAME "h5pl" CACHE STRING "Name of HDF5 filter plugins package")
+mark_as_advanced (HDF5_FILTER_PLUGINS_PACKAGE_NAME)
+set (HDF5_FILTER_PLUGINS_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Base name of HDF5 filter plugins compressed file")
+set (HDF5_FILTER_PLUGINS_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "URL to retrieve external HDF5 filter plugins compressed file from")
+mark_as_advanced (HDF5_FILTER_PLUGINS_TGZ_NAME)
+mark_as_advanced (HDF5_FILTER_PLUGINS_TGZ_ORIGPATH)
+set (HDF5_FILTER_PLUGINS_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "GIT URL to retrieve external HDF5 filter plugins source from")
+set (HDF5_FILTER_PLUGINS_GIT_TAG "master" CACHE STRING "GIT tag to retrieve external HDF5 filter plugins source from")
+mark_as_advanced (HDF5_FILTER_PLUGINS_GIT_URL)
+mark_as_advanced (HDF5_FILTER_PLUGINS_GIT_TAG)
+# DEPRECATED
+if (DEFINED PLUGIN_PACKAGE_NAME)
+  message (DEPRECATION "PLUGIN_PACKAGE_NAME has been deprecated in favor of HDF5_FILTER_PLUGINS_PACKAGE_NAME")
+endif ()
+if (DEFINED PLUGIN_TGZ_NAME)
+  message (DEPRECATION "PLUGIN_TGZ_NAME has been deprecated in favor of HDF5_FILTER_PLUGINS_TGZ_NAME")
+endif ()
+if (DEFINED PLUGIN_TGZ_ORIGPATH)
+  message (DEPRECATION "PLUGIN_TGZ_ORIGPATH has been deprecated in favor of HDF5_FILTER_PLUGINS_TGZ_ORIGPATH")
+endif ()
+if (DEFINED PLUGIN_GIT_URL)
+  message (DEPRECATION "PLUGIN_GIT_URL has been deprecated in favor of HDF5_FILTER_PLUGINS_GIT_URL")
+endif ()
+if (DEFINED PLUGIN_GIT_BRANCH)
+  message (DEPRECATION "PLUGIN_GIT_BRANCH has been deprecated in favor of HDF5_FILTER_PLUGINS_GIT_TAG")
+endif ()
 
 ###########
 # bitgroom
@@ -120,13 +135,14 @@ mark_as_advanced (BSHUF_PACKAGE_NAME)
 # blosc
 ########
 
+set (HDF5_BLOSC_VERSION "1.21.6" CACHE INTERNAL "Version of Blosc to use when building from external source")
 set (BLOSC_GIT_URL "https://github.com/Blosc/c-blosc.git" CACHE STRING "Use BLOSC from Github repository")
 set (BLOSC_GIT_BRANCH "main" CACHE STRING "")
 mark_as_advanced (BLOSC_GIT_URL)
 mark_as_advanced (BLOSC_GIT_BRANCH)
 
 set (BLOSC_TGZ_ORIGPATH "https://github.com/Blosc/c-blosc/archive/refs/tags" CACHE STRING "Use PLUGINS from original location")
-set (BLOSC_TGZ_NAME "c-blosc-1.21.6.tar.gz" CACHE STRING "Use BLOSC from compressed file")
+set (BLOSC_TGZ_NAME "c-blosc-${HDF5_BLOSC_VERSION}.tar.gz" CACHE STRING "Use BLOSC from compressed file")
 mark_as_advanced (BLOSC_TGZ_ORIGPATH)
 mark_as_advanced (BLOSC_TGZ_NAME)
 
@@ -150,13 +166,14 @@ mark_as_advanced (BLOSC_ZLIB_PACKAGE_NAME)
 # blosc2
 ########
 
+set (HDF5_BLOSC2_VERSION "2.17.1" CACHE INTERNAL "Version of Blosc2 to use when building from external source")
 set (BLOSC2_GIT_URL "https://github.com/Blosc/c-blosc2.git" CACHE STRING "Use BLOSC2 from Github repository")
 set (BLOSC2_GIT_BRANCH "main" CACHE STRING "")
 mark_as_advanced (BLOSC2_GIT_URL)
 mark_as_advanced (BLOSC2_GIT_BRANCH)
 
 set (BLOSC2_TGZ_ORIGPATH "https://github.com/Blosc/c-blosc2/archive/refs/tags" CACHE STRING "Use PLUGINS from original location")
-set (BLOSC2_TGZ_NAME "c-blosc2-2.17.1.tar.gz" CACHE STRING "Use BLOSC2 from compressed file")
+set (BLOSC2_TGZ_NAME "c-blosc2-${HDF5_BLOSC2_VERSION}.tar.gz" CACHE STRING "Use BLOSC2 from compressed file")
 mark_as_advanced (BLOSC2_TGZ_ORIGPATH)
 mark_as_advanced (BLOSC2_TGZ_NAME)
 
@@ -300,13 +317,14 @@ mark_as_advanced (ZFP_PACKAGE_NAME)
 # zstd
 ######
 
-set (ZSTD_GIT_URL "https://github.com/facebook/zstd.git" CACHE STRING "Use ZSTD from  GitHub repository")
+set (HDF5_ZSTD_VERSION "1.5.7" CACHE INTERNAL "Version of Zstd to use when building from external source")
+set (ZSTD_GIT_URL "https://github.com/facebook/zstd.git" CACHE STRING "Use ZSTD from GitHub repository")
 set (ZSTD_GIT_BRANCH "dev" CACHE STRING "")
 mark_as_advanced (ZSTD_GIT_URL)
 mark_as_advanced (ZSTD_GIT_BRANCH)
 
-set (ZSTD_TGZ_ORIGPATH "https://github.com/facebook/zstd/releases/download/v1.5.7" CACHE STRING "Use PLUGINS from original location")
-set (ZSTD_TGZ_NAME "zstd-1.5.7.tar.gz" CACHE STRING "Use ZSTD from compressed file")
+set (ZSTD_TGZ_ORIGPATH "https://github.com/facebook/zstd/releases/download/v${HDF5_ZSTD_VERSION}" CACHE STRING "Use PLUGINS from original location")
+set (ZSTD_TGZ_NAME "zstd-${HDF5_ZSTD_VERSION}.tar.gz" CACHE STRING "Use ZSTD from compressed file")
 mark_as_advanced (ZSTD_TGZ_ORIGPATH)
 mark_as_advanced (ZSTD_TGZ_NAME)
 

@@ -549,7 +549,6 @@ include (${HDF_CONFIG_DIR}/HDFMacros.cmake)
 
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
-include (${HDF_RESOURCES_DIR}/HDF5PluginMacros.cmake)
 include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
@@ -1248,9 +1247,9 @@ if (HDF5_ENABLE_PLUGIN_SUPPORT)
   else ()
     include (CMakePlugins.cmake)
 
-    if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES AND PLUGIN_FOUND)
-      PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-    endif ()
+#    if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES AND HDF5_PLUGINS_FOUND)
+#      PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
+#    endif ()
   endif ()
 endif ()
 

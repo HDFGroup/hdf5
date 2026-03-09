@@ -209,15 +209,15 @@
           "type": "STRING",
           "value": "TGZ"
         },
-        "PLUGIN_PACKAGE_NAME": {
+        "HDF5_FILTER_PLUGINS_PACKAGE_NAME": {
           "type": "STRING",
-          "value": "pl"
+          "value": "h5pl"
         },
-        "PLUGIN_TGZ_ORIGPATH": {
+        "HDF5_FILTER_PLUGINS_TGZ_ORIGPATH": {
           "type": "STRING",
           "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"
         },
-        "PLUGIN_TGZ_NAME": {
+        "HDF5_FILTER_PLUGINS_TGZ_NAME": {
           "type": "STRING",
           "value": "hdf5_plugins-master.tar.gz"
         }

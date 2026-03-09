@@ -548,7 +548,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
         set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};configinstall;/")
       endif ()
     endif ()
-    if (PLUGIN_FOUND AND PLUGIN_USE_EXTERNAL)
+    if (HDF5_PLUGINS_FOUND AND PLUGIN_USE_EXTERNAL)
       if (WIN32)
         set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;ALL;/")
       else ()
