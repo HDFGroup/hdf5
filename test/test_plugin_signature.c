@@ -890,33 +890,33 @@ test_keystore_multiple_keys(void)
 
     /* Set environment variable to use this KeyStore */
     snprintf(keystore_path, sizeof(keystore_path), "%s", keystore_dir);
-    setenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
+    HDsetenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
     reset_keystore_state();
 
     /* Verify all 3 plugins (each should match a different key) */
     if (H5PL__verify_signature_appended(plugin1_path) < 0) {
         H5_FAILED();
         fprintf(stderr, "Plugin1 (org1 key) was rejected\n");
-        unsetenv("HDF5_PLUGIN_KEYSTORE");
+        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
         goto error;
     }
 
     if (H5PL__verify_signature_appended(plugin2_path) < 0) {
         H5_FAILED();
         fprintf(stderr, "Plugin2 (org2 key) was rejected\n");
-        unsetenv("HDF5_PLUGIN_KEYSTORE");
+        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
         goto error;
     }
 
     if (H5PL__verify_signature_appended(plugin3_path) < 0) {
         H5_FAILED();
         fprintf(stderr, "Plugin3 (org3 key) was rejected\n");
-        unsetenv("HDF5_PLUGIN_KEYSTORE");
+        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
         goto error;
     }
 
     /* Cleanup */
-    unsetenv("HDF5_PLUGIN_KEYSTORE");
+    HDunsetenv("HDF5_PLUGIN_KEYSTORE");
     free(keystore_dir);
 
     PASSED();
@@ -995,19 +995,19 @@ test_invalid_pem_file_handling(void)
 
     /* Set environment variable to use this KeyStore */
     snprintf(keystore_path, sizeof(keystore_path), "%s", keystore_dir);
-    setenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
+    HDsetenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
     reset_keystore_state();
 
     /* Verify plugin (should succeed - corrupted files silently skipped) */
     if (H5PL__verify_signature_appended(plugin_path) < 0) {
         H5_FAILED();
         fprintf(stderr, "Valid plugin was rejected despite corrupted PEM files in KeyStore\n");
-        unsetenv("HDF5_PLUGIN_KEYSTORE");
+        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
         goto error;
     }
 
     /* Cleanup */
-    unsetenv("HDF5_PLUGIN_KEYSTORE");
+    HDunsetenv("HDF5_PLUGIN_KEYSTORE");
     free(keystore_dir);
 
     PASSED();
@@ -1071,19 +1071,19 @@ test_rsa4096_signature(void)
 
     /* Set environment variable to use this KeyStore */
     snprintf(keystore_path, sizeof(keystore_path), "%s", keystore_dir);
-    setenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
+    HDsetenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
     reset_keystore_state();
 
     /* Verify plugin (RSA-4096 signature is 512 bytes, within 1024-byte limit) */
     if (H5PL__verify_signature_appended(plugin_path) < 0) {
         H5_FAILED();
         fprintf(stderr, "RSA-4096 signed plugin was rejected\n");
-        unsetenv("HDF5_PLUGIN_KEYSTORE");
+        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
         goto error;
     }
 
     /* Cleanup */
-    unsetenv("HDF5_PLUGIN_KEYSTORE");
+    HDunsetenv("HDF5_PLUGIN_KEYSTORE");
     free(keystore_dir);
 
     PASSED();
@@ -1177,14 +1177,14 @@ test_keystore_symlink_rejection(void)
 
     /* Set environment variable to use this KeyStore */
     snprintf(keystore_path, sizeof(keystore_path), "%s", keystore_dir);
-    setenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
+    HDsetenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
     reset_keystore_state();
 
     /* Verify trusted plugin should succeed */
     if (H5PL__verify_signature_appended(plugin_trusted) < 0) {
         H5_FAILED();
         fprintf(stderr, "Trusted plugin was rejected\n");
-        unsetenv("HDF5_PLUGIN_KEYSTORE");
+        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
         goto error;
     }
 
@@ -1198,12 +1198,12 @@ test_keystore_symlink_rejection(void)
     if (status >= 0) {
         H5_FAILED();
         fprintf(stderr, "Attacker plugin was incorrectly accepted (symlink not skipped)\n");
-        unsetenv("HDF5_PLUGIN_KEYSTORE");
+        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
         goto error;
     }
 
     /* Cleanup */
-    unsetenv("HDF5_PLUGIN_KEYSTORE");
+    HDunsetenv("HDF5_PLUGIN_KEYSTORE");
     free(keystore_dir);
 
     PASSED();
@@ -1284,7 +1284,7 @@ test_keystore_world_writable_rejection(void)
 
     /* Set environment variable to use this KeyStore */
     snprintf(keystore_path, sizeof(keystore_path), "%s", keystore_dir);
-    setenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
+    HDsetenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
     reset_keystore_state();
 
     /* Verification should fail due to world-writable directory */
@@ -1297,12 +1297,12 @@ test_keystore_world_writable_rejection(void)
     if (status >= 0) {
         H5_FAILED();
         fprintf(stderr, "World-writable directory was not rejected\n");
-        unsetenv("HDF5_PLUGIN_KEYSTORE");
+        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
         goto error;
     }
 
     /* Cleanup */
-    unsetenv("HDF5_PLUGIN_KEYSTORE");
+    HDunsetenv("HDF5_PLUGIN_KEYSTORE");
     free(keystore_dir);
 
     PASSED();
