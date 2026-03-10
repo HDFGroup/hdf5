@@ -706,7 +706,6 @@ H5PL__load_keys_from_directory(const char *dir_path)
             if (H5PL__add_key_to_keystore(key, file_path) < 0) {
                 EVP_PKEY_free(key);
                 H5MM_xfree(file_path);
-                closedir(dir);
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add key to keystore");
             }
             /* Key ownership transferred to keystore */
@@ -717,9 +716,9 @@ H5PL__load_keys_from_directory(const char *dir_path)
         H5MM_xfree(file_path);
     }
 
-    closedir(dir);
-
 done:
+    if (dir)
+        closedir(dir);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__load_keys_from_directory() */
 #else  /* H5_HAVE_WIN32_API */
