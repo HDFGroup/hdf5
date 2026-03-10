@@ -358,11 +358,34 @@ add_key_to_keystore(const char *keystore_dir, const char *key_name, const char *
 
     snprintf(dest_path, sizeof(dest_path), "%s/%s", keystore_dir, key_name);
 
-    /* Copy file using system command */
-    snprintf(cmd, sizeof(cmd), "cp %s %s", key_source, dest_path);
-    if (system(cmd) != 0) {
-        fprintf(stderr, "Failed to copy key to keystore: %s -> %s\n", key_source, dest_path);
-        return NULL;
+    /* Copy file using C standard I/O (portable across all platforms) */
+    {
+        FILE         *src, *dst;
+        unsigned char buf[4096];
+        size_t        n;
+        int           copy_ok = 1;
+
+        if (NULL == (src = fopen(key_source, "rb"))) {
+            fprintf(stderr, "Failed to open source key: %s\n", key_source);
+            return NULL;
+        }
+        if (NULL == (dst = fopen(dest_path, "wb"))) {
+            fprintf(stderr, "Failed to open dest key: %s\n", dest_path);
+            fclose(src);
+            return NULL;
+        }
+        while ((n = fread(buf, 1, sizeof(buf), src)) > 0) {
+            if (fwrite(buf, 1, n, dst) != n) {
+                copy_ok = 0;
+                break;
+            }
+        }
+        fclose(src);
+        fclose(dst);
+        if (!copy_ok) {
+            fprintf(stderr, "Failed to copy key to keystore: %s -> %s\n", key_source, dest_path);
+            return NULL;
+        }
     }
 
     ret_value = strdup(dest_path);
