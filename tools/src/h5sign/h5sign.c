@@ -754,8 +754,8 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 
     /* Prepare and write footer in little-endian format */
     {
-        uint8_t             footer_buf[H5PL_SIG_FOOTER_SIZE];
-        H5PL_sig_footer_t   footer;
+        uint8_t           footer_buf[H5PL_SIG_FOOTER_SIZE];
+        H5PL_sig_footer_t footer;
 
         footer.signature_length = (uint32_t)sig_len;
         footer.algorithm_id     = algorithm_id;

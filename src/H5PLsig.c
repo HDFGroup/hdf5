@@ -651,7 +651,7 @@ H5PL__load_keys_from_directory(const char *dir_path)
     while (NULL != (entry = readdir(dir))) {
         char  *file_path = NULL;
         size_t namelen   = strlen(entry->d_name);
-        size_t    path_len;
+        size_t path_len;
 
         /* Skip . and .. */
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
