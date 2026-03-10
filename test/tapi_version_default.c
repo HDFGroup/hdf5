@@ -51,7 +51,7 @@ main(void)
 {
     int nerrors = 0;
 
-    printf("Testing API version defaulting for versioned functions\n");
+    TESTING("API version defaulting for versioned functions");
 
 #if TEST_API_VERSION == 16
     printf("Configured with H5_USE_16_API\n");
@@ -346,10 +346,11 @@ main(void)
 #endif
 
     if (nerrors) {
-        fprintf(stderr, "\n*** %d TEST%s FAILED ***\n", nerrors, nerrors > 1 ? "S" : "");
+        H5_FAILED();
+        fprintf(stderr, "    %d version check%s failed\n", nerrors, nerrors > 1 ? "s" : "");
         return 1;
     }
 
-    printf("\nAll API version defaulting tests passed.\n");
+    PASSED();
     return 0;
 }

@@ -543,6 +543,11 @@ sub create_test ($) {
     my $test_dir = $prefix;
     $test_dir =~ s/src\/?$/test\//;
 
+    # Validate the substitution succeeded
+    if ($test_dir eq $prefix && $prefix ne "") {
+        die "create_test: prefix '$prefix' does not end in 'src/' -- cannot derive test directory";
+    }
+
     # Create test directory if it doesn't exist
     if ($test_dir ne "" && ! -d $test_dir) {
         mkdir $test_dir or die "unable to create directory: $test_dir";
@@ -596,7 +601,7 @@ sub create_test ($) {
     print TEST "main(void)\n";
     print TEST "{\n";
     print TEST "    int nerrors = 0;\n\n";
-    print TEST "    printf(\"Testing API version defaulting for versioned functions\\n\");\n\n";
+    print TEST "    TESTING(\"API version defaulting for versioned functions\");\n\n";
 
     # Generate test sections for each API version
     my $first = 1;
@@ -632,10 +637,11 @@ sub create_test ($) {
 
     # Print result checking and return
     print TEST "    if (nerrors) {\n";
-    print TEST "        fprintf(stderr, \"\\n*** %d TEST%s FAILED ***\\n\", nerrors, nerrors > 1 ? \"S\" : \"\");\n";
+    print TEST "        H5_FAILED();\n";
+    print TEST "        fprintf(stderr, \"    %d version check%s failed\\n\", nerrors, nerrors > 1 ? \"s\" : \"\");\n";
     print TEST "        return 1;\n";
     print TEST "    }\n\n";
-    print TEST "    printf(\"\\nAll API version defaulting tests passed.\\n\");\n";
+    print TEST "    PASSED();\n";
     print TEST "    return 0;\n";
     print TEST "}\n";
 
