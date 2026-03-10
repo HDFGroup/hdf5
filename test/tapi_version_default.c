@@ -28,22 +28,21 @@
 /*
  * Helper macro: check that a _vers macro equals an expected value.
  */
-#define CHECK_VERS(func_name, expected)                                  \
-    do {                                                                 \
-        if (func_name##_vers != (expected)) {                            \
-            fprintf(stderr, "FAIL: %s_vers = %d, expected %d\n",      \
-                    #func_name, func_name##_vers, (expected));            \
-            nerrors++;                                                    \
-        }                                                                \
+#define CHECK_VERS(func_name, expected)                                                                      \
+    do {                                                                                                     \
+        if (func_name##_vers != (expected)) {                                                                \
+            fprintf(stderr, "FAIL: %s_vers = %d, expected %d\n", #func_name, func_name##_vers, (expected));  \
+            nerrors++;                                                                                       \
+        }                                                                                                    \
     } while (0)
 
-#define CHECK_VERS_T(type_name, expected)                                \
-    do {                                                                 \
-        if (type_name##_t_vers != (expected)) {                          \
-            fprintf(stderr, "FAIL: %s_t_vers = %d, expected %d\n",    \
-                    #type_name, type_name##_t_vers, (expected));          \
-            nerrors++;                                                    \
-        }                                                                \
+#define CHECK_VERS_T(type_name, expected)                                                                    \
+    do {                                                                                                     \
+        if (type_name##_t_vers != (expected)) {                                                              \
+            fprintf(stderr, "FAIL: %s_t_vers = %d, expected %d\n", #type_name, type_name##_t_vers,           \
+                    (expected));                                                                             \
+            nerrors++;                                                                                       \
+        }                                                                                                    \
     } while (0)
 
 int
