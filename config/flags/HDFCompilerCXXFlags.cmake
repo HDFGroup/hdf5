@@ -139,14 +139,7 @@ if (CMAKE_CXX_COMPILER_LOADED)
     list (APPEND HDF5_CMAKE_CXX_FLAGS "${OPTIMIZE_CXXFLAGS}")
   endif ()
 
-  #-----------------------------------------------------------------------------
-  # Option to override the compiler for h5c++
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_PARALLEL AND MPI_CXX_FOUND)
-    set (_HDF5_H5CC_CXX_COMPILER ${MPI_CXX_COMPILER})
-  else ()
-    set (_HDF5_H5CC_CXX_COMPILER ${CMAKE_CXX_COMPILER})
-  endif ()
+  set (_HDF5_H5CC_CXX_COMPILER ${CMAKE_CXX_COMPILER})
   set (HDF5_H5CC_CXX_COMPILER ${_HDF5_H5CC_CXX_COMPILER} CACHE STRING "C++ compiler to use in h5c++")
 endif ()
 

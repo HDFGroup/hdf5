@@ -1434,7 +1434,7 @@ if (H5_HAVE_PKGCONFIG)
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
       COMPONENT libraries
   )
-  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+  if (HDF5_ENABLE_PARALLEL)
     #legacy requires a different name
     configure_file (
         ${HDF_CONFIG_DIR}/libh5cc.in
@@ -1454,19 +1454,15 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-  # This custom target and doxygen/configure work together
-  # Replace variables inside @@ with the current values
-  add_custom_target (hdf5lib_doc ALL
-        COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-        DEPENDS ${HDF5_SRC_BINARY_DIR}/H5build_settings.c
-        WORKING_DIRECTORY ${HDF5_SRC_DIR}
-        COMMENT "Generating HDF5 library Source API documentation with Doxygen"
-        VERBATIM )
-
-  if (NOT TARGET doxygen)
-    add_custom_target (doxygen)
-  endif ()
-
-  add_dependencies (doxygen hdf5lib_doc)
-
+  # Contribute the core library headers and the H5build_settings.c generated
+  # file to the global property that the top-level doc target reads. The
+  # hdf5lib_doc target itself is defined at the very end of the top-level
+  # CMakeLists.txt, after all language-binding subdirectories (c++, fortran,
+  # java, tools) have been processed and have appended their own sources to
+  # HDF5_DOXYGEN_LIB_INPUTS. This eliminates the need for file(GLOB) here.
+  set_property (GLOBAL APPEND PROPERTY HDF5_DOXYGEN_LIB_INPUTS
+    ${H5_PUBLIC_HEADERS}
+    ${H5_GENERATED_HEADERS}
+    ${HDF5_SRC_BINARY_DIR}/H5build_settings.c
+  )
 endif ()

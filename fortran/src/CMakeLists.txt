@@ -704,3 +704,16 @@ if (H5_HAVE_PKGCONFIG)
     )
   endif ()
 endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build documentation
+#-----------------------------------------------------------------------------
+if (DOXYGEN_FOUND)
+  # Contribute the static (non-generated) Fortran F90 sources to the main
+  # library documentation input list. Generated files (H5_gen.F90,
+  # H5fortran_types.F90) are build-time artefacts and are omitted since
+  # Doxygen does not require them for the API reference.
+  set_property (GLOBAL APPEND PROPERTY HDF5_DOXYGEN_LIB_INPUTS
+    ${f90_F_BASE_SOURCES}
+  )
+endif ()
