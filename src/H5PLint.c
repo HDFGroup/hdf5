@@ -465,6 +465,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
                     *plugin_type = H5PL_TYPE_VFD;
                 *plugin_info = cls;
             }
+
             break;
         }
 

@@ -799,6 +799,7 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, bool 
 
     /* Loop over the paths in the table, checking for an appropriate plugin */
     for (u = 0; u < H5PL_num_paths_g; u++) {
+
         /* Search for the plugin in this path */
         if (H5PL__find_plugin_in_path(search_params, found, H5PL_paths_g[u], plugin_info) < 0)
             HERROR(H5E_PLUGIN, H5E_CANTGET, "search in path %s encountered an error", H5PL_paths_g[u]);
