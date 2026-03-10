@@ -38,9 +38,6 @@ jobs:
     runs-on: windows-11-arm
     if: ${{ inputs.build_mode != 'Debug' }}
     steps:
-      - name: Check OpenSSL Version (Windows)
-        run: openssl version
-
       - name: Get Sources
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
