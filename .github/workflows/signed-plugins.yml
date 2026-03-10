@@ -97,6 +97,10 @@ jobs:
         openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
         mkdir -p ci-keystore
         cp ci-test-public.pem ci-keystore/
+        # Pre-seed build keys so CMake reuses the CI key pair (avoids key mismatch)
+        mkdir -p build
+        cp ci-test-private.pem build/private.pem
+        cp ci-test-public.pem build/public.pem
 
     - name: Generate test RSA key pair (Windows)
       if: runner.os == 'Windows'
@@ -106,6 +110,10 @@ jobs:
         & openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
         New-Item -ItemType Directory -Force -Path ci-keystore
         Copy-Item ci-test-public.pem ci-keystore/
+        # Pre-seed build keys so CMake reuses the CI key pair (avoids key mismatch)
+        New-Item -ItemType Directory -Force -Path build
+        Copy-Item ci-test-private.pem build\private.pem
+        Copy-Item ci-test-public.pem build\public.pem
 
     - name: Configure CMake
       shell: bash
@@ -131,7 +139,7 @@ jobs:
     - name: Build
       run: cmake --build build --parallel 4 --config ${{ matrix.config.build_type }}
 
-    - name: Copy OpenSSL DLLs and secure keystore (Windows)
+    - name: Copy OpenSSL DLLs and secure keystores (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
@@ -139,6 +147,8 @@ jobs:
         Copy-Item "C:\Program Files\OpenSSL\bin\libssl-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
         # Restrict test keystore ACLs so permission check passes
         icacls build\test_keystore /inheritance:r /grant "${env:USERNAME}:(OI)(CI)F" /grant "Administrators:(OI)(CI)F"
+        # Also restrict the compile-time keystore (ci-keystore)
+        icacls ci-keystore /inheritance:r /grant "${env:USERNAME}:(OI)(CI)F" /grant "Administrators:(OI)(CI)F"
 
     - name: Run Tests
       shell: bash

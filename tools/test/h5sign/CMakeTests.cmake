@@ -212,6 +212,21 @@ if (OPENSSL_EXECUTABLE)
     DEPENDS H5SIGN-genkey-public
   )
 
+  # On Windows, restrict test keystore ACLs so the permission security check passes
+  if (WIN32)
+    add_test (
+      NAME H5SIGN-verify-secure-keystore
+      COMMAND powershell -NonInteractive -NoProfile
+        -Command "icacls '${PROJECT_BINARY_DIR}/testfiles/test_keystore' /inheritance:r '/grant' ($env:USERNAME + ':(OI)(CI)F') '/grant' 'Administrators:(OI)(CI)F'"
+    )
+    set_tests_properties (H5SIGN-verify-secure-keystore PROPERTIES
+      DEPENDS H5SIGN-verify-setup-keystore
+    )
+    set (H5SIGN_COPY_PUBKEY_DEPS "H5SIGN-verify-setup-keystore;H5SIGN-verify-secure-keystore")
+  else ()
+    set (H5SIGN_COPY_PUBKEY_DEPS "H5SIGN-verify-setup-keystore")
+  endif ()
+
   # Copy public key to keystore directory
   add_test (
     NAME H5SIGN-verify-copy-pubkey
@@ -219,7 +234,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-copy-pubkey PROPERTIES
-    DEPENDS H5SIGN-verify-setup-keystore
+    DEPENDS "${H5SIGN_COPY_PUBKEY_DEPS}"
   )
 
   # Create unsigned plugin for negative test
