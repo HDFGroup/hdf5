@@ -470,6 +470,8 @@ herr_t
 H5PL__validate_directory_permissions(const char *dir_path)
 {
     h5_stat_t                st;
+    char                     abs_path[MAX_PATH];
+    const char              *check_path          = dir_path;
     PSECURITY_DESCRIPTOR     pSD                  = NULL;
     PACL                     pDACL                = NULL;
     PSID                     pSidEveryone         = NULL;
@@ -496,10 +498,14 @@ H5PL__validate_directory_permissions(const char *dir_path)
     if (!S_ISDIR(st.st_mode))
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore path is not a directory: %s", dir_path);
 
-    /* Windows ACL-based permission checking */
+    /* Windows ACL-based permission checking.
+     * GetNamedSecurityInfoA requires an absolute path with backslashes;
+     * resolve any relative or forward-slash path to a canonical absolute path. */
+    if (GetFullPathNameA(dir_path, MAX_PATH, abs_path, NULL) != 0)
+        check_path = abs_path;
 
     /* Get the security descriptor for the directory */
-    dwRes = GetNamedSecurityInfoA(dir_path, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pDACL,
+    dwRes = GetNamedSecurityInfoA(check_path, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pDACL,
                                   NULL, &pSD);
 
     if (dwRes != ERROR_SUCCESS) {
