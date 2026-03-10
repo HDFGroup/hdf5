@@ -571,6 +571,43 @@ sub create_test ($) {
     print TEST " *          -DH5_USE_*_API and -DTEST_API_VERSION=* flags to verify each\n";
     print TEST " *          API version level.\n";
     print TEST " */\n";
+
+    # Emit preamble that clears all global API version defaults.
+    # When the project is configured with a default API version (e.g.,
+    # HDF5_DEFAULT_API_VERSION=v16), H5pubconf.h defines H5_USE_16_API_DEFAULT,
+    # which causes H5version.h to activate H5_USE_16_API. If the test also
+    # defines -DH5_USE_200_API, both blocks would be active and the earliest
+    # one wins (setting everything to version 1). To isolate each test to
+    # exactly one API version, we include H5pubconf.h first (setting its
+    # include guard), then #undef all API version macros, and re-establish
+    # only the version under test before including the rest of the headers.
+    print TEST "/* Include config header first to set its include guard */\n";
+    print TEST "#include \"H5pubconf.h\"\n\n";
+    print TEST "/* Clear all API version macros that may have been set by the\n";
+    print TEST " * global default configuration, so only the version under test\n";
+    print TEST " * is active when H5version.h is processed.\n";
+    print TEST " */\n";
+    foreach my $api_vers (@versions) {
+        print TEST "#undef H5_USE_${api_vers}_API_DEFAULT\n";
+        print TEST "#undef H5_USE_${api_vers}_API\n";
+    }
+    print TEST "\n";
+    print TEST "/* Re-establish only the API version under test */\n";
+    my $first_preamble = 1;
+    foreach my $api_vers (@versions) {
+        if ($first_preamble) {
+            print TEST "#if TEST_API_VERSION == $api_vers\n";
+            $first_preamble = 0;
+        }
+        else {
+            print TEST "#elif TEST_API_VERSION == $api_vers\n";
+        }
+        print TEST "  #define H5_USE_${api_vers}_API 1\n";
+    }
+    print TEST "#else\n";
+    print TEST "  #error \"TEST_API_VERSION not set to a valid value\"\n";
+    print TEST "#endif\n\n";
+
     print TEST "#include \"h5test.h\"\n\n";
 
     # Print CHECK_VERS macro for functions

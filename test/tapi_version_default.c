@@ -23,6 +23,43 @@
  *          -DH5_USE_*_API and -DTEST_API_VERSION=* flags to verify each
  *          API version level.
  */
+/* Include config header first to set its include guard */
+#include "H5pubconf.h"
+
+/* Clear all API version macros that may have been set by the
+ * global default configuration, so only the version under test
+ * is active when H5version.h is processed.
+ */
+#undef H5_USE_16_API_DEFAULT
+#undef H5_USE_16_API
+#undef H5_USE_18_API_DEFAULT
+#undef H5_USE_18_API
+#undef H5_USE_110_API_DEFAULT
+#undef H5_USE_110_API
+#undef H5_USE_112_API_DEFAULT
+#undef H5_USE_112_API
+#undef H5_USE_114_API_DEFAULT
+#undef H5_USE_114_API
+#undef H5_USE_200_API_DEFAULT
+#undef H5_USE_200_API
+
+/* Re-establish only the API version under test */
+#if TEST_API_VERSION == 16
+  #define H5_USE_16_API 1
+#elif TEST_API_VERSION == 18
+  #define H5_USE_18_API 1
+#elif TEST_API_VERSION == 110
+  #define H5_USE_110_API 1
+#elif TEST_API_VERSION == 112
+  #define H5_USE_112_API 1
+#elif TEST_API_VERSION == 114
+  #define H5_USE_114_API 1
+#elif TEST_API_VERSION == 200
+  #define H5_USE_200_API 1
+#else
+  #error "TEST_API_VERSION not set to a valid value"
+#endif
+
 #include "h5test.h"
 
 /*
