@@ -4990,14 +4990,9 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t
 {
     if (a->version != b->version)
         return (false);
-#if defined(_WIN32)
-    /*
-     * On Windows, function pointer addresses can differ because of import
-     * thunks even when they represent the same callback symbol.
-     */
     else if ((a->rpt_fcn == NULL) != (b->rpt_fcn == NULL))
         return (false);
-#else
+#ifndef H5_HAVE_MINGW
     else if (a->rpt_fcn != b->rpt_fcn)
         return (false);
 #endif
