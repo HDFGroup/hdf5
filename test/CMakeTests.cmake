@@ -916,11 +916,7 @@ if ("H5TEST-error_test" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
 endif ()
 
 #-- Adding tests for API version defaulting
-if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
-  set (API_VERSION_TEST_NUMBERS 16 18 110 112 114 200)
-else ()
-  set (API_VERSION_TEST_NUMBERS 200)
-endif ()
+#   API_VERSION_TEST_NUMBERS is defined in CMakeLists.txt and already in scope
 foreach (api_num IN LISTS API_VERSION_TEST_NUMBERS)
   add_test (NAME H5TEST-tapi_version_default_v${api_num}
       COMMAND $<TARGET_FILE:tapi_version_default_v${api_num}>

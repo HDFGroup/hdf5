@@ -670,8 +670,12 @@ foreach (api_num IN LISTS API_VERSION_TEST_NUMBERS)
   set (test_name tapi_version_default_v${api_num})
   add_executable (${test_name} ${HDF5_TEST_SOURCE_DIR}/tapi_version_default.c)
   target_include_directories (${test_name} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  target_compile_options(${test_name} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  target_compile_definitions(${test_name} PRIVATE "${HDF5_TEST_COMPILE_DEFS_PRIVATE}" "H5_USE_${api_num}_API" "TEST_API_VERSION=${api_num}")
+  target_compile_options(${test_name} PRIVATE ${HDF5_CMAKE_C_FLAGS})
+  target_compile_definitions(${test_name} PRIVATE
+      ${HDF5_TEST_COMPILE_DEFS_PRIVATE}
+      H5_USE_${api_num}_API
+      TEST_API_VERSION=${api_num}
+  )
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${test_name} STATIC)
     target_link_libraries (${test_name} PRIVATE ${HDF5_TEST_LIB_TARGET})
