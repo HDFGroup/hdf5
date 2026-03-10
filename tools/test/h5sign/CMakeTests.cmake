@@ -236,7 +236,8 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-copy-pubkey PROPERTIES
-    FIXTURES_REQUIRED "H5SIGN_keys;H5SIGN_keystore"
+    DEPENDS H5SIGN-verify-setup-keystore
+    FIXTURES_REQUIRED H5SIGN_keys
     FIXTURES_SETUP H5SIGN_keystore
   )
 
