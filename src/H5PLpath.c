@@ -88,7 +88,6 @@ static unsigned H5PL_num_paths_g = 0;
 /* The capacity of the path table */
 static unsigned H5PL_path_capacity_g = H5PL_INITIAL_PATH_CAPACITY;
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5PL__insert_at()
  *
