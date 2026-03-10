@@ -15,6 +15,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ## 📖 Contents
 * [Executive Summary](CHANGELOG.md#execsummary)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
+* [Deprecations](CHANGELOG.md#-deprecations)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](CHANGELOG.md#-bug-fixes)
 * [Support for new platforms and languages](CHANGELOG.md#-support-for-new-platforms-and-languages)
@@ -40,6 +41,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Enhanced Features:
 
+- Made several improvements to the CMake logic for handling filter libraries
 
 ## Java Enhancements:
 
@@ -50,10 +52,34 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # ⚠️ Breaking Changes
 
+# 🪦 Deprecations
+
+- The CMake variable `ZLIB_GIT_BRANCH` has been deprecated in favor of `ZLIB_GIT_TAG`
+- The CMake variable `ZLIBNG_GIT_BRANCH` has been deprecated in favor of `ZLIBNG_GIT_TAG`
+- The CMake variable `LIBAEC_GIT_BRANCH` has been deprecated in favor of `LIBAEC_GIT_TAG`
+- The CMake variable `PLUGIN_GIT_BRANCH` has been deprecated in favor of `HDF5_FILTER_PLUGINS_GIT_TAG`
+- The CMake variable `PLUGIN_GIT_URL` has been deprecated in favor of `HDF5_FILTER_PLUGINS_GIT_URL`
+- The CMake variable `PLUGIN_TGZ_NAME` has been deprecated in favor of `HDF5_FILTER_PLUGINS_TGZ_NAME`
+- The CMake variable `PLUGIN_TGZ_ORIGPATH` has been deprecated in favor of `HDF5_FILTER_PLUGINS_TGZ_ORIGPATH`
+- The CMake variable `PLUGIN_PACKAGE_NAME` has been deprecated in favor of `HDF5_FILTER_PLUGINS_PACKAGE_NAME`
 
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Updated external building of zlib, zlib-ng and libaec to not use a patching process
+
+   When building these libraries from external sources while building HDF5, the library previously used a patching process to adapt the libraries to its own build process. The sources for these libraries are no longer patched and build directly from the sources of the latest upstream releases (currently, zlib 1.3.2, zlib-ng 2.3.3 and libaec 1.1.6). This also fixed an issue with the build of zlib-ng failing due to updates that were made since the last version that HDF5 was patching the sources for.
+
+   Fixes GitHub issue #6204
+
+### Fixed an issue where CMake-built installations of zlib libraries couldn't be located on a system
+
+   An incorrect package name was being supplied to CMake's find_package() function when attempting to locate zlib libraries on the system in Config mode. The package name has been corrected and CMake-built zlib libraries can now be located.
+
+### Fixed an issue where static zlib libraries couldn't be found on the system
+
+   The value of the HDF5 CMake variable `HDF5_USE_ZLIB_STATIC` was previously used incorrectly when locating zlib libraries on the system with CMake's find_package() function, causing it to have no effect. This has been fixed and static zlib libraries can now be located.
 
 ### Added a CMake module to locate zlib-ng for zlib support
 
