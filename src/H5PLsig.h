@@ -81,6 +81,47 @@ typedef struct H5PL_sig_footer_t {
     uint32_t magic;            /* Magic number H5PL_SIG_MAGIC */
 } H5PL_sig_footer_t;
 
+/*-------------------------------------------------------------------------
+ * Function:    H5PL_sig_encode_footer
+ *
+ * Purpose:     Encode a signature footer struct into a 12-byte little-endian
+ *              buffer suitable for appending to a signed plugin file.
+ *
+ * Note:        Requires H5encode.h for UINT32ENCODE / UINT16ENCODE.
+ *-------------------------------------------------------------------------
+ */
+static H5_ATTR_UNUSED void
+H5PL_sig_encode_footer(uint8_t buf[H5PL_SIG_FOOTER_SIZE], const H5PL_sig_footer_t *footer)
+{
+    uint8_t *p = buf;
+
+    UINT32ENCODE(p, footer->signature_length);
+    *p++ = footer->algorithm_id;
+    *p++ = footer->format_version;
+    UINT16ENCODE(p, footer->reserved);
+    UINT32ENCODE(p, footer->magic);
+} /* end H5PL_sig_encode_footer() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL_sig_decode_footer
+ *
+ * Purpose:     Decode a 12-byte little-endian buffer into a footer struct.
+ *
+ * Note:        Requires H5encode.h for UINT32DECODE / UINT16DECODE.
+ *-------------------------------------------------------------------------
+ */
+static H5_ATTR_UNUSED void
+H5PL_sig_decode_footer(const uint8_t buf[H5PL_SIG_FOOTER_SIZE], H5PL_sig_footer_t *footer)
+{
+    const uint8_t *p = buf;
+
+    UINT32DECODE(p, footer->signature_length);
+    footer->algorithm_id   = *p++;
+    footer->format_version = *p++;
+    UINT16DECODE(p, footer->reserved);
+    UINT32DECODE(p, footer->magic);
+} /* end H5PL_sig_decode_footer() */
+
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
 
 /*

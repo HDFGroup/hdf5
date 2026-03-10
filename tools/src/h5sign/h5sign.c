@@ -539,15 +539,14 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
 
     /* Detect already-signed files: check for HDF5 magic number in the last footer bytes */
     if (file_size >= (hsize_t)H5PL_SIG_FOOTER_SIZE) {
-        uint8_t  check_buf[H5PL_SIG_FOOTER_SIZE];
-        uint32_t existing_magic = 0;
+        uint8_t           check_buf[H5PL_SIG_FOOTER_SIZE];
+        H5PL_sig_footer_t check_footer;
 
         if (HDlseek(fd, (HDoff_t)(file_size - (hsize_t)H5PL_SIG_FOOTER_SIZE), SEEK_SET) >= 0) {
             h5_posix_io_ret_t nr = HDread(fd, check_buf, H5PL_SIG_FOOTER_SIZE);
             if (nr == (h5_posix_io_ret_t)H5PL_SIG_FOOTER_SIZE) {
-                uint8_t *cp = check_buf + H5PL_SIG_FOOTER_MAGIC_OFFSET;
-                UINT32DECODE(cp, existing_magic);
-                if (existing_magic == H5PL_SIG_MAGIC) {
+                H5PL_sig_decode_footer(check_buf, &check_footer);
+                if (check_footer.magic == H5PL_SIG_MAGIC) {
                     if (!opt_force) {
                         fprintf(rawerrorstream, "Error: Plugin file '%s' is already signed\n", plugin_path);
                         fprintf(rawerrorstream,
@@ -558,13 +557,14 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
                     }
 
                     /* --force: strip the existing signature and footer so we can re-sign.
-                     * Decode signature_length from bytes 0-3 of the footer we already read. */
+                     * Decode footer from the buffer we already read. */
                     {
-                        uint32_t existing_sig_len = 0;
-                        uint8_t *cp_sig           = check_buf; /* sig_len at bytes 0-3 */
-                        hsize_t  binary_size;
+                        H5PL_sig_footer_t existing_footer;
+                        uint32_t          existing_sig_len;
+                        hsize_t           binary_size;
 
-                        UINT32DECODE(cp_sig, existing_sig_len);
+                        H5PL_sig_decode_footer(check_buf, &existing_footer);
+                        existing_sig_len = existing_footer.signature_length;
 
                         if (existing_sig_len == 0 ||
                             (hsize_t)existing_sig_len + (hsize_t)H5PL_SIG_FOOTER_SIZE > file_size) {
@@ -752,21 +752,17 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     if (opt_verbose)
         fprintf(rawoutstream, "Signature appended to plugin\n");
 
-    /* Prepare footer in little-endian format */
+    /* Prepare and write footer in little-endian format */
     {
-        uint8_t  footer_buf[12];
-        uint8_t *p = footer_buf;
+        uint8_t             footer_buf[H5PL_SIG_FOOTER_SIZE];
+        H5PL_sig_footer_t   footer;
 
-        /* Encode signature length as little-endian uint32 */
-        UINT32ENCODE(p, (uint32_t)sig_len);
-        /* Encode algorithm ID (1 byte) */
-        *p++ = algorithm_id;
-        /* Encode format version (1 byte, v1.0 = 1) */
-        *p++ = 1;
-        /* Encode reserved bytes (2 bytes, must be 0) */
-        UINT16ENCODE(p, (uint16_t)0);
-        /* Encode magic number as little-endian uint32 */
-        UINT32ENCODE(p, H5PL_SIG_MAGIC);
+        footer.signature_length = (uint32_t)sig_len;
+        footer.algorithm_id     = algorithm_id;
+        footer.format_version   = H5PL_SIG_FORMAT_VERSION_CURRENT;
+        footer.reserved         = 0;
+        footer.magic            = H5PL_SIG_MAGIC;
+        H5PL_sig_encode_footer(footer_buf, &footer);
 
         /* Write footer to file */
         if (write_with_retry(fd, footer_buf, sizeof(footer_buf), "footer", plugin_path, file_size) < 0) {

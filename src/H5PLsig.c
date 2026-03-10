@@ -143,6 +143,8 @@ typedef enum {
 static int    H5PL__compare_signature_hashes(const void *a, const void *b);
 static herr_t H5PL__load_revoked_signatures(const char *keystore_dir);
 static bool   H5PL__is_signature_revoked(const unsigned char *signature, size_t signature_len);
+static void   H5PL__free_keystore(void);
+static herr_t H5PL__process_key_file(const char *file_path);
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__compare_signature_hashes
@@ -579,6 +581,39 @@ done:
 #endif /* H5_HAVE_WIN32_API */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5PL__process_key_file
+ *
+ * Purpose:     Load a PEM key file and add it to the keystore
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__process_key_file(const char *file_path)
+{
+    EVP_PKEY *key       = NULL;
+    herr_t    ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(file_path);
+
+    /* Try to load key */
+    if (NULL != (key = H5PL__create_public_RSA_from_file(file_path))) {
+        /* Add to keystore */
+        if (H5PL__add_key_to_keystore(key, file_path) < 0) {
+            EVP_PKEY_free(key);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add key to keystore");
+        }
+        /* Key ownership transferred to keystore */
+    }
+    /* Skip files that fail to load (invalid PEM, etc.) */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__process_key_file() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5PL__load_keys_from_directory
  *
  * Purpose:     Load all .pem files from a directory into the keystore
@@ -614,9 +649,8 @@ H5PL__load_keys_from_directory(const char *dir_path)
 
     /* Iterate through directory entries */
     while (NULL != (entry = readdir(dir))) {
-        char     *file_path = NULL;
-        EVP_PKEY *key       = NULL;
-        size_t    namelen   = strlen(entry->d_name);
+        char  *file_path = NULL;
+        size_t namelen   = strlen(entry->d_name);
         size_t    path_len;
 
         /* Skip . and .. */
@@ -700,17 +734,11 @@ H5PL__load_keys_from_directory(const char *dir_path)
             }
         }
 
-        /* Try to load key */
-        if (NULL != (key = H5PL__create_public_RSA_from_file(file_path))) {
-            /* Add to keystore */
-            if (H5PL__add_key_to_keystore(key, file_path) < 0) {
-                EVP_PKEY_free(key);
-                H5MM_xfree(file_path);
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add key to keystore");
-            }
-            /* Key ownership transferred to keystore */
+        /* Load key and add to keystore */
+        if (H5PL__process_key_file(file_path) < 0) {
+            H5MM_xfree(file_path);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot process key file");
         }
-        /* Skip files that fail to load (invalid PEM, etc.) */
 
         /* Clean up file path */
         H5MM_xfree(file_path);
@@ -750,10 +778,9 @@ H5PL__load_keys_from_directory(const char *dir_path)
         }
 
         do {
-            char      file_path[MAX_PATH];
-            char      canonical_dir[MAX_PATH];
-            char      canonical_file[MAX_PATH];
-            EVP_PKEY *key = NULL;
+            char file_path[MAX_PATH];
+            char canonical_dir[MAX_PATH];
+            char canonical_file[MAX_PATH];
 
             /* Skip directories */
             if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
@@ -783,16 +810,9 @@ H5PL__load_keys_from_directory(const char *dir_path)
                 }
             }
 
-            /* Try to load key */
-            if (NULL != (key = H5PL__create_public_RSA_from_file(file_path))) {
-                /* Add to keystore */
-                if (H5PL__add_key_to_keystore(key, file_path) < 0) {
-                    EVP_PKEY_free(key);
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add key to keystore");
-                }
-                /* Key ownership transferred to keystore */
-            }
-            /* Skip files that fail to load (invalid PEM, etc.) */
+            /* Load key and add to keystore */
+            if (H5PL__process_key_file(file_path) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot process key file");
 
         } while (FindNextFileA(dir_handle, &find_data) != 0);
     }
@@ -804,6 +824,42 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__load_keys_from_directory() */
 #endif /* H5_HAVE_WIN32_API */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__free_keystore
+ *
+ * Purpose:     Free all keys and revocation entries in the keystore
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+H5PL__free_keystore(void)
+{
+    if (H5PL_keystore_g) {
+        size_t i;
+        for (i = 0; i < H5PL_keystore_count_g; i++) {
+            if (H5PL_keystore_g[i].key)
+                EVP_PKEY_free(H5PL_keystore_g[i].key);
+            if (H5PL_keystore_g[i].source)
+                H5MM_xfree(H5PL_keystore_g[i].source);
+        }
+        H5MM_xfree(H5PL_keystore_g);
+        H5PL_keystore_g = NULL;
+    }
+    H5PL_keystore_count_g    = 0;
+    H5PL_keystore_capacity_g = 0;
+
+    if (H5PL_revoked_sigs_g) {
+        H5MM_xfree(H5PL_revoked_sigs_g);
+        H5PL_revoked_sigs_g = NULL;
+    }
+    H5PL_revoked_sigs_count_g    = 0;
+    H5PL_revoked_sigs_capacity_g = 0;
+
+    H5PL_keystore_initialized_g     = false;
+    H5PL_revoked_sigs_initialized_g = false;
+} /* end H5PL__free_keystore() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__init_keystore
@@ -921,32 +977,8 @@ H5PL__init_keystore(void)
 
 done:
     /* Cleanup on initialization failure */
-    if (ret_value < 0) {
-        if (H5PL_keystore_g) {
-            size_t i;
-            /* Free all keys that were added before failure */
-            for (i = 0; i < H5PL_keystore_count_g; i++) {
-                if (H5PL_keystore_g[i].key)
-                    EVP_PKEY_free(H5PL_keystore_g[i].key);
-                if (H5PL_keystore_g[i].source)
-                    H5MM_xfree(H5PL_keystore_g[i].source);
-            }
-            H5MM_xfree(H5PL_keystore_g);
-            H5PL_keystore_g          = NULL;
-            H5PL_keystore_count_g    = 0;
-            H5PL_keystore_capacity_g = 0;
-        }
-
-        /* Free revocation list allocated before failure */
-        if (H5PL_revoked_sigs_g) {
-            H5MM_xfree(H5PL_revoked_sigs_g);
-            H5PL_revoked_sigs_g          = NULL;
-            H5PL_revoked_sigs_count_g    = 0;
-            H5PL_revoked_sigs_capacity_g = 0;
-        }
-        H5PL_keystore_initialized_g     = false;
-        H5PL_revoked_sigs_initialized_g = false;
-    }
+    if (ret_value < 0)
+        H5PL__free_keystore();
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__init_keystore() */
@@ -1351,9 +1383,8 @@ static herr_t
 H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_path,
                                H5PL_sig_footer_t *footer_out, size_t *binary_size_out)
 {
-    uint8_t  footer_buf[H5PL_SIG_FOOTER_SIZE];
-    uint8_t *p         = footer_buf;
-    herr_t   ret_value = SUCCEED;
+    uint8_t footer_buf[H5PL_SIG_FOOTER_SIZE];
+    herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1372,11 +1403,7 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
         HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read signature footer");
 
     /* Decode footer (little-endian to native byte order) */
-    UINT32DECODE(p, footer_out->signature_length);
-    footer_out->algorithm_id   = *p++;
-    footer_out->format_version = *p++;
-    UINT16DECODE(p, footer_out->reserved);
-    UINT32DECODE(p, footer_out->magic);
+    H5PL_sig_decode_footer(footer_buf, footer_out);
 
     /* Validate magic number */
     if (footer_out->magic != H5PL_SIG_MAGIC)
@@ -1782,32 +1809,8 @@ H5PL__cleanup_signature_cache(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Free all keys in the keystore */
-    if (H5PL_keystore_initialized_g) {
-        if (H5PL_keystore_g) {
-            size_t i;
-            for (i = 0; i < H5PL_keystore_count_g; i++) {
-                if (H5PL_keystore_g[i].key)
-                    EVP_PKEY_free(H5PL_keystore_g[i].key);
-                if (H5PL_keystore_g[i].source)
-                    H5MM_xfree(H5PL_keystore_g[i].source);
-            }
-            H5MM_xfree(H5PL_keystore_g);
-            H5PL_keystore_g = NULL;
-        }
-        H5PL_keystore_count_g       = 0;
-        H5PL_keystore_capacity_g    = 0;
-        H5PL_keystore_initialized_g = false;
-    }
-
-    /* Free revocation list */
-    if (H5PL_revoked_sigs_initialized_g) {
-        H5MM_xfree(H5PL_revoked_sigs_g);
-        H5PL_revoked_sigs_g             = NULL;
-        H5PL_revoked_sigs_count_g       = 0;
-        H5PL_revoked_sigs_capacity_g    = 0;
-        H5PL_revoked_sigs_initialized_g = false;
-    }
+    /* Free all keys in the keystore and revocation list */
+    H5PL__free_keystore();
 
     /* Free all entries in the signature verification cache */
     if (H5PL_sig_cache_g) {
