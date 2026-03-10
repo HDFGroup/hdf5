@@ -915,6 +915,24 @@ if ("H5TEST-error_test" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (H5TEST-error_test PROPERTIES DISABLED true)
 endif ()
 
+#-- Adding tests for API version defaulting
+if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+  set (API_VERSION_TEST_VARIANTS v16 v18 v110 v112 v114 v200)
+else ()
+  set (API_VERSION_TEST_VARIANTS v200)
+endif ()
+foreach (api_ver ${API_VERSION_TEST_VARIANTS})
+  add_test (NAME H5TEST-tapi_version_default_${api_ver}
+      COMMAND $<TARGET_FILE:tapi_version_default_${api_ver}>
+  )
+  set_tests_properties (H5TEST-tapi_version_default_${api_ver} PROPERTIES
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+  if ("H5TEST-tapi_version_default_${api_ver}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5TEST-tapi_version_default_${api_ver} PROPERTIES DISABLED true)
+  endif ()
+endforeach ()
+
 #-- Adding test for links_env
 add_test (NAME H5TEST-links_env-clear-objects
     COMMAND ${CMAKE_COMMAND} -E remove
