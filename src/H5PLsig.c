@@ -471,7 +471,7 @@ H5PL__validate_directory_permissions(const char *dir_path)
 {
     h5_stat_t                st;
     char                     abs_path[MAX_PATH];
-    const char              *check_path          = dir_path;
+    const char              *check_path           = dir_path;
     PSECURITY_DESCRIPTOR     pSD                  = NULL;
     PACL                     pDACL                = NULL;
     PSID                     pSidEveryone         = NULL;
