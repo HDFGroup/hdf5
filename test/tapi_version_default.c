@@ -45,19 +45,19 @@
 
 /* Re-establish only the API version under test */
 #if TEST_API_VERSION == 16
-  #define H5_USE_16_API 1
+#define H5_USE_16_API 1
 #elif TEST_API_VERSION == 18
-  #define H5_USE_18_API 1
+#define H5_USE_18_API 1
 #elif TEST_API_VERSION == 110
-  #define H5_USE_110_API 1
+#define H5_USE_110_API 1
 #elif TEST_API_VERSION == 112
-  #define H5_USE_112_API 1
+#define H5_USE_112_API 1
 #elif TEST_API_VERSION == 114
-  #define H5_USE_114_API 1
+#define H5_USE_114_API 1
 #elif TEST_API_VERSION == 200
-  #define H5_USE_200_API 1
+#define H5_USE_200_API 1
 #else
-  #error "TEST_API_VERSION not set to a valid value"
+#error "TEST_API_VERSION not set to a valid value"
 #endif
 
 #include "h5test.h"
