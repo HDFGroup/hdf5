@@ -70,7 +70,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-genkey-private PROPERTIES
-    DEPENDS H5SIGN-gentest
+    FIXTURES_REQUIRED H5SIGN_testfiles
     FIXTURES_SETUP H5SIGN_keys
   )
 
@@ -82,6 +82,7 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-genkey-public PROPERTIES
     DEPENDS H5SIGN-genkey-private
+    FIXTURES_REQUIRED H5SIGN_testfiles
     FIXTURES_SETUP H5SIGN_keys
   )
 
@@ -106,7 +107,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-sign_small PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-small-for-signing"
+    DEPENDS H5SIGN-verify-copy-small-for-signing
     FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys"
   )
 
@@ -117,7 +118,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-sign_medium_verbose PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-unsigned"
+    DEPENDS H5SIGN-verify-copy-unsigned
     FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys"
   )
 
@@ -130,7 +131,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-sign_large PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-genkey-private;H5SIGN-genkey-public;H5SIGN-verify-copy-large-for-signing"
+    DEPENDS H5SIGN-verify-copy-large-for-signing
     FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys"
   )
 
@@ -182,7 +183,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-error_bad_plugin PROPERTIES
-    DEPENDS "H5SIGN-genkey-private;H5SIGN-genkey-public"
+    FIXTURES_REQUIRED H5SIGN_keys
     WILL_FAIL "true"
   )
 
@@ -193,7 +194,7 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-error_bad_key PROPERTIES
-    DEPENDS H5SIGN-gentest
+    FIXTURES_REQUIRED H5SIGN_testfiles
     WILL_FAIL "true"
   )
 
@@ -202,6 +203,8 @@ if (OPENSSL_EXECUTABLE)
   # These tests verify that the signature verification and caching work
   # --------------------------------------------------------------------
 
+  # ---- Keystore setup (fixture: H5SIGN_keystore) ----
+
   # Create keystore directory for verification tests
   add_test (
     NAME H5SIGN-verify-setup-keystore
@@ -209,7 +212,8 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-setup-keystore PROPERTIES
-    DEPENDS H5SIGN-genkey-public
+    FIXTURES_REQUIRED H5SIGN_keys
+    FIXTURES_SETUP H5SIGN_keystore
   )
 
   # On Windows, restrict test keystore ACLs so the permission security check passes
@@ -221,10 +225,8 @@ if (OPENSSL_EXECUTABLE)
     )
     set_tests_properties (H5SIGN-verify-secure-keystore PROPERTIES
       DEPENDS H5SIGN-verify-setup-keystore
+      FIXTURES_SETUP H5SIGN_keystore
     )
-    set (H5SIGN_COPY_PUBKEY_DEPS "H5SIGN-verify-setup-keystore;H5SIGN-verify-secure-keystore")
-  else ()
-    set (H5SIGN_COPY_PUBKEY_DEPS "H5SIGN-verify-setup-keystore")
   endif ()
 
   # Copy public key to keystore directory
@@ -234,8 +236,11 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-copy-pubkey PROPERTIES
-    DEPENDS "${H5SIGN_COPY_PUBKEY_DEPS}"
+    FIXTURES_REQUIRED "H5SIGN_keys;H5SIGN_keystore"
+    FIXTURES_SETUP H5SIGN_keystore
   )
+
+  # ---- Signed plugin preparation (fixture: H5SIGN_signed_plugins) ----
 
   # Create unsigned plugin for negative test
   add_test (
@@ -244,7 +249,8 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-copy-unsigned PROPERTIES
-    DEPENDS H5SIGN-gentest
+    FIXTURES_REQUIRED H5SIGN_testfiles
+    FIXTURES_SETUP H5SIGN_signed_plugins
   )
 
   # Copy plugin_small.so to a private file for the verification sign test,
@@ -255,7 +261,8 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-copy-small-for-signing PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-verify-copy-pubkey"
+    FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keystore"
+    FIXTURES_SETUP H5SIGN_signed_plugins
   )
 
   # Sign the private copy of the small plugin for verification tests
@@ -266,6 +273,8 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-verify-sign-plugins PROPERTIES
     DEPENDS H5SIGN-verify-copy-small-for-signing
+    FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys"
+    FIXTURES_SETUP H5SIGN_signed_plugins
   )
 
   # Rename signed plugin for verification test
@@ -276,6 +285,7 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-verify-rename-signed PROPERTIES
     DEPENDS H5SIGN-verify-sign-plugins
+    FIXTURES_SETUP H5SIGN_signed_plugins
   )
 
   # Copy plugin_large.so to a private file for the cache sign test,
@@ -286,7 +296,8 @@ if (OPENSSL_EXECUTABLE)
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-copy-large-for-signing PROPERTIES
-    DEPENDS "H5SIGN-gentest;H5SIGN-verify-copy-pubkey"
+    FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keystore"
+    FIXTURES_SETUP H5SIGN_signed_plugins
   )
 
   # Sign the private copy of the large plugin for cache tests
@@ -297,6 +308,8 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-verify-sign-cache-test PROPERTIES
     DEPENDS H5SIGN-verify-copy-large-for-signing
+    FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys"
+    FIXTURES_SETUP H5SIGN_signed_plugins
   )
 
   # Rename signed plugin for cache test
@@ -307,6 +320,7 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-verify-rename-cache-test PROPERTIES
     DEPENDS H5SIGN-verify-sign-cache-test
+    FIXTURES_SETUP H5SIGN_signed_plugins
   )
 
   # Create tampered plugin (sign then modify)
@@ -319,16 +333,17 @@ if (OPENSSL_EXECUTABLE)
   )
   set_tests_properties (H5SIGN-verify-create-tampered PROPERTIES
     DEPENDS H5SIGN-verify-rename-signed
+    FIXTURES_SETUP H5SIGN_signed_plugins
   )
 
-  # Run verification tests
+  # ---- Run verification tests ----
   add_test (
     NAME H5SIGN-verify-tests
     COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5signverifytest>
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
   set_tests_properties (H5SIGN-verify-tests PROPERTIES
-    DEPENDS "H5SIGN-verify-rename-signed;H5SIGN-verify-copy-unsigned;H5SIGN-verify-rename-cache-test;H5SIGN-verify-create-tampered"
+    FIXTURES_REQUIRED "H5SIGN_testfiles;H5SIGN_keys;H5SIGN_keystore;H5SIGN_signed_plugins"
   )
 
 else ()
