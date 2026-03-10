@@ -99,6 +99,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    `H5Ovisit()` would previously internally traverse each object's path name from the iteration root group in order to retrieve information about that object, causing severe performance degradation with a deeply nested group structure. Modified the algorithm to instead retrieve information directly from the object. To get this benefit, users should use `H5Ovisit3()`, or use `H5Ovisit2()` with neither `H5O_INFO_HDR` nor `H5O_INFO_META_SIZE` selected in the `fields` parameter. Performance of `H5Ocopy()`, `H5Iget_name()`, and external links with a callback set should also improve in similar situations.
 
+### Versioned API functions now default to earliest version for older API settings
+
+   When a global API compatibility version is set (e.g., `H5_USE_16_API`), functions introduced after that version previously defaulted to their latest version, which could break applications. For example, an application using `H5_USE_16_API` that called `H5Sencode()` (introduced in 1.8, versioned in 1.12) would get `H5Sencode2()` instead of `H5Sencode1()`, potentially causing compilation or runtime failures. Versioned functions now default to their earliest (version 1) variant when the configured API level predates the function's introduction, providing maximum compatibility. See issue [#6278](https://github.com/HDFGroup/hdf5/issues/6278).
+
 ## Parallel Library
 
 ## Fortran Library
