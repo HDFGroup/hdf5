@@ -408,7 +408,7 @@ typedef struct h5tool_format_t {
     /*
      * Fields associated with the individual elements.
      *
-     *   fmt:       A printf(3c) format to use to print the value string
+     *   fmt:       A printf(3) format to use to print the value string
      *              after it has been rendered.  The default is "%s".
      *
      *   suf1:      This string is appended to elements which are followed by
@@ -427,7 +427,7 @@ typedef struct h5tool_format_t {
      * Fields associated with the index values printed at the left edge of
      * each line of output.
      *
-     *   n_fmt:     Each index value is printed according to this printf(3c)
+     *   n_fmt:     Each index value is printed according to this printf(3)
      *              format string which should include a format for a long
      *              integer.  The default is "%lu".
      *
@@ -437,7 +437,7 @@ typedef struct h5tool_format_t {
      *   fmt:       After the index values are formatted individually and
      *              separated from one another by some string, the entire
      *              resulting string will be formatted according to this
-     *              printf(3c) format which should include a format for a
+     *              printf(3) format which should include a format for a
      *              character string.  The default is "%s".
      */
     const char *idx_n_fmt; /*index number format           */
