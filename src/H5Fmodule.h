@@ -925,7 +925,7 @@
  *  ls -l
  * \endcode
  * on a Unix system or the detailed folder listing on an Apple or Microsoft Windows
- * system. The name passed to #H5Fcreate or #H5Fopen should include a printf(3c)-style integer
+ * system. The name passed to #H5Fcreate or #H5Fopen should include a printf(3)-style integer
  * format specifier which will be replaced with the family member number. The first family
  * member is numbered zero (0).
  *
