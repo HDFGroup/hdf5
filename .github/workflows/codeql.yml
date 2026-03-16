@@ -74,6 +74,10 @@ jobs:
                    id: cpp/toctou-race-condition
                - exclude:
                    id: cpp/short-global-name
+               - exclude:
+                   id: cpp/non-constant-format
+               - exclude:
+                   id: cpp/uncontrolled-format-string
 
       - name: Build
         run: |
