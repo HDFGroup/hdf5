@@ -168,7 +168,7 @@ if (ZLIBNG_FOUND)
 
   # Determine zlib-ng include directory (or directories)
   foreach (zlibng_target ${ZLIBNG_LIBRARIES})
-    if (NOT TARGET ${ZLIBNG_LIBRARIES})
+    if (NOT TARGET ${zlibng_target})
       continue ()
     endif ()
 
