@@ -13,6 +13,9 @@ on:
     - cron: "16 7 * * 0"
   workflow_dispatch:  # Allow manual triggering
 
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: Analyze
@@ -39,7 +42,7 @@ jobs:
           echo "F77=mpif90" >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Configure HDF5
         run: |
@@ -62,7 +65,7 @@ jobs:
             ..
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4.32.4
+        uses: github/codeql-action/init@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
         with:
           languages: c-cpp
           build-mode: manual
@@ -98,14 +101,14 @@ jobs:
         shell: bash
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4.32.4
+        uses: github/codeql-action/analyze@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
         with:
           category: "/language:c-cpp"
           output: sarif-results
           upload: failure-only
 
       - name: filter-sarif
-        uses: advanced-security/filter-sarif@v1
+        uses: advanced-security/filter-sarif@f3b8118a9349d88f7b1c0c488476411145b6270d # v1
         with:
           patterns: |
             -**/test/**
@@ -115,6 +118,6 @@ jobs:
           output: sarif-results/cpp.sarif
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v4.32.4
+        uses: github/codeql-action/upload-sarif@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
         with:
           sarif_file: sarif-results/cpp.sarif
