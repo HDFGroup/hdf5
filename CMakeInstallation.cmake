@@ -50,45 +50,46 @@ endif ()
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
-if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  if (HDF5_EXPORTED_TARGETS)
-    if (HDF5_ENABLE_JNI)
-      install (
-          EXPORT ${HDF5_EXPORTED_TARGETS}_java
-          DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-          FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_java-targets.cmake
-          NAMESPACE ${HDF_PACKAGE_NAMESPACE}
-          COMPONENT configinstall
-      )
-    endif ()
-    if (BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
-      install (
-          EXPORT ${HDF5_EXPORTED_TARGETS}_static
-          DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-          FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_static-targets.cmake
-          NAMESPACE ${HDF_PACKAGE_NAMESPACE}
-          COMPONENT configinstall
-      )
-    endif ()
+if (HDF5_EXPORTED_TARGETS AND NOT HDF5_EXTERNALLY_CONFIGURED)
+  if (HDF5_ENABLE_JNI)
     install (
-        EXPORT ${HDF5_EXPORTED_TARGETS}
+        EXPORT ${HDF5_EXPORTED_TARGETS}_java
         DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_java-targets.cmake
         NAMESPACE ${HDF_PACKAGE_NAMESPACE}
         COMPONENT configinstall
     )
   endif ()
-
+  if (BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
+    install (
+        EXPORT ${HDF5_EXPORTED_TARGETS}_static
+        DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_static-targets.cmake
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+        COMPONENT configinstall
+    )
+  endif ()
+  install (
+      EXPORT ${HDF5_EXPORTED_TARGETS}
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+      COMPONENT configinstall
+  )
 endif ()
 
 #-----------------------------------------------------------------------------
-# Export all exported targets to the build tree for use by parent project
+# If built as a sub-project or if cross-compiling, export all exported targets
+# to the build tree
 #-----------------------------------------------------------------------------
-export (
-    TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
-    FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
-    NAMESPACE ${HDF_PACKAGE_NAMESPACE}
-)
+if (HDF5_EXTERNALLY_CONFIGURED OR CMAKE_CROSSCOMPILING)
+  export (
+      TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
+      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+      APPEND
+  )
+endif ()
 
 #-----------------------------------------------------------------------------
 # Set includes needed for build
@@ -174,6 +175,11 @@ endif ()
 #-----------------------------------------------------------------------------
 install (
     FILES ${CMAKE_SOURCE_DIR}/config/cmake/Findlibaec.cmake
+    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
+    COMPONENT configinstall
+)
+install (
+    FILES ${CMAKE_SOURCE_DIR}/config/cmake/FindZLIBNG.cmake
     DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
     COMPONENT configinstall
 )
@@ -524,31 +530,29 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
 
   set (CPACK_INSTALL_CMAKE_PROJECTS "${HDF5_BINARY_DIR};HDF5;ALL;/")
 
-  if (HDF5_PACKAGE_EXTLIBS)
-    if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-      if (H5_ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
-        if (WIN32)
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;ALL;/")
-        else ()
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;libraries;/")
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;configinstall;/")
-        endif ()
+  if (HDF5_PACKAGE_EXTLIBS AND (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT|TGZ"))
+    if (H5_ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
+      if (WIN32)
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;ALL;/")
+      else ()
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;libraries;/")
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;configinstall;/")
       endif ()
-      if (H5_SZIP_FOUND AND SZIP_USE_EXTERNAL)
-        set (SZIP_PROJNAME "${LIBAEC_PACKAGE_NAME}")
-        if (WIN32)
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};ALL;/")
-        else ()
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};libraries;/")
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};configinstall;/")
-        endif ()
+    endif ()
+    if (H5_SZIP_FOUND AND SZIP_USE_EXTERNAL)
+      set (SZIP_PROJNAME "${LIBAEC_PACKAGE_NAME}")
+      if (WIN32)
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};ALL;/")
+      else ()
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};libraries;/")
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};configinstall;/")
       endif ()
-      if (PLUGIN_FOUND AND PLUGIN_USE_EXTERNAL)
-        if (WIN32)
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;ALL;/")
-        else ()
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;libraries;/")
-        endif ()
+    endif ()
+    if (HDF5_PLUGINS_FOUND AND PLUGIN_USE_EXTERNAL)
+      if (WIN32)
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;ALL;/")
+      else ()
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;libraries;/")
       endif ()
     endif ()
   endif ()

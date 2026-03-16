@@ -497,7 +497,6 @@ macro (HDF_DIR_PATHS package_prefix)
   if (NOT ${package_prefix}_INSTALL_DOC_DIR)
     set (${package_prefix}_INSTALL_DOC_DIR ${${package_prefix}_INSTALL_DATA_DIR})
   endif ()
-  message (STATUS "Final: ${${package_prefix}_INSTALL_DOC_DIR}")
 
   # Append the needed INSTALL_RPATH for HDF Standard binary packages
   if (APPLE)
@@ -516,8 +515,6 @@ macro (HDF_DIR_PATHS package_prefix)
   SET_HDF_BUILD_TYPE()
 
   SET_HDF_OUTPUT_DIRS(${package_prefix})
-
-  include (FetchContent)
 endmacro ()
 
 # ADD_H5_FLAGS: Parse and add compiler flags from a file.

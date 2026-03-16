@@ -164,6 +164,10 @@ typedef herr_t (*H5G_traverse_t)(H5G_loc_t *grp_loc /*in*/, const char *name,
                                  const struct H5O_link_t *lnk /*in*/, H5G_loc_t *obj_loc /*out*/,
                                  void *operator_data /*in,out*/, H5G_own_loc_t *own_loc /*out*/);
 
+/* Typedef for internal library object iteration/visit callback */
+typedef herr_t (*H5G_obj_iterate_t)(hid_t group, const char *name, const struct H5O_loc_t *obj_oloc,
+                                    void *op_data);
+
 /* Describe kind of callback to make for each link */
 typedef enum H5G_link_iterate_op_type_t {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -217,7 +221,7 @@ H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned targ
 H5_DLL herr_t H5G_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                           hsize_t skip, hsize_t *last_lnk, const H5G_link_iterate_t *lnk_op, void *op_data);
 H5_DLL herr_t H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
-                        H5L_iterate2_t op, void *op_data);
+                        H5L_iterate2_t link_op, H5G_obj_iterate_t obj_op, void *op_data);
 
 /*
  * Functions that understand links in groups

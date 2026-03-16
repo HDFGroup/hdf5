@@ -29,11 +29,11 @@
         },
         "ZLIB_TGZ_ORIGPATH": {
           "type": "STRING",
-          "value": "https://github.com/madler/zlib/releases/download/v1.3.1"
+          "value": "https://github.com/madler/zlib/releases/download/v1.3.2"
         },
         "ZLIB_TGZ_NAME": {
           "type": "STRING",
-          "value": "zlib-1.3.1.tar.gz"
+          "value": "zlib-1.3.2.tar.gz"
         },
         "ZLIBNG_PACKAGE_NAME": {
           "type": "STRING",
@@ -45,7 +45,7 @@
         },
         "ZLIBNG_TGZ_NAME": {
           "type": "STRING",
-          "value": "2.2.4.tar.gz"
+          "value": "2.3.3.tar.gz"
         },
         "LIBAEC_PACKAGE_NAME": {
           "type": "STRING",
@@ -53,11 +53,11 @@
         },
         "LIBAEC_TGZ_ORIGPATH": {
           "type": "STRING",
-          "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"
+          "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.6"
         },
         "LIBAEC_TGZ_NAME": {
           "type": "STRING",
-          "value": "libaec-1.1.3.tar.gz"
+          "value": "libaec-1.1.6.tar.gz"
         }
       }
     },
@@ -209,15 +209,15 @@
           "type": "STRING",
           "value": "TGZ"
         },
-        "PLUGIN_PACKAGE_NAME": {
+        "HDF5_FILTER_PLUGINS_PACKAGE_NAME": {
           "type": "STRING",
-          "value": "pl"
+          "value": "h5pl"
         },
-        "PLUGIN_TGZ_ORIGPATH": {
+        "HDF5_FILTER_PLUGINS_TGZ_ORIGPATH": {
           "type": "STRING",
           "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"
         },
-        "PLUGIN_TGZ_NAME": {
+        "HDF5_FILTER_PLUGINS_TGZ_NAME": {
           "type": "STRING",
           "value": "hdf5_plugins-master.tar.gz"
         }
@@ -232,7 +232,8 @@
         "ci-base-tgz"
       ],
       "cacheVariables": {
-        "PLUGIN_USE_LOCALCONTENT": "OFF"
+        "PLUGIN_USE_LOCALCONTENT": "OFF",
+        "PLUGIN_USE_EXTERNAL": "ON"
       }
     },
     {

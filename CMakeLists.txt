@@ -549,8 +549,6 @@ include (${HDF_CONFIG_DIR}/HDFMacros.cmake)
 
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
-include (${HDF_RESOURCES_DIR}/HDFLibMacros.cmake)
-include (${HDF_RESOURCES_DIR}/HDF5PluginMacros.cmake)
 include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
@@ -959,11 +957,18 @@ include (UserMacros.cmake)
 include (config/CacheURLs.cmake)
 
 #-----------------------------------------------------------------------------
-# Include filter (zlib, szip, etc.) macros
+# Include filter (zlib, szip, etc.) support
 #-----------------------------------------------------------------------------
-if (HDF5_ENABLE_ZLIB_SUPPORT OR HDF5_ENABLE_SZIP_SUPPORT)
-  include (CMakeFilters.cmake)
-endif ()
+unset (SETTINGS_EXTERNAL_FILTERS)
+include (${HDF_CONFIG_DIR}/HDF5UseZLIB.cmake)
+include (${HDF_CONFIG_DIR}/HDF5UseLibaec.cmake)
+
+# Process list of filters for libhdf5.settings (and the H5build_settings string)
+list (REMOVE_DUPLICATES SETTINGS_EXTERNAL_FILTERS)
+string (REPLACE ";" " " SETTINGS_EXTERNAL_FILTERS "${SETTINGS_EXTERNAL_FILTERS}")
+
+# Print out compression libraries linked for debugging
+message (VERBOSE "LINK_COMP_LIBS=${LINK_COMP_LIBS}")
 
 #-----------------------------------------------------------------------------
 # Include external VOL connectors
@@ -1174,17 +1179,6 @@ endif ()
 #-----------------------------------------------------------------------------
 add_subdirectory (src)
 
-if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-  if ((H5_ZLIB_FOUND AND ZLIB_USE_EXTERNAL) OR (H5_SZIP_FOUND AND SZIP_USE_EXTERNAL))
-    if (BUILD_STATIC_LIBS)
-      add_dependencies (${HDF5_LIB_TARGET} ${LINK_COMP_LIBS})
-    endif ()
-    if (BUILD_SHARED_LIBS)
-      add_dependencies (${HDF5_LIBSH_TARGET} ${LINK_COMP_LIBS})
-    endif ()
-  endif ()
-endif ()
-
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------
@@ -1242,9 +1236,9 @@ if (HDF5_ENABLE_PLUGIN_SUPPORT)
   else ()
     include (CMakePlugins.cmake)
 
-    if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES AND PLUGIN_FOUND)
-      PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-    endif ()
+#    if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES AND HDF5_PLUGINS_FOUND)
+#      PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
+#    endif ()
   endif ()
 endif ()
 

@@ -14,7 +14,6 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 #### Main Configuration Files
 - `CMakeLists.txt` - Root build configuration
 - `CMakeBuildOptions.cmake` - Centralized build option definitions
-- `CMakeFilters.cmake` - Compression filter support (zlib, szip, libaec)
 - `CMakeTests.cmake` - Testing infrastructure configuration
 - `CMakeInstallation.cmake` - Installation and packaging setup
 - `CMakeVOL.cmake` - Virtual Object Layer connector support

@@ -15,6 +15,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ## 📖 Contents
 * [Executive Summary](CHANGELOG.md#execsummary)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
+* [Deprecations](CHANGELOG.md#-deprecations)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](CHANGELOG.md#-bug-fixes)
 * [Support for new platforms and languages](CHANGELOG.md#-support-for-new-platforms-and-languages)
@@ -40,6 +41,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Enhanced Features:
 
+- Made several improvements to the CMake logic for handling filter libraries
 
 ## Java Enhancements:
 
@@ -50,10 +52,38 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # ⚠️ Breaking Changes
 
+# 🪦 Deprecations
+
+- The CMake variable `ZLIB_GIT_BRANCH` has been deprecated in favor of `ZLIB_GIT_TAG`
+- The CMake variable `ZLIBNG_GIT_BRANCH` has been deprecated in favor of `ZLIBNG_GIT_TAG`
+- The CMake variable `LIBAEC_GIT_BRANCH` has been deprecated in favor of `LIBAEC_GIT_TAG`
+- The CMake variable `PLUGIN_GIT_BRANCH` has been deprecated in favor of `HDF5_FILTER_PLUGINS_GIT_TAG`
+- The CMake variable `PLUGIN_GIT_URL` has been deprecated in favor of `HDF5_FILTER_PLUGINS_GIT_URL`
+- The CMake variable `PLUGIN_TGZ_NAME` has been deprecated in favor of `HDF5_FILTER_PLUGINS_TGZ_NAME`
+- The CMake variable `PLUGIN_TGZ_ORIGPATH` has been deprecated in favor of `HDF5_FILTER_PLUGINS_TGZ_ORIGPATH`
+- The CMake variable `PLUGIN_PACKAGE_NAME` has been deprecated in favor of `HDF5_FILTER_PLUGINS_PACKAGE_NAME`
 
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Updated external building of zlib, zlib-ng and libaec to not use a patching process
+
+   When building these libraries from external sources while building HDF5, the library previously used a patching process to adapt the libraries to its own build process. The sources for these libraries are no longer patched and build directly from the sources of the latest upstream releases (currently, zlib 1.3.2, zlib-ng 2.3.3 and libaec 1.1.6). This also fixed an issue with the build of zlib-ng failing due to updates that were made since the last version that HDF5 was patching the sources for.
+
+   Fixes GitHub issue #6204
+
+### Fixed an issue where CMake-built installations of zlib libraries couldn't be located on a system
+
+   An incorrect package name was being supplied to CMake's find_package() function when attempting to locate zlib libraries on the system in Config mode. The package name has been corrected and CMake-built zlib libraries can now be located.
+
+### Fixed an issue where static zlib libraries couldn't be found on the system
+
+   The value of the HDF5 CMake variable `HDF5_USE_ZLIB_STATIC` was previously used incorrectly when locating zlib libraries on the system with CMake's find_package() function, causing it to have no effect. This has been fixed and static zlib libraries can now be located.
+
+### Added a CMake module to locate zlib-ng for zlib support
+
+   A new `FindZLIBNG.cmake` CMake module has been added. This module is intended to locate zlib-ng on the system for zlib support in HDF5 when zlib-ng was built with Autotools instead of CMake. When zlib-ng support is enabled in HDF5 with the `HDF5_ENABLE_ZLIB_SUPPORT` and `HDF5_USE_ZLIB_NG` options, this module will first check for an existing CMake-built zlib-ng and use that if it's available. Otherwise, the module will heuristically search for zlib-ng on the system. If necessary, the module can be hinted toward a particular zlib-ng installation by setting the CMake variable `ZLIBNG_ROOT` to point to a directory.
 
 ### Added a CMake module to locate libaec for SZIP support
 
@@ -64,6 +94,10 @@ We would like to thank the many HDF5 community members who contributed to this r
    The CMake build system now uses separate export targets for different library types: static libraries use `${HDF5_EXPORTED_TARGETS}_static`, Java libraries use `${HDF5_EXPORTED_TARGETS}_java`, and shared libraries continue using the main `${HDF5_EXPORTED_TARGETS}`. The generated `hdf5-config.cmake` file conditionally includes the appropriate target files (`hdf5-targets_static.cmake` and `hdf5-targets_java.cmake`), allowing downstream projects to selectively link against specific library variants. This refactoring improves build system maintainability and applies consistently across all HDF5 components (core, C++, Fortran, high-level APIs, tools, and Java JNI).
 
 ## Library
+
+### Improve performance of H5Ovisit() with deeply nested group structures
+
+   `H5Ovisit()` would previously internally traverse each object's path name from the iteration root group in order to retrieve information about that object, causing severe performance degradation with a deeply nested group structure. Modified the algorithm to instead retrieve information directly from the object. To get this benefit, users should use `H5Ovisit3()`, or use `H5Ovisit2()` with neither `H5O_INFO_HDR` nor `H5O_INFO_META_SIZE` selected in the `fields` parameter. Performance of `H5Ocopy()`, `H5Iget_name()`, and external links with a callback set should also improve in similar situations.
 
 ## Parallel Library
 
