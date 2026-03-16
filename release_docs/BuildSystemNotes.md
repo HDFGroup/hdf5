@@ -25,7 +25,6 @@ A comprehensive analysis of the HDF5 CMake-only build system and CI/CD infrastru
 **Library Types:**
 - `BUILD_STATIC_LIBS=ON` - Static library builds
 - `BUILD_SHARED_LIBS=ON` - Shared library builds
-- `HDF5_ONLY_SHARED_LIBS=OFF` - Force shared-only builds
 - `HDF5_BUILD_STATIC_TOOLS=OFF` - Static vs shared tools
 
 **Language Bindings:**

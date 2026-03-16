@@ -727,7 +727,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   # Enable instrumenting of the library's internal operations
-  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF HDF5_ENABLE_TRACE OFF)
+  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument the library" OFF HDF5_ENABLE_PARALLEL OFF)
 
   # Instrumenting is enabled by default for parallel debug builds
   if (HDF5_ENABLE_PARALLEL)

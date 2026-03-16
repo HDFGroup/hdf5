@@ -42,9 +42,16 @@ mark_as_advanced (HDF5_MINGW_STATIC_GCC_LIBS)
 
 option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
+if (HDF5_ENABLE_TRACE)
+  message (DEPRECATION "HDF5_ENABLE_TRACE has been deprecated and may be removed in a future release of HDF5")
+endif ()
 
-option (HDF5_ENABLE_EMBEDDED_LIBINFO "Embed library info into executables" ON)
+option (HDF5_ENABLE_EMBEDDED_LIBINFO "Embed library info into executables" OFF)
 mark_as_advanced (HDF5_ENABLE_EMBEDDED_LIBINFO)
+if (HDF5_ENABLE_EMBEDDED_LIBINFO)
+  message (DEPRECATION "HDF5_ENABLE_EMBEDDED_LIBINFO has been deprecated and may be removed in a future release of HDF5")
+endif ()
+
 
 option (HDF5_ENABLE_HDFS "Enable HDFS" OFF)
 

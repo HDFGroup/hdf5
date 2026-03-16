@@ -1254,7 +1254,6 @@ if (BUILD_STATIC_LIBS)
       PUBLIC
           ${HDF_EXTRA_C_FLAGS}
       PRIVATE
-          "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>" # Enable tracing of the API
           "$<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>"
           "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
   )
@@ -1291,7 +1290,6 @@ if (BUILD_SHARED_LIBS)
           "H5_BUILT_AS_DYNAMIC_LIB"
           ${HDF_EXTRA_C_FLAGS}
       PRIVATE
-          "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>"  # Enable tracing of the API
           "$<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>"
           "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
   )
