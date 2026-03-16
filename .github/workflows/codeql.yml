@@ -68,6 +68,18 @@ jobs:
           build-mode: manual
           queries: +security-and-quality
           
+          # Excluded rules justification:
+          # - cpp/toctou-race-condition: HDF5 file operations inherently involve
+          #   check-then-act patterns that cannot be avoided in a file I/O library.
+          # - cpp/short-global-name: HDF5 uses short prefixed names (H5F_, H5D_, etc.)
+          #   as an intentional namespace convention throughout the public API.
+          # - cpp/non-constant-format, cpp/uncontrolled-format-string: All flagged
+          #   sites are intentional format-string-as-template patterns:
+          #   h5tools_str.c uses configurable output formats (e.g., OPT(info->fmt_float, "%g")),
+          #   h5repart.c and sio_engine.c use family file naming templates with %d,
+          #   H5FDmulti.c uses API-configured member name templates with %s.
+          #   These are bounded by snprintf, guarded by H5_WARN_FORMAT_NONLITERAL_OFF,
+          #   and the format strings originate from application code, not untrusted input.
           config: |
              query-filters:
                - exclude:
