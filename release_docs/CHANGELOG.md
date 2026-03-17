@@ -30,13 +30,14 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 > - The format of the GitHub tag for HDF5 releases has been changed to Major.Minor.Patch, consistent with the versioning policy change to follow the Semantic Versioning Specification described in this [Wiki page](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy).  The previous tag format hdf5_Major_Minor_Patch that was created in addition for HDF5 2.0.0 and this release will not be continued.
 
   
-## Acknowledgements: 
-
-We would like to thank the many HDF5 community members who contributed to this release of HDF5.
-
 # 🪲 Note! Bug Fix in this release
 
    A typo in variable LT_HL_F_VERS_INTERFACE left H5_HL_F_SOVERS_INTERFACE empty, resulting in malformed macOS linker flags.  The typo was fixed in this patch release.
+
+
+## Acknowledgements: 
+
+We would like to thank the many HDF5 community members who contributed to this release of HDF5.
 
 # ⚠️ Breaking Changes
 
