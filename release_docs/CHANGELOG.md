@@ -14,7 +14,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## 📖 Contents
 * [Executive Summary](CHANGELOG.md#execsummary)
-* [Bug Fix in this release](CHANGELOG.md#-bug-fix-in-this)
+* [Note! Bug Fix in this release](CHANGELOG.md#-Note-bug-fix-in-this-release)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [Version 2.1.0 release entries](CHANGELOG.md#version-2.1.0-release-entries)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
