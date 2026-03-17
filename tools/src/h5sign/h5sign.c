@@ -336,6 +336,11 @@ read_private_key(const char *keyfile)
         {
             h5_stat_t key_stat;
             if (HDfstat(fileno(fp), &key_stat) == 0) {
+                if (!S_ISREG(key_stat.st_mode)) {
+                    fprintf(rawerrorstream, "Error: '%s' is not a regular file\n", keyfile);
+                    fclose(fp);
+                    goto done;
+                }
                 if (key_stat.st_mode & (S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) {
                     fprintf(rawerrorstream, "Error: Private key file '%s' has insecure permissions (%03o)\n",
                             keyfile, (unsigned)(key_stat.st_mode & 0777));
