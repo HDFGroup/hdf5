@@ -34,7 +34,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 We would like to thank the many HDF5 community members who contributed to this release of HDF5.
 
-# 🪲 BNote! Bug Fix in this release
+# 🪲 Note! Bug Fix in this release
 
    A typo in variable LT_HL_F_VERS_INTERFACE left H5_HL_F_SOVERS_INTERFACE empty, resulting in malformed macOS linker flags.  The typo was fixed in this patch release.
 
