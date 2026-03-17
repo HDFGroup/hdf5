@@ -1,4 +1,12 @@
-HDF5 version 2.1.1  
+HDF5 version 2.1.1 released on 
+---
+
+> [!Note]
+>
+> - A typo in variable LT_HL_F_VERS_INTERFACE left H5_HL_F_SOVERS_INTERFACE empty, resulting in malformed macOS linker flags. The typo was fixed in this patch release.
+
+---
+HDF5 version 2.1.0 released on 2026-03-02
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -14,35 +22,37 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## 📖 Contents
 * [Executive Summary](CHANGELOG.md#execsummary)
-* [Note! Bug Fix in this release](CHANGELOG.md#-Note-bug-fix-in-this-release)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
-* [Version 2.1.0 release entries](CHANGELOG.md#version-2.1.0-release-entries)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](CHANGELOG.md#-bug-fixes)
 * [Support for new platforms and languages](CHANGELOG.md#-support-for-new-platforms-and-languages)
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.1.1
+# 🔆 Executive Summary: HDF5 Version 2.1.0
 
 > [!IMPORTANT]
 >
 > - The format of the GitHub tag for HDF5 releases has been changed to Major.Minor.Patch, consistent with the versioning policy change to follow the Semantic Versioning Specification described in this [Wiki page](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy).  The previous tag format hdf5_Major_Minor_Patch that was created in addition for HDF5 2.0.0 and this release will not be continued.
 
+## Performance Enhancements:
+
+
+## Significant Advancements:
+
+
+## Enhanced Features:
+
+
+## Java Enhancements:
+
   
-# 🪲 Note! Bug Fix in this release
-
-   A typo in variable LT_HL_F_VERS_INTERFACE left H5_HL_F_SOVERS_INTERFACE empty, resulting in malformed macOS linker flags.  The typo was fixed in this patch release.
-
-
 ## Acknowledgements: 
 
 We would like to thank the many HDF5 community members who contributed to this release of HDF5.
 
 # ⚠️ Breaking Changes
 
-
-# Version 2.1.0 release entries
 
 # 🚀 New Features & Improvements
 
