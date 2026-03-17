@@ -1,6 +1,6 @@
 # HDF5 Security Policy
 
-<!-- SHINE:CONTROL-SET=HDF5; VERSION=2026-02; REPO={owner}/{repo} -->
+<!-- SHINE:CONTROL-SET=HDF5; VERSION=2026-02; REPO=HDFGroup/hdf5 -->
 <!-- SHINE:MAP=SHINE-HDF5-VULN-01, SHINE-HDF5-BUILD-03, SHINE-HDF5-DIST-02, SHINE-HDF5-PRIV-01 -->
 
 This document covers HDF5-specific security information. For the general HDF Group security governance framework — including vulnerability management processes, triage SLAs, disclosure timelines, build provenance standards, testing policies, and researcher safe harbor — see the [HDF Group Security & Sustainability Policies](https://ssp.hdfgroup.org/policy/).
