@@ -141,7 +141,8 @@ function (external_hdf5_plugins_library)
   # Include HDF5 filter plugins CMake cache configuration
   include (${HDF_RESOURCES_DIR}/HDF5PluginCache.cmake)
 
-  # Set other options for build
+  # Set other options for build. Set CMake policy CMP0077 so that option()
+  # commands in Blosc(2) don't override values we set here
   set (CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR NOT PLUGIN_USE_LOCALCONTENT)
@@ -150,11 +151,18 @@ function (external_hdf5_plugins_library)
     message (VERBOSE "Configuring HDF5 filter plugins project")
   endif ()
 
+  # If building zlib externally when building HDF5, instruct Blosc(2) to prefer
+  # using a system zlib for building so that it doesn't build its own zlib that
+  # will conflict with the one HDF5 will build.
+  if (HDF5_ENABLE_ZLIB_SUPPORT AND ZLIB_USE_EXTERNAL)
+    set (PREFER_EXTERNAL_ZLIB ON)
+  endif ()
+
   # Make HDF5 filter plugins project available for the build
   FetchContent_MakeAvailable (HDF5_FILTER_PLUGINS)
 
   # Set HDF5 filter plugins directory and status variables
-  set (PLUGIN_BINARY_DIR "${plugin_BINARY_DIR}" PARENT_SCOPE)
+  set (PLUGIN_BINARY_DIR "${hdf5_filter_plugins_BINARY_DIR}" PARENT_SCOPE)
 
   set (HDF5_PLUGINS_FOUND TRUE PARENT_SCOPE)
 endfunction ()
