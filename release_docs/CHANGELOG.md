@@ -39,7 +39,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    A typo in variable LT_HL_F_VERS_INTERFACE left H5_HL_F_SOVERS_INTERFACE empty, resulting in malformed macOS linker flags.  The typo was fixed in this patch release.
 
-Other changes since HDF5 2.0.0 can be seen in release_docs/HISTORY-2.X.md or in the CHANGELOG.md file for the HDF5 2.1.0 release
+Other changes since HDF5 2.0.0 can be seen in release_docs/HISTORY-2.X.md or in release_docs/CHANGELOG.md file for the HDF5 2.1.0 release.
 
 
 ## Testing
