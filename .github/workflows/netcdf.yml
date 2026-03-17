@@ -4,6 +4,14 @@ name: netCDF dev
 on:
   workflow_dispatch:
   push:
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
   pull_request:
     branches: [ develop ]
     paths-ignore:
