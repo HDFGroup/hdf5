@@ -729,8 +729,8 @@ parse_command_line(int argc, const char *const *argv)
                         leave(EXIT_FAILURE);
                     }
                     {
-                        size_t cur_len = strlen(g_list_of_fields);
-                        size_t new_len = cur_len + strlen(FIELD_SEP) + strlen(str) + 1;
+                        size_t cur_len     = strlen(g_list_of_fields);
+                        size_t new_len     = cur_len + strlen(FIELD_SEP) + strlen(str) + 1;
                         char  *realloc_tmp = (char *)realloc(g_list_of_fields, new_len);
                         if (realloc_tmp == NULL) {
                             error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
