@@ -199,7 +199,15 @@ jobs:
 
       - name: Create description for release/snapshot from "Executive Summary" section of CHANGELOG.md
         run: |
-          sed -n '/^# .* Executive Summary: HDF5 Version .*/,/^# .* Breaking Changes/p'  ./hdfsrc/release_docs/CHANGELOG.md | sed '$d' > description.txt
+          TAG="${{ inputs.use_tag }}"
+          if [[ "$TAG" =~ ^[0-9]+\.[0-9]+\.([0-9]+)$ ]] && [[ "${BASH_REMATCH[1]}" != "0" ]]; then
+            # Patch release: extract from line 1 to the line before the second "HDF5 version" line
+            awk '/^HDF5 version/{count++; if(count==2) exit} {print}' ./hdfsrc/release_docs/CHANGELOG.md > description.txt
+          else
+            # Major/minor release or snapshot: extract "Executive Summary" section
+            sed -n '/^# .* Executive Summary: HDF5 Version .*/,/^# .* Breaking Changes/p'  ./hdfsrc/release_docs/CHANGELOG.md | sed '$d' > description.txt
+          fi
+        shell:bash
 
       - name: List files in the repository
         run: |
