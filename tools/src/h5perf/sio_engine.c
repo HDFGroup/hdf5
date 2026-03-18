@@ -349,7 +349,7 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
                 if (HDmkdir(fullname, 0755) < 0 && errno != EEXIST) {
                     /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
                      * Default to PREFIX's original prefix value. */
-                    strcpy(fullname, prefix);
+                    snprintf(fullname, size, "%s", prefix);
                 }
 
             strcat(fullname, "/");
