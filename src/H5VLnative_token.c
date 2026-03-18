@@ -140,7 +140,8 @@ H5VL__native_str_to_token(void *obj, H5I_type_t obj_type, const char *token_str,
     /* Check parameters */
     assert(token_str);
 
-    sscanf(token_str, "%" PRIuHADDR, &addr);
+    if (sscanf(token_str, "%" PRIuHADDR, &addr) != 1)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "can't parse token string");
 
     if (H5VL_native_addr_to_token(obj, obj_type, addr, token) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "can't convert address to object token");
