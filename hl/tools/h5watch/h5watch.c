@@ -731,12 +731,12 @@ parse_command_line(int argc, const char *const *argv)
                     {
                         size_t cur_len = strlen(g_list_of_fields);
                         size_t new_len = cur_len + strlen(FIELD_SEP) + strlen(str) + 1;
-                        char  *tmp     = (char *)realloc(g_list_of_fields, new_len);
-                        if (tmp == NULL) {
+                        char  *realloc_tmp = (char *)realloc(g_list_of_fields, new_len);
+                        if (realloc_tmp == NULL) {
                             error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                             leave(EXIT_FAILURE);
                         }
-                        g_list_of_fields = tmp;
+                        g_list_of_fields = realloc_tmp;
                         snprintf(g_list_of_fields + cur_len, new_len - cur_len, "%s%s", FIELD_SEP, str);
                     }
                 }
