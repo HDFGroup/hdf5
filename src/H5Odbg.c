@@ -309,22 +309,26 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
 
         /* Only dump times, if they are tracked */
         if (oh->flags & H5O_HDR_STORE_TIMES) {
-            struct tm *tm;       /* Time structure */
-            char       buf[128]; /* Buffer for formatting time info */
+            struct tm tm_buf;    /* Time structure */
+            char      buf[128]; /* Buffer for formatting time info */
 
             /* Time fields */
-            tm = localtime(&oh->atime);
-            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
-            tm = localtime(&oh->mtime);
-            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
-            tm = localtime(&oh->ctime);
-            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
-            tm = localtime(&oh->btime);
-            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
+            if (localtime_r(&oh->atime, &tm_buf) != NULL) {
+                strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
+                fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
+            }
+            if (localtime_r(&oh->mtime, &tm_buf) != NULL) {
+                strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
+                fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
+            }
+            if (localtime_r(&oh->ctime, &tm_buf) != NULL) {
+                strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
+                fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
+            }
+            if (localtime_r(&oh->btime, &tm_buf) != NULL) {
+                strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
+                fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
+            }
         } /* end if */
 
         /* Attribute tracking fields */
