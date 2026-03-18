@@ -2284,8 +2284,8 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
 
             /* Modification time */
             if (oinfo->mtime > 0) {
-                char      buf[256];
-                struct tm tm_buf;
+                char       buf[256];
+                struct tm  tm_buf;
                 struct tm *tm_result;
 
                 if (simple_output_g)

@@ -388,13 +388,13 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                     else {
                         /* print the value of a soft link */
                         /* XML */
-                        char  linkxid[100];
-                        char  parentxid[100];
-                        char  targetxid[100];
-                        char *t_prefix   = xml_escape_the_name(strcmp(prefix, "") ? prefix : "/");
-                        char *t_name     = xml_escape_the_name(name);
-                        char *t_targbuf  = xml_escape_the_name(targbuf);
-                        char *t_obj_path = xml_escape_the_name(obj_path);
+                        char   linkxid[100];
+                        char   parentxid[100];
+                        char   targetxid[100];
+                        char  *t_prefix   = xml_escape_the_name(strcmp(prefix, "") ? prefix : "/");
+                        char  *t_name     = xml_escape_the_name(name);
+                        char  *t_targbuf  = xml_escape_the_name(targbuf);
+                        char  *t_obj_path = xml_escape_the_name(obj_path);
                         char  *t_link_path;
                         size_t t_link_path_len = strlen(prefix) + linfo->u.val_size + 2;
                         int    res;

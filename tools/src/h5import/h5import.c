@@ -131,7 +131,8 @@ main(int argc, char *argv[])
 
             case 1: /* counting input files */
                 if (opt->fcount < 29) {
-                    (void)snprintf(opt->infiles[opt->fcount].datafile, sizeof(opt->infiles[opt->fcount].datafile), "%s", argv[i]);
+                    (void)snprintf(opt->infiles[opt->fcount].datafile,
+                                   sizeof(opt->infiles[opt->fcount].datafile), "%s", argv[i]);
                     in                               = &(opt->infiles[opt->fcount].in);
                     opt->infiles[opt->fcount].config = 0;
                     setDefaultValues(in, opt->fcount);
@@ -148,7 +149,8 @@ main(int argc, char *argv[])
                 break;
 
             case 3: /* get configfile name */
-                (void)snprintf(opt->infiles[opt->fcount - 1].configfile, sizeof(opt->infiles[opt->fcount - 1].configfile), "%s", argv[i]);
+                (void)snprintf(opt->infiles[opt->fcount - 1].configfile,
+                               sizeof(opt->infiles[opt->fcount - 1].configfile), "%s", argv[i]);
                 opt->infiles[opt->fcount - 1].config = 1;
                 break;
 

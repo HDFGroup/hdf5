@@ -905,8 +905,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                             "error message = '%s', file->mem = %p, total read size = %llu, bytes this "
                             "sub-read = %llu, bytes actually read = %llu, offset = %llu",
-                            time_str, file->name, file->fd, myerrno, strerror(myerrno),
-                            (void *)file->mem, (unsigned long long)size, (unsigned long long)bytes_in,
+                            time_str, file->name, file->fd, myerrno, strerror(myerrno), (void *)file->mem,
+                            (unsigned long long)size, (unsigned long long)bytes_in,
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
 

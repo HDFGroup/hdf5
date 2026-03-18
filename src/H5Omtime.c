@@ -260,7 +260,7 @@ static herr_t
 H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, size_t p_size, uint8_t *p,
                   const void *_mesg)
 {
-    const time_t *mesg      = (const time_t *)_mesg;
+    const time_t *mesg = (const time_t *)_mesg;
     struct tm     tm_buf;
     herr_t        ret_value = SUCCEED;
 
