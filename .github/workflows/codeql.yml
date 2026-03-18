@@ -90,6 +90,16 @@ jobs:
           #   arguments or documented environment variables. Accepting user-provided
           #   paths is the core purpose of these tools. The two core library hits
           #   (H5FDsubfiling, H5FDioc) use documented env vars for VFD configuration.
+          # - cpp/type-confusion: HDF5 object header messages use a void* dispatch
+          #   pattern where H5O_shared_t is embedded as the first member of message
+          #   structs (C "base class" idiom). Runtime type guards prevent invalid casts.
+          #   H5TSpool thread arg is always passed as the correct type.
+          # - cpp/uncontrolled-allocation-size: CLI tools and benchmarks intentionally
+          #   accept allocation sizes from command-line arguments (block size, dataset
+          #   dimensions). This is expected for performance testing and file utilities.
+          # - cpp/world-writable-file-creation: CLI tools create files using fopen()
+          #   which defaults to 0666 & ~umask. File permissions are the user's
+          #   responsibility via umask, consistent with standard POSIX utilities.
           #
           # Code style rules (non-security, no severity rating):
           # These are structural patterns inherent to HDF5's C codebase and
@@ -118,6 +128,12 @@ jobs:
                    id: cpp/tainted-format-string
                - exclude:
                    id: cpp/path-injection
+               - exclude:
+                   id: cpp/type-confusion
+               - exclude:
+                   id: cpp/uncontrolled-allocation-size
+               - exclude:
+                   id: cpp/world-writable-file-creation
                - exclude:
                    id: cpp/long-switch
                - exclude:
