@@ -398,12 +398,14 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                         char *t_link_path;
                         int   res;
 
-                        t_link_path = (char *)malloc(strlen(prefix) + linfo->u.val_size + 1);
+                        {
+                            size_t t_link_path_len = strlen(prefix) + linfo->u.val_size + 2;
+                            t_link_path = (char *)malloc(t_link_path_len);
+                        }
                         if (targbuf[0] == '/')
-                            strcpy(t_link_path, targbuf);
+                            snprintf(t_link_path, strlen(targbuf) + 1, "%s", targbuf);
                         else {
-                            strcpy(t_link_path, prefix);
-                            strcat(strcat(t_link_path, "/"), targbuf);
+                            snprintf(t_link_path, strlen(prefix) + linfo->u.val_size + 2, "%s/%s", prefix, targbuf);
                         } /* end else */
 
                         /* Create OBJ-XIDs for the parent and object */
