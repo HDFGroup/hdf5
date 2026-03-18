@@ -3974,7 +3974,6 @@ getExternalFilename(struct Input *in, FILE *strm)
     temp_len           = strlen(temp);
     in->externFilename = (char *)malloc((temp_len + 1) * sizeof(char));
     (void)snprintf(in->externFilename, temp_len + 1, "%s", temp);
-    in->externFilename[temp_len] = '\0';
     return (0);
 }
 

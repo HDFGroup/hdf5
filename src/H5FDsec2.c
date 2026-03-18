@@ -657,7 +657,7 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             if (localtime_r(&mytime, &tm_buf) != NULL)
                 strftime(time_str, sizeof(time_str), "%c", &tm_buf);
             else
-                strncpy(time_str, "(unknown)", sizeof(time_str));
+                snprintf(time_str, sizeof(time_str), "(unknown)");
 
 #ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, 0, SEEK_CUR);
@@ -775,7 +775,7 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
             if (localtime_r(&mytime, &tm_buf) != NULL)
                 strftime(time_str, sizeof(time_str), "%c", &tm_buf);
             else
-                strncpy(time_str, "(unknown)", sizeof(time_str));
+                snprintf(time_str, sizeof(time_str), "(unknown)");
 
 #ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, 0, SEEK_CUR);

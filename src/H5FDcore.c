@@ -395,7 +395,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
             if (localtime_r(&mytime, &tm_buf) != NULL)
                 strftime(time_str, sizeof(time_str), "%c", &tm_buf);
             else
-                strncpy(time_str, "(unknown)", sizeof(time_str));
+                snprintf(time_str, sizeof(time_str), "(unknown)");
 
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
@@ -908,7 +908,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                         if (localtime_r(&mytime, &tm_buf) != NULL)
                             strftime(time_str, sizeof(time_str), "%c", &tm_buf);
                         else
-                            strncpy(time_str, "(unknown)", sizeof(time_str));
+                            snprintf(time_str, sizeof(time_str), "(unknown)");
 
                         offset = HDlseek(file->fd, 0, SEEK_CUR);
 

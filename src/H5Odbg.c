@@ -313,22 +313,29 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
             char      buf[128]; /* Buffer for formatting time info */
 
             /* Time fields */
-            if (localtime_r(&oh->atime, &tm_buf) != NULL) {
+            if (localtime_r(&oh->atime, &tm_buf) != NULL)
                 strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
-                fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
-            }
-            if (localtime_r(&oh->mtime, &tm_buf) != NULL) {
+            else
+                snprintf(buf, sizeof(buf), "(invalid time)");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
+
+            if (localtime_r(&oh->mtime, &tm_buf) != NULL)
                 strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
-                fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
-            }
-            if (localtime_r(&oh->ctime, &tm_buf) != NULL) {
+            else
+                snprintf(buf, sizeof(buf), "(invalid time)");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
+
+            if (localtime_r(&oh->ctime, &tm_buf) != NULL)
                 strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
-                fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
-            }
-            if (localtime_r(&oh->btime, &tm_buf) != NULL) {
+            else
+                snprintf(buf, sizeof(buf), "(invalid time)");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
+
+            if (localtime_r(&oh->btime, &tm_buf) != NULL)
                 strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
-                fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
-            }
+            else
+                snprintf(buf, sizeof(buf), "(invalid time)");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
         } /* end if */
 
         /* Attribute tracking fields */

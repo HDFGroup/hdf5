@@ -429,10 +429,11 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             fullname[size - 1] = '\0';
         }
 
-        if ((strlen(fullname) + strlen(base_name) + 1) < size) {
+        if ((strlen(fullname) + strlen(base_name) + 2) < size) {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
             h5_stat_t buf;
+            size_t    cur_len;
 
             memset(&buf, 0, sizeof(h5_stat_t));
             if (HDstat(fullname, &buf) < 0)
@@ -443,8 +444,8 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
                     snprintf(fullname, size, "%s", prefix);
                 }
 
-            strcat(fullname, "/");
-            strcat(fullname, base_name);
+            cur_len = strlen(fullname);
+            snprintf(fullname + cur_len, size - cur_len, "/%s", base_name);
         }
         else {
             /* Buffer is too small */
@@ -456,15 +457,17 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         return NULL;
     }
     else {
-        strcpy(fullname, base_name);
+        snprintf(fullname, size, "%s", base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (strlen(fullname) + strlen(suffix) >= size)
+        size_t cur_len = strlen(fullname);
+
+        if (cur_len + strlen(suffix) >= size)
             return NULL;
 
-        strcat(fullname, suffix);
+        snprintf(fullname + cur_len, size - cur_len, "%s", suffix);
     }
 
     /* Remove any double slashes in the filename */

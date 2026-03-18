@@ -1189,7 +1189,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             if (localtime_r(&mytime, &tm_buf) != NULL)
                 strftime(time_str, sizeof(time_str), "%c", &tm_buf);
             else
-                strncpy(time_str, "(unknown)", sizeof(time_str));
+                snprintf(time_str, sizeof(time_str), "(unknown)");
 
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
@@ -1419,7 +1419,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
             if (localtime_r(&mytime, &tm_buf) != NULL)
                 strftime(time_str, sizeof(time_str), "%c", &tm_buf);
             else
-                strncpy(time_str, "(unknown)", sizeof(time_str));
+                snprintf(time_str, sizeof(time_str), "(unknown)");
 
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
