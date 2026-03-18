@@ -131,8 +131,11 @@ main(int argc, char *argv[])
 
             case 1: /* counting input files */
                 if (opt->fcount < 29) {
-                    (void)snprintf(opt->infiles[opt->fcount].datafile,
-                                   sizeof(opt->infiles[opt->fcount].datafile), "%s", argv[i]);
+                    if (snprintf(opt->infiles[opt->fcount].datafile,
+                                 MAX_PATH_NAME_LENGTH, "%s", argv[i]) >= MAX_PATH_NAME_LENGTH) {
+                        (void)fprintf(rawerrorstream, err10, argv[i]);
+                        goto err;
+                    }
                     in                               = &(opt->infiles[opt->fcount].in);
                     opt->infiles[opt->fcount].config = 0;
                     setDefaultValues(in, opt->fcount);
@@ -149,8 +152,11 @@ main(int argc, char *argv[])
                 break;
 
             case 3: /* get configfile name */
-                (void)snprintf(opt->infiles[opt->fcount - 1].configfile,
-                               sizeof(opt->infiles[opt->fcount - 1].configfile), "%s", argv[i]);
+                if (snprintf(opt->infiles[opt->fcount - 1].configfile,
+                             MAX_PATH_NAME_LENGTH, "%s", argv[i]) >= MAX_PATH_NAME_LENGTH) {
+                    (void)fprintf(rawerrorstream, err10, argv[i]);
+                    goto err;
+                }
                 opt->infiles[opt->fcount - 1].config = 1;
                 break;
 
@@ -162,7 +168,7 @@ main(int argc, char *argv[])
                     (void)fprintf(rawerrorstream, err10, argv[i]);
                     goto err;
                 }
-                (void)snprintf(opt->outfile, sizeof(opt->outfile), "%s", argv[i]);
+                snprintf(opt->outfile, MAX_PATH_NAME_LENGTH, "%s", argv[i]);
                 outfile_named = true;
                 break;
 
@@ -3975,7 +3981,7 @@ getExternalFilename(struct Input *in, FILE *strm)
 
     temp_len           = strlen(temp);
     in->externFilename = (char *)malloc((temp_len + 1) * sizeof(char));
-    (void)snprintf(in->externFilename, temp_len + 1, "%s", temp);
+    strcpy(in->externFilename, temp);
     return (0);
 }
 
