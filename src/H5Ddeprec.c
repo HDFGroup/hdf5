@@ -380,6 +380,9 @@ H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
     dset_opt_args.chunk_read.filters  = 0;
     dset_opt_args.chunk_read.buf      = buf;
     dset_opt_args.chunk_read.buf_size = NULL;
+    dset_opt_args.chunk_read.use_sub_chunk = false;
+    dset_opt_args.chunk_read.byte_offset   = 0;
+    dset_opt_args.chunk_read.byte_size     = 0;
     vol_cb_args.op_type               = H5VL_NATIVE_DATASET_CHUNK_READ;
     vol_cb_args.args                  = &dset_opt_args;
 

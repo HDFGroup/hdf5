@@ -56,6 +56,10 @@
  * buffer the filter is handed is much longer than the data read into it */
 #define SHORT_CHUNK_BIG_NELMTS 1000
 #define SHORT_CHUNK_RAW_MAX    25 /* longest raw chunk any of the cases stores */
+#define DATASETNAME20 "sub_chunk"
+#ifdef H5_HAVE_FILTER_DEFLATE
+#define DATASETNAME21 "sub_chunk_filtered"
+#endif
 
 #define RANK     2
 #define NX       16
@@ -2657,6 +2661,265 @@ error:
     return 1;
 } /* end test_direct_chunk_read_buf_size() */
 
+/*-------------------------------------------------------------------------
+ * Function:    test_direct_chunk_read_sub_chunk
+ *
+ * Purpose:     Test sub-chunk byte range reads with H5Dread_chunk2
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_direct_chunk_read_sub_chunk(hid_t fid)
+{
+    enum {
+        SUB_CHUNK_OFFSET = 17,
+        SUB_CHUNK_SIZE   = 53
+    };
+
+    hid_t         sid           = H5I_INVALID_HID;  /* Dataspace ID */
+    hid_t         did           = H5I_INVALID_HID;  /* Dataset ID */
+    hid_t         filtered_did  = H5I_INVALID_HID;  /* Filtered dataset ID */
+    hid_t         dcpl          = H5I_INVALID_HID;  /* Dataset creation property list */
+    hid_t         filtered_dcpl = H5I_INVALID_HID;  /* Filtered dataset creation property list */
+    hid_t         dxpl          = H5I_INVALID_HID;  /* Dataset transfer property list */
+    hsize_t       dims[2]       = {DIM0, DIM1};     /* Dimension sizes */
+    hsize_t       chunk[2]      = {CHUNK0, CHUNK1}; /* Chunk dimension sizes */
+    hsize_t       offset[2]     = {0, 0};           /* Offset for chunk I/O */
+    uint32_t      filters       = 0;                /* Filter mask out */
+    size_t        tmp_buf_size;                     /* Buffer size for H5Dread_chunk2 */
+    size_t        byte_offset_out = 0;              /* Retrieved sub-chunk byte offset */
+    size_t        byte_size_out   = 0;              /* Retrieved sub-chunk byte size */
+    int           wdata[DIM0][DIM1];                /* Write buffer */
+    unsigned char sub_chunk_buf[SUB_CHUNK_SIZE];    /* Sub-chunk read buffer */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    int rdata_deprec[DIM0][DIM1]; /* Deprecated full chunk read buffer */
+#endif
+#ifdef H5_HAVE_FILTER_DEFLATE
+    size_t         filtered_full_size  = 0;    /* Full filtered raw chunk size */
+    size_t         filtered_sub_offset = 0;    /* Filtered sub-chunk offset */
+    size_t         filtered_sub_size   = 0;    /* Filtered sub-chunk size */
+    unsigned char *filtered_full_buf   = NULL; /* Full filtered raw chunk buffer */
+    unsigned char *filtered_sub_buf    = NULL; /* Filtered sub-chunk buffer */
+#endif
+    herr_t status; /* Status value */
+    int    i, j;   /* Local index variables */
+
+    TESTING("sub-chunk byte range reads with H5Dread_chunk2");
+
+    /* Initialize data */
+    for (i = 0; i < DIM0; i++)
+        for (j = 0; j < DIM1; j++)
+            wdata[i][j] = (i * DIM1) + j;
+
+    /* Create the dataspace */
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create an unfiltered single-chunk dataset */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    if ((did = H5Dcreate2(fid, DATASETNAME20, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, sizeof(wdata), (void *)wdata) < 0)
+        TEST_ERROR;
+
+    /* Create a DXPL for sub-chunk reads */
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR;
+
+    /* Invalid ranges should be rejected by the DXPL API */
+    H5E_BEGIN_TRY
+    {
+        if ((status = H5Pset_sub_chunk(dxpl, 1, 0)) != FAIL)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* Configure a valid sub-chunk range and verify it round-trips */
+    if (H5Pset_sub_chunk(dxpl, SUB_CHUNK_OFFSET, SUB_CHUNK_SIZE) < 0)
+        TEST_ERROR;
+    if (H5Pget_sub_chunk(dxpl, &byte_offset_out, &byte_size_out) < 0)
+        TEST_ERROR;
+    if (byte_offset_out != SUB_CHUNK_OFFSET || byte_size_out != SUB_CHUNK_SIZE)
+        TEST_ERROR;
+
+    /* Query the required sub-chunk buffer size */
+    tmp_buf_size = 0;
+    if (H5Dread_chunk2(did, dxpl, offset, &filters, NULL, &tmp_buf_size) < 0)
+        TEST_ERROR;
+    if (tmp_buf_size != SUB_CHUNK_SIZE)
+        TEST_ERROR;
+    if (filters != 0)
+        TEST_ERROR;
+
+    /* No bytes should be read if the supplied buffer is too small */
+    memset(sub_chunk_buf, 0, sizeof(sub_chunk_buf));
+    tmp_buf_size = SUB_CHUNK_SIZE - 1;
+    if (H5Dread_chunk2(did, dxpl, offset, &filters, sub_chunk_buf, &tmp_buf_size) < 0)
+        TEST_ERROR;
+    if (tmp_buf_size != SUB_CHUNK_SIZE)
+        TEST_ERROR;
+    for (i = 0; i < SUB_CHUNK_SIZE; i++)
+        if (sub_chunk_buf[i] != 0)
+            TEST_ERROR;
+
+    /* Read the requested sub-chunk and compare it to the original bytes */
+    tmp_buf_size = sizeof(sub_chunk_buf);
+    if (H5Dread_chunk2(did, dxpl, offset, &filters, sub_chunk_buf, &tmp_buf_size) < 0)
+        TEST_ERROR;
+    if (tmp_buf_size != SUB_CHUNK_SIZE)
+        TEST_ERROR;
+    if (filters != 0)
+        TEST_ERROR;
+    if (memcmp(sub_chunk_buf, ((const unsigned char *)wdata) + SUB_CHUNK_OFFSET, SUB_CHUNK_SIZE) != 0)
+        TEST_ERROR;
+
+    /* Invalid read-time ranges should fail */
+    if (H5Pset_sub_chunk(dxpl, sizeof(wdata) - 10, 20) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        tmp_buf_size = sizeof(sub_chunk_buf);
+        if ((status = H5Dread_chunk2(did, dxpl, offset, &filters, sub_chunk_buf, &tmp_buf_size)) != FAIL)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* Resetting the range to (0, 0) restores full chunk reads */
+    if (H5Pset_sub_chunk(dxpl, 0, 0) < 0)
+        TEST_ERROR;
+    tmp_buf_size = 0;
+    if (H5Dread_chunk2(did, dxpl, offset, &filters, NULL, &tmp_buf_size) < 0)
+        TEST_ERROR;
+    if (tmp_buf_size != sizeof(wdata))
+        TEST_ERROR;
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    /* Deprecated chunk reads should continue to ignore the sub-chunk DXPL state */
+    if (H5Pset_sub_chunk(dxpl, SUB_CHUNK_OFFSET, SUB_CHUNK_SIZE) < 0)
+        TEST_ERROR;
+    memset(rdata_deprec, 0, sizeof(rdata_deprec));
+    if (H5Dread_chunk1(did, dxpl, offset, &filters, rdata_deprec) < 0)
+        TEST_ERROR;
+    if (filters != 0)
+        TEST_ERROR;
+    if (memcmp(rdata_deprec, wdata, sizeof(wdata)) != 0)
+        TEST_ERROR;
+#endif
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    /* Create a filtered single-chunk dataset and verify sub-ranges against a full raw read */
+    if ((filtered_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(filtered_dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pset_deflate(filtered_dcpl, 6) < 0)
+        TEST_ERROR;
+    if ((filtered_did =
+             H5Dcreate2(fid, DATASETNAME21, H5T_NATIVE_INT, sid, H5P_DEFAULT, filtered_dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(filtered_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+
+    filtered_full_size = 0;
+    if (H5Dread_chunk2(filtered_did, H5P_DEFAULT, offset, &filters, NULL, &filtered_full_size) < 0)
+        TEST_ERROR;
+    if (filtered_full_size == 0)
+        TEST_ERROR;
+    if (filters != 0)
+        TEST_ERROR;
+
+    if (NULL == (filtered_full_buf = (unsigned char *)malloc(filtered_full_size)))
+        TEST_ERROR;
+    tmp_buf_size = filtered_full_size;
+    if (H5Dread_chunk2(filtered_did, H5P_DEFAULT, offset, &filters, filtered_full_buf, &tmp_buf_size) < 0)
+        TEST_ERROR;
+    if (tmp_buf_size != filtered_full_size)
+        TEST_ERROR;
+    if (filters != 0)
+        TEST_ERROR;
+
+    filtered_sub_offset = filtered_full_size / 3;
+    filtered_sub_size   = filtered_full_size - filtered_sub_offset;
+    if (filtered_sub_size > 23)
+        filtered_sub_size = 23;
+    if (filtered_sub_size == 0)
+        filtered_sub_size = filtered_full_size;
+    if (filtered_sub_size == 0)
+        TEST_ERROR;
+
+    if (H5Pset_sub_chunk(dxpl, filtered_sub_offset, filtered_sub_size) < 0)
+        TEST_ERROR;
+    if (NULL == (filtered_sub_buf = (unsigned char *)malloc(filtered_sub_size)))
+        TEST_ERROR;
+
+    tmp_buf_size = 0;
+    if (H5Dread_chunk2(filtered_did, dxpl, offset, &filters, NULL, &tmp_buf_size) < 0)
+        TEST_ERROR;
+    if (tmp_buf_size != filtered_sub_size)
+        TEST_ERROR;
+    if (filters != 0)
+        TEST_ERROR;
+
+    tmp_buf_size = filtered_sub_size;
+    if (H5Dread_chunk2(filtered_did, dxpl, offset, &filters, filtered_sub_buf, &tmp_buf_size) < 0)
+        TEST_ERROR;
+    if (tmp_buf_size != filtered_sub_size)
+        TEST_ERROR;
+    if (filters != 0)
+        TEST_ERROR;
+    if (memcmp(filtered_sub_buf, filtered_full_buf + filtered_sub_offset, filtered_sub_size) != 0)
+        TEST_ERROR;
+#endif
+
+    if (H5Pclose(dxpl) < 0)
+        TEST_ERROR;
+#ifdef H5_HAVE_FILTER_DEFLATE
+    if (H5Dclose(filtered_did) < 0)
+        TEST_ERROR;
+    if (H5Pclose(filtered_dcpl) < 0)
+        TEST_ERROR;
+#endif
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+#ifdef H5_HAVE_FILTER_DEFLATE
+    free(filtered_sub_buf);
+    free(filtered_full_buf);
+#endif
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl);
+        H5Dclose(filtered_did);
+        H5Pclose(filtered_dcpl);
+        H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    free(filtered_sub_buf);
+    free(filtered_full_buf);
+#endif
+
+    H5_FAILED();
+    return 1;
+} /* end test_direct_chunk_read_sub_chunk() */
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 /*-------------------------------------------------------------------------
  * Function:    test_deprec
@@ -2968,6 +3231,7 @@ main(void)
     nerrors += test_short_filtered_chunk(file_id);
     nerrors += test_read_unallocated_chunk(file_id);
     nerrors += test_direct_chunk_read_buf_size(file_id);
+    nerrors += test_direct_chunk_read_sub_chunk(file_id);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(file_id);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

@@ -1349,6 +1349,11 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *          file bypassing the library's internal data transfer pipeline,
  *          including filters.
  *
+ *          A dataset transfer property list passed in \p dxpl_id may narrow
+ *          the direct read to a contiguous sub-range of the raw chunk bytes by
+ *          using H5Pset_sub_chunk(). If no sub-range is set, the entire raw
+ *          chunk is read.
+ *
  *          \p offset is an array specifying the logical position of the
  *          first element of the chunk in the dataset's dataspace. The
  *          length of the \p offset array must equal the number of dimensions,
@@ -1367,12 +1372,13 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *
  *          \p buf_size must be passed as a pointer to a variable holding the
  *          allocated size, in bytes, of the memory buffer \p buf. On exit,
- *          \p *buf_size is set to the buffer size needed to read the chunk, which
- *          is the same as the size of the chunk on disk. If the value of
- *          \p *buf_size passed in was insufficient to read the entire, chunk, no
- *          data is read. \p buf may be passed as NULL as long as \p *buf_size
- *          is 0. \p filters is always set by this function even if the chunk
- *          was not read.
+ *          \p *buf_size is set to the buffer size needed to read the selected
+ *          raw chunk data. If no sub-range was set in \p dxpl_id, this is the
+ *          same as the size of the chunk on disk. If the value of
+ *          \p *buf_size passed in was insufficient to read the selected raw
+ *          chunk data, no data is read. \p buf may be passed as NULL as long as
+ *          \p *buf_size is 0. \p filters is always set by this function even
+ *          if the chunk was not read.
  *
  * \attention Exercise caution when using H5Dread_chunk2() and
  *          H5Dwrite_chunk(), as they read and write data chunks directly

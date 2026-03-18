@@ -88,6 +88,15 @@
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF  H5D_IO_VECTOR_SIZE
 #define H5D_XFER_HYPER_VECTOR_SIZE_ENC  H5P__encode_size_t
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEC  H5P__decode_size_t
+/* Definitions for direct chunk sub-range properties */
+#define H5D_XFER_SUB_CHUNK_BYTE_OFFSET_SIZE sizeof(size_t)
+#define H5D_XFER_SUB_CHUNK_BYTE_OFFSET_DEF  0
+#define H5D_XFER_SUB_CHUNK_BYTE_OFFSET_ENC  H5P__encode_size_t
+#define H5D_XFER_SUB_CHUNK_BYTE_OFFSET_DEC  H5P__decode_size_t
+#define H5D_XFER_SUB_CHUNK_BYTE_SIZE_SIZE   sizeof(size_t)
+#define H5D_XFER_SUB_CHUNK_BYTE_SIZE_DEF    0
+#define H5D_XFER_SUB_CHUNK_BYTE_SIZE_ENC    H5P__encode_size_t
+#define H5D_XFER_SUB_CHUNK_BYTE_SIZE_DEC    H5P__decode_size_t
 
 /* Parallel I/O properties */
 /* Note: Some of these are registered with the DXPL class even when parallel
@@ -283,6 +292,10 @@ static const void *H5D_def_vlen_free_info_g =
     H5D_XFER_VLEN_FREE_INFO_DEF; /* Default value for vlen free information */
 static const size_t H5D_def_hyp_vec_size_g =
     H5D_XFER_HYPER_VECTOR_SIZE_DEF; /* Default value for vector size */
+static const size_t H5D_def_sub_chunk_byte_offset_g =
+    H5D_XFER_SUB_CHUNK_BYTE_OFFSET_DEF; /* Default byte offset for direct chunk sub-range reads */
+static const size_t H5D_def_sub_chunk_byte_size_g =
+    H5D_XFER_SUB_CHUNK_BYTE_SIZE_DEF; /* Default byte size for direct chunk sub-range reads */
 static const H5FD_mpio_xfer_t H5D_def_io_xfer_mode_g =
     H5D_XFER_IO_XFER_MODE_DEF; /* Default value for I/O transfer mode */
 static const H5FD_mpio_chunk_opt_t      H5D_def_mpio_chunk_opt_mode_g      = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF;
@@ -385,6 +398,17 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5D_XFER_HYPER_VECTOR_SIZE_NAME, H5D_XFER_HYPER_VECTOR_SIZE_SIZE,
                            &H5D_def_hyp_vec_size_g, NULL, NULL, NULL, H5D_XFER_HYPER_VECTOR_SIZE_ENC,
                            H5D_XFER_HYPER_VECTOR_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
+    /* Register the direct chunk sub-range properties */
+    if (H5P__register_real(pclass, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_NAME, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_SIZE,
+                           &H5D_def_sub_chunk_byte_offset_g, NULL, NULL, NULL,
+                           H5D_XFER_SUB_CHUNK_BYTE_OFFSET_ENC, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_DEC, NULL,
+                           NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+    if (H5P__register_real(pclass, H5D_XFER_SUB_CHUNK_BYTE_SIZE_NAME, H5D_XFER_SUB_CHUNK_BYTE_SIZE_SIZE,
+                           &H5D_def_sub_chunk_byte_size_g, NULL, NULL, NULL, H5D_XFER_SUB_CHUNK_BYTE_SIZE_ENC,
+                           H5D_XFER_SUB_CHUNK_BYTE_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the I/O transfer mode properties */
@@ -1685,6 +1709,78 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_hyper_vector_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_sub_chunk
+ *
+ * Purpose:     Sets the contiguous byte range to read from a chunk with
+ *              H5Dread_chunk2().
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_sub_chunk(hid_t plist_id, size_t byte_offset, size_t byte_size)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (byte_offset > 0 && 0 == byte_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "byte_size must be greater than zero when byte_offset is non-zero");
+    if (byte_size > 0 && byte_offset > (SIZE_MAX - byte_size))
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "sub-chunk byte range overflows size_t");
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Update property list */
+    if (H5P_set(plist, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_NAME, &byte_offset) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set sub-chunk byte offset");
+    if (H5P_set(plist, H5D_XFER_SUB_CHUNK_BYTE_SIZE_NAME, &byte_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set sub-chunk byte size");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_sub_chunk() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_sub_chunk
+ *
+ * Purpose:     Reads values previously set with H5Pset_sub_chunk().
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_sub_chunk(hid_t plist_id, size_t *byte_offset /*out*/, size_t *byte_size /*out*/)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Return values */
+    if (byte_offset)
+        if (H5P_get(plist, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_NAME, byte_offset) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get sub-chunk byte offset");
+    if (byte_size)
+        if (H5P_get(plist, H5D_XFER_SUB_CHUNK_BYTE_SIZE_NAME, byte_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get sub-chunk byte size");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_sub_chunk() */
 
 /*-------------------------------------------------------------------------
  * Function:       H5P__dxfr_io_xfer_mode_enc

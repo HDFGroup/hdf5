@@ -69,6 +69,8 @@
 #define H5D_XFER_VFL_ID_NAME                "vfl_id"              /* File driver ID */
 #define H5D_XFER_VFL_INFO_NAME              "vfl_info"            /* File driver info */
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME     "vec_size"            /* Hyperslab vector size */
+#define H5D_XFER_SUB_CHUNK_BYTE_OFFSET_NAME "sub_chunk_byte_offset" /* Direct chunk byte offset */
+#define H5D_XFER_SUB_CHUNK_BYTE_SIZE_NAME   "sub_chunk_byte_size"   /* Direct chunk byte size */
 #define H5D_XFER_IO_XFER_MODE_NAME          "io_xfer_mode"        /* I/O transfer mode */
 #define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME   "mpio_collective_opt" /* Optimization of MPI-IO transfer mode */
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME   "mpio_chunk_opt_hard"

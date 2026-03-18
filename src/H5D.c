@@ -27,6 +27,7 @@
 #include "H5FLprivate.h" /* Free lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
+#include "H5Pprivate.h"  /* Property lists                           */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
@@ -1182,8 +1183,12 @@ H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
                void *buf /*out*/, size_t *buf_size)
 {
     H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
+    H5P_genplist_t                     *dxpl_plist = NULL;   /* DXPL for this operation */
     H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;       /* Arguments for optional operation */
+    size_t                              sub_chunk_byte_offset = 0; /* Raw chunk byte offset from DXPL */
+    size_t                              sub_chunk_byte_size   = 0; /* Raw chunk byte size from DXPL */
+    bool                                use_sub_chunk         = false; /* Whether to read only a sub-range */
     herr_t                              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1204,11 +1209,29 @@ H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
     else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
+    /* Get the DXPL properties for direct chunk sub-range reads */
+    if (NULL == (dxpl_plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for DXPL ID");
+    if (H5P_get(dxpl_plist, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_NAME, &sub_chunk_byte_offset) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sub-chunk byte offset");
+    if (H5P_get(dxpl_plist, H5D_XFER_SUB_CHUNK_BYTE_SIZE_NAME, &sub_chunk_byte_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sub-chunk byte size");
+
+    if (sub_chunk_byte_offset > 0 && 0 == sub_chunk_byte_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "sub-chunk byte size must be greater than zero when byte offset is non-zero");
+    if (sub_chunk_byte_size > 0 && sub_chunk_byte_offset > (SIZE_MAX - sub_chunk_byte_size))
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "sub-chunk byte range overflows size_t");
+    use_sub_chunk = (sub_chunk_byte_size > 0);
+
     /* Set up VOL callback arguments */
     dset_opt_args.chunk_read.offset   = offset;
     dset_opt_args.chunk_read.filters  = 0;
     dset_opt_args.chunk_read.buf      = buf;
     dset_opt_args.chunk_read.buf_size = buf_size;
+    dset_opt_args.chunk_read.use_sub_chunk = use_sub_chunk;
+    dset_opt_args.chunk_read.byte_offset   = sub_chunk_byte_offset;
+    dset_opt_args.chunk_read.byte_size     = sub_chunk_byte_size;
     vol_cb_args.op_type               = H5VL_NATIVE_DATASET_CHUNK_READ;
     vol_cb_args.args                  = &dset_opt_args;
 

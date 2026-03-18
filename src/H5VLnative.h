@@ -85,6 +85,9 @@ typedef struct H5VL_native_dataset_chunk_read_t {
     uint32_t       filters;
     void          *buf;
     size_t        *buf_size;
+    bool           use_sub_chunk;
+    size_t         byte_offset;
+    size_t         byte_size;
 } H5VL_native_dataset_chunk_read_t;
 
 /* Parameters for native connector's dataset 'chunk write' operation */
