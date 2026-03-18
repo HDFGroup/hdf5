@@ -131,8 +131,8 @@ main(int argc, char *argv[])
 
             case 1: /* counting input files */
                 if (opt->fcount < 29) {
-                    if (snprintf(opt->infiles[opt->fcount].datafile,
-                                 MAX_PATH_NAME_LENGTH, "%s", argv[i]) >= MAX_PATH_NAME_LENGTH) {
+                    if (snprintf(opt->infiles[opt->fcount].datafile, MAX_PATH_NAME_LENGTH, "%s", argv[i]) >=
+                        MAX_PATH_NAME_LENGTH) {
                         (void)fprintf(rawerrorstream, err10, argv[i]);
                         goto err;
                     }
@@ -152,8 +152,8 @@ main(int argc, char *argv[])
                 break;
 
             case 3: /* get configfile name */
-                if (snprintf(opt->infiles[opt->fcount - 1].configfile,
-                             MAX_PATH_NAME_LENGTH, "%s", argv[i]) >= MAX_PATH_NAME_LENGTH) {
+                if (snprintf(opt->infiles[opt->fcount - 1].configfile, MAX_PATH_NAME_LENGTH, "%s", argv[i]) >=
+                    MAX_PATH_NAME_LENGTH) {
                     (void)fprintf(rawerrorstream, err10, argv[i]);
                     goto err;
                 }
