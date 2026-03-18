@@ -338,12 +338,12 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             fullname[size - 1] = '\0';
         }
 
-        /* +2 accounts for '/' separator and NUL terminator */
-        if ((strlen(fullname) + strlen(base_name) + 2) < size) {
+        {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
             h5_stat_t buf;
             size_t    cur_len;
+            int       nchars;
 
             memset(&buf, 0, sizeof(h5_stat_t));
             if (HDstat(fullname, &buf) < 0)
@@ -354,15 +354,10 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
                     snprintf(fullname, size, "%s", prefix);
                 }
 
-            /* Re-check length after potential prefix fallback */
             cur_len = strlen(fullname);
-            if ((cur_len + strlen(base_name) + 2) >= size)
+            nchars  = snprintf(fullname + cur_len, size - cur_len, "/%s", base_name);
+            if (nchars < 0 || (size_t)nchars >= size - cur_len)
                 return NULL;
-            snprintf(fullname + cur_len, size - cur_len, "/%s", base_name);
-        }
-        else {
-            /* Buffer is too small */
-            return NULL;
         }
     }
     else if (strlen(base_name) >= size) {
