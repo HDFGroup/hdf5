@@ -59,13 +59,13 @@ mark_as_advanced (KWSYS_TGZ_NAME)
 ########################
 
 set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location")
-set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file")
+set (PLUGIN_TGZ_NAME "hdf5_plugins-2.1.1.tar.gz" CACHE STRING "Use PLUGINS from compressed file")
 mark_as_advanced (PLUGIN_TGZ_ORIGPATH)
 mark_as_advanced (PLUGIN_TGZ_NAME)
 set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package")
 mark_as_advanced (PLUGIN_PACKAGE_NAME)
 set (PLUGIN_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF Group repository")
-set (PLUGIN_GIT_BRANCH "master" CACHE STRING "")
+set (PLUGIN_GIT_BRANCH "2.1.1" CACHE STRING "")
 mark_as_advanced (PLUGIN_GIT_URL)
 mark_as_advanced (PLUGIN_GIT_BRANCH)
 

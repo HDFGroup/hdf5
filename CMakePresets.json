@@ -215,11 +215,11 @@
         },
         "PLUGIN_TGZ_ORIGPATH": {
           "type": "STRING",
-          "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/2.1.0"
+          "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/2.1.1"
         },
         "PLUGIN_TGZ_NAME": {
           "type": "STRING",
-          "value": "hdf5_plugins-2.1.0.tar.gz"
+          "value": "hdf5_plugins-2.1.1.tar.gz"
         }
       }
     },
