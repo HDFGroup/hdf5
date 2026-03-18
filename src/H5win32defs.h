@@ -60,6 +60,19 @@ struct timezone {
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
 #define HDunsetenv(N)         Wsetenv(N, "", 1)
 
+/* Windows localtime_s/gmtime_s have reversed parameter order and return
+ * errno_t instead of struct tm*.  These wrappers match the POSIX signature. */
+static __inline struct tm *
+HDgmtime_r(const time_t *timep, struct tm *result)
+{
+    return gmtime_s(result, timep) == 0 ? result : NULL;
+}
+static __inline struct tm *
+HDlocaltime_r(const time_t *timep, struct tm *result)
+{
+    return localtime_s(result, timep) == 0 ? result : NULL;
+}
+
 #ifndef H5_HAVE_MINGW
 #define HDftruncate(F, L) _chsize_s(F, L)
 #define HDfseek(F, O, W)  _fseeki64(F, O, W)

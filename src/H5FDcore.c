@@ -387,16 +387,10 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
         } while (-1 == bytes_wrote && EINTR == errno);
 
         if (-1 == bytes_wrote) { /* error */
-            int       myerrno = errno;
-            time_t    mytime  = time(NULL);
-            struct tm tm_buf;
-            char      time_str[32];
+            int  myerrno = errno;
+            char time_str[32];
 
-            if (localtime_r(&mytime, &tm_buf) != NULL)
-                strftime(time_str, sizeof(time_str), "%c", &tm_buf);
-            else
-                snprintf(time_str, sizeof(time_str), "(unknown)");
-
+            H5_get_localtime_str(time_str, sizeof(time_str));
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
@@ -900,16 +894,10 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                     } while (-1 == bytes_read && EINTR == errno);
 
                     if (-1 == bytes_read) { /* error */
-                        int       myerrno = errno;
-                        time_t    mytime  = time(NULL);
-                        struct tm tm_buf;
-                        char      time_str[32];
+                        int  myerrno = errno;
+                        char time_str[32];
 
-                        if (localtime_r(&mytime, &tm_buf) != NULL)
-                            strftime(time_str, sizeof(time_str), "%c", &tm_buf);
-                        else
-                            snprintf(time_str, sizeof(time_str), "(unknown)");
-
+                        H5_get_localtime_str(time_str, sizeof(time_str));
                         offset = HDlseek(file->fd, 0, SEEK_CUR);
 
                         HGOTO_ERROR(

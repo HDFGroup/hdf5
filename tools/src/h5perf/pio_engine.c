@@ -444,7 +444,10 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
                     snprintf(fullname, size, "%s", prefix);
                 }
 
+            /* Re-check length after potential prefix fallback */
             cur_len = strlen(fullname);
+            if ((cur_len + strlen(base_name) + 2) >= size)
+                return NULL;
             snprintf(fullname + cur_len, size - cur_len, "/%s", base_name);
         }
         else {

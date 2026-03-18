@@ -454,7 +454,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     FUNC_ENTER_PACKAGE
 
     time(&rawtime);
-    if (gmtime_r(&rawtime, &tm_buf) == NULL)
+    if (HDgmtime_r(&rawtime, &tm_buf) == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to convert time");
     strftime(rec->time_of_creation, sizeof(rec->time_of_creation), "%Y%m%dT%H%M%SZ", &tm_buf);
 

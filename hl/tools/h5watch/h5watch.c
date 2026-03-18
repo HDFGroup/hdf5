@@ -730,7 +730,7 @@ parse_command_line(int argc, const char *const *argv)
                     }
                     {
                         size_t cur_len = strlen(g_list_of_fields);
-                        size_t new_len = cur_len + strlen(str) + 2;
+                        size_t new_len = cur_len + strlen(FIELD_SEP) + strlen(str) + 1;
                         if ((g_list_of_fields = (char *)realloc(g_list_of_fields, new_len)) == NULL) {
                             error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                             leave(EXIT_FAILURE);

@@ -272,7 +272,7 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, s
     assert(mesg);
 
     /* encode */
-    if (gmtime_r(mesg, &tm_buf) == NULL)
+    if (HDgmtime_r(mesg, &tm_buf) == NULL)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "gmtime_r failed on time value");
 
     snprintf((char *)p, p_size, "%04d%02d%02d%02d%02d%02d", 1900 + tm_buf.tm_year, 1 + tm_buf.tm_mon,
@@ -419,7 +419,7 @@ H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     assert(fwidth >= 0);
 
     /* debug */
-    if (localtime_r(mesg, &tm_buf) != NULL)
+    if (HDlocaltime_r(mesg, &tm_buf) != NULL)
         strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
     else
         snprintf(buf, sizeof(buf), "(invalid time)");

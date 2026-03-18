@@ -1181,16 +1181,10 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
         } while (-1 == bytes_read && EINTR == errno);
 
         if (-1 == bytes_read) { /* error */
-            int       myerrno = errno;
-            time_t    mytime  = time(NULL);
-            struct tm tm_buf;
-            char      time_str[32];
+            int  myerrno = errno;
+            char time_str[32];
 
-            if (localtime_r(&mytime, &tm_buf) != NULL)
-                strftime(time_str, sizeof(time_str), "%c", &tm_buf);
-            else
-                snprintf(time_str, sizeof(time_str), "(unknown)");
-
+            H5_get_localtime_str(time_str, sizeof(time_str));
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             if (file->fa.flags & H5FD_LOG_LOC_READ)
@@ -1411,16 +1405,10 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
         } while (-1 == bytes_wrote && EINTR == errno);
 
         if (-1 == bytes_wrote) { /* error */
-            int       myerrno = errno;
-            time_t    mytime  = time(NULL);
-            struct tm tm_buf;
-            char      time_str[32];
+            int  myerrno = errno;
+            char time_str[32];
 
-            if (localtime_r(&mytime, &tm_buf) != NULL)
-                strftime(time_str, sizeof(time_str), "%c", &tm_buf);
-            else
-                snprintf(time_str, sizeof(time_str), "(unknown)");
-
+            H5_get_localtime_str(time_str, sizeof(time_str));
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             if (file->fa.flags & H5FD_LOG_LOC_WRITE)
