@@ -240,7 +240,7 @@ H5_get_localtime_str(char *buf, size_t buf_size)
 
     time(&now);
     if (HDlocaltime_r(&now, &tm_buf) != NULL)
-        strftime(buf, buf_size, "%c", &tm_buf);
+        strftime(buf, buf_size, "%c", &tm_buf); /* %c is locale-dependent; fine for diagnostics */
     else
         snprintf(buf, buf_size, "(unknown)");
 } /* end H5_get_localtime_str() */
