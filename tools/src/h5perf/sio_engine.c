@@ -338,6 +338,7 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             fullname[size - 1] = '\0';
         }
 
+        /* +2 accounts for '/' separator and NUL terminator */
         if ((strlen(fullname) + strlen(base_name) + 2) < size) {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
