@@ -85,6 +85,12 @@ jobs:
           #   These are bounded by snprintf, guarded by H5_WARN_FORMAT_NONLITERAL_OFF,
           #   and the format strings originate from application code, not untrusted input.
           #
+          # - cpp/path-injection: All flagged sites are CLI tools (h5dump, h5repack,
+          #   h5import, h5jam, h5ls, h5perf) that take file paths from command-line
+          #   arguments or documented environment variables. Accepting user-provided
+          #   paths is the core purpose of these tools. The two core library hits
+          #   (H5FDsubfiling, H5FDioc) use documented env vars for VFD configuration.
+          #
           # Code style rules (non-security, no severity rating):
           # These are structural patterns inherent to HDF5's C codebase and
           # do not represent security vulnerabilities.
@@ -110,6 +116,8 @@ jobs:
                    id: cpp/uncontrolled-format-string
                - exclude:
                    id: cpp/tainted-format-string
+               - exclude:
+                   id: cpp/path-injection
                - exclude:
                    id: cpp/long-switch
                - exclude:
