@@ -174,12 +174,12 @@ endif ()
 # Add CMake Find modules to installation
 #-----------------------------------------------------------------------------
 install (
-    FILES ${CMAKE_SOURCE_DIR}/config/cmake/Findlibaec.cmake
+    FILES ${HDF_RESOURCES_DIR}/Findlibaec.cmake
     DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
     COMPONENT configinstall
 )
 install (
-    FILES ${CMAKE_SOURCE_DIR}/config/cmake/FindZLIBNG.cmake
+    FILES ${HDF_RESOURCES_DIR}/FindZLIBNG.cmake
     DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
     COMPONENT configinstall
 )
