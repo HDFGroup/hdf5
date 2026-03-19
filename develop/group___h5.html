@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-12</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-19</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -135,70 +135,7 @@ $(function(){initNavTree('group___h5.html','',''); });
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Use the functions in this module to manage the life cycle of HDF5 library instances.</p>
-<table class="doxtable">
-<tr>
-<th>Create</th><th>Read</th></tr>
-<tr valign="top">
-<td><div class="fragment"><div class="line"><span class="lineno">   23</span>    {</div>
-<div class="line"><span class="lineno">   24</span>        <span class="comment">// an HDF5 library instance is automatically initialized as</span></div>
-<div class="line"><span class="lineno">   25</span>        <span class="comment">// part of the first HDF5 API call, but there&#39;s no harm in</span></div>
-<div class="line"><span class="lineno">   26</span>        <span class="comment">// calling H5open().</span></div>
-<div class="line"><span class="lineno">   27</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga27fa33dc262dda95c5aa8df533837480">H5open</a>() &lt; 0) {</div>
-<div class="line"><span class="lineno">   28</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   29</span>        }</div>
-<div class="line"><span class="lineno">   30</span>    }</div>
-</div><!-- fragment --> </td><td><div class="fragment"><div class="line"><span class="lineno">   34</span>    {</div>
-<div class="line"><span class="lineno">   35</span>        __label__ fail_read;</div>
-<div class="line"><span class="lineno">   36</span>        <span class="keywordtype">unsigned</span> majnum, minnum, relnum;</div>
-<div class="line"><span class="lineno">   37</span>        <span class="keywordtype">bool</span>     flag;</div>
-<div class="line"><span class="lineno">   38</span> </div>
-<div class="line"><span class="lineno">   39</span>        <span class="comment">// retrieve the library version</span></div>
-<div class="line"><span class="lineno">   40</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#gaf87da966fdf896ec7bca794e21d4ab0a">H5get_libversion</a>(&amp;majnum, &amp;minnum, &amp;relnum) &lt; 0) {</div>
-<div class="line"><span class="lineno">   41</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   42</span>            <span class="keywordflow">goto</span> fail_read;</div>
-<div class="line"><span class="lineno">   43</span>        }</div>
-<div class="line"><span class="lineno">   44</span>        <span class="comment">// is this a thread-safe library build?</span></div>
-<div class="line"><span class="lineno">   45</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#gaae7a734fe6c8080bff45b9142a173bc5">H5is_library_threadsafe</a>(&amp;flag) &lt; 0) {</div>
-<div class="line"><span class="lineno">   46</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   47</span>            <span class="keywordflow">goto</span> fail_read;</div>
-<div class="line"><span class="lineno">   48</span>        }</div>
-<div class="line"><span class="lineno">   49</span> </div>
-<div class="line"><span class="lineno">   50</span>        printf(<span class="stringliteral">&quot;Welcome to HDF5 %d.%d.%d\n&quot;</span>, majnum, minnum, relnum);</div>
-<div class="line"><span class="lineno">   51</span>        printf(<span class="stringliteral">&quot;Thread-safety %s\n&quot;</span>, (flag &gt; 0) ? <span class="stringliteral">&quot;enabled&quot;</span> : <span class="stringliteral">&quot;disabled&quot;</span>);</div>
-<div class="line"><span class="lineno">   52</span> </div>
-<div class="line"><span class="lineno">   53</span>fail_read:;</div>
-<div class="line"><span class="lineno">   54</span>    }</div>
-</div><!-- fragment --> </td></tr>
-<tr>
-<th>Update</th><th>Delete</th></tr>
-<tr valign="top">
-<td><div class="fragment"><div class="line"><span class="lineno">   58</span>    {</div>
-<div class="line"><span class="lineno">   59</span>        <span class="comment">// update the library instance free list limits</span></div>
-<div class="line"><span class="lineno">   60</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#gaa3f78b24b8a1ff4168db2b7ddca21545">H5set_free_list_limits</a>(512 * 1024, 32 * 1024, 2048 * 1024, 128 * 1024, 8192 * 1024, 512 * 1024) &lt;</div>
-<div class="line"><span class="lineno">   61</span>            0) {</div>
-<div class="line"><span class="lineno">   62</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   63</span>        }</div>
-<div class="line"><span class="lineno">   64</span>    }</div>
-</div><!-- fragment --> </td><td><div class="fragment"><div class="line"><span class="lineno">   10</span><span class="keywordtype">void</span></div>
-<div class="line"><span class="lineno">   11</span>closing_shop(<span class="keywordtype">void</span> *ctx)</div>
-<div class="line"><span class="lineno">   12</span>{</div>
-<div class="line"><span class="lineno">   13</span>    printf(<span class="stringliteral">&quot;GoodBye, Cruel World!\n&quot;</span>);</div>
-<div class="line"><span class="lineno">   14</span>}</div>
-</div><!-- fragment --> <div class="fragment"><div class="line"><span class="lineno">   68</span>    {</div>
-<div class="line"><span class="lineno">   69</span><span class="preprocessor">#if H5_VERSION_GE(1, 13, 0)</span></div>
-<div class="line"><span class="lineno">   70</span>        <span class="comment">// install a finalization routine</span></div>
-<div class="line"><span class="lineno">   71</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#gade62a3e6b75bed52234d9e8432c27fb2">H5atclose</a>(&amp;closing_shop, NULL) &lt; 0) {</div>
-<div class="line"><span class="lineno">   72</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   73</span>        }</div>
-<div class="line"><span class="lineno">   74</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   75</span>        <span class="comment">// close shop</span></div>
-<div class="line"><span class="lineno">   76</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga8a9fe81dcf66972ed75ea481e7750574">H5close</a>() &lt; 0) {</div>
-<div class="line"><span class="lineno">   77</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   78</span>        }</div>
-<div class="line"><span class="lineno">   79</span>    }</div>
-</div><!-- fragment --> </td></tr>
-</table>
+<div class="textblock"><p>Use the functions in this module to manage the life cycle of HDF5 library instances. </p>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>

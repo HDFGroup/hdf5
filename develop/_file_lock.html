@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-12</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-19</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -152,7 +152,7 @@ crashing your reader processes."</p>
 <p>One of those caches is the metadata cache, which stores things like B-tree nodes that we use to locate data in the file. Problems arise when parent objects are flushed to storage before child objects. If a reader tries to load unflushed children, the object's file offset could point at garbage and it will encounter library failures as it tries to access the non-existent objects.</p>
 <p>Keep in mind that the HDF5 library is not analogous to a database server. The HDF5 library is just a simple shared library, like libjpeg. Library state is maintained per-library-instance and there is no IPC between HDF5 libraries loaded by different processes (exception: collective operations in parallel HDF5, but that's not what were talking about here).</p>
 <p>Prior to HDF5 1.10.0, concurrent access to an HDF5 file by multiple processes, when one or more processes is a writer, was not supported. There was no enforcement mechanism for this. We simply told people not to do it.</p>
-<p>In HDF5 1.10.0, we updated the library to allow the single-writer / multiple-readers (SWMR - pronounced "swimmer") access pattern. This setup allows one writer and multiple readers to access the same file, as long as a certain protocol is followed concerning file opening order and setting the right flags. Since synchronization might be tricky to pull off and the consequences of getting it wrong could result in corrupt files or crashed readers, we decided to add a file locking scheme to help users get it right. Since this would also help prevent harmful accesses when SWMR is not in use, we decided to switch the file locking scheme on by default. This scheme has been carried forward into HDF5 1.12 and 1.14 (soon to be 2.0).</p>
+<p>In HDF5 1.10.0, we updated the library to allow the single-writer / multiple-readers (SWMR - pronounced "swimmer") access pattern. This setup allows one writer and multiple readers to access the same file, as long as a certain protocol is followed concerning file opening order and setting the right flags. Since synchronization might be tricky to pull off and the consequences of getting it wrong could result in corrupt files or crashed readers, we decided to add a file locking scheme to help users get it right. Since this would also help prevent harmful accesses when SWMR is not in use, we decided to switch the file locking scheme on by default. This scheme has been carried forward into HDF5 1.12 and later versions.</p>
 <p>Note that the current implementation of SWMR is only useful for appending to chunked datasets. Creating file objects like groups and datasets is not supported in the current SWMR implementation.</p>
 <p>Unfortunately, this file locking scheme has caused problems for some users. This is usually people who are working on network file systems like NFS or on parallel file systems, especially when file locks have been disabled, which often causes lock calls to fail. As a result of this, we've added work-arounds to disable the file locking scheme over the years.</p>
 <h1 class="doxsection"><a class="anchor" id="sec_filelock_scheme"></a>
