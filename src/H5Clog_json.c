@@ -204,7 +204,8 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
     H5C_log_json_udata_t *json_udata = NULL;
     char                 *file_name  = NULL;
     size_t                n_chars;
-    herr_t                ret_value = SUCCEED; /* Return value */
+    int                   log_file_fd = -1;
+    herr_t                ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -243,8 +244,12 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
         snprintf(file_name, n_chars, "RANK_%d.%s", mpi_rank, log_location);
 
     /* Open log file and set it to be unbuffered */
-    if (NULL == (json_udata->outfile = fopen(file_name, "w")))
+    if ((log_file_fd = HDopen(file_name, O_WRONLY | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_URWGROR)) < 0)
+        HSYS_GOTO_ERROR(H5E_CACHE, H5E_CANTOPENFILE, FAIL, "can't create mdc log file");
+    if (NULL == (json_udata->outfile = HDfdopen(log_file_fd, "w"))) {
+        HDclose(log_file_fd);
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file");
+    }
     setbuf(json_udata->outfile, NULL);
 
 done:

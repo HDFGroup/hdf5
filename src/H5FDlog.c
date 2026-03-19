@@ -540,8 +540,18 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         }
 
         /* Set the log file pointer */
-        if (fa->logfile)
-            file->logfp = fopen(fa->logfile, "w");
+        if (fa->logfile) {
+            int log_file_id = -1;
+
+            if ((log_file_id =
+                     HDopen(fa->logfile, O_WRONLY | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_URWGROR)) < 0)
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open log file");
+
+            if (NULL == (file->logfp = HDfdopen(log_file_id, "w"))) {
+                HDclose(log_file_id);
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open log file");
+            }
+        }
         else
             file->logfp = stderr;
 

@@ -2072,7 +2072,7 @@ static herr_t
 H5FD__subfiling_ioc_open_files(int64_t file_context_id, int file_acc_flags)
 {
     subfiling_context_t *sf_context   = NULL;
-    mode_t               mode         = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    mode_t               mode         = H5_POSIX_CREATE_MODE_URWGROR;
     char                *filepath     = NULL;
     char                *subfile_dir  = NULL;
     char                *base         = NULL;
@@ -2210,6 +2210,7 @@ H5FD__subfiling_create_config_file(subfiling_context_t *sf_context, const char *
     FILE  *config_file        = NULL;
     char  *config_filename    = NULL;
     char  *line_buf           = NULL;
+    int    config_file_fd     = -1;
     int    ret                = 0;
     herr_t ret_value          = SUCCEED;
 
@@ -2255,7 +2256,12 @@ H5FD__subfiling_create_config_file(subfiling_context_t *sf_context, const char *
         int n_subfiles = sf_context->sf_num_subfiles;
         int num_digits;
 
-        if (NULL == (config_file = fopen(config_filename, "w+")))
+        if ((config_file_fd =
+                 HDopen(config_filename, O_WRONLY | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_URWGROR)) < 0)
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
+                            "couldn't create/truncate subfiling configuration file");
+
+        if (NULL == (config_file = HDfdopen(config_file_fd, "w")))
             HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
                             "couldn't create/truncate subfiling configuration file");
 
@@ -2301,9 +2307,12 @@ H5FD__subfiling_create_config_file(subfiling_context_t *sf_context, const char *
     }
 
 done:
-    if (config_file)
+    if (config_file) {
         if (EOF == fclose(config_file))
             HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "couldn't close subfiling configuration file");
+    }
+    else if (config_file_fd >= 0 && HDclose(config_file_fd) < 0)
+        HSYS_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "couldn't close subfiling configuration file");
 
     H5MM_free(line_buf);
     H5MM_free(config_filename);
