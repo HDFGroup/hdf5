@@ -339,10 +339,10 @@ options_get_object(const char *path, pack_opttbl_t *table)
     for (i = 0; i < table->nelems; i++) {
         /* make full path (start with "/") to compare correctly  */
         if (table->objs[i].path[0] != '/') {
-            snprintf(tbl_path, sizeof(tbl_path), "/%s", table->objs[i].path);
+            snprintf(tbl_path, MAX_NC_NAME + 1, "/%s", table->objs[i].path);
         }
         else
-            snprintf(tbl_path, sizeof(tbl_path), "%s", table->objs[i].path);
+            snprintf(tbl_path, MAX_NC_NAME + 1, "%s", table->objs[i].path);
 
         /* found it */
         if (strcmp(tbl_path, path) == 0) {
